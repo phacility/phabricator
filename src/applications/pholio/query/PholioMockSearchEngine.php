@@ -12,9 +12,15 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
+
     $saved->setParameter(
       'authorPHIDs',
       $this->readUsersFromRequest($request, 'authors'));
+
+    $saved->setParameter(
+      'projects',
+      $this->readProjectsFromRequest($request, 'projects'));
+
     $saved->setParameter(
       'statuses',
       $request->getStrList('status'));
@@ -26,9 +32,23 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
     $query = id(new PholioMockQuery())
       ->needCoverFiles(true)
       ->needImages(true)
-      ->needTokenCounts(true)
-      ->withAuthorPHIDs($saved->getParameter('authorPHIDs', array()))
-      ->withStatuses($saved->getParameter('statuses', array()));
+      ->needTokenCounts(true);
+
+    $datasource = id(new PhabricatorPeopleUserFunctionDatasource())
+      ->setViewer($this->requireViewer());
+
+    $author_phids = $saved->getParameter('authorPHIDs', array());
+    $author_phids = $datasource->evaluateTokens($author_phids);
+    if ($author_phids) {
+      $query->withAuthorPHIDs($author_phids);
+    }
+
+    $statuses = $saved->getParameter('statuses', array());
+    if ($statuses) {
+      $query->withStatuses($statuses);
+    }
+
+    $this->setQueryProjects($query, $saved);
 
     return $query;
   }
@@ -38,6 +58,7 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
     PhabricatorSavedQuery $saved_query) {
 
     $author_phids = $saved_query->getParameter('authorPHIDs', array());
+    $projects = $saved_query->getParameter('projects', array());
 
     $statuses = array(
       '' => pht('Any Status'),
@@ -51,10 +72,16 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
     $form
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
+          ->setDatasource(new PhabricatorPeopleUserFunctionDatasource())
           ->setName('authors')
           ->setLabel(pht('Authors'))
           ->setValue($author_phids))
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource(new PhabricatorProjectLogicalDatasource())
+          ->setName('projects')
+          ->setLabel(pht('Projects'))
+          ->setValue($projects))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Status'))
@@ -114,15 +141,22 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
 
     $viewer = $this->requireViewer();
 
+    $xform = PhabricatorFileTransform::getTransformByKey(
+      PhabricatorFileThumbnailTransform::TRANSFORM_PINBOARD);
+
     $board = new PHUIPinboardView();
     foreach ($mocks as $mock) {
+
+      $image = $mock->getCoverFile();
+      $image_uri = $image->getURIForTransform($xform);
+      list($x, $y) = $xform->getTransformedDimensions($image);
 
       $header = 'M'.$mock->getID().' '.$mock->getName();
       $item = id(new PHUIPinboardItemView())
         ->setHeader($header)
         ->setURI('/M'.$mock->getID())
-        ->setImageURI($mock->getCoverFile()->getThumb280x210URI())
-        ->setImageSize(280, 210)
+        ->setImageURI($image_uri)
+        ->setImageSize($x, $y)
         ->setDisabled($mock->isClosed())
         ->addIconCount('fa-picture-o', count($mock->getImages()))
         ->addIconCount('fa-trophy', $mock->getTokenCount());

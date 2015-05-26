@@ -27,7 +27,7 @@ final class PhortuneAccount extends PhortuneDAO
     PhabricatorUser $actor,
     PhabricatorContentSource $content_source) {
 
-    $account = PhortuneAccount::initializeNewAccount($actor);
+    $account = self::initializeNewAccount($actor);
 
     $xactions = array();
     $xactions[] = id(new PhortuneAccountTransaction())

@@ -49,14 +49,16 @@ final class PhabricatorAccessLogConfigOptions
     );
 
     $http_desc = pht(
-      'Format for the HTTP access log. Use {{log.access.path}} to set the '.
-      'path. Available variables are:');
+      'Format for the HTTP access log. Use `%s` to set the path. '.
+      'Available variables are:',
+      'log.access.path');
     $http_desc .= "\n\n";
     $http_desc .= $this->renderMapHelp($http_map);
 
     $ssh_desc = pht(
-      'Format for the SSH access log. Use {{log.ssh.path}} to set the '.
-      'path. Available variables are:');
+      'Format for the SSH access log. Use %s to set the path. '.
+      'Available variables are:',
+      'log.ssh.path');
     $ssh_desc .= "\n\n";
     $ssh_desc .= $this->renderMapHelp($ssh_map);
 
@@ -67,7 +69,6 @@ final class PhabricatorAccessLogConfigOptions
         ->setDescription(
           pht(
             "To enable the Phabricator access log, specify a path. The ".
-            "access log can provide more detailed information about ".
             "Phabricator access than normal HTTP access logs (for instance, ".
             "it can show logged-in users, controllers, and other application ".
             "data).\n\n".

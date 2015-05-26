@@ -60,8 +60,7 @@ final class DiffusionRepositoryController extends DiffusionController {
         }
       } else {
         $empty_title = pht('Empty Repository');
-        $empty_message = pht(
-          'This repository does not have any commits yet.');
+        $empty_message = pht('This repository does not have any commits yet.');
       }
     }
 
@@ -303,10 +302,40 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $view->setActionList($actions);
 
-    return id(new PHUIObjectBoxView())
+    $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($view);
 
+    $info = null;
+    $drequest = $this->getDiffusionRequest();
+    if ($drequest->getRefAlternatives()) {
+      $message = array(
+        pht(
+          'The ref "%s" is ambiguous in this repository.',
+          $drequest->getBranch()),
+        ' ',
+        phutil_tag(
+          'a',
+          array(
+            'href' => $drequest->generateURI(
+              array(
+                'action' => 'refs',
+              )),
+          ),
+          pht('View Alternatives')),
+      );
+
+      $messages = array($message);
+
+      $info = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->setErrors(array($message));
+
+      $box->setInfoView($info);
+    }
+
+
+    return $box;
   }
 
   private function buildBranchListTable(DiffusionRequest $drequest) {
@@ -321,6 +350,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $branches = $this->callConduitWithDiffusionRequest(
       'diffusion.branchquery',
       array(
+        'closed' => false,
         'limit' => $limit + 1,
       ));
     if (!$branches) {
@@ -360,9 +390,9 @@ final class DiffusionRepositoryController extends DiffusionController {
     $button->setTag('a');
     $button->setIcon($icon);
     $button->setHref($drequest->generateURI(
-            array(
-              'action' => 'branches',
-            )));
+      array(
+        'action' => 'branches',
+      )));
 
     $header->addActionLink($button);
     $panel->setHeader($header);

@@ -36,7 +36,7 @@ abstract class DrydockBlueprintImplementation {
     $lease = idx($query, $lease_id);
 
     if (!$lease) {
-      throw new Exception("No such lease '{$lease_id}'!");
+      throw new Exception(pht("No such lease '%d'!", $lease_id));
     }
 
     return $lease;
@@ -45,7 +45,7 @@ abstract class DrydockBlueprintImplementation {
   protected function getInstance() {
     if (!$this->instance) {
       throw new Exception(
-        'Attach the blueprint instance to the implementation.');
+        pht('Attach the blueprint instance to the implementation.'));
     }
 
     return $this->instance;
@@ -116,7 +116,7 @@ abstract class DrydockBlueprintImplementation {
 
     $scope = $this->pushActiveScope($resource, $lease);
 
-    $this->log('Trying to Allocate Lease');
+    $this->log(pht('Trying to Allocate Lease'));
 
     $lease->setStatus(DrydockLeaseStatus::STATUS_ACQUIRING);
     $lease->setResourceID($resource->getID());
@@ -158,7 +158,7 @@ abstract class DrydockBlueprintImplementation {
       $this->log('Allocated Lease');
     } else {
       $resource->killTransaction();
-      $this->log('Failed to Allocate Lease');
+      $this->log(pht('Failed to Allocate Lease'));
     }
 
     if ($allocation_exception) {
@@ -221,7 +221,7 @@ abstract class DrydockBlueprintImplementation {
 
     $scope = $this->pushActiveScope($resource, $lease);
 
-    $this->log('Acquiring Lease');
+    $this->log(pht('Acquiring Lease'));
     $lease->setStatus(DrydockLeaseStatus::STATUS_ACTIVE);
     $lease->setResourceID($resource->getID());
     $lease->attachResource($resource);
@@ -237,7 +237,7 @@ abstract class DrydockBlueprintImplementation {
 
     $lease->setAttributes($ephemeral_lease->getAttributes());
     $lease->save();
-    $this->log('Acquired Lease');
+    $this->log(pht('Acquired Lease'));
   }
 
 
@@ -287,7 +287,7 @@ abstract class DrydockBlueprintImplementation {
     $lease->saveTransaction();
 
     if (!$released) {
-      throw new Exception('Unable to release lease: lease not active!');
+      throw new Exception(pht('Unable to release lease: lease not active!'));
     }
 
   }
@@ -353,7 +353,7 @@ abstract class DrydockBlueprintImplementation {
   public static function writeLog(
     DrydockResource $resource = null,
     DrydockLease $lease = null,
-    $message) {
+    $message = null) {
 
     $log = id(new DrydockLog())
       ->setEpoch(time())
@@ -377,7 +377,7 @@ abstract class DrydockBlueprintImplementation {
     if ($list === null) {
       $blueprints = id(new PhutilSymbolLoader())
         ->setType('class')
-        ->setAncestorClass('DrydockBlueprintImplementation')
+        ->setAncestorClass(__CLASS__)
         ->setConcreteOnly(true)
         ->selectAndLoadSymbols();
       $list = ipull($blueprints, 'name', 'name');
@@ -428,9 +428,12 @@ abstract class DrydockBlueprintImplementation {
 
     if (!($resource instanceof DrydockResource)) {
       throw new Exception(
-        "Blueprint '{$blueprint}' is not properly implemented: ".
-        "executeAllocateResource() must return an object of type ".
-        "DrydockResource or throw, but returned something else.");
+        pht(
+          "Blueprint '%s' is not properly implemented: %s must return an ".
+          "object of type %s or throw, but returned something else.",
+          $blueprint,
+          'executeAllocateResource()',
+          'DrydockResource'));
     }
 
     $current_status = $resource->getStatus();
@@ -439,10 +442,14 @@ abstract class DrydockBlueprintImplementation {
       $current_name = DrydockResourceStatus::getNameForStatus($current_status);
       $req_name = DrydockResourceStatus::getNameForStatus($req_status);
       throw new Exception(
-        "Blueprint '{$blueprint}' is not properly implemented: ".
-        "executeAllocateResource() must return a DrydockResource with ".
-        "status '{$req_name}', but returned one with status ".
-        "'{$current_name}'.");
+        pht(
+          "Blueprint '%s' is not properly implemented: %s must return a %s ".
+          "with status '%s', but returned one with status '%s'.",
+          $blueprint,
+          'executeAllocateResource()',
+          'DrydockResource',
+          $req_name,
+          $current_name));
     }
   }
 
@@ -452,7 +459,7 @@ abstract class DrydockBlueprintImplementation {
 
     if (($this->activeResource !== null) ||
         ($this->activeLease !== null)) {
-      throw new Exception('There is already an active resource or lease!');
+      throw new Exception(pht('There is already an active resource or lease!'));
     }
 
     $this->activeResource = $resource;

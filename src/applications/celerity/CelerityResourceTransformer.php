@@ -332,7 +332,10 @@ final class CelerityResourceTransformer {
     if (empty($map[$var_name])) {
       $path = $this->currentPath;
       throw new Exception(
-        "CSS file '{$path}' has unknown variable '{$var_name}'.");
+        pht(
+          "CSS file '%s' has unknown variable '%s'.",
+          $path,
+          $var_name));
     }
 
     return $map[$var_name];

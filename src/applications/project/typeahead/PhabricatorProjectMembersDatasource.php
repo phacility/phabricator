@@ -41,6 +41,7 @@ final class PhabricatorProjectMembersDatasource
       $result
         ->setTokenType(PhabricatorTypeaheadTokenView::TYPE_FUNCTION)
         ->setIcon('fa-users')
+        ->setColor(null)
         ->setPHID('members('.$result->getPHID().')')
         ->setDisplayName(pht('Members: %s', $result->getDisplayName()))
         ->setName($result->getName().' members');
@@ -79,6 +80,9 @@ final class PhabricatorProjectMembersDatasource
 
     $tokens = $this->renderTokens($phids);
     foreach ($tokens as $token) {
+      // Remove any project color on this token.
+      $token->setColor(null);
+
       if ($token->isInvalid()) {
         $token
           ->setValue(pht('Members: Invalid Project'));

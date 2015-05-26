@@ -79,8 +79,8 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
 
     if (empty($databases[$namespace.'_meta_data'])) {
       $message = pht(
-        'Run the storage upgrade script to setup Phabricator\'s database '.
-        'schema.');
+        "Run the storage upgrade script to setup Phabricator's database ".
+        "schema.");
 
       $this->newIssue('storage.upgrade')
         ->setName(pht('Setup MySQL Schema'))
@@ -103,10 +103,11 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
       if ($diff) {
         $this->newIssue('storage.patch')
           ->setName(pht('Upgrade MySQL Schema'))
-          ->setMessage(pht(
-            "Run the storage upgrade script to upgrade Phabricator's database ".
-              "schema. Missing patches:<br />%s<br />",
-            phutil_implode_html(phutil_tag('br'), array_keys($diff))))
+          ->setMessage(
+            pht(
+              "Run the storage upgrade script to upgrade Phabricator's ".
+              "database schema. Missing patches:<br />%s<br />",
+              phutil_implode_html(phutil_tag('br'), array_keys($diff))))
           ->addCommand(
             hsprintf('<tt>phabricator/ $</tt> ./bin/storage upgrade'));
       }
@@ -123,13 +124,15 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
         ->setName(pht('Deprecated mysql.host Format'))
         ->setSummary(
           pht(
-            'Move port information from `mysql.host` to `mysql.port` in your '.
-            'config.'))
+            'Move port information from `%s` to `%s` in your config.',
+            'mysql.host',
+            'mysql.port'))
         ->setMessage(
           pht(
-            'Your `mysql.host` configuration contains a port number, but '.
-            'this usage is deprecated. Instead, put the port number in '.
-            '`mysql.port`.'))
+            'Your `%s` configuration contains a port number, but this usage '.
+            'is deprecated. Instead, put the port number in `%s`.',
+            'mysql.host',
+            'mysql.port'))
         ->addPhabricatorConfig('mysql.host')
         ->addPhabricatorConfig('mysql.port')
         ->addCommand(

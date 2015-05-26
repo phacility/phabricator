@@ -7,7 +7,7 @@ final class ManiphestQueryConduitAPIMethod extends ManiphestConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Execute complex searches for Maniphest tasks.';
+    return pht('Execute complex searches for Maniphest tasks.');
   }
 
   protected function defineParamTypes() {
@@ -79,7 +79,10 @@ final class ManiphestQueryConduitAPIMethod extends ManiphestConduitAPIMethod {
 
     $projects = $request->getValue('projectPHIDs');
     if ($projects) {
-      $query->withAllProjects($projects);
+      $query->withEdgeLogicPHIDs(
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        PhabricatorQueryConstraint::OPERATOR_AND,
+        $projects);
     }
 
     $ccs = $request->getValue('ccPHIDs');

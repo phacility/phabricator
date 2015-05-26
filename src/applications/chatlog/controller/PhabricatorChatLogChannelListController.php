@@ -12,8 +12,8 @@ final class PhabricatorChatLogChannelListController
     $user = $request->getUser();
 
     $channels = id(new PhabricatorChatLogChannelQuery())
-                ->setViewer($user)
-                ->execute();
+      ->setViewer($user)
+      ->execute();
 
     $list = new PHUIObjectItemListView();
     foreach ($channels as $channel) {

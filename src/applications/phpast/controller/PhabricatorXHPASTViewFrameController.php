@@ -22,7 +22,7 @@ final class PhabricatorXHPASTViewFrameController
         '',
       )),
       array(
-        'title' => 'XHPAST View',
+        'title' => pht('XHPAST View'),
       ));
   }
 }

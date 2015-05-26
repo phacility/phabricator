@@ -15,7 +15,7 @@
   padding: 1px 0 3px;
 }
 
-.remarkup-code span {
+.remarkup-code span.bright {
   border-bottom: 1px solid transparent;
 }
 

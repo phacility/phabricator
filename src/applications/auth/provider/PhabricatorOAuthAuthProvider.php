@@ -82,8 +82,9 @@ abstract class PhabricatorOAuthAuthProvider extends PhabricatorAuthProvider {
     $help = $this->getProviderConfigurationHelp();
 
     return $help."\n\n".
-      pht('Use the **OAuth App Notes** field to record details about which '.
-          'account the external application is registered under.');
+      pht(
+        'Use the **OAuth App Notes** field to record details about which '.
+        'account the external application is registered under.');
   }
 
   abstract protected function getProviderConfigurationHelp();

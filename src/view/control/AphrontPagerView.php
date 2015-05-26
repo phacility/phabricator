@@ -13,52 +13,52 @@ final class AphrontPagerView extends AphrontView {
   private $surroundingPages = 2;
   private $enableKeyboardShortcuts;
 
-  final public function setPageSize($page_size) {
+  public function setPageSize($page_size) {
     $this->pageSize = max(1, $page_size);
     return $this;
   }
 
-  final public function setOffset($offset) {
+  public function setOffset($offset) {
     $this->offset = max(0, $offset);
     return $this;
   }
 
-  final public function getOffset() {
+  public function getOffset() {
     return $this->offset;
   }
 
-  final public function getPageSize() {
+  public function getPageSize() {
     return $this->pageSize;
   }
 
-  final public function setCount($count) {
+  public function setCount($count) {
     $this->count = $count;
     return $this;
   }
 
-  final public function setHasMorePages($has_more) {
+  public function setHasMorePages($has_more) {
     $this->hasMorePages = $has_more;
     return $this;
   }
 
-  final public function setURI(PhutilURI $uri, $paging_parameter) {
+  public function setURI(PhutilURI $uri, $paging_parameter) {
     $this->uri = $uri;
     $this->pagingParameter = $paging_parameter;
     return $this;
   }
 
-  final public function readFromRequest(AphrontRequest $request) {
+  public function readFromRequest(AphrontRequest $request) {
     $this->uri = $request->getRequestURI();
     $this->pagingParameter = 'offset';
     $this->offset = $request->getInt($this->pagingParameter);
     return $this;
   }
 
-  final public function willShowPagingControls() {
+  public function willShowPagingControls() {
     return $this->hasMorePages;
   }
 
-  final public function setSurroundingPages($pages) {
+  public function setSurroundingPages($pages) {
     $this->surroundingPages = max(0, $pages);
     return $this;
   }
@@ -109,8 +109,7 @@ final class AphrontPagerView extends AphrontView {
 
   public function render() {
     if (!$this->uri) {
-      throw new Exception(
-        pht('You must call setURI() before you can call render().'));
+      throw new PhutilInvalidStateException('setURI');
     }
 
     require_celerity_resource('aphront-pager-view-css');

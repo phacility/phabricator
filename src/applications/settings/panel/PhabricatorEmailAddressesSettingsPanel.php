@@ -289,7 +289,7 @@ final class PhabricatorEmailAddressesSettingsPanel
       ->appendParagraph(
         pht(
           'Are you sure you want to delete this address? You will no '.
-            'longer be able to use it to login.'))
+          'longer be able to use it to login.'))
       ->appendParagraph(
         pht(
           'Note: Removing an email address from your account will invalidate '.

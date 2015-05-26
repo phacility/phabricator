@@ -198,7 +198,7 @@ abstract class PhabricatorOAuth2AuthProvider
     $force_refresh = false) {
 
     if ($account->getProviderKey() !== $this->getProviderKey()) {
-      throw new Exception('Account does not match provider!');
+      throw new Exception(pht('Account does not match provider!'));
     }
 
     if (!$force_refresh) {
@@ -262,8 +262,7 @@ abstract class PhabricatorOAuth2AuthProvider
             phabricator_datetime($oauth_expires, $viewer)));
       } else {
         $item->addAttribute(
-          pht(
-            'Active OAuth Token'));
+          pht('Active OAuth Token'));
       }
     } else if ($is_invalid) {
       $item->addAttribute(pht('Invalid OAuth Access Token'));

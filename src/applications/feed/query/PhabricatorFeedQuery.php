@@ -67,7 +67,8 @@ final class PhabricatorFeedQuery
       $keys = $this->chronologicalKeys;
       foreach ($keys as $key) {
         if (!ctype_digit($key)) {
-          throw new Exception("Key '{$key}' is not a valid chronological key!");
+          throw new Exception(
+            pht("Key '%s' is not a valid chronological key!", $key));
         }
       }
 

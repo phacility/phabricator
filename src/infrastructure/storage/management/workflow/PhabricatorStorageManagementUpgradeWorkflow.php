@@ -7,7 +7,7 @@ final class PhabricatorStorageManagementUpgradeWorkflow
     $this
       ->setName('upgrade')
       ->setExamples('**upgrade** [__options__]')
-      ->setSynopsis('Upgrade database schemata.')
+      ->setSynopsis(pht('Upgrade database schemata.'))
       ->setArguments(
         array(
           array(
@@ -46,12 +46,14 @@ final class PhabricatorStorageManagementUpgradeWorkflow
 
     if (!$is_dry && !$is_force) {
       echo phutil_console_wrap(
-        'Before running storage upgrades, you should take down the '.
-        'Phabricator web interface and stop any running Phabricator '.
-        'daemons (you can disable this warning with --force).');
+        pht(
+          'Before running storage upgrades, you should take down the '.
+          'Phabricator web interface and stop any running Phabricator '.
+          'daemons (you can disable this warning with %s).',
+          '--force'));
 
-      if (!phutil_console_confirm('Are you ready to continue?')) {
-        echo "Cancelled.\n";
+      if (!phutil_console_confirm(pht('Are you ready to continue?'))) {
+        echo pht('Cancelled.')."\n";
         return 1;
       }
     }
@@ -60,8 +62,12 @@ final class PhabricatorStorageManagementUpgradeWorkflow
     if ($apply_only) {
       if (empty($patches[$apply_only])) {
         throw new PhutilArgumentUsageException(
-          "--apply argument '{$apply_only}' is not a valid patch. Use ".
-          "'storage status' to show patch status.");
+          pht(
+            "%s argument '%s' is not a valid patch. ".
+            "Use '%s' to show patch status.",
+            '--apply',
+            $apply_only,
+            'storage status'));
       }
     }
 
@@ -73,15 +79,17 @@ final class PhabricatorStorageManagementUpgradeWorkflow
     if ($applied === null) {
 
       if ($is_dry) {
-        echo "DRYRUN: Patch metadata storage doesn't exist yet, it would ".
-             "be created.\n";
+        echo pht(
+          "DRYRUN: Patch metadata storage doesn't exist yet, ".
+          "it would be created.\n");
         return 0;
       }
 
       if ($apply_only) {
         throw new PhutilArgumentUsageException(
-          'Storage has not been initialized yet, you must initialize storage '.
-          'before selectively applying patches.');
+          pht(
+            'Storage has not been initialized yet, you must initialize '.
+            'storage before selectively applying patches.'));
         return 1;
       }
 
@@ -103,7 +111,7 @@ final class PhabricatorStorageManagementUpgradeWorkflow
           $api->markPatchApplied($patch);
         }
       } else {
-        echo "Loading quickstart template...\n";
+        echo pht('Loading quickstart template...')."\n";
         $root = dirname(phutil_get_library_root('phabricator'));
         $sql  = $root.'/resources/sql/quickstart.sql';
         $api->applyPatchSQL($sql);
@@ -111,7 +119,7 @@ final class PhabricatorStorageManagementUpgradeWorkflow
     }
 
     if ($init_only) {
-      echo "Storage initialized.\n";
+      echo pht('Storage initialized.')."\n";
       return 0;
     }
 
@@ -127,11 +135,13 @@ final class PhabricatorStorageManagementUpgradeWorkflow
 
         if (!$is_force && !$is_dry) {
           echo phutil_console_wrap(
-            "Patch '{$apply_only}' has already been applied. Are you sure ".
-            "you want to apply it again? This may put your storage in a state ".
-            "that the upgrade scripts can not automatically manage.");
-          if (!phutil_console_confirm('Apply patch again?')) {
-            echo "Cancelled.\n";
+            pht(
+              "Patch '%s' has already been applied. Are you sure you want ".
+              "to apply it again? This may put your storage in a state ".
+              "that the upgrade scripts can not automatically manage.",
+              $apply_only));
+          if (!phutil_console_confirm(pht('Apply patch again?'))) {
+            echo pht('Cancelled.')."\n";
             return 1;
           }
         }
@@ -155,8 +165,11 @@ final class PhabricatorStorageManagementUpgradeWorkflow
         foreach ($patch->getAfter() as $after) {
           if (empty($applied[$after])) {
             if ($apply_only) {
-              echo "Unable to apply patch '{$apply_only}' because it depends ".
-                   "on patch '{$after}', which has not been applied.\n";
+              echo pht(
+                "Unable to apply patch '%s' because it depends ".
+                "on patch '%s', which has not been applied.\n",
+                $apply_only,
+                $after);
               return 1;
             }
             $can_apply = false;
@@ -171,9 +184,9 @@ final class PhabricatorStorageManagementUpgradeWorkflow
         $applied_something = true;
 
         if ($is_dry) {
-          echo "DRYRUN: Would apply patch '{$key}'.\n";
+          echo pht("DRYRUN: Would apply patch '%s'.", $key)."\n";
         } else {
-          echo "Applying patch '{$key}'...\n";
+          echo pht("Applying patch '%s'...", $key)."\n";
           $api->applyPatch($patch);
           if (!$skip_mark) {
             $api->markPatchApplied($key);
@@ -190,7 +203,9 @@ final class PhabricatorStorageManagementUpgradeWorkflow
             'Some patches could not be applied: '.
             implode(', ', array_keys($patches)));
         } else if (!$is_dry && !$apply_only) {
-          echo "Storage is up to date. Use 'storage status' for details.\n";
+          echo pht(
+            "Storage is up to date. Use '%s' for details.\n",
+            'storage status');
         }
         break;
       }

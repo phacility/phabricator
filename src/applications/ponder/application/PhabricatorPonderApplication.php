@@ -29,8 +29,8 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
   }
 
   public function loadStatus(PhabricatorUser $user) {
-    // replace with "x new unanswered questions" or some such
-    // make sure to use self::formatStatusCount and friends...!
+    // Replace with "x new unanswered questions" or some such
+    // make sure to use `self::formatStatusCount` and friends...!
     $status = array();
 
     return $status;
@@ -76,6 +76,12 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
           'This page documents the commands you can use to interact with '.
           'questions in Ponder.'),
       ),
+    );
+  }
+
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      PonderQuestionPHIDType::TYPECONST,
     );
   }
 

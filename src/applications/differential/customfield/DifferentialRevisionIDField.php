@@ -19,8 +19,7 @@ final class DifferentialRevisionIDField
 
   public function getFieldDescription() {
     return pht(
-      'Ties commits to revisions and provides a permananent link between '.
-      'them.');
+      'Ties commits to revisions and provides a permanent link between them.');
   }
 
   public function canDisableField() {
@@ -32,6 +31,14 @@ final class DifferentialRevisionIDField
   }
 
   public function parseValueFromCommitMessage($value) {
+    // If the value is just "D123" or similar, parse the ID from it directly.
+    $value = trim($value);
+    $matches = null;
+    if (preg_match('/^[dD]([1-9]\d*)\z/', $value, $matches)) {
+      return (int)$matches[1];
+    }
+
+    // Otherwise, try to extract a URI value.
     return self::parseRevisionIDFromURI($value);
   }
 

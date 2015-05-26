@@ -15,13 +15,15 @@ final class DifferentialHostedMercurialLandingStrategy
     try {
       $this->commitRevisionToWorkspace($revision, $workspace, $viewer);
     } catch (Exception $e) {
-      throw new PhutilProxyException('Failed to commit patch', $e);
+      throw new PhutilProxyException(pht('Failed to commit patch.'), $e);
     }
 
     try {
       $this->pushWorkspaceRepository($repository, $workspace, $viewer);
     } catch (Exception $e) {
-      throw new PhutilProxyException('Failed to push changes upstream', $e);
+      throw new PhutilProxyException(
+        pht('Failed to push changes upstream.'),
+        $e);
     }
   }
 

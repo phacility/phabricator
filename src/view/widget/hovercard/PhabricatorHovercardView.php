@@ -2,7 +2,7 @@
 
 /**
  * The default one-for-all hovercard. We may derive from this one to create
- * more specialized ones
+ * more specialized ones.
  */
 final class PhabricatorHovercardView extends AphrontView {
 
@@ -62,7 +62,7 @@ final class PhabricatorHovercardView extends AphrontView {
 
   public function render() {
     if (!$this->handle) {
-      throw new Exception('Call setObjectHandle() before calling render()!');
+      throw new PhutilInvalidStateException('setObjectHandle');
     }
 
     $handle = $this->handle;

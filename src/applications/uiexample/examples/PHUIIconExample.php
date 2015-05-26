@@ -3,11 +3,11 @@
 final class PHUIIconExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Icons and Images';
+    return pht('Icons and Images');
   }
 
   public function getDescription() {
-    return 'Easily render icons or images with links and sprites.';
+    return pht('Easily render icons or images with links and sprites.');
   }
 
   private function listTransforms() {

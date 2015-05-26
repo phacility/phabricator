@@ -27,7 +27,7 @@ final class PHUIPagedFormView extends AphrontView {
    */
   public function addPage($key, PHUIFormPageView $page) {
     if (isset($this->pages[$key])) {
-      throw new Exception("Duplicate page with key '{$key}'!");
+      throw new Exception(pht("Duplicate page with key '%s'!", $key));
     }
     $this->pages[$key] = $page;
     $page->setPagedFormView($this, $key);
@@ -44,7 +44,7 @@ final class PHUIPagedFormView extends AphrontView {
    */
   public function getPage($key) {
     if (!$this->pageExists($key)) {
-      throw new Exception("No page '{$key}' exists!");
+      throw new Exception(pht("No page '%s' exists!", $key));
     }
     return $this->pages[$key];
   }
@@ -87,7 +87,7 @@ final class PHUIPagedFormView extends AphrontView {
       $index--;
     }
 
-    throw new Exception("Requesting out-of-bounds page '{$index}'.");
+    throw new Exception(pht("Requesting out-of-bounds page '%s'.", $index));
   }
 
   protected function getLastIndex() {
@@ -152,7 +152,7 @@ final class PHUIPagedFormView extends AphrontView {
 
     $is_attempt_complete = false;
     if ($this->prevPage) {
-      $prev_index = $this->getPageIndex($selected->getKey()) - 1;;
+      $prev_index = $this->getPageIndex($selected->getKey()) - 1;
       $index = max(0, $prev_index);
       $selected = $this->getPageByIndex($index);
     } else if ($this->nextPage) {
@@ -226,7 +226,7 @@ final class PHUIPagedFormView extends AphrontView {
 
     $selected_page = $this->getSelectedPage();
     if (!$selected_page) {
-      throw new Exception('No selected page!');
+      throw new Exception(pht('No selected page!'));
     }
 
     $form->addHiddenInput(
@@ -256,7 +256,7 @@ final class PHUIPagedFormView extends AphrontView {
     if ($this->isLastPage($selected_page)) {
       $submit->addSubmitButton(pht('Save'));
     } else {
-      $submit->addSubmitButton(pht("Continue \xC2\xBB"));
+      $submit->addSubmitButton(pht('Continue')." \xC2\xBB");
     }
 
     $form->appendChild($selected_page);

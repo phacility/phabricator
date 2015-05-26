@@ -14,15 +14,14 @@ final class PhabricatorPHPConfigSetupCheck extends PhabricatorSetupCheck {
     $safe_mode = ini_get('safe_mode');
     if ($safe_mode) {
       $message = pht(
-        "You have 'safe_mode' enabled in your PHP configuration, but ".
-        "Phabricator will not run in safe mode. Safe mode has been deprecated ".
-        "in PHP 5.3 and removed in PHP 5.4.".
-        "\n\n".
-        "Disable safe mode to continue.");
+        "You have '%s' enabled in your PHP configuration, but Phabricator ".
+        "will not run in safe mode. Safe mode has been deprecated in PHP 5.3 ".
+        "and removed in PHP 5.4.\n\nDisable safe mode to continue.",
+        'safe_mode');
 
       $this->newIssue('php.safe_mode')
         ->setIsFatal(true)
-        ->setName(pht('Disable PHP safe_mode'))
+        ->setName(pht('Disable PHP %s', 'safe_mode'))
         ->setMessage($message)
         ->addPHPConfig('safe_mode');
       return;
@@ -146,17 +145,15 @@ final class PhabricatorPHPConfigSetupCheck extends PhabricatorSetupCheck {
       }
 
       $issue = $this->newIssue('php.open_basedir')
-        ->setName(pht('Disable PHP open_basedir'))
+        ->setName(pht('Disable PHP %s', 'open_basedir'))
         ->addPHPConfig('open_basedir');
 
       if ($failures) {
         $message = pht(
-          "Your server is configured with 'open_basedir', which prevents ".
-          "Phabricator from opening files it requires access to.".
-          "\n\n".
-          "Disable this setting to continue.".
-          "\n\n".
-          "Failures:\n\n%s",
+          "Your server is configured with '%s', which prevents Phabricator ".
+          "from opening files it requires access to.\n\n".
+          "Disable this setting to continue.\n\nFailures:\n\n%s",
+          'open_basedir',
           implode("\n\n", $failures));
 
         $issue
@@ -166,15 +163,17 @@ final class PhabricatorPHPConfigSetupCheck extends PhabricatorSetupCheck {
         return;
       } else {
         $summary = pht(
-          "You have 'open_basedir' configured in your PHP settings, which ".
-          "may cause some features to fail.");
+          "You have '%s' configured in your PHP settings, which ".
+          "may cause some features to fail.",
+          'open_basedir');
 
         $message = pht(
-          "You have 'open_basedir' configured in your PHP settings. Although ".
-          "this setting appears permissive enough that Phabricator will ".
-          "work properly, you may still run into problems because of it.".
-          "\n\n".
-          "Consider disabling 'open_basedir'.");
+          "You have '%s' configured in your PHP settings. Although this ".
+          "setting appears permissive enough that Phabricator will work ".
+          "properly, you may still run into problems because of it.\n\n".
+          "Consider disabling '%s'.",
+          'open_basedir',
+          'open_basedir');
 
         $issue
           ->setSummary($summary)

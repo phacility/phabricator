@@ -3,136 +3,95 @@
 final class PhabricatorFileTransformController
   extends PhabricatorFileController {
 
-  private $transform;
-  private $phid;
-  private $key;
-
   public function shouldRequireLogin() {
     return false;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->transform = $data['transform'];
-    $this->phid      = $data['phid'];
-    $this->key       = $data['key'];
-  }
-
-  public function processRequest() {
-    $viewer = $this->getRequest()->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     // NOTE: This is a public/CDN endpoint, and permission to see files is
     // controlled by knowing the secret key, not by authentication.
 
+    $is_regenerate = $request->getBool('regenerate');
+
+    $source_phid = $request->getURIData('phid');
     $file = id(new PhabricatorFileQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPHIDs(array($this->phid))
+      ->withPHIDs(array($source_phid))
       ->executeOne();
     if (!$file) {
       return new Aphront404Response();
     }
 
-    if (!$file->validateSecretKey($this->key)) {
+    $secret_key = $request->getURIData('key');
+    if (!$file->validateSecretKey($secret_key)) {
       return new Aphront403Response();
     }
 
-    $xform = id(new PhabricatorTransformedFile())
-      ->loadOneWhere(
-        'originalPHID = %s AND transform = %s',
-        $this->phid,
-        $this->transform);
+    $transform = $request->getURIData('transform');
+    $xform = $this->loadTransform($source_phid, $transform);
 
     if ($xform) {
-      return $this->buildTransformedFileResponse($xform);
+      if ($is_regenerate) {
+        $this->destroyTransform($xform);
+      } else {
+        return $this->buildTransformedFileResponse($xform);
+      }
     }
 
-    $type = $file->getMimeType();
-
-    if (!$file->isViewableInBrowser() || !$file->isTransformableImage()) {
-      return $this->buildDefaultTransformation($file);
+    $xforms = PhabricatorFileTransform::getAllTransforms();
+    if (!isset($xforms[$transform])) {
+      return new Aphront404Response();
     }
+
+    $xform = $xforms[$transform];
 
     // We're essentially just building a cache here and don't need CSRF
     // protection.
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
-    switch ($this->transform) {
-      case 'thumb-profile':
-        $xformed_file = $this->executeThumbTransform($file, 50, 50);
-        break;
-      case 'thumb-280x210':
-        $xformed_file = $this->executeThumbTransform($file, 280, 210);
-        break;
-      case 'thumb-220x165':
-        $xformed_file = $this->executeThumbTransform($file, 220, 165);
-        break;
-      case 'preview-100':
-        $xformed_file = $this->executePreviewTransform($file, 100);
-        break;
-      case 'preview-220':
-        $xformed_file = $this->executePreviewTransform($file, 220);
-        break;
-      case 'thumb-160x120':
-        $xformed_file = $this->executeThumbTransform($file, 160, 120);
-        break;
-      case 'thumb-60x45':
-        $xformed_file = $this->executeThumbTransform($file, 60, 45);
-        break;
-      default:
-        return new Aphront400Response();
+    $xformed_file = null;
+    if ($xform->canApplyTransform($file)) {
+      try {
+        $xformed_file = $xforms[$transform]->applyTransform($file);
+      } catch (Exception $ex) {
+        // In normal transform mode, we ignore failures and generate a
+        // default transform below. If we're explicitly regenerating the
+        // thumbnail, rethrow the exception.
+        if ($is_regenerate) {
+          throw $ex;
+        }
+      }
+    }
+
+    if (!$xformed_file) {
+      $xformed_file = $xform->getDefaultTransform($file);
     }
 
     if (!$xformed_file) {
       return new Aphront400Response();
     }
 
-    $xform = new PhabricatorTransformedFile();
-    $xform->setOriginalPHID($this->phid);
-    $xform->setTransform($this->transform);
-    $xform->setTransformedPHID($xformed_file->getPHID());
-    $xform->save();
+    $xform = id(new PhabricatorTransformedFile())
+      ->setOriginalPHID($source_phid)
+      ->setTransform($transform)
+      ->setTransformedPHID($xformed_file->getPHID());
 
-    return $this->buildTransformedFileResponse($xform);
-  }
-
-  private function buildDefaultTransformation(PhabricatorFile $file) {
-    static $regexps = array(
-      '@application/zip@'     => 'zip',
-      '@image/@'              => 'image',
-      '@application/pdf@'     => 'pdf',
-      '@.*@'                  => 'default',
-    );
-
-    $type = $file->getMimeType();
-    $prefix = 'default';
-    foreach ($regexps as $regexp => $implied_prefix) {
-      if (preg_match($regexp, $type)) {
-        $prefix = $implied_prefix;
-        break;
+    try {
+      $xform->save();
+    } catch (AphrontDuplicateKeyQueryException $ex) {
+      // If we collide when saving, we've raced another endpoint which was
+      // transforming the same file. Just throw our work away and use that
+      // transform instead.
+      $this->destroyTransform($xform);
+      $xform = $this->loadTransform($source_phid, $transform);
+      if (!$xform) {
+        return new Aphront404Response();
       }
     }
 
-    switch ($this->transform) {
-      case 'thumb-280x210':
-        $suffix = '280x210';
-        break;
-      case 'thumb-160x120':
-        $suffix = '160x120';
-        break;
-      case 'thumb-60x45':
-        $suffix = '60x45';
-        break;
-      case 'preview-100':
-        $suffix = '.p100';
-        break;
-      default:
-        throw new Exception('Unsupported transformation type!');
-    }
-
-    $path = celerity_get_resource_uri(
-      "rsrc/image/icon/fatcow/thumbnails/{$prefix}{$suffix}.png");
-
-    return id(new AphrontRedirectResponse())
-      ->setURI($path);
+    return $this->buildTransformedFileResponse($xform);
   }
 
   private function buildTransformedFileResponse(
@@ -152,14 +111,31 @@ final class PhabricatorFileTransformController
     return $file->getRedirectResponse();
   }
 
-  private function executePreviewTransform(PhabricatorFile $file, $size) {
-    $xformer = new PhabricatorImageTransformer();
-    return $xformer->executePreviewTransform($file, $size);
+  private function destroyTransform(PhabricatorTransformedFile $xform) {
+    $engine = new PhabricatorDestructionEngine();
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($engine->getViewer())
+      ->withPHIDs(array($xform->getTransformedPHID()))
+      ->executeOne();
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
+    if (!$file) {
+      if ($xform->getID()) {
+        $xform->delete();
+      }
+    } else {
+      $engine->destroyObject($file);
+    }
+
+    unset($unguarded);
   }
 
-  private function executeThumbTransform(PhabricatorFile $file, $x, $y) {
-    $xformer = new PhabricatorImageTransformer();
-    return $xformer->executeThumbTransform($file, $x, $y);
+  private function loadTransform($source_phid, $transform) {
+    return id(new PhabricatorTransformedFile())->loadOneWhere(
+      'originalPHID = %s AND transform = %s',
+      $source_phid,
+      $transform);
   }
 
 }

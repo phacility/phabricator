@@ -42,7 +42,6 @@ abstract class HeraldAdapter {
   const FIELD_APPLICATION_EMAIL      = 'applicaton-email';
   const FIELD_TASK_PRIORITY          = 'taskpriority';
   const FIELD_TASK_STATUS            = 'taskstatus';
-  const FIELD_ARCANIST_PROJECT       = 'arcanist-project';
   const FIELD_PUSHER_IS_COMMITTER    = 'pusher-is-committer';
   const FIELD_PATH                   = 'path';
 
@@ -78,6 +77,7 @@ abstract class HeraldAdapter {
   const ACTION_FLAG         = 'flag';
   const ACTION_ASSIGN_TASK  = 'assigntask';
   const ACTION_ADD_PROJECTS = 'addprojects';
+  const ACTION_REMOVE_PROJECTS = 'removeprojects';
   const ACTION_ADD_REVIEWERS = 'addreviewers';
   const ACTION_ADD_BLOCKING_REVIEWERS = 'addblockingreviewers';
   const ACTION_APPLY_BUILD_PLANS = 'applybuildplans';
@@ -99,7 +99,6 @@ abstract class HeraldAdapter {
   const VALUE_BUILD_PLAN      = 'buildplan';
   const VALUE_TASK_PRIORITY   = 'taskpriority';
   const VALUE_TASK_STATUS     = 'taskstatus';
-  const VALUE_ARCANIST_PROJECT  = 'arcanistprojects';
   const VALUE_LEGAL_DOCUMENTS   = 'legaldocuments';
   const VALUE_APPLICATION_EMAIL = 'applicationemail';
 
@@ -138,8 +137,10 @@ abstract class HeraldAdapter {
 
         if (array_key_exists($key, $this->customActions)) {
           throw new Exception(
-            'More than one Herald custom action implementation '.
-            'handles the action key: \''.$key.'\'.');
+            pht(
+              "More than one Herald custom action implementation ".
+              "handles the action key: '%s'.",
+              $key));
         }
 
         $this->customActions[$key] = $action;
@@ -162,10 +163,13 @@ abstract class HeraldAdapter {
       return $this->isNewObject;
     }
 
-    throw new Exception(pht('You must setIsNewObject to a boolean first!'));
+    throw new Exception(
+      pht(
+        'You must %s to a boolean first!',
+        'setIsNewObject()'));
   }
   public function setIsNewObject($new) {
-    $this->isNewObject = (bool) $new;
+    $this->isNewObject = (bool)$new;
     return $this;
   }
 
@@ -205,8 +209,7 @@ abstract class HeraldAdapter {
           return $this->getCustomFieldValue($field_name);
         }
 
-        throw new Exception(
-          "Unknown field '{$field_name}'!");
+        throw new Exception(pht("Unknown field '%s'!", $field_name));
     }
   }
 
@@ -243,6 +246,20 @@ abstract class HeraldAdapter {
     return $this->queuedTransactions;
   }
 
+  protected function newTransaction() {
+    $object = $this->newObject();
+
+    if (!($object instanceof PhabricatorApplicationTransactionInterface)) {
+      throw new Exception(
+        pht(
+          'Unable to build a new transaction for adapter object; it does '.
+          'not implement "%s".',
+          'PhabricatorApplicationTransactionInterface'));
+    }
+
+    return $object->getApplicationTransactionTemplate();
+  }
+
 
   /**
    * NOTE: You generally should not override this; it exists to support legacy
@@ -256,6 +273,26 @@ abstract class HeraldAdapter {
   abstract public function getAdapterContentDescription();
   abstract public function getAdapterApplicationClass();
   abstract public function getObject();
+
+
+  /**
+   * Return a new characteristic object for this adapter.
+   *
+   * The adapter will use this object to test for interfaces, generate
+   * transactions, and interact with custom fields.
+   *
+   * Adapters must return an object from this method to enable custom
+   * field rules and various implicit actions.
+   *
+   * Normally, you'll return an empty version of the adapted object:
+   *
+   *   return new ApplicationObject();
+   *
+   * @return null|object Template object.
+   */
+  protected function newObject() {
+    return null;
+  }
 
   public function supportsRuleType($rule_type) {
     return false;
@@ -346,7 +383,6 @@ abstract class HeraldAdapter {
       self::FIELD_APPLICATION_EMAIL => pht('Receiving email address'),
       self::FIELD_TASK_PRIORITY => pht('Task priority'),
       self::FIELD_TASK_STATUS => pht('Task status'),
-      self::FIELD_ARCANIST_PROJECT => pht('Arcanist Project'),
       self::FIELD_PUSHER_IS_COMMITTER => pht('Pusher same as committer'),
       self::FIELD_PATH => pht('Path'),
     ) + $this->getCustomFieldNameMap();
@@ -402,7 +438,6 @@ abstract class HeraldAdapter {
       case self::FIELD_PUSHER:
       case self::FIELD_TASK_PRIORITY:
       case self::FIELD_TASK_STATUS:
-      case self::FIELD_ARCANIST_PROJECT:
         return array(
           self::CONDITION_IS_ANY,
           self::CONDITION_IS_NOT_ANY,
@@ -501,7 +536,9 @@ abstract class HeraldAdapter {
           return $this->getCustomFieldConditions($field);
         }
         throw new Exception(
-          "This adapter does not define conditions for field '{$field}'!");
+          pht(
+            "This adapter does not define conditions for field '%s'!",
+            $field));
     }
   }
 
@@ -537,25 +574,25 @@ abstract class HeraldAdapter {
       case self::CONDITION_IS_ANY:
         if (!is_array($condition_value)) {
           throw new HeraldInvalidConditionException(
-            'Expected condition value to be an array.');
+            pht('Expected condition value to be an array.'));
         }
         $condition_value = array_fuse($condition_value);
         return isset($condition_value[$field_value]);
       case self::CONDITION_IS_NOT_ANY:
         if (!is_array($condition_value)) {
           throw new HeraldInvalidConditionException(
-            'Expected condition value to be an array.');
+            pht('Expected condition value to be an array.'));
         }
         $condition_value = array_fuse($condition_value);
         return !isset($condition_value[$field_value]);
       case self::CONDITION_INCLUDE_ALL:
         if (!is_array($field_value)) {
           throw new HeraldInvalidConditionException(
-            'Object produced non-array value!');
+            pht('Object produced non-array value!'));
         }
         if (!is_array($condition_value)) {
           throw new HeraldInvalidConditionException(
-            'Expected condition value to be an array.');
+            pht('Expected condition value to be an array.'));
         }
 
         $have = array_select_keys(array_fuse($field_value), $condition_value);
@@ -586,7 +623,7 @@ abstract class HeraldAdapter {
           $result = @preg_match($condition_value.'S', $value);
           if ($result === false) {
             throw new HeraldInvalidConditionException(
-              'Regular expression is not valid!');
+              pht('Regular expression is not valid!'));
           }
           if ($result) {
             return true;
@@ -598,14 +635,16 @@ abstract class HeraldAdapter {
         // dictionary. The first regexp must match the dictionary key, and the
         // second regexp must match the dictionary value. If any key/value pair
         // in the dictionary matches both regexps, the condition is satisfied.
-        $regexp_pair = json_decode($condition_value, true);
-        if (!is_array($regexp_pair)) {
+        $regexp_pair = null;
+        try {
+          $regexp_pair = phutil_json_decode($condition_value);
+        } catch (PhutilJSONParserException $ex) {
           throw new HeraldInvalidConditionException(
-            'Regular expression pair is not valid JSON!');
+            pht('Regular expression pair is not valid JSON!'));
         }
         if (count($regexp_pair) != 2) {
           throw new HeraldInvalidConditionException(
-            'Regular expression pair is not a pair!');
+            pht('Regular expression pair is not a pair!'));
         }
 
         $key_regexp   = array_shift($regexp_pair);
@@ -615,13 +654,13 @@ abstract class HeraldAdapter {
           $key_matches = @preg_match($key_regexp, $key);
           if ($key_matches === false) {
             throw new HeraldInvalidConditionException(
-              'First regular expression is invalid!');
+              pht('First regular expression is invalid!'));
           }
           if ($key_matches) {
             $value_matches = @preg_match($value_regexp, $value);
             if ($value_matches === false) {
               throw new HeraldInvalidConditionException(
-                'Second regular expression is invalid!');
+                pht('Second regular expression is invalid!'));
             }
             if ($value_matches) {
               return true;
@@ -634,7 +673,7 @@ abstract class HeraldAdapter {
         $rule = $engine->getRule($condition_value);
         if (!$rule) {
           throw new HeraldInvalidConditionException(
-            'Condition references a rule which does not exist!');
+            pht('Condition references a rule which does not exist!'));
         }
 
         $is_not = ($condition_type == self::CONDITION_NOT_RULE);
@@ -644,12 +683,12 @@ abstract class HeraldAdapter {
         }
         return $result;
       case self::CONDITION_HAS_BIT:
-        return (($condition_value & $field_value) === (int) $condition_value);
+        return (($condition_value & $field_value) === (int)$condition_value);
       case self::CONDITION_NOT_BIT:
-        return (($condition_value & $field_value) !== (int) $condition_value);
+        return (($condition_value & $field_value) !== (int)$condition_value);
       default:
         throw new HeraldInvalidConditionException(
-          "Unknown condition '{$condition_type}'.");
+          pht("Unknown condition '%s'.", $condition_type));
     }
   }
 
@@ -670,8 +709,10 @@ abstract class HeraldAdapter {
         }
         break;
       case self::CONDITION_REGEXP_PAIR:
-        $json = json_decode($condition_value, true);
-        if (!is_array($json)) {
+        $json = null;
+        try {
+          $json = phutil_json_decode($condition_value);
+        } catch (PhutilJSONParserException $ex) {
           throw new HeraldInvalidConditionException(
             pht(
               'The regular expression pair "%s" is not valid JSON. Enter a '.
@@ -755,7 +796,20 @@ abstract class HeraldAdapter {
 
   public function getActions($rule_type) {
     $custom_actions = $this->getCustomActionsForRuleType($rule_type);
-    return mpull($custom_actions, 'getActionKey');
+    $custom_actions = mpull($custom_actions, 'getActionKey');
+
+    $actions = $custom_actions;
+
+    $object = $this->newObject();
+
+    if (($object instanceof PhabricatorProjectInterface)) {
+      if ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) {
+        $actions[] = self::ACTION_ADD_PROJECTS;
+        $actions[] = self::ACTION_REMOVE_PROJECTS;
+      }
+    }
+
+    return $actions;
   }
 
   public function getActionNameMap($rule_type) {
@@ -771,6 +825,7 @@ abstract class HeraldAdapter {
           self::ACTION_FLAG         => pht('Mark with flag'),
           self::ACTION_ASSIGN_TASK  => pht('Assign task to'),
           self::ACTION_ADD_PROJECTS => pht('Add projects'),
+          self::ACTION_REMOVE_PROJECTS => pht('Remove projects'),
           self::ACTION_ADD_REVIEWERS => pht('Add reviewers'),
           self::ACTION_ADD_BLOCKING_REVIEWERS => pht('Add blocking reviewers'),
           self::ACTION_APPLY_BUILD_PLANS => pht('Run build plans'),
@@ -787,14 +842,13 @@ abstract class HeraldAdapter {
           self::ACTION_AUDIT        => pht('Trigger an Audit by me'),
           self::ACTION_FLAG         => pht('Mark with flag'),
           self::ACTION_ASSIGN_TASK  => pht('Assign task to me'),
-          self::ACTION_ADD_PROJECTS => pht('Add projects'),
           self::ACTION_ADD_REVIEWERS => pht('Add me as a reviewer'),
           self::ACTION_ADD_BLOCKING_REVIEWERS =>
             pht('Add me as a blocking reviewer'),
         );
         break;
       default:
-        throw new Exception("Unknown rule type '{$rule_type}'!");
+        throw new Exception(pht("Unknown rule type '%s'!", $rule_type));
     }
 
     $custom_actions = $this->getCustomActionsForRuleType($rule_type);
@@ -888,8 +942,6 @@ abstract class HeraldAdapter {
             return self::VALUE_TASK_PRIORITY;
           case self::FIELD_TASK_STATUS:
             return self::VALUE_TASK_STATUS;
-          case self::FIELD_ARCANIST_PROJECT:
-            return self::VALUE_ARCANIST_PROJECT;
           default:
             return self::VALUE_USER;
         }
@@ -932,7 +984,7 @@ abstract class HeraldAdapter {
       case self::CONDITION_NOT_RULE:
         return self::VALUE_RULE;
       default:
-        throw new Exception("Unknown condition '{$condition}'.");
+        throw new Exception(pht("Unknown condition '%s'.", $condition));
     }
   }
 
@@ -953,6 +1005,7 @@ abstract class HeraldAdapter {
         case self::ACTION_FLAG:
           return self::VALUE_FLAG_COLOR;
         case self::ACTION_ADD_PROJECTS:
+        case self::ACTION_REMOVE_PROJECTS:
           return self::VALUE_PROJECT;
       }
     } else {
@@ -964,6 +1017,7 @@ abstract class HeraldAdapter {
         case self::ACTION_NOTHING:
           return self::VALUE_NONE;
         case self::ACTION_ADD_PROJECTS:
+        case self::ACTION_REMOVE_PROJECTS:
           return self::VALUE_PROJECT;
         case self::ACTION_FLAG:
           return self::VALUE_FLAG_COLOR;
@@ -987,7 +1041,7 @@ abstract class HeraldAdapter {
       return $custom_action->getActionType();
     }
 
-    throw new Exception("Unknown or invalid action '".$action."'.");
+    throw new Exception(pht("Unknown or invalid action '%s'.", $action));
   }
 
 
@@ -998,65 +1052,6 @@ abstract class HeraldAdapter {
     return array(
       HeraldRepetitionPolicyConfig::EVERY,
     );
-  }
-
-
-  public static function applyFlagEffect(HeraldEffect $effect, $phid) {
-    $color = $effect->getTarget();
-
-    $rule = $effect->getRule();
-    $user = $rule->getAuthor();
-
-    $flag = PhabricatorFlagQuery::loadUserFlag($user, $phid);
-    if ($flag) {
-      return new HeraldApplyTranscript(
-        $effect,
-        false,
-        pht('Object already flagged.'));
-    }
-
-    $handle = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
-      ->withPHIDs(array($phid))
-      ->executeOne();
-
-    $flag = new PhabricatorFlag();
-    $flag->setOwnerPHID($user->getPHID());
-    $flag->setType($handle->getType());
-    $flag->setObjectPHID($handle->getPHID());
-
-    // TOOD: Should really be transcript PHID, but it doesn't exist yet.
-    $flag->setReasonPHID($user->getPHID());
-
-    $flag->setColor($color);
-    $flag->setNote(
-      pht('Flagged by Herald Rule "%s".', $rule->getName()));
-    $flag->save();
-
-    return new HeraldApplyTranscript(
-      $effect,
-      true,
-      pht('Added flag.'));
-  }
-
-  protected function applyEmailEffect(HeraldEffect $effect) {
-
-    foreach ($effect->getTarget() as $phid) {
-      $this->emailPHIDs[$phid] = $phid;
-
-      // If this is a personal rule, we'll force delivery of a real email. This
-      // effect is stronger than notification preferences, so you get an actual
-      // email even if your preferences are set to "Notify" or "Ignore".
-      $rule = $effect->getRule();
-      if ($rule->isPersonalRule()) {
-        $this->forcedEmailPHIDs[$phid] = $phid;
-      }
-    }
-
-    return new HeraldApplyTranscript(
-      $effect,
-      true,
-      pht('Added mailable to mail targets.'));
   }
 
   public static function getAllAdapters() {
@@ -1088,7 +1083,7 @@ abstract class HeraldAdapter {
   public static function getEnabledAdapterMap(PhabricatorUser $viewer) {
     $map = array();
 
-    $adapters = HeraldAdapter::getAllAdapters();
+    $adapters = self::getAllAdapters();
     foreach ($adapters as $adapter) {
       if (!$adapter->isAvailableToUser($viewer)) {
         continue;
@@ -1202,7 +1197,15 @@ abstract class HeraldAdapter {
     $rule_global = HeraldRuleTypeConfig::RULE_TYPE_GLOBAL;
 
     $action_type = $action->getAction();
-    $action_name = idx($this->getActionNameMap($rule_global), $action_type);
+
+    $default = $this->isHeraldCustomKey($action_type)
+      ? pht('(Unknown Custom Action "%s") equals', $action_type)
+      : pht('(Unknown Action "%s") equals', $action_type);
+
+    $action_name = idx(
+      $this->getActionNameMap($rule_global),
+      $action_type,
+      $default);
 
     $target = $this->renderActionTargetAsText($action, $handles);
 
@@ -1335,27 +1338,6 @@ abstract class HeraldAdapter {
 
 
   /**
-   * Return an object which custom fields can be generated from while editing
-   * rules. Adapters must return an object from this method to enable custom
-   * field rules.
-   *
-   * Normally, you'll return an empty version of the adapted object, assuming
-   * it implements @{interface:PhabricatorCustomFieldInterface}:
-   *
-   *   return new ApplicationObject();
-   *
-   * This is normally the only adapter method you need to override to enable
-   * Herald rules to run against custom fields.
-   *
-   * @return null|PhabricatorCustomFieldInterface Template object.
-   * @task customfield
-   */
-  protected function getCustomFieldTemplateObject() {
-    return null;
-  }
-
-
-  /**
    * Returns the prefix used to namespace Herald fields which are based on
    * custom fields.
    *
@@ -1406,8 +1388,8 @@ abstract class HeraldAdapter {
       $this->customFields = null;
 
 
-      $template_object = $this->getCustomFieldTemplateObject();
-      if ($template_object) {
+      $template_object = $this->newObject();
+      if ($template_object instanceof PhabricatorCustomFieldInterface) {
         $object = $this->getObject();
         if (!$object) {
           $object = $template_object;
@@ -1529,6 +1511,152 @@ abstract class HeraldAdapter {
     }
 
     return $field->getHeraldFieldValueType($condition);
+  }
+
+
+/* -(  Applying Effects  )--------------------------------------------------- */
+
+
+  /**
+   * @task apply
+   */
+  protected function applyStandardEffect(HeraldEffect $effect) {
+    $action = $effect->getAction();
+
+    $rule_type = $effect->getRule()->getRuleType();
+    $supported = $this->getActions($rule_type);
+    $supported = array_fuse($supported);
+    if (empty($supported[$action])) {
+      return new HeraldApplyTranscript(
+        $effect,
+        false,
+        pht(
+          'Adapter "%s" does not support action "%s" for rule type "%s".',
+          get_class($this),
+          $action,
+          $rule_type));
+    }
+
+    switch ($action) {
+      case self::ACTION_ADD_PROJECTS:
+      case self::ACTION_REMOVE_PROJECTS:
+        return $this->applyProjectsEffect($effect);
+      case self::ACTION_FLAG:
+        return $this->applyFlagEffect($effect);
+      case self::ACTION_EMAIL:
+        return $this->applyEmailEffect($effect);
+      default:
+        break;
+    }
+
+    $result = $this->handleCustomHeraldEffect($effect);
+
+    if (!$result) {
+      return new HeraldApplyTranscript(
+        $effect,
+        false,
+        pht(
+          'No custom action exists to handle rule action "%s".',
+          $action));
+    }
+
+    return $result;
+  }
+
+
+  /**
+   * @task apply
+   */
+  private function applyProjectsEffect(HeraldEffect $effect) {
+
+    if ($effect->getAction() == self::ACTION_ADD_PROJECTS) {
+      $kind = '+';
+    } else {
+      $kind = '-';
+    }
+
+    $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+    $project_phids = $effect->getTarget();
+    $xaction = $this->newTransaction()
+      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+      ->setMetadataValue('edge:type', $project_type)
+      ->setNewValue(
+        array(
+          $kind => array_fuse($project_phids),
+        ));
+
+    $this->queueTransaction($xaction);
+
+    return new HeraldApplyTranscript(
+      $effect,
+      true,
+      pht('Added projects.'));
+  }
+
+
+  /**
+   * @task apply
+   */
+  private function applyFlagEffect(HeraldEffect $effect) {
+    $phid = $this->getPHID();
+    $color = $effect->getTarget();
+
+    $rule = $effect->getRule();
+    $user = $rule->getAuthor();
+
+    $flag = PhabricatorFlagQuery::loadUserFlag($user, $phid);
+    if ($flag) {
+      return new HeraldApplyTranscript(
+        $effect,
+        false,
+        pht('Object already flagged.'));
+    }
+
+    $handle = id(new PhabricatorHandleQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($phid))
+      ->executeOne();
+
+    $flag = new PhabricatorFlag();
+    $flag->setOwnerPHID($user->getPHID());
+    $flag->setType($handle->getType());
+    $flag->setObjectPHID($handle->getPHID());
+
+    // TOOD: Should really be transcript PHID, but it doesn't exist yet.
+    $flag->setReasonPHID($user->getPHID());
+
+    $flag->setColor($color);
+    $flag->setNote(
+      pht('Flagged by Herald Rule "%s".', $rule->getName()));
+    $flag->save();
+
+    return new HeraldApplyTranscript(
+      $effect,
+      true,
+      pht('Added flag.'));
+  }
+
+
+  /**
+   * @task apply
+   */
+  private function applyEmailEffect(HeraldEffect $effect) {
+    foreach ($effect->getTarget() as $phid) {
+      $this->emailPHIDs[$phid] = $phid;
+
+      // If this is a personal rule, we'll force delivery of a real email. This
+      // effect is stronger than notification preferences, so you get an actual
+      // email even if your preferences are set to "Notify" or "Ignore".
+      $rule = $effect->getRule();
+      if ($rule->isPersonalRule()) {
+        $this->forcedEmailPHIDs[$phid] = $phid;
+      }
+    }
+
+    return new HeraldApplyTranscript(
+      $effect,
+      true,
+      pht('Added mailable to mail targets.'));
   }
 
 

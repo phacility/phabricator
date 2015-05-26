@@ -1,0 +1,125 @@
+@title Search User Guide
+@group userguide
+
+Introduction to searching for documents in Phabricator.
+
+Overview
+========
+
+Phabricator has two major ways to search for documents and objects (like tasks,
+code reviews, users, wiki documents, and so on): **global search** and
+**application search**.
+
+**Global search** allows you to search across multiple document types at once,
+but has fewer options for refining a search. It's a good general-purpose
+search, and helpful if you're searching for a text string.
+
+**Application search** allows you to search within an application (like
+Maniphest) for documents of a specific type. Because application search is only
+searching one type of object, it can provide more powerful options for
+filtering, ordering, and displaying the results.
+
+Both types of search share many of the same features. This document walks
+through how to use search and how to take advantage of some of the advanced
+options.
+
+
+Global Search
+=============
+
+Global search allows you to search across multiple document types at once.
+You can access global search by entering a search query in the main menu bar.
+
+By default, global search queries search all document types: for example, they
+will find matching tasks, commits, wiki documents, users, etc. You can use the
+dropdown to the left of the search box to select a different search scope.
+
+If you choose the **Current Application** scope, Phabricator will search for
+open documents in the current application. For example, if you're in Maniphest
+and run a search, you'll get matching tasks. If you're in Phriction and run a
+search, you'll get matching wiki documents.
+
+Some pages (like the 404 page) don't belong to an application, or belong to an
+application which doesn't have any searchable documents. In these cases,
+Phabricator will search all documents.
+
+To quickly **jump to an object** like a task, enter the object's ID in the
+global search box and search for it. For example, you can enter `T123` or
+`D456` to quickly jump to the corresponding task or code review, or enter a Git
+commit hash to jump to the corresponding commit. For a complete list of
+supported commands, see @{article:Search User Guide: Shortcuts}.
+
+After running a search, you can scroll up to add filters and refine the result
+set. You can also select **Advanced Search** from the dropdown menu to jump
+here immediately, or press return in the search box without entering a query.
+
+This interface supports standard Phabricator search and filtering features,
+like **saved queries** and **typeaheads**. See below for more details on using
+these features.
+
+
+Application Search
+==================
+
+Application search gives you a more powerful way to search one type of document,
+like tasks. Most applications provide application search interfaces for the
+documents or objects they let you create: these pages have queries in the left
+menu, show objects or documents in the main content area, and have controls
+for refining the results.
+
+These interfaces support **saved queries** and **typeaheads**.
+
+
+Saving and Sharing Queries
+=============
+
+If you have a query which you run often, you can save it for easy access.
+To do this, click "Save Custom Query..." on the result screen. Choose a name
+for your query and it will be saved in the left nav so you can run it again
+with one click.
+
+You can use "Edit Queries..." to reorder queries or remove saved queries you
+don't use anymore.
+
+If you drag a query to the top of the list, it will execute by default when
+you load the relevant search interface. You can use this to make your default
+view show the results you most often want.
+
+You can share queries with other users by sending them the URL. This will run
+the same query for them with all the parameters you've set (they may see
+different results than you do, because they may not have the same permisions).
+
+
+Typeaheads
+==========
+
+Typeaheads are text inputs which suggest options as you type. Typeaheads make
+it easy to select users, projects, document types, and other kinds of objects
+without typing their full names.
+
+For example, if you want to find tasks that a specific user created, you can
+use the "Authors:" filter in Maniphest. The filter uses a typeahead control
+to let you enter authors who you want to search for.
+
+To use a typeahead, enter the first few letters of the thing you want to
+select. It will appear in a dropdown under your cursor, and you can select it
+by clicking it (or using the arrow keys to highlight it, then pressing return).
+
+If you aren't sure about the exact name of what you're looking for, click the
+browse button ({nav icon=search}) to the right of the input. This will let you
+browse through valid results for the control. You can filter the results from
+within the browse dialog to narrow them down.
+
+Some typeaheads support advanced selection functions which can let you build
+more powerful queries. If a control supports functions, the "Browse" dialog
+will show that advanced functions are available and give you a link to details
+on which functions you can use.
+
+For example, the `members()` function lets you automatically select all of the
+members of a project. You could use this with the "Authors" filter to find
+tasks created by anyone on a certain team.
+
+Another useful function is the `viewer()` function, which works as though you'd
+typed your own username when you run the query. However, if you send the query
+to someone else, it will show results for //their// username when they run it.
+This can be particularly useful when creating dashboard panels.

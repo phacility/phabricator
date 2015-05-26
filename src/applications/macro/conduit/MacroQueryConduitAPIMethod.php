@@ -7,7 +7,7 @@ final class MacroQueryConduitAPIMethod extends MacroConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Retrieve image macro information.';
+    return pht('Retrieve image macro information.');
   }
 
   protected function defineParamTypes() {

@@ -16,8 +16,7 @@ final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
       ->execute();
 
     if (!$task_daemon) {
-      $doc_href = PhabricatorEnv::getDocLink(
-        'Managing Daemons with phd');
+      $doc_href = PhabricatorEnv::getDocLink('Managing Daemons with phd');
 
       $summary = pht(
         'You must start the Phabricator daemons to send email, rebuild '.
@@ -57,24 +56,29 @@ final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
 
       if ($phd_user) {
         if ($daemon->getRunningAsUser() != $phd_user) {
-          $doc_href = PhabricatorEnv::getDocLink(
-            'Managing Daemons with phd');
+          $doc_href = PhabricatorEnv::getDocLink('Managing Daemons with phd');
 
           $summary = pht(
             'At least one daemon is currently running as a different '.
-            'user than configured in the Phabricator phd.user setting');
+            'user than configured in the Phabricator %s setting',
+            'phd.user');
 
           $message = pht(
             'A daemon is running as user %s while the Phabricator config '.
-            'specifies phd.user to be %s.'.
+            'specifies %s to be %s.'.
             "\n\n".
-            'Either adjust phd.user to match %s or start '.
+            'Either adjust %s to match %s or start '.
             'the daemons as the correct user. '.
             "\n\n".
-            'phd Daemons will try to '.
-            'use sudo to start as the configured user. '.
-            'Make sure that the user who starts phd has the correct '.
-            'sudo permissions to start phd daemons as %s',
+            '%s Daemons will try to use %s to start as the configured user. '.
+            'Make sure that the user who starts %s has the correct '.
+            'sudo permissions to start %s daemons as %s',
+            'phd.user',
+            'phd.user',
+            'phd',
+            'sudo',
+            'phd',
+            'phd',
             phutil_tag('tt', array(), $daemon->getRunningAsUser()),
             phutil_tag('tt', array(), $phd_user),
             phutil_tag('tt', array(), $daemon->getRunningAsUser()),

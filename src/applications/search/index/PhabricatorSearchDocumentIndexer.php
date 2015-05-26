@@ -36,7 +36,7 @@ abstract class PhabricatorSearchDocumentIndexer extends Phobject {
       ->withPHIDs(array($phid))
       ->executeOne();
     if (!$object) {
-      throw new Exception("Unable to load object by phid '{$phid}'!");
+      throw new Exception(pht("Unable to load object by PHID '%s'!", $phid));
     }
     return $object;
   }
@@ -69,21 +69,25 @@ abstract class PhabricatorSearchDocumentIndexer extends Phobject {
         $this->indexProjects($document, $object);
       }
 
-      $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
+      $engine = PhabricatorSearchEngine::loadEngine();
       try {
         $engine->reindexAbstractDocument($document);
       } catch (Exception $ex) {
-        $phid = $document->getPHID();
-        $class = get_class($engine);
-
-        phlog("Unable to index document {$phid} with engine {$class}.");
+        phlog(
+          pht(
+            'Unable to index document %s with engine %s.',
+            $document->getPHID(),
+            get_class($engine)));
         phlog($ex);
       }
 
       $this->dispatchDidUpdateIndexEvent($phid, $document);
     } catch (Exception $ex) {
-      $class = get_class($this);
-      phlog("Unable to build document {$phid} with indexer {$class}.");
+      phlog(
+        pht(
+          'Unable to build document %s with indexer %s.',
+          $phid,
+          get_class($this)));
       phlog($ex);
     }
 

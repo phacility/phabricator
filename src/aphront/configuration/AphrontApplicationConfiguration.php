@@ -58,7 +58,19 @@ abstract class AphrontApplicationConfiguration {
    * @phutil-external-symbol class PhabricatorStartup
    */
   public static function runHTTPRequest(AphrontHTTPSink $sink) {
+    $multimeter = MultimeterControl::newInstance();
+    $multimeter->setEventContext('<http-init>');
+    $multimeter->setEventViewer('<none>');
+
+    // Build a no-op write guard for the setup phase. We'll replace this with a
+    // real write guard later on, but we need to survive setup and build a
+    // request object first.
+    $write_guard = new AphrontWriteGuard('id');
+
     PhabricatorEnv::initializeWebEnvironment();
+
+    $multimeter->setSampleRate(
+      PhabricatorEnv::getEnvConfig('debug.sample-rate'));
 
     $debug_time_limit = PhabricatorEnv::getEnvConfig('debug.time-limit');
     if ($debug_time_limit) {
@@ -101,6 +113,11 @@ abstract class AphrontApplicationConfiguration {
     $application->willBuildRequest();
     $request = $application->buildRequest();
 
+    // Now that we have a request, convert the write guard into one which
+    // actually checks CSRF tokens.
+    $write_guard->dispose();
+    $write_guard = new AphrontWriteGuard(array($request, 'validateCSRF'));
+
     // Build the server URI implied by the request headers. If an administrator
     // has not configured "phabricator.base-uri" yet, we'll use this to generate
     // links.
@@ -114,11 +131,13 @@ abstract class AphrontApplicationConfiguration {
         'U' => (string)$request->getRequestURI()->getPath(),
       ));
 
-    $write_guard = new AphrontWriteGuard(array($request, 'validateCSRF'));
-
     $processing_exception = null;
     try {
-      $response = $application->processRequest($request, $access_log, $sink);
+      $response = $application->processRequest(
+        $request,
+        $access_log,
+        $sink,
+        $multimeter);
       $response_code = $response->getHTTPResponseCode();
     } catch (Exception $ex) {
       $processing_exception = $ex;
@@ -133,7 +152,14 @@ abstract class AphrontApplicationConfiguration {
         'T' => PhabricatorStartup::getMicrosecondsSinceStart(),
       ));
 
+    $multimeter->newEvent(
+      MultimeterEvent::TYPE_REQUEST_TIME,
+      $multimeter->getEventContext(),
+      PhabricatorStartup::getMicrosecondsSinceStart());
+
     $access_log->write();
+
+    $multimeter->saveEvents();
 
     DarkConsoleXHProfPluginAPI::saveProfilerSample($access_log);
 
@@ -162,16 +188,19 @@ abstract class AphrontApplicationConfiguration {
   public function processRequest(
     AphrontRequest $request,
     PhutilDeferredLog $access_log,
-    AphrontHTTPSink $sink) {
+    AphrontHTTPSink $sink,
+    MultimeterControl $multimeter) {
 
     $this->setRequest($request);
 
     list($controller, $uri_data) = $this->buildController();
 
+    $controller_class = get_class($controller);
     $access_log->setData(
       array(
-        'C' => get_class($controller),
+        'C' => $controller_class,
       ));
+    $multimeter->setEventContext('web.'.$controller_class);
 
     $request->setURIMap($uri_data);
     $controller->setRequest($request);
@@ -189,6 +218,7 @@ abstract class AphrontApplicationConfiguration {
             'u' => $request->getUser()->getUserName(),
             'P' => $request->getUser()->getPHID(),
           ));
+        $multimeter->setEventViewer('user.'.$request->getUser()->getPHID());
       }
 
       if (!$response) {
@@ -298,13 +328,14 @@ abstract class AphrontApplicationConfiguration {
           // test) so it's fine that we don't have SERVER_ADDR defined.
         } else {
           throw new AphrontUsageException(
-            pht('No SERVER_ADDR'),
+            pht('No %s', 'SERVER_ADDR'),
             pht(
               'Phabricator is configured to operate in cluster mode, but '.
-              'SERVER_ADDR is not defined in the request context. Your '.
-              'webserver configuration needs to forward SERVER_ADDR to '.
-              'PHP so Phabricator can reject requests received on '.
-              'external interfaces.'));
+              '%s is not defined in the request context. Your webserver '.
+              'configuration needs to forward %s to PHP so Phabricator can '.
+              'reject requests received on external interfaces.',
+              'SERVER_ADDR',
+              'SERVER_ADDR'));
         }
       } else {
         if (!PhabricatorEnv::isClusterAddress($server_addr)) {
@@ -383,20 +414,23 @@ abstract class AphrontApplicationConfiguration {
           ->executeOne();
       } catch (PhabricatorPolicyException $ex) {
         throw new Exception(
-          'This blog is not visible to logged out users, so it can not be '.
-          'visited from a custom domain.');
+          pht(
+            'This blog is not visible to logged out users, so it can not be '.
+            'visited from a custom domain.'));
       }
 
       if (!$blog) {
         if ($prod_uri && $prod_uri != $base_uri) {
-          $prod_str = ' or '.$prod_uri;
+          $prod_str = pht('%s or %s', $base_uri, $prod_uri);
         } else {
-          $prod_str = '';
+          $prod_str = $base_uri;
         }
         throw new Exception(
-          'Specified domain '.$host.' is not configured for Phabricator '.
-          'requests. Please use '.$base_uri.$prod_str.' to visit this instance.'
-        );
+          pht(
+            'Specified domain %s is not configured for Phabricator '.
+            'requests. Please use %s to visit this instance.',
+            $host,
+            $prod_str));
       }
 
       // TODO: Make this more flexible and modular so any application can

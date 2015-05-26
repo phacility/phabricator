@@ -3,11 +3,11 @@
 $table = new PhabricatorCalendarEvent();
 $conn_w = $table->establishConnection('w');
 
-echo "Assigning PHIDs to events...\n";
+echo pht('Assigning PHIDs to events...')."\n";
 foreach (new LiskMigrationIterator($table) as $event) {
   $id = $event->getID();
 
-  echo "Updating event {$id}...\n";
+  echo pht('Updating event %d...', $id)."\n";
   if ($event->getPHID()) {
     continue;
   }
@@ -19,4 +19,4 @@ foreach (new LiskMigrationIterator($table) as $event) {
     $table->generatePHID(),
     $id);
 }
-echo "Done.\n";
+echo pht('Done.')."\n";

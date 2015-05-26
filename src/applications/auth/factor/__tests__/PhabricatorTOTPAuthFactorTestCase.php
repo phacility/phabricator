@@ -39,6 +39,4 @@ final class PhabricatorTOTPAuthFactorTestCase extends PhabricatorTestCase {
 
   }
 
-
-
 }

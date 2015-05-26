@@ -42,7 +42,7 @@ final class PhabricatorMarkupEngine {
   private $objects = array();
   private $viewer;
   private $contextObject;
-  private $version = 14;
+  private $version = 15;
 
 
 /* -(  Markup Pipeline  )---------------------------------------------------- */
@@ -190,12 +190,17 @@ final class PhabricatorMarkupEngine {
   private function requireKeyProcessed($key) {
     if (empty($this->objects[$key])) {
       throw new Exception(
-        "Call addObject() before using results (key = '{$key}').");
+        pht(
+          "Call %s before using results (key = '%s').",
+          'addObject()',
+          $key));
     }
 
     if (!isset($this->objects[$key]['output'])) {
       throw new Exception(
-        'Call process() before using results.');
+        pht(
+          'Call %s before using results.',
+          'process()'));
     }
   }
 
@@ -337,6 +342,7 @@ final class PhabricatorMarkupEngine {
   public static function newPhameMarkupEngine() {
     return self::newMarkupEngine(array(
       'macros' => false,
+      'uri.full' => true,
     ));
   }
 
@@ -349,8 +355,15 @@ final class PhabricatorMarkupEngine {
       array(
         'macros'      => false,
         'youtube'     => false,
-
       ));
+  }
+
+  /**
+   * @task engine
+   */
+  public static function newCalendarMarkupEngine() {
+    return self::newMarkupEngine(array(
+    ));
   }
 
 
@@ -409,7 +422,7 @@ final class PhabricatorMarkupEngine {
         $engine->setConfig('pygments.enabled', false);
         break;
       default:
-        throw new Exception("Unknown engine ruleset: {$ruleset}!");
+        throw new Exception(pht('Unknown engine ruleset: %s!', $ruleset));
     }
 
     $engines[$ruleset] = $engine;
@@ -429,6 +442,7 @@ final class PhabricatorMarkupEngine {
       'macros'        => true,
       'uri.allowed-protocols' => PhabricatorEnv::getEnvConfig(
         'uri.allowed-protocols'),
+      'uri.full' => false,
       'syntax-highlighter.engine' => PhabricatorEnv::getEnvConfig(
         'syntax-highlighter.engine'),
       'preserve-linebreaks' => true,
@@ -440,7 +454,6 @@ final class PhabricatorMarkupEngine {
    * @task engine
    */
   public static function newMarkupEngine(array $options) {
-
     $options += self::getMarkupEngineDefaultConfiguration();
 
     $engine = new PhutilRemarkupEngine();
@@ -455,6 +468,8 @@ final class PhabricatorMarkupEngine {
     $engine->setConfig(
       'syntax-highlighter.engine',
       $options['syntax-highlighter.engine']);
+
+    $engine->setConfig('uri.full', $options['uri.full']);
 
     $rules = array();
     $rules[] = new PhutilRemarkupEscapeRemarkupRule();
@@ -578,7 +593,7 @@ final class PhabricatorMarkupEngine {
     //  - Hopefully don't return too much text. We don't explicitly limit
     //    this right now.
 
-    $blocks = preg_split("/\n *\n\s*/", trim($corpus));
+    $blocks = preg_split("/\n *\n\s*/", $corpus);
 
     $best = null;
     foreach ($blocks as $block) {

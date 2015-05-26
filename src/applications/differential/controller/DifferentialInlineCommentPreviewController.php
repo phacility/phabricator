@@ -6,8 +6,19 @@ extends PhabricatorInlineCommentPreviewController {
   protected function loadInlineComments() {
     $viewer = $this->getViewer();
 
+    $revision = id(new DifferentialRevisionQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->getRevisionID()))
+      ->executeOne();
+    if (!$revision) {
+      return array();
+    }
+
     return id(new DifferentialInlineCommentQuery())
-      ->withDraftComments($viewer->getPHID(), $this->getRevisionID())
+      ->setViewer($this->getViewer())
+      ->withDrafts(true)
+      ->withAuthorPHIDs(array($viewer->getPHID()))
+      ->withRevisionPHIDs(array($revision->getPHID()))
       ->execute();
   }
 

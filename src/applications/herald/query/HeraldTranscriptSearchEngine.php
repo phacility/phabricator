@@ -125,7 +125,7 @@ final class HeraldTranscriptSearchEngine
       }
       $item->addAttribute($handles[$xscript->getObjectPHID()]->renderLink());
       $item->addAttribute(
-        number_format((int)(1000 * $xscript->getDuration())).' ms');
+        pht('%s ms', new PhutilNumber((int)(1000 * $xscript->getDuration()))));
       $item->addIcon(
         'none',
         phabricator_datetime($xscript->getTime(), $viewer));

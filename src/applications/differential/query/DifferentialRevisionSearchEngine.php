@@ -71,11 +71,11 @@ final class DifferentialRevisionSearchEngine
       ->needDrafts(true)
       ->needRelationships(true);
 
-    $datasource = id(new PhabricatorTypeaheadUserParameterizedDatasource())
+    $user_datasource = id(new PhabricatorPeopleUserFunctionDatasource())
       ->setViewer($this->requireViewer());
 
     $responsible_phids = $saved->getParameter('responsiblePHIDs', array());
-    $responsible_phids = $datasource->evaluateTokens($responsible_phids);
+    $responsible_phids = $user_datasource->evaluateTokens($responsible_phids);
     if ($responsible_phids) {
       $query->withResponsibleUsers($responsible_phids);
     }
@@ -83,6 +83,7 @@ final class DifferentialRevisionSearchEngine
     $this->setQueryProjects($query, $saved);
 
     $author_phids = $saved->getParameter('authorPHIDs', array());
+    $author_phids = $user_datasource->evaluateTokens($author_phids);
     if ($author_phids) {
       $query->withAuthors($author_phids);
     }
@@ -92,7 +93,10 @@ final class DifferentialRevisionSearchEngine
       $query->withReviewers($reviewer_phids);
     }
 
+    $sub_datasource = id(new PhabricatorMetaMTAMailableFunctionDatasource())
+      ->setViewer($this->requireViewer());
     $subscriber_phids = $saved->getParameter('subscriberPHIDs', array());
+    $subscriber_phids = $sub_datasource->evaluateTokens($subscriber_phids);
     if ($subscriber_phids) {
       $query->withCCs($subscriber_phids);
     }
@@ -140,13 +144,13 @@ final class DifferentialRevisionSearchEngine
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Responsible Users'))
           ->setName('responsibles')
-          ->setDatasource(new PhabricatorTypeaheadUserParameterizedDatasource())
+          ->setDatasource(new PhabricatorPeopleUserFunctionDatasource())
           ->setValue($responsible_phids))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Authors'))
           ->setName('authors')
-          ->setDatasource(new PhabricatorPeopleDatasource())
+          ->setDatasource(new PhabricatorPeopleUserFunctionDatasource())
           ->setValue($author_phids))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
@@ -158,7 +162,7 @@ final class DifferentialRevisionSearchEngine
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Subscribers'))
           ->setName('subscribers')
-          ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
+          ->setDatasource(new PhabricatorMetaMTAMailableFunctionDatasource())
           ->setValue($subscriber_phids))
       ->appendControl(
         id(new AphrontFormTokenizerControl())

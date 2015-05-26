@@ -13,7 +13,7 @@ final class PhabricatorApplicationTransactionValidationException
     $this->errors = $errors;
 
     $message = array();
-    $message[] = 'Validation errors:';
+    $message[] = pht('Validation errors:');
     foreach ($this->errors as $error) {
       $message[] = '  - '.$error->getMessage();
     }

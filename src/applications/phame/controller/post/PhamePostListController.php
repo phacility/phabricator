@@ -54,7 +54,7 @@ final class PhamePostListController extends PhameController {
         $nav->selectFilter('post/all');
         break;
       default:
-        throw new Exception("Unknown filter '{$this->filter}'!");
+        throw new Exception(pht("Unknown filter '%s'!", $this->filter));
     }
 
     $pager = id(new AphrontCursorPagerView())

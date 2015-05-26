@@ -29,7 +29,7 @@ final class DifferentialInlineCommentEditController
     $revision = $this->loadRevision();
 
     if (!id(new DifferentialChangeset())->load($changeset_id)) {
-      throw new Exception('Invalid changeset ID!');
+      throw new Exception(pht('Invalid changeset ID!'));
     }
 
     return id(new DifferentialInlineComment())
@@ -39,13 +39,17 @@ final class DifferentialInlineCommentEditController
 
   protected function loadComment($id) {
     return id(new DifferentialInlineCommentQuery())
+      ->setViewer($this->getViewer())
       ->withIDs(array($id))
+      ->withDeletedDrafts(true)
       ->executeOne();
   }
 
   protected function loadCommentByPHID($phid) {
     return id(new DifferentialInlineCommentQuery())
+      ->setViewer($this->getViewer())
       ->withPHIDs(array($phid))
+      ->withDeletedDrafts(true)
       ->executeOne();
   }
 
@@ -55,7 +59,7 @@ final class DifferentialInlineCommentEditController
 
     $inline = $this->loadComment($id);
     if (!$this->canEditInlineComment($user, $inline)) {
-      throw new Exception('That comment is not editable!');
+      throw new Exception(pht('That comment is not editable!'));
     }
     return $inline;
   }

@@ -28,12 +28,15 @@ JX.behavior('conpherence-menu', function(config) {
 
   // TODO - move more logic into the ThreadManager
   var threadManager = new JX.ConpherenceThreadManager();
+  threadManager.setMessagesRootCallback(function() {
+    return scrollbar.getContentNode();
+  });
   threadManager.setWillLoadThreadCallback(function() {
     markThreadLoading(true);
   });
   threadManager.setDidLoadThreadCallback(function(r) {
     var header = JX.$H(r.header);
-    var messages = JX.$H(r.messages);
+    var messages = JX.$H(r.transactions);
     var form = JX.$H(r.form);
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var header_root = JX.DOM.find(root, 'div', 'conpherence-header-pane');
@@ -48,7 +51,6 @@ JX.behavior('conpherence-menu', function(config) {
   });
 
   threadManager.setDidUpdateThreadCallback(function(r) {
-    JX.DOM.appendContent(scrollbar.getContentNode(), JX.$H(r.transactions));
     _scrollMessageWindow();
   });
 
@@ -70,14 +72,13 @@ JX.behavior('conpherence-menu', function(config) {
       } catch (ex) {
         // Ignore; maybe no files widget
       }
-      JX.DOM.appendContent(scrollbar.getContentNode(), JX.$H(r.transactions));
-      _scrollMessageWindow();
-
       if (fileWidget) {
         JX.DOM.setContent(
           fileWidget,
           JX.$H(r.file_widget));
       }
+
+      _scrollMessageWindow();
       textarea.value = '';
     }
     markThreadLoading(false);
@@ -119,6 +120,7 @@ JX.behavior('conpherence-menu', function(config) {
     var messages_root = JX.DOM.find(root, 'div', 'conpherence-message-pane');
     var messages = JX.DOM.find(messages_root, 'div', 'conpherence-messages');
     scrollbar = new JX.Scrollbar(messages);
+    scrollbar.setAsScrollFrame();
   }
   init();
 
@@ -189,6 +191,7 @@ JX.behavior('conpherence-menu', function(config) {
       threadManager.setLoadedThreadPHID(config.selectedThreadPHID);
       threadManager.setLatestTransactionID(config.latestTransactionID);
       threadManager.setCanEditLoadedThread(config.canEditSelectedThread);
+      threadManager.cacheCurrentTransactions();
       _scrollMessageWindow();
       _focusTextarea();
     } else {
@@ -317,12 +320,26 @@ JX.behavior('conpherence-menu', function(config) {
         buildDeviceWidgetSelector : build_device_widget_selector
       });
   }
+
   var _firstScroll = true;
   function _scrollMessageWindow() {
     if (_firstScroll) {
       _firstScroll = false;
-      // let the standard #anchor tech take over
+
+      // We want to let the standard #anchor tech take over after we make sure
+      // we don't have to present the user with a "load older message?" dialog
       if (window.location.hash) {
+        var hash = window.location.hash.replace(/^#/, '');
+        try {
+          JX.$('anchor-' + hash);
+        } catch (ex) {
+          var uri = '/conpherence/' +
+            _thread.selected + '/' + hash + '/';
+          threadManager.setLoadThreadURI(uri);
+          threadManager.loadThreadByID(_thread.selected, true);
+          _firstScroll = true;
+          return;
+        }
         return;
       }
     }
@@ -374,7 +391,7 @@ JX.behavior('conpherence-menu', function(config) {
     var form = JX.DOM.find(root, 'form', 'conpherence-pontificate');
     var data = e.getNodeData('conpherence-edit-metadata');
     var header = JX.DOM.find(root, 'div', 'conpherence-header-pane');
-    var messages = JX.DOM.find(root, 'div', 'conpherence-messages');
+    var messages = scrollbar.getContentNode();
 
     new JX.Workflow.newFromForm(form, data)
       .setHandler(JX.bind(this, function(r) {
@@ -398,31 +415,6 @@ JX.behavior('conpherence-menu', function(config) {
         }
       }))
       .start();
-  });
-
-  var _loadingTransactionID = null;
-  JX.Stratcom.listen('click', 'show-older-messages', function(e) {
-    e.kill();
-    var data = e.getNodeData('show-older-messages');
-    if (data.oldest_transaction_id == _loadingTransactionID) {
-      return;
-    }
-    _loadingTransactionID = data.oldest_transaction_id;
-    var node = e.getNode('show-older-messages');
-    JX.DOM.setContent(node, 'Loading...');
-    JX.DOM.alterClass(node, 'conpherence-show-older-messages-loading', true);
-
-    var conf_id = _thread.selected;
-    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var messages_root = JX.DOM.find(root, 'div', 'conpherence-messages');
-    new JX.Workflow(config.baseURI + conf_id + '/', data)
-    .setHandler(function(r) {
-      JX.DOM.remove(node);
-      var messages = JX.$H(r.messages);
-      JX.DOM.prependContent(
-        messages_root,
-        JX.$H(messages));
-    }).start();
   });
 
   /**

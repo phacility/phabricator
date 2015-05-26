@@ -84,8 +84,8 @@ final class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
 
     $table = new AphrontTableView($rows);
     $table->setClassName('error-log');
-    $table->setHeaders(array('Error'));
-    $table->setNoDataString('No errors.');
+    $table->setHeaders(array(pht('Error')));
+    $table->setNoDataString(pht('No errors.'));
 
     return phutil_tag(
       'div',

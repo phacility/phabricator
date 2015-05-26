@@ -17,17 +17,17 @@ final class PhabricatorMailManagementReceiveTestWorkflow
           array(
             'name'    => 'as',
             'param'   => 'user',
-            'help'    => 'Act as the specified user.',
+            'help'    => pht('Act as the specified user.'),
           ),
           array(
             'name'    => 'from',
             'param'   => 'email',
-            'help'    => 'Simulate mail delivery "From:" the given user.',
+            'help'    => pht('Simulate mail delivery "From:" the given user.'),
           ),
           array(
             'name'    => 'to',
             'param'   => 'object',
-            'help'    => 'Simulate mail delivery "To:" the given object.',
+            'help'    => pht('Simulate mail delivery "To:" the given object.'),
           ),
         ));
   }
@@ -38,7 +38,9 @@ final class PhabricatorMailManagementReceiveTestWorkflow
     $to = $args->getArg('to');
     if (!$to) {
       throw new PhutilArgumentUsageException(
-        "Use '--to' to specify the receiving object or email address.");
+        pht(
+          "Use '%s' to specify the receiving object or email address.",
+          '--to'));
     }
 
     $to_application_email = id(new PhabricatorMetaMTAApplicationEmailQuery())
@@ -127,10 +129,11 @@ final class PhabricatorMailManagementReceiveTestWorkflow
       if (!($receiver instanceof PhabricatorObjectMailReceiver)) {
         $class = get_class($receiver);
         throw new Exception(
-          "Receiver '%s' accepts mail to '%s', but is not a ".
-          "subclass of PhabricatorObjectMailReceiver.",
-          $class,
-          $to);
+          pht(
+            "Receiver '%s' accepts mail to '%s', but is not a ".
+            "subclass of PhabricatorObjectMailReceiver.",
+            $class,
+            $to));
       }
 
       $object = $receiver->loadMailReceiverObject($to, $user);

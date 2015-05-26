@@ -40,7 +40,7 @@ final class PhragmentCreateController extends PhragmentController {
       $v_editpolicy = $request->getStr('editPolicy');
 
       if (strpos($v_name, '/') !== false) {
-        $errors[] = pht('The fragment name can not contain \'/\'.');
+        $errors[] = pht("The fragment name can not contain '/'.");
       }
 
       $file = id(new PhabricatorFileQuery())
@@ -48,7 +48,7 @@ final class PhragmentCreateController extends PhragmentController {
         ->withIDs(array($v_fileid))
         ->executeOne();
       if (!$file) {
-        $errors[] = pht('The specified file doesn\'t exist.');
+        $errors[] = pht("The specified file doesn't exist.");
       }
 
       if (!count($errors)) {
@@ -117,7 +117,7 @@ final class PhragmentCreateController extends PhragmentController {
     $crumbs->addTextCrumb(pht('Create Fragment'));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText('Create Fragment')
+      ->setHeaderText(pht('Create Fragment'))
       ->setForm($form);
 
     if ($error_view) {

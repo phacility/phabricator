@@ -1,6 +1,6 @@
 <?php
 
-echo 'Giving pholio images PHIDs';
+echo pht('Giving Pholio images PHIDs');
 $table = new PholioImage();
 $table->openTransaction();
 
@@ -20,4 +20,4 @@ foreach (new LiskMigrationIterator($table) as $image) {
 }
 
 $table->saveTransaction();
-echo "\nDone.\n";
+echo "\n".pht('Done.')."\n";

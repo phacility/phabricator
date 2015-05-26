@@ -3,11 +3,11 @@
 final class PhabricatorSetupIssueUIExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Setup Issue';
+    return pht('Setup Issue');
   }
 
   public function getDescription() {
-    return 'Setup errors and warnings.';
+    return pht('Setup errors and warnings.');
   }
 
   public function renderExample() {

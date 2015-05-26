@@ -106,7 +106,7 @@ final class PhabricatorRepositoryGraphCache {
 
       // Sanity check so we can survive and recover from bad data.
       if (isset($seen[$commit_id])) {
-        phlog(pht('Unexpected infinite loop in RepositoryGraphCache!'));
+        phlog(pht('Unexpected infinite loop in %s!', __CLASS__));
         return false;
       } else {
         $seen[$commit_id] = true;

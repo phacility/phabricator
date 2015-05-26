@@ -74,7 +74,7 @@ final class PHUIButtonBarExample extends PhabricatorUIExample {
       ->addClass('mlr mll mlb');
 
     $wrap1 = id(new PHUIObjectBoxView())
-      ->setHeaderText('Button Bar Example')
+      ->setHeaderText(pht('Button Bar Example'))
       ->appendChild($layout1)
       ->appendChild($layout2)
       ->appendChild($layout3);

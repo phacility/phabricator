@@ -11,7 +11,7 @@ final class PhabricatorWorkingCopyDiscoveryTestCase
         1368319448,
       ),
       mpull($refs, 'getEpoch'),
-      'Commit Epochs');
+      pht('Commit Epochs'));
   }
 
   public function testMercurialCommitDiscovery() {

@@ -17,8 +17,9 @@ final class LiskIsolationTestDAO extends LiskDAO {
 
   protected function establishLiveConnection($mode) {
     throw new LiskIsolationTestDAOException(
-      'Isolation failure! DAO is attempting to connect to an external '.
-      'resource!');
+      pht(
+        'Isolation failure! DAO is attempting to connect to an external '.
+        'resource!'));
   }
 
   protected function getConnectionNamespace() {

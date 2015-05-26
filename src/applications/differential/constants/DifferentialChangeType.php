@@ -52,42 +52,42 @@ final class DifferentialChangeType {
 
   public static function isOldLocationChangeType($type) {
     static $types = array(
-      DifferentialChangeType::TYPE_MOVE_AWAY  => true,
-      DifferentialChangeType::TYPE_COPY_AWAY  => true,
-      DifferentialChangeType::TYPE_MULTICOPY  => true,
+      self::TYPE_MOVE_AWAY  => true,
+      self::TYPE_COPY_AWAY  => true,
+      self::TYPE_MULTICOPY  => true,
     );
     return isset($types[$type]);
   }
 
   public static function isNewLocationChangeType($type) {
     static $types = array(
-      DifferentialChangeType::TYPE_MOVE_HERE  => true,
-      DifferentialChangeType::TYPE_COPY_HERE  => true,
+      self::TYPE_MOVE_HERE  => true,
+      self::TYPE_COPY_HERE  => true,
     );
     return isset($types[$type]);
   }
 
   public static function isDeleteChangeType($type) {
     static $types = array(
-      DifferentialChangeType::TYPE_DELETE     => true,
-      DifferentialChangeType::TYPE_MOVE_AWAY  => true,
-      DifferentialChangeType::TYPE_MULTICOPY  => true,
+      self::TYPE_DELETE     => true,
+      self::TYPE_MOVE_AWAY  => true,
+      self::TYPE_MULTICOPY  => true,
     );
     return isset($types[$type]);
   }
 
   public static function isCreateChangeType($type) {
     static $types = array(
-      DifferentialChangeType::TYPE_ADD        => true,
-      DifferentialChangeType::TYPE_COPY_HERE  => true,
-      DifferentialChangeType::TYPE_MOVE_HERE  => true,
+      self::TYPE_ADD        => true,
+      self::TYPE_COPY_HERE  => true,
+      self::TYPE_MOVE_HERE  => true,
     );
     return isset($types[$type]);
   }
 
   public static function isModifyChangeType($type) {
     static $types = array(
-      DifferentialChangeType::TYPE_CHANGE     => true,
+      self::TYPE_CHANGE     => true,
     );
     return isset($types[$type]);
   }
@@ -105,7 +105,7 @@ final class DifferentialChangeType {
       self::TYPE_MESSAGE    => pht('Commit Message'),
       self::TYPE_CHILD      => pht('Contents Modified'),
     );
-    return idx($types, coalesce($type, '?'), 'Unknown');
+    return idx($types, coalesce($type, '?'), pht('Unknown'));
   }
 
 }

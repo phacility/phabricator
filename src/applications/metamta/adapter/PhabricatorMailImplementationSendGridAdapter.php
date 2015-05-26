@@ -78,8 +78,10 @@ final class PhabricatorMailImplementationSendGridAdapter
 
     if (!$user || !$key) {
       throw new Exception(
-        "Configure 'sendgrid.api-user' and 'sendgrid.api-key' to use ".
-        "SendGrid for mail delivery.");
+        pht(
+          "Configure '%s' and '%s' to use SendGrid for mail delivery.",
+          'sendgrid.api-user',
+          'sendgrid.api-key'));
     }
 
     $params = array();
@@ -142,14 +144,18 @@ final class PhabricatorMailImplementationSendGridAdapter
 
     list($body) = $future->resolvex();
 
-    $response = json_decode($body, true);
-    if (!is_array($response)) {
-      throw new Exception("Failed to JSON decode response: {$body}");
+    $response = null;
+    try {
+      $response = phutil_json_decode($body);
+    } catch (PhutilJSONParserException $ex) {
+      throw new PhutilProxyException(
+        pht('Failed to JSON decode response.'),
+        $ex);
     }
 
     if ($response['message'] !== 'success') {
       $errors = implode(';', $response['errors']);
-      throw new Exception("Request failed with errors: {$errors}.");
+      throw new Exception(pht('Request failed with errors: %s.', $errors));
     }
 
     return true;

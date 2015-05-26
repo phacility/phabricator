@@ -144,7 +144,9 @@ final class DiffusionCommitQuery
   public function getIdentifierMap() {
     if ($this->identifierMap === null) {
       throw new Exception(
-        'You must execute() the query before accessing the identifier map.');
+        pht(
+          'You must %s the query before accessing the identifier map.',
+          'execute()'));
     }
     return $this->identifierMap;
   }
@@ -491,8 +493,10 @@ final class DiffusionCommitQuery
             self::AUDIT_STATUS_PARTIAL,
           );
           throw new Exception(
-            "Unknown audit status '{$status}'! Valid statuses are: ".
-            implode(', ', $valid));
+            pht(
+              "Unknown audit status '%s'! Valid statuses are: %s.",
+              $status,
+              implode(', ', $valid)));
       }
     }
 

@@ -22,6 +22,8 @@ final class DiffusionBranchTableView extends DiffusionView {
     $current_branch = $drequest->getBranch();
     $repository = $drequest->getRepository();
 
+    $can_close_branches = ($repository->isHg());
+
     Javelin::initBehavior('phabricator-tooltips');
 
     $doc_href = PhabricatorEnv::getDoclink('Diffusion User Guide: Autoclose');
@@ -75,6 +77,14 @@ final class DiffusionBranchTableView extends DiffusionView {
             'size' => 200,
           ));
 
+      $fields = $branch->getRawFields();
+      $closed = idx($fields, 'closed');
+      if ($closed) {
+        $status = pht('Closed');
+      } else {
+        $status = pht('Open');
+      }
+
       $rows[] = array(
         phutil_tag(
           'a',
@@ -99,6 +109,7 @@ final class DiffusionBranchTableView extends DiffusionView {
         self::linkCommit(
           $drequest->getRepository(),
           $branch->getCommitIdentifier()),
+        $status,
         $status_icon,
         $datetime,
         AphrontTableView::renderSingleDisplayLine($details),
@@ -116,6 +127,7 @@ final class DiffusionBranchTableView extends DiffusionView {
         pht('History'),
         pht('Branch'),
         pht('Head'),
+        pht('State'),
         pht(''),
         pht('Modified'),
         pht('Details'),
@@ -127,7 +139,15 @@ final class DiffusionBranchTableView extends DiffusionView {
         '',
         '',
         '',
+        '',
         'wide',
+      ));
+    $view->setColumnVisibility(
+      array(
+        true,
+        true,
+        true,
+        $can_close_branches,
       ));
     $view->setRowClasses($rowc);
     return $view->render();

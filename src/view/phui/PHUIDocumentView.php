@@ -16,7 +16,6 @@ final class PHUIDocumentView extends AphrontTagView {
   private $bookdescription;
   private $mobileview;
   private $fontKit;
-  private $actionListID;
   private $fluid;
 
   public function setOffset($offset) {
@@ -59,11 +58,6 @@ final class PHUIDocumentView extends AphrontTagView {
     return $this;
   }
 
-  public function setActionListID($id) {
-    $this->actionListID = $id;
-    return $this;
-  }
-
   public function setFluid($fluid) {
     $this->fluid = $fluid;
     return $this;
@@ -74,7 +68,7 @@ final class PHUIDocumentView extends AphrontTagView {
 
     if ($this->offset) {
       $classes[] = 'phui-document-offset';
-    };
+    }
 
     if ($this->fluid) {
       $classes[] = 'phui-document-fluid';
@@ -164,28 +158,6 @@ final class PHUIDocumentView extends AphrontTagView {
         $this->renderChildren());
     } else {
       $main_content = $this->renderChildren();
-    }
-
-    if ($this->actionListID) {
-      $icon_id = celerity_generate_unique_node_id();
-      $icon = id(new PHUIIconView())
-        ->setIconFont('fa-bars');
-      $meta = array(
-        'map' => array(
-          $this->actionListID => 'phabricator-action-list-toggle',
-          $icon_id => 'phuix-dropdown-open',
-        ),
-      );
-      $mobile_menu = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setText(pht('Actions'))
-        ->setHref('#')
-        ->setIcon($icon)
-        ->addClass('phui-mobile-menu')
-        ->setID($icon_id)
-        ->addSigil('jx-toggle-class')
-        ->setMetadata($meta);
-      $this->header->addActionLink($mobile_menu);
     }
 
     $content_inner = phutil_tag(

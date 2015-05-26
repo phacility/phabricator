@@ -48,7 +48,7 @@ abstract class PhabricatorFeedStory
       try {
         $ok =
           class_exists($class) &&
-          is_subclass_of($class, 'PhabricatorFeedStory');
+          is_subclass_of($class, __CLASS__);
       } catch (PhutilMissingSymbolException $ex) {
         $ok = false;
       }
@@ -215,7 +215,7 @@ abstract class PhabricatorFeedStory
       case PhabricatorApplicationTransaction::TARGET_TEXT:
         break;
       default:
-        throw new Exception('Unknown rendering target: '.$target);
+        throw new Exception(pht('Unknown rendering target: %s', $target));
         break;
     }
   }
@@ -229,7 +229,9 @@ abstract class PhabricatorFeedStory
     $object = idx($this->objects, $phid);
     if (!$object) {
       throw new Exception(
-        "Story is asking for an object it did not request ('{$phid}')!");
+        pht(
+          "Story is asking for an object it did not request ('%s')!",
+          $phid));
     }
     return $object;
   }
@@ -237,7 +239,7 @@ abstract class PhabricatorFeedStory
   public function getPrimaryObject() {
     $phid = $this->getPrimaryObjectPHID();
     if (!$phid) {
-      throw new Exception('Story has no primary object!');
+      throw new Exception(pht('Story has no primary object!'));
     }
     return $this->getObject($phid);
   }
@@ -308,7 +310,7 @@ abstract class PhabricatorFeedStory
 
     $handle = new PhabricatorObjectHandle();
     $handle->setPHID($phid);
-    $handle->setName("Unloaded Object '{$phid}'");
+    $handle->setName(pht("Unloaded Object '%s'", $phid));
 
     return $handle;
   }
@@ -453,15 +455,9 @@ abstract class PhabricatorFeedStory
    * @task policy
    */
   public function getPolicy($capability) {
-    // If this story's primary object is a policy-aware object, use its policy
-    // to control story visiblity.
-
-    $primary_phid = $this->getPrimaryObjectPHID();
-    if (isset($this->objects[$primary_phid])) {
-      $object = $this->objects[$primary_phid];
-      if ($object instanceof PhabricatorPolicyInterface) {
-        return $object->getPolicy($capability);
-      }
+    $policy_object = $this->getPrimaryPolicyObject();
+    if ($policy_object) {
+      return $policy_object->getPolicy($capability);
     }
 
     // TODO: Remove this once all objects are policy-aware. For now, keep
@@ -476,10 +472,35 @@ abstract class PhabricatorFeedStory
    * @task policy
    */
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    $policy_object = $this->getPrimaryPolicyObject();
+    if ($policy_object) {
+      return $policy_object->hasAutomaticCapability($capability, $viewer);
+    }
+
     return false;
   }
 
   public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
+
+  /**
+   * Get the policy object this story is about, if such a policy object
+   * exists.
+   *
+   * @return PhabricatorPolicyInterface|null Policy object, if available.
+   * @task policy
+   */
+  private function getPrimaryPolicyObject() {
+    $primary_phid = $this->getPrimaryObjectPHID();
+    if (empty($this->objects[$primary_phid])) {
+      $object = $this->objects[$primary_phid];
+      if ($object instanceof PhabricatorPolicyInterface) {
+        return $object;
+      }
+    }
+
     return null;
   }
 

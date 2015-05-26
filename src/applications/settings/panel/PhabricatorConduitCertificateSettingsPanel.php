@@ -67,7 +67,8 @@ final class PhabricatorConduitCertificateSettingsPanel
       $notice->appendChild(phutil_tag(
         'p',
         array(),
-        pht('Your old certificate has been destroyed and you have been issued '.
+        pht(
+          'Your old certificate has been destroyed and you have been issued '.
         'a new certificate. Sessions established under the old certificate '.
         'are no longer valid.')));
       $notice = $notice->render();
@@ -83,7 +84,8 @@ final class PhabricatorConduitCertificateSettingsPanel
       ->appendChild(phutil_tag(
         'p',
         array('class' => 'aphront-form-instructions'),
-        pht('This certificate allows you to authenticate over Conduit, '.
+        pht(
+          'This certificate allows you to authenticate over Conduit, '.
           'the Phabricator API. Normally, you just run %s to install it.',
           phutil_tag('tt', array(), 'arc install-certificate'))))
       ->appendChild(
@@ -98,7 +100,8 @@ final class PhabricatorConduitCertificateSettingsPanel
       ->setHeaderText(pht('Arcanist Certificate'))
       ->setForm($cert_form);
 
-    $regen_instruction = pht('You can regenerate this certificate, which '.
+    $regen_instruction = pht(
+      'You can regenerate this certificate, which '.
       'will invalidate the old certificate and create a new one.');
 
     $regen_form = new AphrontFormView();

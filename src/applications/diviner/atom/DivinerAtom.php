@@ -95,16 +95,14 @@ final class DivinerAtom {
 
   public function getDocblockText() {
     if ($this->docblockText === null) {
-      throw new Exception(
-        pht('Call %s before %s!', 'setDocblockRaw()', 'getDocblockText()'));
+      throw new PhutilInvalidStateException('setDocblockRaw');
     }
     return $this->docblockText;
   }
 
   public function getDocblockMeta() {
     if ($this->docblockMeta === null) {
-      throw new Exception(
-        pht('Call %s before %s!', 'setDocblockRaw()', 'getDocblockMeta()'));
+      throw new PhutilInvalidStateException('setDocblockRaw');
     }
     return $this->docblockMeta;
   }
@@ -398,7 +396,7 @@ final class DivinerAtom {
       case self::TYPE_METHOD:
         return pht('This method is not documented.');
       default:
-        phlog("Need translation for '{$type}'.");
+        phlog(pht("Need translation for '%s'.", $type));
         return pht('This %s is not documented.', $type);
     }
   }
@@ -429,7 +427,7 @@ final class DivinerAtom {
       case self::TYPE_METHOD:
         return pht('Method');
       default:
-        phlog("Need translation for '{$type}'.");
+        phlog(pht("Need translation for '%s'.", $type));
         return ucwords($type);
     }
   }

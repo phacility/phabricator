@@ -73,7 +73,7 @@ final class PhabricatorTypeaheadModularDatasourceController
         // If this is a request for a specific token after the user clicks
         // "Select", return the token in wire format so it can be added to
         // the tokenizer.
-        if ($select_phid) {
+        if ($select_phid !== null) {
           $map = mpull($results, null, 'getPHID');
           $token = idx($map, $select_phid);
           if (!$token) {

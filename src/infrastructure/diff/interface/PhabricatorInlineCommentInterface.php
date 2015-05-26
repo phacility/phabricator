@@ -54,4 +54,7 @@ interface PhabricatorInlineCommentInterface extends PhabricatorMarkupInterface {
   public function save();
   public function delete();
 
+  public function setIsGhost($is_ghost);
+  public function getIsGhost();
+
 }

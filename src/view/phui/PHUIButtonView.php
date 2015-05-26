@@ -4,7 +4,6 @@ final class PHUIButtonView extends AphrontTagView {
 
   const GREEN = 'green';
   const GREY = 'grey';
-  const BLACK = 'black';
   const DISABLED = 'disabled';
 
   const SIMPLE = 'simple';
@@ -102,6 +101,18 @@ final class PHUIButtonView extends AphrontTagView {
 
   protected function getTagName() {
     return $this->tag;
+  }
+
+  public function setDropdownMenu(PhabricatorActionListView $actions) {
+    Javelin::initBehavior('phui-dropdown-menu');
+
+    $this->addSigil('phui-dropdown-menu');
+    $this->setMetadata(
+      array(
+        'items' => $actions,
+      ));
+
+    return $this;
   }
 
   protected function getTagAttributes() {

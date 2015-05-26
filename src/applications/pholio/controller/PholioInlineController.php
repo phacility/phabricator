@@ -70,7 +70,7 @@ final class PholioInlineController extends PholioController {
 
       $file = $image->getFile();
       if (!$file->isViewableImage()) {
-        throw new Exception('File is not viewable.');
+        throw new Exception(pht('File is not viewable.'));
       }
 
       $image_uri = $file->getBestURI();

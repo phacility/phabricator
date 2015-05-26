@@ -5,7 +5,8 @@ final class PhrictionReplyHandler
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof PhrictionDocument)) {
-      throw new Exception('Mail receiver is not a PhrictionDocument!');
+      throw new Exception(
+        pht('Mail receiver is not a %s!', 'PhrictionDocument'));
     }
   }
 

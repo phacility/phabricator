@@ -96,10 +96,13 @@ final class PhrictionEditController
 
       $draft_note = new PHUIInfoView();
       $draft_note->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
-      $draft_note->setTitle('Recovered Draft');
-      $draft_note->appendChild(hsprintf(
-        '<p>Showing a saved draft of your edits, you can %s.</p>',
-        $discard));
+      $draft_note->setTitle(pht('Recovered Draft'));
+      $draft_note->appendChild(
+        hsprintf(
+          '<p>%s</p>',
+          pht(
+            'Showing a saved draft of your edits, you can %s.',
+            $discard)));
     } else {
       $content_text = $content->getContent();
       $draft_note = null;

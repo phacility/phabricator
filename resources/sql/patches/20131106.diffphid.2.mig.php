@@ -13,7 +13,7 @@ foreach ($chunk_iter as $chunk) {
 
   foreach ($chunk as $diff) {
     $id = $diff->getID();
-    echo "Migrating diff ID {$id}...\n";
+    echo pht('Migrating diff ID %d...', $id)."\n";
 
     $phid = $diff->getPHID();
     if (strlen($phid)) {
@@ -44,4 +44,4 @@ foreach ($chunk_iter as $chunk) {
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

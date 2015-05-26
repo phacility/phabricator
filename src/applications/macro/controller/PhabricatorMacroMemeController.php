@@ -14,7 +14,7 @@ final class PhabricatorMacroMemeController
     $lower_text = $request->getStr('lowertext');
     $user = $request->getUser();
 
-    $uri = PhabricatorMacroMemeController::generateMacro($user, $macro_name,
+    $uri = self::generateMacro($user, $macro_name,
       $upper_text, $lower_text);
     if ($uri === false) {
       return new Aphront404Response();

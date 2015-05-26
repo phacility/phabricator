@@ -33,7 +33,6 @@ final class DifferentialQueryDiffsConduitAPIMethod
         ->withIDs($ids)
         ->withRevisionIDs($revision_ids)
         ->needChangesets(true)
-        ->needArcanistProjects(true)
         ->execute();
     }
 

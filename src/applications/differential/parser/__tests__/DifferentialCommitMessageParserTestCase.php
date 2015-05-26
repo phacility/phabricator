@@ -18,8 +18,9 @@ final class DifferentialCommitMessageParserTestCase
         throw new Exception(
           pht(
             'Expected test file "%s" to contain four parts (message, fields, '.
-            'output, errors) divided by "~~~~~~~~~~".',
-            $file));
+            'output, errors) divided by "%s".',
+            $file,
+            '~~~~~~~~~~'));
       }
 
       list($message, $fields, $output, $errors) = $parts;

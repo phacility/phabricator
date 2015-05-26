@@ -11,7 +11,7 @@ final class FeedPublishConduitAPIMethod extends FeedConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Publish a story to the feed.';
+    return pht('Publish a story to the feed.');
   }
 
   protected function defineParamTypes() {

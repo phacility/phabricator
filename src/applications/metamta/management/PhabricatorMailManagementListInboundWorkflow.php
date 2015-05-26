@@ -6,7 +6,7 @@ final class PhabricatorMailManagementListInboundWorkflow
   protected function didConstruct() {
     $this
       ->setName('list-inbound')
-      ->setSynopsis('List inbound messages received by Phabricator.')
+      ->setSynopsis(pht('List inbound messages received by Phabricator.'))
       ->setExamples(
         '**list-inbound**')
       ->setArguments(
@@ -15,7 +15,8 @@ final class PhabricatorMailManagementListInboundWorkflow
             'name'    => 'limit',
             'param'   => 'N',
             'default' => 100,
-            'help'    => 'Show a specific number of messages (default 100).',
+            'help'    => pht(
+              'Show a specific number of messages (default 100).'),
           ),
         ));
   }
@@ -43,10 +44,10 @@ final class PhabricatorMailManagementListInboundWorkflow
 
     $table = id(new PhutilConsoleTable())
       ->setShowHeader(false)
-      ->addColumn('id',      array('title' => 'ID'))
-      ->addColumn('author',  array('title' => 'Author'))
-      ->addColumn('phid',    array('title' => 'Related PHID'))
-      ->addColumn('subject', array('title' => 'Subject'));
+      ->addColumn('id',      array('title' => pht('ID')))
+      ->addColumn('author',  array('title' => pht('Author')))
+      ->addColumn('phid',    array('title' => pht('Related PHID')))
+      ->addColumn('subject', array('title' => pht('Subject')));
 
     foreach (array_reverse($mails) as $mail) {
       $table->addRow(array(

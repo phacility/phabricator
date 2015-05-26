@@ -71,10 +71,6 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        return $object->getViewPolicy();
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        return $object->getEditPolicy();
       case DifferentialTransaction::TYPE_ACTION:
         return null;
       case DifferentialTransaction::TYPE_INLINE:
@@ -95,8 +91,6 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case DifferentialTransaction::TYPE_ACTION:
       case DifferentialTransaction::TYPE_UPDATE:
         return $xaction->getNewValue();
@@ -189,17 +183,7 @@ final class DifferentialTransactionEditor
     $status_abandoned = ArcanistDifferentialRevisionStatus::ABANDONED;
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        $object->setViewPolicy($xaction->getNewValue());
-        return;
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        $object->setEditPolicy($xaction->getNewValue());
-        return;
-      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-      case PhabricatorTransactions::TYPE_COMMENT:
       case DifferentialTransaction::TYPE_INLINE:
-        return;
-      case PhabricatorTransactions::TYPE_EDGE:
         return;
       case DifferentialTransaction::TYPE_UPDATE:
         if (!$this->getIsCloseByCommit()) {
@@ -220,7 +204,6 @@ final class DifferentialTransactionEditor
         } else {
           $object->setRepositoryPHID($diff->getRepositoryPHID());
         }
-        $object->setArcanistProjectPHID($diff->getArcanistProjectPHID());
         $object->attachActiveDiff($diff);
 
         // TODO: Update the `diffPHID` once we add that.
@@ -578,12 +561,6 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        return;
-      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-      case PhabricatorTransactions::TYPE_EDGE:
-      case PhabricatorTransactions::TYPE_COMMENT:
       case DifferentialTransaction::TYPE_ACTION:
         return;
       case DifferentialTransaction::TYPE_INLINE:
@@ -632,7 +609,7 @@ final class DifferentialTransactionEditor
             $state,
             $phid);
         }
-        return;
+        break;
     }
 
     return parent::applyBuiltinExternalTransaction($object, $xaction);
@@ -931,8 +908,7 @@ final class DifferentialTransactionEditor
 
       case DifferentialAction::ACTION_REJECT:
         if ($actor_is_author) {
-          return pht(
-            'You can not request changes to your own revision.');
+          return pht('You can not request changes to your own revision.');
         }
 
         if ($revision_status == $status_abandoned) {
@@ -1507,13 +1483,14 @@ final class DifferentialTransactionEditor
           $nested_comments = $this->nestCommentHistory(
             $inline->getComment(), $comments_by_line_number, $authors_by_phid);
 
-          $section->addFragment('================')
-                  ->addFragment('Comment at: '.$file.':'.$range)
-                  ->addPlaintextFragment($patch)
-                  ->addHTMLFragment($this->renderPatchHTMLForMail($patch))
-                  ->addFragment('----------------')
-                  ->addFragment($nested_comments)
-                  ->addFragment(null);
+          $section
+            ->addFragment('================')
+            ->addFragment(pht('Comment at: %s:%s', $file, $range))
+            ->addPlaintextFragment($patch)
+            ->addHTMLFragment($this->renderPatchHTMLForMail($patch))
+            ->addFragment('----------------')
+            ->addFragment($nested_comments)
+            ->addFragment(null);
         }
       }
     }
@@ -1592,8 +1569,7 @@ final class DifferentialTransactionEditor
       ->executeOne();
     if (!$revision) {
       throw new Exception(
-        pht(
-          'Failed to load revision for Herald adapter construction!'));
+        pht('Failed to load revision for Herald adapter construction!'));
     }
 
     $adapter = HeraldDifferentialRevisionAdapter::newLegacyAdapter(

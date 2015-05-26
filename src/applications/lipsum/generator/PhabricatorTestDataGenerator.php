@@ -12,7 +12,9 @@ abstract class PhabricatorTestDataGenerator {
         ->loadOneWhere('1 = 1 ORDER BY RAND() LIMIT 1');
     } catch (PhutilMissingSymbolException $ex) {
       throw new PhutilMissingSymbolException(
-        'Unable to load symbol '.$classname.': this class does not exit.');
+        pht(
+          'Unable to load symbol %s: this class does not exit.',
+          $classname));
     }
   }
 

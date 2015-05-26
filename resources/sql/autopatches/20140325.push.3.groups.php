@@ -2,7 +2,7 @@
 
 $conn_w = id(new PhabricatorRepository())->establishConnection('w');
 
-echo "Adding transaction log event groups...\n";
+echo pht('Adding transaction log event groups...')."\n";
 
 $logs = queryfx_all(
   $conn_w,
@@ -10,7 +10,7 @@ $logs = queryfx_all(
   'repository_pushlog');
 foreach ($logs as $log) {
   $id = $log['id'];
-  echo "Migrating log {$id}...\n";
+  echo pht('Migrating log %d...', $id)."\n";
   if ($log['pushEventPHID']) {
     continue;
   }
@@ -40,4 +40,4 @@ foreach ($logs as $log) {
     $log['transactionKey']);
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

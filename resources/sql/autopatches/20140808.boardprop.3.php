@@ -6,7 +6,7 @@ $conn_w = $table->establishConnection('w');
 foreach (new LiskMigrationIterator($table) as $column) {
   $id = $column->getID();
 
-  echo "Adjusting column {$id}...\n";
+  echo pht('Adjusting column %d...', $id)."\n";
   if ($column->getSequence() == 0) {
 
     $properties = $column->getProperties();
@@ -21,4 +21,4 @@ foreach (new LiskMigrationIterator($table) as $column) {
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

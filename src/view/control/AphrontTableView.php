@@ -124,6 +124,7 @@ final class AphrontTableView extends AphrontView {
 
     $visibility = array_values($this->columnVisibility);
     $device_visibility = array_values($this->deviceVisibility);
+
     $headers = $this->headers;
     $short_headers = $this->shortHeaders;
     $sort_values = $this->sortValues;
@@ -235,11 +236,15 @@ final class AphrontTableView extends AphrontView {
     if ($data) {
       $row_num = 0;
       foreach ($data as $row) {
+        $row_size = count($row);
         while (count($row) > count($col_classes)) {
           $col_classes[] = null;
         }
         while (count($row) > count($visibility)) {
           $visibility[] = true;
+        }
+        while (count($row) > count($device_visibility)) {
+          $device_visibility[] = true;
         }
         $tr = array();
         // NOTE: Use of a separate column counter is to allow this to work

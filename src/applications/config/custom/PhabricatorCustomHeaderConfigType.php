@@ -5,8 +5,10 @@ final class PhabricatorCustomHeaderConfigType
 
   public function validateOption(PhabricatorConfigOption $option, $value) {
     if (phid_get_type($value) != PhabricatorFileFilePHIDType::TYPECONST) {
-      throw new Exception(pht(
-        '%s is not a valid file phid.', $value));
+      throw new Exception(
+        pht(
+          '%s is not a valid file PHID.',
+          $value));
     }
 
     $file = id(new PhabricatorFileQuery())
@@ -14,23 +16,27 @@ final class PhabricatorCustomHeaderConfigType
       ->withPHIDs(array($value))
       ->executeOne();
     if (!$file) {
-      throw new Exception(pht(
-        '%s is not a valid file phid.', $value));
+      throw new Exception(
+        pht(
+          '%s is not a valid file PHID.',
+          $value));
     }
 
     $most_open_policy = PhabricatorPolicies::getMostOpenPolicy();
     if ($file->getViewPolicy() != $most_open_policy) {
-      throw new Exception(pht(
-        'Specified file %s has policy "%s" but should have policy "%s".',
-        $value,
-        $file->getViewPolicy(),
-        $most_open_policy));
+      throw new Exception(
+        pht(
+          'Specified file %s has policy "%s" but should have policy "%s".',
+          $value,
+          $file->getViewPolicy(),
+          $most_open_policy));
     }
 
     if (!$file->isViewableImage()) {
-      throw new Exception(pht(
-        'Specified file %s is not a viewable image.',
-        $value));
+      throw new Exception(
+        pht(
+          'Specified file %s is not a viewable image.',
+          $value));
     }
   }
 

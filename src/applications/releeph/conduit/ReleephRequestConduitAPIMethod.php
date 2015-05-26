@@ -7,7 +7,7 @@ final class ReleephRequestConduitAPIMethod extends ReleephConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Request a commit or diff to be picked to a branch.';
+    return pht('Request a commit or diff to be picked to a branch.');
   }
 
   protected function defineParamTypes() {
@@ -24,8 +24,8 @@ final class ReleephRequestConduitAPIMethod extends ReleephConduitAPIMethod {
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_BRANCH'      => 'Unknown Releeph branch.',
-      'ERR_FIELD_PARSE' => 'Unable to parse a Releeph field.',
+      'ERR_BRANCH'      => pht('Unknown Releeph branch.'),
+      'ERR_FIELD_PARSE' => pht('Unable to parse a Releeph field.'),
     );
   }
 
@@ -45,7 +45,10 @@ final class ReleephRequestConduitAPIMethod extends ReleephConduitAPIMethod {
 
     if (!$releeph_branch) {
       throw id(new ConduitException('ERR_BRANCH'))->setErrorDescription(
-        "No ReleephBranch found with PHID {$branch_phid}!");
+        pht(
+          'No %s found with PHID %s!',
+          'ReleephBranch',
+          $branch_phid));
     }
 
     $releeph_project = $releeph_branch->getProduct();

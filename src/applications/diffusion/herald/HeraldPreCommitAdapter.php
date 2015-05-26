@@ -101,9 +101,6 @@ abstract class HeraldPreCommitAdapter extends HeraldAdapter {
             true,
             pht('Did nothing.'));
           break;
-        case self::ACTION_EMAIL:
-          $result[] = $this->applyEmailEffect($effect);
-          break;
         case self::ACTION_BLOCK:
           $result[] = new HeraldApplyTranscript(
             $effect,
@@ -111,14 +108,7 @@ abstract class HeraldPreCommitAdapter extends HeraldAdapter {
             pht('Blocked push.'));
           break;
         default:
-          $custom_result = parent::handleCustomHeraldEffect($effect);
-          if ($custom_result === null) {
-            throw new Exception(pht(
-              "No rules to handle action '%s'.",
-              $action));
-          }
-
-          $result[] = $custom_result;
+          $result[] = $this->applyStandardEffect($effect);
           break;
       }
     }

@@ -74,8 +74,7 @@ abstract class FileConduitAPIMethod extends ConduitAPIMethod {
 
     if ($chunk->getDataFilePHID()) {
       throw new Exception(
-        pht(
-          'Chunk has already been uploaded.'));
+        pht('Chunk has already been uploaded.'));
     }
 
     return $chunk;

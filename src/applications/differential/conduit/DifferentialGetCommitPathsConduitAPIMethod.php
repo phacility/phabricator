@@ -8,8 +8,9 @@ final class DifferentialGetCommitPathsConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Query which paths should be included when committing a '.
-           'Differential revision.';
+    return pht(
+      'Query which paths should be included when committing a '.
+      'Differential revision.');
   }
 
   protected function defineParamTypes() {
@@ -24,7 +25,7 @@ final class DifferentialGetCommitPathsConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_NOT_FOUND' => 'No such revision exists.',
+      'ERR_NOT_FOUND' => pht('No such revision exists.'),
     );
   }
 

@@ -133,7 +133,7 @@ final class HeraldRule extends HeraldDAO
     assert_instances_of($children, 'HeraldDAO');
 
     if (!$this->getID()) {
-      throw new Exception('Save rule before saving children.');
+      throw new PhutilInvalidStateException('save');
     }
 
     foreach ($children as $child) {

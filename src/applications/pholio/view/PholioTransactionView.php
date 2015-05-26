@@ -67,7 +67,7 @@ final class PholioTransactionView
           $inlines[] = $xaction;
           break;
         default:
-          throw new Exception('Unknown grouped transaction type!');
+          throw new Exception(pht('Unknown grouped transaction type!'));
       }
     }
 
@@ -101,12 +101,12 @@ final class PholioTransactionView
 
     $image = idx($images, $comment->getImageID());
     if (!$image) {
-      throw new Exception('No image attached!');
+      throw new Exception(pht('No image attached!'));
     }
 
     $file = $image->getFile();
     if (!$file->isViewableImage()) {
-      throw new Exception('File is not viewable.');
+      throw new Exception(pht('File is not viewable.'));
     }
 
     $image_uri = $file->getBestURI();

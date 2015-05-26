@@ -17,7 +17,11 @@ final class PhabricatorPasteRemarkupRule extends PhabricatorObjectRemarkupRule {
 
   }
 
-  protected function renderObjectEmbed($object, $handle, $options) {
+  protected function renderObjectEmbed(
+    $object,
+    PhabricatorObjectHandle $handle,
+    $options) {
+
     $embed_paste = id(new PasteEmbedView())
       ->setPaste($object)
       ->setHandle($handle);

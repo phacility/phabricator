@@ -13,7 +13,7 @@ final class ReleephDiffChurnFieldSpecification
   }
 
   public function getName() {
-    return 'Churn';
+    return pht('Churn');
   }
 
   public function renderPropertyViewValue(array $handles) {
@@ -56,7 +56,7 @@ final class ReleephDiffChurnFieldSpecification
 
     if ($points === 0) {
       $points = 0.15 * self::MAX_POINTS;
-      $blurb = 'Silent diff';
+      $blurb = pht('Silent diff');
     } else {
       $parts = array();
       if ($rejections) {
@@ -75,7 +75,7 @@ final class ReleephDiffChurnFieldSpecification
         $blurb = head($parts);
       } else {
         $last = array_pop($parts);
-        $blurb = implode(', ', $parts).' and '.$last;
+        $blurb = pht('%s and %s', implode(', ', $parts), $last);
       }
     }
 

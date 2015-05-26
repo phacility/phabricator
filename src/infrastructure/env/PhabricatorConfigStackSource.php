@@ -19,7 +19,7 @@ final class PhabricatorConfigStackSource
 
   public function popSource() {
     if (empty($this->stack)) {
-      throw new Exception('Popping an empty config stack!');
+      throw new Exception(pht('Popping an empty %s!', __CLASS__));
     }
     return array_shift($this->stack);
   }

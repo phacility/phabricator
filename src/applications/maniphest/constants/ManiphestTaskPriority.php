@@ -101,6 +101,9 @@ final class ManiphestTaskPriority extends ManiphestConstants {
     return idx(self::getColorMap(), $priority, 'black');
   }
 
+  public static function getTaskPriorityIcon($priority) {
+    return 'fa-arrow-right';
+  }
 
   private static function getConfig() {
     $config = PhabricatorEnv::getEnvConfig('maniphest.priorities');

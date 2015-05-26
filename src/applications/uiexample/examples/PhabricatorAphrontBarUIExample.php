@@ -3,11 +3,11 @@
 final class PhabricatorAphrontBarUIExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Bars';
+    return pht('Bars');
   }
 
   public function getDescription() {
-    return 'Like fractions, but more horizontal.';
+    return pht('Like fractions, but more horizontal.');
   }
 
   public function renderExample() {

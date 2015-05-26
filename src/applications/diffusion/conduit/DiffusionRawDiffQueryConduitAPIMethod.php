@@ -8,9 +8,9 @@ final class DiffusionRawDiffQueryConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return
+    return pht(
       'Get raw diff information from a repository for a specific commit at an '.
-      '(optional) path.';
+      '(optional) path.');
   }
 
   protected function defineReturnType() {

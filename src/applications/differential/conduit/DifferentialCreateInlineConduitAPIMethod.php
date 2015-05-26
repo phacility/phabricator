@@ -8,7 +8,7 @@ final class DifferentialCreateInlineConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Add an inline comment to a Differential revision.';
+    return pht('Add an inline comment to a Differential revision.');
   }
 
   protected function defineParamTypes() {
@@ -29,11 +29,16 @@ final class DifferentialCreateInlineConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR-BAD-REVISION' => 'Bad revision ID.',
-      'ERR-BAD-DIFF'     => 'Bad diff ID, or diff does not belong to revision.',
-      'ERR-NEED-DIFF'    => 'Neither revision ID nor diff ID was provided.',
-      'ERR-NEED-FILE'    => 'A file path was not provided.',
-      'ERR-BAD-FILE'     => "Requested file doesn't exist in this revision.",
+      'ERR-BAD-REVISION' => pht(
+        'Bad revision ID.'),
+      'ERR-BAD-DIFF'     => pht(
+        'Bad diff ID, or diff does not belong to revision.'),
+      'ERR-NEED-DIFF'    => pht(
+        'Neither revision ID nor diff ID was provided.'),
+      'ERR-NEED-FILE'    => pht(
+        'A file path was not provided.'),
+      'ERR-BAD-FILE'     => pht(
+        "Requested file doesn't exist in this revision."),
     );
   }
 

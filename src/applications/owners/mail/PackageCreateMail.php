@@ -7,6 +7,6 @@ final class PackageCreateMail extends PackageMail {
   }
 
   protected function getVerb() {
-    return 'Created';
+    return pht('Created');
   }
 }

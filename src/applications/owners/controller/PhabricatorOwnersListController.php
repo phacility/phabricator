@@ -285,7 +285,7 @@ final class PhabricatorOwnersListController
             phutil_tag(
               'a',
               array(
-                'href' => (string) $href,
+                'href' => (string)$href,
               ),
               $path->getPath()));
         } else {

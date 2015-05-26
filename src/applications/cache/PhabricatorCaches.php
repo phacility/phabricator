@@ -270,7 +270,7 @@ final class PhabricatorCaches {
   }
 
   private static function addNamespaceToCaches(array $caches) {
-    $namespace = PhabricatorCaches::getNamespace();
+    $namespace = self::getNamespace();
     if (!$namespace) {
       return $caches;
     }
@@ -332,7 +332,9 @@ final class PhabricatorCaches {
   public static function inflateData($value) {
     if (!function_exists('gzinflate')) {
       throw new Exception(
-        pht('gzinflate() is not available; unable to read deflated data!'));
+        pht(
+          '%s is not available; unable to read deflated data!',
+          'gzinflate()'));
     }
 
     $value = gzinflate($value);

@@ -44,11 +44,8 @@ Create a `.arcconfig` file in your project's working copy:
   yourproject/ $ $EDITOR .arcconfig
   yourproject/ $ cat .arcconfig
   {
-    "project.name" : "yourprojectname",
     "phabricator.uri" : "https://phabricator.example.com/"
   }
-
-Set `project.name` to a string that identifies the project.
 
 Set `phabricator.uri` to the URI for your Phabricator install (where `arc`
 should send changes to).

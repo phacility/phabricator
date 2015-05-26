@@ -155,7 +155,8 @@ final class DifferentialRepositoryField
       return;
     }
 
-    $body->addTextSection(pht('REPOSITORY'),
+    $body->addTextSection(
+      pht('REPOSITORY'),
       $repository->getMonogram().' '.$repository->getName());
   }
 

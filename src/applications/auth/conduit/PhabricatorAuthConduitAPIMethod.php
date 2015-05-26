@@ -3,8 +3,7 @@
 abstract class PhabricatorAuthConduitAPIMethod extends ConduitAPIMethod {
 
   final public function getApplication() {
-    return PhabricatorApplication::getByClass(
-      'PhabricatorAuthApplication');
+    return PhabricatorApplication::getByClass('PhabricatorAuthApplication');
   }
 
   public function getMethodStatus() {
@@ -12,8 +11,7 @@ abstract class PhabricatorAuthConduitAPIMethod extends ConduitAPIMethod {
   }
 
   public function getMethodStatusDescription() {
-    return pht(
-      'These methods are recently introduced and subject to change.');
+    return pht('These methods are recently introduced and subject to change.');
   }
 
 }

@@ -3,11 +3,11 @@
 final class PhabricatorBarePageUIExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Bare Page';
+    return pht('Bare Page');
   }
 
   public function getDescription() {
-    return 'This is a bare page.';
+    return pht('This is a bare page.');
   }
 
   public function renderExample() {

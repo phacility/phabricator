@@ -65,7 +65,7 @@ abstract class PhabricatorCustomField {
           "object of class '{$obj_class}'.");
       }
 
-      $fields = PhabricatorCustomField::buildFieldList(
+      $fields = self::buildFieldList(
         $base_class,
         $spec,
         $object);
@@ -105,7 +105,18 @@ abstract class PhabricatorCustomField {
   /**
    * @task apps
    */
-  public static function buildFieldList($base_class, array $spec, $object) {
+  public static function buildFieldList(
+    $base_class,
+    array $spec,
+    $object,
+    array $options = array()) {
+
+    PhutilTypeSpec::checkMap(
+      $options,
+      array(
+        'withDisabled' => 'optional bool',
+      ));
+
     $field_objects = id(new PhutilSymbolLoader())
       ->setAncestorClass($base_class)
       ->loadObjects();
@@ -135,13 +146,16 @@ abstract class PhabricatorCustomField {
 
     $fields = array_select_keys($fields, array_keys($spec)) + $fields;
 
-    foreach ($spec as $key => $config) {
-      if (empty($fields[$key])) {
-        continue;
-      }
-      if (!empty($config['disabled'])) {
-        if ($fields[$key]->canDisableField()) {
-          unset($fields[$key]);
+    if (empty($options['withDisabled'])) {
+      foreach ($fields as $key => $field) {
+        $config = idx($spec, $key, array()) + array(
+          'disabled' => $field->shouldDisableByDefault(),
+        );
+
+        if (!empty($config['disabled'])) {
+          if ($field->canDisableField()) {
+            unset($fields[$key]);
+          }
         }
       }
     }
@@ -1053,22 +1067,6 @@ abstract class PhabricatorCustomField {
       return $this->proxy->shouldHideInApplicationTransactions($xaction);
     }
     return false;
-  }
-
-  /**
-   * TODO: this is only used by Diffusion right now and everything is completely
-   * faked since Diffusion doesn't use ApplicationTransactions yet. This should
-   * get fleshed out as we have more use cases.
-   *
-   * @task appxaction
-   */
-  public function buildApplicationTransactionMailBody(
-    PhabricatorApplicationTransaction $xaction,
-    PhabricatorMetaMTAMailBody $body) {
-    if ($this->proxy) {
-      return $this->proxy->buildApplicationTransactionMailBody($xaction, $body);
-    }
-    return;
   }
 
 

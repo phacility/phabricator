@@ -3,6 +3,14 @@
 final class PhabricatorObjectHandle
   implements PhabricatorPolicyInterface {
 
+  const AVAILABILITY_FULL = 'full';
+  const AVAILABILITY_NONE = 'none';
+  const AVAILABILITY_PARTIAL = 'partial';
+  const AVAILABILITY_DISABLED = 'disabled';
+
+  const STATUS_OPEN = 'open';
+  const STATUS_CLOSED = 'closed';
+
   private $uri;
   private $phid;
   private $type;
@@ -13,9 +21,9 @@ final class PhabricatorObjectHandle
   private $icon;
   private $tagColor;
   private $timestamp;
-  private $status = PhabricatorObjectHandleStatus::STATUS_OPEN;
+  private $status = self::STATUS_OPEN;
+  private $availability = self::AVAILABILITY_FULL;
   private $complete;
-  private $disabled;
   private $objectName;
   private $policyFiltered;
 
@@ -129,6 +137,19 @@ final class PhabricatorObjectHandle
     return $this->name;
   }
 
+  public function setAvailability($availability) {
+    $this->availability = $availability;
+    return $this;
+  }
+
+  public function getAvailability() {
+    return $this->availability;
+  }
+
+  public function isDisabled() {
+    return ($this->getAvailability() == self::AVAILABILITY_DISABLED);
+  }
+
   public function setStatus($status) {
     $this->status = $status;
     return $this;
@@ -225,33 +246,6 @@ final class PhabricatorObjectHandle
   }
 
 
-  /**
-   * Set whether or not the underlying object is disabled. See
-   * @{method:isDisabled} for an explanation of what it means to be disabled.
-   *
-   * @param bool True if the handle represents a disabled object.
-   * @return this
-   */
-  public function setDisabled($disabled) {
-    $this->disabled = $disabled;
-    return $this;
-  }
-
-
-  /**
-   * Determine if the handle represents an object which has been disabled --
-   * for example, disabled users, archived projects, etc. These objects are
-   * complete and exist, but should be excluded from some system interactions
-   * (for instance, they usually should not appear in typeaheads, and should
-   * not have mail/notifications delivered to or about them).
-   *
-   * @return bool True if the handle represents a disabled object.
-   */
-  public function isDisabled() {
-    return $this->disabled;
-  }
-
-
   public function renderLink($name = null) {
     if ($name === null) {
       $name = $this->getLinkName();
@@ -260,14 +254,12 @@ final class PhabricatorObjectHandle
     $classes[] = 'phui-handle';
     $title = $this->title;
 
-    if ($this->status != PhabricatorObjectHandleStatus::STATUS_OPEN) {
+    if ($this->status != self::STATUS_OPEN) {
       $classes[] = 'handle-status-'.$this->status;
-      $title = $title ? $title : $this->status;
     }
 
-    if ($this->disabled) {
-      $classes[] = 'handle-disabled';
-      $title = pht('Disabled'); // Overwrite status.
+    if ($this->availability != self::AVAILABILITY_FULL) {
+      $classes[] = 'handle-availability-'.$this->availability;
     }
 
     if ($this->getType() == PhabricatorPeopleUserPHIDType::TYPECONST) {

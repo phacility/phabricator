@@ -43,24 +43,19 @@ final class DrydockConsoleController extends DrydockController {
         ->setHeader(pht('Resources'))
         ->setHref($this->getApplicationURI('resource/'))
         ->addAttribute(
-          pht(
-            'View and manage resources Drydock has built, like hosts.')));
+          pht('View and manage resources Drydock has built, like hosts.')));
 
     $menu->addItem(
       id(new PHUIObjectItemView())
         ->setHeader(pht('Leases'))
         ->setHref($this->getApplicationURI('lease/'))
-        ->addAttribute(
-          pht(
-            'Manage leases on resources.')));
+        ->addAttribute(pht('Manage leases on resources.')));
 
     $menu->addItem(
       id(new PHUIObjectItemView())
         ->setHeader(pht('Logs'))
         ->setHref($this->getApplicationURI('log/'))
-        ->addAttribute(
-          pht(
-            'View logs.')));
+        ->addAttribute(pht('View logs.')));
 
 
     $crumbs = $this->buildApplicationCrumbs();

@@ -150,7 +150,7 @@ final class PhabricatorWorkerTriggerQuery
 
     if (($this->nextEpochMin !== null) ||
         ($this->nextEpochMax !== null) ||
-        ($this->order == PhabricatorWorkerTriggerQuery::ORDER_EXECUTION)) {
+        ($this->order == self::ORDER_EXECUTION)) {
       $joins[] = qsprintf(
         $conn_r,
         'JOIN %T e ON e.triggerID = t.id',

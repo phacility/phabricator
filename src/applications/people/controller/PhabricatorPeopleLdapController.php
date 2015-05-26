@@ -26,7 +26,7 @@ final class PhabricatorPeopleLdapController
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('LDAP query'))
-          ->setCaption(pht('A filter such as (objectClass=*)'))
+          ->setCaption(pht('A filter such as %s.', '(objectClass=*)'))
           ->setName('query'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
@@ -131,7 +131,7 @@ final class PhabricatorPeopleLdapController
 
     $ldap_provider = PhabricatorLDAPAuthProvider::getLDAPProvider();
     if (!$ldap_provider) {
-      throw new Exception('No LDAP provider enabled!');
+      throw new Exception(pht('No LDAP provider enabled!'));
     }
 
     $ldap_adapter = $ldap_provider->getAdapter();

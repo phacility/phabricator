@@ -158,12 +158,10 @@
   background-color: rgba(0,0,0,.5);
   opacity: .8;
   height: 28px;
-  line-height: 12px;
   box-shadow: 0px 1px 1px rgba(128, 128, 128, 0.25);
-  padding: 6px 30px 6px 6px;
+  padding: 3px 30px 3px 6px;
   float: left;
   width: 205px;
-  left: 0;
 }
 
 .phabricator-main-menu.main-header-dark .phabricator-main-menu-search input {
@@ -175,6 +173,7 @@
   height: 32px;
   font-size: 15px;
   width: 100%;
+  padding-left: 50px;
 }
 
 .phabricator-main-menu .phabricator-main-menu-search input:focus {
@@ -201,10 +200,57 @@
   height: 24px;
   width: 28px;
   top: 10px;
-  right: -7px;
+  right: -6px;
   margin: 0 8px 0 0;
   padding: 0;
   border-radius: 0;
+}
+
+.phabricator-main-menu-search button.phabricator-main-menu-search-dropdown {
+  position: absolute;
+  right: auto;
+  left: -45px;
+  width: 40px;
+  background: transparent;
+}
+
+.device-desktop .phabricator-main-menu-search
+  button.phabricator-main-menu-search-dropdown:hover .phui-icon-view {
+    color: #fff;
+}
+
+.device .phabricator-main-menu-search
+  button.phabricator-main-menu-search-dropdown {
+    left: 2px;
+    background: #000;
+}
+
+.device .phabricator-main-menu-search
+  button.phabricator-main-menu-search-dropdown .phui-icon-view {
+    margin-top: 2px;
+  }
+
+.device .phabricator-main-menu-search
+  button.phabricator-main-menu-search-dropdown .caret {
+    margin-top: 3px;
+}
+
+button.phabricator-main-menu-search-dropdown .caret:before {
+  content: "\f107";
+  font-family: FontAwesome;
+}
+
+.phabricator-main-menu-search button.phabricator-main-menu-search-dropdown
+  .phui-icon-view {
+  color: rgba(255,255,255,.8);
+}
+
+.phabricator-main-menu-search-dropdown .caret {
+  position: absolute;
+  right: 13px;
+  top: 3px;
+  border: none;
+  margin-top: 1px;
 }
 
 .phabricator-main-menu-search button:hover {
@@ -219,7 +265,7 @@
 }
 
 .phabricator-main-menu-search-target div.jx-typeahead-results {
-  background: #ffffff;
+  background: #fff;
   word-wrap: break-word;
   overflow-y: auto;
   box-shadow: {$dropshadow};

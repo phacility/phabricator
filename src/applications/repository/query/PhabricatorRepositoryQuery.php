@@ -10,7 +10,6 @@ final class PhabricatorRepositoryQuery
   private $uuids;
   private $nameContains;
   private $remoteURIs;
-  private $anyProjectPHIDs;
   private $datasourceQuery;
 
   private $numericIdentifiers;
@@ -99,11 +98,6 @@ final class PhabricatorRepositoryQuery
     return $this;
   }
 
-  public function withAnyProjects(array $projects) {
-    $this->anyProjectPHIDs = $projects;
-    return $this;
-  }
-
   public function withDatasourceQuery($query) {
     $this->datasourceQuery = $query;
     return $this;
@@ -147,8 +141,7 @@ final class PhabricatorRepositoryQuery
 
   public function getIdentifierMap() {
     if ($this->identifierMap === null) {
-      throw new Exception(
-        'You must execute() the query before accessing the identifier map.');
+      throw new PhutilInvalidStateException('execute');
     }
     return $this->identifierMap;
   }
@@ -163,10 +156,13 @@ final class PhabricatorRepositoryQuery
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T r %Q %Q %Q %Q',
+      '%Q FROM %T r %Q %Q %Q %Q %Q %Q',
+      $this->buildSelectClause($conn_r),
       $table->getTableName(),
-      $this->buildJoinsClause($conn_r),
+      $this->buildJoinClause($conn_r),
       $this->buildWhereClause($conn_r),
+      $this->buildGroupClause($conn_r),
+      $this->buildHavingClause($conn_r),
       $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
@@ -242,7 +238,7 @@ final class PhabricatorRepositoryQuery
         case self::HOSTED_ALL:
           break;
         default:
-          throw new Exception("Uknown hosted failed '${hosted}'!");
+          throw new Exception(pht("Unknown hosted failed '%s'!", $hosted));
       }
     }
 
@@ -390,36 +386,50 @@ final class PhabricatorRepositoryQuery
     return $map;
   }
 
-  private function buildJoinsClause(AphrontDatabaseConnection $conn_r) {
-    $joins = array();
-
-    $join_summary_table = $this->needCommitCounts ||
-                          $this->needMostRecentCommits;
-
-    $vector = $this->getOrderVector();
-    if ($vector->containsKey('committed') ||
-        $vector->containsKey('size')) {
-      $join_summary_table = true;
+  protected function buildSelectClause(AphrontDatabaseConnection $conn) {
+    $parts = $this->buildSelectClauseParts($conn);
+    if ($this->shouldJoinSummaryTable()) {
+      $parts[] = 's.*';
     }
+    return $this->formatSelectClause($parts);
+  }
 
-    if ($join_summary_table) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
+    $joins = $this->buildJoinClauseParts($conn_r);
+
+    if ($this->shouldJoinSummaryTable()) {
       $joins[] = qsprintf(
         $conn_r,
         'LEFT JOIN %T s ON r.id = s.repositoryID',
         PhabricatorRepository::TABLE_SUMMARY);
     }
 
-    if ($this->anyProjectPHIDs) {
-      $joins[] = qsprintf(
-        $conn_r,
-        'JOIN edge e ON e.src = r.phid');
-    }
-
-    return implode(' ', $joins);
+    return $this->formatJoinClause($joins);
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  private function shouldJoinSummaryTable() {
+    if ($this->needCommitCounts) {
+      return true;
+    }
+
+    if ($this->needMostRecentCommits) {
+      return true;
+    }
+
+    $vector = $this->getOrderVector();
+    if ($vector->containsKey('committed')) {
+      return true;
+    }
+
+    if ($vector->containsKey('size')) {
+      return true;
+    }
+
+    return false;
+  }
+
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn_r) {
+    $where = parent::buildWhereClauseParts($conn_r);
 
     if ($this->ids) {
       $where[] = qsprintf(
@@ -492,13 +502,6 @@ final class PhabricatorRepositoryQuery
         $this->nameContains);
     }
 
-    if ($this->anyProjectPHIDs) {
-      $where[] = qsprintf(
-        $conn_r,
-        'e.dst IN (%Ls)',
-        $this->anyProjectPHIDs);
-    }
-
     if (strlen($this->datasourceQuery)) {
       // This handles having "rP" match callsigns starting with "P...".
       $query = trim($this->datasourceQuery);
@@ -514,12 +517,8 @@ final class PhabricatorRepositoryQuery
         $callsign);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
-
-
 
   public function getQueryApplicationClass() {
     return 'PhabricatorDiffusionApplication';

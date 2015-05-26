@@ -101,7 +101,7 @@ final class PhrictionDocument extends PhrictionDAO
     );
 
     if (empty($types[$type])) {
-      throw new Exception("Unknown URI type '{$type}'!");
+      throw new Exception(pht("Unknown URI type '%s'!", $type));
     }
 
     $prefix = $types[$type];

@@ -5,6 +5,7 @@ final class PhabricatorAuditInlineComment
 
   private $proxy;
   private $syntheticAuthor;
+  private $isGhost;
 
   public function __construct() {
     $this->proxy = new PhabricatorAuditTransactionComment();
@@ -114,7 +115,7 @@ final class PhabricatorAuditInlineComment
   private static function buildProxies(array $inlines) {
     $results = array();
     foreach ($inlines as $key => $inline) {
-      $results[$key] = PhabricatorAuditInlineComment::newFromModernComment(
+      $results[$key] = self::newFromModernComment(
         $inline);
     }
     return $results;
@@ -306,6 +307,15 @@ final class PhabricatorAuditInlineComment
 
   public function getFixedState() {
     return $this->proxy->getFixedState();
+  }
+
+  public function setIsGhost($is_ghost) {
+    $this->isGhost = $is_ghost;
+    return $this;
+  }
+
+  public function getIsGhost() {
+    return $this->isGhost;
   }
 
 

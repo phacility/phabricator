@@ -89,26 +89,28 @@ final class PhabricatorXHProfProfileTopLevelView
           array(
             'sigil' => 'has-tooltip',
             'meta'  => array(
-              'tip' => pht('Total wall time spent in this function and all of '.
-                       'its children (children are other functions it called '.
-                       'while executing).'),
+              'tip' => pht(
+                'Total wall time spent in this function and all of '.
+                'its children (children are other functions it called '.
+                'while executing).'),
               'size' => 200,
             ),
           ),
-          'Wall Time (Inclusive)'),
+          pht('Wall Time (Inclusive)')),
         '%',
         javelin_tag(
           'span',
           array(
             'sigil' => 'has-tooltip',
             'meta'  => array(
-              'tip' => pht('Wall time spent in this function, excluding time '.
-                       'spent in children (children are other functions it '.
-                       'called while executing).'),
+              'tip' => pht(
+                'Wall time spent in this function, excluding time '.
+                'spent in children (children are other functions it '.
+                'called while executing).'),
               'size' => 200,
             ),
           ),
-          'Wall Time (Exclusive)'),
+          pht('Wall Time (Exclusive)')),
         '%',
       ));
     $table->setColumnClasses(
@@ -128,7 +130,7 @@ final class PhabricatorXHProfProfileTopLevelView
     if ($this->file) {
       $button = id(new PHUIButtonView())
         ->setHref($this->file->getBestURI())
-        ->setText(pht('Download .xhprof Profile'))
+        ->setText(pht('Download %s Profile', '.xhprof'))
         ->setTag('a');
       $header->addActionLink($button);
     }

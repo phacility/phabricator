@@ -290,8 +290,8 @@ final class PHUITimelineEventView extends AphrontView {
         pht('Comment Actions'));
 
       if ($items) {
-        $sigil = 'phui-timeline-menu';
-        Javelin::initBehavior('phui-timeline-dropdown-menu');
+        $sigil = 'phui-dropdown-menu';
+        Javelin::initBehavior('phui-dropdown-menu');
       } else {
         $sigil = null;
       }

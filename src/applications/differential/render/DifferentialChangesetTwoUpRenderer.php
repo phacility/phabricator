@@ -278,6 +278,7 @@ final class DifferentialChangesetTwoUpRenderer
 
                 $scaffold->addInlineView($companion);
                 unset($new_comments[$n_num][$key]);
+                break;
               }
             }
           }
@@ -298,10 +299,12 @@ final class DifferentialChangesetTwoUpRenderer
     return $this->wrapChangeInTable(phutil_implode_html('', $html));
   }
 
-  public function renderFileChange($old_file = null,
-                                   $new_file = null,
-                                   $id = 0,
-                                   $vs = 0) {
+  public function renderFileChange(
+    $old_file = null,
+    $new_file = null,
+    $id = 0,
+    $vs = 0) {
+
     $old = null;
     if ($old_file) {
       $old = $this->renderImageStage($old_file);

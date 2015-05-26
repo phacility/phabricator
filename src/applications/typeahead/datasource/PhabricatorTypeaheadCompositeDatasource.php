@@ -162,5 +162,20 @@ abstract class PhabricatorTypeaheadCompositeDatasource
     return parent::renderFunctionTokens($function, $argv_list);
   }
 
+  protected function renderSpecialTokens(array $values) {
+    $result = array();
+    foreach ($this->getUsableDatasources() as $source) {
+      $special = $source->renderSpecialTokens($values);
+      foreach ($special as $key => $token) {
+        $result[$key] = $token;
+        unset($values[$key]);
+      }
+      if (!$values) {
+        break;
+      }
+    }
+    return $result;
+  }
+
 
 }

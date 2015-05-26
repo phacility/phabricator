@@ -5,7 +5,7 @@ $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
 $args = new PhutilArgumentParser($argv);
-$args->setTagline('manage internationalization');
+$args->setTagline(pht('manage internationalization'));
 $args->setSynopsis(<<<EOSYNOPSIS
 **i18n** __command__ [__options__]
     Manage translations and internationalization.

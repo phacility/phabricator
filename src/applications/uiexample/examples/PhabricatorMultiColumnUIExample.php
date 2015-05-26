@@ -3,12 +3,13 @@
 final class PhabricatorMultiColumnUIExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Multiple Column Layouts';
+    return pht('Multiple Column Layouts');
   }
 
   public function getDescription() {
-    return 'A container good for 1-7 equally spaced columns. '.
-      'Fixed and Fluid layouts.';
+    return pht(
+      'A container good for 1-7 equally spaced columns. '.
+      'Fixed and Fluid layouts.');
   }
 
   public function renderExample() {
@@ -104,27 +105,27 @@ final class PhabricatorMultiColumnUIExample extends PhabricatorUIExample {
       ->setFullWidth(true)
       ->appendChild(
         id(new AphrontFormTextControl())
-        ->setLabel('Name')
-        ->setDisableAutocomplete(true)
+        ->setLabel(pht('Name'))
+        ->setDisableAu4tocomplete(true)
         ->setSigil('name-input'))
       ->appendChild(
         id(new AphrontFormTextControl())
-        ->setLabel('Address')
+        ->setLabel(pht('Address'))
         ->setDisableAutocomplete(true)
         ->setSigil('address-input'))
       ->appendChild(
         id(new AphrontFormTextControl())
-        ->setLabel('City/State')
+        ->setLabel(pht('City/State'))
         ->setDisableAutocomplete(true)
         ->setSigil('city-input'))
       ->appendChild(
         id(new AphrontFormTextControl())
-        ->setLabel('Country')
+        ->setLabel(pht('Country'))
         ->setDisableAutocomplete(true)
         ->setSigil('country-input'))
       ->appendChild(
         id(new AphrontFormTextControl())
-        ->setLabel('Postal Code')
+        ->setLabel(pht('Postal Code'))
         ->setDisableAutocomplete(true)
         ->setSigil('postal-input'));
 
@@ -133,19 +134,19 @@ final class PhabricatorMultiColumnUIExample extends PhabricatorUIExample {
       ->setFullWidth(true)
       ->appendChild(
         id(new AphrontFormTextControl())
-        ->setLabel('Card Number')
+        ->setLabel(pht('Card Number'))
         ->setDisableAutocomplete(true)
         ->setSigil('number-input')
         ->setError(''))
       ->appendChild(
         id(new AphrontFormTextControl())
-        ->setLabel('CVC')
+        ->setLabel(pht('CVC'))
         ->setDisableAutocomplete(true)
         ->setSigil('cvc-input')
         ->setError(''))
       ->appendChild(
         id(new PhortuneMonthYearExpiryControl())
-        ->setLabel('Expiration')
+        ->setLabel(pht('Expiration'))
         ->setUser($user)
         ->setError(''));
 
@@ -154,7 +155,7 @@ final class PhabricatorMultiColumnUIExample extends PhabricatorUIExample {
     $cc_title = pht('Payment Information');
 
     $head6 = id(new PHUIHeaderView())
-      ->setHeader(pht('Let\'s Go Shopping'));
+      ->setHeader(pht("Let's Go Shopping"));
     $layout6 = id(new AphrontMultiColumnView())
       ->addColumn(hsprintf('<h1>%s</h1>%s', $shipping_title, $shipping))
       ->addColumn(hsprintf('<h1>%s</h1>%s', $billing_title, $shipping))

@@ -28,10 +28,9 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
   protected function loadHandles(array $objects) {
     $phids = mpull($objects, 'getPHID');
 
-    $handles = id(new PhabricatorHandleQuery($phids))
-      ->withPHIDs($phids)
-      ->setViewer($this->getEngine()->getConfig('viewer'))
-      ->execute();
+    $viewer = $this->getEngine()->getConfig('viewer');
+    $handles = $viewer->loadHandles($phids);
+    $handles = iterator_to_array($handles);
 
     $result = array();
     foreach ($objects as $id => $object) {
@@ -40,15 +39,26 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     return $result;
   }
 
-  protected function getObjectHref($object, $handle, $id) {
-    return $handle->getURI();
+  protected function getObjectHref(
+    $object,
+    PhabricatorObjectHandle $handle,
+    $id) {
+
+    $uri = $handle->getURI();
+
+    if ($this->getEngine()->getConfig('uri.full')) {
+      $uri = PhabricatorEnv::getURI($uri);
+    }
+
+    return $uri;
   }
 
   protected function renderObjectRefForAnyMedia (
-      $object,
-      $handle,
-      $anchor,
-      $id) {
+    $object,
+    PhabricatorObjectHandle $handle,
+    $anchor,
+    $id) {
+
     $href = $this->getObjectHref($object, $handle, $id);
     $text = $this->getObjectNamePrefix().$id;
 
@@ -68,10 +78,15 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
 
   }
 
-  protected function renderObjectRef($object, $handle, $anchor, $id) {
+  protected function renderObjectRef(
+    $object,
+    PhabricatorObjectHandle $handle,
+    $anchor,
+    $id) {
+
     $href = $this->getObjectHref($object, $handle, $id);
     $text = $this->getObjectNamePrefix().$id;
-    $status_closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
+    $status_closed = PhabricatorObjectHandle::STATUS_CLOSED;
 
     if ($anchor) {
       $href = $href.'#'.$anchor;
@@ -86,7 +101,11 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     return $this->renderHovertag($text, $href, $attr);
   }
 
-  protected function renderObjectEmbedForAnyMedia($object, $handle, $options) {
+  protected function renderObjectEmbedForAnyMedia(
+    $object,
+    PhabricatorObjectHandle $handle,
+    $options) {
+
     $name = $handle->getFullName();
     $href = $handle->getURI();
 
@@ -100,10 +119,14 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     return $this->renderObjectEmbed($object, $handle, $options);
   }
 
-  protected function renderObjectEmbed($object, $handle, $options) {
+  protected function renderObjectEmbed(
+    $object,
+    PhabricatorObjectHandle $handle,
+    $options) {
+
     $name = $handle->getFullName();
     $href = $handle->getURI();
-    $status_closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
+    $status_closed = PhabricatorObjectHandle::STATUS_CLOSED;
     $attr = array(
       'phid' => $handle->getPHID(),
       'closed'  => ($handle->getStatus() == $status_closed),
@@ -115,9 +138,9 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
   protected function renderObjectTagForMail(
     $text,
     $href,
-    $handle) {
+    PhabricatorObjectHandle $handle) {
 
-    $status_closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
+    $status_closed = PhabricatorObjectHandle::STATUS_CLOSED;
     $strikethrough = $handle->getStatus() == $status_closed ?
       'text-decoration: line-through;' :
       'text-decoration: none;';
@@ -243,7 +266,7 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     return $results;
   }
 
-  public function markupObjectEmbed($matches) {
+  public function markupObjectEmbed(array $matches) {
     if (!$this->isFlatText($matches[0])) {
       return $matches[0];
     }
@@ -256,7 +279,7 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     ));
   }
 
-  public function markupObjectReference($matches) {
+  public function markupObjectReference(array $matches) {
     if (!$this->isFlatText($matches[0])) {
       return $matches[0];
     }

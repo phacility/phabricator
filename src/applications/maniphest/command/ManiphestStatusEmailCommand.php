@@ -29,11 +29,11 @@ final class ManiphestStatusEmailCommand
     $table = implode("\n", $table);
 
     return pht(
-      'To change the status of a task, specify the desired status, like '.
-      '`!status invalid`. This table shows the configured names for statuses.'.
-      "\n\n%s\n\n".
-      'If you specify an invalid status, the command is ignored. This '.
-      'command has no effect if you do not specify a status.',
+      "To change the status of a task, specify the desired status, like ".
+      "`%s`. This table shows the configured names for statuses.\n\n%s\n\n".
+      "If you specify an invalid status, the command is ignored. This ".
+      "command has no effect if you do not specify a status.",
+      '!status invalid',
       $table);
   }
 

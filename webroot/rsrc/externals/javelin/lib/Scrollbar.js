@@ -100,6 +100,7 @@ JX.install('Scrollbar', {
   statics: {
     _controlWidth: null,
 
+
     /**
      * Compute the width of the browser's scrollbar control, in pixels.
      */
@@ -118,7 +119,34 @@ JX.install('Scrollbar', {
       }
 
       return self._controlWidth;
+    },
+
+
+    /**
+     * Get the margin width required to avoid double scrollbars.
+     *
+     * For most browsers which render a real scrollbar control, this is 0.
+     * Adjacent elements may touch the edge of the content directly without
+     * overlapping.
+     *
+     * On OSX with a trackpad, scrollbars are only drawn when content is
+     * scrolled. Content panes with internal scrollbars may overlap adjacent
+     * scrollbars if they are not laid out with a margin.
+     *
+     * @return int Control margin width in pixels.
+     */
+    getScrollbarControlMargin: function() {
+      var self = JX.Scrollbar;
+
+      // If this browser and OS don't render a real scrollbar control, we
+      // need to leave a margin. Generally, this is OSX with no mouse attached.
+      if (self._getScrollbarControlWidth() === 0) {
+        return 12;
+      }
+
+      return 0;
     }
+
 
   },
 

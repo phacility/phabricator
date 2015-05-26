@@ -44,7 +44,7 @@ final class PhabricatorSearchPreferencesSettingsPanel
             $preferences->getPreference($pref_jump, 1))
           ->addCheckbox($pref_shortcut,
             1,
-            pht("Press '/' to focus the search input."),
+            pht("Press '%s' to focus the search input.", '/'),
             $preferences->getPreference($pref_shortcut, 1)))
       ->appendChild(
         id(new AphrontFormSubmitControl())

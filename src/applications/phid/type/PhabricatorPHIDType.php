@@ -9,16 +9,20 @@ abstract class PhabricatorPHIDType {
     if ($const === false) {
       throw new Exception(
         pht(
-          'PHIDType class "%s" must define an TYPECONST property.',
-          get_class($this)));
+          '%s class "%s" must define a %s property.',
+          __CLASS__,
+          get_class($this),
+          'TYPECONST'));
     }
 
     if (!is_string($const) || !preg_match('/^[A-Z]{4}$/', $const)) {
       throw new Exception(
         pht(
-          'PHIDType class "%s" has an invalid TYPECONST property. PHID '.
+          '%s class "%s" has an invalid %s property. PHID '.
           'constants must be a four character uppercase string.',
-          get_class($this)));
+          __CLASS__,
+          get_class($this),
+          'TYPECONST'));
     }
 
     return $const;
@@ -31,6 +35,13 @@ abstract class PhabricatorPHIDType {
   }
 
   public function getTypeIcon() {
+    // Default to the application icon if the type doesn't specify one.
+    $application_class = $this->getPHIDTypeApplicationClass();
+    if ($application_class) {
+      $application = newv($application_class, array());
+      return $application->getFontIcon();
+    }
+
     return null;
   }
 
@@ -162,9 +173,13 @@ abstract class PhabricatorPHIDType {
           $that_class = $original[$type];
           $this_class = get_class($object);
           throw new Exception(
-            "Two PhabricatorPHIDType classes ({$that_class}, {$this_class}) ".
-            "both handle PHID type '{$type}'. A type may be handled by only ".
-            "one class.");
+            pht(
+              "Two %s classes (%s, %s) both handle PHID type '%s'. ".
+              "A type may be handled by only one class.",
+              __CLASS__,
+              $that_class,
+              $this_class,
+              $type));
         }
 
         $original[$type] = get_class($object);

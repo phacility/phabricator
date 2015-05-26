@@ -80,6 +80,7 @@ JX.install('Hovercard', {
       var p = JX.$V(root);
       var d = JX.Vector.getDim(root);
       var n = JX.Vector.getDim(child);
+      var v = JX.Vector.getViewport();
 
       // Move the tip so it's nicely aligned.
       // I'm just doing north/south alignment for now
@@ -89,8 +90,12 @@ JX.install('Hovercard', {
       var x = parseInt(p.x, 10) - margin / 2;
       var y = parseInt(p.y - n.y, 10) - margin;
 
+      // If running off the edge of the viewport, make it margin / 2 away
+      // from the far right edge of the viewport instead
+      if ((x + n.x) > (v.x)) {
+        x = x - parseInt(x + n.x - v.x + margin / 2, 10);
       // If more in the center, we can safely center
-      if (x > (n.x / 2) + margin) {
+      } else if (x > (n.x / 2) + margin) {
         x = parseInt(p.x - (n.x / 2) + d.x, 10);
       }
 

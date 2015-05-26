@@ -5,7 +5,7 @@ final class DifferentialReplyHandler
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof DifferentialRevision)) {
-      throw new Exception('Receiver is not a DifferentialRevision!');
+      throw new Exception(pht('Receiver is not a %s!', 'DifferentialRevision'));
     }
   }
 

@@ -295,7 +295,7 @@ final class PonderQuestionTransaction
 
     if (count($add) != 1) {
       throw new Exception(
-        'There should be only one answer added at a time.');
+        pht('There should be only one answer added at a time.'));
     }
 
     return reset($add);
@@ -303,7 +303,7 @@ final class PonderQuestionTransaction
 
   /**
    * Generally, the answer object is only available if the transaction
-   * type is self::TYPE_ANSWERS.
+   * type is `self::TYPE_ANSWERS`.
    *
    * Some stories - notably ones made before D7027 - will be of the more
    * generic @{class:PhabricatorApplicationTransactionFeedStory}. These

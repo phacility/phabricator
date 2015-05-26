@@ -49,10 +49,6 @@ Other options include:
     See below for details about path resolution, or see
     @{article:libphutil Libraries User Guide} for a general introduction to
     libphutil libraries.
-  - **project.name**: name an "Arcanist Project" to associate this working
-    copy (Git, Mercurial) or directory (SVN) with. Previously, this was a
-    required option, but `arc` can now usually operate without it in Git and
-    Mercurial. This option was previously called `project_id`.
   - **https.cabundle**: specifies the path to an alternate certificate bundle
     for use when making HTTPS connections.
   - **lint.engine**: the name of a subclass of

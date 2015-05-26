@@ -297,5 +297,4 @@ final class PhortuneMerchantViewController
   }
 
 
-
 }

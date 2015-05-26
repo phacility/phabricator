@@ -8,8 +8,8 @@ final class DiffusionMergedCommitsQueryConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return
-      'Merged commit information for a specific commit in a repository.';
+    return pht(
+      'Merged commit information for a specific commit in a repository.');
   }
 
   protected function defineReturnType() {
@@ -24,7 +24,8 @@ final class DiffusionMergedCommitsQueryConduitAPIMethod
   }
 
   private function getLimit(ConduitAPIRequest $request) {
-    return $request->getValue('limit', PHP_INT_MAX);
+    // TODO: Paginate this sensibly at some point.
+    return $request->getValue('limit', 4096);
   }
 
   protected function getGitResult(ConduitAPIRequest $request) {

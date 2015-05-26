@@ -84,8 +84,11 @@ final class PhabricatorFileQuery
           empty($spec['originalPHID']) ||
           empty($spec['transform'])) {
         throw new Exception(
-          "Transform specification must be a dictionary with keys ".
-          "'originalPHID' and 'transform'!");
+          pht(
+            "Transform specification must be a dictionary with keys ".
+            "'%s' and '%s'!",
+            'originalPHID',
+            'transform'));
       }
     }
 

@@ -560,8 +560,7 @@ final class PhabricatorAuthRegisterController
       return array($account, $provider, $response);
     } else if (count($providers) > 1) {
       $response = $this->renderError(
-        pht(
-          'There are too many configured default registration providers.'));
+        pht('There are too many configured default registration providers.'));
       return array($account, $provider, $response);
     }
 
@@ -604,17 +603,9 @@ final class PhabricatorAuthRegisterController
       return null;
     }
 
-    try {
-      $xformer = new PhabricatorImageTransformer();
-      return $xformer->executeProfileTransform(
-        $file,
-        $width = 50,
-        $min_height = 50,
-        $max_height = 50);
-    } catch (Exception $ex) {
-      phlog($ex);
-      return null;
-    }
+    $xform = PhabricatorFileTransform::getTransformByKey(
+      PhabricatorFileThumbnailTransform::TRANSFORM_PROFILE);
+    return $xform->executeTransform($file);
   }
 
   protected function renderError($message) {

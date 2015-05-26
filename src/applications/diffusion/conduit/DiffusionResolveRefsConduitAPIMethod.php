@@ -18,16 +18,23 @@ final class DiffusionResolveRefsConduitAPIMethod
   protected function defineCustomParamTypes() {
     return array(
       'refs' => 'required list<string>',
+      'types' => 'optional list<string>',
     );
   }
 
   protected function getResult(ConduitAPIRequest $request) {
     $refs = $request->getValue('refs');
+    $types = $request->getValue('types');
 
-    return id(new DiffusionLowLevelResolveRefsQuery())
+    $query = id(new DiffusionLowLevelResolveRefsQuery())
       ->setRepository($this->getDiffusionRequest()->getRepository())
-      ->withRefs($refs)
-      ->execute();
+      ->withRefs($refs);
+
+    if ($types) {
+      $query->withTypes($types);
+    }
+
+    return $query->execute();
   }
 
 }

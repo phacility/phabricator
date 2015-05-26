@@ -8,7 +8,7 @@ final class DiffusionExistsQueryConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Determine if code exists in a version control system.';
+    return pht('Determine if code exists in a version control system.');
   }
 
   protected function defineReturnType() {
@@ -51,7 +51,7 @@ final class DiffusionExistsQueryConduitAPIMethod
     list($err, $stdout) = $repository->execLocalCommand(
       'id --rev %s',
       $commit);
-    return  !$err;
+    return !$err;
   }
 
 }

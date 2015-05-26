@@ -33,7 +33,7 @@ final class DiffusionInlineCommentController
       PhabricatorRepository::TABLE_PATH,
       $path_id);
     if (!$path) {
-      throw new Exception('Invalid path ID!');
+      throw new Exception(pht('Invalid path ID!'));
     }
 
     return id(new PhabricatorAuditInlineComment())
@@ -55,7 +55,7 @@ final class DiffusionInlineCommentController
 
     $inline = $this->loadComment($id);
     if (!$this->canEditInlineComment($user, $inline)) {
-      throw new Exception('That comment is not editable!');
+      throw new Exception(pht('That comment is not editable!'));
     }
     return $inline;
   }

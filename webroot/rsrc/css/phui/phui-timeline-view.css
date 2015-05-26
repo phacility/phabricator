@@ -92,6 +92,7 @@
 
 .phui-timeline-image {
   background-repeat: no-repeat;
+  background-size: 100%;
   position: absolute;
   border-radius: 3px;
 }

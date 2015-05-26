@@ -12,7 +12,7 @@ final class DarkConsoleErrorLogPluginAPI {
     // reenter autoloaders).
     PhutilReadableSerializer::printableValue(null);
     PhutilErrorHandler::setErrorListener(
-      array('DarkConsoleErrorLogPluginAPI', 'handleErrors'));
+      array(__CLASS__, 'handleErrors'));
   }
 
   public static function enableDiscardMode() {
@@ -67,7 +67,7 @@ final class DarkConsoleErrorLogPluginAPI {
         );
         break;
       default:
-        error_log('Unknown event : '.$event);
+        error_log(pht('Unknown event: %s', $event));
         break;
     }
   }

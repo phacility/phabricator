@@ -158,4 +158,10 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
     );
   }
 
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      ManiphestTaskPHIDType::TYPECONST,
+    );
+  }
+
 }

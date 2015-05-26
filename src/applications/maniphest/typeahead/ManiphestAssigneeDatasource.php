@@ -14,7 +14,7 @@ final class ManiphestAssigneeDatasource
   public function getComponentDatasources() {
     return array(
       new PhabricatorPeopleDatasource(),
-      new ManiphestNoOwnerDatasource(),
+      new PhabricatorPeopleNoOwnerDatasource(),
     );
   }
 

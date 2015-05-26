@@ -5,8 +5,7 @@
  *
  * This clock can be used for testing, or to cancel events.
  */
-final class PhabricatorNeverTriggerClock
-  extends PhabricatorTriggerClock {
+final class PhabricatorNeverTriggerClock extends PhabricatorTriggerClock {
 
   public function validateProperties(array $properties) {
     PhutilTypeSpec::checkMap(

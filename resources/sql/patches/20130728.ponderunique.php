@@ -2,7 +2,7 @@
 
 $map = array();
 
-echo "Merging duplicate answers by authors...\n";
+echo pht('Merging duplicate answers by authors...')."\n";
 
 $atable = new PonderAnswer();
 $conn_w = $atable->establishConnection('w');
@@ -14,14 +14,14 @@ foreach ($answers as $answer) {
   $qid = $answer->getQuestionID();
   $author_phid = $answer->getAuthorPHID();
 
-  echo "Processing answer ID #{$aid}...\n";
+  echo pht('Processing answer ID #%d...', $aid)."\n";
 
   if (empty($map[$qid][$author_phid])) {
-    echo "Answer is unique.\n";
+    echo pht('Answer is unique.')."\n";
     $map[$qid][$author_phid] = $answer;
     continue;
   } else {
-    echo "Merging answer.\n";
+    echo pht('Merging answer.')."\n";
     $target = $map[$qid][$author_phid];
     queryfx(
       $conn_w,
@@ -55,4 +55,4 @@ foreach ($answers as $answer) {
 }
 
 $conn_w->saveTransaction();
-echo "Done.\n";
+echo pht('Done.')."\n";

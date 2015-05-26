@@ -14,7 +14,7 @@ final class PhabricatorUserEditorTestCase extends PhabricatorTestCase {
 
     $this->registerUser(
       'PhabricatorUserEditorTestCaseOK',
-      'PhabricatorUserEditorTestCase@example.com');
+      'PhabricatorUserEditorTest@example.com');
 
     $this->assertTrue(true);
   }
@@ -27,9 +27,7 @@ final class PhabricatorUserEditorTestCase extends PhabricatorTestCase {
     $email = $prefix.'@evil.com@example.com';
 
     try {
-      $this->registerUser(
-        'PhabricatorUserEditorTestCaseInvalid',
-        $email);
+      $this->registerUser('PhabricatorUserEditorTestCaseInvalid', $email);
     } catch (Exception $ex) {
       $caught = $ex;
     }
@@ -45,7 +43,7 @@ final class PhabricatorUserEditorTestCase extends PhabricatorTestCase {
     try {
       $this->registerUser(
         'PhabricatorUserEditorTestCaseDomain',
-        'PhabricatorUserEditorTestCase@whitehouse.gov');
+        'PhabricatorUserEditorTest@whitehouse.gov');
     } catch (Exception $ex) {
       $caught = $ex;
     }

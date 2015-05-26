@@ -103,10 +103,14 @@ final class ConpherenceTransactionView extends AphrontView {
     $transaction = $this->getConpherenceTransaction();
     switch ($transaction->getTransactionType()) {
       case ConpherenceTransactionType::TYPE_DATE_MARKER:
-        return phutil_tag(
+        return javelin_tag(
           'div',
           array(
             'class' => 'conpherence-transaction-view date-marker',
+            'sigil' => 'conpherence-transaction-view',
+            'meta' => array(
+              'id' => $transaction->getID() + 0.5,
+            ),
           ),
           array(
             phutil_tag(
@@ -134,11 +138,15 @@ final class ConpherenceTransactionView extends AphrontView {
       'conpherence-transaction-header grouped',
       array($actions, $info));
 
-    return phutil_tag(
+    return javelin_tag(
       'div',
       array(
         'class' => 'conpherence-transaction-view '.$classes,
         'id'    => $transaction_id,
+        'sigil' => 'conpherence-transaction-view',
+        'meta' => array(
+          'id' => $transaction->getID(),
+        ),
       ),
       array(
         $image,
@@ -256,6 +264,8 @@ final class ConpherenceTransactionView extends AphrontView {
         $content = $transaction->getTitle();
         break;
       case ConpherenceTransactionType::TYPE_TITLE:
+      case ConpherenceTransactionType::TYPE_PICTURE:
+      case ConpherenceTransactionType::TYPE_PICTURE_CROP:
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:

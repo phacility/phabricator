@@ -55,7 +55,7 @@ final class PhabricatorMetaMTASendGridReceiveController
     $received->processReceivedMail();
 
     $response = new AphrontWebpageResponse();
-    $response->setContent(pht("Got it! Thanks, SendGrid!\n"));
+    $response->setContent(pht('Got it! Thanks, SendGrid!')."\n");
     return $response;
   }
 

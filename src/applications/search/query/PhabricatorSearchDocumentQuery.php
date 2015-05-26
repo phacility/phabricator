@@ -4,10 +4,23 @@ final class PhabricatorSearchDocumentQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $savedQuery;
+  private $objectCapabilities;
 
   public function withSavedQuery(PhabricatorSavedQuery $query) {
     $this->savedQuery = $query;
     return $this;
+  }
+
+  public function requireObjectCapabilities(array $capabilities) {
+    $this->objectCapabilities = $capabilities;
+    return $this;
+  }
+
+  protected function getRequiredObjectCapabilities() {
+    if ($this->objectCapabilities) {
+      return $this->objectCapabilities;
+    }
+    return $this->getRequiredCapabilities();
   }
 
   protected function loadPage() {
@@ -15,6 +28,7 @@ final class PhabricatorSearchDocumentQuery
 
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->getViewer())
+      ->requireObjectCapabilities($this->getRequiredObjectCapabilities())
       ->withPHIDs($phids)
       ->execute();
 
@@ -60,7 +74,7 @@ final class PhabricatorSearchDocumentQuery
       ->setParameter('offset', $this->getOffset())
       ->setParameter('limit', $this->getRawResultLimit());
 
-    $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
+    $engine = PhabricatorSearchEngine::loadEngine();
 
     return $engine->executeSearch($query);
   }
@@ -72,8 +86,7 @@ final class PhabricatorSearchDocumentQuery
   protected function getResultCursor($result) {
     throw new Exception(
       pht(
-        'This query does not support cursor paging; it must be offset '.
-        'paged.'));
+        'This query does not support cursor paging; it must be offset paged.'));
   }
 
   protected function nextPage(array $page) {

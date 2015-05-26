@@ -9,15 +9,15 @@ final class PhrictionChangeType extends PhrictionConstants {
   const CHANGE_STUB       = 4;
 
   public static function getChangeTypeLabel($const) {
-    static $map = array(
-      self::CHANGE_EDIT       => 'Edit',
-      self::CHANGE_DELETE     => 'Delete',
-      self::CHANGE_MOVE_HERE  => 'Move Here',
-      self::CHANGE_MOVE_AWAY  => 'Move Away',
-      self::CHANGE_STUB       => 'Created through child',
+    $map = array(
+      self::CHANGE_EDIT       => pht('Edit'),
+      self::CHANGE_DELETE     => pht('Delete'),
+      self::CHANGE_MOVE_HERE  => pht('Move Here'),
+      self::CHANGE_MOVE_AWAY  => pht('Move Away'),
+      self::CHANGE_STUB       => pht('Created through child'),
     );
 
-    return idx($map, $const, '???');
+    return idx($map, $const, pht('Unknown'));
   }
 
 }

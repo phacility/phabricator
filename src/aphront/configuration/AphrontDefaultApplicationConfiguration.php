@@ -135,7 +135,9 @@ class AphrontDefaultApplicationConfiguration
         ->addCancelButton($ex->getCancelURI())
         ->addSubmitButton(pht('Enter High Security'));
 
-      foreach ($request->getPassthroughRequestParameters() as $key => $value) {
+      $request_parameters = $request->getPassthroughRequestParameters(
+        $respect_quicksand = true);
+      foreach ($request_parameters as $key => $value) {
         $dialog->addHiddenInput($key, $value);
       }
 
@@ -227,11 +229,10 @@ class AphrontDefaultApplicationConfiguration
     $message  = $ex->getMessage();
 
     if ($ex instanceof AphrontSchemaQueryException) {
-      $message .=
-        "\n\n".
+      $message .= "\n\n".pht(
         "NOTE: This usually indicates that the MySQL schema has not been ".
-        "properly upgraded. Run 'bin/storage upgrade' to ensure your ".
-        "schema is up to date.";
+        "properly upgraded. Run '%s' to ensure your schema is up to date.",
+        'bin/storage upgrade');
     }
 
     if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
@@ -252,13 +253,13 @@ class AphrontDefaultApplicationConfiguration
 
     $dialog = new AphrontDialogView();
     $dialog
-      ->setTitle('Unhandled Exception ("'.$class.'")')
+      ->setTitle(pht('Unhandled Exception ("%s")', $class))
       ->setClass('aphront-exception-dialog')
       ->setUser($user)
       ->appendChild($content);
 
     if ($this->getRequest()->isAjax()) {
-      $dialog->addCancelButton('/', 'Close');
+      $dialog->addCancelButton('/', pht('Close'));
     }
 
     $response = new AphrontDialogResponse();

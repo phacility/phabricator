@@ -7,7 +7,6 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
   }
 
   protected function executeChecks() {
-
     if (phutil_is_windows()) {
       $bin_name = 'where';
     } else {
@@ -28,8 +27,9 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
 
     if (!Filesystem::binaryExists('diff')) {
       $message = pht(
-        "Without 'diff', Phabricator will not be able to generate or render ".
-        "diffs in multiple applications.");
+        "Without '%s', Phabricator will not be able to generate or render ".
+        "diffs in multiple applications.",
+        'diff');
       $this->raiseWarning('diff', $message);
     } else {
       $tmp_a = new TempFile();
@@ -43,12 +43,13 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
       list($err) = exec_manual('diff %s %s', $tmp_a, $tmp_b);
       if ($err) {
         $this->newIssue('bin.diff.same')
-          ->setName(pht("Unexpected 'diff' Behavior"))
+          ->setName(pht("Unexpected '%s' Behavior", 'diff'))
           ->setMessage(
             pht(
-              "The 'diff' binary on this system has unexpected behavior: ".
+              "The '%s' binary on this system has unexpected behavior: ".
               "it was expected to exit without an error code when passed ".
               "identical files, but exited with code %d.",
+              'diff',
               $err));
       }
 
@@ -58,9 +59,10 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
           ->setName(pht("Unexpected 'diff' Behavior"))
           ->setMessage(
             pht(
-              "The 'diff' binary on this system has unexpected behavior: ".
+              "The '%s' binary on this system has unexpected behavior: ".
               "it was expected to exit with a nonzero error code when passed ".
-              "differing files, but did not."));
+              "differing files, but did not.",
+              'diff'));
       }
     }
 
@@ -249,7 +251,6 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
   }
 
   private function raiseBadVersionWarning($binary, $bad_version) {
-
     switch ($binary) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         break;

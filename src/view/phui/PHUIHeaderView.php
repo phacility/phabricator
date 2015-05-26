@@ -1,6 +1,6 @@
 <?php
 
-final class PHUIHeaderView extends AphrontView {
+final class PHUIHeaderView extends AphrontTagView {
 
   const PROPERTY_STATUS = 1;
 
@@ -123,7 +123,11 @@ final class PHUIHeaderView extends AphrontView {
     return $this;
   }
 
-  public function render() {
+  protected function getTagName() {
+    return 'div';
+  }
+
+  protected function getTagAttributes() {
     require_celerity_resource('phui-header-view-css');
 
     $classes = array();
@@ -146,6 +150,16 @@ final class PHUIHeaderView extends AphrontView {
       $classes[] = 'phui-header-tall';
     }
 
+    if ($this->image) {
+      $classes[] = 'phui-header-has-image';
+    }
+
+    return array(
+      'class' => $classes,
+    );
+  }
+
+  protected function getTagContent() {
     $image = null;
     if ($this->image) {
       $image = phutil_tag(
@@ -156,7 +170,6 @@ final class PHUIHeaderView extends AphrontView {
           'style' => 'background-image: url('.$this->image.')',
         ),
         ' ');
-      $classes[] = 'phui-header-has-image';
     }
 
     $header = array();
@@ -226,7 +239,7 @@ final class PHUIHeaderView extends AphrontView {
             $property_list[] = $property;
           break;
           default:
-            throw new Exception('Incorrect Property Passed');
+            throw new Exception(pht('Incorrect Property Passed'));
           break;
         }
       }
@@ -243,20 +256,15 @@ final class PHUIHeaderView extends AphrontView {
         $property_list);
     }
 
-    return phutil_tag(
-      'div',
-      array(
-        'class' => implode(' ', $classes),
-      ),
-      array(
-        $image,
-        phutil_tag(
-          'h1',
-          array(
-            'class' => 'phui-header-view grouped',
-          ),
-          $header),
-      ));
+    return array(
+      $image,
+      phutil_tag(
+        'h1',
+        array(
+          'class' => 'phui-header-view grouped',
+        ),
+        $header),
+      );
   }
 
   private function renderPolicyProperty(PhabricatorPolicyInterface $object) {

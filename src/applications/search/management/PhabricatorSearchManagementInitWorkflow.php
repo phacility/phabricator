@@ -6,14 +6,14 @@ final class PhabricatorSearchManagementInitWorkflow
   protected function didConstruct() {
     $this
       ->setName('init')
-      ->setSynopsis('Initialize or repair an index.')
+      ->setSynopsis(pht('Initialize or repair an index.'))
       ->setExamples('**init**');
   }
 
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
 
-    $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
+    $engine = PhabricatorSearchEngine::loadEngine();
 
     $work_done = false;
     if (!$engine->indexExists()) {
@@ -28,7 +28,7 @@ final class PhabricatorSearchManagementInitWorkflow
     } else if (!$engine->indexIsSane()) {
       $console->writeOut(
         '%s',
-          pht('Index exists but is incorrect, fixing...'));
+        pht('Index exists but is incorrect, fixing...'));
       $engine->initIndex();
       $console->writeOut(
         "%s\n",
@@ -39,8 +39,9 @@ final class PhabricatorSearchManagementInitWorkflow
     if ($work_done) {
       $console->writeOut(
         "%s\n",
-        pht('Index maintenance complete. Run `./bin/search index` to '.
-            'reindex documents'));
+        pht(
+          'Index maintenance complete. Run `%s` to reindex documents',
+          './bin/search index'));
     } else {
       $console->writeOut(
         "%s\n",

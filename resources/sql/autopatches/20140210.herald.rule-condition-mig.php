@@ -3,7 +3,8 @@
 $table = new HeraldCondition();
 $conn_w = $table->establishConnection('w');
 
-echo "Migrating Herald conditions of type Herald rule from IDs to PHIDs...\n";
+echo pht(
+  "Migrating Herald conditions of type Herald rule from IDs to PHIDs...\n");
 foreach (new LiskMigrationIterator($table) as $condition) {
   if ($condition->getFieldName() != HeraldAdapter::FIELD_RULE) {
     continue;
@@ -14,7 +15,7 @@ foreach (new LiskMigrationIterator($table) as $condition) {
     continue;
   }
   $id = $condition->getID();
-  echo "Updating condition {$id}...\n";
+  echo pht('Updating condition %s...', $id)."\n";
 
   $rule = id(new HeraldRuleQuery())
     ->setViewer(PhabricatorUser::getOmnipotentUser())
@@ -28,4 +29,4 @@ foreach (new LiskMigrationIterator($table) as $condition) {
     json_encode($rule->getPHID()),
     $id);
 }
-echo "Done.\n";
+echo pht('Done.')."\n";

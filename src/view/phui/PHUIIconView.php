@@ -106,7 +106,7 @@ final class PHUIIconView extends AphrontTagView {
     $root = dirname(phutil_get_library_root('phabricator'));
     $path = $root.'/resources/sprite/manifest/'.$sheet.'.json';
     $data = Filesystem::readFile($path);
-    return idx(json_decode($data, true), 'sprites');
+    return idx(phutil_json_decode($data), 'sprites');
   }
 
   public static function getFontIcons() {

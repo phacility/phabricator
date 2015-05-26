@@ -49,7 +49,6 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
         'inline/' => array(
           '(?:(?P<id>\d+)/)?' => 'PholioInlineController',
           'list/(?P<id>\d+)/' => 'PholioInlineListController',
-          'thumb/(?P<imageid>\d+)/' => 'PholioInlineThumbController',
         ),
         'image/' => array(
           'upload/' => 'PholioImageUploadController',
@@ -87,6 +86,12 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
           'This page documents the commands you can use to interact with '.
           'mocks in Pholio.'),
       ),
+    );
+  }
+
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      PholioMockPHIDType::TYPECONST,
     );
   }
 

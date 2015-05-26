@@ -1,12 +1,12 @@
 <?php
 
-echo "Generating file keys...\n";
+echo pht('Generating file keys...')."\n";
 $table = new PhabricatorFile();
 $table->openTransaction();
 $table->beginReadLocking();
 
 $files = $table->loadAllWhere('secretKey IS NULL');
-echo count($files).' files to generate keys for';
+echo pht('%d files to generate keys for', count($files));
 foreach ($files as $file) {
   queryfx(
     $file->establishConnection('w'),
@@ -19,4 +19,4 @@ foreach ($files as $file) {
 
 $table->endReadLocking();
 $table->saveTransaction();
-echo "\nDone.\n";
+echo "\n".pht('Done.')."\n";

@@ -13,8 +13,7 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
       $text);
   }
 
-  public function markupDocumentLink($matches) {
-
+  public function markupDocumentLink(array $matches) {
     $link = trim($matches[1]);
     $name = trim(idx($matches, 2, $link));
     if (empty($matches[2])) {

@@ -3,20 +3,14 @@
 final class PhameBlogEditController
   extends PhameController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
-    if ($this->id) {
+    $id = $request->getURIData('id');
+    if ($id) {
       $blog = id(new PhameBlogQuery())
         ->setViewer($user)
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_EDIT,
@@ -30,76 +24,75 @@ final class PhameBlogEditController
       $page_title = pht('Edit Blog');
       $cancel_uri = $this->getApplicationURI('blog/view/'.$blog->getID().'/');
     } else {
-      $blog = id(new PhameBlog())
-        ->setCreatorPHID($user->getPHID());
-
-      $blog->setViewPolicy(PhabricatorPolicies::POLICY_USER);
-      $blog->setEditPolicy(PhabricatorPolicies::POLICY_USER);
-      $blog->setJoinPolicy(PhabricatorPolicies::POLICY_USER);
+      $blog = PhameBlog::initializeNewBlog($user);
 
       $submit_button = pht('Create Blog');
       $page_title = pht('Create Blog');
       $cancel_uri = $this->getApplicationURI();
     }
+    $name          = $blog->getName();
+    $description   = $blog->getDescription();
+    $custom_domain = $blog->getDomain();
+    $skin          = $blog->getSkin();
+    $can_view      = $blog->getViewPolicy();
+    $can_edit      = $blog->getEditPolicy();
+    $can_join      = $blog->getJoinPolicy();
 
-    $e_name          = true;
-    $e_custom_domain = null;
-    $errors          = array();
-
+    $e_name               = true;
+    $e_custom_domain      = null;
+    $e_view_policy        = null;
+    $validation_exception = null;
     if ($request->isFormPost()) {
       $name          = $request->getStr('name');
       $description   = $request->getStr('description');
-      $custom_domain = $request->getStr('custom_domain');
+      $custom_domain = nonempty($request->getStr('custom_domain'), null);
       $skin          = $request->getStr('skin');
+      $can_view      = $request->getStr('can_view');
+      $can_edit      = $request->getStr('can_edit');
+      $can_join      = $request->getStr('can_join');
 
-      if (empty($name)) {
-        $errors[] = pht('You must give the blog a name.');
-        $e_name = pht('Required');
-      } else {
-        $e_name = null;
-      }
+      $xactions = array(
+        id(new PhameBlogTransaction())
+          ->setTransactionType(PhameBlogTransaction::TYPE_NAME)
+          ->setNewValue($name),
+        id(new PhameBlogTransaction())
+          ->setTransactionType(PhameBlogTransaction::TYPE_DESCRIPTION)
+          ->setNewValue($description),
+        id(new PhameBlogTransaction())
+          ->setTransactionType(PhameBlogTransaction::TYPE_DOMAIN)
+          ->setNewValue($custom_domain),
+        id(new PhameBlogTransaction())
+          ->setTransactionType(PhameBlogTransaction::TYPE_SKIN)
+          ->setNewValue($skin),
+        id(new PhameBlogTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+          ->setNewValue($can_view),
+        id(new PhameBlogTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+          ->setNewValue($can_edit),
+        id(new PhameBlogTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
+          ->setNewValue($can_join),
+      );
 
-      $blog->setName($name);
-      $blog->setDescription($description);
-      $blog->setDomain(nonempty($custom_domain, null));
-      $blog->setSkin($skin);
-      $blog->setViewPolicy($request->getStr('can_view'));
-      $blog->setEditPolicy($request->getStr('can_edit'));
-      $blog->setJoinPolicy($request->getStr('can_join'));
+      $editor = id(new PhameBlogEditor())
+        ->setActor($user)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true);
 
-      if (!empty($custom_domain)) {
-        list($error_label, $error_text) =
-          $blog->validateCustomDomain($custom_domain);
-        if ($error_label) {
-          $errors[] = $error_text;
-          $e_custom_domain = $error_label;
-        }
-        if ($blog->getViewPolicy() != PhabricatorPolicies::POLICY_PUBLIC) {
-          $errors[] = pht(
-            'For custom domains to work, the blog must have a view policy of '.
-            'public.');
-          // Prefer earlier labels for the multiple error scenario.
-          if (!$e_custom_domain) {
-            $e_custom_domain = pht('Invalid Policy');
-          }
-        }
-      }
+      try {
+        $editor->applyTransactions($blog, $xactions);
+        return id(new AphrontRedirectResponse())
+          ->setURI($this->getApplicationURI('blog/view/'.$blog->getID().'/'));
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
 
-      // Don't let users remove their ability to edit blogs.
-      PhabricatorPolicyFilter::mustRetainCapability(
-        $user,
-        $blog,
-        PhabricatorPolicyCapability::CAN_EDIT);
-
-      if (!$errors) {
-        try {
-          $blog->save();
-          return id(new AphrontRedirectResponse())
-            ->setURI($this->getApplicationURI('blog/view/'.$blog->getID().'/'));
-        } catch (AphrontDuplicateKeyQueryException $ex) {
-          $errors[] = pht('Domain must be unique.');
-          $e_custom_domain = pht('Not Unique');
-        }
+        $e_name = $validation_exception->getShortMessage(
+          PhameBlogTransaction::TYPE_NAME);
+        $e_custom_domain = $validation_exception->getShortMessage(
+          PhameBlogTransaction::TYPE_DOMAIN);
+        $e_view_policy = $validation_exception->getShortMessage(
+          PhabricatorTransactions::TYPE_VIEW_POLICY);
       }
     }
 
@@ -117,7 +110,7 @@ final class PhameBlogEditController
         id(new AphrontFormTextControl())
         ->setLabel(pht('Name'))
         ->setName('name')
-        ->setValue($blog->getName())
+        ->setValue($name)
         ->setID('blog-name')
         ->setError($e_name))
       ->appendChild(
@@ -125,7 +118,7 @@ final class PhameBlogEditController
           ->setUser($user)
           ->setLabel(pht('Description'))
           ->setName('description')
-          ->setValue($blog->getDescription())
+          ->setValue($description)
           ->setID('blog-description')
           ->setUser($user)
           ->setDisableMacros(true))
@@ -135,6 +128,8 @@ final class PhameBlogEditController
           ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
           ->setPolicyObject($blog)
           ->setPolicies($policies)
+          ->setError($e_view_policy)
+          ->setValue($can_view)
           ->setName('can_view'))
       ->appendChild(
         id(new AphrontFormPolicyControl())
@@ -142,6 +137,7 @@ final class PhameBlogEditController
           ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
           ->setPolicyObject($blog)
           ->setPolicies($policies)
+          ->setValue($can_edit)
           ->setName('can_edit'))
       ->appendChild(
         id(new AphrontFormPolicyControl())
@@ -149,20 +145,21 @@ final class PhameBlogEditController
           ->setCapability(PhabricatorPolicyCapability::CAN_JOIN)
           ->setPolicyObject($blog)
           ->setPolicies($policies)
+          ->setValue($can_join)
           ->setName('can_join'))
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel(pht('Custom Domain'))
         ->setName('custom_domain')
-        ->setValue($blog->getDomain())
+        ->setValue($custom_domain)
         ->setCaption(
-          pht('Must include at least one dot (.), e.g. blog.example.com'))
+          pht('Must include at least one dot (.), e.g. %s', 'blog.example.com'))
         ->setError($e_custom_domain))
       ->appendChild(
         id(new AphrontFormSelectControl())
         ->setLabel(pht('Skin'))
         ->setName('skin')
-        ->setValue($blog->getSkin())
+        ->setValue($skin)
         ->setOptions($skins))
       ->appendChild(
         id(new AphrontFormSubmitControl())
@@ -171,14 +168,14 @@ final class PhameBlogEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
-      ->setFormErrors($errors)
+      ->setValidationException($validation_exception)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($page_title, $this->getApplicationURI('blog/new'));
 
     $nav = $this->renderSideNavFilterView();
-    $nav->selectFilter($this->id ? null : 'blog/new');
+    $nav->selectFilter($id ? null : 'blog/new');
     $nav->appendChild(
       array(
         $crumbs,

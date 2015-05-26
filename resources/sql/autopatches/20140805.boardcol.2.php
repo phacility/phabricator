@@ -19,12 +19,12 @@ foreach ($rows as $row) {
 
 $sql = array();
 foreach ($cols as $col_phid => $obj_phids) {
-  echo "Migrating column '{$col_phid}'...\n";
+  echo pht("Migrating column '%s'...", $col_phid)."\n";
   $column = id(new PhabricatorProjectColumn())->loadOneWhere(
     'phid = %s',
     $col_phid);
   if (!$column) {
-    echo "Column '{$col_phid}' does not exist.\n";
+    echo pht("Column '%s' does not exist.", $col_phid)."\n";
     continue;
   }
 
@@ -40,7 +40,7 @@ foreach ($cols as $col_phid => $obj_phids) {
   }
 }
 
-echo "Inserting rows...\n";
+echo pht('Inserting rows...')."\n";
 foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
   queryfx(
     $conn_w,
@@ -50,4 +50,4 @@ foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
     $chunk);
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

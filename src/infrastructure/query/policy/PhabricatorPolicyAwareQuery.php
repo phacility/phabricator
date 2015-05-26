@@ -33,6 +33,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
   private $rawResultLimit;
   private $capabilities;
   private $workspace = array();
+  private $inFlightPHIDs = array();
   private $policyFilteredPHIDs = array();
   private $canUseApplication;
 
@@ -171,7 +172,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
     }
 
     if (count($results) > 1) {
-      throw new Exception('Expected a single result!');
+      throw new Exception(pht('Expected a single result!'));
     }
 
     if (!$results) {
@@ -190,7 +191,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    */
   final public function execute() {
     if (!$this->viewer) {
-      throw new Exception('Call setViewer() before execute()!');
+      throw new PhutilInvalidStateException('setViewer');
     }
 
     $parent_query = $this->getParentQuery();
@@ -465,6 +466,39 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
     }
 
     return $map;
+  }
+
+
+  /**
+   * Mark PHIDs as in flight.
+   *
+   * PHIDs which are "in flight" are actively being queried for. Using this
+   * list can prevent infinite query loops by aborting queries which cycle.
+   *
+   * @param list<phid> List of PHIDs which are now in flight.
+   * @return this
+   */
+  public function putPHIDsInFlight(array $phids) {
+    foreach ($phids as $phid) {
+      $this->inFlightPHIDs[$phid] = $phid;
+    }
+    return $this;
+  }
+
+
+  /**
+   * Get PHIDs which are currently in flight.
+   *
+   * PHIDs which are "in flight" are actively being queried for.
+   *
+   * @return map<phid, phid> PHIDs currently in flight.
+   */
+  public function getPHIDsInFlight() {
+    $results = $this->inFlightPHIDs;
+    if ($this->getParentQuery()) {
+      $results += $this->getParentQuery()->getPHIDsInFlight();
+    }
+    return $results;
   }
 
 

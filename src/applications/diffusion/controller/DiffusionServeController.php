@@ -342,7 +342,11 @@ final class DiffusionServeController extends DiffusionController {
     // resolve the binary first.
     $bin = Filesystem::resolveBinary('git-http-backend');
     if (!$bin) {
-      throw new Exception('Unable to find `git-http-backend` in PATH!');
+      throw new Exception(
+        pht(
+          'Unable to find `%s` in %s!',
+          'git-http-backend',
+          '$PATH'));
     }
 
     $env = array(
@@ -485,7 +489,11 @@ final class DiffusionServeController extends DiffusionController {
 
     $bin = Filesystem::resolveBinary('hg');
     if (!$bin) {
-      throw new Exception('Unable to find `hg` in PATH!');
+      throw new Exception(
+        pht(
+          'Unable to find `%s` in %s!',
+          'hg',
+          '$PATH'));
     }
 
     $env = $this->getCommonEnvironment($viewer);

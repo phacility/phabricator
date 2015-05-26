@@ -8,7 +8,7 @@ final class DifferentialGetCommitMessageConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Retrieve Differential commit messages or message templates.';
+    return pht('Retrieve Differential commit messages or message templates.');
   }
 
   protected function defineParamTypes() {
@@ -27,7 +27,7 @@ final class DifferentialGetCommitMessageConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_NOT_FOUND' => 'Revision was not found.',
+      'ERR_NOT_FOUND' => pht('Revision was not found.'),
     );
   }
 

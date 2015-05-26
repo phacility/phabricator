@@ -25,6 +25,8 @@ final class PhabricatorRepositoryTransaction
   const TYPE_DANGEROUS = 'repo:dangerous';
   const TYPE_CLONE_NAME = 'repo:clone-name';
   const TYPE_SERVICE = 'repo:service';
+  const TYPE_SYMBOLS_SOURCES = 'repo:symbol-source';
+  const TYPE_SYMBOLS_LANGUAGE = 'repo:symbol-language';
 
   // TODO: Clean up these legacy transaction types.
   const TYPE_SSH_LOGIN = 'repo:ssh-login';
@@ -59,6 +61,14 @@ final class PhabricatorRepositoryTransaction
         }
         if ($new) {
           $phids[] = $new;
+        }
+        break;
+      case self::TYPE_SYMBOLS_SOURCES:
+        if ($old) {
+          $phids = array_merge($phids, $old);
+        }
+        if ($new) {
+          $phids = array_merge($phids, $new);
         }
         break;
     }
@@ -393,6 +403,18 @@ final class PhabricatorRepositoryTransaction
             $this->renderHandleLink($old),
             $this->renderHandleLink($new));
         }
+      case self::TYPE_SYMBOLS_SOURCES:
+        return pht(
+          '%s changed symbol sources from %s to %s.',
+          $this->renderHandleLink($author_phid),
+          empty($old) ? pht('None') : $this->renderHandleList($old),
+          empty($new) ? pht('None') : $this->renderHandleList($new));
+
+      case self::TYPE_SYMBOLS_LANGUAGE:
+        return pht('%s changed indexed languages from %s to %s.',
+            $this->renderHandleLink($author_phid),
+            $old ? implode(', ', $old) : pht('Any'),
+            $new ? implode(', ', $new) : pht('Any'));
     }
 
     return parent::getTitle();

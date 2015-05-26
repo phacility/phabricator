@@ -255,7 +255,7 @@ final class PhabricatorStartup {
     static $initialized;
     if (!$initialized) {
       declare(ticks=1);
-      register_tick_function(array('PhabricatorStartup', 'onDebugTick'));
+      register_tick_function(array(__CLASS__, 'onDebugTick'));
     }
   }
 
@@ -425,7 +425,8 @@ final class PhabricatorStartup {
           $_POST = array_merge($_POST, $filtered);
           break;
         case INPUT_ENV;
-          $_ENV = array_merge($_ENV, $filtered);
+          $env = array_merge($_ENV, $filtered);
+          $_ENV = self::filterEnvSuperglobal($env);
           break;
       }
     }
@@ -457,6 +458,30 @@ final class PhabricatorStartup {
       }
     }
   }
+
+
+  /**
+   * Adjust `$_ENV` before execution.
+   *
+   * Adjustments here primarily impact the environment as seen by subprocesses.
+   * The environment is forwarded explicitly by @{class:ExecFuture}.
+   *
+   * @param map<string, wild> Input `$_ENV`.
+   * @return map<string, string> Suitable `$_ENV`.
+   * @task validation
+   */
+  private static function filterEnvSuperglobal(array $env) {
+
+    // In some configurations, we may get "argc" and "argv" set in $_ENV.
+    // These are not real environmental variables, and "argv" may have an array
+    // value which can not be forwarded to subprocesses. Remove these from the
+    // environment if they are present.
+    unset($env['argc']);
+    unset($env['argv']);
+
+    return $env;
+  }
+
 
   /**
    * @task validation
@@ -622,7 +647,7 @@ final class PhabricatorStartup {
     // populated into $_POST, but it wasn't.
 
     $config = ini_get('post_max_size');
-    PhabricatorStartup::didFatal(
+    self::didFatal(
       "As received by the server, this request had a nonzero content length ".
       "but no POST data.\n\n".
       "Normally, this indicates that it exceeds the 'post_max_size' setting ".

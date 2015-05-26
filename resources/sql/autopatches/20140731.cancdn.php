@@ -4,7 +4,7 @@ $table = new PhabricatorFile();
 $conn_w = $table->establishConnection('w');
 foreach (new LiskMigrationIterator($table) as $file) {
   $id = $file->getID();
-  echo "Updating flags for file {$id}...\n";
+  echo pht('Updating flags for file %d...', $id)."\n";
   $meta = $file->getMetadata();
   if (!idx($meta, 'canCDN')) {
 

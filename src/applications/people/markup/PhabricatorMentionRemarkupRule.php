@@ -26,7 +26,7 @@ final class PhabricatorMentionRemarkupRule extends PhutilRemarkupRule {
       $text);
   }
 
-  protected function markupMention($matches) {
+  protected function markupMention(array $matches) {
     $engine = $this->getEngine();
 
     if ($engine->isTextMode()) {
@@ -72,15 +72,8 @@ final class PhabricatorMentionRemarkupRule extends PhutilRemarkupRule {
     $users = id(new PhabricatorPeopleQuery())
       ->setViewer($this->getEngine()->getConfig('viewer'))
       ->withUsernames($usernames)
+      ->needAvailability(true)
       ->execute();
-
-    if ($users) {
-      $user_statuses = id(new PhabricatorCalendarEvent())
-        ->loadCurrentStatuses(mpull($users, 'getPHID'));
-      $user_statuses = mpull($user_statuses, null, 'getUserPHID');
-    } else {
-      $user_statuses = array();
-    }
 
     $actual_users = array();
 
@@ -156,14 +149,8 @@ final class PhabricatorMentionRemarkupRule extends PhutilRemarkupRule {
           if (!$user->isUserActivated()) {
             $tag->setDotColor(PHUITagView::COLOR_GREY);
           } else {
-            $status = idx($user_statuses, $user->getPHID());
-            if ($status) {
-              $status = $status->getStatus();
-              if ($status == PhabricatorCalendarEvent::STATUS_AWAY) {
-                $tag->setDotColor(PHUITagView::COLOR_RED);
-              } else if ($status == PhabricatorCalendarEvent::STATUS_AWAY) {
-                $tag->setDotColor(PHUITagView::COLOR_ORANGE);
-              }
+            if ($user->getAwayUntil()) {
+              $tag->setDotColor(PHUITagView::COLOR_RED);
             }
           }
         }

@@ -137,7 +137,7 @@ abstract class PhabricatorApplicationTransaction
 
   public function getComment() {
     if ($this->commentNotLoaded) {
-      throw new Exception('Comment for this transaction was not loaded.');
+      throw new Exception(pht('Comment for this transaction was not loaded.'));
     }
     return $this->comment;
   }
@@ -292,8 +292,7 @@ abstract class PhabricatorApplicationTransaction
   public function getHandles() {
     if ($this->handles === null) {
       throw new Exception(
-        'Transaction requires handles and it did not load them.'
-      );
+        pht('Transaction requires handles and it did not load them.'));
     }
     return $this->handles;
   }
@@ -1073,7 +1072,7 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function attachTransactionGroup(array $group) {
-    assert_instances_of($group, 'PhabricatorApplicationTransaction');
+    assert_instances_of($group, __CLASS__);
     $this->transactionGroup = $group;
     return $this;
   }
@@ -1165,7 +1164,7 @@ abstract class PhabricatorApplicationTransaction
       }
 
       $old_target = $xaction->getRenderingTarget();
-      $new_target = PhabricatorApplicationTransaction::TARGET_TEXT;
+      $new_target = self::TARGET_TEXT;
       $xaction->setRenderingTarget($new_target);
 
       if ($publisher->getRenderWithImpliedContext()) {

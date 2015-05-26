@@ -174,7 +174,7 @@ final class AphrontDialogView extends AphrontView {
     return $this;
   }
 
-  final public function render() {
+  public function render() {
     require_celerity_resource('aphront-dialog-view-css');
 
     $buttons = array();
@@ -215,7 +215,10 @@ final class AphrontDialogView extends AphrontView {
 
     if (!$this->user) {
       throw new Exception(
-        pht('You must call setUser() when rendering an AphrontDialogView.'));
+        pht(
+          'You must call %s when rendering an %s.',
+          'setUser()',
+          __CLASS__));
     }
 
     $more = $this->class;

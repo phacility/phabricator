@@ -17,7 +17,9 @@ final class PhabricatorHash extends Phobject {
 
     if (!$key) {
       throw new Exception(
-        "Set a 'security.hmac-key' in your Phabricator configuration!");
+        pht(
+          "Set a '%s' in your Phabricator configuration!",
+          'security.hmac-key'));
     }
 
     return hash_hmac('sha1', $string, $key);
@@ -31,11 +33,11 @@ final class PhabricatorHash extends Phobject {
   public static function digestPassword(PhutilOpaqueEnvelope $envelope, $salt) {
     $result = $envelope->openEnvelope();
     if (!$result) {
-      throw new Exception('Trying to digest empty password!');
+      throw new Exception(pht('Trying to digest empty password!'));
     }
 
     for ($ii = 0; $ii < 1000; $ii++) {
-      $result = PhabricatorHash::digest($result, $salt);
+      $result = self::digest($result, $salt);
     }
 
     return $result;
@@ -100,8 +102,9 @@ final class PhabricatorHash extends Phobject {
     if ($length < $min_length) {
       throw new Exception(
         pht(
-          'Length parameter in digestToLength() must be at least %s, '.
+          'Length parameter in %s must be at least %s, '.
           'but %s was provided.',
+          'digestToLength()',
           new PhutilNumber($min_length),
           new PhutilNumber($length)));
     }
@@ -113,7 +116,7 @@ final class PhabricatorHash extends Phobject {
     // who can control the inputs from intentionally using the hashed form
     // of a string to cause a collision.
 
-    $hash = PhabricatorHash::digestForIndex($string);
+    $hash = self::digestForIndex($string);
 
     $prefix = substr($string, 0, ($length - ($min_length - 1)));
 

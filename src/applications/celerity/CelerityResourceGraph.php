@@ -7,9 +7,7 @@ final class CelerityResourceGraph extends AbstractDirectedGraph {
 
   protected function loadEdges(array $nodes) {
     if (!$this->graphSet) {
-      throw new Exception(
-        'Call setResourceGraph before loading the graph!'
-      );
+      throw new PhutilInvalidStateException('setResourceGraph');
     }
 
     $graph = $this->getResourceGraph();
@@ -20,7 +18,7 @@ final class CelerityResourceGraph extends AbstractDirectedGraph {
     return $edges;
   }
 
-  final public function setResourceGraph(array $graph) {
+  public function setResourceGraph(array $graph) {
     $this->resourceGraph = $graph;
     $this->graphSet = true;
     return $this;

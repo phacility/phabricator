@@ -2,6 +2,14 @@
  * @provides phui-calendar-css
  */
 
+ .phui-calendar-list a {
+  color: {$lightgreytext};
+ }
+
+.phui-calendar-viewer-invited a {
+  color: {$green};
+}
+
 .phui-calendar-red a {
   color: {$red};
 }
@@ -34,6 +42,14 @@
   color: {$violet};
 }
 
+.phui-calendar-grey a {
+  color: {$lightgreytext};
+}
+
+.phui-calendar-bg-viewer-invited {
+  background-color: {$lightgreen};
+}
+
 .phui-calendar-bg-red {
   background-color: {$lightred};
 }
@@ -47,7 +63,7 @@
 }
 
 .phui-calendar-bg-green {
-  background-color: {$lightgreen}
+  background-color: {$lightgreen};
 }
 
 .phui-calendar-bg-blue {
@@ -64,6 +80,20 @@
 
 .phui-calendar-bg-violet {
   background-color: {$lightviolet};
+}
+
+.phui-calendar-bg-grey {
+  background-color: {$darkgreybackground};
+}
+
+.phui-calendar-list-dot {
+  background-color: {$lightgreytext};
+  border-color: {$lightgreytext};
+}
+
+.phui-calendar-viewer-invited .phui-calendar-list-dot {
+  background-color: {$green};
+  border-color: {$green};
 }
 
 .phui-calendar-red .phui-calendar-list-dot {
@@ -104,4 +134,9 @@
 .phui-calendar-violet .phui-calendar-list-dot {
   background-color: {$violet};
   border-color: {$violet};
+}
+
+.phui-calendar-grey .phui-calendar-list-dot {
+  background-color: {$lightgreytext};
+  border-color: {$lightgreytext};
 }

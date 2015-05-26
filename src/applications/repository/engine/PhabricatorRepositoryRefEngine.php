@@ -19,6 +19,8 @@ final class PhabricatorRepositoryRefEngine
 
     $repository = $this->getRepository();
 
+    $branches_may_close = false;
+
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
@@ -31,6 +33,7 @@ final class PhabricatorRepositoryRefEngine
         $branches = $this->loadMercurialBranchPositions($repository);
         $bookmarks = $this->loadMercurialBookmarkPositions($repository);
         $tags = array();
+        $branches_may_close = true;
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $branches = $this->loadGitBranchPositions($repository);
@@ -86,6 +89,51 @@ final class PhabricatorRepositoryRefEngine
 
       $this->newRefs = array();
       $this->deadRefs = array();
+    }
+
+    if ($branches && $branches_may_close) {
+      $this->updateBranchStates($repository, $branches);
+    }
+  }
+
+  private function updateBranchStates(
+    PhabricatorRepository $repository,
+    array $branches) {
+
+    assert_instances_of($branches, 'DiffusionRepositoryRef');
+
+    $all_cursors = id(new PhabricatorRepositoryRefCursorQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withRepositoryPHIDs(array($repository->getPHID()))
+      ->execute();
+
+    $state_map = array();
+    $type_branch = PhabricatorRepositoryRefCursor::TYPE_BRANCH;
+    foreach ($all_cursors as $cursor) {
+      if ($cursor->getRefType() !== $type_branch) {
+        continue;
+      }
+      $raw_name = $cursor->getRefNameRaw();
+      $hash = $cursor->getCommitIdentifier();
+
+      $state_map[$raw_name][$hash] = $cursor;
+    }
+
+    foreach ($branches as $branch) {
+      $cursor = idx($state_map, $branch->getShortName(), array());
+      $cursor = idx($cursor, $branch->getCommitIdentifier());
+      if (!$cursor) {
+        continue;
+      }
+
+      $fields = $branch->getRawFields();
+
+      $cursor_state = (bool)$cursor->getIsClosed();
+      $branch_state = (bool)idx($fields, 'closed');
+
+      if ($cursor_state != $branch_state) {
+        $cursor->setIsClosed((int)$branch_state)->save();
+      }
     }
   }
 
@@ -262,15 +310,36 @@ final class PhabricatorRepositoryRefEngine
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         if ($all_closing_heads) {
-          $escheads = array();
+          $parts = array();
           foreach ($all_closing_heads as $head) {
-            $escheads[] = hgsprintf('%s', $head);
+            $parts[] = hgsprintf('%s', $head);
           }
-          $escheads = implode(' or ', $escheads);
+
+          // See T5896. Mercurial can not parse an "X or Y or ..." rev list
+          // with more than about 300 items, because it exceeds the maximum
+          // allowed recursion depth. Split all the heads into chunks of
+          // 256, and build a query like this:
+          //
+          //   ((1 or 2 or ... or 255) or (256 or 257 or ... 511))
+          //
+          // If we have more than 65535 heads, we'll do that again:
+          //
+          //   (((1 or ...) or ...) or ((65536 or ...) or ...))
+
+          $chunk_size = 256;
+          while (count($parts) > $chunk_size) {
+            $chunks = array_chunk($parts, $chunk_size);
+            foreach ($chunks as $key => $chunk) {
+              $chunks[$key] = '('.implode(' or ', $chunk).')';
+            }
+            $parts = array_values($chunks);
+          }
+          $parts = '('.implode(' or ', $parts).')';
+
           list($stdout) = $this->getRepository()->execxLocalCommand(
             'log --template %s --rev %s',
             '{node}\n',
-            hgsprintf('%s', $new_head).' - ('.$escheads.')');
+            hgsprintf('%s', $new_head).' - '.$parts);
         } else {
           list($stdout) = $this->getRepository()->execxLocalCommand(
             'log --template %s --rev %s',
@@ -328,7 +397,7 @@ final class PhabricatorRepositoryRefEngine
         $class = 'PhabricatorRepositoryMercurialCommitMessageParserWorker';
         break;
       default:
-        throw new Exception("Unknown repository type '{$vcs}'!");
+        throw new Exception(pht("Unknown repository type '%s'!", $vcs));
     }
 
     $all_commits = queryfx_all(

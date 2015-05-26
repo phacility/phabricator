@@ -23,8 +23,10 @@ final class PhabricatorDaemonManagementDebugWorkflow
           ),
           array(
             'name' => 'as-current-user',
-            'help' => 'Run the daemon as the current user '.
-              'instead of the configured phd.user',
+            'help' => pht(
+              'Run the daemon as the current user '.
+              'instead of the configured %s',
+              'phd.user'),
           ),
           array(
             'name' => 'autoscale',

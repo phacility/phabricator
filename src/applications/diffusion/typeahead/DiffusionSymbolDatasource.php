@@ -32,7 +32,6 @@ final class DiffusionSymbolDatasource
         ->setViewer($viewer)
         ->setNamePrefix($raw_query)
         ->setLimit(15)
-        ->needArcanistProjects(true)
         ->needRepositories(true)
         ->needPaths(true)
         ->execute();
@@ -40,14 +39,14 @@ final class DiffusionSymbolDatasource
         $lang = $symbol->getSymbolLanguage();
         $name = $symbol->getSymbolName();
         $type = $symbol->getSymbolType();
-        $proj = $symbol->getArcanistProject()->getName();
+        $repo = $symbol->getRepository()->getName();
 
         $results[] = id(new PhabricatorTypeaheadResult())
           ->setName($name)
           ->setURI($symbol->getURI())
           ->setPHID(md5($symbol->getURI())) // Just needs to be unique.
           ->setDisplayName($name)
-          ->setDisplayType(strtoupper($lang).' '.ucwords($type).' ('.$proj.')')
+          ->setDisplayType(strtoupper($lang).' '.ucwords($type).' ('.$repo.')')
           ->setPriorityType('symb');
       }
     }

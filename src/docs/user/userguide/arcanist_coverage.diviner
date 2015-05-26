@@ -64,6 +64,6 @@ might look like this:
   );
 
 You may also want to filter coverage information to the paths passed to the
-unit test engine. See @{class@arcanist:ArcanistPhutilTestCase} and
+unit test engine. See @{class@arcanist:PhutilTestCase} and
 @{class@arcanist:PhutilUnitTestEngine} for an example of coverage integration
 in PHP using Xdebug.

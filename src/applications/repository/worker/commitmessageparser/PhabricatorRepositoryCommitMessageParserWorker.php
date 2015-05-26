@@ -317,17 +317,10 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       ->setUnitStatus(DifferentialUnitStatus::UNIT_AUTO_SKIP)
       ->setDateCreated($this->commit->getEpoch())
       ->setDescription(
-        'Commit r'.
-        $this->repository->getCallsign().
-        $this->commit->getCommitIdentifier());
-
-    // TODO: This is not correct in SVN where one repository can have multiple
-    // Arcanist projects.
-    $arcanist_project = id(new PhabricatorRepositoryArcanistProject())
-      ->loadOneWhere('repositoryID = %d LIMIT 1', $this->repository->getID());
-    if ($arcanist_project) {
-      $diff->setArcanistProjectPHID($arcanist_project->getPHID());
-    }
+        pht(
+          'Commit %s',
+          'r'.$this->repository->getCallsign().
+          $this->commit->getCommitIdentifier()));
 
     $parents = DiffusionQuery::callConduitWithDiffusionRequest(
       $viewer,

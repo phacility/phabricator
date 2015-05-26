@@ -10,7 +10,7 @@ abstract class PhabricatorConfigProxySource
 
   final protected function getSource() {
     if (!$this->source) {
-      throw new Exception('No configuration source set!');
+      throw new Exception(pht('No configuration source set!'));
     }
     return $this->source;
   }

@@ -52,7 +52,7 @@ would allow administrators to gain other users' credentials).
   - administrators can access them, edit settings, and retrieve credentials;
   - they do not receive email;
   - they appear with lower precedence in the UI when selecting users, with
-    a "Bot" note (because i t usually does not make sense to, for example,
+    a "Bot" note (because it usually does not make sense to, for example,
     assign a task to a bot).
 
 = Disabled Users =

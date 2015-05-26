@@ -113,7 +113,7 @@ abstract class PhabricatorSetupCheck {
 
   final public static function runAllChecks() {
     $symbols = id(new PhutilSymbolLoader())
-      ->setAncestorClass('PhabricatorSetupCheck')
+      ->setAncestorClass(__CLASS__)
       ->setConcreteOnly(true)
       ->selectAndLoadSymbols();
 
@@ -130,7 +130,9 @@ abstract class PhabricatorSetupCheck {
       foreach ($check->getIssues() as $key => $issue) {
         if (isset($issues[$key])) {
           throw new Exception(
-            "Two setup checks raised an issue with key '{$key}'!");
+            pht(
+              "Two setup checks raised an issue with key '%s'!",
+              $key));
         }
         $issues[$key] = $issue;
         if ($issue->getIsFatal()) {
@@ -139,8 +141,8 @@ abstract class PhabricatorSetupCheck {
       }
     }
 
-    foreach (PhabricatorEnv::getEnvConfig('config.ignore-issues')
-              as $ignorable => $derp) {
+    $ignore_issues = PhabricatorEnv::getEnvConfig('config.ignore-issues');
+    foreach ($ignore_issues as $ignorable => $derp) {
       if (isset($issues[$ignorable])) {
         $issues[$ignorable]->setIsIgnored(true);
       }

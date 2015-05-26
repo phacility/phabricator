@@ -127,8 +127,8 @@ final class ReleephRequest extends ReleephDAO
       if ($this->getInBranch()) {
         return ReleephRequestStatus::STATUS_NEEDS_REVERT;
       } else {
-        $intent_pass = ReleephRequest::INTENT_PASS;
-        $intent_want = ReleephRequest::INTENT_WANT;
+        $intent_pass = self::INTENT_PASS;
+        $intent_want = self::INTENT_WANT;
 
         $has_been_in_branch = $this->getCommitIdentifier();
         // Regardless of why we reverted something, always say reverted if it
@@ -290,15 +290,8 @@ final class ReleephRequest extends ReleephDAO
   }
 
   public function setStatus($value) {
-    throw new Exception('`status` is now deprecated!');
+    throw new Exception(pht('`%s` is now deprecated!', 'status'));
   }
-
-/* -(  Make magic Lisk methods private  )------------------------------------ */
-
-  private function setUserIntents(array $ar) {
-    return parent::setUserIntents($ar);
-  }
-
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

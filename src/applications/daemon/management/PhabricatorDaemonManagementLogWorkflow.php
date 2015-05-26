@@ -17,15 +17,15 @@ final class PhabricatorDaemonManagementLogWorkflow
           array(
             'name'    => 'id',
             'param'   => 'id',
-            'help'    => 'Show logs for daemon(s) with given ID(s).',
+            'help'    => pht('Show logs for daemon(s) with given ID(s).'),
             'repeat'  => true,
           ),
           array(
             'name'    => 'limit',
             'param'   => 'N',
             'default' => 100,
-            'help'    => 'Show a specific number of log messages '.
-                         '(default 100).',
+            'help'    => pht(
+              'Show a specific number of log messages (default 100).'),
           ),
         ));
   }
@@ -87,7 +87,7 @@ final class PhabricatorDaemonManagementLogWorkflow
 
       $console->writeOut(
         "%s\n",
-        sprintf(
+        pht(
           'Daemon %d %s [%s] %s',
           $id,
           $type,

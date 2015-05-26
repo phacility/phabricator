@@ -108,12 +108,6 @@ final class PassphraseCredentialTransactionEditor
           }
         }
         return;
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        $object->setViewPolicy($xaction->getNewValue());
-        return;
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        $object->setEditPolicy($xaction->getNewValue());
-        return;
       case PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET:
         return;
       case PassphraseCredentialTransaction::TYPE_LOCK:
@@ -140,8 +134,6 @@ final class PassphraseCredentialTransactionEditor
       case PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET:
       case PassphraseCredentialTransaction::TYPE_LOCK:
       case PassphraseCredentialTransaction::TYPE_CONDUIT:
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;
     }
 

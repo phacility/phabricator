@@ -259,7 +259,9 @@ final class PhabricatorProjectQuery
           break;
         default:
           throw new Exception(
-            "Unknown project status '{$this->status}'!");
+            pht(
+              "Unknown project status '%s'!",
+              $this->status));
       }
       $where[] = qsprintf(
         $conn_r,

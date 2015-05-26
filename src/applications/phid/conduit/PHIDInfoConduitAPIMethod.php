@@ -11,11 +11,11 @@ final class PHIDInfoConduitAPIMethod extends PHIDConduitAPIMethod {
   }
 
   public function getMethodStatusDescription() {
-    return "Replaced by 'phid.query'.";
+    return pht("Replaced by 'phid.query'.");
   }
 
   public function getMethodDescription() {
-    return 'Retrieve information about an arbitrary PHID.';
+    return pht('Retrieve information about an arbitrary PHID.');
   }
 
   protected function defineParamTypes() {
@@ -30,7 +30,7 @@ final class PHIDInfoConduitAPIMethod extends PHIDConduitAPIMethod {
 
   protected function defineErrorTypes() {
     return array(
-      'ERR-BAD-PHID' => 'No such object exists.',
+      'ERR-BAD-PHID' => pht('No such object exists.'),
     );
   }
 

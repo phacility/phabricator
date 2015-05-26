@@ -50,6 +50,26 @@ final class ManiphestCustomFieldStatusParserTestCase
       'Fixes t2apps' => array(),
       'fixes a bug' => array(),
       'Prefixes T2' => array(),
+      'Reopens T123' => array(
+        array(
+          'match' => 'Reopens T123',
+          'prefix' => 'Reopens',
+          'infix' => '',
+          'monograms' => array('T123'),
+          'suffix' => '',
+          'offset' => 0,
+        ),
+      ),
+      'Fixes T123, T456, and T789.' => array(
+        array(
+          'match' => 'Fixes T123, T456, and T789',
+          'prefix' => 'Fixes',
+          'infix' => '',
+          'monograms' => array('T123', 'T456', 'T789'),
+          'suffix' => '',
+          'offset' => 0,
+        ),
+      ),
     );
 
     foreach ($map as $input => $expect) {

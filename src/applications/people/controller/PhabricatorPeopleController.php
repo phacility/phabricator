@@ -45,10 +45,6 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
     return $this->buildSideNavView(true)->getMenu();
   }
 
-  protected function buildApplicationCrumbs() {
-    return parent::buildApplicationCrumbs();
-  }
-
   public function buildIconNavView(PhabricatorUser $user) {
     $viewer = $this->getViewer();
     $picture = $user->getProfileImageURI();
@@ -70,8 +66,7 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
     if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
       $phid = $user->getPHID();
       $view_uri = sprintf(
-        '/maniphest/?statuses=%s&assigned=%s#R',
-        implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
+        '/maniphest/?statuses=open()&assigned=%s#R',
         $phid);
       $nav->addIcon(
         'maniphest', pht('Open Tasks'), 'fa-anchor', null, $view_uri);

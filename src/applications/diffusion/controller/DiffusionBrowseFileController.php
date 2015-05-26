@@ -124,13 +124,15 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       switch ($follow) {
         case 'first':
           $notice->appendChild(
-            pht('Unable to continue tracing the history of this file because '.
-            'this commit is the first commit in the repository.'));
+            pht(
+              'Unable to continue tracing the history of this file because '.
+              'this commit is the first commit in the repository.'));
           break;
         case 'created':
           $notice->appendChild(
-            pht('Unable to continue tracing the history of this file because '.
-            'this commit created the file.'));
+            pht(
+              'Unable to continue tracing the history of this file because '.
+              'this commit created the file.'));
           break;
       }
       $content[] = $notice;
@@ -142,7 +144,8 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       $notice->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
       $notice->setTitle(pht('File Renamed'));
       $notice->appendChild(
-        pht("File history passes through a rename from '%s' to '%s'.",
+        pht(
+          "File history passes through a rename from '%s' to '%s'.",
           $drequest->getPath(), $renamed));
       $content[] = $notice;
     }
@@ -266,32 +269,35 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
       $id = celerity_generate_unique_node_id();
 
-      $projects = $drequest->loadArcanistProjects();
-      $langs = array();
-      foreach ($projects as $project) {
-        $ls = $project->getSymbolIndexLanguages();
-        if (!$ls) {
-          continue;
-        }
-        $dep_projects = $project->getSymbolIndexProjects();
-        $dep_projects[] = $project->getPHID();
-        foreach ($ls as $lang) {
-          if (!isset($langs[$lang])) {
-            $langs[$lang] = array();
-          }
-          $langs[$lang] += $dep_projects + array($project);
+      $repo = $drequest->getRepository();
+      $symbol_repos = nonempty($repo->getSymbolSources(), array());
+      $symbol_repos[] = $repo;
+
+      $lang = last(explode('.', $drequest->getPath()));
+      $repo_languages = $repo->getSymbolLanguages();
+      $repo_languages = nonempty($repo_languages, array());
+      $repo_languages = array_fill_keys($repo_languages, true);
+
+      $needs_symbols = true;
+      if ($repo_languages && $symbol_repos) {
+        $have_symbols = id(new DiffusionSymbolQuery())
+            ->existsSymbolsInRepository($repo->getPHID());
+        if (!$have_symbols) {
+          $needs_symbols = false;
         }
       }
 
-      $lang = last(explode('.', $drequest->getPath()));
+      if ($needs_symbols && $repo_languages) {
+        $needs_symbols = isset($repo_languages[$lang]);
+      }
 
-      if (isset($langs[$lang])) {
+      if ($needs_symbols) {
         Javelin::initBehavior(
           'repository-crossreference',
           array(
             'container' => $id,
             'lang' => $lang,
-            'projects' => $langs[$lang],
+            'repositories' => $symbol_repos,
           ));
       }
 

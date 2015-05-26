@@ -87,7 +87,7 @@ final class PhabricatorMySQLFileStorageEngine
   private function loadFromMySQLFileStorage($handle) {
     $blob = id(new PhabricatorFileStorageBlob())->load($handle);
     if (!$blob) {
-      throw new Exception("Unable to load MySQL blob file '{$handle}'!");
+      throw new Exception(pht("Unable to load MySQL blob file '%s'!", $handle));
     }
     return $blob;
   }

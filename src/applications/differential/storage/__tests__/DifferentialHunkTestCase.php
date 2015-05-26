@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialHunkTestCase extends ArcanistPhutilTestCase {
+final class DifferentialHunkTestCase extends PhutilTestCase {
 
   public function testMakeChanges() {
     $root = dirname(__FILE__).'/hunk/';

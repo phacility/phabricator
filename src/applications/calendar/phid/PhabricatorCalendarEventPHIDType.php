@@ -8,6 +8,10 @@ final class PhabricatorCalendarEventPHIDType extends PhabricatorPHIDType {
     return pht('Event');
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorCalendarApplication';
+  }
+
   public function newObject() {
     return new PhabricatorCalendarEvent();
   }
@@ -29,9 +33,46 @@ final class PhabricatorCalendarEventPHIDType extends PhabricatorPHIDType {
       $event = $objects[$phid];
 
       $id = $event->getID();
+      $name = $event->getName();
+      $is_cancelled = $event->getIsCancelled();
 
-      $handle->setName(pht('Event %d', $id));
+      $handle
+        ->setName($name)
+        ->setFullName(pht('E%d: %s', $id, $name))
+        ->setURI('/E'.$id);
+
+      if ($is_cancelled) {
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
+      }
     }
   }
 
+  public function canLoadNamedObject($name) {
+    return preg_match('/^E[1-9]\d*$/i', $name);
+  }
+
+  public function loadNamedObjects(
+    PhabricatorObjectQuery $query,
+    array $names) {
+
+    $id_map = array();
+    foreach ($names as $name) {
+      $id = (int)substr($name, 1);
+      $id_map[$id][] = $name;
+    }
+
+    $objects = id(new PhabricatorCalendarEventQuery())
+      ->setViewer($query->getViewer())
+      ->withIDs(array_keys($id_map))
+      ->execute();
+
+    $results = array();
+    foreach ($objects as $id => $object) {
+      foreach (idx($id_map, $id, array()) as $name) {
+        $results[$name] = $object;
+      }
+    }
+
+    return $results;
+  }
 }

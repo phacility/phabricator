@@ -20,7 +20,7 @@ final class PhabricatorPeopleQuery
   private $needPrimaryEmail;
   private $needProfile;
   private $needProfileImage;
-  private $needStatus;
+  private $needAvailability;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -102,8 +102,8 @@ final class PhabricatorPeopleQuery
     return $this;
   }
 
-  public function needStatus($need) {
-    $this->needStatus = $need;
+  public function needAvailability($need) {
+    $this->needAvailability = $need;
     return $this;
   }
 
@@ -148,38 +148,71 @@ final class PhabricatorPeopleQuery
     }
 
     if ($this->needProfileImage) {
-      $user_profile_file_phids = mpull($users, 'getProfileImagePHID');
-      $user_profile_file_phids = array_filter($user_profile_file_phids);
-      if ($user_profile_file_phids) {
-        $files = id(new PhabricatorFileQuery())
-          ->setParentQuery($this)
-          ->setViewer($this->getViewer())
-          ->withPHIDs($user_profile_file_phids)
-          ->execute();
-        $files = mpull($files, null, 'getPHID');
-      } else {
-        $files = array();
-      }
+      $rebuild = array();
       foreach ($users as $user) {
-        $image_phid = $user->getProfileImagePHID();
-        if (isset($files[$image_phid])) {
-          $profile_image_uri = $files[$image_phid]->getBestURI();
-        } else {
-          $profile_image_uri = PhabricatorUser::getDefaultProfileImageURI();
+        $image_uri = $user->getProfileImageCache();
+        if ($image_uri) {
+          // This user has a valid cache, so we don't need to fetch any
+          // data or rebuild anything.
+
+          $user->attachProfileImageURI($image_uri);
+          continue;
         }
-        $user->attachProfileImageURI($profile_image_uri);
+
+        // This user's cache is invalid or missing, so we're going to rebuild
+        // it.
+        $rebuild[] = $user;
+      }
+
+      if ($rebuild) {
+        $file_phids = mpull($rebuild, 'getProfileImagePHID');
+        $file_phids = array_filter($file_phids);
+
+        if ($file_phids) {
+          // NOTE: We're using the omnipotent user here because older profile
+          // images do not have the 'profile' flag, so they may not be visible
+          // to the executing viewer. At some point, we could migrate to add
+          // this flag and then use the real viewer, or just use the real
+          // viewer after enough time has passed to limit the impact of old
+          // data. The consequence of missing here is that we cache a default
+          // image when a real image exists.
+          $files = id(new PhabricatorFileQuery())
+            ->setParentQuery($this)
+            ->setViewer(PhabricatorUser::getOmnipotentUser())
+            ->withPHIDs($file_phids)
+            ->execute();
+          $files = mpull($files, null, 'getPHID');
+        } else {
+          $files = array();
+        }
+
+        foreach ($rebuild as $user) {
+          $image_phid = $user->getProfileImagePHID();
+          if (isset($files[$image_phid])) {
+            $image_uri = $files[$image_phid]->getBestURI();
+          } else {
+            $image_uri = PhabricatorUser::getDefaultProfileImageURI();
+          }
+
+          $user->writeProfileImageCache($image_uri);
+          $user->attachProfileImageURI($image_uri);
+        }
       }
     }
 
-    if ($this->needStatus) {
-      $user_list = mpull($users, null, 'getPHID');
-      $statuses = id(new PhabricatorCalendarEvent())->loadCurrentStatuses(
-        array_keys($user_list));
-      foreach ($user_list as $phid => $user) {
-        $status = idx($statuses, $phid);
-        if ($status) {
-          $user->attachStatus($status);
+    if ($this->needAvailability) {
+      $rebuild = array();
+      foreach ($users as $user) {
+        $cache = $user->getAvailabilityCache();
+        if ($cache !== null) {
+          $user->attachAvailability($cache);
+        } else {
+          $rebuild[] = $user;
         }
+      }
+
+      if ($rebuild) {
+        $this->rebuildAvailabilityCache($rebuild);
       }
     }
 
@@ -346,5 +379,78 @@ final class PhabricatorPeopleQuery
     );
   }
 
+  private function rebuildAvailabilityCache(array $rebuild) {
+    $rebuild = mpull($rebuild, null, 'getPHID');
+
+    // Limit the window we look at because far-future events are largely
+    // irrelevant and this makes the cache cheaper to build and allows it to
+    // self-heal over time.
+    $min_range = PhabricatorTime::getNow();
+    $max_range = $min_range + phutil_units('72 hours in seconds');
+
+    $events = id(new PhabricatorCalendarEventQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withInvitedPHIDs(array_keys($rebuild))
+      ->withIsCancelled(false)
+      ->withDateRange($min_range, $max_range)
+      ->execute();
+
+    // Group all the events by invited user. Only examine events that users
+    // are actually attending.
+    $map = array();
+    foreach ($events as $event) {
+      foreach ($event->getInvitees() as $invitee) {
+        if (!$invitee->isAttending()) {
+          continue;
+        }
+
+        $invitee_phid = $invitee->getInviteePHID();
+        if (!isset($rebuild[$invitee_phid])) {
+          continue;
+        }
+
+        $map[$invitee_phid][] = $event;
+      }
+    }
+
+    foreach ($rebuild as $phid => $user) {
+      $events = idx($map, $phid, array());
+
+      $cursor = $min_range;
+      if ($events) {
+        // Find the next time when the user has no meetings. If we move forward
+        // because of an event, we check again for events after that one ends.
+        while (true) {
+          foreach ($events as $event) {
+            $from = $event->getDateFromForCache();
+            $to = $event->getDateTo();
+            if (($from <= $cursor) && ($to > $cursor)) {
+              $cursor = $to;
+              continue 2;
+            }
+          }
+          break;
+        }
+      }
+
+      if ($cursor > $min_range) {
+        $availability = array(
+          'until' => $cursor,
+        );
+        $availability_ttl = $cursor;
+      } else {
+        $availability = array(
+          'until' => null,
+        );
+        $availability_ttl = $max_range;
+      }
+
+      // Never TTL the cache to longer than the maximum range we examined.
+      $availability_ttl = min($availability_ttl, $max_range);
+
+      $user->writeAvailabilityCache($availability, $availability_ttl);
+      $user->attachAvailability($availability);
+    }
+  }
 
 }

@@ -47,7 +47,7 @@ final class ManiphestBatchEditController extends ManiphestController {
 
     $actions = $request->getStr('actions');
     if ($actions) {
-      $actions = json_decode($actions, true);
+      $actions = phutil_json_decode($actions);
     }
 
     if ($request->isFormPost() && is_array($actions)) {
@@ -213,7 +213,7 @@ final class ManiphestBatchEditController extends ManiphestController {
     $xactions = array();
     foreach ($actions as $action) {
       if (empty($type_map[$action['action']])) {
-        throw new Exception("Unknown batch edit action '{$action}'!");
+        throw new Exception(pht("Unknown batch edit action '%s'!", $action));
       }
 
       $type = $type_map[$action['action']];
@@ -265,8 +265,8 @@ final class ManiphestBatchEditController extends ManiphestController {
             continue 2;
           }
           $value = head($value);
-          $no_owner = ManiphestNoOwnerDatasource::FUNCTION_TOKEN;
-          if ($value === ManiphestNoOwnerDatasource::FUNCTION_TOKEN) {
+          $no_owner = PhabricatorPeopleNoOwnerDatasource::FUNCTION_TOKEN;
+          if ($value === $no_owner) {
             $value = null;
           }
           break;

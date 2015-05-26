@@ -201,7 +201,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
 
               if ($source_file_type == DifferentialChangeType::FILE_DELETED) {
                 throw new Exception(
-                  'Something is wrong; source of a copy must exist.');
+                  pht('Something is wrong; source of a copy must exist.'));
               }
 
               if ($source_file_type != DifferentialChangeType::FILE_DIRECTORY) {
@@ -504,10 +504,11 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
     if ($need) {
       $subpath = $repository->getDetail('svn-subpath');
       if (!$subpath) {
-        $commits = implode(', ', $need);
         throw new Exception(
-          "Missing commits ({$need}) in a SVN repository which is not ".
-          "configured for subdirectory-only parsing!");
+          pht(
+            'Missing commits (%s) in a SVN repository which is not '.
+            'configured for subdirectory-only parsing!',
+            implode(', ', $need)));
       }
 
       foreach ($need as $foreign_commit) {
@@ -631,7 +632,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
       case 'dir':   return DifferentialChangeType::FILE_DIRECTORY;
       case 'file':  return DifferentialChangeType::FILE_NORMAL;
       default:
-        throw new Exception("Unknown SVN file kind '{$kind}'.");
+        throw new Exception(pht("Unknown SVN file kind '%s'.", $kind));
     }
   }
 
@@ -687,7 +688,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
                        '(<size>(.*?)</size>)?@';
             $matches = null;
             if (!preg_match($pattern, $entry, $matches)) {
-              throw new Exception('Unable to parse entry!');
+              throw new Exception(pht('Unable to parse entry!'));
             }
             $map[html_entity_decode($matches[2])] =
               $this->getFileTypeFromSVNKind($matches[1]);
@@ -704,40 +705,61 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
             $mode = 'entry';
             $entry = array();
           } else {
-            throw new Exception("Expected </list> or <entry, got {$line}.");
+            throw new Exception(
+              pht(
+                'Expected %s or %s, got %s.',
+                '</list>',
+                '<entry',
+                $line));
           }
           break;
         case 'xml':
           $expect = '/<?xml version="1.0".*?>/';
           if (!preg_match($expect, $line)) {
-            throw new Exception("Expected '{$expect}', got {$line}.");
+            throw new Exception(
+              pht(
+                "Expected '%s', got %s.",
+                $expect,
+                $line));
           }
           $mode = 'list';
           break;
         case 'list':
           $expect = '<lists>';
           if ($line !== $expect) {
-            throw new Exception("Expected '{$expect}', got {$line}.");
+            throw new Exception(
+              pht(
+                "Expected '%s', got %s.",
+                $expect,
+                $line));
           }
           $mode = 'list1';
           break;
         case 'list1':
           $expect = '<list';
           if ($line !== $expect) {
-            throw new Exception("Expected '{$expect}', got {$line}.");
+            throw new Exception(
+              pht(
+                "Expected '%s', got %s.",
+                $expect,
+                $line));
           }
           $mode = 'list2';
           break;
         case 'list2':
           if (!preg_match('/^\s+path="/', $line)) {
-            throw new Exception("Expected '   path=...', got {$line}.");
+            throw new Exception(
+              pht(
+                "Expected '%s', got %s.",
+                '   path=...',
+                $line));
           }
           $mode = 'entry-or-end';
           break;
       }
     }
     if (!$done) {
-      throw new Exception('Unexpected end of file.');
+      throw new Exception(pht('Unexpected end of file.'));
     }
 
     return $map;

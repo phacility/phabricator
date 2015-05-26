@@ -30,9 +30,8 @@ final class PhabricatorDisplayPreferencesSettingsPanel
     $e_editor = null;
     if ($request->isFormPost()) {
       $monospaced = $request->getStr($pref_monospaced);
-
-      // Prevent the user from doing stupid things.
-      $monospaced = preg_replace('/[^a-z0-9 ,".]+/i', '', $monospaced);
+      $monospaced = PhabricatorUserPreferences::filterMonospacedCSSRule(
+        $monospaced);
 
       $preferences->setPreference($pref_titles, $request->getStr($pref_titles));
       $preferences->setPreference($pref_editor, $request->getStr($pref_editor));
@@ -96,10 +95,16 @@ EXAMPLE;
       $pref_monospaced_textareas_value = 'disabled';
     }
 
-    $editor_instructions = pht('Link to edit files in external editor. '.
+    $editor_instructions = pht(
+      'Link to edit files in external editor. '.
       '%%f is replaced by filename, %%l by line number, %%r by repository '.
       'callsign, %%%% by literal %%. For documentation, see: %s',
       $editor_doc_link);
+
+    $font_instructions = pht(
+      'Overrides default fonts in tools like Differential. '.
+      'Input should be valid CSS "font" declaration, such as '.
+      '"13px Consolas"');
 
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -111,10 +116,12 @@ EXAMPLE;
           ->setOptions(
             array(
               'glyph' =>
-              pht("In page titles, show Tool names as unicode glyphs: ".
+              pht(
+                'In page titles, show Tool names as unicode glyphs: %s',
                 "\xE2\x9A\x99"),
               'text' =>
-              pht('In page titles, show Tool names as plain text: '.
+              pht(
+                'In page titles, show Tool names as plain text: '.
                 '[Differential]'),
             )))
       ->appendChild(
@@ -137,8 +144,7 @@ EXAMPLE;
         id(new AphrontFormTextControl())
         ->setLabel(pht('Monospaced Font'))
         ->setName($pref_monospaced)
-        ->setCaption(
-          pht('Overrides default fonts in tools like Differential.'))
+        ->setCaption($font_instructions)
         ->setValue($preferences->getPreference($pref_monospaced)))
       ->appendChild(
         id(new AphrontFormMarkupControl())

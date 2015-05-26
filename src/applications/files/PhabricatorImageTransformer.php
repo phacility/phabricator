@@ -20,51 +20,6 @@ final class PhabricatorImageTransformer {
       ));
   }
 
-  public function executeThumbTransform(
-    PhabricatorFile $file,
-    $x,
-    $y) {
-
-    $image = $this->crudelyScaleTo($file, $x, $y);
-
-    return PhabricatorFile::newFromFileData(
-      $image,
-      array(
-        'name' => 'thumb-'.$file->getName(),
-        'canCDN' => true,
-      ));
-  }
-
-  public function executeProfileTransform(
-    PhabricatorFile $file,
-    $x,
-    $min_y,
-    $max_y) {
-
-    $image = $this->crudelyCropTo($file, $x, $min_y, $max_y);
-
-    return PhabricatorFile::newFromFileData(
-      $image,
-      array(
-        'name' => 'profile-'.$file->getName(),
-        'canCDN' => true,
-      ));
-  }
-
-  public function executePreviewTransform(
-    PhabricatorFile $file,
-    $size) {
-
-    $image = $this->generatePreview($file, $size);
-
-    return PhabricatorFile::newFromFileData(
-      $image,
-      array(
-        'name' => 'preview-'.$file->getName(),
-        'canCDN' => true,
-      ));
-  }
-
   public function executeConpherenceTransform(
     PhabricatorFile $file,
     $top,
@@ -83,36 +38,9 @@ final class PhabricatorImageTransformer {
       $image,
       array(
         'name' => 'conpherence-'.$file->getName(),
+        'profile' => true,
         'canCDN' => true,
       ));
-  }
-
-  private function crudelyCropTo(PhabricatorFile $file, $x, $min_y, $max_y) {
-    $data = $file->loadFileData();
-    $img = imagecreatefromstring($data);
-    $sx = imagesx($img);
-    $sy = imagesy($img);
-
-    $scaled_y = ($x / $sx) * $sy;
-    if ($scaled_y > $max_y) {
-      // This image is very tall and thin.
-      $scaled_y = $max_y;
-    } else if ($scaled_y < $min_y) {
-      // This image is very short and wide.
-      $scaled_y = $min_y;
-    }
-
-    $cropped = $this->applyScaleWithImagemagick($file, $x, $scaled_y);
-    if ($cropped != null) {
-      return $cropped;
-    }
-
-    $img = $this->applyScaleTo(
-      $file,
-      $x,
-      $scaled_y);
-
-    return self::saveImageDataInAnyFormat($img, $file->getMimeType());
   }
 
   private function crasslyCropTo(PhabricatorFile $file, $top, $left, $w, $h) {
@@ -137,86 +65,12 @@ final class PhabricatorImageTransformer {
     return self::saveImageDataInAnyFormat($dst, $file->getMimeType());
   }
 
-
-  /**
-   * Very crudely scale an image up or down to an exact size.
-   */
-  private function crudelyScaleTo(PhabricatorFile $file, $dx, $dy) {
-    $scaled = $this->applyScaleWithImagemagick($file, $dx, $dy);
-
-    if ($scaled != null) {
-      return $scaled;
-    }
-
-    $dst = $this->applyScaleTo($file, $dx, $dy);
-    return self::saveImageDataInAnyFormat($dst, $file->getMimeType());
-  }
-
   private function getBlankDestinationFile($dx, $dy) {
     $dst = imagecreatetruecolor($dx, $dy);
     imagesavealpha($dst, true);
     imagefill($dst, 0, 0, imagecolorallocatealpha($dst, 255, 255, 255, 127));
 
     return $dst;
-  }
-
-  private function applyScaleTo(PhabricatorFile $file, $dx, $dy) {
-    $data = $file->loadFileData();
-    $src = imagecreatefromstring($data);
-
-    $x = imagesx($src);
-    $y = imagesy($src);
-
-    $scale = min(($dx / $x), ($dy / $y), 1);
-
-    $sdx = $scale * $x;
-    $sdy = $scale * $y;
-
-    $dst = $this->getBlankDestinationFile($dx, $dy);
-    imagesavealpha($dst, true);
-    imagefill($dst, 0, 0, imagecolorallocatealpha($dst, 255, 255, 255, 127));
-
-    imagecopyresampled(
-      $dst,
-      $src,
-      ($dx - $sdx) / 2,  ($dy - $sdy) / 2,
-      0, 0,
-      $sdx, $sdy,
-      $x, $y);
-
-    return $dst;
-
-  }
-
-  public static function getPreviewDimensions(PhabricatorFile $file, $size) {
-    $metadata = $file->getMetadata();
-    $x = idx($metadata, PhabricatorFile::METADATA_IMAGE_WIDTH);
-    $y = idx($metadata, PhabricatorFile::METADATA_IMAGE_HEIGHT);
-
-    if (!$x || !$y) {
-      $data = $file->loadFileData();
-      $src = imagecreatefromstring($data);
-
-      $x = imagesx($src);
-      $y = imagesy($src);
-    }
-
-    $scale = min($size / $x, $size / $y, 1);
-
-    $dx = max($size / 4, $scale * $x);
-    $dy = max($size / 4, $scale * $y);
-
-    $sdx = $scale * $x;
-    $sdy = $scale * $y;
-
-    return array(
-      'x' => $x,
-      'y' => $y,
-      'dx' => $dx,
-      'dy' => $dy,
-      'sdx' => $sdx,
-      'sdy' => $sdy,
-    );
   }
 
   public static function getScaleForCrop(
@@ -239,31 +93,6 @@ final class PhabricatorImageTransformer {
     }
 
     return $scale;
-  }
-
-  private function generatePreview(PhabricatorFile $file, $size) {
-    $data = $file->loadFileData();
-    $src = imagecreatefromstring($data);
-
-    $dimensions = self::getPreviewDimensions($file, $size);
-    $x = $dimensions['x'];
-    $y = $dimensions['y'];
-    $dx = $dimensions['dx'];
-    $dy = $dimensions['dy'];
-    $sdx = $dimensions['sdx'];
-    $sdy = $dimensions['sdy'];
-
-    $dst = $this->getBlankDestinationFile($dx, $dy);
-
-    imagecopyresampled(
-      $dst,
-      $src,
-      ($dx - $sdx) / 2, ($dy - $sdy) / 2,
-      0, 0,
-      $sdx, $sdy,
-      $x, $y);
-
-    return self::saveImageDataInAnyFormat($dst, $file->getMimeType());
   }
 
   private function applyMemeToFile(
@@ -402,49 +231,6 @@ final class PhabricatorImageTransformer {
     );
   }
 
-  private function applyScaleWithImagemagick(PhabricatorFile $file, $dx, $dy) {
-    $img_type = $file->getMimeType();
-    $imagemagick = PhabricatorEnv::getEnvConfig('files.enable-imagemagick');
-
-    if ($img_type != 'image/gif' || $imagemagick == false) {
-      return null;
-    }
-
-    $data = $file->loadFileData();
-    $src = imagecreatefromstring($data);
-
-    $x = imagesx($src);
-    $y = imagesy($src);
-
-    if (self::isEnormousGIF($x, $y)) {
-      return null;
-    }
-
-    $scale = min(($dx / $x), ($dy / $y), 1);
-
-    $sdx = $scale * $x;
-    $sdy = $scale * $y;
-
-    $input = new TempFile();
-    Filesystem::writeFile($input, $data);
-
-    $resized = new TempFile();
-
-    $future = new ExecFuture(
-      'convert %s -coalesce -resize %sX%s%s %s',
-      $input,
-      $sdx,
-      $sdy,
-      '!',
-      $resized);
-
-    // Don't spend more than 10 seconds resizing; just fail if it takes longer
-    // than that.
-    $future->setTimeout(10)->resolvex();
-
-    return Filesystem::readFile($resized);
-  }
-
   private function applyMemeWithImagemagick(
     $input,
     $above,
@@ -480,57 +266,6 @@ final class PhabricatorImageTransformer {
     $future->setTimeout(10)->resolvex();
 
     return Filesystem::readFile($output);
-  }
-
-/* -(  Detecting Enormous Files  )------------------------------------------- */
-
-
-  /**
-   * Determine if an image is enormous (too large to transform).
-   *
-   * Attackers can perform a denial of service attack by uploading highly
-   * compressible images with enormous dimensions but a very small filesize.
-   * Transforming them (e.g., into thumbnails) may consume huge quantities of
-   * memory and CPU relative to the resources required to transmit the file.
-   *
-   * In general, we respond to these images by declining to transform them, and
-   * using a default thumbnail instead.
-   *
-   * @param int Width of the image, in pixels.
-   * @param int Height of the image, in pixels.
-   * @return bool True if this image is enormous (too large to transform).
-   * @task enormous
-   */
-  public static function isEnormousImage($x, $y) {
-    // This is just a sanity check, but if we don't have valid dimensions we
-    // shouldn't be trying to transform the file.
-    if (($x <= 0) || ($y <= 0)) {
-      return true;
-    }
-
-    return ($x * $y) > (4096 * 4096);
-  }
-
-
-  /**
-   * Determine if a GIF is enormous (too large to transform).
-   *
-   * For discussion, see @{method:isEnormousImage}. We need to be more
-   * careful about GIFs, because they can also have a large number of frames
-   * despite having a very small filesize. We're more conservative about
-   * calling GIFs enormous than about calling images in general enormous.
-   *
-   * @param int Width of the GIF, in pixels.
-   * @param int Height of the GIF, in pixels.
-   * @return bool True if this image is enormous (too large to transform).
-   * @task enormous
-   */
-  public static function isEnormousGIF($x, $y) {
-    if (self::isEnormousImage($x, $y)) {
-      return true;
-    }
-
-    return ($x * $y) > (800 * 800);
   }
 
 

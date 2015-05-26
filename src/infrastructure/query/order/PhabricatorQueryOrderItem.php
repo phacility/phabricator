@@ -15,8 +15,7 @@
  * This class is primarily internal to the query infrastructure, and most
  * application code should not need to interact with it directly.
  */
-final class PhabricatorQueryOrderItem
-  extends Phobject {
+final class PhabricatorQueryOrderItem extends Phobject {
 
   private $orderKey;
   private $isReversed;

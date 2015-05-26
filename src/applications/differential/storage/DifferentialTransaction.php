@@ -274,14 +274,11 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
       case self::TYPE_STATUS:
         switch ($this->getNewValue()) {
           case ArcanistDifferentialRevisionStatus::ACCEPTED:
-            return pht(
-              'This revision is now accepted and ready to land.');
+            return pht('This revision is now accepted and ready to land.');
           case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
-            return pht(
-              'This revision now requires changes to proceed.');
+            return pht('This revision now requires changes to proceed.');
           case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
-            return pht(
-              'This revision now requires review to proceed.');
+            return pht('This revision now requires review to proceed.');
         }
     }
 
@@ -568,7 +565,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
               'this revision.');
         }
         break;
-      case DifferentialTransaction::TYPE_ACTION:
+      case self::TYPE_ACTION:
         switch ($this->getNewValue()) {
           case DifferentialAction::ACTION_CLOSE:
             return pht('This revision is already closed.');
@@ -595,11 +592,9 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
               'You can not commandeer this revision because you already own '.
               'it.');
           case DifferentialAction::ACTION_ACCEPT:
-            return pht(
-              'You have already accepted this revision.');
+            return pht('You have already accepted this revision.');
           case DifferentialAction::ACTION_REJECT:
-            return pht(
-              'You have already requested changes to this revision.');
+            return pht('You have already requested changes to this revision.');
         }
         break;
     }

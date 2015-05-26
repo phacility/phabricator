@@ -197,10 +197,11 @@ final class PhabricatorOwnersEditController
           ->setName('auditing')
           ->setLabel(pht('Auditing'))
           ->setCaption(
-            pht('With auditing enabled, all future commits that touch '.
-                'this package will be reviewed to make sure an owner '.
-                'of the package is involved and the commit message has '.
-                'a valid revision, reviewed by, and author.'))
+            pht(
+              'With auditing enabled, all future commits that touch '.
+              'this package will be reviewed to make sure an owner '.
+              'of the package is involved and the commit message has '.
+              'a valid revision, reviewed by, and author.'))
           ->setOptions(array(
             'disabled'  => pht('Disabled'),
             'enabled'   => pht('Enabled'),
@@ -223,8 +224,9 @@ final class PhabricatorOwnersEditController
               ),
               pht('Add New Path')))
           ->setDescription(
-            pht('Specify the files and directories which comprise '.
-                'this package.'))
+            pht(
+              'Specify the files and directories which comprise '.
+              'this package.'))
           ->setContent(javelin_tag(
               'table',
               array(

@@ -3,6 +3,8 @@
 final class PhabricatorSearchController
   extends PhabricatorSearchBaseController {
 
+  const SCOPE_CURRENT_APPLICATION = 'application';
+
   private $queryKey;
 
   public function shouldAllowPublic() {
@@ -32,49 +34,66 @@ final class PhabricatorSearchController
     $engine = new PhabricatorSearchApplicationSearchEngine();
     $engine->setViewer($viewer);
 
-    // NOTE: This is a little weird. If we're coming from primary search, we
-    // load the user's first search filter and overwrite the "query" part of
-    // it, then send them to that result page. This is sort of odd, but lets
-    // users choose a default query like "Open Tasks" in a reasonable way,
-    // with only this piece of somewhat-sketchy code. See discussion in T4365.
-
+    // If we're coming from primary search, do some special handling to
+    // interpret the scope selector and query.
     if ($request->getBool('search:primary')) {
+
+      // If there's no query, just take the user to advanced search.
       if (!strlen($request->getStr('query'))) {
         $advanced_uri = '/search/query/advanced/';
         return id(new AphrontRedirectResponse())->setURI($advanced_uri);
       }
 
-      $named_queries = $engine->loadEnabledNamedQueries();
-      if ($named_queries) {
-        $named = head($named_queries);
+      // First, load or construct a template for the search by examining
+      // the current search scope.
+      $scope = $request->getStr('search:scope');
+      $saved = null;
 
-        $query_key = $named->getQueryKey();
-        $saved = null;
-        if ($engine->isBuiltinQuery($query_key)) {
-          $saved = $engine->buildSavedQueryFromBuiltin($query_key);
-        } else {
-          $saved = id(new PhabricatorSavedQueryQuery())
-            ->setViewer($viewer)
-            ->withQueryKeys(array($query_key))
-            ->executeOne();
-        }
-
-        if ($saved) {
-          $saved->setParameter('query', $request->getStr('query'));
-          $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-            try {
-              $saved->setID(null)->save();
-            } catch (AphrontDuplicateKeyQueryException $ex) {
-              // Ignore, this is just a repeated search.
-            }
-          unset($unguarded);
-
-          $results_uri = $engine->getQueryResultsPageURI(
-            $saved->getQueryKey()).'#R';
-
-          return id(new AphrontRedirectResponse())->setURI($results_uri);
+      if ($scope == self::SCOPE_CURRENT_APPLICATION) {
+        $application = id(new PhabricatorApplicationQuery())
+          ->setViewer($viewer)
+          ->withClasses(array($request->getStr('search:application')))
+          ->executeOne();
+        if ($application) {
+          $types = $application->getApplicationSearchDocumentTypes();
+          if ($types) {
+            $saved = id(new PhabricatorSavedQuery())
+              ->setEngineClassName(get_class($engine))
+              ->setParameter('types', $types)
+              ->setParameter('statuses', array('open'));
+          }
         }
       }
+
+      if (!$saved && !$engine->isBuiltinQuery($scope)) {
+        $saved = id(new PhabricatorSavedQueryQuery())
+          ->setViewer($viewer)
+          ->withQueryKeys(array($scope))
+          ->executeOne();
+      }
+
+      if (!$saved) {
+        if (!$engine->isBuiltinQuery($scope)) {
+          $scope = 'all';
+        }
+        $saved = $engine->buildSavedQueryFromBuiltin($scope);
+      }
+
+      // Add the user's query, then save this as a new saved query and send
+      // the user to the results page.
+      $saved->setParameter('query', $request->getStr('query'));
+
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        try {
+          $saved->setID(null)->save();
+        } catch (AphrontDuplicateKeyQueryException $ex) {
+          // Ignore, this is just a repeated search.
+        }
+      unset($unguarded);
+
+      $query_key = $saved->getQueryKey();
+      $results_uri = $engine->getQueryResultsPageURI($query_key).'#R';
+      return id(new AphrontRedirectResponse())->setURI($results_uri);
     }
 
     $controller = id(new PhabricatorApplicationSearchController())

@@ -21,7 +21,7 @@ To add new tests to a libphutil, Arcanist or Phabricator module:
   - Create a ##__tests__/## directory in the module if it doesn't exist yet.
   - Add classes to the ##__tests__/## directory which extend from
     @{class:PhabricatorTestCase} (in Phabricator) or
-    @{class@arcanist:ArcanistPhutilTestCase} (elsewhere).
+    @{class@arcanist:PhutilTestCase} (elsewhere).
   - Run ##arc liberate## on the library root so your classes are loadable.
 
 = Running Tests =
@@ -60,7 +60,7 @@ You can see this class at @{class:PhabricatorTrivialTestCase} and run it with:
    PASS   <1ms*  testAllIsRightWithTheWorld
 
 For more information on writing tests, see
-@{class@arcanist:ArcanistPhutilTestCase} and @{class:PhabricatorTestCase}.
+@{class@arcanist:PhutilTestCase} and @{class:PhabricatorTestCase}.
 
 = Database Isolation =
 

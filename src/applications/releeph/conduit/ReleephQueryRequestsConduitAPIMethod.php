@@ -8,8 +8,8 @@ final class ReleephQueryRequestsConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return
-      'Return information about all Releeph requests linked to the given ids.';
+    return pht(
+      'Return information about all Releeph requests linked to the given ids.');
   }
 
   protected function defineParamTypes() {

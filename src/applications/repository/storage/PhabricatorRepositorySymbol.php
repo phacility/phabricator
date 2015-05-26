@@ -8,7 +8,7 @@
  */
 final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
 
-  protected $arcanistProjectID;
+  protected $repositoryPHID;
   protected $symbolContext;
   protected $symbolName;
   protected $symbolType;
@@ -17,12 +17,10 @@ final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
   protected $lineNumber;
 
   private $path = self::ATTACHABLE;
-  private $arcanistProject = self::ATTACHABLE;
   private $repository = self::ATTACHABLE;
 
   protected function getConfiguration() {
     return array(
-      self::CONFIG_IDS => self::IDS_MANUAL,
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_COLUMN_SCHEMA => array(
         'id' => null,
@@ -42,13 +40,6 @@ final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
   }
 
   public function getURI() {
-    if (!$this->repository) {
-      // This symbol is in the index, but we don't know which Repository it's
-      // part of. Usually this means the Arcanist Project hasn't been linked
-      // to a Repository. We can't generate a URI, so just fail.
-      return null;
-    }
-
     $request = DiffusionRequest::newFromDictionary(
       array(
         'user' => PhabricatorUser::getOmnipotentUser(),
@@ -75,17 +66,8 @@ final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
     return $this->assertAttached($this->repository);
   }
 
-  public function attachRepository($repository) {
+  public function attachRepository(PhabricatorRepository $repository) {
     $this->repository = $repository;
-    return $this;
-  }
-
-  public function getArcanistProject() {
-    return $this->assertAttached($this->arcanistProject);
-  }
-
-  public function attachArcanistProject($project) {
-    $this->arcanistProject = $project;
     return $this;
   }
 

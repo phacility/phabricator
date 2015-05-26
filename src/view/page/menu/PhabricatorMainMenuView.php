@@ -72,6 +72,13 @@ final class PhabricatorMainMenuView extends AphrontView {
         phutil_implode_html(' ', $aural));
     }
 
+    $applications = PhabricatorApplication::getAllInstalledApplications();
+    foreach ($applications as $application) {
+      $menus[] = $application->buildMainMenuExtraNodes(
+        $user,
+        $this->getController());
+    }
+
     $application_menu = $this->renderApplicationMenu();
     $classes = array();
     $classes[] = 'phabricator-main-menu';
@@ -114,6 +121,16 @@ final class PhabricatorMainMenuView extends AphrontView {
     if ($show_search) {
       $search = new PhabricatorMainMenuSearchView();
       $search->setUser($user);
+
+      $application = null;
+      $controller = $this->getController();
+      if ($controller) {
+        $application = $controller->getCurrentApplication();
+      }
+      if ($application) {
+        $search->setApplication($application);
+      }
+
       $result = $search;
 
       $pref_shortcut = PhabricatorUserPreferences::PREFERENCE_SEARCH_SHORTCUT;
@@ -298,22 +315,20 @@ final class PhabricatorMainMenuView extends AphrontView {
     $container_classes = array('alert-notifications');
     $aural = array();
 
+    $dropdown_query = id(new AphlictDropdownDataQuery())
+      ->setViewer($user);
+    $dropdown_data = $dropdown_query->execute();
+
     $message_tag = '';
     $message_notification_dropdown = '';
-    $conpherence = 'PhabricatorConpherenceApplication';
-    if (PhabricatorApplication::isClassInstalledForViewer(
-      $conpherence,
-      $user)) {
+    $conpherence_app = 'PhabricatorConpherenceApplication';
+    $conpherence_data = $dropdown_data[$conpherence_app];
+    if ($conpherence_data['isInstalled']) {
       $message_id = celerity_generate_unique_node_id();
       $message_count_id = celerity_generate_unique_node_id();
       $message_dropdown_id = celerity_generate_unique_node_id();
 
-      $unread_status = ConpherenceParticipationStatus::BEHIND;
-      $unread = id(new ConpherenceParticipantCountQuery())
-        ->withParticipantPHIDs(array($user->getPHID()))
-        ->withParticipationStatus($unread_status)
-        ->execute();
-      $message_count_number = idx($unread, $user->getPHID(), 0);
+      $message_count_number = $conpherence_data['rawCount'];
 
       if ($message_count_number) {
         $aural[] = phutil_tag(
@@ -328,17 +343,13 @@ final class PhabricatorMainMenuView extends AphrontView {
         $aural[] = pht('No messages.');
       }
 
-      if ($message_count_number > 999) {
-        $message_count_number = "\xE2\x88\x9E";
-      }
-
       $message_count_tag = phutil_tag(
         'span',
         array(
           'id'    => $message_count_id,
           'class' => 'phabricator-main-menu-message-count',
         ),
-        $message_count_number);
+        $conpherence_data['count']);
 
       $message_icon_tag = javelin_tag(
         'span',
@@ -373,7 +384,7 @@ final class PhabricatorMainMenuView extends AphrontView {
           'dropdownID'  => $message_dropdown_id,
           'loadingText' => pht('Loading...'),
           'uri'         => '/conpherence/panel/',
-          'countType'   => 'messages',
+          'countType'   => $conpherence_data['countType'],
           'countNumber' => $message_count_number,
           'unreadClass' => 'message-unread',
         ));
@@ -392,15 +403,13 @@ final class PhabricatorMainMenuView extends AphrontView {
     $bubble_tag = '';
     $notification_dropdown = '';
     $notification_app = 'PhabricatorNotificationsApplication';
-    if (PhabricatorApplication::isClassInstalledForViewer(
-      $notification_app,
-      $user)) {
+    $notification_data = $dropdown_data[$notification_app];
+    if ($notification_data['isInstalled']) {
       $count_id = celerity_generate_unique_node_id();
       $dropdown_id = celerity_generate_unique_node_id();
       $bubble_id = celerity_generate_unique_node_id();
 
-      $count_number = id(new PhabricatorFeedStoryNotification())
-        ->countUnread($user);
+      $count_number = $notification_data['rawCount'];
 
       if ($count_number) {
         $aural[] = phutil_tag(
@@ -415,17 +424,13 @@ final class PhabricatorMainMenuView extends AphrontView {
         $aural[] = pht('No notifications.');
       }
 
-      if ($count_number > 999) {
-        $count_number = "\xE2\x88\x9E";
-      }
-
       $count_tag = phutil_tag(
         'span',
         array(
           'id'    => $count_id,
           'class' => 'phabricator-main-menu-alert-count',
         ),
-        $count_number);
+        $notification_data['count']);
 
       $icon_tag = javelin_tag(
         'span',
@@ -457,7 +462,7 @@ final class PhabricatorMainMenuView extends AphrontView {
           'dropdownID'  => $dropdown_id,
           'loadingText' => pht('Loading...'),
           'uri'         => '/notification/panel/',
-          'countType'   => 'notifications',
+          'countType'   => $notification_data['countType'],
           'countNumber' => $count_number,
           'unreadClass' => 'alert-unread',
         ));
@@ -477,13 +482,6 @@ final class PhabricatorMainMenuView extends AphrontView {
       $notification_dropdown,
       $message_notification_dropdown,
     );
-
-    $applications = PhabricatorApplication::getAllInstalledApplications();
-    foreach ($applications as $application) {
-      $dropdowns[] = $application->buildMainMenuExtraNodes(
-        $this->getUser(),
-        $this->getController());
-    }
 
     return array(
       array(

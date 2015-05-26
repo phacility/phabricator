@@ -1,6 +1,6 @@
 <?php
 
-echo "Updating old commit authors...\n";
+echo pht('Updating old commit authors...')."\n";
 $table = new PhabricatorRepositoryCommit();
 $table->openTransaction();
 
@@ -31,10 +31,10 @@ foreach ($commits as $commit) {
 }
 
 $table->saveTransaction();
-echo "Done.\n";
+echo pht('Done.')."\n";
 
 
-echo "Updating old commit mailKeys...\n";
+echo pht('Updating old commit %s...', 'mailKeys')."\n";
 $table->openTransaction();
 
 $commits = queryfx_all(
@@ -55,4 +55,4 @@ foreach ($commits as $commit) {
 }
 
 $table->saveTransaction();
-echo "Done.\n";
+echo pht('Done.')."\n";

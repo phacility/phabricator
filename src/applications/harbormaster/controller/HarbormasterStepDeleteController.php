@@ -22,7 +22,7 @@ final class HarbormasterStepDeleteController extends HarbormasterController {
       ->withIDs(array($id))
       ->executeOne();
     if ($step === null) {
-      throw new Exception('Build step not found!');
+      throw new Exception(pht('Build step not found!'));
     }
 
     $plan_id = $step->getBuildPlan()->getID();
@@ -43,8 +43,8 @@ final class HarbormasterStepDeleteController extends HarbormasterController {
         'p',
         array(),
         pht(
-          'Are you sure you want to delete this '.
-          'step? This can\'t be undone!')));
+          "Are you sure you want to delete this step? ".
+          "This can't be undone!")));
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 

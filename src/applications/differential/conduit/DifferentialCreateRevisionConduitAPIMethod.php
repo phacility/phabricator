@@ -27,7 +27,7 @@ final class DifferentialCreateRevisionConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_BAD_DIFF' => 'Bad diff ID.',
+      'ERR_BAD_DIFF' => pht('Bad diff ID.'),
     );
   }
 

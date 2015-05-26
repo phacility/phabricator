@@ -3,11 +3,11 @@
 final class PHUIActionPanelExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Action Panel';
+    return pht('Action Panel');
   }
 
   public function getDescription() {
-    return 'A panel with strong tendencies for inciting ACTION!';
+    return pht('A panel with strong tendencies for inciting ACTION!');
   }
 
   public function renderExample() {
@@ -30,7 +30,7 @@ final class PHUIActionPanelExample extends PhabricatorUIExample {
       ->setFontIcon('fa-server')
       ->setHeader(pht('Launch Instance'))
       ->setHref('#')
-      ->setSubHeader(pht('Maybe this is what you\'re likely here for.'))
+      ->setSubHeader(pht("Maybe this is what you're likely here for."))
       ->setStatus(pht('You have no instances.'))
       ->setState(PHUIActionPanelView::STATE_ERROR);
     $view->addColumn($panel2);

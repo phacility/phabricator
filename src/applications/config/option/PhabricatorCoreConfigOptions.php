@@ -58,9 +58,9 @@ final class PhabricatorCoreConfigOptions
             'Phabricator, and a production environment for deploying it), '.
             'set the production environment URI here so that emails and other '.
             'durable URIs will always generate with links pointing at the '.
-            'production environment. If unset, defaults to '.
-            '{{phabricator.base-uri}}. Most installs do not need to set '.
-            'this option.'))
+            'production environment. If unset, defaults to `%s`. Most '.
+            'installs do not need to set this option.',
+            'phabricator.base-uri'))
         ->addExample('http://phabricator.example.com/', pht('Valid Setting')),
       $this->newOption('phabricator.allowed-uris', 'list<string>', array())
         ->setLocked(true)
@@ -68,9 +68,9 @@ final class PhabricatorCoreConfigOptions
         ->setDescription(
           pht(
             "These alternative URIs will be able to access 'normal' pages ".
-              "on your Phabricator install. Other features such as OAuth ".
-              "won't work. The major use case for this is moving installs ".
-              "across domains."))
+            "on your Phabricator install. Other features such as OAuth ".
+            "won't work. The major use case for this is moving installs ".
+            "across domains."))
         ->addExample(
           "http://phabricator2.example.com/\n".
           "http://phabricator3.example.com/",
@@ -83,8 +83,9 @@ final class PhabricatorCoreConfigOptions
             "PHP requires that you set a timezone in your php.ini before ".
             "using date functions, or it will emit a warning. If this isn't ".
             "possible (for instance, because you are using HPHP) you can set ".
-            "some valid constant for date_default_timezone_set() here and ".
-            "Phabricator will set it on your behalf, silencing the warning."))
+            "some valid constant for %s here and Phabricator will set it on ".
+            "your behalf, silencing the warning.",
+            'date_default_timezone_set()'))
         ->addExample('America/New_York', pht('US East (EDT)'))
         ->addExample('America/Chicago', pht('US Central (CDT)'))
         ->addExample('America/Boise', pht('US Mountain (MDT)'))
@@ -92,14 +93,14 @@ final class PhabricatorCoreConfigOptions
       $this->newOption('phabricator.cookie-prefix', 'string', null)
         ->setLocked(true)
         ->setSummary(
-          pht('Set a string Phabricator should use to prefix '.
-              'cookie names.'))
+          pht(
+            'Set a string Phabricator should use to prefix cookie names.'))
         ->setDescription(
           pht(
             'Cookies set for x.com are also sent for y.x.com. Assuming '.
             'Phabricator instances are running on both domains, this will '.
             'create a collision preventing you from logging in.'))
-        ->addExample('dev', pht('Prefix cookie with "dev"')),
+        ->addExample('dev', pht('Prefix cookie with "%s"', 'dev')),
       $this->newOption('phabricator.show-prototypes', 'bool', false)
         ->setLocked(true)
         ->setBoolOptions(
@@ -155,22 +156,29 @@ final class PhabricatorCoreConfigOptions
             'linked.')),
       $this->newOption('environment.append-paths', 'list<string>', $paths)
         ->setSummary(
-          pht('These paths get appended to your \$PATH envrionment variable.'))
+          pht(
+            'These paths get appended to your %s environment variable.',
+            '$PATH'))
         ->setDescription(
           pht(
             "Phabricator occasionally shells out to other binaries on the ".
-            "server. An example of this is the `pygmentize` command, used ".
-            "to syntax-highlight code written in languages other than PHP. ".
-            "By default, it is assumed that these binaries are in the \$PATH ".
-            "of the user running Phabricator (normally 'apache', 'httpd', or ".
-            "'nobody'). Here you can add extra directories to the \$PATH ".
+            "server. An example of this is the `%s` command, used to ".
+            "syntax-highlight code written in languages other than PHP. By ".
+            "default, it is assumed that these binaries are in the %s of the ".
+            "user running Phabricator (normally 'apache', 'httpd', or ".
+            "'nobody'). Here you can add extra directories to the %s ".
             "environment variable, for when these binaries are in ".
             "non-standard locations.\n\n".
-            "Note that you can also put binaries in ".
-            "`phabricator/support/bin/` (for example, by symlinking them).\n\n".
+            "Note that you can also put binaries in `%s` (for example, by ".
+            "symlinking them).\n\n".
             "The current value of PATH after configuration is applied is:\n\n".
             "  lang=text\n".
-            "  %s", $path))
+            "  %s",
+            '$PATH',
+            '$PATH',
+            'phabricator/support/bin/',
+            $path,
+            'pygmentize'))
         ->setLocked(true)
         ->addExample('/usr/local/bin', pht('Add One Path'))
         ->addExample("/usr/bin\n/usr/local/bin", pht('Add Multiple Paths')),
@@ -200,7 +208,7 @@ final class PhabricatorCoreConfigOptions
             ),
             pht('Applications application'))))
         ->setDescription(
-          pht('Array containing list of Uninstalled applications.')),
+          pht('Array containing list of uninstalled applications.')),
       $this->newOption('phabricator.application-settings', 'wild', array())
         ->setLocked(true)
         ->setDescription(
@@ -261,7 +269,9 @@ final class PhabricatorCoreConfigOptions
         throw new PhabricatorConfigValidationException(
           pht(
             "Config option '%s' is invalid. The URI must start with ".
-            "'http://' or 'https://'.",
+            "%s' or '%s'.",
+            'http://',
+            'https://',
             $key));
       }
 
@@ -269,10 +279,12 @@ final class PhabricatorCoreConfigOptions
       if (strpos($domain, '.') === false) {
         throw new PhabricatorConfigValidationException(
           pht(
-            "Config option '%s' is invalid. The URI must contain a dot ('.'), ".
-            "like 'http://example.com/', not just a bare name like ".
-            "'http://example/'. Some web browsers will not set cookies on ".
-            "domains with no TLD.",
+            "Config option '%s' is invalid. The URI must contain a dot ".
+            "('%s'), like '%s', not just a bare name like '%s'. Some web ".
+            "browsers will not set cookies on domains with no TLD.",
+            '.',
+            'http://example.com/',
+            'http://example/',
             $key));
       }
 
@@ -281,11 +293,11 @@ final class PhabricatorCoreConfigOptions
         throw new PhabricatorConfigValidationException(
           pht(
             "Config option '%s' is invalid. The URI must NOT have a path, ".
-            "e.g. 'http://phabricator.example.com/' is OK, but ".
-            "'http://example.com/phabricator/' is not. Phabricator must be ".
-            "installed on an entire domain; it can not be installed on a ".
-            "path.",
-            $key));
+            "e.g. '%s' is OK, but '%s' is not. Phabricator must be installed ".
+            "on an entire domain; it can not be installed on a path.",
+            $key,
+            'http://phabricator.example.com/',
+            'http://example.com/phabricator/'));
       }
     }
 
@@ -299,16 +311,13 @@ final class PhabricatorCoreConfigOptions
         throw new PhabricatorConfigValidationException(
           pht(
             "Config option '%s' is invalid. The timezone identifier must ".
-            "be a valid timezone identifier recognized by PHP, like ".
-            "'America/Los_Angeles'. You can find a list of valid identifiers ".
-            "here: %s",
+            "be a valid timezone identifier recognized by PHP, like '%s'. "."
+            You can find a list of valid identifiers here: %s",
             $key,
+            'America/Los_Angeles',
             'http://php.net/manual/timezones.php'));
       }
     }
-
-
-
   }
 
 

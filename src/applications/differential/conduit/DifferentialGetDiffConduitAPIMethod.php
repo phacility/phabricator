@@ -17,13 +17,15 @@ final class DifferentialGetDiffConduitAPIMethod
 
   public function getMethodStatusDescription() {
     return pht(
-      'This method has been deprecated in favor of differential.querydiffs.');
+      'This method has been deprecated in favor of %s.',
+      'differential.querydiffs');
   }
 
 
   public function getMethodDescription() {
-    return pht('Load the content of a diff from Differential by revision id '.
-               'or diff id.');
+    return pht(
+      'Load the content of a diff from Differential by revision ID '.
+      'or diff ID.');
   }
 
   protected function defineParamTypes() {
@@ -39,7 +41,7 @@ final class DifferentialGetDiffConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_BAD_DIFF'        => 'No such diff exists.',
+      'ERR_BAD_DIFF' => pht('No such diff exists.'),
     );
   }
 
@@ -67,7 +69,6 @@ final class DifferentialGetDiffConduitAPIMethod
         ->setViewer($request->getUser())
         ->withIDs(array($diff_id))
         ->needChangesets(true)
-        ->needArcanistProjects(true)
         ->executeOne();
     }
 

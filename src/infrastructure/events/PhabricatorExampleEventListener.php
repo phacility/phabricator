@@ -21,8 +21,11 @@ final class PhabricatorExampleEventListener extends PhabricatorEventListener {
 
     $console = PhutilConsole::getConsole();
     $console->writeOut(
-      "PhabricatorExampleEventListener got test event at %d\n",
-      $event->getValue('time'));
+      "%s\n",
+      pht(
+        '%s got test event at %d',
+        __CLASS__,
+        $event->getValue('time')));
   }
 
 }
