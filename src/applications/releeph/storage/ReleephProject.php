@@ -35,6 +35,7 @@ final class ReleephProject extends ReleephDAO
         'name' => 'text128',
         'trunkBranch' => 'text255',
         'isActive' => 'bool',
+        'arcanistProjectID' => 'id?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'projectName' => array(
