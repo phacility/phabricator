@@ -174,31 +174,10 @@ final class PhabricatorApplicationSearchController
     // we sort out T5307.
 
     $form->appendChild($submit);
-    $filter_view = id(new AphrontListFilterView())->appendChild($form);
-
-    if ($run_query && $named_query) {
-      if ($named_query->getIsBuiltin()) {
-        $description = pht(
-          'Showing results for query "%s".',
-          $named_query->getQueryName());
-      } else {
-        $description = pht(
-          'Showing results for saved query "%s".',
-          $named_query->getQueryName());
-      }
-
-      $filter_view->setCollapsed(
-        pht('Edit Query...'),
-        pht('Hide Query'),
-        $description,
-        $this->getApplicationURI('query/advanced/?query='.$query_key));
-    }
 
     if ($this->getPreface()) {
       $nav->appendChild($this->getPreface());
     }
-
-    $nav->appendChild($filter_view);
 
     if ($named_query) {
       $title = $named_query->getQueryName();
@@ -207,9 +186,8 @@ final class PhabricatorApplicationSearchController
     }
 
     if ($run_query) {
-      $nav->appendChild(
-        $anchor = id(new PhabricatorAnchorView())
-          ->setAnchorName('R'));
+      $anchor = id(new PhabricatorAnchorView())
+        ->setAnchorName('R');
 
       try {
         $query = $engine->buildQueryFromSavedQuery($saved_query);
@@ -234,7 +212,14 @@ final class PhabricatorApplicationSearchController
         }
 
         $box = id(new PHUIObjectBoxView())
-          ->setHeaderText($title);
+          ->setHeaderText($title)
+          ->setAnchor($anchor);
+
+        $box->setShowHide(
+          pht('Edit Query'),
+          pht('Hide Query'),
+          $form,
+          $this->getApplicationURI('query/advanced/?query='.$query_key));
 
         if ($list instanceof AphrontTableView) {
           $box->setTable($list);
@@ -246,7 +231,6 @@ final class PhabricatorApplicationSearchController
         // TODO: This is a bit hacky.
         if ($list instanceof PHUIObjectItemListView) {
           $list->setNoDataString(pht('No results found for this query.'));
-          $list->setPager($pager);
         } else {
           if ($pager->willShowPagingControls()) {
             $pager_box = id(new PHUIBoxView())

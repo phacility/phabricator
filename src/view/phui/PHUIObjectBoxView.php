@@ -18,6 +18,12 @@ final class PHUIObjectBoxView extends AphrontView {
   private $objectList;
   private $table;
   private $collapsed = false;
+  private $anchor;
+
+  private $showAction;
+  private $hideAction;
+  private $showHideHref;
+  private $showHideContent;
 
   private $tabs = array();
   private $propertyLists = array();
@@ -162,6 +168,19 @@ final class PHUIObjectBoxView extends AphrontView {
     return $this;
   }
 
+  public function setAnchor(PhabricatorAnchorView $anchor) {
+    $this->anchor = $anchor;
+    return $this;
+  }
+
+  public function setShowHide($show, $hide, $content, $href) {
+    $this->showAction = $show;
+    $this->hideAction = $hide;
+    $this->showHideContent = $content;
+    $this->showHideHref = $href;
+    return $this;
+  }
+
   public function setValidationException(
     PhabricatorApplicationTransactionValidationException $ex = null) {
     $this->validationException = $ex;
@@ -177,6 +196,55 @@ final class PHUIObjectBoxView extends AphrontView {
       $header = id(new PHUIHeaderView())
         ->setHeader($this->headerText);
     }
+
+    $showhide = null;
+    if ($this->showAction !== null) {
+      Javelin::initBehavior('phabricator-reveal-content');
+
+      $hide_action_id = celerity_generate_unique_node_id();
+      $show_action_id = celerity_generate_unique_node_id();
+      $content_id = celerity_generate_unique_node_id();
+
+      $hide_action = id(new PHUIButtonView())
+        ->setTag('a')
+        ->addSigil('reveal-content')
+        ->setID($hide_action_id)
+        ->setHref($this->showHideHref)
+        ->setMetaData(
+          array(
+            'hideIDs' => array($hide_action_id),
+            'showIDs' => array($content_id, $show_action_id),
+          ))
+        ->setText($this->showAction);
+
+      $show_action = id(new PHUIButtonView())
+        ->setTag('a')
+        ->addSigil('reveal-content')
+        ->setStyle('display: none;')
+        ->setHref('#')
+        ->setID($show_action_id)
+        ->setMetaData(
+          array(
+            'hideIDs' => array($content_id, $show_action_id),
+            'showIDs' => array($hide_action_id),
+          ))
+        ->setText($this->hideAction);
+
+      $header->addActionLink($hide_action);
+      $header->addActionLink($show_action);
+
+      $showhide = array(
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'phui-object-box-hidden-content',
+            'id' => $content_id,
+            'style' => 'display: none;',
+          ),
+          $this->showHideContent),
+      );
+    }
+
 
     if ($this->actionListID) {
       $icon_id = celerity_generate_unique_node_id();
@@ -284,6 +352,7 @@ final class PHUIObjectBoxView extends AphrontView {
     $content = id(new PHUIBoxView())
       ->appendChild(
         array(
+          $this->anchor,
           $header,
           $this->infoView,
           $this->formErrors,
@@ -292,6 +361,7 @@ final class PHUIObjectBoxView extends AphrontView {
           $this->form,
           $tabs,
           $tab_lists,
+          $showhide,
           $property_lists,
           $this->table,
           $this->renderChildren(),

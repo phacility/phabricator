@@ -90,6 +90,12 @@ div.phui-object-box.phui-object-box-flush {
   border-bottom-color: {$lightred};
 }
 
+.phui-object-box-hidden-content {
+  background: {$lightgreybackground};
+  border-bottom: 1px solid {$thinblueborder};
+  margin-bottom: 4px;
+}
+
 /* - Double Object Box Override --------------------------------------------- */
 
 .phui-object-box .phui-object-box {
