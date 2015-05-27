@@ -49,7 +49,7 @@ final class PhabricatorRepositoryDiscoveryEngine
         $refs = $this->discoverGitCommits();
         break;
       default:
-        throw new Exception("Unknown VCS '{$vcs}'!");
+        throw new Exception(pht("Unknown VCS '%s'!", $vcs));
     }
 
     // Clear the working set cache.
@@ -571,7 +571,7 @@ final class PhabricatorRepositoryDiscoveryEngine
         $class = 'PhabricatorRepositoryMercurialCommitMessageParserWorker';
         break;
       default:
-        throw new Exception("Unknown repository type '{$vcs}'!");
+        throw new Exception(pht("Unknown repository type '%s'!", $vcs));
     }
 
     $data['commitID'] = $commit->getID();

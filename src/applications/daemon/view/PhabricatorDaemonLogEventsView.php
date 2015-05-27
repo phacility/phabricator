@@ -99,7 +99,7 @@ final class PhabricatorDaemonLogEventsView extends AphrontView {
             array(
               'href' => '/daemon/log/'.$event->getLogID().'/',
             ),
-            'Daemon '.$event->getLogID()));
+            pht('Daemon %s', $event->getLogID())));
       }
 
       $rows[] = $row;

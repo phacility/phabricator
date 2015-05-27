@@ -7,7 +7,7 @@ final class PhabricatorStorageManagementShellWorkflow
     $this
       ->setName('shell')
       ->setExamples('**shell** [__options__]')
-      ->setSynopsis('Launch an interactive shell.');
+      ->setSynopsis(pht('Launch an interactive shell.'));
   }
 
   public function execute(PhutilArgumentParser $args) {

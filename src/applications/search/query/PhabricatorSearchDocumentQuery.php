@@ -86,8 +86,7 @@ final class PhabricatorSearchDocumentQuery
   protected function getResultCursor($result) {
     throw new Exception(
       pht(
-        'This query does not support cursor paging; it must be offset '.
-        'paged.'));
+        'This query does not support cursor paging; it must be offset paged.'));
   }
 
   protected function nextPage(array $page) {

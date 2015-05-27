@@ -25,7 +25,7 @@ final class PhabricatorRepositoryListController
           ),
           pht('View in Diffusion'));
       } else {
-        $diffusion_link = phutil_tag('em', array(), 'Not Tracked');
+        $diffusion_link = phutil_tag('em', array(), pht('Not Tracked'));
       }
 
       $rows[] = array(
@@ -85,68 +85,6 @@ final class PhabricatorRepositoryListController
     $panel->setHeader($header);
     $panel->appendChild($table);
 
-    $projects = id(new PhabricatorRepositoryArcanistProject())->loadAll();
-
-    $rows = array();
-    foreach ($projects as $project) {
-      $repo = idx($repos, $project->getRepositoryID());
-      if ($repo) {
-        $repo_name = $repo->getName();
-      } else {
-        $repo_name = '-';
-      }
-
-      $rows[] = array(
-        $project->getName(),
-        $repo_name,
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/repository/project/edit/'.$project->getID().'/',
-            'class' => 'button grey small',
-          ),
-          pht('Edit')),
-        javelin_tag(
-          'a',
-          array(
-            'href' => '/repository/project/delete/'.$project->getID().'/',
-            'class' => 'button grey small',
-            'sigil' => 'workflow',
-          ),
-          pht('Delete')),
-      );
-
-    }
-
-    $project_table = new AphrontTableView($rows);
-    $project_table->setNoDataString(pht('No Arcanist Projects'));
-    $project_table->setHeaders(
-      array(
-        pht('Project ID'),
-        pht('Repository'),
-        '',
-        '',
-      ));
-    $project_table->setColumnClasses(
-      array(
-        '',
-        'wide',
-        'action',
-        'action',
-      ));
-
-    $project_table->setColumnVisibility(
-      array(
-        true,
-        true,
-        $is_admin,
-        $is_admin,
-      ));
-
-    $project_panel = new PHUIObjectBoxView();
-    $project_panel->setHeaderText(pht('Arcanist Projects'));
-    $project_panel->appendChild($project_table);
-
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Repository List'));
 
@@ -154,7 +92,6 @@ final class PhabricatorRepositoryListController
       array(
         $crumbs,
         $panel,
-        $project_panel,
       ),
       array(
         'title' => pht('Repository List'),

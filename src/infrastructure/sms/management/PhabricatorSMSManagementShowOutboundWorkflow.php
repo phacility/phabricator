@@ -6,7 +6,7 @@ final class PhabricatorSMSManagementShowOutboundWorkflow
   protected function didConstruct() {
     $this
       ->setName('show-outbound')
-      ->setSynopsis('Show diagnostic details about outbound sms.')
+      ->setSynopsis(pht('Show diagnostic details about outbound SMS.'))
       ->setExamples(
         '**show-outbound** --id 1 --id 2')
       ->setArguments(
@@ -14,7 +14,7 @@ final class PhabricatorSMSManagementShowOutboundWorkflow
           array(
             'name'    => 'id',
             'param'   => 'id',
-            'help'    => 'Show details about outbound sms with given ID.',
+            'help'    => pht('Show details about outbound SMS with given ID.'),
             'repeat'  => true,
           ),
         ));
@@ -26,7 +26,9 @@ final class PhabricatorSMSManagementShowOutboundWorkflow
     $ids = $args->getArg('id');
     if (!$ids) {
       throw new PhutilArgumentUsageException(
-        "Use the '--id' flag to specify one or more sms messages to show.");
+        pht(
+          "Use the '%s' flag to specify one or more SMS messages to show.",
+          '--id'));
     }
 
     $messages = id(new PhabricatorSMS())->loadAllWhere(
@@ -38,8 +40,9 @@ final class PhabricatorSMSManagementShowOutboundWorkflow
       $missing = array_diff_key($ids, $messages);
       if ($missing) {
         throw new PhutilArgumentUsageException(
-          'Some specified sms messages do not exist: '.
-          implode(', ', array_keys($missing)));
+          pht(
+            'Some specified SMS messages do not exist: %s',
+            implode(', ', array_keys($missing))));
       }
     }
 

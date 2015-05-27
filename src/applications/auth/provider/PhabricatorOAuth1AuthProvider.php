@@ -84,11 +84,11 @@ abstract class PhabricatorOAuth1AuthProvider
     $verifier = $request->getStr('oauth_verifier');
 
     if (!$token) {
-      throw new Exception("Expected 'oauth_token' in request!");
+      throw new Exception(pht("Expected '%s' in request!", 'oauth_token'));
     }
 
     if (!$verifier) {
-      throw new Exception("Expected 'oauth_verifier' in request!");
+      throw new Exception(pht("Expected '%s' in request!", 'oauth_verifier'));
     }
 
     $adapter->setToken($token);

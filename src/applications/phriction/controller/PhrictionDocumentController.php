@@ -146,7 +146,7 @@ final class PhrictionDocumentController
 
         $core_content = $notice->render();
       } else {
-        throw new Exception("Unknown document status '{$doc_status}'!");
+        throw new Exception(pht("Unknown document status '%s'!", $doc_status));
       }
 
       $move_notice = null;

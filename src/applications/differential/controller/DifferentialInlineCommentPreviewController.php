@@ -19,6 +19,7 @@ extends PhabricatorInlineCommentPreviewController {
       ->withDrafts(true)
       ->withAuthorPHIDs(array($viewer->getPHID()))
       ->withRevisionPHIDs(array($revision->getPHID()))
+      ->needHidden(true)
       ->execute();
   }
 

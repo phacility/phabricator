@@ -1,6 +1,6 @@
 <?php
 
-// Switch PhabricatorWorkerActiveTask from autoincrement IDs to counter IDs.
+// Switch PhabricatorWorkerActiveTask from auto-increment IDs to counter IDs.
 // Set the initial counter ID to be larger than any known task ID.
 
 $active_table = new PhabricatorWorkerActiveTask();

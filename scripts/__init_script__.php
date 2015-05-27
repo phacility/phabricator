@@ -11,7 +11,7 @@ function init_phabricator_script() {
   @include_once 'libphutil/scripts/__init_script__.php';
   if (!@constant('__LIBPHUTIL__')) {
     echo "ERROR: Unable to load libphutil. Update your PHP 'include_path' to ".
-         "include the parent directory of libphutil/.\n";
+      "include the parent directory of libphutil/.\n";
     exit(1);
   }
 

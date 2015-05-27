@@ -906,11 +906,10 @@ final class DifferentialChangesetParser {
         $shield = $renderer->renderShield(
           pht('This file was completely deleted.'));
       } else if ($this->changeset->getAffectedLineCount() > 2500) {
-        $lines = number_format($this->changeset->getAffectedLineCount());
         $shield = $renderer->renderShield(
           pht(
             'This file has a very large number of changes (%s lines).',
-            $lines));
+            new PhutilNumber($this->changeset->getAffectedLineCount())));
       }
     }
 
@@ -1154,10 +1153,11 @@ final class DifferentialChangesetParser {
    *
    * @return array($gaps, $mask, $depths)
    */
-  private function calculateGapsMaskAndDepths($mask_force,
-                                              $feedback_mask,
-                                              $range_start,
-                                              $range_len) {
+  private function calculateGapsMaskAndDepths(
+    $mask_force,
+    $feedback_mask,
+    $range_start,
+    $range_len) {
 
     // Calculate gaps and mask first
     $gaps = array();
@@ -1263,7 +1263,7 @@ final class DifferentialChangesetParser {
     PhabricatorInlineCommentInterface $comment) {
 
     if (!$this->isCommentVisibleOnRenderedDiff($comment)) {
-      throw new Exception('Comment is not visible on changeset!');
+      throw new Exception(pht('Comment is not visible on changeset!'));
     }
 
     $changeset_id = $comment->getChangesetID();

@@ -27,7 +27,10 @@ final class LiskDAOSet {
 
   public function addToSet(LiskDAO $dao) {
     if ($this->relatives) {
-      throw new Exception("Don't call addToSet() after loading data!");
+      throw new Exception(
+        pht(
+          "Don't call %s after loading data!",
+          __FUNCTION__.'()'));
     }
     $this->daos[] = $dao;
     $dao->putInSet($this);

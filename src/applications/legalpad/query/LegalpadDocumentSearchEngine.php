@@ -108,7 +108,6 @@ final class LegalpadDocumentSearchEngine
       pht('Created After'),
       'createdEnd',
       pht('Created Before'));
-
   }
 
   protected function getURI($path) {

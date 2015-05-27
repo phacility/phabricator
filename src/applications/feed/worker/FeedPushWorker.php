@@ -13,7 +13,7 @@ abstract class FeedPushWorker extends PhabricatorWorker {
 
     if (!$story) {
       throw new PhabricatorWorkerPermanentFailureException(
-        'Feed story does not exist.');
+        pht('Feed story does not exist.'));
     }
 
     return $story;

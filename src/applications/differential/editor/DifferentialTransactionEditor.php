@@ -908,8 +908,7 @@ final class DifferentialTransactionEditor
 
       case DifferentialAction::ACTION_REJECT:
         if ($actor_is_author) {
-          return pht(
-            'You can not request changes to your own revision.');
+          return pht('You can not request changes to your own revision.');
         }
 
         if ($revision_status == $status_abandoned) {
@@ -1484,13 +1483,14 @@ final class DifferentialTransactionEditor
           $nested_comments = $this->nestCommentHistory(
             $inline->getComment(), $comments_by_line_number, $authors_by_phid);
 
-          $section->addFragment('================')
-                  ->addFragment('Comment at: '.$file.':'.$range)
-                  ->addPlaintextFragment($patch)
-                  ->addHTMLFragment($this->renderPatchHTMLForMail($patch))
-                  ->addFragment('----------------')
-                  ->addFragment($nested_comments)
-                  ->addFragment(null);
+          $section
+            ->addFragment('================')
+            ->addFragment(pht('Comment at: %s:%s', $file, $range))
+            ->addPlaintextFragment($patch)
+            ->addHTMLFragment($this->renderPatchHTMLForMail($patch))
+            ->addFragment('----------------')
+            ->addFragment($nested_comments)
+            ->addFragment(null);
         }
       }
     }
@@ -1569,8 +1569,7 @@ final class DifferentialTransactionEditor
       ->executeOne();
     if (!$revision) {
       throw new Exception(
-        pht(
-          'Failed to load revision for Herald adapter construction!'));
+        pht('Failed to load revision for Herald adapter construction!'));
     }
 
     $adapter = HeraldDifferentialRevisionAdapter::newLegacyAdapter(

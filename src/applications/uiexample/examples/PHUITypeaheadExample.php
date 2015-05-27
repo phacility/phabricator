@@ -3,7 +3,7 @@
 final class PHUITypeaheadExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Typeaheads';
+    return pht('Typeaheads');
   }
 
   public function getDescription() {
@@ -50,7 +50,7 @@ final class PHUITypeaheadExample extends PhabricatorUIExample {
     $output = array();
 
     $output[] = id(new PHUIObjectBoxView())
-      ->setHeaderText('Tokens')
+      ->setHeaderText(pht('Tokens'))
       ->appendChild($token_list);
 
     return $output;

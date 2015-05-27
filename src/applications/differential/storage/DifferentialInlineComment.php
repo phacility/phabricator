@@ -24,6 +24,7 @@ final class DifferentialInlineComment
       ->setViewPolicy('public')
       ->setEditPolicy($this->getAuthorPHID())
       ->setContentSource($content_source)
+      ->attachIsHidden(false)
       ->setCommentVersion(1);
 
     return $this->proxy;
@@ -47,6 +48,14 @@ final class DifferentialInlineComment
     $this->proxy->delete();
 
     return $this;
+  }
+
+  public function supportsHiding() {
+    return true;
+  }
+
+  public function isHidden() {
+    return $this->proxy->getIsHidden();
   }
 
   public function getID() {

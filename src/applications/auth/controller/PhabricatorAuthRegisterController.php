@@ -560,8 +560,7 @@ final class PhabricatorAuthRegisterController
       return array($account, $provider, $response);
     } else if (count($providers) > 1) {
       $response = $this->renderError(
-        pht(
-          'There are too many configured default registration providers.'));
+        pht('There are too many configured default registration providers.'));
       return array($account, $provider, $response);
     }
 

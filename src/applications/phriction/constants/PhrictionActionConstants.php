@@ -9,15 +9,15 @@ final class PhrictionActionConstants extends PhrictionConstants {
   const ACTION_MOVE_HERE = 'move here';
 
   public static function getActionPastTenseVerb($action) {
-    static $map = array(
-      self::ACTION_CREATE   => 'created',
-      self::ACTION_EDIT     => 'edited',
-      self::ACTION_DELETE   => 'deleted',
-      self::ACTION_MOVE_AWAY => 'moved',
-      self::ACTION_MOVE_HERE => 'moved',
+    $map = array(
+      self::ACTION_CREATE   => pht('created'),
+      self::ACTION_EDIT     => pht('edited'),
+      self::ACTION_DELETE   => pht('deleted'),
+      self::ACTION_MOVE_AWAY => pht('moved'),
+      self::ACTION_MOVE_HERE => pht('moved'),
     );
 
-    return idx($map, $action, "brazenly {$action}'d");
+    return idx($map, $action, pht("brazenly %s'd", $action));
   }
 
 }

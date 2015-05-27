@@ -208,7 +208,7 @@ final class ConpherenceUpdateController
           $response_mode = 'ajax';
           break;
         default:
-          throw new Exception('Unknown action: '.$action);
+          throw new Exception(pht('Unknown action: %s', $action));
           break;
       }
 

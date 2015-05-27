@@ -67,7 +67,7 @@ final class DarkConsoleErrorLogPluginAPI {
         );
         break;
       default:
-        error_log('Unknown event : '.$event);
+        error_log(pht('Unknown event: %s', $event));
         break;
     }
   }

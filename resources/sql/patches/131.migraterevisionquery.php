@@ -5,7 +5,7 @@ $table->openTransaction();
 $table->beginReadLocking();
 $conn_w = $table->establishConnection('w');
 
-echo 'Migrating revisions';
+echo pht('Migrating revisions')."\n";
 do {
   $revisions = $table->loadAllWhere('branchName IS NULL LIMIT 1000');
 
@@ -32,4 +32,4 @@ do {
 
 $table->endReadLocking();
 $table->saveTransaction();
-echo "\nDone.\n";
+echo "\n".pht('Done.')."\n";

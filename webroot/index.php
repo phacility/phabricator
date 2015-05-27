@@ -31,7 +31,6 @@ try {
       throw $ex;
     }
   }
-
 } catch (Exception $ex) {
   PhabricatorStartup::didEncounterFatalException('Core Exception', $ex, false);
 }

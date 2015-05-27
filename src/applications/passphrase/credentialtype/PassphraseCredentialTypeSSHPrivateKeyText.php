@@ -45,9 +45,11 @@ final class PassphraseCredentialTypeSSHPrivateKeyText
     if (!Filesystem::binaryExists('ssh-keygen')) {
       throw new Exception(
         pht(
-          'Decrypting SSH keys requires the `ssh-keygen` binary, but it '.
-          'is not available in PATH. Either make it available or strip the '.
-          'password fromt his SSH key manually before uploading it.'));
+          'Decrypting SSH keys requires the `%s` binary, but it '.
+          'is not available in %s. Either make it available or strip the '.
+          'password fromt his SSH key manually before uploading it.',
+          'ssh-keygen',
+          '$PATH'));
     }
 
     list($err, $stdout, $stderr) = exec_manual(

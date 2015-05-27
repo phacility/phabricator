@@ -12,7 +12,7 @@ final class PhabricatorTime {
 
     $ok = date_default_timezone_set($timezone);
     if (!$ok) {
-      throw new Exception("Invalid timezone '{$timezone}'!");
+      throw new Exception(pht("Invalid timezone '%s'!", $timezone));
     }
 
     self::$stack[] = array(
@@ -70,6 +70,12 @@ final class PhabricatorTime {
     $day = $today->format('d');
     $today = new DateTime("{$year}-{$month}-{$day}", $timezone);
     return $today;
+  }
+
+  public static function getDateTimeFromEpoch($epoch, PhabricatorUser $viewer) {
+    $datetime = new DateTime('@'.$epoch);
+    $datetime->setTimeZone($viewer->getTimeZone());
+    return $datetime;
   }
 
 }

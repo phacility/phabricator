@@ -317,9 +317,10 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       ->setUnitStatus(DifferentialUnitStatus::UNIT_AUTO_SKIP)
       ->setDateCreated($this->commit->getEpoch())
       ->setDescription(
-        'Commit r'.
-        $this->repository->getCallsign().
-        $this->commit->getCommitIdentifier());
+        pht(
+          'Commit %s',
+          'r'.$this->repository->getCallsign().
+          $this->commit->getCommitIdentifier()));
 
     $parents = DiffusionQuery::callConduitWithDiffusionRequest(
       $viewer,

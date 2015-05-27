@@ -56,7 +56,7 @@ final class LegalpadDocumentBody extends LegalpadDAO
         $text = $this->getTitle();
         break;
       default:
-        throw new Exception('Unknown field: '.$field);
+        throw new Exception(pht('Unknown field: %s', $field));
         break;
     }
 

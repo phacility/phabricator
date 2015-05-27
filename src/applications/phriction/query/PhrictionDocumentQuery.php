@@ -271,7 +271,7 @@ final class PhrictionDocumentQuery
       case self::STATUS_ANY:
         break;
       default:
-        throw new Exception("Unknown status '{$this->status}'!");
+        throw new Exception(pht("Unknown status '%s'!", $this->status));
     }
 
     $where[] = $this->buildPagingClause($conn);

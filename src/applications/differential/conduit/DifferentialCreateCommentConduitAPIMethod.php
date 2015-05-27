@@ -27,7 +27,7 @@ final class DifferentialCreateCommentConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_BAD_REVISION' => 'Bad revision ID.',
+      'ERR_BAD_REVISION' => pht('Bad revision ID.'),
     );
   }
 

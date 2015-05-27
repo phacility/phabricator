@@ -6,7 +6,7 @@ final class PhabricatorMailManagementListOutboundWorkflow
   protected function didConstruct() {
     $this
       ->setName('list-outbound')
-      ->setSynopsis('List outbound messages sent by Phabricator.')
+      ->setSynopsis(pht('List outbound messages sent by Phabricator.'))
       ->setExamples(
         '**list-outbound**')
       ->setArguments(
@@ -15,7 +15,8 @@ final class PhabricatorMailManagementListOutboundWorkflow
             'name'    => 'limit',
             'param'   => 'N',
             'default' => 100,
-            'help'    => 'Show a specific number of messages (default 100).',
+            'help'    => pht(
+              'Show a specific number of messages (default 100).'),
           ),
         ));
   }
@@ -35,9 +36,9 @@ final class PhabricatorMailManagementListOutboundWorkflow
 
     $table = id(new PhutilConsoleTable())
       ->setShowHeader(false)
-      ->addColumn('id',      array('title' => 'ID'))
-      ->addColumn('status',  array('title' => 'Status'))
-      ->addColumn('subject', array('title' => 'Subject'));
+      ->addColumn('id',      array('title' => pht('ID')))
+      ->addColumn('status',  array('title' => pht('Status')))
+      ->addColumn('subject', array('title' => pht('Subject')));
 
     foreach (array_reverse($mails) as $mail) {
       $status = $mail->getStatus();

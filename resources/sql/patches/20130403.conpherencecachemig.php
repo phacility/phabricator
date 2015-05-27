@@ -1,6 +1,7 @@
 <?php
 
-echo "Migrating data from conpherence transactions to conpherence 'cache'...\n";
+echo pht(
+  "Migrating data from conpherence transactions to conpherence 'cache'...\n");
 
 $table = new ConpherenceThread();
 $table->openTransaction();
@@ -10,7 +11,7 @@ $participant_table = new ConpherenceParticipant();
 
 $conpherences = new LiskMigrationIterator($table);
 foreach ($conpherences as $conpherence) {
-  echo 'Migrating conpherence #'.$conpherence->getID()."\n";
+  echo pht('Migrating conpherence #%d', $conpherence->getID())."\n";
 
   $participants = id(new ConpherenceParticipant())
     ->loadAllWhere('conpherencePHID = %s', $conpherence->getPHID());
@@ -61,4 +62,4 @@ foreach ($conpherences as $conpherence) {
 }
 
 $table->saveTransaction();
-echo "\nDone.\n";
+echo "\n".pht('Done.')."\n";

@@ -38,7 +38,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     if (!$diffs) {
       throw new Exception(
-        'This revision has no diffs. Something has gone quite wrong.');
+        pht('This revision has no diffs. Something has gone quite wrong.'));
     }
 
     $revision->attachActiveDiff(last($diffs));
@@ -151,7 +151,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     if (count($changesets) > $limit && !$large) {
       $count = count($changesets);
       $warning = new PHUIInfoView();
-      $warning->setTitle('Very Large Diff');
+      $warning->setTitle(pht('Very Large Diff'));
       $warning->setSeverity(PHUIInfoView::SEVERITY_WARNING);
       $warning->appendChild(hsprintf(
         '%s <strong>%s</strong>',
@@ -175,6 +175,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
       $query = id(new DifferentialInlineCommentQuery())
         ->setViewer($user)
+        ->needHidden(true)
         ->withRevisionPHIDs(array($revision->getPHID()));
       $inlines = $query->execute();
       $inlines = $query->adjustInlinesForChangesets(
@@ -261,12 +262,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $repository = $revision->getRepository();
     if ($repository) {
-      list($symbol_indexes, $repository_phids) = $this->buildSymbolIndexes(
+      $symbol_indexes = $this->buildSymbolIndexes(
         $repository,
         $visible_changesets);
     } else {
       $symbol_indexes = array();
-      $repository_phids = null;
     }
 
     $revision_detail->setActions($actions);
@@ -306,15 +306,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ),
       $comment_view);
 
-    if ($repository) {
-      Javelin::initBehavior(
-        'repository-crossreference',
-        array(
-          'section' => $wrap_id,
-          'repositories' => $repository_phids,
-        ));
-    }
-
     $changeset_view = new DifferentialChangesetListView();
     $changeset_view->setChangesets($changesets);
     $changeset_view->setVisibleChangesets($visible_changesets);
@@ -338,7 +329,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $changeset_view->setRepository($repository);
     }
     $changeset_view->setSymbolIndexes($symbol_indexes);
-    $changeset_view->setTitle('Diff '.$target->getID());
+    $changeset_view->setTitle(pht('Diff %s', $target->getID()));
 
     $diff_history = id(new DifferentialRevisionUpdateHistoryView())
       ->setUser($user)
@@ -758,11 +749,22 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $langs = $repository->getSymbolLanguages();
     $langs = nonempty($langs, array());
 
+    $sources = $repository->getSymbolSources();
+    $sources = nonempty($sources, array());
+
     $symbol_indexes = array();
+
+    if ($langs && $sources) {
+      $have_symbols = id(new DiffusionSymbolQuery())
+          ->existsSymbolsInRepository($repository->getPHID());
+      if (!$have_symbols) {
+        return $symbol_indexes;
+      }
+    }
 
     $repository_phids = array_merge(
       array($repository->getPHID()),
-      nonempty($repository->getSymbolSources(), array()));
+      $sources);
 
     $indexed_langs = array_fill_keys($langs, true);
     foreach ($visible_changesets as $key => $changeset) {
@@ -775,7 +777,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       }
     }
 
-    return array($symbol_indexes, $repository_phids);
+    return $symbol_indexes;
   }
 
   private function loadOtherRevisions(

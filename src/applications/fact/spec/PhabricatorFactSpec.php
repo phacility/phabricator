@@ -33,8 +33,9 @@ abstract class PhabricatorFactSpec {
   }
 
   public function getName() {
-    $type = $this->getType();
-    return "Fact ({$type})";
+    return pht(
+      'Fact (%s)',
+      $this->getType());
   }
 
   public function formatValueForDisplay(PhabricatorUser $user, $value) {

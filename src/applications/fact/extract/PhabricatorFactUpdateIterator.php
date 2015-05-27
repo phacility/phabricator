@@ -2,7 +2,7 @@
 
 /**
  * Iterate over objects by update time in a stable way. This iterator only works
- * for "normal" Lisk objects: objects with an autoincrement ID and a
+ * for "normal" Lisk objects: objects with an auto-increment ID and a
  * dateModified column.
  */
 final class PhabricatorFactUpdateIterator extends PhutilBufferedIterator {

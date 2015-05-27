@@ -136,9 +136,9 @@ final class PhabricatorEmbedFileRemarkupRule
         'class'       => $image_class,
         'sigil'       => 'lightboxable',
         'meta'        => array(
-          'phid' => $file->getPHID(),
-          'uri' => $file->getBestURI(),
-          'dUri' => $file->getDownloadURI(),
+          'phid'     => $file->getPHID(),
+          'uri'      => $file->getBestURI(),
+          'dUri'     => $file->getDownloadURI(),
           'viewable' => true,
         ),
       ),

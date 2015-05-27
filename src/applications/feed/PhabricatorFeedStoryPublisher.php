@@ -74,21 +74,29 @@ final class PhabricatorFeedStoryPublisher {
   public function publish() {
     $class = $this->storyType;
     if (!$class) {
-      throw new Exception('Call setStoryType() before publishing!');
+      throw new Exception(
+        pht(
+          'Call %s before publishing!',
+          'setStoryType()'));
     }
 
     if (!class_exists($class)) {
       throw new Exception(
-        "Story type must be a valid class name and must subclass ".
-        "PhabricatorFeedStory. ".
-        "'{$class}' is not a loadable class.");
+        pht(
+          "Story type must be a valid class name and must subclass %s. ".
+          "'%s' is not a loadable class.",
+          'PhabricatorFeedStory',
+          $class));
     }
 
     if (!is_subclass_of($class, 'PhabricatorFeedStory')) {
       throw new Exception(
-        "Story type must be a valid class name and must subclass ".
-        "PhabricatorFeedStory. ".
-        "'{$class}' is not a subclass of PhabricatorFeedStory.");
+        pht(
+          "Story type must be a valid class name and must subclass %s. ".
+          "'%s' is not a subclass of %s.",
+          'PhabricatorFeedStory',
+          $class,
+          'PhabricatorFeedStory'));
     }
 
     $chrono_key = $this->generateChronologicalKey();
@@ -139,7 +147,10 @@ final class PhabricatorFeedStoryPublisher {
   private function insertNotifications($chrono_key, array $subscribed_phids) {
     if (!$this->primaryObjectPHID) {
       throw new Exception(
-        'You must call setPrimaryObjectPHID() if you setSubscribedPHIDs()!');
+        pht(
+          'You must call %s if you %s!',
+          'setPrimaryObjectPHID()',
+          'setSubscribedPHIDs()'));
     }
 
     $notif = new PhabricatorFeedStoryNotification();

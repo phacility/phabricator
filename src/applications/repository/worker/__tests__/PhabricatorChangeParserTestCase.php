@@ -1138,7 +1138,7 @@ final class PhabricatorChangeParserTestCase
 
     $this->assertTrue(
       isset($commits['2']),
-      'Expect rCHE2 to exist as a foreign stub.');
+      pht('Expect %s to exist as a foreign stub.', 'rCHE2'));
 
     // The foreign stub should be marked imported.
 

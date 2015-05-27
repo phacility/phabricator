@@ -265,8 +265,7 @@ abstract class DifferentialChangesetHTMLRenderer
             'This file was converted from %s for display.',
             phutil_tag('strong', array(), $encoding));
         } else {
-          $messages[] = pht(
-            'This file uses an unknown character encoding.');
+          $messages[] = pht('This file uses an unknown character encoding.');
         }
       }
     }
@@ -371,7 +370,11 @@ abstract class DifferentialChangesetHTMLRenderer
         $force !== 'whitespace' &&
         $force !== 'none' &&
         $force !== 'default') {
-      throw new Exception("Invalid 'force' parameter '{$force}'!");
+      throw new Exception(
+        pht(
+          "Invalid '%s' parameter '%s'!",
+          'force',
+          $force));
     }
 
     $range = "0-{$end}";
@@ -516,7 +519,7 @@ abstract class DifferentialChangesetHTMLRenderer
       if ($is_last_block) {
         $text = pht('Show Last %d Line(s)', $block_size);
       } else {
-        $text = pht("\xE2\x96\xBC Show %d Line(s)", $block_size);
+        $text = "\xE2\x96\xBC ".pht('Show %d Line(s)', $block_size);
       }
 
       $links[] = $this->renderShowContextLink(

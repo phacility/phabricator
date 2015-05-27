@@ -93,25 +93,21 @@ final class PhabricatorTypeaheadFunctionHelpController
 
     $content[] = '= '.pht('Using Typeahead Functions');
     $content[] = pht(
-      'In addition to typing user and project names to build queries, you can '.
-      'also type the names of special functions which give you more options '.
-      'and the ability to express more complex queries.'.
-      "\n\n".
-      'Functions have an internal name (like `viewer()`) and a '.
-      'human-readable name, like `Current Viewer`. In general, you can type '.
-      'either one to select the function. You can also click the '.
-      '{nav icon=search} button on any typeahead control to browse available '.
-      'functions and find this documentation.'.
-      "\n\n".
-      'This documentation uses the internal names to make it clear where '.
-      'tokens begin and end. Specifically, you will find queries written '.
-      'out like this in the documentation: '.
-      "\n\n".
-      '> viewer(), alincoln'.
-      "\n\n".
-      'When this query is actually shown in the control, it will look more '.
-      'like this:'.
-      "\n\n".
+      "In addition to typing user and project names to build queries, you can ".
+      "also type the names of special functions which give you more options ".
+      "and the ability to express more complex queries.\n\n".
+      "Functions have an internal name (like `%s`) and a human-readable name, ".
+      "like `Current Viewer`. In general, you can type either one to select ".
+      "the function. You can also click the {nav icon=search} button on any ".
+      "typeahead control to browse available functions and find this ".
+      "documentation.\n\n".
+      "This documentation uses the internal names to make it clear where ".
+      "tokens begin and end. Specifically, you will find queries written ".
+      "out like this in the documentation:\n\n%s\n\n".
+      "When this query is actually shown in the control, it will look more ".
+      "like this:\n\n%s",
+      'viewer()',
+      '> viewer(), alincoln',
       '> {nav Current Viewer} {nav alincoln (Abraham Lincoln)}');
 
 

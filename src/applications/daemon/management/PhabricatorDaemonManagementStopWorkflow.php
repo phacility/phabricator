@@ -9,7 +9,8 @@ final class PhabricatorDaemonManagementStopWorkflow
       ->setSynopsis(
         pht(
           'Stop all running daemons, or specific daemons identified by PIDs. '.
-          'Use **phd status** to find PIDs.'))
+          'Use **%s** to find PIDs.',
+          'phd status'))
       ->setArguments(
         array(
           array(

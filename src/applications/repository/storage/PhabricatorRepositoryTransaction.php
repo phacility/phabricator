@@ -27,6 +27,7 @@ final class PhabricatorRepositoryTransaction
   const TYPE_SERVICE = 'repo:service';
   const TYPE_SYMBOLS_SOURCES = 'repo:symbol-source';
   const TYPE_SYMBOLS_LANGUAGE = 'repo:symbol-language';
+  const TYPE_STAGING_URI = 'repo:staging-uri';
 
   // TODO: Clean up these legacy transaction types.
   const TYPE_SSH_LOGIN = 'repo:ssh-login';
@@ -412,9 +413,29 @@ final class PhabricatorRepositoryTransaction
 
       case self::TYPE_SYMBOLS_LANGUAGE:
         return pht('%s changed indexed languages from %s to %s.',
+          $this->renderHandleLink($author_phid),
+          $old ? implode(', ', $old) : pht('Any'),
+          $new ? implode(', ', $new) : pht('Any'));
+
+      case self::TYPE_STAGING_URI:
+        if (!$old) {
+          return pht(
+            '%s set "%s" as the staging area for this repository.',
             $this->renderHandleLink($author_phid),
-            $old ? implode(', ', $old) : pht('Any'),
-            $new ? implode(', ', $new) : pht('Any'));
+            $new);
+        } else if (!$new) {
+          return pht(
+            '%s removed "%s" as the staging area for this repository.',
+            $this->renderHandleLink($author_phid),
+            $old);
+        } else {
+          return pht(
+            '%s changed the staging area for this repository from '.
+            '"%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $old,
+            $new);
+        }
     }
 
     return parent::getTitle();

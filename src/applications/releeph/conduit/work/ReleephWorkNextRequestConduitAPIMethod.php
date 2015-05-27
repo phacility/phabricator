@@ -15,9 +15,9 @@ final class ReleephWorkNextRequestConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return
-      'Return info required to cut a branch, '.
-      'and pick and revert ReleephRequests';
+    return pht(
+      'Return info required to cut a branch, and pick and revert %s.',
+      'ReleephRequests');
   }
 
   protected function defineParamTypes() {
@@ -33,8 +33,8 @@ final class ReleephWorkNextRequestConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR-NOT-PUSHER' =>
-        'You are not listed as a pusher for thie Releeph project!',
+      'ERR-NOT-PUSHER' => pht(
+        'You are not listed as a pusher for the Releeph project!'),
     );
   }
 

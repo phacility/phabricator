@@ -3,15 +3,14 @@
 final class PHUIInfoPanelExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Info Panel';
+    return pht('Info Panel');
   }
 
   public function getDescription() {
-    return 'A medium sized box with bits of gooey information.';
+    return pht('A medium sized box with bits of gooey information.');
   }
 
   public function renderExample() {
-
     $header1 = id(new PHUIHeaderView())
       ->setHeader(pht('Conpherence'));
 
@@ -42,60 +41,60 @@ final class PHUIInfoPanelExample extends PhabricatorUIExample {
     $column1 = id(new PHUIInfoPanelView())
       ->setHeader($header1)
       ->setColumns(3)
-      ->addInfoBlock(3, 'Needs Triage')
-      ->addInfoBlock(5, 'Unbreak Now')
-      ->addInfoBlock(0, 'High')
-      ->addInfoBlock(0, 'Normal')
-      ->addInfoBlock(12, 'Low')
-      ->addInfoBlock(123, 'Wishlist');
+      ->addInfoBlock(3, pht('Needs Triage'))
+      ->addInfoBlock(5, pht('Unbreak Now'))
+      ->addInfoBlock(0, pht('High'))
+      ->addInfoBlock(0, pht('Normal'))
+      ->addInfoBlock(12, pht('Low'))
+      ->addInfoBlock(123, pht('Wishlist'));
 
     $column2 = id(new PHUIInfoPanelView())
       ->setHeader($header2)
       ->setColumns(3)
-      ->addInfoBlock(3, 'Needs Triage')
-      ->addInfoBlock(5, 'Unbreak Now')
-      ->addInfoBlock(0, 'High')
-      ->addInfoBlock(0, 'Normal')
-      ->addInfoBlock(12, 'Low')
-      ->addInfoBlock(123, 'Wishlist');
+      ->addInfoBlock(3, pht('Needs Triage'))
+      ->addInfoBlock(5, pht('Unbreak Now'))
+      ->addInfoBlock(0, pht('High'))
+      ->addInfoBlock(0, pht('Normal'))
+      ->addInfoBlock(12, pht('Low'))
+      ->addInfoBlock(123, pht('Wishlist'));
 
     $column3 = id(new PHUIInfoPanelView())
       ->setHeader($header3)
       ->setColumns(3)
-      ->addInfoBlock(3, 'Needs Triage')
-      ->addInfoBlock(5, 'Unbreak Now')
-      ->addInfoBlock(0, 'High')
-      ->addInfoBlock(0, 'Normal')
-      ->addInfoBlock(12, 'Low')
-      ->addInfoBlock(123, 'Wishlist');
+      ->addInfoBlock(3, pht('Needs Triage'))
+      ->addInfoBlock(5, pht('Unbreak Now'))
+      ->addInfoBlock(0, pht('High'))
+      ->addInfoBlock(0, pht('Normal'))
+      ->addInfoBlock(12, pht('Low'))
+      ->addInfoBlock(123, pht('Wishlist'));
 
     $column4 = id(new PHUIInfoPanelView())
       ->setHeader($header4)
       ->setColumns(3)
       ->setProgress(90)
-      ->addInfoBlock(3, 'Needs Triage')
-      ->addInfoBlock(5, 'Unbreak Now')
-      ->addInfoBlock(0, 'High')
-      ->addInfoBlock(0, 'Normal')
-      ->addInfoBlock(0, 'Wishlist');
+      ->addInfoBlock(3, pht('Needs Triage'))
+      ->addInfoBlock(5, pht('Unbreak Now'))
+      ->addInfoBlock(0, pht('High'))
+      ->addInfoBlock(0, pht('Normal'))
+      ->addInfoBlock(0, pht('Wishlist'));
 
     $column5 = id(new PHUIInfoPanelView())
       ->setHeader($header5)
       ->setColumns(2)
       ->setProgress(25)
-      ->addInfoBlock(3, 'Needs Triage')
-      ->addInfoBlock(5, 'Unbreak Now')
-      ->addInfoBlock(0, 'High')
-      ->addInfoBlock(0, 'Normal');
+      ->addInfoBlock(3, pht('Needs Triage'))
+      ->addInfoBlock(5, pht('Unbreak Now'))
+      ->addInfoBlock(0, pht('High'))
+      ->addInfoBlock(0, pht('Normal'));
 
     $column6 = id(new PHUIInfoPanelView())
       ->setHeader($header6)
       ->setColumns(2)
       ->setProgress(50)
-      ->addInfoBlock(3, 'Needs Triage')
-      ->addInfoBlock(5, 'Unbreak Now')
-      ->addInfoBlock(0, 'High')
-      ->addInfoBlock(0, 'Normal');
+      ->addInfoBlock(3, pht('Needs Triage'))
+      ->addInfoBlock(5, pht('Unbreak Now'))
+      ->addInfoBlock(0, pht('High'))
+      ->addInfoBlock(0, pht('Normal'));
 
     $layout1 = id(new AphrontMultiColumnView())
       ->addColumn($column1)

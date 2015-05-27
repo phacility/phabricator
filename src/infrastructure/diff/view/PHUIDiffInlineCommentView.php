@@ -17,4 +17,8 @@ abstract class PHUIDiffInlineCommentView extends AphrontView {
     return null;
   }
 
+  public function isHidden() {
+    return false;
+  }
+
 }

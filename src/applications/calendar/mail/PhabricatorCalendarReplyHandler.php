@@ -5,7 +5,10 @@ final class PhabricatorCalendarReplyHandler
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof PhabricatorCalendarEvent)) {
-      throw new Exception('Mail receiver is not a PhabricatorCalendarEvent!');
+      throw new Exception(
+        pht(
+          'Mail receiver is not a %s!',
+          'PhabricatorCalendarEvent'));
     }
   }
 

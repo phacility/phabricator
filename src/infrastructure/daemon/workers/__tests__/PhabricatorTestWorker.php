@@ -26,10 +26,10 @@ final class PhabricatorTestWorker extends PhabricatorWorker {
   protected function doWork() {
     switch (idx($this->getTaskData(), 'doWork')) {
       case 'fail-temporary':
-        throw new Exception('Temporary failure!');
+        throw new Exception(pht('Temporary failure!'));
       case 'fail-permanent':
         throw new PhabricatorWorkerPermanentFailureException(
-          'Permanent failure!');
+          pht('Permanent failure!'));
       default:
         return;
     }

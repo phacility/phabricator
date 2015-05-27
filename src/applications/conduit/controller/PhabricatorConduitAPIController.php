@@ -176,11 +176,14 @@ final class PhabricatorConduitAPIController
 
     $config_key = 'security.allow-conduit-act-as-user';
     if (!PhabricatorEnv::getEnvConfig($config_key)) {
-      throw new Exception('security.allow-conduit-act-as-user is disabled');
+      throw new Exception(pht('%s is disabled.', $config_key));
     }
 
     if (!$api_request->getUser()->getIsAdmin()) {
-      throw new Exception('Only administrators can use actAsUser');
+      throw new Exception(
+        pht(
+          'Only administrators can use %s.',
+          __FUNCTION__));
     }
 
     $user = id(new PhabricatorUser())->loadOneWhere(
@@ -189,8 +192,10 @@ final class PhabricatorConduitAPIController
 
     if (!$user) {
       throw new Exception(
-        "The actAsUser username '{$user_name}' is not a valid user."
-      );
+        pht(
+          "The %s username '%s' is not a valid user.",
+          __FUNCTION__,
+          $user_name));
     }
 
     $api_request->setUser($user);
@@ -224,7 +229,8 @@ final class PhabricatorConduitAPIController
         return array(
           'ERR-INVALID-AUTH',
           pht(
-            'Request is missing required "auth.host" parameter.'),
+            'Request is missing required "%s" parameter.',
+            'auth.host'),
         );
       }
 
@@ -266,8 +272,7 @@ final class PhabricatorConduitAPIController
       if (!$stored_key) {
         return array(
           'ERR-INVALID-AUTH',
-          pht(
-            'No user or device is associated with that public key.'),
+          pht('No user or device is associated with that public key.'),
         );
       }
 
@@ -311,7 +316,8 @@ final class PhabricatorConduitAPIController
       return array(
         'ERR-INVALID-AUTH',
         pht(
-          'Provided "auth.type" ("%s") is not recognized.',
+          'Provided "%s" ("%s") is not recognized.',
+          'auth.type',
           $auth_type),
       );
     }
@@ -405,8 +411,7 @@ final class PhabricatorConduitAPIController
       if (!($user instanceof PhabricatorUser)) {
         return array(
           'ERR-INVALID-AUTH',
-          pht(
-            'API token is not associated with a valid user.'),
+          pht('API token is not associated with a valid user.'),
         );
       }
 
@@ -421,12 +426,11 @@ final class PhabricatorConduitAPIController
     if ($access_token &&
         $method_scope != PhabricatorOAuthServerScope::SCOPE_NOT_ACCESSIBLE) {
       $token = id(new PhabricatorOAuthServerAccessToken())
-        ->loadOneWhere('token = %s',
-                       $access_token);
+        ->loadOneWhere('token = %s', $access_token);
       if (!$token) {
         return array(
           'ERR-INVALID-AUTH',
-          'Access token does not exist.',
+          pht('Access token does not exist.'),
         );
       }
 
@@ -436,19 +440,18 @@ final class PhabricatorConduitAPIController
       if (!$valid) {
         return array(
           'ERR-INVALID-AUTH',
-          'Access token is invalid.',
+          pht('Access token is invalid.'),
         );
       }
 
       // valid token, so let's log in the user!
       $user_phid = $token->getUserPHID();
       $user = id(new PhabricatorUser())
-        ->loadOneWhere('phid = %s',
-                       $user_phid);
+        ->loadOneWhere('phid = %s', $user_phid);
       if (!$user) {
         return array(
           'ERR-INVALID-AUTH',
-          'Access token is for invalid user.',
+          pht('Access token is for invalid user.'),
         );
       }
       return $this->validateAuthenticatedUser(
@@ -467,7 +470,7 @@ final class PhabricatorConduitAPIController
       if (!$user) {
         return array(
           'ERR-INVALID-AUTH',
-          'Authentication is invalid.',
+          pht('Authentication is invalid.'),
         );
       }
       $token = idx($metadata, 'authToken');
@@ -476,7 +479,7 @@ final class PhabricatorConduitAPIController
       if (sha1($token.$certificate) !== $signature) {
         return array(
           'ERR-INVALID-AUTH',
-          'Authentication is invalid.',
+          pht('Authentication is invalid.'),
         );
       }
       return $this->validateAuthenticatedUser(
@@ -491,7 +494,7 @@ final class PhabricatorConduitAPIController
     if (!$session_key) {
       return array(
         'ERR-INVALID-SESSION',
-        'Session key is not present.',
+        pht('Session key is not present.'),
       );
     }
 
@@ -501,7 +504,7 @@ final class PhabricatorConduitAPIController
     if (!$user) {
       return array(
         'ERR-INVALID-SESSION',
-        'Session key is invalid.',
+        pht('Session key is invalid.'),
       );
     }
 
@@ -642,10 +645,13 @@ final class PhabricatorConduitAPIController
           // actually do type checking, it might be reasonable to treat it as
           // a string if the parameter type is string.
           throw new Exception(
-            "The value for parameter '{$key}' is not valid JSON. All ".
-            "parameters must be encoded as JSON values, including strings ".
-            "(which means you need to surround them in double quotes). ".
-            "Check your syntax. Value was: {$value}");
+            pht(
+              "The value for parameter '%s' is not valid JSON. All ".
+              "parameters must be encoded as JSON values, including strings ".
+              "(which means you need to surround them in double quotes). ".
+              "Check your syntax. Value was: %s.",
+              $key,
+              $value));
         }
         $params[$key] = $decoded_value;
       }
@@ -666,7 +672,7 @@ final class PhabricatorConduitAPIController
       } catch (PhutilJSONParserException $ex) {
         throw new PhutilProxyException(
           pht(
-            "Invalid parameter information was passed to method '%s'",
+            "Invalid parameter information was passed to method '%s'.",
             $method),
           $ex);
       }

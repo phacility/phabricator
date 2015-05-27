@@ -64,12 +64,16 @@ abstract class PhameController extends PhabricatorController {
 
       $blogger = phutil_tag('strong', array(), $blogger);
       if ($post->isDraft()) {
-        $title = pht('%s drafted a blog post on %s.',
-          $blogger, $blog);
+        $title = pht(
+          '%s drafted a blog post on %s.',
+          $blogger,
+          $blog);
         $title = phutil_tag('em', array(), $title);
       } else {
-        $title = pht('%s wrote a blog post on %s.',
-          $blogger, $blog);
+        $title = pht(
+          '%s wrote a blog post on %s.',
+          $blogger,
+          $blog);
       }
 
       $item = id(new PHUIObjectItemView())

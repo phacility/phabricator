@@ -60,10 +60,10 @@ final class PhabricatorOAuthServerScope {
     $label = null;
     switch ($scope) {
       case self::SCOPE_OFFLINE_ACCESS:
-        $label = 'Make access tokens granted to this client never expire.';
+        $label = pht('Make access tokens granted to this client never expire.');
         break;
       case self::SCOPE_WHOAMI:
-        $label = 'Read access to Conduit method user.whoami.';
+        $label = pht('Read access to Conduit method %s.', 'user.whoami');
         break;
     }
 

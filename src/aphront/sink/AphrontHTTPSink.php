@@ -25,7 +25,7 @@ abstract class AphrontHTTPSink {
    */
   final public function writeHTTPStatus($code, $message = '') {
     if (!preg_match('/^\d{3}$/', $code)) {
-      throw new Exception("Malformed HTTP status code '{$code}'!");
+      throw new Exception(pht("Malformed HTTP status code '%s'!", $code));
     }
 
     $code = (int)$code;
@@ -42,14 +42,15 @@ abstract class AphrontHTTPSink {
   final public function writeHeaders(array $headers) {
     foreach ($headers as $header) {
       if (!is_array($header) || count($header) !== 2) {
-        throw new Exception('Malformed header.');
+        throw new Exception(pht('Malformed header.'));
       }
       list($name, $value) = $header;
 
       if (strpos($name, ':') !== false) {
         throw new Exception(
-          'Declining to emit response with malformed HTTP header name: '.
-          $name);
+          pht(
+            'Declining to emit response with malformed HTTP header name: %s',
+            $name));
       }
 
       // Attackers may perform an "HTTP response splitting" attack by making
@@ -64,8 +65,9 @@ abstract class AphrontHTTPSink {
 
       if (preg_match('/[\r\n\0]/', $name.$value)) {
         throw new Exception(
-          "Declining to emit response with unsafe HTTP header: ".
-          "<'".$name."', '".$value."'>.");
+          pht(
+            'Declining to emit response with unsafe HTTP header: %s',
+            "<'".$name."', '".$value."'>."));
       }
     }
 

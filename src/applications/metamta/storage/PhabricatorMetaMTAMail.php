@@ -390,7 +390,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
     if (!$force_send) {
       if ($this->getStatus() != self::STATUS_QUEUE) {
-        throw new Exception('Trying to send an already-sent mail!');
+        throw new Exception(pht('Trying to send an already-sent mail!'));
       }
     }
 
@@ -622,8 +622,9 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       if (!$add_to && !$add_cc) {
         $this->setStatus(self::STATUS_VOID);
         $this->setMessage(
-          'Message has no valid recipients: all To/Cc are disabled, invalid, '.
-          'or configured not to receive this mail.');
+          pht(
+            'Message has no valid recipients: all To/Cc are disabled, '.
+            'invalid, or configured not to receive this mail.'));
         return $this->save();
       }
 
@@ -644,8 +645,9 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         $this->setStatus(self::STATUS_VOID);
         $this->setMessage(
           pht(
-            'Phabricator is running in silent mode. See `phabricator.silent` '.
-            'in the configuration to change this setting.'));
+            'Phabricator is running in silent mode. See `%s` '.
+            'in the configuration to change this setting.',
+            'phabricator.silent'));
         return $this->save();
       }
 
@@ -727,11 +729,11 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   }
 
   public static function getReadableStatus($status_code) {
-    static $readable = array(
-      self::STATUS_QUEUE => 'Queued for Delivery',
-      self::STATUS_FAIL  => 'Delivery Failed',
-      self::STATUS_SENT  => 'Sent',
-      self::STATUS_VOID  => 'Void',
+    $readable = array(
+      self::STATUS_QUEUE => pht('Queued for Delivery'),
+      self::STATUS_FAIL  => pht('Delivery Failed'),
+      self::STATUS_SENT  => pht('Sent'),
+      self::STATUS_VOID  => pht('Void'),
     );
     $status_code = coalesce($status_code, '?');
     return idx($readable, $status_code, $status_code);

@@ -1,8 +1,8 @@
 <?php
 
-echo "Migrating macro authors...\n";
+echo pht('Migrating macro authors...')."\n";
 foreach (new LiskMigrationIterator(new PhabricatorFileImageMacro()) as $macro) {
-  echo "Macro #".$macro->getID()."\n";
+  echo pht('Macro #%d', $macro->getID())."\n";
 
   if ($macro->getAuthorPHID()) {
     // Already have an author; skip it.
@@ -36,4 +36,4 @@ foreach (new LiskMigrationIterator(new PhabricatorFileImageMacro()) as $macro) {
     $macro->getID());
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

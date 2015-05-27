@@ -137,7 +137,7 @@ final class ReleephBranchQuery
           'isActive = 1');
         break;
       default:
-        throw new Exception("Unknown status constant '{$status}'!");
+        throw new Exception(pht("Unknown status constant '%s'!", $status));
     }
 
     $where[] = $this->buildPagingClause($conn_r);

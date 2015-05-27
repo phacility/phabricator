@@ -12,7 +12,7 @@ final class ReleephDiffSizeFieldSpecification
   }
 
   public function getName() {
-    return 'Size';
+    return pht('Size');
   }
 
   public function renderPropertyViewValue(array $handles) {
@@ -50,10 +50,10 @@ final class ReleephDiffSizeFieldSpecification
       Javelin::initBehavior('phabricator-tooltips');
       require_celerity_resource('aphront-tooltip-css');
 
-      $test_blurb =
-        pht('%d line(s)', $mr_changes['tests']['lines']).' and '.
-        pht('%d path(s)', count($mr_changes['tests']['paths'])).
-        " contain changes to test code:\n";
+      $test_blurb = pht(
+        "%d line(s) and %d path(s) contain changes to test code:\n",
+        $mr_changes['tests']['lines'],
+        count($mr_changes['tests']['paths']));
       foreach ($mr_changes['tests']['paths'] as $mr_test_path) {
         $test_blurb .= pht("%s\n", $mr_test_path);
       }
@@ -73,9 +73,11 @@ final class ReleephDiffSizeFieldSpecification
     }
 
     $blurb = hsprintf('%s%s.',
-      pht('%d line(s)', $mr_changes['code']['lines']).' and '.
-      pht('%d path(s)', count($mr_changes['code']['paths'])).' over '.
-      pht('%d diff(s)', count($diffs)),
+      pht(
+        '%d line(s) and %d path(s) over %d diff(s)',
+        $mr_changes['code']['lines'],
+        $mr_changes['code']['paths'],
+        count($diffs)),
       $test_tag);
 
     return id(new AphrontProgressBarView())

@@ -18,7 +18,7 @@ abstract class PhabricatorWorkerTriggerManagementWorkflow
     $ids = $args->getArg('id');
     if (!$ids) {
       throw new PhutilArgumentUsageException(
-        pht('Use --id to select triggers by ID.'));
+        pht('Use %s to select triggers by ID.', '--id'));
     }
 
     $triggers = id(new PhabricatorWorkerTriggerQuery())

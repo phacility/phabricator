@@ -10,7 +10,8 @@ final class DiffusionGetRecentCommitsByPathConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Get commit identifiers for recent commits affecting a given path.';
+    return pht(
+      'Get commit identifiers for recent commits affecting a given path.');
   }
 
   protected function defineParamTypes() {

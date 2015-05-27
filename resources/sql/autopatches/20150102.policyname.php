@@ -15,7 +15,7 @@ foreach ($policies as $policy) {
   $map[$old_name] = $new_name;
 }
 
-echo "Migrating policies...\n";
+echo pht('Migrating policies...')."\n";
 $table = new PhabricatorPolicy();
 $conn_w = $table->establishConnection('w');
 

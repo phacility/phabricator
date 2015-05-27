@@ -3,18 +3,18 @@
 final class PHUIBoxExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Box';
+    return pht('Box');
   }
 
   public function getDescription() {
-    return 'It\'s a fancy or non-fancy box. Put stuff in it.';
+    return pht("It's a fancy or non-fancy box. Put stuff in it.");
   }
 
   public function renderExample() {
 
     $content1 = 'Asmund and Signy';
     $content2 = 'The Cottager and his Cat';
-    $content3 = 'Geirlug The King\'s Daughter';
+    $content3 = "Geirlug The King's Daughter";
 
     $layout1 =
       array(
@@ -67,18 +67,18 @@ final class PHUIBoxExample extends PhabricatorUIExample {
         ->setTag('a')
         ->setColor(PHUIButtonView::SIMPLE)
         ->setIcon($image)
-        ->setText('Such Wow')
+        ->setText(pht('Such Wow'))
         ->addClass(PHUI::MARGIN_SMALL_RIGHT);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader('Fancy Box')
+      ->setHeader(pht('Fancy Box'))
       ->addActionLink($button);
 
     $obj4 = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->appendChild(id(new PHUIBoxView())
         ->addPadding(PHUI::PADDING_MEDIUM)
-        ->appendChild('Such Fancy, Nice Box, Many Corners.'));
+        ->appendChild(pht('Such Fancy, Nice Box, Many Corners.')));
 
     $head1 = id(new PHUIHeaderView())
       ->setHeader(pht('Plain Box'));

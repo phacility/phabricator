@@ -3,16 +3,16 @@
 $old_key = 'phabricator.show-beta-applications';
 $new_key = 'phabricator.show-prototypes';
 
-echo "Migrating '{$old_key}' to '{$new_key}'...\n";
+echo pht("Migrating '%s' to '%s'...", $old_key, $new_key)."\n";
 
 if (PhabricatorEnv::getEnvConfig($new_key)) {
-  echo "Skipping migration, new data is already set.\n";
+  echo pht('Skipping migration, new data is already set.')."\n";
   return;
 }
 
 $old = PhabricatorEnv::getEnvConfigIfExists($old_key);
 if (!$old) {
-  echo "Skipping migration, old data does not exist.\n";
+  echo pht('Skipping migration, old data does not exist.')."\n";
   return;
 }
 
@@ -21,4 +21,4 @@ PhabricatorConfigEntry::loadConfigEntry($new_key)
   ->setValue($old)
   ->save();
 
-echo "Done.\n";
+echo pht('Done.')."\n";

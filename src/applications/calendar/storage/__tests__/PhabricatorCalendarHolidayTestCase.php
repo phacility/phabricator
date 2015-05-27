@@ -12,7 +12,7 @@ final class PhabricatorCalendarHolidayTestCase extends PhabricatorTestCase {
     parent::willRunTests();
     id(new PhabricatorCalendarHoliday())
       ->setDay('2012-01-02')
-      ->setName('International Testing Day')
+      ->setName(pht('International Testing Day'))
       ->save();
   }
 
@@ -32,7 +32,7 @@ final class PhabricatorCalendarHolidayTestCase extends PhabricatorTestCase {
       $this->assertEqual(
         $expect,
         date('Y-m-d', $actual),
-        "{$n} business days since '{$date}'");
+        pht("%d business days since '%s'", $n, $date));
     }
   }
 

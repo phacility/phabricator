@@ -6,9 +6,7 @@ final class PhabricatorDaemonManagementRestartWorkflow
   protected function didConstruct() {
     $this
       ->setName('restart')
-      ->setSynopsis(
-        pht(
-          'Stop, then start the standard daemon loadout.'))
+      ->setSynopsis(pht('Stop, then start the standard daemon loadout.'))
       ->setArguments(
         array(
           array(

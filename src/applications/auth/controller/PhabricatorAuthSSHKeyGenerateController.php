@@ -55,9 +55,9 @@ final class PhabricatorAuthSSHKeyGenerateController
         ->setSubmitURI($file->getDownloadURI())
         ->appendParagraph(
           pht(
-          'A keypair has been generated, and the public key has been '.
-          'added as a recognized key. Use the button below to download '.
-          'the private key.'))
+            'A keypair has been generated, and the public key has been '.
+            'added as a recognized key. Use the button below to download '.
+            'the private key.'))
         ->appendParagraph(
           pht(
             'After you download the private key, it will be destroyed. '.
@@ -77,8 +77,7 @@ final class PhabricatorAuthSSHKeyGenerateController
             'This workflow will generate a new SSH keypair, add the public '.
             'key, and let you download the private key.'))
         ->appendParagraph(
-          pht(
-            'Phabricator will not retain a copy of the private key.'))
+          pht('Phabricator will not retain a copy of the private key.'))
         ->addSubmitButton(pht('Generate New Keypair'))
         ->addCancelButton($cancel_uri);
     } catch (Exception $ex) {

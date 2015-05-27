@@ -23,7 +23,7 @@ final class PhabricatorRepositoryTestCase
       $this->assertEqual(
         $expect,
         $repository->getRemoteProtocol(),
-        "Protocol for '{$uri}'.");
+        pht("Protocol for '%s'.", $uri));
     }
   }
 
@@ -35,7 +35,7 @@ final class PhabricatorRepositoryTestCase
 
     $this->assertTrue(
       $repo->shouldTrackBranch('imaginary'),
-      'Track all branches by default.');
+      pht('Track all branches by default.'));
 
     $repo->setDetail(
       'branch-filter',
@@ -45,11 +45,11 @@ final class PhabricatorRepositoryTestCase
 
     $this->assertTrue(
       $repo->shouldTrackBranch('master'),
-      'Track listed branches.');
+      pht('Track listed branches.'));
 
     $this->assertFalse(
       $repo->shouldTrackBranch('imaginary'),
-      'Do not track unlisted branches.');
+      pht('Do not track unlisted branches.'));
   }
 
   public function testSubversionPathInfo() {

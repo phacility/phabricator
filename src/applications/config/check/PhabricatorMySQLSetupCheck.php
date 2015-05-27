@@ -27,14 +27,15 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
     $recommended_minimum = (32 * 1024 * 1024);
     if ($max_allowed_packet < $recommended_minimum) {
       $message = pht(
-        "MySQL is configured with a small 'max_allowed_packet' (%d), ".
+        "MySQL is configured with a small '%s' (%d), ".
         "which may cause some large writes to fail. Strongly consider raising ".
         "this to at least %d in your MySQL configuration.",
+        'max_allowed_packet',
         $max_allowed_packet,
         $recommended_minimum);
 
       $this->newIssue('mysql.max_allowed_packet')
-        ->setName(pht('Small MySQL "max_allowed_packet"'))
+        ->setName(pht('Small MySQL "%s"', 'max_allowed_packet'))
         ->setMessage($message)
         ->addMySQLConfig('max_allowed_packet');
     }
@@ -70,7 +71,7 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
         phutil_tag('pre', array(), 'sql_mode=STRICT_ALL_TABLES'));
 
       $this->newIssue('mysql.mode')
-        ->setName(pht('MySQL STRICT_ALL_TABLES Mode Not Set'))
+        ->setName(pht('MySQL %s Mode Not Set', 'STRICT_ALL_TABLES'))
         ->setSummary($summary)
         ->setMessage($message)
         ->addMySQLConfig('sql_mode');
@@ -109,7 +110,7 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
         phutil_tag('tt', array(), 'ONLY_FULL_GROUP_BY'));
 
       $this->newIssue('mysql.mode')
-        ->setName(pht('MySQL ONLY_FULL_GROUP_BY Mode Set'))
+        ->setName(pht('MySQL %s Mode Set', 'ONLY_FULL_GROUP_BY'))
         ->setSummary($summary)
         ->setMessage($message)
         ->addMySQLConfig('sql_mode');
@@ -134,7 +135,7 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
           phutil_tag('tt', array(), 'ft_stopword_file'));
 
         $this->newIssue('mysql.ft_stopword_file')
-          ->setName(pht('MySQL ft_stopword_file Not Supported'))
+          ->setName(pht('MySQL %s Not Supported', 'ft_stopword_file'))
           ->setSummary($summary)
           ->setMessage($message)
           ->addMySQLConfig('ft_stopword_file');

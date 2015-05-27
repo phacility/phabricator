@@ -59,8 +59,7 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
   protected function getCustomCapabilities() {
     return array(
       FilesDefaultViewCapability::CAPABILITY => array(
-        'caption' => pht(
-          'Default view policy for newly created files.'),
+        'caption' => pht('Default view policy for newly created files.'),
       ),
     );
   }

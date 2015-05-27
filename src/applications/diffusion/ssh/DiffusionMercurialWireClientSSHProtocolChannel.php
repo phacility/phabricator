@@ -207,7 +207,7 @@ final class DiffusionMercurialWireClientSSHProtocolChannel
           break;
         }
       } else {
-        throw new Exception("Bad parser state '{$this->state}'!");
+        throw new Exception(pht("Bad parser state '%s'!", $this->state));
       }
     }
 

@@ -3,7 +3,7 @@
 final class PhabricatorMailingListsApplication extends PhabricatorApplication {
 
   public function getName() {
-    return 'Mailing Lists';
+    return pht('Mailing Lists');
   }
 
   public function getBaseURI() {
@@ -11,7 +11,7 @@ final class PhabricatorMailingListsApplication extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'Manage External Lists';
+    return pht('Manage External Lists');
   }
 
   public function getFontIcon() {

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Logs messages to stdout
+ * Logs messages to stdout.
  */
 final class PhabricatorBotDebugLogHandler extends PhabricatorBotHandler {
   public function receiveMessage(PhabricatorBotMessage $message) {

@@ -41,8 +41,10 @@ final class DifferentialChangesetOneUpRenderer
 
     $column_width = 4;
 
+    $hidden = new PHUIDiffRevealIconView();
+
     $out = array();
-    foreach ($primitives as $p) {
+    foreach ($primitives as $k => $p) {
       $type = $p['type'];
       switch ($type) {
         case 'old':
@@ -50,6 +52,27 @@ final class DifferentialChangesetOneUpRenderer
         case 'old-file':
         case 'new-file':
           $is_old = ($type == 'old' || $type == 'old-file');
+
+          $o_hidden = array();
+          $n_hidden = array();
+
+          for ($look = $k + 1; isset($primitives[$look]); $look++) {
+            $next = $primitives[$look];
+            switch ($next['type']) {
+              case 'inline':
+                $comment = $next['comment'];
+                if ($comment->isHidden()) {
+                  if ($next['right']) {
+                    $n_hidden[] = $comment;
+                  } else {
+                    $o_hidden[] = $comment;
+                  }
+                }
+                break;
+              default:
+                break 2;
+            }
+          }
 
           $cells = array();
           if ($is_old) {
@@ -68,7 +91,13 @@ final class DifferentialChangesetOneUpRenderer
             } else {
               $left_id = null;
             }
-            $cells[] = phutil_tag('th', array('id' => $left_id), $p['line']);
+
+            $line = $p['line'];
+            if ($o_hidden) {
+              $line = array($hidden, $line);
+            }
+
+            $cells[] = phutil_tag('th', array('id' => $left_id), $line);
 
             $cells[] = phutil_tag('th', array());
             $cells[] = $no_copy;
@@ -85,7 +114,13 @@ final class DifferentialChangesetOneUpRenderer
               } else {
                 $left_id = null;
               }
-              $cells[] = phutil_tag('th', array('id' => $left_id), $p['oline']);
+
+              $oline = $p['oline'];
+              if ($o_hidden) {
+                $oline = array($hidden, $oline);
+              }
+
+              $cells[] = phutil_tag('th', array('id' => $left_id), $oline);
             }
 
             if ($type == 'new-file') {
@@ -97,8 +132,13 @@ final class DifferentialChangesetOneUpRenderer
             } else {
               $right_id = null;
             }
-            $cells[] = phutil_tag('th', array('id' => $right_id), $p['line']);
 
+            $line = $p['line'];
+            if ($n_hidden) {
+              $line = array($hidden, $line);
+            }
+
+            $cells[] = phutil_tag('th', array('id' => $right_id), $line);
 
             $cells[] = $no_copy;
             $cells[] = phutil_tag('td', array('class' => $class), $p['render']);

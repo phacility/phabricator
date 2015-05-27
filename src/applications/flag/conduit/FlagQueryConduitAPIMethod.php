@@ -7,7 +7,7 @@ final class FlagQueryConduitAPIMethod extends FlagConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Query flag markers.';
+    return pht('Query flag markers.');
   }
 
   protected function defineParamTypes() {

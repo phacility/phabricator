@@ -7,7 +7,7 @@ final class FileUploadConduitAPIMethod extends FileConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Upload a file to the server.';
+    return pht('Upload a file to the server.');
   }
 
   protected function defineParamTypes() {

@@ -143,8 +143,8 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     if (!$tasks) {
       return $this->renderMiniPanel(
-        'No "Unbreak Now!" Tasks',
-        'Nothing appears to be critically broken right now.');
+        pht('No "Unbreak Now!" Tasks'),
+        pht('Nothing appears to be critically broken right now.'));
     }
 
     $href = urisprintf(
@@ -190,10 +190,8 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     if (!$tasks) {
       return $this->renderMiniPanel(
-        'No "Needs Triage" Tasks',
-        hsprintf(
-          'No tasks in <a href="/project/">projects you are a member of</a> '.
-          'need triage.'));
+        pht('No "Needs Triage" Tasks'),
+        pht('No tasks in projects you are a member of need triage.'));
     }
 
     $title = pht('Needs Triage');
@@ -228,8 +226,8 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     if (!$blocking && !$active) {
       return $this->renderMiniPanel(
-        'No Waiting Revisions',
-        'No revisions are waiting on you.');
+        pht('No Waiting Revisions'),
+        pht('No revisions are waiting on you.'));
     }
 
     $title = pht('Revisions Waiting on You');
@@ -283,8 +281,8 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     if (!$tasks) {
       return $this->renderMiniPanel(
-        'No Assigned Tasks',
-        'You have no assigned tasks.');
+        pht('No Assigned Tasks'),
+        pht('You have no assigned tasks.'));
     }
 
     $title = pht('Assigned Tasks');
@@ -360,8 +358,8 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     if (!$commits) {
       return $this->renderMinipanel(
-        'No Audits',
-        'No commits are waiting for you to audit them.');
+        pht('No Audits'),
+        pht('No commits are waiting for you to audit them.'));
     }
 
     $view = id(new PhabricatorAuditListView())
@@ -399,8 +397,8 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     if (!$commits) {
       return $this->renderMinipanel(
-        'No Problem Commits',
-        'No one has raised concerns with your commits.');
+        pht('No Problem Commits'),
+        pht('No one has raised concerns with your commits.'));
     }
 
     $view = id(new PhabricatorAuditListView())

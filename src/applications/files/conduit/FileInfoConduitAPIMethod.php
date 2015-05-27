@@ -7,7 +7,7 @@ final class FileInfoConduitAPIMethod extends FileConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Get information about a file.';
+    return pht('Get information about a file.');
   }
 
   protected function defineParamTypes() {
@@ -23,7 +23,7 @@ final class FileInfoConduitAPIMethod extends FileConduitAPIMethod {
 
   protected function defineErrorTypes() {
     return array(
-      'ERR-NOT-FOUND'     => 'No such file exists.',
+      'ERR-NOT-FOUND' => pht('No such file exists.'),
     );
   }
 

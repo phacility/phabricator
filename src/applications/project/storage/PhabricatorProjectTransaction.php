@@ -129,16 +129,16 @@ final class PhabricatorProjectTransaction
         // TODO: Some day, it would be nice to show the images.
         if (!$old) {
           return pht(
-            '%s set this project\'s image to %s.',
+            "%s set this project's image to %s.",
             $author_handle,
             $this->renderHandleLink($new));
         } else if (!$new) {
           return pht(
-            '%s removed this project\'s image.',
+            "%s removed this project's image.",
             $author_handle);
         } else {
           return pht(
-            '%s updated this project\'s image from %s to %s.',
+            "%s updated this project's image from %s to %s.",
             $author_handle,
             $this->renderHandleLink($old),
             $this->renderHandleLink($new));
@@ -147,14 +147,14 @@ final class PhabricatorProjectTransaction
 
       case self::TYPE_ICON:
         return pht(
-          '%s set this project\'s icon to %s.',
+          "%s set this project's icon to %s.",
           $author_handle,
           PhabricatorProjectIcon::getLabel($new));
         break;
 
       case self::TYPE_COLOR:
         return pht(
-          '%s set this project\'s color to %s.',
+          "%s set this project's color to %s.",
           $author_handle,
           PHUITagView::getShadeName($new));
         break;
@@ -162,11 +162,11 @@ final class PhabricatorProjectTransaction
       case self::TYPE_LOCKED:
         if ($new) {
           return pht(
-            '%s locked this project\'s membership.',
+            "%s locked this project's membership.",
             $author_handle);
         } else {
           return pht(
-            '%s unlocked this project\'s membership.',
+            "%s unlocked this project's membership.",
             $author_handle);
         }
         break;

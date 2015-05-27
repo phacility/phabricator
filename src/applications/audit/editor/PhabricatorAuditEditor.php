@@ -28,7 +28,7 @@ final class PhabricatorAuditEditor
     } else {
       $name = $this->getActor()->getUsername();
     }
-    return array('Added by '.$name.'.');
+    return array(pht('Added by %s.', $name));
   }
 
   public function setRawPatch($patch) {
@@ -432,7 +432,7 @@ final class PhabricatorAuditEditor
     }
 
     foreach ($phids as $phid) {
-      $this->addAuditReason($phid, 'Requested by Author');
+      $this->addAuditReason($phid, pht('Requested by Author'));
     }
     return id(new PhabricatorAuditTransaction())
       ->setTransactionType(PhabricatorAuditActionConstants::ADD_AUDITORS)

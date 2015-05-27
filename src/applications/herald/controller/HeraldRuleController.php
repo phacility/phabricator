@@ -270,7 +270,7 @@ final class HeraldRuleController extends HeraldController {
     if (!is_array($data) ||
         !$data['conditions'] ||
         !$data['actions']) {
-      throw new Exception('Failed to decode rule data.');
+      throw new Exception(pht('Failed to decode rule data.'));
     }
 
     $conditions = array();
@@ -320,7 +320,7 @@ final class HeraldRuleController extends HeraldController {
       try {
         $adapter->willSaveAction($rule, $obj);
       } catch (HeraldInvalidActionException $ex) {
-        $errors[] = $ex;
+        $errors[] = $ex->getMessage();
       }
 
       $actions[] = $obj;
@@ -354,7 +354,6 @@ final class HeraldRuleController extends HeraldController {
     if ($rule->getConditions()) {
       $serial_conditions = array();
       foreach ($rule->getConditions() as $condition) {
-
         $value = $condition->getValue();
         switch ($condition->getFieldName()) {
           case HeraldAdapter::FIELD_TASK_PRIORITY:
@@ -394,10 +393,10 @@ final class HeraldRuleController extends HeraldController {
     $serial_actions = array(
       array('default', ''),
     );
+
     if ($rule->getActions()) {
       $serial_actions = array();
       foreach ($rule->getActions() as $action) {
-
         switch ($action->getAction()) {
           case HeraldAdapter::ACTION_FLAG:
           case HeraldAdapter::ACTION_BLOCK:
@@ -438,13 +437,27 @@ final class HeraldRuleController extends HeraldController {
     // names of, so that saving a rule without touching anything doesn't change
     // it.
     foreach ($rule->getConditions() as $condition) {
-      if (empty($field_map[$condition->getFieldName()])) {
-        $field_map[$condition->getFieldName()] = pht('<Unknown Field>');
+      $field_name = $condition->getFieldName();
+
+      if (empty($field_map[$field_name])) {
+        $field_map[$field_name] = pht('<Unknown Field "%s">', $field_name);
       }
     }
 
     $actions = $adapter->getActions($rule->getRuleType());
     $action_map = array_select_keys($all_actions, $actions);
+
+    // Populate any actions which exist in the rule but which we don't know the
+    // names of, so that saving a rule without touching anything doesn't change
+    // it.
+    foreach ($rule->getActions() as $action) {
+      $action_name = $action->getAction();
+
+      if (empty($action_map[$action_name])) {
+        $action_map[$action_name] = pht('<Unknown Action "%s">', $action_name);
+      }
+    }
+
 
     $config_info = array();
     $config_info['fields'] = $field_map;
@@ -452,7 +465,11 @@ final class HeraldRuleController extends HeraldController {
     $config_info['actions'] = $action_map;
 
     foreach ($config_info['fields'] as $field => $name) {
-      $field_conditions = $adapter->getConditionsForField($field);
+      try {
+        $field_conditions = $adapter->getConditionsForField($field);
+      } catch (Exception $ex) {
+        $field_conditions = array(HeraldAdapter::CONDITION_UNCONDITIONALLY);
+      }
       $config_info['conditionMap'][$field] = $field_conditions;
     }
 
@@ -468,9 +485,15 @@ final class HeraldRuleController extends HeraldController {
     $config_info['rule_type'] = $rule->getRuleType();
 
     foreach ($config_info['actions'] as $action => $name) {
-      $config_info['targets'][$action] = $adapter->getValueTypeForAction(
-        $action,
-       $rule->getRuleType());
+      try {
+        $action_value = $adapter->getValueTypeForAction(
+          $action,
+         $rule->getRuleType());
+      } catch (Exception $ex) {
+        $action_value = array(HeraldAdapter::VALUE_NONE);
+      }
+
+      $config_info['targets'][$action] = $action_value;
     }
 
     $changeflag_options =
@@ -603,7 +626,6 @@ final class HeraldRuleController extends HeraldController {
       'taskpriority' => new ManiphestTaskPriorityDatasource(),
       'taskstatus' => new ManiphestTaskStatusDatasource(),
       'buildplan' => new HarbormasterBuildPlanDatasource(),
-      'arcanistprojects' => new DiffusionArcanistProjectDatasource(),
       'package' => new PhabricatorOwnersPackageDatasource(),
       'project' => new PhabricatorProjectDatasource(),
       'user' => new PhabricatorPeopleDatasource(),

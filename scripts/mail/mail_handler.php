@@ -88,7 +88,7 @@ try {
   $received->processReceivedMail();
 } catch (Exception $e) {
   $received
-    ->setMessage('EXCEPTION: '.$e->getMessage())
+    ->setMessage(pht('EXCEPTION: %s', $e->getMessage()))
     ->save();
 
   throw $e;

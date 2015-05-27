@@ -43,9 +43,12 @@ final class PhabricatorPHPMailerConfigOptions
         ->setSummary(pht('Configure TLS or SSL for SMTP.'))
         ->setDescription(
           pht(
-            "Using PHPMailer with SMTP, you can set this to one of 'tls' or ".
-            "'ssl' to use TLS or SSL, respectively. Leave it blank for ".
-            "vanilla SMTP. If you're sending via Gmail, set it to 'ssl'.")),
+            "Using PHPMailer with SMTP, you can set this to one of '%s' or ".
+            "'%s' to use TLS or SSL, respectively. Leave it blank for ".
+            "vanilla SMTP. If you're sending via Gmail, set it to '%s'.",
+            'tls',
+            'ssl',
+            'ssl')),
       $this->newOption('phpmailer.smtp-user', 'string', null)
         ->setLocked(true)
         ->setDescription(pht('Username for SMTP.')),

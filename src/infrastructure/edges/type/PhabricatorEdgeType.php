@@ -18,16 +18,20 @@ abstract class PhabricatorEdgeType extends Phobject {
     if ($const === false) {
       throw new Exception(
         pht(
-          'EdgeType class "%s" must define an EDGECONST property.',
-          get_class($this)));
+          '%s class "%s" must define an %s property.',
+          __CLASS__,
+          get_class($this),
+          'EDGECONST'));
     }
 
     if (!is_int($const) || ($const <= 0)) {
       throw new Exception(
         pht(
-          'EdgeType class "%s" has an invalid EDGECONST property. Edge '.
-          'constants must be positive integers.',
-          get_class($this)));
+          '%s class "%s" has an invalid %s property. '.
+          'Edge constants must be positive integers.',
+          __CLASS__,
+          get_class($this),
+          'EDGECONST'));
     }
 
     return $const;

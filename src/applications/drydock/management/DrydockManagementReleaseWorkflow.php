@@ -6,7 +6,7 @@ final class DrydockManagementReleaseWorkflow
   protected function didConstruct() {
     $this
       ->setName('release')
-      ->setSynopsis('Release a lease.')
+      ->setSynopsis(pht('Release a lease.'))
       ->setArguments(
         array(
           array(
@@ -22,7 +22,7 @@ final class DrydockManagementReleaseWorkflow
     $ids = $args->getArg('ids');
     if (!$ids) {
       throw new PhutilArgumentUsageException(
-        'Specify one or more lease IDs to release.');
+        pht('Specify one or more lease IDs to release.'));
     }
 
     $viewer = $this->getViewer();
@@ -35,15 +35,15 @@ final class DrydockManagementReleaseWorkflow
     foreach ($ids as $id) {
       $lease = idx($leases, $id);
       if (!$lease) {
-        $console->writeErr("Lease %d does not exist!\n", $id);
+        $console->writeErr("%s\n", pht('Lease %d does not exist!', $id));
       } else if ($lease->getStatus() != DrydockLeaseStatus::STATUS_ACTIVE) {
-        $console->writeErr("Lease %d is not 'active'!\n", $id);
+        $console->writeErr("%s\n", pht("Lease %d is not 'active'!", $id));
       } else {
         $resource = $lease->getResource();
         $blueprint = $resource->getBlueprint();
         $blueprint->releaseLease($resource, $lease);
 
-        $console->writeErr("Released lease %d.\n", $id);
+        $console->writeErr("%s\n", pht('Released lease %d.', $id));
       }
     }
 

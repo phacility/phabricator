@@ -75,7 +75,7 @@ final class AphrontRequestTestCase extends PhabricatorTestCase {
       $this->assertEqual(
         $expect,
         $r->getHost(),
-        'Host: '.$input);
+        pht('Host: %s', $input));
     }
   }
 

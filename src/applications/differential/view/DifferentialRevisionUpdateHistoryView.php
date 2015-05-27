@@ -365,7 +365,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       case DifferentialLintStatus::LINT_POSTPONED:
         return pht('Lint Postponed');
     }
-    return '???';
+    return pht('Unknown');
   }
 
   public static function getDiffUnitMessage(DifferentialDiff $diff) {
@@ -386,7 +386,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       case DifferentialUnitStatus::UNIT_POSTPONED:
         return pht('Unit Tests Postponed');
     }
-    return '???';
+    return pht('Unknown');
   }
 
   private static function renderDiffStar($star) {

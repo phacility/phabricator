@@ -72,7 +72,7 @@ final class DiffusionRepositoryTag {
 
   public function getMessage() {
     if ($this->message === false) {
-      throw new Exception('Message is not attached!');
+      throw new Exception(pht('Message is not attached!'));
     }
     return $this->message;
   }

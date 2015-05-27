@@ -138,8 +138,10 @@ abstract class PhabricatorTestCase extends PhutilTestCase {
       unset($this->env);
     } catch (Exception $ex) {
       throw new Exception(
-        'Some test called PhabricatorEnv::beginScopedEnv(), but is still '.
-        'holding a reference to the scoped environment!');
+        pht(
+          'Some test called %s, but is still holding '.
+          'a reference to the scoped environment!',
+          'PhabricatorEnv::beginScopedEnv()'));
     }
   }
 
@@ -208,8 +210,9 @@ abstract class PhabricatorTestCase extends PhutilTestCase {
   public static function assertExecutingUnitTests() {
     if (!self::$testsAreRunning) {
       throw new Exception(
-        'Executing test code outside of test execution! This code path can '.
-        'only be run during unit tests.');
+        pht(
+          'Executing test code outside of test execution! This code path can '.
+          'only be run during unit tests.'));
     }
   }
 

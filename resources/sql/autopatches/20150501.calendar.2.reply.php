@@ -1,6 +1,6 @@
 <?php
 
-echo "Adding mailkeys to events.\n";
+echo pht('Adding %s to events.', 'mailkeys')."\n";
 
 $table = new PhabricatorCalendarEvent();
 $conn_w = $table->establishConnection('w');
@@ -8,7 +8,7 @@ $iterator = new LiskMigrationIterator($table);
 foreach ($iterator as $event) {
   $id = $event->getID();
 
-  echo "Populating event {$id}...\n";
+  echo pht('Populating event %d...', $id)."\n";
 
   queryfx(
     $conn_w,
@@ -18,4 +18,4 @@ foreach ($iterator as $event) {
     $id);
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

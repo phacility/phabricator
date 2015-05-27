@@ -23,7 +23,7 @@ final class PHUIDiffInlineCommentUndoView
       array(
         'class' => 'differential-inline-undo',
       ),
-      array('Changes discarded. ', $link));
+      array(pht('Changes discarded. '), $link));
   }
 
 }

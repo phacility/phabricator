@@ -41,8 +41,9 @@ final class PhamePostViewController extends PhameController {
           ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
           ->setTitle(pht('Draft Post'))
           ->appendChild(
-            pht('Only you can see this draft until you publish it. '.
-                'Use "Preview / Publish" to publish this post.')));
+            pht(
+              'Only you can see this draft until you publish it. '.
+              'Use "Preview / Publish" to publish this post.')));
     }
 
     if (!$post->getBlog()) {
@@ -51,8 +52,9 @@ final class PhamePostViewController extends PhameController {
           ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
           ->setTitle(pht('Not On A Blog'))
           ->appendChild(
-            pht('This post is not associated with a blog (the blog may have '.
-                'been deleted). Use "Move Post" to move it to a new blog.')));
+            pht(
+              'This post is not associated with a blog (the blog may have '.
+              'been deleted). Use "Move Post" to move it to a new blog.')));
     }
 
     $nav->appendChild(

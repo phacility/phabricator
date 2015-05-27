@@ -126,20 +126,20 @@ final class DiffusionRepositoryEditBranchesController
         'develop',
         'release',
       ),
-      pht('Select master, develop, and release.'),
+      pht('Select %s, %s, and %s.', 'master', 'develop', 'release'),
     );
     $rows[] = array(
       array(
         'master',
         'regexp(/^release-/)',
       ),
-      pht('Select master, and all branches which start with "release-".'),
+      pht('Select master, and all branches which start with "%s".', 'release-'),
     );
     $rows[] = array(
       array(
         'regexp(/^(?!temp-)/)',
       ),
-      pht('Select all branches which do not start with "temp-".'),
+      pht('Select all branches which do not start with "%s".', 'temp-'),
     );
 
     foreach ($rows as $k => $row) {
@@ -167,8 +167,7 @@ final class DiffusionRepositoryEditBranchesController
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->appendRemarkupInstructions(
-        pht(
-          'You can choose a **Default Branch** for viewing this repository.'))
+        pht('You can choose a **Default Branch** for viewing this repository.'))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('default')
@@ -196,7 +195,8 @@ final class DiffusionRepositoryEditBranchesController
         pht(
           'When specifying branches, you should enter one branch name per '.
           'line. You can use regular expressions to match branches by '.
-          'wrapping an expression in `regexp(...)`. For example:'))
+          'wrapping an expression in `%s`. For example:',
+          'regexp(...)'))
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setValue($example_table))

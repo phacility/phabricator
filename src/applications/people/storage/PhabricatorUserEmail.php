@@ -83,8 +83,9 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
    */
   public static function describeValidAddresses() {
     return pht(
-      "Email addresses should be in the form 'user@domain.com'. The maximum ".
-      "length of an email address is %d character(s).",
+      "Email addresses should be in the form '%s'. The maximum ".
+      "length of an email address is %s character(s).",
+      'user@domain.com',
       new PhutilNumber(self::MAX_ADDRESS_LENGTH));
   }
 
@@ -131,10 +132,11 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
     }
 
     if (count($domains) == 1) {
-      return 'Email address must be @'.head($domains);
+      return pht('Email address must be @%s', head($domains));
     } else {
-      return 'Email address must be at one of: '.
-        implode(', ', $domains);
+      return pht(
+        'Email address must be at one of: %s',
+        implode(', ', $domains));
     }
   }
 
@@ -174,27 +176,23 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
 
     $signature = null;
     if (!$is_serious) {
-      $signature = <<<EOSIGNATURE
-Get Well Soon,
-Phabricator
-EOSIGNATURE;
+      $signature = pht("Get Well Soon,\nPhabricator");
     }
 
-    $body = <<<EOBODY
-Hi {$username},
-
-Please verify that you own this email address ({$address}) by clicking this
-link:
-
-  {$link}
-
-{$signature}
-EOBODY;
+    $body = sprintf(
+      "%s\n\n%s\n\n  %s\n\n%s",
+      pht('Hi %s', $username),
+      pht(
+        'Please verify that you own this email address (%s) by '.
+        'clicking this link:',
+        $address),
+      $link,
+      $signature);
 
     id(new PhabricatorMetaMTAMail())
       ->addRawTos(array($address))
       ->setForceDelivery(true)
-      ->setSubject('[Phabricator] Email Verification')
+      ->setSubject(pht('[Phabricator] Email Verification'))
       ->setBody($body)
       ->setRelatedPHID($user->getPHID())
       ->saveAndSend();
@@ -220,19 +218,20 @@ EOBODY;
     $old_address = $this->getAddress();
     $new_address = $new->getAddress();
 
-    $body = <<<EOBODY
-Hi {$username},
-
-This email address ({$old_address}) is no longer your primary email address.
-Going forward, Phabricator will send all email to your new primary email
-address ({$new_address}).
-
-EOBODY;
+    $body = sprintf(
+      "%s\n\n%s\n",
+      pht('Hi %s', $username),
+      pht(
+        'This email address (%s) is no longer your primary email address. '.
+        'Going forward, Phabricator will send all email to your new primary '.
+        'email address (%s).',
+        $old_address,
+        $new_address));
 
     id(new PhabricatorMetaMTAMail())
       ->addRawTos(array($old_address))
       ->setForceDelivery(true)
-      ->setSubject('[Phabricator] Primary Address Changed')
+      ->setSubject(pht('[Phabricator] Primary Address Changed'))
       ->setBody($body)
       ->setFrom($user->getPHID())
       ->setRelatedPHID($user->getPHID())
@@ -253,18 +252,18 @@ EOBODY;
 
     $new_address = $this->getAddress();
 
-    $body = <<<EOBODY
-Hi {$username},
-
-This is now your primary email address ({$new_address}). Going forward,
-Phabricator will send all email here.
-
-EOBODY;
+    $body = sprintf(
+      "%s\n\n%s\n",
+      pht('Hi %s', $username),
+      pht(
+        'This is now your primary email address (%s). Going forward, '.
+        'Phabricator will send all email here.',
+        $new_address));
 
     id(new PhabricatorMetaMTAMail())
       ->addRawTos(array($new_address))
       ->setForceDelivery(true)
-      ->setSubject('[Phabricator] Primary Address Changed')
+      ->setSubject(pht('[Phabricator] Primary Address Changed'))
       ->setBody($body)
       ->setFrom($user->getPHID())
       ->setRelatedPHID($user->getPHID())

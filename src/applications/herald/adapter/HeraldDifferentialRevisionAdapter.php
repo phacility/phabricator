@@ -80,7 +80,6 @@ final class HeraldDifferentialRevisionAdapter
         self::FIELD_AFFECTED_PACKAGE,
         self::FIELD_AFFECTED_PACKAGE_OWNER,
         self::FIELD_IS_NEW_OBJECT,
-        self::FIELD_ARCANIST_PROJECT,
       ),
       parent::getFields());
   }
@@ -259,8 +258,6 @@ final class HeraldDifferentialRevisionAdapter
         $packages = $this->loadAffectedPackages();
         return PhabricatorOwnersOwner::loadAffiliatedUserPHIDs(
           mpull($packages, 'getID'));
-      case self::FIELD_ARCANIST_PROJECT:
-        return $this->revision->getArcanistProjectPHID();
     }
 
     return parent::getHeraldField($field);
@@ -305,7 +302,8 @@ final class HeraldDifferentialRevisionAdapter
       $effect->setAction(self::ACTION_ADD_CC);
       $effect->setTarget(array_keys($this->explicitCCs));
       $effect->setReason(
-        pht('CCs provided explicitly by revision author or carried over '.
+        pht(
+          'CCs provided explicitly by revision author or carried over '.
         'from a previous version of the revision.'));
       $result[] = new HeraldApplyTranscript(
         $effect,
@@ -346,8 +344,9 @@ final class HeraldDifferentialRevisionAdapter
               $result[] = new HeraldApplyTranscript(
                 $effect,
                 true,
-                pht('Added these addresses to CC list. '.
-                'Others could not be added.'));
+                pht(
+                  'Added these addresses to CC list. '.
+                  'Others could not be added.'));
             }
             $result[] = new HeraldApplyTranscript(
               $failed,

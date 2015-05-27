@@ -123,12 +123,10 @@ final class PhabricatorPeopleNewController
 
     if ($is_bot) {
       $form->appendRemarkupInstructions(
-        pht(
-          'You are creating a new **bot/script** user account.'));
+        pht('You are creating a new **bot/script** user account.'));
     } else {
       $form->appendRemarkupInstructions(
-        pht(
-          'You are creating a new **standard** user account.'));
+        pht('You are creating a new **standard** user account.'));
     }
 
     $form

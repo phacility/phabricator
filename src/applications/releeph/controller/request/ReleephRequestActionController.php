@@ -64,8 +64,9 @@ final class ReleephRequestActionController
           // We're all good!
         } else {
           throw new Exception(
-            "Bug!  Only pushers or the requestor can manually change a ".
-            "request's in-branch status!");
+            pht(
+              "Bug! Only pushers or the requestor can manually change a ".
+              "request's in-branch status!"));
         }
 
         if ($action === 'mark-manually-picked') {
@@ -89,7 +90,8 @@ final class ReleephRequestActionController
         break;
 
       default:
-        throw new Exception("unknown or unimplemented action {$action}");
+        throw new Exception(
+          pht('Unknown or unimplemented action %s.', $action));
     }
 
     $editor->applyTransactions($pull, $xactions);

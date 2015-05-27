@@ -3,12 +3,13 @@
 final class PHUIInfoExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Info View';
+    return pht('Info View');
   }
 
   public function getDescription() {
-    return hsprintf(
-      'Use <tt>PHUIInfoView</tt> to render errors, warnings and notices.');
+    return pht(
+      'Use %s to render errors, warnings and notices.',
+      phutil_tag('tt', array(), 'PHUIInfoView'));
   }
 
   public function renderExample() {
@@ -16,16 +17,16 @@ final class PHUIInfoExample extends PhabricatorUIExample {
     $user = $request->getUser();
 
     $sevs = array(
-      PHUIInfoView::SEVERITY_ERROR    => 'Error',
-      PHUIInfoView::SEVERITY_WARNING  => 'Warning',
-      PHUIInfoView::SEVERITY_NODATA   => 'No Data',
-      PHUIInfoView::SEVERITY_NOTICE   => 'Notice',
-      PHUIInfoView::SEVERITY_SUCCESS   => 'Success',
+      PHUIInfoView::SEVERITY_ERROR    => pht('Error'),
+      PHUIInfoView::SEVERITY_WARNING  => pht('Warning'),
+      PHUIInfoView::SEVERITY_NODATA   => pht('No Data'),
+      PHUIInfoView::SEVERITY_NOTICE   => pht('Notice'),
+      PHUIInfoView::SEVERITY_SUCCESS  => pht('Success'),
     );
 
     $button = id(new PHUIButtonView())
         ->setTag('a')
-        ->setText('Resolve Issue')
+        ->setText(pht('Resolve Issue'))
         ->setHref('#');
 
     $views = array();
@@ -42,7 +43,7 @@ final class PHUIInfoExample extends PhabricatorUIExample {
     foreach ($sevs as $sev => $title) {
       $view = new PHUIInfoView();
       $view->setSeverity($sev);
-      $view->appendChild('Several issues were encountered.');
+      $view->appendChild(pht('Several issues were encountered.'));
       $view->addButton($button);
       $views[] = $view;
     }
@@ -54,9 +55,9 @@ final class PHUIInfoExample extends PhabricatorUIExample {
       $view->setSeverity($sev);
       $view->setErrors(
         array(
-          'Overcooked.',
-          'Too much salt.',
-          'Full of sand.',
+          pht('Overcooked.'),
+          pht('Too much salt.'),
+          pht('Full of sand.'),
         ));
       $views[] = $view;
     }
@@ -67,12 +68,12 @@ final class PHUIInfoExample extends PhabricatorUIExample {
       $view = new PHUIInfoView();
       $view->setSeverity($sev);
       $view->setTitle($title);
-      $view->appendChild('Several issues were encountered.');
+      $view->appendChild(pht('Several issues were encountered.'));
       $view->setErrors(
         array(
-          'Overcooked.',
-          'Too much salt.',
-          'Full of sand.',
+          pht('Overcooked.'),
+          pht('Too much salt.'),
+          pht('Full of sand.'),
         ));
       $views[] = $view;
     }

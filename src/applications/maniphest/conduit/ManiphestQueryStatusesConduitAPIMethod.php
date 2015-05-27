@@ -8,7 +8,8 @@ final class ManiphestQueryStatusesConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Retrieve information about possible Maniphest Task status values.';
+    return pht(
+      'Retrieve information about possible Maniphest task status values.');
   }
 
   protected function defineParamTypes() {

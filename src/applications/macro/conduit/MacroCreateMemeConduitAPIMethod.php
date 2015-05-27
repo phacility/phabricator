@@ -28,7 +28,7 @@ final class MacroCreateMemeConduitAPIMethod extends MacroConduitAPIMethod {
 
   protected function defineErrorTypes() {
     return array(
-      'ERR-NOT-FOUND' => 'Macro was not found.',
+      'ERR-NOT-FOUND' => pht('Macro was not found.'),
     );
   }
 

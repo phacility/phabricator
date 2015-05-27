@@ -150,8 +150,11 @@ final class PHUICalendarListView extends AphrontTagView {
       $this->getUser(),
       $event->getEpochEnd()));
 
+    $start_date = $start->getDateTime()->format('m d Y');
+    $end_date = $end->getDateTime()->format('m d Y');
+
     if ($event->getIsAllDay()) {
-      if ($start->getValueDay() == $end->getValueDay()) {
+      if ($start_date == $end_date) {
         $tip = pht('All day');
       } else {
         $tip = pht(
@@ -160,9 +163,7 @@ final class PHUICalendarListView extends AphrontTagView {
           $end->getValueAsFormat('M j, Y'));
       }
     } else {
-      if ($start->getValueDay() == $end->getValueDay() &&
-        $start->getValueMonth() == $end->getValueMonth() &&
-        $start->getValueYear() == $end->getValueYear()) {
+      if ($start->getValueDate() == $end->getValueDate()) {
         $tip = pht(
           '%s - %s',
           $start->getValueAsFormat('g:i A'),

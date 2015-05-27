@@ -8,7 +8,7 @@ final class FileUploadHashConduitAPIMethod extends FileConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Upload a file to the server using content hash.';
+    return pht('Upload a file to the server using content hash.');
   }
 
   protected function defineParamTypes() {

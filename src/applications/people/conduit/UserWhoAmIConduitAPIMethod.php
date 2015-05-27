@@ -7,7 +7,7 @@ final class UserWhoAmIConduitAPIMethod extends UserConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Retrieve information about the logged-in user.';
+    return pht('Retrieve information about the logged-in user.');
   }
 
   protected function defineParamTypes() {

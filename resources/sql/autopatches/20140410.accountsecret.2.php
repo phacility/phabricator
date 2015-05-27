@@ -1,12 +1,10 @@
 <?php
 
-echo "Updating users...\n";
-
+echo pht('Updating users...')."\n";
 
 foreach (new LiskMigrationIterator(new PhabricatorUser()) as $user) {
-
   $id = $user->getID();
-  echo "Updating {$id}...\n";
+  echo pht('Updating %d...', $id)."\n";
 
   if (strlen($user->getAccountSecret())) {
     continue;
@@ -20,4 +18,4 @@ foreach (new LiskMigrationIterator(new PhabricatorUser()) as $user) {
     $id);
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

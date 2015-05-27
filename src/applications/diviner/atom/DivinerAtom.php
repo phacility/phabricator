@@ -396,7 +396,7 @@ final class DivinerAtom {
       case self::TYPE_METHOD:
         return pht('This method is not documented.');
       default:
-        phlog("Need translation for '{$type}'.");
+        phlog(pht("Need translation for '%s'.", $type));
         return pht('This %s is not documented.', $type);
     }
   }
@@ -427,7 +427,7 @@ final class DivinerAtom {
       case self::TYPE_METHOD:
         return pht('Method');
       default:
-        phlog("Need translation for '{$type}'.");
+        phlog(pht("Need translation for '%s'.", $type));
         return ucwords($type);
     }
   }

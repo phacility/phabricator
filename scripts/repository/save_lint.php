@@ -11,7 +11,7 @@ $synopsis = <<<EOT
 EOT;
 
 $args = id(new PhutilArgumentParser($argv))
-  ->setTagline('save lint errors to database')
+  ->setTagline(pht('save lint errors to database'))
   ->setSynopsis($synopsis)
   ->parseStandardArguments()
   ->parse(array(

@@ -54,9 +54,6 @@ a.phui-calendar-month-secret-link {
   position: absolute;
   left: 0;
   right: 0;
-  top: 0;
-  bottom: 0;
-  outline: 0;
 }
 
 table.phui-calendar-view tr td:first-child {
@@ -149,7 +146,8 @@ table.phui-calendar-view td.phui-calendar-date-number-container {
   background: transparent;
 }
 
-.phui-calendar-view .phui-calendar-list {
+.phui-calendar-view .phui-calendar-list,
+.phui-calendar-view .phui-calendar-month-list {
   padding: 1px;
   width: auto;
 }

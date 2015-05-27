@@ -223,8 +223,11 @@ final class CeleritySpriteGenerator {
     foreach ($images as $image) {
       if (!preg_match('/\.png$/', $image)) {
         throw new Exception(
-          "Expected file '{$image}' in '{$path}' to be a sprite source ".
-          "ending in '.png'.");
+          pht(
+            "Expected file '%s' in '%s' to be a sprite source ending in '%s'.",
+            $image,
+            $path,
+            '.png'));
       }
       $result[] = substr($image, 0, -4);
     }

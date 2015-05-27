@@ -141,8 +141,7 @@ final class PhabricatorRepositoryQuery
 
   public function getIdentifierMap() {
     if ($this->identifierMap === null) {
-      throw new Exception(
-        'You must execute() the query before accessing the identifier map.');
+      throw new PhutilInvalidStateException('execute');
     }
     return $this->identifierMap;
   }
@@ -239,7 +238,7 @@ final class PhabricatorRepositoryQuery
         case self::HOSTED_ALL:
           break;
         default:
-          throw new Exception("Uknown hosted failed '${hosted}'!");
+          throw new Exception(pht("Unknown hosted failed '%s'!", $hosted));
       }
     }
 

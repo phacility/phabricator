@@ -23,16 +23,14 @@ final class PhabricatorPeopleNoOwnerDatasource
         'name' => pht('No Owner'),
         'summary' => pht('Find results which are not assigned.'),
         'description' => pht(
-          'This function includes results which have no owner. Use a query '.
-          'like this to find unassigned results:'.
-          "\n\n".
-          '> none()'.
-          "\n\n".
-          'If you combine this function with other functions, the query will '.
-          'return results which match the other selectors //or// have no '.
-          'owner. For example, this query will find results which are owned '.
-          'by `alincoln`, and will also find results which have no owner:'.
-          "\n\n".
+          "This function includes results which have no owner. Use a query ".
+          "like this to find unassigned results:\n\n%s\n\n".
+          "If you combine this function with other functions, the query will ".
+          "return results which match the other selectors //or// have no ".
+          "owner. For example, this query will find results which are owned ".
+          "by `alincoln`, and will also find results which have no owner:".
+          "\n\n%s",
+          '> none()',
           '> alincoln, none()'),
       ),
     );

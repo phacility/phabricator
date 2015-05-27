@@ -1,6 +1,6 @@
 <?php
 
-echo "Retro-naming unnamed events.\n";
+echo pht('Retro-naming unnamed events.')."\n";
 
 $table = new PhabricatorCalendarEvent();
 $conn_w = $table->establishConnection('w');
@@ -9,7 +9,7 @@ foreach ($iterator as $event) {
   $id = $event->getID();
 
   if (strlen($event->getName()) == 0) {
-    echo "Renaming event {$id}...\n";
+    echo pht('Renaming event %d...', $id)."\n";
     $viewer = PhabricatorUser::getOmnipotentUser();
 
     // NOTE: This uses PeopleQuery directly, instead of HandleQuery, to avoid
@@ -35,4 +35,4 @@ foreach ($iterator as $event) {
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

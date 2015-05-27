@@ -191,6 +191,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     if ($revision) {
       $query = id(new DifferentialInlineCommentQuery())
         ->setViewer($viewer)
+        ->needHidden(true)
         ->withRevisionPHIDs(array($revision->getPHID()));
       $inlines = $query->execute();
       $inlines = $query->adjustInlinesForChangesets(
@@ -372,7 +373,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
       $inline = new DifferentialInlineComment();
       $inline->setChangesetID($changeset->getID());
       $inline->setIsNewFile(1);
-      $inline->setSyntheticAuthor('Lint: '.$msg['name']);
+      $inline->setSyntheticAuthor(pht('Lint: %s', $msg['name']));
       $inline->setLineNumber($msg['line']);
       $inline->setLineLength(0);
 

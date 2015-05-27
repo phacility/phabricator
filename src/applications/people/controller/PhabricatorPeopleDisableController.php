@@ -41,8 +41,7 @@ final class PhabricatorPeopleDisableController
         ->setTitle(pht('Something Stays Your Hand'))
         ->appendParagraph(
           pht(
-            'Try as you might, you find you can not disable your '.
-            'own account.'))
+            'Try as you might, you find you can not disable your own account.'))
         ->addCancelButton($done_uri, pht('Curses!'));
     }
 

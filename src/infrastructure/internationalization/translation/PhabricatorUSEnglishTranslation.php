@@ -1067,6 +1067,35 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
+      'These %s object(s) will be destroyed forever:' => array(
+        'This object will be destroyed forever:',
+        'These objects will be destroyed forever:',
+      ),
+
+      'Are you absolutely certain you want to destroy these %s '.
+      'object(s)?' => array(
+        'Are you absolutely certain you want to destroy this object?',
+        'Are you absolutely certain you want to destroy these objects?',
+      ),
+
+      '%s added %s owner(s): %s.' => array(
+        array(
+          '%s added an owner: %3$s.',
+          '%s added owners: %3$s.',
+        ),
+      ),
+
+      '%s removed %s owner(s): %s.' => array(
+        array(
+          '%s removed an owner: %3$s.',
+          '%s removed owners: %3$s.',
+        ),
+      ),
+
+      '%s changed %s package owner(s), added %s: %s; removed %s: %s.' => array(
+        '%s changed package owners, added: %4$s; removed: %6$s.',
+      ),
+
     );
   }
 

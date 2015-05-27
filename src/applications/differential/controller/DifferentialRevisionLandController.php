@@ -29,10 +29,12 @@ final class DifferentialRevisionLandController extends DifferentialController {
       $this->pushStrategy = newv($this->strategyClass, array());
     } else {
       throw new Exception(
-        "Strategy type must be a valid class name and must subclass ".
-        "DifferentialLandingStrategy. ".
-        "'{$this->strategyClass}' is not a subclass of ".
-        "DifferentialLandingStrategy.");
+        pht(
+          "Strategy type must be a valid class name and must subclass ".
+          "%s. '%s' is not a subclass of %s",
+          'DifferentialLandingStrategy',
+          $this->strategyClass,
+          'DifferentialLandingStrategy'));
     }
 
     if ($request->isDialogFormPost()) {
@@ -91,7 +93,7 @@ final class DifferentialRevisionLandController extends DifferentialController {
     $prompt = hsprintf('%s<br><br>%s',
       pht(
         'This will squash and rebase revision %s, and push it to '.
-          'the default / master branch.',
+        'the default / master branch.',
         $revision_id),
       pht('It is an experimental feature and may not work.'));
 
@@ -109,13 +111,13 @@ final class DifferentialRevisionLandController extends DifferentialController {
   private function attemptLand($revision, $request) {
     $status = $revision->getStatus();
     if ($status != ArcanistDifferentialRevisionStatus::ACCEPTED) {
-      throw new Exception('Only Accepted revisions can be landed.');
+      throw new Exception(pht('Only Accepted revisions can be landed.'));
     }
 
     $repository = $revision->getRepository();
 
     if ($repository === null) {
-      throw new Exception('revision is not attached to a repository.');
+      throw new Exception(pht('Revision is not attached to a repository.'));
     }
 
     $can_push = PhabricatorPolicyFilter::hasCapability(

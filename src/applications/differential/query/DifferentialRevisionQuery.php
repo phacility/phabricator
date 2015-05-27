@@ -820,7 +820,7 @@ final class DifferentialRevisionQuery
         break;
       default:
         throw new Exception(
-          "Unknown revision status filter constant '{$this->status}'!");
+          pht("Unknown revision status filter constant '%s'!", $this->status));
     }
 
     $where[] = $this->buildWhereClauseParts($conn_r);
@@ -1035,7 +1035,7 @@ final class DifferentialRevisionQuery
             // The author can never have authority unless we allow self-accept.
             $has_authority = false;
           } else {
-            // Otherwise, look up whether th viewer has authority.
+            // Otherwise, look up whether the viewer has authority.
             $has_authority = isset($authority[$reviewer_phid]);
           }
 

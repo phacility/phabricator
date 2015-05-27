@@ -17,8 +17,10 @@ final class PhabricatorPolicyFilter {
 
     if (!self::hasCapability($user, $object, $capability)) {
       throw new Exception(
-        "You can not make that edit, because it would remove your ability ".
-        "to '{$capability}' the object.");
+        pht(
+          "You can not make that edit, because it would remove your ability ".
+          "to '%s' the object.",
+          $capability));
     }
   }
 
@@ -110,8 +112,7 @@ final class PhabricatorPolicyFilter {
     $capabilities = $this->capabilities;
 
     if (!$viewer || !$capabilities) {
-      throw new Exception(
-        'Call setViewer() and requireCapabilities() before apply()!');
+      throw new PhutilInvalidStateException('setViewer', 'requireCapabilities');
     }
 
     // If the viewer is omnipotent, short circuit all the checks and just
@@ -135,8 +136,10 @@ final class PhabricatorPolicyFilter {
       foreach ($capabilities as $capability) {
         if (!in_array($capability, $object_capabilities)) {
           throw new Exception(
-            "Testing for capability '{$capability}' on an object which does ".
-            "not have that capability!");
+            pht(
+              "Testing for capability '%s' on an object which does ".
+              "not have that capability!",
+              $capability));
         }
 
         $policy = $this->getObjectPolicy($object, $capability);

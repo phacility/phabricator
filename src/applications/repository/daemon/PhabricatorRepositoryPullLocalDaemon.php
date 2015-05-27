@@ -43,18 +43,18 @@ final class PhabricatorRepositoryPullLocalDaemon
       array(
         array(
           'name'      => 'no-discovery',
-          'help'      => 'Pull only, without discovering commits.',
+          'help'      => pht('Pull only, without discovering commits.'),
         ),
         array(
           'name'      => 'not',
           'param'     => 'repository',
           'repeat'    => true,
-          'help'      => 'Do not pull __repository__.',
+          'help'      => pht('Do not pull __repository__.'),
         ),
         array(
           'name'      => 'repositories',
           'wildcard'  => true,
-          'help'      => 'Pull specific __repositories__ instead of all.',
+          'help'      => pht('Pull specific __repositories__ instead of all.'),
         ),
       ));
 
@@ -312,7 +312,9 @@ final class PhabricatorRepositoryPullLocalDaemon
       foreach ($include as $name) {
         if (empty($by_callsign[$name])) {
           throw new Exception(
-            "No repository exists with callsign '{$name}'!");
+            pht(
+              "No repository exists with callsign '%s'!",
+              $name));
         }
       }
     }

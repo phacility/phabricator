@@ -26,10 +26,10 @@ final class DifferentialUpdateRevisionConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_BAD_DIFF' => 'Bad diff ID.',
-      'ERR_BAD_REVISION' => 'Bad revision ID.',
-      'ERR_WRONG_USER' => 'You are not the author of this revision.',
-      'ERR_CLOSED' => 'This revision has already been closed.',
+      'ERR_BAD_DIFF'     => pht('Bad diff ID.'),
+      'ERR_BAD_REVISION' => pht('Bad revision ID.'),
+      'ERR_WRONG_USER'   => pht('You are not the author of this revision.'),
+      'ERR_CLOSED'       => pht('This revision has already been closed.'),
     );
   }
 

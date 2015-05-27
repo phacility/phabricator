@@ -8,7 +8,7 @@ final class DifferentialSetDiffPropertyConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Attach properties to Differential diffs.';
+    return pht('Attach properties to Differential diffs.');
   }
 
   protected function defineParamTypes() {
@@ -25,7 +25,7 @@ final class DifferentialSetDiffPropertyConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_NOT_FOUND' => 'Diff was not found.',
+      'ERR_NOT_FOUND' => pht('Diff was not found.'),
     );
   }
 

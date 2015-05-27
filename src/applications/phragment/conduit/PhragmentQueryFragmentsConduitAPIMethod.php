@@ -27,7 +27,7 @@ final class PhragmentQueryFragmentsConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_BAD_FRAGMENT' => 'No such fragment exists',
+      'ERR_BAD_FRAGMENT' => pht('No such fragment exists.'),
     );
   }
 

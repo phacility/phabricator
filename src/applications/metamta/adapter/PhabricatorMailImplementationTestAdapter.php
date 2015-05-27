@@ -81,12 +81,12 @@ final class PhabricatorMailImplementationTestAdapter
   public function send() {
     if (!empty($this->guts['fail-permanently'])) {
       throw new PhabricatorMetaMTAPermanentFailureException(
-        'Unit Test (Permanent)');
+        pht('Unit Test (Permanent)'));
     }
 
     if (!empty($this->guts['fail-temporarily'])) {
       throw new Exception(
-        'Unit Test (Temporary)');
+        pht('Unit Test (Temporary)'));
     }
 
     $this->guts['did-send'] = true;

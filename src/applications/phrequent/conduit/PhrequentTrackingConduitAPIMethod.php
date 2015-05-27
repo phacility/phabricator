@@ -8,8 +8,7 @@ final class PhrequentTrackingConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return pht(
-      'Returns current objects being tracked in Phrequent.');
+    return pht('Returns current objects being tracked in Phrequent.');
   }
 
   public function getMethodStatus() {

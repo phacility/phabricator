@@ -17,7 +17,7 @@ final class DrydockResourceStatus extends DrydockConstants {
       self::STATUS_DESTROYED    => pht('Destroyed'),
     );
 
-    return idx($map, $status, 'Unknown');
+    return idx($map, $status, pht('Unknown'));
   }
 
   public static function getAllStatuses() {

@@ -7,7 +7,7 @@ final class PhabricatorStorageManagementDatabasesWorkflow
     $this
       ->setName('databases')
       ->setExamples('**databases** [__options__]')
-      ->setSynopsis('List Phabricator databases.');
+      ->setSynopsis(pht('List Phabricator databases.'));
   }
 
   public function execute(PhutilArgumentParser $args) {

@@ -167,8 +167,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
           ->addCheckbox(
             'requireSignature',
             'requireSignature',
-            pht(
-              'Should signing this document be required to use Phabricator?'),
+            pht('Should signing this document be required to use Phabricator?'),
             $v_require_signature)
           ->setCaption($caption));
     }

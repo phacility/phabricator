@@ -183,7 +183,7 @@ final class HarbormasterBuildViewController
       }
 
       $properties = new PHUIPropertyListView();
-      $properties->addProperty('Build Target ID', $build_target->getID());
+      $properties->addProperty(pht('Build Target ID'), $build_target->getID());
       $target_box->addPropertyList($properties, pht('Metadata'));
 
       $targets[] = $target_box;
@@ -527,7 +527,5 @@ final class HarbormasterBuildViewController
 
     return $table;
   }
-
-
 
 }

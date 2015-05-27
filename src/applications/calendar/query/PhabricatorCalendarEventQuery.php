@@ -42,6 +42,30 @@ final class PhabricatorCalendarEventQuery
     return $this;
   }
 
+  protected function getDefaultOrderVector() {
+    return array('start', 'id');
+  }
+
+  public function getOrderableColumns() {
+    return array(
+      'start' => array(
+        'table' => $this->getPrimaryTableAlias(),
+        'column' => 'dateFrom',
+        'reverse' => true,
+        'type' => 'int',
+        'unique' => false,
+      ),
+    ) + parent::getOrderableColumns();
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $event = $this->loadCursorObject($cursor);
+    return array(
+      'start' => $event->getDateFrom(),
+      'id' => $event->getID(),
+    );
+  }
+
   protected function loadPage() {
     $table = new PhabricatorCalendarEvent();
     $conn_r = $table->establishConnection('r');
@@ -156,6 +180,21 @@ final class PhabricatorCalendarEventQuery
 
 
   protected function willFilterPage(array $events) {
+    $range_start = $this->rangeBegin;
+    $range_end = $this->rangeEnd;
+
+    foreach ($events as $key => $event) {
+      $event_start = $event->getDateFrom();
+      $event_end = $event->getDateTo();
+
+      if ($range_start && $event_end < $range_start) {
+        unset($events[$key]);
+      }
+      if ($range_end && $event_start > $range_end) {
+        unset($events[$key]);
+      }
+    }
+
     $phids = array();
 
     foreach ($events as $event) {
@@ -172,6 +211,8 @@ final class PhabricatorCalendarEventQuery
       $event_invitees = idx($invitees, $event->getPHID(), array());
       $event->attachInvitees($event_invitees);
     }
+
+    $events = msort($events, 'getDateFrom');
 
     return $events;
   }

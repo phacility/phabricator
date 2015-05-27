@@ -131,7 +131,10 @@ final class PhabricatorMailImplementationMailgunAdapter
 
     if (!idx($response, 'id')) {
       $message = $response['message'];
-      throw new Exception("Request failed with errors: {$message}.");
+      throw new Exception(
+        pht(
+          'Request failed with errors: %s.',
+          $message));
     }
 
     return true;

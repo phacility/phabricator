@@ -68,7 +68,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         $transaction = null;
         break;
       default:
-        throw new Exception('unknown action');
+        throw new Exception(pht("Unknown action '%s'!", $action));
     }
 
     if ($transaction) {

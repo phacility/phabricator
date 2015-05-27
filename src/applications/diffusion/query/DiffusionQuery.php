@@ -32,7 +32,7 @@ abstract class DiffusionQuery extends PhabricatorQuery {
 
     $name = idx($map, $repository->getVersionControlSystem());
     if (!$name) {
-      throw new Exception('Unsupported VCS!');
+      throw new Exception(pht('Unsupported VCS!'));
     }
 
     $class = str_replace('Diffusion', 'Diffusion'.$name, $base_class);

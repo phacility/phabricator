@@ -55,9 +55,10 @@ final class DifferentialRevisionCloseDetailsController
     $body_why = array();
     if ($revision_match_data['usedURI']) {
       return pht(
-        'We found a "Differential Revision" field with value "%s" in the '.
-        'commit message, and the domain on the URI matches this install, so '.
+        'We found a "%s" field with value "%s" in the commit message, '.
+        'and the domain on the URI matches this install, so '.
         'we linked this commit to %s.',
+        'Differential Revision',
         $revision_match_data['foundURI'],
         phutil_tag(
           'a',
@@ -67,16 +68,17 @@ final class DifferentialRevisionCloseDetailsController
           $obj_handle->getName()));
     } else if ($revision_match_data['foundURI']) {
       $body_why[] = pht(
-        'We found a "Differential Revision" field with value "%s" in the '.
-        'commit message, but the domain on this URI did not match the '.
-        'configured domain for this install, "%s", so we ignored it under '.
+        'We found a "%s" field with value "%s" in the commit message, '.
+        'but the domain on this URI did not match the configured '.
+        'domain for this install, "%s", so we ignored it under '.
         'the assumption that it refers to some third-party revision.',
+        'Differential Revision',
         $revision_match_data['foundURI'],
         $revision_match_data['validDomain']);
     } else {
       $body_why[] = pht(
-        'We didn\'t find a "Differential Revision" field in the commit '.
-        'message.');
+        'We didn\'t find a "%s" field in the commit message.',
+        'Differential Revision');
     }
 
     switch ($revision_match_data['matchHashType']) {

@@ -67,7 +67,7 @@ final class DiffusionURITestCase extends PhutilTestCase {
       $this->assertEqual(
         $expect,
         $actual,
-        "Parsing '{$input}'");
+        pht("Parsing '%s'", $input));
     }
   }
 

@@ -3,7 +3,7 @@
 $table = new PhrictionDocument();
 $conn_w = $table->establishConnection('w');
 
-echo "Populating Phriction policies.\n";
+echo pht('Populating Phriction policies.')."\n";
 
 $default_view_policy = PhabricatorPolicies::POLICY_USER;
 $default_edit_policy = PhabricatorPolicies::POLICY_USER;
@@ -12,7 +12,7 @@ foreach (new LiskMigrationIterator($table) as $doc) {
   $id = $doc->getID();
 
   if ($doc->getViewPolicy() && $doc->getEditPolicy()) {
-    echo "Skipping doc $id; already has policy set.\n";
+    echo pht('Skipping document %d; already has policy set.', $id)."\n";
     continue;
   }
 
@@ -38,7 +38,10 @@ foreach (new LiskMigrationIterator($table) as $doc) {
       $edit_policy = nonempty($project->getEditPolicy(), $default_edit_policy);
 
       $project_name = $project->getName();
-      echo "Migrating doc $id to project policy $project_name...\n";
+      echo pht(
+        "Migrating document %d to project policy %s...\n",
+        $id,
+        $project_name);
       $doc->setViewPolicy($view_policy);
       $doc->setEditPolicy($edit_policy);
       $doc->save();
@@ -46,10 +49,10 @@ foreach (new LiskMigrationIterator($table) as $doc) {
     }
   }
 
-  echo "Migrating doc $id to default install policy...\n";
+  echo pht('Migrating document %d to default install policy...', $id)."\n";
   $doc->setViewPolicy($default_view_policy);
   $doc->setEditPolicy($default_edit_policy);
   $doc->save();
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

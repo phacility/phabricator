@@ -7,7 +7,7 @@ final class ProjectQueryConduitAPIMethod extends ProjectConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Execute searches for Projects.';
+    return pht('Execute searches for Projects.');
   }
 
   protected function defineParamTypes() {

@@ -299,10 +299,13 @@ final class ReleephRequestTransactionalEditor
         $type = $xaction->getTransactionType();
         $new = $xaction->getNewValue();
         phlog(
-          "Unknown discovery action '{$action}' ".
-          "for xaction of type {$type} ".
-          "with new value {$new} ".
-          "mentioning RQ{$id}!");
+          pht(
+            "Unknown discovery action '%s' for xaction of type %s ".
+            "with new value %s mentioning %s!",
+            $action,
+            $type,
+            $new,
+            'RQ'.$id));
         break;
     }
   }

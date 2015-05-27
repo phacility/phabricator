@@ -16,7 +16,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         'user'    => true,
         'admin'   => true,
       ),
-      'Public Policy (Enabled in Config)');
+      pht('Public Policy (Enabled in Config)'));
   }
 
 
@@ -35,7 +35,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         'user'    => true,
         'admin'   => true,
       ),
-      'Public Policy (Disabled in Config)');
+      pht('Public Policy (Disabled in Config)'));
   }
 
 
@@ -51,7 +51,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         'user'    => true,
         'admin'   => true,
       ),
-      'User Policy');
+      pht('User Policy'));
   }
 
 
@@ -66,7 +66,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         'user'    => false,
         'admin'   => true,
       ),
-      'Admin Policy');
+      pht('Admin Policy'));
   }
 
 
@@ -81,7 +81,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         'user'    => false,
         'admin'   => false,
       ),
-      'No One Policy');
+      pht('No One Policy'));
   }
 
 
@@ -105,22 +105,22 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
     $this->assertEqual(
       3,
       count($query->setLimit(3)->setOffset(0)->execute()),
-      'Invisible objects are ignored.');
+      pht('Invisible objects are ignored.'));
 
     $this->assertEqual(
       0,
       count($query->setLimit(3)->setOffset(3)->execute()),
-      'Offset pages through visible objects only.');
+      pht('Offset pages through visible objects only.'));
 
     $this->assertEqual(
       2,
       count($query->setLimit(3)->setOffset(1)->execute()),
-      'Offsets work correctly.');
+      pht('Offsets work correctly.'));
 
     $this->assertEqual(
       2,
       count($query->setLimit(0)->setOffset(1)->execute()),
-      'Offset with no limit works.');
+      pht('Offset with no limit works.'));
   }
 
 
@@ -144,12 +144,12 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
     $this->assertEqual(
       3,
       count($query->setLimit(3)->setOffset(0)->execute()),
-      'Limits work.');
+      pht('Limits work.'));
 
     $this->assertEqual(
       2,
       count($query->setLimit(3)->setOffset(4)->execute()),
-      'Limit + offset work.');
+      pht('Limit + offset work.'));
   }
 
 
@@ -185,7 +185,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         'user'    => false,
         'admin'   => false,
       ),
-      'Invalid Policy');
+      pht('Invalid Policy'));
   }
 
 
@@ -222,7 +222,10 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
       }
       $this->assertTrue(
         (bool)PhabricatorApplication::getByClass($class),
-        "Application class '{$class}' for query '{$qclass}'");
+        pht(
+          "Application class '%s' for query '%s'.",
+          $class,
+          $qclass));
     }
   }
 
@@ -281,11 +284,11 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         $this->assertEqual(
           $object,
           $result,
-          "{$description} with user {$spec} should succeed.");
+          pht('%s with user %s should succeed.', $description, $spec));
       } else {
         $this->assertTrue(
           $caught instanceof PhabricatorPolicyException,
-          "{$description} with user {$spec} should fail.");
+          pht('%s with user %s should fail.', $description, $spec));
       }
     }
   }
@@ -326,7 +329,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         $user->setIsAdmin(true);
         break;
       default:
-        throw new Exception("Unknown user spec '{$spec}'.");
+        throw new Exception(pht("Unknown user spec '%s'.", $spec));
     }
 
     return $user;

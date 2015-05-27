@@ -11,11 +11,11 @@ final class PasteInfoConduitAPIMethod extends PasteConduitAPIMethod {
   }
 
   public function getMethodStatusDescription() {
-    return "Replaced by 'paste.query'.";
+    return pht("Replaced by '%s'.", 'paste.query');
   }
 
   public function getMethodDescription() {
-    return 'Retrieve an array of information about a paste.';
+    return pht('Retrieve an array of information about a paste.');
   }
 
   protected function defineParamTypes() {
@@ -30,7 +30,7 @@ final class PasteInfoConduitAPIMethod extends PasteConduitAPIMethod {
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_BAD_PASTE' => 'No such paste exists',
+      'ERR_BAD_PASTE' => pht('No such paste exists.'),
     );
   }
 

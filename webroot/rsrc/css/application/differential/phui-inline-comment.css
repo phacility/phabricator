@@ -434,3 +434,21 @@
     border-color: {$lightgreyborder};
     color: {$lightgreytext};
 }
+
+
+/* - Hiding Inlines ------------------------------------------------------------
+*/
+
+.reveal-inlines {
+  float: left;
+  margin-left: 4px;
+  color: {$lightbluetext};
+}
+
+.reveal-inlines span.phui-icon-view {
+  color: {$lightbluetext};
+}
+
+.reveal-inlines:hover span.phui-icon-view {
+  color: {$darkbluetext};
+}

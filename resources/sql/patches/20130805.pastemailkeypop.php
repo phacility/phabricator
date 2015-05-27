@@ -1,6 +1,6 @@
 <?php
 
-echo "Populating pastes with mail keys...\n";
+echo pht('Populating pastes with mail keys...')."\n";
 
 $table = new PhabricatorPaste();
 $table->openTransaction();
@@ -17,11 +17,11 @@ foreach (new LiskMigrationIterator($table) as $paste) {
       $paste->getTableName(),
       Filesystem::readRandomCharacters(20),
       $id);
-    echo "Generated Key\n";
+    echo pht('Generated Key')."\n";
   } else {
     echo "-\n";
   }
 }
 
 $table->saveTransaction();
-echo "Done.\n";
+echo pht('Done.')."\n";

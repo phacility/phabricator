@@ -26,7 +26,7 @@ final class PhameBlogListController extends PhameController {
           ));
         break;
       default:
-        throw new Exception("Unknown filter '{$filter}'!");
+        throw new Exception(pht("Unknown filter '%s'!", $filter));
     }
 
     $pager = id(new AphrontPagerView())

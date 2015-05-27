@@ -117,8 +117,10 @@ final class PHUICalendarMonthView extends AphrontView {
 
     foreach ($cell_lists_by_week as $week_of_cell_lists) {
       $cells = array();
+      $max_count = $this->getMaxDailyEventsForWeek($week_of_cell_lists);
+
       foreach ($week_of_cell_lists as $cell_list) {
-        $cells[] = $this->getEventListCell($cell_list);
+        $cells[] = $this->getEventListCell($cell_list, $max_count);
       }
       $rows[] = phutil_tag('tr', array(), $cells);
 
@@ -153,7 +155,19 @@ final class PHUICalendarMonthView extends AphrontView {
     return $box;
   }
 
-  private function getEventListCell($event_list) {
+  private function getMaxDailyEventsForWeek($week_of_cell_lists) {
+    $max_count = 0;
+
+    foreach ($week_of_cell_lists as $cell_list) {
+      if ($cell_list['count'] > $max_count) {
+        $max_count = $cell_list['count'];
+      }
+    }
+
+    return $max_count;
+  }
+
+  private function getEventListCell($event_list, $max_count = 0) {
     $list = $event_list['list'];
     $class = $event_list['class'];
     $uri = $event_list['uri'];
@@ -162,7 +176,7 @@ final class PHUICalendarMonthView extends AphrontView {
     $viewer_is_invited = $list->getIsViewerInvitedOnList();
 
     $event_count_badge = $this->getEventCountBadge($count, $viewer_is_invited);
-    $cell_day_secret_link = $this->getHiddenDayLink($uri);
+    $cell_day_secret_link = $this->getHiddenDayLink($uri, $max_count, 125);
 
     $cell_data_div = phutil_tag(
       'div',
@@ -191,7 +205,7 @@ final class PHUICalendarMonthView extends AphrontView {
 
     if ($date) {
       $uri = $event_list['uri'];
-      $cell_day_secret_link = $this->getHiddenDayLink($uri);
+      $cell_day_secret_link = $this->getHiddenDayLink($uri, 0, 25);
 
       $cell_day = phutil_tag(
         'a',
@@ -291,11 +305,16 @@ final class PHUICalendarMonthView extends AphrontView {
       $event_count);
   }
 
-  private function getHiddenDayLink($uri) {
+  private function getHiddenDayLink($uri, $count, $max_height) {
+    // approximately the height of the tallest cell
+    $height = 18 * $count + 5;
+    $height = ($height > $max_height) ? $height : $max_height;
+    $height_style = 'height: '.$height.'px';
     return phutil_tag(
       'a',
       array(
         'class' => 'phui-calendar-month-secret-link',
+        'style' => $height_style,
         'href' => $uri,
       ),
       null);

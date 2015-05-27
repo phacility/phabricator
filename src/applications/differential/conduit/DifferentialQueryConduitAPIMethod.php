@@ -8,7 +8,7 @@ final class DifferentialQueryConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Query Differential revisions which match certain criteria.';
+    return pht('Query Differential revisions which match certain criteria.');
   }
 
   protected function defineParamTypes() {
@@ -53,7 +53,7 @@ final class DifferentialQueryConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.',
+      'ERR-INVALID-PARAMETER' => pht('Missing or malformed parameter.'),
     );
   }
 
@@ -103,7 +103,9 @@ final class DifferentialQueryConduitAPIMethod
         }
         throw id(new ConduitException('ERR-INVALID-PARAMETER'))
           ->setErrorDescription(
-            'Unknown paths: '.implode(', ', $unknown_paths));
+            pht(
+              'Unknown paths: %s',
+              implode(', ', $unknown_paths)));
       }
 
       $repos = array();
@@ -118,7 +120,9 @@ final class DifferentialQueryConduitAPIMethod
           if (!$repos[$callsign]) {
             throw id(new ConduitException('ERR-INVALID-PARAMETER'))
               ->setErrorDescription(
-                'Unknown repo callsign: '.$callsign);
+                pht(
+                  'Unknown repo callsign: %s',
+                  $callsign));
           }
         }
         $repo = $repos[$callsign];

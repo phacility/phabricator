@@ -28,7 +28,8 @@ final class PhabricatorAuthManagementTrustOAuthClientWorkflow
     if (!$id) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Specify an OAuth client id with --id.'));
+          'Specify an OAuth client id with %s.',
+          '--id'));
     }
 
     $client = id(new PhabricatorOAuthServerClientQuery())

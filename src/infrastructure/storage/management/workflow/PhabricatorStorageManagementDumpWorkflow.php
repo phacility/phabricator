@@ -7,7 +7,7 @@ final class PhabricatorStorageManagementDumpWorkflow
     $this
       ->setName('dump')
       ->setExamples('**dump** [__options__]')
-      ->setSynopsis('Dump all data in storage to stdout.');
+      ->setSynopsis(pht('Dump all data in storage to stdout.'));
   }
 
   public function execute(PhutilArgumentParser $args) {
@@ -22,8 +22,9 @@ final class PhabricatorStorageManagementDumpWorkflow
         pht(
           '**Storage Not Initialized**: There is no database storage '.
           'initialized in this storage namespace ("%s"). Use '.
-          '**storage upgrade** to initialize storage.',
-          $namespace));
+          '**%s** to initialize storage.',
+          $namespace,
+          'storage upgrade'));
       return 1;
     }
 

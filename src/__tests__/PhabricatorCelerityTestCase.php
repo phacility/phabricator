@@ -28,7 +28,8 @@ final class PhabricatorCelerityTestCase extends PhabricatorTestCase {
         $maps_are_identical,
         pht(
           'When this test fails, it means the Celerity resource map is out '.
-          'of date. Run `bin/celerity map` to rebuild it.'));
+          'of date. Run `%s` to rebuild it.',
+          'bin/celerity map'));
     }
   }
 

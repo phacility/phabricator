@@ -7,7 +7,7 @@ final class FlagEditConduitAPIMethod extends FlagConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Create or modify a flag.';
+    return pht('Create or modify a flag.');
   }
 
   protected function defineParamTypes() {

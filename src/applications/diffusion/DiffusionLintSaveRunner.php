@@ -172,7 +172,7 @@ final class DiffusionLintSaveRunner {
         try {
           $paths = phutil_json_decode($json);
         } catch (PhutilJSONParserException $ex) {
-          fprintf(STDERR, pht("Invalid JSON: %s\n", $json));
+          fprintf(STDERR, pht('Invalid JSON: %s', $json)."\n");
           continue;
         }
 

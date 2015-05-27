@@ -6,7 +6,7 @@ final class PhabricatorMailManagementShowOutboundWorkflow
   protected function didConstruct() {
     $this
       ->setName('show-outbound')
-      ->setSynopsis('Show diagnostic details about outbound mail.')
+      ->setSynopsis(pht('Show diagnostic details about outbound mail.'))
       ->setExamples(
         '**show-outbound** --id 1 --id 2')
       ->setArguments(
@@ -14,7 +14,7 @@ final class PhabricatorMailManagementShowOutboundWorkflow
           array(
             'name'    => 'id',
             'param'   => 'id',
-            'help'    => 'Show details about outbound mail with given ID.',
+            'help'    => pht('Show details about outbound mail with given ID.'),
             'repeat'  => true,
           ),
           array(
@@ -32,7 +32,9 @@ final class PhabricatorMailManagementShowOutboundWorkflow
     $ids = $args->getArg('id');
     if (!$ids) {
       throw new PhutilArgumentUsageException(
-        "Use the '--id' flag to specify one or more messages to show.");
+        pht(
+          "Use the '%s' flag to specify one or more messages to show.",
+          '--id'));
     }
 
     $messages = id(new PhabricatorMetaMTAMail())->loadAllWhere(
@@ -44,8 +46,9 @@ final class PhabricatorMailManagementShowOutboundWorkflow
       $missing = array_diff_key($ids, $messages);
       if ($missing) {
         throw new PhutilArgumentUsageException(
-          'Some specified messages do not exist: '.
-          implode(', ', array_keys($missing)));
+          pht(
+            'Some specified messages do not exist: %s',
+            implode(', ', array_keys($missing))));
       }
     }
 

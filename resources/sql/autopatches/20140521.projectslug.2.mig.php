@@ -6,16 +6,16 @@ $conn_w = $project_table->establishConnection('w');
 $slug_table_name = id(new PhabricatorProjectSlug())->getTableName();
 $time = time();
 
-echo "Migrating project phriction slugs...\n";
+echo pht('Migrating project phriction slugs...')."\n";
 foreach (new LiskMigrationIterator($project_table) as $project) {
   $id = $project->getID();
 
-  echo "Migrating project {$id}...\n";
+  echo pht('Migrating project %d...', $id)."\n";
   $phriction_slug = rtrim($project->getPhrictionSlug(), '/');
   $slug = id(new PhabricatorProjectSlug())
     ->loadOneWhere('slug = %s', $phriction_slug);
   if ($slug) {
-    echo "Already migrated {$id}... Continuing.\n";
+    echo pht('Already migrated %d... Continuing.', $id)."\n";
     continue;
   }
   queryfx(
@@ -27,7 +27,7 @@ foreach (new LiskMigrationIterator($project_table) as $project) {
     $phriction_slug,
     $time,
     $time);
-  echo "Migrated {$id}.\n";
+  echo pht('Migrated %d.', $id)."\n";
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

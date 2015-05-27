@@ -57,6 +57,6 @@ final class PhabricatorGlobalUploadTargetView extends AphrontView {
         'class' => 'phabricator-global-upload-instructions',
         'style' => 'display: none;',
       ),
-      pht("\xE2\x87\xAA Drop Files to Upload"));
+      "\xE2\x87\xAA ".pht('Drop Files to Upload'));
   }
 }
