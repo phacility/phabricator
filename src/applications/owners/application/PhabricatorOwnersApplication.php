@@ -47,6 +47,7 @@ final class PhabricatorOwnersApplication extends PhabricatorApplication {
         'new/' => 'PhabricatorOwnersEditController',
         'package/(?P<id>[1-9]\d*)/' => 'PhabricatorOwnersDetailController',
         'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorOwnersDeleteController',
+        'paths/(?P<id>[1-9]\d*)/' => 'PhabricatorOwnersPathsController',
       ),
     );
   }

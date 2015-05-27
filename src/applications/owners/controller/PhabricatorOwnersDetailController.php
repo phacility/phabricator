@@ -188,6 +188,7 @@ final class PhabricatorOwnersDetailController
 
     $id = $package->getID();
     $edit_uri = $this->getApplicationURI("/edit/{$id}/");
+    $paths_uri = $this->getApplicationURI("/paths/{$id}/");
     $delete_uri = $this->getApplicationURI("/delete/{$id}/");
 
     $view = id(new PhabricatorActionListView())
@@ -200,6 +201,13 @@ final class PhabricatorOwnersDetailController
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit)
           ->setHref($edit_uri))
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Edit Paths'))
+          ->setIcon('fa-folder-open')
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(!$can_edit)
+          ->setHref($paths_uri))
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Delete Package'))
@@ -242,6 +250,18 @@ final class PhabricatorOwnersDetailController
       );
     }
 
+    $info = null;
+    if (!$paths) {
+      $info = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->setErrors(
+          array(
+            pht(
+              'This package does not contain any paths yet. Use '.
+              '"Edit Paths" to add some.'),
+          ));
+    }
+
     $table = id(new AphrontTableView($rows))
       ->setHeaders(
         array(
@@ -256,10 +276,15 @@ final class PhabricatorOwnersDetailController
           'wide',
         ));
 
-    return id(new PHUIObjectBoxView())
+    $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Paths'))
       ->appendChild($table);
 
+    if ($info) {
+      $box->setInfoView($info);
+    }
+
+    return $box;
   }
 
 }

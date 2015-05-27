@@ -21,9 +21,13 @@ final class PhabricatorOwnersEditController
       if (!$package) {
         return new Aphront404Response();
       }
+
+      $is_new = false;
     } else {
       $package = new PhabricatorOwnersPackage();
       $package->setPrimaryOwnerPHID($viewer->getPHID());
+
+      $is_new = true;
     }
 
     $e_name = true;
@@ -51,22 +55,6 @@ final class PhabricatorOwnersEditController
       }
       $owners = array_unique($owners);
 
-      $paths = $request->getArr('path');
-      $repos = $request->getArr('repo');
-      $excludes = $request->getArr('exclude');
-
-      $path_refs = array();
-      for ($ii = 0; $ii < count($paths); $ii++) {
-        if (empty($paths[$ii]) || empty($repos[$ii])) {
-          continue;
-        }
-        $path_refs[] = array(
-          'repositoryPHID'  => $repos[$ii],
-          'path'            => $paths[$ii],
-          'excluded'        => $excludes[$ii],
-        );
-      }
-
       if (!strlen($package->getName())) {
         $e_name = pht('Required');
         $errors[] = pht('Package name is required.');
@@ -81,13 +69,9 @@ final class PhabricatorOwnersEditController
         $e_primary = null;
       }
 
-      if (!$path_refs) {
-        $errors[] = pht('Package must include at least one path.');
-      }
-
       if (!$errors) {
         $package->attachUnsavedOwners($owners);
-        $package->attachUnsavedPaths($path_refs);
+        $package->attachUnsavedPaths(array());
         $package->attachOldAuditingEnabled($old_auditing_enabled);
         $package->attachOldPrimaryOwnerPHID($old_primary);
         try {
@@ -95,8 +79,15 @@ final class PhabricatorOwnersEditController
             ->setActor($viewer)
             ->setPackage($package)
             ->save();
-          return id(new AphrontRedirectResponse())
-            ->setURI('/owners/package/'.$package->getID().'/');
+
+          $id = $package->getID();
+          if ($is_new) {
+            $next_uri = '/owners/paths/'.$id.'/';
+          } else {
+            $next_uri = '/owners/package/'.$id.'/';
+          }
+
+          return id(new AphrontRedirectResponse())->setURI($next_uri);
         } catch (AphrontDuplicateKeyQueryException $ex) {
           $e_name = pht('Duplicate');
           $errors[] = pht('Package name must be unique.');
@@ -105,16 +96,6 @@ final class PhabricatorOwnersEditController
     } else {
       $owners = $package->loadOwners();
       $owners = mpull($owners, 'getUserPHID');
-
-      $paths = $package->loadPaths();
-      $path_refs = array();
-      foreach ($paths as $path) {
-        $path_refs[] = array(
-          'repositoryPHID' => $path->getRepositoryPHID(),
-          'path' => $path->getPath(),
-          'excluded' => $path->getExcluded(),
-        );
-      }
     }
 
     $primary = $package->getPrimaryOwnerPHID();
@@ -124,51 +105,15 @@ final class PhabricatorOwnersEditController
       $value_primary_owner = array();
     }
 
-    if ($package->getID()) {
-      $title = pht('Edit Package');
-    } else {
+    if ($is_new) {
+      $cancel_uri = '/owners/';
       $title = pht('New Package');
+      $button_text = pht('Continue');
+    } else {
+      $cancel_uri = '/owners/package/'.$package->getID().'/';
+      $title = pht('Edit Package');
+      $button_text = pht('Save Package');
     }
-
-    $repos = id(new PhabricatorRepositoryQuery())
-      ->setViewer($viewer)
-      ->execute();
-
-    $default_paths = array();
-    foreach ($repos as $repo) {
-      $default_path = $repo->getDetail('default-owners-path');
-      if ($default_path) {
-        $default_paths[$repo->getPHID()] = $default_path;
-      }
-    }
-
-    $repos = mpull($repos, 'getCallsign', 'getPHID');
-    asort($repos);
-
-    $template = new AphrontTypeaheadTemplateView();
-    $template = $template->render();
-
-    Javelin::initBehavior(
-      'owners-path-editor',
-      array(
-        'root'                => 'path-editor',
-        'table'               => 'paths',
-        'add_button'          => 'addpath',
-        'repositories'        => $repos,
-        'input_template'      => $template,
-        'pathRefs'            => $path_refs,
-
-        'completeURI'         => '/diffusion/services/path/complete/',
-        'validateURI'         => '/diffusion/services/path/validate/',
-
-        'repositoryDefaultPaths' => $default_paths,
-      ));
-
-    require_celerity_resource('owners-path-editor-css');
-
-    $cancel_uri = $package->getID()
-      ? '/owners/package/'.$package->getID().'/'
-      : '/owners/';
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
@@ -211,30 +156,6 @@ final class PhabricatorOwnersEditController
               ? 'enabled'
               : 'disabled'))
       ->appendChild(
-        id(new PHUIFormInsetView())
-          ->setTitle(pht('Paths'))
-          ->addDivAttributes(array('id' => 'path-editor'))
-          ->setRightButton(javelin_tag(
-              'a',
-              array(
-                'href' => '#',
-                'class' => 'button green',
-                'sigil' => 'addpath',
-                'mustcapture' => true,
-              ),
-              pht('Add New Path')))
-          ->setDescription(
-            pht(
-              'Specify the files and directories which comprise '.
-              'this package.'))
-          ->setContent(javelin_tag(
-              'table',
-              array(
-                'class' => 'owners-path-editor-table',
-                'sigil' => 'paths',
-              ),
-              '')))
-      ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel(pht('Description'))
           ->setName('description')
@@ -242,7 +163,7 @@ final class PhabricatorOwnersEditController
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)
-          ->setValue(pht('Save Package')));
+          ->setValue($button_text));
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
@@ -251,7 +172,10 @@ final class PhabricatorOwnersEditController
 
     $crumbs = $this->buildApplicationCrumbs();
     if ($package->getID()) {
-      $crumbs->addTextCrumb(pht('Edit %s', $package->getName()));
+      $crumbs->addTextCrumb(
+        $package->getName(),
+        $this->getApplicationURI('package/'.$package->getID().'/'));
+      $crumbs->addTextCrumb(pht('Edit'));
     } else {
       $crumbs->addTextCrumb(pht('New Package'));
     }
