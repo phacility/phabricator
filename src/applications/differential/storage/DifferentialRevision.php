@@ -522,6 +522,7 @@ final class DifferentialRevision extends DifferentialDAO
     }
 
     $query = id(new DifferentialInlineCommentQuery())
+      ->needHidden(true)
       ->setViewer($viewer);
 
     // NOTE: This is a bit sketchy: this method adjusts the inlines as a

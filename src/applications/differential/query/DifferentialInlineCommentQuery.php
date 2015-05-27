@@ -15,6 +15,7 @@ final class DifferentialInlineCommentQuery
   private $authorPHIDs;
   private $revisionPHIDs;
   private $deletedDrafts;
+  private $needHidden;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -55,6 +56,11 @@ final class DifferentialInlineCommentQuery
     return $this;
   }
 
+  public function needHidden($need) {
+    $this->needHidden = $need;
+    return $this;
+  }
+
   public function execute() {
     $table = new DifferentialTransactionComment();
     $conn_r = $table->establishConnection('r');
@@ -67,6 +73,26 @@ final class DifferentialInlineCommentQuery
       $this->buildLimitClause($conn_r));
 
     $comments = $table->loadAllFromArray($data);
+
+    if ($this->needHidden) {
+      $viewer_phid = $this->getViewer()->getPHID();
+      if ($viewer_phid && $comments) {
+        $hidden = queryfx_all(
+          $conn_r,
+          'SELECT commentID FROM %T WHERE userPHID = %s
+            AND commentID IN (%Ls)',
+          id(new DifferentialHiddenComment())->getTableName(),
+          $viewer_phid,
+          mpull($comments, 'getID'));
+        $hidden = array_fuse(ipull($hidden, 'commentID'));
+      } else {
+        $hidden = array();
+      }
+
+      foreach ($comments as $inline) {
+        $inline->attachIsHidden(isset($hidden[$inline->getID()]));
+      }
+    }
 
     foreach ($comments as $key => $value) {
       $comments[$key] = DifferentialInlineComment::newFromModernComment(
