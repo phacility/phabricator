@@ -5,18 +5,28 @@ final class CeleritySpriteGenerator {
   public function buildMenuSheet() {
     $sprites = array();
 
-    $sources = array(
-      'logo' => array(
+    $colors = array(
+      'dark',
+      'red',
+      'blue',
+      'indigo',
+      'blindigo',
+      'rainbow',
+    );
+
+    $sources = array();
+    foreach ($colors as $color) {
+      $sources[$color.'-logo'] = array(
         'x' => 96,
         'y' => 40,
-        'css' => '.phabricator-main-menu-logo',
-      ),
-      'eye' => array(
+        'css' => '.'.$color.'-logo',
+      );
+      $sources[$color.'-eye'] = array(
         'x' => 40,
         'y' => 40,
-        'css' => '.phabricator-main-menu-eye',
-      ),
-    );
+        'css' => '.'.$color.'-eye',
+      );
+    }
 
     $scales = array(
       '1x' => 1,
@@ -137,32 +147,6 @@ final class CeleritySpriteGenerator {
 
     $sheet = $this->buildSheet('login', true);
     $sheet->setScales($scales);
-    foreach ($sprites as $sprite) {
-      $sheet->addSprite($sprite);
-    }
-
-    return $sheet;
-  }
-
-  public function buildMainHeaderSheet() {
-    $gradients = $this->getDirectoryList('main_header');
-    $template = new PhutilSprite();
-
-    $sprites = array();
-    foreach ($gradients as $gradient) {
-      $path = $this->getPath('main_header/'.$gradient.'.png');
-      $sprite = id(clone $template)
-        ->setName('main-header-'.$gradient)
-        ->setSourceFile($path)
-        ->setTargetCSS('.main-header-'.$gradient);
-      $sprite->setSourceSize(6, 44);
-      $sprites[] = $sprite;
-    }
-
-    $sheet = $this->buildSheet('main-header',
-      false,
-      PhutilSpriteSheet::TYPE_REPEAT_X);
-
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
     }

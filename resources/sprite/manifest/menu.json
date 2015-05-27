@@ -1,15 +1,65 @@
 {
   "version": 1,
   "sprites": {
-    "eye": {
-      "name": "eye",
-      "rule": ".phabricator-main-menu-eye",
-      "hash": "8848ce0f1d60278ba13a306805107d62"
+    "blindigo-eye": {
+      "name": "blindigo-eye",
+      "rule": ".blindigo-eye",
+      "hash": "fcd3eb2a8d2d8babf59a952b62783282"
     },
-    "logo": {
-      "name": "logo",
-      "rule": ".phabricator-main-menu-logo",
-      "hash": "346032db9e1dbaafc9574664b9581b03"
+    "blindigo-logo": {
+      "name": "blindigo-logo",
+      "rule": ".blindigo-logo",
+      "hash": "a22978e621df5126471576510303222f"
+    },
+    "blue-eye": {
+      "name": "blue-eye",
+      "rule": ".blue-eye",
+      "hash": "f7505e56e452c5922f1a275a736d5326"
+    },
+    "blue-logo": {
+      "name": "blue-logo",
+      "rule": ".blue-logo",
+      "hash": "4c6240f153245d56a6bf02bb6796404f"
+    },
+    "dark-eye": {
+      "name": "dark-eye",
+      "rule": ".dark-eye",
+      "hash": "c8112e52666fa1cb509ebb2cdf3a3df5"
+    },
+    "dark-logo": {
+      "name": "dark-logo",
+      "rule": ".dark-logo",
+      "hash": "e3425da87e8f6737d8db0063d064cd7d"
+    },
+    "indigo-eye": {
+      "name": "indigo-eye",
+      "rule": ".indigo-eye",
+      "hash": "497b57bc1709a88fa68b14dc88a2a253"
+    },
+    "indigo-logo": {
+      "name": "indigo-logo",
+      "rule": ".indigo-logo",
+      "hash": "c7223567a77c46fbab571170f0a76ae6"
+    },
+    "rainbow-eye": {
+      "name": "rainbow-eye",
+      "rule": ".rainbow-eye",
+      "hash": "2c63171eeb8ba6acb645219fdf2585b1"
+    },
+    "rainbow-logo": {
+      "name": "rainbow-logo",
+      "rule": ".rainbow-logo",
+      "hash": "eca0c685cb9524bff513a5f7eab7c6e5"
+    },
+    "red-eye": {
+      "name": "red-eye",
+      "rule": ".red-eye",
+      "hash": "97a9a11ecbeee1fbb8a7c8ea406e4be4"
+    },
+    "red-logo": {
+      "name": "red-logo",
+      "rule": ".red-logo",
+      "hash": "1126a79154d24242d3f72e868b95a445"
     }
   },
   "scales": [

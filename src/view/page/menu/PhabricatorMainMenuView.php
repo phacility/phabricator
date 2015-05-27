@@ -275,6 +275,8 @@ final class PhabricatorMainMenuView extends AphrontView {
       }
     }
 
+    $color = PhabricatorEnv::getEnvConfig('ui.header-color');
+
     return phutil_tag(
       'a',
       array(
@@ -291,13 +293,13 @@ final class PhabricatorMainMenuView extends AphrontView {
         phutil_tag(
           'span',
           array(
-            'class' => 'sprite-menu phabricator-main-menu-eye',
+            'class' => 'sprite-menu phabricator-main-menu-eye '.$color.'-eye',
           ),
           ''),
           phutil_tag(
           'span',
           array(
-            'class' => 'sprite-menu phabricator-main-menu-logo',
+            'class' => 'sprite-menu phabricator-main-menu-logo '.$color.'-logo',
             'style' => $style_logo,
           ),
           ''),

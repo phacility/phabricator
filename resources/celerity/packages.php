@@ -125,7 +125,6 @@ return array(
 
     'font-fontawesome',
     'phui-font-icon-base-css',
-    'sprite-main-header-css',
     'phui-box-css',
     'phui-object-box-css',
     'phui-timeline-view-css',

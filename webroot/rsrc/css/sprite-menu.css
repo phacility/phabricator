@@ -13,15 +13,55 @@ only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   .sprite-menu {
     background-image: url(/rsrc/image/sprite-menu-X2.png);
-    background-size: 97px 82px;
+    background-size: 194px 205px;
   }
 }
 
 
-.phabricator-main-menu-logo {
+.dark-logo {
   background-position: 0px 0px;
 }
 
-.phabricator-main-menu-eye {
+.dark-eye {
+  background-position: 0px -82px;
+}
+
+.red-logo {
+  background-position: -97px 0px;
+}
+
+.red-eye {
+  background-position: -41px -82px;
+}
+
+.blue-logo {
   background-position: 0px -41px;
+}
+
+.blue-eye {
+  background-position: -82px -82px;
+}
+
+.indigo-logo {
+  background-position: -97px -41px;
+}
+
+.indigo-eye {
+  background-position: -123px -82px;
+}
+
+.blindigo-logo {
+  background-position: 0px -123px;
+}
+
+.blindigo-eye {
+  background-position: -97px -123px;
+}
+
+.rainbow-logo {
+  background-position: 0px -164px;
+}
+
+.rainbow-eye {
+  background-position: -97px -164px;
 }
