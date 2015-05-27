@@ -19,7 +19,6 @@ final class PhabricatorOwnersDetailController
     }
 
     $paths = $package->loadPaths();
-    $owners = $package->loadOwners();
 
     $repository_phids = array();
     foreach ($paths as $path) {
@@ -36,98 +35,18 @@ final class PhabricatorOwnersDetailController
       $repositories = array();
     }
 
-    $phids = array();
-    foreach ($owners as $owner) {
-      $phids[$owner->getUserPHID()] = true;
-    }
-    $phids = array_keys($phids);
+    $actions = $this->buildPackageActionView($package);
+    $properties = $this->buildPackagePropertyView($package);
+    $properties->setActionList($actions);
 
-    $handles = $this->loadViewerHandles($phids);
+    $header = id(new PHUIHeaderView())
+      ->setUser($viewer)
+      ->setHeader($package->getName())
+      ->setPolicyObject($package);
 
-    $rows = array();
-
-    $rows[] = array(pht('Name'), $package->getName());
-    $rows[] = array(pht('Description'), $package->getDescription());
-
-    $primary_owner = null;
-    $primary_phid = $package->getPrimaryOwnerPHID();
-    if ($primary_phid && isset($handles[$primary_phid])) {
-      $primary_owner = phutil_tag(
-        'strong',
-        array(),
-        $handles[$primary_phid]->renderLink());
-    }
-    $rows[] = array(pht('Primary Owner'), $primary_owner);
-
-    $owner_links = array();
-    foreach ($owners as $owner) {
-      $owner_links[] = $handles[$owner->getUserPHID()]->renderLink();
-    }
-    $owner_links = phutil_implode_html(phutil_tag('br'), $owner_links);
-    $rows[] = array(pht('Owners'), $owner_links);
-
-    $rows[] = array(
-      pht('Auditing'),
-      $package->getAuditingEnabled() ?
-        pht('Enabled') :
-        pht('Disabled'),
-    );
-
-    $path_links = array();
-    foreach ($paths as $path) {
-      $repo = idx($repositories, $path->getRepositoryPHID());
-      if (!$repo) {
-        continue;
-      }
-      $href = DiffusionRequest::generateDiffusionURI(
-        array(
-          'callsign' => $repo->getCallsign(),
-          'branch'   => $repo->getDefaultBranch(),
-          'path'     => $path->getPath(),
-          'action'   => 'browse',
-        ));
-      $repo_name = phutil_tag('strong', array(), $repo->getName());
-      $path_link = phutil_tag(
-        'a',
-        array(
-          'href' => (string)$href,
-        ),
-        $path->getPath());
-      $path_links[] = hsprintf(
-        '%s %s %s',
-        ($path->getExcluded() ? "\xE2\x80\x93" : '+'),
-        $repo_name,
-        $path_link);
-    }
-    $path_links = phutil_implode_html(phutil_tag('br'), $path_links);
-    $rows[] = array(pht('Paths'), $path_links);
-
-    $table = new AphrontTableView($rows);
-    $table->setColumnClasses(
-      array(
-        'header',
-        'wide',
-      ));
-
-    $panel = new PHUIObjectBoxView();
-    $header = new PHUIHeaderView();
-    $header->setHeader(
-      pht('Package Details for "%s"', $package->getName()));
-    $header->addActionLink(
-      id(new PHUIButtonView())
-        ->setTag('a')
-        ->setHref('/owners/delete/'.$package->getID().'/')
-        ->addSigil('workflow')
-        ->setText(pht('Delete Package')));
-
-    $header->addActionLink(
-      id(new PHUIButtonView())
-        ->setTag('a')
-        ->setHref('/owners/edit/'.$package->getID().'/')
-        ->setText(pht('Edit Package')));
-
-    $panel->setHeader($header);
-    $panel->appendChild($table);
+    $panel = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->addPropertyList($properties);
 
     $commit_views = array();
 
@@ -209,11 +128,138 @@ final class PhabricatorOwnersDetailController
       array(
         $crumbs,
         $panel,
+        $this->renderPathsTable($paths, $repositories),
         $commit_panels,
       ),
       array(
-        'title' => pht('Package %s', $package->getName()),
+        'title' => $package->getName(),
       ));
+  }
+
+
+  private function buildPackagePropertyView(PhabricatorOwnersPackage $package) {
+    $viewer = $this->getViewer();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer);
+
+    $primary_phid = $package->getPrimaryOwnerPHID();
+    if ($primary_phid) {
+      $primary_owner = $viewer->renderHandle($primary_phid);
+    } else {
+      $primary_owner = phutil_tag('em', array(), pht('None'));
+    }
+    $view->addProperty(pht('Primary Owner'), $primary_owner);
+
+    // TODO: needOwners() this on the Query.
+    $owners = $package->loadOwners();
+    if ($owners) {
+      $owner_list = $viewer->renderHandleList(mpull($owners, 'getUserPHID'));
+    } else {
+      $owner_list = phutil_tag('em', array(), pht('None'));
+    }
+    $view->addProperty(pht('Owners'), $owner_list);
+
+    if ($package->getAuditingEnabled()) {
+      $auditing = pht('Enabled');
+    } else {
+      $auditing = pht('Disabled');
+    }
+    $view->addProperty(pht('Auditing'), $auditing);
+
+    $description = $package->getDescription();
+    if (strlen($description)) {
+      $view->addSectionHeader(pht('Description'));
+      $view->addTextContent(
+        $output = PhabricatorMarkupEngine::renderOneObject(
+          id(new PhabricatorMarkupOneOff())->setContent($description),
+          'default',
+          $viewer));
+    }
+
+    return $view;
+  }
+
+  private function buildPackageActionView(PhabricatorOwnersPackage $package) {
+    $viewer = $this->getViewer();
+
+    // TODO: Implement this capability.
+    $can_edit = true;
+
+    $id = $package->getID();
+    $edit_uri = $this->getApplicationURI("/edit/{$id}/");
+    $delete_uri = $this->getApplicationURI("/delete/{$id}/");
+
+    $view = id(new PhabricatorActionListView())
+      ->setUser($viewer)
+      ->setObject($package)
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Edit Package'))
+          ->setIcon('fa-pencil')
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(!$can_edit)
+          ->setHref($edit_uri))
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Delete Package'))
+          ->setIcon('fa-times')
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true)
+          ->setHref($delete_uri));
+
+    return $view;
+  }
+
+  private function renderPathsTable(array $paths, array $repositories) {
+    $viewer = $this->getViewer();
+
+    $rows = array();
+    foreach ($paths as $path) {
+      $repo = idx($repositories, $path->getRepositoryPHID());
+      if (!$repo) {
+        continue;
+      }
+      $href = DiffusionRequest::generateDiffusionURI(
+        array(
+          'callsign' => $repo->getCallsign(),
+          'branch'   => $repo->getDefaultBranch(),
+          'path'     => $path->getPath(),
+          'action'   => 'browse',
+        ));
+
+      $path_link = phutil_tag(
+        'a',
+        array(
+          'href' => (string)$href,
+        ),
+        $path->getPath());
+
+      $rows[] = array(
+        ($path->getExcluded() ? '-' : '+'),
+        $repo->getName(),
+        $path_link,
+      );
+    }
+
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          null,
+          pht('Repository'),
+          pht('Path'),
+        ))
+      ->setColumnClasses(
+        array(
+          null,
+          null,
+          'wide',
+        ));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Paths'))
+      ->appendChild($table);
+
   }
 
 }
