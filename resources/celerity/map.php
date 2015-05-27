@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '97a49e3e',
-    'core.pkg.js' => '328799d0',
+    'core.pkg.js' => '0e261ea7',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '30602b8c',
     'differential.pkg.js' => '8c98ce21',
@@ -334,7 +334,7 @@ return array(
     'rsrc/js/application/calendar/behavior-day-view.js' => '5c46cff2',
     'rsrc/js/application/calendar/behavior-event-all-day.js' => '38dcf3c8',
     'rsrc/js/application/config/behavior-reorder-fields.js' => 'b6993408',
-    'rsrc/js/application/conpherence/ConpherenceThreadManager.js' => '10246726',
+    'rsrc/js/application/conpherence/ConpherenceThreadManager.js' => '01774ab2',
     'rsrc/js/application/conpherence/behavior-drag-and-drop-photo.js' => 'cf86d16a',
     'rsrc/js/application/conpherence/behavior-durable-column.js' => '16c695bf',
     'rsrc/js/application/conpherence/behavior-menu.js' => 'c0348cac',
@@ -504,7 +504,7 @@ return array(
     'conpherence-menu-css' => 'f389e048',
     'conpherence-message-pane-css' => '5bb4b76d',
     'conpherence-notification-css' => '919974b6',
-    'conpherence-thread-manager' => '10246726',
+    'conpherence-thread-manager' => '01774ab2',
     'conpherence-transaction-css' => '42a457f6',
     'conpherence-update-css' => '1099a660',
     'conpherence-widget-pane-css' => '2af42ebe',
@@ -827,6 +827,17 @@ return array(
     'unhandled-exception-css' => '37d4f9a2',
   ),
   'requires' => array(
+    '01774ab2' => array(
+      'javelin-dom',
+      'javelin-util',
+      'javelin-stratcom',
+      'javelin-install',
+      'javelin-aphlict',
+      'javelin-workflow',
+      'javelin-router',
+      'javelin-behavior-device',
+      'javelin-vector',
+    ),
     '029a133d' => array(
       'aphront-dialog-view-css',
     ),
@@ -889,17 +900,6 @@ return array(
     '0f764c35' => array(
       'javelin-install',
       'javelin-util',
-    ),
-    10246726 => array(
-      'javelin-dom',
-      'javelin-util',
-      'javelin-stratcom',
-      'javelin-install',
-      'javelin-aphlict',
-      'javelin-workflow',
-      'javelin-router',
-      'javelin-behavior-device',
-      'javelin-vector',
     ),
     '13c739ea' => array(
       'javelin-behavior',
