@@ -19,6 +19,7 @@ final class PhabricatorOwnersPackageTransactionEditor
     $types[] = PhabricatorOwnersPackageTransaction::TYPE_OWNERS;
     $types[] = PhabricatorOwnersPackageTransaction::TYPE_AUDITING;
     $types[] = PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION;
+    $types[] = PhabricatorOwnersPackageTransaction::TYPE_PATHS;
 
     return $types;
   }
@@ -41,6 +42,10 @@ final class PhabricatorOwnersPackageTransactionEditor
         return (int)$object->getAuditingEnabled();
       case PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION:
         return $object->getDescription();
+      case PhabricatorOwnersPackageTransaction::TYPE_PATHS:
+        // TODO: needPaths() this on the query
+        $paths = $object->loadPaths();
+        return mpull($paths, 'getRef');
     }
   }
 
@@ -52,6 +57,7 @@ final class PhabricatorOwnersPackageTransactionEditor
       case PhabricatorOwnersPackageTransaction::TYPE_NAME:
       case PhabricatorOwnersPackageTransaction::TYPE_PRIMARY:
       case PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION:
+      case PhabricatorOwnersPackageTransaction::TYPE_PATHS:
         return $xaction->getNewValue();
       case PhabricatorOwnersPackageTransaction::TYPE_AUDITING:
         return (int)$xaction->getNewValue();
@@ -61,6 +67,24 @@ final class PhabricatorOwnersPackageTransactionEditor
         $phids = array_values($phids);
         return $phids;
     }
+  }
+
+  protected function transactionHasEffect(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorOwnersPackageTransaction::TYPE_PATHS:
+        $old = $xaction->getOldValue();
+        $new = $xaction->getNewValue();
+
+        $diffs = PhabricatorOwnersPath::getTransactionValueChanges($old, $new);
+        list($rem, $add) = $diffs;
+
+        return ($rem || $add);
+    }
+
+    return parent::transactionHasEffect($object, $xaction);
   }
 
   protected function applyCustomInternalTransaction(
@@ -81,6 +105,7 @@ final class PhabricatorOwnersPackageTransactionEditor
         $object->setAuditingEnabled($xaction->getNewValue());
         return;
       case PhabricatorOwnersPackageTransaction::TYPE_OWNERS:
+      case PhabricatorOwnersPackageTransaction::TYPE_PATHS:
         return;
     }
 
@@ -122,6 +147,31 @@ final class PhabricatorOwnersPackageTransactionEditor
         }
 
         // TODO: Attach owners here
+        return;
+      case PhabricatorOwnersPackageTransaction::TYPE_PATHS:
+        $old = $xaction->getOldValue();
+        $new = $xaction->getNewValue();
+
+        // TODO: needPaths this
+        $paths = $object->loadPaths();
+
+        $diffs = PhabricatorOwnersPath::getTransactionValueChanges($old, $new);
+        list($rem, $add) = $diffs;
+
+        $set = PhabricatorOwnersPath::getSetFromTransactionValue($rem);
+        foreach ($paths as $path) {
+          $ref = $path->getRef();
+          if (PhabricatorOwnersPath::isRefInSet($ref, $set)) {
+            $path->delete();
+          }
+        }
+
+        foreach ($add as $ref) {
+          $path = PhabricatorOwnersPath::newFromRef($ref)
+            ->setPackageID($object->getID())
+            ->save();
+        }
+
         return;
     }
 

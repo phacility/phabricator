@@ -195,7 +195,6 @@ final class PhabricatorOwnersDetailController
     $id = $package->getID();
     $edit_uri = $this->getApplicationURI("/edit/{$id}/");
     $paths_uri = $this->getApplicationURI("/paths/{$id}/");
-    $delete_uri = $this->getApplicationURI("/delete/{$id}/");
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
@@ -213,14 +212,7 @@ final class PhabricatorOwnersDetailController
           ->setIcon('fa-folder-open')
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit)
-          ->setHref($paths_uri))
-      ->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Delete Package'))
-          ->setIcon('fa-times')
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(true)
-          ->setHref($delete_uri));
+          ->setHref($paths_uri));
 
     return $view;
   }

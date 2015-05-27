@@ -211,6 +211,16 @@ span.single-display-line-content {
   background: #fcf2bb;
 }
 
+.aphront-table-view tr.diff-removed,
+.aphront-table-view tr.alt-diff-removed {
+  background: {$lightred}
+}
+
+.aphront-table-view tr.diff-added,
+.aphront-table-view tr.alt-diff-added {
+  background: {$lightgreen}
+}
+
 .aphront-table-view tr.no-data td {
   padding: 12px;
   text-align: center;

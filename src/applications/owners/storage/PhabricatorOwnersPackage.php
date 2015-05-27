@@ -13,12 +13,6 @@ final class PhabricatorOwnersPackage
   protected $primaryOwnerPHID;
   protected $mailKey;
 
-  private $unsavedOwners = self::ATTACHABLE;
-  private $unsavedPaths = self::ATTACHABLE;
-  private $actorPHID;
-  private $oldPrimaryOwnerPHID;
-  private $oldAuditingEnabled;
-
   public static function initializeNewPackage(PhabricatorUser $actor) {
     return id(new PhabricatorOwnersPackage())
       ->setAuditingEnabled(0)
@@ -83,51 +77,6 @@ final class PhabricatorOwnersPackage
     return parent::save();
   }
 
-  public function attachUnsavedOwners(array $owners) {
-    $this->unsavedOwners = $owners;
-    return $this;
-  }
-
-  public function getUnsavedOwners() {
-    return $this->assertAttached($this->unsavedOwners);
-  }
-
-  public function attachUnsavedPaths(array $paths) {
-    $this->unsavedPaths = $paths;
-    return $this;
-  }
-
-  public function getUnsavedPaths() {
-    return $this->assertAttached($this->unsavedPaths);
-  }
-
-  public function attachActorPHID($actor_phid) {
-    $this->actorPHID = $actor_phid;
-    return $this;
-  }
-
-  public function getActorPHID() {
-    return $this->actorPHID;
-  }
-
-  public function attachOldPrimaryOwnerPHID($old_primary) {
-    $this->oldPrimaryOwnerPHID = $old_primary;
-    return $this;
-  }
-
-  public function getOldPrimaryOwnerPHID() {
-    return $this->oldPrimaryOwnerPHID;
-  }
-
-  public function attachOldAuditingEnabled($auditing_enabled) {
-    $this->oldAuditingEnabled = $auditing_enabled;
-    return $this;
-  }
-
-  public function getOldAuditingEnabled() {
-    return $this->oldAuditingEnabled;
-  }
-
   public function setName($name) {
     $this->name = $name;
     if (!$this->getID()) {
@@ -163,15 +112,15 @@ final class PhabricatorOwnersPackage
     }
 
     return self::loadPackagesForPaths($repository, $paths);
- }
+  }
 
- public static function loadOwningPackages($repository, $path) {
+  public static function loadOwningPackages($repository, $path) {
     if (empty($path)) {
       return array();
     }
 
     return self::loadPackagesForPaths($repository, array($path), 1);
- }
+  }
 
   private static function loadPackagesForPaths(
     PhabricatorRepository $repository,

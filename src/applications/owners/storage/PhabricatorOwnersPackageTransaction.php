@@ -8,6 +8,7 @@ final class PhabricatorOwnersPackageTransaction
   const TYPE_OWNERS = 'owners.owners';
   const TYPE_AUDITING = 'owners.auditing';
   const TYPE_DESCRIPTION = 'owners.description';
+  const TYPE_PATHS = 'owners.paths';
 
   public function getApplicationName() {
     return 'owners';
@@ -120,6 +121,11 @@ final class PhabricatorOwnersPackageTransaction
         return pht(
           '%s updated the description for this package.',
           $this->renderHandleLink($author_phid));
+      case self::TYPE_PATHS:
+        // TODO: Flesh this out.
+        return pht(
+          '%s updated paths for this package.',
+          $this->renderHandleLink($author_phid));
     }
 
     return parent::getTitle();
@@ -129,6 +135,8 @@ final class PhabricatorOwnersPackageTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_DESCRIPTION:
         return ($this->getOldValue() !== null);
+      case self::TYPE_PATHS:
+        return true;
     }
 
     return parent::hasChangeDetails();
@@ -144,6 +152,57 @@ final class PhabricatorOwnersPackageTransaction
           $viewer,
           $old,
           $new);
+      case self::TYPE_PATHS:
+        $old = $this->getOldValue();
+        $new = $this->getNewValue();
+
+        $diffs = PhabricatorOwnersPath::getTransactionValueChanges($old, $new);
+        list($rem, $add) = $diffs;
+
+        $rows = array();
+        foreach ($rem as $ref) {
+          $rows[] = array(
+            'class' => 'diff-removed',
+            'change' => '-',
+          ) + $ref;
+        }
+
+        foreach ($add as $ref) {
+          $rows[] = array(
+            'class' => 'diff-added',
+            'change' => '+',
+          ) + $ref;
+        }
+
+        $rowc = array();
+        foreach ($rows as $key => $row) {
+          $rowc[] = $row['class'];
+          $rows[$key] = array(
+            $row['change'],
+            $row['excluded'] ? pht('Exclude') : pht('Include'),
+            $viewer->renderHandle($row['repositoryPHID']),
+            $row['path'],
+          );
+        }
+
+        $table = id(new AphrontTableView($rows))
+          ->setRowClasses($rowc)
+          ->setHeaders(
+            array(
+              null,
+              pht('Type'),
+              pht('Repository'),
+              pht('Path'),
+            ))
+          ->setColumnClasses(
+            array(
+              null,
+              null,
+              null,
+              'wide',
+            ));
+
+        return $table;
     }
 
     return parent::renderChangeDetails($viewer);

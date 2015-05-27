@@ -26,39 +26,48 @@ final class PhabricatorOwnersPathsController
       $excludes = $request->getArr('exclude');
 
       $path_refs = array();
-      for ($ii = 0; $ii < count($paths); $ii++) {
-        if (empty($paths[$ii]) || empty($repos[$ii])) {
-          continue;
+      foreach ($paths as $key => $path) {
+        if (!isset($repos[$key])) {
+          throw new Exception(
+            pht(
+              'No repository PHID for path "%s"!',
+              $key));
         }
+
+        if (!isset($excludes[$key])) {
+          throw new Exception(
+            pht(
+              'No exclusion value for path "%s"!',
+              $key));
+        }
+
         $path_refs[] = array(
-          'repositoryPHID' => $repos[$ii],
-          'path' => $paths[$ii],
-          'excluded' => $excludes[$ii],
+          'repositoryPHID' => $repos[$key],
+          'path' => $path,
+          'excluded' => (int)$excludes[$key],
         );
       }
 
-      $package->attachUnsavedOwners(array());
-      $package->attachUnsavedPaths($path_refs);
-      $package->attachOldAuditingEnabled($package->getAuditingEnabled());
-      $package->attachOldPrimaryOwnerPHID($package->getPrimaryOwnerPHID());
+      $type_paths = PhabricatorOwnersPackageTransaction::TYPE_PATHS;
 
-      id(new PhabricatorOwnersPackageEditor())
+      $xactions = array();
+      $xactions[] = id(new PhabricatorOwnersPackageTransaction())
+        ->setTransactionType($type_paths)
+        ->setNewValue($path_refs);
+
+      $editor = id(new PhabricatorOwnersPackageTransactionEditor())
         ->setActor($viewer)
-        ->setPackage($package)
-        ->save();
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true);
+
+      $editor->applyTransactions($package, $xactions);
 
       return id(new AphrontRedirectResponse())
         ->setURI('/owners/package/'.$package->getID().'/');
     } else {
       $paths = $package->loadPaths();
-      $path_refs = array();
-      foreach ($paths as $path) {
-        $path_refs[] = array(
-          'repositoryPHID' => $path->getRepositoryPHID(),
-          'path' => $path->getPath(),
-          'excluded' => $path->getExcluded(),
-        );
-      }
+      $path_refs = mpull($paths, 'getRef');
     }
 
     $repos = id(new PhabricatorRepositoryQuery())
