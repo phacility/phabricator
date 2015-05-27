@@ -28,18 +28,26 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   private $invitees = self::ATTACHABLE;
   private $appliedViewer;
 
-  public static function initializeNewCalendarEvent(PhabricatorUser $actor) {
+  public static function initializeNewCalendarEvent(
+    PhabricatorUser $actor,
+    $mode) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
       ->withClasses(array('PhabricatorCalendarApplication'))
       ->executeOne();
+
+    if ($mode == 'public') {
+      $view_policy = PhabricatorPolicies::getMostOpenPolicy();
+    } else {
+      $view_policy = $actor->getPHID();
+    }
 
     return id(new PhabricatorCalendarEvent())
       ->setUserPHID($actor->getPHID())
       ->setIsCancelled(0)
       ->setIsAllDay(0)
       ->setIcon(self::DEFAULT_ICON)
-      ->setViewPolicy($actor->getPHID())
+      ->setViewPolicy($view_policy)
       ->setEditPolicy($actor->getPHID())
       ->attachInvitees(array())
       ->applyViewerTimezone($actor);
