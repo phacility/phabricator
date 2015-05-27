@@ -8,6 +8,7 @@ body div.jx-tokenizer {
   background: transparent;
   position: relative;
   width: 100%;
+  overflow: hidden;
 }
 
 body div.jx-tokenizer-container {

@@ -33,6 +33,10 @@
   vertical-align: middle;
 }
 
+.device-phone .phui-header-col3 {
+  vertical-align: top;
+}
+
 body .phui-header-shell.phui-header-no-backgound {
   background-color: transparent;
   border: none;

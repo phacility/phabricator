@@ -103,6 +103,10 @@
   padding: 20px 16px 20px 20px;
 }
 
+.device .project-board-header .phui-header-shell {
+  padding: 8px;
+}
+
 .project-board-header .phui-header-view {
   font-size: 18px;
 }

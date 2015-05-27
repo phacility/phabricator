@@ -45,7 +45,7 @@ div.phui-object-box.phui-object-box-flush {
 }
 
 .device-phone .phui-object-box .phui-header-shell {
-  padding-bottom: 8px;
+  padding: 4px 0 12px 4px;
 }
 
 .device-tablet .phui-object-box {
