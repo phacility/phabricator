@@ -74,6 +74,7 @@
       "type": "xhpast",
       "include": "(\\.php$)",
       "severity": {
+        "16": "advice",
         "34": "error"
       },
       "xhpast.blacklisted.function": {
