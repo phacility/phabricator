@@ -21,86 +21,93 @@ final class PhabricatorOwnersEditController
       if (!$package) {
         return new Aphront404Response();
       }
-
       $is_new = false;
     } else {
-      $package = new PhabricatorOwnersPackage();
-      $package->setPrimaryOwnerPHID($viewer->getPHID());
-
+      $package = PhabricatorOwnersPackage::initializeNewPackage($viewer);
       $is_new = true;
     }
 
     $e_name = true;
     $e_primary = true;
 
+    $v_name = $package->getName();
+    $v_primary = $package->getPrimaryOwnerPHID();
+    // TODO: Pull these off needOwners() on the Query.
+    $v_owners = mpull($package->loadOwners(), 'getUserPHID');
+    $v_auditing = $package->getAuditingEnabled();
+    $v_description = $package->getDescription();
+
+
     $errors = array();
-
     if ($request->isFormPost()) {
-      $package->setName($request->getStr('name'));
-      $package->setDescription($request->getStr('description'));
-      $old_auditing_enabled = $package->getAuditingEnabled();
-      $package->setAuditingEnabled(
-        ($request->getStr('auditing') === 'enabled')
-          ? 1
-          : 0);
+      $xactions = array();
 
-      $primary = $request->getArr('primary');
-      $primary = reset($primary);
-      $old_primary = $package->getPrimaryOwnerPHID();
-      $package->setPrimaryOwnerPHID($primary);
+      $v_name = $request->getStr('name');
+      $v_primary = head($request->getArr('primary'));
+      $v_owners = $request->getArr('owners');
+      $v_auditing = ($request->getStr('auditing') == 'enabled');
+      $v_description = $request->getStr('description');
 
-      $owners = $request->getArr('owners');
-      if ($primary) {
-        array_unshift($owners, $primary);
-      }
-      $owners = array_unique($owners);
-
-      if (!strlen($package->getName())) {
-        $e_name = pht('Required');
-        $errors[] = pht('Package name is required.');
-      } else {
-        $e_name = null;
+      if ($v_primary) {
+        $v_owners[] = $v_primary;
+        $v_owners = array_unique($v_owners);
       }
 
-      if (!$package->getPrimaryOwnerPHID()) {
-        $e_primary = pht('Required');
-        $errors[] = pht('Package must have a primary owner.');
-      } else {
-        $e_primary = null;
-      }
+      $type_name = PhabricatorOwnersPackageTransaction::TYPE_NAME;
+      $type_primary = PhabricatorOwnersPackageTransaction::TYPE_PRIMARY;
+      $type_owners = PhabricatorOwnersPackageTransaction::TYPE_OWNERS;
+      $type_auditing = PhabricatorOwnersPackageTransaction::TYPE_AUDITING;
+      $type_description = PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION;
 
-      if (!$errors) {
-        $package->attachUnsavedOwners($owners);
-        $package->attachUnsavedPaths(array());
-        $package->attachOldAuditingEnabled($old_auditing_enabled);
-        $package->attachOldPrimaryOwnerPHID($old_primary);
-        try {
-          id(new PhabricatorOwnersPackageEditor())
-            ->setActor($viewer)
-            ->setPackage($package)
-            ->save();
+      $xactions[] = id(new PhabricatorOwnersPackageTransaction())
+        ->setTransactionType($type_name)
+        ->setNewValue($v_name);
 
-          $id = $package->getID();
-          if ($is_new) {
-            $next_uri = '/owners/paths/'.$id.'/';
-          } else {
-            $next_uri = '/owners/package/'.$id.'/';
-          }
+      $xactions[] = id(new PhabricatorOwnersPackageTransaction())
+        ->setTransactionType($type_primary)
+        ->setNewValue($v_primary);
 
-          return id(new AphrontRedirectResponse())->setURI($next_uri);
-        } catch (AphrontDuplicateKeyQueryException $ex) {
-          $e_name = pht('Duplicate');
-          $errors[] = pht('Package name must be unique.');
+      $xactions[] = id(new PhabricatorOwnersPackageTransaction())
+        ->setTransactionType($type_owners)
+        ->setNewValue($v_owners);
+
+      $xactions[] = id(new PhabricatorOwnersPackageTransaction())
+        ->setTransactionType($type_auditing)
+        ->setNewValue($v_auditing);
+
+      $xactions[] = id(new PhabricatorOwnersPackageTransaction())
+        ->setTransactionType($type_description)
+        ->setNewValue($v_description);
+
+      $editor = id(new PhabricatorOwnersPackageTransactionEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true);
+
+      try {
+        $editor->applyTransactions($package, $xactions);
+
+        $id = $package->getID();
+        if ($is_new) {
+          $next_uri = '/owners/paths/'.$id.'/';
+        } else {
+          $next_uri = '/owners/package/'.$id.'/';
         }
+
+        return id(new AphrontRedirectResponse())->setURI($next_uri);
+      } catch (AphrontDuplicateKeyQueryException $ex) {
+        $e_name = pht('Duplicate');
+        $errors[] = pht('Package name must be unique.');
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
+
+        $e_name = $ex->getShortMessage($type_name);
+        $e_primary = $ex->getShortMessage($type_primary);
       }
-    } else {
-      $owners = $package->loadOwners();
-      $owners = mpull($owners, 'getUserPHID');
     }
 
-    $primary = $package->getPrimaryOwnerPHID();
-    if ($primary) {
-      $value_primary_owner = array($primary);
+    if ($v_primary) {
+      $value_primary_owner = array($v_primary);
     } else {
       $value_primary_owner = array();
     }
@@ -121,7 +128,7 @@ final class PhabricatorOwnersEditController
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
           ->setName('name')
-          ->setValue($package->getName())
+          ->setValue($v_name)
           ->setError($e_name))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
@@ -136,7 +143,7 @@ final class PhabricatorOwnersEditController
           ->setDatasource(new PhabricatorProjectOrUserDatasource())
           ->setLabel(pht('Owners'))
           ->setName('owners')
-          ->setValue($owners))
+          ->setValue($v_owners))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('auditing')
@@ -147,19 +154,18 @@ final class PhabricatorOwnersEditController
               'this package will be reviewed to make sure an owner '.
               'of the package is involved and the commit message has '.
               'a valid revision, reviewed by, and author.'))
-          ->setOptions(array(
-            'disabled'  => pht('Disabled'),
-            'enabled'   => pht('Enabled'),
-          ))
-          ->setValue(
-            $package->getAuditingEnabled()
-              ? 'enabled'
-              : 'disabled'))
+          ->setOptions(
+            array(
+              'disabled'  => pht('Disabled'),
+              'enabled'   => pht('Enabled'),
+            ))
+          ->setValue(($v_auditing ? 'enabled' : 'disabled')))
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
+        id(new PhabricatorRemarkupControl())
+          ->setUser($viewer)
           ->setLabel(pht('Description'))
           ->setName('description')
-          ->setValue($package->getDescription()))
+          ->setValue($v_description))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)

@@ -124,12 +124,18 @@ final class PhabricatorOwnersDetailController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($package->getName());
 
+    $timeline = $this->buildTransactionTimeline(
+      $package,
+      new PhabricatorOwnersPackageTransactionQuery());
+    $timeline->setShouldTerminate(true);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $panel,
         $this->renderPathsTable($paths, $repositories),
         $commit_panels,
+        $timeline,
       ),
       array(
         'title' => $package->getName(),
