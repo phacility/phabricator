@@ -3,22 +3,20 @@
 final class PhabricatorOwnersDetailController
   extends PhabricatorOwnersController {
 
-  private $id;
-  private $package;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
+  public function shouldAllowPublic() {
+    return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
-    $package = id(new PhabricatorOwnersPackage())->load($this->id);
+    $package = id(new PhabricatorOwnersPackageQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($request->getURIData('id')))
+      ->executeOne();
     if (!$package) {
       return new Aphront404Response();
     }
-    $this->package = $package;
 
     $paths = $package->loadPaths();
     $owners = $package->loadOwners();
@@ -30,7 +28,7 @@ final class PhabricatorOwnersDetailController
 
     if ($repository_phids) {
       $repositories = id(new PhabricatorRepositoryQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withPHIDs(array_keys($repository_phids))
         ->execute();
       $repositories = mpull($repositories, null, 'getPHID');
@@ -131,9 +129,6 @@ final class PhabricatorOwnersDetailController
     $panel->setHeader($header);
     $panel->appendChild($table);
 
-    $key = 'package/'.$package->getID();
-    $this->setSideNavFilter($key);
-
     $commit_views = array();
 
     $commit_uri = id(new PhutilURI('/audit/'))
@@ -151,7 +146,7 @@ final class PhabricatorOwnersDetailController
       ->execute();
     if ($attention_commits) {
       $view = id(new PhabricatorAuditListView())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setCommits($attention_commits);
 
       $commit_views[] = array(
@@ -172,7 +167,7 @@ final class PhabricatorOwnersDetailController
       ->execute();
 
     $view = id(new PhabricatorAuditListView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setCommits($all_commits)
       ->setNoDataString(pht('No commits in this package.'));
 
@@ -210,21 +205,15 @@ final class PhabricatorOwnersDetailController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($package->getName());
 
-    $nav = $this->buildSideNavView();
-    $nav->appendChild($crumbs);
-    $nav->appendChild($panel);
-    $nav->appendChild($commit_panels);
-
     return $this->buildApplicationPage(
-      $nav,
+      array(
+        $crumbs,
+        $panel,
+        $commit_panels,
+      ),
       array(
         'title' => pht('Package %s', $package->getName()),
       ));
-  }
-
-  protected function getExtraPackageViews(AphrontSideNavFilterView $view) {
-    $package = $this->package;
-    $view->addFilter('package/'.$package->getID(), pht('Details'));
   }
 
 }

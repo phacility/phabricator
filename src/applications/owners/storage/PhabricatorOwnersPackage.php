@@ -37,7 +37,7 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
     return array(
       // This information is better available from the history table.
       self::CONFIG_TIMESTAMPS => false,
-      self::CONFIG_AUX_PHID   => true,
+      self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text128',
         'originalName' => 'text255',
@@ -60,7 +60,8 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID('OPKG');
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorOwnersPackagePHIDType::TYPECONST);
   }
 
   public function attachUnsavedOwners(array $owners) {

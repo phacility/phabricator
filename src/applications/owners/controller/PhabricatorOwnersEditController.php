@@ -3,24 +3,27 @@
 final class PhabricatorOwnersEditController
   extends PhabricatorOwnersController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getUser();
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    if ($this->id) {
-      $package = id(new PhabricatorOwnersPackage())->load($this->id);
+    $id = $request->getURIData('id');
+    if ($id) {
+      $package = id(new PhabricatorOwnersPackageQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            // TODO: Support this capability.
+            // PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
       if (!$package) {
         return new Aphront404Response();
       }
     } else {
       $package = new PhabricatorOwnersPackage();
-      $package->setPrimaryOwnerPHID($user->getPHID());
+      $package->setPrimaryOwnerPHID($viewer->getPHID());
     }
 
     $e_name = true;
@@ -89,7 +92,7 @@ final class PhabricatorOwnersEditController
         $package->attachOldPrimaryOwnerPHID($old_primary);
         try {
           id(new PhabricatorOwnersPackageEditor())
-            ->setActor($user)
+            ->setActor($viewer)
             ->setPackage($package)
             ->save();
           return id(new AphrontRedirectResponse())
@@ -123,15 +126,12 @@ final class PhabricatorOwnersEditController
 
     if ($package->getID()) {
       $title = pht('Edit Package');
-      $side_nav_filter = 'edit/'.$this->id;
     } else {
       $title = pht('New Package');
-      $side_nav_filter = 'new';
     }
-    $this->setSideNavFilter($side_nav_filter);
 
     $repos = id(new PhabricatorRepositoryQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->execute();
 
     $default_paths = array();
@@ -171,7 +171,7 @@ final class PhabricatorOwnersEditController
       : '/owners/';
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
@@ -256,24 +256,14 @@ final class PhabricatorOwnersEditController
       $crumbs->addTextCrumb(pht('New Package'));
     }
 
-    $nav = $this->buildSideNavView();
-    $nav->appendChild($crumbs);
-    $nav->appendChild($form_box);
-
     return $this->buildApplicationPage(
       array(
-        $nav,
+        $crumbs,
+        $form_box,
       ),
       array(
         'title' => $title,
       ));
   }
 
-  protected function getExtraPackageViews(AphrontSideNavFilterView $view) {
-    if ($this->id) {
-      $view->addFilter('edit/'.$this->id, pht('Edit'));
-    } else {
-      $view->addFilter('new', pht('New'));
-    }
-  }
 }
