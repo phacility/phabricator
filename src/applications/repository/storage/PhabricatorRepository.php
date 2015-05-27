@@ -136,6 +136,11 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       'isHosted'    => $this->isHosted(),
       'isImporting' => $this->isImporting(),
       'encoding'    => $this->getDetail('encoding'),
+      'staging' => array(
+        'supported' => $this->supportsStaging(),
+        'prefix' => 'phabricator',
+        'uri' => $this->getStagingURI(),
+      ),
     );
   }
 
@@ -1794,6 +1799,22 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function getSymbolLanguages() {
     return $this->getDetail('symbol-languages', array());
+  }
+
+
+/* -(  Staging  )-------------------------------------------------------------*/
+
+
+  public function supportsStaging() {
+    return $this->isGit();
+  }
+
+
+  public function getStagingURI() {
+    if (!$this->supportsStaging()) {
+      return null;
+    }
+    return $this->getDetail('staging-uri', null);
   }
 
 
