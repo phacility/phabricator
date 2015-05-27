@@ -185,9 +185,25 @@ final class PhabricatorApplicationSearchController
       $title = pht('Advanced Search');
     }
 
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title);
+
+    if ($run_query || $named_query) {
+      $box->setShowHide(
+        pht('Edit Query'),
+        pht('Hide Query'),
+        $form,
+        $this->getApplicationURI('query/advanced/?query='.$query_key));
+    } else {
+      $box->setForm($form);
+    }
+
+    $nav->appendChild($box);
+
     if ($run_query) {
-      $anchor = id(new PhabricatorAnchorView())
-        ->setAnchorName('R');
+      $box->setAnchor(
+        id(new PhabricatorAnchorView())
+          ->setAnchorName('R'));
 
       try {
         $query = $engine->buildQueryFromSavedQuery($saved_query);
@@ -211,22 +227,11 @@ final class PhabricatorApplicationSearchController
             $saved_query);
         }
 
-        $box = id(new PHUIObjectBoxView())
-          ->setHeaderText($title)
-          ->setAnchor($anchor);
-
-        $box->setShowHide(
-          pht('Edit Query'),
-          pht('Hide Query'),
-          $form,
-          $this->getApplicationURI('query/advanced/?query='.$query_key));
-
         if ($list instanceof AphrontTableView) {
           $box->setTable($list);
         } else {
           $box->setObjectList($list);
         }
-        $nav->appendChild($box);
 
         // TODO: This is a bit hacky.
         if ($list instanceof PHUIObjectItemListView) {
@@ -249,13 +254,7 @@ final class PhabricatorApplicationSearchController
     }
 
     if ($errors) {
-      $errors = id(new PHUIInfoView())
-        ->setTitle(pht('Query Errors'))
-        ->setErrors($errors);
-    }
-
-    if ($errors) {
-      $nav->appendChild($errors);
+      $box->setFormErrors($errors, pht('Query Errors'));
     }
 
     $crumbs = $parent
