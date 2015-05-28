@@ -157,17 +157,17 @@ final class PhabricatorAuditListView extends AphrontView {
         ->setObjectName($commit_name)
         ->setHeader($commit_desc)
         ->setHref($commit_link)
-        ->addAttribute($status_text)
+        ->addAttribute(pht('Author: %s', $author_name))
         ->addAttribute($reasons)
-        ->addIcon('none', $committed)
-        ->setSubHead(pht('Author: %s', $author_name));
+        ->addIcon('none', $committed);
 
       if (!empty($auditors)) {
         $item->addByLine(pht('Auditors: %s', $auditors));
       }
 
       if ($status_color) {
-        $item->setStatusIcon('fa-exclamation-triangle '.$status_color);
+        $item->setStatusIcon(
+          'fa-exclamation-triangle '.$status_color, $status_text);
       }
 
       $list->addItem($item);

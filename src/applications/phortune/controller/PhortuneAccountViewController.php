@@ -143,7 +143,7 @@ final class PhortuneAccountViewController extends PhortuneController {
 
       switch ($method->getStatus()) {
         case PhortunePaymentMethod::STATUS_ACTIVE:
-          $item->setBarColor('green');
+          $item->setStatusIcon('fa-check green');
 
           $disable_uri = $this->getApplicationURI('card/'.$id.'/disable/');
           $item->addAction(
@@ -154,6 +154,7 @@ final class PhortuneAccountViewController extends PhortuneController {
               ->setWorkflow(true));
           break;
         case PhortunePaymentMethod::STATUS_DISABLED:
+          $item->setStatusIcon('fa-ban lightbluetext');
           $item->setDisabled(true);
           break;
       }
