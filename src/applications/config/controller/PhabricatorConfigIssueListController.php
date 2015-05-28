@@ -89,12 +89,12 @@ final class PhabricatorConfigIssueListController
           ->setHref($href)
           ->addAttribute($issue->getSummary());
         if (!$issue->getIsIgnored()) {
-          $item->setBarColor('yellow');
+          $item->setStatusIcon('fa-warning yellow');
           $list->addItem($item);
         } else {
           $item->addIcon('fa-eye-slash', pht('Ignored'));
           $item->setDisabled(true);
-          $item->setBarColor('none');
+          $item->setStatusIcon('fa-warning grey');
           $ignored_items[] = $item;
         }
       }
