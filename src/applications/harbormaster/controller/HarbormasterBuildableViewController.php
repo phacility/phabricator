@@ -175,7 +175,9 @@ final class HarbormasterBuildableViewController
         ->setHref($view_uri);
 
       $status = $build->getBuildStatus();
-      $item->setBarColor(HarbormasterBuild::getBuildStatusColor($status));
+      $item->setStatusIcon(
+        'fa-dot-circle-o '.HarbormasterBuild::getBuildStatusColor($status),
+        HarbormasterBuild::getBuildStatusName($status));
 
       $item->addAttribute(HarbormasterBuild::getBuildStatusName($status));
 
