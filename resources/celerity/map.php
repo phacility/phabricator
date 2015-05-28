@@ -7,11 +7,11 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '97a49e3e',
-    'core.pkg.js' => 'a5ed8c89',
+    'core.pkg.css' => '68d4f4fb',
+    'core.pkg.js' => '3bbe23c6',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '30602b8c',
-    'differential.pkg.js' => '8c98ce21',
+    'differential.pkg.js' => 'ebef29b1',
     'diffusion.pkg.css' => '591664fa',
     'diffusion.pkg.js' => '0115b37c',
     'maniphest.pkg.css' => '68d4dd3d',
@@ -111,7 +111,7 @@ return array(
     'rsrc/css/application/uiexample/example.css' => '528b19de',
     'rsrc/css/core/core.css' => 'aaea7a7a',
     'rsrc/css/core/remarkup.css' => '07b7dc54',
-    'rsrc/css/core/syntax.css' => '6b7b24d9',
+    'rsrc/css/core/syntax.css' => '9fd11da8',
     'rsrc/css/core/z-index.css' => 'c4732d32',
     'rsrc/css/diviner/diviner-shared.css' => '38813222',
     'rsrc/css/font/font-awesome.css' => 'e2e712fe',
@@ -202,7 +202,7 @@ return array(
     'rsrc/externals/javelin/ext/view/__tests__/ViewInterpreter.js' => '7a94d6a5',
     'rsrc/externals/javelin/ext/view/__tests__/ViewRenderer.js' => '6ea96ac9',
     'rsrc/externals/javelin/lib/Cookie.js' => '62dfea03',
-    'rsrc/externals/javelin/lib/DOM.js' => '6f7962d5',
+    'rsrc/externals/javelin/lib/DOM.js' => '147805fa',
     'rsrc/externals/javelin/lib/History.js' => 'd4505101',
     'rsrc/externals/javelin/lib/JSON.js' => '69adf288',
     'rsrc/externals/javelin/lib/Leader.js' => '331b1611',
@@ -399,7 +399,7 @@ return array(
     'rsrc/js/application/releeph/releeph-preview-branch.js' => 'b2b4fbaf',
     'rsrc/js/application/releeph/releeph-request-state-change.js' => 'a0b57eb8',
     'rsrc/js/application/releeph/releeph-request-typeahead.js' => 'de2e896f',
-    'rsrc/js/application/repository/repository-crossreference.js' => '3975b470',
+    'rsrc/js/application/repository/repository-crossreference.js' => 'bea81850',
     'rsrc/js/application/search/behavior-reorder-queries.js' => 'e9581f08',
     'rsrc/js/application/slowvote/behavior-slowvote-embed.js' => '887ad43f',
     'rsrc/js/application/transactions/behavior-show-older-transactions.js' => 'dbbf48b6',
@@ -636,7 +636,7 @@ return array(
     'javelin-behavior-remarkup-preview' => 'f7379f45',
     'javelin-behavior-reorder-applications' => '76b9fc3e',
     'javelin-behavior-reorder-columns' => 'e1d25dfb',
-    'javelin-behavior-repository-crossreference' => '3975b470',
+    'javelin-behavior-repository-crossreference' => 'bea81850',
     'javelin-behavior-scrollbar' => '834a1173',
     'javelin-behavior-search-reorder-queries' => 'e9581f08',
     'javelin-behavior-select-on-click' => '4e3e79a6',
@@ -652,7 +652,7 @@ return array(
     'javelin-color' => '7e41274a',
     'javelin-cookie' => '62dfea03',
     'javelin-diffusion-locate-file-source' => 'b42eddc7',
-    'javelin-dom' => '6f7962d5',
+    'javelin-dom' => '147805fa',
     'javelin-dynval' => 'f6555212',
     'javelin-event' => '85ea0626',
     'javelin-fx' => '54b612ba',
@@ -821,7 +821,7 @@ return array(
     'sprite-menu-css' => '9ef76324',
     'sprite-projects-css' => 'b0d9e24f',
     'sprite-tokens-css' => '1706b943',
-    'syntax-highlighting-css' => '6b7b24d9',
+    'syntax-highlighting-css' => '9fd11da8',
     'tokens-css' => '3d0f239e',
     'typeahead-browse-css' => 'd8581d2c',
     'unhandled-exception-css' => '37d4f9a2',
@@ -917,6 +917,13 @@ return array(
       'javelin-dom',
       'javelin-uri',
       'phabricator-textareautils',
+    ),
+    '147805fa' => array(
+      'javelin-magical-init',
+      'javelin-install',
+      'javelin-util',
+      'javelin-vector',
+      'javelin-stratcom',
     ),
     '1499a8cb' => array(
       'javelin-behavior',
@@ -1061,12 +1068,6 @@ return array(
     ),
     '331b1611' => array(
       'javelin-install',
-    ),
-    '3975b470' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-stratcom',
-      'javelin-uri',
     ),
     '3ab51e2c' => array(
       'javelin-behavior',
@@ -1378,13 +1379,6 @@ return array(
     '6eff08aa' => array(
       'javelin-install',
       'javelin-util',
-      'javelin-stratcom',
-    ),
-    '6f7962d5' => array(
-      'javelin-magical-init',
-      'javelin-install',
-      'javelin-util',
-      'javelin-vector',
       'javelin-stratcom',
     ),
     '70baed2f' => array(
@@ -1791,6 +1785,12 @@ return array(
       'javelin-dom',
       'javelin-util',
       'phabricator-shaped-request',
+    ),
+    'bea81850' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-stratcom',
+      'javelin-uri',
     ),
     'c1700f6f' => array(
       'javelin-install',
