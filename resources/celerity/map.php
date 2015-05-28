@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '0df8c6bf',
+    'core.pkg.css' => '99b01d05',
     'core.pkg.js' => 'e4f47dfd',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => 'bb338e4b',
@@ -25,7 +25,7 @@ return array(
     'rsrc/css/aphront/notification.css' => '9c279160',
     'rsrc/css/aphront/pager-view.css' => '2e3539af',
     'rsrc/css/aphront/panel-view.css' => '8427b78d',
-    'rsrc/css/aphront/phabricator-nav-view.css' => '949b43d9',
+    'rsrc/css/aphront/phabricator-nav-view.css' => '0ecd30a1',
     'rsrc/css/aphront/table-view.css' => 'fb17602c',
     'rsrc/css/aphront/tokenizer.css' => '04875312',
     'rsrc/css/aphront/tooltip.css' => '7672b60f',
@@ -714,7 +714,7 @@ return array(
     'phabricator-keyboard-shortcut' => '1ae869f2',
     'phabricator-keyboard-shortcut-manager' => 'c1700f6f',
     'phabricator-main-menu-view' => '4b7ecab2',
-    'phabricator-nav-view-css' => '949b43d9',
+    'phabricator-nav-view-css' => '0ecd30a1',
     'phabricator-notification' => '0c6946e7',
     'phabricator-notification-css' => '9c279160',
     'phabricator-notification-menu-css' => '713df25a',
