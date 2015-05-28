@@ -42,12 +42,11 @@ final class PhabricatorOwnersApplication extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/owners/' => array(
-        '' => 'PhabricatorOwnersListController',
-        'view/(?P<view>[^/]+)/' => 'PhabricatorOwnersListController',
+        '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorOwnersListController',
         'edit/(?P<id>[1-9]\d*)/' => 'PhabricatorOwnersEditController',
         'new/' => 'PhabricatorOwnersEditController',
         'package/(?P<id>[1-9]\d*)/' => 'PhabricatorOwnersDetailController',
-        'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorOwnersDeleteController',
+        'paths/(?P<id>[1-9]\d*)/' => 'PhabricatorOwnersPathsController',
       ),
     );
   }

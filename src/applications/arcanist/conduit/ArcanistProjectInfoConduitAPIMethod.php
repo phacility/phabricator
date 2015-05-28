@@ -7,8 +7,12 @@ final class ArcanistProjectInfoConduitAPIMethod
     return 'arcanist.projectinfo';
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
   public function getMethodDescription() {
-    return pht('Get information about Arcanist projects.');
+    return pht('Arcanist projects are deprecated.');
   }
 
   protected function defineParamTypes() {

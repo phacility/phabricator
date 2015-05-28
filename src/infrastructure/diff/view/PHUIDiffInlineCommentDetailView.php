@@ -18,6 +18,10 @@ final class PHUIDiffInlineCommentDetailView
     return $this;
   }
 
+  public function isHidden() {
+    return $this->inlineComment->isHidden();
+  }
+
   public function setHandles(array $handles) {
     assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
@@ -192,6 +196,8 @@ final class PHUIDiffInlineCommentDetailView
     if (!$this->preview) {
       $nextprev = new PHUIButtonBarView();
       $nextprev->addClass('mml');
+
+
       $up = id(new PHUIButtonView())
         ->setTag('a')
         ->setColor(PHUIButtonView::SIMPLE)
@@ -207,6 +213,18 @@ final class PHUIDiffInlineCommentDetailView
         ->setIconFont('fa-chevron-down')
         ->addSigil('differential-inline-next')
         ->setMustCapture(true);
+
+      $hide = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setColor(PHUIButtonView::SIMPLE)
+        ->setTooltip(pht('Hide Comment'))
+        ->setIconFont('fa-times')
+        ->addSigil('hide-inline')
+        ->setMustCapture(true);
+
+      if ($viewer_phid && $inline->getID() && $inline->supportsHiding()) {
+        $nextprev->addButton($hide);
+      }
 
       $nextprev->addButton($up);
       $nextprev->addButton($down);

@@ -1,6 +1,5 @@
 {
-  "project.name" : "phabricator",
-  "phabricator.uri" : "https://secure.phabricator.com/",
-  "unit.engine" : "PhutilUnitTestEngine",
-  "load" : ["src/"]
+  "phabricator.uri": "https://secure.phabricator.com/",
+  "unit.engine": "PhutilUnitTestEngine",
+  "load": ["src/"]
 }

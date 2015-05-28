@@ -64,7 +64,9 @@ JX.behavior('fancy-datepicker', function() {
     JX.DOM.remove(picker);
     picker = null;
     JX.DOM.alterClass(root, 'picker-open', false);
-    e.kill();
+    if (e) {
+      e.kill();
+    }
 
     root = null;
   };
@@ -78,25 +80,23 @@ JX.behavior('fancy-datepicker', function() {
 
   var get_inputs = function() {
     return {
-      y: JX.DOM.find(root, 'select', 'year-input'),
-      m: JX.DOM.find(root, 'select', 'month-input'),
-      d: JX.DOM.find(root, 'select', 'day-input'),
+      d: JX.DOM.find(root, 'input', 'date-input'),
       t: JX.DOM.find(root, 'input', 'time-input')
     };
   };
 
   var read_date = function() {
     var i = get_inputs();
-    value_y = +i.y.value;
-    value_m = +i.m.value;
-    value_d = +i.d.value;
+    var date = i.d.value;
+    var parts = date.split('/');
+    value_y = +parts[2];
+    value_m = +parts[0];
+    value_d = +parts[1];
   };
 
   var write_date = function() {
     var i = get_inputs();
-    i.y.value = value_y;
-    i.m.value = value_m;
-    i.d.value = value_d;
+    i.d.value = value_m + '/' + value_d + '/' + value_y;
   };
 
   var render = function() {
@@ -133,9 +133,12 @@ JX.behavior('fancy-datepicker', function() {
     return JX.$N('td', {meta: {value: value}, className: class_name}, label);
   };
 
-
   // Render the top bar which allows you to pick a month and year.
   var render_month = function() {
+    var valid_date = getValidDate();
+    var month = valid_date.getMonth();
+    var year = valid_date.getYear() + 1900;
+
     var months = [
       'January',
       'February',
@@ -152,7 +155,7 @@ JX.behavior('fancy-datepicker', function() {
 
     var buttons = [
       cell('\u25C0', 'm:-1', false, 'lrbutton'),
-      cell(months[value_m - 1] + ' ' + value_y, null),
+      cell(months[month] + ' ' + year, null),
       cell('\u25B6', 'm:1', false, 'lrbutton')];
 
     return JX.$N(
@@ -161,9 +164,26 @@ JX.behavior('fancy-datepicker', function() {
       JX.$N('tr', {}, buttons));
   };
 
+  function getValidDate() {
+    var written_date = new Date(value_y, value_m-1, value_d);
+    if (isNaN(written_date.getTime())) {
+      return new Date();
+    } else {
+      //year 01 should be 2001, not 1901
+      if (written_date.getYear() < 70) {
+        value_y += 2000;
+        written_date = new Date(value_y, value_m-1, value_d);
+      }
+      return written_date;
+    }
+  }
+
 
   // Render the day-of-week and calendar views.
   var render_day = function() {
+    var today = new Date();
+    var valid_date = getValidDate();
+
     var weeks = [];
 
     // First, render the weekday names.
@@ -179,16 +199,21 @@ JX.behavior('fancy-datepicker', function() {
     // Render the calendar itself. NOTE: Javascript uses 0-based month indexes
     // while we use 1-based month indexes, so we have to adjust for that.
     var days = [];
-    var start = new Date(value_y, value_m - 1, 1).getDay();
+    var start = new Date(
+      valid_date.getYear() + 1900,
+      valid_date.getMonth(),
+      1).getDay();
+
     while (start--) {
       days.push(cell('', null, false, 'day-placeholder'));
     }
 
-    var today = new Date();
-
     for (ii = 1; ii <= 31; ii++) {
-      var date = new Date(value_y, value_m - 1, ii);
-      if (date.getMonth() != (value_m - 1)) {
+      var date = new Date(
+        valid_date.getYear() + 1900,
+        valid_date.getMonth(),
+        ii);
+      if (date.getMonth() != (valid_date.getMonth())) {
         // We've spilled over into the next month, so stop rendering.
         break;
       }
@@ -206,7 +231,11 @@ JX.behavior('fancy-datepicker', function() {
         classes.push('weekend');
       }
 
-      days.push(cell(ii, 'd:'+ii, value_d == ii, classes.join(' ')));
+      days.push(cell(
+        ii,
+        'd:'+ii,
+        valid_date.getDate() == ii,
+        classes.join(' ')));
     }
 
     // Slice the days into weeks.
@@ -231,6 +260,11 @@ JX.behavior('fancy-datepicker', function() {
       if (!data.value) {
         return;
       }
+
+      var valid_date = getValidDate();
+      value_y = valid_date.getYear() + 1900;
+      value_m = valid_date.getMonth() + 1;
+      value_d = valid_date.getDate();
 
       var p = data.value.split(':');
       switch (p[0]) {
@@ -262,5 +296,12 @@ JX.behavior('fancy-datepicker', function() {
 
       render();
     });
+
+  JX.Stratcom.listen('click', null, function(e){
+    if (e.getNode('phabricator-datepicker')) {
+      return;
+    }
+    onclose();
+  });
 
 });

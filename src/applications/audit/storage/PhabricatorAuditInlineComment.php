@@ -23,6 +23,14 @@ final class PhabricatorAuditInlineComment
     return $this->proxy;
   }
 
+  public function supportsHiding() {
+    return false;
+  }
+
+  public function isHidden() {
+    return false;
+  }
+
   public function getTransactionCommentForSave() {
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorContentSource::SOURCE_LEGACY,

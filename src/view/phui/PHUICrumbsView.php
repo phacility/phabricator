@@ -84,6 +84,7 @@ final class PHUICrumbsView extends AphrontView {
             'class' => implode(' ', $action_classes),
             'sigil' => implode(' ', $action_sigils),
             'style' => $action->getStyle(),
+            'meta' => $action->getMetadata(),
           ),
           array(
             $icon,

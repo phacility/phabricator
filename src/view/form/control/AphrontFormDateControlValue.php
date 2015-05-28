@@ -2,9 +2,7 @@
 
 final class AphrontFormDateControlValue extends Phobject {
 
-  private $valueDay;
-  private $valueMonth;
-  private $valueYear;
+  private $valueDate;
   private $valueTime;
   private $valueEnabled;
 
@@ -12,16 +10,8 @@ final class AphrontFormDateControlValue extends Phobject {
   private $zone;
   private $optional;
 
-  public function getValueDay() {
-    return $this->valueDay;
-  }
-
-  public function getValueMonth() {
-    return $this->valueMonth;
-  }
-
-  public function getValueYear() {
-    return $this->valueYear;
+  public function getValueDate() {
+    return $this->valueDate;
   }
 
   public function getValueTime() {
@@ -36,15 +26,7 @@ final class AphrontFormDateControlValue extends Phobject {
   }
 
   public function isEmpty() {
-    if ($this->valueDay) {
-      return false;
-    }
-
-    if ($this->valueMonth) {
-      return false;
-    }
-
-    if ($this->valueYear) {
+    if ($this->valueDate) {
       return false;
     }
 
@@ -83,9 +65,7 @@ final class AphrontFormDateControlValue extends Phobject {
 
     $value = new AphrontFormDateControlValue();
     $value->viewer = $viewer;
-    $value->valueYear = $year;
-    $value->valueMonth = $month;
-    $value->valueDay = $day;
+    $value->valueDate = $month.'/'.$day.'/'.$year;
     $value->valueTime = coalesce($time, '12:00 AM');
     $value->valueEnabled = $enabled;
 
@@ -95,10 +75,7 @@ final class AphrontFormDateControlValue extends Phobject {
   public static function newFromRequest(AphrontRequest $request, $key) {
     $value = new AphrontFormDateControlValue();
     $value->viewer = $request->getViewer();
-
-    $value->valueDay = $request->getInt($key.'_d');
-    $value->valueMonth = $request->getInt($key.'_m');
-    $value->valueYear = $request->getInt($key.'_y');
+    $value->valueDate = $request->getStr($key.'_d');
     $value->valueTime = $request->getStr($key.'_t');
     $value->valueEnabled = $request->getStr($key.'_e');
 
@@ -111,10 +88,13 @@ final class AphrontFormDateControlValue extends Phobject {
     $readable = $value->formatTime($epoch, 'Y!m!d!g:i A');
     $readable = explode('!', $readable, 4);
 
-    $value->valueYear  = $readable[0];
-    $value->valueMonth = $readable[1];
-    $value->valueDay   = $readable[2];
+    $year  = $readable[0];
+    $month = $readable[1];
+    $day   = $readable[2];
+
+    $value->valueDate = $month.'/'.$day.'/'.$year;
     $value->valueTime  = $readable[3];
+
 
     return $value;
   }
@@ -125,9 +105,7 @@ final class AphrontFormDateControlValue extends Phobject {
     $value = new AphrontFormDateControlValue();
     $value->viewer = $viewer;
 
-    $value->valueYear = idx($dictionary, 'y');
-    $value->valueMonth = idx($dictionary, 'm');
-    $value->valueDay = idx($dictionary, 'd');
+    $value->valueDate = idx($dictionary, 'd');
     $value->valueTime = idx($dictionary, 't');
     $value->valueEnabled = idx($dictionary, 'e');
 
@@ -149,9 +127,7 @@ final class AphrontFormDateControlValue extends Phobject {
 
   public function getDictionary() {
     return array(
-      'y' => $this->valueYear,
-      'm' => $this->valueMonth,
-      'd' => $this->valueDay,
+      'd' => $this->valueDate,
       't' => $this->valueTime,
       'e' => $this->valueEnabled,
     );
@@ -176,9 +152,7 @@ final class AphrontFormDateControlValue extends Phobject {
       return null;
     }
 
-    $year = $this->valueYear;
-    $month = $this->valueMonth;
-    $day = $this->valueDay;
+    $date = $this->valueDate;
     $time = $this->valueTime;
     $zone = $this->getTimezone();
 
@@ -203,12 +177,25 @@ final class AphrontFormDateControlValue extends Phobject {
     }
 
     try {
-      $date = new DateTime("{$year}-{$month}-{$day} {$time}", $zone);
-      $value = $date->format('U');
+      $datetime = new DateTime("{$date} {$time}", $zone);
+      $value = $datetime->format('U');
     } catch (Exception $ex) {
       $value = null;
     }
     return $value;
+  }
+
+  public function getDateTime() {
+    $epoch = $this->getEpoch();
+    $date = null;
+
+    if ($epoch) {
+      $zone = $this->getTimezone();
+      $date = new DateTime('@'.$epoch);
+      $date->setTimeZone($zone);
+    }
+
+    return $date;
   }
 
   private function getTimezone() {

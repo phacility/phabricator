@@ -21,8 +21,7 @@ final class ReleephProductSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new ReleephProductQuery())
-      ->setOrder(ReleephProductQuery::ORDER_NAME)
-      ->needArcanistProjects(true);
+      ->setOrder(ReleephProductQuery::ORDER_NAME);
 
     $active = $saved->getParameter('active');
     $value = idx($this->getActiveValues(), $active);
@@ -118,11 +117,6 @@ final class ReleephProductSearchEngine
             'href' => '/diffusion/'.$repo->getCallsign().'/',
           ),
           'r'.$repo->getCallsign()));
-
-      $arc = $product->getArcanistProject();
-      if ($arc) {
-        $item->addAttribute($arc->getName());
-      }
 
       $list->addItem($item);
     }

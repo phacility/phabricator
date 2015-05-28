@@ -175,6 +175,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
       $query = id(new DifferentialInlineCommentQuery())
         ->setViewer($user)
+        ->needHidden(true)
         ->withRevisionPHIDs(array($revision->getPHID()));
       $inlines = $query->execute();
       $inlines = $query->adjustInlinesForChangesets(

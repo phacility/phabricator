@@ -15,6 +15,14 @@ abstract class PhabricatorInlineCommentController
   abstract protected function saveComment(
     PhabricatorInlineCommentInterface $inline);
 
+  protected function hideComments(array $ids) {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  protected function showComments(array $ids) {
+    throw new PhutilMethodNotImplementedException();
+  }
+
   private $changesetID;
   private $isNewFile;
   private $isOnRight;
@@ -84,6 +92,22 @@ abstract class PhabricatorInlineCommentController
 
     $op = $this->getOperation();
     switch ($op) {
+      case 'hide':
+      case 'show':
+        if (!$request->validateCSRF()) {
+          return new Aphront404Response();
+        }
+
+        $ids = $request->getStrList('ids');
+        if ($ids) {
+          if ($op == 'hide') {
+            $this->hideComments($ids);
+          } else {
+            $this->showComments($ids);
+          }
+        }
+
+        return id(new AphrontAjaxResponse())->setContent(array());
       case 'done':
         if (!$request->validateCSRF()) {
           return new Aphront404Response();

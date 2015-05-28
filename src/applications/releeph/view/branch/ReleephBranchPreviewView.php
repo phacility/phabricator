@@ -24,7 +24,7 @@ final class ReleephBranchPreviewView extends AphrontFormControl {
 
   protected function renderInput() {
     static $required_params = array(
-      'arcProjectID',
+      'repositoryPHID',
       'projectName',
       'isSymbolic',
       'template',
@@ -43,9 +43,9 @@ final class ReleephBranchPreviewView extends AphrontFormControl {
     $output_id = celerity_generate_unique_node_id();
 
     Javelin::initBehavior('releeph-preview-branch', array(
-      'uri'           => '/releeph/branch/preview/',
-      'outputID'      => $output_id,
-      'params'        => array(
+      'uri'      => '/releeph/branch/preview/',
+      'outputID' => $output_id,
+      'params'   => array(
         'static'  => $this->statics,
         'dynamic' => $this->dynamics,
       ),

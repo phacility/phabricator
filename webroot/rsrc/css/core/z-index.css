@@ -32,6 +32,10 @@
   z-index: 2;
 }
 
+div.phui-calendar-day-event {
+  z-index: 2;
+}
+
 .slowvote-above-the-bar {
   z-index: 3;
 }

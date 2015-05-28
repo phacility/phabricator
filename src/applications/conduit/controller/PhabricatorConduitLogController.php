@@ -98,7 +98,7 @@ final class PhabricatorConduitLogController
         array($call->getMethod(), $client),
         $status,
         $call->getError(),
-        pht('%d us', number_format($call->getDuration())),
+        pht('%s us', new PhutilNumber($call->getDuration())),
         phabricator_datetime($call->getDateCreated(), $viewer),
       );
     }

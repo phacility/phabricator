@@ -154,7 +154,10 @@ final class HeraldDifferentialDiffAdapter extends HeraldDifferentialAdapter {
             pht('Blocked diff.'));
           break;
         default:
-          throw new Exception(pht('No rules to handle action "%s"!', $action));
+          $result[] = new HeraldApplyTranscript(
+            $effect,
+            false,
+            pht('No rules to handle action "%s"!', $action));
       }
     }
 

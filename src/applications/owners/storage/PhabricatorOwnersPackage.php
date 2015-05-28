@@ -1,19 +1,23 @@
 <?php
 
-final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
-  implements PhabricatorPolicyInterface {
+final class PhabricatorOwnersPackage
+  extends PhabricatorOwnersDAO
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorApplicationTransactionInterface {
 
   protected $name;
   protected $originalName;
   protected $auditingEnabled;
   protected $description;
   protected $primaryOwnerPHID;
+  protected $mailKey;
 
-  private $unsavedOwners = self::ATTACHABLE;
-  private $unsavedPaths = self::ATTACHABLE;
-  private $actorPHID;
-  private $oldPrimaryOwnerPHID;
-  private $oldAuditingEnabled;
+  public static function initializeNewPackage(PhabricatorUser $actor) {
+    return id(new PhabricatorOwnersPackage())
+      ->setAuditingEnabled(0)
+      ->setPrimaryOwnerPHID($actor->getPHID());
+  }
 
   public function getCapabilities() {
     return array(
@@ -37,13 +41,14 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
     return array(
       // This information is better available from the history table.
       self::CONFIG_TIMESTAMPS => false,
-      self::CONFIG_AUX_PHID   => true,
+      self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text128',
         'originalName' => 'text255',
         'description' => 'text',
         'primaryOwnerPHID' => 'phid?',
         'auditingEnabled' => 'bool',
+        'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -60,52 +65,16 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID('OPKG');
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorOwnersPackagePHIDType::TYPECONST);
   }
 
-  public function attachUnsavedOwners(array $owners) {
-    $this->unsavedOwners = $owners;
-    return $this;
-  }
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
 
-  public function getUnsavedOwners() {
-    return $this->assertAttached($this->unsavedOwners);
-  }
-
-  public function attachUnsavedPaths(array $paths) {
-    $this->unsavedPaths = $paths;
-    return $this;
-  }
-
-  public function getUnsavedPaths() {
-    return $this->assertAttached($this->unsavedPaths);
-  }
-
-  public function attachActorPHID($actor_phid) {
-    $this->actorPHID = $actor_phid;
-    return $this;
-  }
-
-  public function getActorPHID() {
-    return $this->actorPHID;
-  }
-
-  public function attachOldPrimaryOwnerPHID($old_primary) {
-    $this->oldPrimaryOwnerPHID = $old_primary;
-    return $this;
-  }
-
-  public function getOldPrimaryOwnerPHID() {
-    return $this->oldPrimaryOwnerPHID;
-  }
-
-  public function attachOldAuditingEnabled($auditing_enabled) {
-    $this->oldAuditingEnabled = $auditing_enabled;
-    return $this;
-  }
-
-  public function getOldAuditingEnabled() {
-    return $this->oldAuditingEnabled;
+    return parent::save();
   }
 
   public function setName($name) {
@@ -143,15 +112,15 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
     }
 
     return self::loadPackagesForPaths($repository, $paths);
- }
+  }
 
- public static function loadOwningPackages($repository, $path) {
+  public static function loadOwningPackages($repository, $path) {
     if (empty($path)) {
       return array();
     }
 
     return self::loadPackagesForPaths($repository, array($path), 1);
- }
+  }
 
   private static function loadPackagesForPaths(
     PhabricatorRepository $repository,
@@ -268,4 +237,27 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
     }
     return $result;
   }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorOwnersPackageTransactionEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorOwnersPackageTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
+  }
+
 }

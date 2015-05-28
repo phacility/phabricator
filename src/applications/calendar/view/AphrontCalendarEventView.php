@@ -12,6 +12,7 @@ final class AphrontCalendarEventView extends AphrontView {
   private $uri;
   private $isAllDay;
   private $icon;
+  private $canEdit;
 
   public function setURI($uri) {
     $this->uri = $uri;
@@ -97,6 +98,14 @@ final class AphrontCalendarEventView extends AphrontView {
     return $this->icon;
   }
 
+  public function setCanEdit($can_edit) {
+    $this->canEdit = $can_edit;
+    return $this;
+  }
+
+  public function getCanEdit() {
+    return $this->canEdit;
+  }
 
   public function getMultiDay() {
     $nextday = strtotime('12:00 AM Tomorrow', $this->getEpochStart());
