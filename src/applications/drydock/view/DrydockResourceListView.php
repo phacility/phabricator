@@ -27,16 +27,16 @@ final class DrydockResourceListView extends AphrontView {
 
       switch ($resource->getStatus()) {
         case DrydockResourceStatus::STATUS_PENDING:
-          $item->setBarColor('yellow');
+          $item->setStatusIcon('fa-dot-circle yellow');
           break;
         case DrydockResourceStatus::STATUS_OPEN:
-          $item->setBarColor('green');
+          $item->setStatusIcon('fa-dot-circle green');
           break;
         case DrydockResourceStatus::STATUS_DESTROYED:
-          $item->setBarColor('black');
+          $item->setStatusIcon('fa-times-circle black');
           break;
         default:
-          $item->setBarColor('red');
+          $item->setStatusIcon('fa-dot-circle red');
           break;
       }
 

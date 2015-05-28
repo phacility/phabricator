@@ -43,16 +43,16 @@ final class DrydockLogListView extends AphrontView {
     $table->setDeviceReadyTable(true);
     $table->setHeaders(
       array(
-        'Resource',
-        'Lease',
-        'Message',
-        'Date',
+        pht('Resource'),
+        pht('Lease'),
+        pht('Message'),
+        pht('Date'),
       ));
     $table->setShortHeaders(
       array(
-        'R',
-        'L',
-        'Message',
+        pht('R'),
+        pht('L'),
+        pht('Message'),
         '',
       ));
     $table->setColumnClasses(
