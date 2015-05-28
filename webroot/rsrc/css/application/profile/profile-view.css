@@ -43,11 +43,6 @@
   padding: 16px;
 }
 
-.phabricator-project-feed {
-  padding: 4px 0 12px 12px;
-  max-width: 640px;
-}
-
 .phabricator-project-feed .phui-info-view {
   margin: 12px 0;
 }

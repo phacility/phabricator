@@ -157,16 +157,12 @@ final class PHUIFeedStoryView extends AphrontView {
 
     $body = null;
     $foot = null;
-    $image_style = null;
-    $actor = '';
 
-    if ($this->image) {
-      $actor = new PHUIIconView();
-      $actor->setImage($this->image);
-      $actor->addClass('phui-feed-story-actor-image');
-      if ($this->imageHref) {
-        $actor->setHref($this->imageHref);
-      }
+    $actor = new PHUIIconView();
+    $actor->setImage($this->image);
+    $actor->addClass('phui-feed-story-actor-image');
+    if ($this->imageHref) {
+      $actor->setHref($this->imageHref);
     }
 
     if ($this->epoch) {

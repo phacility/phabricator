@@ -59,6 +59,7 @@ final class PhabricatorFeedBuilder {
         $last_date = $date;
         $header = new PHUIHeaderView();
         $header->setHeader($date);
+        $header->setHeaderIcon('fa-calendar blue msr');
 
         $null_view->appendChild($header);
       }
@@ -94,10 +95,9 @@ final class PhabricatorFeedBuilder {
       $null_view->appendChild($view);
     }
 
+    return id(new PHUIObjectBoxView())
+      ->appendChild($null_view);
 
-
-    return id(new AphrontNullView())
-      ->appendChild($null_view->render());
   }
 
 }

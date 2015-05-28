@@ -1,11 +1,8 @@
 /**
  * @provides phui-feed-story-css
  */
-
-.phui-feed-story {
-  background: 5px 2px no-repeat;
-  min-height: 44px;
-  background-color: #fff;
+.phui-object-box .phabricator-feed-frame .phui-header-shell h1 {
+  color: {$blue};
 }
 
 .phui-feed-story-head .phui-feed-story-actor-image {
@@ -14,12 +11,15 @@
   background-size: 35px;
   float: left;
   margin-right: 8px;
+  border: 1px solid rgba(55,55,55,.2);
+  border-radius: 3px;
 }
 
 .phui-feed-story-head {
-  padding: 8px;
+  padding: 12px 8px;
   overflow: hidden;
   color: {$greytext};
+  line-height: 16px;
 }
 
 .phui-feed-story-head .phui-link-person {
@@ -28,11 +28,12 @@
 }
 
 .phui-feed-story-body {
-  margin: 0 8px 8px;
+  margin: 4px 8px 8px;
   color: {$darkgreytext};
   word-break: break-word;
   max-height: 300px;
   overflow: hidden;
+  line-height: 18px;
 }
 
 .phui-feed-story-body.phabricator-remarkup {
@@ -40,10 +41,8 @@
 }
 
 .phui-feed-story-foot {
-  font-size: 11px;
-  background: {$lightgreybackground};
-  padding: 8px;
-  line-height: 14px;
+  font-size: 12px;
+  padding: 8px 8px 12px 8px;
 }
 
 .phui-feed-story-foot,
