@@ -93,12 +93,23 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
       range.start + l.length + m.length);
   }
 
+  function prepend_char_to_lines(ch, sel, def) {
+    if (sel) {
+      sel = sel.split('\n');
+    } else {
+      sel = [def];
+    }
+    sel = sel.join('\n' + ch);
+    return sel;
+  }
+
   function assist(area, action, root) {
     // If the user has some text selected, we'll try to use that (for example,
     // if they have a word selected and want to bold it). Otherwise we'll insert
     // generic text.
     var sel = JX.TextAreaUtils.getSelectionText(area);
     var r = JX.TextAreaUtils.getSelectionRange(area);
+    var ch;
 
     switch (action) {
       case 'fa-bold':
@@ -120,19 +131,19 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
         break;
       case 'fa-list-ul':
       case 'fa-list-ol':
-        var ch = (action == 'fa-list-ol') ? '  # ' : '  - ';
-        if (sel) {
-          sel = sel.split('\n');
-        } else {
-          sel = [pht('List Item')];
-        }
-        sel = sel.join('\n' + ch);
+        ch = (action == 'fa-list-ol') ? '  # ' : '  - ';
+        sel = prepend_char_to_lines(ch, sel, pht('List Item'));
         update(area, ((r.start === 0) ? '' : '\n\n') + ch, sel, '\n\n');
         break;
       case 'fa-code':
         sel = sel || 'foreach ($list as $item) {\n  work_miracles($item);\n}';
         var code_prefix = (r.start === 0) ? '' : '\n';
         update(area, code_prefix + '```\n', sel, '\n```');
+        break;
+      case 'fa-quote-right':
+        ch = '> ';
+        sel = prepend_char_to_lines(ch, sel, pht('Quoted Text'));
+        update(area, ((r.start === 0) ? '' : '\n\n') + ch, sel, '\n\n');
         break;
       case 'fa-table':
         var table_prefix = (r.start === 0 ? '' : '\n\n');

@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '97a49e3e',
-    'core.pkg.js' => '0e261ea7',
+    'core.pkg.js' => 'a5ed8c89',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '30602b8c',
     'differential.pkg.js' => '8c98ce21',
@@ -459,7 +459,7 @@ return array(
     'rsrc/js/core/behavior-object-selector.js' => '49b73b36',
     'rsrc/js/core/behavior-oncopy.js' => '2926fff2',
     'rsrc/js/core/behavior-phabricator-nav.js' => '14d7a8b8',
-    'rsrc/js/core/behavior-phabricator-remarkup-assist.js' => 'e32d14ab',
+    'rsrc/js/core/behavior-phabricator-remarkup-assist.js' => '095ed313',
     'rsrc/js/core/behavior-refresh-csrf.js' => '7814b593',
     'rsrc/js/core/behavior-remarkup-preview.js' => 'f7379f45',
     'rsrc/js/core/behavior-reorder-applications.js' => '76b9fc3e',
@@ -610,7 +610,7 @@ return array(
     'javelin-behavior-phabricator-notification-example' => '8ce821c5',
     'javelin-behavior-phabricator-object-selector' => '49b73b36',
     'javelin-behavior-phabricator-oncopy' => '2926fff2',
-    'javelin-behavior-phabricator-remarkup-assist' => 'e32d14ab',
+    'javelin-behavior-phabricator-remarkup-assist' => '095ed313',
     'javelin-behavior-phabricator-reveal-content' => '60821bc7',
     'javelin-behavior-phabricator-search-typeahead' => '048330fa',
     'javelin-behavior-phabricator-show-older-transactions' => 'dbbf48b6',
@@ -881,6 +881,15 @@ return array(
       'javelin-install',
       'javelin-dom',
       'javelin-stratcom',
+      'javelin-vector',
+    ),
+    '095ed313' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
+      'phabricator-phtize',
+      'phabricator-textareautils',
+      'javelin-workflow',
       'javelin-vector',
     ),
     '0a3f3021' => array(
@@ -1902,15 +1911,6 @@ return array(
     ),
     'e292eaf4' => array(
       'javelin-install',
-    ),
-    'e32d14ab' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
-      'phabricator-phtize',
-      'phabricator-textareautils',
-      'javelin-workflow',
-      'javelin-vector',
     ),
     'e379b58e' => array(
       'javelin-behavior',
