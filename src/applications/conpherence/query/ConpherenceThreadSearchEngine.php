@@ -227,15 +227,13 @@ final class ConpherenceThreadSearchEngine
               continue;
             }
 
-            $history_href = '/'.$monogram.'#'.$xaction->getID();
-
             $view = id(new ConpherenceTransactionView())
               ->setUser($viewer)
               ->setHandles($handles)
               ->setMarkupEngine($engines[$conpherence_phid])
               ->setConpherenceThread($conpherence)
               ->setConpherenceTransaction($xaction)
-              ->setEpoch($xaction->getDateCreated(), $history_href)
+              ->setFullDisplay(false)
               ->addClass('conpherence-fulltext-result');
 
             if ($message['match']) {
