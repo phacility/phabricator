@@ -307,7 +307,6 @@ final class PhabricatorCalendarEventSearchEngine
     $viewer = $this->requireViewer();
     $list = new PHUIObjectItemListView();
     foreach ($events as $event) {
-      // $href = '/E'.$event->getID();
       $from = phabricator_datetime($event->getDateFrom(), $viewer);
       $to = phabricator_datetime($event->getDateTo(), $viewer);
       $creator_handle = $handles[$event->getUserPHID()];

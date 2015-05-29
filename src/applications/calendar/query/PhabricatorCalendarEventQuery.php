@@ -101,13 +101,14 @@ final class PhabricatorCalendarEventQuery
     foreach ($events as $event) {
       $sequence_start = 0;
       $instance_count = null;
+      $duration = $event->getDateTo() - $event->getDateFrom();
 
       if ($event->getIsRecurring()) {
         $frequency = $event->getFrequencyUnit();
         $modify_key = '+1 '.$frequency;
 
         if ($this->rangeBegin && $this->rangeBegin > $event->getDateFrom()) {
-          $max_date = $this->rangeBegin;
+          $max_date = $this->rangeBegin - $duration;
           $date = $event->getDateFrom();
           $datetime = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
 
@@ -120,7 +121,7 @@ final class PhabricatorCalendarEventQuery
 
           $start = $this->rangeBegin;
         } else {
-          $start = $event->getDateFrom();
+          $start = $event->getDateFrom() - $duration;
         }
 
         $date = $start;
