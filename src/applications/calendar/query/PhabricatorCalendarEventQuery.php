@@ -266,11 +266,15 @@ final class PhabricatorCalendarEventQuery
       $phids[] = $event->getPHID();
     }
 
-    $invitees = id(new PhabricatorCalendarEventInviteeQuery())
-      ->setViewer($this->getViewer())
-      ->withEventPHIDs($phids)
-      ->execute();
-    $invitees = mgroup($invitees, 'getEventPHID');
+    if ($events) {
+      $invitees = id(new PhabricatorCalendarEventInviteeQuery())
+        ->setViewer($this->getViewer())
+        ->withEventPHIDs($phids)
+        ->execute();
+      $invitees = mgroup($invitees, 'getEventPHID');
+    } else {
+      $invitees = array();
+    }
 
     foreach ($events as $event) {
       $event_invitees = idx($invitees, $event->getPHID(), array());
