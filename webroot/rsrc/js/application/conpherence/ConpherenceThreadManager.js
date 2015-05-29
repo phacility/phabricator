@@ -447,9 +447,20 @@ JX.install('ConpherenceThreadManager', {
     },
 
     sendMessage: function(form, params) {
+      var inputs = JX.DOM.scry(form, 'input');
+      var block_empty = true;
+      for (var i = 0; i < inputs.length; i++) {
+        if (inputs[i].type != 'hidden') {
+          continue;
+        }
+        if (inputs[i].name == 'action' && inputs[i].value == 'join_room') {
+          block_empty = false;
+          continue;
+        }
+      }
       // don't bother sending up text if there is nothing to submit
       var textarea = JX.DOM.find(form, 'textarea');
-      if (!textarea.value.length) {
+      if (block_empty && !textarea.value.length) {
         return;
       }
       params = this._getParams(params);

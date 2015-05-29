@@ -228,7 +228,8 @@ final class PHUICalendarMonthView extends AphrontView {
       $cell_day = null;
     }
 
-    if ($date && $date->format('j') == $this->day) {
+    if ($date && $date->format('j') == $this->day &&
+      $date->format('m') == $this->month) {
       $today_class = 'phui-calendar-today-slot phui-calendar-today';
     } else {
       $today_class = 'phui-calendar-today-slot';

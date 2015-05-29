@@ -74,7 +74,8 @@ final class ConpherenceTransactionRenderer {
       ->setUser($user)
       ->setConpherenceThread($conpherence)
       ->setHandles($handles)
-      ->setMarkupEngine($engine);
+      ->setMarkupEngine($engine)
+      ->setFullDisplay($full_display);
 
     foreach ($transactions as $transaction) {
       if ($previous_transaction) {
@@ -96,21 +97,6 @@ final class ConpherenceTransactionRenderer {
       }
       $transaction_view = id(clone $transaction_view_template)
         ->setConpherenceTransaction($transaction);
-      if ($full_display) {
-        $transaction_view
-          ->setAnchor(
-            $transaction->getID(),
-            phabricator_time($transaction->getDateCreated(), $user));
-        $transaction_view->setContentSource($transaction->getContentSource());
-        $transaction_view->setShowImages(true);
-      } else {
-        $transaction_view
-          ->setEpoch(
-            $transaction->getDateCreated(),
-            '/'.$conpherence->getMonogram().'#'.$transaction->getID())
-            ->setTimeOnly(true);
-        $transaction_view->setShowImages(false);
-      }
 
       $rendered_transactions[] = $transaction_view->render();
       $previous_transaction = $transaction;

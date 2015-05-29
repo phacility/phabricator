@@ -51,10 +51,16 @@ final class DifferentialInlineComment
   }
 
   public function supportsHiding() {
+    if ($this->getSyntheticAuthor()) {
+      return false;
+    }
     return true;
   }
 
   public function isHidden() {
+    if (!$this->supportsHiding()) {
+      return false;
+    }
     return $this->proxy->getIsHidden();
   }
 

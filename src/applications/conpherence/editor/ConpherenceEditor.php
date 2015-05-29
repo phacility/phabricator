@@ -576,6 +576,21 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     return $body;
   }
 
+  protected function addEmailPreferenceSectionToMailBody(
+    PhabricatorMetaMTAMailBody $body,
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $href = PhabricatorEnv::getProductionURI(
+      '/'.$object->getMonogram().'?settings');
+    if ($object->getIsRoom()) {
+      $label = pht('EMAIL PREFERENCES FOR THIS ROOM');
+    } else {
+      $label = pht('EMAIL PREFERENCES FOR THIS MESSAGE');
+    }
+    $body->addLinkSection($label, $href);
+  }
+
   protected function getMailSubjectPrefix() {
     return PhabricatorEnv::getEnvConfig('metamta.conpherence.subject-prefix');
   }

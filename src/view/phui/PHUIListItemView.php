@@ -29,6 +29,18 @@ final class PHUIListItemView extends AphrontTagView {
   private $aural;
   private $profileImage;
 
+  public function setDropdownMenu(PhabricatorActionListView $actions) {
+    Javelin::initBehavior('phui-dropdown-menu');
+
+    $this->addSigil('phui-dropdown-menu');
+    $this->setMetadata(
+      array(
+        'items' => $actions,
+      ));
+
+    return $this;
+  }
+
   public function setAural($aural) {
     $this->aural = $aural;
     return $this;

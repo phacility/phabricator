@@ -29,7 +29,10 @@ final class PhabricatorCalendarEventEditController
     $uri_query = $request->getStr('query');
 
     if ($this->isCreate()) {
-      $event = PhabricatorCalendarEvent::initializeNewCalendarEvent($viewer);
+      $mode = $request->getStr('mode');
+      $event = PhabricatorCalendarEvent::initializeNewCalendarEvent(
+        $viewer,
+        $mode);
 
       $create_start_year = $request->getInt('year');
       $create_start_month = $request->getInt('month');
