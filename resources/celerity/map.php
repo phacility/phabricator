@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '68d4f4fb',
+    'core.pkg.css' => 'e2460e8f',
     'core.pkg.js' => '3bbe23c6',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '30602b8c',
@@ -135,7 +135,7 @@ return array(
     'rsrc/css/phui/phui-feed-story.css' => 'c9f3a0b5',
     'rsrc/css/phui/phui-fontkit.css' => 'dd8ddf27',
     'rsrc/css/phui/phui-form-view.css' => '808329f2',
-    'rsrc/css/phui/phui-form.css' => 'f535f938',
+    'rsrc/css/phui/phui-form.css' => '25876baf',
     'rsrc/css/phui/phui-header-view.css' => '75aaf372',
     'rsrc/css/phui/phui-icon.css' => 'bc766998',
     'rsrc/css/phui/phui-image-mask.css' => '5a8b09c8',
@@ -333,6 +333,7 @@ return array(
     'rsrc/js/application/auth/behavior-persona-login.js' => '9414ff18',
     'rsrc/js/application/calendar/behavior-day-view.js' => '5c46cff2',
     'rsrc/js/application/calendar/behavior-event-all-day.js' => '38dcf3c8',
+    'rsrc/js/application/calendar/behavior-recurring-edit.js' => '85c73ceb',
     'rsrc/js/application/config/behavior-reorder-fields.js' => 'b6993408',
     'rsrc/js/application/conpherence/ConpherenceThreadManager.js' => '01774ab2',
     'rsrc/js/application/conpherence/behavior-drag-and-drop-photo.js' => 'cf86d16a',
@@ -629,6 +630,7 @@ return array(
     'javelin-behavior-project-boards' => 'ba4fa35c',
     'javelin-behavior-project-create' => '065227cc',
     'javelin-behavior-quicksand-blacklist' => '7927a7d3',
+    'javelin-behavior-recurring-edit' => '85c73ceb',
     'javelin-behavior-refresh-csrf' => '7814b593',
     'javelin-behavior-releeph-preview-branch' => 'b2b4fbaf',
     'javelin-behavior-releeph-request-state-change' => 'a0b57eb8',
@@ -775,7 +777,7 @@ return array(
     'phui-feed-story-css' => 'c9f3a0b5',
     'phui-font-icon-base-css' => '3dad2ae3',
     'phui-fontkit-css' => 'dd8ddf27',
-    'phui-form-css' => 'f535f938',
+    'phui-form-css' => '25876baf',
     'phui-form-view-css' => '808329f2',
     'phui-header-view-css' => '75aaf372',
     'phui-icon-view-css' => 'bc766998',

@@ -21,9 +21,11 @@ final class PhabricatorCalendarEventEditController
     $error_end_date = true;
     $validation_exception = null;
 
+    $is_recurring_id = celerity_generate_unique_node_id();
+    $frequency_id = celerity_generate_unique_node_id();
     $all_day_id = celerity_generate_unique_node_id();
     $start_date_id = celerity_generate_unique_node_id();
-    $end_date_id = null;
+    $end_date_id = celerity_generate_unique_node_id();
 
     $next_workflow = $request->getStr('next');
     $uri_query = $request->getStr('query');
@@ -70,7 +72,6 @@ final class PhabricatorCalendarEventEditController
       $subscribers = array();
       $invitees = array($user_phid);
       $cancel_uri = $this->getApplicationURI();
-      $end_date_id = celerity_generate_unique_node_id();
     } else {
       $event = id(new PhabricatorCalendarEventQuery())
         ->setViewer($viewer)
@@ -113,6 +114,8 @@ final class PhabricatorCalendarEventEditController
     $name = $event->getName();
     $description = $event->getDescription();
     $is_all_day = $event->getIsAllDay();
+    $is_recurring = $event->getIsRecurring();
+    $frequency = idx($event->getRecurrenceFrequency(), 'rule');
     $icon = $event->getIcon();
 
     $current_policies = id(new PhabricatorPolicyQuery())
@@ -134,6 +137,8 @@ final class PhabricatorCalendarEventEditController
       $subscribers = $request->getArr('subscribers');
       $edit_policy = $request->getStr('editPolicy');
       $view_policy = $request->getStr('viewPolicy');
+      $is_recurring = $request->getStr('isRecurring') ? 1 : 0;
+      $frequency = $request->getStr('frequency');
       $is_all_day = $request->getStr('isAllDay');
       $icon = $request->getStr('icon');
 
@@ -151,6 +156,16 @@ final class PhabricatorCalendarEventEditController
         ->setTransactionType(
           PhabricatorCalendarEventTransaction::TYPE_NAME)
         ->setNewValue($name);
+
+      $xactions[] = id(new PhabricatorCalendarEventTransaction())
+        ->setTransactionType(
+          PhabricatorCalendarEventTransaction::TYPE_RECURRING)
+        ->setNewValue($is_recurring);
+
+      $xactions[] = id(new PhabricatorCalendarEventTransaction())
+        ->setTransactionType(
+          PhabricatorCalendarEventTransaction::TYPE_FREQUENCY)
+        ->setNewValue(array('rule' => $frequency));
 
       $xactions[] = id(new PhabricatorCalendarEventTransaction())
         ->setTransactionType(
@@ -233,17 +248,43 @@ final class PhabricatorCalendarEventEditController
       }
     }
 
-    Javelin::initBehavior('event-all-day', array(
-      'allDayID' => $all_day_id,
-      'startDateID' => $start_date_id,
-      'endDateID' => $end_date_id,
-    ));
-
     $name = id(new AphrontFormTextControl())
       ->setLabel(pht('Name'))
       ->setName('name')
       ->setValue($name)
       ->setError($error_name);
+
+    Javelin::initBehavior('recurring-edit', array(
+      'isRecurring' => $is_recurring_id,
+      'frequency' => $frequency_id,
+    ));
+
+    $is_recurring_checkbox = id(new AphrontFormCheckboxControl())
+      ->addCheckbox(
+        'isRecurring',
+        1,
+        pht('Recurring Event'),
+        $is_recurring,
+        $is_recurring_id);
+
+    $recurrence_frequency_select = id(new AphrontFormSelectControl())
+      ->setName('frequency')
+      ->setOptions(array(
+          'daily' => pht('Daily'),
+          'weekly' => pht('Weekly'),
+          'monthly' => pht('Monthly'),
+          'yearly' => pht('Yearly'),
+        ))
+      ->setValue($frequency)
+      ->setLabel(pht('Recurring Event Frequency'))
+      ->setID($frequency_id)
+      ->setDisabled(!$is_recurring);
+
+    Javelin::initBehavior('event-all-day', array(
+      'allDayID' => $all_day_id,
+      'startDateID' => $start_date_id,
+      'endDateID' => $end_date_id,
+    ));
 
     $all_day_checkbox = id(new AphrontFormCheckboxControl())
       ->addCheckbox(
@@ -323,6 +364,8 @@ final class PhabricatorCalendarEventEditController
       ->addHiddenInput('query', $uri_query)
       ->setUser($viewer)
       ->appendChild($name)
+      ->appendChild($is_recurring_checkbox)
+      ->appendChild($recurrence_frequency_select)
       ->appendChild($all_day_checkbox)
       ->appendChild($start_control)
       ->appendChild($end_control)

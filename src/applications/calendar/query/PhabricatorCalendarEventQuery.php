@@ -11,6 +11,13 @@ final class PhabricatorCalendarEventQuery
   private $creatorPHIDs;
   private $isCancelled;
 
+  private $generateGhosts = false;
+
+  public function setGenerateGhosts($generate_ghosts) {
+    $this->generateGhosts = $generate_ghosts;
+    return $this;
+  }
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -69,6 +76,7 @@ final class PhabricatorCalendarEventQuery
   protected function loadPage() {
     $table = new PhabricatorCalendarEvent();
     $conn_r = $table->establishConnection('r');
+    $viewer = $this->getViewer();
 
     $data = queryfx_all(
       $conn_r,
@@ -84,6 +92,63 @@ final class PhabricatorCalendarEventQuery
 
     foreach ($events as $event) {
       $event->applyViewerTimezone($this->getViewer());
+    }
+
+    if (!$this->generateGhosts) {
+      return $events;
+    }
+
+    foreach ($events as $event) {
+      $sequence_start = 0;
+      $instance_count = null;
+
+      if ($event->getIsRecurring()) {
+        $frequency = $event->getFrequencyUnit();
+        $modify_key = '+1 '.$frequency;
+
+        if ($this->rangeBegin && $this->rangeBegin > $event->getDateFrom()) {
+          $max_date = $this->rangeBegin;
+          $date = $event->getDateFrom();
+          $datetime = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
+
+          while ($date < $max_date) {
+            // TODO: optimize this to not loop through all off-screen events
+            $sequence_start++;
+            $datetime = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
+            $date = $datetime->modify($modify_key)->format('U');
+          }
+
+          $start = $this->rangeBegin;
+        } else {
+          $start = $event->getDateFrom();
+        }
+
+        $date = $start;
+        $start_datetime = PhabricatorTime::getDateTimeFromEpoch(
+          $start,
+          $viewer);
+
+        if ($this->rangeEnd) {
+          $end = $this->rangeEnd;
+          $instance_count = $sequence_start;
+
+          while ($date < $end) {
+            $instance_count++;
+            $datetime = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
+            $datetime->modify($modify_key);
+            $date = $datetime->format('U');
+          }
+        } else {
+          $instance_count = $this->getRawResultLimit();
+        }
+
+        $sequence_start = max(1, $sequence_start);
+
+        $max_sequence = $sequence_start + $instance_count;
+        for ($index = $sequence_start; $index < $max_sequence; $index++) {
+          $events[] = $event->generateNthGhost($index, $viewer);
+        }
+      }
     }
 
     return $events;
@@ -122,7 +187,7 @@ final class PhabricatorCalendarEventQuery
     if ($this->rangeBegin) {
       $where[] = qsprintf(
         $conn_r,
-        'event.dateTo >= %d',
+        'event.dateTo >= %d OR event.isRecurring = 1',
         $this->rangeBegin);
     }
 

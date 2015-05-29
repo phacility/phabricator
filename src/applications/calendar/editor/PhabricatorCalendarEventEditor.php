@@ -23,6 +23,12 @@ final class PhabricatorCalendarEventEditor
     $types[] = PhabricatorCalendarEventTransaction::TYPE_ALL_DAY;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_ICON;
 
+    $types[] = PhabricatorCalendarEventTransaction::TYPE_RECURRING;
+    $types[] = PhabricatorCalendarEventTransaction::TYPE_FREQUENCY;
+    $types[] = PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE;
+    $types[] = PhabricatorCalendarEventTransaction::TYPE_INSTANCE_OF_EVENT;
+    $types[] = PhabricatorCalendarEventTransaction::TYPE_SEQUENCE_INDEX;
+
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -34,6 +40,16 @@ final class PhabricatorCalendarEventEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRING:
+        return $object->getIsRecurring();
+      case PhabricatorCalendarEventTransaction::TYPE_FREQUENCY:
+        return $object->getRecurrenceFrequency();
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
+        return $object->getRecurrenceEndDate();
+      case PhabricatorCalendarEventTransaction::TYPE_INSTANCE_OF_EVENT:
+        return $object->getInstanceOfEventPHID();
+      case PhabricatorCalendarEventTransaction::TYPE_SEQUENCE_INDEX:
+        return $object->getSequenceIndex();
       case PhabricatorCalendarEventTransaction::TYPE_NAME:
         return $object->getName();
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
@@ -72,6 +88,11 @@ final class PhabricatorCalendarEventEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRING:
+      case PhabricatorCalendarEventTransaction::TYPE_FREQUENCY:
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
+      case PhabricatorCalendarEventTransaction::TYPE_INSTANCE_OF_EVENT:
+      case PhabricatorCalendarEventTransaction::TYPE_SEQUENCE_INDEX:
       case PhabricatorCalendarEventTransaction::TYPE_NAME:
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
       case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
@@ -93,6 +114,16 @@ final class PhabricatorCalendarEventEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRING:
+        return $object->setIsRecurring($xaction->getNewValue());
+      case PhabricatorCalendarEventTransaction::TYPE_FREQUENCY:
+        return $object->setRecurrenceFrequency($xaction->getNewValue());
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
+        return $object->setRecurrenceEndDate($xaction->getNewValue());
+      case PhabricatorCalendarEventTransaction::TYPE_INSTANCE_OF_EVENT:
+        return $object->setInstanceOfEventPHID($xaction->getNewValue());
+      case PhabricatorCalendarEventTransaction::TYPE_SEQUENCE_INDEX:
+        return $object->setSequenceIndex($xaction->getNewValue());
       case PhabricatorCalendarEventTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
         return;
@@ -126,6 +157,11 @@ final class PhabricatorCalendarEventEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRING:
+      case PhabricatorCalendarEventTransaction::TYPE_FREQUENCY:
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
+      case PhabricatorCalendarEventTransaction::TYPE_INSTANCE_OF_EVENT:
+      case PhabricatorCalendarEventTransaction::TYPE_SEQUENCE_INDEX:
       case PhabricatorCalendarEventTransaction::TYPE_NAME:
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
@@ -181,6 +217,11 @@ final class PhabricatorCalendarEventEditor
       switch ($xaction->getTransactionType()) {
         case PhabricatorCalendarEventTransaction::TYPE_ICON:
           break;
+        case PhabricatorCalendarEventTransaction::TYPE_RECURRING:
+        case PhabricatorCalendarEventTransaction::TYPE_FREQUENCY:
+        case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
+        case PhabricatorCalendarEventTransaction::TYPE_INSTANCE_OF_EVENT:
+        case PhabricatorCalendarEventTransaction::TYPE_SEQUENCE_INDEX:
         case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
         case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
         case PhabricatorCalendarEventTransaction::TYPE_CANCEL:

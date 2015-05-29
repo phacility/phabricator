@@ -50,7 +50,8 @@ final class PhabricatorCalendarEventSearchEngine
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorCalendarEventQuery());
+    $query = id(new PhabricatorCalendarEventQuery())
+      ->setGenerateGhosts(true);
     $viewer = $this->requireViewer();
     $timezone = new DateTimeZone($viewer->getTimezoneIdentifier());
 
@@ -132,7 +133,8 @@ final class PhabricatorCalendarEventSearchEngine
       $query->withCreatorPHIDs($creator_phids);
     }
 
-    $is_cancelled = $saved->getParameter('isCancelled');
+    $is_cancelled = $saved->getParameter('isCancelled', 'active');
+
     switch ($is_cancelled) {
       case 'active':
         $query->withIsCancelled(false);
@@ -305,14 +307,14 @@ final class PhabricatorCalendarEventSearchEngine
     $viewer = $this->requireViewer();
     $list = new PHUIObjectItemListView();
     foreach ($events as $event) {
-      $href = '/E'.$event->getID();
+      // $href = '/E'.$event->getID();
       $from = phabricator_datetime($event->getDateFrom(), $viewer);
       $to = phabricator_datetime($event->getDateTo(), $viewer);
       $creator_handle = $handles[$event->getUserPHID()];
 
       $item = id(new PHUIObjectItemView())
         ->setHeader($event->getName())
-        ->setHref($href)
+        ->setHref($event->getURI())
         ->addByline(pht('Creator: %s', $creator_handle->renderLink()))
         ->addAttribute(pht('From %s to %s', $from, $to))
         ->addAttribute(id(new PhutilUTF8StringTruncator())
@@ -371,7 +373,8 @@ final class PhabricatorCalendarEventSearchEngine
       $event->setUserPHID($status->getUserPHID());
       $event->setDescription(pht('%s (%s)', $name_text, $status_text));
       $event->setName($status_text);
-      $event->setEventID($status->getID());
+      $event->setURI($status->getURI());
+      // $event->setEventID($status->getID());
       $event->setViewerIsInvited($viewer_is_invited);
       $month_view->addEvent($event);
     }
@@ -423,7 +426,7 @@ final class PhabricatorCalendarEventSearchEngine
       $event->setViewerIsInvited($viewer_is_invited);
 
       $event->setName($status->getName());
-      $event->setURI('/'.$status->getMonogram());
+      $event->setURI($status->getURI());
       $day_view->addEvent($event);
     }
 

@@ -17,11 +17,19 @@ final class PhabricatorCalendarEventViewController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
+    $sequence = $request->getURIData('sequence');
+
     $event = id(new PhabricatorCalendarEventQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))
       ->executeOne();
     if (!$event) {
+      return new Aphront404Response();
+    }
+
+    if ($sequence && $event->getIsRecurring()) {
+      $event = $event->generateNthGhost($sequence, $viewer);
+    } else if ($sequence) {
       return new Aphront404Response();
     }
 
@@ -127,13 +135,15 @@ final class PhabricatorCalendarEventViewController
       $event,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Edit Event'))
-        ->setIcon('fa-pencil')
-        ->setHref($this->getApplicationURI("event/edit/{$id}/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+    if (!$event->getIsGhostEvent()) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Edit Event'))
+          ->setIcon('fa-pencil')
+          ->setHref($this->getApplicationURI("event/edit/{$id}/"))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(!$can_edit));
+    }
 
     if ($is_attending) {
       $actions->addAction(
@@ -203,6 +213,12 @@ final class PhabricatorCalendarEventViewController
       $properties->addProperty(
         pht('Ends'),
         phabricator_datetime($event->getDateTo(), $viewer));
+    }
+
+    if ($event->getIsRecurring()) {
+      $properties->addProperty(
+        pht('Recurs'),
+        idx($event->getRecurrenceFrequency(), 'rule'));
     }
 
     $properties->addProperty(

@@ -20,6 +20,14 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $icon;
   protected $mailKey;
 
+  protected $isRecurring = 0;
+  protected $recurrenceFrequency = array();
+  protected $recurrenceEndDate;
+
+  private $isGhostEvent = false;
+  protected $instanceOfEventPHID;
+  protected $sequenceIndex;
+
   protected $viewPolicy;
   protected $editPolicy;
 
@@ -36,8 +44,13 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->withClasses(array('PhabricatorCalendarApplication'))
       ->executeOne();
 
+    $view_policy = null;
+    $is_recurring = 0;
+
     if ($mode == 'public') {
       $view_policy = PhabricatorPolicies::getMostOpenPolicy();
+    } else if ($mode == 'recurring') {
+      $is_recurring = true;
     } else {
       $view_policy = $actor->getPHID();
     }
@@ -46,6 +59,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setUserPHID($actor->getPHID())
       ->setIsCancelled(0)
       ->setIsAllDay(0)
+      ->setIsRecurring($is_recurring)
       ->setIcon(self::DEFAULT_ICON)
       ->setViewPolicy($view_policy)
       ->setEditPolicy($actor->getPHID())
@@ -180,11 +194,18 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'isAllDay' => 'bool',
         'icon' => 'text32',
         'mailKey' => 'bytes20',
+        'isRecurring' => 'bool',
+        'recurrenceEndDate' => 'epoch?',
+        'instanceOfEventPHID' => 'phid?',
+        'sequenceIndex' => 'uint32?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'userPHID_dateFrom' => array(
           'columns' => array('userPHID', 'dateTo'),
         ),
+      ),
+      self::CONFIG_SERIALIZATION => array(
+        'recurrenceFrequency' => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
   }
@@ -236,6 +257,69 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       return false;
     }
     return true;
+  }
+
+  public function getIsGhostEvent() {
+    return $this->isGhostEvent;
+  }
+
+  public function setIsGhostEvent($is_ghost_event) {
+    $this->isGhostEvent = $is_ghost_event;
+    return $this;
+  }
+
+  public function generateNthGhost(
+    $sequence_index,
+    PhabricatorUser $actor) {
+
+    $frequency = $this->getFrequencyUnit();
+    $modify_key = '+'.$sequence_index.' '.$frequency;
+
+    $date = $this->dateFrom;
+    $date_time = PhabricatorTime::getDateTimeFromEpoch($date, $actor);
+    $date_time->modify($modify_key);
+    $date = $date_time->format('U');
+
+    $duration = $this->dateTo - $this->dateFrom;
+
+    $edit_policy = PhabricatorPolicies::POLICY_NOONE;
+
+    $ghost_event = id(clone $this)
+      ->setIsGhostEvent(true)
+      ->setDateFrom($date)
+      ->setDateTo($date + $duration)
+      ->setIsRecurring(false)
+      ->setRecurrenceFrequency(null)
+      ->setInstanceOfEventPHID($this->getPHID())
+      ->setSequenceIndex($sequence_index)
+      ->setEditPolicy($edit_policy);
+
+    return $ghost_event;
+  }
+
+  public function getFrequencyUnit() {
+    $frequency = idx($this->recurrenceFrequency, 'rule');
+
+    switch ($frequency) {
+      case 'daily':
+        return 'day';
+      case 'weekly':
+        return 'week';
+      case 'monthly':
+        return 'month';
+      case 'yearly':
+        return 'yearly';
+      default:
+        return 'day';
+    }
+  }
+
+  public function getURI() {
+    $uri = '/'.$this->getMonogram();
+    if ($this->isGhostEvent) {
+      $uri = $uri.'/'.$this->sequenceIndex;
+    }
+    return $uri;
   }
 
 /* -(  Markup Interface  )--------------------------------------------------- */
@@ -307,6 +391,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     // The owner of a task can always view and edit it.
     $user_phid = $this->getUserPHID();
+    if ($this->isGhostEvent) {
+      return false;
+    }
     if ($user_phid) {
       $viewer_phid = $viewer->getPHID();
       if ($viewer_phid == $user_phid) {
@@ -328,7 +415,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function describeAutomaticCapability($capability) {
     return pht('The owner of an event can always view and edit it,
-      and invitees can always view it.');
+      and invitees can always view it, except if the event is an
+      instance of a recurring event.');
   }
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
