@@ -393,8 +393,6 @@ final class PhabricatorCalendarEventTransaction
           $added = array();
           $uninvited = array();
 
-          // $event = $this->renderHandleLink($object_phid);
-
           foreach ($new as $phid => $status) {
             if ($status == PhabricatorCalendarEventInvitee::STATUS_INVITED
               || $status == PhabricatorCalendarEventInvitee::STATUS_ATTENDING) {

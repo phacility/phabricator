@@ -218,7 +218,12 @@ final class PhabricatorCalendarEventViewController
     if ($event->getIsRecurring()) {
       $properties->addProperty(
         pht('Recurs'),
-        idx($event->getRecurrenceFrequency(), 'rule'));
+        ucwords(idx($event->getRecurrenceFrequency(), 'rule')));
+      if ($event->getIsGhostEvent()) {
+        $properties->addProperty(
+          pht('Recurrence of Event'),
+          $viewer->renderHandle($event->getInstanceOfEventPHID()));
+      }
     }
 
     $properties->addProperty(

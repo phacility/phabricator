@@ -288,8 +288,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setIsGhostEvent(true)
       ->setDateFrom($date)
       ->setDateTo($date + $duration)
-      ->setIsRecurring(false)
-      ->setRecurrenceFrequency(null)
+      ->setIsRecurring(true)
+      ->setRecurrenceFrequency($this->recurrenceFrequency)
       ->setInstanceOfEventPHID($this->getPHID())
       ->setSequenceIndex($sequence_index)
       ->setEditPolicy($edit_policy);
