@@ -115,7 +115,7 @@ final class PHUIPinboardItemView extends AphrontView {
       $classes[] = 'phui-pinboard-item-disabled';
     }
 
-    return phutil_tag(
+    $item = phutil_tag(
       'div',
       array(
         'class' => implode(' ', $classes),
@@ -126,6 +126,13 @@ final class PHUIPinboardItemView extends AphrontView {
         $content,
         $icons,
       ));
+
+    return phutil_tag(
+      'li',
+      array(
+        'class' => 'phui-pinboard-list-item',
+      ),
+      $item);
   }
 
 }

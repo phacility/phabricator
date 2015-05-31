@@ -3,16 +3,13 @@
  */
 
 .phui-pinboard-view {
-  padding: 8px 0 16px 16px;
-  overflow: hidden;
-}
-
-.dashboard-pane .phui-pinboard-view {
   padding: 16px 8px;
+  overflow: hidden;
+  text-align: center;
 }
 
-.device-phone .phui-pinboard-view {
-  padding: 0;
+.phui-pinboard-list-item {
+  display: inline;
 }
 
 .phui-pinboard-item-view {
@@ -25,7 +22,7 @@
 }
 
 .phui-pinboard-view .phui-pinboard-item-view {
-  float: left;
+  display: inline-block;
 }
 
 .device-desktop .phui-pinboard-item-view:hover {
