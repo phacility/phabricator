@@ -44,7 +44,6 @@ abstract class ConpherenceController extends PhabricatorController {
 
   protected function buildConpherenceApplicationCrumbs($is_rooms = false) {
     $crumbs = parent::buildApplicationCrumbs();
-    $crumbs->setBorder(true);
 
     if ($is_rooms) {
       $crumbs

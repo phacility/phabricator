@@ -18,7 +18,6 @@
   color: {$darkbluetext};
   font-weight: bold;
   text-decoration: none;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.9);
 }
 
 .device-phone .phui-crumbs-view {
