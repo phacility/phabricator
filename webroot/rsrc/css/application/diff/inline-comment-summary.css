@@ -13,7 +13,7 @@
   margin-top: -16px;
 }
 
-.phabricator-inline-summary-table th {
+.phabricator-inline-summary-table .inline-comment-summary-table-header {
   font-weight: bold;
   padding: 16px 1px 8px;
   background: #fff;
@@ -21,7 +21,7 @@
   border-bottom: 1px solid {$thinblueborder};
 }
 
-.phabricator-inline-summary-table td  {
+.phabricator-inline-summary-table .inline-table-dolumn  {
   padding: 4px 8px;
   white-space: nowrap;
   color: {$darkbluetext};
