@@ -2,6 +2,10 @@
  * @provides phui-feed-story-css
  */
 
+.phabricator-feed-frame .phui-box.phui-feed-story {
+  border-bottom: 1px solid {$thinblueborder};
+}
+
 .phui-feed-story-head .phui-feed-story-actor-image {
   width: 35px;
   height: 35px;

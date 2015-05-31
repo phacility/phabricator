@@ -105,19 +105,27 @@ div.phui-object-box.phui-object-box-flush {
   padding: 0;
 }
 
+/* eh oh el */
+.phui-object-box .phui-object-box + .phui-object-box {
+  border-top: 1px solid {$thinblueborder};
+}
+
 .phui-object-box .phui-box-border {
   border-width: 0;
   padding: 0;
   margin: 0;
 }
 
-.phui-object-box .phui-object-box .phui-header-shell h1 {
-  padding: 8px;
+.phui-object-box .phui-object-box .phui-header-shell .phui-header-view {
+  padding: 4px 8px;
+  background-color: {$lightgreybackground};
+}
+
+.phui-object-box .phui-object-box .phui-header-shell .phui-header-header {
   font-size: 13px;
   margin: 0;
   color: {$darkbluetext};
   font-weight: 500;
-  background-color: {$lightgreybackground};
 }
 
 .phui-object-box .phui-object-box .phui-header-shell {
