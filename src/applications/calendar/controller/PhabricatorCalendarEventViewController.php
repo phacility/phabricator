@@ -135,7 +135,19 @@ final class PhabricatorCalendarEventViewController
       $event,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    if (!$event->getIsGhostEvent()) {
+    if (($event->getIsRecurring() && $event->getIsGhostEvent())) {
+      $index = $event->getSequenceIndex();
+
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Edit This Instance'))
+          ->setIcon('fa-pencil')
+          ->setHref($this->getApplicationURI("event/edit/{$id}/{$index}/"))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(!$can_edit));
+    }
+
+    if (!$event->getIsRecurring() && !$event->getIsGhostEvent()) {
       $actions->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit Event'))
@@ -219,7 +231,7 @@ final class PhabricatorCalendarEventViewController
       $properties->addProperty(
         pht('Recurs'),
         ucwords(idx($event->getRecurrenceFrequency(), 'rule')));
-      if ($event->getIsGhostEvent()) {
+      if ($event->getInstanceOfEventPHID()) {
         $properties->addProperty(
           pht('Recurrence of Event'),
           $viewer->renderHandle($event->getInstanceOfEventPHID()));

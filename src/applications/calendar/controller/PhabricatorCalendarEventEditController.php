@@ -86,6 +86,52 @@ final class PhabricatorCalendarEventEditController
         return new Aphront404Response();
       }
 
+      if ($request->getURIData('sequence')) {
+        $index = $request->getURIData('sequence');
+
+        $result = id(new PhabricatorCalendarEventQuery())
+          ->setViewer($viewer)
+          ->withInstanceSequencePairs(
+            array(
+              array(
+                $event->getPHID(),
+                $index,
+              ),
+            ))
+          ->requireCapabilities(
+            array(
+              PhabricatorPolicyCapability::CAN_VIEW,
+              PhabricatorPolicyCapability::CAN_EDIT,
+            ))
+          ->executeOne();
+
+        if ($result) {
+          return id(new AphrontRedirectResponse())
+            ->setURI('/calendar/event/edit/'.$result->getID().'/');
+        }
+
+        $invitees = $event->getInvitees();
+
+        $new_ghost = $event->generateNthGhost($index, $viewer);
+        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $new_ghost
+          ->setID(null)
+          ->setPHID(null)
+          ->removeViewerTimezone($viewer)
+          ->save();
+        $ghost_invitees = array();
+        foreach ($invitees as $invitee) {
+          $ghost_invitee = clone $invitee;
+          $ghost_invitee
+            ->setID(null)
+            ->setEventPHID($new_ghost->getPHID())
+            ->save();
+        }
+        unset($unguarded);
+        return id(new AphrontRedirectResponse())
+          ->setURI('/calendar/event/edit/'.$new_ghost->getID().'/');
+      }
+
       $end_value = AphrontFormDateControlValue::newFromEpoch(
         $viewer,
         $event->getDateTo());

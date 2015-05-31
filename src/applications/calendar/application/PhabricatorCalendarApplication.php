@@ -53,7 +53,7 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
         'event/' => array(
           'create/'
             => 'PhabricatorCalendarEventEditController',
-          'edit/(?P<id>[1-9]\d*)/'
+          'edit/(?P<id>[1-9]\d*)/(?:(?P<sequence>\d+)/)?'
             => 'PhabricatorCalendarEventEditController',
           'drag/(?P<id>[1-9]\d*)/'
             => 'PhabricatorCalendarEventDragController',

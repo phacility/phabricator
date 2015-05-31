@@ -10,6 +10,8 @@ final class PhabricatorCalendarEventQuery
   private $inviteePHIDs;
   private $creatorPHIDs;
   private $isCancelled;
+  private $instanceSequencePairs;
+
 
   private $generateGhosts = false;
 
@@ -46,6 +48,11 @@ final class PhabricatorCalendarEventQuery
 
   public function withIsCancelled($is_cancelled) {
     $this->isCancelled = $is_cancelled;
+    return $this;
+  }
+
+  public function withInstanceSequencePairs(array $pairs) {
+    $this->instanceSequencePairs = $pairs;
     return $this;
   }
 
@@ -98,12 +105,15 @@ final class PhabricatorCalendarEventQuery
       return $events;
     }
 
+    $map = array();
+    $instance_sequence_pairs = array();
+
     foreach ($events as $event) {
       $sequence_start = 0;
       $instance_count = null;
       $duration = $event->getDateTo() - $event->getDateFrom();
 
-      if ($event->getIsRecurring()) {
+      if ($event->getIsRecurring() && !$event->getInstanceOfEventPHID()) {
         $frequency = $event->getFrequencyUnit();
         $modify_key = '+1 '.$frequency;
 
@@ -147,7 +157,37 @@ final class PhabricatorCalendarEventQuery
 
         $max_sequence = $sequence_start + $instance_count;
         for ($index = $sequence_start; $index < $max_sequence; $index++) {
+          $instance_sequence_pairs[] = array($event->getPHID(), $index);
           $events[] = $event->generateNthGhost($index, $viewer);
+
+          $key = last_key($events);
+          $map[$event->getPHID()][$index] = $key;
+        }
+      }
+    }
+
+    if (count($instance_sequence_pairs) > 0) {
+      $sub_query = id(new PhabricatorCalendarEventQuery())
+        ->setViewer($viewer)
+        ->setParentQuery($this)
+        ->withInstanceSequencePairs($instance_sequence_pairs)
+        ->execute();
+
+      foreach ($sub_query as $edited_ghost) {
+        $indexes = idx($map, $edited_ghost->getInstanceOfEventPHID());
+        $key = idx($indexes, $edited_ghost->getSequenceIndex());
+        $events[$key] = $edited_ghost;
+      }
+
+      $id_map = array();
+      foreach ($events as $key => $event) {
+        if ($event->getIsGhostEvent()) {
+          continue;
+        }
+        if (isset($id_map[$event->getID()])) {
+          unset($events[$key]);
+        } else {
+          $id_map[$event->getID()] = true;
         }
       }
     }
@@ -218,6 +258,22 @@ final class PhabricatorCalendarEventQuery
         $conn_r,
         'event.isCancelled = %d',
         (int)$this->isCancelled);
+    }
+
+    if ($this->instanceSequencePairs !== null) {
+      $sql = array();
+
+      foreach ($this->instanceSequencePairs as $pair) {
+        $sql[] = qsprintf(
+          $conn_r,
+          '(event.instanceOfEventPHID = %s AND event.sequenceIndex = %d)',
+          $pair[0],
+          $pair[1]);
+      }
+      $where[] = qsprintf(
+        $conn_r,
+        '%Q',
+        implode(' OR ', $sql));
     }
 
     $where[] = $this->buildPagingClause($conn_r);

@@ -203,6 +203,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'userPHID_dateFrom' => array(
           'columns' => array('userPHID', 'dateTo'),
         ),
+        'key_instance' => array(
+          'columns' => array('instanceOfEventPHID', 'sequenceIndex'),
+          'unique' => true,
+        ),
       ),
       self::CONFIG_SERIALIZATION => array(
         'recurrenceFrequency' => self::SERIALIZATION_JSON,
@@ -391,9 +395,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     // The owner of a task can always view and edit it.
     $user_phid = $this->getUserPHID();
-    if ($this->isGhostEvent) {
-      return false;
-    }
     if ($user_phid) {
       $viewer_phid = $viewer->getPHID();
       if ($viewer_phid == $user_phid) {
