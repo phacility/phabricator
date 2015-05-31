@@ -10,8 +10,9 @@
   padding: 8px;
 }
 
-.phui-workpanel-view .phui-header-shell .phui-header-view {
+.phui-workpanel-view .phui-header-shell .phui-header-header {
   font-size: 14px;
+  line-height: 18px;
   color: {$darkbluetext};
 }
 

@@ -23,6 +23,11 @@
   margin: 16px auto;
 }
 
+.device-desktop .phui-document-box {
+  max-width: 996px;
+  margin: 24px auto;
+}
+
 .device-desktop .phui-document-fluid .phui-document-view {
   max-width: none;
   margin: 16px;

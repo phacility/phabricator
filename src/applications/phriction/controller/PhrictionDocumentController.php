@@ -422,12 +422,12 @@ final class PhrictionDocumentController
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Document Hierarchy'));
 
-    return id(new PHUIDocumentView())
+    $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->appendChild(phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-remarkup',
+          'class' => 'phabricator-remarkup mlt mlb',
         ),
         phutil_tag(
           'ul',
@@ -435,6 +435,8 @@ final class PhrictionDocumentController
             'class' => 'remarkup-list',
           ),
           $list)));
+
+     return phutil_tag_div('phui-document-box', $box);
   }
 
   private function renderChildDocumentLink(array $info) {

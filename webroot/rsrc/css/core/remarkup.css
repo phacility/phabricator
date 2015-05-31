@@ -109,6 +109,10 @@
   margin: 4px 0 4px 24px;
 }
 
+.phabricator-remarkup .remarkup-list-item {
+  line-height: 1.55em;
+}
+
 .phabricator-remarkup li.phantom-item,
 .phabricator-remarkup li.phantom-item {
   list-style-type: none;

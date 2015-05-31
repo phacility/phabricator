@@ -93,7 +93,6 @@ div.phui-object-box.phui-object-box-flush {
 .phui-object-box-hidden-content {
   background: {$lightgreybackground};
   border-bottom: 1px solid {$thinblueborder};
-  margin-bottom: 4px;
 }
 
 .phui-object-box.phui-object-box-collapsed .phui-object-box-hidden-content {

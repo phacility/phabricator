@@ -148,15 +148,15 @@ final class PhrictionHistoryController
       PhrictionDocument::getSlugURI($document->getSlug(), 'history'));
 
     $header = new PHUIHeaderView();
-    $header->setHeader(pht('Document History for %s',
-      phutil_tag(
+    $header->setHeader(phutil_tag(
         'a',
         array('href' => PhrictionDocument::getSlugURI($document->getSlug())),
-        head($history)->getTitle())));
+        head($history)->getTitle()));
+    $header->setSubheader(pht('Document History'));
 
     $obj_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($list)
+      ->setObjectList($list)
       ->appendChild($pager);
 
     return $this->buildApplicationPage(

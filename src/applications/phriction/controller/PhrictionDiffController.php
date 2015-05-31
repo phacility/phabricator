@@ -126,7 +126,8 @@ final class PhrictionDiffController extends PhrictionController {
     $title = pht('Version %s vs %s', $l, $r);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($title);
+      ->setHeader($title)
+      ->setTall(true);
 
     $crumbs->addTextCrumb($title, $request->getRequestURI());
 
