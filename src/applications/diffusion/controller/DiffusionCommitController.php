@@ -148,6 +148,7 @@ final class DiffusionCommitController extends DiffusionController {
           ),
           $message));
 
+      $headsup_view->setTall(true);
       $object_box = id(new PHUIObjectBoxView())
         ->setHeader($headsup_view)
         ->addPropertyList($property_list)

@@ -24,6 +24,7 @@ final class PHUIDocumentView extends AphrontTagView {
   }
 
   public function setHeader(PHUIHeaderView $header) {
+    $header->setTall(true);
     $this->header = $header;
     return $this;
   }
@@ -111,21 +112,7 @@ final class PHUIDocumentView extends AphrontTagView {
 
     $book = null;
     if ($this->bookname) {
-      $book = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-document-bookname grouped',
-        ),
-        array(
-          phutil_tag(
-            'span',
-            array('class' => 'bookname'),
-            $this->bookname),
-          phutil_tag(
-            'span',
-            array('class' => 'bookdescription'),
-          $this->bookdescription),
-        ));
+      $book = pht('%s (%s)', $this->bookname, $this->bookdescription);
     }
 
     $topnav = null;
@@ -159,13 +146,13 @@ final class PHUIDocumentView extends AphrontTagView {
       $main_content = $this->renderChildren();
     }
 
+    $this->header->setSubheader($book);
     $content_inner = phutil_tag(
         'div',
         array(
           'class' => 'phui-document-inner',
         ),
         array(
-          $book,
           $this->header,
           $topnav,
           $main_content,

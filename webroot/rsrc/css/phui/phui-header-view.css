@@ -64,23 +64,28 @@ body .phui-header-shell.phui-bleed-header
 }
 
 .phui-header-view {
-  font-size: 16px;
-  color: #000;
-  font-weight: 500;
   position: relative;
+  font-size: 13px;
 }
 
-.device-phone .phui-header-view {
+.phui-header-header {
+  color: #000;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.device-phone .phui-header-header {
   font-size: 14px;
 }
 
-.phui-object-box .phui-header-tall h1.phui-header-view,
-.phui-document-view .phui-header-tall h1.phui-header-view {
+.phui-object-box .phui-header-tall .phui-header-header,
+.phui-document-view .phui-header-tall .phui-header-header {
   font-size: 18px;
   font-weight: 500;
 }
 
-.phui-header-view .phui-header-col2 > a {
+.phui-header-view .phui-header-header a {
   color: #000;
 }
 
@@ -90,6 +95,7 @@ body .phui-header-shell.phui-bleed-header
 
 .phui-object-box .phui-header-view .phui-header-action-links {
   margin-right: 4px;
+  font-size: 13px;
 }
 
 .device-phone .phui-object-box .phui-header-view .phui-header-action-links {

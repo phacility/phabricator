@@ -125,7 +125,3 @@ div.phui-object-box.phui-object-box-flush {
   margin: 0;
   padding: 0;
 }
-
-.phui-box-border + .phui-box-border {
-  border-top: 1px solid {$thinblueborder};
-}

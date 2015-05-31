@@ -18,8 +18,7 @@
 .aphront-table-view td.aphront-table-notice {
   padding: 12px 16px;
   font-size: 13px;
-  color: {$blue};
-  font-weight: bold;
+  color: {$darkbluetext};
   border-bottom: 1px solid {$thinblueborder};
 }
 

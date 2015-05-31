@@ -10,6 +10,7 @@
 
 .phui-document-view .phui-header-shell {
   padding: 16px;
+  background-color: #F5F7FA;
 }
 
 .phui-document-content {
@@ -47,8 +48,8 @@
 .device-phone .phui-document-sidenav {
   position: static;
   width: auto;
-  border-top: 1px solid #d7d7d7;
-  border-bottom: 1px solid #d7d7d7;
+  border-top: 1px solid {$thinblueborder};
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 .device-phone .phui-sidenav-view .phui-document-inner {
@@ -57,27 +58,8 @@
 
 .phui-sidenav-view .phui-document-inner {
   margin-right: 200px;
-  border-right: 1px solid #e7e7e7;
+  border-right: 1px solid {$thinblueborder};
   background: #fff;
-}
-
-.phui-document-bookname {
-  padding: 8px 16px;
-  color: #9ca5b5;
-  background-color: #fff;
-  border-bottom: 1px solid {$lightblueborder};
-}
-
-.device-phone .phui-document-bookname {
-  padding: 8px;
-}
-
-.phui-document-bookname .bookname {
-  float: left;
-}
-
-.phui-document-bookname .bookdescription {
-  float: right;
 }
 
 .phui-document-content .phui-header-shell {

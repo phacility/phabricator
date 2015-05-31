@@ -13,6 +13,7 @@ final class PHUIHeaderView extends AphrontTagView {
   private $headerIcon;
   private $noBackground;
   private $bleedHeader;
+  private $tall;
   private $properties = array();
   private $actionLinks = array();
   private $buttonBar = null;
@@ -32,6 +33,11 @@ final class PHUIHeaderView extends AphrontTagView {
 
   public function setNoBackground($nada) {
     $this->noBackground = $nada;
+    return $this;
+  }
+
+  public function setTall($tall) {
+    $this->tall = $tall;
     return $this;
   }
 
@@ -147,7 +153,8 @@ final class PHUIHeaderView extends AphrontTagView {
       $classes[] = 'phui-bleed-header';
     }
 
-    if ($this->properties || $this->policyObject || $this->subheader) {
+    if ($this->properties || $this->policyObject ||
+        $this->subheader || $this->tall) {
       $classes[] = 'phui-header-tall';
     }
 
@@ -230,7 +237,12 @@ final class PHUIHeaderView extends AphrontTagView {
         ->setIconFont($this->headerIcon);
       $left[] = $icon;
     }
-    $left[] = $this->header;
+    $left[] = phutil_tag(
+      'span',
+      array(
+        'class' => 'phui-header-header',
+      ),
+      $this->header);
 
     if ($this->objectName) {
       array_unshift(
