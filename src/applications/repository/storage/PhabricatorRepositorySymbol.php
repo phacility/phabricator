@@ -15,6 +15,10 @@ final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
   protected $symbolLanguage;
   protected $pathID;
   protected $lineNumber;
+  private $isExternal;
+  private $source;
+  private $location;
+  private $externalURI;
 
   private $path = self::ATTACHABLE;
   private $repository = self::ATTACHABLE;
@@ -40,6 +44,10 @@ final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
   }
 
   public function getURI() {
+    if ($this->isExternal) {
+      return $this->externalURI;
+    }
+
     $request = DiffusionRequest::newFromDictionary(
       array(
         'user' => PhabricatorUser::getOmnipotentUser(),
@@ -71,4 +79,32 @@ final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
     return $this;
   }
 
+  public function isExternal() {
+    return $this->isExternal;
+  }
+  public function setIsExternal($is_external) {
+    $this->isExternal = $is_external;
+    return $this;
+  }
+
+  public function getSource() {
+    return $this->source;
+  }
+  public function setSource($source) {
+    $this->source = $source;
+    return $this;
+  }
+
+  public function getLocation() {
+    return $this->location;
+  }
+  public function setLocation($location) {
+    $this->location = $location;
+    return $this;
+  }
+
+  public function setExternalURI($external_uri) {
+    $this->externalURI = $external_uri;
+    return $this;
+  }
 }
