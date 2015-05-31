@@ -88,13 +88,13 @@ explain how these settings affect workflows.
 == History Mutability: Git ==
 
 In a workflow with //mutable// history, you rewrite local history. You develop
-in feature branches, but squash or amend before pushing by using ##git commit
---amend##, ##git rebase -i##, or `git merge --squash`. Generally, one idea in
+in feature branches, but squash or amend before pushing by using `git commit
+--amend`, `git rebase -i`, or `git merge --squash`. Generally, one idea in
 the remote is represented by one commit.
 
 In a workflow with //immutable// history, you do not rewrite local history. You
 develop in feature branches and push them without squashing commits. You do not
-use ##git commit --amend## or ##git rebase -i##. Generally, one idea in the
+use `git commit --amend` or `git rebase -i`. Generally, one idea in the
 remote is represented by many commits.
 
 Practically, these are the differences you'll see based on your setting:

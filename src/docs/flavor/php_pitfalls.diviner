@@ -31,7 +31,7 @@ complex variables safely.
 
 = isset(), empty() and Truthiness =
 
-A value is "truthy" if it evaluates to true in an ##if## clause:
+A value is "truthy" if it evaluates to true in an `if` clause:
 
   $value = something();
   if ($value) {
@@ -61,7 +61,7 @@ This is wrong because it prevents users from making the comment "0". //THIS
 COMMENT IS TOTALLY AWESOME AND I MAKE IT ALL THE TIME SO YOU HAD BETTER NOT
 BREAK IT!!!// A better test is probably strlen().
 
-In addition to truth tests with ##if##, PHP has two special truthiness operators
+In addition to truth tests with `if`, PHP has two special truthiness operators
 which look like functions but aren't: empty() and isset(). These operators help
 deal with undeclared variables.
 
@@ -147,12 +147,12 @@ In a libphutil environment, you can often do this easily with
 
 These functions are much slower for even moderately large inputs than
 array_intersect_key() and array_diff_key(), because they can not make the
-assumption that their inputs are unique scalars as the ##key## varieties can.
-Strongly prefer the ##key## varieties.
+assumption that their inputs are unique scalars as the `key` varieties can.
+Strongly prefer the `key` varieties.
 
 = array_uintersect() and array_udiff() are Definitely Slow Too =
 
-These functions have the problems of both the ##usort()## family and the
+These functions have the problems of both the `usort()` family and the
 `array_diff()` family. Avoid them.
 
 = foreach() Does Not Create Scope =
@@ -205,7 +205,7 @@ emerge unmodified. That is, if you have a function that takes references:
   $x = 41;
   call_user_func('add_one', $x);
 
-...##$x## will not be modified. The solution is to use call_user_func_array()
+...`$x` will not be modified. The solution is to use call_user_func_array()
 and wrap the reference in an array:
 
   $x = 41;
@@ -243,7 +243,7 @@ dictionary (vs a list) when passed to json_encode().
 
 = Invoking "new" With an Argument Vector is Really Hard =
 
-If you have some ##$class_name## and some ##$argv## of constructor
+If you have some `$class_name` and some `$argv` of constructor
 arguments and you want to do this:
 
   new $class_name($argv[0], $argv[1], ...);

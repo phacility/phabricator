@@ -39,7 +39,7 @@ you are writing; they are adapted from Facebook's internal documentation.
   - **Concurrent Change Robustness:** If you're making a refactoring change, is
     it robust against people introducing new calls between the time you started
     the change and when you commit it? For example, if you change the parameter
-    order of some function from ##f(a, b)## to ##f(b, a)## and a new callsite is
+    order of some function from `f(a, b)` to `f(b, a)` and a new callsite is
     introduced in the meantime, could it go unnoticed? How bad would that be?
     (Because of this risk, you should almost never make parameter order
     changes in weakly typed languages like PHP and Javascript.)

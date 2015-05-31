@@ -19,21 +19,21 @@ guidelines, you probably don't need to read this super thoroughly.
 
   - Use two spaces for indentation. Don't use tab literal characters.
   - Use Unix linebreaks ("\n"), not MSDOS ("\r\n") or OS9 ("\r").
-  - Put a space after control keywords like ##if## and ##for##.
+  - Put a space after control keywords like `if` and `for`.
   - Put a space after commas in argument lists.
-  - Put a space around operators like ##=##, ##<##, etc.
+  - Put a space around operators like `=`, `<`, etc.
   - Don't put spaces after function names.
   - Parentheses should hug their contents.
   - Generally, prefer to wrap code at 80 columns.
 
 = Case and Capitalization =
 
-  - Name variables and functions using ##lowercase_with_underscores##.
-  - Name classes using ##UpperCamelCase##.
-  - Name methods and properties using ##lowerCamelCase##.
+  - Name variables and functions using `lowercase_with_underscores`.
+  - Name classes using `UpperCamelCase`.
+  - Name methods and properties using `lowerCamelCase`.
   - Use uppercase for common acronyms like ID and HTML.
-  - Name constants using ##UPPERCASE##.
-  - Write ##true##, ##false## and ##null## in lowercase.
+  - Name constants using `UPPERCASE`.
+  - Write `true`, `false` and `null` in lowercase.
 
 = Comments =
 
@@ -43,9 +43,9 @@ guidelines, you probably don't need to read this super thoroughly.
 = PHP Language Style =
 
   - Use "<?php", not the "<?" short form. Omit the closing "?>" tag.
-  - Prefer casts like ##(string)## to casting functions like ##strval()##.
-  - Prefer type checks like ##$v === null## to type functions like
-    ##is_null()##.
+  - Prefer casts like `(string)` to casting functions like `strval()`.
+  - Prefer type checks like `$v === null` to type functions like
+    `is_null()`.
   - Avoid all crazy alternate forms of language constructs like "endwhile"
     and "<>".
   - Always put braces around conditional and loop blocks.

@@ -48,7 +48,7 @@ in your configuration:
     default. If your domain is `example.org`, set this to something like
     `noreply@example.org`.
   - **metamta.domain** should be set to your domain, e.g. `example.org`.
-  - **metamta.can-send-as-user** should be left as ##false## in most cases,
+  - **metamta.can-send-as-user** should be left as `false` in most cases,
     but see the documentation for details.
 
 = Configuring Mail Adapters =
@@ -56,19 +56,19 @@ in your configuration:
 To choose how mail will be sent, change the `metamta.mail-adapter` key in
 your configuration. Possible values are listed in the UI:
 
-  - ##PhabricatorMailImplementationAmazonMailgunAdapter##: use Mailgun, see
+  - `PhabricatorMailImplementationAmazonMailgunAdapter`: use Mailgun, see
     "Adapter: Mailgun".
-  - ##PhabricatorMailImplementationAmazonSESAdapter##: use Amazon SES, see
+  - `PhabricatorMailImplementationAmazonSESAdapter`: use Amazon SES, see
     "Adapter: Amazon SES".
-  - ##PhabricatorMailImplementationPHPMailerLiteAdapter##: default, uses
+  - `PhabricatorMailImplementationPHPMailerLiteAdapter`: default, uses
     "sendmail", see "Adapter: Sendmail".
-  - ##PhabricatorMailImplementationPHPMailerAdapter##: uses SMTP, see
+  - `PhabricatorMailImplementationPHPMailerAdapter`: uses SMTP, see
     "Adapter: SMTP".
-  - ##PhabricatorMailImplementationSendGridAdapter##: use SendGrid, see
+  - `PhabricatorMailImplementationSendGridAdapter`: use SendGrid, see
     "Adapter: SendGrid".
-  - ##Some Custom Class You Write##: use a custom adapter you write, see
+  - `Some Custom Class You Write`: use a custom adapter you write, see
     "Adapter: Custom".
-  - ##PhabricatorMailImplementationTestAdapter##: this will
+  - `PhabricatorMailImplementationTestAdapter`: this will
     **completely disable** outbound mail. You can use this if you don't want to
     send outbound mail, or want to skip this step for now and configure it
     later.
@@ -137,7 +137,7 @@ To configure Phabricator to use Amazon SES, set these configuration keys:
   - **amazon-ses.secret-key**: set to your Amazon SES secret key.
 
 NOTE: Amazon SES **requires you to verify your "From" address**. Configure which
-"From" address to use by setting "##metamta.default-address##" in your config,
+"From" address to use by setting "`metamta.default-address`" in your config,
 then follow the Amazon SES verification process to verify it. You won't be able
 to send email until you do this!
 
@@ -147,7 +147,7 @@ SendGrid is an email delivery service like Amazon SES. You can learn more at
 <http://sendgrid.com/>. It is easy to configure, but not free.
 
 You can configure SendGrid in two ways: you can send via SMTP or via the REST
-API. To use SMTP, just configure ##sendmail## and leave Phabricator's setup
+API. To use SMTP, just configure `sendmail` and leave Phabricator's setup
 with defaults. To use the REST API, follow the instructions in this section.
 
 To configure Phabricator to use SendGrid, set these configuration keys:
@@ -187,7 +187,7 @@ particular:
 
 Run `bin/mail help <command>` for more help on using these commands.
 
-You can monitor daemons using the Daemon Console (##/daemon/##, or click
+You can monitor daemons using the Daemon Console (`/daemon/`, or click
 **Daemon Console** from the homepage).
 
 = Next Steps =

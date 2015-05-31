@@ -35,7 +35,7 @@ Exuberant Ctags (http://ctags.sourceforge.net):
   ./scripts/symbols/generate_ctags_symbols.php
 
 If you want to identify symbols from another language, you need to write a
-script which can export them (for example, maybe by parsing a ##ctags## file).
+script which can export them (for example, maybe by parsing a `ctags` file).
 
 The output format of the script should be one symbol per line:
 
@@ -49,13 +49,13 @@ Context is, broadly speaking, the scope or namespace where the symbol is
 defined. For object-oriented languages, this is probably a class name. The
 symbols with that context are class constants, methods, properties, nested
 classes, etc. When printing symbols without a context (those that are defined
-globally, for instance), the ##<context>## field should be empty (that is, the
+globally, for instance), the `<context>` field should be empty (that is, the
 line should start with a space).
 
 Your script should enumerate all the symbols in your project, and provide paths
 from the project root (where ".arcconfig" is) beginning with a "/".
 
-You can look at ##generate_php_symbols.php## for an example of how you might
+You can look at `generate_php_symbols.php` for an example of how you might
 write such a script, and run this command to see its output:
 
   $ cd phabricator/
@@ -69,7 +69,7 @@ To actually build the symbol index, pipe this data to the
 Then just set up a cronjob to run that however often you like.
 
 You can test that the import worked by querying for symbols using the Conduit
-method ##diffusion.findsymbols##. Some features (like that method, and the
+method `diffusion.findsymbols`. Some features (like that method, and the
 IRC bot integration) will start working immediately. Others will require more
 configuration.
 

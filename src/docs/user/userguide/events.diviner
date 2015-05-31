@@ -154,11 +154,11 @@ The constant for this event is
 This event is dispatched before a task is edited, and allows you to respond to
 or alter the edit. Data available on this event:
 
-  - ##task## The @{class:ManiphestTask} being edited.
-  - ##transactions## The list of edits (objects of class
+  - `task` The @{class:ManiphestTask} being edited.
+  - `transactions` The list of edits (objects of class
     @{class:ManiphestTransaction}) being applied.
-  - ##new## A boolean indicating if this task is being created.
-  - ##mail## If this edit originates from email, the
+  - `new` A boolean indicating if this task is being created.
+  - `mail` If this edit originates from email, the
     @{class:PhabricatorMetaMTAReceivedMail} object.
 
 This is similar to the next event (did edit task) but occurs before the edit
@@ -172,11 +172,11 @@ The constant for this event is
 This event is dispatched after a task is edited, and allows you to react to the
 edit. Data available on this event:
 
-  - ##task## The @{class:ManiphestTask} that was edited.
-  - ##transactions## The list of edits (objects of class
+  - `task` The @{class:ManiphestTask} that was edited.
+  - `transactions` The list of edits (objects of class
     @{class:ManiphestTransaction}) that were applied.
-  - ##new## A boolean indicating if this task was newly created.
-  - ##mail## If this edit originates from email, the
+  - `new` A boolean indicating if this task was newly created.
+  - `mail` If this edit originates from email, the
     @{class:PhabricatorMetaMTAReceivedMail} object.
 
 This is similar to the previous event (will edit task) but occurs after the
@@ -190,8 +190,8 @@ The constant for this event is
 This event is dispatched before Differential decides if a file is generated (and
 doesn't need to be reviewed) or not. Data available on this event:
 
-  - ##corpus## Body of the file.
-  - ##is_generated## Boolean indicating if this file should be treated as
+  - `corpus` Body of the file.
+  - `is_generated` Boolean indicating if this file should be treated as
     generated.
 
 == Diffusion: Did Discover Commit ==

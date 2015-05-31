@@ -8,7 +8,7 @@ Differential, Files, and Paste), integrates with static analysis ("lint") and
 unit tests, and manages common workflows like getting changes into Differential
 for review.
 
-A detailed command reference is available by running ##arc help##. This
+A detailed command reference is available by running `arc help`. This
 document provides an overview of common workflows and installation.
 
 Arcanist has technical, contributor-focused documentation here:
@@ -38,34 +38,34 @@ For detailed information about a specific command, run:
 
 Arcanist allows you to do things like:
 
-  - get detailed help about available commands with ##arc help##
-  - send your code to Differential for review with ##arc diff## (for detailed
+  - get detailed help about available commands with `arc help`
+  - send your code to Differential for review with `arc diff` (for detailed
     instructions, see @{article:Arcanist User Guide: arc diff})
-  - show pending revision information with ##arc list##
-  - find likely reviewers for a change with ##arc cover##
-  - apply changes in a revision to the working copy with ##arc patch##
-  - download a patch from Differential with ##arc export##
-  - update Git commit messages after review with ##arc amend##
-  - commit SVN changes with ##arc commit##
-  - push Git and Mercurial changes with ##arc land##
-  - view enhanced information about Git branches with ##arc branch##
+  - show pending revision information with `arc list`
+  - find likely reviewers for a change with `arc cover`
+  - apply changes in a revision to the working copy with `arc patch`
+  - download a patch from Differential with `arc export`
+  - update Git commit messages after review with `arc amend`
+  - commit SVN changes with `arc commit`
+  - push Git and Mercurial changes with `arc land`
+  - view enhanced information about Git branches with `arc branch`
 
 Once you've configured lint and unit test integration, you can also:
 
-  - check your code for syntax and style errors with ##arc lint##
+  - check your code for syntax and style errors with `arc lint`
     (see @{article:Arcanist User Guide: Lint})
-  - run unit tests that cover your changes with ##arc unit##
+  - run unit tests that cover your changes with `arc unit`
 
 Arcanist integrates with other tools:
 
-  - upload and download files with ##arc upload## and ##arc download##
-  - create and view pastes with ##arc paste##
+  - upload and download files with `arc upload` and `arc download`
+  - create and view pastes with `arc paste`
 
 Arcanist has some advanced features as well, you can:
 
-  - execute Conduit method calls with ##arc call-conduit##
-  - create or update libphutil libraries with ##arc liberate##
-  - activate tab completion with ##arc shell-complete##
+  - execute Conduit method calls with `arc call-conduit`
+  - create or update libphutil libraries with `arc liberate`
+  - activate tab completion with `arc shell-complete`
   - ...or extend Arcanist and add new commands.
 
 Except where otherwise noted, these workflows are generally agnostic to the
@@ -99,7 +99,7 @@ This should leave you with a directory structure like this
     arcanist/           # Arcanist-specific code and libraries.
     libphutil/          # A shared library Arcanist depends upon.
 
-Now add ##some_install_path/arcanist/bin/## to your PATH environment variable.
+Now add `some_install_path/arcanist/bin/` to your PATH environment variable.
 When you type "arc", you should see something like this:
 
   Usage Exception: No command provided. Try 'arc help'.
@@ -137,8 +137,8 @@ able to use:
 
 == Installing Tab Completion ==
 
-If you use ##bash##, you can set up tab completion by adding something like this
-to your ##.bashrc##, ##.profile## or similar:
+If you use `bash`, you can set up tab completion by adding something like this
+to your `.bashrc`, `.profile` or similar:
 
   source /path/to/arcanist/resources/shell/bash-completion
 
