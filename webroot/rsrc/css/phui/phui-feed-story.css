@@ -1,9 +1,6 @@
 /**
  * @provides phui-feed-story-css
  */
-.phui-object-box .phabricator-feed-frame .phui-header-shell h1 {
-  color: {$blue};
-}
 
 .phui-feed-story-head .phui-feed-story-actor-image {
   width: 35px;

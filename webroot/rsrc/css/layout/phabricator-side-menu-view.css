@@ -19,7 +19,7 @@
 }
 
 .phabricator-side-menu .phui-list-item-selected {
-  background-color: rgba(0,0,0,.05);
+  background-color: {$lightsky};
   border-left: 4px solid {$sky};
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
@@ -68,6 +68,7 @@
   line-height: 38px;
   text-align: center;
   vertical-align: bottom;
+  text-shadow: {$whitetextshadow};
 }
 
 .phabricator-icon-nav .phabricator-side-menu .phui-list-item-selected {

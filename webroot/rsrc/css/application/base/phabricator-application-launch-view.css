@@ -48,6 +48,7 @@ div.phabricator-application-launch-container {
   text-align: center;
   vertical-align: bottom;
   color: {$darkbluetext};
+  text-shadow: {$whitetextshadow};
 }
 
 .device-desktop a.phabricator-application-launch-container:hover {

@@ -113,11 +113,12 @@ div.phui-object-box.phui-object-box-flush {
 }
 
 .phui-object-box .phui-object-box .phui-header-shell h1 {
-  padding: 8px 4px;
+  padding: 8px;
   font-size: 13px;
   margin: 0;
-  color: {$bluetext};
+  color: {$darkbluetext};
   font-weight: 500;
+  background-color: {$lightgreybackground};
 }
 
 .phui-object-box .phui-object-box .phui-header-shell {

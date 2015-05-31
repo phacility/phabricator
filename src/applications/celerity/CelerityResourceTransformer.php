@@ -177,6 +177,7 @@ final class CelerityResourceTransformer {
 
       // Drop Shadow
       'dropshadow' => '0 1px 6px rgba(0, 0, 0, .25)',
+      'whitetextshadow' => '0 1px 0 rgba(255, 255, 255, 1)',
 
       // Anchors
       'anchor' => '#136CB2',
@@ -194,7 +195,7 @@ final class CelerityResourceTransformer {
       'lightblue'     => '#daeaf3',
       'sky'           => '#3498db',
       'lightsky'      => '#ddeef9',
-      'fire'          => '#fa4b2a',
+      'fire'          => '#e62f17',
       'indigo'        => '#6e5cb6',
       'lightindigo'   => '#eae6f7',
       'pink'          => '#da49be',

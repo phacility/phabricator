@@ -318,18 +318,18 @@
 }
 
 .phui-timeline-older-transactions-are-hidden {
-  background: {$lightyellow};
-  border: 1px solid {$yellow};
+  background: {$sh-yellowbackground};
+  border: 1px solid {$sh-yellowborder};
   text-align: center;
   padding: 12px;
   color: {$darkgreytext};
   cursor: pointer;
+  border-radius: 3px;
 }
 
 .device-phone .phui-timeline-older-transactions-are-hidden {
   margin: 0 8px;
 }
-
 
 .phui-timeline-title .phui-timeline-extra-information a {
   font-weight: normal;

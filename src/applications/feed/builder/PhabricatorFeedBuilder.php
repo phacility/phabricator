@@ -59,7 +59,7 @@ final class PhabricatorFeedBuilder {
         $last_date = $date;
         $header = new PHUIHeaderView();
         $header->setHeader($date);
-        $header->setHeaderIcon('fa-calendar blue msr');
+        $header->setHeaderIcon('fa-calendar msr');
 
         $null_view->appendChild($header);
       }

@@ -92,6 +92,7 @@
   text-align: center;
   vertical-align: middle;
   line-height: 24px;
+  text-shadow: {$whitetextshadow};
 }
 
 .phabricator-expand-application-menu,
@@ -220,7 +221,7 @@
 
 .device-desktop .phabricator-main-menu-search
   button.phabricator-main-menu-search-dropdown:hover .phui-icon-view {
-    color: {$sky};
+    color: {$darkbluetext};
 }
 
 .device-desktop .phabricator-main-menu-search
@@ -238,15 +239,16 @@
 button.phabricator-main-menu-search-dropdown .caret:before {
   content: "\f107";
   font-family: FontAwesome;
-  color: {$bluetext};
+  color: {$lightbluetext};
 }
 
 .phabricator-main-menu-search button.phabricator-main-menu-search-dropdown
   .phui-icon-view {
-  color: {$bluetext};
+  color: {$lightbluetext};
   font-size: 15px;
   top: 6px;
   left: 8px;
+  text-shadow: {$whitetextshadow};
 }
 
 .phabricator-main-menu-search-dropdown .caret {
@@ -351,6 +353,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 
 .alert-notifications .phui-icon-view {
   color: {$lightbluetext};
+  text-shadow: {$whitetextshadow};
 }
 
 .device-desktop .alert-notifications:hover {
@@ -387,6 +390,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
   float: left;
   margin: 11px 6px 0 -2px;
   font-size: 12px;
+  text-shadow: {$whitetextshadow};
 }
 
 .device-phone .alert-unread .phabricator-main-menu-alert-count,
@@ -489,10 +493,11 @@ button.phabricator-main-menu-search-dropdown .caret:before {
   font-size: 20px;
   height: 20px;
   width: 20px;
-  color: {$bluetext};
+  color: {$lightbluetext};
   margin: 8px;
   text-align: center;
   vertical-align: middle;
+  text-shadow: {$whitetextshadow};
 }
 
 .device .phabricator-application-menu .phui-list-item-icon.phui-font-fa {
@@ -506,7 +511,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 .device-desktop .phabricator-application-menu
   .core-menu-item.phui-list-item-view:hover
   .phui-list-item-icon.phui-font-fa {
-    color: {$sky};
+    color: {$darkbluetext};
   }
 
 .device-desktop .phabricator-application-menu
