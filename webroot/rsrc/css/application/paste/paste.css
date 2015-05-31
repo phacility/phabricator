@@ -3,14 +3,18 @@
  */
 
 .paste-embed {
-  background: {$lightbluebackground};
-  border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
+  background: {$sh-yellowbackground};
+  border: 1px solid {$sh-lightyellowborder};
+  border-radius: 3px;
+}
+
+.paste-embed .phabricator-source-code-container {
+  border: none;
 }
 
 .paste-embed-head {
-  border-bottom: 1px solid {$thinblueborder};
-  padding: 6px 10px;
+  border-bottom: 1px solid {$sh-lightyellowborder};
+  padding: 8px 12px;
 }
 
 .paste-embed-head a {
