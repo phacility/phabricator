@@ -678,7 +678,7 @@ final class PhabricatorProjectBoardViewController
     }
 
     $column_button = id(new PHUIIconView())
-      ->setIconFont('fa-gear')
+      ->setIconFont('fa-caret-down')
       ->setHref('#')
       ->addSigil('boards-dropdown-menu')
       ->setMetadata(

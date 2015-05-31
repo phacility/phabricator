@@ -7,11 +7,12 @@
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
   background-color: #fff;
+  padding: 8px;
 }
 
-.phui-workpanel-view .phui-header-shell {
-  padding: 8px;
+.phui-workpanel-view .phui-header-shell .phui-header-view {
   font-size: 14px;
+  color: {$darkbluetext};
 }
 
 .phui-workpanel-view .phui-header-shell .phui-header-subheader {

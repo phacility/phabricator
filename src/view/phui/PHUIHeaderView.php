@@ -204,7 +204,7 @@ final class PHUIHeaderView extends AphrontTagView {
           $action_list[] = phutil_tag(
             'li',
             array(
-              'class' => 'phui-header-list-icon',
+              'class' => 'phui-header-action-icon',
             ),
             $icon);
         }
@@ -213,14 +213,14 @@ final class PHUIHeaderView extends AphrontTagView {
         $action_list[] = phutil_tag(
           'li',
           array(
-            'class' => 'phui-header-list-icon phui-header-tags',
+            'class' => 'phui-header-action-tag',
           ),
           array_interleave(' ', $this->tags));
       }
       $right[] = phutil_tag(
         'ul',
           array(
-            'class' => 'phui-header-icon-list',
+            'class' => 'phui-header-action-list',
           ),
           $action_list);
     }
