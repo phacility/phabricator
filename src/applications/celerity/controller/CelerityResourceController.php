@@ -165,7 +165,7 @@ abstract class CelerityResourceController extends PhabricatorController {
   }
 
   private function getCacheKey($path) {
-    return 'celerity:'.$path;
+    return 'celerity:'.PhabricatorHash::digestToLength($path, 64);
   }
 
 }
