@@ -11,7 +11,7 @@ $projects = queryfx_all(
 foreach ($projects as $project) {
   $repo = id(new PhabricatorRepositoryQuery())
     ->setViewer(PhabricatorUser::getOmnipotentUser())
-    ->withIDs(array($project['repository']))
+    ->withIDs(array($project['repositoryID']))
     ->executeOne();
 
   if (!$repo) {
