@@ -203,15 +203,17 @@ final class PhabricatorCalendarEventEditController
           PhabricatorCalendarEventTransaction::TYPE_NAME)
         ->setNewValue($name);
 
-      $xactions[] = id(new PhabricatorCalendarEventTransaction())
-        ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_RECURRING)
-        ->setNewValue($is_recurring);
+      if ($this->isCreate()) {
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_RECURRING)
+          ->setNewValue($is_recurring);
 
-      $xactions[] = id(new PhabricatorCalendarEventTransaction())
-        ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_FREQUENCY)
-        ->setNewValue(array('rule' => $frequency));
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_FREQUENCY)
+          ->setNewValue(array('rule' => $frequency));
+      }
 
       $xactions[] = id(new PhabricatorCalendarEventTransaction())
         ->setTransactionType(
@@ -294,37 +296,42 @@ final class PhabricatorCalendarEventEditController
       }
     }
 
+    $is_recurring_checkbox = null;
+    $recurrence_frequency_select = null;
+
     $name = id(new AphrontFormTextControl())
       ->setLabel(pht('Name'))
       ->setName('name')
       ->setValue($name)
       ->setError($error_name);
 
-    Javelin::initBehavior('recurring-edit', array(
-      'isRecurring' => $is_recurring_id,
-      'frequency' => $frequency_id,
-    ));
+    if ($this->isCreate()) {
+      Javelin::initBehavior('recurring-edit', array(
+        'isRecurring' => $is_recurring_id,
+        'frequency' => $frequency_id,
+      ));
 
-    $is_recurring_checkbox = id(new AphrontFormCheckboxControl())
-      ->addCheckbox(
-        'isRecurring',
-        1,
-        pht('Recurring Event'),
-        $is_recurring,
-        $is_recurring_id);
+      $is_recurring_checkbox = id(new AphrontFormCheckboxControl())
+        ->addCheckbox(
+          'isRecurring',
+          1,
+          pht('Recurring Event'),
+          $is_recurring,
+          $is_recurring_id);
 
-    $recurrence_frequency_select = id(new AphrontFormSelectControl())
-      ->setName('frequency')
-      ->setOptions(array(
-          'daily' => pht('Daily'),
-          'weekly' => pht('Weekly'),
-          'monthly' => pht('Monthly'),
-          'yearly' => pht('Yearly'),
-        ))
-      ->setValue($frequency)
-      ->setLabel(pht('Recurring Event Frequency'))
-      ->setID($frequency_id)
-      ->setDisabled(!$is_recurring);
+      $recurrence_frequency_select = id(new AphrontFormSelectControl())
+        ->setName('frequency')
+        ->setOptions(array(
+            'daily' => pht('Daily'),
+            'weekly' => pht('Weekly'),
+            'monthly' => pht('Monthly'),
+            'yearly' => pht('Yearly'),
+          ))
+        ->setValue($frequency)
+        ->setLabel(pht('Recurring Event Frequency'))
+        ->setID($frequency_id)
+        ->setDisabled(!$is_recurring);
+    }
 
     Javelin::initBehavior('event-all-day', array(
       'allDayID' => $all_day_id,
@@ -409,9 +416,16 @@ final class PhabricatorCalendarEventEditController
       ->addHiddenInput('next', $next_workflow)
       ->addHiddenInput('query', $uri_query)
       ->setUser($viewer)
-      ->appendChild($name)
-      ->appendChild($is_recurring_checkbox)
-      ->appendChild($recurrence_frequency_select)
+      ->appendChild($name);
+
+    if ($is_recurring_checkbox) {
+      $form->appendChild($is_recurring_checkbox);
+    }
+    if ($recurrence_frequency_select) {
+      $form->appendControl($recurrence_frequency_select);
+    }
+
+    $form
       ->appendChild($all_day_checkbox)
       ->appendChild($start_control)
       ->appendChild($end_control)

@@ -135,7 +135,7 @@ final class PhabricatorCalendarEventViewController
       $event,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    if (($event->getIsRecurring() && $event->getIsGhostEvent())) {
+    if ($event->getIsRecurring() && $event->getIsGhostEvent()) {
       $index = $event->getSequenceIndex();
 
       $actions->addAction(

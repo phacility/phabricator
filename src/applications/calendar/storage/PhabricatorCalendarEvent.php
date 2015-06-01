@@ -279,6 +279,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $frequency = $this->getFrequencyUnit();
     $modify_key = '+'.$sequence_index.' '.$frequency;
 
+    $instance_of = ($this->getPHID()) ?
+      $this->getPHID() : $this->instanceOfEventPHID;
+
     $date = $this->dateFrom;
     $date_time = PhabricatorTime::getDateTimeFromEpoch($date, $actor);
     $date_time->modify($modify_key);
@@ -294,7 +297,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setDateTo($date + $duration)
       ->setIsRecurring(true)
       ->setRecurrenceFrequency($this->recurrenceFrequency)
-      ->setInstanceOfEventPHID($this->getPHID())
+      ->setInstanceOfEventPHID($instance_of)
       ->setSequenceIndex($sequence_index)
       ->setEditPolicy($edit_policy);
 
