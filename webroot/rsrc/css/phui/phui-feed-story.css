@@ -2,7 +2,7 @@
  * @provides phui-feed-story-css
  */
 
-.phabricator-feed-frame .phui-box.phui-feed-story {
+.phui-object-box .phui-box.phui-feed-story {
   border-bottom: 1px solid {$thinblueborder};
 }
 

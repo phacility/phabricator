@@ -32,8 +32,6 @@ final class PhabricatorProjectFeedController
         ->setURI('/tag/'.$project->getPrimarySlug().'/');
     }
 
-    require_celerity_resource('phabricator-profile-css');
-
     $query = new PhabricatorFeedQuery();
     $query->setFilterPHIDs(
       array(
@@ -44,11 +42,13 @@ final class PhabricatorProjectFeedController
     $stories = $query->execute();
     $feed = $this->renderStories($stories);
 
-    $content = phutil_tag_div('phabricator-project-feed', $feed);
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Project Activity'))
+      ->appendChild($feed);
 
     $nav = $this->buildIconNavView($project);
     $nav->selectFilter("feed/{$id}/");
-    $nav->appendChild($content);
+    $nav->appendChild($box);
 
     return $this->buildApplicationPage(
       $nav,

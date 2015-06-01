@@ -83,20 +83,22 @@ final class PhabricatorFeedBuilder {
       $null_view->appendChild($view);
     }
 
+    $box = id(new PHUIObjectBoxView())
+      ->appendChild($null_view);
+
     if (empty($stories)) {
       $nodatastring = pht('No Stories.');
       if ($this->noDataString) {
         $nodatastring = $this->noDataString;
       }
 
-      $view = id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
+      $view = id(new PHUIBoxView())
+        ->addClass('mlt mlb msr msl')
         ->appendChild($nodatastring);
-      $null_view->appendChild($view);
+      $box->appendChild($view);
     }
 
-    return id(new PHUIObjectBoxView())
-      ->appendChild($null_view);
+    return $box;
 
   }
 

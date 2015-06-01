@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '1b6e6a39',
+    'core.pkg.css' => '63bd9495',
     'core.pkg.js' => 'fbf1d615',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => 'f89b49b6',
@@ -98,7 +98,6 @@ return array(
     'rsrc/css/application/ponder/feed.css' => 'e62615b6',
     'rsrc/css/application/ponder/post.css' => '9d415218',
     'rsrc/css/application/ponder/vote.css' => '8ed6ed8b',
-    'rsrc/css/application/profile/profile-view.css' => 'cb6f56b7',
     'rsrc/css/application/projects/project-icon.css' => 'c2ecb7f1',
     'rsrc/css/application/releeph/releeph-core.css' => '9b3c5733',
     'rsrc/css/application/releeph/releeph-preview-branch.css' => 'b7a6f4a5',
@@ -130,7 +129,7 @@ return array(
     'rsrc/css/phui/phui-button.css' => 'b995182d',
     'rsrc/css/phui/phui-crumbs-view.css' => 'ce840ec2',
     'rsrc/css/phui/phui-document.css' => '08f33f08',
-    'rsrc/css/phui/phui-feed-story.css' => '06872ae9',
+    'rsrc/css/phui/phui-feed-story.css' => '153a2ebf',
     'rsrc/css/phui/phui-fontkit.css' => 'b664ac96',
     'rsrc/css/phui/phui-form-view.css' => 'a0e8f168',
     'rsrc/css/phui/phui-form.css' => 'f535f938',
@@ -723,7 +722,6 @@ return array(
     'phabricator-object-selector-css' => '029a133d',
     'phabricator-phtize' => 'd254d646',
     'phabricator-prefab' => '6920d200',
-    'phabricator-profile-css' => 'cb6f56b7',
     'phabricator-remarkup-css' => '67a4ee29',
     'phabricator-search-results-css' => 'ce897fb9',
     'phabricator-shaped-request' => '7cbe244b',
@@ -764,7 +762,7 @@ return array(
     'phui-calendar-month-css' => '476be7e0',
     'phui-crumbs-view-css' => 'ce840ec2',
     'phui-document-view-css' => '08f33f08',
-    'phui-feed-story-css' => '06872ae9',
+    'phui-feed-story-css' => '153a2ebf',
     'phui-font-icon-base-css' => '3dad2ae3',
     'phui-fontkit-css' => 'b664ac96',
     'phui-form-css' => 'f535f938',
