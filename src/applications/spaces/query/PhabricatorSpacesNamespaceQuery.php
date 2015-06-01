@@ -23,7 +23,7 @@ final class PhabricatorSpacesNamespaceQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationSpaces';
+    return 'PhabricatorSpacesApplication';
   }
 
   protected function loadPage() {

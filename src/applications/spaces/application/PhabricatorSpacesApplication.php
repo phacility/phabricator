@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorApplicationSpaces extends PhabricatorApplication {
+final class PhabricatorSpacesApplication extends PhabricatorApplication {
 
   public function getBaseURI() {
     return '/spaces/';

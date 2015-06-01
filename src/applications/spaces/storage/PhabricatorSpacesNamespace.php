@@ -15,7 +15,7 @@ final class PhabricatorSpacesNamespace
   public static function initializeNewNamespace(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
-      ->withClasses(array('PhabricatorApplicationSpaces'))
+      ->withClasses(array('PhabricatorSpacesApplication'))
       ->executeOne();
 
     $view_policy = $app->getPolicy(
