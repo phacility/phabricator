@@ -4,7 +4,8 @@ final class PhabricatorSpacesNamespace
   extends PhabricatorSpacesDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorDestructibleInterface {
 
   protected $namespaceName;
   protected $viewPolicy;
@@ -101,6 +102,15 @@ final class PhabricatorSpacesNamespace
     PhabricatorApplicationTransactionView $timeline,
     AphrontRequest $request) {
     return $timeline;
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+    $this->delete();
   }
 
 }
