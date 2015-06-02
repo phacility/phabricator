@@ -110,8 +110,9 @@ final class PhabricatorCalendarEventQuery
 
     foreach ($events as $event) {
       $sequence_start = 0;
-      $instance_count = null;
+      $sequence_end = null;
       $duration = $event->getDateTo() - $event->getDateFrom();
+      $end = null;
 
       if ($event->getIsRecurring() && !$event->getInstanceOfEventPHID()) {
         $frequency = $event->getFrequencyUnit();
@@ -135,28 +136,31 @@ final class PhabricatorCalendarEventQuery
         }
 
         $date = $start;
-        $start_datetime = PhabricatorTime::getDateTimeFromEpoch(
-          $start,
-          $viewer);
+        $datetime = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
 
-        if ($this->rangeEnd) {
+        if (($this->rangeEnd && $event->getRecurrenceEndDate()) &&
+          $this->rangeEnd < $event->getRecurrenceEndDate()) {
           $end = $this->rangeEnd;
-          $instance_count = $sequence_start;
+        } else if ($event->getRecurrenceEndDate()) {
+          $end = $event->getRecurrenceEndDate();
+        } else if ($this->rangeEnd) {
+          $end = $this->rangeEnd;
+        }
 
+        if ($end) {
+          $sequence_end = $sequence_start;
           while ($date < $end) {
-            $instance_count++;
-            $datetime = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
+            $sequence_end++;
             $datetime->modify($modify_key);
             $date = $datetime->format('U');
           }
         } else {
-          $instance_count = $this->getRawResultLimit();
+          $sequence_end = $this->getRawResultLimit() + $sequence_start;
         }
 
         $sequence_start = max(1, $sequence_start);
 
-        $max_sequence = $sequence_start + $instance_count;
-        for ($index = $sequence_start; $index < $max_sequence; $index++) {
+        for ($index = $sequence_start; $index < $sequence_end; $index++) {
           $instance_sequence_pairs[] = array($event->getPHID(), $index);
           $events[] = $event->generateNthGhost($index, $viewer);
 

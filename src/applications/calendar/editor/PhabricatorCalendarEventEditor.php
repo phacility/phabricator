@@ -90,7 +90,6 @@ final class PhabricatorCalendarEventEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorCalendarEventTransaction::TYPE_RECURRING:
       case PhabricatorCalendarEventTransaction::TYPE_FREQUENCY:
-      case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_INSTANCE_OF_EVENT:
       case PhabricatorCalendarEventTransaction::TYPE_SEQUENCE_INDEX:
       case PhabricatorCalendarEventTransaction::TYPE_NAME:
@@ -101,6 +100,7 @@ final class PhabricatorCalendarEventEditor
         return $xaction->getNewValue();
       case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
         return (int)$xaction->getNewValue();
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
         return $xaction->getNewValue()->getEpoch();
@@ -118,8 +118,6 @@ final class PhabricatorCalendarEventEditor
         return $object->setIsRecurring($xaction->getNewValue());
       case PhabricatorCalendarEventTransaction::TYPE_FREQUENCY:
         return $object->setRecurrenceFrequency($xaction->getNewValue());
-      case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
-        return $object->setRecurrenceEndDate($xaction->getNewValue());
       case PhabricatorCalendarEventTransaction::TYPE_INSTANCE_OF_EVENT:
         return $object->setInstanceOfEventPHID($xaction->getNewValue());
       case PhabricatorCalendarEventTransaction::TYPE_SEQUENCE_INDEX:
@@ -132,6 +130,9 @@ final class PhabricatorCalendarEventEditor
         return;
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
         $object->setDateTo($xaction->getNewValue());
+        return;
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
+        $object->setRecurrenceEndDate($xaction->getNewValue());
         return;
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
         $object->setDescription($xaction->getNewValue());
@@ -313,6 +314,7 @@ final class PhabricatorCalendarEventEditor
           $errors[] = $error;
         }
         break;
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
         foreach ($xactions as $xaction) {

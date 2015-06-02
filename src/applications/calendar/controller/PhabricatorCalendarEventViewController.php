@@ -135,7 +135,7 @@ final class PhabricatorCalendarEventViewController
       $event,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    if ($event->getIsRecurring() && $event->getIsGhostEvent()) {
+    if ($event->getIsRecurring() && $event->getInstanceOfEventPHID()) {
       $index = $event->getSequenceIndex();
 
       $actions->addAction(
@@ -231,6 +231,13 @@ final class PhabricatorCalendarEventViewController
       $properties->addProperty(
         pht('Recurs'),
         ucwords(idx($event->getRecurrenceFrequency(), 'rule')));
+
+      if ($event->getRecurrenceEndDate()) {
+        $properties->addProperty(
+          pht('Recurrence Ends'),
+          phabricator_datetime($event->getRecurrenceEndDate(), $viewer));
+      }
+
       if ($event->getInstanceOfEventPHID()) {
         $properties->addProperty(
           pht('Recurrence of Event'),

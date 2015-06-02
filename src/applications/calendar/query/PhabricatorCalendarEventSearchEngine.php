@@ -373,7 +373,6 @@ final class PhabricatorCalendarEventSearchEngine
       $event->setDescription(pht('%s (%s)', $name_text, $status_text));
       $event->setName($status_text);
       $event->setURI($status->getURI());
-      // $event->setEventID($status->getID());
       $event->setViewerIsInvited($viewer_is_invited);
       $month_view->addEvent($event);
     }

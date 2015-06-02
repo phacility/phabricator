@@ -23,6 +23,11 @@ final class AphrontFormDateControl extends AphrontFormControl {
     return $this;
   }
 
+  public function setIsDisabled($is_datepicker_disabled) {
+    $this->isDisabled = $is_datepicker_disabled;
+    return $this;
+  }
+
   public function setEndDateID($value) {
     $this->endDateID = $value;
     return $this;
