@@ -992,12 +992,10 @@ abstract class PhabricatorApplicationTransactionEditor
     // Hook for other edges that may need (re-)loading
     $object = $this->willPublish($object, $xactions);
 
-    $this->loadHandles($xactions);
-
-    $mail = null;
+    $mailed = array();
     if (!$this->getDisableEmail()) {
       if ($this->shouldSendMail($object, $xactions)) {
-        $mail = $this->sendMail($object, $xactions);
+        $mailed = $this->sendMail($object, $xactions);
       }
     }
 
@@ -1009,10 +1007,6 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if ($this->shouldPublishFeedStory($object, $xactions)) {
-      $mailed = array();
-      if ($mail) {
-        $mailed = $mail->buildRecipientList();
-      }
       $this->publishFeedStory(
         $object,
         $xactions,
@@ -2128,29 +2122,59 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if (!$any_visible) {
-      return;
+      return array();
     }
 
-    $email_force = array();
     $email_to = $this->mailToPHIDs;
     $email_cc = $this->mailCCPHIDs;
-
     $email_cc = array_merge($email_cc, $this->heraldEmailPHIDs);
-    $email_force = $this->heraldForcedEmailPHIDs;
 
-    $phids = array_merge($email_to, $email_cc);
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireActor())
-      ->withPHIDs($phids)
-      ->execute();
+    $targets = $this->buildReplyHandler($object)
+      ->getMailTargets($email_to, $email_cc);
 
-    $template = $this->buildMailTemplate($object);
+    // Set this explicitly before we start swapping out the effective actor.
+    $this->setActingAsPHID($this->getActingAsPHID());
+
+
+    $mailed = array();
+    foreach ($targets as $target) {
+      $original_actor = $this->getActor();
+      $this->setActor($target->getViewer());
+      // TODO: Swap locale to viewer locale.
+
+      $caught = null;
+      try {
+        // Reload handles for the new viewer.
+        $this->loadHandles($xactions);
+
+        $mail = $this->sendMailToTarget($object, $xactions, $target);
+      } catch (Exception $ex) {
+        $caught = $ex;
+      }
+
+      $this->setActor($original_actor);
+      if ($caught) {
+        throw $ex;
+      }
+
+      foreach ($mail->buildRecipientList() as $phid) {
+        $mailed[$phid] = true;
+      }
+    }
+
+    return array_keys($mailed);
+  }
+
+  private function sendMailToTarget(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    PhabricatorMailTarget $target) {
+
+    $mail = $this->buildMailTemplate($object);
     $body = $this->buildMailBody($object, $xactions);
 
     $mail_tags = $this->getMailTags($object, $xactions);
     $action = $this->getMailAction($object, $xactions);
-
-    $reply_handler = $this->buildReplyHandler($object);
 
     if (PhabricatorEnv::getEnvConfig('metamta.email-preferences')) {
       $this->addEmailPreferenceSectionToMailBody(
@@ -2159,48 +2183,36 @@ abstract class PhabricatorApplicationTransactionEditor
         $xactions);
     }
 
-    $template
+    $mail
       ->setFrom($this->getActingAsPHID())
       ->setSubjectPrefix($this->getMailSubjectPrefix())
       ->setVarySubjectPrefix('['.$action.']')
       ->setThreadID($this->getMailThreadID($object), $this->getIsNewObject())
       ->setRelatedPHID($object->getPHID())
       ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
-      ->setForceHeraldMailRecipientPHIDs($email_force)
+      ->setForceHeraldMailRecipientPHIDs($this->heraldForcedEmailPHIDs)
       ->setMailTags($mail_tags)
       ->setIsBulk(true)
       ->setBody($body->render())
       ->setHTMLBody($body->renderHTML());
 
     foreach ($body->getAttachments() as $attachment) {
-      $template->addAttachment($attachment);
+      $mail->addAttachment($attachment);
     }
 
     if ($this->heraldHeader) {
-      $template->addHeader('X-Herald-Rules', $this->heraldHeader);
+      $mail->addHeader('X-Herald-Rules', $this->heraldHeader);
     }
 
     if ($object instanceof PhabricatorProjectInterface) {
-      $this->addMailProjectMetadata($object, $template);
+      $this->addMailProjectMetadata($object, $mail);
     }
 
     if ($this->getParentMessageID()) {
-      $template->setParentMessageID($this->getParentMessageID());
+      $mail->setParentMessageID($this->getParentMessageID());
     }
 
-    $mails = $reply_handler->multiplexMail(
-      $template,
-      array_select_keys($handles, $email_to),
-      array_select_keys($handles, $email_cc));
-
-    foreach ($mails as $mail) {
-      $mail->saveAndSend();
-    }
-
-    $template->addTos($email_to);
-    $template->addCCs($email_cc);
-
-    return $template;
+    return $target->sendMail($mail);
   }
 
   private function addMailProjectMetadata(
