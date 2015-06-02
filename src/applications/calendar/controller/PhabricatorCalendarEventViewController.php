@@ -135,24 +135,27 @@ final class PhabricatorCalendarEventViewController
       $event,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    if ($event->getIsRecurring() && $event->getInstanceOfEventPHID()) {
-      $index = $event->getSequenceIndex();
+    $edit_label = false;
+    $edit_uri = false;
 
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Edit This Instance'))
-          ->setIcon('fa-pencil')
-          ->setHref($this->getApplicationURI("event/edit/{$id}/{$index}/"))
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(!$can_edit));
+    if ($event->getIsGhostEvent()) {
+      $index = $event->getSequenceIndex();
+      $edit_label = pht('Edit This Instance');
+      $edit_uri = "event/edit/{$id}/{$index}/";
+    } else if ($event->getInstanceOfEventPHID() && !$event->getIsGhostEvent()) {
+      $edit_label = pht('Edit This Instance');
+      $edit_uri = "event/edit/{$id}/";
+    } else if (!$event->getIsRecurring()) {
+      $edit_label = pht('Edit');
+      $edit_uri = "event/edit/{$id}/";
     }
 
-    if (!$event->getIsRecurring() && !$event->getIsGhostEvent()) {
+    if ($edit_label && $edit_uri) {
       $actions->addAction(
         id(new PhabricatorActionView())
-          ->setName(pht('Edit Event'))
+          ->setName($edit_label)
           ->setIcon('fa-pencil')
-          ->setHref($this->getApplicationURI("event/edit/{$id}/"))
+          ->setHref($this->getApplicationURI($edit_uri))
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit));
     }
