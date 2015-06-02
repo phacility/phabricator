@@ -3,8 +3,6 @@
 final class PhabricatorPasteEditor
   extends PhabricatorApplicationTransactionEditor {
 
-  private $pasteFile;
-
   public function getEditorApplicationClass() {
     return 'PhabricatorPasteApplication';
   }
@@ -134,7 +132,7 @@ final class PhabricatorPasteEditor
   protected function getMailTo(PhabricatorLiskDAO $object) {
     return array(
       $object->getAuthorPHID(),
-      $this->requireActor()->getPHID(),
+      $this->getActingAsPHID(),
     );
   }
 
@@ -184,6 +182,10 @@ final class PhabricatorPasteEditor
 
   protected function supportsSearch() {
     return false;
+  }
+
+  protected function supportsWorkers() {
+    return true;
   }
 
 }

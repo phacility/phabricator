@@ -1,10 +1,11 @@
 <?php
 
 /**
- * @task mail   Sending Mail
- * @task feed   Publishing Feed Stories
+ * @task mail Sending Mail
+ * @task feed Publishing Feed Stories
  * @task search Search Index
- * @task files  Integration with Files
+ * @task files Integration with Files
+ * @task workers Managing Workers
  */
 abstract class PhabricatorApplicationTransactionEditor
   extends PhabricatorEditor {
@@ -30,6 +31,9 @@ abstract class PhabricatorApplicationTransactionEditor
   private $actingAsPHID;
   private $disableEmail;
 
+  private $heraldEmailPHIDs = array();
+  private $heraldForcedEmailPHIDs = array();
+  private $heraldHeader;
 
   /**
    * Get the class name for the application this editor is a part of.
@@ -861,11 +865,71 @@ abstract class PhabricatorApplicationTransactionEditor
           $object,
           $herald_xactions);
 
+        $adapter = $this->getHeraldAdapter();
+        $this->heraldEmailPHIDs = $adapter->getEmailPHIDs();
+        $this->heraldForcedEmailPHIDs = $adapter->getForcedEmailPHIDs();
+
         // Merge the new transactions into the transaction list: we want to
         // send email and publish feed stories about them, too.
         $xactions = array_merge($xactions, $herald_xactions);
       }
     }
+
+    $this->didApplyTransactions($xactions);
+
+    if ($object instanceof PhabricatorCustomFieldInterface) {
+      // Maybe this makes more sense to move into the search index itself? For
+      // now I'm putting it here since I think we might end up with things that
+      // need it to be up to date once the next page loads, but if we don't go
+      // there we we could move it into search once search moves to the daemons.
+
+      // It now happens in the search indexer as well, but the search indexer is
+      // always daemonized, so the logic above still potentially holds. We could
+      // possibly get rid of this. The major motivation for putting it in the
+      // indexer was to enable reindexing to work.
+
+      $fields = PhabricatorCustomField::getObjectFields(
+        $object,
+        PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
+      $fields->readFieldsFromStorage($object);
+      $fields->rebuildIndexes($object);
+    }
+
+    $herald_xscript = $this->getHeraldTranscript();
+    if ($herald_xscript) {
+      $herald_header = $herald_xscript->getXHeraldRulesHeader();
+      $herald_header = HeraldTranscript::saveXHeraldRulesHeader(
+        $object->getPHID(),
+        $herald_header);
+    } else {
+      $herald_header = HeraldTranscript::loadXHeraldRulesHeader(
+        $object->getPHID());
+    }
+    $this->heraldHeader = $herald_header;
+
+    if ($this->supportsWorkers()) {
+      PhabricatorWorker::scheduleTask(
+        'PhabricatorApplicationTransactionPublishWorker',
+        array(
+          'objectPHID' => $object->getPHID(),
+          'actorPHID' => $this->getActingAsPHID(),
+          'xactionPHIDs' => mpull($xactions, 'getPHID'),
+          'state' => $this->getWorkerState(),
+        ),
+        array(
+          'objectPHID' => $object->getPHID(),
+          'priority' => PhabricatorWorker::PRIORITY_ALERTS,
+        ));
+    } else {
+      $this->publishTransactions($object, $xactions);
+    }
+
+    return $xactions;
+  }
+
+  public function publishTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
 
     // Before sending mail or publishing feed stories, reload the object
     // subscribers to pick up changes caused by Herald (or by other side effects
@@ -899,26 +963,6 @@ abstract class PhabricatorApplicationTransactionEditor
         $object,
         $xactions,
         $mailed);
-    }
-
-    $this->didApplyTransactions($xactions);
-
-    if ($object instanceof PhabricatorCustomFieldInterface) {
-      // Maybe this makes more sense to move into the search index itself? For
-      // now I'm putting it here since I think we might end up with things that
-      // need it to be up to date once the next page loads, but if we don't go
-      // there we we could move it into search once search moves to the daemons.
-
-      // It now happens in the search indexer as well, but the search indexer is
-      // always daemonized, so the logic above still potentially holds. We could
-      // possibly get rid of this. The major motivation for putting it in the
-      // indexer was to enable reindexing to work.
-
-      $fields = PhabricatorCustomField::getObjectFields(
-        $object,
-        PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
-      $fields->readFieldsFromStorage($object);
-      $fields->rebuildIndexes($object);
     }
 
     return $xactions;
@@ -2043,11 +2087,8 @@ abstract class PhabricatorApplicationTransactionEditor
     $email_to = $this->getMailTo($object);
     $email_cc = $this->getMailCC($object);
 
-    $adapter = $this->getHeraldAdapter();
-    if ($adapter) {
-      $email_cc = array_merge($email_cc, $adapter->getEmailPHIDs());
-      $email_force = $adapter->getForcedEmailPHIDs();
-    }
+    $email_cc = array_merge($email_cc, $this->heraldEmailPHIDs);
+    $email_force = $this->heraldForcedEmailPHIDs;
 
     $phids = array_merge($email_to, $email_cc);
     $handles = id(new PhabricatorHandleQuery())
@@ -2087,19 +2128,8 @@ abstract class PhabricatorApplicationTransactionEditor
       $template->addAttachment($attachment);
     }
 
-    $herald_xscript = $this->getHeraldTranscript();
-    if ($herald_xscript) {
-      $herald_header = $herald_xscript->getXHeraldRulesHeader();
-      $herald_header = HeraldTranscript::saveXHeraldRulesHeader(
-        $object->getPHID(),
-        $herald_header);
-    } else {
-      $herald_header = HeraldTranscript::loadXHeraldRulesHeader(
-        $object->getPHID());
-    }
-
-    if ($herald_header) {
-      $template->addHeader('X-Herald-Rules', $herald_header);
+    if ($this->heraldHeader) {
+      $template->addHeader('X-Herald-Rules', $this->heraldHeader);
     }
 
     if ($object instanceof PhabricatorProjectInterface) {
@@ -2763,6 +2793,114 @@ abstract class PhabricatorApplicationTransactionEditor
 
       $editor->applyTransactions($target, array($template));
     }
+  }
+
+
+/* -(  Workers  )------------------------------------------------------------ */
+
+
+  /**
+   * @task workers
+   */
+  protected function supportsWorkers() {
+    // TODO: Remove this method once everything supports workers.
+    return false;
+  }
+
+
+  /**
+   * Convert the editor state to a serializable dictionary which can be passed
+   * to a worker.
+   *
+   * This data will be loaded with @{method:loadWorkerState} in the worker.
+   *
+   * @return dict<string, wild> Serializable editor state.
+   * @task workers
+   */
+  final private function getWorkerState() {
+    $state = array();
+    foreach ($this->getAutomaticStateProperties() as $property) {
+      $state[$property] = $this->$property;
+    }
+
+    $state += array(
+      'excludeMailRecipientPHIDs' => $this->getExcludeMailRecipientPHIDs(),
+    );
+
+    return $state + array(
+      'custom' => $this->getCustomWorkerState(),
+    );
+  }
+
+
+  /**
+   * Hook; return custom properties which need to be passed to workers.
+   *
+   * @return dict<string, wild> Custom properties.
+   * @task workers
+   */
+  protected function getCustomWorkerState() {
+    return array();
+  }
+
+
+  /**
+   * Load editor state using a dictionary emitted by @{method:getWorkerState}.
+   *
+   * This method is used to load state when running worker operations.
+   *
+   * @param dict<string, wild> Editor state, from @{method:getWorkerState}.
+   * @return this
+   * @task workers
+   */
+  final public function loadWorkerState(array $state) {
+    foreach ($this->getAutomaticStateProperties() as $property) {
+      $this->$property = idx($state, $property);
+    }
+
+    $exclude = idx($state, 'excludeMailRecipientPHIDs', array());
+    $this->setExcludeMailRecipientPHIDs($exclude);
+
+    $custom = idx($state, 'custom', array());
+    $this->loadCustomWorkerState($custom);
+
+    return $this;
+  }
+
+
+  /**
+   * Hook; set custom properties on the editor from data emitted by
+   * @{method:getCustomWorkerState}.
+   *
+   * @param dict<string, wild> Custom state,
+   *   from @{method:getCustomWorkerState}.
+   * @return this
+   * @task workers
+   */
+  protected function loadCustomWorkerState(array $state) {
+    return $this;
+  }
+
+
+  /**
+   * Get a list of object properties which should be automatically sent to
+   * workers in the state data.
+   *
+   * These properties will be automatically stored and loaded by the editor in
+   * the worker.
+   *
+   * @return list<string> List of properties.
+   * @task workers
+   */
+  private function getAutomaticStateProperties() {
+    return array(
+      'parentMessageID',
+      'disableEmail',
+      'isNewObject',
+      'heraldEmailPHIDs',
+      'heraldForcedEmailPHIDs',
+      'heraldHeader',
+    );
   }
 
 }
