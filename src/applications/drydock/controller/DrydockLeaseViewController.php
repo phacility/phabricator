@@ -30,7 +30,7 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
     $actions = $this->buildActionListView($lease);
     $properties = $this->buildPropertyListView($lease, $actions);
 
-    $pager = new AphrontPagerView();
+    $pager = new PHUIPagerView();
     $pager->setURI(new PhutilURI($lease_uri), 'offset');
     $pager->setOffset($request->getInt('offset'));
 

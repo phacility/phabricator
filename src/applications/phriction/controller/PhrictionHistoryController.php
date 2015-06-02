@@ -29,7 +29,7 @@ final class PhrictionHistoryController
 
     $current = $document->getContent();
 
-    $pager = new AphrontPagerView();
+    $pager = new PHUIPagerView();
     $pager->setOffset($request->getInt('page'));
     $pager->setURI($request->getRequestURI(), 'page');
 

@@ -739,7 +739,7 @@ abstract class PhabricatorApplicationSearchEngine {
 
   public function newPagerForSavedQuery(PhabricatorSavedQuery $saved) {
     if ($this->shouldUseOffsetPaging()) {
-      $pager = new AphrontPagerView();
+      $pager = new PHUIPagerView();
     } else {
       $pager = new AphrontCursorPagerView();
     }

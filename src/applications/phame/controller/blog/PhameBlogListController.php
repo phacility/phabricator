@@ -29,7 +29,7 @@ final class PhameBlogListController extends PhameController {
         throw new Exception(pht("Unknown filter '%s'!", $filter));
     }
 
-    $pager = id(new AphrontPagerView())
+    $pager = id(new PHUIPagerView())
       ->setURI($request->getRequestURI(), 'offset')
       ->setOffset($request->getInt('offset'));
 

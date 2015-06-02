@@ -39,7 +39,7 @@ abstract class PhabricatorOffsetPagedQuery extends PhabricatorQuery {
     }
   }
 
-  final public function executeWithOffsetPager(AphrontPagerView $pager) {
+  final public function executeWithOffsetPager(PHUIPagerView $pager) {
     $this->setLimit($pager->getPageSize() + 1);
     $this->setOffset($pager->getOffset());
 

@@ -1,6 +1,6 @@
 <?php
 
-final class AphrontPagerView extends AphrontView {
+final class PHUIPagerView extends AphrontView {
 
   private $offset;
   private $pageSize = 100;
@@ -112,7 +112,7 @@ final class AphrontPagerView extends AphrontView {
       throw new PhutilInvalidStateException('setURI');
     }
 
-    require_celerity_resource('aphront-pager-view-css');
+    require_celerity_resource('phui-pager-css');
 
     $page = (int)floor($this->getOffset() / $this->getPageSize());
     $last = ((int)ceil($this->computeCount() / $this->getPageSize())) - 1;
@@ -125,7 +125,7 @@ final class AphrontPagerView extends AphrontView {
     if ($max - $min > $last) {
       $max = $min + $last;
       if ($max == $min) {
-        return phutil_tag('div', array('class' => 'aphront-pager-view'), '');
+        return phutil_tag('div', array('class' => 'phui-pager-view'), '');
       }
     }
 
@@ -197,18 +197,20 @@ final class AphrontPagerView extends AphrontView {
       list($index, $label, $class) = $link;
       $display_index = $this->getDisplayIndex($index);
       $link = $base_uri->alter($parameter, $display_index);
-      $rendered_links[] = phutil_tag(
-        'a',
-        array(
-          'href' => $link,
-          'class' => $class,
-        ),
-        $label);
+      $rendered_links[] = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setHref($link)
+        ->setColor(PHUIButtonView::SIMPLE)
+        ->addClass('mml')
+        ->addClass($class)
+        ->setText($label);
     }
 
     return phutil_tag(
       'div',
-      array('class' => 'aphront-pager-view'),
+      array(
+        'class' => 'phui-pager-view',
+      ),
       $rendered_links);
   }
 

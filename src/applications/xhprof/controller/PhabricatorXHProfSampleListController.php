@@ -13,7 +13,7 @@ final class PhabricatorXHProfSampleListController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $pager = new AphrontPagerView();
+    $pager = new PHUIPagerView();
     $pager->setOffset($request->getInt('page'));
 
     switch ($this->view) {

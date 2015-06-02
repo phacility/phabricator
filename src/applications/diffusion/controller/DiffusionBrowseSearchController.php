@@ -47,7 +47,7 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
 
     $limit = 100;
     $page = $this->getRequest()->getInt('page', 0);
-    $pager = new AphrontPagerView();
+    $pager = new PHUIPagerView();
     $pager->setPageSize($limit);
     $pager->setOffset($page);
     $pager->setURI($this->getRequest()->getRequestURI(), 'page');
