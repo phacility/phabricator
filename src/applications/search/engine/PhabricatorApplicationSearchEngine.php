@@ -484,7 +484,6 @@ abstract class PhabricatorApplicationSearchEngine {
       $key,
       array(
         PhabricatorProjectProjectPHIDType::TYPECONST,
-        PhabricatorMailingListListPHIDType::TYPECONST,
       ));
   }
 

@@ -39,9 +39,6 @@ final class PhabricatorMetaMTAActorQuery extends PhabricatorQuery {
         case PhabricatorPeopleExternalPHIDType::TYPECONST:
           $this->loadExternalUserActors($actors, $phids);
           break;
-        case PhabricatorMailingListListPHIDType::TYPECONST:
-          $this->loadMailingListActors($actors, $phids);
-          break;
         default:
           $this->loadUnknownActors($actors, $phids);
           break;
@@ -124,28 +121,6 @@ final class PhabricatorMetaMTAActorQuery extends PhabricatorQuery {
     }
   }
 
-  private function loadMailingListActors(array $actors, array $phids) {
-    assert_instances_of($actors, 'PhabricatorMetaMTAActor');
-
-    $lists = id(new PhabricatorMailingListQuery())
-      ->setViewer($this->getViewer())
-      ->withPHIDs($phids)
-      ->execute();
-    $lists = mpull($lists, null, 'getPHID');
-
-    foreach ($phids as $phid) {
-      $actor = $actors[$phid];
-
-      $list = idx($lists, $phid);
-      if (!$list) {
-        $actor->setUndeliverable(PhabricatorMetaMTAActor::REASON_UNLOADABLE);
-        continue;
-      }
-
-      $actor->setName($list->getName());
-      $actor->setEmailAddress($list->getEmail());
-    }
-  }
 
   private function loadUnknownActors(array $actors, array $phids) {
     foreach ($phids as $phid) {

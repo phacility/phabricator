@@ -137,10 +137,6 @@
       "name": "Macro",
       "include": "(^src/applications/macro/)"
     },
-    "mailinglists": {
-      "name": "Mailing Lists",
-      "include": "(^src/applications/mailinglists/)"
-    },
     "maniphest": {
       "name": "Maniphest",
       "include": "(^src/applications/maniphest/)"

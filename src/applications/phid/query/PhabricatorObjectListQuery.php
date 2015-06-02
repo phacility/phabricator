@@ -143,27 +143,6 @@ final class PhabricatorObjectListQuery {
       }
     }
 
-    $mailing_list_app = PhabricatorApplication::getByClass(
-      'PhabricatorMailingListsApplication');
-    if ($mailing_list_app->isInstalled()) {
-      if ($names) {
-        // We still haven't been able to resolve everything; try mailing lists
-        // by name as a last resort.
-        $lists = id(new PhabricatorMailingListQuery())
-          ->setViewer($this->getViewer())
-          ->withNames($names)
-          ->execute();
-
-        $lists = mpull($lists, null, 'getName');
-        foreach ($names as $key => $name) {
-          if (isset($lists[$name])) {
-            $results[$name] = $lists[$name];
-            unset($names[$key]);
-          }
-        }
-      }
-    }
-
     return $results;
   }
 
