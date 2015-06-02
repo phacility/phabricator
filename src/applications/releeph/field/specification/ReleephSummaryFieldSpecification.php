@@ -34,7 +34,7 @@ final class ReleephSummaryFieldSpecification
 
   public function renderHelpForArcanist() {
     $text = pht(
-      "A one-line title summarizing this request. ".
+      'A one-line title summarizing this request. '.
       'Leave blank to use the original commit title.')."\n";
     return phutil_console_wrap($text, 8);
   }

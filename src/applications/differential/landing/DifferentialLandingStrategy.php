@@ -2,7 +2,7 @@
 
 abstract class DifferentialLandingStrategy {
 
-  public abstract function processLandRequest(
+  abstract public function processLandRequest(
     AphrontRequest $request,
     DifferentialRevision $revision,
     PhabricatorRepository $repository);
@@ -10,7 +10,7 @@ abstract class DifferentialLandingStrategy {
   /**
    * @return PhabricatorActionView or null.
    */
-  public abstract function createMenuItem(
+  abstract public function createMenuItem(
     PhabricatorUser $viewer,
     DifferentialRevision $revision,
     PhabricatorRepository $repository);

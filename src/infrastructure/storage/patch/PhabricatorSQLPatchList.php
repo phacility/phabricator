@@ -2,8 +2,8 @@
 
 abstract class PhabricatorSQLPatchList {
 
-  public abstract function getNamespace();
-  public abstract function getPatches();
+  abstract public function getNamespace();
+  abstract public function getPatches();
 
   /**
    * Examine a directory for `.php` and `.sql` files and build patch
