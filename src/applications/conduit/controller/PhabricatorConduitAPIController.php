@@ -475,10 +475,10 @@ final class PhabricatorConduitAPIController
     ConduitAPIRequest $request,
     PhabricatorUser $user) {
 
-    if (!$user->isUserActivated()) {
+    if (!$user->canEstablishAPISessions()) {
       return array(
-        'ERR-USER-DISABLED',
-        pht('User account is not activated.'),
+        'ERR-INVALID-AUTH',
+        pht('User account is not permitted to use the API.'),
       );
     }
 

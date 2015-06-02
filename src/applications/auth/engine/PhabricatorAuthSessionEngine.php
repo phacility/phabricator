@@ -158,6 +158,21 @@ final class PhabricatorAuthSessionEngine extends Phobject {
         $session_dict[substr($key, 2)] = $value;
       }
     }
+
+    $user = $user_table->loadFromArray($info);
+    switch ($session_type) {
+      case PhabricatorAuthSession::TYPE_WEB:
+        // Explicitly prevent bots and mailing lists from establishing web
+        // sessions. It's normally impossible to attach authentication to these
+        // accounts, and likewise impossible to generate sessions, but it's
+        // technically possible that a session could exist in the database. If
+        // one does somehow, refuse to load it.
+        if (!$user->canEstablishWebSessions()) {
+          return null;
+        }
+        break;
+    }
+
     $session = id(new PhabricatorAuthSession())->loadFromArray($session_dict);
 
     $ttl = PhabricatorAuthSession::getSessionTypeTTL($session_type);
@@ -181,7 +196,6 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       unset($unguarded);
     }
 
-    $user = $user_table->loadFromArray($info);
     $user->attachSession($session);
     return $user;
   }

@@ -4,8 +4,6 @@ final class PhabricatorPeopleCreateController
   extends PhabricatorPeopleController {
 
   public function handleRequest(AphrontRequest $request) {
-    $this->requireApplicationCapability(
-      PeopleCreateUsersCapability::CAPABILITY);
     $admin = $request->getUser();
 
     id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
@@ -17,7 +15,7 @@ final class PhabricatorPeopleCreateController
     if ($request->isFormPost()) {
       $v_type = $request->getStr('type');
 
-      if ($v_type == 'standard' || $v_type == 'bot') {
+      if ($v_type == 'standard' || $v_type == 'bot' || $v_type == 'list') {
         return id(new AphrontRedirectResponse())->setURI(
           $this->getApplicationURI('new/'.$v_type.'/'));
       }
@@ -41,6 +39,41 @@ final class PhabricatorPeopleCreateController
     $bot_admin = pht(
       'Administrators have greater access to edit these accounts.');
 
+    $types = array();
+
+    $can_create = $this->hasApplicationCapability(
+      PeopleCreateUsersCapability::CAPABILITY);
+    if ($can_create) {
+      $types[] = array(
+        'type' => 'standard',
+        'name' => pht('Create Standard User'),
+        'help' => pht('Create a standard user account.'),
+      );
+    }
+
+    $types[] = array(
+      'type' => 'bot',
+      'name' => pht('Create Bot User'),
+      'help' => pht('Create a new user for use with automated scripts.'),
+    );
+
+    $types[] = array(
+      'type' => 'list',
+      'name' => pht('Create Mailing List User'),
+      'help' => pht(
+        'Create a mailing list user to represent an existing, external '.
+        'mailing list like a Google Group or a Mailman list.'),
+    );
+
+    $buttons = id(new AphrontFormRadioButtonControl())
+      ->setLabel(pht('Account Type'))
+      ->setName('type')
+      ->setValue($v_type);
+
+    foreach ($types as $type) {
+      $buttons->addButton($type['type'], $type['name'], $type['help']);
+    }
+
     $form = id(new AphrontFormView())
       ->setUser($admin)
       ->appendRemarkupInstructions(
@@ -49,19 +82,7 @@ final class PhabricatorPeopleCreateController
           'explanation of user account types, see [[ %s | User Guide: '.
           'Account Roles ]].',
           PhabricatorEnv::getDoclink('User Guide: Account Roles')))
-      ->appendChild(
-        id(new AphrontFormRadioButtonControl())
-          ->setLabel(pht('Account Type'))
-          ->setName('type')
-          ->setValue($v_type)
-          ->addButton(
-            'standard',
-            pht('Create Standard User'),
-            hsprintf('%s<br /><br />%s', $standard_caption, $standard_admin))
-          ->addButton(
-            'bot',
-            pht('Create Bot/Script User'),
-            hsprintf('%s<br /><br />%s', $bot_caption, $bot_admin)))
+      ->appendChild($buttons)
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($this->getApplicationURI())

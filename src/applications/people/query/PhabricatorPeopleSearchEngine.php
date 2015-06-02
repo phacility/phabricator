@@ -34,6 +34,10 @@ final class PhabricatorPeopleSearchEngine
       $this->readBoolFromRequest($request, 'isSystemAgent'));
 
     $saved->setParameter(
+      'isMailingList',
+      $this->readBoolFromRequest($request, 'isMailingList'));
+
+    $saved->setParameter(
       'needsApproval',
       $this->readBoolFromRequest($request, 'needsApproval'));
 
@@ -77,6 +81,7 @@ final class PhabricatorPeopleSearchEngine
     $is_admin = $saved->getParameter('isAdmin');
     $is_disabled = $saved->getParameter('isDisabled');
     $is_system_agent = $saved->getParameter('isSystemAgent');
+    $is_mailing_list = $saved->getParameter('isMailingList');
     $needs_approval = $saved->getParameter('needsApproval');
 
     if ($is_admin !== null) {
@@ -89,6 +94,10 @@ final class PhabricatorPeopleSearchEngine
 
     if ($is_system_agent !== null) {
       $query->withIsSystemAgent($is_system_agent);
+    }
+
+    if ($is_mailing_list !== null) {
+      $query->withIsMailingList($is_mailing_list);
     }
 
     if ($needs_approval !== null) {
@@ -121,6 +130,7 @@ final class PhabricatorPeopleSearchEngine
     $is_admin = $this->getBoolFromQuery($saved, 'isAdmin');
     $is_disabled = $this->getBoolFromQuery($saved, 'isDisabled');
     $is_system_agent = $this->getBoolFromQuery($saved, 'isSystemAgent');
+    $is_mailing_list = $this->getBoolFromQuery($saved, 'isMailingList');
     $needs_approval = $this->getBoolFromQuery($saved, 'needsApproval');
 
     $form
@@ -166,6 +176,17 @@ final class PhabricatorPeopleSearchEngine
               '' => pht('(Show All)'),
               'true' => pht('Show Only Bots'),
               'false' => pht('Hide Bots'),
+            )))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setName('isMailingList')
+          ->setLabel(pht('Mailing Lists'))
+          ->setValue($is_mailing_list)
+          ->setOptions(
+            array(
+              '' => pht('(Show All)'),
+              'true' => pht('Show Only Mailing Lists'),
+              'false' => pht('Hide Mailing Lists'),
             )))
       ->appendChild(
         id(new AphrontFormSelectControl())
@@ -276,6 +297,10 @@ final class PhabricatorPeopleSearchEngine
 
       if ($user->getIsSystemAgent()) {
         $item->addIcon('fa-desktop', pht('Bot'));
+      }
+
+      if ($user->getIsMailingList()) {
+        $item->addIcon('fa-envelope-o', pht('Mailing List'));
       }
 
       if ($viewer->getIsAdmin()) {

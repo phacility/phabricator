@@ -19,6 +19,10 @@ final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
   }
 
   public function isEnabled() {
+    if ($this->getUser()->getIsMailingList()) {
+      return false;
+    }
+
     return PhabricatorEnv::getEnvConfig('diffusion.allow-http-auth');
   }
 
