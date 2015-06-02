@@ -31,7 +31,7 @@ final class PhabricatorSpacesNamespaceSearchEngine
     return '/spaces/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All Spaces'),
     );
