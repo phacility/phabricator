@@ -1,6 +1,36 @@
 <?php
 
 /**
+ *
+ * Publishing and Managing State
+ * ======
+ *
+ * After applying changes, the Editor queues a worker to publish mail, feed,
+ * and notifications, and to perform other background work like updating search
+ * indexes. This allows it to do this work without impacting performance for
+ * users.
+ *
+ * When work is moved to the daemons, the Editor state is serialized by
+ * @{method:getWorkerState}, then reloaded in a daemon process by
+ * @{method:loadWorkerState}. **This is fragile.**
+ *
+ * State is not persisted into the daemons by default, because we can not send
+ * arbitrary objects into the queue. This means the default behavior of any
+ * state properties is to reset to their defaults without warning prior to
+ * publishing.
+ *
+ * The easiest way to avoid this is to keep Editors stateless: the overwhelming
+ * majority of Editors can be written statelessly. If you need to maintain
+ * state, you can either:
+ *
+ *   - not require state to exist during publishing; or
+ *   - pass state to the daemons by implementing @{method:getCustomWorkerState}
+ *     and @{method:loadCustomWorkerState}.
+ *
+ * This architecture isn't ideal, and we may eventually split this class into
+ * "Editor" and "Publisher" parts to make it more robust. See T6367 for some
+ * discussion and context.
+ *
  * @task mail Sending Mail
  * @task feed Publishing Feed Stories
  * @task search Search Index
@@ -34,6 +64,10 @@ abstract class PhabricatorApplicationTransactionEditor
   private $heraldEmailPHIDs = array();
   private $heraldForcedEmailPHIDs = array();
   private $heraldHeader;
+  private $mailToPHIDs = array();
+  private $mailCCPHIDs = array();
+  private $feedNotifyPHIDs = array();
+  private $feedRelatedPHIDs = array();
 
   /**
    * Get the class name for the application this editor is a part of.
@@ -907,22 +941,42 @@ abstract class PhabricatorApplicationTransactionEditor
     }
     $this->heraldHeader = $herald_header;
 
-    if ($this->supportsWorkers()) {
-      PhabricatorWorker::scheduleTask(
-        'PhabricatorApplicationTransactionPublishWorker',
-        array(
-          'objectPHID' => $object->getPHID(),
-          'actorPHID' => $this->getActingAsPHID(),
-          'xactionPHIDs' => mpull($xactions, 'getPHID'),
-          'state' => $this->getWorkerState(),
-        ),
-        array(
-          'objectPHID' => $object->getPHID(),
-          'priority' => PhabricatorWorker::PRIORITY_ALERTS,
-        ));
-    } else {
-      $this->publishTransactions($object, $xactions);
+    // We're going to compute some of the data we'll use to publish these
+    // transactions here, before queueing a worker.
+    //
+    // Primarily, this is more correct: we want to publish the object as it
+    // exists right now. The worker may not execute for some time, and we want
+    // to use the current To/CC list, not respect any changes which may occur
+    // between now and when the worker executes.
+    //
+    // As a secondary benefit, this tends to reduce the amount of state that
+    // Editors need to pass into workers.
+    $object = $this->willPublish($object, $xactions);
+
+    if (!$this->getDisableEmail()) {
+      if ($this->shouldSendMail($object, $xactions)) {
+        $this->mailToPHIDs = $this->getMailTo($object);
+        $this->mailCCPHIDs = $this->getMailCC($object);
+      }
     }
+
+    if ($this->shouldPublishFeedStory($object, $xactions)) {
+      $this->feedRelatedPHIDs = $this->getFeedRelatedPHIDs($object, $xactions);
+      $this->feedNotifyPHIDs = $this->getFeedNotifyPHIDs($object, $xactions);
+    }
+
+    PhabricatorWorker::scheduleTask(
+      'PhabricatorApplicationTransactionPublishWorker',
+      array(
+        'objectPHID' => $object->getPHID(),
+        'actorPHID' => $this->getActingAsPHID(),
+        'xactionPHIDs' => mpull($xactions, 'getPHID'),
+        'state' => $this->getWorkerState(),
+      ),
+      array(
+        'objectPHID' => $object->getPHID(),
+        'priority' => PhabricatorWorker::PRIORITY_ALERTS,
+      ));
 
     return $xactions;
   }
@@ -936,7 +990,7 @@ abstract class PhabricatorApplicationTransactionEditor
     // in various transaction phases).
     $this->loadSubscribers($object);
     // Hook for other edges that may need (re-)loading
-    $this->loadEdges($object, $xactions);
+    $object = $this->willPublish($object, $xactions);
 
     $this->loadHandles($xactions);
 
@@ -1040,12 +1094,6 @@ abstract class PhabricatorApplicationTransactionEditor
     } else {
       $this->subscribers = array();
     }
-  }
-
-  protected function loadEdges(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-    return;
   }
 
   private function validateEditParameters(
@@ -2084,8 +2132,8 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     $email_force = array();
-    $email_to = $this->getMailTo($object);
-    $email_cc = $this->getMailCC($object);
+    $email_to = $this->mailToPHIDs;
+    $email_cc = $this->mailCCPHIDs;
 
     $email_cc = array_merge($email_cc, $this->heraldEmailPHIDs);
     $email_force = $this->heraldForcedEmailPHIDs;
@@ -2511,8 +2559,8 @@ abstract class PhabricatorApplicationTransactionEditor
       return;
     }
 
-    $related_phids = $this->getFeedRelatedPHIDs($object, $xactions);
-    $subscribed_phids = $this->getFeedNotifyPHIDs($object, $xactions);
+    $related_phids = $this->feedRelatedPHIDs;
+    $subscribed_phids = $this->feedNotifyPHIDs;
 
     $story_type = $this->getFeedStoryType();
     $story_data = $this->getFeedStoryData($object, $xactions);
@@ -2800,11 +2848,17 @@ abstract class PhabricatorApplicationTransactionEditor
 
 
   /**
+   * Load any object state which is required to publish transactions.
+   *
+   * This hook is invoked in the main process before we compute data related
+   * to publishing transactions (like email "To" and "CC" lists), and again in
+   * the worker before publishing occurs.
+   *
+   * @return object Publishable object.
    * @task workers
    */
-  protected function supportsWorkers() {
-    // TODO: Remove this method once everything supports workers.
-    return false;
+  protected function willPublish(PhabricatorLiskDAO $object, array $xactions) {
+    return $object;
   }
 
 
@@ -2825,11 +2879,10 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $state += array(
       'excludeMailRecipientPHIDs' => $this->getExcludeMailRecipientPHIDs(),
-    );
-
-    return $state + array(
       'custom' => $this->getCustomWorkerState(),
     );
+
+    return $state;
   }
 
 
@@ -2900,6 +2953,10 @@ abstract class PhabricatorApplicationTransactionEditor
       'heraldEmailPHIDs',
       'heraldForcedEmailPHIDs',
       'heraldHeader',
+      'mailToPHIDs',
+      'mailCCPHIDs',
+      'feedNotifyPHIDs',
+      'feedRelatedPHIDs',
     );
   }
 

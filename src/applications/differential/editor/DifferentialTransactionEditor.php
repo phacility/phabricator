@@ -1902,4 +1902,15 @@ final class DifferentialTransactionEditor
     return $section;
   }
 
+  protected function getCustomWorkerState() {
+    return array(
+      'changedPriorToCommitURI' => $this->changedPriorToCommitURI,
+    );
+  }
+
+  protected function loadCustomWorkerState(array $state) {
+    $this->changedPriorToCommitURI = idx($state, 'changedPriorToCommitURI');
+    return $this;
+  }
+
 }

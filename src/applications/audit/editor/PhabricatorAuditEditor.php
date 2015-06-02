@@ -8,6 +8,7 @@ final class PhabricatorAuditEditor
   private $auditReasonMap = array();
   private $affectedFiles;
   private $rawPatch;
+  private $auditorPHIDs = array();
 
   private $didExpandInlineState;
 
@@ -341,6 +342,9 @@ final class PhabricatorAuditEditor
     if ($import_status_flag) {
       $object->writeImportStatusFlag($import_status_flag);
     }
+
+    // Collect auditor PHIDs for building mail.
+    $this->auditorPHIDs = mpull($object->getAudits(), 'getAuditorPHID');
 
     return $xactions;
   }
@@ -689,10 +693,7 @@ final class PhabricatorAuditEditor
       $user_phids[$committer_phid][] = pht('Committer');
     }
 
-    // we loaded this in applyFinalEffects
-    $audit_requests = $object->getAudits();
-    $auditor_phids = mpull($audit_requests, 'getAuditorPHID');
-    foreach ($auditor_phids as $auditor_phid) {
+    foreach ($this->auditorPHIDs as $auditor_phid) {
       $user_phids[$auditor_phid][] = pht('Auditor');
     }
 
@@ -981,6 +982,21 @@ final class PhabricatorAuditEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
     return $this->shouldPublishRepositoryActivity($object, $xactions);
+  }
+
+  protected function getCustomWorkerState() {
+    return array(
+      'rawPatch' => $this->rawPatch,
+      'affectedFiles' => $this->affectedFiles,
+      'auditorPHIDs' => $this->auditorPHIDs,
+    );
+  }
+
+  protected function loadCustomWorkerState(array $state) {
+    $this->rawPatch = idx($state, 'rawPatch');
+    $this->affectedFiles = idx($state, 'affectedFiles');
+    $this->auditorPHIDs = idx($state, 'auditorPHIDs');
+    return $this;
   }
 
 }

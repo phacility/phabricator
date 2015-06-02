@@ -184,8 +184,4 @@ final class PhabricatorPasteEditor
     return false;
   }
 
-  protected function supportsWorkers() {
-    return true;
-  }
-
 }
