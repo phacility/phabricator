@@ -352,17 +352,7 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorDestructionEngine $engine) {
 
     $this->openTransaction();
-
-      // TODO: Once this implements PhabricatorTransactionInterface, this
-      // will be handled automatically and can be removed.
-      $xactions = id(new ManiphestTransaction())->loadAllWhere(
-        'objectPHID = %s',
-        $this->getPHID());
-      foreach ($xactions as $xaction) {
-        $engine->destroyObject($xaction);
-      }
-
-      $this->delete();
+    $this->delete();
     $this->saveTransaction();
   }
 
