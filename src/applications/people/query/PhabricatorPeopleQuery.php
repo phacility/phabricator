@@ -312,10 +312,11 @@ final class PhabricatorPeopleQuery
         $this->dateCreatedBefore);
     }
 
-    if ($this->isAdmin) {
+    if ($this->isAdmin !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'user.isAdmin = 1');
+        'user.isAdmin = %d',
+        (int)$this->isAdmin);
     }
 
     if ($this->isDisabled !== null) {
@@ -332,10 +333,11 @@ final class PhabricatorPeopleQuery
         (int)$this->isApproved);
     }
 
-    if ($this->isSystemAgent) {
+    if ($this->isSystemAgent !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'user.isSystemAgent = 1');
+        'user.isSystemAgent = %d',
+        (int)$this->isSystemAgent);
     }
 
     if (strlen($this->nameLike)) {
