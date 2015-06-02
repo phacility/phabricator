@@ -2137,7 +2137,6 @@ phutil_register_library_map(array(
     'PhabricatorOAuthServerTestController' => 'applications/oauthserver/controller/PhabricatorOAuthServerTestController.php',
     'PhabricatorOAuthServerTokenController' => 'applications/oauthserver/controller/PhabricatorOAuthServerTokenController.php',
     'PhabricatorObjectHandle' => 'applications/phid/PhabricatorObjectHandle.php',
-    'PhabricatorObjectHandleConstants' => 'applications/phid/handle/const/PhabricatorObjectHandleConstants.php',
     'PhabricatorObjectHasAsanaSubtaskEdgeType' => 'applications/doorkeeper/edge/PhabricatorObjectHasAsanaSubtaskEdgeType.php',
     'PhabricatorObjectHasAsanaTaskEdgeType' => 'applications/doorkeeper/edge/PhabricatorObjectHasAsanaTaskEdgeType.php',
     'PhabricatorObjectHasContributorEdgeType' => 'applications/transactions/edges/PhabricatorObjectHasContributorEdgeType.php',
