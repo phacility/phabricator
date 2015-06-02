@@ -2000,7 +2000,6 @@ phutil_register_library_map(array(
     'PhabricatorMacroTransactionQuery' => 'applications/macro/query/PhabricatorMacroTransactionQuery.php',
     'PhabricatorMacroTransactionType' => 'applications/macro/constants/PhabricatorMacroTransactionType.php',
     'PhabricatorMacroViewController' => 'applications/macro/controller/PhabricatorMacroViewController.php',
-    'PhabricatorMail' => 'applications/metamta/PhabricatorMail.php',
     'PhabricatorMailImplementationAdapter' => 'applications/metamta/adapter/PhabricatorMailImplementationAdapter.php',
     'PhabricatorMailImplementationAmazonSESAdapter' => 'applications/metamta/adapter/PhabricatorMailImplementationAmazonSESAdapter.php',
     'PhabricatorMailImplementationMailgunAdapter' => 'applications/metamta/adapter/PhabricatorMailImplementationMailgunAdapter.php',
