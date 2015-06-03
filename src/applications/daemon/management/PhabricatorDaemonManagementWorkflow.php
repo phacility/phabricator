@@ -5,7 +5,7 @@ abstract class PhabricatorDaemonManagementWorkflow
 
   private $runDaemonsAsUser = null;
 
-  protected final function loadAvailableDaemonClasses() {
+  final protected function loadAvailableDaemonClasses() {
     $loader = new PhutilSymbolLoader();
     return $loader
       ->setAncestorClass('PhutilDaemon')
@@ -13,12 +13,12 @@ abstract class PhabricatorDaemonManagementWorkflow
       ->selectSymbolsWithoutLoading();
   }
 
-  protected final function getPIDDirectory() {
+  final protected function getPIDDirectory() {
     $path = PhabricatorEnv::getEnvConfig('phd.pid-directory');
     return $this->getControlDirectory($path);
   }
 
-  protected final function getLogDirectory() {
+  final protected function getLogDirectory() {
     $path = PhabricatorEnv::getEnvConfig('phd.log-directory');
     return $this->getControlDirectory($path);
   }
@@ -42,7 +42,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     return $path;
   }
 
-  protected final function loadRunningDaemons() {
+  final protected function loadRunningDaemons() {
     $daemons = array();
 
     $pid_dir = $this->getPIDDirectory();
@@ -56,7 +56,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     return array_mergev($daemons);
   }
 
-  protected final function loadAllRunningDaemons() {
+  final protected function loadAllRunningDaemons() {
     $local_daemons = $this->loadRunningDaemons();
 
     $local_ids = array();
@@ -114,7 +114,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     return head($match);
   }
 
-  protected final function launchDaemons(
+  final protected function launchDaemons(
     array $daemons,
     $debug,
     $run_as_current_user = false) {
@@ -307,7 +307,7 @@ abstract class PhabricatorDaemonManagementWorkflow
 /* -(  Commands  )----------------------------------------------------------- */
 
 
-  protected final function executeStartCommand(array $options) {
+  final protected function executeStartCommand(array $options) {
     PhutilTypeSpec::checkMap(
       $options,
       array(
@@ -377,7 +377,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     return 0;
   }
 
-  protected final function executeStopCommand(
+  final protected function executeStopCommand(
     array $pids,
     array $options) {
 
@@ -454,7 +454,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     return 0;
   }
 
-  protected final function executeReloadCommand(array $pids) {
+  final protected function executeReloadCommand(array $pids) {
     $console = PhutilConsole::getConsole();
 
     $daemons = $this->loadRunningDaemons();

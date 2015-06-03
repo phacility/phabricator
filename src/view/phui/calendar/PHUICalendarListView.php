@@ -89,7 +89,7 @@ final class PHUICalendarListView extends AphrontTagView {
       $content = javelin_tag(
         'a',
         array(
-          'href' => '/E'.$event->getEventID(),
+          'href' => $event->getURI(),
           'sigil' => 'has-tooltip',
           'meta'  => array(
             'tip'  => $tip,

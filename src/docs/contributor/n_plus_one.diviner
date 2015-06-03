@@ -14,11 +14,11 @@ The N+1 query problem is a common performance antipattern. It looks like this:
     // ...
   }
 
-Assuming ##load_cats()## has an implementation that boils down to:
+Assuming `load_cats()` has an implementation that boils down to:
 
   SELECT * FROM cat WHERE ...
 
-..and ##load_hats_for_cat($cat)## has an implementation something like this:
+..and `load_hats_for_cat($cat)` has an implementation something like this:
 
   SELECT * FROM hat WHERE catID = ...
 

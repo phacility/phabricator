@@ -16,7 +16,7 @@ final class PhameBlog extends PhameDAO
   protected $editPolicy;
   protected $joinPolicy;
 
-  static private $requestBlog;
+  private static $requestBlog;
 
   protected function getConfiguration() {
     return array(
@@ -175,7 +175,7 @@ final class PhameBlog extends PhameDAO
     return $this->setConfigData($config);
   }
 
-  static public function getSkinOptionsForSelect() {
+  public static function getSkinOptionsForSelect() {
     $classes = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhameBlogSkin')
       ->setType('class')

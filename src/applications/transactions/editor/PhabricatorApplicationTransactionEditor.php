@@ -764,7 +764,12 @@ abstract class PhabricatorApplicationTransactionEditor
 
       $xactions = $this->didApplyInternalEffects($object, $xactions);
 
-      $object->save();
+      try {
+        $object->save();
+      } catch (AphrontDuplicateKeyQueryException $ex) {
+        $object->killTransaction();
+        throw $ex;
+      }
 
       foreach ($xactions as $xaction) {
         $xaction->setObjectPHID($object->getPHID());

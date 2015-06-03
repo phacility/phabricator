@@ -29,7 +29,7 @@ final class PhabricatorFeedStoryNotification extends PhabricatorFeedDAO {
     ) + parent::getConfiguration();
   }
 
-  static public function updateObjectNotificationViews(
+  public static function updateObjectNotificationViews(
     PhabricatorUser $user,
     $object_phid) {
 

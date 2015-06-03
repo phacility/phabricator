@@ -17,13 +17,17 @@ final class PhabricatorCalendarEventEditController
     $viewer = $request->getViewer();
     $user_phid = $viewer->getPHID();
     $error_name = true;
+    $error_recurrence_end_date = true;
     $error_start_date = true;
     $error_end_date = true;
     $validation_exception = null;
 
+    $is_recurring_id = celerity_generate_unique_node_id();
+    $recurrence_end_date_id = celerity_generate_unique_node_id();
+    $frequency_id = celerity_generate_unique_node_id();
     $all_day_id = celerity_generate_unique_node_id();
     $start_date_id = celerity_generate_unique_node_id();
-    $end_date_id = null;
+    $end_date_id = celerity_generate_unique_node_id();
 
     $next_workflow = $request->getStr('next');
     $uri_query = $request->getStr('query');
@@ -63,6 +67,8 @@ final class PhabricatorCalendarEventEditController
         list($start_value, $end_value) = $this->getDefaultTimeValues($viewer);
       }
 
+      $recurrence_end_date_value = clone $end_value;
+      $recurrence_end_date_value->setOptional(true);
 
       $submit_label = pht('Create');
       $page_title = pht('Create Event');
@@ -70,7 +76,6 @@ final class PhabricatorCalendarEventEditController
       $subscribers = array();
       $invitees = array($user_phid);
       $cancel_uri = $this->getApplicationURI();
-      $end_date_id = celerity_generate_unique_node_id();
     } else {
       $event = id(new PhabricatorCalendarEventQuery())
         ->setViewer($viewer)
@@ -85,12 +90,60 @@ final class PhabricatorCalendarEventEditController
         return new Aphront404Response();
       }
 
+      if ($request->getURIData('sequence')) {
+        $index = $request->getURIData('sequence');
+
+        $result = id(new PhabricatorCalendarEventQuery())
+          ->setViewer($viewer)
+          ->withInstanceSequencePairs(
+            array(
+              array(
+                $event->getPHID(),
+                $index,
+              ),
+            ))
+          ->requireCapabilities(
+            array(
+              PhabricatorPolicyCapability::CAN_VIEW,
+              PhabricatorPolicyCapability::CAN_EDIT,
+            ))
+          ->executeOne();
+
+        if ($result) {
+          return id(new AphrontRedirectResponse())
+            ->setURI('/calendar/event/edit/'.$result->getID().'/');
+        }
+
+        $invitees = $event->getInvitees();
+
+        $new_ghost = $event->generateNthGhost($index, $viewer);
+        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $new_ghost
+          ->setID(null)
+          ->setPHID(null)
+          ->removeViewerTimezone($viewer)
+          ->save();
+        $ghost_invitees = array();
+        foreach ($invitees as $invitee) {
+          $ghost_invitee = clone $invitee;
+          $ghost_invitee
+            ->setID(null)
+            ->setEventPHID($new_ghost->getPHID())
+            ->save();
+        }
+        unset($unguarded);
+        return id(new AphrontRedirectResponse())
+          ->setURI('/calendar/event/edit/'.$new_ghost->getID().'/');
+      }
+
       $end_value = AphrontFormDateControlValue::newFromEpoch(
         $viewer,
         $event->getDateTo());
       $start_value = AphrontFormDateControlValue::newFromEpoch(
         $viewer,
         $event->getDateFrom());
+      $recurrence_end_date_value = id(clone $end_value)
+        ->setOptional(true);
 
       $submit_label = pht('Update');
       $page_title   = pht('Update Event');
@@ -113,6 +166,8 @@ final class PhabricatorCalendarEventEditController
     $name = $event->getName();
     $description = $event->getDescription();
     $is_all_day = $event->getIsAllDay();
+    $is_recurring = $event->getIsRecurring();
+    $frequency = idx($event->getRecurrenceFrequency(), 'rule');
     $icon = $event->getIcon();
 
     $current_policies = id(new PhabricatorPolicyQuery())
@@ -130,10 +185,16 @@ final class PhabricatorCalendarEventEditController
       $end_value = AphrontFormDateControlValue::newFromRequest(
         $request,
         'end');
+      $recurrence_end_date_value = AphrontFormDateControlValue::newFromRequest(
+        $request,
+        'recurrenceEndDate');
+      $recurrence_end_date_value->setOptional(true);
       $description = $request->getStr('description');
       $subscribers = $request->getArr('subscribers');
       $edit_policy = $request->getStr('editPolicy');
       $view_policy = $request->getStr('viewPolicy');
+      $is_recurring = $request->getStr('isRecurring') ? 1 : 0;
+      $frequency = $request->getStr('frequency');
       $is_all_day = $request->getStr('isAllDay');
       $icon = $request->getStr('icon');
 
@@ -151,6 +212,23 @@ final class PhabricatorCalendarEventEditController
         ->setTransactionType(
           PhabricatorCalendarEventTransaction::TYPE_NAME)
         ->setNewValue($name);
+
+      if ($this->isCreate()) {
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_RECURRING)
+          ->setNewValue($is_recurring);
+
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_FREQUENCY)
+          ->setNewValue(array('rule' => $frequency));
+
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE)
+          ->setNewValue($recurrence_end_date_value);
+      }
 
       $xactions[] = id(new PhabricatorCalendarEventTransaction())
         ->setTransactionType(
@@ -227,10 +305,62 @@ final class PhabricatorCalendarEventEditController
             PhabricatorCalendarEventTransaction::TYPE_START_DATE);
         $error_end_date = $ex->getShortMessage(
             PhabricatorCalendarEventTransaction::TYPE_END_DATE);
+        $error_recurrence_end_date = $ex->getShortMessage(
+            PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE);
 
         $event->setViewPolicy($view_policy);
         $event->setEditPolicy($edit_policy);
       }
+    }
+
+    $is_recurring_checkbox = null;
+    $recurrence_end_date_control = null;
+    $recurrence_frequency_select = null;
+
+    $name = id(new AphrontFormTextControl())
+      ->setLabel(pht('Name'))
+      ->setName('name')
+      ->setValue($name)
+      ->setError($error_name);
+
+    if ($this->isCreate()) {
+      Javelin::initBehavior('recurring-edit', array(
+        'isRecurring' => $is_recurring_id,
+        'frequency' => $frequency_id,
+        'recurrenceEndDate' => $recurrence_end_date_id,
+      ));
+
+      $is_recurring_checkbox = id(new AphrontFormCheckboxControl())
+        ->addCheckbox(
+          'isRecurring',
+          1,
+          pht('Recurring Event'),
+          $is_recurring,
+          $is_recurring_id);
+
+      $recurrence_end_date_control = id(new AphrontFormDateControl())
+        ->setUser($viewer)
+        ->setName('recurrenceEndDate')
+        ->setLabel(pht('Recurrence End Date'))
+        ->setError($error_recurrence_end_date)
+        ->setValue($recurrence_end_date_value)
+        ->setID($recurrence_end_date_id)
+        ->setIsTimeDisabled(true)
+        ->setAllowNull(true)
+        ->setIsDisabled(!$is_recurring);
+
+      $recurrence_frequency_select = id(new AphrontFormSelectControl())
+        ->setName('frequency')
+        ->setOptions(array(
+            'daily' => pht('Daily'),
+            'weekly' => pht('Weekly'),
+            'monthly' => pht('Monthly'),
+            'yearly' => pht('Yearly'),
+          ))
+        ->setValue($frequency)
+        ->setLabel(pht('Recurring Event Frequency'))
+        ->setID($frequency_id)
+        ->setDisabled(!$is_recurring);
     }
 
     Javelin::initBehavior('event-all-day', array(
@@ -238,12 +368,6 @@ final class PhabricatorCalendarEventEditController
       'startDateID' => $start_date_id,
       'endDateID' => $end_date_id,
     ));
-
-    $name = id(new AphrontFormTextControl())
-      ->setLabel(pht('Name'))
-      ->setName('name')
-      ->setValue($name)
-      ->setError($error_name);
 
     $all_day_checkbox = id(new AphrontFormCheckboxControl())
       ->addCheckbox(
@@ -322,7 +446,19 @@ final class PhabricatorCalendarEventEditController
       ->addHiddenInput('next', $next_workflow)
       ->addHiddenInput('query', $uri_query)
       ->setUser($viewer)
-      ->appendChild($name)
+      ->appendChild($name);
+
+    if ($is_recurring_checkbox) {
+      $form->appendChild($is_recurring_checkbox);
+    }
+    if ($recurrence_end_date_control) {
+      $form->appendChild($recurrence_end_date_control);
+    }
+    if ($recurrence_frequency_select) {
+      $form->appendControl($recurrence_frequency_select);
+    }
+
+    $form
       ->appendChild($all_day_checkbox)
       ->appendChild($start_control)
       ->appendChild($end_control)

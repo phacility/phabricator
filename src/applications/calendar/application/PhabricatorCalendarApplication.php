@@ -40,7 +40,8 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
-      '/E(?P<id>[1-9]\d*)' => 'PhabricatorCalendarEventViewController',
+      '/E(?P<id>[1-9]\d*)(?:/(?P<sequence>\d+))?'
+        => 'PhabricatorCalendarEventViewController',
       '/calendar/' => array(
         '(?:query/(?P<queryKey>[^/]+)/(?:(?P<year>\d+)/'.
           '(?P<month>\d+)/)?(?:(?P<day>\d+)/)?)?'
@@ -52,7 +53,7 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
         'event/' => array(
           'create/'
             => 'PhabricatorCalendarEventEditController',
-          'edit/(?P<id>[1-9]\d*)/'
+          'edit/(?P<id>[1-9]\d*)/(?:(?P<sequence>\d+)/)?'
             => 'PhabricatorCalendarEventEditController',
           'drag/(?P<id>[1-9]\d*)/'
             => 'PhabricatorCalendarEventDragController',

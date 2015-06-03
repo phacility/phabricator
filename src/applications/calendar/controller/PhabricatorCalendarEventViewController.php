@@ -17,11 +17,21 @@ final class PhabricatorCalendarEventViewController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
+    $sequence = $request->getURIData('sequence');
+
     $event = id(new PhabricatorCalendarEventQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))
       ->executeOne();
     if (!$event) {
+      return new Aphront404Response();
+    }
+
+    if ($sequence && $event->getIsRecurring()) {
+      $parent_event = $event;
+      $event = $event->generateNthGhost($sequence, $viewer);
+      $event->attachParentEvent($parent_event);
+    } else if ($sequence) {
       return new Aphront404Response();
     }
 
@@ -127,13 +137,30 @@ final class PhabricatorCalendarEventViewController
       $event,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Edit Event'))
-        ->setIcon('fa-pencil')
-        ->setHref($this->getApplicationURI("event/edit/{$id}/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+    $edit_label = false;
+    $edit_uri = false;
+
+    if ($event->getIsGhostEvent()) {
+      $index = $event->getSequenceIndex();
+      $edit_label = pht('Edit This Instance');
+      $edit_uri = "event/edit/{$id}/{$index}/";
+    } else if ($event->getInstanceOfEventPHID() && !$event->getIsGhostEvent()) {
+      $edit_label = pht('Edit This Instance');
+      $edit_uri = "event/edit/{$id}/";
+    } else if (!$event->getIsRecurring()) {
+      $edit_label = pht('Edit');
+      $edit_uri = "event/edit/{$id}/";
+    }
+
+    if ($edit_label && $edit_uri) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName($edit_label)
+          ->setIcon('fa-pencil')
+          ->setHref($this->getApplicationURI($edit_uri))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(!$can_edit));
+    }
 
     if ($is_attending) {
       $actions->addAction(
@@ -203,6 +230,24 @@ final class PhabricatorCalendarEventViewController
       $properties->addProperty(
         pht('Ends'),
         phabricator_datetime($event->getDateTo(), $viewer));
+    }
+
+    if ($event->getIsRecurring()) {
+      $properties->addProperty(
+        pht('Recurs'),
+        ucwords(idx($event->getRecurrenceFrequency(), 'rule')));
+
+      if ($event->getRecurrenceEndDate()) {
+        $properties->addProperty(
+          pht('Recurrence Ends'),
+          phabricator_datetime($event->getRecurrenceEndDate(), $viewer));
+      }
+
+      if ($event->getInstanceOfEventPHID()) {
+        $properties->addProperty(
+          pht('Recurrence of Event'),
+          $viewer->renderHandle($event->getInstanceOfEventPHID()));
+      }
     }
 
     $properties->addProperty(

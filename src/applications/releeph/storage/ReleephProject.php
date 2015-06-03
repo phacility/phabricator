@@ -23,7 +23,6 @@ final class ReleephProject extends ReleephDAO
   protected $details = array();
 
   private $repository = self::ATTACHABLE;
-  private $arcanistProject = self::ATTACHABLE;
 
   protected function getConfiguration() {
     return array(
@@ -65,16 +64,6 @@ final class ReleephProject extends ReleephDAO
 
   public function setDetail($key, $value) {
     $this->details[$key] = $value;
-    return $this;
-  }
-
-  public function getArcanistProject() {
-    return $this->assertAttached($this->arcanistProject);
-  }
-
-  public function attachArcanistProject(
-    PhabricatorRepositoryArcanistProject $arcanist_project = null) {
-    $this->arcanistProject = $arcanist_project;
     return $this;
   }
 

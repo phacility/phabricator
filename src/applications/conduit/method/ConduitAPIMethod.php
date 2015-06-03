@@ -90,7 +90,7 @@ abstract class ConduitAPIMethod
     return $this->execute($request);
   }
 
-  public abstract function getAPIMethodName();
+  abstract public function getAPIMethodName();
 
   /**
    * Return a key which sorts methods by application name, then method status,
