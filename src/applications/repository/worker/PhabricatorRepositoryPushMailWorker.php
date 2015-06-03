@@ -42,7 +42,8 @@ final class PhabricatorRepositoryPushMailWorker
 
     $task_data = $this->getTaskData();
     $viewer = $target->getViewer();
-    // TODO: Swap locale to viewer locale.
+
+    $locale = PhabricatorEnv::beginScopedLocale($viewer->getTranslation());
 
     $logs = $event->getLogs();
 

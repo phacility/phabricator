@@ -2139,8 +2139,10 @@ abstract class PhabricatorApplicationTransactionEditor
     $mailed = array();
     foreach ($targets as $target) {
       $original_actor = $this->getActor();
-      $this->setActor($target->getViewer());
-      // TODO: Swap locale to viewer locale.
+
+      $viewer = $target->getViewer();
+      $this->setActor($viewer);
+      $locale = PhabricatorEnv::beginScopedLocale($viewer->getTranslation());
 
       $caught = null;
       try {
@@ -2153,6 +2155,8 @@ abstract class PhabricatorApplicationTransactionEditor
       }
 
       $this->setActor($original_actor);
+      unset($locale);
+
       if ($caught) {
         throw $ex;
       }
