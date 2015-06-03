@@ -28,7 +28,9 @@ final class PhabricatorCalendarEventViewController
     }
 
     if ($sequence && $event->getIsRecurring()) {
+      $parent_event = $event;
       $event = $event->generateNthGhost($sequence, $viewer);
+      $event->attachParentEvent($parent_event);
     } else if ($sequence) {
       return new Aphront404Response();
     }

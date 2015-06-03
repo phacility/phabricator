@@ -12,7 +12,6 @@ final class PhabricatorCalendarEventQuery
   private $isCancelled;
   private $instanceSequencePairs;
 
-
   private $generateGhosts = false;
 
   public function setGenerateGhosts($generate_ghosts) {
@@ -108,13 +107,22 @@ final class PhabricatorCalendarEventQuery
     $map = array();
     $instance_sequence_pairs = array();
 
-    foreach ($events as $event) {
+    foreach ($events as $key => $event) {
       $sequence_start = 0;
       $sequence_end = null;
       $duration = $event->getDateTo() - $event->getDateFrom();
       $end = null;
 
-      if ($event->getIsRecurring() && !$event->getInstanceOfEventPHID()) {
+      $instance_of = $event->getInstanceOfEventPHID();
+
+      if ($instance_of == null && $this->isCancelled !== null) {
+        if ($event->getIsCancelled() != $this->isCancelled) {
+          unset($events[$key]);
+          continue;
+        }
+      }
+
+      if ($event->getIsRecurring() && $instance_of == null) {
         $frequency = $event->getFrequencyUnit();
         $modify_key = '+1 '.$frequency;
 
@@ -164,8 +172,8 @@ final class PhabricatorCalendarEventQuery
           $instance_sequence_pairs[] = array($event->getPHID(), $index);
           $events[] = $event->generateNthGhost($index, $viewer);
 
-          $key = last_key($events);
-          $map[$event->getPHID()][$index] = $key;
+          $last_key = last_key($events);
+          $map[$event->getPHID()][$index] = $last_key;
         }
       }
     }
@@ -308,6 +316,9 @@ final class PhabricatorCalendarEventQuery
   protected function willFilterPage(array $events) {
     $range_start = $this->rangeBegin;
     $range_end = $this->rangeEnd;
+    $instance_of_event_phids = array();
+    $recurring_events = array();
+    $viewer = $this->getViewer();
 
     foreach ($events as $key => $event) {
       $event_start = $event->getDateFrom();
@@ -325,11 +336,27 @@ final class PhabricatorCalendarEventQuery
 
     foreach ($events as $event) {
       $phids[] = $event->getPHID();
+      $instance_of = $event->getInstanceOfEventPHID();
+
+      if ($instance_of) {
+        if ($instance_of != $event->getPHID() || $event->getIsGhostEvent()) {
+          $instance_of_event_phids[] = $event->getInstanceOfEventPHID();
+        }
+      }
+    }
+
+    if (count($instance_of_event_phids) > 0) {
+      $recurring_events = id(new PhabricatorCalendarEventQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($instance_of_event_phids)
+        ->execute();
+
+      $recurring_events = mpull($recurring_events, null, 'getPHID');
     }
 
     if ($events) {
       $invitees = id(new PhabricatorCalendarEventInviteeQuery())
-        ->setViewer($this->getViewer())
+        ->setViewer($viewer)
         ->withEventPHIDs($phids)
         ->execute();
       $invitees = mgroup($invitees, 'getEventPHID');
@@ -337,9 +364,29 @@ final class PhabricatorCalendarEventQuery
       $invitees = array();
     }
 
-    foreach ($events as $event) {
+    foreach ($events as $key => $event) {
       $event_invitees = idx($invitees, $event->getPHID(), array());
       $event->attachInvitees($event_invitees);
+
+      $instance_of = $event->getInstanceOfEventPHID();
+      if (!$instance_of) {
+        continue;
+      }
+      $parent = idx($recurring_events, $instance_of);
+
+      // should never get here
+      if (!$parent) {
+        unset($events[$key]);
+        continue;
+      }
+      $event->attachParentEvent($parent);
+
+      if ($this->isCancelled !== null) {
+        if ($event->getIsCancelled() != $this->isCancelled) {
+          unset($events[$key]);
+          continue;
+        }
+      }
     }
 
     $events = msort($events, 'getDateFrom');

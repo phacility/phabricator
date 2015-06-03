@@ -33,6 +33,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   const DEFAULT_ICON = 'fa-calendar';
 
+  private $parentEvent = self::ATTACHABLE;
   private $invitees = self::ATTACHABLE;
   private $appliedViewer;
 
@@ -327,6 +328,31 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $uri = $uri.'/'.$this->sequenceIndex;
     }
     return $uri;
+  }
+
+  public function getParentEvent() {
+    return $this->assertAttached($this->parentEvent);
+  }
+
+  public function attachParentEvent($event) {
+    $this->parentEvent = $event;
+    return $this;
+  }
+
+  public function getIsCancelled() {
+    $instance_of = $this->instanceOfEventPHID;
+    if ($instance_of != null && $this->getIsParentCancelled()) {
+      return true;
+    }
+    return $this->isCancelled;
+  }
+
+  public function getIsParentCancelled() {
+    $recurring_event = $this->getParentEvent();
+    if ($recurring_event->getIsCancelled()) {
+      return true;
+    }
+    return false;
   }
 
 /* -(  Markup Interface  )--------------------------------------------------- */
