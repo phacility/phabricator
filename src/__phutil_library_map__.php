@@ -6273,6 +6273,7 @@ phutil_register_library_map(array(
       'PhameDAO',
       'PhabricatorPolicyInterface',
       'PhabricatorMarkupInterface',
+      'PhabricatorApplicationTransactionInterface',
     ),
     'PhameBlogDeleteController' => 'PhameController',
     'PhameBlogEditController' => 'PhameController',
