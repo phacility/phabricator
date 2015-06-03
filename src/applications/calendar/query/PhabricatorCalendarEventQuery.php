@@ -10,6 +10,7 @@ final class PhabricatorCalendarEventQuery
   private $inviteePHIDs;
   private $creatorPHIDs;
   private $isCancelled;
+  private $eventsWithNoParent;
   private $instanceSequencePairs;
 
   private $generateGhosts = false;
@@ -47,6 +48,11 @@ final class PhabricatorCalendarEventQuery
 
   public function withIsCancelled($is_cancelled) {
     $this->isCancelled = $is_cancelled;
+    return $this;
+  }
+
+  public function withEventsWithNoParent($events_with_no_parent) {
+    $this->eventsWithNoParent = $events_with_no_parent;
     return $this;
   }
 
@@ -272,6 +278,12 @@ final class PhabricatorCalendarEventQuery
         (int)$this->isCancelled);
     }
 
+    if ($this->eventsWithNoParent == true) {
+      $where[] = qsprintf(
+        $conn_r,
+        'event.instanceOfEventPHID IS NULL');
+    }
+
     if ($this->instanceSequencePairs !== null) {
       $sql = array();
 
@@ -339,9 +351,7 @@ final class PhabricatorCalendarEventQuery
       $instance_of = $event->getInstanceOfEventPHID();
 
       if ($instance_of) {
-        if ($instance_of != $event->getPHID() || $event->getIsGhostEvent()) {
-          $instance_of_event_phids[] = $event->getInstanceOfEventPHID();
-        }
+        $instance_of_event_phids[] = $instance_of;
       }
     }
 
@@ -349,6 +359,7 @@ final class PhabricatorCalendarEventQuery
       $recurring_events = id(new PhabricatorCalendarEventQuery())
         ->setViewer($viewer)
         ->withPHIDs($instance_of_event_phids)
+        ->withEventsWithNoParent(true)
         ->execute();
 
       $recurring_events = mpull($recurring_events, null, 'getPHID');
