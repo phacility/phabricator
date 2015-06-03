@@ -141,6 +141,7 @@ final class PHUIHeaderView extends AphrontTagView {
 
   protected function getTagAttributes() {
     require_celerity_resource('phui-header-view-css');
+    require_celerity_resource('font-oswald');
 
     $classes = array();
     $classes[] = 'phui-header-shell';

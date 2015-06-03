@@ -2,8 +2,14 @@
  * @provides phui-fontkit-css
  */
 
+/* - Source Sans ---------------------------------------------------------------
+
+  Used in Documents, Conpherence
+
+*/
+
 .phui-font-source-sans {
-  font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Source Sans Pro', {$fontfamily};
   font-size: 15px;
   font-weight: 400;
   line-height: 20px;
@@ -13,7 +19,7 @@
 .phui-font-source-sans.conpherence-message-pane .remarkup-assist-textarea,
 .conpherence-durable-column-body,
 .conpherence-durable-column-body .remarkup-assist-textarea  {
-  font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Source Sans Pro', {$fontfamily};
   font-weight: 400;
   font-size: 14px;
   line-height: 18px;
@@ -40,13 +46,14 @@
 .phui-font-source-sans .phabricator-remarkup h4.remarkup-header,
 .phui-font-source-sans .phabricator-remarkup h5.remarkup-header,
 .phui-font-source-sans .phabricator-remarkup h6.remarkup-header {
+  font-family: 'Oswald', {$fontfamily};
   color: {$darkbluetext};
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .phui-font-source-sans .phabricator-remarkup h2.remarkup-header {
   padding: 24px 24px 8px 0;
-  border-bottom: 1px solid {$thinblueborder};
+  border-bottom: 1px solid {$lightblueborder};
   font-size: 22px;
   font-weight: 400;
   color: {$darkbluetext};
@@ -104,4 +111,23 @@ body .phui-font-source-sans
   font-size: 13px;
   top: 4px;
   left: 6px;
+}
+
+/* - Oswald --------------------------------------------------------------------
+
+  Used as Primary Headers in Object Boxes, Headers in Documents
+
+*/
+
+.phui-object-box :first-child .phui-header-header,
+.phui-document-view .phui-header-tall .phui-header-header,
+.aphront-dialog-head .phui-header-header {
+  font-family: 'Oswald', {$fontfamily};
+  font-weight: 400;
+}
+
+.phui-font-source-sans .phui-header-header {
+  font-family: 'Oswald', {$fontfamily};
+  color: {$darkbluetext};
+  font-weight: 400;
 }

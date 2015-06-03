@@ -175,6 +175,9 @@ final class CelerityResourceTransformer {
       'basefont' => "13px/1.231 'Segoe UI', 'Segoe UI Web Regular', ".
         "'Segoe UI Symbol', 'Helvetica Neue', Helvetica, Arial, sans-serif",
 
+      'fontfamily' => "'Segoe UI', 'Segoe UI Web Regular', ".
+        "'Segoe UI Symbol', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+
       // Drop Shadow
       'dropshadow' => '0 1px 6px rgba(0, 0, 0, .25)',
       'whitetextshadow' => '0 1px 0 rgba(255, 255, 255, 1)',

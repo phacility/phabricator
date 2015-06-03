@@ -1,0 +1,32 @@
+/**
+ * @provides font-oswald
+ * @requires phui-fontkit-css
+ */
+
+@font-face {
+  font-family: 'Oswald';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Oswald'),
+       local('Oswald-Regular'),
+       url(/rsrc/externals/font/oswald/Oswald-Regular.woff2)
+        format('woff2'),
+       url(/rsrc/externals/font/oswald/Oswald-Regular.woff)
+        format('woff'),
+       url(/rsrc/externals/font/oswald/Oswald-Regular.eot)
+        format('embedded-opentype');
+}
+
+@font-face {
+  font-family: 'Oswald';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Oswald'),
+       local('Oswald-Light'),
+       url(/rsrc/externals/font/oswald/Oswald-Light.woff2)
+        format('woff2'),
+       url(/rsrc/externals/font/oswald/Oswald-Light.woff)
+        format('woff'),
+       url(/rsrc/externals/font/oswald/Oswald-Light.eot)
+        format('embedded-opentype');
+}

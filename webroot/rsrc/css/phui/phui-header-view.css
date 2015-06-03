@@ -69,10 +69,10 @@ body .phui-header-shell.phui-bleed-header
 }
 
 .phui-header-header {
-  color: #000;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 500;
   line-height: 24px;
+  color: #000;
 }
 
 .device-phone .phui-header-header {
@@ -81,8 +81,7 @@ body .phui-header-shell.phui-bleed-header
 
 .phui-object-box .phui-header-tall .phui-header-header,
 .phui-document-view .phui-header-tall .phui-header-header {
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 20px;
 }
 
 .phui-header-view .phui-header-header a {
