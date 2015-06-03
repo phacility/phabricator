@@ -3020,7 +3020,6 @@ phutil_register_library_map(array(
     'PhrequentUIEventListener' => 'applications/phrequent/event/PhrequentUIEventListener.php',
     'PhrequentUserTime' => 'applications/phrequent/storage/PhrequentUserTime.php',
     'PhrequentUserTimeQuery' => 'applications/phrequent/query/PhrequentUserTimeQuery.php',
-    'PhrictionActionConstants' => 'applications/phriction/constants/PhrictionActionConstants.php',
     'PhrictionChangeType' => 'applications/phriction/constants/PhrictionChangeType.php',
     'PhrictionConduitAPIMethod' => 'applications/phriction/conduit/PhrictionConduitAPIMethod.php',
     'PhrictionConstants' => 'applications/phriction/constants/PhrictionConstants.php',
@@ -6581,7 +6580,6 @@ phutil_register_library_map(array(
       'PhabricatorPolicyInterface',
     ),
     'PhrequentUserTimeQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
-    'PhrictionActionConstants' => 'PhrictionConstants',
     'PhrictionChangeType' => 'PhrictionConstants',
     'PhrictionConduitAPIMethod' => 'ConduitAPIMethod',
     'PhrictionContent' => array(
