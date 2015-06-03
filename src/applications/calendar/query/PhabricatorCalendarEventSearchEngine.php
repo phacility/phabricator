@@ -462,7 +462,11 @@ final class PhabricatorCalendarEventSearchEngine
   }
 
   public function getPageSize(PhabricatorSavedQuery $saved) {
-    return $saved->getParameter('limit', 1000);
+    if ($this->isMonthView($saved) || $this->isDayView($saved)) {
+      return $saved->getParameter('limit', 1000);
+    } else {
+      return $saved->getParameter('limit', 100);
+    }
   }
 
   private function getDateFrom(PhabricatorSavedQuery $saved) {
