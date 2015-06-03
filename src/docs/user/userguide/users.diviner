@@ -72,6 +72,11 @@ underlying user account can't see.
 The **Mailing List** role for an account can not be changed after the account
 is created.
 
+Some options can be configured for mailing lists by browsing to the list user's
+profile and clicking {nav Edit Settings}. You can change the addresss for a
+list by editing "Email Addresses" here, choose the language and format for
+email the list receives, and customize which actions the list is notified about.
+
 **Mailing List** accounts differ from normal accounts in that they:
 
   - can not log in;
