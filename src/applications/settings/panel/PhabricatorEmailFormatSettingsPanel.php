@@ -15,8 +15,17 @@ final class PhabricatorEmailFormatSettingsPanel
     return pht('Email');
   }
 
+  public function isEditableByAdministrators() {
+    if ($this->getUser()->getIsMailingList()) {
+      return true;
+    }
+
+    return false;
+  }
+
   public function processRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $this->getViewer();
+    $user = $this->getUser();
 
     $preferences = $user->loadPreferences();
 
@@ -98,7 +107,7 @@ final class PhabricatorEmailFormatSettingsPanel
 
     $form = new AphrontFormView();
     $form
-      ->setUser($user);
+      ->setUser($viewer);
 
     if (PhabricatorMetaMTAMail::shouldMultiplexAllMail()) {
       $html_email_control = id(new AphrontFormSelectControl())
