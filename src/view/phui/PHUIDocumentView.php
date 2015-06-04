@@ -146,7 +146,9 @@ final class PHUIDocumentView extends AphrontTagView {
       $main_content = $this->renderChildren();
     }
 
-    $this->header->setSubheader($book);
+    if ($book) {
+      $this->header->setSubheader($book);
+    }
     $content_inner = phutil_tag(
         'div',
         array(

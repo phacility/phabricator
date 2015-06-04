@@ -72,11 +72,7 @@ body .phui-header-shell.phui-bleed-header
   font-size: 18px;
   font-weight: 500;
   line-height: 24px;
-  color: #000;
-}
-
-.device-phone .phui-header-header {
-  font-size: 14px;
+  color: {$darkbluetext};
 }
 
 .phui-object-box .phui-header-tall .phui-header-header,
@@ -85,7 +81,12 @@ body .phui-header-shell.phui-bleed-header
 }
 
 .phui-header-view .phui-header-header a {
-  color: #000;
+  color: {$darkbluetext};
+}
+
+.device-desktop .phui-header-view .phui-header-header a:hover {
+  text-decoration: none;
+  color: {$fire};
 }
 
 .phui-header-view .phui-header-action-links {
