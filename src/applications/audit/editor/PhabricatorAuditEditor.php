@@ -673,12 +673,6 @@ final class PhabricatorAuditEditor
         $object);
     }
 
-    // Reload the commit to pull commit data.
-    $commit = id(new DiffusionCommitQuery())
-      ->setViewer($this->requireActor())
-      ->withIDs(array($object->getID()))
-      ->needCommitData(true)
-      ->executeOne();
     $data = $commit->getCommitData();
 
     $user_phids = array();
@@ -997,6 +991,15 @@ final class PhabricatorAuditEditor
     $this->affectedFiles = idx($state, 'affectedFiles');
     $this->auditorPHIDs = idx($state, 'auditorPHIDs');
     return $this;
+  }
+
+  protected function willPublish(PhabricatorLiskDAO $object, array $xactions) {
+    return id(new DiffusionCommitQuery())
+      ->setViewer($this->requireActor())
+      ->withIDs(array($object->getID()))
+      ->needAuditRequests(true)
+      ->needCommitData(true)
+      ->executeOne();
   }
 
 }
