@@ -373,6 +373,12 @@ final class ManiphestTransactionEditor
     return $xactions;
   }
 
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
   protected function getMailSubjectPrefix() {
     return PhabricatorEnv::getEnvConfig('metamta.maniphest.subject-prefix');
   }
