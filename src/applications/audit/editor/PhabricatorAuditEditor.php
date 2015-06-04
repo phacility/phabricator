@@ -673,11 +673,11 @@ final class PhabricatorAuditEditor
         $object);
     }
 
-    $data = $commit->getCommitData();
+    $data = $object->getCommitData();
 
     $user_phids = array();
 
-    $author_phid = $commit->getAuthorPHID();
+    $author_phid = $object->getAuthorPHID();
     if ($author_phid) {
       $user_phids[$author_phid][] = pht('Author');
     }
