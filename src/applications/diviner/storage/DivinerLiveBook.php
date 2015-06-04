@@ -93,8 +93,6 @@ final class DivinerLiveBook extends DivinerDAO
       $atoms = id(new DivinerAtomQuery())
         ->setViewer($engine->getViewer())
         ->withBookPHIDs(array($this->getPHID()))
-        ->withIncludeGhosts(true)
-        ->withIncludeUndocumentable(true)
         ->execute();
 
       foreach ($atoms as $atom) {

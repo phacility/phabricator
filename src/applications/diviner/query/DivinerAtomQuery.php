@@ -9,8 +9,8 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $types;
   private $contexts;
   private $indexes;
-  private $includeUndocumentable;
-  private $includeGhosts;
+  private $isDocumentable;
+  private $isGhost;
   private $nodeHashes;
   private $titles;
   private $nameContains;
@@ -81,9 +81,9 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
 
   /**
-   * Include "ghosts", which are symbols which used to exist but do not exist
-   * currently (for example, a function which existed in an older version of
-   * the codebase but was deleted).
+   * Include or exclude "ghosts", which are symbols which used to exist but do
+   * not exist currently (for example, a function which existed in an older
+   * version of the codebase but was deleted).
    *
    * These symbols had PHIDs assigned to them, and may have other sorts of
    * metadata that we don't want to lose (like comments or flags), so we don't
@@ -92,14 +92,11 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
    * have been generated incorrectly by accident. In these cases, we can
    * restore the original data.
    *
-   * However, most callers are not interested in these symbols, so they are
-   * excluded by default. You can use this method to include them in results.
-   *
-   * @param bool  True to include ghosts.
+   * @param bool
    * @return this
    */
-  public function withIncludeGhosts($include) {
-    $this->includeGhosts = $include;
+  public function withGhosts($ghosts) {
+    $this->isGhost = $ghosts;
     return $this;
   }
 
@@ -108,8 +105,8 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
-  public function withIncludeUndocumentable($include) {
-    $this->includeUndocumentable = $include;
+  public function withIsDocumentable($documentable) {
+    $this->isDocumentable = $documentable;
     return $this;
   }
 
@@ -346,16 +343,19 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $this->indexes);
     }
 
-    if (!$this->includeUndocumentable) {
+    if ($this->isDocumentable !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'isDocumentable = 1');
+        'isDocumentable = %d',
+        (int)$this->isDocumentable);
     }
 
-    if (!$this->includeGhosts) {
-      $where[] = qsprintf(
-        $conn_r,
-        'graphHash IS NOT NULL');
+    if ($this->isGhost !== null) {
+      if ($this->isGhost) {
+        $where[] = qsprintf($conn_r, 'graphHash IS NULL');
+      } else {
+        $where[] = qsprintf($conn_r, 'graphHash IS NOT NULL');
+      }
     }
 
     if ($this->nodeHashes) {

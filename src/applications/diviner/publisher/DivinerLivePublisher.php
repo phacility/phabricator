@@ -64,7 +64,7 @@ final class DivinerLivePublisher extends DivinerPublisher {
     $symbols = id(new DivinerAtomQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withBookPHIDs(array($this->loadBook()->getPHID()))
-      ->withIncludeUndocumentable(true)
+      ->withGhosts(false)
       ->execute();
 
     return mpull($symbols, 'getGraphHash');

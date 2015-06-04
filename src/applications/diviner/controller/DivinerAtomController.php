@@ -47,6 +47,8 @@ final class DivinerAtomController extends DivinerController {
       ->withNames(array($this->atomName))
       ->withContexts(array($this->atomContext))
       ->withIndexes(array($this->atomIndex))
+      ->withGhosts(false)
+      ->withIsDocumentable(true)
       ->needAtoms(true)
       ->needExtends(true)
       ->needChildren(true)
