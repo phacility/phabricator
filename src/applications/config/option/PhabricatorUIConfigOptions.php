@@ -20,18 +20,15 @@ final class PhabricatorUIConfigOptions
   }
 
   public function getOptions() {
+    $manifest = PHUIIconView::getSheetManifest('main-header');
     $custom_header_example =
       PhabricatorCustomHeaderConfigType::getExampleConfig();
     $experimental_link = 'https://secure.phabricator.com/T4214';
-
-    $options = array(
-      'blindigo' => 'blindigo',
-      'blue' => 'blue',
-      'dark' => 'dark',
-      'indigo' => 'indigo',
-      'red' => 'red',
-      'rainbow' => 'rainbow',
-    );
+    $options = array();
+    foreach (array_keys($manifest) as $sprite_name) {
+      $key = substr($sprite_name, strlen('main-header-'));
+      $options[$key] = $key;
+    }
 
     $example = <<<EOJSON
 [

@@ -108,16 +108,16 @@
 }
 
 .conpherence-durable-column-header {
-  border-left: 1px solid {$lightblueborder};
-  border-right: 1px solid {$lightblueborder};
+  border-left: 1px solid rgba(0,0,0,.1);
+  border-right: 1px solid rgba(0,0,0,.1);
 }
 
 .conpherence-durable-column-header-text {
   float: left;
   padding: 13px 0 12px 12px;
   font-size: 15px;
-  color: {$darkbluetext};
-  font-weight: 500;
+  color: {$hoverwhite};
+  font-weight: 400;
   width: 230px;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -125,7 +125,7 @@
 }
 
 .conpherence-durable-column-header-text .phui-icon-view {
-  color: {$bluetext};
+  color: {$hoverwhite};
 }
 
 .conpherence-durable-column-icon-bar {

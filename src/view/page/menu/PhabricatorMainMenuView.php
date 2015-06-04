@@ -27,6 +27,7 @@ final class PhabricatorMainMenuView extends AphrontView {
     $user = $this->user;
 
     require_celerity_resource('phabricator-main-menu-view');
+    require_celerity_resource('sprite-main-header-css');
 
     $header_id = celerity_generate_unique_node_id();
     $menus = array();
@@ -80,7 +81,7 @@ final class PhabricatorMainMenuView extends AphrontView {
 
     $application_menu = $this->renderApplicationMenu();
     $classes = array();
-    $classes[] = 'phabricator-main-menu';
+    $classes[] = 'phabricator-main-menu sprite-main-header';
     $classes[] = 'phabricator-main-menu-background';
 
     return phutil_tag(
@@ -159,7 +160,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'meta'  => array(
           'map' => array(
             $header_id => 'phabricator-application-menu-expanded',
-            $button_id => 'sky',
+            $button_id => 'menu-icon-selected',
           ),
         ),
       ),
@@ -222,7 +223,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'meta'  => array(
           'map' => array(
             $header_id => 'phabricator-search-menu-expanded',
-            $button_id => 'sky',
+            $button_id => 'menu-icon-selected',
           ),
         ),
       ),
@@ -273,9 +274,14 @@ final class PhabricatorMainMenuView extends AphrontView {
           'background-position: 0px 0px; '.
           'background-image: url('.$logo_uri.');';
       }
+    } else {
+      $color = PhabricatorEnv::getEnvConfig('ui.header-color');
+      if ($color == 'light') {
+        $color = 'dark';
+      } else {
+        $color = 'light';
+      }
     }
-
-    $color = PhabricatorEnv::getEnvConfig('ui.header-color');
 
     return phutil_tag(
       'a',

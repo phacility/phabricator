@@ -1,5 +1,6 @@
 /**
  * @provides phabricator-main-menu-view
+ * @requires phui-theme-css
  */
 
 
@@ -17,7 +18,7 @@
 .phabricator-main-menu-background {
   min-height: 43px;
   background: #ebecee;
-  border-bottom: 1px solid {$hovergrey};
+  border-bottom: 1px solid rgba(0,0,0,.1);
 }
 
 .device-desktop .phabricator-main-menu {
@@ -88,11 +89,10 @@
   font-size: 20px;
   height: 20px;
   width: 20px;
-  color: {$bluetext};
+  color: {$hoverwhite};
   text-align: center;
   vertical-align: middle;
   line-height: 24px;
-  text-shadow: {$whitetextshadow};
 }
 
 .phabricator-expand-application-menu,
@@ -161,7 +161,6 @@
   border-color: {$blueborder};
   border-radius: 3px;
   background-color: #fff;
-  opacity: .8;
   height: 28px;
   padding: 3px 30px 3px 6px;
   float: left;
@@ -190,7 +189,7 @@
 .phabricator-main-menu-search button {
   color: {$bluetext};
   position: absolute;
-  background: {$lightgreybackground};
+  background: {$greybackground};
   border: none;
   outline: none;
   box-shadow: none;
@@ -221,34 +220,37 @@
 
 .device-desktop .phabricator-main-menu-search
   button.phabricator-main-menu-search-dropdown:hover .phui-icon-view {
-    color: {$darkbluetext};
+    color: #fff;
 }
-
-.device-desktop .phabricator-main-menu-search
-  button.phabricator-main-menu-search-dropdown:hover {
-    background-color: rgba(55,55,55,0.08);
-    border-radius: 3px;
-  }
 
 .device .phabricator-main-menu-search
   button.phabricator-main-menu-search-dropdown {
     left: 2px;
-    background: {$lightgreybackground};
+    background: {$greybackground};
 }
 
 button.phabricator-main-menu-search-dropdown .caret:before {
   content: "\f107";
   font-family: FontAwesome;
-  color: {$lightbluetext};
+  color: {$hoverwhite};
 }
 
 .phabricator-main-menu-search button.phabricator-main-menu-search-dropdown
   .phui-icon-view {
-  color: {$lightbluetext};
+  color: {$hoverwhite};
   font-size: 15px;
   top: 6px;
   left: 8px;
-  text-shadow: {$whitetextshadow};
+}
+
+.device
+  .phabricator-main-menu-search button.phabricator-main-menu-search-dropdown
+  .phui-icon-view {
+  color: {$bluetext};
+}
+
+.device button.phabricator-main-menu-search-dropdown .caret:before {
+  color: {$bluetext};
 }
 
 .phabricator-main-menu-search-dropdown .caret {
@@ -335,6 +337,8 @@ button.phabricator-main-menu-search-dropdown .caret:before {
   line-height: 18px;
 }
 
+
+
 /* - Alert ---------------------------------------------------------------------
 
   Alert menus are like icon menus but don't obey collapse rules.
@@ -352,8 +356,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 }
 
 .alert-notifications .phui-icon-view {
-  color: {$lightbluetext};
-  text-shadow: {$whitetextshadow};
+  color: {$hoverwhite};
 }
 
 .device-desktop .alert-notifications:hover {
@@ -362,7 +365,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 }
 
 .device-desktop .alert-notifications:hover .phui-icon-view {
-  color: {$sky};
+  color: #fff;
 }
 
 .phabricator-main-menu-alert-icon,
@@ -371,10 +374,14 @@ button.phabricator-main-menu-search-dropdown .caret:before {
   height: 18px;
   float: left;
   padding: 8px 6px 8px 4px;
-  color: {$sky};
+  color: #fff;
   font-size: 18px;
   line-height: 20px;
   text-align: right;
+}
+
+.phui-icon-view.menu-icon-selected {
+  color: #fff;
 }
 
 .phabricator-main-menu-alert-icon {
@@ -384,13 +391,12 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 
 .phabricator-main-menu-alert-count,
 .phabricator-main-menu-message-count {
-  color: {$sky};
+  color: #fff;
   text-align: center;
   display: none;
   float: left;
   margin: 11px 6px 0 -2px;
   font-size: 12px;
-  text-shadow: {$whitetextshadow};
 }
 
 .device-phone .alert-unread .phabricator-main-menu-alert-count,
@@ -400,7 +406,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 
 .alert-unread .phabricator-main-menu-alert-icon,
 .message-unread .phabricator-main-menu-message-icon  {
-  color: {$sky};
+  color: #fff;
 }
 
 .alert-unread .phabricator-main-menu-alert-count,
@@ -423,18 +429,16 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 }
 
 .device .phabricator-dark-menu .phui-list-item-type-label {
-  border-top: 1px solid {$thinblueborder};
   text-transform: uppercase;
   font-size: 13px;
   background-color: #fff;
   padding: 6px 0 6px 12px;
   display: block;
   font-weight: bold;
-  color: {$blue};
+  color: #000;
 }
 
 .device .phabricator-dark-menu .phui-list-item-href {
-  border-top: 1px solid {$thinblueborder};
   background-color: #fff;
   padding: 4px 0 4px 20px;
   display: block;
@@ -461,19 +465,19 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 
 .device .phabricator-search-menu-expanded .phabricator-search-menu {
   display: block;
-  padding-top: 44px;
+  position: absolute;
+  top: 38px;
+  left: 8px;
+  right: 8px;
+  border: 1px solid {$lightblueborder};
+  border-radius: 3px;
+  box-shadow: {$dropshadow};
 }
 
 .device .phabricator-dark-menu .phui-list-item-type-link {
-  font-size: 15px;
-  min-height: 30px;
-  line-height: 28px;
+  min-height: 24px;
+  line-height: 20px;
   background: #fff;
-}
-
-.device .phui-list-item-type-link
-  .phabricator-core-menu-icon + .phui-list-item-name {
-  margin-left: 32px;
 }
 
 .device-desktop .phabricator-application-menu {
@@ -493,11 +497,16 @@ button.phabricator-main-menu-search-dropdown .caret:before {
   font-size: 20px;
   height: 20px;
   width: 20px;
-  color: {$lightbluetext};
+  color: {$hoverwhite};
   margin: 8px;
   text-align: center;
   vertical-align: middle;
-  text-shadow: {$whitetextshadow};
+}
+
+.device .phabricator-dark-menu.phabricator-application-menu
+  .phui-list-item-icon.phui-font-fa,
+.device .phabricator-dark-menu .phabricator-core-menu-icon {
+  display: none;
 }
 
 .device .phabricator-application-menu .phui-list-item-icon.phui-font-fa {
@@ -511,18 +520,12 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 .device-desktop .phabricator-application-menu
   .core-menu-item.phui-list-item-view:hover
   .phui-list-item-icon.phui-font-fa {
-    color: {$darkbluetext};
+    color: #fff;
   }
 
 .device-desktop .phabricator-application-menu
   .phui-list-item-view.core-menu-item {
   display: block;
-}
-
-.device-desktop .phabricator-application-menu
- .core-menu-item.phui-list-item-view:hover {
-  background-color: rgba(55,55,55,.08);
-  border-radius: 3px;
 }
 
 .device-desktop .phabricator-application-menu .phui-list-item-view {
@@ -572,7 +575,13 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 
 .device .phabricator-application-menu-expanded .phabricator-application-menu {
   display: block;
-  padding-top: 44px;
+  position: absolute;
+  border: 1px solid {$lightblueborder};
+  border-radius: 3px;
+  box-shadow: {$dropshadow};
+  top: 38px;
+  right: 8px;
+  width: 240px;
 }
 
 .device .phabricator-application-menu,

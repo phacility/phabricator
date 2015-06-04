@@ -349,6 +349,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     $classes = array();
     $classes[] = 'main-page-frame';
+    $classes[] = 'phui-theme-'.PhabricatorEnv::getEnvConfig('ui.header-color');
     $developer_warning = null;
     if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode') &&
         DarkConsoleErrorLogPluginAPI::getErrors()) {
