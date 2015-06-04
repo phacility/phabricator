@@ -373,14 +373,6 @@ final class ManiphestTransactionEditor
     return $xactions;
   }
 
-  protected function shouldSendMail(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-
-    $xactions = mfilter($xactions, 'shouldHide', true);
-    return $xactions;
-  }
-
   protected function getMailSubjectPrefix() {
     return PhabricatorEnv::getEnvConfig('metamta.maniphest.subject-prefix');
   }

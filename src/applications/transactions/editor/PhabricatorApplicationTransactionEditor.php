@@ -2110,21 +2110,6 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    // Check if any of the transactions are visible. If we don't have any
-    // visible transactions, don't send the mail.
-
-    $any_visible = false;
-    foreach ($xactions as $xaction) {
-      if (!$xaction->shouldHideForMail($xactions)) {
-        $any_visible = true;
-        break;
-      }
-    }
-
-    if (!$any_visible) {
-      return array();
-    }
-
     $email_to = $this->mailToPHIDs;
     $email_cc = $this->mailCCPHIDs;
     $email_cc = array_merge($email_cc, $this->heraldEmailPHIDs);
@@ -2145,6 +2130,7 @@ abstract class PhabricatorApplicationTransactionEditor
       $locale = PhabricatorEnv::beginScopedLocale($viewer->getTranslation());
 
       $caught = null;
+      $mail = null;
       try {
         // Reload handles for the new viewer.
         $this->loadHandles($xactions);
@@ -2161,8 +2147,10 @@ abstract class PhabricatorApplicationTransactionEditor
         throw $ex;
       }
 
-      foreach ($mail->buildRecipientList() as $phid) {
-        $mailed[$phid] = true;
+      if ($mail) {
+        foreach ($mail->buildRecipientList() as $phid) {
+          $mailed[$phid] = true;
+        }
       }
     }
 
@@ -2173,6 +2161,21 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions,
     PhabricatorMailTarget $target) {
+
+    // Check if any of the transactions are visible for this viewer. If we
+    // don't have any visible transactions, don't send the mail.
+
+    $any_visible = false;
+    foreach ($xactions as $xaction) {
+      if (!$xaction->shouldHideForMail($xactions)) {
+        $any_visible = true;
+        break;
+      }
+    }
+
+    if (!$any_visible) {
+      return null;
+    }
 
     $mail = $this->buildMailTemplate($object);
     $body = $this->buildMailBody($object, $xactions);
