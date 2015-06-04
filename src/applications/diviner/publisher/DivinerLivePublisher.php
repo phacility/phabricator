@@ -31,8 +31,6 @@ final class DivinerLivePublisher extends DivinerPublisher {
       ->withNames(array($atom->getName()))
       ->withContexts(array($atom->getContext()))
       ->withIndexes(array($this->getAtomSimilarIndex($atom)))
-      ->withIncludeUndocumentable(true)
-      ->withIncludeGhosts(true)
       ->executeOne();
 
     if ($symbol) {

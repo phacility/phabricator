@@ -240,7 +240,6 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       if ($child_hashes) {
         $children = id(new DivinerAtomQuery())
           ->setViewer($this->getViewer())
-          ->withIncludeUndocumentable(true)
           ->withNodeHashes($child_hashes)
           ->needAtoms($this->needAtoms)
           ->execute();
