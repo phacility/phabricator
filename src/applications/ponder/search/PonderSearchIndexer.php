@@ -16,7 +16,7 @@ final class PonderSearchIndexer
       ->setDocumentModified($question->getDateModified());
 
     $doc->addField(
-      PhabricatorSearchField::FIELD_BODY,
+      PhabricatorSearchDocumentFieldType::FIELD_BODY,
       $question->getContent());
 
     $doc->addRelationship(
@@ -32,7 +32,7 @@ final class PonderSearchIndexer
     foreach ($answers as $answer) {
       if (strlen($answer->getContent())) {
         $doc->addField(
-          PhabricatorSearchField::FIELD_COMMENT,
+          PhabricatorSearchDocumentFieldType::FIELD_COMMENT,
           $answer->getContent());
       }
     }

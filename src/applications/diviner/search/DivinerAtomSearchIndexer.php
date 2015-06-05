@@ -16,7 +16,7 @@ final class DivinerAtomSearchIndexer extends PhabricatorSearchDocumentIndexer {
       ->setDocumentModified($book->getDateModified());
 
     $doc->addField(
-      PhabricatorSearchField::FIELD_BODY,
+      PhabricatorSearchDocumentFieldType::FIELD_BODY,
       $atom->getSummary());
 
     $doc->addRelationship(

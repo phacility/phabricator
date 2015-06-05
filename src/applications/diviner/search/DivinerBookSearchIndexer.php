@@ -15,7 +15,7 @@ final class DivinerBookSearchIndexer extends PhabricatorSearchDocumentIndexer {
       ->setDocumentModified($book->getDateModified());
 
     $doc->addField(
-      PhabricatorSearchField::FIELD_BODY,
+      PhabricatorSearchDocumentFieldType::FIELD_BODY,
       $book->getPreface());
 
     return $doc;

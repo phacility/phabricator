@@ -18,7 +18,7 @@ final class PhabricatorCalendarEventSearchIndexer
     $doc->setDocumentModified($event->getDateModified());
 
     $doc->addField(
-      PhabricatorSearchField::FIELD_BODY,
+      PhabricatorSearchDocumentFieldType::FIELD_BODY,
       $event->getDescription());
 
     $doc->addRelationship(

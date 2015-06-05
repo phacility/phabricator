@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSearchField {
+final class PhabricatorSearchDocumentFieldType extends Phobject {
 
   const FIELD_TITLE         = 'titl';
   const FIELD_BODY          = 'body';
