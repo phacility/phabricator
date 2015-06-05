@@ -11,10 +11,17 @@ abstract class PhabricatorSearchTokenizerField
     return $this->getListFromRequest($request, $key);
   }
 
+  public function getValueForQuery($value) {
+    return $this->newDatasource()
+      ->setViewer($this->getViewer())
+      ->evaluateTokens($value);
+  }
+
   protected function newControl() {
     return id(new AphrontFormTokenizerControl())
       ->setDatasource($this->newDatasource());
   }
+
 
   abstract protected function newDatasource();
 

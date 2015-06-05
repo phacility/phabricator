@@ -201,6 +201,10 @@ abstract class PhabricatorSearchField extends Phobject {
     return null;
   }
 
+  public function getValueForQuery($value) {
+    return $value;
+  }
+
 
 /* -(  Rendering Controls  )------------------------------------------------- */
 

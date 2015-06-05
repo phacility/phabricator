@@ -11,6 +11,10 @@ final class PhabricatorSearchDateField
     return $request->getStr($key);
   }
 
+  public function getValueForQuery($value) {
+    return $this->parseDateTime($value);
+  }
+
   protected function validateControlValue($value) {
     if (!strlen($value)) {
       return;

@@ -8,9 +8,7 @@ final class PhabricatorSearchUsersField
   }
 
   protected function newDatasource() {
-    // TODO: Make this use PhabricatorPeopleUserFunctionDatasource once field
-    // support is a little more powerful.
-    return new PhabricatorPeopleDatasource();
+    return new PhabricatorPeopleUserFunctionDatasource();
   }
 
   protected function getValueFromRequest(AphrontRequest $request, $key) {

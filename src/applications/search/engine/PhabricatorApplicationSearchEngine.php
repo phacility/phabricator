@@ -90,8 +90,24 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
    * @param PhabricatorSavedQuery The saved query to operate on.
    * @return The result of the query.
    */
-  abstract public function buildQueryFromSavedQuery(
-    PhabricatorSavedQuery $saved);
+  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
+    $fields = $this->buildSearchFields();
+    $viewer = $this->requireViewer();
+
+    $parameters = array();
+    foreach ($fields as $field) {
+      $field->setViewer($viewer);
+      $field->readValueFromSavedQuery($saved);
+      $value = $field->getValueForQuery($field->getValue());
+      $parameters[$field->getKey()] = $value;
+    }
+
+    return $this->buildQueryFromParameters($parameters);
+  }
+
+  protected function buildQueryFromParameters(array $parameters) {
+    throw new PhutilMethodNotImplementedException();
+  }
 
   /**
    * Builds the search form using the request.

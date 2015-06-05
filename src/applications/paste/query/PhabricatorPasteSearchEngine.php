@@ -11,21 +11,24 @@ final class PhabricatorPasteSearchEngine
     return 'PhabricatorPasteApplication';
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
+  public function buildQueryFromParameters(array $map) {
     $query = id(new PhabricatorPasteQuery())
-      ->needContent(true)
-      ->withAuthorPHIDs($saved->getParameter('authorPHIDs', array()))
-      ->withLanguages($saved->getParameter('languages', array()));
+      ->needContent(true);
 
-    $start = $this->parseDateTime($saved->getParameter('createdStart'));
-    $end = $this->parseDateTime($saved->getParameter('createdEnd'));
-
-    if ($start) {
-      $query->withDateCreatedAfter($start);
+    if ($map['authorPHIDs']) {
+      $query->withAuthorPHIDs($map['authorPHIDs']);
     }
 
-    if ($end) {
-      $query->withDateCreatedBefore($end);
+    if ($map['languages']) {
+      $query->withLanguages($map['languages']);
+    }
+
+    if ($map['createdStart']) {
+      $query->withDateCreatedAfter($map['createdStart']);
+    }
+
+    if ($map['createdEnd']) {
+      $query->withDateCreatedBefore($map['createdEnd']);
     }
 
     return $query;
