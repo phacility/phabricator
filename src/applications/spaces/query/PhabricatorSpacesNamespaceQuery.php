@@ -145,4 +145,33 @@ final class PhabricatorSpacesNamespaceQuery
     return $result;
   }
 
+  /**
+   * Get the Space PHID for an object, if one exists.
+   *
+   * This is intended to simplify performing a bunch of redundant checks; you
+   * can intentionally pass any value in (including `null`).
+   *
+   * @param wild
+   * @return phid|null
+   */
+  public static function getObjectSpacePHID($object) {
+    if (!$object) {
+      return null;
+    }
+
+    if (!($object instanceof PhabricatorSpacesInterface)) {
+      return null;
+    }
+
+    $space_phid = $object->getSpacePHID();
+    if ($space_phid === null) {
+      $default_space = self::getDefaultSpace();
+      if ($default_space) {
+        $space_phid = $default_space->getPHID();
+      }
+    }
+
+    return $space_phid;
+  }
+
 }

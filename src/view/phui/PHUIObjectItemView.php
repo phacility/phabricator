@@ -323,12 +323,21 @@ final class PHUIObjectItemView extends AphrontTagView {
   }
 
   protected function getTagContent() {
+    $viewer = $this->getUser();
+
     $content_classes = array();
     $content_classes[] = 'phui-object-item-content';
 
-    $header_name = null;
+    $header_name = array();
+
+    if ($viewer) {
+      $header_name[] = id(new PHUISpacesNamespaceContextView())
+        ->setUser($viewer)
+        ->setObject($this->object);
+    }
+
     if ($this->objectName) {
-      $header_name = array(
+      $header_name[] = array(
         phutil_tag(
           'span',
           array(

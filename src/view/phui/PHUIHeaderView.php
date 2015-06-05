@@ -172,9 +172,14 @@ final class PHUIHeaderView extends AphrontTagView {
         ' ');
     }
 
-    $header = array();
+    $viewer = $this->getUser();
 
-    $header[] = $this->renderObjectSpaceInformation();
+    $header = array();
+    if ($viewer) {
+      $header[] = id(new PHUISpacesNamespaceContextView())
+        ->setUser($viewer)
+        ->setObject($this->policyObject);
+    }
 
     if ($this->objectName) {
       $header[] = array(
@@ -296,41 +301,5 @@ final class PHUIHeaderView extends AphrontTagView {
 
     return array($icon, $link);
   }
-
-  private function renderObjectSpaceInformation() {
-    $viewer = $this->getUser();
-
-    $object = $this->policyObject;
-    if (!$object) {
-      return;
-    }
-
-    if (!($object instanceof PhabricatorSpacesInterface)) {
-      return;
-    }
-
-    $space_phid = $object->getSpacePHID();
-    if ($space_phid === null) {
-      $default_space = PhabricatorSpacesNamespaceQuery::getDefaultSpace();
-      if ($default_space) {
-        $space_phid = $default_space->getPHID();
-      }
-    }
-
-    if ($space_phid === null) {
-      return;
-    }
-
-    return phutil_tag(
-      'span',
-      array(
-        'class' => 'spaces-name',
-      ),
-      array(
-        $viewer->renderHandle($space_phid),
-        ' | ',
-      ));
-  }
-
 
 }

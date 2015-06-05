@@ -7,18 +7,17 @@ final class PhabricatorSearchHovercardController
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $phids = $request->getArr('phids');
 
     $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withPHIDs($phids)
       ->execute();
     $objects = id(new PhabricatorObjectQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withPHIDs($phids)
       ->execute();
 
@@ -26,9 +25,15 @@ final class PhabricatorSearchHovercardController
 
     foreach ($phids as $phid) {
       $handle = $handles[$phid];
+      $object = $objects[$phid];
 
-      $hovercard = new PhabricatorHovercardView();
-      $hovercard->setObjectHandle($handle);
+      $hovercard = id(new PhabricatorHovercardView())
+        ->setUser($viewer)
+        ->setObjectHandle($handle);
+
+      if ($object) {
+        $hovercard->setObject($object);
+      }
 
       // Send it to the other side of the world, thanks to PhutilEventEngine
       $event = new PhabricatorEvent(
@@ -36,9 +41,9 @@ final class PhabricatorSearchHovercardController
         array(
           'hovercard' => $hovercard,
           'handle'    => $handle,
-          'object'    => idx($objects, $phid),
+          'object'    => $object,
         ));
-      $event->setUser($user);
+      $event->setUser($viewer);
       PhutilEventEngine::dispatchEvent($event);
 
       $cards[$phid] = $hovercard;
