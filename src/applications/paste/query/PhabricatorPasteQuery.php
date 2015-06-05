@@ -67,6 +67,10 @@ final class PhabricatorPasteQuery
     return $this;
   }
 
+  protected function newResultObject() {
+    return new PhabricatorPaste();
+  }
+
   protected function loadPage() {
     $table = new PhabricatorPaste();
     $conn_r = $table->establishConnection('r');

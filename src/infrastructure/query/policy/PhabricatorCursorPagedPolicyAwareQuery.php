@@ -10,6 +10,7 @@
  * @task paging Paging
  * @task order Result Ordering
  * @task edgelogic Working with Edge Logic
+ * @task spaces Working with Spaces
  */
 abstract class PhabricatorCursorPagedPolicyAwareQuery
   extends PhabricatorPolicyAwareQuery {
@@ -23,6 +24,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $builtinOrder;
   private $edgeLogicConstraints = array();
   private $edgeLogicConstraintsAreValid = false;
+  private $spacePHIDs;
 
   protected function getPageCursors(array $page) {
     return array(
@@ -247,6 +249,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $where = array();
     $where[] = $this->buildPagingClause($conn);
     $where[] = $this->buildEdgeLogicWhereClause($conn);
+    $where[] = $this->buildSpacesWhereClause($conn);
     return $where;
   }
 
@@ -1610,5 +1613,164 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $this;
   }
 
+
+/* -(  Spaces  )------------------------------------------------------------- */
+
+
+  /**
+   * Constrain the query to return results from only specific Spaces.
+   *
+   * Pass a list of Space PHIDs, or `null` to represent the default space. Only
+   * results in those Spaces will be returned.
+   *
+   * Queries are always constrained to include only results from spaces the
+   * viewer has access to.
+   *
+   * @param list<phid|null>
+   * @task spaces
+   */
+  public function withSpacePHIDs(array $space_phids) {
+    $object = $this->newResultObject();
+
+    if (!$object) {
+      throw new Exception(
+        pht(
+          'This query (of class "%s") does not implement newResultObject(), '.
+          'but must implement this method to enable support for Spaces.',
+          get_class($this)));
+    }
+
+    if (!($object instanceof PhabricatorSpacesInterface)) {
+      throw new Exception(
+        pht(
+          'This query (of class "%s") returned an object of class "%s" from '.
+          'getNewResultObject(), but it does not implement the required '.
+          'interface ("%s"). Objects must implement this interface to enable '.
+          'Spaces support.',
+          get_class($this),
+          get_class($object),
+          'PhabricatorSpacesInterface'));
+    }
+
+    $this->spacePHIDs = $space_phids;
+
+    return $this;
+  }
+
+
+  /**
+   * Constrain the query to include only results in valid Spaces.
+   *
+   * This method builds part of a WHERE clause which considers the spaces the
+   * viewer has access to see with any explicit constraint on spaces added by
+   * @{method:withSpacePHIDs}.
+   *
+   * @param AphrontDatabaseConnection Database connection.
+   * @return string Part of a WHERE clause.
+   * @task spaces
+   */
+  private function buildSpacesWhereClause(AphrontDatabaseConnection $conn) {
+    $object = $this->newResultObject();
+    if (!$object) {
+      return null;
+    }
+
+    if (!($object instanceof PhabricatorSpacesInterface)) {
+      return null;
+    }
+
+    $viewer = $this->getViewer();
+
+    $space_phids = array();
+    $include_null = false;
+
+    $all = PhabricatorSpacesNamespaceQuery::getAllSpaces();
+    if (!$all) {
+      // If there are no spaces at all, implicitly give the viewer access to
+      // the default space.
+      $include_null = true;
+    } else {
+      // Otherwise, give them access to the spaces they have permission to
+      // see.
+      $viewer_spaces = PhabricatorSpacesNamespaceQuery::getViewerSpaces(
+        $viewer);
+      foreach ($viewer_spaces as $viewer_space) {
+        $phid = $viewer_space->getPHID();
+        $space_phids[$phid] = $phid;
+        if ($viewer_space->getIsDefaultNamespace()) {
+          $include_null = true;
+        }
+      }
+    }
+
+    // If we have additional explicit constraints, evaluate them now.
+    if ($this->spacePHIDs !== null) {
+      $explicit = array();
+      $explicit_null = false;
+      foreach ($this->spacePHIDs as $phid) {
+        if ($phid === null) {
+          $space = PhabricatorSpacesNamespaceQuery::getDefaultSpace();
+        } else {
+          $space = idx($all, $phid);
+        }
+
+        if ($space) {
+          $phid = $space->getPHID();
+          $explicit[$phid] = $phid;
+          if ($space->getIsDefaultNamespace()) {
+            $explicit_null = true;
+          }
+        }
+      }
+
+      // If the viewer can see the default space but it isn't on the explicit
+      // list of spaces to query, don't match it.
+      if ($include_null && !$explicit_null) {
+        $include_null = false;
+      }
+
+      // Include only the spaces common to the viewer and the constraints.
+      $space_phids = array_intersect_key($space_phids, $explicit);
+    }
+
+    if (!$space_phids && !$include_null) {
+      if ($this->spacePHIDs === null) {
+        throw new PhabricatorEmptyQueryException(
+          pht('You do not have access to any spaces.'));
+      } else {
+        throw new PhabricatorEmptyQueryException(
+          pht(
+            'You do not have access to any of the spaces this query '.
+            'is constrained to.'));
+      }
+    }
+
+    $alias = $this->getPrimaryTableAlias();
+    if ($alias) {
+      $col = qsprintf($conn, '%T.spacePHID', $alias);
+    } else {
+      $col = 'spacePHID';
+    }
+
+    if ($space_phids && $include_null) {
+      return qsprintf(
+        $conn,
+        '(%Q IN (%Ls) OR %Q IS NULL)',
+        $col,
+        $space_phids,
+        $col);
+    } else if ($space_phids) {
+      return qsprintf(
+        $conn,
+        '%Q IN (%Ls)',
+        $col,
+        $space_phids);
+    } else {
+      return qsprintf(
+        $conn,
+        '%Q IS NULL',
+        $col);
+    }
+  }
 
 }

@@ -453,6 +453,14 @@ final class PhabricatorPolicyFilter {
       return true;
     }
 
+    if ($object instanceof PhabricatorSpacesInterface) {
+      $space_phid = $object->getSpacePHID();
+      if (!$this->canViewerSeeObjectsInSpace($viewer, $space_phid)) {
+        $this->rejectObjectFromSpace($object, $space_phid);
+        return false;
+      }
+    }
+
     if ($object->hasAutomaticCapability($capability, $viewer)) {
       return true;
     }
@@ -674,6 +682,66 @@ final class PhabricatorPolicyFilter {
     }
 
     return $access_denied;
+  }
+
+
+  private function canViewerSeeObjectsInSpace(
+    PhabricatorUser $viewer,
+    $space_phid) {
+
+    $spaces = PhabricatorSpacesNamespaceQuery::getAllSpaces();
+
+    // If there are no spaces, everything exists in an implicit default space
+    // with no policy controls. This is the default state.
+    if (!$spaces) {
+      if ($space_phid !== null) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+
+    if ($space_phid === null) {
+      $space = PhabricatorSpacesNamespaceQuery::getDefaultSpace();
+    } else {
+      $space = idx($spaces, $space_phid);
+    }
+
+    if (!$space) {
+      return false;
+    }
+
+    // This may be more involved later, but for now being able to see the
+    // space is equivalent to being able to see everything in it.
+    return self::hasCapability(
+      $viewer,
+      $space,
+      PhabricatorPolicyCapability::CAN_VIEW);
+  }
+
+  private function rejectObjectFromSpace(
+    PhabricatorPolicyInterface $object,
+    $space_phid) {
+
+    if (!$this->raisePolicyExceptions) {
+      return;
+    }
+
+    if ($this->viewer->isOmnipotent()) {
+      return;
+    }
+
+    $access_denied = $this->renderAccessDenied($object);
+
+    $rejection = pht(
+      'This object is in a space you do not have permission to access.');
+    $full_message = pht('[%s] %s', $access_denied, $rejection);
+
+    $exception = id(new PhabricatorPolicyException($full_message))
+      ->setTitle($access_denied)
+      ->setRejection($rejection);
+
+    throw $exception;
   }
 
 }
