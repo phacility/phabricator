@@ -11,6 +11,10 @@ final class PhabricatorPasteSearchEngine
     return 'PhabricatorPasteApplication';
   }
 
+  public function newResultObject() {
+    return new PhabricatorPaste();
+  }
+
   public function buildQueryFromParameters(array $map) {
     $query = id(new PhabricatorPasteQuery())
       ->needContent(true);

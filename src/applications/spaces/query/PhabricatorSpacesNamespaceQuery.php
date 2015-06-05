@@ -86,6 +86,10 @@ final class PhabricatorSpacesNamespaceQuery
       ));
   }
 
+  public static function getSpacesExist() {
+    return (bool)self::getAllSpaces();
+  }
+
   public static function getAllSpaces() {
     $cache = PhabricatorCaches::getRequestCache();
     $cache_key = self::KEY_ALL;

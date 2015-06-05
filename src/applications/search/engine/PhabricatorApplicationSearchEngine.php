@@ -26,6 +26,10 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   const CONTEXT_LIST  = 'list';
   const CONTEXT_PANEL = 'panel';
 
+  public function newResultObject() {
+    return null;
+  }
+
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
     return $this;
@@ -102,7 +106,20 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       $parameters[$field->getKey()] = $value;
     }
 
-    return $this->buildQueryFromParameters($parameters);
+    $query = $this->buildQueryFromParameters($parameters);
+
+    $object = $this->newResultObject();
+    if (!$object) {
+      return $query;
+    }
+
+    if ($object instanceof PhabricatorSpacesInterface) {
+      if (!empty($parameters['spacePHIDs'])) {
+        $query->withSpacePHIDs($parameters['spacePHIDs']);
+      }
+    }
+
+    return $query;
   }
 
   protected function buildQueryFromParameters(array $parameters) {
@@ -144,6 +161,20 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
     foreach ($this->buildCustomSearchFields() as $field) {
       $fields[] = $field;
+    }
+
+    $object = $this->newResultObject();
+    if (!$object) {
+      return $fields;
+    }
+
+    if ($object instanceof PhabricatorSpacesInterface) {
+      if (PhabricatorSpacesNamespaceQuery::getSpacesExist()) {
+        $fields[] = id(new PhabricatorSearchSpacesField())
+          ->setKey('spacePHIDs')
+          ->setAliases(array('space', 'spaces'))
+          ->setLabel(pht('Spaces'));
+      }
     }
 
     return $fields;
@@ -893,6 +924,10 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
    * @task appsearch
    */
   public function getCustomFieldObject() {
+    $object = $this->newResultObject();
+    if ($object instanceof PhabricatorCustomFieldInterface) {
+      return $object;
+    }
     return null;
   }
 
