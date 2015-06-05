@@ -44,6 +44,7 @@ final class PhabricatorNuanceApplication extends PhabricatorApplication {
           'new/'                   => 'NuanceItemEditController',
         ),
         'source/' => array(
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'NuanceSourceListController',
           'view/(?P<id>[1-9]\d*)/' => 'NuanceSourceViewController',
           'edit/(?P<id>[1-9]\d*)/' => 'NuanceSourceEditController',
           'new/(?P<type>[^/]+)/'   => 'NuanceSourceEditController',
