@@ -38,6 +38,12 @@ final class PhabricatorSpacesApplication extends PhabricatorApplication {
     return true;
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new PhabricatorSpacesRemarkupRule(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/S(?P<id>[1-9]\d*)' => 'PhabricatorSpacesViewController',
