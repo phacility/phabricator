@@ -4,6 +4,8 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
 
   protected function run() {
     do {
+      PhabricatorCaches::destroyRequestCache();
+
       $tasks = id(new PhabricatorWorkerLeaseQuery())
         ->setLimit(1)
         ->execute();
