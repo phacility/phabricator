@@ -98,8 +98,12 @@ final class DivinerLiveSymbol extends DivinerDAO
     return $this->assertAttached($this->atom);
   }
 
-  public function attachAtom(DivinerLiveAtom $atom) {
-    $this->atom = DivinerAtom::newFromDictionary($atom->getAtomData());
+  public function attachAtom(DivinerLiveAtom $atom = null) {
+    if ($atom === null) {
+      $this->atom = null;
+    } else {
+      $this->atom = DivinerAtom::newFromDictionary($atom->getAtomData());
+    }
     return $this;
   }
 
@@ -229,6 +233,10 @@ final class DivinerLiveSymbol extends DivinerDAO
 
 
   public function getMarkupText($field) {
+    if (!$this->getAtom()) {
+      return;
+    }
+
     return $this->getAtom()->getDocblockText();
   }
 

@@ -151,10 +151,6 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
       foreach ($atoms as $key => $atom) {
         $data = idx($atom_data, $atom->getPHID());
-        if (!$data) {
-          unset($atoms[$key]);
-          continue;
-        }
         $atom->attachAtom($data);
       }
     }
@@ -170,6 +166,10 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
       $names = array();
       foreach ($atoms as $atom) {
+        if (!$atom->getAtom()) {
+          continue;
+        }
+
         foreach ($atom->getAtom()->getExtends() as $xref) {
           $names[] = $xref->getName();
         }
@@ -189,10 +189,17 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       }
 
       foreach ($atoms as $atom) {
-        $alang = $atom->getAtom()->getLanguage();
-        $extends = array();
-        foreach ($atom->getAtom()->getExtends() as $xref) {
+        $atom_lang    = null;
+        $atom_extends = array();
 
+        if ($atom->getAtom()) {
+          $atom_lang    = $atom->getAtom()->getLanguage();
+          $atom_extends = $atom->getAtom()->getExtends();
+        }
+
+        $extends = array();
+
+        foreach ($atom_extends as $xref) {
           // If there are no symbols of the matching name and type, we can't
           // resolve this.
           if (empty($xatoms[$xref->getName()][$xref->getType()])) {
@@ -216,7 +223,7 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           // classes can not implement JS classes.
           $same_lang = array();
           foreach ($maybe as $xatom) {
-            if ($xatom->getAtom()->getLanguage() == $alang) {
+            if ($xatom->getAtom()->getLanguage() == $atom_lang) {
               $same_lang[] = $xatom;
             }
           }
@@ -396,7 +403,13 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     $hashes = array();
     foreach ($symbols as $symbol) {
-      foreach ($symbol->getAtom()->getChildHashes() as $hash) {
+      $child_hashes = array();
+
+      if ($symbol->getAtom()) {
+        $child_hashes = $symbol->getAtom()->getChildHashes();
+      }
+
+      foreach ($child_hashes as $hash) {
         $hashes[$hash] = $hash;
       }
       if ($recurse_up) {
@@ -426,8 +439,14 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     assert_instances_of($children, 'DivinerLiveSymbol');
 
     foreach ($symbols as $symbol) {
+      $child_hashes = array();
       $symbol_children = array();
-      foreach ($symbol->getAtom()->getChildHashes() as $hash) {
+
+      if ($symbol->getAtom()) {
+        $child_hashes = $symbol->getAtom()->getChildHashes();
+      }
+
+      foreach ($child_hashes as $hash) {
         if (isset($children[$hash])) {
           $symbol_children[] = $children[$hash];
         }
