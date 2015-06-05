@@ -42,7 +42,11 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   }
 
   public function getURI() {
-    return '/P'.$this->getID();
+    return '/'.$this->getMonogram();
+  }
+
+  public function getMonogram() {
+    return 'P'.$this->getID();
   }
 
   protected function getConfiguration() {

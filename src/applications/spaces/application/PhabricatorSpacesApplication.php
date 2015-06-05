@@ -15,7 +15,7 @@ final class PhabricatorSpacesApplication extends PhabricatorApplication {
   }
 
   public function getFontIcon() {
-    return 'fa-compass';
+    return 'fa-th-large';
   }
 
   public function getTitleGlyph() {

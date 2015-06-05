@@ -28,7 +28,10 @@ final class PhabricatorSpacesNamespacePHIDType
 
     foreach ($handles as $phid => $handle) {
       $namespace = $objects[$phid];
+      $monogram = $namespace->getMonogram();
+
       $handle->setName($namespace->getNamespaceName());
+      $handle->setURI('/'.$monogram);
     }
   }
 

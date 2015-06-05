@@ -174,6 +174,20 @@ final class PHUIHeaderView extends AphrontTagView {
 
     $header = array();
 
+    $header[] = $this->renderObjectSpaceInformation();
+
+    if ($this->objectName) {
+      $header[] = array(
+        phutil_tag(
+          'a',
+          array(
+            'href' => '/'.$this->objectName,
+          ),
+          $this->objectName),
+        ' ',
+      );
+    }
+
     if ($this->actionLinks) {
       $actions = array();
       foreach ($this->actionLinks as $button) {
@@ -199,18 +213,6 @@ final class PHUIHeaderView extends AphrontTagView {
         $this->buttonBar);
     }
     $header[] = $this->header;
-
-    if ($this->objectName) {
-      array_unshift(
-        $header,
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/'.$this->objectName,
-          ),
-          $this->objectName),
-        ' ');
-    }
 
     if ($this->tags) {
       $header[] = ' ';
@@ -268,9 +270,9 @@ final class PHUIHeaderView extends AphrontTagView {
   }
 
   private function renderPolicyProperty(PhabricatorPolicyInterface $object) {
-    $policies = PhabricatorPolicyQuery::loadPolicies(
-      $this->getUser(),
-      $object);
+    $viewer = $this->getUser();
+
+    $policies = PhabricatorPolicyQuery::loadPolicies($viewer, $object);
 
     $view_capability = PhabricatorPolicyCapability::CAN_VIEW;
     $policy = idx($policies, $view_capability);
@@ -294,4 +296,41 @@ final class PHUIHeaderView extends AphrontTagView {
 
     return array($icon, $link);
   }
+
+  private function renderObjectSpaceInformation() {
+    $viewer = $this->getUser();
+
+    $object = $this->policyObject;
+    if (!$object) {
+      return;
+    }
+
+    if (!($object instanceof PhabricatorSpacesInterface)) {
+      return;
+    }
+
+    $space_phid = $object->getSpacePHID();
+    if ($space_phid === null) {
+      $default_space = PhabricatorSpacesNamespaceQuery::getDefaultSpace();
+      if ($default_space) {
+        $space_phid = $default_space->getPHID();
+      }
+    }
+
+    if ($space_phid === null) {
+      return;
+    }
+
+    return phutil_tag(
+      'span',
+      array(
+        'class' => 'spaces-name',
+      ),
+      array(
+        $viewer->renderHandle($space_phid),
+        ' | ',
+      ));
+  }
+
+
 }
