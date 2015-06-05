@@ -355,7 +355,8 @@ final class PhabricatorUser
     // discussion in T3684.
     $token = $this->getRawCSRFToken();
     $hash = PhabricatorHash::digest($token, $salt);
-    return 'B@'.$salt.substr($hash, 0, self::CSRF_TOKEN_LENGTH);
+    return self::CSRF_BREACH_PREFIX.$salt.substr(
+        $hash, 0, self::CSRF_TOKEN_LENGTH);
   }
 
   public function validateCSRFToken($token) {
