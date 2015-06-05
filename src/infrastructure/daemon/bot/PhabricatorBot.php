@@ -106,6 +106,8 @@ final class PhabricatorBot extends PhabricatorDaemon {
 
   private function runLoop() {
     do {
+      PhabricatorCaches::destroyRequestCache();
+
       $this->stillWorking();
 
       $messages = $this->protocolAdapter->getNextMessages($this->pollFrequency);

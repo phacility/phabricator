@@ -9,8 +9,8 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $types;
   private $contexts;
   private $indexes;
-  private $includeUndocumentable;
-  private $includeGhosts;
+  private $isDocumentable;
+  private $isGhost;
   private $nodeHashes;
   private $titles;
   private $nameContains;
@@ -81,9 +81,9 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
 
   /**
-   * Include "ghosts", which are symbols which used to exist but do not exist
-   * currently (for example, a function which existed in an older version of
-   * the codebase but was deleted).
+   * Include or exclude "ghosts", which are symbols which used to exist but do
+   * not exist currently (for example, a function which existed in an older
+   * version of the codebase but was deleted).
    *
    * These symbols had PHIDs assigned to them, and may have other sorts of
    * metadata that we don't want to lose (like comments or flags), so we don't
@@ -92,14 +92,11 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
    * have been generated incorrectly by accident. In these cases, we can
    * restore the original data.
    *
-   * However, most callers are not interested in these symbols, so they are
-   * excluded by default. You can use this method to include them in results.
-   *
-   * @param bool  True to include ghosts.
+   * @param bool
    * @return this
    */
-  public function withIncludeGhosts($include) {
-    $this->includeGhosts = $include;
+  public function withGhosts($ghosts) {
+    $this->isGhost = $ghosts;
     return $this;
   }
 
@@ -108,8 +105,8 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
-  public function withIncludeUndocumentable($include) {
-    $this->includeUndocumentable = $include;
+  public function withIsDocumentable($documentable) {
+    $this->isDocumentable = $documentable;
     return $this;
   }
 
@@ -154,10 +151,6 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
       foreach ($atoms as $key => $atom) {
         $data = idx($atom_data, $atom->getPHID());
-        if (!$data) {
-          unset($atoms[$key]);
-          continue;
-        }
         $atom->attachAtom($data);
       }
     }
@@ -173,6 +166,10 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
       $names = array();
       foreach ($atoms as $atom) {
+        if (!$atom->getAtom()) {
+          continue;
+        }
+
         foreach ($atom->getAtom()->getExtends() as $xref) {
           $names[] = $xref->getName();
         }
@@ -192,10 +189,17 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       }
 
       foreach ($atoms as $atom) {
-        $alang = $atom->getAtom()->getLanguage();
-        $extends = array();
-        foreach ($atom->getAtom()->getExtends() as $xref) {
+        $atom_lang    = null;
+        $atom_extends = array();
 
+        if ($atom->getAtom()) {
+          $atom_lang    = $atom->getAtom()->getLanguage();
+          $atom_extends = $atom->getAtom()->getExtends();
+        }
+
+        $extends = array();
+
+        foreach ($atom_extends as $xref) {
           // If there are no symbols of the matching name and type, we can't
           // resolve this.
           if (empty($xatoms[$xref->getName()][$xref->getType()])) {
@@ -219,7 +223,7 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           // classes can not implement JS classes.
           $same_lang = array();
           foreach ($maybe as $xatom) {
-            if ($xatom->getAtom()->getLanguage() == $alang) {
+            if ($xatom->getAtom()->getLanguage() == $atom_lang) {
               $same_lang[] = $xatom;
             }
           }
@@ -243,7 +247,6 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       if ($child_hashes) {
         $children = id(new DivinerAtomQuery())
           ->setViewer($this->getViewer())
-          ->withIncludeUndocumentable(true)
           ->withNodeHashes($child_hashes)
           ->needAtoms($this->needAtoms)
           ->execute();
@@ -346,16 +349,19 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $this->indexes);
     }
 
-    if (!$this->includeUndocumentable) {
+    if ($this->isDocumentable !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'isDocumentable = 1');
+        'isDocumentable = %d',
+        (int)$this->isDocumentable);
     }
 
-    if (!$this->includeGhosts) {
-      $where[] = qsprintf(
-        $conn_r,
-        'graphHash IS NOT NULL');
+    if ($this->isGhost !== null) {
+      if ($this->isGhost) {
+        $where[] = qsprintf($conn_r, 'graphHash IS NULL');
+      } else {
+        $where[] = qsprintf($conn_r, 'graphHash IS NOT NULL');
+      }
     }
 
     if ($this->nodeHashes) {
@@ -397,7 +403,13 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     $hashes = array();
     foreach ($symbols as $symbol) {
-      foreach ($symbol->getAtom()->getChildHashes() as $hash) {
+      $child_hashes = array();
+
+      if ($symbol->getAtom()) {
+        $child_hashes = $symbol->getAtom()->getChildHashes();
+      }
+
+      foreach ($child_hashes as $hash) {
         $hashes[$hash] = $hash;
       }
       if ($recurse_up) {
@@ -427,8 +439,14 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     assert_instances_of($children, 'DivinerLiveSymbol');
 
     foreach ($symbols as $symbol) {
+      $child_hashes = array();
       $symbol_children = array();
-      foreach ($symbol->getAtom()->getChildHashes() as $hash) {
+
+      if ($symbol->getAtom()) {
+        $child_hashes = $symbol->getAtom()->getChildHashes();
+      }
+
+      foreach ($child_hashes as $hash) {
         if (isset($children[$hash])) {
           $symbol_children[] = $children[$hash];
         }

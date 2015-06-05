@@ -1,7 +1,10 @@
 <?php
 
 final class PhameBlog extends PhameDAO
-  implements PhabricatorPolicyInterface, PhabricatorMarkupInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorMarkupInterface,
+    PhabricatorApplicationTransactionInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:description';
 
@@ -300,6 +303,28 @@ final class PhameBlog extends PhameDAO
 
   public function shouldUseMarkupCache($field) {
     return (bool)$this->getPHID();
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhameBlogEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhameBlogTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
   }
 
 }

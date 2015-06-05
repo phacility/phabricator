@@ -12,6 +12,7 @@ final class PhabricatorPeopleQuery
   private $dateCreatedBefore;
   private $isAdmin;
   private $isSystemAgent;
+  private $isMailingList;
   private $isDisabled;
   private $isApproved;
   private $nameLike;
@@ -64,6 +65,11 @@ final class PhabricatorPeopleQuery
 
   public function withIsSystemAgent($system_agent) {
     $this->isSystemAgent = $system_agent;
+    return $this;
+  }
+
+  public function withIsMailingList($mailing_list) {
+    $this->isMailingList = $mailing_list;
     return $this;
   }
 
@@ -312,10 +318,11 @@ final class PhabricatorPeopleQuery
         $this->dateCreatedBefore);
     }
 
-    if ($this->isAdmin) {
+    if ($this->isAdmin !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'user.isAdmin = 1');
+        'user.isAdmin = %d',
+        (int)$this->isAdmin);
     }
 
     if ($this->isDisabled !== null) {
@@ -332,10 +339,18 @@ final class PhabricatorPeopleQuery
         (int)$this->isApproved);
     }
 
-    if ($this->isSystemAgent) {
+    if ($this->isSystemAgent !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'user.isSystemAgent = 1');
+        'user.isSystemAgent = %d',
+        (int)$this->isSystemAgent);
+    }
+
+    if ($this->isMailingList !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'user.isMailingList = %d',
+        (int)$this->isMailingList);
     }
 
     if (strlen($this->nameLike)) {

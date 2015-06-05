@@ -376,9 +376,7 @@ final class ManiphestTransactionEditor
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-
-    $xactions = mfilter($xactions, 'shouldHide', true);
-    return $xactions;
+    return true;
   }
 
   protected function getMailSubjectPrefix() {

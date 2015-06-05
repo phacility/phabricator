@@ -14,10 +14,23 @@ final class PhabricatorSpacesTestCase extends PhabricatorTestCase {
     // Test that our helper methods work correctly.
 
     $actor = $this->generateNewTestUser();
-    $this->newSpace($actor, pht('Test Space'), true);
+
+    $default = $this->newSpace($actor, pht('Test Space'), true);
     $this->assertEqual(1, count($this->loadAllSpaces()));
+    $this->assertEqual(
+      1,
+      count(PhabricatorSpacesNamespaceQuery::getAllSpaces()));
+    $cache_default = PhabricatorSpacesNamespaceQuery::getDefaultSpace();
+    $this->assertEqual($default->getPHID(), $cache_default->getPHID());
+
     $this->destroyAllSpaces();
     $this->assertEqual(0, count($this->loadAllSpaces()));
+    $this->assertEqual(
+      0,
+      count(PhabricatorSpacesNamespaceQuery::getAllSpaces()));
+    $this->assertEqual(
+      null,
+      PhabricatorSpacesNamespaceQuery::getDefaultSpace());
   }
 
   public function testSpacesSeveralSpaces() {
@@ -27,9 +40,15 @@ final class PhabricatorSpacesTestCase extends PhabricatorTestCase {
     // work fine.
 
     $actor = $this->generateNewTestUser();
-    $this->newSpace($actor, pht('Default Space'), true);
+    $default = $this->newSpace($actor, pht('Default Space'), true);
     $this->newSpace($actor, pht('Alternate Space'), false);
     $this->assertEqual(2, count($this->loadAllSpaces()));
+    $this->assertEqual(
+      2,
+      count(PhabricatorSpacesNamespaceQuery::getAllSpaces()));
+
+    $cache_default = PhabricatorSpacesNamespaceQuery::getDefaultSpace();
+    $this->assertEqual($default->getPHID(), $cache_default->getPHID());
   }
 
   public function testSpacesRequireNames() {
@@ -70,6 +89,84 @@ final class PhabricatorSpacesTestCase extends PhabricatorTestCase {
     $this->assertTrue(($caught instanceof Exception));
   }
 
+  public function testSpacesPolicyFiltering() {
+    $this->destroyAllSpaces();
+
+    $creator = $this->generateNewTestUser();
+    $viewer = $this->generateNewTestUser();
+
+    // Create a new paste.
+    $paste = PhabricatorPaste::initializeNewPaste($creator)
+      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setFilePHID('')
+      ->setLanguage('')
+      ->save();
+
+    // It should be visible.
+    $this->assertTrue(
+      PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $paste,
+        PhabricatorPolicyCapability::CAN_VIEW));
+
+    // Create a default space with an open view policy.
+    $default = $this->newSpace($creator, pht('Default Space'), true)
+      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+      ->save();
+    PhabricatorSpacesNamespaceQuery::destroySpacesCache();
+
+    // The paste should now be in the space implicitly, but still visible
+    // because the space view policy is open.
+    $this->assertTrue(
+      PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $paste,
+        PhabricatorPolicyCapability::CAN_VIEW));
+
+    // Make the space view policy restrictive.
+    $default
+      ->setViewPolicy(PhabricatorPolicies::POLICY_NOONE)
+      ->save();
+    PhabricatorSpacesNamespaceQuery::destroySpacesCache();
+
+    // The paste should be in the space implicitly, and no longer visible.
+    $this->assertFalse(
+      PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $paste,
+        PhabricatorPolicyCapability::CAN_VIEW));
+
+    // Put the paste in the space explicitly.
+    $paste
+      ->setSpacePHID($default->getPHID())
+      ->save();
+    PhabricatorSpacesNamespaceQuery::destroySpacesCache();
+
+    // This should still fail, we're just in the space explicitly now.
+    $this->assertFalse(
+      PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $paste,
+        PhabricatorPolicyCapability::CAN_VIEW));
+
+    // Create an alternate space with more permissive policies, then move the
+    // paste to that space.
+    $alternate = $this->newSpace($creator, pht('Alternate Space'), false)
+      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+      ->save();
+    $paste
+      ->setSpacePHID($alternate->getPHID())
+      ->save();
+    PhabricatorSpacesNamespaceQuery::destroySpacesCache();
+
+    // Now the paste should be visible again.
+    $this->assertTrue(
+      PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $paste,
+        PhabricatorPolicyCapability::CAN_VIEW));
+  }
+
   private function loadAllSpaces() {
     return id(new PhabricatorSpacesNamespaceQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
@@ -77,6 +174,7 @@ final class PhabricatorSpacesTestCase extends PhabricatorTestCase {
   }
 
   private function destroyAllSpaces() {
+    PhabricatorSpacesNamespaceQuery::destroySpacesCache();
     $spaces = $this->loadAllSpaces();
     foreach ($spaces as $space) {
       $engine = new PhabricatorDestructionEngine();

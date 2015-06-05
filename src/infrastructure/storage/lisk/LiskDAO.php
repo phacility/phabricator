@@ -1897,6 +1897,11 @@ abstract class LiskDAO {
         continue;
       }
 
+      if ($property === 'spacePHID') {
+        $map[$property] = 'phid?';
+        continue;
+      }
+
       // If the column is named `somethingPHID`, infer it is a PHID.
       if (preg_match('/[a-z]PHID$/', $property)) {
         $map[$property] = 'phid';
@@ -1935,6 +1940,11 @@ abstract class LiskDAO {
           $default_map['key_phid'] = array(
             'columns' => array('phid'),
             'unique' => true,
+          );
+          break;
+        case 'spacePHID':
+          $default_map['key_space'] = array(
+            'columns' => array('spacePHID'),
           );
           break;
       }

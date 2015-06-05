@@ -67,6 +67,7 @@ final class AlmanacDeviceEditor
 
     switch ($xaction->getTransactionType()) {
       case AlmanacDeviceTransaction::TYPE_NAME:
+        return;
       case AlmanacDeviceTransaction::TYPE_INTERFACE:
         $old = $xaction->getOldValue();
         if ($old) {

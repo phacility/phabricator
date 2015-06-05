@@ -1902,4 +1902,25 @@ final class DifferentialTransactionEditor
     return $section;
   }
 
+  protected function willPublish(PhabricatorLiskDAO $object, array $xactions) {
+    // Reload to pick up the active diff and reviewer status.
+    return id(new DifferentialRevisionQuery())
+      ->setViewer($this->getActor())
+      ->needReviewerStatus(true)
+      ->needActiveDiffs(true)
+      ->withIDs(array($object->getID()))
+      ->executeOne();
+  }
+
+  protected function getCustomWorkerState() {
+    return array(
+      'changedPriorToCommitURI' => $this->changedPriorToCommitURI,
+    );
+  }
+
+  protected function loadCustomWorkerState(array $state) {
+    $this->changedPriorToCommitURI = idx($state, 'changedPriorToCommitURI');
+    return $this;
+  }
+
 }

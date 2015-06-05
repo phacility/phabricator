@@ -67,6 +67,10 @@ final class PhabricatorPasteQuery
     return $this;
   }
 
+  protected function newResultObject() {
+    return new PhabricatorPaste();
+  }
+
   protected function loadPage() {
     $table = new PhabricatorPaste();
     $conn_r = $table->establishConnection('r');
@@ -96,61 +100,59 @@ final class PhabricatorPasteQuery
     return $pastes;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
-
-    $where[] = $this->buildPagingClause($conn_r);
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->authorPHIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
     if ($this->parentPHIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'parentPHID IN (%Ls)',
         $this->parentPHIDs);
     }
 
     if ($this->languages) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'language IN (%Ls)',
         $this->languages);
     }
 
     if ($this->dateCreatedAfter) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'dateCreated >= %d',
         $this->dateCreatedAfter);
     }
 
     if ($this->dateCreatedBefore) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'dateCreated <= %d',
         $this->dateCreatedBefore);
     }
 
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   private function getContentCacheKey(PhabricatorPaste $paste) {

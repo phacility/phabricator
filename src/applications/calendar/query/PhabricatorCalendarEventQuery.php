@@ -110,8 +110,7 @@ final class PhabricatorCalendarEventQuery
       return $events;
     }
 
-    $map = array();
-    $instance_sequence_pairs = array();
+    $enforced_end = null;
 
     foreach ($events as $key => $event) {
       $sequence_start = 0;
@@ -159,6 +158,12 @@ final class PhabricatorCalendarEventQuery
           $end = $event->getRecurrenceEndDate();
         } else if ($this->rangeEnd) {
           $end = $this->rangeEnd;
+        } else if ($enforced_end) {
+          if ($end) {
+            $end = min($end, $enforced_end);
+          } else {
+            $end = $enforced_end;
+          }
         }
 
         if ($end) {
@@ -167,6 +172,9 @@ final class PhabricatorCalendarEventQuery
             $sequence_end++;
             $datetime->modify($modify_key);
             $date = $datetime->format('U');
+            if ($sequence_end > $this->getRawResultLimit() + $sequence_start) {
+              break;
+            }
           }
         } else {
           $sequence_end = $this->getRawResultLimit() + $sequence_start;
@@ -175,12 +183,25 @@ final class PhabricatorCalendarEventQuery
         $sequence_start = max(1, $sequence_start);
 
         for ($index = $sequence_start; $index < $sequence_end; $index++) {
-          $instance_sequence_pairs[] = array($event->getPHID(), $index);
           $events[] = $event->generateNthGhost($index, $viewer);
-
-          $last_key = last_key($events);
-          $map[$event->getPHID()][$index] = $last_key;
         }
+
+        if (count($events) >= $this->getRawResultLimit()) {
+          $events = msort($events, 'getDateFrom');
+          $events = array_slice($events, 0, $this->getRawResultLimit(), true);
+          $enforced_end = last($events)->getDateFrom();
+        }
+      }
+    }
+
+    $map = array();
+    $instance_sequence_pairs = array();
+
+    foreach ($events as $key => $event) {
+      if ($event->getIsGhostEvent()) {
+        $index = $event->getSequenceIndex();
+        $instance_sequence_pairs[] = array($event->getPHID(), $index);
+        $map[$event->getPHID()][$index] = $key;
       }
     }
 

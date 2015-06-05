@@ -20,10 +20,27 @@ final class PhabricatorPeopleSearchEngine
 
     $saved->setParameter('usernames', $request->getStrList('usernames'));
     $saved->setParameter('nameLike', $request->getStr('nameLike'));
-    $saved->setParameter('isAdmin', $request->getStr('isAdmin'));
-    $saved->setParameter('isDisabled', $request->getStr('isDisabled'));
-    $saved->setParameter('isSystemAgent', $request->getStr('isSystemAgent'));
-    $saved->setParameter('needsApproval', $request->getStr('needsApproval'));
+
+    $saved->setParameter(
+      'isAdmin',
+      $this->readBoolFromRequest($request, 'isAdmin'));
+
+    $saved->setParameter(
+      'isDisabled',
+      $this->readBoolFromRequest($request, 'isDisabled'));
+
+    $saved->setParameter(
+      'isSystemAgent',
+      $this->readBoolFromRequest($request, 'isSystemAgent'));
+
+    $saved->setParameter(
+      'isMailingList',
+      $this->readBoolFromRequest($request, 'isMailingList'));
+
+    $saved->setParameter(
+      'needsApproval',
+      $this->readBoolFromRequest($request, 'needsApproval'));
+
     $saved->setParameter('createdStart', $request->getStr('createdStart'));
     $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
 
@@ -64,25 +81,27 @@ final class PhabricatorPeopleSearchEngine
     $is_admin = $saved->getParameter('isAdmin');
     $is_disabled = $saved->getParameter('isDisabled');
     $is_system_agent = $saved->getParameter('isSystemAgent');
+    $is_mailing_list = $saved->getParameter('isMailingList');
     $needs_approval = $saved->getParameter('needsApproval');
-    $no_disabled = $saved->getParameter('noDisabled');
 
-    if ($is_admin) {
-      $query->withIsAdmin(true);
+    if ($is_admin !== null) {
+      $query->withIsAdmin($is_admin);
     }
 
-    if ($is_disabled) {
-      $query->withIsDisabled(true);
-    } else if ($no_disabled) {
-      $query->withIsDisabled(false);
+    if ($is_disabled !== null) {
+      $query->withIsDisabled($is_disabled);
     }
 
-    if ($is_system_agent) {
-      $query->withIsSystemAgent(true);
+    if ($is_system_agent !== null) {
+      $query->withIsSystemAgent($is_system_agent);
     }
 
-    if ($needs_approval) {
-      $query->withIsApproved(false);
+    if ($is_mailing_list !== null) {
+      $query->withIsMailingList($is_mailing_list);
+    }
+
+    if ($needs_approval !== null) {
+      $query->withIsApproved(!$needs_approval);
     }
 
     $start = $this->parseDateTime($saved->getParameter('createdStart'));
@@ -108,10 +127,11 @@ final class PhabricatorPeopleSearchEngine
     $usernames = $saved->getParameter('usernames', array());
     $like = $saved->getParameter('nameLike');
 
-    $is_admin = $saved->getParameter('isAdmin');
-    $is_disabled = $saved->getParameter('isDisabled');
-    $is_system_agent = $saved->getParameter('isSystemAgent');
-    $needs_approval = $saved->getParameter('needsApproval');
+    $is_admin = $this->getBoolFromQuery($saved, 'isAdmin');
+    $is_disabled = $this->getBoolFromQuery($saved, 'isDisabled');
+    $is_system_agent = $this->getBoolFromQuery($saved, 'isSystemAgent');
+    $is_mailing_list = $this->getBoolFromQuery($saved, 'isMailingList');
+    $needs_approval = $this->getBoolFromQuery($saved, 'needsApproval');
 
     $form
       ->appendChild(
@@ -125,28 +145,60 @@ final class PhabricatorPeopleSearchEngine
           ->setLabel(pht('Name Contains'))
           ->setValue($like))
       ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->setLabel('Role')
-          ->addCheckbox(
-            'isAdmin',
-            1,
-            pht('Show only administrators.'),
-            $is_admin)
-          ->addCheckbox(
-            'isDisabled',
-            1,
-            pht('Show only disabled users.'),
-            $is_disabled)
-          ->addCheckbox(
-            'isSystemAgent',
-            1,
-            pht('Show only bots.'),
-            $is_system_agent)
-          ->addCheckbox(
-            'needsApproval',
-            1,
-            pht('Show only users who need approval.'),
-            $needs_approval));
+        id(new AphrontFormSelectControl())
+          ->setName('isAdmin')
+          ->setLabel(pht('Administrators'))
+          ->setValue($is_admin)
+          ->setOptions(
+            array(
+              '' => pht('(Show All)'),
+              'true' => pht('Show Only Administrators'),
+              'false' => pht('Hide Administrators'),
+            )))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setName('isDisabled')
+          ->setLabel(pht('Disabled'))
+          ->setValue($is_disabled)
+          ->setOptions(
+            array(
+              '' => pht('(Show All)'),
+              'true' => pht('Show Only Disabled Users'),
+              'false' => pht('Hide Disabled Users'),
+            )))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setName('isSystemAgent')
+          ->setLabel(pht('Bots'))
+          ->setValue($is_system_agent)
+          ->setOptions(
+            array(
+              '' => pht('(Show All)'),
+              'true' => pht('Show Only Bots'),
+              'false' => pht('Hide Bots'),
+            )))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setName('isMailingList')
+          ->setLabel(pht('Mailing Lists'))
+          ->setValue($is_mailing_list)
+          ->setOptions(
+            array(
+              '' => pht('(Show All)'),
+              'true' => pht('Show Only Mailing Lists'),
+              'false' => pht('Hide Mailing Lists'),
+            )))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setName('needsApproval')
+          ->setLabel(pht('Needs Approval'))
+          ->setValue($needs_approval)
+          ->setOptions(
+            array(
+              '' => pht('(Show All)'),
+              'true' => pht('Show Only Unapproved Users'),
+              'false' => pht('Hide Unapproved Users'),
+            )));
 
     $this->appendCustomFieldsToForm($form, $saved);
 
@@ -165,6 +217,7 @@ final class PhabricatorPeopleSearchEngine
 
   protected function getBuiltinQueryNames() {
     $names = array(
+      'active' => pht('Active'),
       'all' => pht('All'),
     );
 
@@ -183,10 +236,13 @@ final class PhabricatorPeopleSearchEngine
     switch ($query_key) {
       case 'all':
         return $query;
+      case 'active':
+        return $query
+          ->setParameter('isDisabled', false);
       case 'approval':
         return $query
           ->setParameter('needsApproval', true)
-          ->setParameter('noDisabled', true);
+          ->setParameter('isDisabled', true);
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
@@ -240,7 +296,11 @@ final class PhabricatorPeopleSearchEngine
       }
 
       if ($user->getIsSystemAgent()) {
-        $item->addIcon('fa-desktop', pht('Bot/Script'));
+        $item->addIcon('fa-desktop', pht('Bot'));
+      }
+
+      if ($user->getIsMailingList()) {
+        $item->addIcon('fa-envelope-o', pht('Mailing List'));
       }
 
       if ($viewer->getIsAdmin()) {

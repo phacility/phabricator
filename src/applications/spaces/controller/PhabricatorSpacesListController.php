@@ -32,7 +32,7 @@ final class PhabricatorSpacesListController
     return $nav;
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $can_create = $this->hasApplicationCapability(

@@ -21,9 +21,8 @@ final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
     }
   }
 
-  public function getPrivateReplyHandlerEmailAddress(
-    PhabricatorObjectHandle $handle) {
-    return $this->getDefaultPrivateReplyHandlerEmailAddress($handle, 'Z');
+  public function getPrivateReplyHandlerEmailAddress(PhabricatorUser $user) {
+    return $this->getDefaultPrivateReplyHandlerEmailAddress($user, 'Z');
   }
 
   public function getPublicReplyHandlerEmailAddress() {

@@ -65,6 +65,8 @@ final class PhabricatorTriggerDaemon
     $this->nextCollection = PhabricatorTime::getNow();
 
     do {
+      PhabricatorCaches::destroyRequestCache();
+
       $lock = PhabricatorGlobalLock::newLock('trigger');
 
       try {

@@ -3,6 +3,7 @@
 final class PhabricatorSearchRelationship {
 
   const RELATIONSHIP_AUTHOR     = 'auth';
+  const RELATIONSHIP_BOOK       = 'book';
   const RELATIONSHIP_REVIEWER   = 'revw';
   const RELATIONSHIP_SUBSCRIBER = 'subs';
   const RELATIONSHIP_COMMENTER  = 'comm';

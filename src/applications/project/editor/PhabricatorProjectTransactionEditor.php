@@ -397,14 +397,13 @@ final class PhabricatorProjectTransactionEditor
     return parent::requireCapabilities($object, $xaction);
   }
 
-  protected function loadEdges(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-
+  protected function willPublish(PhabricatorLiskDAO $object, array $xactions) {
     $member_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $object->getPHID(),
       PhabricatorProjectProjectHasMemberEdgeType::EDGECONST);
     $object->attachMemberPHIDs($member_phids);
+
+    return $object;
   }
 
   protected function shouldSendMail(

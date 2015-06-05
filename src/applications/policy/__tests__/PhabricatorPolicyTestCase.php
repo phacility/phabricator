@@ -190,6 +190,102 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
 
 
   /**
+   * Test that extended policies work.
+   */
+  public function testExtendedPolicies() {
+    $object = $this->buildObject(PhabricatorPolicies::POLICY_USER)
+      ->setPHID('PHID-TEST-1');
+
+    $this->expectVisibility(
+      $object,
+      array(
+        'public'  => false,
+        'user'    => true,
+        'admin'   => true,
+      ),
+      pht('No Extended Policy'));
+
+    // Add a restrictive extended policy.
+    $extended = $this->buildObject(PhabricatorPolicies::POLICY_ADMIN)
+      ->setPHID('PHID-TEST-2');
+    $object->setExtendedPolicies(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW => array(
+          array($extended, PhabricatorPolicyCapability::CAN_VIEW),
+        ),
+      ));
+
+    $this->expectVisibility(
+      $object,
+      array(
+        'public'  => false,
+        'user'    => false,
+        'admin'   => true,
+      ),
+      pht('With Extended Policy'));
+
+    // Depend on a different capability.
+    $object->setExtendedPolicies(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW => array(
+          array($extended, PhabricatorPolicyCapability::CAN_EDIT),
+        ),
+      ));
+
+    $extended->setCapabilities(array(PhabricatorPolicyCapability::CAN_EDIT));
+    $extended->setPolicies(
+      array(
+        PhabricatorPolicyCapability::CAN_EDIT =>
+          PhabricatorPolicies::POLICY_NOONE,
+      ));
+
+    $this->expectVisibility(
+      $object,
+      array(
+        'public'  => false,
+        'user'    => false,
+        'admin'   => false,
+      ),
+      pht('With Extended Policy + Edit'));
+  }
+
+
+  /**
+   * Test that cyclic extended policies are arrested properly.
+   */
+  public function testExtendedPolicyCycles() {
+    $object = $this->buildObject(PhabricatorPolicies::POLICY_USER)
+      ->setPHID('PHID-TEST-1');
+
+    $this->expectVisibility(
+      $object,
+      array(
+        'public'  => false,
+        'user'    => true,
+        'admin'   => true,
+      ),
+      pht('No Extended Policy'));
+
+    // Set a self-referential extended policy on the object. This should
+    // make it fail all policy checks.
+    $object->setExtendedPolicies(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW => array(
+          array($object, PhabricatorPolicyCapability::CAN_VIEW),
+        ),
+      ));
+
+    $this->expectVisibility(
+      $object,
+      array(
+        'public'  => false,
+        'user'    => false,
+        'admin'   => false,
+      ),
+      pht('Extended Policy with Cycle'));
+  }
+
+  /**
    * An omnipotent user should be able to see even objects with invalid
    * policies.
    */
@@ -274,6 +370,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
       $query->setViewer($viewer);
 
       $caught = null;
+      $result = null;
       try {
         $result = $query->executeOne();
       } catch (PhabricatorPolicyException $ex) {

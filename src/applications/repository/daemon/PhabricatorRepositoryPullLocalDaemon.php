@@ -73,6 +73,7 @@ final class PhabricatorRepositoryPullLocalDaemon
     $queue = array();
 
     while (!$this->shouldExit()) {
+      PhabricatorCaches::destroyRequestCache();
       $pullable = $this->loadPullableRepositories($include, $exclude);
 
       // If any repositories have the NEEDS_UPDATE flag set, pull them

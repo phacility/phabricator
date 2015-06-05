@@ -19,6 +19,10 @@ final class PhabricatorSSHKeysSettingsPanel extends PhabricatorSettingsPanel {
   }
 
   public function isEnabled() {
+    if ($this->getUser()->getIsMailingList()) {
+      return false;
+    }
+
     return true;
   }
 
