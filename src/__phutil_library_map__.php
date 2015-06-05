@@ -3903,7 +3903,6 @@ phutil_register_library_map(array(
     'DivinerLiveBook' => array(
       'DivinerDAO',
       'PhabricatorPolicyInterface',
-      'PhabricatorProjectInterface',
       'PhabricatorDestructibleInterface',
     ),
     'DivinerLivePublisher' => 'DivinerPublisher',
