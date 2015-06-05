@@ -14,7 +14,7 @@
  * @task exec       Paging and Executing Queries
  * @task render     Rendering Results
  */
-abstract class PhabricatorApplicationSearchEngine {
+abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
   private $application;
   private $viewer;
@@ -69,8 +69,20 @@ abstract class PhabricatorApplicationSearchEngine {
    * @param AphrontRequest The search request.
    * @return PhabricatorSavedQuery
    */
-  abstract public function buildSavedQueryFromRequest(
-    AphrontRequest $request);
+  public function buildSavedQueryFromRequest(AphrontRequest $request) {
+    $fields = $this->buildSearchFields();
+    $viewer = $this->requireViewer();
+
+    $saved = new PhabricatorSavedQuery();
+    foreach ($fields as $field) {
+      $field->setViewer($viewer);
+
+      $value = $field->readValueFromRequest($request);
+      $saved->setParameter($field->getKey(), $value);
+    }
+
+    return $saved;
+  }
 
   /**
    * Executes the saved query.
@@ -88,9 +100,42 @@ abstract class PhabricatorApplicationSearchEngine {
    * @param PhabricatorSavedQuery The query from which to build the form.
    * @return void
    */
-  abstract public function buildSearchForm(
+  public function buildSearchForm(
     AphrontFormView $form,
-    PhabricatorSavedQuery $query);
+    PhabricatorSavedQuery $saved) {
+
+    $fields = $this->buildSearchFields();
+    $viewer = $this->requireViewer();
+
+    foreach ($fields as $field) {
+      $field->setViewer($viewer);
+      $field->readValueFromSavedQuery($saved);
+    }
+
+    foreach ($fields as $field) {
+      foreach ($field->getErrors() as $error) {
+        $this->addError(last($error));
+      }
+    }
+
+    foreach ($fields as $field) {
+      $field->appendToForm($form);
+    }
+  }
+
+  protected function buildSearchFields() {
+    $fields = array();
+
+    foreach ($this->buildCustomSearchFields() as $field) {
+      $fields[] = $field;
+    }
+
+    return $fields;
+  }
+
+  protected function buildCustomSearchFields() {
+    throw new PhutilMethodNotImplementedException();
+  }
 
   public function getErrors() {
     return $this->errors;

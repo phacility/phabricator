@@ -11,24 +11,6 @@ final class PhabricatorPasteSearchEngine
     return 'PhabricatorPasteApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-    $saved->setParameter(
-      'authorPHIDs',
-      $this->readUsersFromRequest($request, 'authors'));
-
-    $languages = $request->getStrList('languages');
-    if ($request->getBool('noLanguage')) {
-      $languages[] = null;
-    }
-    $saved->setParameter('languages', $languages);
-
-    $saved->setParameter('createdStart', $request->getStr('createdStart'));
-    $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
-
-    return $saved;
-  }
-
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhabricatorPasteQuery())
       ->needContent(true)
@@ -49,49 +31,22 @@ final class PhabricatorPasteSearchEngine
     return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
-    $author_phids = $saved_query->getParameter('authorPHIDs', array());
-
-    $languages = $saved_query->getParameter('languages', array());
-    $no_language = false;
-    foreach ($languages as $key => $language) {
-      if ($language === null) {
-        $no_language = true;
-        unset($languages[$key]);
-        continue;
-      }
-    }
-
-    $form
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('authors')
-          ->setLabel(pht('Authors'))
-          ->setValue($author_phids))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setName('languages')
-          ->setLabel(pht('Languages'))
-          ->setValue(implode(', ', $languages)))
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->addCheckbox(
-            'noLanguage',
-            1,
-            pht('Find Pastes with no specified language.'),
-            $no_language));
-
-    $this->buildDateRange(
-      $form,
-      $saved_query,
-      'createdStart',
-      pht('Created After'),
-      'createdEnd',
-      pht('Created Before'));
-
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchUsersField())
+        ->setAliases(array('authors'))
+        ->setKey('authorPHIDs')
+        ->setLabel(pht('Authors')),
+      id(new PhabricatorSearchStringListField())
+        ->setKey('languages')
+        ->setLabel(pht('Languages')),
+      id(new PhabricatorSearchDateField())
+        ->setKey('createdStart')
+        ->setLabel(pht('Created After')),
+      id(new PhabricatorSearchDateField())
+        ->setKey('createdEnd')
+        ->setLabel(pht('Created Before')),
+    );
   }
 
   protected function getURI($path) {
