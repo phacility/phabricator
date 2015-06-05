@@ -51,6 +51,7 @@ final class PhabricatorNuanceApplication extends PhabricatorApplication {
           'create/' => 'NuanceSourceCreateController',
         ),
         'queue/' => array(
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'NuanceQueueListController',
           'view/(?P<id>[1-9]\d*)/' => 'NuanceQueueViewController',
           'edit/(?P<id>[1-9]\d*)/' => 'NuanceQueueEditController',
           'new/'                   => 'NuanceQueueEditController',
