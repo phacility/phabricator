@@ -1138,6 +1138,7 @@ phutil_register_library_map(array(
     'NuanceRequestorViewController' => 'applications/nuance/controller/NuanceRequestorViewController.php',
     'NuanceSchemaSpec' => 'applications/nuance/storage/NuanceSchemaSpec.php',
     'NuanceSource' => 'applications/nuance/storage/NuanceSource.php',
+    'NuanceSourceCreateController' => 'applications/nuance/controller/NuanceSourceCreateController.php',
     'NuanceSourceDefaultEditCapability' => 'applications/nuance/capability/NuanceSourceDefaultEditCapability.php',
     'NuanceSourceDefaultViewCapability' => 'applications/nuance/capability/NuanceSourceDefaultViewCapability.php',
     'NuanceSourceDefinition' => 'applications/nuance/source/NuanceSourceDefinition.php',
@@ -4455,6 +4456,7 @@ phutil_register_library_map(array(
     'NuanceQueue' => array(
       'NuanceDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorApplicationTransactionInterface',
     ),
     'NuanceQueueEditController' => 'NuanceController',
     'NuanceQueueEditor' => 'PhabricatorApplicationTransactionEditor',
@@ -4481,6 +4483,7 @@ phutil_register_library_map(array(
       'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
     ),
+    'NuanceSourceCreateController' => 'NuanceController',
     'NuanceSourceDefaultEditCapability' => 'PhabricatorPolicyCapability',
     'NuanceSourceDefaultViewCapability' => 'PhabricatorPolicyCapability',
     'NuanceSourceDefinition' => 'Phobject',

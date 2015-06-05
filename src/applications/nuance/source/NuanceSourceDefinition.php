@@ -9,9 +9,11 @@ abstract class NuanceSourceDefinition extends Phobject {
     $this->actor = $actor;
     return $this;
   }
+
   public function getActor() {
     return $this->actor;
   }
+
   public function requireActor() {
     $actor = $this->getActor();
     if (!$actor) {
@@ -25,28 +27,17 @@ abstract class NuanceSourceDefinition extends Phobject {
     $this->sourceObject = $source;
     return $this;
   }
+
   public function getSourceObject() {
     return $this->sourceObject;
   }
+
   public function requireSourceObject() {
     $source = $this->getSourceObject();
     if (!$source) {
       throw new PhutilInvalidStateException('setSourceObject');
     }
     return $source;
-  }
-
-  public static function getSelectOptions() {
-    $definitions = self::getAllDefinitions();
-
-    $options = array();
-    foreach ($definitions as $definition) {
-      $key = $definition->getSourceTypeConstant();
-      $name = $definition->getName();
-      $options[$key] = $name;
-    }
-
-    return $options;
   }
 
   /**
@@ -67,6 +58,8 @@ abstract class NuanceSourceDefinition extends Phobject {
     static $definitions;
 
     if ($definitions === null) {
+      $definitions = array();
+
       $objects = id(new PhutilSymbolLoader())
         ->setAncestorClass(__CLASS__)
         ->loadObjects();
@@ -82,9 +75,10 @@ abstract class NuanceSourceDefinition extends Phobject {
               $conflict,
               $name));
         }
+        $definitions[$key] = $definition;
       }
-      $definitions = $objects;
     }
+
     return $definitions;
   }
 
@@ -92,6 +86,12 @@ abstract class NuanceSourceDefinition extends Phobject {
    * A human readable string like "Twitter" or "Phabricator Form".
    */
   abstract public function getName();
+
+
+  /**
+   * Human readable description of this source, a sentence or two long.
+   */
+  abstract public function getSourceDescription();
 
   /**
    * This should be a any VARCHAR(32).
@@ -193,13 +193,7 @@ abstract class NuanceSourceDefinition extends Phobject {
         ->setLabel(pht('Name'))
         ->setName('name')
         ->setError($e_name)
-        ->setValue($source->getName()))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-        ->setLabel(pht('Type'))
-        ->setName('type')
-        ->setOptions(self::getSelectOptions())
-        ->setValue($source->getType()));
+        ->setValue($source->getName()));
 
     $form = $this->augmentEditForm($form, $ex);
 

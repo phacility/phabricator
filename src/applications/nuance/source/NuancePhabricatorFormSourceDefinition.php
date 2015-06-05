@@ -7,6 +7,10 @@ final class NuancePhabricatorFormSourceDefinition
     return pht('Phabricator Form');
   }
 
+  public function getSourceDescription() {
+    return pht('Create a web form that submits into a Nuance queue.');
+  }
+
   public function getSourceTypeConstant() {
     return 'phabricator-form';
   }
