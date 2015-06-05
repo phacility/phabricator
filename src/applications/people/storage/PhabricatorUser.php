@@ -59,6 +59,7 @@ final class PhabricatorUser
 
   private $authorities = array();
   private $handlePool;
+  private $csrfSalt;
 
   protected function readField($field) {
     switch ($field) {
@@ -342,15 +343,13 @@ final class PhabricatorUser
       self::CSRF_TOKEN_LENGTH);
   }
 
-  /**
-   * @phutil-external-symbol class PhabricatorStartup
-   */
   public function getCSRFToken() {
-    $salt = PhabricatorStartup::getGlobal('csrf.salt');
-    if (!$salt) {
-      $salt = Filesystem::readRandomCharacters(self::CSRF_SALT_LENGTH);
-      PhabricatorStartup::setGlobal('csrf.salt', $salt);
+    if ($this->csrfSalt === null) {
+      $this->csrfSalt = Filesystem::readRandomCharacters(
+        self::CSRF_SALT_LENGTH);
     }
+
+    $salt = $this->csrfSalt;
 
     // Generate a token hash to mitigate BREACH attacks against SSL. See
     // discussion in T3684.
