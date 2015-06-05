@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @task action Handling Action Requests
+ */
 abstract class NuanceSourceDefinition extends Phobject {
 
   private $actor;
@@ -254,4 +257,54 @@ abstract class NuanceSourceDefinition extends Phobject {
   abstract public function renderView();
 
   abstract public function renderListView();
+
+
+  protected function newItemFromProperties(
+    NuanceRequestor $requestor,
+    array $properties,
+    PhabricatorContentSource $content_source) {
+
+    // TODO: Should we have a tighter actor/viewer model? Requestors will
+    // often have no real user associated with them...
+    $actor = PhabricatorUser::getOmnipotentUser();
+
+    $source = $this->requireSourceObject();
+
+    $item = NuanceItem::initializeNewItem();
+
+    $xactions = array();
+
+    $xactions[] = id(new NuanceItemTransaction())
+      ->setTransactionType(NuanceItemTransaction::TYPE_SOURCE)
+      ->setNewValue($source->getPHID());
+
+    $xactions[] = id(new NuanceItemTransaction())
+      ->setTransactionType(NuanceItemTransaction::TYPE_REQUESTOR)
+      ->setNewValue($requestor->getPHID());
+
+    foreach ($properties as $key => $property) {
+      $xactions[] = id(new NuanceItemTransaction())
+        ->setTransactionType(NuanceItemTransaction::TYPE_PROPERTY)
+        ->setMetadataValue(NuanceItemTransaction::PROPERTY_KEY, $key)
+        ->setNewValue($property);
+    }
+
+    $editor = id(new NuanceItemEditor())
+      ->setActor($actor)
+      ->setActingAsPHID($requestor->getActingAsPHID())
+      ->setContentSource($content_source);
+
+    $editor->applyTransactions($item, $xactions);
+
+    return $item;
+  }
+
+
+/* -(  Handling Action Requests  )------------------------------------------- */
+
+
+  public function handleActionRequest(AphrontRequest $request) {
+    return new Aphront404Response();
+  }
+
 }

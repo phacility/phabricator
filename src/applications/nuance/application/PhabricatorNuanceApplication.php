@@ -62,6 +62,9 @@ final class PhabricatorNuanceApplication extends PhabricatorApplication {
           'new/'                   => 'NuanceRequestorEditController',
         ),
       ),
+      '/action/' => array(
+        '(?P<id>[1-9]\d*)/(?P<path>.*)' => 'NuanceSourceActionController',
+      ),
     );
   }
 
