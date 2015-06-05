@@ -164,14 +164,6 @@ class AphrontDefaultApplicationConfiguration
         return $login_controller->handleRequest($request);
       }
 
-      $list = $ex->getMoreInfo();
-      foreach ($list as $key => $item) {
-        $list[$key] = phutil_tag('li', array(), $item);
-      }
-      if ($list) {
-        $list = phutil_tag('ul', array(), $list);
-      }
-
       $content = array(
         phutil_tag(
           'div',
@@ -179,17 +171,28 @@ class AphrontDefaultApplicationConfiguration
             'class' => 'aphront-policy-rejection',
           ),
           $ex->getRejection()),
-        phutil_tag(
+      );
+
+      if ($ex->getCapabilityName()) {
+        $list = $ex->getMoreInfo();
+        foreach ($list as $key => $item) {
+          $list[$key] = phutil_tag('li', array(), $item);
+        }
+        if ($list) {
+          $list = phutil_tag('ul', array(), $list);
+        }
+
+        $content[] = phutil_tag(
           'div',
           array(
             'class' => 'aphront-capability-details',
           ),
-          pht('Users with the "%s" capability:', $ex->getCapabilityName())),
-        $list,
-      );
+          pht('Users with the "%s" capability:', $ex->getCapabilityName()));
 
-      $dialog = new AphrontDialogView();
-      $dialog
+        $content[] = $list;
+      }
+
+      $dialog = id(new AphrontDialogView())
         ->setTitle($ex->getTitle())
         ->setClass('aphront-access-dialog')
         ->setUser($user)

@@ -547,35 +547,17 @@ final class PhabricatorPolicyFilter {
 
     $details = array_filter(array_merge(array($more), (array)$exceptions));
 
-    // NOTE: Not every type of policy object has a real PHID; just load an
-    // empty handle if a real PHID isn't available.
-    $phid = nonempty($object->getPHID(), PhabricatorPHIDConstants::PHID_VOID);
-
-    $handle = id(new PhabricatorHandleQuery())
-      ->setViewer($this->viewer)
-      ->withPHIDs(array($phid))
-      ->executeOne();
-
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-    if ($is_serious) {
-      $title = pht(
-        'Access Denied: %s',
-        $handle->getObjectName());
-    } else {
-      $title = pht(
-        'You Shall Not Pass: %s',
-        $handle->getObjectName());
-    }
+    $access_denied = $this->renderAccessDenied($object);
 
     $full_message = pht(
       '[%s] (%s) %s // %s',
-      $title,
+      $access_denied,
       $capability_name,
       $rejection,
       implode(' ', $details));
 
     $exception = id(new PhabricatorPolicyException($full_message))
-      ->setTitle($title)
+      ->setTitle($access_denied)
       ->setRejection($rejection)
       ->setCapabilityName($capability_name)
       ->setMoreInfo($details);
@@ -666,6 +648,32 @@ final class PhabricatorPolicyFilter {
     } else {
       return $object->getPolicy($capability);
     }
+  }
+
+  private function renderAccessDenied(PhabricatorPolicyInterface $object) {
+    // NOTE: Not every type of policy object has a real PHID; just load an
+    // empty handle if a real PHID isn't available.
+    $phid = nonempty($object->getPHID(), PhabricatorPHIDConstants::PHID_VOID);
+
+    $handle = id(new PhabricatorHandleQuery())
+      ->setViewer($this->viewer)
+      ->withPHIDs(array($phid))
+      ->executeOne();
+
+    $object_name = $handle->getObjectName();
+
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+    if ($is_serious) {
+      $access_denied = pht(
+        'Access Denied: %s',
+        $object_name);
+    } else {
+      $access_denied = pht(
+        'You Shall Not Pass: %s',
+        $object_name);
+    }
+
+    return $access_denied;
   }
 
 }
