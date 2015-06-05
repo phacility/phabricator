@@ -5615,6 +5615,7 @@ phutil_register_library_map(array(
       'PhabricatorProjectInterface',
       'PhabricatorDestructibleInterface',
       'PhabricatorApplicationTransactionInterface',
+      'PhabricatorSpacesInterface',
     ),
     'PhabricatorPasteApplication' => 'PhabricatorApplication',
     'PhabricatorPasteCommentController' => 'PhabricatorPasteController',
