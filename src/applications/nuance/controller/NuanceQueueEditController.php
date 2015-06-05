@@ -2,43 +2,36 @@
 
 final class NuanceQueueEditController extends NuanceController {
 
-  private $queueID;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
-  public function setQueueID($queue_id) {
-    $this->queueID = $queue_id;
-    return $this;
-  }
-  public function getQueueID() {
-    return $this->queueID;
-  }
-
-  public function willProcessRequest(array $data) {
-    $this->setQueueID(idx($data, 'id'));
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $queue_id = $this->getQueueID();
+    $queue_id = $request->getURIData('id');
     $is_new = !$queue_id;
-
     if ($is_new) {
-      $queue = new NuanceQueue();
-
+      $queue = NuanceQueue::initializeNewQueue();
     } else {
       $queue = id(new NuanceQueueQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withIDs(array($queue_id))
         ->executeOne();
-    }
-
-    if (!$queue) {
-      return new Aphront404Response();
+      if (!$queue) {
+        return new Aphront404Response();
+      }
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    $title = 'TODO';
+    $crumbs->addTextCrumb(
+      pht('Queues'),
+      $this->getApplicationURI('queue/'));
+
+    if ($is_new) {
+      $title = pht('Create Queue');
+      $crumbs->addTextCrumb(pht('Create'));
+    } else {
+      $title = pht('Edit %s', $queue->getName());
+      $crumbs->addTextCrumb($queue->getName(), $queue->getURI());
+      $crumbs->addTextCrumb(pht('Edit'));
+    }
 
     return $this->buildApplicationPage(
       $crumbs,
