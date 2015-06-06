@@ -348,6 +348,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function getIsParentCancelled() {
+    if ($this->instanceOfEventPHID == null) {
+      return false;
+    }
+
     $recurring_event = $this->getParentEvent();
     if ($recurring_event->getIsCancelled()) {
       return true;

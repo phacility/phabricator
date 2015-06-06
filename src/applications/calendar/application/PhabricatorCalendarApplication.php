@@ -57,7 +57,7 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
             => 'PhabricatorCalendarEventEditController',
           'drag/(?P<id>[1-9]\d*)/'
             => 'PhabricatorCalendarEventDragController',
-          'cancel/(?P<id>[1-9]\d*)/'
+          'cancel/(?P<id>[1-9]\d*)/(?:(?P<sequence>\d+)/)?'
             => 'PhabricatorCalendarEventCancelController',
           '(?P<action>join|decline|accept)/(?P<id>[1-9]\d*)/'
             => 'PhabricatorCalendarEventJoinController',

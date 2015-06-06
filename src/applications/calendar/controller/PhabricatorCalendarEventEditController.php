@@ -78,14 +78,15 @@ final class PhabricatorCalendarEventEditController
       $cancel_uri = $this->getApplicationURI();
     } else {
       $event = id(new PhabricatorCalendarEventQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($this->id))
-        ->requireCapabilities(
-          array(
-            PhabricatorPolicyCapability::CAN_VIEW,
-            PhabricatorPolicyCapability::CAN_EDIT,
-          ))
-        ->executeOne();
+      ->setViewer($viewer)
+      ->withIDs(array($this->id))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
+
       if (!$event) {
         return new Aphront404Response();
       }
@@ -93,47 +94,23 @@ final class PhabricatorCalendarEventEditController
       if ($request->getURIData('sequence')) {
         $index = $request->getURIData('sequence');
 
-        $result = id(new PhabricatorCalendarEventQuery())
-          ->setViewer($viewer)
-          ->withInstanceSequencePairs(
-            array(
-              array(
-                $event->getPHID(),
-                $index,
-              ),
-            ))
-          ->requireCapabilities(
-            array(
-              PhabricatorPolicyCapability::CAN_VIEW,
-              PhabricatorPolicyCapability::CAN_EDIT,
-            ))
-          ->executeOne();
+        $result = $this->getEventAtIndexForGhostPHID(
+          $viewer,
+          $event->getPHID(),
+          $index);
 
         if ($result) {
           return id(new AphrontRedirectResponse())
             ->setURI('/calendar/event/edit/'.$result->getID().'/');
         }
 
-        $invitees = $event->getInvitees();
+        $event = $this->createEventFromGhost(
+          $viewer,
+          $event,
+          $index);
 
-        $new_ghost = $event->generateNthGhost($index, $viewer);
-        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $new_ghost
-          ->setID(null)
-          ->setPHID(null)
-          ->removeViewerTimezone($viewer)
-          ->save();
-        $ghost_invitees = array();
-        foreach ($invitees as $invitee) {
-          $ghost_invitee = clone $invitee;
-          $ghost_invitee
-            ->setID(null)
-            ->setEventPHID($new_ghost->getPHID())
-            ->save();
-        }
-        unset($unguarded);
         return id(new AphrontRedirectResponse())
-          ->setURI('/calendar/event/edit/'.$new_ghost->getID().'/');
+          ->setURI('/calendar/event/edit/'.$event->getID().'/');
       }
 
       $end_value = AphrontFormDateControlValue::newFromEpoch(
