@@ -590,10 +590,24 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
+      '%s added %s dependencie(s) for %s: %s.' => array(
+        array(
+          '%s added a dependency for %3$s: %4$s.',
+          '%s added dependencies for %3$s: %4$s.',
+        ),
+      ),
+
       '%s removed %s dependencie(s): %s.' => array(
         array(
           '%s removed a dependency: %3$s.',
           '%s removed dependencies: %3$s.',
+        ),
+      ),
+
+      '%s removed %s dependencie(s) for %s: %s.' => array(
+        array(
+          '%s removed a dependency for %3$s: %4$s.',
+          '%s removed dependencies for %3$s: %4$s.',
         ),
       ),
 
@@ -604,10 +618,24 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
+      '%s added %s dependent revision(s) for %s: %s.' => array(
+        array(
+          '%s added a dependent revision for %3$s: %4$s.',
+          '%s added dependent revisions for %3$s: %4$s.',
+        ),
+      ),
+
       '%s removed %s dependent revision(s): %s.' => array(
         array(
           '%s removed a dependent revision: %3$s.',
           '%s removed dependent revisions: %3$s.',
+        ),
+      ),
+
+      '%s removed %s dependent revision(s) for %s: %s.' => array(
+        array(
+          '%s removed a dependent revision for %3$s: %4$s.',
+          '%s removed dependent revisions for %3$s: %4$s.',
         ),
       ),
 
