@@ -324,7 +324,7 @@ final class PhabricatorCalendarEventEditController
         ->setID($recurrence_end_date_id)
         ->setIsTimeDisabled(true)
         ->setAllowNull(true)
-        ->setIsDisabled(!$is_recurring);
+        ->setIsDisabled($recurrence_end_date_value->isDisabled());
 
       $recurrence_frequency_select = id(new AphrontFormSelectControl())
         ->setName('frequency')
