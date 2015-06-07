@@ -14,10 +14,10 @@ final class ConpherenceNewRoomController extends ConpherenceController {
 
       $xactions = array();
       $xactions[] = id(new ConpherenceTransaction())
-        ->setTransactionType(ConpherenceTransactionType::TYPE_PARTICIPANTS)
+        ->setTransactionType(ConpherenceTransaction::TYPE_PARTICIPANTS)
         ->setNewValue(array('+' => array($user->getPHID())));
       $xactions[] = id(new ConpherenceTransaction())
-        ->setTransactionType(ConpherenceTransactionType::TYPE_TITLE)
+        ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
         ->setNewValue($request->getStr('title'));
       $xactions[] = id(new ConpherenceTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
@@ -41,7 +41,7 @@ final class ConpherenceNewRoomController extends ConpherenceController {
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
 
-        $e_title = $ex->getShortMessage(ConpherenceTransactionType::TYPE_TITLE);
+        $e_title = $ex->getShortMessage(ConpherenceTransaction::TYPE_TITLE);
 
         $conpherence->setViewPolicy($request->getStr('viewPolicy'));
         $conpherence->setEditPolicy($request->getStr('editPolicy'));

@@ -2,6 +2,26 @@
 
 final class PholioTransaction extends PhabricatorApplicationTransaction {
 
+  // Edits to the high level mock
+  const TYPE_NAME         = 'name';
+  const TYPE_DESCRIPTION  = 'description';
+  const TYPE_STATUS       = 'status';
+
+  // Edits to images within the mock
+  const TYPE_IMAGE_FILE = 'image-file';
+  const TYPE_IMAGE_NAME= 'image-name';
+  const TYPE_IMAGE_DESCRIPTION = 'image-description';
+  const TYPE_IMAGE_REPLACE = 'image-replace';
+  const TYPE_IMAGE_SEQUENCE = 'image-sequence';
+
+  // Your witty commentary at the mock : image : x,y level
+  const TYPE_INLINE  = 'inline';
+
+  const MAILTAG_STATUS            = 'pholio-status';
+  const MAILTAG_COMMENT           = 'pholio-comment';
+  const MAILTAG_UPDATED           = 'pholio-updated';
+  const MAILTAG_OTHER             = 'pholio-other';
+
   public function getApplicationName() {
     return 'pholio';
   }
@@ -26,16 +46,16 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
     $old = $this->getOldValue();
 
     switch ($this->getTransactionType()) {
-      case PholioTransactionType::TYPE_IMAGE_FILE:
+      case self::TYPE_IMAGE_FILE:
         $phids = array_merge($phids, $new, $old);
         break;
-      case PholioTransactionType::TYPE_IMAGE_REPLACE:
+      case self::TYPE_IMAGE_REPLACE:
         $phids[] = $new;
         $phids[] = $old;
         break;
-      case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
-      case PholioTransactionType::TYPE_IMAGE_NAME:
-      case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
+      case self::TYPE_IMAGE_DESCRIPTION:
+      case self::TYPE_IMAGE_NAME:
+      case self::TYPE_IMAGE_SEQUENCE:
         $phids[] = key($new);
         break;
     }
@@ -47,13 +67,13 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
     $old = $this->getOldValue();
 
     switch ($this->getTransactionType()) {
-      case PholioTransactionType::TYPE_DESCRIPTION:
+      case self::TYPE_DESCRIPTION:
         return ($old === null);
-      case PholioTransactionType::TYPE_IMAGE_NAME:
-      case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
+      case self::TYPE_IMAGE_NAME:
+      case self::TYPE_IMAGE_DESCRIPTION:
         return ($old === array(null => null));
       // this is boring / silly to surface; changing sequence is NBD
-      case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
+      case self::TYPE_IMAGE_SEQUENCE:
         return true;
     }
 
@@ -62,17 +82,17 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
 
   public function getIcon() {
     switch ($this->getTransactionType()) {
-      case PholioTransactionType::TYPE_INLINE:
+      case self::TYPE_INLINE:
         return 'fa-comment';
-      case PholioTransactionType::TYPE_NAME:
-      case PholioTransactionType::TYPE_DESCRIPTION:
-      case PholioTransactionType::TYPE_STATUS:
-      case PholioTransactionType::TYPE_IMAGE_NAME:
-      case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
-      case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
+      case self::TYPE_NAME:
+      case self::TYPE_DESCRIPTION:
+      case self::TYPE_STATUS:
+      case self::TYPE_IMAGE_NAME:
+      case self::TYPE_IMAGE_DESCRIPTION:
+      case self::TYPE_IMAGE_SEQUENCE:
         return 'fa-pencil';
-      case PholioTransactionType::TYPE_IMAGE_FILE:
-      case PholioTransactionType::TYPE_IMAGE_REPLACE:
+      case self::TYPE_IMAGE_FILE:
+      case self::TYPE_IMAGE_REPLACE:
         return 'fa-picture-o';
     }
 
@@ -82,24 +102,24 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
   public function getMailTags() {
     $tags = array();
     switch ($this->getTransactionType()) {
-      case PholioTransactionType::TYPE_INLINE:
+      case self::TYPE_INLINE:
       case PhabricatorTransactions::TYPE_COMMENT:
-        $tags[] = MetaMTANotificationType::TYPE_PHOLIO_COMMENT;
+        $tags[] = self::MAILTAG_COMMENT;
         break;
-      case PholioTransactionType::TYPE_STATUS:
-        $tags[] = MetaMTANotificationType::TYPE_PHOLIO_STATUS;
+      case self::TYPE_STATUS:
+        $tags[] = self::MAILTAG_STATUS;
         break;
-      case PholioTransactionType::TYPE_NAME:
-      case PholioTransactionType::TYPE_DESCRIPTION:
-      case PholioTransactionType::TYPE_IMAGE_NAME:
-      case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
-      case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
-      case PholioTransactionType::TYPE_IMAGE_FILE:
-      case PholioTransactionType::TYPE_IMAGE_REPLACE:
-        $tags[] = MetaMTANotificationType::TYPE_PHOLIO_UPDATED;
+      case self::TYPE_NAME:
+      case self::TYPE_DESCRIPTION:
+      case self::TYPE_IMAGE_NAME:
+      case self::TYPE_IMAGE_DESCRIPTION:
+      case self::TYPE_IMAGE_SEQUENCE:
+      case self::TYPE_IMAGE_FILE:
+      case self::TYPE_IMAGE_REPLACE:
+        $tags[] = self::MAILTAG_UPDATED;
         break;
       default:
-        $tags[] = MetaMTANotificationType::TYPE_PHOLIO_OTHER;
+        $tags[] = self::MAILTAG_OTHER;
         break;
     }
     return $tags;
@@ -113,7 +133,7 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
 
     $type = $this->getTransactionType();
     switch ($type) {
-      case PholioTransactionType::TYPE_NAME:
+      case self::TYPE_NAME:
         if ($old === null) {
           return pht(
             '%s created "%s".',
@@ -127,17 +147,17 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
             $new);
         }
         break;
-      case PholioTransactionType::TYPE_DESCRIPTION:
+      case self::TYPE_DESCRIPTION:
         return pht(
           "%s updated the mock's description.",
           $this->renderHandleLink($author_phid));
         break;
-      case PholioTransactionType::TYPE_STATUS:
+      case self::TYPE_STATUS:
         return pht(
           "%s updated the mock's status.",
           $this->renderHandleLink($author_phid));
         break;
-      case PholioTransactionType::TYPE_INLINE:
+      case self::TYPE_INLINE:
         $count = 1;
         foreach ($this->getTransactionGroup() as $xaction) {
           if ($xaction->getTransactionType() == $type) {
@@ -150,14 +170,14 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
           $this->renderHandleLink($author_phid),
           $count);
         break;
-      case PholioTransactionType::TYPE_IMAGE_REPLACE:
+      case self::TYPE_IMAGE_REPLACE:
         return pht(
           '%s replaced %s with %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($old),
           $this->renderHandleLink($new));
         break;
-      case PholioTransactionType::TYPE_IMAGE_FILE:
+      case self::TYPE_IMAGE_FILE:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
 
@@ -184,7 +204,7 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
         }
         break;
 
-      case PholioTransactionType::TYPE_IMAGE_NAME:
+      case self::TYPE_IMAGE_NAME:
         return pht(
           '%s renamed an image (%s) from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
@@ -192,13 +212,13 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
           reset($old),
           reset($new));
         break;
-      case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
+      case self::TYPE_IMAGE_DESCRIPTION:
         return pht(
           '%s updated an image\'s (%s) description.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink(key($new)));
         break;
-      case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
+      case self::TYPE_IMAGE_SEQUENCE:
         return pht(
           '%s updated an image\'s (%s) sequence.',
           $this->renderHandleLink($author_phid),
@@ -218,7 +238,7 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
 
     $type = $this->getTransactionType();
     switch ($type) {
-      case PholioTransactionType::TYPE_NAME:
+      case self::TYPE_NAME:
         if ($old === null) {
           return pht(
             '%s created %s.',
@@ -233,44 +253,44 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
             $new);
         }
         break;
-      case PholioTransactionType::TYPE_DESCRIPTION:
+      case self::TYPE_DESCRIPTION:
         return pht(
           '%s updated the description for %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
-      case PholioTransactionType::TYPE_STATUS:
+      case self::TYPE_STATUS:
         return pht(
           '%s updated the status for %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
-      case PholioTransactionType::TYPE_INLINE:
+      case self::TYPE_INLINE:
         return pht(
           '%s added an inline comment to %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
-      case PholioTransactionType::TYPE_IMAGE_REPLACE:
-      case PholioTransactionType::TYPE_IMAGE_FILE:
+      case self::TYPE_IMAGE_REPLACE:
+      case self::TYPE_IMAGE_FILE:
         return pht(
           '%s updated images of %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
-      case PholioTransactionType::TYPE_IMAGE_NAME:
+      case self::TYPE_IMAGE_NAME:
         return pht(
           '%s updated the image names of %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
-      case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
+      case self::TYPE_IMAGE_DESCRIPTION:
         return pht(
           '%s updated image descriptions of %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
-      case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
+      case self::TYPE_IMAGE_SEQUENCE:
         return pht(
           '%s updated image sequence of %s.',
           $this->renderHandleLink($author_phid),
@@ -284,13 +304,13 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
   public function getBodyForFeed(PhabricatorFeedStory $story) {
     $text = null;
     switch ($this->getTransactionType()) {
-      case PholioTransactionType::TYPE_NAME:
+      case self::TYPE_NAME:
         if ($this->getOldValue() === null) {
           $mock = $story->getPrimaryObject();
           $text = $mock->getDescription();
         }
         break;
-      case PholioTransactionType::TYPE_INLINE:
+      case self::TYPE_INLINE:
         $text = $this->getComment()->getContent();
         break;
     }
@@ -307,8 +327,8 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
 
   public function hasChangeDetails() {
     switch ($this->getTransactionType()) {
-      case PholioTransactionType::TYPE_DESCRIPTION:
-      case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
+      case self::TYPE_DESCRIPTION:
+      case self::TYPE_IMAGE_DESCRIPTION:
         return true;
     }
     return parent::hasChangeDetails();
@@ -318,7 +338,7 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
     $old = $this->getOldValue();
     $new = $this->getNewValue();
     if ($this->getTransactionType() ==
-        PholioTransactionType::TYPE_IMAGE_DESCRIPTION) {
+        self::TYPE_IMAGE_DESCRIPTION) {
       $old = reset($old);
       $new = reset($new);
     }
@@ -334,19 +354,19 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case PholioTransactionType::TYPE_NAME:
+      case self::TYPE_NAME:
         if ($old === null) {
           return PhabricatorTransactions::COLOR_GREEN;
         }
-      case PholioTransactionType::TYPE_DESCRIPTION:
-      case PholioTransactionType::TYPE_STATUS:
-      case PholioTransactionType::TYPE_IMAGE_NAME:
-      case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
-      case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
+      case self::TYPE_DESCRIPTION:
+      case self::TYPE_STATUS:
+      case self::TYPE_IMAGE_NAME:
+      case self::TYPE_IMAGE_DESCRIPTION:
+      case self::TYPE_IMAGE_SEQUENCE:
         return PhabricatorTransactions::COLOR_BLUE;
-      case PholioTransactionType::TYPE_IMAGE_REPLACE:
+      case self::TYPE_IMAGE_REPLACE:
         return PhabricatorTransactions::COLOR_YELLOW;
-      case PholioTransactionType::TYPE_IMAGE_FILE:
+      case self::TYPE_IMAGE_FILE:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
         if ($add && $rem) {
@@ -363,11 +383,11 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
 
   public function getNoEffectDescription() {
     switch ($this->getTransactionType()) {
-      case PholioTransactionType::TYPE_IMAGE_NAME:
+      case self::TYPE_IMAGE_NAME:
         return pht('The image title was not updated.');
-      case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
+      case self::TYPE_IMAGE_DESCRIPTION:
         return pht('The image description was not updated.');
-      case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
+      case self::TYPE_IMAGE_SEQUENCE:
         return pht('The image sequence was not updated.');
     }
 

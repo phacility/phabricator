@@ -1258,19 +1258,19 @@ final class DifferentialTransactionEditor
 
   public function getMailTagsMap() {
     return array(
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEW_REQUEST =>
+      DifferentialTransaction::MAILTAG_REVIEW_REQUEST =>
         pht('A revision is created.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_UPDATED =>
+      DifferentialTransaction::MAILTAG_UPDATED =>
         pht('A revision is updated.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT =>
+      DifferentialTransaction::MAILTAG_COMMENT =>
         pht('Someone comments on a revision.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED =>
+      DifferentialTransaction::MAILTAG_CLOSED =>
         pht('A revision is closed.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS =>
+      DifferentialTransaction::MAILTAG_REVIEWERS =>
         pht("A revision's reviewers change."),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_CC =>
+      DifferentialTransaction::MAILTAG_CC =>
         pht("A revision's CCs change."),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_OTHER =>
+      DifferentialTransaction::MAILTAG_OTHER =>
         pht('Other revision activity not listed above occurs.'),
     );
   }
