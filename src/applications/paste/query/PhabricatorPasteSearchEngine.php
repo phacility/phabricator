@@ -15,7 +15,7 @@ final class PhabricatorPasteSearchEngine
     return new PhabricatorPaste();
   }
 
-  public function buildQueryFromParameters(array $map) {
+  protected function buildQueryFromParameters(array $map) {
     $query = id(new PhabricatorPasteQuery())
       ->needContent(true);
 

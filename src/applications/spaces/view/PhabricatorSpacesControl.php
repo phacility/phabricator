@@ -28,7 +28,7 @@ final class PhabricatorSpacesControl extends AphrontFormControl {
     return $map;
   }
 
-  public function renderInput() {
+  protected function renderInput() {
     $viewer = $this->getUser();
 
     $this->setLabel(pht('Space'));
