@@ -1111,30 +1111,10 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       return;
     }
 
-    $phids = array();
     foreach ($list->getFields() as $field) {
       $key = $this->getKeyForCustomField($field);
       $value = $saved->getParameter($key);
-      $phids[$key] = $field->getRequiredHandlePHIDsForApplicationSearch($value);
-    }
-    $all_phids = array_mergev($phids);
-
-    $handles = array();
-    if ($all_phids) {
-      $handles = id(new PhabricatorHandleQuery())
-        ->setViewer($this->requireViewer())
-        ->withPHIDs($all_phids)
-        ->execute();
-    }
-
-    foreach ($list->getFields() as $field) {
-      $key = $this->getKeyForCustomField($field);
-      $value = $saved->getParameter($key);
-      $field->appendToApplicationSearchForm(
-        $this,
-        $form,
-        $value,
-        array_select_keys($handles, $phids[$key]));
+      $field->appendToApplicationSearchForm($this, $form, $value);
     }
   }
 

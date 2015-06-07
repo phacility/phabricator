@@ -768,46 +768,25 @@ abstract class PhabricatorCustomField {
 
 
   /**
-   * Append search controls to the interface. If you need handles, use
-   * @{method:getRequiredHandlePHIDsForApplicationSearch} to get them.
+   * Append search controls to the interface.
    *
    * @param PhabricatorApplicationSearchEngine Engine constructing the form.
    * @param AphrontFormView The form to update.
    * @param wild Value from the saved query.
-   * @param list<PhabricatorObjectHandle> List of handles.
    * @return void
    * @task appsearch
    */
   public function appendToApplicationSearchForm(
     PhabricatorApplicationSearchEngine $engine,
     AphrontFormView $form,
-    $value,
-    array $handles) {
+    $value) {
     if ($this->proxy) {
       return $this->proxy->appendToApplicationSearchForm(
         $engine,
         $form,
-        $value,
-        $handles);
+        $value);
     }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
-  }
-
-
-  /**
-   * Return a list of PHIDs which @{method:appendToApplicationSearchForm} needs
-   * handles for. This is primarily useful if the field stores PHIDs and you
-   * need to (for example) render a tokenizer control.
-   *
-   * @param wild Value from the saved query.
-   * @return list<phid> List of PHIDs.
-   * @task appsearch
-   */
-  public function getRequiredHandlePHIDsForApplicationSearch($value) {
-    if ($this->proxy) {
-      return $this->proxy->getRequiredHandlePHIDsForApplicationSearch($value);
-    }
-    return array();
   }
 
 
