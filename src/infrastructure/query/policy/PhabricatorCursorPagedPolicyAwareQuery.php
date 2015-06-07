@@ -76,6 +76,24 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $this->beforeID;
   }
 
+  public function loadStandardPage(PhabricatorLiskDAO $table) {
+    $conn = $table->establishConnection('r');
+
+    $rows = queryfx_all(
+      $conn,
+      '%Q FROM %T %Q %Q %Q %Q %Q %Q %Q',
+      $this->buildSelectClause($conn),
+      $table->getTableName(),
+      (string)$this->getPrimaryTableAlias(),
+      $this->buildJoinClause($conn),
+      $this->buildWhereClause($conn),
+      $this->buildGroupClause($conn),
+      $this->buildHavingClause($conn),
+      $this->buildOrderClause($conn),
+      $this->buildLimitClause($conn));
+
+    return $table->loadAllFromArray($rows);
+  }
 
   /**
    * Get the viewer for making cursor paging queries.
