@@ -4,6 +4,7 @@ final class PhabricatorSearchSelectField
   extends PhabricatorSearchField {
 
   private $options;
+  private $default;
 
   public function setOptions(array $options) {
     $this->options = $options;
@@ -15,7 +16,12 @@ final class PhabricatorSearchSelectField
   }
 
   protected function getDefaultValue() {
-    return null;
+    return $this->default;
+  }
+
+  public function setDefault($default) {
+    $this->default = $default;
+    return $this;
   }
 
   protected function getValueFromRequest(AphrontRequest $request, $key) {
