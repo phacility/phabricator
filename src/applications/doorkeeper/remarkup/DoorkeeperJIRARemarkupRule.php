@@ -1,6 +1,6 @@
 <?php
 
-final class DoorkeeperRemarkupRuleJIRA
+final class DoorkeeperJIRARemarkupRule
   extends DoorkeeperRemarkupRule {
 
   public function apply($text) {

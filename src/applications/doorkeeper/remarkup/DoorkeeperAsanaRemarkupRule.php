@@ -1,6 +1,6 @@
 <?php
 
-final class DoorkeeperRemarkupRuleAsana
+final class DoorkeeperAsanaRemarkupRule
   extends DoorkeeperRemarkupRule {
 
   public function apply($text) {
