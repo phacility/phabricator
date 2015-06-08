@@ -163,7 +163,7 @@ final class PhabricatorProjectBoardViewController
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
         PhabricatorQueryConstraint::OPERATOR_AND,
         array($project->getPHID()))
-      ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
+      ->setOrder(ManiphestTaskQuery::ORDER_PRIORITY)
       ->setViewer($viewer)
       ->execute();
     $tasks = mpull($tasks, null, 'getPHID');

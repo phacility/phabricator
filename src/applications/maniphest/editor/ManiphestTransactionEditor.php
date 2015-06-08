@@ -632,7 +632,7 @@ final class ManiphestTransactionEditor
 
     $query = id(new ManiphestTaskQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
+      ->setOrder(ManiphestTaskQuery::ORDER_PRIORITY)
       ->withPriorities(array($dst->getPriority()))
       ->setLimit(1);
 

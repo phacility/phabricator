@@ -145,7 +145,7 @@ final class ManiphestTaskTestCase extends PhabricatorTestCase {
   private function loadTasks(PhabricatorUser $viewer, $auto_base) {
     $tasks = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
-      ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
+      ->setOrder(ManiphestTaskQuery::ORDER_PRIORITY)
       ->execute();
 
     // NOTE: AUTO_INCREMENT changes survive ROLLBACK, and we can't throw them
