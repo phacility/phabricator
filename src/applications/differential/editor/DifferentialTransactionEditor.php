@@ -1554,10 +1554,6 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $unsubscribed_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $object->getPHID(),
-      PhabricatorObjectHasUnsubscriberEdgeType::EDGECONST);
-
     $revision = id(new DifferentialRevisionQuery())
       ->setViewer($this->getActor())
       ->withPHIDs(array($object->getPHID()))
@@ -1577,7 +1573,6 @@ final class DifferentialTransactionEditor
     $reviewer_phids = mpull($reviewers, 'getReviewerPHID');
 
     $adapter->setExplicitReviewers($reviewer_phids);
-    $adapter->setForbiddenCCs($unsubscribed_phids);
 
     return $adapter;
   }
@@ -1588,24 +1583,6 @@ final class DifferentialTransactionEditor
     HeraldTranscript $transcript) {
 
     $xactions = array();
-
-    // Build a transaction to adjust CCs.
-    $ccs = array(
-      '+' => array_keys($adapter->getCCsAddedByHerald()),
-      '-' => array_keys($adapter->getCCsRemovedByHerald()),
-    );
-    $value = array();
-    foreach ($ccs as $type => $phids) {
-      foreach ($phids as $phid) {
-        $value[$type][$phid] = $phid;
-      }
-    }
-
-    if ($value) {
-      $xactions[] = id(new DifferentialTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
-        ->setNewValue($value);
-    }
 
     // Build a transaction to adjust reviewers.
     $reviewers = array(

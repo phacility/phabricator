@@ -6,10 +6,6 @@ final class HeraldDifferentialRevisionAdapter
   protected $revision;
 
   protected $explicitReviewers;
-  protected $forbiddenCCs;
-
-  protected $newCCs = array();
-  protected $remCCs = array();
   protected $addReviewerPHIDs = array();
   protected $blockingReviewerPHIDs = array();
   protected $buildPlans = array();
@@ -112,19 +108,6 @@ final class HeraldDifferentialRevisionAdapter
   public function setExplicitReviewers($explicit_reviewers) {
     $this->explicitReviewers = $explicit_reviewers;
     return $this;
-  }
-
-  public function setForbiddenCCs($forbidden_ccs) {
-    $this->forbiddenCCs = $forbidden_ccs;
-    return $this;
-  }
-
-  public function getCCsAddedByHerald() {
-    return array_diff_key($this->newCCs, $this->remCCs);
-  }
-
-  public function getCCsRemovedByHerald() {
-    return $this->remCCs;
   }
 
   public function getReviewersAddedByHerald() {
@@ -286,57 +269,9 @@ final class HeraldDifferentialRevisionAdapter
 
     $result = array();
 
-    $forbidden_ccs = array_fill_keys(
-      nonempty($this->forbiddenCCs, array()),
-      true);
-
     foreach ($effects as $effect) {
       $action = $effect->getAction();
       switch ($action) {
-        case self::ACTION_ADD_CC:
-          $base_target = $effect->getTarget();
-          $forbidden = array();
-          foreach ($base_target as $key => $fbid) {
-            if (isset($forbidden_ccs[$fbid])) {
-              $forbidden[] = $fbid;
-              unset($base_target[$key]);
-            } else {
-              $this->newCCs[$fbid] = true;
-            }
-          }
-
-          if ($forbidden) {
-            $failed = clone $effect;
-            $failed->setTarget($forbidden);
-            if ($base_target) {
-              $effect->setTarget($base_target);
-              $result[] = new HeraldApplyTranscript(
-                $effect,
-                true,
-                pht(
-                  'Added these addresses to CC list. '.
-                  'Others could not be added.'));
-            }
-            $result[] = new HeraldApplyTranscript(
-              $failed,
-              false,
-              pht('CC forbidden, these addresses have unsubscribed.'));
-          } else {
-            $result[] = new HeraldApplyTranscript(
-              $effect,
-              true,
-              pht('Added addresses to CC list.'));
-          }
-          break;
-        case self::ACTION_REMOVE_CC:
-          foreach ($effect->getTarget() as $fbid) {
-            $this->remCCs[$fbid] = true;
-          }
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Removed addresses from CC list.'));
-          break;
         case self::ACTION_ADD_REVIEWERS:
           foreach ($effect->getTarget() as $phid) {
             $this->addReviewerPHIDs[$phid] = true;
