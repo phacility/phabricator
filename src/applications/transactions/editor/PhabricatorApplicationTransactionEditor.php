@@ -2904,6 +2904,13 @@ abstract class PhabricatorApplicationTransactionEditor
         continue;
       }
 
+      if ($node instanceof PhabricatorUser) {
+        // TODO: At least for now, don't record inverse edge transactions
+        // for users (for example, "alincoln joined project X"): Feed fills
+        // this role instead.
+        continue;
+      }
+
       $editor = $node->getApplicationTransactionEditor();
       $template = $node->getApplicationTransactionTemplate();
       $target = $node->getApplicationTransactionObject();
