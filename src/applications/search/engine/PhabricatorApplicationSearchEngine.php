@@ -200,11 +200,79 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       $fields[] = $custom_field;
     }
 
-    return $fields;
+    $field_map = array();
+    foreach ($fields as $field) {
+      $key = $field->getKey();
+      if (isset($field_map[$key])) {
+        throw new Exception(
+          pht(
+            'Two fields in this SearchEngine use the same key ("%s"), but '.
+            'each field must use a unique key.',
+            $key));
+      }
+      $field_map[$key] = $field;
+    }
+
+    return $this->adjustFieldsForDisplay($field_map);
+  }
+
+  private function adjustFieldsForDisplay(array $field_map) {
+    $order = $this->getDefaultFieldOrder();
+
+    $head_keys = array();
+    $tail_keys = array();
+    $seen_tail = false;
+    foreach ($order as $order_key) {
+      if ($order_key === '...') {
+        $seen_tail = true;
+        continue;
+      }
+
+      if (!$seen_tail) {
+        $head_keys[] = $order_key;
+      } else {
+        $tail_keys[] = $order_key;
+      }
+    }
+
+    $head = array_select_keys($field_map, $head_keys);
+    $body = array_diff_key($field_map, array_fuse($tail_keys));
+    $tail = array_select_keys($field_map, $tail_keys);
+
+    return $head + $body + $tail;
   }
 
   protected function buildCustomSearchFields() {
     throw new PhutilMethodNotImplementedException();
+  }
+
+
+  /**
+   * Define the default display order for fields by returning a list of
+   * field keys.
+   *
+   * You can use the special key `...` to mean "all unspecified fields go
+   * here". This lets you easily put important fields at the top of the form,
+   * standard fields in the middle of the form, and less important fields at
+   * the bottom.
+   *
+   * For example, you might return a list like this:
+   *
+   *   return array(
+   *     'authorPHIDs',
+   *     'reviewerPHIDs',
+   *     '...',
+   *     'createdAfter',
+   *     'createdBefore',
+   *   );
+   *
+   * Any unspecified fields (including custom fields and fields added
+   * automatically by infrastruture) will be put in the middle.
+   *
+   * @return list<string> Default ordering for field keys.
+   */
+  protected function getDefaultFieldOrder() {
+    return array();
   }
 
   public function getErrors() {
@@ -1101,8 +1169,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     return 'custom:'.$field->getFieldIndex();
   }
 
-
-  protected function buildCustomFieldSearchFields() {
+  private function buildCustomFieldSearchFields() {
     $list = $this->getCustomFieldList();
     if (!$list) {
       return array();
