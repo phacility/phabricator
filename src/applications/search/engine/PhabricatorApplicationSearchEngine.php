@@ -113,6 +113,15 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       return $query;
     }
 
+    if ($object instanceof PhabricatorSubscribableInterface) {
+      if (!empty($parameters['subscriberPHIDs'])) {
+        $query->withEdgeLogicPHIDs(
+          PhabricatorObjectHasSubscriberEdgeType::EDGECONST,
+          PhabricatorQueryConstraint::OPERATOR_OR,
+          $parameters['subscriberPHIDs']);
+      }
+    }
+
     if ($object instanceof PhabricatorProjectInterface) {
       if (!empty($parameters['projectPHIDs'])) {
         $query->withEdgeLogicConstraints(
@@ -178,6 +187,13 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     $object = $this->newResultObject();
     if (!$object) {
       return $fields;
+    }
+
+    if ($object instanceof PhabricatorSubscribableInterface) {
+      $fields[] = id(new PhabricatorSearchSubscribersField())
+        ->setLabel(pht('Subscribers'))
+        ->setKey('subscriberPHIDs')
+        ->setAliases(array('subscriber', 'subscribers'));
     }
 
     if ($object instanceof PhabricatorProjectInterface) {

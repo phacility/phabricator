@@ -56,6 +56,14 @@ final class PhabricatorPasteSearchEngine
     );
   }
 
+  protected function getDefaultFieldOrder() {
+    return array(
+      '...',
+      'createdStart',
+      'createdEnd',
+    );
+  }
+
   protected function getURI($path) {
     return '/paste/'.$path;
   }

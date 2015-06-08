@@ -76,7 +76,12 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $this->beforeID;
   }
 
-  public function loadStandardPage(PhabricatorLiskDAO $table) {
+  protected function loadStandardPage(PhabricatorLiskDAO $table) {
+    $rows = $this->loadStandardPageRows($table);
+    return $table->loadAllFromArray($rows);
+  }
+
+  protected function loadStandardPageRows(PhabricatorLiskDAO $table) {
     $conn = $table->establishConnection('r');
 
     $rows = queryfx_all(
@@ -92,7 +97,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $this->buildOrderClause($conn),
       $this->buildLimitClause($conn));
 
-    return $table->loadAllFromArray($rows);
+    return $rows;
   }
 
   /**

@@ -26,9 +26,11 @@ abstract class PhabricatorSearchTokenizerField
   abstract protected function newDatasource();
 
 
-  protected function getUsersFromRequest(AphrontRequest $request, $key) {
+  protected function getUsersFromRequest(
+    AphrontRequest $request,
+    $key,
+    array $allow_types = array()) {
     $list = $this->getListFromRequest($request, $key);
-    $allow_types = array();
 
     $phids = array();
     $names = array();

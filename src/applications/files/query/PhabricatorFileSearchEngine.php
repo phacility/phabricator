@@ -37,6 +37,14 @@ final class PhabricatorFileSearchEngine
     );
   }
 
+  protected function getDefaultFieldOrder() {
+    return array(
+      '...',
+      'createdStart',
+      'createdEnd',
+    );
+  }
+
   public function buildQueryFromParameters(array $map) {
     $query = id(new PhabricatorFileQuery());
 
