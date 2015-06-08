@@ -1018,11 +1018,7 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    // Before sending mail or publishing feed stories, reload the object
-    // subscribers to pick up changes caused by Herald (or by other side effects
-    // in various transaction phases).
-    $this->loadSubscribers($object);
-    // Hook for other edges that may need (re-)loading
+    // Hook for edges or other properties that may need (re-)loading
     $object = $this->willPublish($object, $xactions);
 
     $mailed = array();
@@ -2424,7 +2420,8 @@ abstract class PhabricatorApplicationTransactionEditor
     $has_support = false;
 
     if ($object instanceof PhabricatorSubscribableInterface) {
-      $phids[] = $this->subscribers;
+      $phid = $object->getPHID();
+      $phids[] = PhabricatorSubscribersQuery::loadSubscribersForPHID($phid);
       $has_support = true;
     }
 

@@ -176,6 +176,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   }
 
   public function addPHIDHeaders($name, array $phids) {
+    $phids = array_unique($phids);
     foreach ($phids as $phid) {
       $this->addHeader($name, '<'.$phid.'>');
     }
