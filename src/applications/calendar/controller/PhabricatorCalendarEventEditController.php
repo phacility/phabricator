@@ -201,10 +201,12 @@ final class PhabricatorCalendarEventEditController
             PhabricatorCalendarEventTransaction::TYPE_FREQUENCY)
           ->setNewValue(array('rule' => $frequency));
 
-        $xactions[] = id(new PhabricatorCalendarEventTransaction())
-          ->setTransactionType(
-            PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE)
-          ->setNewValue($recurrence_end_date_value);
+        if (!$recurrence_end_date_value->isDisabled()) {
+          $xactions[] = id(new PhabricatorCalendarEventTransaction())
+            ->setTransactionType(
+              PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE)
+            ->setNewValue($recurrence_end_date_value);
+        }
       }
 
       $xactions[] = id(new PhabricatorCalendarEventTransaction())
