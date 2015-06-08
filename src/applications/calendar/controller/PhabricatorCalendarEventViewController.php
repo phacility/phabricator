@@ -46,12 +46,19 @@ final class PhabricatorCalendarEventViewController
       } else if ($sequence) {
         return new Aphront404Response();
       }
-    }
 
-    $title = 'E'.$event->getID();
-    $page_title = $title.' '.$event->getName();
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($title, '/E'.$event->getID());
+      $title = $event->getMonogram().' ('.$sequence.')';
+      $page_title = $title.' '.$event->getName();
+      $crumbs = $this->buildApplicationCrumbs();
+      $crumbs->addTextCrumb($title, '/'.$event->getMonogram().'/'.$sequence);
+
+
+    } else {
+      $title = 'E'.$event->getID();
+      $page_title = $title.' '.$event->getName();
+      $crumbs = $this->buildApplicationCrumbs();
+      $crumbs->addTextCrumb($title, '/E'.$event->getID());
+    }
 
     $timeline = $this->buildTransactionTimeline(
       $event,
