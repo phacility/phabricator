@@ -225,7 +225,7 @@ final class DifferentialChangesetOneUpRenderer
         'file' => $new_file,
         'line' => 1,
         'oline' => ($old_file ? 1 : null),
-        'render' => $this->renderImageStage($old_file),
+        'render' => $this->renderImageStage($new_file),
       );
     }
 
