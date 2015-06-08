@@ -891,20 +891,6 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
 /* -(  Result Ordering  )---------------------------------------------------- */
 
-
-  /**
-   * Save order selection to a @{class:PhabricatorSavedQuery}.
-   */
-  protected function saveQueryOrder(
-    PhabricatorSavedQuery $saved,
-    AphrontRequest $request) {
-
-    $saved->setParameter('order', $request->getStr('order'));
-
-    return $this;
-  }
-
-
   /**
    * Set query ordering from a saved value.
    */
