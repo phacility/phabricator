@@ -41,7 +41,7 @@ final class PhabricatorProjectSearchEngine
   }
 
 
-  public function buildQueryFromParameters(array $map) {
+protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
     if (strlen($map['name'])) {

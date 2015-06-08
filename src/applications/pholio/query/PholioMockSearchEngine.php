@@ -32,7 +32,7 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
     );
   }
 
-  public function buildQueryFromParameters(array $map) {
+  protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
     if ($map['authorPHIDs']) {

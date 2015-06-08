@@ -78,7 +78,7 @@ final class PhabricatorPeopleSearchEngine
     );
   }
 
-  public function buildQueryFromParameters(array $map) {
+  protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
     $viewer = $this->requireViewer();

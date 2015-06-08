@@ -178,7 +178,7 @@ final class AlmanacServiceQuery
     return parent::didFilterPage($services);
   }
 
-  public function getPrimaryTableAlias() {
+  protected function getPrimaryTableAlias() {
     return 'service';
   }
 

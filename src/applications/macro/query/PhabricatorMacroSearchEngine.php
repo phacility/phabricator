@@ -54,7 +54,7 @@ final class PhabricatorMacroSearchEngine
     );
   }
 
-  public function buildQueryFromParameters(array $map) {
+  protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
     if ($map['authorPHIDs']) {

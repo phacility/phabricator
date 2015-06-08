@@ -45,7 +45,7 @@ final class PhabricatorFileSearchEngine
     );
   }
 
-  public function buildQueryFromParameters(array $map) {
+  protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
     if ($map['authorPHIDs']) {
