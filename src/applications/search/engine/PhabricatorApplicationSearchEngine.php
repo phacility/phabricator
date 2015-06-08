@@ -108,6 +108,9 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
    * @return The result of the query.
    */
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
+    $saved = clone $saved;
+    $this->willUseSavedQuery($saved);
+
     $fields = $this->buildSearchFields();
     $viewer = $this->requireViewer();
 
@@ -153,9 +156,34 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       $this->applyCustomFieldsToQuery($query, $saved);
     }
 
-    $this->setQueryOrder($query, $saved);
+    $order = $saved->getParameter('order');
+    $builtin = $query->getBuiltinOrders();
+    if (strlen($order) && isset($builtin[$order])) {
+      $query->setOrder($order);
+    } else {
+      // If the order is invalid or not available, we choose the first
+      // builtin order. This isn't always the default order for the query,
+      // but is the first value in the "Order" dropdown, and makes the query
+      // behavior more consistent with the UI. In queries where the two
+      // orders differ, this order is the preferred order for humans.
+      $query->setOrder(head_key($builtin));
+    }
 
     return $query;
+  }
+
+  /**
+   * Hook for subclasses to adjust saved queries prior to use.
+   *
+   * If an application changes how queries are saved, it can implement this
+   * hook to keep old queries working the way users expect, by reading,
+   * adjusting, and overwriting parameters.
+   *
+   * @param PhabricatorSavedQuery Saved query which will be executed.
+   * @return void
+   */
+  protected function willUseSavedQuery(PhabricatorSavedQuery $saved) {
+    return;
   }
 
   protected function buildQueryFromParameters(array $parameters) {
@@ -172,6 +200,9 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   public function buildSearchForm(
     AphrontFormView $form,
     PhabricatorSavedQuery $saved) {
+
+    $saved = clone $saved;
+    $this->willUseSavedQuery($saved);
 
     $fields = $this->buildSearchFields();
     $viewer = $this->requireViewer();
@@ -888,50 +919,6 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
           ->setValue($end_str));
   }
 
-
-/* -(  Result Ordering  )---------------------------------------------------- */
-
-  /**
-   * Set query ordering from a saved value.
-   */
-  protected function setQueryOrder(
-    PhabricatorCursorPagedPolicyAwareQuery $query,
-    PhabricatorSavedQuery $saved) {
-
-    $order = $saved->getParameter('order');
-    $builtin = $query->getBuiltinOrders();
-
-    if (strlen($order) && isset($builtin[$order])) {
-      $query->setOrder($order);
-    } else {
-      // If the order is invalid or not available, we choose the first
-      // builtin order. This isn't always the default order for the query,
-      // but is the first value in the "Order" dropdown, and makes the query
-      // behavior more consistent with the UI. In queries where the two
-      // orders differ, this order is the preferred order for humans.
-      $query->setOrder(head_key($builtin));
-    }
-
-    return $this;
-  }
-
-
-
-  protected function appendOrderFieldsToForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved,
-    PhabricatorCursorPagedPolicyAwareQuery $query) {
-
-    $orders = $query->getBuiltinOrders();
-    $orders = ipull($orders, 'name');
-
-    $form->appendControl(
-      id(new AphrontFormSelectControl())
-        ->setLabel(pht('Order'))
-        ->setName('order')
-        ->setOptions($orders)
-        ->setValue($saved->getParameter('order')));
-  }
 
 /* -(  Paging and Executing Queries  )--------------------------------------- */
 
