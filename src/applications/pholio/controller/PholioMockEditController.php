@@ -339,7 +339,7 @@ final class PholioMockEditController extends PholioController {
           ->setDatasource(new PhabricatorProjectDatasource()))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('CC'))
+          ->setLabel(pht('Subscribers'))
           ->setName('cc')
           ->setValue($v_cc)
           ->setUser($user)
