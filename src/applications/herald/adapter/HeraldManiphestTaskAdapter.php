@@ -3,7 +3,6 @@
 final class HeraldManiphestTaskAdapter extends HeraldAdapter {
 
   private $task;
-  private $ccPHIDs = array();
   private $assignPHID;
 
   protected function newObject() {
@@ -48,14 +47,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
     return $this->task;
   }
 
-  private function setCcPHIDs(array $cc_phids) {
-    $this->ccPHIDs = $cc_phids;
-    return $this;
-  }
-  public function getCcPHIDs() {
-    return $this->ccPHIDs;
-  }
-
   public function setAssignPHID($assign_phid) {
     $this->assignPHID = $assign_phid;
     return $this;
@@ -92,6 +83,7 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         return array_merge(
           array(
             self::ACTION_ADD_CC,
+            self::ACTION_REMOVE_CC,
             self::ACTION_EMAIL,
             self::ACTION_ASSIGN_TASK,
             self::ACTION_NOTHING,
@@ -101,6 +93,7 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         return array_merge(
           array(
             self::ACTION_ADD_CC,
+            self::ACTION_REMOVE_CC,
             self::ACTION_EMAIL,
             self::ACTION_FLAG,
             self::ACTION_ASSIGN_TASK,
@@ -148,15 +141,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
     foreach ($effects as $effect) {
       $action = $effect->getAction();
       switch ($action) {
-        case self::ACTION_ADD_CC:
-          foreach ($effect->getTarget() as $phid) {
-            $this->ccPHIDs[] = $phid;
-          }
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Added addresses to cc list.'));
-          break;
         case self::ACTION_ASSIGN_TASK:
           $target_array = $effect->getTarget();
           $assign_phid = reset($target_array);

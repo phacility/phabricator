@@ -513,13 +513,6 @@ final class ManiphestTransactionEditor
 
     $xactions = array();
 
-    $cc_phids = $adapter->getCcPHIDs();
-    if ($cc_phids) {
-      $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
-        ->setNewValue(array('+' => $cc_phids));
-    }
-
     $assign_phid = $adapter->getAssignPHID();
     if ($assign_phid) {
       $xactions[] = id(new ManiphestTransaction())
