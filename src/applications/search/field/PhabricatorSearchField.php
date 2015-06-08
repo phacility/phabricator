@@ -209,7 +209,9 @@ abstract class PhabricatorSearchField extends Phobject {
 /* -(  Rendering Controls  )------------------------------------------------- */
 
 
-  abstract protected function newControl();
+  protected function newControl() {
+    throw new PhutilMethodNotImplementedException();
+  }
 
 
   protected function renderControl() {

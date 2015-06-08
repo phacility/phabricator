@@ -127,6 +127,10 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       }
     }
 
+    if ($object instanceof PhabricatorCustomFieldInterface) {
+      $this->applyCustomFieldsToQuery($query, $saved);
+    }
+
     return $query;
   }
 
@@ -190,6 +194,10 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
           ->setAliases(array('space', 'spaces'))
           ->setLabel(pht('Spaces'));
       }
+    }
+
+    foreach ($this->buildCustomFieldSearchFields() as $custom_field) {
+      $fields[] = $custom_field;
     }
 
     return $fields;
@@ -1094,14 +1102,22 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   }
 
 
-  /**
-   * Add inputs to an application search form so the user can query on custom
-   * fields.
-   *
-   * @param AphrontFormView Form to update.
-   * @param PhabricatorSavedQuery Values to prefill.
-   * @return void
-   */
+  protected function buildCustomFieldSearchFields() {
+    $list = $this->getCustomFieldList();
+    if (!$list) {
+      return array();
+    }
+
+    $fields = array();
+    foreach ($list->getFields() as $field) {
+      $fields[] = id(new PhabricatorSearchCustomFieldProxyField())
+        ->setSearchEngine($this)
+        ->setCustomField($field);
+    }
+    return $fields;
+  }
+
+  // TODO: Remove.
   protected function appendCustomFieldsToForm(
     AphrontFormView $form,
     PhabricatorSavedQuery $saved) {
