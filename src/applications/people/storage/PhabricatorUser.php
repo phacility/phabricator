@@ -345,6 +345,12 @@ final class PhabricatorUser
   }
 
   public function getCSRFToken() {
+    if ($this->isOmnipotent()) {
+      // We may end up here when called from the daemons. The omnipotent user
+      // has no meaningful CSRF token, so just return `null`.
+      return null;
+    }
+
     if ($this->csrfSalt === null) {
       $this->csrfSalt = Filesystem::readRandomCharacters(
         self::CSRF_SALT_LENGTH);
