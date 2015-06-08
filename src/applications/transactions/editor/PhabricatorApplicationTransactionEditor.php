@@ -264,6 +264,10 @@ abstract class PhabricatorApplicationTransactionEditor
       $types[] = PhabricatorTransactions::TYPE_EDGE;
     }
 
+    if ($this->object instanceof PhabricatorSpacesInterface) {
+      $types[] = PhabricatorTransactions::TYPE_SPACE;
+    }
+
     return $types;
   }
 
@@ -292,6 +296,21 @@ abstract class PhabricatorApplicationTransactionEditor
         return $object->getEditPolicy();
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
         return $object->getJoinPolicy();
+      case PhabricatorTransactions::TYPE_SPACE:
+        $space_phid = $object->getSpacePHID();
+        if ($space_phid === null) {
+          if ($this->getIsNewObject()) {
+            // In this case, just return `null` so we know this is the initial
+            // transaction and it should be hidden.
+            return null;
+          }
+
+          $default_space = PhabricatorSpacesNamespaceQuery::getDefaultSpace();
+          if ($default_space) {
+            $space_phid = $default_space->getPHID();
+          }
+        }
+        return $space_phid;
       case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $xaction->getMetadataValue('edge:type');
         if (!$edge_type) {
@@ -337,7 +356,16 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_INLINESTATE:
-        return $xaction->getNewValue();
+      case PhabricatorTransactions::TYPE_SPACE:
+        $space_phid = $xaction->getNewValue();
+        if (!strlen($space_phid)) {
+          // If an install has no Spaces, we might end up with the empty string
+          // here instead of a strict `null`. Just make this work like callers
+          // might reasonably expect.
+          return null;
+        } else {
+          return $space_phid;
+        }
       case PhabricatorTransactions::TYPE_EDGE:
         return $this->getEdgeTransactionNewValue($xaction);
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
@@ -437,6 +465,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_INLINESTATE:
       case PhabricatorTransactions::TYPE_EDGE:
+      case PhabricatorTransactions::TYPE_SPACE:
       case PhabricatorTransactions::TYPE_COMMENT:
         return $this->applyBuiltinInternalTransaction($object, $xaction);
     }
@@ -485,6 +514,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
       case PhabricatorTransactions::TYPE_INLINESTATE:
+      case PhabricatorTransactions::TYPE_SPACE:
       case PhabricatorTransactions::TYPE_COMMENT:
         return $this->applyBuiltinExternalTransaction($object, $xaction);
     }
@@ -536,6 +566,9 @@ abstract class PhabricatorApplicationTransactionEditor
         break;
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
         $object->setJoinPolicy($xaction->getNewValue());
+        break;
+      case PhabricatorTransactions::TYPE_SPACE:
+        $object->setSpacePHID($xaction->getNewValue());
         break;
     }
   }
@@ -1190,18 +1223,9 @@ abstract class PhabricatorApplicationTransactionEditor
           PhabricatorPolicyCapability::CAN_VIEW);
         break;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        PhabricatorPolicyFilter::requireCapability(
-          $actor,
-          $object,
-          PhabricatorPolicyCapability::CAN_EDIT);
-        break;
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        PhabricatorPolicyFilter::requireCapability(
-          $actor,
-          $object,
-          PhabricatorPolicyCapability::CAN_EDIT);
-        break;
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorTransactions::TYPE_SPACE:
         PhabricatorPolicyFilter::requireCapability(
           $actor,
           $object,
@@ -1882,6 +1906,12 @@ abstract class PhabricatorApplicationTransactionEditor
           $type,
           PhabricatorPolicyCapability::CAN_EDIT);
         break;
+      case PhabricatorTransactions::TYPE_SPACE:
+        $errors[] = $this->validateSpaceTransactions(
+          $object,
+          $xactions,
+          $type);
+        break;
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $groups = array();
         foreach ($xactions as $xaction) {
@@ -1967,6 +1997,52 @@ abstract class PhabricatorApplicationTransactionEditor
 
     return $errors;
   }
+
+
+  private function validateSpaceTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    $transaction_type) {
+    $errors = array();
+
+    $all_spaces = PhabricatorSpacesNamespaceQuery::getAllSpaces();
+    $viewer_spaces = PhabricatorSpacesNamespaceQuery::getViewerSpaces(
+      $this->getActor());
+    foreach ($xactions as $xaction) {
+      $space_phid = $xaction->getNewValue();
+
+      if ($space_phid === null) {
+        if (!$all_spaces) {
+          // The install doesn't have any spaces, so this is fine.
+          continue;
+        }
+
+        // The install has some spaces, so every object needs to be put
+        // in a valid space.
+        $errors[] = new PhabricatorApplicationTransactionValidationError(
+          $transaction_type,
+          pht('Invalid'),
+          pht('You must choose a space for this object.'),
+          $xaction);
+        continue;
+      }
+
+      // If the PHID isn't `null`, it needs to be a valid space that the
+      // viewer can see.
+      if (empty($viewer_spaces[$space_phid])) {
+        $errors[] = new PhabricatorApplicationTransactionValidationError(
+          $transaction_type,
+          pht('Invalid'),
+          pht(
+            'You can not shift this object in the selected space, because '.
+            'the space does not exist or you do not have access to it.'),
+          $xaction);
+      }
+    }
+
+    return $errors;
+  }
+
 
   protected function adjustObjectForPolicyChecks(
     PhabricatorLiskDAO $object,

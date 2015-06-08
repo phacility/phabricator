@@ -7,20 +7,32 @@
   "uri.source":
     "https://secure.phabricator.com/diffusion/P/browse/master/%f$%l",
   "rules": {
-    "(\\.php$)": "DivinerPHPAtomizer",
-    "(\\.diviner$)": "DivinerArticleAtomizer"
+    "(\\.diviner$)": "DivinerArticleAtomizer",
+    "(\\.php$)": "DivinerPHPAtomizer"
   },
   "exclude": [
     "(^externals/)",
-    "(^webroot/rsrc/externals/)",
-    "(^scripts/)",
-    "(^support/)",
     "(^resources/)",
-    "(^src/docs/user/)",
+    "(^scripts/)",
+    "(^src/docs/contributor/)",
     "(^src/docs/flavor/)",
-    "(^src/docs/contributor/)"
+    "(^src/docs/user/)",
+    "(^support/)",
+    "(^webroot/rsrc/externals/)"
   ],
   "groups": {
+    "aphront": {
+      "name": "Aphront",
+      "include": "(^src/aphront/)"
+    },
+    "almanac": {
+      "name": "Almanac",
+      "include": "(^src/applications/almanac/)"
+    },
+    "aphlict": {
+      "name": "Aphlict",
+      "include": "(^src/applications/aphlict/)"
+    },
     "arcanist": {
       "name": "Arcanist Integration",
       "include": "(^src/applications/arcanist/)"
@@ -45,6 +57,10 @@
       "name": "Calendar",
       "include": "(^src/applications/calendar/)"
     },
+    "celerity": {
+      "name": "Celerity",
+      "include": "(^src/applications/celerity/)"
+    },
     "chatlog": {
       "name": "Chatlog",
       "include": "(^src/applications/chatlog/)"
@@ -61,13 +77,28 @@
       "name": "Conpherence",
       "include": "(^src/applications/conpherence/)"
     },
+    "console": {
+      "name": "Console",
+      "include": "(^src/applications/console/)"
+    },
     "countdown": {
       "name": "Countdown",
       "include": "(^src/applications/countdown/)"
     },
+    "customfield": {
+      "name": "Custom Fields",
+      "include": "(^src/infrastructure/customfield/)"
+    },
     "daemon": {
       "name": "Daemons",
-      "include": "(^src/applications/daemon/)"
+      "include": [
+        "(^src/applications/daemon/)",
+        "(^src/infrastructure/daemon/)"
+      ]
+    },
+    "dashboard": {
+      "name": "Dashboard",
+      "include": "(^src/applications/dashboard/)"
     },
     "differential": {
       "name": "Differential",
@@ -76,10 +107,6 @@
     "diffusion": {
       "name": "Diffusion",
       "include": "(^src/applications/diffusion/)"
-    },
-    "directory": {
-      "name": "Directory",
-      "include": "(^src/applications/directory/)"
     },
     "diviner": {
       "name": "Diviner",
@@ -97,6 +124,14 @@
       "name": "Drydock",
       "include": "(^src/applications/drydock/)"
     },
+    "edges": {
+      "name": "Edges",
+      "include": "(^src/infrastructure/edges/)"
+    },
+    "events": {
+      "name": "Events",
+      "include": "(^src/infrastructure/events/)"
+    },
     "fact": {
       "name": "Fact",
       "include": "(^src/applications/fact/)"
@@ -113,6 +148,10 @@
       "name": "Flags",
       "include": "(^src/applications/flag/)"
     },
+    "fund": {
+      "name": "Fund",
+      "include": "(^src/applications/fund/)"
+    },
     "harbormaster": {
       "name": "Harbormaster",
       "include": "(^src/applications/harbormaster/)"
@@ -124,6 +163,10 @@
     "herald": {
       "name": "Herald",
       "include": "(^src/applications/herald/)"
+    },
+    "home": {
+      "name": "Home",
+      "include": "(^src/applications/home/)"
     },
     "legalpad": {
       "name": "Legalpad",
@@ -142,16 +185,24 @@
       "include": "(^src/applications/maniphest/)"
     },
     "meta": {
-      "name": "Meta",
+      "name": "Applications",
       "include": "(^src/applications/meta/)"
     },
     "metamta": {
       "name": "MetaMTA",
       "include": "(^src/applications/metamta/)"
     },
+    "multimeter": {
+      "name": "Multimeter",
+      "include": "(^src/applications/multimeter/)"
+    },
     "notification": {
       "name": "Notifications",
       "include": "(^src/applications/notification/)"
+    },
+    "nuance": {
+      "name": "Nuance",
+      "include": "(^src/applications/nuance/)"
     },
     "oauthserver": {
       "name": "OAuth Server",
@@ -160,6 +211,10 @@
     "owners": {
       "name": "Owners",
       "include": "(^src/applications/owners/)"
+    },
+    "passphrase": {
+      "name": "Passphrase",
+      "include": "(^src/applications/passphrase/)"
     },
     "paste": {
       "name": "Paste",
@@ -193,6 +248,10 @@
       "name": "PHPAST",
       "include": "(^src/applications/phpast/)"
     },
+    "phragment": {
+      "name": "Phragment",
+      "include": "(^src/applications/phragment/)"
+    },
     "phrequent": {
       "name": "Phrequent",
       "include": "(^src/applications/phrequent/)"
@@ -200,6 +259,10 @@
     "phriction": {
       "name": "Phriction",
       "include": "(^src/applications/phriction/)"
+    },
+    "phui": {
+      "name": "PHUI",
+      "include": "(^src/view/phui/)"
     },
     "policy": {
       "name": "Policy",
@@ -219,7 +282,10 @@
     },
     "remarkup": {
       "name": "Remarkup",
-      "include": "(^src/applications/remarkup/)"
+      "include": [
+        "(^src/applications/remarkup/)",
+        "(^src/infrastructure/markup/)"
+      ]
     },
     "repository": {
       "name": "Repositories",
@@ -237,9 +303,21 @@
       "name": "Slowvote",
       "include": "(^src/applications/slowvote/)"
     },
+    "spaces": {
+      "name": "Spaces",
+      "include": "(^src/applications/spaces/)"
+    },
+    "storage": {
+      "name": "Storage",
+      "include": "(^src/infrastructure/storage/)"
+    },
     "subscriptions": {
       "name": "Subscriptions",
       "include": "(^src/applications/subscriptions/)"
+    },
+    "support": {
+      "name": "Support",
+      "include": "(^src/applications/support/)"
     },
     "system": {
       "name": "System",

@@ -13,6 +13,9 @@ final class PholioMock extends PholioDAO
 
   const MARKUP_FIELD_DESCRIPTION  = 'markup:description';
 
+  const STATUS_OPEN = 'open';
+  const STATUS_CLOSED = 'closed';
+
   protected $authorPHID;
   protected $viewPolicy;
   protected $editPolicy;
@@ -41,7 +44,7 @@ final class PholioMock extends PholioDAO
     return id(new PholioMock())
       ->setAuthorPHID($actor->getPHID())
       ->attachImages(array())
-      ->setStatus('open')
+      ->setStatus(self::STATUS_OPEN)
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy);
   }
@@ -159,8 +162,8 @@ final class PholioMock extends PholioDAO
 
   public function getStatuses() {
     $options = array();
-    $options['open'] = pht('Open');
-    $options['closed'] = pht('Closed');
+    $options[self::STATUS_OPEN] = pht('Open');
+    $options[self::STATUS_CLOSED] = pht('Closed');
     return $options;
   }
 

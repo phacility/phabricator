@@ -51,7 +51,7 @@ final class PholioMockCommentController extends PholioController {
 
     foreach ($inline_comments as $inline_comment) {
       $xactions[] = id(new PholioTransaction())
-        ->setTransactionType(PholioTransactionType::TYPE_INLINE)
+        ->setTransactionType(PholioTransaction::TYPE_INLINE)
         ->attachComment($inline_comment);
     }
 

@@ -140,3 +140,11 @@ body.device-phone .phui-header-view {
 .device .phui-header-action-links .phui-mobile-menu {
   display: inline-block;
 }
+
+.spaces-name {
+  color: {$lightbluetext};
+}
+
+.spaces-name .phui-handle {
+  color: #000;
+}

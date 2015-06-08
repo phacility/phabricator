@@ -47,16 +47,16 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     if (!$errors) {
       $xactions = array();
       $xactions[] = id(new ConpherenceTransaction())
-        ->setTransactionType(ConpherenceTransactionType::TYPE_PARTICIPANTS)
+        ->setTransactionType(ConpherenceTransaction::TYPE_PARTICIPANTS)
         ->setNewValue(array('+' => $participant_phids));
       if ($files) {
         $xactions[] = id(new ConpherenceTransaction())
-          ->setTransactionType(ConpherenceTransactionType::TYPE_FILES)
+          ->setTransactionType(ConpherenceTransaction::TYPE_FILES)
           ->setNewValue(array('+' => mpull($files, 'getPHID')));
       }
       if ($title) {
         $xactions[] = id(new ConpherenceTransaction())
-          ->setTransactionType(ConpherenceTransactionType::TYPE_TITLE)
+          ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
           ->setNewValue($title);
       }
 
@@ -100,7 +100,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $xactions = array();
     if ($files) {
       $xactions[] = id(new ConpherenceTransaction())
-        ->setTransactionType(ConpherenceTransactionType::TYPE_FILES)
+        ->setTransactionType(ConpherenceTransaction::TYPE_FILES)
         ->setNewValue(array('+' => mpull($files, 'getPHID')));
     }
     $xactions[] = id(new ConpherenceTransaction())
@@ -117,11 +117,11 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
 
-    $types[] = ConpherenceTransactionType::TYPE_TITLE;
-    $types[] = ConpherenceTransactionType::TYPE_PARTICIPANTS;
-    $types[] = ConpherenceTransactionType::TYPE_FILES;
-    $types[] = ConpherenceTransactionType::TYPE_PICTURE;
-    $types[] = ConpherenceTransactionType::TYPE_PICTURE_CROP;
+    $types[] = ConpherenceTransaction::TYPE_TITLE;
+    $types[] = ConpherenceTransaction::TYPE_PARTICIPANTS;
+    $types[] = ConpherenceTransaction::TYPE_FILES;
+    $types[] = ConpherenceTransaction::TYPE_PICTURE;
+    $types[] = ConpherenceTransaction::TYPE_PICTURE_CROP;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
@@ -134,18 +134,18 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case ConpherenceTransactionType::TYPE_TITLE:
+      case ConpherenceTransaction::TYPE_TITLE:
         return $object->getTitle();
-      case ConpherenceTransactionType::TYPE_PICTURE:
+      case ConpherenceTransaction::TYPE_PICTURE:
         return $object->getImagePHID(ConpherenceImageData::SIZE_ORIG);
-      case ConpherenceTransactionType::TYPE_PICTURE_CROP:
+      case ConpherenceTransaction::TYPE_PICTURE_CROP:
         return $object->getImagePHID(ConpherenceImageData::SIZE_CROP);
-      case ConpherenceTransactionType::TYPE_PARTICIPANTS:
+      case ConpherenceTransaction::TYPE_PARTICIPANTS:
         if ($this->getIsNewObject()) {
           return array();
         }
         return $object->getParticipantPHIDs();
-      case ConpherenceTransactionType::TYPE_FILES:
+      case ConpherenceTransaction::TYPE_FILES:
         return $object->getFilePHIDs();
     }
   }
@@ -155,14 +155,14 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case ConpherenceTransactionType::TYPE_TITLE:
-      case ConpherenceTransactionType::TYPE_PICTURE_CROP:
+      case ConpherenceTransaction::TYPE_TITLE:
+      case ConpherenceTransaction::TYPE_PICTURE_CROP:
         return $xaction->getNewValue();
-      case ConpherenceTransactionType::TYPE_PICTURE:
+      case ConpherenceTransaction::TYPE_PICTURE:
         $file = $xaction->getNewValue();
         return $file->getPHID();
-      case ConpherenceTransactionType::TYPE_PARTICIPANTS:
-      case ConpherenceTransactionType::TYPE_FILES:
+      case ConpherenceTransaction::TYPE_PARTICIPANTS:
+      case ConpherenceTransaction::TYPE_FILES:
         return $this->getPHIDTransactionNewValue($xaction);
     }
   }
@@ -207,7 +207,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case ConpherenceTransactionType::TYPE_PARTICIPANTS:
+        case ConpherenceTransaction::TYPE_PARTICIPANTS:
           // Since this is a new ConpherenceThread, we have to create the
           // participation data asap to pass policy checks. For existing
           // ConpherenceThreads, the existing participation is correct
@@ -247,20 +247,20 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
     $make_author_recent_participant = true;
     switch ($xaction->getTransactionType()) {
-      case ConpherenceTransactionType::TYPE_TITLE:
+      case ConpherenceTransaction::TYPE_TITLE:
         $object->setTitle($xaction->getNewValue());
         break;
-      case ConpherenceTransactionType::TYPE_PICTURE:
+      case ConpherenceTransaction::TYPE_PICTURE:
         $object->setImagePHID(
           $xaction->getNewValue(),
           ConpherenceImageData::SIZE_ORIG);
         break;
-      case ConpherenceTransactionType::TYPE_PICTURE_CROP:
+      case ConpherenceTransaction::TYPE_PICTURE_CROP:
         $object->setImagePHID(
           $xaction->getNewValue(),
           ConpherenceImageData::SIZE_CROP);
         break;
-      case ConpherenceTransactionType::TYPE_PARTICIPANTS:
+      case ConpherenceTransaction::TYPE_PARTICIPANTS:
         if (!$this->getIsNewObject()) {
           $old_map = array_fuse($xaction->getOldValue());
           $new_map = array_fuse($xaction->getNewValue());
@@ -322,7 +322,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case ConpherenceTransactionType::TYPE_FILES:
+      case ConpherenceTransaction::TYPE_FILES:
         $editor = new PhabricatorEdgeEditor();
         $edge_type = PhabricatorObjectHasFileEdgeType::EDGECONST;
         $old = array_fill_keys($xaction->getOldValue(), true);
@@ -343,7 +343,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         }
         $editor->save();
         break;
-      case ConpherenceTransactionType::TYPE_PARTICIPANTS:
+      case ConpherenceTransaction::TYPE_PARTICIPANTS:
         if ($this->getIsNewObject()) {
           continue;
         }
@@ -443,7 +443,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     parent::requireCapabilities($object, $xaction);
 
     switch ($xaction->getTransactionType()) {
-      case ConpherenceTransactionType::TYPE_PARTICIPANTS:
+      case ConpherenceTransaction::TYPE_PARTICIPANTS:
         $old_map = array_fuse($xaction->getOldValue());
         $new_map = array_fuse($xaction->getNewValue());
 
@@ -473,13 +473,13 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         break;
       // This is similar to PhabricatorTransactions::TYPE_COMMENT so
       // use CAN_VIEW
-      case ConpherenceTransactionType::TYPE_FILES:
+      case ConpherenceTransaction::TYPE_FILES:
         PhabricatorPolicyFilter::requireCapability(
           $this->requireActor(),
           $object,
           PhabricatorPolicyCapability::CAN_VIEW);
         break;
-      case ConpherenceTransactionType::TYPE_TITLE:
+      case ConpherenceTransaction::TYPE_TITLE:
         PhabricatorPolicyFilter::requireCapability(
           $this->requireActor(),
           $object,
@@ -494,10 +494,10 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
     $type = $u->getTransactionType();
     switch ($type) {
-      case ConpherenceTransactionType::TYPE_TITLE:
+      case ConpherenceTransaction::TYPE_TITLE:
         return $v;
-      case ConpherenceTransactionType::TYPE_FILES:
-      case ConpherenceTransactionType::TYPE_PARTICIPANTS:
+      case ConpherenceTransaction::TYPE_FILES:
+      case ConpherenceTransaction::TYPE_PARTICIPANTS:
         return $this->mergePHIDOrEdgeTransactions($u, $v);
     }
 
@@ -626,9 +626,9 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case ConpherenceTransactionType::TYPE_PICTURE:
+      case ConpherenceTransaction::TYPE_PICTURE:
           return array($xaction->getNewValue()->getPHID());
-      case ConpherenceTransactionType::TYPE_PICTURE_CROP:
+      case ConpherenceTransaction::TYPE_PICTURE_CROP:
           return array($xaction->getNewValue());
     }
 
@@ -643,7 +643,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
-      case ConpherenceTransactionType::TYPE_TITLE:
+      case ConpherenceTransaction::TYPE_TITLE:
         if (!$object->getIsRoom()) {
           continue;
         }
@@ -667,7 +667,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
           $errors[] = $error;
         }
         break;
-      case ConpherenceTransactionType::TYPE_PICTURE:
+      case ConpherenceTransaction::TYPE_PICTURE:
         foreach ($xactions as $xaction) {
           $file = $xaction->getNewValue();
           if (!$file->isTransformableImage()) {
@@ -682,7 +682,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
           }
         }
         break;
-      case ConpherenceTransactionType::TYPE_PARTICIPANTS:
+      case ConpherenceTransaction::TYPE_PARTICIPANTS:
         foreach ($xactions as $xaction) {
           $new_phids = $this->getPHIDTransactionNewValue($xaction, array());
           $old_phids = nonempty($object->getParticipantPHIDs(), array());

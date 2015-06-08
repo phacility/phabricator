@@ -11,13 +11,13 @@
   },
   "exclude": [
     "(^externals/)",
-    "(^webroot/rsrc/externals/)",
-    "(^scripts/)",
-    "(^support/)",
     "(^resources/)",
-    "(^src/docs/tech/)",
+    "(^scripts/)",
+    "(^src/docs/contributor/)",
     "(^src/docs/flavor/)",
-    "(^src/docs/contributor/)"
+    "(^src/docs/tech/)",
+    "(^support/)",
+    "(^webroot/rsrc/externals/)"
   ],
   "groups": {
     "intro": {
@@ -28,24 +28,6 @@
     },
     "userguide": {
       "name": "Application User Guides"
-    },
-    "differential": {
-      "name": "Differential (Code Review)"
-    },
-    "diffusion": {
-      "name": "Diffusion (Repository Browser)"
-    },
-    "maniphest": {
-      "name": "Maniphest (Task Tracking)"
-    },
-    "slowvote": {
-      "name": "Slowvote (Polls)"
-    },
-    "herald": {
-      "name": "Herald (Notifications)"
-    },
-    "phriction": {
-      "name": "Phriction (Wiki)"
     }
   }
 }

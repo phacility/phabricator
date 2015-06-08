@@ -5,7 +5,7 @@ final class NuanceItemQuery
 
   private $ids;
   private $phids;
-  private $sourceIDs;
+  private $sourcePHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -17,54 +17,52 @@ final class NuanceItemQuery
     return $this;
   }
 
-  public function withSourceIDs($source_ids) {
-    $this->sourceIDs = $source_ids;
+  public function withSourcePHIDs($source_phids) {
+    $this->sourcePHIDs = $source_phids;
     return $this;
   }
 
-
   protected function loadPage() {
     $table = new NuanceItem();
-    $conn_r = $table->establishConnection('r');
+    $conn = $table->establishConnection('r');
 
     $data = queryfx_all(
-      $conn_r,
-      'SELECT FROM %T %Q %Q %Q',
+      $conn,
+      '%Q FROM %T %Q %Q %Q',
+      $this->buildSelectClause($conn),
       $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
+      $this->buildWhereClause($conn),
+      $this->buildOrderClause($conn),
+      $this->buildLimitClause($conn));
 
     return $table->loadAllFromArray($data);
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    if ($this->sourceID) {
+    if ($this->sourcePHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'sourceID IN (%Ld)',
-        $this->sourceIDs);
+        $conn,
+        'sourcePHID IN (%Ls)',
+        $this->sourcePHIDs);
     }
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
 }

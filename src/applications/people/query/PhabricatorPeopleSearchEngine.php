@@ -242,7 +242,7 @@ final class PhabricatorPeopleSearchEngine
       case 'approval':
         return $query
           ->setParameter('needsApproval', true)
-          ->setParameter('isDisabled', true);
+          ->setParameter('isDisabled', false);
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);

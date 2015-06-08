@@ -71,7 +71,7 @@ final class ConpherenceUpdateThreadConduitAPIMethod
     if ($add_participant_phids) {
       $xactions[] = id(new ConpherenceTransaction())
         ->setTransactionType(
-          ConpherenceTransactionType::TYPE_PARTICIPANTS)
+          ConpherenceTransaction::TYPE_PARTICIPANTS)
         ->setNewValue(array('+' => $add_participant_phids));
     }
     if ($remove_participant_phid) {
@@ -80,12 +80,12 @@ final class ConpherenceUpdateThreadConduitAPIMethod
       }
       $xactions[] = id(new ConpherenceTransaction())
         ->setTransactionType(
-          ConpherenceTransactionType::TYPE_PARTICIPANTS)
+          ConpherenceTransaction::TYPE_PARTICIPANTS)
         ->setNewValue(array('-' => array($remove_participant_phid)));
     }
     if ($title) {
       $xactions[] = id(new ConpherenceTransaction())
-        ->setTransactionType(ConpherenceTransactionType::TYPE_TITLE)
+        ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
         ->setNewValue($title);
     }
     if ($message) {

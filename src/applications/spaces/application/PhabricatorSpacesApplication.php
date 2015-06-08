@@ -15,7 +15,7 @@ final class PhabricatorSpacesApplication extends PhabricatorApplication {
   }
 
   public function getFontIcon() {
-    return 'fa-compass';
+    return 'fa-th-large';
   }
 
   public function getTitleGlyph() {
@@ -36,6 +36,12 @@ final class PhabricatorSpacesApplication extends PhabricatorApplication {
 
   public function isPrototype() {
     return true;
+  }
+
+  public function getRemarkupRules() {
+    return array(
+      new PhabricatorSpacesRemarkupRule(),
+    );
   }
 
   public function getRoutes() {

@@ -14,7 +14,7 @@
  * @task exec       Paging and Executing Queries
  * @task render     Rendering Results
  */
-abstract class PhabricatorApplicationSearchEngine {
+abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
   private $application;
   private $viewer;
@@ -25,6 +25,10 @@ abstract class PhabricatorApplicationSearchEngine {
 
   const CONTEXT_LIST  = 'list';
   const CONTEXT_PANEL = 'panel';
+
+  public function newResultObject() {
+    return null;
+  }
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -69,8 +73,20 @@ abstract class PhabricatorApplicationSearchEngine {
    * @param AphrontRequest The search request.
    * @return PhabricatorSavedQuery
    */
-  abstract public function buildSavedQueryFromRequest(
-    AphrontRequest $request);
+  public function buildSavedQueryFromRequest(AphrontRequest $request) {
+    $fields = $this->buildSearchFields();
+    $viewer = $this->requireViewer();
+
+    $saved = new PhabricatorSavedQuery();
+    foreach ($fields as $field) {
+      $field->setViewer($viewer);
+
+      $value = $field->readValueFromRequest($request);
+      $saved->setParameter($field->getKey(), $value);
+    }
+
+    return $saved;
+  }
 
   /**
    * Executes the saved query.
@@ -78,8 +94,45 @@ abstract class PhabricatorApplicationSearchEngine {
    * @param PhabricatorSavedQuery The saved query to operate on.
    * @return The result of the query.
    */
-  abstract public function buildQueryFromSavedQuery(
-    PhabricatorSavedQuery $saved);
+  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
+    $fields = $this->buildSearchFields();
+    $viewer = $this->requireViewer();
+
+    $parameters = array();
+    foreach ($fields as $field) {
+      $field->setViewer($viewer);
+      $field->readValueFromSavedQuery($saved);
+      $value = $field->getValueForQuery($field->getValue());
+      $parameters[$field->getKey()] = $value;
+    }
+
+    $query = $this->buildQueryFromParameters($parameters);
+
+    $object = $this->newResultObject();
+    if (!$object) {
+      return $query;
+    }
+
+    if ($object instanceof PhabricatorProjectInterface) {
+      if (!empty($parameters['projectPHIDs'])) {
+        $query->withEdgeLogicConstraints(
+          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+          $parameters['projectPHIDs']);
+      }
+    }
+
+    if ($object instanceof PhabricatorSpacesInterface) {
+      if (!empty($parameters['spacePHIDs'])) {
+        $query->withSpacePHIDs($parameters['spacePHIDs']);
+      }
+    }
+
+    return $query;
+  }
+
+  protected function buildQueryFromParameters(array $parameters) {
+    throw new PhutilMethodNotImplementedException();
+  }
 
   /**
    * Builds the search form using the request.
@@ -88,9 +141,63 @@ abstract class PhabricatorApplicationSearchEngine {
    * @param PhabricatorSavedQuery The query from which to build the form.
    * @return void
    */
-  abstract public function buildSearchForm(
+  public function buildSearchForm(
     AphrontFormView $form,
-    PhabricatorSavedQuery $query);
+    PhabricatorSavedQuery $saved) {
+
+    $fields = $this->buildSearchFields();
+    $viewer = $this->requireViewer();
+
+    foreach ($fields as $field) {
+      $field->setViewer($viewer);
+      $field->readValueFromSavedQuery($saved);
+    }
+
+    foreach ($fields as $field) {
+      foreach ($field->getErrors() as $error) {
+        $this->addError(last($error));
+      }
+    }
+
+    foreach ($fields as $field) {
+      $field->appendToForm($form);
+    }
+  }
+
+  protected function buildSearchFields() {
+    $fields = array();
+
+    foreach ($this->buildCustomSearchFields() as $field) {
+      $fields[] = $field;
+    }
+
+    $object = $this->newResultObject();
+    if (!$object) {
+      return $fields;
+    }
+
+    if ($object instanceof PhabricatorProjectInterface) {
+      $fields[] = id(new PhabricatorSearchProjectsField())
+        ->setKey('projectPHIDs')
+        ->setAliases(array('project', 'projects'))
+        ->setLabel(pht('Projects'));
+    }
+
+    if ($object instanceof PhabricatorSpacesInterface) {
+      if (PhabricatorSpacesNamespaceQuery::getSpacesExist()) {
+        $fields[] = id(new PhabricatorSearchSpacesField())
+          ->setKey('spacePHIDs')
+          ->setAliases(array('space', 'spaces'))
+          ->setLabel(pht('Spaces'));
+      }
+    }
+
+    return $fields;
+  }
+
+  protected function buildCustomSearchFields() {
+    throw new PhutilMethodNotImplementedException();
+  }
 
   public function getErrors() {
     return $this->errors;
@@ -832,6 +939,10 @@ abstract class PhabricatorApplicationSearchEngine {
    * @task appsearch
    */
   public function getCustomFieldObject() {
+    $object = $this->newResultObject();
+    if ($object instanceof PhabricatorCustomFieldInterface) {
+      return $object;
+    }
     return null;
   }
 
@@ -1000,30 +1111,10 @@ abstract class PhabricatorApplicationSearchEngine {
       return;
     }
 
-    $phids = array();
     foreach ($list->getFields() as $field) {
       $key = $this->getKeyForCustomField($field);
       $value = $saved->getParameter($key);
-      $phids[$key] = $field->getRequiredHandlePHIDsForApplicationSearch($value);
-    }
-    $all_phids = array_mergev($phids);
-
-    $handles = array();
-    if ($all_phids) {
-      $handles = id(new PhabricatorHandleQuery())
-        ->setViewer($this->requireViewer())
-        ->withPHIDs($all_phids)
-        ->execute();
-    }
-
-    foreach ($list->getFields() as $field) {
-      $key = $this->getKeyForCustomField($field);
-      $value = $saved->getParameter($key);
-      $field->appendToApplicationSearchForm(
-        $this,
-        $form,
-        $value,
-        array_select_keys($handles, $phids[$key]));
+      $field->appendToApplicationSearchForm($this, $form, $value);
     }
   }
 

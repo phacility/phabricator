@@ -15,7 +15,7 @@ final class PholioSearchIndexer extends PhabricatorSearchDocumentIndexer {
       ->setDocumentModified($mock->getDateModified());
 
     $doc->addField(
-      PhabricatorSearchField::FIELD_BODY,
+      PhabricatorSearchDocumentFieldType::FIELD_BODY,
       $mock->getDescription());
 
     $doc->addRelationship(

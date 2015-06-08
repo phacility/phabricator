@@ -44,11 +44,14 @@ final class PhabricatorNuanceApplication extends PhabricatorApplication {
           'new/'                   => 'NuanceItemEditController',
         ),
         'source/' => array(
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'NuanceSourceListController',
           'view/(?P<id>[1-9]\d*)/' => 'NuanceSourceViewController',
           'edit/(?P<id>[1-9]\d*)/' => 'NuanceSourceEditController',
-          'new/'                   => 'NuanceSourceEditController',
+          'new/(?P<type>[^/]+)/'   => 'NuanceSourceEditController',
+          'create/' => 'NuanceSourceCreateController',
         ),
         'queue/' => array(
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'NuanceQueueListController',
           'view/(?P<id>[1-9]\d*)/' => 'NuanceQueueViewController',
           'edit/(?P<id>[1-9]\d*)/' => 'NuanceQueueEditController',
           'new/'                   => 'NuanceQueueEditController',
@@ -58,6 +61,9 @@ final class PhabricatorNuanceApplication extends PhabricatorApplication {
           'edit/(?P<id>[1-9]\d*)/' => 'NuanceRequestorEditController',
           'new/'                   => 'NuanceRequestorEditController',
         ),
+      ),
+      '/action/' => array(
+        '(?P<id>[1-9]\d*)/(?P<path>.*)' => 'NuanceSourceActionController',
       ),
     );
   }

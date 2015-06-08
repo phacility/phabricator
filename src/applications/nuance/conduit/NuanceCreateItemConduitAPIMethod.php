@@ -36,7 +36,7 @@ final class NuanceCreateItemConduitAPIMethod extends NuanceConduitAPIMethod {
 
     $user = $request->getUser();
 
-    $item = NuanceItem::initializeNewItem($user);
+    $item = NuanceItem::initializeNewItem();
     $xactions = array();
 
     if ($source_phid) {

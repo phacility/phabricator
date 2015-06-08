@@ -172,7 +172,26 @@ final class PHUIHeaderView extends AphrontTagView {
         ' ');
     }
 
+    $viewer = $this->getUser();
+
     $header = array();
+    if ($viewer) {
+      $header[] = id(new PHUISpacesNamespaceContextView())
+        ->setUser($viewer)
+        ->setObject($this->policyObject);
+    }
+
+    if ($this->objectName) {
+      $header[] = array(
+        phutil_tag(
+          'a',
+          array(
+            'href' => '/'.$this->objectName,
+          ),
+          $this->objectName),
+        ' ',
+      );
+    }
 
     if ($this->actionLinks) {
       $actions = array();
@@ -199,18 +218,6 @@ final class PHUIHeaderView extends AphrontTagView {
         $this->buttonBar);
     }
     $header[] = $this->header;
-
-    if ($this->objectName) {
-      array_unshift(
-        $header,
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/'.$this->objectName,
-          ),
-          $this->objectName),
-        ' ');
-    }
 
     if ($this->tags) {
       $header[] = ' ';
@@ -268,9 +275,9 @@ final class PHUIHeaderView extends AphrontTagView {
   }
 
   private function renderPolicyProperty(PhabricatorPolicyInterface $object) {
-    $policies = PhabricatorPolicyQuery::loadPolicies(
-      $this->getUser(),
-      $object);
+    $viewer = $this->getUser();
+
+    $policies = PhabricatorPolicyQuery::loadPolicies($viewer, $object);
 
     $view_capability = PhabricatorPolicyCapability::CAN_VIEW;
     $policy = idx($policies, $view_capability);
@@ -294,4 +301,5 @@ final class PHUIHeaderView extends AphrontTagView {
 
     return array($icon, $link);
   }
+
 }

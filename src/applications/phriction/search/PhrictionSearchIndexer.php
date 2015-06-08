@@ -25,7 +25,7 @@ final class PhrictionSearchIndexer
     $doc->setDocumentModified($content->getDateModified());
 
     $doc->addField(
-      PhabricatorSearchField::FIELD_BODY,
+      PhabricatorSearchDocumentFieldType::FIELD_BODY,
       $content->getContent());
 
     $doc->addRelationship(

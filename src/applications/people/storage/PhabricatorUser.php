@@ -751,6 +751,20 @@ final class PhabricatorUser
       $email->getUserPHID());
   }
 
+  public function getDefaultSpacePHID() {
+    // TODO: We might let the user switch which space they're "in" later on;
+    // for now just use the global space if one exists.
+
+    $spaces = PhabricatorSpacesNamespaceQuery::getViewerSpaces($this);
+    foreach ($spaces as $space) {
+      if ($space->getIsDefaultNamespace()) {
+        return $space->getPHID();
+      }
+    }
+
+    return null;
+  }
+
 
   /**
    * Grant a user a source of authority, to let them bypass policy checks they

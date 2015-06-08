@@ -24,8 +24,8 @@ final class PhabricatorDoorkeeperApplication extends PhabricatorApplication {
 
   public function getRemarkupRules() {
     return array(
-      new DoorkeeperRemarkupRuleAsana(),
-      new DoorkeeperRemarkupRuleJIRA(),
+      new DoorkeeperAsanaRemarkupRule(),
+      new DoorkeeperJIRARemarkupRule(),
     );
   }
 

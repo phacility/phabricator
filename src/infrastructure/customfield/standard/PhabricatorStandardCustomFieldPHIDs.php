@@ -61,13 +61,6 @@ abstract class PhabricatorStandardCustomFieldPHIDs
     }
   }
 
-  public function getRequiredHandlePHIDsForApplicationSearch($value) {
-    if ($value) {
-      return $value;
-    }
-    return array();
-  }
-
   public function getRequiredHandlePHIDsForPropertyView() {
     $value = $this->getFieldValue();
     if ($value) {

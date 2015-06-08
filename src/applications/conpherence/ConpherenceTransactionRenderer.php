@@ -61,7 +61,7 @@ final class ConpherenceTransactionRenderer {
     // between days. some setup required!
     $previous_transaction = null;
     $date_marker_transaction = id(new ConpherenceTransaction())
-      ->setTransactionType(ConpherenceTransactionType::TYPE_DATE_MARKER)
+      ->setTransactionType(ConpherenceTransaction::TYPE_DATE_MARKER)
       ->makeEphemeral();
     $date_marker_transaction_view = id(new ConpherenceTransactionView())
       ->setUser($user)

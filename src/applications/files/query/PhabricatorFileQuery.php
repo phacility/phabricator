@@ -118,19 +118,7 @@ final class PhabricatorFileQuery
   }
 
   protected function loadPage() {
-    $table = new PhabricatorFile();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT f.* FROM %T f %Q %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildJoinClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    $files = $table->loadAllFromArray($data);
+    $files = $this->loadStandardPage(new PhabricatorFile());
 
     if (!$files) {
       return $files;
@@ -218,49 +206,48 @@ final class PhabricatorFileQuery
     return $files;
   }
 
-  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
-    $joins = array();
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
 
     if ($this->transforms) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T t ON t.transformedPHID = f.phid',
         id(new PhabricatorTransformedFile())->getTableName());
     }
 
-    return implode(' ', $joins);
+    return $joins;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
-
-    $where[] = $this->buildPagingClause($conn_r);
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'f.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'f.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'f.authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
     if ($this->explicitUploads !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'f.isExplicitUpload = true');
+        $conn,
+        'f.isExplicitUpload = %d',
+        (int)$this->explicitUploads);
     }
 
     if ($this->transforms !== null) {
@@ -268,70 +255,70 @@ final class PhabricatorFileQuery
       foreach ($this->transforms as $transform) {
         if ($transform['transform'] === true) {
           $clauses[] = qsprintf(
-            $conn_r,
+            $conn,
             '(t.originalPHID = %s)',
             $transform['originalPHID']);
         } else {
           $clauses[] = qsprintf(
-            $conn_r,
+            $conn,
             '(t.originalPHID = %s AND t.transform = %s)',
             $transform['originalPHID'],
             $transform['transform']);
         }
       }
-      $where[] = qsprintf($conn_r, '(%Q)', implode(') OR (', $clauses));
+      $where[] = qsprintf($conn, '(%Q)', implode(') OR (', $clauses));
     }
 
     if ($this->dateCreatedAfter !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'f.dateCreated >= %d',
         $this->dateCreatedAfter);
     }
 
     if ($this->dateCreatedBefore !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'f.dateCreated <= %d',
         $this->dateCreatedBefore);
     }
 
     if ($this->contentHashes !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'f.contentHash IN (%Ls)',
         $this->contentHashes);
     }
 
     if ($this->minLength !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'byteSize >= %d',
         $this->minLength);
     }
 
     if ($this->maxLength !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'byteSize <= %d',
         $this->maxLength);
     }
 
     if ($this->names !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'name in (%Ls)',
         $this->names);
     }
 
     if ($this->isPartial !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'isPartial = %d',
         (int)$this->isPartial);
     }
 
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   protected function getPrimaryTableAlias() {

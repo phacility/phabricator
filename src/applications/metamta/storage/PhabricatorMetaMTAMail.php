@@ -64,12 +64,10 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   }
 
   /**
-   * Set tags (@{class:MetaMTANotificationType} constants) which identify the
-   * content of this mail in a general way. These tags are used to allow users
-   * to opt out of receiving certain types of mail, like updates when a task's
-   * projects change.
+   * These tags are used to allow users to opt out of receiving certain types
+   * of mail, like updates when a task's projects change.
    *
-   * @param list<const> List of @{class:MetaMTANotificationType} constants.
+   * @param list<const>
    * @return this
    */
   public function setMailTags(array $tags) {

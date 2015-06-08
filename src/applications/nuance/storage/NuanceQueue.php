@@ -2,7 +2,9 @@
 
 final class NuanceQueue
   extends NuanceDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorApplicationTransactionInterface {
 
   protected $name;
   protected $mailKey;
@@ -24,6 +26,10 @@ final class NuanceQueue
       NuanceQueuePHIDType::TYPECONST);
   }
 
+  public static function initializeNewQueue() {
+    return new NuanceQueue();
+  }
+
   public function save() {
     if (!$this->getMailKey()) {
       $this->setMailKey(Filesystem::readRandomCharacters(20));
@@ -34,6 +40,10 @@ final class NuanceQueue
   public function getURI() {
     return '/nuance/queue/view/'.$this->getID().'/';
   }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
 
   public function getCapabilities() {
     return array(
@@ -57,6 +67,28 @@ final class NuanceQueue
 
   public function describeAutomaticCapability($capability) {
     return null;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new NuanceQueueEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new NuanceQueueTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
   }
 
 }

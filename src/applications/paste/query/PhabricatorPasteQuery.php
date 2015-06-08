@@ -72,20 +72,7 @@ final class PhabricatorPasteQuery
   }
 
   protected function loadPage() {
-    $table = new PhabricatorPaste();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT paste.* FROM %T paste %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    $pastes = $table->loadAllFromArray($data);
-
-    return $pastes;
+    return $this->loadStandardPage(new PhabricatorPaste());
   }
 
   protected function didFilterPage(array $pastes) {
@@ -103,49 +90,49 @@ final class PhabricatorPasteQuery
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->authorPHIDs) {
+    if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
         'authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
-    if ($this->parentPHIDs) {
+    if ($this->parentPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
         'parentPHID IN (%Ls)',
         $this->parentPHIDs);
     }
 
-    if ($this->languages) {
+    if ($this->languages !== null) {
       $where[] = qsprintf(
         $conn,
         'language IN (%Ls)',
         $this->languages);
     }
 
-    if ($this->dateCreatedAfter) {
+    if ($this->dateCreatedAfter !== null) {
       $where[] = qsprintf(
         $conn,
         'dateCreated >= %d',
         $this->dateCreatedAfter);
     }
 
-    if ($this->dateCreatedBefore) {
+    if ($this->dateCreatedBefore !== null) {
       $where[] = qsprintf(
         $conn,
         'dateCreated <= %d',
