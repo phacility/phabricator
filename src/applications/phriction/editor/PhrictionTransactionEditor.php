@@ -776,24 +776,6 @@ final class PhrictionTransactionEditor
       ->setDocument($object);
   }
 
-  protected function didApplyHeraldRules(
-    PhabricatorLiskDAO $object,
-    HeraldAdapter $adapter,
-    HeraldTranscript $transcript) {
-
-    $xactions = array();
-
-    $cc_phids = $adapter->getCcPHIDs();
-    if ($cc_phids) {
-      $value = array_fuse($cc_phids);
-      $xactions[] = id(new PhrictionTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
-        ->setNewValue(array('+' => $value));
-    }
-
-    return $xactions;
-  }
-
   private function buildNewContentTemplate(
     PhrictionDocument $document) {
 
