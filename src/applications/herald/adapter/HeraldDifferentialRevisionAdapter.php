@@ -5,7 +5,6 @@ final class HeraldDifferentialRevisionAdapter
 
   protected $revision;
 
-  protected $explicitCCs;
   protected $explicitReviewers;
   protected $forbiddenCCs;
 
@@ -108,11 +107,6 @@ final class HeraldDifferentialRevisionAdapter
     $object->diff = $diff;
 
     return $object;
-  }
-
-  public function setExplicitCCs($explicit_ccs) {
-    $this->explicitCCs = $explicit_ccs;
-    return $this;
   }
 
   public function setExplicitReviewers($explicit_reviewers) {
@@ -221,12 +215,6 @@ final class HeraldDifferentialRevisionAdapter
         return mpull($projects, 'getPHID');
       case self::FIELD_DIFF_FILE:
         return $this->loadAffectedPaths();
-      case self::FIELD_CC:
-        if (isset($this->explicitCCs)) {
-          return array_keys($this->explicitCCs);
-        } else {
-          return $this->revision->getCCPHIDs();
-        }
       case self::FIELD_REVIEWERS:
         if (isset($this->explicitReviewers)) {
           return array_keys($this->explicitReviewers);
@@ -297,19 +285,6 @@ final class HeraldDifferentialRevisionAdapter
     assert_instances_of($effects, 'HeraldEffect');
 
     $result = array();
-    if ($this->explicitCCs) {
-      $effect = new HeraldEffect();
-      $effect->setAction(self::ACTION_ADD_CC);
-      $effect->setTarget(array_keys($this->explicitCCs));
-      $effect->setReason(
-        pht(
-          'CCs provided explicitly by revision author or carried over '.
-        'from a previous version of the revision.'));
-      $result[] = new HeraldApplyTranscript(
-        $effect,
-        true,
-        pht('Added addresses to CC list.'));
-    }
 
     $forbidden_ccs = array_fill_keys(
       nonempty($this->forbiddenCCs, array()),

@@ -104,9 +104,6 @@ final class PhrictionDocumentHeraldAdapter extends HeraldAdapter {
         return $this->getDocument()->getContent()->getContent();
       case self::FIELD_AUTHOR:
         return $this->getDocument()->getContent()->getAuthorPHID();
-      case self::FIELD_CC:
-        return PhabricatorSubscribersQuery::loadSubscribersForPHID(
-          $this->getDocument()->getPHID());
       case self::FIELD_PATH:
         return $this->getDocument()->getContent()->getSlug();
     }

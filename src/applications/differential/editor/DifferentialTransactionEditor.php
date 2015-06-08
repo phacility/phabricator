@@ -1558,9 +1558,6 @@ final class DifferentialTransactionEditor
       $object->getPHID(),
       PhabricatorObjectHasUnsubscriberEdgeType::EDGECONST);
 
-    $subscribed_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-      $object->getPHID());
-
     $revision = id(new DifferentialRevisionQuery())
       ->setViewer($this->getActor())
       ->withPHIDs(array($object->getPHID()))
@@ -1579,7 +1576,6 @@ final class DifferentialTransactionEditor
     $reviewers = $revision->getReviewerStatus();
     $reviewer_phids = mpull($reviewers, 'getReviewerPHID');
 
-    $adapter->setExplicitCCs($subscribed_phids);
     $adapter->setExplicitReviewers($reviewer_phids);
     $adapter->setForbiddenCCs($unsubscribed_phids);
 

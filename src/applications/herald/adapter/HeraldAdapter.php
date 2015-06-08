@@ -196,6 +196,20 @@ abstract class HeraldAdapter {
         return true;
       case self::FIELD_IS_NEW_OBJECT:
         return $this->getIsNewObject();
+      case self::FIELD_CC:
+        $object = $this->getObject();
+
+        if (!($object instanceof PhabricatorSubscribableInterface)) {
+          throw new Exception(
+            pht(
+              'Adapter object (of class "%s") does not implement interface '.
+              '"%s", so the subscribers field value can not be determined.',
+              get_class($object),
+              'PhabricatorSubscribableInterface'));
+        }
+
+        $phid = $object->getPHID();
+        return PhabricatorSubscribersQuery::loadSubscribersForPHID($phid);
       case self::FIELD_APPLICATION_EMAIL:
         $value = array();
         // while there is only one match by implementation, we do set

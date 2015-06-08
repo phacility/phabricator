@@ -101,9 +101,6 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
         return $this->getMock()->getDescription();
       case self::FIELD_AUTHOR:
         return $this->getMock()->getAuthorPHID();
-      case self::FIELD_CC:
-        return PhabricatorSubscribersQuery::loadSubscribersForPHID(
-          $this->getMock()->getPHID());
       case self::FIELD_PROJECTS:
         return PhabricatorEdgeQuery::loadDestinationPHIDs(
           $this->getMock()->getPHID(),
