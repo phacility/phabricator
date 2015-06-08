@@ -293,12 +293,6 @@ final class HeraldDifferentialRevisionAdapter
     foreach ($effects as $effect) {
       $action = $effect->getAction();
       switch ($action) {
-        case self::ACTION_NOTHING:
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('OK, did nothing.'));
-          break;
         case self::ACTION_ADD_CC:
           $base_target = $effect->getTarget();
           $forbidden = array();

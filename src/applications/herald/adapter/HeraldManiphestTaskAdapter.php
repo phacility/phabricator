@@ -148,12 +148,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
     foreach ($effects as $effect) {
       $action = $effect->getAction();
       switch ($action) {
-        case self::ACTION_NOTHING:
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Great success at doing nothing.'));
-          break;
         case self::ACTION_ADD_CC:
           foreach ($effect->getTarget() as $phid) {
             $this->ccPHIDs[] = $phid;

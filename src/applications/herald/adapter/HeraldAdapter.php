@@ -1559,6 +1559,8 @@ abstract class HeraldAdapter {
         return $this->applyFlagEffect($effect);
       case self::ACTION_EMAIL:
         return $this->applyEmailEffect($effect);
+      case self::ACTION_NOTHING:
+        return $this->applyNothingEffect($effect);
       default:
         break;
     }
@@ -1577,6 +1579,12 @@ abstract class HeraldAdapter {
     return $result;
   }
 
+  private function applyNothingEffect(HeraldEffect $effect) {
+    return new HeraldApplyTranscript(
+      $effect,
+      true,
+      pht('Did nothing.'));
+  }
 
   /**
    * @task apply
