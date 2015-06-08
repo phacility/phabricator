@@ -193,7 +193,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
-  protected function newResultObject() {
+  public function newResultObject() {
     return new ManiphestTask();
   }
 

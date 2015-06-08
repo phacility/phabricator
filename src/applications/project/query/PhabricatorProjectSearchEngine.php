@@ -11,8 +11,9 @@ final class PhabricatorProjectSearchEngine
     return 'PhabricatorProjectApplication';
   }
 
-  public function newResultObject() {
-    return new PhabricatorProject();
+  public function newQuery() {
+    return id(new PhabricatorProjectQuery())
+      ->needImages(true);
   }
 
   protected function buildCustomSearchFields() {
@@ -41,8 +42,7 @@ final class PhabricatorProjectSearchEngine
 
 
   public function buildQueryFromParameters(array $map) {
-    $query = id(new PhabricatorProjectQuery())
-      ->needImages(true);
+    $query = $this->newQuery();
 
     if (strlen($map['name'])) {
       $tokens = PhabricatorTypeaheadDatasource::tokenizeString($map['name']);

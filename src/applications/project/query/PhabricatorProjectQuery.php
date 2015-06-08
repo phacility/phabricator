@@ -95,12 +95,25 @@ final class PhabricatorProjectQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new PhabricatorProject();
+  }
+
   protected function getDefaultOrderVector() {
     return array('name');
   }
 
-  public function getOrderableColumns() {
+  public function getBuiltinOrders() {
     return array(
+      'name' => array(
+        'vector' => array('name'),
+        'name' => pht('Name'),
+      ),
+    ) + parent::getBuiltinOrders();
+  }
+
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
       'name' => array(
         'table' => $this->getPrimaryTableAlias(),
         'column' => 'name',

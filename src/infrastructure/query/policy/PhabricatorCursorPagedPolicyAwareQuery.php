@@ -200,7 +200,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return null;
   }
 
-  protected function newResultObject() {
+  public function newResultObject() {
     return null;
   }
 
@@ -844,6 +844,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           'column' => 'indexValue',
           'type' => $index->getIndexValueType(),
           'null' => 'tail',
+          'customfield' => true,
+          'customfield.index.table' => $index->getTableName(),
+          'customfield.index.key' => $digest,
         );
       }
     }
@@ -1229,6 +1232,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
     }
 
+    // TODO: Get rid of this.
     foreach ($this->applicationSearchOrders as $key => $order) {
       $table = $order['table'];
       $index = $order['index'];
@@ -1245,6 +1249,32 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $phid_column,
         $alias,
         $index);
+    }
+
+    $phid_column = $this->getApplicationSearchObjectPHIDColumn();
+    $orderable = $this->getOrderableColumns();
+
+    $vector = $this->getOrderVector();
+    foreach ($vector as $order) {
+      $spec = $orderable[$order->getOrderKey()];
+      if (empty($spec['customfield'])) {
+        continue;
+      }
+
+      $table = $spec['customfield.index.table'];
+      $alias = $spec['table'];
+      $key = $spec['customfield.index.key'];
+
+      $joins[] = qsprintf(
+        $conn_r,
+        'LEFT JOIN %T %T ON %T.objectPHID = %Q
+          AND %T.indexKey = %s',
+        $table,
+        $alias,
+        $alias,
+        $phid_column,
+        $alias,
+        $key);
     }
 
     return implode(' ', $joins);

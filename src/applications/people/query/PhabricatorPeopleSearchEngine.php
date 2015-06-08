@@ -11,8 +11,10 @@ final class PhabricatorPeopleSearchEngine
     return 'PhabricatorPeopleApplication';
   }
 
-  public function newResultObject() {
-    return new PhabricatorUser();
+  public function newQuery() {
+    return id(new PhabricatorPeopleQuery())
+      ->needPrimaryEmail(true)
+      ->needProfileImage(true);
   }
 
   protected function buildCustomSearchFields() {
@@ -77,9 +79,7 @@ final class PhabricatorPeopleSearchEngine
   }
 
   public function buildQueryFromParameters(array $map) {
-    $query = id(new PhabricatorPeopleQuery())
-      ->needPrimaryEmail(true)
-      ->needProfileImage(true);
+    $query = $this->newQuery();
 
     $viewer = $this->requireViewer();
 

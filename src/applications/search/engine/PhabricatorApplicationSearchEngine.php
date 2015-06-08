@@ -27,6 +27,19 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   const CONTEXT_PANEL = 'panel';
 
   public function newResultObject() {
+    // We may be able to get this automatically if newQuery() is implemented.
+    $query = $this->newQuery();
+    if ($query) {
+      $object = $query->newResultObject();
+      if ($object) {
+        return $object;
+      }
+    }
+
+    return null;
+  }
+
+  public function newQuery() {
     return null;
   }
 
@@ -98,15 +111,15 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     $fields = $this->buildSearchFields();
     $viewer = $this->requireViewer();
 
-    $parameters = array();
+    $map = array();
     foreach ($fields as $field) {
       $field->setViewer($viewer);
       $field->readValueFromSavedQuery($saved);
       $value = $field->getValueForQuery($field->getValue());
-      $parameters[$field->getKey()] = $value;
+      $map[$field->getKey()] = $value;
     }
 
-    $query = $this->buildQueryFromParameters($parameters);
+    $query = $this->buildQueryFromParameters($map);
 
     $object = $this->newResultObject();
     if (!$object) {
@@ -114,31 +127,33 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     }
 
     if ($object instanceof PhabricatorSubscribableInterface) {
-      if (!empty($parameters['subscriberPHIDs'])) {
+      if (!empty($map['subscriberPHIDs'])) {
         $query->withEdgeLogicPHIDs(
           PhabricatorObjectHasSubscriberEdgeType::EDGECONST,
           PhabricatorQueryConstraint::OPERATOR_OR,
-          $parameters['subscriberPHIDs']);
+          $map['subscriberPHIDs']);
       }
     }
 
     if ($object instanceof PhabricatorProjectInterface) {
-      if (!empty($parameters['projectPHIDs'])) {
+      if (!empty($map['projectPHIDs'])) {
         $query->withEdgeLogicConstraints(
           PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
-          $parameters['projectPHIDs']);
+          $map['projectPHIDs']);
       }
     }
 
     if ($object instanceof PhabricatorSpacesInterface) {
-      if (!empty($parameters['spacePHIDs'])) {
-        $query->withSpacePHIDs($parameters['spacePHIDs']);
+      if (!empty($map['spacePHIDs'])) {
+        $query->withSpacePHIDs($map['spacePHIDs']);
       }
     }
 
     if ($object instanceof PhabricatorCustomFieldInterface) {
       $this->applyCustomFieldsToQuery($query, $saved);
     }
+
+    $this->setQueryOrder($query, $saved);
 
     return $query;
   }
@@ -185,35 +200,44 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     }
 
     $object = $this->newResultObject();
-    if (!$object) {
-      return $fields;
-    }
+    if ($object) {
+      if ($object instanceof PhabricatorSubscribableInterface) {
+        $fields[] = id(new PhabricatorSearchSubscribersField())
+          ->setLabel(pht('Subscribers'))
+          ->setKey('subscriberPHIDs')
+          ->setAliases(array('subscriber', 'subscribers'));
+      }
 
-    if ($object instanceof PhabricatorSubscribableInterface) {
-      $fields[] = id(new PhabricatorSearchSubscribersField())
-        ->setLabel(pht('Subscribers'))
-        ->setKey('subscriberPHIDs')
-        ->setAliases(array('subscriber', 'subscribers'));
-    }
+      if ($object instanceof PhabricatorProjectInterface) {
+        $fields[] = id(new PhabricatorSearchProjectsField())
+          ->setKey('projectPHIDs')
+          ->setAliases(array('project', 'projects'))
+          ->setLabel(pht('Projects'));
+      }
 
-    if ($object instanceof PhabricatorProjectInterface) {
-      $fields[] = id(new PhabricatorSearchProjectsField())
-        ->setKey('projectPHIDs')
-        ->setAliases(array('project', 'projects'))
-        ->setLabel(pht('Projects'));
-    }
-
-    if ($object instanceof PhabricatorSpacesInterface) {
-      if (PhabricatorSpacesNamespaceQuery::getSpacesExist()) {
-        $fields[] = id(new PhabricatorSearchSpacesField())
-          ->setKey('spacePHIDs')
-          ->setAliases(array('space', 'spaces'))
-          ->setLabel(pht('Spaces'));
+      if ($object instanceof PhabricatorSpacesInterface) {
+        if (PhabricatorSpacesNamespaceQuery::getSpacesExist()) {
+          $fields[] = id(new PhabricatorSearchSpacesField())
+            ->setKey('spacePHIDs')
+            ->setAliases(array('space', 'spaces'))
+            ->setLabel(pht('Spaces'));
+        }
       }
     }
 
     foreach ($this->buildCustomFieldSearchFields() as $custom_field) {
       $fields[] = $custom_field;
+    }
+
+    $query = $this->newQuery();
+    if ($query) {
+      $orders = $query->getBuiltinOrders();
+      $orders = ipull($orders, 'name');
+
+      $fields[] = id(new PhabricatorSearchOrderField())
+        ->setLabel(pht('Order'))
+        ->setKey('order')
+        ->setOptions($orders);
     }
 
     $field_map = array();
@@ -890,6 +914,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
     $order = $saved->getParameter('order');
     $builtin = $query->getBuiltinOrders();
+
     if (strlen($order) && isset($builtin[$order])) {
       $query->setOrder($order);
     } else {

@@ -53,6 +53,10 @@ final class PholioMockQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new PholioMock();
+  }
+
   protected function loadPage() {
     $mocks = $this->loadStandardPage(new PholioMock());
 

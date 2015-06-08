@@ -11,8 +11,8 @@ final class PhabricatorFileSearchEngine
     return 'PhabricatorFilesApplication';
   }
 
-  public function newResultObject() {
-    return new PhabricatorFile();
+  public function newQuery() {
+    return new PhabricatorFileQuery();
   }
 
   protected function buildCustomSearchFields() {
@@ -46,7 +46,7 @@ final class PhabricatorFileSearchEngine
   }
 
   public function buildQueryFromParameters(array $map) {
-    $query = id(new PhabricatorFileQuery());
+    $query = $this->newQuery();
 
     if ($map['authorPHIDs']) {
       $query->withAuthorPHIDs($map['authorPHIDs']);

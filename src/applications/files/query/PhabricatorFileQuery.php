@@ -117,6 +117,10 @@ final class PhabricatorFileQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new PhabricatorFile();
+  }
+
   protected function loadPage() {
     $files = $this->loadStandardPage(new PhabricatorFile());
 
