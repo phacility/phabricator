@@ -269,6 +269,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       $fields[] = id(new PhabricatorSearchOrderField())
         ->setLabel(pht('Order By'))
         ->setKey('order')
+        ->setOrderAliases($query->getBuiltinOrderAliasMap())
         ->setOptions($orders);
     }
 
