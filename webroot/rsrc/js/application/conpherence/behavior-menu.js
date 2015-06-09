@@ -299,7 +299,7 @@ JX.behavior('conpherence-menu', function(config) {
       widget = 'widgets-people';
       var uri = JX.$U(location.href);
       var params = uri.getQueryParams();
-      if (params['settings'] !== null) {
+      if ('settings' in params) {
         widget = 'widgets-settings';
       }
     }
