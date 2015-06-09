@@ -11,55 +11,32 @@ final class HarbormasterBuildPlanSearchEngine
     return 'PhabricatorHarbormasterApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    $saved->setParameter(
-      'status',
-      $this->readListFromRequest($request, 'status'));
-
-    $this->saveQueryOrder($saved, $request);
-
-    return $saved;
+  public function newQuery() {
+    return new HarbormasterBuildPlanQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new HarbormasterBuildPlanQuery());
-    $this->setQueryOrder($query, $saved);
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchCheckboxesField())
+        ->setLabel(pht('Status'))
+        ->setKey('status')
+        ->setAliases(array('statuses'))
+        ->setOptions(
+          array(
+            HarbormasterBuildPlan::STATUS_ACTIVE => pht('Active'),
+            HarbormasterBuildPlan::STATUS_DISABLED => pht('Disabled'),
+          )),
+    );
+  }
 
-    $status = $saved->getParameter('status', array());
-    if ($status) {
-      $query->withStatuses($status);
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
+
+    if ($map['status']) {
+      $query->withStatuses($map['status']);
     }
 
     return $query;
-  }
-
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved) {
-
-    $status = $saved->getParameter('status', array());
-
-    $form
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->setLabel('Status')
-          ->addCheckbox(
-            'status[]',
-            HarbormasterBuildPlan::STATUS_ACTIVE,
-            pht('Active'),
-            in_array(HarbormasterBuildPlan::STATUS_ACTIVE, $status))
-          ->addCheckbox(
-            'status[]',
-            HarbormasterBuildPlan::STATUS_DISABLED,
-            pht('Disabled'),
-            in_array(HarbormasterBuildPlan::STATUS_DISABLED, $status)));
-
-    $this->appendOrderFieldsToForm(
-      $form,
-      $saved,
-      new HarbormasterBuildPlanQuery());
   }
 
   protected function getURI($path) {

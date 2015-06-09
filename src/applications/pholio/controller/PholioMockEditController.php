@@ -93,7 +93,7 @@ final class PholioMockEditController extends PholioController {
       $mock_xactions[$type_cc]   = array('=' => $v_cc);
 
       if (!strlen($request->getStr('name'))) {
-        $e_name = 'Required';
+        $e_name = pht('Required');
         $errors[] = pht('You must give the mock a name.');
       }
 
@@ -339,7 +339,7 @@ final class PholioMockEditController extends PholioController {
           ->setDatasource(new PhabricatorProjectDatasource()))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('CC'))
+          ->setLabel(pht('Subscribers'))
           ->setName('cc')
           ->setValue($v_cc)
           ->setUser($user)

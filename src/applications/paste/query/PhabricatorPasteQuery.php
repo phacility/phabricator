@@ -67,7 +67,7 @@ final class PhabricatorPasteQuery
     return $this;
   }
 
-  protected function newResultObject() {
+  public function newResultObject() {
     return new PhabricatorPaste();
   }
 

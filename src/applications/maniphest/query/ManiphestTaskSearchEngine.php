@@ -38,8 +38,9 @@ final class ManiphestTaskSearchEngine
     return 'PhabricatorManiphestApplication';
   }
 
-  public function getCustomFieldObject() {
-    return new ManiphestTask();
+  public function newQuery() {
+    return id(new ManiphestTaskQuery())
+      ->needProjectPHIDs(true);
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -108,8 +109,7 @@ final class ManiphestTaskSearchEngine
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new ManiphestTaskQuery())
-      ->needProjectPHIDs(true);
+    $query = $this->newQuery();
 
     $viewer = $this->requireViewer();
 
@@ -156,10 +156,14 @@ final class ManiphestTaskSearchEngine
     $query->withBlockingTasks($saved->getParameter('blocking'));
     $query->withBlockedTasks($saved->getParameter('blocked'));
 
-    $this->applyOrderByToQuery(
-      $query,
-      $this->getOrderValues(),
-      $saved->getParameter('order'));
+    // TODO: This is glue that will be obsolete soon.
+    $order = $saved->getParameter('order');
+    $builtin = $query->getBuiltinOrderAliasMap();
+    if (strlen($order) && isset($builtin[$order])) {
+      $query->setOrder($order);
+    } else {
+      $query->setOrder(head_key($builtin));
+    }
 
     $group = $saved->getParameter('group');
     $group = idx($this->getGroupValues(), $group);
@@ -246,9 +250,7 @@ final class ManiphestTaskSearchEngine
 
     $ids = $saved->getParameter('ids', array());
 
-    $builtin_orders = $this->getOrderOptions();
-    $custom_orders = $this->getCustomFieldOrderOptions();
-    $all_orders = $builtin_orders + $custom_orders;
+    $all_orders = ipull($this->newQuery()->getBuiltinOrders(), 'name');
 
     $form
       ->appendControl(
@@ -403,24 +405,6 @@ final class ManiphestTaskSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
-  }
-
-  private function getOrderOptions() {
-    return array(
-      'priority' => pht('Priority'),
-      'updated' => pht('Date Updated'),
-      'created' => pht('Date Created'),
-      'title' => pht('Title'),
-    );
-  }
-
-  private function getOrderValues() {
-    return array(
-      'priority' => ManiphestTaskQuery::ORDER_PRIORITY,
-      'updated'  => ManiphestTaskQuery::ORDER_MODIFIED,
-      'created'  => ManiphestTaskQuery::ORDER_CREATED,
-      'title'    => ManiphestTaskQuery::ORDER_TITLE,
-    );
   }
 
   private function getGroupOptions() {

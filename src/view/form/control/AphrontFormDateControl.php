@@ -61,7 +61,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
       $this->valueTime = $time;
 
       // Assume invalid.
-      $err = 'Invalid';
+      $err = pht('Invalid');
 
       $zone = $this->getTimezone();
 

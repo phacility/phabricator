@@ -453,24 +453,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
       ->setMock($object);
   }
 
-  protected function didApplyHeraldRules(
-    PhabricatorLiskDAO $object,
-    HeraldAdapter $adapter,
-    HeraldTranscript $transcript) {
-
-    $xactions = array();
-
-    $cc_phids = $adapter->getCcPHIDs();
-    if ($cc_phids) {
-      $value = array_fuse($cc_phids);
-      $xactions[] = id(new PholioTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
-        ->setNewValue(array('+' => $value));
-    }
-
-    return $xactions;
-  }
-
   protected function sortTransactions(array $xactions) {
     $head = array();
     $tail = array();

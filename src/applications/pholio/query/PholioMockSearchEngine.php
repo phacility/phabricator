@@ -10,11 +10,14 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
     return 'PhabricatorPholioApplication';
   }
 
-  public function newResultObject() {
-    return new PholioMock();
+  public function newQuery() {
+    return id(new PholioMockQuery())
+      ->needCoverFiles(true)
+      ->needImages(true)
+      ->needTokenCounts(true);
   }
 
-  public function buildCustomSearchFields() {
+  protected function buildCustomSearchFields() {
     return array(
       id(new PhabricatorSearchUsersField())
         ->setKey('authorPHIDs')
@@ -29,11 +32,8 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
     );
   }
 
-  public function buildQueryFromParameters(array $map) {
-    $query = id(new PholioMockQuery())
-      ->needCoverFiles(true)
-      ->needImages(true)
-      ->needTokenCounts(true);
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
 
     if ($map['authorPHIDs']) {
       $query->withAuthorPHIDs($map['authorPHIDs']);

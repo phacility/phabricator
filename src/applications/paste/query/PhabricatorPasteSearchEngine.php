@@ -11,13 +11,13 @@ final class PhabricatorPasteSearchEngine
     return 'PhabricatorPasteApplication';
   }
 
-  public function newResultObject() {
-    return new PhabricatorPaste();
+  public function newQuery() {
+    return id(new PhabricatorPasteQuery())
+      ->needContent(true);
   }
 
   protected function buildQueryFromParameters(array $map) {
-    $query = id(new PhabricatorPasteQuery())
-      ->needContent(true);
+    $query = $this->newQuery();
 
     if ($map['authorPHIDs']) {
       $query->withAuthorPHIDs($map['authorPHIDs']);
@@ -53,6 +53,14 @@ final class PhabricatorPasteSearchEngine
       id(new PhabricatorSearchDateField())
         ->setKey('createdEnd')
         ->setLabel(pht('Created Before')),
+    );
+  }
+
+  protected function getDefaultFieldOrder() {
+    return array(
+      '...',
+      'createdStart',
+      'createdEnd',
     );
   }
 

@@ -77,7 +77,7 @@ final class HeraldDifferentialDiffAdapter extends HeraldDifferentialAdapter {
   public function getActionNameMap($rule_type) {
     return array(
       self::ACTION_BLOCK => pht('Block diff with message'),
-    );
+    ) + parent::getActionNameMap($rule_type);
   }
 
   public function getHeraldField($field) {
@@ -141,12 +141,6 @@ final class HeraldDifferentialDiffAdapter extends HeraldDifferentialAdapter {
     foreach ($effects as $effect) {
       $action = $effect->getAction();
       switch ($action) {
-        case self::ACTION_NOTHING:
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Did nothing.'));
-          break;
         case self::ACTION_BLOCK:
           $result[] = new HeraldApplyTranscript(
             $effect,
@@ -154,10 +148,8 @@ final class HeraldDifferentialDiffAdapter extends HeraldDifferentialAdapter {
             pht('Blocked diff.'));
           break;
         default:
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            false,
-            pht('No rules to handle action "%s"!', $action));
+          $result[] = $this->applyStandardEffect($effect);
+          break;
       }
     }
 

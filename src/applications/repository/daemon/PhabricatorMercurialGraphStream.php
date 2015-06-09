@@ -100,7 +100,10 @@ final class PhabricatorMercurialGraphStream
     }
 
     throw new Exception(
-      "No such {$until_type} '{$until_name}' in repository!");
+      pht(
+        "No such %s '%s' in repository!",
+        $until_type,
+        $until_name));
   }
 
 

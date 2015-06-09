@@ -13,7 +13,8 @@ final class PhabricatorUser
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorSSHPublicKeyInterface {
+    PhabricatorSSHPublicKeyInterface,
+    PhabricatorApplicationTransactionInterface {
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';
@@ -344,6 +345,12 @@ final class PhabricatorUser
   }
 
   public function getCSRFToken() {
+    if ($this->isOmnipotent()) {
+      // We may end up here when called from the daemons. The omnipotent user
+      // has no meaningful CSRF token, so just return `null`.
+      return null;
+    }
+
     if ($this->csrfSalt === null) {
       $this->csrfSalt = Filesystem::readRandomCharacters(
         self::CSRF_SALT_LENGTH);
@@ -1211,6 +1218,28 @@ final class PhabricatorUser
 
   public function getSSHKeyDefaultName() {
     return 'id_rsa_phabricator';
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorUserProfileEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorUserTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
   }
 
 }

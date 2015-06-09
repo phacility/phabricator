@@ -18,7 +18,7 @@ final class PhabricatorRepositoryType {
 
   public static function getNameForRepositoryType($type) {
     $map = self::getAllRepositoryTypes();
-    return idx($map, $type, 'Unknown');
+    return idx($map, $type, pht('Unknown'));
   }
 
 }

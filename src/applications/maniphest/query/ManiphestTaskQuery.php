@@ -43,7 +43,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   const GROUP_STATUS        = 'group-status';
   const GROUP_PROJECT       = 'group-project';
 
-  private $orderBy          = 'order-modified';
   const ORDER_PRIORITY      = 'order-priority';
   const ORDER_CREATED       = 'order-created';
   const ORDER_MODIFIED      = 'order-modified';
@@ -127,11 +126,27 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function setGroupBy($group) {
     $this->groupBy = $group;
-    return $this;
-  }
 
-  public function setOrderBy($order) {
-    $this->orderBy = $order;
+    switch ($this->groupBy) {
+      case self::GROUP_NONE:
+        $vector = array();
+        break;
+      case self::GROUP_PRIORITY:
+        $vector = array('priority');
+        break;
+      case self::GROUP_OWNER:
+        $vector = array('owner');
+        break;
+      case self::GROUP_STATUS:
+        $vector = array('status');
+        break;
+      case self::GROUP_PROJECT:
+        $vector = array('project');
+        break;
+    }
+
+    $this->setGroupVector($vector);
+
     return $this;
   }
 
@@ -193,71 +208,8 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
-  protected function newResultObject() {
+  public function newResultObject() {
     return new ManiphestTask();
-  }
-
-  protected function willExecute() {
-    // If we already have an order vector, use it as provided.
-    // TODO: This is a messy hack to make setOrderVector() stronger than
-    // setPriority().
-    $vector = $this->getOrderVector();
-    $keys = mpull(iterator_to_array($vector), 'getOrderKey');
-    if (array_values($keys) !== array('id')) {
-      return;
-    }
-
-    $parts = array();
-    switch ($this->groupBy) {
-      case self::GROUP_NONE:
-        break;
-      case self::GROUP_PRIORITY:
-        $parts[] = array('priority');
-        break;
-      case self::GROUP_OWNER:
-        $parts[] = array('owner');
-        break;
-      case self::GROUP_STATUS:
-        $parts[] = array('status');
-        break;
-      case self::GROUP_PROJECT:
-        $parts[] = array('project');
-        break;
-    }
-
-    if ($this->applicationSearchOrders) {
-      $columns = array();
-      foreach ($this->applicationSearchOrders as $order) {
-        $part = 'custom:'.$order['key'];
-        if ($order['ascending']) {
-          $part = '-'.$part;
-        }
-        $columns[] = $part;
-      }
-      $columns[] = 'id';
-      $parts[] = $columns;
-    } else {
-      switch ($this->orderBy) {
-        case self::ORDER_PRIORITY:
-          $parts[] = array('priority', 'subpriority', 'id');
-          break;
-        case self::ORDER_CREATED:
-          $parts[] = array('id');
-          break;
-        case self::ORDER_MODIFIED:
-          $parts[] = array('updated', 'id');
-          break;
-        case self::ORDER_TITLE:
-          $parts[] = array('title', 'id');
-          break;
-      }
-    }
-
-    $parts = array_mergev($parts);
-    // We may have a duplicate column if we are both ordering and grouping
-    // by priority.
-    $parts = array_unique($parts);
-    $this->setOrderVector($parts);
   }
 
   protected function loadPage() {
@@ -758,6 +710,41 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     }
 
     return $id;
+  }
+
+  public function getBuiltinOrders() {
+    $orders = array(
+      'priority' => array(
+        'vector' => array('priority', 'subpriority', 'id'),
+        'name' => pht('Priority'),
+        'aliases' => array(self::ORDER_PRIORITY),
+      ),
+      'updated' => array(
+        'vector' => array('updated', 'id'),
+        'name' => pht('Date Updated'),
+        'aliases' => array(self::ORDER_MODIFIED),
+      ),
+      'title' => array(
+        'vector' => array('title', 'id'),
+        'name' => pht('Title'),
+        'aliases' => array(self::ORDER_TITLE),
+      ),
+    ) + parent::getBuiltinOrders();
+
+    // Alias the "newest" builtin to the historical key for it.
+    $orders['newest']['aliases'][] = self::ORDER_CREATED;
+
+    $orders = array_select_keys(
+      $orders,
+      array(
+        'priority',
+        'updated',
+        'newest',
+        'oldest',
+        'title',
+      )) + $orders;
+
+    return $orders;
   }
 
   public function getOrderableColumns() {

@@ -37,7 +37,7 @@ abstract class ReleephLevelFieldSpecification
     }
 
     $control = id(new AphrontFormRadioButtonControl())
-      ->setLabel('Level')
+      ->setLabel(pht('Level'))
       ->setName($control_name)
       ->setValue($level);
 
@@ -75,7 +75,7 @@ abstract class ReleephLevelFieldSpecification
 
   public function validate($value) {
     if ($value === null) {
-      $this->error = 'Required';
+      $this->error = pht('Required');
       $label = $this->getName();
       throw new ReleephFieldParseException(
         $this,

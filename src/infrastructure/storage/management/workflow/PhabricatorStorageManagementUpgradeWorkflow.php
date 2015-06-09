@@ -200,12 +200,13 @@ final class PhabricatorStorageManagementUpgradeWorkflow
       if (!$applied_something) {
         if (count($patches)) {
           throw new Exception(
-            'Some patches could not be applied: '.
-            implode(', ', array_keys($patches)));
+            pht(
+              'Some patches could not be applied: %s',
+              implode(', ', array_keys($patches))));
         } else if (!$is_dry && !$apply_only) {
           echo pht(
-            "Storage is up to date. Use '%s' for details.\n",
-            'storage status');
+            "Storage is up to date. Use '%s' for details.",
+            'storage status')."\n";
         }
         break;
       }

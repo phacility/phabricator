@@ -27,6 +27,19 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   const CONTEXT_PANEL = 'panel';
 
   public function newResultObject() {
+    // We may be able to get this automatically if newQuery() is implemented.
+    $query = $this->newQuery();
+    if ($query) {
+      $object = $query->newResultObject();
+      if ($object) {
+        return $object;
+      }
+    }
+
+    return null;
+  }
+
+  public function newQuery() {
     return null;
   }
 
@@ -95,39 +108,82 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
    * @return The result of the query.
    */
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
+    $saved = clone $saved;
+    $this->willUseSavedQuery($saved);
+
     $fields = $this->buildSearchFields();
     $viewer = $this->requireViewer();
 
-    $parameters = array();
+    $map = array();
     foreach ($fields as $field) {
       $field->setViewer($viewer);
       $field->readValueFromSavedQuery($saved);
       $value = $field->getValueForQuery($field->getValue());
-      $parameters[$field->getKey()] = $value;
+      $map[$field->getKey()] = $value;
     }
 
-    $query = $this->buildQueryFromParameters($parameters);
+    $query = $this->buildQueryFromParameters($map);
 
     $object = $this->newResultObject();
     if (!$object) {
       return $query;
     }
 
+    if ($object instanceof PhabricatorSubscribableInterface) {
+      if (!empty($map['subscriberPHIDs'])) {
+        $query->withEdgeLogicPHIDs(
+          PhabricatorObjectHasSubscriberEdgeType::EDGECONST,
+          PhabricatorQueryConstraint::OPERATOR_OR,
+          $map['subscriberPHIDs']);
+      }
+    }
+
     if ($object instanceof PhabricatorProjectInterface) {
-      if (!empty($parameters['projectPHIDs'])) {
+      if (!empty($map['projectPHIDs'])) {
         $query->withEdgeLogicConstraints(
           PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
-          $parameters['projectPHIDs']);
+          $map['projectPHIDs']);
       }
     }
 
     if ($object instanceof PhabricatorSpacesInterface) {
-      if (!empty($parameters['spacePHIDs'])) {
-        $query->withSpacePHIDs($parameters['spacePHIDs']);
+      if (!empty($map['spacePHIDs'])) {
+        $query->withSpacePHIDs($map['spacePHIDs']);
       }
     }
 
+    if ($object instanceof PhabricatorCustomFieldInterface) {
+      $this->applyCustomFieldsToQuery($query, $saved);
+    }
+
+    $order = $saved->getParameter('order');
+    $builtin = $query->getBuiltinOrderAliasMap();
+    if (strlen($order) && isset($builtin[$order])) {
+      $query->setOrder($order);
+    } else {
+      // If the order is invalid or not available, we choose the first
+      // builtin order. This isn't always the default order for the query,
+      // but is the first value in the "Order" dropdown, and makes the query
+      // behavior more consistent with the UI. In queries where the two
+      // orders differ, this order is the preferred order for humans.
+      $query->setOrder(head_key($builtin));
+    }
+
     return $query;
+  }
+
+  /**
+   * Hook for subclasses to adjust saved queries prior to use.
+   *
+   * If an application changes how queries are saved, it can implement this
+   * hook to keep old queries working the way users expect, by reading,
+   * adjusting, and overwriting parameters.
+   *
+   * @param PhabricatorSavedQuery Saved query which will be executed.
+   * @return void
+   */
+  protected function willUseSavedQuery(PhabricatorSavedQuery $saved) {
+    return;
   }
 
   protected function buildQueryFromParameters(array $parameters) {
@@ -144,6 +200,9 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   public function buildSearchForm(
     AphrontFormView $form,
     PhabricatorSavedQuery $saved) {
+
+    $saved = clone $saved;
+    $this->willUseSavedQuery($saved);
 
     $fields = $this->buildSearchFields();
     $viewer = $this->requireViewer();
@@ -172,31 +231,119 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     }
 
     $object = $this->newResultObject();
-    if (!$object) {
-      return $fields;
-    }
+    if ($object) {
+      if ($object instanceof PhabricatorSubscribableInterface) {
+        $fields[] = id(new PhabricatorSearchSubscribersField())
+          ->setLabel(pht('Subscribers'))
+          ->setKey('subscriberPHIDs')
+          ->setAliases(array('subscriber', 'subscribers'));
+      }
 
-    if ($object instanceof PhabricatorProjectInterface) {
-      $fields[] = id(new PhabricatorSearchProjectsField())
-        ->setKey('projectPHIDs')
-        ->setAliases(array('project', 'projects'))
-        ->setLabel(pht('Projects'));
-    }
+      if ($object instanceof PhabricatorProjectInterface) {
+        $fields[] = id(new PhabricatorSearchProjectsField())
+          ->setKey('projectPHIDs')
+          ->setAliases(array('project', 'projects'))
+          ->setLabel(pht('Projects'));
+      }
 
-    if ($object instanceof PhabricatorSpacesInterface) {
-      if (PhabricatorSpacesNamespaceQuery::getSpacesExist()) {
-        $fields[] = id(new PhabricatorSearchSpacesField())
-          ->setKey('spacePHIDs')
-          ->setAliases(array('space', 'spaces'))
-          ->setLabel(pht('Spaces'));
+      if ($object instanceof PhabricatorSpacesInterface) {
+        if (PhabricatorSpacesNamespaceQuery::getSpacesExist()) {
+          $fields[] = id(new PhabricatorSearchSpacesField())
+            ->setKey('spacePHIDs')
+            ->setAliases(array('space', 'spaces'))
+            ->setLabel(pht('Spaces'));
+        }
       }
     }
 
-    return $fields;
+    foreach ($this->buildCustomFieldSearchFields() as $custom_field) {
+      $fields[] = $custom_field;
+    }
+
+    $query = $this->newQuery();
+    if ($query) {
+      $orders = $query->getBuiltinOrders();
+      $orders = ipull($orders, 'name');
+
+      $fields[] = id(new PhabricatorSearchOrderField())
+        ->setLabel(pht('Order'))
+        ->setKey('order')
+        ->setOptions($orders);
+    }
+
+    $field_map = array();
+    foreach ($fields as $field) {
+      $key = $field->getKey();
+      if (isset($field_map[$key])) {
+        throw new Exception(
+          pht(
+            'Two fields in this SearchEngine use the same key ("%s"), but '.
+            'each field must use a unique key.',
+            $key));
+      }
+      $field_map[$key] = $field;
+    }
+
+    return $this->adjustFieldsForDisplay($field_map);
+  }
+
+  private function adjustFieldsForDisplay(array $field_map) {
+    $order = $this->getDefaultFieldOrder();
+
+    $head_keys = array();
+    $tail_keys = array();
+    $seen_tail = false;
+    foreach ($order as $order_key) {
+      if ($order_key === '...') {
+        $seen_tail = true;
+        continue;
+      }
+
+      if (!$seen_tail) {
+        $head_keys[] = $order_key;
+      } else {
+        $tail_keys[] = $order_key;
+      }
+    }
+
+    $head = array_select_keys($field_map, $head_keys);
+    $body = array_diff_key($field_map, array_fuse($tail_keys));
+    $tail = array_select_keys($field_map, $tail_keys);
+
+    return $head + $body + $tail;
   }
 
   protected function buildCustomSearchFields() {
     throw new PhutilMethodNotImplementedException();
+  }
+
+
+  /**
+   * Define the default display order for fields by returning a list of
+   * field keys.
+   *
+   * You can use the special key `...` to mean "all unspecified fields go
+   * here". This lets you easily put important fields at the top of the form,
+   * standard fields in the middle of the form, and less important fields at
+   * the bottom.
+   *
+   * For example, you might return a list like this:
+   *
+   *   return array(
+   *     'authorPHIDs',
+   *     'reviewerPHIDs',
+   *     '...',
+   *     'createdAfter',
+   *     'createdBefore',
+   *   );
+   *
+   * Any unspecified fields (including custom fields and fields added
+   * automatically by infrastruture) will be put in the middle.
+   *
+   * @return list<string> Default ordering for field keys.
+   */
+  protected function getDefaultFieldOrder() {
+    return array();
   }
 
   public function getErrors() {
@@ -773,63 +920,6 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   }
 
 
-/* -(  Result Ordering  )---------------------------------------------------- */
-
-
-  /**
-   * Save order selection to a @{class:PhabricatorSavedQuery}.
-   */
-  protected function saveQueryOrder(
-    PhabricatorSavedQuery $saved,
-    AphrontRequest $request) {
-
-    $saved->setParameter('order', $request->getStr('order'));
-
-    return $this;
-  }
-
-
-  /**
-   * Set query ordering from a saved value.
-   */
-  protected function setQueryOrder(
-    PhabricatorCursorPagedPolicyAwareQuery $query,
-    PhabricatorSavedQuery $saved) {
-
-    $order = $saved->getParameter('order');
-    $builtin = $query->getBuiltinOrders();
-    if (strlen($order) && isset($builtin[$order])) {
-      $query->setOrder($order);
-    } else {
-      // If the order is invalid or not available, we choose the first
-      // builtin order. This isn't always the default order for the query,
-      // but is the first value in the "Order" dropdown, and makes the query
-      // behavior more consistent with the UI. In queries where the two
-      // orders differ, this order is the preferred order for humans.
-      $query->setOrder(head_key($builtin));
-    }
-
-    return $this;
-  }
-
-
-
-  protected function appendOrderFieldsToForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved,
-    PhabricatorCursorPagedPolicyAwareQuery $query) {
-
-    $orders = $query->getBuiltinOrders();
-    $orders = ipull($orders, 'name');
-
-    $form->appendControl(
-      id(new AphrontFormSelectControl())
-        ->setLabel(pht('Order'))
-        ->setName('order')
-        ->setOptions($orders)
-        ->setValue($saved->getParameter('order')));
-  }
-
 /* -(  Paging and Executing Queries  )--------------------------------------- */
 
 
@@ -1023,66 +1113,6 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     }
   }
 
-  protected function applyOrderByToQuery(
-    PhabricatorCursorPagedPolicyAwareQuery $query,
-    array $standard_values,
-    $order) {
-
-    if (substr($order, 0, 7) === 'custom:') {
-      $list = $this->getCustomFieldList();
-      if (!$list) {
-        $query->setOrderBy(head($standard_values));
-        return;
-      }
-
-      foreach ($list->getFields() as $field) {
-        $key = $this->getKeyForCustomField($field);
-
-        if ($key === $order) {
-          $index = $field->buildOrderIndex();
-
-          if ($index === null) {
-            $query->setOrderBy(head($standard_values));
-            return;
-          }
-
-          $query->withApplicationSearchOrder(
-            $field,
-            $index,
-            false);
-          break;
-        }
-      }
-    } else {
-      $order = idx($standard_values, $order);
-      if ($order) {
-        $query->setOrderBy($order);
-      } else {
-        $query->setOrderBy(head($standard_values));
-      }
-    }
-  }
-
-
-  protected function getCustomFieldOrderOptions() {
-    $list = $this->getCustomFieldList();
-    if (!$list) {
-      return;
-    }
-
-    $custom_order = array();
-    foreach ($list->getFields() as $field) {
-      if ($field->shouldAppearInApplicationSearch()) {
-        if ($field->buildOrderIndex() !== null) {
-          $key = $this->getKeyForCustomField($field);
-          $custom_order[$key] = $field->getFieldName();
-        }
-      }
-    }
-
-    return $custom_order;
-  }
-
   /**
    * Get a unique key identifying a field.
    *
@@ -1093,15 +1123,22 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     return 'custom:'.$field->getFieldIndex();
   }
 
+  private function buildCustomFieldSearchFields() {
+    $list = $this->getCustomFieldList();
+    if (!$list) {
+      return array();
+    }
 
-  /**
-   * Add inputs to an application search form so the user can query on custom
-   * fields.
-   *
-   * @param AphrontFormView Form to update.
-   * @param PhabricatorSavedQuery Values to prefill.
-   * @return void
-   */
+    $fields = array();
+    foreach ($list->getFields() as $field) {
+      $fields[] = id(new PhabricatorSearchCustomFieldProxyField())
+        ->setSearchEngine($this)
+        ->setCustomField($field);
+    }
+    return $fields;
+  }
+
+  // TODO: Remove.
   protected function appendCustomFieldsToForm(
     AphrontFormView $form,
     PhabricatorSavedQuery $saved) {

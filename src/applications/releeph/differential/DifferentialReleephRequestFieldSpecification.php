@@ -51,7 +51,7 @@ final class DifferentialReleephRequestFieldSpecification {
   }
 
   public function renderLabelForRevisionView() {
-    return 'Releeph';
+    return pht('Releeph');
   }
 
   public function getRequiredHandlePHIDs() {
@@ -246,7 +246,7 @@ final class DifferentialReleephRequestFieldSpecification {
   }
 
   public function renderLabelForCommitMessage() {
-    return 'Releeph';
+    return pht('Releeph');
   }
 
   public function shouldAppearOnCommitMessageTemplate() {

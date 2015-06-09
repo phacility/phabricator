@@ -13,7 +13,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
   protected $commitData;
   private $commitDiff;
 
-  protected $addCCPHIDs = array();
   protected $auditMap = array();
   protected $buildPlans = array();
 
@@ -141,6 +140,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         return array_merge(
           array(
             self::ACTION_ADD_CC,
+            self::ACTION_REMOVE_CC,
             self::ACTION_EMAIL,
             self::ACTION_AUDIT,
             self::ACTION_APPLY_BUILD_PLANS,
@@ -151,6 +151,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         return array_merge(
           array(
             self::ACTION_ADD_CC,
+            self::ACTION_REMOVE_CC,
             self::ACTION_EMAIL,
             self::ACTION_FLAG,
             self::ACTION_AUDIT,
@@ -218,10 +219,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
 
   public function getPHID() {
     return $this->commit->getPHID();
-  }
-
-  public function getAddCCMap() {
-    return $this->addCCPHIDs;
   }
 
   public function getAuditMap() {
@@ -491,24 +488,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     foreach ($effects as $effect) {
       $action = $effect->getAction();
       switch ($action) {
-        case self::ACTION_NOTHING:
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Great success at doing nothing.'));
-          break;
-        case self::ACTION_ADD_CC:
-          foreach ($effect->getTarget() as $phid) {
-            if (empty($this->addCCPHIDs[$phid])) {
-              $this->addCCPHIDs[$phid] = array();
-            }
-            $this->addCCPHIDs[$phid][] = $effect->getRule()->getID();
-          }
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Added address to CC.'));
-          break;
         case self::ACTION_AUDIT:
           foreach ($effect->getTarget() as $phid) {
             if (empty($this->auditMap[$phid])) {

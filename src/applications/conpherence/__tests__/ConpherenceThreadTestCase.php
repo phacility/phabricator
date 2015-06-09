@@ -160,8 +160,8 @@ final class ConpherenceThreadTestCase extends ConpherenceTestCase {
     list($errors, $conpherence) = ConpherenceEditor::createThread(
       $creator,
       $participant_phids,
-      'Test',
-      'Test',
+      pht('Test'),
+      pht('Test'),
       PhabricatorContentSource::newConsoleSource());
     return $conpherence;
   }

@@ -114,7 +114,7 @@ final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
                 'poll_id' => $vote_id,
               ));
             $output[$vote['phid']] = 'V'.$vote['id'].': '.$vote['question'].
-              ' Come Vote '.$vote['uri'];
+              ' '.pht('Come Vote').' '.$vote['uri'];
           }
         }
 

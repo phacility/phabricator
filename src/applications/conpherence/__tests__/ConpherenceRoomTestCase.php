@@ -161,7 +161,7 @@ final class ConpherenceRoomTestCase extends ConpherenceTestCase {
       ->setNewValue(array('+' => $participant_phids));
     $xactions[] = id(new ConpherenceTransaction())
       ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
-      ->setNewValue('Test');
+      ->setNewValue(pht('Test'));
 
     id(new ConpherenceEditor())
       ->setActor($creator)

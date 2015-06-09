@@ -60,16 +60,16 @@ final class PhabricatorRepositoryManagementImportingWorkflow
           $status = $row['importStatus'];
           $need = array();
           if (!($status & PhabricatorRepositoryCommit::IMPORTED_MESSAGE)) {
-            $need[] = 'Message';
+            $need[] = pht('Message');
           }
           if (!($status & PhabricatorRepositoryCommit::IMPORTED_CHANGE)) {
-            $need[] = 'Change';
+            $need[] = pht('Change');
           }
           if (!($status & PhabricatorRepositoryCommit::IMPORTED_OWNERS)) {
-            $need[] = 'Owners';
+            $need[] = pht('Owners');
           }
           if (!($status & PhabricatorRepositoryCommit::IMPORTED_HERALD)) {
-            $need[] = 'Herald';
+            $need[] = pht('Herald');
           }
 
           $console->writeOut(' %s', implode(', ', $need));

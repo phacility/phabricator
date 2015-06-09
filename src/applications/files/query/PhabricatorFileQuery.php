@@ -117,6 +117,10 @@ final class PhabricatorFileQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new PhabricatorFile();
+  }
+
   protected function loadPage() {
     $files = $this->loadStandardPage(new PhabricatorFile());
 
@@ -138,6 +142,14 @@ final class PhabricatorFileQuery
     foreach ($files as $file) {
       $phids = array_keys($edges[$file->getPHID()][$edge_type]);
       $file->attachObjectPHIDs($phids);
+
+      if ($file->getIsProfileImage()) {
+        // If this is a profile image, don't bother loading related files.
+        // It will always be visible, and we can get into trouble if we try
+        // to load objects and end up stuck in a cycle. See T8478.
+        continue;
+      }
+
       foreach ($phids as $phid) {
         $object_phids[$phid] = true;
       }

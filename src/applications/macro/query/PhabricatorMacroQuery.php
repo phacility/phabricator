@@ -5,7 +5,7 @@ final class PhabricatorMacroQuery
 
   private $ids;
   private $phids;
-  private $authors;
+  private $authorPHIDs;
   private $names;
   private $nameLike;
   private $namePrefix;
@@ -51,8 +51,8 @@ final class PhabricatorMacroQuery
     return $this;
   }
 
-  public function withAuthorPHIDs(array $authors) {
-    $this->authors = $authors;
+  public function withAuthorPHIDs(array $author_phids) {
+    $this->authorPHIDs = $author_phids;
     return $this;
   }
 
@@ -96,53 +96,46 @@ final class PhabricatorMacroQuery
     return $this;
   }
 
-  protected function loadPage() {
-    $macro_table = new PhabricatorFileImageMacro();
-    $conn = $macro_table->establishConnection('r');
-
-    $rows = queryfx_all(
-      $conn,
-      'SELECT m.* FROM %T m %Q %Q %Q',
-      $macro_table->getTableName(),
-      $this->buildWhereClause($conn),
-      $this->buildOrderClause($conn),
-      $this->buildLimitClause($conn));
-
-    return $macro_table->loadAllFromArray($rows);
+  public function newResultObject() {
+    return new PhabricatorFileImageMacro();
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
-    $where = array();
+  protected function loadPage() {
+    return $this->loadStandardPage(new PhabricatorFileImageMacro());
+  }
 
-    if ($this->ids) {
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
         'm.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
         'm.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->authors) {
+    if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
         'm.authorPHID IN (%Ls)',
-        $this->authors);
+        $this->authorPHIDs);
     }
 
-    if ($this->nameLike) {
+    if (strlen($this->nameLike)) {
       $where[] = qsprintf(
         $conn,
         'm.name LIKE %~',
         $this->nameLike);
     }
 
-    if ($this->names) {
+    if ($this->names !== null) {
       $where[] = qsprintf(
         $conn,
         'm.name IN (%Ls)',
@@ -210,9 +203,7 @@ final class PhabricatorMacroQuery
       }
     }
 
-    $where[] = $this->buildPagingClause($conn);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   protected function didFilterPage(array $macros) {

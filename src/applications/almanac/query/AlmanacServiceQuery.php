@@ -60,47 +60,35 @@ final class AlmanacServiceQuery
   }
 
   protected function loadPage() {
-    $table = new AlmanacService();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT service.* FROM %T service %Q %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildJoinClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage(new AlmanacService());
   }
 
-  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
-    $joins = array();
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
 
     if ($this->devicePHIDs !== null) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T binding ON service.phid = binding.servicePHID',
         id(new AlmanacBinding())->getTableName());
     }
 
-    return implode(' ', $joins);
+    return $joins;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'service.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'service.phid IN (%Ls)',
         $this->phids);
     }
@@ -112,49 +100,47 @@ final class AlmanacServiceQuery
       }
 
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'service.nameIndex IN (%Ls)',
         $hashes);
     }
 
     if ($this->serviceClasses !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'service.serviceClass IN (%Ls)',
         $this->serviceClasses);
     }
 
     if ($this->devicePHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'binding.devicePHID IN (%Ls)',
         $this->devicePHIDs);
     }
 
     if ($this->locked !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'service.isLocked = %d',
         (int)$this->locked);
     }
 
     if ($this->namePrefix !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'service.name LIKE %>',
         $this->namePrefix);
     }
 
     if ($this->nameSuffix !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'service.name LIKE %<',
         $this->nameSuffix);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   protected function willFilterPage(array $services) {
@@ -192,10 +178,14 @@ final class AlmanacServiceQuery
     return parent::didFilterPage($services);
   }
 
+  protected function getPrimaryTableAlias() {
+    return 'service';
+  }
+
   public function getOrderableColumns() {
     return parent::getOrderableColumns() + array(
       'name' => array(
-        'table' => 'service',
+        'table' => $this->getPrimaryTableAlias(),
         'column' => 'name',
         'type' => 'string',
         'unique' => true,

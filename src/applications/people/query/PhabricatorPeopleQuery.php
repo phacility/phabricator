@@ -113,19 +113,13 @@ final class PhabricatorPeopleQuery
     return $this;
   }
 
-  protected function loadPage() {
-    $table  = new PhabricatorUser();
-    $conn_r = $table->establishConnection('r');
+  public function newResultObject() {
+    return new PhabricatorUser();
+  }
 
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T user %Q %Q %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildJoinsClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildGroupClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
+  protected function loadPage() {
+    $table = new PhabricatorUser();
+    $data = $this->loadStandardPageRows($table);
 
     if ($this->needPrimaryEmail) {
       $table->putInSet(new LiskDAOSet());
@@ -225,23 +219,21 @@ final class PhabricatorPeopleQuery
     return $users;
   }
 
-  protected function buildGroupClause(AphrontDatabaseConnection $conn) {
+  protected function shouldGroupQueryResultRows() {
     if ($this->nameTokens) {
-      return qsprintf(
-        $conn,
-        'GROUP BY user.id');
-    } else {
-      return $this->buildApplicationSearchGroupClause($conn);
+      return true;
     }
+
+    return parent::shouldGroupQueryResultRows();
   }
 
-  private function buildJoinsClause($conn_r) {
-    $joins = array();
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
 
     if ($this->emails) {
       $email_table = new PhabricatorUserEmail();
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T email ON email.userPHID = user.PHID',
         $email_table->getTableName());
     }
@@ -250,7 +242,7 @@ final class PhabricatorPeopleQuery
       foreach ($this->nameTokens as $key => $token) {
         $token_table = 'token_'.$key;
         $joins[] = qsprintf(
-          $conn_r,
+          $conn,
           'JOIN %T %T ON %T.userID = user.id AND %T.token LIKE %>',
           PhabricatorUser::NAMETOKEN_TABLE,
           $token_table,
@@ -260,110 +252,105 @@ final class PhabricatorPeopleQuery
       }
     }
 
-    $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
-
-    $joins = implode(' ', $joins);
     return  $joins;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->usernames !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.userName IN (%Ls)',
         $this->usernames);
     }
 
     if ($this->emails !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'email.address IN (%Ls)',
         $this->emails);
     }
 
     if ($this->realnames !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.realName IN (%Ls)',
         $this->realnames);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->dateCreatedAfter) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.dateCreated >= %d',
         $this->dateCreatedAfter);
     }
 
     if ($this->dateCreatedBefore) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.dateCreated <= %d',
         $this->dateCreatedBefore);
     }
 
     if ($this->isAdmin !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.isAdmin = %d',
         (int)$this->isAdmin);
     }
 
     if ($this->isDisabled !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.isDisabled = %d',
         (int)$this->isDisabled);
     }
 
     if ($this->isApproved !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.isApproved = %d',
         (int)$this->isApproved);
     }
 
     if ($this->isSystemAgent !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.isSystemAgent = %d',
         (int)$this->isSystemAgent);
     }
 
     if ($this->isMailingList !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.isMailingList = %d',
         (int)$this->isMailingList);
     }
 
     if (strlen($this->nameLike)) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.username LIKE %~ OR user.realname LIKE %~',
         $this->nameLike,
         $this->nameLike);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   protected function getPrimaryTableAlias() {

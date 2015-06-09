@@ -889,6 +889,7 @@ final class PhabricatorAuditEditor
             "H{$rule_id}"));
       }
     }
+
     if ($audit_phids) {
       $xactions[] = id(new PhabricatorAuditTransaction())
         ->setTransactionType(PhabricatorAuditActionConstants::ADD_AUDITORS)
@@ -899,15 +900,6 @@ final class PhabricatorAuditEditor
         ->setMetadataValue(
           'auditReasonMap', $this->auditReasonMap);
     }
-
-    $cc_phids = $adapter->getAddCCMap();
-    $add_ccs = array('+' => array());
-    foreach ($cc_phids as $phid => $rule_ids) {
-      $add_ccs['+'][$phid] = $phid;
-    }
-    $xactions[] = id(new PhabricatorAuditTransaction())
-      ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
-      ->setNewValue($add_ccs);
 
     HarbormasterBuildable::applyBuildPlans(
       $object->getPHID(),

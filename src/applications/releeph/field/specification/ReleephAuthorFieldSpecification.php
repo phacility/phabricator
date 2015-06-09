@@ -8,7 +8,7 @@ final class ReleephAuthorFieldSpecification
   }
 
   public function getName() {
-    return 'Author';
+    return pht('Author');
   }
 
   public function getRequiredHandlePHIDsForPropertyView() {
