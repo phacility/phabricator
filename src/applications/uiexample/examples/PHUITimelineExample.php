@@ -96,8 +96,8 @@ final class PHUITimelineExample extends PhabricatorUIExample {
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
       ->setIcon('fa-tag')
-      ->setTitle(str_repeat('Long Text Title ', 64))
-      ->appendChild(str_repeat('Long Text Body ', 64))
+      ->setTitle(str_repeat(pht('Long Text Title').' ', 64))
+      ->appendChild(str_repeat(pht('Long Text Body').' ', 64))
       ->setColor(PhabricatorTransactions::COLOR_ORANGE);
 
     $events[] = id(new PHUITimelineEventView())

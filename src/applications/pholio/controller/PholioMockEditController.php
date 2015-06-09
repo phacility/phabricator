@@ -93,7 +93,7 @@ final class PholioMockEditController extends PholioController {
       $mock_xactions[$type_cc]   = array('=' => $v_cc);
 
       if (!strlen($request->getStr('name'))) {
-        $e_name = 'Required';
+        $e_name = pht('Required');
         $errors[] = pht('You must give the mock a name.');
       }
 

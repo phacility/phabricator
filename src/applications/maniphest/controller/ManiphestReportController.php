@@ -589,7 +589,7 @@ final class ManiphestReportController extends ManiphestController {
       $cname[] = $label;
       $cclass[] = 'n';
     }
-    $cname[] = 'Total';
+    $cname[] = pht('Total');
     $cclass[] = 'n';
     $cname[] = javelin_tag(
       'span',

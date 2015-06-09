@@ -157,11 +157,11 @@ final class ReleephRequestSearchEngine
     if (ReleephDefaultFieldSelector::isFacebook()) {
       return array(
         '' => pht('(All Severities)'),
-        11 => 'HOTFIX',
-        12 => 'PIGGYBACK',
-        13 => 'RELEASE',
-        14 => 'DAILY',
-        15 => 'PARKING',
+        11 => pht('HOTFIX'),
+        12 => pht('PIGGYBACK'),
+        13 => pht('RELEASE'),
+        14 => pht('DAILY'),
+        15 => pht('PARKING'),
       );
     } else {
       return array(

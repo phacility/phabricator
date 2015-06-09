@@ -8,7 +8,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
   const TYPE_UPDATE  = 'differential:update';
   const TYPE_ACTION  = 'differential:action';
   const TYPE_STATUS  = 'differential:status';
- 
+
   const MAILTAG_REVIEWERS      = 'differential-reviewers';
   const MAILTAG_CLOSED         = 'differential-committed';
   const MAILTAG_CC             = 'differential-cc';

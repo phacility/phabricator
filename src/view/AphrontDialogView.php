@@ -234,7 +234,10 @@ final class AphrontDialogView extends AphrontView {
       case self::WIDTH_DEFAULT:
         break;
       default:
-        throw new Exception("Unknown dialog width '{$this->width}'!");
+        throw new Exception(
+          pht(
+            "Unknown dialog width '%s'!",
+            $this->width));
     }
 
     if ($this->isStandalone) {

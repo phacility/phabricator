@@ -227,7 +227,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
 
   private function createProject(PhabricatorUser $user) {
     $project = PhabricatorProject::initializeNewProject($user);
-    $project->setName('Test Project '.mt_rand());
+    $project->setName(pht('Test Project %d', mt_rand()));
     $project->save();
 
     return $project;
@@ -247,7 +247,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
 
     $user = new PhabricatorUser();
     $user->setUsername('unittestuser'.$rand);
-    $user->setRealName('Unit Test User '.$rand);
+    $user->setRealName(pht('Unit Test User %d', $rand));
 
     return $user;
   }

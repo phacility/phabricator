@@ -64,7 +64,7 @@ final class PhabricatorProjectDatasource
       $proj_result = id(new PhabricatorTypeaheadResult())
         ->setName($all_strings)
         ->setDisplayName($proj->getName())
-        ->setDisplayType('Project')
+        ->setDisplayType(pht('Project'))
         ->setURI('/tag/'.$proj->getPrimarySlug().'/')
         ->setPHID($proj->getPHID())
         ->setIcon($proj->getIcon())

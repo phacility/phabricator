@@ -15,7 +15,7 @@ final class PhabricatorApplicationTransactionNoEffectException
     $this->hasComment = $has_comment;
 
     $message = array();
-    $message[] = 'Transactions have no effect:';
+    $message[] = pht('Transactions have no effect:');
     foreach ($this->transactions as $transaction) {
       $message[] = '  - '.$transaction->getNoEffectDescription();
     }

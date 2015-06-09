@@ -15,12 +15,14 @@ final class PhabricatorCustomFieldImplementationIncompleteException
       $name = $field->getFieldName();
     }
 
-    $class = get_class($field);
-
     parent::__construct(
-      "Custom field '{$name}' (with key '{$key}', of class '{$class}') is ".
-      "incompletely implemented: it claims to support a feature, but does not ".
-      "implement all of the required methods for that feature.");
+      pht(
+        "Custom field '%s' (with key '%s', of class '%s') is incompletely ".
+        "implemented: it claims to support a feature, but does not ".
+        "implement all of the required methods for that feature.",
+        $name,
+        $key,
+        get_class($field)));
   }
 
 }

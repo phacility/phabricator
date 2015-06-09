@@ -72,9 +72,9 @@ final class PhabricatorPeopleDatasource
       }
 
       if ($this->enrichResults) {
-        $display_type = 'User';
+        $display_type = pht('User');
         if ($user->getIsAdmin()) {
-          $display_type = 'Administrator';
+          $display_type = pht('Administrator');
         }
         $result->setDisplayType($display_type);
         $result->setImageURI($handles[$user->getPHID()]->getImageURI());

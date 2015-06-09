@@ -5,4 +5,4 @@
 // already migrated, so this was cleaned up when ReleephRequestEvent was
 // removed.
 
-echo "(This migration is obsolete.)\n";
+echo pht('(This migration is obsolete.)')."\n";

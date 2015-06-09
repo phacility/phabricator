@@ -191,7 +191,7 @@ final class PhabricatorStorageManagementAPI {
         $this->applyPatchPHP($name);
         break;
       default:
-        throw new Exception("Unable to apply patch of type '{$type}'.");
+        throw new Exception(pht("Unable to apply patch of type '%s'.", $type));
     }
   }
 

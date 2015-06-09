@@ -29,7 +29,7 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
             } else if ($ex instanceof PhabricatorWorkerYieldException) {
               $this->log(pht('Task %s yielded.', $id));
             } else {
-              $this->log("Task {$id} failed!");
+              $this->log(pht('Task %d failed!', $id));
               throw new PhutilProxyException(
                 pht('Error while executing Task ID %d.', $id),
                 $ex);

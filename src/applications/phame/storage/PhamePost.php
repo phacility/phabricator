@@ -167,13 +167,13 @@ final class PhamePost extends PhameDAO
 
     if ($current == 'facebook' ||
         PhabricatorFacebookAuthProvider::getFacebookApplicationID()) {
-      $options['facebook'] = 'Facebook';
+      $options['facebook'] = pht('Facebook');
     }
     if ($current == 'disqus' ||
         PhabricatorEnv::getEnvConfig('disqus.shortname')) {
-      $options['disqus'] = 'Disqus';
+      $options['disqus'] = pht('Disqus');
     }
-    $options['none'] = 'None';
+    $options['none'] = pht('None');
 
     return $options;
   }

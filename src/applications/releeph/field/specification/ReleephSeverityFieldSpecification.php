@@ -11,7 +11,7 @@ final class ReleephSeverityFieldSpecification
   }
 
   public function getName() {
-    return 'Severity';
+    return pht('Severity');
   }
 
   public function getStorageKey() {

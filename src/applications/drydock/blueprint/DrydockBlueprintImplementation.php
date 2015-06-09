@@ -155,7 +155,7 @@ abstract class DrydockBlueprintImplementation {
       $resource->endReadLocking();
     if ($allocated) {
       $resource->saveTransaction();
-      $this->log('Allocated Lease');
+      $this->log(pht('Allocated Lease'));
     } else {
       $resource->killTransaction();
       $this->log(pht('Failed to Allocate Lease'));
