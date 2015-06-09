@@ -164,10 +164,10 @@ final class PhabricatorCalendarEventViewController
       $index = $event->getSequenceIndex();
       $edit_label = pht('Edit This Instance');
       $edit_uri = "event/edit/{$id}/{$index}/";
-    } else if ($event->getInstanceOfEventPHID() && !$event->getIsGhostEvent()) {
+    } else if ($event->getIsRecurrenceException()) {
       $edit_label = pht('Edit This Instance');
       $edit_uri = "event/edit/{$id}/";
-    } else if (!$event->getIsRecurring()) {
+    } else if (!$event->getIsRecurrenceParent()) {
       $edit_label = pht('Edit');
       $edit_uri = "event/edit/{$id}/";
     }
@@ -208,12 +208,12 @@ final class PhabricatorCalendarEventViewController
       $reinstate_label = pht('Reinstate This Instance');
       $cancel_disabled = (!$can_edit || $can_reinstate);
       $cancel_uri = $this->getApplicationURI("event/cancel/{$id}/{$index}/");
-    } else if ($event->getInstanceOfEventPHID()) {
+    } else if ($event->getIsRecurrenceException()) {
       $can_reinstate = $event->getIsParentCancelled();
       $cancel_label = pht('Cancel This Instance');
       $reinstate_label = pht('Reinstate This Instance');
       $cancel_disabled = (!$can_edit || $can_reinstate);
-    } else if ($event->getIsRecurring()) {
+    } else if ($event->getIsRecurrenceParent()) {
       $cancel_label = pht('Cancel Recurrence');
       $reinstate_label = pht('Reinstate Recurrence');
       $cancel_disabled = !$can_edit;

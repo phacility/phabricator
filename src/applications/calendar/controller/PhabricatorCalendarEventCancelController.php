@@ -42,8 +42,7 @@ final class PhabricatorCalendarEventCancelController
 
     $is_cancelled = $event->getIsCancelled();
     $is_parent_cancelled = $event->getIsParentCancelled();
-    $is_recurring = $event->getIsRecurring();
-    $instance_of = $event->getInstanceOfEventPHID();
+    $is_parent = $event->getIsRecurrenceParent();
 
     $validation_exception = null;
 
@@ -86,7 +85,7 @@ final class PhabricatorCalendarEventCancelController
           cancelled recurring event.');
         $cancel = pht('Cancel');
         $submit = null;
-      } else if ($is_recurring && !$instance_of) {
+      } else if ($is_parent) {
         $title = pht('Reinstate Recurrence');
         $paragraph = pht('Reinstate the entire series
           of recurring events?');
@@ -105,7 +104,7 @@ final class PhabricatorCalendarEventCancelController
           of a recurring event.');
         $cancel = pht('Don\'t Cancel Instance');
         $submit = pht('Cancel Instance');
-      } else if ($is_recurring && !$instance_of) {
+      } else if ($is_parent) {
         $title = pht('Cancel Recurrence');
         $paragraph = pht('Cancel the entire series
           of recurring events?');
