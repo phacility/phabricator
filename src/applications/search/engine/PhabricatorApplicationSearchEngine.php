@@ -205,6 +205,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     $this->willUseSavedQuery($saved);
 
     $fields = $this->buildSearchFields();
+    $fields = $this->adjustFieldsForDisplay($fields);
     $viewer = $this->requireViewer();
 
     foreach ($fields as $field) {
@@ -266,7 +267,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       $orders = ipull($orders, 'name');
 
       $fields[] = id(new PhabricatorSearchOrderField())
-        ->setLabel(pht('Order'))
+        ->setLabel(pht('Order By'))
         ->setKey('order')
         ->setOptions($orders);
     }
@@ -284,7 +285,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       $field_map[$key] = $field;
     }
 
-    return $this->adjustFieldsForDisplay($field_map);
+    return $field_map;
   }
 
   private function adjustFieldsForDisplay(array $field_map) {
@@ -310,7 +311,13 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     $body = array_diff_key($field_map, array_fuse($tail_keys));
     $tail = array_select_keys($field_map, $tail_keys);
 
-    return $head + $body + $tail;
+    $result = $head + $body + $tail;
+
+    foreach ($this->getHiddenFields() as $hidden_key) {
+      unset($result[$hidden_key]);
+    }
+
+    return $result;
   }
 
   protected function buildCustomSearchFields() {
@@ -343,6 +350,15 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
    * @return list<string> Default ordering for field keys.
    */
   protected function getDefaultFieldOrder() {
+    return array();
+  }
+
+  /**
+   * Return a list of field keys which should be hidden from the viewer.
+   *
+    * @return list<string> Fields to hide.
+   */
+  protected function getHiddenFields() {
     return array();
   }
 
@@ -924,7 +940,13 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
 
   public function getPageSize(PhabricatorSavedQuery $saved) {
-    return $saved->getParameter('limit', 100);
+    $limit = (int)$saved->getParameter('limit');
+
+    if ($limit > 0) {
+      return $limit;
+    }
+
+    return 100;
   }
 
 
@@ -1062,33 +1084,6 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
 
   /**
-   * Moves data from the request into a saved query.
-   *
-   * @param AphrontRequest Request to read.
-   * @param PhabricatorSavedQuery Query to write to.
-   * @return void
-   * @task appsearch
-   */
-  protected function readCustomFieldsFromRequest(
-    AphrontRequest $request,
-    PhabricatorSavedQuery $saved) {
-
-    $list = $this->getCustomFieldList();
-    if (!$list) {
-      return;
-    }
-
-    foreach ($list->getFields() as $field) {
-      $key = $this->getKeyForCustomField($field);
-      $value = $field->readApplicationSearchValueFromRequest(
-        $this,
-        $request);
-      $saved->setParameter($key, $value);
-    }
-  }
-
-
-  /**
    * Applies data from a saved query to an executable query.
    *
    * @param PhabricatorCursorPagedPolicyAwareQuery Query to constrain.
@@ -1105,22 +1100,11 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     }
 
     foreach ($list->getFields() as $field) {
-      $key = $this->getKeyForCustomField($field);
       $value = $field->applyApplicationSearchConstraintToQuery(
         $this,
         $query,
-        $saved->getParameter($key));
+        $saved->getParameter('custom:'.$field->getFieldIndex()));
     }
-  }
-
-  /**
-   * Get a unique key identifying a field.
-   *
-   * @param PhabricatorCustomField Field to identify.
-   * @return string Unique identifier, suitable for use as an input name.
-   */
-  public function getKeyForCustomField(PhabricatorCustomField $field) {
-    return 'custom:'.$field->getFieldIndex();
   }
 
   private function buildCustomFieldSearchFields() {
@@ -1135,24 +1119,8 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
         ->setSearchEngine($this)
         ->setCustomField($field);
     }
+
     return $fields;
-  }
-
-  // TODO: Remove.
-  protected function appendCustomFieldsToForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved) {
-
-    $list = $this->getCustomFieldList();
-    if (!$list) {
-      return;
-    }
-
-    foreach ($list->getFields() as $field) {
-      $key = $this->getKeyForCustomField($field);
-      $value = $saved->getParameter($key);
-      $field->appendToApplicationSearchForm($this, $form, $value);
-    }
   }
 
 }
