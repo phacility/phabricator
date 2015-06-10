@@ -4405,6 +4405,7 @@ phutil_register_library_map(array(
       'PhabricatorDestructibleInterface',
       'PhabricatorApplicationTransactionInterface',
       'PhabricatorProjectInterface',
+      'PhabricatorSpacesInterface',
     ),
     'ManiphestTaskClosedStatusDatasource' => 'PhabricatorTypeaheadDatasource',
     'ManiphestTaskDependedOnByTaskEdgeType' => 'PhabricatorEdgeType',

@@ -12,7 +12,8 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorCustomFieldInterface,
     PhabricatorDestructibleInterface,
     PhabricatorApplicationTransactionInterface,
-    PhabricatorProjectInterface {
+    PhabricatorProjectInterface,
+    PhabricatorSpacesInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -35,6 +36,7 @@ final class ManiphestTask extends ManiphestDAO
   protected $projectPHIDs = array();
 
   protected $ownerOrdering;
+  protected $spacePHID;
 
   private $subscriberPHIDs = self::ATTACHABLE;
   private $groupByProjectPHID = self::ATTACHABLE;
@@ -377,6 +379,14 @@ final class ManiphestTask extends ManiphestDAO
     AphrontRequest $request) {
 
     return $timeline;
+  }
+
+
+/* -(  PhabricatorSpacesInterface  )----------------------------------------- */
+
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
   }
 
 }

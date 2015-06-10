@@ -155,12 +155,15 @@ final class ManiphestTaskEditController extends ManiphestController {
 
     $aux_fields = $field_list->getFields();
 
+    $v_space = $task->getSpacePHID();
+
     if ($request->isFormPost()) {
       $changes = array();
 
       $new_title = $request->getStr('title');
       $new_desc = $request->getStr('description');
       $new_status = $request->getStr('status');
+      $v_space = $request->getStr('spacePHID');
 
       if (!$task->getID()) {
         $workflow = 'create';
@@ -268,6 +271,7 @@ final class ManiphestTaskEditController extends ManiphestController {
         }
 
         if ($can_edit_policies) {
+          $changes[PhabricatorTransactions::TYPE_SPACE] = $v_space;
           $changes[PhabricatorTransactions::TYPE_VIEW_POLICY] =
             $request->getStr('viewPolicy');
           $changes[PhabricatorTransactions::TYPE_EDIT_POLICY] =
@@ -477,6 +481,8 @@ final class ManiphestTaskEditController extends ManiphestController {
             $task->setViewPolicy($template_task->getViewPolicy());
             $task->setEditPolicy($template_task->getEditPolicy());
 
+            $v_space = $template_task->getSpacePHID();
+
             $template_fields = PhabricatorCustomField::getObjectFields(
               $template_task,
               PhabricatorCustomField::ROLE_EDIT);
@@ -643,6 +649,7 @@ final class ManiphestTaskEditController extends ManiphestController {
             ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
             ->setPolicyObject($task)
             ->setPolicies($policies)
+            ->setSpacePHID($v_space)
             ->setName('viewPolicy'))
         ->appendChild(
           id(new AphrontFormPolicyControl())
