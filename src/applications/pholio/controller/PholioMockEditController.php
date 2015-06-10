@@ -65,6 +65,7 @@ final class PholioMockEditController extends PholioController {
     $v_edit = $mock->getEditPolicy();
     $v_cc = PhabricatorSubscribersQuery::loadSubscribersForPHID(
       $mock->getPHID());
+    $v_space = $mock->getSpacePHID();
 
     if ($request->isFormPost()) {
       $xactions = array();
@@ -75,6 +76,7 @@ final class PholioMockEditController extends PholioController {
       $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
       $type_cc   = PhabricatorTransactions::TYPE_SUBSCRIBERS;
+      $type_space = PhabricatorTransactions::TYPE_SPACE;
 
       $v_name = $request->getStr('name');
       $v_desc = $request->getStr('description');
@@ -83,6 +85,7 @@ final class PholioMockEditController extends PholioController {
       $v_edit = $request->getStr('can_edit');
       $v_cc   = $request->getArr('cc');
       $v_projects = $request->getArr('projects');
+      $v_space = $request->getStr('spacePHID');
 
       $mock_xactions = array();
       $mock_xactions[$type_name] = $v_name;
@@ -91,6 +94,7 @@ final class PholioMockEditController extends PholioController {
       $mock_xactions[$type_view] = $v_view;
       $mock_xactions[$type_edit] = $v_edit;
       $mock_xactions[$type_cc]   = array('=' => $v_cc);
+      $mock_xactions[$type_space] = $v_space;
 
       if (!strlen($request->getStr('name'))) {
         $e_name = pht('Required');
@@ -350,6 +354,7 @@ final class PholioMockEditController extends PholioController {
           ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
           ->setPolicyObject($mock)
           ->setPolicies($policies)
+          ->setSpacePHID($v_space)
           ->setName('can_view'))
       ->appendChild(
         id(new AphrontFormPolicyControl())

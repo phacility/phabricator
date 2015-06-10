@@ -7,7 +7,7 @@ final class PHUIPinboardItemView extends AphrontView {
   private $header;
   private $iconBlock = array();
   private $disabled;
-
+  private $object;
   private $imageWidth;
   private $imageHeight;
 
@@ -42,6 +42,11 @@ final class PHUIPinboardItemView extends AphrontView {
     return $this;
   }
 
+  public function setObject($object) {
+    $this->object = $object;
+    return $this;
+  }
+
   public function render() {
     require_celerity_resource('phui-pinboard-view-css');
     $header = null;
@@ -57,7 +62,17 @@ final class PHUIPinboardItemView extends AphrontView {
           'class' => 'phui-pinboard-item-header '.
             'sprite-gradient '.$header_color,
         ),
-        phutil_tag('a', array('href' => $this->uri), $this->header));
+        array(
+          id(new PHUISpacesNamespaceContextView())
+            ->setUser($this->getUser())
+            ->setObject($this->object),
+          phutil_tag(
+            'a',
+            array(
+              'href' => $this->uri,
+            ),
+            $this->header),
+        ));
     }
 
     $image = null;
