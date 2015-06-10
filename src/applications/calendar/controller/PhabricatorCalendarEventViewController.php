@@ -167,7 +167,7 @@ final class PhabricatorCalendarEventViewController
     } else if ($event->getIsRecurrenceException()) {
       $edit_label = pht('Edit This Instance');
       $edit_uri = "event/edit/{$id}/";
-    } else if (!$event->getIsRecurrenceParent()) {
+    } else {
       $edit_label = pht('Edit');
       $edit_uri = "event/edit/{$id}/";
     }
