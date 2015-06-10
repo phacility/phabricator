@@ -721,9 +721,13 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       ),
       'updated' => array(
         'vector' => array('updated', 'id'),
-        'name' => pht('Date Updated'),
+        'name' => pht('Date Updated (Latest First)'),
         'aliases' => array(self::ORDER_MODIFIED),
       ),
+      'outdated' => array(
+        'vector' => array('-updated', '-id'),
+        'name' => pht('Date Updated (Oldest First)'),
+       ),
       'title' => array(
         'vector' => array('title', 'id'),
         'name' => pht('Title'),
@@ -739,6 +743,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       array(
         'priority',
         'updated',
+        'outdated',
         'newest',
         'oldest',
         'title',
