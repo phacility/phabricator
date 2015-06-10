@@ -90,6 +90,17 @@ final class PhabricatorSpacesNamespaceQuery
     return (bool)self::getAllSpaces();
   }
 
+  public static function getViewerSpacesExist(PhabricatorUser $viewer) {
+    if (!self::getSpacesExist()) {
+      return false;
+    }
+
+    // If the viewer has access to only one space, pretend spaces simply don't
+    // exist.
+    $spaces = self::getViewerSpaces($viewer);
+    return (count($spaces) > 1);
+  }
+
   public static function getAllSpaces() {
     $cache = PhabricatorCaches::getRequestCache();
     $cache_key = self::KEY_ALL;

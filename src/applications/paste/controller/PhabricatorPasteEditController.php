@@ -167,12 +167,6 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       ->setObject($paste)
       ->execute();
 
-    $form->appendControl(
-      id(new PhabricatorSpacesControl())
-        ->setObject($paste)
-        ->setValue($v_space)
-        ->setName('spacePHID'));
-
     $form->appendChild(
       id(new AphrontFormPolicyControl())
         ->setUser($user)
@@ -180,6 +174,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
         ->setPolicyObject($paste)
         ->setPolicies($policies)
         ->setValue($v_view_policy)
+        ->setSpacePHID($v_space)
         ->setName('can_view'));
 
     $form->appendChild(

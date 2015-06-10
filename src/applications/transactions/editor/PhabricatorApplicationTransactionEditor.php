@@ -360,10 +360,13 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_SPACE:
         $space_phid = $xaction->getNewValue();
         if (!strlen($space_phid)) {
-          // If an install has no Spaces, we might end up with the empty string
-          // here instead of a strict `null`. Just make this work like callers
-          // might reasonably expect.
-          return null;
+          // If an install has no Spaces or the Spaces controls are not visible
+          // to the viewer, we might end up with the empty string here instead
+          // of a strict `null`, because some controller just used `getStr()`
+          // to read the space PHID from the request.
+          // Just make this work like callers might reasonably expect so we
+          // don't need to handle this specially in every EditController.
+          return $this->getActor()->getDefaultSpacePHID();
         } else {
           return $space_phid;
         }
@@ -2002,14 +2005,15 @@ abstract class PhabricatorApplicationTransactionEditor
     $transaction_type) {
     $errors = array();
 
-    $all_spaces = PhabricatorSpacesNamespaceQuery::getAllSpaces();
-    $viewer_spaces = PhabricatorSpacesNamespaceQuery::getViewerSpaces(
-      $this->getActor());
+    $actor = $this->getActor();
+
+    $has_spaces = PhabricatorSpacesNamespaceQuery::getViewerSpacesExist($actor);
+    $actor_spaces = PhabricatorSpacesNamespaceQuery::getViewerSpaces($actor);
     foreach ($xactions as $xaction) {
       $space_phid = $xaction->getNewValue();
 
       if ($space_phid === null) {
-        if (!$all_spaces) {
+        if (!$has_spaces) {
           // The install doesn't have any spaces, so this is fine.
           continue;
         }
@@ -2026,7 +2030,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
       // If the PHID isn't `null`, it needs to be a valid space that the
       // viewer can see.
-      if (empty($viewer_spaces[$space_phid])) {
+      if (empty($actor_spaces[$space_phid])) {
         $errors[] = new PhabricatorApplicationTransactionValidationError(
           $transaction_type,
           pht('Invalid'),
@@ -2045,7 +2049,18 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    return clone $object;
+    $copy = clone $object;
+
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorTransactions::TYPE_SPACE:
+          $space_phid = $this->getTransactionNewValue($object, $xaction);
+          $copy->setSpacePHID($space_phid);
+          break;
+      }
+    }
+
+    return $copy;
   }
 
   protected function validateAllTransactions(

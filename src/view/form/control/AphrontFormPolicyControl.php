@@ -5,6 +5,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
   private $object;
   private $capability;
   private $policies;
+  private $spacePHID;
 
   public function setPolicyObject(PhabricatorPolicyInterface $object) {
     $this->object = $object;
@@ -15,6 +16,15 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
     assert_instances_of($policies, 'PhabricatorPolicy');
     $this->policies = $policies;
     return $this;
+  }
+
+  public function setSpacePHID($space_phid) {
+    $this->spacePHID = $space_phid;
+    return $this;
+  }
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
   }
 
   public function setCapability($capability) {
@@ -187,11 +197,14 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
     $selected_icon = idx($selected, 'icon');
     $selected_name = idx($selected, 'name');
 
+    $spaces_control = $this->buildSpacesControl();
+
     return phutil_tag(
       'div',
       array(
       ),
       array(
+        $spaces_control,
         javelin_tag(
           'a',
           array(
@@ -231,4 +244,48 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
     return 'custom:placeholder';
   }
 
+  private function buildSpacesControl() {
+    if ($this->capability != PhabricatorPolicyCapability::CAN_VIEW) {
+      return null;
+    }
+
+    if (!($this->object instanceof PhabricatorSpacesInterface)) {
+      return null;
+    }
+
+    $viewer = $this->getUser();
+    if (!PhabricatorSpacesNamespaceQuery::getViewerSpacesExist($viewer)) {
+      return null;
+    }
+
+    $space_phid = $this->getSpacePHID();
+    if ($space_phid === null) {
+      $space_phid = $viewer->getDefaultSpacePHID();
+    }
+
+    $select = AphrontFormSelectControl::renderSelectTag(
+      $space_phid,
+      $this->getSpaceOptions(),
+      array(
+        'name' => 'spacePHID',
+      ));
+
+    return $select;
+  }
+
+  protected function getSpaceOptions() {
+    $viewer = $this->getUser();
+    $viewer_spaces = PhabricatorSpacesNamespaceQuery::getViewerSpaces($viewer);
+
+    $map = array();
+    foreach ($viewer_spaces as $space) {
+      $map[$space->getPHID()] = pht(
+        'Space %s: %s',
+        $space->getMonogram(),
+        $space->getNamespaceName());
+    }
+    asort($map);
+
+    return $map;
+  }
 }
