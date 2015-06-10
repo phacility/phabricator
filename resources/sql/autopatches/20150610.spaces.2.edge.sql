@@ -1,0 +1,16 @@
+CREATE TABLE {$NAMESPACE}_spaces.edge (
+  src VARBINARY(64) NOT NULL,
+  type INT UNSIGNED NOT NULL,
+  dst VARBINARY(64) NOT NULL,
+  dateCreated INT UNSIGNED NOT NULL,
+  seq INT UNSIGNED NOT NULL,
+  dataID INT UNSIGNED,
+  PRIMARY KEY (src, type, dst),
+  KEY `src` (src, type, dateCreated, seq),
+  UNIQUE KEY `key_dst` (dst, type, src)
+) ENGINE=InnoDB, COLLATE {$COLLATE_TEXT};
+
+CREATE TABLE {$NAMESPACE}_spaces.edgedata (
+  id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  data LONGTEXT NOT NULL COLLATE {$COLLATE_TEXT}
+) ENGINE=InnoDB, COLLATE {$COLLATE_TEXT};

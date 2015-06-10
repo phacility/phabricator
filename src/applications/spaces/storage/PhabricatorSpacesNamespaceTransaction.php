@@ -5,6 +5,7 @@ final class PhabricatorSpacesNamespaceTransaction
 
   const TYPE_NAME = 'spaces:name';
   const TYPE_DEFAULT = 'spaces:default';
+  const TYPE_DESCRIPTION = 'spaces:description';
 
   public function getApplicationName() {
     return 'spaces';
@@ -16,6 +17,38 @@ final class PhabricatorSpacesNamespaceTransaction
 
   public function getApplicationTransactionCommentObject() {
     return null;
+  }
+
+  public function shouldHide() {
+    $old = $this->getOldValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_DESCRIPTION:
+        return ($old === null);
+    }
+
+    return parent::shouldHide();
+  }
+
+  public function hasChangeDetails() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_DESCRIPTION:
+        return true;
+    }
+
+    return parent::hasChangeDetails();
+  }
+
+  public function getRemarkupBlocks() {
+    $blocks = parent::getRemarkupBlocks();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_DESCRIPTION:
+        $blocks[] = $this->getNewValue();
+        break;
+    }
+
+    return $blocks;
   }
 
   public function getTitle() {
@@ -37,6 +70,10 @@ final class PhabricatorSpacesNamespaceTransaction
             $old,
             $new);
         }
+      case self::TYPE_DESCRIPTION:
+        return pht(
+          '%s updated the description for this space.',
+            $this->renderHandleLink($author_phid));
       case self::TYPE_DEFAULT:
         return pht(
           '%s made this the default space.',

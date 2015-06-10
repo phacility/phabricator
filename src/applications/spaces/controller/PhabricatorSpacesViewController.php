@@ -75,6 +75,20 @@ final class PhabricatorSpacesViewController
       pht('Editable By'),
       $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
 
+    $description = $space->getDescription();
+    if (strlen($description)) {
+      $description = PhabricatorMarkupEngine::renderOneObject(
+        id(new PhabricatorMarkupOneOff())->setContent($description),
+        'default',
+        $viewer);
+
+      $list->addSectionHeader(
+        pht('Description'),
+        PHUIPropertyListView::ICON_SUMMARY);
+
+      $list->addTextContent($description);
+    }
+
     return $list;
   }
 
