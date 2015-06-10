@@ -84,7 +84,7 @@ eventually moved to automatic generation based on production data.
 = Caches and Serving Content =
 
 In the simplest implementation of static resources, you write out a raw JS tag
-with something like ##src="/js/base.js"##. This will break disastrously as you
+with something like `src="/js/base.js"`. This will break disastrously as you
 scale, because clients will be running with stale versions of resources. There
 are bunch of subtle problems (especially once you have a CDN), but the big one
 is that if a user is browsing your site as you push/deploy, their client will

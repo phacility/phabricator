@@ -46,6 +46,8 @@ final class DivinerBookController extends DivinerController {
     $atoms = id(new DivinerAtomQuery())
       ->setViewer($viewer)
       ->withBookPHIDs(array($book->getPHID()))
+      ->withGhosts(false)
+      ->withIsDocumentable(true)
       ->execute();
 
     $atoms = msort($atoms, 'getSortKey');

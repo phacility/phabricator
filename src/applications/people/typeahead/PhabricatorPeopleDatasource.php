@@ -54,7 +54,9 @@ final class PhabricatorPeopleDatasource
       if ($user->getIsDisabled()) {
         $closed = pht('Disabled');
       } else if ($user->getIsSystemAgent()) {
-        $closed = pht('Bot/Script');
+        $closed = pht('Bot');
+      } else if ($user->getIsMailingList()) {
+        $closed = pht('Mailing List');
       }
 
       $result = id(new PhabricatorTypeaheadResult())
@@ -65,10 +67,14 @@ final class PhabricatorPeopleDatasource
         ->setPriorityType('user')
         ->setClosed($closed);
 
+      if ($user->getIsMailingList()) {
+        $result->setIcon('fa-envelope-o');
+      }
+
       if ($this->enrichResults) {
-        $display_type = 'User';
+        $display_type = pht('User');
         if ($user->getIsAdmin()) {
-          $display_type = 'Administrator';
+          $display_type = pht('Administrator');
         }
         $result->setDisplayType($display_type);
         $result->setImageURI($handles[$user->getPHID()]->getImageURI());

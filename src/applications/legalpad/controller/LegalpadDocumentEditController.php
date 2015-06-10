@@ -57,7 +57,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
         $errors[] = pht('The document title may not be blank.');
       } else {
         $xactions[] = id(new LegalpadTransaction())
-          ->setTransactionType(LegalpadTransactionType::TYPE_TITLE)
+          ->setTransactionType(LegalpadTransaction::TYPE_TITLE)
           ->setNewValue($title);
       }
 
@@ -67,7 +67,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
         $errors[] = pht('The document may not be blank.');
       } else {
         $xactions[] = id(new LegalpadTransaction())
-          ->setTransactionType(LegalpadTransactionType::TYPE_TEXT)
+          ->setTransactionType(LegalpadTransaction::TYPE_TEXT)
           ->setNewValue($text);
       }
 
@@ -83,13 +83,13 @@ final class LegalpadDocumentEditController extends LegalpadController {
       if ($is_create) {
         $v_signature_type = $request->getStr('signatureType');
         $xactions[] = id(new LegalpadTransaction())
-          ->setTransactionType(LegalpadTransactionType::TYPE_SIGNATURE_TYPE)
+          ->setTransactionType(LegalpadTransaction::TYPE_SIGNATURE_TYPE)
           ->setNewValue($v_signature_type);
       }
 
       $v_preamble = $request->getStr('preamble');
       $xactions[] = id(new LegalpadTransaction())
-        ->setTransactionType(LegalpadTransactionType::TYPE_PREAMBLE)
+        ->setTransactionType(LegalpadTransaction::TYPE_PREAMBLE)
         ->setNewValue($v_preamble);
 
       $v_require_signature = $request->getBool('requireSignature', 0);
@@ -106,7 +106,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
       }
       if ($user->getIsAdmin()) {
         $xactions[] = id(new LegalpadTransaction())
-          ->setTransactionType(LegalpadTransactionType::TYPE_REQUIRE_SIGNATURE)
+          ->setTransactionType(LegalpadTransaction::TYPE_REQUIRE_SIGNATURE)
           ->setNewValue($v_require_signature);
       }
 

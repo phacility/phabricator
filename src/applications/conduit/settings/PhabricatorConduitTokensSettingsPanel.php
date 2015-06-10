@@ -20,6 +20,10 @@ final class PhabricatorConduitTokensSettingsPanel
   }
 
   public function isEnabled() {
+    if ($this->getUser()->getIsMailingList()) {
+      return false;
+    }
+
     return true;
   }
 

@@ -21,20 +21,20 @@ The bot reads a JSON configuration file. You can find an example in:
 
 These are the configuration values it reads:
 
-  - ##server## String, required, the server to connect to.
-  - ##port## Int, optional, the port to connect to (defaults to 6667).
-  - ##ssl## Bool, optional, whether to connect via SSL or not (defaults to
+  - `server` String, required, the server to connect to.
+  - `port` Int, optional, the port to connect to (defaults to 6667).
+  - `ssl` Bool, optional, whether to connect via SSL or not (defaults to
     false).
-  - ##nick## String, nickname to use.
-  - ##user## String, optional, username to use (defaults to ##nick##).
-  - ##pass## String, optional, password for server.
-  - ##nickpass## String, optional, password for NickServ.
-  - ##join## Array, list of channels to join.
-  - ##handlers## Array, list of handlers to run. These are like plugins for the
+  - `nick` String, nickname to use.
+  - `user` String, optional, username to use (defaults to `nick`).
+  - `pass` String, optional, password for server.
+  - `nickpass` String, optional, password for NickServ.
+  - `join` Array, list of channels to join.
+  - `handlers` Array, list of handlers to run. These are like plugins for the
     bot.
-  - ##conduit.uri##, ##conduit.user##, ##conduit.cert## Conduit configuration,
+  - `conduit.uri`, `conduit.user`, `conduit.cert` Conduit configuration,
     see below.
-  - ##notification.channels## Notification configuration, see below.
+  - `notification.channels` Notification configuration, see below.
 
 = Handlers =
 
@@ -46,14 +46,14 @@ the bot. These are the default handlers available:
     up, and says their name with a link to the object. Requires conduit.
   - @{class:PhabricatorBotFeedNotificationHandler} This handler posts
     notifications about changes to revisions to the channels listed in
-    ##notification.channels##.
+    `notification.channels`.
   - @{class:PhabricatorBotLogHandler} This handler records chatlogs which can
     be browsed in the Phabricator web interface.
   - @{class:PhabricatorBotSymbolHandler} This handler posts responses to lookups
     for symbols in Diffusion
   - @{class:PhabricatorBotMacroHandler} This handler looks for users mentioning
     macros, if found will convert image to ASCII and output in chat. Configure
-    with ##macro.size## and ##macro.aspect##
+    with `macro.size` and `macro.aspect`
 
 You can also write your own handlers, by extending
 @{class:PhabricatorBotHandler}.
@@ -70,20 +70,20 @@ with. To do this, login to Phabricator as an administrator and go to
 `People -> Create New Account`. Create a new account and flag them as a
 "Bot/Script". Then in your configuration file, set these parameters:
 
-  - ##conduit.uri## The URI for your Phabricator install, like
-    ##http://phabricator.example.com/##
-  - ##conduit.user## The username your bot should login to Phabricator with --
-    whatever you selected above, like ##phabot##.
-  - ##conduit.cert## The user's certificate, from the "Conduit Certificate" tab
+  - `conduit.uri` The URI for your Phabricator install, like
+    `http://phabricator.example.com/`
+  - `conduit.user` The username your bot should login to Phabricator with --
+    whatever you selected above, like `phabot`.
+  - `conduit.cert` The user's certificate, from the "Conduit Certificate" tab
     in the user's administrative view.
 
 Now the bot should be able to connect to Phabricator via Conduit.
 
 = Starting the Bot =
 
-The bot is a Phabricator daemon, so start it with ##phd##:
+The bot is a Phabricator daemon, so start it with `phd`:
 
   ./bin/phd launch phabricatorbot <absolute_path_to_config_file>
 
-If you have issues you can try ##debug## instead of ##launch##, see
+If you have issues you can try `debug` instead of `launch`, see
 @{article:Managing Daemons with phd} for more information.

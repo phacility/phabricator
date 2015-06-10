@@ -78,7 +78,6 @@ final class DifferentialSubscribersField
       array(
         PhabricatorPeopleUserPHIDType::TYPECONST,
         PhabricatorProjectProjectPHIDType::TYPECONST,
-        PhabricatorMailingListListPHIDType::TYPECONST,
       ));
   }
 

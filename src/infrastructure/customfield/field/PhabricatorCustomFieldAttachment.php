@@ -20,7 +20,9 @@ final class PhabricatorCustomFieldAttachment {
   public function getCustomFieldList($role) {
     if (empty($this->lists[$role])) {
       throw new PhabricatorCustomFieldNotAttachedException(
-        "Role list '{$role}' is not available!");
+        pht(
+          "Role list '%s' is not available!",
+          $role));
     }
     return $this->lists[$role];
   }

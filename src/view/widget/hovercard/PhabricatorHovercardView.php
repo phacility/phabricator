@@ -10,6 +10,7 @@ final class PhabricatorHovercardView extends AphrontView {
    * @var PhabricatorObjectHandle
    */
   private $handle;
+  private $object;
 
   private $title = array();
   private $detail;
@@ -20,6 +21,15 @@ final class PhabricatorHovercardView extends AphrontView {
   public function setObjectHandle(PhabricatorObjectHandle $handle) {
     $this->handle = $handle;
     return $this;
+  }
+
+  public function setObject($object) {
+    $this->object = $object;
+    return $this;
+  }
+
+  public function getObject() {
+    return $this->object;
   }
 
   public function setTitle($title) {
@@ -59,13 +69,20 @@ final class PhabricatorHovercardView extends AphrontView {
       throw new PhutilInvalidStateException('setObjectHandle');
     }
 
+    $viewer = $this->getUser();
     $handle = $this->handle;
 
     require_celerity_resource('phabricator-hovercard-view-css');
 
-    $title = pht('%s: %s',
-      $handle->getTypeName(),
-      $this->title ? $this->title : $handle->getName());
+    $title = array(
+      id(new PHUISpacesNamespaceContextView())
+        ->setUser($viewer)
+        ->setObject($this->getObject()),
+      pht(
+        '%s: %s',
+        $handle->getTypeName(),
+        $this->title ? $this->title : $handle->getName()),
+    );
 
     $header = new PHUIHeaderView();
     $header->setHeader($title);

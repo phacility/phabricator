@@ -58,4 +58,11 @@ final class PhabricatorDivinerApplication extends PhabricatorApplication {
     );
   }
 
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      DivinerAtomPHIDType::TYPECONST,
+      DivinerBookPHIDType::TYPECONST,
+    );
+  }
+
 }

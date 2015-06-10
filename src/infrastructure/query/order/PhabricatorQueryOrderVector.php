@@ -84,6 +84,22 @@ final class PhabricatorQueryOrderVector
     return $obj;
   }
 
+  public function appendVector($vector) {
+    $vector = self::newFromVector($vector);
+
+    // When combining vectors (like "group by" and "order by" vectors), there
+    // may be redundant columns. We only want to append unique columns which
+    // aren't already present in the vector.
+    foreach ($vector->items as $key => $item) {
+      if (empty($this->items[$key])) {
+        $this->items[$key] = $item;
+        $this->keys[] = $key;
+      }
+    }
+
+    return $this;
+  }
+
   public function getAsString() {
     $scalars = array();
     foreach ($this->items as $item) {

@@ -53,16 +53,16 @@ final class PhabricatorApplicationUninstallController
     if ($this->action == 'install') {
       if ($selected->canUninstall()) {
         $dialog
-          ->setTitle('Confirmation')
+          ->setTitle(pht('Confirmation'))
           ->appendChild(
             pht(
               'Install %s application?',
               $selected->getName()))
-          ->addSubmitButton('Install');
+          ->addSubmitButton(pht('Install'));
 
       } else {
         $dialog
-          ->setTitle('Information')
+          ->setTitle(pht('Information'))
           ->appendChild(pht('You cannot install an installed application.'));
       }
     } else {

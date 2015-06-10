@@ -20,8 +20,8 @@ NOTE: Follow these instructions to use Apache. To use nginx or lighttpd, scroll
 down to their sections.
 
 Get Apache running and verify it's serving a test page. Consult the Apache
-documentation for help. Make sure ##mod_php## and ##mod_rewrite## are enabled,
-and ##mod_ssl## if you intend to set up SSL.
+documentation for help. Make sure `mod_php` and `mod_rewrite` are enabled,
+and `mod_ssl` if you intend to set up SSL.
 
 If you haven't already, set up a domain name to point to the host you're
 installing on. You can either install Phabricator on a subdomain (like
@@ -177,7 +177,7 @@ root or some other admin user:
 
   phabricator/ $ ./bin/storage upgrade --user <user> --password <password>
 
-You can avoid the prompt the script issues by passing the ##--force## flag (for
+You can avoid the prompt the script issues by passing the `--force` flag (for
 example, if you are scripting the upgrade process).
 
   phabricator/ $ ./bin/storage upgrade --force

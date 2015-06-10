@@ -61,7 +61,7 @@ identify and fix the problems pretty easily.
 
 If you have a prohibitively large number of UTF-8 issues in your source code,
 Phabricator doesn't include any default tools to help you process them in a
-systematic way. You could hack up ##utf8.php## as a starting point, or use other
+systematic way. You could hack up `utf8.php` as a starting point, or use other
 tools to batch-process your source files.
 
 = Support for Alternate Encodings =

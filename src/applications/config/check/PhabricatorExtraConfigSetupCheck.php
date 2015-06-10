@@ -271,6 +271,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'metamta.maniphest.public-create-email' => $public_mail_reason,
       'metamta.maniphest.default-public-author' => $public_mail_reason,
       'metamta.paste.public-create-email' => $public_mail_reason,
+
+      'security.allow-conduit-act-as-user' => pht(
+        'Impersonating users over the API is no longer supported.'),
     );
 
     return $ancient_config;

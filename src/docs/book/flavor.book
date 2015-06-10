@@ -11,23 +11,20 @@
   },
   "exclude": [
     "(^externals/)",
-    "(^webroot/rsrc/externals/)",
-    "(^scripts/)",
-    "(^support/)",
     "(^resources/)",
-    "(^src/docs/user/)",
+    "(^scripts/)",
+    "(^src/docs/contributor/)",
     "(^src/docs/tech/)",
-    "(^src/docs/contributor/)"
+    "(^src/docs/user/)",
+    "(^support/)",
+    "(^webroot/rsrc/externals/)"
   ],
   "groups": {
     "overview": {
       "name": "Overview"
     },
-    "review": {
-      "name": "Revision Control and Code Review"
-    },
-    "sundry": {
-      "name": "Sundries"
+    "javascript": {
+      "name": "Javascript"
     },
     "lore": {
       "name": "Phabricator Lore"
@@ -35,8 +32,11 @@
     "php": {
       "name": "PHP"
     },
-    "javascript": {
-      "name": "Javascript"
+    "review": {
+      "name": "Revision Control and Code Review"
+    },
+    "sundry": {
+      "name": "Sundries"
     }
   }
 }

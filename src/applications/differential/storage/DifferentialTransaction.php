@@ -4,6 +4,19 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
 
   private $isCommandeerSideEffect;
 
+  const TYPE_INLINE  = 'differential:inline';
+  const TYPE_UPDATE  = 'differential:update';
+  const TYPE_ACTION  = 'differential:action';
+  const TYPE_STATUS  = 'differential:status';
+
+  const MAILTAG_REVIEWERS      = 'differential-reviewers';
+  const MAILTAG_CLOSED         = 'differential-committed';
+  const MAILTAG_CC             = 'differential-cc';
+  const MAILTAG_COMMENT        = 'differential-comment';
+  const MAILTAG_UPDATED        = 'differential-updated';
+  const MAILTAG_REVIEW_REQUEST = 'differential-review-request';
+  const MAILTAG_OTHER          = 'differential-other';
+
 
   public function setIsCommandeerSideEffect($is_side_effect) {
     $this->isCommandeerSideEffect = $is_side_effect;
@@ -13,11 +26,6 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
   public function getIsCommandeerSideEffect() {
     return $this->isCommandeerSideEffect;
   }
-
-  const TYPE_INLINE = 'differential:inline';
-  const TYPE_UPDATE = 'differential:update';
-  const TYPE_ACTION = 'differential:action';
-  const TYPE_STATUS = 'differential:status';
 
   public function getApplicationName() {
     return 'differential';
@@ -109,7 +117,6 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
   }
 
   public function getActionStrength() {
-
     switch ($this->getTransactionType()) {
       case self::TYPE_ACTION:
         return 3;
@@ -160,38 +167,38 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
 
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_SUBSCRIBERS;
-        $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_CC;
+        $tags[] = self::MAILTAG_CC;
         break;
       case self::TYPE_ACTION:
         switch ($this->getNewValue()) {
           case DifferentialAction::ACTION_CLOSE:
-            $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED;
+            $tags[] = self::MAILTAG_CLOSED;
             break;
         }
         break;
       case self::TYPE_UPDATE:
         $old = $this->getOldValue();
         if ($old === null) {
-          $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEW_REQUEST;
+          $tags[] = self::MAILTAG_REVIEW_REQUEST;
         } else {
-          $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_UPDATED;
+          $tags[] = self::MAILTAG_UPDATED;
         }
         break;
       case PhabricatorTransactions::TYPE_EDGE:
         switch ($this->getMetadataValue('edge:type')) {
           case DifferentialRevisionHasReviewerEdgeType::EDGECONST:
-            $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS;
+            $tags[] = self::MAILTAG_REVIEWERS;
             break;
         }
         break;
       case PhabricatorTransactions::TYPE_COMMENT:
       case self::TYPE_INLINE:
-        $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT;
+        $tags[] = self::MAILTAG_COMMENT;
         break;
     }
 
     if (!$tags) {
-      $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_OTHER;
+      $tags[] = self::MAILTAG_OTHER;
     }
 
     return $tags;
@@ -280,7 +287,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
           case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
             return pht('This revision now requires review to proceed.');
         }
-    }
+     }
 
     return parent::getTitle();
   }
@@ -438,7 +445,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
               '%s now requires review to proceed.',
               $object_link);
         }
-    }
+     }
 
     return parent::getTitleForFeed();
   }

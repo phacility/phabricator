@@ -8,7 +8,7 @@ final class ReleephDiffMessageFieldSpecification
   }
 
   public function getName() {
-    return 'Message';
+    return pht('Message');
   }
 
   public function getStyleForPropertyView() {

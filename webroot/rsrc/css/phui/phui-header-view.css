@@ -205,3 +205,11 @@ body .phui-header-shell.phui-bleed-header
   line-height: 20px;
   display: block;
 }
+
+.spaces-name {
+  color: {$lightbluetext};
+}
+
+.spaces-name .phui-handle {
+  color: #000;
+}

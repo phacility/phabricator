@@ -278,6 +278,43 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     return $this;
   }
 
+  /**
+   * @task role
+   */
+  public function makeMailingListUser(PhabricatorUser $user, $mailing_list) {
+    $actor = $this->requireActor();
+
+    if (!$user->getID()) {
+      throw new Exception(pht('User has not been created yet!'));
+    }
+
+    $user->openTransaction();
+      $user->beginWriteLocking();
+
+        $user->reload();
+        if ($user->getIsMailingList() == $mailing_list) {
+          $user->endWriteLocking();
+          $user->killTransaction();
+          return $this;
+        }
+
+        $log = PhabricatorUserLog::initializeNewLog(
+          $actor,
+          $user->getPHID(),
+          PhabricatorUserLog::ACTION_MAILING_LIST);
+        $log->setOldValue($user->getIsMailingList());
+        $log->setNewValue($mailing_list);
+
+        $user->setIsMailingList((int)$mailing_list);
+        $user->save();
+
+        $log->save();
+
+      $user->endWriteLocking();
+    $user->saveTransaction();
+
+    return $this;
+  }
 
   /**
    * @task role

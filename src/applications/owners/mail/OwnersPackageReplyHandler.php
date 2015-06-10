@@ -11,7 +11,7 @@ final class OwnersPackageReplyHandler extends PhabricatorMailReplyHandler {
   }
 
   public function getPrivateReplyHandlerEmailAddress(
-    PhabricatorObjectHandle $handle) {
+    PhabricatorUser $user) {
     return null;
   }
 

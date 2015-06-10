@@ -95,12 +95,25 @@ final class PhabricatorProjectQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new PhabricatorProject();
+  }
+
   protected function getDefaultOrderVector() {
     return array('name');
   }
 
-  public function getOrderableColumns() {
+  public function getBuiltinOrders() {
     return array(
+      'name' => array(
+        'vector' => array('name'),
+        'name' => pht('Name'),
+      ),
+    ) + parent::getBuiltinOrders();
+  }
+
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
       'name' => array(
         'table' => $this->getPrimaryTableAlias(),
         'column' => 'name',
@@ -120,29 +133,7 @@ final class PhabricatorProjectQuery
 
   protected function loadPage() {
     $table = new PhabricatorProject();
-    $conn_r = $table->establishConnection('r');
-
-    // NOTE: Because visibility checks for projects depend on whether or not
-    // the user is a project member, we always load their membership. If we're
-    // loading all members anyway we can piggyback on that; otherwise we
-    // do an explicit join.
-
-    $select_clause = '';
-    if (!$this->needMembers) {
-      $select_clause = ', vm.dst viewerIsMember';
-    }
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT p.* %Q FROM %T p %Q %Q %Q %Q %Q',
-      $select_clause,
-      $table->getTableName(),
-      $this->buildJoinClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildGroupClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
+    $data = $this->loadStandardPageRows($table);
     $projects = $table->loadAllFromArray($data);
 
     if ($projects) {
@@ -240,8 +231,22 @@ final class PhabricatorProjectQuery
     return $projects;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildSelectClauseParts(AphrontDatabaseConnection $conn) {
+    $select = parent::buildSelectClauseParts($conn);
+
+    // NOTE: Because visibility checks for projects depend on whether or not
+    // the user is a project member, we always load their membership. If we're
+    // loading all members anyway we can piggyback on that; otherwise we
+    // do an explicit join.
+    if (!$this->needMembers) {
+      $select[] = 'vm.dst viewerIsMember';
+    }
+
+    return $select;
+  }
+
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->status != self::STATUS_ANY) {
       switch ($this->status) {
@@ -264,86 +269,83 @@ final class PhabricatorProjectQuery
               $this->status));
       }
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'status IN (%Ld)',
         $filter);
     }
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->memberPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'e.dst IN (%Ls)',
         $this->memberPHIDs);
     }
 
     if ($this->slugs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'slug.slug IN (%Ls)',
         $this->slugs);
     }
 
     if ($this->phrictionSlugs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phrictionSlug IN (%Ls)',
         $this->phrictionSlugs);
     }
 
     if ($this->names !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'name IN (%Ls)',
         $this->names);
     }
 
     if ($this->icons !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'icon IN (%Ls)',
         $this->icons);
     }
 
     if ($this->colors !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'color IN (%Ls)',
         $this->colors);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
-  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
+  protected function shouldGroupQueryResultRows() {
     if ($this->memberPHIDs || $this->nameTokens) {
-      return 'GROUP BY p.id';
-    } else {
-      return $this->buildApplicationSearchGroupClause($conn_r);
+      return true;
     }
+    return parent::shouldGroupQueryResultRows();
   }
 
-  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
-    $joins = array();
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
 
     if (!$this->needMembers !== null) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'LEFT JOIN %T vm ON vm.src = p.phid AND vm.type = %d AND vm.dst = %s',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
         PhabricatorProjectProjectHasMemberEdgeType::EDGECONST,
@@ -352,7 +354,7 @@ final class PhabricatorProjectQuery
 
     if ($this->memberPHIDs !== null) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T e ON e.src = p.phid AND e.type = %d',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
         PhabricatorProjectProjectHasMemberEdgeType::EDGECONST);
@@ -360,7 +362,7 @@ final class PhabricatorProjectQuery
 
     if ($this->slugs !== null) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T slug on slug.projectPHID = p.phid',
         id(new PhabricatorProjectSlug())->getTableName());
     }
@@ -369,7 +371,7 @@ final class PhabricatorProjectQuery
       foreach ($this->nameTokens as $key => $token) {
         $token_table = 'token_'.$key;
         $joins[] = qsprintf(
-          $conn_r,
+          $conn,
           'JOIN %T %T ON %T.projectID = p.id AND %T.token LIKE %>',
           PhabricatorProject::TABLE_DATASOURCE_TOKEN,
           $token_table,
@@ -379,9 +381,7 @@ final class PhabricatorProjectQuery
       }
     }
 
-    $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
-
-    return implode(' ', $joins);
+    return $joins;
   }
 
   public function getQueryApplicationClass() {

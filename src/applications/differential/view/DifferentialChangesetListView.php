@@ -190,7 +190,7 @@ final class DifferentialChangesetListView extends AphrontView {
       } else {
         $detail->setAutoload(isset($this->visibleChangesets[$key]));
         if (isset($this->visibleChangesets[$key])) {
-          $load = 'Loading...';
+          $load = pht('Loading...');
         } else {
           $load = javelin_tag(
             'a',

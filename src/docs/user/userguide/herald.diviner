@@ -43,8 +43,8 @@ the actions for any matching rules are taken.
 
 To create a new Herald rule, choose which type of event you want to act on
 (e.g., changes to Differential Revisions, or Commits), and then set a list of
-conditions. For example, you might add the condition ##Author is alincoln
-(Abraham Lincoln)## to keep track of everything alincoln does. Finally, set
+conditions. For example, you might add the condition `Author is alincoln
+(Abraham Lincoln)` to keep track of everything alincoln does. Finally, set
 a list of actions to take when the conditions match, like adding yourself to the
 CC list.
 
@@ -90,7 +90,7 @@ A few features in Herald are particularly complicated:
   filename of the changed file; the second will be used to match the content.
   For example, if you want to match revisions which add or remove calls to
   a "muffinize" function, //but only in JS files//, you can set the value
-  to ##["/\\.js$/", "/muffinize/"]## or similar.
+  to `["/\\.js$/", "/muffinize/"]` or similar.
   - **Another Herald rule**: you can create Herald rules which depend on other
   rules. This can be useful if you need to express a more complicated predicate
   than "all" vs "any" allows, or have a common set of conditions which you want

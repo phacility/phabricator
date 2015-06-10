@@ -30,8 +30,8 @@ Arcanist will load this class and call methods on it in order to run lint. To
 make this work, you need to do three things:
 
   - actually write the class;
-  - add the library where the class exists to your ##.arcconfig##;
-  - add the class name to your ##.arcconfig## as the **lint.engine**,
+  - add the library where the class exists to your `.arcconfig`;
+  - add the class name to your `.arcconfig` as the **lint.engine**,
     **unit.engine**, or **arcanist_configuration**.
 
 = Create a libphutil Library =
@@ -39,7 +39,7 @@ make this work, you need to do three things:
 If you haven't created a library for the class to live in yet, you need to do
 that first. Follow the instructions in
 @{article:libphutil Libraries User Guide}, then make the library loadable by
-adding it to your ##.arcconfig## like this:
+adding it to your `.arcconfig` like this:
 
   {
     // ...
@@ -53,7 +53,7 @@ adding it to your ##.arcconfig## like this:
   }
 
 You can either specify an absolute path, or a path relative to the project root.
-When you run ##arc list --trace##, you should see a message to the effect that
+When you run `arc list --trace`, you should see a message to the effect that
 it has loaded your library.
 
 For debugging or testing, you can also run Arcanist with the
@@ -67,7 +67,7 @@ if you use this flag, Arcanist will ignore any libraries listed in
 
 = Use the Class =
 
-This step is easy: just edit ##.arcconfig## to specify your class name as
+This step is easy: just edit `.arcconfig` to specify your class name as
 the appropriate configuration value.
 
   {
@@ -79,7 +79,7 @@ the appropriate configuration value.
 Now, when you run Arcanist in your project, it will invoke your class when
 appropriate.
 
-For lint and unit tests, you can also use the ##--engine## flag override the
+For lint and unit tests, you can also use the `--engine` flag override the
 default engine:
 
   arc lint --engine MyCustomArcanistLintEngine

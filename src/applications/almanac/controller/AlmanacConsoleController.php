@@ -37,7 +37,7 @@ final class AlmanacConsoleController extends AlmanacController {
     $crumbs->addTextCrumb(pht('Console'));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText('Console')
+      ->setHeaderText(pht('Console'))
       ->setObjectList($menu);
 
     return $this->buildApplicationPage(

@@ -11,74 +11,60 @@ final class PhabricatorFileSearchEngine
     return 'PhabricatorFilesApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-    $saved->setParameter(
-      'authorPHIDs',
-      $this->readUsersFromRequest($request, 'authors'));
-
-    $saved->setParameter('explicit', $request->getBool('explicit'));
-    $saved->setParameter('createdStart', $request->getStr('createdStart'));
-    $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
-
-    return $saved;
+  public function newQuery() {
+    return new PhabricatorFileQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorFileQuery());
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchUsersField())
+        ->setKey('authorPHIDs')
+        ->setAliases(array('author', 'authors'))
+        ->setLabel(pht('Authors')),
+      id(new PhabricatorSearchThreeStateField())
+        ->setKey('explicit')
+        ->setLabel(pht('Upload Source'))
+        ->setOptions(
+          pht('(Show All)'),
+          pht('Show Only Manually Uploaded Files'),
+          pht('Hide Manually Uploaded Files')),
+      id(new PhabricatorSearchDateField())
+        ->setKey('createdStart')
+        ->setLabel(pht('Created After')),
+      id(new PhabricatorSearchDateField())
+        ->setKey('createdEnd')
+        ->setLabel(pht('Created Before')),
+    );
+  }
 
-    $author_phids = $saved->getParameter('authorPHIDs', array());
-    if ($author_phids) {
-      $query->withAuthorPHIDs($author_phids);
+  protected function getDefaultFieldOrder() {
+    return array(
+      '...',
+      'createdStart',
+      'createdEnd',
+    );
+  }
+
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
+
+    if ($map['authorPHIDs']) {
+      $query->withAuthorPHIDs($map['authorPHIDs']);
     }
 
-    if ($saved->getParameter('explicit')) {
-      $query->showOnlyExplicitUploads(true);
+    if ($map['explicit'] !== null) {
+      $query->showOnlyExplicitUploads($map['explicit']);
     }
 
-    $start = $this->parseDateTime($saved->getParameter('createdStart'));
-    $end = $this->parseDateTime($saved->getParameter('createdEnd'));
-
-    if ($start) {
-      $query->withDateCreatedAfter($start);
+    if ($map['createdStart']) {
+      $query->withDateCreatedAfter($map['createdStart']);
     }
 
-    if ($end) {
-      $query->withDateCreatedBefore($end);
+    if ($map['createdEnd']) {
+      $query->withDateCreatedBefore($map['createdEnd']);
     }
 
     return $query;
-  }
-
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
-
-    $author_phids = $saved_query->getParameter('authorPHIDs', array());
-    $explicit = $saved_query->getParameter('explicit');
-
-    $form
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('authors')
-          ->setLabel(pht('Authors'))
-          ->setValue($author_phids))
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->addCheckbox(
-            'explicit',
-            1,
-            pht('Show only manually uploaded files.'),
-            $explicit));
-
-    $this->buildDateRange(
-      $form,
-      $saved_query,
-      'createdStart',
-      pht('Created After'),
-      'createdEnd',
-      pht('Created Before'));
   }
 
   protected function getURI($path) {

@@ -34,7 +34,7 @@ nonfinal.
 
 By default, most linters raise lint messages as errors. You may want to reduce
 the severity of some messages (e.g., reduce errors to warnings). Do this by
-calling ##setCustomSeverityMap()##:
+calling `setCustomSeverityMap()`:
 
   $linter = new ArcanistTextLinter();
 
@@ -50,7 +50,7 @@ constants.
 
 = Disabling Rules =
 
-To disable rules entirely, set their severities to ##SEVERITY_DISABLED##:
+To disable rules entirely, set their severities to `SEVERITY_DISABLED`:
 
   $linter = new ArcanistTextLinter();
 
@@ -91,12 +91,12 @@ information.
 
 == ArcanistTextLinter ==
 
-  - Use ##setMaxLineLength()## to change the 80-column warning to something
+  - Use `setMaxLineLength()` to change the 80-column warning to something
     else.
 
 == ArcanistXHPASTLinter ==
 
-  - Use ##lint.xhpast.naminghook## in ##.arcconfig## to override naming
+  - Use `lint.xhpast.naminghook` in `.arcconfig` to override naming
     convention rules. See @{class@arcanist:ArcanistXHPASTLintNamingHook}
     for details.
-  - Use ##getXHPASTTreeForPath()## to reuse the AAST in other linters.
+  - Use `getXHPASTTreeForPath()` to reuse the AAST in other linters.

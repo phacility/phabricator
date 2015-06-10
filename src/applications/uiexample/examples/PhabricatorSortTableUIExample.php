@@ -18,28 +18,28 @@ final class PhabricatorSortTableUIExample extends PhabricatorUIExample {
         'model'   => 'Civic',
         'year'    => 2004,
         'price'   => 3199,
-        'color'   => 'Blue',
+        'color'   => pht('Blue'),
       ),
       array(
         'make'    => 'Ford',
         'model'   => 'Focus',
         'year'    => 2001,
         'price'   => 2549,
-        'color'   => 'Red',
+        'color'   => pht('Red'),
       ),
       array(
         'make'    => 'Toyota',
         'model'   => 'Camry',
         'year'    => 2009,
         'price'   => 4299,
-        'color'   => 'Black',
+        'color'   => pht('Black'),
       ),
       array(
         'make'    => 'NASA',
         'model'   => 'Shuttle',
         'year'    => 1998,
         'price'   => 1000000000,
-        'color'   => 'White',
+        'color'   => pht('White'),
       ),
     );
 

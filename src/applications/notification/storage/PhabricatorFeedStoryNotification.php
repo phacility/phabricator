@@ -25,11 +25,14 @@ final class PhabricatorFeedStoryNotification extends PhabricatorFeedDAO {
         'userPHID_2' => array(
           'columns' => array('userPHID', 'hasViewed', 'primaryObjectPHID'),
         ),
+        'key_object' => array(
+          'columns' => array('primaryObjectPHID'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
 
-  static public function updateObjectNotificationViews(
+  public static function updateObjectNotificationViews(
     PhabricatorUser $user,
     $object_phid) {
 

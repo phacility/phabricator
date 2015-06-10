@@ -6,9 +6,9 @@ abstract class PhabricatorApplicationTransactionReplyHandler
   abstract public function getObjectPrefix();
 
   public function getPrivateReplyHandlerEmailAddress(
-    PhabricatorObjectHandle $handle) {
+    PhabricatorUser $user) {
     return $this->getDefaultPrivateReplyHandlerEmailAddress(
-      $handle,
+      $user,
       $this->getObjectPrefix());
   }
 

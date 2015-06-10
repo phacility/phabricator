@@ -13,7 +13,8 @@ final class PhabricatorUser
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorSSHPublicKeyInterface {
+    PhabricatorSSHPublicKeyInterface,
+    PhabricatorApplicationTransactionInterface {
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';
@@ -38,6 +39,7 @@ final class PhabricatorUser
   protected $conduitCertificate;
 
   protected $isSystemAgent = 0;
+  protected $isMailingList = 0;
   protected $isAdmin = 0;
   protected $isDisabled = 0;
   protected $isEmailVerified = 0;
@@ -58,6 +60,7 @@ final class PhabricatorUser
 
   private $authorities = array();
   private $handlePool;
+  private $csrfSalt;
 
   protected function readField($field) {
     switch ($field) {
@@ -73,6 +76,8 @@ final class PhabricatorUser
         return (bool)$this->isDisabled;
       case 'isSystemAgent':
         return (bool)$this->isSystemAgent;
+      case 'isMailingList':
+        return (bool)$this->isMailingList;
       case 'isEmailVerified':
         return (bool)$this->isEmailVerified;
       case 'isApproved':
@@ -112,6 +117,46 @@ final class PhabricatorUser
     return true;
   }
 
+  public function canEstablishWebSessions() {
+    if (!$this->isUserActivated()) {
+      return false;
+    }
+
+    if ($this->getIsMailingList()) {
+      return false;
+    }
+
+    if ($this->getIsSystemAgent()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function canEstablishAPISessions() {
+    if (!$this->isUserActivated()) {
+      return false;
+    }
+
+    if ($this->getIsMailingList()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function canEstablishSSHSessions() {
+    if (!$this->isUserActivated()) {
+      return false;
+    }
+
+    if ($this->getIsMailingList()) {
+      return false;
+    }
+
+    return true;
+  }
+
   /**
    * Returns `true` if this is a standard user who is logged in. Returns `false`
    * for logged out, anonymous, or external users.
@@ -140,6 +185,7 @@ final class PhabricatorUser
         'consoleTab' => 'text64',
         'conduitCertificate' => 'text255',
         'isSystemAgent' => 'bool',
+        'isMailingList' => 'bool',
         'isDisabled' => 'bool',
         'isAdmin' => 'bool',
         'timezoneIdentifier' => 'text255',
@@ -298,21 +344,26 @@ final class PhabricatorUser
       self::CSRF_TOKEN_LENGTH);
   }
 
-  /**
-   * @phutil-external-symbol class PhabricatorStartup
-   */
   public function getCSRFToken() {
-    $salt = PhabricatorStartup::getGlobal('csrf.salt');
-    if (!$salt) {
-      $salt = Filesystem::readRandomCharacters(self::CSRF_SALT_LENGTH);
-      PhabricatorStartup::setGlobal('csrf.salt', $salt);
+    if ($this->isOmnipotent()) {
+      // We may end up here when called from the daemons. The omnipotent user
+      // has no meaningful CSRF token, so just return `null`.
+      return null;
     }
+
+    if ($this->csrfSalt === null) {
+      $this->csrfSalt = Filesystem::readRandomCharacters(
+        self::CSRF_SALT_LENGTH);
+    }
+
+    $salt = $this->csrfSalt;
 
     // Generate a token hash to mitigate BREACH attacks against SSL. See
     // discussion in T3684.
     $token = $this->getRawCSRFToken();
     $hash = PhabricatorHash::digest($token, $salt);
-    return 'B@'.$salt.substr($hash, 0, self::CSRF_TOKEN_LENGTH);
+    return self::CSRF_BREACH_PREFIX.$salt.substr(
+        $hash, 0, self::CSRF_TOKEN_LENGTH);
   }
 
   public function validateCSRFToken($token) {
@@ -707,6 +758,20 @@ final class PhabricatorUser
       $email->getUserPHID());
   }
 
+  public function getDefaultSpacePHID() {
+    // TODO: We might let the user switch which space they're "in" later on;
+    // for now just use the global space if one exists.
+
+    $spaces = PhabricatorSpacesNamespaceQuery::getViewerSpaces($this);
+    foreach ($spaces as $space) {
+      if ($space->getIsDefaultNamespace()) {
+        return $space->getPHID();
+      }
+    }
+
+    return null;
+  }
+
 
   /**
    * Grant a user a source of authority, to let them bypass policy checks they
@@ -1032,7 +1097,7 @@ final class PhabricatorUser
       case PhabricatorPolicyCapability::CAN_VIEW:
         return PhabricatorPolicies::POLICY_PUBLIC;
       case PhabricatorPolicyCapability::CAN_EDIT:
-        if ($this->getIsSystemAgent()) {
+        if ($this->getIsSystemAgent() || $this->getIsMailingList()) {
           return PhabricatorPolicies::POLICY_ADMIN;
         } else {
           return PhabricatorPolicies::POLICY_NOONE;
@@ -1153,6 +1218,28 @@ final class PhabricatorUser
 
   public function getSSHKeyDefaultName() {
     return 'id_rsa_phabricator';
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorUserProfileEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorUserTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
   }
 
 }

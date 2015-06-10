@@ -11,122 +11,66 @@ final class PhabricatorRepositorySearchEngine
     return 'PhabricatorDiffusionApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    $saved->setParameter('callsigns', $request->getStrList('callsigns'));
-    $saved->setParameter('status', $request->getStr('status'));
-    $saved->setParameter('order', $request->getStr('order'));
-    $saved->setParameter('hosted', $request->getStr('hosted'));
-    $saved->setParameter('types', $request->getArr('types'));
-    $saved->setParameter('name', $request->getStr('name'));
-
-    $saved->setParameter(
-      'projects',
-      $this->readProjectsFromRequest($request, 'projects'));
-
-    return $saved;
-  }
-
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorRepositoryQuery())
+  public function newQuery() {
+    return id(new PhabricatorRepositoryQuery())
       ->needProjectPHIDs(true)
       ->needCommitCounts(true)
       ->needMostRecentCommits(true);
-
-    $callsigns = $saved->getParameter('callsigns');
-    if ($callsigns) {
-      $query->withCallsigns($callsigns);
-    }
-
-    $status = $saved->getParameter('status');
-    $status = idx($this->getStatusValues(), $status);
-    if ($status) {
-      $query->withStatus($status);
-    }
-
-    $this->setQueryOrder($query, $saved);
-
-    $hosted = $saved->getParameter('hosted');
-    $hosted = idx($this->getHostedValues(), $hosted);
-    if ($hosted) {
-      $query->withHosted($hosted);
-    }
-
-    $types = $saved->getParameter('types');
-    if ($types) {
-      $query->withTypes($types);
-    }
-
-    $name = $saved->getParameter('name');
-    if (strlen($name)) {
-      $query->withNameContains($name);
-    }
-
-    $adjusted = clone $saved;
-    $adjusted->setParameter('projects', $this->readProjectTokens($saved));
-    $this->setQueryProjects($query, $adjusted);
-
-    return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchStringListField())
+        ->setLabel(pht('Callsigns'))
+        ->setKey('callsigns'),
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('name'),
+      id(new PhabricatorSearchSelectField())
+        ->setLabel(pht('Status'))
+        ->setKey('status')
+        ->setOptions($this->getStatusOptions()),
+      id(new PhabricatorSearchSelectField())
+        ->setLabel(pht('Hosted'))
+        ->setKey('hosted')
+        ->setOptions($this->getHostedOptions()),
+      id(new PhabricatorSearchCheckboxesField())
+        ->setLabel(pht('Types'))
+        ->setKey('types')
+        ->setOptions(PhabricatorRepositoryType::getAllRepositoryTypes()),
+    );
+  }
 
-    $callsigns = $saved_query->getParameter('callsigns', array());
-    $types = $saved_query->getParameter('types', array());
-    $types = array_fuse($types);
-    $name = $saved_query->getParameter('name');
-    $projects = $this->readProjectTokens($saved_query);
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
 
-    $form
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setName('callsigns')
-          ->setLabel(pht('Callsigns'))
-          ->setValue(implode(', ', $callsigns)))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setName('name')
-          ->setLabel(pht('Name Contains'))
-          ->setValue($name))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorProjectLogicalDatasource())
-          ->setName('projects')
-          ->setLabel(pht('Projects'))
-          ->setValue($projects))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setName('status')
-          ->setLabel(pht('Status'))
-          ->setValue($saved_query->getParameter('status'))
-          ->setOptions($this->getStatusOptions()))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setName('hosted')
-          ->setLabel(pht('Hosted'))
-          ->setValue($saved_query->getParameter('hosted'))
-          ->setOptions($this->getHostedOptions()));
-
-    $type_control = id(new AphrontFormCheckboxControl())
-      ->setLabel(pht('Types'));
-
-    $all_types = PhabricatorRepositoryType::getAllRepositoryTypes();
-    foreach ($all_types as $key => $name) {
-      $type_control->addCheckbox(
-        'types[]',
-        $key,
-        $name,
-        isset($types[$key]));
+    if ($map['callsigns']) {
+      $query->withCallsigns($map['callsigns']);
     }
-    $form->appendChild($type_control);
 
-    $this->appendOrderFieldsToForm(
-      $form,
-      $saved_query,
-      new PhabricatorRepositoryQuery());
+    if ($map['status']) {
+      $status = idx($this->getStatusValues(), $map['status']);
+      if ($status) {
+        $query->withStatus($status);
+      }
+    }
+
+    if ($map['hosted']) {
+      $hosted = idx($this->getHostedValues(), $map['hosted']);
+      if ($hosted) {
+        $query->withHosted($hosted);
+      }
+    }
+
+    if ($map['types']) {
+      $query->withTypes($map['types']);
+    }
+
+    if (strlen($map['name'])) {
+      $query->withNameContains($map['name']);
+    }
+
+    return $query;
   }
 
   protected function getURI($path) {
@@ -268,15 +212,20 @@ final class PhabricatorRepositorySearchEngine
     return $list;
   }
 
-  private function readProjectTokens(PhabricatorSavedQuery $saved) {
-    $projects = $saved->getParameter('projects', array());
+  protected function willUseSavedQuery(PhabricatorSavedQuery $saved) {
+    $project_phids = $saved->getParameter('projectPHIDs', array());
+
+    $old = $saved->getParameter('projects', array());
+    foreach ($old as $phid) {
+      $project_phids[] = $phid;
+    }
 
     $any = $saved->getParameter('anyProjectPHIDs', array());
     foreach ($any as $project) {
-      $projects[] = 'any('.$project.')';
+      $project_phids[] = 'any('.$project.')';
     }
 
-    return $projects;
+    $saved->setParameter('projectPHIDs', $project_phids);
   }
 
 }

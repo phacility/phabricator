@@ -87,7 +87,7 @@ final class AlmanacBindingEditController
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setName('interfacePHIDs')
-          ->setLabel('Interface')
+          ->setLabel(pht('Interface'))
           ->setLimit(1)
           ->setDatasource(new AlmanacInterfaceDatasource())
           ->setValue($v_interface)

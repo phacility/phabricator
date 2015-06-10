@@ -80,7 +80,7 @@ abstract class AphrontApplicationConfiguration {
     // This is the earliest we can get away with this, we need env config first.
     PhabricatorAccessLog::init();
     $access_log = PhabricatorAccessLog::getLog();
-    PhabricatorStartup::setGlobal('log.access', $access_log);
+    PhabricatorStartup::setAccessLog($access_log);
     $access_log->setData(
       array(
         'R' => AphrontRequest::getHTTPHeader('Referer', '-'),

@@ -23,7 +23,7 @@ final class PhabricatorPagerUIExample extends PhabricatorUIExample {
     $rows = array();
     for ($ii = $offset; $ii < min($item_count, $offset + $page_size); $ii++) {
       $rows[] = array(
-        'Item #'.($ii + 1),
+        pht('Item #%d', $ii + 1),
       );
     }
 

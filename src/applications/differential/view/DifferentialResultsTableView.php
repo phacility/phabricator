@@ -78,7 +78,7 @@ final class DifferentialResultsTableView extends AphrontView {
           'href'        => '#',
           'mustcapture' => true,
         ),
-        'Hide');
+        pht('Hide'));
 
       $rows[] = javelin_tag(
         'tr',

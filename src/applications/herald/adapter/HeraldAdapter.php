@@ -110,6 +110,7 @@ abstract class HeraldAdapter {
   private $queuedTransactions = array();
   private $emailPHIDs = array();
   private $forcedEmailPHIDs = array();
+  private $unsubscribedPHIDs;
 
   public function getEmailPHIDs() {
     return array_values($this->emailPHIDs);
@@ -196,6 +197,20 @@ abstract class HeraldAdapter {
         return true;
       case self::FIELD_IS_NEW_OBJECT:
         return $this->getIsNewObject();
+      case self::FIELD_CC:
+        $object = $this->getObject();
+
+        if (!($object instanceof PhabricatorSubscribableInterface)) {
+          throw new Exception(
+            pht(
+              'Adapter object (of class "%s") does not implement interface '.
+              '"%s", so the subscribers field value can not be determined.',
+              get_class($object),
+              'PhabricatorSubscribableInterface'));
+        }
+
+        $phid = $object->getPHID();
+        return PhabricatorSubscribersQuery::loadSubscribersForPHID($phid);
       case self::FIELD_APPLICATION_EMAIL:
         $value = array();
         // while there is only one match by implementation, we do set
@@ -1541,10 +1556,15 @@ abstract class HeraldAdapter {
       case self::ACTION_ADD_PROJECTS:
       case self::ACTION_REMOVE_PROJECTS:
         return $this->applyProjectsEffect($effect);
+      case self::ACTION_ADD_CC:
+      case self::ACTION_REMOVE_CC:
+        return $this->applySubscribersEffect($effect);
       case self::ACTION_FLAG:
         return $this->applyFlagEffect($effect);
       case self::ACTION_EMAIL:
         return $this->applyEmailEffect($effect);
+      case self::ACTION_NOTHING:
+        return $this->applyNothingEffect($effect);
       default:
         break;
     }
@@ -1563,6 +1583,12 @@ abstract class HeraldAdapter {
     return $result;
   }
 
+  private function applyNothingEffect(HeraldEffect $effect) {
+    return new HeraldApplyTranscript(
+      $effect,
+      true,
+      pht('Did nothing.'));
+  }
 
   /**
    * @task apply
@@ -1591,6 +1617,97 @@ abstract class HeraldAdapter {
       $effect,
       true,
       pht('Added projects.'));
+  }
+
+  /**
+   * @task apply
+   */
+  private function applySubscribersEffect(HeraldEffect $effect) {
+    if ($effect->getAction() == self::ACTION_ADD_CC) {
+      $kind = '+';
+      $is_add = true;
+    } else {
+      $kind = '-';
+      $is_add = false;
+    }
+
+    $subscriber_phids = array_fuse($effect->getTarget());
+    if (!$subscriber_phids) {
+      return new HeraldApplyTranscript(
+        $effect,
+        false,
+        pht('This action lists no users or objects to affect.'));
+    }
+
+    // The "Add Subscribers" rule only adds subscribers who haven't previously
+    // unsubscribed from the object explicitly. Filter these subscribers out
+    // before continuing.
+    $unsubscribed = array();
+    if ($is_add) {
+      if ($this->unsubscribedPHIDs === null) {
+        $this->unsubscribedPHIDs = PhabricatorEdgeQuery::loadDestinationPHIDs(
+          $this->getObject()->getPHID(),
+          PhabricatorObjectHasUnsubscriberEdgeType::EDGECONST);
+      }
+
+      foreach ($this->unsubscribedPHIDs as $phid) {
+        if (isset($subscriber_phids[$phid])) {
+          $unsubscribed[$phid] = $phid;
+          unset($subscriber_phids[$phid]);
+        }
+      }
+    }
+
+    if (!$subscriber_phids) {
+      return new HeraldApplyTranscript(
+        $effect,
+        false,
+        pht('All targets have previously unsubscribed explicitly.'));
+    }
+
+    // Filter out PHIDs which aren't valid subscribers. Lower levels of the
+    // stack will fail loudly if we try to add subscribers with invalid PHIDs
+    // or unknown PHID types, so drop them here.
+    $invalid = array();
+    foreach ($subscriber_phids as $phid) {
+      $type = phid_get_type($phid);
+      switch ($type) {
+        case PhabricatorPeopleUserPHIDType::TYPECONST:
+        case PhabricatorProjectProjectPHIDType::TYPECONST:
+          break;
+        default:
+          $invalid[$phid] = $phid;
+          unset($subscriber_phids[$phid]);
+          break;
+      }
+    }
+
+    if (!$subscriber_phids) {
+      return new HeraldApplyTranscript(
+        $effect,
+        false,
+        pht('All targets are invalid as subscribers.'));
+    }
+
+    $xaction = $this->newTransaction()
+      ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+      ->setNewValue(
+        array(
+          $kind => $subscriber_phids,
+        ));
+
+    $this->queueTransaction($xaction);
+
+    // TODO: We could be more detailed about this, but doing it meaningfully
+    // probably requires substantial changes to how transactions are rendered
+    // first.
+    if ($is_add) {
+      $message = pht('Subscribed targets.');
+    } else {
+      $message = pht('Unsubscribed targets.');
+    }
+
+    return new HeraldApplyTranscript($effect, true, $message);
   }
 
 

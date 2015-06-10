@@ -282,8 +282,7 @@ abstract class PhabricatorStandardCustomField
   public function appendToApplicationSearchForm(
     PhabricatorApplicationSearchEngine $engine,
     AphrontFormView $form,
-    $value,
-    array $handles) {
+    $value) {
     return;
   }
 

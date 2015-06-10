@@ -20,11 +20,20 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $icon;
   protected $mailKey;
 
+  protected $isRecurring = 0;
+  protected $recurrenceFrequency = array();
+  protected $recurrenceEndDate;
+
+  private $isGhostEvent = false;
+  protected $instanceOfEventPHID;
+  protected $sequenceIndex;
+
   protected $viewPolicy;
   protected $editPolicy;
 
   const DEFAULT_ICON = 'fa-calendar';
 
+  private $parentEvent = self::ATTACHABLE;
   private $invitees = self::ATTACHABLE;
   private $appliedViewer;
 
@@ -36,8 +45,13 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->withClasses(array('PhabricatorCalendarApplication'))
       ->executeOne();
 
+    $view_policy = null;
+    $is_recurring = 0;
+
     if ($mode == 'public') {
       $view_policy = PhabricatorPolicies::getMostOpenPolicy();
+    } else if ($mode == 'recurring') {
+      $is_recurring = true;
     } else {
       $view_policy = $actor->getPHID();
     }
@@ -46,6 +60,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setUserPHID($actor->getPHID())
       ->setIsCancelled(0)
       ->setIsAllDay(0)
+      ->setIsRecurring($is_recurring)
       ->setIcon(self::DEFAULT_ICON)
       ->setViewPolicy($view_policy)
       ->setEditPolicy($actor->getPHID())
@@ -180,11 +195,22 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'isAllDay' => 'bool',
         'icon' => 'text32',
         'mailKey' => 'bytes20',
+        'isRecurring' => 'bool',
+        'recurrenceEndDate' => 'epoch?',
+        'instanceOfEventPHID' => 'phid?',
+        'sequenceIndex' => 'uint32?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'userPHID_dateFrom' => array(
           'columns' => array('userPHID', 'dateTo'),
         ),
+        'key_instance' => array(
+          'columns' => array('instanceOfEventPHID', 'sequenceIndex'),
+          'unique' => true,
+        ),
+      ),
+      self::CONFIG_SERIALIZATION => array(
+        'recurrenceFrequency' => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
   }
@@ -236,6 +262,115 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       return false;
     }
     return true;
+  }
+
+  public function getIsGhostEvent() {
+    return $this->isGhostEvent;
+  }
+
+  public function setIsGhostEvent($is_ghost_event) {
+    $this->isGhostEvent = $is_ghost_event;
+    return $this;
+  }
+
+  public function generateNthGhost(
+    $sequence_index,
+    PhabricatorUser $actor) {
+
+    $frequency = $this->getFrequencyUnit();
+    $modify_key = '+'.$sequence_index.' '.$frequency;
+
+    $instance_of = ($this->getPHID()) ?
+      $this->getPHID() : $this->instanceOfEventPHID;
+
+    $date = $this->dateFrom;
+    $date_time = PhabricatorTime::getDateTimeFromEpoch($date, $actor);
+    $date_time->modify($modify_key);
+    $date = $date_time->format('U');
+
+    $duration = $this->dateTo - $this->dateFrom;
+
+    $edit_policy = PhabricatorPolicies::POLICY_NOONE;
+
+    $ghost_event = id(clone $this)
+      ->setIsGhostEvent(true)
+      ->setDateFrom($date)
+      ->setDateTo($date + $duration)
+      ->setIsRecurring(true)
+      ->setRecurrenceFrequency($this->recurrenceFrequency)
+      ->setInstanceOfEventPHID($instance_of)
+      ->setSequenceIndex($sequence_index)
+      ->setEditPolicy($edit_policy);
+
+    return $ghost_event;
+  }
+
+  public function getFrequencyUnit() {
+    $frequency = idx($this->recurrenceFrequency, 'rule');
+
+    switch ($frequency) {
+      case 'daily':
+        return 'day';
+      case 'weekly':
+        return 'week';
+      case 'monthly':
+        return 'month';
+      case 'yearly':
+        return 'yearly';
+      default:
+        return 'day';
+    }
+  }
+
+  public function getURI() {
+    $uri = '/'.$this->getMonogram();
+    if ($this->isGhostEvent) {
+      $uri = $uri.'/'.$this->sequenceIndex;
+    }
+    return $uri;
+  }
+
+  public function getParentEvent() {
+    return $this->assertAttached($this->parentEvent);
+  }
+
+  public function attachParentEvent($event) {
+    $this->parentEvent = $event;
+    return $this;
+  }
+
+  public function getIsCancelled() {
+    $instance_of = $this->instanceOfEventPHID;
+    if ($instance_of != null && $this->getIsParentCancelled()) {
+      return true;
+    }
+    return $this->isCancelled;
+  }
+
+  public function getIsRecurrenceParent() {
+    if ($this->isRecurring && !$this->instanceOfEventPHID) {
+      return true;
+    }
+    return false;
+  }
+
+  public function getIsRecurrenceException() {
+    if ($this->instanceOfEventPHID && !$this->isGhostEvent) {
+      return true;
+    }
+    return false;
+  }
+
+  public function getIsParentCancelled() {
+    if ($this->instanceOfEventPHID == null) {
+      return false;
+    }
+
+    $recurring_event = $this->getParentEvent();
+    if ($recurring_event->getIsCancelled()) {
+      return true;
+    }
+    return false;
   }
 
 /* -(  Markup Interface  )--------------------------------------------------- */
@@ -328,7 +463,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function describeAutomaticCapability($capability) {
     return pht('The owner of an event can always view and edit it,
-      and invitees can always view it.');
+      and invitees can always view it, except if the event is an
+      instance of a recurring event.');
   }
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */

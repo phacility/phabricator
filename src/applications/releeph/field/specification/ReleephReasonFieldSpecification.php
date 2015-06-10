@@ -44,7 +44,7 @@ final class ReleephReasonFieldSpecification
 
   public function validate($reason) {
     if (!$reason) {
-      $this->error = 'Required';
+      $this->error = pht('Required');
       throw new ReleephFieldParseException(
         $this,
         pht('You must give a reason for your request.'));
@@ -53,8 +53,8 @@ final class ReleephReasonFieldSpecification
 
   public function renderHelpForArcanist() {
     $text = pht(
-      "Fully explain why you are requesting this code be included ".
-      "in the next release.\n");
+      'Fully explain why you are requesting this code be included '.
+      'in the next release.')."\n";
     return phutil_console_wrap($text, 8);
   }
 

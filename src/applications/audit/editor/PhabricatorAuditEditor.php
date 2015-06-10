@@ -8,6 +8,7 @@ final class PhabricatorAuditEditor
   private $auditReasonMap = array();
   private $affectedFiles;
   private $rawPatch;
+  private $auditorPHIDs = array();
 
   private $didExpandInlineState;
 
@@ -342,6 +343,9 @@ final class PhabricatorAuditEditor
       $object->writeImportStatusFlag($import_status_flag);
     }
 
+    // Collect auditor PHIDs for building mail.
+    $this->auditorPHIDs = mpull($object->getAudits(), 'getAuditorPHID');
+
     return $xactions;
   }
 
@@ -669,17 +673,11 @@ final class PhabricatorAuditEditor
         $object);
     }
 
-    // Reload the commit to pull commit data.
-    $commit = id(new DiffusionCommitQuery())
-      ->setViewer($this->requireActor())
-      ->withIDs(array($object->getID()))
-      ->needCommitData(true)
-      ->executeOne();
-    $data = $commit->getCommitData();
+    $data = $object->getCommitData();
 
     $user_phids = array();
 
-    $author_phid = $commit->getAuthorPHID();
+    $author_phid = $object->getAuthorPHID();
     if ($author_phid) {
       $user_phids[$author_phid][] = pht('Author');
     }
@@ -689,10 +687,7 @@ final class PhabricatorAuditEditor
       $user_phids[$committer_phid][] = pht('Committer');
     }
 
-    // we loaded this in applyFinalEffects
-    $audit_requests = $object->getAudits();
-    $auditor_phids = mpull($audit_requests, 'getAuditorPHID');
-    foreach ($auditor_phids as $auditor_phid) {
+    foreach ($this->auditorPHIDs as $auditor_phid) {
       $user_phids[$auditor_phid][] = pht('Auditor');
     }
 
@@ -894,6 +889,7 @@ final class PhabricatorAuditEditor
             "H{$rule_id}"));
       }
     }
+
     if ($audit_phids) {
       $xactions[] = id(new PhabricatorAuditTransaction())
         ->setTransactionType(PhabricatorAuditActionConstants::ADD_AUDITORS)
@@ -904,15 +900,6 @@ final class PhabricatorAuditEditor
         ->setMetadataValue(
           'auditReasonMap', $this->auditReasonMap);
     }
-
-    $cc_phids = $adapter->getAddCCMap();
-    $add_ccs = array('+' => array());
-    foreach ($cc_phids as $phid => $rule_ids) {
-      $add_ccs['+'][$phid] = $phid;
-    }
-    $xactions[] = id(new PhabricatorAuditTransaction())
-      ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
-      ->setNewValue($add_ccs);
 
     HarbormasterBuildable::applyBuildPlans(
       $object->getPHID(),
@@ -981,6 +968,30 @@ final class PhabricatorAuditEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
     return $this->shouldPublishRepositoryActivity($object, $xactions);
+  }
+
+  protected function getCustomWorkerState() {
+    return array(
+      'rawPatch' => $this->rawPatch,
+      'affectedFiles' => $this->affectedFiles,
+      'auditorPHIDs' => $this->auditorPHIDs,
+    );
+  }
+
+  protected function loadCustomWorkerState(array $state) {
+    $this->rawPatch = idx($state, 'rawPatch');
+    $this->affectedFiles = idx($state, 'affectedFiles');
+    $this->auditorPHIDs = idx($state, 'auditorPHIDs');
+    return $this;
+  }
+
+  protected function willPublish(PhabricatorLiskDAO $object, array $xactions) {
+    return id(new DiffusionCommitQuery())
+      ->setViewer($this->requireActor())
+      ->withIDs(array($object->getID()))
+      ->needAuditRequests(true)
+      ->needCommitData(true)
+      ->executeOne();
   }
 
 }

@@ -60,10 +60,6 @@ final class PhabricatorConduitAPIController
         // CSRF validation or are using a non-web authentication mechanism.
         $allow_unguarded_writes = true;
 
-        if (isset($metadata['actAsUser'])) {
-          $this->actAsUser($api_request, $metadata['actAsUser']);
-        }
-
         if ($auth_error === null) {
           $conduit_user = $api_request->getUser();
           if ($conduit_user && $conduit_user->getPHID()) {
@@ -161,44 +157,6 @@ final class PhabricatorConduitAPIController
           ->setAddJSONShield(false)
           ->setContent($response->toDictionary());
     }
-  }
-
-  /**
-   * Change the api request user to the user that we want to act as.
-   * Only admins can use actAsUser
-   *
-   * @param   ConduitAPIRequest Request being executed.
-   * @param   string            The username of the user we want to act as
-   */
-  private function actAsUser(
-    ConduitAPIRequest $api_request,
-    $user_name) {
-
-    $config_key = 'security.allow-conduit-act-as-user';
-    if (!PhabricatorEnv::getEnvConfig($config_key)) {
-      throw new Exception(pht('%s is disabled.', $config_key));
-    }
-
-    if (!$api_request->getUser()->getIsAdmin()) {
-      throw new Exception(
-        pht(
-          'Only administrators can use %s.',
-          __FUNCTION__));
-    }
-
-    $user = id(new PhabricatorUser())->loadOneWhere(
-      'userName = %s',
-      $user_name);
-
-    if (!$user) {
-      throw new Exception(
-        pht(
-          "The %s username '%s' is not a valid user.",
-          __FUNCTION__,
-          $user_name));
-    }
-
-    $api_request->setUser($user);
   }
 
   /**
@@ -517,10 +475,10 @@ final class PhabricatorConduitAPIController
     ConduitAPIRequest $request,
     PhabricatorUser $user) {
 
-    if (!$user->isUserActivated()) {
+    if (!$user->canEstablishAPISessions()) {
       return array(
-        'ERR-USER-DISABLED',
-        pht('User account is not activated.'),
+        'ERR-INVALID-AUTH',
+        pht('User account is not permitted to use the API.'),
       );
     }
 

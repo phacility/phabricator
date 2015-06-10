@@ -39,7 +39,7 @@ final class PhabricatorStartup {
 
   private static $startTime;
   private static $debugTimeLimit;
-  private static $globals = array();
+  private static $accessLog;
   private static $capturingOutput;
   private static $rawInput;
   private static $oldMemoryLimit;
@@ -72,25 +72,10 @@ final class PhabricatorStartup {
   /**
    * @task info
    */
-  public static function setGlobal($key, $value) {
-    self::validateGlobal($key);
-
-    self::$globals[$key] = $value;
+  public static function setAccessLog($access_log) {
+    self::$accessLog = $access_log;
   }
 
-
-  /**
-   * @task info
-   */
-  public static function getGlobal($key, $default = null) {
-    self::validateGlobal($key);
-
-    if (!array_key_exists($key, self::$globals)) {
-      return $default;
-    }
-
-    return self::$globals[$key];
-  }
 
   /**
    * @task info
@@ -108,7 +93,7 @@ final class PhabricatorStartup {
    */
   public static function didStartup() {
     self::$startTime = microtime(true);
-    self::$globals = array();
+    self::$accessLog = null;
 
     static $registered;
     if (!$registered) {
@@ -348,8 +333,7 @@ final class PhabricatorStartup {
     }
 
     self::endOutputCapture();
-    $access_log = self::getGlobal('log.access');
-
+    $access_log = self::$accessLog;
     if ($access_log) {
       // We may end up here before the access log is initialized, e.g. from
       // verifyPHP().
@@ -402,9 +386,15 @@ final class PhabricatorStartup {
    */
   private static function normalizeInput() {
     // Replace superglobals with unfiltered versions, disrespect php.ini (we
-    // filter ourselves)
-    $filter = array(INPUT_GET, INPUT_POST,
-      INPUT_SERVER, INPUT_ENV, INPUT_COOKIE,
+    // filter ourselves).
+
+    // NOTE: We don't filter INPUT_SERVER because we don't want to overwrite
+    // changes made in "preamble.php".
+    $filter = array(
+      INPUT_GET,
+      INPUT_POST,
+      INPUT_ENV,
+      INPUT_COOKIE,
     );
     foreach ($filter as $type) {
       $filtered = filter_input_array($type, FILTER_UNSAFE_RAW);
@@ -412,9 +402,6 @@ final class PhabricatorStartup {
         continue;
       }
       switch ($type) {
-        case INPUT_SERVER:
-          $_SERVER = array_merge($_SERVER, $filtered);
-          break;
         case INPUT_GET:
           $_GET = array_merge($_GET, $filtered);
           break;
@@ -547,21 +534,6 @@ final class PhabricatorStartup {
         "Request parameter '__path__' is set, but empty. Your rewrite rules ".
         "are not configured correctly. The '__path__' should always ".
         "begin with a '/'.");
-    }
-  }
-
-
-  /**
-   * @task validation
-   */
-  private static function validateGlobal($key) {
-    static $globals = array(
-      'log.access' => true,
-      'csrf.salt'  => true,
-    );
-
-    if (empty($globals[$key])) {
-      throw new Exception("Access to unknown startup global '{$key}'!");
     }
   }
 

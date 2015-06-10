@@ -68,7 +68,7 @@ final class PhragmentZIPController extends PhragmentController {
     }
 
     if (!$zip->open((string)$temp, ZipArchive::CREATE)) {
-      throw new Exception('Unable to create ZIP archive!');
+      throw new Exception(pht('Unable to create ZIP archive!'));
     }
 
     $mappings = $this->getFragmentMappings($fragment, $fragment->getPath());

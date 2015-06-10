@@ -54,6 +54,8 @@ alincoln", "To: usgrant", "To: htaft"). The major advantages and disadvantages
 of each approach are:
 
   - One mail to everyone:
+    - This violates policy controls. The body of the mail is generated without
+      respect for object policies.
     - Recipients can see To/Cc at a glance.
     - If you use mailing lists, you won't get duplicate mail if you're
       a normal recipient and also Cc'd on a mailing list.
@@ -65,6 +67,7 @@ of each approach are:
     - Not supported with a private reply-to address.
     - Mails are sent in the server default translation.
   - One mail to each user:
+    - Policy controls work correctly and are enforced per-user.
     - Recipients need to look in the mail body to see To/Cc.
     - If you use mailing lists, recipients may sometimes get duplicate
       mail.
@@ -74,8 +77,6 @@ of each approach are:
     - Required if private reply-to addresses are configured.
     - Mails are sent in the language of user preference.
 
-In the code, splitting one outbound email into one-per-recipient is sometimes
-referred to as "multiplexing".
 EODOC
 ));
 
@@ -222,6 +223,7 @@ EODOC
         'metamta.one-mail-per-recipient',
         'bool',
         true)
+        ->setLocked(true)
         ->setBoolOptions(
           array(
             pht('Send Mail To Each Recipient'),

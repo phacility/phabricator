@@ -18,6 +18,9 @@ final class DivinerLivePublisher extends DivinerPublisher {
 
       $book->setConfigurationData($this->getConfigurationData())->save();
       $this->book = $book;
+
+      id(new PhabricatorSearchIndexer())
+        ->queueDocumentForIndexing($book->getPHID());
     }
 
     return $this->book;
@@ -31,8 +34,6 @@ final class DivinerLivePublisher extends DivinerPublisher {
       ->withNames(array($atom->getName()))
       ->withContexts(array($atom->getContext()))
       ->withIndexes(array($this->getAtomSimilarIndex($atom)))
-      ->withIncludeUndocumentable(true)
-      ->withIncludeGhosts(true)
       ->executeOne();
 
     if ($symbol) {
@@ -64,7 +65,7 @@ final class DivinerLivePublisher extends DivinerPublisher {
     $symbols = id(new DivinerAtomQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withBookPHIDs(array($this->loadBook()->getPHID()))
-      ->withIncludeUndocumentable(true)
+      ->withGhosts(false)
       ->execute();
 
     return mpull($symbols, 'getGraphHash');
@@ -123,6 +124,9 @@ final class DivinerLivePublisher extends DivinerPublisher {
       }
 
       $symbol->save();
+
+      id(new PhabricatorSearchIndexer())
+        ->queueDocumentForIndexing($symbol->getPHID());
 
       // TODO: We probably need a finer-grained sense of what "documentable"
       // atoms are. Neither files nor methods are currently considered

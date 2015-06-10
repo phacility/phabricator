@@ -5,7 +5,7 @@ abstract class PhabricatorXHProfController extends PhabricatorController {
   public function buildStandardPageResponse($view, array $data) {
     $page = $this->buildStandardPageView();
 
-    $page->setApplicationName('XHProf');
+    $page->setApplicationName(pht('XHProf'));
     $page->setBaseURI('/xhprof/');
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x98\x84");

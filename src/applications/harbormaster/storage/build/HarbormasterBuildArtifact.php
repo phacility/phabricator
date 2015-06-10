@@ -77,7 +77,7 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
           ->setViewer($viewer)
           ->withIDs(array($data['drydock-lease']))
           ->execute();
-        $lease = $leases[$data['drydock-lease']];
+        $lease = idx($leases, $data['drydock-lease']);
 
         return id(new PHUIObjectItemView())
           ->setObjectName(pht('Drydock Lease'))

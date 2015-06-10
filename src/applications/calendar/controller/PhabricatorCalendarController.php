@@ -26,4 +26,47 @@ abstract class PhabricatorCalendarController extends PhabricatorController {
     return $crumbs;
   }
 
+  protected function getEventAtIndexForGhostPHID($viewer, $phid, $index) {
+    $result = id(new PhabricatorCalendarEventQuery())
+      ->setViewer($viewer)
+      ->withInstanceSequencePairs(
+        array(
+          array(
+            $phid,
+            $index,
+          ),
+        ))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
+
+    return $result;
+  }
+
+  protected function createEventFromGhost($viewer, $event, $index) {
+    $invitees = $event->getInvitees();
+
+    $new_ghost = $event->generateNthGhost($index, $viewer);
+    $new_ghost->attachParentEvent($event);
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+    $new_ghost
+      ->setID(null)
+      ->setPHID(null)
+      ->removeViewerTimezone($viewer)
+      ->save();
+    $ghost_invitees = array();
+    foreach ($invitees as $invitee) {
+      $ghost_invitee = clone $invitee;
+      $ghost_invitee
+        ->setID(null)
+        ->setEventPHID($new_ghost->getPHID())
+        ->save();
+    }
+    unset($unguarded);
+    return $new_ghost;
+  }
 }

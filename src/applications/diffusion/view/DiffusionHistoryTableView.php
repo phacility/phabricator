@@ -149,7 +149,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         $summary = AphrontTableView::renderSingleDisplayLine(
           $history->getSummary());
       } else {
-        $summary = phutil_tag('em', array(), "Importing\xE2\x80\xA6");
+        $summary = phutil_tag('em', array(), pht("Importing\xE2\x80\xA6"));
       }
 
       $build = null;

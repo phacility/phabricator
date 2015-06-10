@@ -95,12 +95,6 @@ abstract class HeraldPreCommitAdapter extends HeraldAdapter {
     foreach ($effects as $effect) {
       $action = $effect->getAction();
       switch ($action) {
-        case self::ACTION_NOTHING:
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Did nothing.'));
-          break;
         case self::ACTION_BLOCK:
           $result[] = new HeraldApplyTranscript(
             $effect,

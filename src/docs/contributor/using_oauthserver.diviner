@@ -105,7 +105,7 @@ https://phabricator.example.com/api/user.whoami?access_token=ykc7ly7vtibj334oga4
 
 If the token has expired or is otherwise invalid, the client will receive
 an error indicating as such. In these cases, the client should re-initiate
-the entire ##Authorization Code Grant## flow.
+the entire `Authorization Code Grant` flow.
 
 NOTE: See "Scopes" section below for more information on what data is
 currently exposed through the OAuth Server.

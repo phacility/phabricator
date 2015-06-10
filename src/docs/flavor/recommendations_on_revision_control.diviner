@@ -24,11 +24,11 @@ master/remote version of the repository. Specifically, this means that an entire
 conceptual changeset ("add a foo widget") is represented in the remote as
 exactly one commit (in some form), not a sequence of checkpoint commits.
 
-  - In SVN, this means don't ##commit## until after an idea has been completely
+  - In SVN, this means don't `commit` until after an idea has been completely
     written. All reasonable SVN workflows naturally enforce this.
-  - In Git, this means squashing checkpoint commits as you go (with ##git commit
-    --amend##) or before pushing (with ##git rebase -i## or ##git merge
-    --squash##), or having a strict policy where your master/trunk contains only
+  - In Git, this means squashing checkpoint commits as you go (with `git commit
+    --amend`) or before pushing (with `git rebase -i` or `git merge
+    --squash`), or having a strict policy where your master/trunk contains only
     merge commits and each is a merge between the old master and a branch which
     represents a single idea. Although this preserves the checkpoint commits
     along the branches, you can view master alone as a series of single-idea

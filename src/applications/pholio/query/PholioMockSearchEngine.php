@@ -10,84 +10,40 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
     return 'PhabricatorPholioApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    $saved->setParameter(
-      'authorPHIDs',
-      $this->readUsersFromRequest($request, 'authors'));
-
-    $saved->setParameter(
-      'projects',
-      $this->readProjectsFromRequest($request, 'projects'));
-
-    $saved->setParameter(
-      'statuses',
-      $request->getStrList('status'));
-
-    return $saved;
-  }
-
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PholioMockQuery())
+  public function newQuery() {
+    return id(new PholioMockQuery())
       ->needCoverFiles(true)
       ->needImages(true)
       ->needTokenCounts(true);
-
-    $datasource = id(new PhabricatorPeopleUserFunctionDatasource())
-      ->setViewer($this->requireViewer());
-
-    $author_phids = $saved->getParameter('authorPHIDs', array());
-    $author_phids = $datasource->evaluateTokens($author_phids);
-    if ($author_phids) {
-      $query->withAuthorPHIDs($author_phids);
-    }
-
-    $statuses = $saved->getParameter('statuses', array());
-    if ($statuses) {
-      $query->withStatuses($statuses);
-    }
-
-    $this->setQueryProjects($query, $saved);
-
-    return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
-
-    $author_phids = $saved_query->getParameter('authorPHIDs', array());
-    $projects = $saved_query->getParameter('projects', array());
-
-    $statuses = array(
-      '' => pht('Any Status'),
-      'closed' => pht('Closed'),
-      'open' => pht('Open'),
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchUsersField())
+        ->setKey('authorPHIDs')
+        ->setAliases(array('authors'))
+        ->setLabel(pht('Authors')),
+      id(new PhabricatorSearchCheckboxesField())
+        ->setKey('statuses')
+        ->setLabel(pht('Status'))
+        ->setOptions(
+          id(new PholioMock())
+            ->getStatuses()),
     );
+  }
 
-    $status = $saved_query->getParameter('statuses', array());
-    $status = head($status);
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
 
-    $form
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleUserFunctionDatasource())
-          ->setName('authors')
-          ->setLabel(pht('Authors'))
-          ->setValue($author_phids))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorProjectLogicalDatasource())
-          ->setName('projects')
-          ->setLabel(pht('Projects'))
-          ->setValue($projects))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Status'))
-          ->setName('status')
-          ->setOptions($statuses)
-          ->setValue($status));
+    if ($map['authorPHIDs']) {
+      $query->withAuthorPHIDs($map['authorPHIDs']);
+    }
+
+    if ($map['statuses']) {
+      $query->withStatuses($map['statuses']);
+    }
+
+    return $query;
   }
 
   protected function getURI($path) {

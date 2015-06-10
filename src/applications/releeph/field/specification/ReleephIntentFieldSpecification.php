@@ -8,7 +8,7 @@ final class ReleephIntentFieldSpecification
   }
 
   public function getName() {
-    return 'Intent';
+    return pht('Intent');
   }
 
   public function getRequiredHandlePHIDsForPropertyView() {

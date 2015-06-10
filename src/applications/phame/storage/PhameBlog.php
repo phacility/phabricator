@@ -1,7 +1,10 @@
 <?php
 
 final class PhameBlog extends PhameDAO
-  implements PhabricatorPolicyInterface, PhabricatorMarkupInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorMarkupInterface,
+    PhabricatorApplicationTransactionInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:description';
 
@@ -16,7 +19,7 @@ final class PhameBlog extends PhameDAO
   protected $editPolicy;
   protected $joinPolicy;
 
-  static private $requestBlog;
+  private static $requestBlog;
 
   protected function getConfiguration() {
     return array(
@@ -175,7 +178,7 @@ final class PhameBlog extends PhameDAO
     return $this->setConfigData($config);
   }
 
-  static public function getSkinOptionsForSelect() {
+  public static function getSkinOptionsForSelect() {
     $classes = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhameBlogSkin')
       ->setType('class')
@@ -300,6 +303,28 @@ final class PhameBlog extends PhameDAO
 
   public function shouldUseMarkupCache($field) {
     return (bool)$this->getPHID();
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhameBlogEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhameBlogTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
   }
 
 }

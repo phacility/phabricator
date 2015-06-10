@@ -18,6 +18,9 @@ abstract class UserConduitAPIMethod extends ConduitAPIMethod {
     if ($user->getIsSystemAgent()) {
       $roles[] = 'agent';
     }
+    if ($user->getIsMailingList()) {
+      $roles[] = 'list';
+    }
     if ($user->getIsAdmin()) {
       $roles[] = 'admin';
     }

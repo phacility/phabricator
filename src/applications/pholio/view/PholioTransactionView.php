@@ -30,14 +30,14 @@ final class PholioTransactionView
 
     switch ($u->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
-      case PholioTransactionType::TYPE_INLINE:
+      case PholioTransaction::TYPE_INLINE:
         break;
       default:
         return false;
     }
 
     switch ($v->getTransactionType()) {
-      case PholioTransactionType::TYPE_INLINE:
+      case PholioTransaction::TYPE_INLINE:
         return true;
     }
 
@@ -50,7 +50,7 @@ final class PholioTransactionView
     $out = array();
 
     $group = $xaction->getTransactionGroup();
-    if ($xaction->getTransactionType() == PholioTransactionType::TYPE_INLINE) {
+    if ($xaction->getTransactionType() == PholioTransaction::TYPE_INLINE) {
       array_unshift($group, $xaction);
     } else {
       $out[] = parent::renderTransactionContent($xaction);
@@ -63,7 +63,7 @@ final class PholioTransactionView
     $inlines = array();
     foreach ($group as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case PholioTransactionType::TYPE_INLINE:
+        case PholioTransaction::TYPE_INLINE:
           $inlines[] = $xaction;
           break;
         default:

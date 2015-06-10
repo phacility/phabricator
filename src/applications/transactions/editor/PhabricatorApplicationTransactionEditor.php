@@ -1,10 +1,41 @@
 <?php
 
 /**
- * @task mail   Sending Mail
- * @task feed   Publishing Feed Stories
+ *
+ * Publishing and Managing State
+ * ======
+ *
+ * After applying changes, the Editor queues a worker to publish mail, feed,
+ * and notifications, and to perform other background work like updating search
+ * indexes. This allows it to do this work without impacting performance for
+ * users.
+ *
+ * When work is moved to the daemons, the Editor state is serialized by
+ * @{method:getWorkerState}, then reloaded in a daemon process by
+ * @{method:loadWorkerState}. **This is fragile.**
+ *
+ * State is not persisted into the daemons by default, because we can not send
+ * arbitrary objects into the queue. This means the default behavior of any
+ * state properties is to reset to their defaults without warning prior to
+ * publishing.
+ *
+ * The easiest way to avoid this is to keep Editors stateless: the overwhelming
+ * majority of Editors can be written statelessly. If you need to maintain
+ * state, you can either:
+ *
+ *   - not require state to exist during publishing; or
+ *   - pass state to the daemons by implementing @{method:getCustomWorkerState}
+ *     and @{method:loadCustomWorkerState}.
+ *
+ * This architecture isn't ideal, and we may eventually split this class into
+ * "Editor" and "Publisher" parts to make it more robust. See T6367 for some
+ * discussion and context.
+ *
+ * @task mail Sending Mail
+ * @task feed Publishing Feed Stories
  * @task search Search Index
- * @task files  Integration with Files
+ * @task files Integration with Files
+ * @task workers Managing Workers
  */
 abstract class PhabricatorApplicationTransactionEditor
   extends PhabricatorEditor {
@@ -30,6 +61,13 @@ abstract class PhabricatorApplicationTransactionEditor
   private $actingAsPHID;
   private $disableEmail;
 
+  private $heraldEmailPHIDs = array();
+  private $heraldForcedEmailPHIDs = array();
+  private $heraldHeader;
+  private $mailToPHIDs = array();
+  private $mailCCPHIDs = array();
+  private $feedNotifyPHIDs = array();
+  private $feedRelatedPHIDs = array();
 
   /**
    * Get the class name for the application this editor is a part of.
@@ -226,6 +264,10 @@ abstract class PhabricatorApplicationTransactionEditor
       $types[] = PhabricatorTransactions::TYPE_EDGE;
     }
 
+    if ($this->object instanceof PhabricatorSpacesInterface) {
+      $types[] = PhabricatorTransactions::TYPE_SPACE;
+    }
+
     return $types;
   }
 
@@ -254,6 +296,21 @@ abstract class PhabricatorApplicationTransactionEditor
         return $object->getEditPolicy();
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
         return $object->getJoinPolicy();
+      case PhabricatorTransactions::TYPE_SPACE:
+        $space_phid = $object->getSpacePHID();
+        if ($space_phid === null) {
+          if ($this->getIsNewObject()) {
+            // In this case, just return `null` so we know this is the initial
+            // transaction and it should be hidden.
+            return null;
+          }
+
+          $default_space = PhabricatorSpacesNamespaceQuery::getDefaultSpace();
+          if ($default_space) {
+            $space_phid = $default_space->getPHID();
+          }
+        }
+        return $space_phid;
       case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $xaction->getMetadataValue('edge:type');
         if (!$edge_type) {
@@ -300,6 +357,16 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_INLINESTATE:
         return $xaction->getNewValue();
+      case PhabricatorTransactions::TYPE_SPACE:
+        $space_phid = $xaction->getNewValue();
+        if (!strlen($space_phid)) {
+          // If an install has no Spaces, we might end up with the empty string
+          // here instead of a strict `null`. Just make this work like callers
+          // might reasonably expect.
+          return null;
+        } else {
+          return $space_phid;
+        }
       case PhabricatorTransactions::TYPE_EDGE:
         return $this->getEdgeTransactionNewValue($xaction);
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
@@ -399,6 +466,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_INLINESTATE:
       case PhabricatorTransactions::TYPE_EDGE:
+      case PhabricatorTransactions::TYPE_SPACE:
       case PhabricatorTransactions::TYPE_COMMENT:
         return $this->applyBuiltinInternalTransaction($object, $xaction);
     }
@@ -447,6 +515,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
       case PhabricatorTransactions::TYPE_INLINESTATE:
+      case PhabricatorTransactions::TYPE_SPACE:
       case PhabricatorTransactions::TYPE_COMMENT:
         return $this->applyBuiltinExternalTransaction($object, $xaction);
     }
@@ -498,6 +567,9 @@ abstract class PhabricatorApplicationTransactionEditor
         break;
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
         $object->setJoinPolicy($xaction->getNewValue());
+        break;
+      case PhabricatorTransactions::TYPE_SPACE:
+        $object->setSpacePHID($xaction->getNewValue());
         break;
     }
   }
@@ -764,7 +836,12 @@ abstract class PhabricatorApplicationTransactionEditor
 
       $xactions = $this->didApplyInternalEffects($object, $xactions);
 
-      $object->save();
+      try {
+        $object->save();
+      } catch (AphrontDuplicateKeyQueryException $ex) {
+        $object->killTransaction();
+        throw $ex;
+      }
 
       foreach ($xactions as $xaction) {
         $xaction->setObjectPHID($object->getPHID());
@@ -856,44 +933,14 @@ abstract class PhabricatorApplicationTransactionEditor
           $object,
           $herald_xactions);
 
+        $adapter = $this->getHeraldAdapter();
+        $this->heraldEmailPHIDs = $adapter->getEmailPHIDs();
+        $this->heraldForcedEmailPHIDs = $adapter->getForcedEmailPHIDs();
+
         // Merge the new transactions into the transaction list: we want to
         // send email and publish feed stories about them, too.
         $xactions = array_merge($xactions, $herald_xactions);
       }
-    }
-
-    // Before sending mail or publishing feed stories, reload the object
-    // subscribers to pick up changes caused by Herald (or by other side effects
-    // in various transaction phases).
-    $this->loadSubscribers($object);
-    // Hook for other edges that may need (re-)loading
-    $this->loadEdges($object, $xactions);
-
-    $this->loadHandles($xactions);
-
-    $mail = null;
-    if (!$this->getDisableEmail()) {
-      if ($this->shouldSendMail($object, $xactions)) {
-        $mail = $this->sendMail($object, $xactions);
-      }
-    }
-
-    if ($this->supportsSearch()) {
-      id(new PhabricatorSearchIndexer())
-        ->queueDocumentForIndexing(
-          $object->getPHID(),
-          $this->getSearchContextParameter($object, $xactions));
-    }
-
-    if ($this->shouldPublishFeedStory($object, $xactions)) {
-      $mailed = array();
-      if ($mail) {
-        $mailed = $mail->buildRecipientList();
-      }
-      $this->publishFeedStory(
-        $object,
-        $xactions,
-        $mailed);
     }
 
     $this->didApplyTransactions($xactions);
@@ -914,6 +961,86 @@ abstract class PhabricatorApplicationTransactionEditor
         PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
       $fields->readFieldsFromStorage($object);
       $fields->rebuildIndexes($object);
+    }
+
+    $herald_xscript = $this->getHeraldTranscript();
+    if ($herald_xscript) {
+      $herald_header = $herald_xscript->getXHeraldRulesHeader();
+      $herald_header = HeraldTranscript::saveXHeraldRulesHeader(
+        $object->getPHID(),
+        $herald_header);
+    } else {
+      $herald_header = HeraldTranscript::loadXHeraldRulesHeader(
+        $object->getPHID());
+    }
+    $this->heraldHeader = $herald_header;
+
+    // We're going to compute some of the data we'll use to publish these
+    // transactions here, before queueing a worker.
+    //
+    // Primarily, this is more correct: we want to publish the object as it
+    // exists right now. The worker may not execute for some time, and we want
+    // to use the current To/CC list, not respect any changes which may occur
+    // between now and when the worker executes.
+    //
+    // As a secondary benefit, this tends to reduce the amount of state that
+    // Editors need to pass into workers.
+    $object = $this->willPublish($object, $xactions);
+
+    if (!$this->getDisableEmail()) {
+      if ($this->shouldSendMail($object, $xactions)) {
+        $this->mailToPHIDs = $this->getMailTo($object);
+        $this->mailCCPHIDs = $this->getMailCC($object);
+      }
+    }
+
+    if ($this->shouldPublishFeedStory($object, $xactions)) {
+      $this->feedRelatedPHIDs = $this->getFeedRelatedPHIDs($object, $xactions);
+      $this->feedNotifyPHIDs = $this->getFeedNotifyPHIDs($object, $xactions);
+    }
+
+    PhabricatorWorker::scheduleTask(
+      'PhabricatorApplicationTransactionPublishWorker',
+      array(
+        'objectPHID' => $object->getPHID(),
+        'actorPHID' => $this->getActingAsPHID(),
+        'xactionPHIDs' => mpull($xactions, 'getPHID'),
+        'state' => $this->getWorkerState(),
+      ),
+      array(
+        'objectPHID' => $object->getPHID(),
+        'priority' => PhabricatorWorker::PRIORITY_ALERTS,
+      ));
+
+    return $xactions;
+  }
+
+  public function publishTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    // Hook for edges or other properties that may need (re-)loading
+    $object = $this->willPublish($object, $xactions);
+
+    $mailed = array();
+    if (!$this->getDisableEmail()) {
+      if ($this->shouldSendMail($object, $xactions)) {
+        $mailed = $this->sendMail($object, $xactions);
+      }
+    }
+
+    if ($this->supportsSearch()) {
+      id(new PhabricatorSearchIndexer())
+        ->queueDocumentForIndexing(
+          $object->getPHID(),
+          $this->getSearchContextParameter($object, $xactions));
+    }
+
+    if ($this->shouldPublishFeedStory($object, $xactions)) {
+      $this->publishFeedStory(
+        $object,
+        $xactions,
+        $mailed);
     }
 
     return $xactions;
@@ -991,12 +1118,6 @@ abstract class PhabricatorApplicationTransactionEditor
     } else {
       $this->subscribers = array();
     }
-  }
-
-  protected function loadEdges(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-    return;
   }
 
   private function validateEditParameters(
@@ -1099,18 +1220,9 @@ abstract class PhabricatorApplicationTransactionEditor
           PhabricatorPolicyCapability::CAN_VIEW);
         break;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        PhabricatorPolicyFilter::requireCapability(
-          $actor,
-          $object,
-          PhabricatorPolicyCapability::CAN_EDIT);
-        break;
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        PhabricatorPolicyFilter::requireCapability(
-          $actor,
-          $object,
-          PhabricatorPolicyCapability::CAN_EDIT);
-        break;
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorTransactions::TYPE_SPACE:
         PhabricatorPolicyFilter::requireCapability(
           $actor,
           $object,
@@ -1791,6 +1903,12 @@ abstract class PhabricatorApplicationTransactionEditor
           $type,
           PhabricatorPolicyCapability::CAN_EDIT);
         break;
+      case PhabricatorTransactions::TYPE_SPACE:
+        $errors[] = $this->validateSpaceTransactions(
+          $object,
+          $xactions,
+          $type);
+        break;
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $groups = array();
         foreach ($xactions as $xaction) {
@@ -1876,6 +1994,52 @@ abstract class PhabricatorApplicationTransactionEditor
 
     return $errors;
   }
+
+
+  private function validateSpaceTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    $transaction_type) {
+    $errors = array();
+
+    $all_spaces = PhabricatorSpacesNamespaceQuery::getAllSpaces();
+    $viewer_spaces = PhabricatorSpacesNamespaceQuery::getViewerSpaces(
+      $this->getActor());
+    foreach ($xactions as $xaction) {
+      $space_phid = $xaction->getNewValue();
+
+      if ($space_phid === null) {
+        if (!$all_spaces) {
+          // The install doesn't have any spaces, so this is fine.
+          continue;
+        }
+
+        // The install has some spaces, so every object needs to be put
+        // in a valid space.
+        $errors[] = new PhabricatorApplicationTransactionValidationError(
+          $transaction_type,
+          pht('Invalid'),
+          pht('You must choose a space for this object.'),
+          $xaction);
+        continue;
+      }
+
+      // If the PHID isn't `null`, it needs to be a valid space that the
+      // viewer can see.
+      if (empty($viewer_spaces[$space_phid])) {
+        $errors[] = new PhabricatorApplicationTransactionValidationError(
+          $transaction_type,
+          pht('Invalid'),
+          pht(
+            'You can not shift this object in the selected space, because '.
+            'the space does not exist or you do not have access to it.'),
+          $xaction);
+      }
+    }
+
+    return $errors;
+  }
+
 
   protected function adjustObjectForPolicyChecks(
     PhabricatorLiskDAO $object,
@@ -2019,8 +2183,60 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    // Check if any of the transactions are visible. If we don't have any
-    // visible transactions, don't send the mail.
+    $email_to = $this->mailToPHIDs;
+    $email_cc = $this->mailCCPHIDs;
+    $email_cc = array_merge($email_cc, $this->heraldEmailPHIDs);
+
+    $targets = $this->buildReplyHandler($object)
+      ->getMailTargets($email_to, $email_cc);
+
+    // Set this explicitly before we start swapping out the effective actor.
+    $this->setActingAsPHID($this->getActingAsPHID());
+
+
+    $mailed = array();
+    foreach ($targets as $target) {
+      $original_actor = $this->getActor();
+
+      $viewer = $target->getViewer();
+      $this->setActor($viewer);
+      $locale = PhabricatorEnv::beginScopedLocale($viewer->getTranslation());
+
+      $caught = null;
+      $mail = null;
+      try {
+        // Reload handles for the new viewer.
+        $this->loadHandles($xactions);
+
+        $mail = $this->sendMailToTarget($object, $xactions, $target);
+      } catch (Exception $ex) {
+        $caught = $ex;
+      }
+
+      $this->setActor($original_actor);
+      unset($locale);
+
+      if ($caught) {
+        throw $ex;
+      }
+
+      if ($mail) {
+        foreach ($mail->buildRecipientList() as $phid) {
+          $mailed[$phid] = true;
+        }
+      }
+    }
+
+    return array_keys($mailed);
+  }
+
+  private function sendMailToTarget(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    PhabricatorMailTarget $target) {
+
+    // Check if any of the transactions are visible for this viewer. If we
+    // don't have any visible transactions, don't send the mail.
 
     $any_visible = false;
     foreach ($xactions as $xaction) {
@@ -2031,88 +2247,52 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if (!$any_visible) {
-      return;
+      return null;
     }
 
-    $email_force = array();
-    $email_to = $this->getMailTo($object);
-    $email_cc = $this->getMailCC($object);
-
-    $adapter = $this->getHeraldAdapter();
-    if ($adapter) {
-      $email_cc = array_merge($email_cc, $adapter->getEmailPHIDs());
-      $email_force = $adapter->getForcedEmailPHIDs();
-    }
-
-    $phids = array_merge($email_to, $email_cc);
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireActor())
-      ->withPHIDs($phids)
-      ->execute();
-
-    $template = $this->buildMailTemplate($object);
+    $mail = $this->buildMailTemplate($object);
     $body = $this->buildMailBody($object, $xactions);
 
     $mail_tags = $this->getMailTags($object, $xactions);
     $action = $this->getMailAction($object, $xactions);
 
-    $reply_handler = $this->buildReplyHandler($object);
+    if (PhabricatorEnv::getEnvConfig('metamta.email-preferences')) {
+      $this->addEmailPreferenceSectionToMailBody(
+        $body,
+        $object,
+        $xactions);
+    }
 
-    $body->addEmailPreferenceSection();
-
-    $template
+    $mail
       ->setFrom($this->getActingAsPHID())
       ->setSubjectPrefix($this->getMailSubjectPrefix())
       ->setVarySubjectPrefix('['.$action.']')
       ->setThreadID($this->getMailThreadID($object), $this->getIsNewObject())
       ->setRelatedPHID($object->getPHID())
       ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
-      ->setForceHeraldMailRecipientPHIDs($email_force)
+      ->setForceHeraldMailRecipientPHIDs($this->heraldForcedEmailPHIDs)
       ->setMailTags($mail_tags)
       ->setIsBulk(true)
       ->setBody($body->render())
       ->setHTMLBody($body->renderHTML());
 
     foreach ($body->getAttachments() as $attachment) {
-      $template->addAttachment($attachment);
+      $mail->addAttachment($attachment);
     }
 
-    $herald_xscript = $this->getHeraldTranscript();
-    if ($herald_xscript) {
-      $herald_header = $herald_xscript->getXHeraldRulesHeader();
-      $herald_header = HeraldTranscript::saveXHeraldRulesHeader(
-        $object->getPHID(),
-        $herald_header);
-    } else {
-      $herald_header = HeraldTranscript::loadXHeraldRulesHeader(
-        $object->getPHID());
-    }
-
-    if ($herald_header) {
-      $template->addHeader('X-Herald-Rules', $herald_header);
+    if ($this->heraldHeader) {
+      $mail->addHeader('X-Herald-Rules', $this->heraldHeader);
     }
 
     if ($object instanceof PhabricatorProjectInterface) {
-      $this->addMailProjectMetadata($object, $template);
+      $this->addMailProjectMetadata($object, $mail);
     }
 
     if ($this->getParentMessageID()) {
-      $template->setParentMessageID($this->getParentMessageID());
+      $mail->setParentMessageID($this->getParentMessageID());
     }
 
-    $mails = $reply_handler->multiplexMail(
-      $template,
-      array_select_keys($handles, $email_to),
-      array_select_keys($handles, $email_cc));
-
-    foreach ($mails as $mail) {
-      $mail->saveAndSend();
-    }
-
-    $template->addTos($email_to);
-    $template->addCCs($email_cc);
-
-    return $template;
+    return $target->sendMail($mail);
   }
 
   private function addMailProjectMetadata(
@@ -2241,7 +2421,8 @@ abstract class PhabricatorApplicationTransactionEditor
     $has_support = false;
 
     if ($object instanceof PhabricatorSubscribableInterface) {
-      $phids[] = $this->subscribers;
+      $phid = $object->getPHID();
+      $phids[] = PhabricatorSubscribersQuery::loadSubscribersForPHID($phid);
       $has_support = true;
     }
 
@@ -2307,6 +2488,21 @@ abstract class PhabricatorApplicationTransactionEditor
     $this->addCustomFieldsToMailBody($body, $object, $xactions);
     return $body;
   }
+
+
+  /**
+   * @task mail
+   */
+  protected function addEmailPreferenceSectionToMailBody(
+    PhabricatorMetaMTAMailBody $body,
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $href = PhabricatorEnv::getProductionURI(
+      '/settings/panel/emailpreferences/');
+    $body->addLinkSection(pht('EMAIL PREFERENCES'), $href);
+  }
+
 
   /**
    * @task mail
@@ -2456,8 +2652,8 @@ abstract class PhabricatorApplicationTransactionEditor
       return;
     }
 
-    $related_phids = $this->getFeedRelatedPHIDs($object, $xactions);
-    $subscribed_phids = $this->getFeedNotifyPHIDs($object, $xactions);
+    $related_phids = $this->feedRelatedPHIDs;
+    $subscribed_phids = $this->feedNotifyPHIDs;
 
     $story_type = $this->getFeedStoryType();
     $story_data = $this->getFeedStoryData($object, $xactions);
@@ -2709,6 +2905,13 @@ abstract class PhabricatorApplicationTransactionEditor
         continue;
       }
 
+      if ($node instanceof PhabricatorUser) {
+        // TODO: At least for now, don't record inverse edge transactions
+        // for users (for example, "alincoln joined project X"): Feed fills
+        // this role instead.
+        continue;
+      }
+
       $editor = $node->getApplicationTransactionEditor();
       $template = $node->getApplicationTransactionTemplate();
       $target = $node->getApplicationTransactionObject();
@@ -2738,6 +2941,123 @@ abstract class PhabricatorApplicationTransactionEditor
 
       $editor->applyTransactions($target, array($template));
     }
+  }
+
+
+/* -(  Workers  )------------------------------------------------------------ */
+
+
+  /**
+   * Load any object state which is required to publish transactions.
+   *
+   * This hook is invoked in the main process before we compute data related
+   * to publishing transactions (like email "To" and "CC" lists), and again in
+   * the worker before publishing occurs.
+   *
+   * @return object Publishable object.
+   * @task workers
+   */
+  protected function willPublish(PhabricatorLiskDAO $object, array $xactions) {
+    return $object;
+  }
+
+
+  /**
+   * Convert the editor state to a serializable dictionary which can be passed
+   * to a worker.
+   *
+   * This data will be loaded with @{method:loadWorkerState} in the worker.
+   *
+   * @return dict<string, wild> Serializable editor state.
+   * @task workers
+   */
+  final private function getWorkerState() {
+    $state = array();
+    foreach ($this->getAutomaticStateProperties() as $property) {
+      $state[$property] = $this->$property;
+    }
+
+    $state += array(
+      'excludeMailRecipientPHIDs' => $this->getExcludeMailRecipientPHIDs(),
+      'custom' => $this->getCustomWorkerState(),
+    );
+
+    return $state;
+  }
+
+
+  /**
+   * Hook; return custom properties which need to be passed to workers.
+   *
+   * @return dict<string, wild> Custom properties.
+   * @task workers
+   */
+  protected function getCustomWorkerState() {
+    return array();
+  }
+
+
+  /**
+   * Load editor state using a dictionary emitted by @{method:getWorkerState}.
+   *
+   * This method is used to load state when running worker operations.
+   *
+   * @param dict<string, wild> Editor state, from @{method:getWorkerState}.
+   * @return this
+   * @task workers
+   */
+  final public function loadWorkerState(array $state) {
+    foreach ($this->getAutomaticStateProperties() as $property) {
+      $this->$property = idx($state, $property);
+    }
+
+    $exclude = idx($state, 'excludeMailRecipientPHIDs', array());
+    $this->setExcludeMailRecipientPHIDs($exclude);
+
+    $custom = idx($state, 'custom', array());
+    $this->loadCustomWorkerState($custom);
+
+    return $this;
+  }
+
+
+  /**
+   * Hook; set custom properties on the editor from data emitted by
+   * @{method:getCustomWorkerState}.
+   *
+   * @param dict<string, wild> Custom state,
+   *   from @{method:getCustomWorkerState}.
+   * @return this
+   * @task workers
+   */
+  protected function loadCustomWorkerState(array $state) {
+    return $this;
+  }
+
+
+  /**
+   * Get a list of object properties which should be automatically sent to
+   * workers in the state data.
+   *
+   * These properties will be automatically stored and loaded by the editor in
+   * the worker.
+   *
+   * @return list<string> List of properties.
+   * @task workers
+   */
+  private function getAutomaticStateProperties() {
+    return array(
+      'parentMessageID',
+      'disableEmail',
+      'isNewObject',
+      'heraldEmailPHIDs',
+      'heraldForcedEmailPHIDs',
+      'heraldHeader',
+      'mailToPHIDs',
+      'mailCCPHIDs',
+      'feedNotifyPHIDs',
+      'feedRelatedPHIDs',
+    );
   }
 
 }

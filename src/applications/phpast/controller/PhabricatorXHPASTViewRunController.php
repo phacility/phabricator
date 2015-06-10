@@ -41,7 +41,7 @@ final class PhabricatorXHPASTViewRunController
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Parse'));
+          ->setValue(pht('Parse')));
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Generate XHP AST'))

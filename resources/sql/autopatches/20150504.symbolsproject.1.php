@@ -11,6 +11,10 @@ $raw_projects_data = queryfx_all($conn_r, 'SELECT * FROM %T', $projects_table);
 $raw_projects_data = ipull($raw_projects_data, null, 'id');
 
 $repository_ids = ipull($raw_projects_data, 'repositoryID');
+if (!$repository_ids) {
+  return;
+}
+
 $repositories = id(new PhabricatorRepositoryQuery())
   ->setViewer(PhabricatorUser::getOmnipotentUser())
   ->withIDs($repository_ids)

@@ -69,9 +69,9 @@ final class PholioMockEditController extends PholioController {
     if ($request->isFormPost()) {
       $xactions = array();
 
-      $type_name = PholioTransactionType::TYPE_NAME;
-      $type_desc = PholioTransactionType::TYPE_DESCRIPTION;
-      $type_status = PholioTransactionType::TYPE_STATUS;
+      $type_name = PholioTransaction::TYPE_NAME;
+      $type_desc = PholioTransaction::TYPE_DESCRIPTION;
+      $type_status = PholioTransaction::TYPE_STATUS;
       $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
       $type_cc   = PhabricatorTransactions::TYPE_SUBSCRIBERS;
@@ -93,7 +93,7 @@ final class PholioMockEditController extends PholioController {
       $mock_xactions[$type_cc]   = array('=' => $v_cc);
 
       if (!strlen($request->getStr('name'))) {
-        $e_name = 'Required';
+        $e_name = pht('Required');
         $errors[] = pht('You must give the mock a name.');
       }
 
@@ -160,7 +160,7 @@ final class PholioMockEditController extends PholioController {
             ->setSequence($sequence);
           $xactions[] = id(new PholioTransaction())
             ->setTransactionType(
-              PholioTransactionType::TYPE_IMAGE_REPLACE)
+              PholioTransaction::TYPE_IMAGE_REPLACE)
             ->setNewValue($replace_image);
           $posted_mock_images[] = $replace_image;
         } else if (!$existing_image) { // this is an add
@@ -171,23 +171,23 @@ final class PholioMockEditController extends PholioController {
             ->setDescription($description)
             ->setSequence($sequence);
           $xactions[] = id(new PholioTransaction())
-            ->setTransactionType(PholioTransactionType::TYPE_IMAGE_FILE)
+            ->setTransactionType(PholioTransaction::TYPE_IMAGE_FILE)
             ->setNewValue(
               array('+' => array($add_image)));
           $posted_mock_images[] = $add_image;
         } else {
           $xactions[] = id(new PholioTransaction())
-            ->setTransactionType(PholioTransactionType::TYPE_IMAGE_NAME)
+            ->setTransactionType(PholioTransaction::TYPE_IMAGE_NAME)
             ->setNewValue(
               array($existing_image->getPHID() => $title));
           $xactions[] = id(new PholioTransaction())
             ->setTransactionType(
-              PholioTransactionType::TYPE_IMAGE_DESCRIPTION)
+              PholioTransaction::TYPE_IMAGE_DESCRIPTION)
               ->setNewValue(
                 array($existing_image->getPHID() => $description));
           $xactions[] = id(new PholioTransaction())
             ->setTransactionType(
-              PholioTransactionType::TYPE_IMAGE_SEQUENCE)
+              PholioTransaction::TYPE_IMAGE_SEQUENCE)
               ->setNewValue(
                 array($existing_image->getPHID() => $sequence));
 
@@ -198,7 +198,7 @@ final class PholioMockEditController extends PholioController {
         if (!isset($files[$file_phid]) && !isset($replaces[$file_phid])) {
           // this is an outright delete
           $xactions[] = id(new PholioTransaction())
-            ->setTransactionType(PholioTransactionType::TYPE_IMAGE_FILE)
+            ->setTransactionType(PholioTransaction::TYPE_IMAGE_FILE)
             ->setNewValue(
               array('-' => array($mock_image)));
         }
@@ -339,7 +339,7 @@ final class PholioMockEditController extends PholioController {
           ->setDatasource(new PhabricatorProjectDatasource()))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('CC'))
+          ->setLabel(pht('Subscribers'))
           ->setName('cc')
           ->setValue($v_cc)
           ->setUser($user)

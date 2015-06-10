@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @task action Handling Action Requests
+ */
 abstract class NuanceSourceDefinition extends Phobject {
 
   private $actor;
@@ -9,9 +12,11 @@ abstract class NuanceSourceDefinition extends Phobject {
     $this->actor = $actor;
     return $this;
   }
+
   public function getActor() {
     return $this->actor;
   }
+
   public function requireActor() {
     $actor = $this->getActor();
     if (!$actor) {
@@ -25,28 +30,17 @@ abstract class NuanceSourceDefinition extends Phobject {
     $this->sourceObject = $source;
     return $this;
   }
+
   public function getSourceObject() {
     return $this->sourceObject;
   }
+
   public function requireSourceObject() {
     $source = $this->getSourceObject();
     if (!$source) {
       throw new PhutilInvalidStateException('setSourceObject');
     }
     return $source;
-  }
-
-  public static function getSelectOptions() {
-    $definitions = self::getAllDefinitions();
-
-    $options = array();
-    foreach ($definitions as $definition) {
-      $key = $definition->getSourceTypeConstant();
-      $name = $definition->getName();
-      $options[$key] = $name;
-    }
-
-    return $options;
   }
 
   /**
@@ -67,6 +61,8 @@ abstract class NuanceSourceDefinition extends Phobject {
     static $definitions;
 
     if ($definitions === null) {
+      $definitions = array();
+
       $objects = id(new PhutilSymbolLoader())
         ->setAncestorClass(__CLASS__)
         ->loadObjects();
@@ -82,9 +78,10 @@ abstract class NuanceSourceDefinition extends Phobject {
               $conflict,
               $name));
         }
+        $definitions[$key] = $definition;
       }
-      $definitions = $objects;
     }
+
     return $definitions;
   }
 
@@ -92,6 +89,12 @@ abstract class NuanceSourceDefinition extends Phobject {
    * A human readable string like "Twitter" or "Phabricator Form".
    */
   abstract public function getName();
+
+
+  /**
+   * Human readable description of this source, a sentence or two long.
+   */
+  abstract public function getSourceDescription();
 
   /**
    * This should be a any VARCHAR(32).
@@ -193,13 +196,7 @@ abstract class NuanceSourceDefinition extends Phobject {
         ->setLabel(pht('Name'))
         ->setName('name')
         ->setError($e_name)
-        ->setValue($source->getName()))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-        ->setLabel(pht('Type'))
-        ->setName('type')
-        ->setOptions(self::getSelectOptions())
-        ->setValue($source->getType()));
+        ->setValue($source->getName()));
 
     $form = $this->augmentEditForm($form, $ex);
 
@@ -260,4 +257,54 @@ abstract class NuanceSourceDefinition extends Phobject {
   abstract public function renderView();
 
   abstract public function renderListView();
+
+
+  protected function newItemFromProperties(
+    NuanceRequestor $requestor,
+    array $properties,
+    PhabricatorContentSource $content_source) {
+
+    // TODO: Should we have a tighter actor/viewer model? Requestors will
+    // often have no real user associated with them...
+    $actor = PhabricatorUser::getOmnipotentUser();
+
+    $source = $this->requireSourceObject();
+
+    $item = NuanceItem::initializeNewItem();
+
+    $xactions = array();
+
+    $xactions[] = id(new NuanceItemTransaction())
+      ->setTransactionType(NuanceItemTransaction::TYPE_SOURCE)
+      ->setNewValue($source->getPHID());
+
+    $xactions[] = id(new NuanceItemTransaction())
+      ->setTransactionType(NuanceItemTransaction::TYPE_REQUESTOR)
+      ->setNewValue($requestor->getPHID());
+
+    foreach ($properties as $key => $property) {
+      $xactions[] = id(new NuanceItemTransaction())
+        ->setTransactionType(NuanceItemTransaction::TYPE_PROPERTY)
+        ->setMetadataValue(NuanceItemTransaction::PROPERTY_KEY, $key)
+        ->setNewValue($property);
+    }
+
+    $editor = id(new NuanceItemEditor())
+      ->setActor($actor)
+      ->setActingAsPHID($requestor->getActingAsPHID())
+      ->setContentSource($content_source);
+
+    $editor->applyTransactions($item, $xactions);
+
+    return $item;
+  }
+
+
+/* -(  Handling Action Requests  )------------------------------------------- */
+
+
+  public function handleActionRequest(AphrontRequest $request) {
+    return new Aphront404Response();
+  }
+
 }

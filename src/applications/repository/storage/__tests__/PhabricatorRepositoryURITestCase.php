@@ -27,7 +27,7 @@ final class PhabricatorRepositoryURITestCase
 
     $repo = PhabricatorRepository::initializeNewRepository($user)
       ->setVersionControlSystem($svn)
-      ->setName('Test Repo')
+      ->setName(pht('Test Repo'))
       ->setCallsign('TESTREPO')
       ->setCredentialPHID($http_credential->getPHID())
       ->save();

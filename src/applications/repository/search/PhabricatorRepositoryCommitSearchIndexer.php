@@ -36,7 +36,7 @@ final class PhabricatorRepositoryCommitSearchIndexer
     $doc->setDocumentTitle($title);
 
     $doc->addField(
-      PhabricatorSearchField::FIELD_BODY,
+      PhabricatorSearchDocumentFieldType::FIELD_BODY,
       $commit_message);
 
     if ($author_phid) {
