@@ -118,10 +118,6 @@ final class PhabricatorUser
   }
 
   public function canEstablishWebSessions() {
-    if (!$this->isUserActivated()) {
-      return false;
-    }
-
     if ($this->getIsMailingList()) {
       return false;
     }
