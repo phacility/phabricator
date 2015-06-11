@@ -58,6 +58,7 @@ final class ManiphestTask extends ManiphestDAO
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
+      ->setSpacePHID($actor->getDefaultSpacePHID())
       ->attachProjectPHIDs(array())
       ->attachSubscriberPHIDs(array());
   }

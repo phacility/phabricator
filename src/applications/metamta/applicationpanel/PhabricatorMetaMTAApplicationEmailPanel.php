@@ -16,24 +16,7 @@ final class PhabricatorMetaMTAApplicationEmailPanel
     $viewer = $this->getViewer();
     $application = $this->getApplication();
 
-    $addresses = id(new PhabricatorMetaMTAApplicationEmailQuery())
-      ->setViewer($viewer)
-      ->withApplicationPHIDs(array($application->getPHID()))
-      ->execute();
-
-    $rows = array();
-    foreach ($addresses as $address) {
-      $rows[] = array(
-        $address->getAddress(),
-      );
-    }
-
-    $table = id(new AphrontTableView($rows))
-      ->setNoDataString(pht('No email addresses configured.'))
-      ->setHeaders(
-        array(
-          pht('Address'),
-        ));
+    $table = $this->buildEmailTable($is_edit = false, null);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -91,68 +74,10 @@ final class PhabricatorMetaMTAApplicationEmailPanel
       return $this->returnDeleteAddressResponse($request, $uri, $delete);
     }
 
-    $emails = id(new PhabricatorMetaMTAApplicationEmailQuery())
-      ->setViewer($viewer)
-      ->withApplicationPHIDs(array($application->getPHID()))
-      ->execute();
+    $table = $this->buildEmailTable(
+      $is_edit = true,
+      $request->getInt('id'));
 
-    $highlight = $request->getInt('highlight');
-    $rowc = array();
-    $rows = array();
-    foreach ($emails as $email) {
-
-      $button_edit = javelin_tag(
-        'a',
-        array(
-          'class' => 'button small grey',
-          'href'  => $uri->alter('edit', $email->getID()),
-          'sigil' => 'workflow',
-        ),
-        pht('Edit'));
-
-      $button_remove = javelin_tag(
-        'a',
-        array(
-          'class'   => 'button small grey',
-          'href'    => $uri->alter('delete', $email->getID()),
-          'sigil'   => 'workflow',
-        ),
-        pht('Delete'));
-
-      if ($highlight == $email->getID()) {
-        $rowc[] = 'highlighted';
-      } else {
-        $rowc[] = null;
-      }
-
-      $rows[] = array(
-        $email->getAddress(),
-        $button_edit,
-        $button_remove,
-      );
-    }
-
-    $table = id(new AphrontTableView($rows))
-      ->setNoDataString(pht('No application emails created yet.'));
-    $table->setHeaders(
-      array(
-        pht('Email'),
-        pht('Edit'),
-        pht('Delete'),
-      ));
-    $table->setColumnClasses(
-      array(
-        'wide',
-        'action',
-        'action',
-      ));
-    $table->setRowClasses($rowc);
-    $table->setColumnVisibility(
-      array(
-        true,
-        true,
-        true,
-      ));
     $form = id(new AphrontFormView())
       ->setUser($viewer);
 
@@ -246,6 +171,8 @@ final class PhabricatorMetaMTAApplicationEmailPanel
 
     $e_email = true;
     $v_email = $email_object->getAddress();
+    $e_space = null;
+    $v_space = $email_object->getSpacePHID();
     $v_default = $email_object->getConfigValue($config_default);
 
     $validation_exception = null;
@@ -253,11 +180,13 @@ final class PhabricatorMetaMTAApplicationEmailPanel
       $e_email = null;
 
       $v_email = trim($request->getStr('email'));
+      $v_space = $request->getStr('spacePHID');
       $v_default = $request->getArr($config_default);
       $v_default = nonempty(head($v_default), null);
 
       $type_address =
         PhabricatorMetaMTAApplicationEmailTransaction::TYPE_ADDRESS;
+      $type_space = PhabricatorTransactions::TYPE_SPACE;
       $type_config =
         PhabricatorMetaMTAApplicationEmailTransaction::TYPE_CONFIG;
 
@@ -268,6 +197,10 @@ final class PhabricatorMetaMTAApplicationEmailPanel
       $xactions[] = id(new PhabricatorMetaMTAApplicationEmailTransaction())
         ->setTransactionType($type_address)
         ->setNewValue($v_email);
+
+      $xactions[] = id(new PhabricatorMetaMTAApplicationEmailTransaction())
+        ->setTransactionType($type_space)
+        ->setNewValue($v_space);
 
       $xactions[] = id(new PhabricatorMetaMTAApplicationEmailTransaction())
         ->setTransactionType($type_config)
@@ -287,6 +220,7 @@ final class PhabricatorMetaMTAApplicationEmailPanel
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
         $e_email = $ex->getShortMessage($type_address);
+        $e_space = $ex->getShortMessage($type_space);
       }
     }
 
@@ -303,7 +237,22 @@ final class PhabricatorMetaMTAApplicationEmailPanel
           ->setLabel(pht('Email'))
           ->setName('email')
           ->setValue($v_email)
-          ->setError($e_email))
+          ->setError($e_email));
+
+    if (PhabricatorSpacesNamespaceQuery::getViewerSpacesExist($viewer)) {
+      $form->appendControl(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Space'))
+          ->setName('spacePHID')
+          ->setValue($v_space)
+          ->setError($e_space)
+          ->setOptions(
+            PhabricatorSpacesNamespaceQuery::getSpaceOptionsForViewer(
+              $viewer,
+              $v_space)));
+    }
+
+    $form
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
@@ -372,6 +321,87 @@ final class PhabricatorMetaMTAApplicationEmailPanel
       ->addCancelButton($uri);
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
+  }
+
+  private function buildEmailTable($is_edit, $highlight) {
+    $viewer = $this->getViewer();
+    $application = $this->getApplication();
+    $uri = new PhutilURI($this->getPanelURI());
+
+    $emails = id(new PhabricatorMetaMTAApplicationEmailQuery())
+      ->setViewer($viewer)
+      ->withApplicationPHIDs(array($application->getPHID()))
+      ->execute();
+
+    $rowc = array();
+    $rows = array();
+    foreach ($emails as $email) {
+
+      $button_edit = javelin_tag(
+        'a',
+        array(
+          'class' => 'button small grey',
+          'href'  => $uri->alter('edit', $email->getID()),
+          'sigil' => 'workflow',
+        ),
+        pht('Edit'));
+
+      $button_remove = javelin_tag(
+        'a',
+        array(
+          'class'   => 'button small grey',
+          'href'    => $uri->alter('delete', $email->getID()),
+          'sigil'   => 'workflow',
+        ),
+        pht('Delete'));
+
+      if ($highlight == $email->getID()) {
+        $rowc[] = 'highlighted';
+      } else {
+        $rowc[] = null;
+      }
+
+      $space_phid = PhabricatorSpacesNamespaceQuery::getObjectSpacePHID($email);
+      if ($space_phid) {
+        $email_space = $viewer->renderHandle($space_phid);
+      } else {
+        $email_space = null;
+      }
+
+      $rows[] = array(
+        $email_space,
+        $email->getAddress(),
+        $button_edit,
+        $button_remove,
+      );
+    }
+
+    $table = id(new AphrontTableView($rows))
+      ->setNoDataString(pht('No application emails created yet.'));
+    $table->setHeaders(
+      array(
+        pht('Space'),
+        pht('Email'),
+        pht('Edit'),
+        pht('Delete'),
+      ));
+    $table->setColumnClasses(
+      array(
+        '',
+        'wide',
+        'action',
+        'action',
+      ));
+    $table->setRowClasses($rowc);
+    $table->setColumnVisibility(
+      array(
+        PhabricatorSpacesNamespaceQuery::getViewerSpacesExist($viewer),
+        true,
+        $is_edit,
+        $is_edit,
+      ));
+
+    return $table;
   }
 
 }

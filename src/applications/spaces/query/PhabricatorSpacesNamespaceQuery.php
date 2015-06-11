@@ -170,6 +170,31 @@ final class PhabricatorSpacesNamespaceQuery
     return $spaces;
   }
 
+  public static function getSpaceOptionsForViewer(
+    PhabricatorUser $viewer,
+    $space_phid) {
+
+    $viewer_spaces = self::getViewerSpaces($viewer);
+
+    $map = array();
+    foreach ($viewer_spaces as $space) {
+
+      // Skip archived spaces, unless the object is already in that space.
+      if ($space->getIsArchived()) {
+        if ($space->getPHID() != $space_phid) {
+          continue;
+        }
+      }
+
+      $map[$space->getPHID()] = pht(
+        'Space %s: %s',
+        $space->getMonogram(),
+        $space->getNamespaceName());
+    }
+    asort($map);
+
+    return $map;
+  }
 
 
   /**

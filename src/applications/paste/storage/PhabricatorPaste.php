@@ -38,7 +38,8 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
       ->setTitle('')
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($edit_policy);
+      ->setEditPolicy($edit_policy)
+      ->setSpacePHID($actor->getDefaultSpacePHID());
   }
 
   public function getURI() {

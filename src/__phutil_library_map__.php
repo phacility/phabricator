@@ -5498,6 +5498,7 @@ phutil_register_library_map(array(
       'PhabricatorPolicyInterface',
       'PhabricatorApplicationTransactionInterface',
       'PhabricatorDestructibleInterface',
+      'PhabricatorSpacesInterface',
     ),
     'PhabricatorMetaMTAApplicationEmailDatasource' => 'PhabricatorTypeaheadDatasource',
     'PhabricatorMetaMTAApplicationEmailEditor' => 'PhabricatorApplicationTransactionEditor',

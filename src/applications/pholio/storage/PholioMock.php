@@ -48,7 +48,8 @@ final class PholioMock extends PholioDAO
       ->attachImages(array())
       ->setStatus(self::STATUS_OPEN)
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($edit_policy);
+      ->setEditPolicy($edit_policy)
+      ->setSpacePHID($actor->getDefaultSpacePHID());
   }
 
   public function getMonogram() {
