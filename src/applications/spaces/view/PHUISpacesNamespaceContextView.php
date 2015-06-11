@@ -41,7 +41,7 @@ final class PHUISpacesNamespaceContextView extends AphrontView {
         'class' => 'spaces-name',
       ),
       array(
-        $viewer->renderHandle($space_phid),
+        $viewer->renderHandle($space_phid)->setUseShortName(true),
         ' | ',
       ));
   }
