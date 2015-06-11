@@ -844,6 +844,11 @@ abstract class PhabricatorApplicationTransactionEditor
         $object->save();
       } catch (AphrontDuplicateKeyQueryException $ex) {
         $object->killTransaction();
+
+        // This callback has an opportunity to throw a better exception,
+        // so execution may end here.
+        $this->didCatchDuplicateKeyException($object, $xactions, $ex);
+
         throw $ex;
       }
 
@@ -1019,6 +1024,13 @@ abstract class PhabricatorApplicationTransactionEditor
       ));
 
     return $xactions;
+  }
+
+  protected function didCatchDuplicateKeyException(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    Exception $ex) {
+    return;
   }
 
   public function publishTransactions(

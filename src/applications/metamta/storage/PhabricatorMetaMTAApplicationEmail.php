@@ -2,7 +2,10 @@
 
 final class PhabricatorMetaMTAApplicationEmail
   extends PhabricatorMetaMTADAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorDestructibleInterface {
 
   protected $applicationPHID;
   protected $address;
@@ -107,6 +110,37 @@ final class PhabricatorMetaMTAApplicationEmail
 
   public function describeAutomaticCapability($capability) {
     return $this->getApplication()->describeAutomaticCapability($capability);
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorMetaMTAApplicationEmailEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorMetaMTAApplicationEmailTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+    $this->delete();
   }
 
 }

@@ -190,30 +190,6 @@ final class PhabricatorMetaMTAApplicationEmailPanel
       ));
   }
 
-  private function validateApplicationEmail($email) {
-    $errors = array();
-    $e_email = true;
-
-    if (!strlen($email)) {
-      $e_email = pht('Required');
-      $errors[] = pht('Email is required.');
-    } else if (!PhabricatorUserEmail::isValidAddress($email)) {
-      $e_email = pht('Invalid');
-      $errors[] = PhabricatorUserEmail::describeValidAddresses();
-    } else if (!PhabricatorUserEmail::isAllowedAddress($email)) {
-      $e_email = pht('Disallowed');
-      $errors[] = PhabricatorUserEmail::describeAllowedAddresses();
-    }
-    $user_emails = id(new PhabricatorUserEmail())
-      ->loadAllWhere('address = %s', $email);
-    if ($user_emails) {
-      $e_email = pht('Duplicate');
-      $errors[] = pht('A user already has this email.');
-    }
-
-    return array($e_email, $errors);
-  }
-
   private function returnNewAddressResponse(
     AphrontRequest $request,
     PhutilURI $uri,
@@ -265,45 +241,59 @@ final class PhabricatorMetaMTAApplicationEmailPanel
 
     $viewer = $request->getUser();
 
-    $e_email = true;
-    $email   = null;
-    $errors  = array();
-    $default_user_key =
+    $config_default =
       PhabricatorMetaMTAApplicationEmail::CONFIG_DEFAULT_AUTHOR;
+
+    $e_email = true;
+    $v_email = $email_object->getAddress();
+    $v_default = $email_object->getConfigValue($config_default);
+
+    $validation_exception = null;
     if ($request->isDialogFormPost()) {
-      $email = trim($request->getStr('email'));
-      list($e_email, $errors) = $this->validateApplicationEmail($email);
-      $email_object->setAddress($email);
-      $default_user = $request->getArr($default_user_key);
-      $default_user = reset($default_user);
-      if ($default_user) {
-        $email_object->setConfigValue($default_user_key, $default_user);
-      }
+      $e_email = null;
 
-      if (!$errors) {
-        try {
-          $email_object->save();
-          return id(new AphrontRedirectResponse())->setURI(
-            $uri->alter('highlight', $email_object->getID()));
-        } catch (AphrontDuplicateKeyQueryException $ex) {
-          $e_email = pht('Duplicate');
-          $errors[] = pht(
-            'Another application is already configured to use this email '.
-            'address.');
-        }
+      $v_email = trim($request->getStr('email'));
+      $v_default = $request->getArr($config_default);
+      $v_default = nonempty(head($v_default), null);
+
+      $type_address =
+        PhabricatorMetaMTAApplicationEmailTransaction::TYPE_ADDRESS;
+      $type_config =
+        PhabricatorMetaMTAApplicationEmailTransaction::TYPE_CONFIG;
+
+      $key_config = PhabricatorMetaMTAApplicationEmailTransaction::KEY_CONFIG;
+
+      $xactions = array();
+
+      $xactions[] = id(new PhabricatorMetaMTAApplicationEmailTransaction())
+        ->setTransactionType($type_address)
+        ->setNewValue($v_email);
+
+      $xactions[] = id(new PhabricatorMetaMTAApplicationEmailTransaction())
+        ->setTransactionType($type_config)
+        ->setMetadataValue($key_config, $config_default)
+        ->setNewValue($v_default);
+
+      $editor = id(new PhabricatorMetaMTAApplicationEmailEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true);
+
+      try {
+        $editor->applyTransactions($email_object, $xactions);
+
+        return id(new AphrontRedirectResponse())->setURI(
+          $uri->alter('highlight', $email_object->getID()));
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
+        $e_email = $ex->getShortMessage($type_address);
       }
     }
 
-    if ($errors) {
-      $errors = id(new PHUIInfoView())
-        ->setErrors($errors);
-    }
-
-    $default_user = $email_object->getConfigValue($default_user_key);
-    if ($default_user) {
-      $default_user_value = array($default_user);
+    if ($v_default) {
+      $v_default = array($v_default);
     } else {
-      $default_user_value = array();
+      $v_default = array();
     }
 
     $form = id(new AphrontFormView())
@@ -312,28 +302,29 @@ final class PhabricatorMetaMTAApplicationEmailPanel
         id(new AphrontFormTextControl())
           ->setLabel(pht('Email'))
           ->setName('email')
-          ->setValue($email_object->getAddress())
-          ->setCaption(PhabricatorUserEmail::describeAllowedAddresses())
+          ->setValue($v_email)
           ->setError($e_email))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setLabel(pht('Default Author'))
-          ->setName($default_user_key)
+          ->setName($config_default)
           ->setLimit(1)
-          ->setValue($default_user_value)
+          ->setValue($v_default)
           ->setCaption(pht(
             'Used if the "From:" address does not map to a known account.')));
+
     if ($is_new) {
       $title = pht('New Address');
     } else {
       $title = pht('Edit Address');
     }
+
     $dialog = id(new AphrontDialogView())
       ->setUser($viewer)
       ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->setTitle($title)
-      ->appendChild($errors)
+      ->setValidationException($validation_exception)
       ->appendForm($form)
       ->addSubmitButton(pht('Save'))
       ->addCancelButton($uri);
@@ -350,7 +341,8 @@ final class PhabricatorMetaMTAApplicationEmailPanel
     PhutilURI $uri,
     $email_object_id) {
 
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
+
     $email_object = id(new PhabricatorMetaMTAApplicationEmailQuery())
       ->setViewer($viewer)
       ->withIDs(array($email_object_id))
@@ -365,7 +357,8 @@ final class PhabricatorMetaMTAApplicationEmailPanel
     }
 
     if ($request->isDialogFormPost()) {
-      $email_object->delete();
+      $engine = new PhabricatorDestructionEngine();
+      $engine->destroyObject($email_object);
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
 
