@@ -936,14 +936,16 @@ abstract class PhabricatorApplicationTransactionEditor
           $object,
           $herald_xactions);
 
-        $adapter = $this->getHeraldAdapter();
-        $this->heraldEmailPHIDs = $adapter->getEmailPHIDs();
-        $this->heraldForcedEmailPHIDs = $adapter->getForcedEmailPHIDs();
-
         // Merge the new transactions into the transaction list: we want to
         // send email and publish feed stories about them, too.
         $xactions = array_merge($xactions, $herald_xactions);
       }
+
+      // If Herald did not generate transactions, we may still need to handle
+      // "Send an Email" rules.
+      $adapter = $this->getHeraldAdapter();
+      $this->heraldEmailPHIDs = $adapter->getEmailPHIDs();
+      $this->heraldForcedEmailPHIDs = $adapter->getForcedEmailPHIDs();
     }
 
     $this->didApplyTransactions($xactions);
