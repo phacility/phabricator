@@ -72,9 +72,11 @@ final class PhabricatorNuanceApplication extends PhabricatorApplication {
     return array(
       NuanceSourceDefaultViewCapability::CAPABILITY => array(
         'caption' => pht('Default view policy for newly created sources.'),
+        'template' => NuanceSourcePHIDType::TYPECONST,
       ),
       NuanceSourceDefaultEditCapability::CAPABILITY => array(
         'caption' => pht('Default edit policy for newly created sources.'),
+        'template' => NuanceSourcePHIDType::TYPECONST,
       ),
       NuanceSourceManageCapability::CAPABILITY => array(),
     );
