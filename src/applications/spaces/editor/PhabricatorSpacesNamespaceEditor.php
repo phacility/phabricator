@@ -17,6 +17,7 @@ final class PhabricatorSpacesNamespaceEditor
     $types[] = PhabricatorSpacesNamespaceTransaction::TYPE_NAME;
     $types[] = PhabricatorSpacesNamespaceTransaction::TYPE_DESCRIPTION;
     $types[] = PhabricatorSpacesNamespaceTransaction::TYPE_DEFAULT;
+    $types[] = PhabricatorSpacesNamespaceTransaction::TYPE_ARCHIVE;
 
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -40,6 +41,8 @@ final class PhabricatorSpacesNamespaceEditor
           return null;
         }
         return $object->getDescription();
+      case PhabricatorSpacesNamespaceTransaction::TYPE_ARCHIVE:
+        return $object->getIsArchived();
       case PhabricatorSpacesNamespaceTransaction::TYPE_DEFAULT:
         return $object->getIsDefaultNamespace() ? 1 : null;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -61,6 +64,8 @@ final class PhabricatorSpacesNamespaceEditor
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return $xaction->getNewValue();
+      case PhabricatorSpacesNamespaceTransaction::TYPE_ARCHIVE:
+        return $xaction->getNewValue() ? 1 : 0;
       case PhabricatorSpacesNamespaceTransaction::TYPE_DEFAULT:
         return $xaction->getNewValue() ? 1 : null;
     }
@@ -84,6 +89,9 @@ final class PhabricatorSpacesNamespaceEditor
       case PhabricatorSpacesNamespaceTransaction::TYPE_DEFAULT:
         $object->setIsDefaultNamespace($new ? 1 : null);
         return;
+      case PhabricatorSpacesNamespaceTransaction::TYPE_ARCHIVE:
+        $object->setIsArchived($new ? 1 : 0);
+        return;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
         $object->setViewPolicy($new);
         return;
@@ -103,6 +111,7 @@ final class PhabricatorSpacesNamespaceEditor
       case PhabricatorSpacesNamespaceTransaction::TYPE_NAME:
       case PhabricatorSpacesNamespaceTransaction::TYPE_DESCRIPTION:
       case PhabricatorSpacesNamespaceTransaction::TYPE_DEFAULT:
+      case PhabricatorSpacesNamespaceTransaction::TYPE_ARCHIVE:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;
@@ -128,13 +137,27 @@ final class PhabricatorSpacesNamespaceEditor
           $error = new PhabricatorApplicationTransactionValidationError(
             $type,
             pht('Required'),
-              pht('Spaces must have a name.'),
+            pht('Spaces must have a name.'),
             nonempty(last($xactions), null));
 
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
         }
         break;
+      case PhabricatorSpacesNamespaceTransaction::TYPE_DEFAULT:
+        if (!$this->getIsNewObject()) {
+          foreach ($xactions as $xaction) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'Only the first space created can be the default space, and '.
+                'it must remain the default space evermore.'),
+              $xaction);
+          }
+        }
+        break;
+
     }
 
     return $errors;

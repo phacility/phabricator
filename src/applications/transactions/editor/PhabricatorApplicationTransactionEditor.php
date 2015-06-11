@@ -310,6 +310,7 @@ abstract class PhabricatorApplicationTransactionEditor
             $space_phid = $default_space->getPHID();
           }
         }
+
         return $space_phid;
       case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $xaction->getMetadataValue('edge:type');
@@ -2011,6 +2012,8 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $has_spaces = PhabricatorSpacesNamespaceQuery::getViewerSpacesExist($actor);
     $actor_spaces = PhabricatorSpacesNamespaceQuery::getViewerSpaces($actor);
+    $active_spaces = PhabricatorSpacesNamespaceQuery::getViewerActiveSpaces(
+      $actor);
     foreach ($xactions as $xaction) {
       $space_phid = $xaction->getNewValue();
 
@@ -2039,6 +2042,23 @@ abstract class PhabricatorApplicationTransactionEditor
           pht(
             'You can not shift this object in the selected space, because '.
             'the space does not exist or you do not have access to it.'),
+          $xaction);
+      } else if (empty($active_spaces[$space_phid])) {
+
+        // It's OK to edit objects in an archived space, so just move on if
+        // we aren't adjusting the value.
+        $old_space_phid = $this->getTransactionOldValue($object, $xaction);
+        if ($space_phid == $old_space_phid) {
+          continue;
+        }
+
+        $errors[] = new PhabricatorApplicationTransactionValidationError(
+          $transaction_type,
+          pht('Archived'),
+          pht(
+            'You can not shift this object into the selected space, because '.
+            'the space is archived. Objects can not be created inside (or '.
+            'moved into) archived spaces.'),
           $xaction);
       }
     }

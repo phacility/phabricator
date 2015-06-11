@@ -9,6 +9,7 @@ final class PhabricatorSpacesNamespaceQuery
   private $ids;
   private $phids;
   private $isDefaultNamespace;
+  private $isArchived;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -25,38 +26,32 @@ final class PhabricatorSpacesNamespaceQuery
     return $this;
   }
 
+  public function withIsArchived($archived) {
+    $this->isArchived = $archived;
+    return $this;
+  }
+
   public function getQueryApplicationClass() {
     return 'PhabricatorSpacesApplication';
   }
 
   protected function loadPage() {
-    $table = new PhabricatorSpacesNamespace();
-    $conn_r = $table->establishConnection('r');
-
-    $rows = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($rows);
+    return $this->loadStandardPage(new PhabricatorSpacesNamespace());
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
@@ -64,17 +59,23 @@ final class PhabricatorSpacesNamespaceQuery
     if ($this->isDefaultNamespace !== null) {
       if ($this->isDefaultNamespace) {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           'isDefaultNamespace = 1');
       } else {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           'isDefaultNamespace IS NULL');
       }
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-    return $this->formatWhereClause($where);
+    if ($this->isArchived !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'isArchived = %d',
+        (int)$this->isArchived);
+    }
+
+    return $where;
   }
 
   public static function destroySpacesCache() {
@@ -155,6 +156,21 @@ final class PhabricatorSpacesNamespaceQuery
 
     return $result;
   }
+
+
+  public static function getViewerActiveSpaces(PhabricatorUser $viewer) {
+    $spaces = self::getViewerSpaces($viewer);
+
+    foreach ($spaces as $key => $space) {
+      if ($space->getIsArchived()) {
+        unset($spaces[$key]);
+      }
+    }
+
+    return $spaces;
+  }
+
+
 
   /**
    * Get the Space PHID for an object, if one exists.

@@ -1,0 +1,27 @@
+@title Spaces User Guide
+@group userguide
+
+Guide to the Spaces application.
+
+Overview
+========
+
+IMPORTANT: Spaces is a prototype application.
+
+Archiving Spaces
+================
+
+If you no longer need a Space, you can archive it by choosing
+{nav Archive Space} from the detail view. This hides the space and all the
+objects in it without deleting any data.
+
+New objects can't be created into archived spaces, and existing objects can't
+be shifted into archived spaces. The UI won't give you options to choose
+these spaces when creating or editing objects.
+
+Additionally, objects (like tasks) in archived spaces won't be shown in most
+search result lists by default. If you need to find objects in an archived
+space, use the `Spaces` constraint to specifically search for objects in that
+space.
+
+You can reactivate a space later by choosing {nav Activate Space}.

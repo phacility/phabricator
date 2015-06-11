@@ -39,6 +39,10 @@ final class PhabricatorSpacesNamespacePHIDType
       $handle->setName($name);
       $handle->setFullName(pht('%s %s', $monogram, $name));
       $handle->setURI('/'.$monogram);
+
+      if ($namespace->getIsArchived()) {
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
+      }
     }
   }
 

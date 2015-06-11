@@ -759,7 +759,7 @@ final class PhabricatorUser
     // for now just use the global space if one exists.
 
     // If the viewer has access to the default space, use that.
-    $spaces = PhabricatorSpacesNamespaceQuery::getViewerSpaces($this);
+    $spaces = PhabricatorSpacesNamespaceQuery::getViewerActiveSpaces($this);
     foreach ($spaces as $space) {
       if ($space->getIsDefaultNamespace()) {
         return $space->getPHID();

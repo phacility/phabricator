@@ -6,6 +6,7 @@ final class PhabricatorSpacesNamespaceTransaction
   const TYPE_NAME = 'spaces:name';
   const TYPE_DEFAULT = 'spaces:default';
   const TYPE_DESCRIPTION = 'spaces:description';
+  const TYPE_ARCHIVE = 'spaces:archive';
 
   public function getApplicationName() {
     return 'spaces';
@@ -78,6 +79,16 @@ final class PhabricatorSpacesNamespaceTransaction
         return pht(
           '%s made this the default space.',
           $this->renderHandleLink($author_phid));
+      case self::TYPE_ARCHIVE:
+        if ($new) {
+          return pht(
+            '%s archived this space.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s activated this space.',
+            $this->renderHandleLink($author_phid));
+        }
     }
 
     return parent::getTitle();

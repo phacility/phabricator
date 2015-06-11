@@ -265,7 +265,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
 
     $select = AphrontFormSelectControl::renderSelectTag(
       $space_phid,
-      $this->getSpaceOptions(),
+      $this->getSpaceOptions($space_phid),
       array(
         'name' => 'spacePHID',
       ));
@@ -273,12 +273,20 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
     return $select;
   }
 
-  protected function getSpaceOptions() {
+  protected function getSpaceOptions($space_phid) {
     $viewer = $this->getUser();
     $viewer_spaces = PhabricatorSpacesNamespaceQuery::getViewerSpaces($viewer);
 
     $map = array();
     foreach ($viewer_spaces as $space) {
+
+      // Skip archived spaces, unless the object is already in that space.
+      if ($space->getIsArchived()) {
+        if ($space->getPHID() != $space_phid) {
+          continue;
+        }
+      }
+
       $map[$space->getPHID()] = pht(
         'Space %s: %s',
         $space->getMonogram(),
