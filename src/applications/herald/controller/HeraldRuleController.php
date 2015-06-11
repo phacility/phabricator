@@ -632,6 +632,7 @@ final class HeraldRuleController extends HeraldController {
       'email' => new PhabricatorMetaMTAMailableDatasource(),
       'userorproject' => new PhabricatorProjectOrUserDatasource(),
       'applicationemail' => new PhabricatorMetaMTAApplicationEmailDatasource(),
+      'space' => new PhabricatorSpacesNamespaceDatasource(),
     );
 
     foreach ($sources as $key => $source) {

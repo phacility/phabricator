@@ -44,6 +44,7 @@ abstract class HeraldAdapter {
   const FIELD_TASK_STATUS            = 'taskstatus';
   const FIELD_PUSHER_IS_COMMITTER    = 'pusher-is-committer';
   const FIELD_PATH                   = 'path';
+  const FIELD_SPACE = 'space';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -101,6 +102,7 @@ abstract class HeraldAdapter {
   const VALUE_TASK_STATUS     = 'taskstatus';
   const VALUE_LEGAL_DOCUMENTS   = 'legaldocuments';
   const VALUE_APPLICATION_EMAIL = 'applicationemail';
+  const VALUE_SPACE = 'space';
 
   private $contentSource;
   private $isNewObject;
@@ -219,6 +221,19 @@ abstract class HeraldAdapter {
           $value[] = $this->getApplicationEmail()->getPHID();
         }
         return $value;
+      case self::FIELD_SPACE:
+        $object = $this->getObject();
+
+        if (!($object instanceof PhabricatorSpacesInterface)) {
+          throw new Exception(
+            pht(
+              'Adapter object (of class "%s") does not implement interface '.
+              '"%s", so the Space field value can not be determined.',
+              get_class($object),
+              'PhabricatorSpacesInterface'));
+        }
+
+        return PhabricatorSpacesNamespaceQuery::getObjectSpacePHID($object);
       default:
         if ($this->isHeraldCustomKey($field_name)) {
           return $this->getCustomFieldValue($field_name);
@@ -400,6 +415,7 @@ abstract class HeraldAdapter {
       self::FIELD_TASK_STATUS => pht('Task status'),
       self::FIELD_PUSHER_IS_COMMITTER => pht('Pusher same as committer'),
       self::FIELD_PATH => pht('Path'),
+      self::FIELD_SPACE => pht('Space'),
     ) + $this->getCustomFieldNameMap();
   }
 
@@ -453,6 +469,7 @@ abstract class HeraldAdapter {
       case self::FIELD_PUSHER:
       case self::FIELD_TASK_PRIORITY:
       case self::FIELD_TASK_STATUS:
+      case self::FIELD_SPACE:
         return array(
           self::CONDITION_IS_ANY,
           self::CONDITION_IS_NOT_ANY,
@@ -957,6 +974,8 @@ abstract class HeraldAdapter {
             return self::VALUE_TASK_PRIORITY;
           case self::FIELD_TASK_STATUS:
             return self::VALUE_TASK_STATUS;
+          case self::FIELD_SPACE:
+            return self::VALUE_SPACE;
           default:
             return self::VALUE_USER;
         }
