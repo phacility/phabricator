@@ -97,7 +97,7 @@ Even if a user satisfies the view policy for a space, they must still pass the
 view policy on the object: the space check is a new check in addition to any
 check on the object, and can only limit access.
 
-The edit poilcy for a space only affects the Space itself, and is not applied
+The edit policy for a space only affects the Space itself, and is not applied
 to objects inside the space.
 
 
