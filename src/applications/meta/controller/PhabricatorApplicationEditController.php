@@ -136,6 +136,20 @@ final class PhabricatorApplicationEditController
 
         $template = $application->getCapabilityTemplatePHIDType($capability);
         if ($template) {
+          $phid_types = PhabricatorPHIDType::getAllTypes();
+          $phid_type = idx($phid_types, $template);
+          if ($phid_type) {
+            $template_object = $phid_type->newObject();
+            if ($template_object) {
+              $template_policies = id(new PhabricatorPolicyQuery())
+                ->setViewer($user)
+                ->setObject($template_object)
+                ->execute();
+              $control->setPolicies($template_policies);
+              $control->setTemplateObject($template_object);
+            }
+          }
+
           $control->setTemplatePHIDType($template);
         }
 

@@ -7,6 +7,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
   private $policies;
   private $spacePHID;
   private $templatePHIDType;
+  private $templateObject;
 
   public function setPolicyObject(PhabricatorPolicyInterface $object) {
     $this->object = $object;
@@ -30,6 +31,11 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
 
   public function setTemplatePHIDType($type) {
     $this->templatePHIDType = $type;
+    return $this;
+  }
+
+  public function setTemplateObject($object) {
+    $this->templateObject = $object;
     return $this;
   }
 
@@ -64,9 +70,31 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
 
   protected function getOptions() {
     $capability = $this->capability;
+    $policies = $this->policies;
+
+    // Exclude object policies which don't make sense here. This primarily
+    // filters object policies associated from template capabilities (like
+    // "Default Task View Policy" being set to "Task Author") so they aren't
+    // made available on non-template capabilities (like "Can Bulk Edit").
+    foreach ($policies as $key => $policy) {
+      if ($policy->getType() != PhabricatorPolicyType::TYPE_OBJECT) {
+        continue;
+      }
+
+      $rule = PhabricatorPolicyQuery::getObjectPolicyRule($policy->getPHID());
+      if (!$rule) {
+        continue;
+      }
+
+      $target = nonempty($this->templateObject, $this->object);
+      if (!$rule->canApplyToObject($target)) {
+        unset($policies[$key]);
+        continue;
+      }
+    }
 
     $options = array();
-    foreach ($this->policies as $policy) {
+    foreach ($policies as $policy) {
       if ($policy->getPHID() == PhabricatorPolicies::POLICY_PUBLIC) {
         // Never expose "Public" for capabilities which don't support it.
         $capobj = PhabricatorPolicyCapability::getCapabilityByKey($capability);
@@ -74,6 +102,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
           continue;
         }
       }
+
       $policy_short_name = id(new PhutilUTF8StringTruncator())
         ->setMaximumGlyphs(28)
         ->truncateString($policy->getName());
@@ -122,6 +151,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
       $options,
       array(
         PhabricatorPolicyType::TYPE_GLOBAL,
+        PhabricatorPolicyType::TYPE_OBJECT,
         PhabricatorPolicyType::TYPE_USER,
         PhabricatorPolicyType::TYPE_CUSTOM,
         PhabricatorPolicyType::TYPE_PROJECT,

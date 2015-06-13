@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @task objectpolicy Implementing Object Policies
+ */
 abstract class PhabricatorPolicyRule {
 
   const CONTROL_TYPE_TEXT       = 'text';
@@ -91,6 +94,40 @@ abstract class PhabricatorPolicyRule {
    */
   public function ruleHasEffect($value) {
     return true;
+  }
+
+
+/* -(  Implementing Object Policies  )--------------------------------------- */
+
+
+  /**
+   * Return a unique string like "maniphest.author" to expose this rule as an
+   * object policy.
+   *
+   * Object policy rules, like "Task Author", are more advanced than basic
+   * policy rules (like "All Users") but not as powerful as custom rules.
+   *
+   * @return string Unique identifier for this rule.
+   * @task objectpolicy
+   */
+  public function getObjectPolicyKey() {
+    return null;
+  }
+
+  public function getObjectPolicyName() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  public function getObjectPolicyShortName() {
+    return $this->getObjectPolicyName();
+  }
+
+  public function getObjectPolicyIcon() {
+    return 'fa-cube';
+  }
+
+  public function getPolicyExplanation() {
+    throw new PhutilMethodNotImplementedException();
   }
 
 }
