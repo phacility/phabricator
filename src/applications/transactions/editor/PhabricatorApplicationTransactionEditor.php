@@ -2087,6 +2087,19 @@ abstract class PhabricatorApplicationTransactionEditor
 
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
+        case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+          $clone_xaction = clone $xaction;
+          $clone_xaction->setOldValue(array_values($this->subscribers));
+          $clone_xaction->setNewValue(
+            $this->getPHIDTransactionNewValue(
+              $clone_xaction));
+
+          PhabricatorPolicyRule::passTransactionHintToRule(
+            $copy,
+            new PhabricatorSubscriptionsSubscribersPolicyRule(),
+            array_fuse($clone_xaction->getNewValue()));
+
+          break;
         case PhabricatorTransactions::TYPE_SPACE:
           $space_phid = $this->getTransactionNewValue($object, $xaction);
           $copy->setSpacePHID($space_phid);

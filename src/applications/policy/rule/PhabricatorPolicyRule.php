@@ -97,6 +97,56 @@ abstract class PhabricatorPolicyRule {
   }
 
 
+/* -(  Transaction Hints  )-------------------------------------------------- */
+
+
+  /**
+   * Tell policy rules about upcoming transaction effects.
+   *
+   * Before transaction effects are applied, we try to stop users from making
+   * edits which will lock them out of objects. We can't do this perfectly,
+   * since they can set a policy to "the moon is full" moments before it wanes,
+   * but we try to prevent as many mistakes as possible.
+   *
+   * Some policy rules depend on complex checks against object state which
+   * we can't set up ahead of time. For example, subscriptions require database
+   * writes.
+   *
+   * In cases like this, instead of doing writes, you can pass a hint about an
+   * object to a policy rule. The rule can then look for hints and use them in
+   * rendering a verdict about whether the user will be able to see the object
+   * or not after applying the policy change.
+   *
+   * @param PhabricatorPolicyInterface Object to pass a hint about.
+   * @param PhabricatorPolicyRule Rule to pass hint to.
+   * @param wild Hint.
+   * @return void
+   */
+  public static function passTransactionHintToRule(
+    PhabricatorPolicyInterface $object,
+    PhabricatorPolicyRule $rule,
+    $hint) {
+
+    $cache = PhabricatorCaches::getRequestCache();
+    $cache->setKey(self::getObjectPolicyCacheKey($object, $rule), $hint);
+  }
+
+  protected function getTransactionHint(
+    PhabricatorPolicyInterface $object) {
+
+    $cache = PhabricatorCaches::getRequestCache();
+    return $cache->getKey(self::getObjectPolicyCacheKey($object, $this));
+  }
+
+  private static function getObjectPolicyCacheKey(
+    PhabricatorPolicyInterface $object,
+    PhabricatorPolicyRule $rule) {
+    $hash = spl_object_hash($object);
+    $rule = get_class($rule);
+    return 'policycache.'.$hash.'.'.$rule;
+  }
+
+
 /* -(  Implementing Object Policies  )--------------------------------------- */
 
 

@@ -208,5 +208,32 @@ final class PhabricatorPolicyDataTestCase extends PhabricatorTestCase {
         PhabricatorPolicyCapability::CAN_VIEW));
   }
 
+  public function testObjectPolicyRuleSubscribers() {
+    $author = $this->generateNewTestUser();
+
+    $rule = new PhabricatorSubscriptionsSubscribersPolicyRule();
+
+    $task = ManiphestTask::initializeNewTask($author);
+    $task->setViewPolicy($rule->getObjectPolicyFullKey());
+    $task->save();
+
+    $this->assertFalse(
+      PhabricatorPolicyFilter::hasCapability(
+        $author,
+        $task,
+        PhabricatorPolicyCapability::CAN_VIEW));
+
+    id(new PhabricatorSubscriptionsEditor())
+      ->setActor($author)
+      ->setObject($task)
+      ->subscribeExplicit(array($author->getPHID()))
+      ->save();
+
+    $this->assertTrue(
+      PhabricatorPolicyFilter::hasCapability(
+        $author,
+        $task,
+        PhabricatorPolicyCapability::CAN_VIEW));
+  }
 
 }
