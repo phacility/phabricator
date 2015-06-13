@@ -6,6 +6,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
   private $capability;
   private $policies;
   private $spacePHID;
+  private $templatePHIDType;
 
   public function setPolicyObject(PhabricatorPolicyInterface $object) {
     $this->object = $object;
@@ -25,6 +26,11 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
 
   public function getSpacePHID() {
     return $this->spacePHID;
+  }
+
+  public function setTemplatePHIDType($type) {
+    $this->templatePHIDType = $type;
+    return $this;
   }
 
   public function setCapability($capability) {
@@ -178,6 +184,18 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
     }
 
 
+    if ($this->templatePHIDType) {
+      $context_path = 'template/'.$this->templatePHIDType.'/';
+    } else {
+      $object_phid = $this->object->getPHID();
+      if ($object_phid) {
+        $context_path = 'object/'.$object_phid.'/';
+      } else {
+        $object_type = phid_get_type($this->object->generatePHID());
+        $context_path = 'type/'.$object_type.'/';
+      }
+    }
+
     Javelin::initBehavior(
       'policy-control',
       array(
@@ -190,6 +208,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
         'labels' => $labels,
         'value' => $this->getValue(),
         'capability' => $this->capability,
+        'editURI' => '/policy/edit/'.$context_path,
         'customPlaceholder' => $this->getCustomPolicyPlaceholder(),
       ));
 

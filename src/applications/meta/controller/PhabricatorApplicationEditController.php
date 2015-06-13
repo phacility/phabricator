@@ -124,8 +124,7 @@ final class PhabricatorApplicationEditController
             ->setValue(idx($descriptions, $capability))
             ->setCaption($caption));
       } else {
-        $form->appendChild(
-          id(new AphrontFormPolicyControl())
+        $control = id(new AphrontFormPolicyControl())
           ->setUser($user)
           ->setDisabled($locked)
           ->setCapability($capability)
@@ -133,7 +132,14 @@ final class PhabricatorApplicationEditController
           ->setPolicies($policies)
           ->setLabel($label)
           ->setName('policy:'.$capability)
-          ->setCaption($caption));
+          ->setCaption($caption);
+
+        $template = $application->getCapabilityTemplatePHIDType($capability);
+        if ($template) {
+          $control->setTemplatePHIDType($template);
+        }
+
+        $form->appendControl($control);
       }
 
     }

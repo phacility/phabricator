@@ -8,9 +8,15 @@ abstract class PhabricatorPolicyRule {
   const CONTROL_TYPE_NONE       = 'none';
 
   abstract public function getRuleDescription();
-  abstract public function applyRule(PhabricatorUser $viewer, $value);
+  abstract public function applyRule(
+    PhabricatorUser $viewer,
+    $value,
+    PhabricatorPolicyInterface $object);
 
-  public function willApplyRules(PhabricatorUser $viewer, array $values) {
+  public function willApplyRules(
+    PhabricatorUser $viewer,
+    array $values,
+    array $objects) {
     return;
   }
 
@@ -20,6 +26,16 @@ abstract class PhabricatorPolicyRule {
 
   public function getValueControlTemplate() {
     return null;
+  }
+
+  /**
+   * Return `true` if this rule can be applied to the given object.
+   *
+   * Some policy rules may only operation on certain kinds of objects. For
+   * example, a "task author" rule
+   */
+  public function canApplyToObject(PhabricatorPolicyInterface $object) {
+    return true;
   }
 
   protected function getDatasourceTemplate(

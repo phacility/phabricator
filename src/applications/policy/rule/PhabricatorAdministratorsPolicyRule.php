@@ -6,7 +6,10 @@ final class PhabricatorAdministratorsPolicyRule extends PhabricatorPolicyRule {
     return pht('administrators');
   }
 
-  public function applyRule(PhabricatorUser $viewer, $value) {
+  public function applyRule(
+    PhabricatorUser $viewer,
+    $value,
+    PhabricatorPolicyInterface $object) {
     return $viewer->getIsAdmin();
   }
 

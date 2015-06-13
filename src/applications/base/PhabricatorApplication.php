@@ -583,6 +583,12 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
   }
 
   public function getCapabilityTemplatePHIDType($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return null;
+    }
+
     $spec = $this->getCustomCapabilitySpecification($capability);
     return idx($spec, 'template');
   }

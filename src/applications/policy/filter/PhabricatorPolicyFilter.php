@@ -149,13 +149,13 @@ final class PhabricatorPolicyFilter {
         }
 
         if ($type == PhabricatorPolicyPHIDTypePolicy::TYPECONST) {
-          $need_policies[$policy] = $policy;
+          $need_policies[$policy][] = $object;
         }
       }
     }
 
     if ($need_policies) {
-      $this->loadCustomPolicies(array_keys($need_policies));
+      $this->loadCustomPolicies($need_policies);
     }
 
     // If we need projects, check if any of the projects we need are also the
@@ -500,7 +500,7 @@ final class PhabricatorPolicyFilter {
             $this->rejectObject($object, $policy, $capability);
           }
         } else if ($type == PhabricatorPolicyPHIDTypePolicy::TYPECONST) {
-          if ($this->checkCustomPolicy($policy)) {
+          if ($this->checkCustomPolicy($policy, $object)) {
             return true;
           } else {
             $this->rejectObject($object, $policy, $capability);
@@ -573,30 +573,47 @@ final class PhabricatorPolicyFilter {
     throw $exception;
   }
 
-  private function loadCustomPolicies(array $phids) {
+  private function loadCustomPolicies(array $map) {
     $viewer = $this->viewer;
     $viewer_phid = $viewer->getPHID();
 
     $custom_policies = id(new PhabricatorPolicyQuery())
       ->setViewer($viewer)
-      ->withPHIDs($phids)
+      ->withPHIDs(array_keys($map))
       ->execute();
     $custom_policies = mpull($custom_policies, null, 'getPHID');
 
-
     $classes = array();
     $values = array();
-    foreach ($custom_policies as $policy) {
+    $objects = array();
+    foreach ($custom_policies as $policy_phid => $policy) {
       foreach ($policy->getCustomRuleClasses() as $class) {
         $classes[$class] = $class;
         $values[$class][] = $policy->getCustomRuleValues($class);
+
+        foreach (idx($map, $policy_phid, array()) as $object) {
+          $objects[$class][] = $object;
+        }
       }
     }
 
     foreach ($classes as $class => $ignored) {
-      $object = newv($class, array());
-      $object->willApplyRules($viewer, array_mergev($values[$class]));
-      $classes[$class] = $object;
+      $rule_object = newv($class, array());
+
+      // Filter out any objects which the rule can't apply to.
+      $target_objects = idx($objects, $class, array());
+      foreach ($target_objects as $key => $target_object) {
+        if (!$rule_object->canApplyToObject($target_object)) {
+          unset($target_objects[$key]);
+        }
+      }
+
+      $rule_object->willApplyRules(
+        $viewer,
+        array_mergev($values[$class]),
+        $target_objects);
+
+      $classes[$class] = $rule_object;
     }
 
     foreach ($custom_policies as $policy) {
@@ -610,7 +627,10 @@ final class PhabricatorPolicyFilter {
     $this->customPolicies[$viewer->getPHID()] += $custom_policies;
   }
 
-  private function checkCustomPolicy($policy_phid) {
+  private function checkCustomPolicy(
+    $policy_phid,
+    PhabricatorPolicyInterface $object) {
+
     $viewer = $this->viewer;
     $viewer_phid = $viewer->getPHID();
 
@@ -623,14 +643,19 @@ final class PhabricatorPolicyFilter {
     $objects = $policy->getRuleObjects();
     $action = null;
     foreach ($policy->getRules() as $rule) {
-      $object = idx($objects, idx($rule, 'rule'));
-      if (!$object) {
+      $rule_object = idx($objects, idx($rule, 'rule'));
+      if (!$rule_object) {
         // Reject, this policy has a bogus rule.
         return false;
       }
 
+      if (!$rule_object->canApplyToObject($object)) {
+        // Reject, this policy rule can't be applied to the given object.
+        return false;
+      }
+
       // If the user matches this rule, use this action.
-      if ($object->applyRule($viewer, idx($rule, 'value'))) {
+      if ($rule_object->applyRule($viewer, idx($rule, 'value'), $object)) {
         $action = idx($rule, 'action');
         break;
       }
