@@ -114,6 +114,20 @@ abstract class PhabricatorPolicyRule {
     return null;
   }
 
+  public function getObjectPolicyFullKey() {
+    $key = $this->getObjectPolicyKey();
+
+    if (!$key) {
+      throw new Exception(
+        pht(
+          'This policy rule (of class "%s") does not have an associated '.
+          'object policy key.',
+          get_class($this)));
+    }
+
+    return PhabricatorPolicyQuery::OBJECT_POLICY_PREFIX.$key;
+  }
+
   public function getObjectPolicyName() {
     throw new PhutilMethodNotImplementedException();
   }

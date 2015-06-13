@@ -316,7 +316,7 @@ final class PhabricatorPolicyQuery
         continue;
       }
 
-      $full_key = self::OBJECT_POLICY_PREFIX.$key;
+      $full_key = $rule->getObjectPolicyFullKey();
       if (isset($results[$full_key])) {
         throw new Exception(
           pht(
