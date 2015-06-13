@@ -70,7 +70,7 @@ body .phui-header-shell.phui-bleed-header
 
 .phui-header-header {
   font-size: 18px;
-  font-weight: 500;
+  font-weight: bold;
   line-height: 24px;
   color: {$darkbluetext};
 }
@@ -86,7 +86,7 @@ body .phui-header-shell.phui-bleed-header
 
 .device-desktop .phui-header-view .phui-header-header a:hover {
   text-decoration: none;
-  color: {$fire};
+  color: {$blue};
 }
 
 .phui-header-view .phui-header-action-links {
@@ -152,9 +152,6 @@ body .phui-header-shell.phui-bleed-header
 
 .phui-header-subheader .phui-header-status-dark {
   color: {$sh-indigotext};
-  background-color: {$sh-indigobackground};
-  padding: 2px 8px;
-  border-radius: 3px;
   margin-right: 8px;
 }
 
@@ -164,17 +161,11 @@ body .phui-header-shell.phui-bleed-header
 
 .phui-header-subheader .phui-header-status-red {
   color: {$sh-redtext};
-  background-color: {$sh-redbackground};
-  padding: 2px 8px;
-  border-radius: 3px;
   margin-right: 8px;
 }
 
 .phui-header-subheader .phui-header-status-green {
   color: {$sh-greentext};
-  background-color: {$sh-greenbackground};
-  padding: 2px 8px;
-  border-radius: 3px;
   margin-right: 8px;
 }
 

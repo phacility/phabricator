@@ -109,7 +109,6 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
   protected function getTagContent() {
     $column_key = PhabricatorUserPreferences::PREFERENCE_CONPHERENCE_COLUMN;
-    require_celerity_resource('font-source-sans-pro');
 
     Javelin::initBehavior(
       'durable-column',

@@ -172,10 +172,10 @@ final class CelerityResourceTransformer {
   public static function getCSSVariableMap() {
     return array(
       // Fonts
-      'basefont' => "13px/1.231 'Segoe UI', 'Segoe UI Web Regular', ".
+      'basefont' => "13px/1.231 'Lato', 'Segoe UI Web Regular', ".
         "'Segoe UI Symbol', 'Helvetica Neue', Helvetica, Arial, sans-serif",
 
-      'fontfamily' => "'Segoe UI', 'Segoe UI Web Regular', ".
+      'fontfamily' => "'Lato', 'Segoe UI Web Regular', ".
         "'Segoe UI Symbol', 'Helvetica Neue', Helvetica, Arial, sans-serif",
 
       // Drop Shadow

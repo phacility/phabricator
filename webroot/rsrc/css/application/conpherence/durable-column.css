@@ -250,11 +250,14 @@
 }
 
 .conpherence-durable-column-transactions .conpherence-transaction-detail
-.conpherence-transaction-header .conpherence-transaction-info,
-.conpherence-transaction-header .epoch-link {
+.conpherence-transaction-header .conpherence-transaction-info {
   color: {$lightbluetext};
   float: none;
   font-size: 12px;
+}
+
+.conpherence-transaction-header .epoch-link {
+  color: {$lightgreytext};
 }
 
 .conpherence-durable-column-transactions .conpherence-transaction-detail

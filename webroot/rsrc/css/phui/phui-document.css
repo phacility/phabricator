@@ -33,6 +33,10 @@
   margin: 16px;
 }
 
+.phui-crumbs-view + .phui-document-fluid .phui-document-view {
+  margin-top: 0;
+}
+
 .device-desktop .phui-document-view.phui-offset-view {
   max-width: 800px;
 }
@@ -103,6 +107,7 @@
 
 .phui-document-content .phabricator-remarkup {
   padding: 16px;
+  font-size: 14px;
 }
 
 .phui-document-view .phui-header-action-links .phui-mobile-menu {
@@ -151,6 +156,7 @@
   border-left: 1px solid {$thinblueborder};
   padding: 16px 12px;
   margin: 0;
+  font-size: 12px;
 }
 
 .device-phone .phui-document-view .phabricator-remarkup.remarkup-has-toc {

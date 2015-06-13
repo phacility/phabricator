@@ -283,7 +283,7 @@
 .conpherence-message-pane .conpherence-transaction-info,
 .conpherence-message-pane .anchor-link,
 .conpherence-message-pane .phabricator-content-source-view {
-  color: {$lightbluetext};
+  color: {$lightgreytext};
   line-height: 16px;
   font-size: 12px;
 }

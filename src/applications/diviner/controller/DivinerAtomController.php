@@ -88,7 +88,6 @@ final class DivinerAtomController extends DivinerController {
       ->setBook($book->getTitle(), $group_name)
       ->setHeader($header)
       ->addClass('diviner-view')
-      ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
       ->appendChild($properties);
 
     if ($atom) {

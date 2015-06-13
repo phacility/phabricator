@@ -266,7 +266,6 @@ final class LegalpadDocumentSignController extends LegalpadController {
     $content = id(new PHUIDocumentView())
       ->addClass('legalpad')
       ->setHeader($header)
-      ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
       ->appendChild(
         array(
           $signed_status,

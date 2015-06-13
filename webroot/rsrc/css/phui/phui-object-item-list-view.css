@@ -73,12 +73,13 @@ ul.phui-object-item-list-view {
 }
 
 .phui-object-item-name {
-  font-weight: 500;
   padding: 8px 8px 0;
   white-space: nowrap;
   word-wrap: break-word;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
 }
 
 .device-phone .phui-object-item-name {

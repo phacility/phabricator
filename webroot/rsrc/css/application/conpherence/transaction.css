@@ -12,7 +12,6 @@
 
 .conpherence-transaction-header .phui-link-person {
   font-weight: bold;
-  color: {$darkbluetext};
 }
 
 .conpherence-transaction-view.date-marker {
@@ -22,7 +21,7 @@
   position: relative;
   top: -11px;
   background-color: #fff;
-  color: {$darkbluetext};
+  color: #000;
   font-weight: bold;
 }
 

@@ -3,7 +3,7 @@
  */
 
 .phabricator-remarkup {
-  line-height: 1.45em;
+  line-height: 1.51em;
 }
 
 .phabricator-remarkup p {
@@ -259,7 +259,7 @@
 }
 
 .phabricator-remarkup-toc-header {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 13px;
   color: {$darkbluetext};
   font-weight: bold;
@@ -280,7 +280,7 @@
 .phabricator-remarkup-toc ul li {
   padding: 0;
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

@@ -47,7 +47,10 @@
 }
 
 .conpherence-widget-pane .widgets-header .phui-header-shell {
-  padding: 8px;
+  padding: 6px 8px;
+}
+
+.conpherence-widget-pane .widgets-header .phui-header-header {
   font-size: 14px;
 }
 

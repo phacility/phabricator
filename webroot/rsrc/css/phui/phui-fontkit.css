@@ -2,117 +2,6 @@
  * @provides phui-fontkit-css
  */
 
-/* - Source Sans ---------------------------------------------------------------
-
-  Used in Documents, Conpherence
-
-*/
-
-.phui-font-source-sans {
-  font-family: 'Source Sans Pro', {$fontfamily};
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 20px;
-}
-
-.phui-font-source-sans.conpherence-message-pane,
-.phui-font-source-sans.conpherence-message-pane .remarkup-assist-textarea,
-.conpherence-durable-column-body,
-.conpherence-durable-column-body .remarkup-assist-textarea  {
-  font-family: 'Source Sans Pro', {$fontfamily};
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 18px;
-}
-
-.PhabricatorMonospaced .phui-document-view .phui-font-source-sans,
-.phui-document-view .phui-font-source-sans .phabricator-remarkup
-  .remarkup-code-block .remarkup-code {
-  font-size: 11px;
-  line-height: 1.3em;
-}
-
-.platform-windows .PhabricatorMonospaced .phui-document-view
-  .phui-font-source-sans,
-.platform-windows .phui-document-view .phui-font-source-sans
-  .phabricator-remarkup .remarkup-code-block .remarkup-code {
-  font-size: 12px;
-  line-height: 1.3em;
-}
-
-.phui-font-source-sans .phabricator-remarkup h1.remarkup-header,
-.phui-font-source-sans .phabricator-remarkup h2.remarkup-header,
-.phui-font-source-sans .phabricator-remarkup h3.remarkup-header,
-.phui-font-source-sans .phabricator-remarkup h4.remarkup-header,
-.phui-font-source-sans .phabricator-remarkup h5.remarkup-header,
-.phui-font-source-sans .phabricator-remarkup h6.remarkup-header {
-  font-family: 'Oswald', {$fontfamily};
-  color: {$darkbluetext};
-  font-weight: 400;
-}
-
-.phui-font-source-sans .phabricator-remarkup h2.remarkup-header {
-  padding: 24px 24px 8px 0;
-  border-bottom: 1px solid {$lightblueborder};
-  font-size: 22px;
-  font-weight: 400;
-  color: {$darkbluetext};
-  margin: 0 0 16px;
-}
-
-.phui-font-source-sans .phabricator-remarkup tt.remarkup-monospaced {
-  font-size: 13px;
-  padding: 1px 3px 2px;
-}
-
-.diviner-view .phui-font-source-sans .phui-property-list-section,
-.legalpad .phui-font-source-sans .phui-property-list-section {
-  border-bottom: 1px solid {$thinblueborder};
-  background: {$lightgreybackground};
-}
-
-.legalpad .phui-font-source-sans .phui-property-list-section-header {
-  padding: 16px 4px 0 16px;
-}
-
-.phui-font-source-sans .phui-property-list-text-content {
-  background: {$lightgreybackground};
-  padding: 0;
-}
-
-.phui-font-source-sans .phui-property-list-container {
-  padding-bottom: 6px;
-  font: {$basefont};
-  line-height: 16px;
-}
-
-.phui-font-source-sans .phabricator-action-view {
-  font: {$basefont};
-  font-size: 12px;
-}
-
-body .phui-font-source-sans
-  .phui-header-shell.phui-bleed-header {
-    padding: 0;
-  }
-
-body .phui-font-source-sans
-  .phui-header-shell.phui-bleed-header .phui-header-view {
-  font-size: 20px;
-  font-weight: normal;
-}
-
-.phui-font-source-sans .phui-form-view {
-  font: {$basefont};
-  font-weight: normal;
-}
-
-.phui-font-source-sans .phui-tag-shade .phui-icon-view {
-  font-size: 13px;
-  top: 4px;
-  left: 6px;
-}
-
 /* - Oswald --------------------------------------------------------------------
 
   Used as Primary Headers in Object Boxes, Headers in Documents
@@ -126,7 +15,18 @@ body .phui-font-source-sans
   font-weight: 400;
 }
 
-.phui-font-source-sans .phui-header-header {
+.phui-document-view .phui-header-header {
+  font-family: 'Oswald', {$fontfamily};
+  color: {$darkbluetext};
+  font-weight: 400;
+}
+
+.phui-document-view .phabricator-remarkup h1.remarkup-header,
+.phui-document-view .phabricator-remarkup h2.remarkup-header,
+.phui-document-view .phabricator-remarkup h3.remarkup-header,
+.phui-document-view .phabricator-remarkup h4.remarkup-header,
+.phui-document-view .phabricator-remarkup h5.remarkup-header,
+.phui-document-view .phabricator-remarkup h6.remarkup-header {
   font-family: 'Oswald', {$fontfamily};
   color: {$darkbluetext};
   font-weight: 400;
