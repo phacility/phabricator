@@ -22,6 +22,7 @@ Great Z-Index War where all indexes grow without bound in an endless arms race.
 Phabricator's preprocessor provides some standard color variables. You can
 reference these with `{$color}`. For example:
 
+  lang=css
   span.critical {
     color: {$red};
   }
@@ -78,6 +79,7 @@ adjust behavior responsively. In particular:
 Since many rules are specific to handheld devices, the `.device` class selects
 either tablets or phones:
 
+  lang=css
   .device {
     /* Phone or tablet (not desktop). */
   }
