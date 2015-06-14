@@ -63,8 +63,8 @@ final class PonderVoteEditor extends PhabricatorEditor {
 
       queryfx($conn,
         'UPDATE %T as t
-        SET t.`voteCount` = t.`voteCount` + %d
-        WHERE t.`PHID` = %s',
+        SET t.voteCount = t.voteCount + %d
+        WHERE t.PHID = %s',
         $votable->getTableName(),
         $delta,
         $votable->getVotablePHID());
