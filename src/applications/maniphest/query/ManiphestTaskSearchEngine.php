@@ -43,7 +43,7 @@ final class ManiphestTaskSearchEngine
       ->needProjectPHIDs(true);
   }
 
-  public function buildCustomSearchFields() {
+  protected function buildCustomSearchFields() {
     return array(
       id(new PhabricatorSearchOwnersField())
         ->setLabel(pht('Assigned To'))
@@ -105,7 +105,7 @@ final class ManiphestTaskSearchEngine
     );
   }
 
-  public function getDefaultFieldOrder() {
+  protected function getDefaultFieldOrder() {
     return array(
       'assignedPHIDs',
       'projectPHIDs',
@@ -128,7 +128,7 @@ final class ManiphestTaskSearchEngine
     );
   }
 
-  public function getHiddenFields() {
+  protected function getHiddenFields() {
     $keys = array();
 
     if ($this->getIsBoardView()) {
@@ -140,7 +140,7 @@ final class ManiphestTaskSearchEngine
     return $keys;
   }
 
-  public function buildQueryFromParameters(array $map) {
+  protected function buildQueryFromParameters(array $map) {
     $query = id(new ManiphestTaskQuery())
       ->needProjectPHIDs(true);
 

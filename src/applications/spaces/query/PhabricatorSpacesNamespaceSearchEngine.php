@@ -15,7 +15,7 @@ final class PhabricatorSpacesNamespaceSearchEngine
     return new PhabricatorSpacesNamespaceQuery();
   }
 
-  public function buildCustomSearchFields() {
+  protected function buildCustomSearchFields() {
     return array(
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Active'))
@@ -27,7 +27,7 @@ final class PhabricatorSpacesNamespaceSearchEngine
     );
   }
 
-  public function buildQueryFromParameters(array $map) {
+  protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
     if ($map['active']) {
