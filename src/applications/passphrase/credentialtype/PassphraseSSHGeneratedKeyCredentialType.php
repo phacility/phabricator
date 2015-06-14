@@ -1,7 +1,7 @@
 <?php
 
-final class PassphraseCredentialTypeSSHGeneratedKey
-  extends PassphraseCredentialTypeSSHPrivateKey {
+final class PassphraseSSHGeneratedKeyCredentialType
+  extends PassphraseSSHPrivateKeyCredentialType {
 
   const CREDENTIAL_TYPE = 'ssh-generated-key';
 

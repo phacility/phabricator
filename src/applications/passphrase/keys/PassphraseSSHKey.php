@@ -9,13 +9,13 @@ final class PassphraseSSHKey extends PassphraseAbstractKey {
     return $key->loadAndValidateFromPHID(
       $phid,
       $viewer,
-      PassphraseCredentialTypeSSHPrivateKey::PROVIDES_TYPE);
+      PassphraseSSHPrivateKeyCredentialType::PROVIDES_TYPE);
   }
 
   public function getKeyfileEnvelope() {
     $credential = $this->requireCredential();
 
-    $file_type = PassphraseCredentialTypeSSHPrivateKeyFile::CREDENTIAL_TYPE;
+    $file_type = PassphraseSSHPrivateKeyFileCredentialType::CREDENTIAL_TYPE;
     if ($credential->getCredentialType() != $file_type) {
       // If the credential does not store a file, write the key text out to a
       // temporary file so we can pass it to `ssh`.
