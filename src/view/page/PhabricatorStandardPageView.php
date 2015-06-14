@@ -174,6 +174,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     require_celerity_resource('phabricator-standard-page-view');
     require_celerity_resource('conpherence-durable-column-view');
     require_celerity_resource('font-lato');
+    require_celerity_resource('font-slabo');
 
     Javelin::initBehavior('workflow', array());
 

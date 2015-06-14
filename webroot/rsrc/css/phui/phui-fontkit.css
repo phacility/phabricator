@@ -2,7 +2,7 @@
  * @provides phui-fontkit-css
  */
 
-/* - Oswald --------------------------------------------------------------------
+/* - Slabo ---------------------------------------------------------------------
 
   Used as Primary Headers in Object Boxes, Headers in Documents
 
@@ -11,14 +11,12 @@
 .phui-object-box :first-child .phui-header-header,
 .phui-document-view .phui-header-tall .phui-header-header,
 .aphront-dialog-head .phui-header-header {
-  font-family: 'Oswald', {$fontfamily};
-  font-weight: 400;
+  font-family: 'Slabo', {$fontfamily};
 }
 
 .phui-document-view .phui-header-header {
-  font-family: 'Oswald', {$fontfamily};
+  font-family: 'Slabo', {$fontfamily};
   color: {$darkbluetext};
-  font-weight: 400;
 }
 
 .phui-document-view .phabricator-remarkup h1.remarkup-header,
@@ -27,7 +25,13 @@
 .phui-document-view .phabricator-remarkup h4.remarkup-header,
 .phui-document-view .phabricator-remarkup h5.remarkup-header,
 .phui-document-view .phabricator-remarkup h6.remarkup-header {
-  font-family: 'Oswald', {$fontfamily};
-  color: {$darkbluetext};
-  font-weight: 400;
+  font-family: 'Slabo', {$fontfamily};
+  color: #000;
+}
+
+.phui-document-view .phabricator-remarkup h2.remarkup-header {
+  padding: 24px 24px 8px 0;
+  border-bottom: 1px solid {$thinblueborder};
+  color: #000;
+  margin: 0 0 16px;
 }

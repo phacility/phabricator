@@ -141,7 +141,6 @@ final class PHUIHeaderView extends AphrontTagView {
 
   protected function getTagAttributes() {
     require_celerity_resource('phui-header-view-css');
-    require_celerity_resource('font-oswald');
 
     $classes = array();
     $classes[] = 'phui-header-shell';
@@ -266,8 +265,8 @@ final class PHUIHeaderView extends AphrontTagView {
       $this->header);
 
     if ($this->tags) {
-      $header[] = ' ';
-      $header[] = phutil_tag(
+      $left[] = ' ';
+      $left[] = phutil_tag(
         'span',
         array(
           'class' => 'phui-header-tags',

@@ -1,0 +1,15 @@
+/**
+ * @provides font-slabo
+ * @requires phui-fontkit-css
+ */
+
+@font-face {
+  font-family: 'Slabo';
+  font-style: normal;
+  src: local('Slabo'),
+       local('Slabo-Regular'),
+       url(/rsrc/externals/font/slabo/Slabo-Regular.woff2)
+        format('woff2'),
+       url(/rsrc/externals/font/slabo/Slabo-Regular.woff)
+        format('woff');
+}
