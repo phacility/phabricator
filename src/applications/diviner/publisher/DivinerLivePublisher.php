@@ -12,7 +12,7 @@ final class DivinerLivePublisher extends DivinerPublisher {
       if (!$book) {
         $book = id(new DivinerLiveBook())
           ->setName($book_name)
-          ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+          ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
           ->save();
       }
 
