@@ -25,7 +25,7 @@ final class PonderVoteEditor extends PhabricatorEditor {
   public function saveVote() {
     $actor = $this->requireActor();
     if (!$this->votable) {
-      throw new Exception(pht('Must set votable before saving vote.'));
+      throw new PhutilInvalidStateException('setVotable');
     }
 
     $votable = $this->votable;
