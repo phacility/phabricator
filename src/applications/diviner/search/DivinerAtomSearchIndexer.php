@@ -10,6 +10,10 @@ final class DivinerAtomSearchIndexer extends PhabricatorSearchDocumentIndexer {
     $atom = $this->loadDocumentByPHID($phid);
     $book = $atom->getBook();
 
+    if (!$atom->getIsDocumentable()) {
+      return null;
+    }
+
     $doc = $this->newDocument($phid)
       ->setDocumentTitle($atom->getTitle())
       ->setDocumentCreated($book->getDateCreated())
