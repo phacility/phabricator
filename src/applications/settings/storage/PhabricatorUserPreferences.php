@@ -8,6 +8,7 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
   const PREFERENCE_MULTIEDIT            = 'multiedit';
   const PREFERENCE_TITLES               = 'titles';
   const PREFERENCE_MONOSPACED_TEXTAREAS = 'monospaced-textareas';
+  const PREFERENCE_DATE_FORMAT          = 'date-format';
   const PREFERENCE_TIME_FORMAT          = 'time-format';
   const PREFERENCE_WEEK_START_DAY       = 'week-start-day';
 

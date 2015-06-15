@@ -10,6 +10,7 @@ final class AphrontFormDateControlValue extends Phobject {
   private $zone;
   private $optional;
 
+
   public function getValueDate() {
     return $this->valueDate;
   }
@@ -65,7 +66,11 @@ final class AphrontFormDateControlValue extends Phobject {
 
     $value = new AphrontFormDateControlValue();
     $value->viewer = $viewer;
-    $value->valueDate = $month.'/'.$day.'/'.$year;
+    $value->valueDate = $value->getFormattedDateFromParts(
+      $year,
+      $month,
+      $day,
+      $value);
     $value->valueTime = coalesce($time, '12:00 AM');
     $value->valueEnabled = $enabled;
 
@@ -75,10 +80,13 @@ final class AphrontFormDateControlValue extends Phobject {
   public static function newFromRequest(AphrontRequest $request, $key) {
     $value = new AphrontFormDateControlValue();
     $value->viewer = $request->getViewer();
-    $value->valueDate = $request->getStr($key.'_d');
+
+    $value->valueDate = $value->getFormattedDateFromDate(
+      $request->getStr($key.'_d'),
+      $value);
+
     $value->valueTime = $request->getStr($key.'_t');
     $value->valueEnabled = $request->getStr($key.'_e');
-
     return $value;
   }
 
@@ -92,7 +100,11 @@ final class AphrontFormDateControlValue extends Phobject {
     $month = $readable[1];
     $day   = $readable[2];
 
-    $value->valueDate = $month.'/'.$day.'/'.$year;
+    $value->valueDate = $value->getFormattedDateFromParts(
+      $year,
+      $month,
+      $day,
+      $value);
     $value->valueTime  = $readable[3];
 
 
@@ -105,7 +117,10 @@ final class AphrontFormDateControlValue extends Phobject {
     $value = new AphrontFormDateControlValue();
     $value->viewer = $viewer;
 
-    $value->valueDate = idx($dictionary, 'd');
+    $value->valueDate = $value->getFormattedDateFromDate(
+      idx($dictionary, 'd'),
+      $value);
+
     $value->valueTime = idx($dictionary, 't');
     $value->valueEnabled = idx($dictionary, 'e');
 
@@ -183,6 +198,45 @@ final class AphrontFormDateControlValue extends Phobject {
       $value = null;
     }
     return $value;
+  }
+
+  private function getDateFormat() {
+    $preferences = $this->viewer->loadPreferences();
+    $pref_date_format = PhabricatorUserPreferences::PREFERENCE_DATE_FORMAT;
+
+    return $preferences->getPreference($pref_date_format, 'Y-m-d');
+  }
+
+  private function getFormattedDateFromDate($date, $value) {
+    $original_input = $date;
+    $zone = $value->getTimezone();
+    $separator = $value->getFormatSeparator();
+    $parts = preg_split('@[,./:-]@', $date);
+    $date = implode($separator, $parts);
+    $date = id(new DateTime($date, $zone));
+
+    if ($date) {
+      return $date->format($value->getDateFormat());
+    } else {
+      return $original_input;
+    }
+  }
+
+  private function getFormattedDateFromParts($year, $month, $day, $value) {
+    $zone = $value->getTimezone();
+
+    return id(new DateTime("{$year}-{$month}-{$day}", $zone))
+      ->format($value->getDateFormat());
+  }
+
+  private function getFormatSeparator() {
+    $format = $this->getDateFormat();
+    switch ($format) {
+      case 'n/j/Y':
+        return '/';
+      default:
+        return '-';
+    }
   }
 
   public function getDateTime() {

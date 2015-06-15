@@ -127,7 +127,21 @@ final class AphrontFormDateControl extends AphrontFormControl {
   }
 
   private function getDateInputValue() {
-    return $this->valueDate;
+    $date_format = $this->getDateFormat();
+    $timezone = $this->getTimezone();
+
+    $datetime = new DateTime($this->valueDate, $timezone);
+    $date = $datetime->format($date_format);
+
+    return $date;
+  }
+
+  private function getDateFormat() {
+    $viewer = $this->getUser();
+    $preferences = $viewer->loadPreferences();
+    $pref_date_format = PhabricatorUserPreferences::PREFERENCE_DATE_FORMAT;
+
+    return $preferences->getPreference($pref_date_format, 'Y-m-d');
   }
 
   private function getTimeInputValue() {
@@ -242,7 +256,9 @@ final class AphrontFormDateControl extends AphrontFormControl {
       ),
       $time_sel);
 
-    Javelin::initBehavior('fancy-datepicker', array());
+    Javelin::initBehavior('fancy-datepicker', array(
+      'format' => $this->getDateFormat(),
+      ));
 
     $classes = array();
     $classes[] = 'aphront-form-date-container';
