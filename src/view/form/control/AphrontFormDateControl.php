@@ -136,6 +136,14 @@ final class AphrontFormDateControl extends AphrontFormControl {
     return $date;
   }
 
+  private function getTimeFormat() {
+    $viewer = $this->getUser();
+    $preferences = $viewer->loadPreferences();
+    $pref_time_format = PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT;
+
+    return $preferences->getPreference($pref_time_format, 'g:i A');
+  }
+
   private function getDateFormat() {
     $viewer = $this->getUser();
     $preferences = $viewer->loadPreferences();
@@ -233,6 +241,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
       'startTimeID' => $time_id,
       'endTimeID' => $this->endDateID,
       'timeValues' => $values,
+      'format' => $this->getTimeFormat(),
       ));
 
 
@@ -335,20 +344,31 @@ final class AphrontFormDateControl extends AphrontFormControl {
   }
 
   private function getTimeTypeaheadValues() {
+    $time_format = $this->getTimeFormat();
     $times = array();
-    $am_pm_list = array('AM', 'PM');
 
-    foreach ($am_pm_list as $am_pm) {
-      for ($hour = 0; $hour < 12; $hour++) {
-        $actual_hour = ($hour == 0) ? 12 : $hour;
-        $times[] = $actual_hour.':00 '.$am_pm;
-        $times[] = $actual_hour.':30 '.$am_pm;
+    if ($time_format == 'g:i A') {
+      $am_pm_list = array('AM', 'PM');
+
+      foreach ($am_pm_list as $am_pm) {
+        for ($hour = 0; $hour < 12; $hour++) {
+          $actual_hour = ($hour == 0) ? 12 : $hour;
+          $times[] = $actual_hour.':00 '.$am_pm;
+          $times[] = $actual_hour.':30 '.$am_pm;
+        }
+      }
+    } else if ($time_format == 'H:i') {
+      for ($hour = 0; $hour < 24; $hour++) {
+        $written_hour = ($hour > 9) ? $hour : '0'.$hour;
+        $times[] = $written_hour.':00';
+        $times[] = $written_hour.':30';
       }
     }
 
     foreach ($times as $key => $time) {
       $times[$key] = array($key, $time);
     }
+
     return $times;
   }
 
