@@ -7,7 +7,11 @@
  *           javelin-vector
  */
 
-JX.behavior('fancy-datepicker', function() {
+JX.behavior('fancy-datepicker', function(config, statics) {
+  if (statics.initialized) {
+    return;
+  }
+  statics.initialized = true;
 
   var picker;
   var root;
@@ -15,6 +19,32 @@ JX.behavior('fancy-datepicker', function() {
   var value_y;
   var value_m;
   var value_d;
+
+  var get_format_separator = function() {
+    var format = get_format();
+    switch (format.toLowerCase()) {
+      case 'n/j/y':
+        return '/';
+      default:
+        return '-';
+    }
+  };
+
+  var get_key_maps = function() {
+    var format = get_format();
+    var regex = new RegExp('[./ -]');
+    return format.split(regex);
+  };
+
+  var get_format = function() {
+    var format = config.format;
+
+    if (format === null) {
+      format = 'Y-m-d';
+    }
+
+    return format;
+  };
 
   var onopen = function(e) {
     e.kill();
@@ -85,18 +115,76 @@ JX.behavior('fancy-datepicker', function() {
     };
   };
 
-  var read_date = function() {
-    var i = get_inputs();
-    var date = i.d.value;
-    var parts = date.split('/');
-    value_y = +parts[2];
-    value_m = +parts[0];
-    value_d = +parts[1];
+  var read_date = function(){
+    var inputs = get_inputs();
+    var date = inputs.d.value;
+    var regex = new RegExp('[./ -]');
+    var date_parts = date.split(regex);
+    var map = get_key_maps();
+
+    for (var i=0; i < date_parts.length; i++) {
+      var key = map[i].toLowerCase();
+
+      switch (key) {
+        case 'y':
+          value_y = date_parts[i];
+          break;
+        case 'm':
+          value_m = date_parts[i];
+          break;
+        case 'd':
+          value_d = date_parts[i];
+          break;
+      }
+    }
   };
 
   var write_date = function() {
-    var i = get_inputs();
-    i.d.value = value_m + '/' + value_d + '/' + value_y;
+    var inputs = get_inputs();
+    var map = get_key_maps();
+    var arr_values = [];
+
+    for(var i=0; i < map.length; i++) {
+      switch (map[i].toLowerCase()) {
+        case 'y':
+          arr_values[i] = value_y;
+          break;
+        case 'm':
+          arr_values[i] = value_m;
+          break;
+        case 'n':
+          arr_values[i] = value_m;
+          break;
+        case 'd':
+          arr_values[i] = value_d;
+          break;
+        case 'j':
+          arr_values[i] = value_d;
+          break;
+      }
+    }
+
+    var text_value = '';
+    var separator = get_format_separator();
+
+    for(var j=0; j < arr_values.length; j++) {
+      var element = arr_values[j];
+      var format = get_format();
+
+      if ((format.toLowerCase() === 'd-m-y' ||
+        format.toLowerCase() === 'y-m-d') &&
+        element < 10) {
+        element = '0' + element;
+      }
+
+      if (text_value.length === 0) {
+        text_value += element;
+      } else {
+        text_value = text_value + separator + element;
+      }
+    }
+
+    inputs.d.value = text_value;
   };
 
   var render = function() {

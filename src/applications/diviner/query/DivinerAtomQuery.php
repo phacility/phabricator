@@ -179,6 +179,7 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $xatoms = id(new DivinerAtomQuery())
           ->setViewer($this->getViewer())
           ->withNames($names)
+          ->withGhosts(false)
           ->needExtends(true)
           ->needAtoms(true)
           ->needChildren($this->needChildren)

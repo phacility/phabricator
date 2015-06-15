@@ -191,7 +191,7 @@ final class PhabricatorCalendarEventEditController
           PhabricatorCalendarEventTransaction::TYPE_NAME)
         ->setNewValue($name);
 
-      if ($is_parent && $this->isCreate()) {
+      if ($is_recurring && $this->isCreate()) {
         $xactions[] = id(new PhabricatorCalendarEventTransaction())
           ->setTransactionType(
             PhabricatorCalendarEventTransaction::TYPE_RECURRING)
@@ -210,7 +210,7 @@ final class PhabricatorCalendarEventEditController
         }
       }
 
-      if (($is_parent && $this->isCreate()) || !$is_parent) {
+      if (($is_recurring && $this->isCreate()) || !$is_parent) {
         $xactions[] = id(new PhabricatorCalendarEventTransaction())
           ->setTransactionType(
             PhabricatorCalendarEventTransaction::TYPE_ALL_DAY)

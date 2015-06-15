@@ -19,6 +19,7 @@ final class PhabricatorDateTimeSettingsPanel extends PhabricatorSettingsPanel {
     $username = $user->getUsername();
 
     $pref_time = PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT;
+    $pref_date = PhabricatorUserPreferences::PREFERENCE_DATE_FORMAT;
     $pref_week_start = PhabricatorUserPreferences::PREFERENCE_WEEK_START_DAY;
     $preferences = $user->loadPreferences();
 
@@ -31,12 +32,16 @@ final class PhabricatorDateTimeSettingsPanel extends PhabricatorSettingsPanel {
         $errors[] = pht('The selected timezone is not a valid timezone.');
       }
 
-      $preferences->setPreference(
-        $pref_time,
-        $request->getStr($pref_time));
-      $preferences->setPreference(
-        $pref_week_start,
-        $request->getStr($pref_week_start));
+      $preferences
+        ->setPreference(
+          $pref_time,
+          $request->getStr($pref_time))
+        ->setPreference(
+          $pref_date,
+          $request->getStr($pref_date))
+        ->setPreference(
+          $pref_week_start,
+          $request->getStr($pref_week_start));
 
       if (!$errors) {
         $preferences->save();
@@ -69,6 +74,18 @@ final class PhabricatorDateTimeSettingsPanel extends PhabricatorSettingsPanel {
           ->setCaption(
             pht('Format used when rendering a time of day.'))
           ->setValue($preferences->getPreference($pref_time)))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Date Format'))
+          ->setName($pref_date)
+          ->setOptions(array(
+              'Y-m-d' => pht('ISO 8601 (2000-02-28)'),
+              'n/j/Y' => pht('US (2/28/2000)'),
+              'd-m-Y' => pht('European (28-02-2000)'),
+            ))
+          ->setCaption(
+            pht('Format used when rendering a date.'))
+          ->setValue($preferences->getPreference($pref_date)))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Week Starts On'))
