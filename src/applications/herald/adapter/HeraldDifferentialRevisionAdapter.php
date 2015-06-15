@@ -3,6 +3,7 @@
 final class HeraldDifferentialRevisionAdapter
   extends HeraldDifferentialAdapter {
 
+  protected $diff;
   protected $revision;
 
   protected $explicitReviewers;
