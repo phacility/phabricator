@@ -37,6 +37,12 @@ final class PhabricatorSpacesViewController
       ->setHeader($space->getNamespaceName())
       ->setPolicyObject($space);
 
+    if ($space->getIsArchived()) {
+      $header->setStatus('fa-ban', 'red', pht('Archived'));
+    } else {
+      $header->setStatus('fa-check', 'bluegrey', pht('Active'));
+    }
+
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($property_list);
@@ -75,6 +81,20 @@ final class PhabricatorSpacesViewController
       pht('Editable By'),
       $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
 
+    $description = $space->getDescription();
+    if (strlen($description)) {
+      $description = PhabricatorMarkupEngine::renderOneObject(
+        id(new PhabricatorMarkupOneOff())->setContent($description),
+        'default',
+        $viewer);
+
+      $list->addSectionHeader(
+        pht('Description'),
+        PHUIPropertyListView::ICON_SUMMARY);
+
+      $list->addTextContent($description);
+    }
+
     return $list;
   }
 
@@ -97,6 +117,26 @@ final class PhabricatorSpacesViewController
         ->setHref($this->getApplicationURI('edit/'.$space->getID().'/'))
         ->setWorkflow(!$can_edit)
         ->setDisabled(!$can_edit));
+
+    $id = $space->getID();
+
+    if ($space->getIsArchived()) {
+      $list->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Activate Space'))
+          ->setIcon('fa-check')
+          ->setHref($this->getApplicationURI("activate/{$id}/"))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    } else {
+      $list->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Archive Space'))
+          ->setIcon('fa-ban')
+          ->setHref($this->getApplicationURI("archive/{$id}/"))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    }
 
     return $list;
   }

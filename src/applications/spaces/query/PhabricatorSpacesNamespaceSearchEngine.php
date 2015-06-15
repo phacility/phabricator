@@ -11,21 +11,31 @@ final class PhabricatorSpacesNamespaceSearchEngine
     return pht('Spaces');
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    return $saved;
+  public function newQuery() {
+    return new PhabricatorSpacesNamespaceQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorSpacesNamespaceQuery());
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchThreeStateField())
+        ->setLabel(pht('Active'))
+        ->setKey('active')
+        ->setOptions(
+          pht('(Show All)'),
+          pht('Show Only Active Spaces'),
+          pht('Hide Active Spaces')),
+    );
+  }
+
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
+
+    if ($map['active']) {
+      $query->withIsArchived(!$map['active']);
+    }
 
     return $query;
   }
-
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {}
 
   protected function getURI($path) {
     return '/spaces/'.$path;
@@ -33,6 +43,7 @@ final class PhabricatorSpacesNamespaceSearchEngine
 
   protected function getBuiltinQueryNames() {
     $names = array(
+      'active' => pht('Active Spaces'),
       'all' => pht('All Spaces'),
     );
 
@@ -40,11 +51,12 @@ final class PhabricatorSpacesNamespaceSearchEngine
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
     switch ($query_key) {
+      case 'active':
+        return $query->setParameter('active', true);
       case 'all':
         return $query;
     }
@@ -70,6 +82,10 @@ final class PhabricatorSpacesNamespaceSearchEngine
 
       if ($space->getIsDefaultNamespace()) {
         $item->addIcon('fa-certificate', pht('Default Space'));
+      }
+
+      if ($space->getIsArchived()) {
+        $item->setDisabled(true);
       }
 
       $list->addItem($item);

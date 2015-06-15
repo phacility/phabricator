@@ -1,6 +1,6 @@
 <?php
 
-abstract class DifferentialLandingStrategy {
+abstract class DifferentialLandingStrategy extends Phobject {
 
   abstract public function processLandRequest(
     AphrontRequest $request,

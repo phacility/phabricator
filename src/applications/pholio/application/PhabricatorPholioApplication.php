@@ -71,8 +71,12 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
 
   protected function getCustomCapabilities() {
     return array(
-      PholioDefaultViewCapability::CAPABILITY => array(),
-      PholioDefaultEditCapability::CAPABILITY => array(),
+      PholioDefaultViewCapability::CAPABILITY => array(
+        'template' => PholioMockPHIDType::TYPECONST,
+      ),
+      PholioDefaultEditCapability::CAPABILITY => array(
+        'template' => PholioMockPHIDType::TYPECONST,
+      ),
     );
   }
 

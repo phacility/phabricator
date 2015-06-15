@@ -1,3 +1,3 @@
 <?php
 
-abstract class PhortuneConstants {}
+abstract class PhortuneConstants extends Phobject {}

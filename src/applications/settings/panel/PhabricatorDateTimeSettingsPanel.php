@@ -58,23 +58,14 @@ final class PhabricatorDateTimeSettingsPanel extends PhabricatorSettingsPanel {
           ->setName('timezone')
           ->setOptions($timezone_id_map)
           ->setValue($user->getTimezoneIdentifier()))
-      ->appendRemarkupInstructions(
-        pht(
-          "**Custom Date and Time Formats**\n\n".
-          "You can specify custom formats which will be used when ".
-          "rendering dates and times of day. Examples:\n\n".
-          "| Format  | Example  | Notes |\n".
-          "| ------  | -------- | ----- |\n".
-          "| `g:i A` | 2:34 PM  | Default 12-hour time. |\n".
-          "| `G.i a` | 02.34 pm | Alternate 12-hour time. |\n".
-          "| `H:i`   | 14:34    | 24-hour time. |\n".
-          "\n\n".
-          "You can find a [[%s | full reference in the PHP manual]].",
-          'http://www.php.net/manual/en/function.date.php'))
       ->appendChild(
-        id(new AphrontFormTextControl())
+        id(new AphrontFormSelectControl())
           ->setLabel(pht('Time-of-Day Format'))
           ->setName($pref_time)
+          ->setOptions(array(
+              'g:i A' => pht('12-hour (2:34 PM)'),
+              'H:i' => pht('24-hour (14:34)'),
+            ))
           ->setCaption(
             pht('Format used when rendering a time of day.'))
           ->setValue($preferences->getPreference($pref_time)))

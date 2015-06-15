@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionRepositoryTag {
+final class DiffusionRepositoryTag extends Phobject {
 
   private $author;
   private $epoch;

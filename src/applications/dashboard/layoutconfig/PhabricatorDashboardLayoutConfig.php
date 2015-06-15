@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorDashboardLayoutConfig {
+final class PhabricatorDashboardLayoutConfig extends Phobject {
 
   const MODE_FULL                = 'layout-mode-full';
   const MODE_HALF_AND_HALF       = 'layout-mode-half-and-half';

@@ -24,7 +24,7 @@ final class PhabricatorStandardCustomFieldCredential
 
     $all_types = PassphraseCredentialType::getAllProvidesTypes();
     if (!in_array($provides_type, $all_types)) {
-      $provides_type = PassphraseCredentialTypePassword::PROVIDES_TYPE;
+      $provides_type = PassphrasePasswordCredentialType::PROVIDES_TYPE;
     }
 
     $credentials = id(new PassphraseCredentialQuery())

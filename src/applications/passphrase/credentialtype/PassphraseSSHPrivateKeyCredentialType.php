@@ -1,6 +1,6 @@
 <?php
 
-abstract class PassphraseCredentialTypeSSHPrivateKey
+abstract class PassphraseSSHPrivateKeyCredentialType
   extends PassphraseCredentialType {
 
   const PROVIDES_TYPE = 'provides/ssh-key-file';

@@ -1,6 +1,7 @@
 <?php
 
 final class DefaultDatabaseConfigurationProvider
+  extends Phobject
   implements DatabaseConfigurationProvider {
 
   private $dao;

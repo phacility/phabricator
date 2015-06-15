@@ -115,7 +115,7 @@ abstract class ConduitAPIMethod
     return head(explode('.', $this->getAPIMethodName(), 2));
   }
 
-  public static function getConduitMethod($method_name) {
+  public static function loadAllConduitMethods() {
     static $method_map = null;
 
     if ($method_map === null) {
@@ -143,6 +143,11 @@ abstract class ConduitAPIMethod
       }
     }
 
+    return $method_map;
+  }
+
+  public static function getConduitMethod($method_name) {
+    $method_map = self::loadAllConduitMethods();
     return idx($method_map, $method_name);
   }
 

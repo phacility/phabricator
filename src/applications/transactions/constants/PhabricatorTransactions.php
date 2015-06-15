@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorTransactions {
+final class PhabricatorTransactions extends Phobject {
 
   const TYPE_COMMENT      = 'core:comment';
   const TYPE_SUBSCRIBERS  = 'core:subscribers';

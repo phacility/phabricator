@@ -67,6 +67,7 @@ guidelines, you probably don't need to read this super thoroughly.
 
 **if/else:**
 
+  lang=php
   if ($some_variable > 3) {
     // ...
   } else if ($some_variable === null) {
@@ -81,6 +82,7 @@ use the "endif" construct, and write "else if" as two words.
 
 **for:**
 
+  lang=php
   for ($ii = 0; $ii < 10; $ii++) {
     // ...
   }
@@ -90,12 +92,14 @@ visually and react better to "Find Next..." in editors.
 
 **foreach:**
 
+  lang=php
   foreach ($map as $key => $value) {
     // ...
   }
 
 **switch:**
 
+  lang=php
   switch ($value) {
     case 1:
       // ...
@@ -115,6 +119,7 @@ visually and react better to "Find Next..." in editors.
 
 **array literals:**
 
+  lang=php
   $junk = array(
     'nuts',
     'bolts',
@@ -126,6 +131,7 @@ diffs which add elements to the array affect only one line.
 
 **operators:**
 
+  lang=php
   $a + $b;                // Put spaces around operators.
   $omg.$lol;              // Exception: no spaces around string concatenation.
   $arr[] = $element;      // Couple [] with the array when appending.
@@ -133,6 +139,7 @@ diffs which add elements to the array affect only one line.
 
 **function/method calls:**
 
+  lang=php
   // One line
   eject($cargo);
 
@@ -143,6 +150,7 @@ diffs which add elements to the array affect only one line.
 
 **function/method definitions:**
 
+  lang=php
   function example_function($base_value, $additional_value) {
     return $base_value + $additional_value;
   }
@@ -157,6 +165,7 @@ diffs which add elements to the array affect only one line.
 
 **class:**
 
+  lang=php
   class Dog extends Animal {
 
     const CIRCLES_REQUIRED_TO_LIE_DOWN = 3;

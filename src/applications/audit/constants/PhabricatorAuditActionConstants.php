@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorAuditActionConstants {
+final class PhabricatorAuditActionConstants extends Phobject {
 
   const CONCERN   = 'concern';
   const ACCEPT    = 'accept';

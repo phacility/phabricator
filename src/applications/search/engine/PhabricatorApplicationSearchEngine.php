@@ -149,6 +149,10 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     if ($object instanceof PhabricatorSpacesInterface) {
       if (!empty($map['spacePHIDs'])) {
         $query->withSpacePHIDs($map['spacePHIDs']);
+      } else {
+        // If the user doesn't search for objects in specific spaces, we
+        // default to "all active spaces you have permission to view".
+        $query->withSpaceIsArchived(false);
       }
     }
 

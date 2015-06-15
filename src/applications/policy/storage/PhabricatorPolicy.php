@@ -54,6 +54,11 @@ final class PhabricatorPolicy
       return PhabricatorPolicyQuery::getGlobalPolicy($policy_identifier);
     }
 
+    $policy = PhabricatorPolicyQuery::getObjectPolicy($policy_identifier);
+    if ($policy) {
+      return $policy;
+    }
+
     if (!$handle) {
       throw new Exception(
         pht(
@@ -158,7 +163,16 @@ final class PhabricatorPolicy
     return $this->workflow;
   }
 
+  public function setIcon($icon) {
+    $this->icon = $icon;
+    return $this;
+  }
+
   public function getIcon() {
+    if ($this->icon) {
+      return $this->icon;
+    }
+
     switch ($this->getType()) {
       case PhabricatorPolicyType::TYPE_GLOBAL:
         static $map = array(
@@ -203,6 +217,11 @@ final class PhabricatorPolicy
   public static function getPolicyExplanation(
     PhabricatorUser $viewer,
     $policy) {
+
+    $rule = PhabricatorPolicyQuery::getObjectPolicyRule($policy);
+    if ($rule) {
+      return $rule->getPolicyExplanation();
+    }
 
     switch ($policy) {
       case PhabricatorPolicies::POLICY_PUBLIC:

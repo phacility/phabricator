@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorObjectSelectorDialog {
+final class PhabricatorObjectSelectorDialog extends Phobject {
 
   private $user;
   private $filters = array();

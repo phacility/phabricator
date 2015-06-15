@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorRepositoryCommitRef {
+final class PhabricatorRepositoryCommitRef extends Phobject {
 
   private $identifier;
   private $epoch;

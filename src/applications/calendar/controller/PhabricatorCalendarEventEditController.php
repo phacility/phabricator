@@ -17,7 +17,7 @@ final class PhabricatorCalendarEventEditController
     $viewer = $request->getViewer();
     $user_phid = $viewer->getPHID();
     $error_name = true;
-    $error_recurrence_end_date = true;
+    $error_recurrence_end_date = null;
     $error_start_date = true;
     $error_end_date = true;
     $validation_exception = null;
@@ -336,8 +336,7 @@ final class PhabricatorCalendarEventEditController
         ->setID($recurrence_end_date_id)
         ->setIsTimeDisabled(true)
         ->setIsDisabled($recurrence_end_date_value->isDisabled())
-        ->setAllowNull(true)
-        ->isRequired(false);
+        ->setAllowNull(true);
 
       $recurrence_frequency_select = id(new AphrontFormSelectControl())
         ->setName('frequency')

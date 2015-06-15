@@ -2,6 +2,8 @@
 
 final class AphrontPlainTextResponse extends AphrontResponse {
 
+  private $content;
+
   public function setContent($content) {
     $this->content = $content;
     return $this;

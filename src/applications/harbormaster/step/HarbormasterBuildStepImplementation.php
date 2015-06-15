@@ -1,6 +1,6 @@
 <?php
 
-abstract class HarbormasterBuildStepImplementation {
+abstract class HarbormasterBuildStepImplementation extends Phobject {
 
   public static function getImplementations() {
     return id(new PhutilSymbolLoader())

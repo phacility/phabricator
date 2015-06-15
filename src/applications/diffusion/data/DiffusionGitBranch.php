@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionGitBranch {
+final class DiffusionGitBranch extends Phobject {
 
   const DEFAULT_GIT_REMOTE = 'origin';
 

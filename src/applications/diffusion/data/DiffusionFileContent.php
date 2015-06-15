@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionFileContent {
+final class DiffusionFileContent extends Phobject {
 
   private $corpus;
   private $blameDict;

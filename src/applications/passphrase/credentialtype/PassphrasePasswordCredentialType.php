@@ -1,6 +1,6 @@
 <?php
 
-final class PassphraseCredentialTypePassword
+final class PassphrasePasswordCredentialType
   extends PassphraseCredentialType {
 
   const CREDENTIAL_TYPE = 'password';

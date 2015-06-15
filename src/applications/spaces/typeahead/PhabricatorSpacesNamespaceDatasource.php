@@ -21,9 +21,20 @@ final class PhabricatorSpacesNamespaceDatasource
     $spaces = $this->executeQuery($query);
     $results = array();
     foreach ($spaces as $space) {
-      $results[] = id(new PhabricatorTypeaheadResult())
-        ->setName($space->getNamespaceName())
+      $full_name = pht(
+        '%s %s',
+        $space->getMonogram(),
+        $space->getNamespaceName());
+
+      $result = id(new PhabricatorTypeaheadResult())
+        ->setName($full_name)
         ->setPHID($space->getPHID());
+
+      if ($space->getIsArchived()) {
+        $result->setClosed(pht('Archived'));
+      }
+
+      $results[] = $result;
     }
 
     return $this->filterResultsAgainstTokens($results);

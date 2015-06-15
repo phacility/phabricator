@@ -4,7 +4,7 @@
  * @task enormous Detecting Enormous Images
  * @task save     Saving Image Data
  */
-final class PhabricatorImageTransformer {
+final class PhabricatorImageTransformer extends Phobject {
 
   public function executeMemeTransform(
     PhabricatorFile $file,

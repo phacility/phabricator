@@ -118,10 +118,6 @@ final class PhabricatorUser
   }
 
   public function canEstablishWebSessions() {
-    if (!$this->isUserActivated()) {
-      return false;
-    }
-
     if ($this->getIsMailingList()) {
       return false;
     }
@@ -762,11 +758,20 @@ final class PhabricatorUser
     // TODO: We might let the user switch which space they're "in" later on;
     // for now just use the global space if one exists.
 
-    $spaces = PhabricatorSpacesNamespaceQuery::getViewerSpaces($this);
+    // If the viewer has access to the default space, use that.
+    $spaces = PhabricatorSpacesNamespaceQuery::getViewerActiveSpaces($this);
     foreach ($spaces as $space) {
       if ($space->getIsDefaultNamespace()) {
         return $space->getPHID();
       }
+    }
+
+    // Otherwise, use the space with the lowest ID that they have access to.
+    // This just tends to keep the default stable and predictable over time,
+    // so adding a new space won't change behavior for users.
+    if ($spaces) {
+      $spaces = msort($spaces, 'getID');
+      return head($spaces)->getPHID();
     }
 
     return null;

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorAuditCommitStatusConstants {
+final class PhabricatorAuditCommitStatusConstants extends Phobject {
 
   const NONE                = 0;
   const NEEDS_AUDIT         = 1;

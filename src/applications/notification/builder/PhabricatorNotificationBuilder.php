@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorNotificationBuilder {
+final class PhabricatorNotificationBuilder extends Phobject {
 
   private $stories;
   private $user = null;

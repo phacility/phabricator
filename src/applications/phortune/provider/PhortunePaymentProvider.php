@@ -3,7 +3,7 @@
 /**
  * @task addmethod  Adding Payment Methods
  */
-abstract class PhortunePaymentProvider {
+abstract class PhortunePaymentProvider extends Phobject {
 
   private $providerConfig;
 

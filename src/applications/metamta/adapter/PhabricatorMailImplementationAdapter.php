@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorMailImplementationAdapter {
+abstract class PhabricatorMailImplementationAdapter extends Phobject {
 
   abstract public function setFrom($email, $name = '');
   abstract public function addReplyTo($email, $name = '');

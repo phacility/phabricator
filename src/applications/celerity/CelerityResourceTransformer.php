@@ -1,6 +1,6 @@
 <?php
 
-final class CelerityResourceTransformer {
+final class CelerityResourceTransformer extends Phobject {
 
   private $minify;
   private $rawURIMap;

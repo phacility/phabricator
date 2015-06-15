@@ -5,7 +5,7 @@
  * @task resource   Resource Allocation
  * @task log        Logging
  */
-abstract class DrydockBlueprintImplementation {
+abstract class DrydockBlueprintImplementation extends Phobject {
 
   private $activeResource;
   private $activeLease;

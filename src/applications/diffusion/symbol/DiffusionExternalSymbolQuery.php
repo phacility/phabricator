@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionExternalSymbolQuery {
+final class DiffusionExternalSymbolQuery extends Phobject {
   private $languages = array();
   private $types = array();
   private $names = array();

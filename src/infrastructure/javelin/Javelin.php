@@ -1,6 +1,6 @@
 <?php
 
-final class Javelin {
+final class Javelin extends Phobject {
 
   public static function initBehavior(
     $behavior,

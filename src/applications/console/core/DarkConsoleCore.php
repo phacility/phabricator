@@ -1,6 +1,6 @@
 <?php
 
-final class DarkConsoleCore {
+final class DarkConsoleCore extends Phobject {
 
   private $plugins = array();
   const STORAGE_VERSION = 1;

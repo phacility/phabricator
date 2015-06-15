@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorMetaMTAEmailBodyParser {
+final class PhabricatorMetaMTAEmailBodyParser extends Phobject {
 
   /**
    * Mails can have bodies such as

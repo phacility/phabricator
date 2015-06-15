@@ -28,6 +28,9 @@ final class PhabricatorFeedStoryNotification extends PhabricatorFeedDAO {
         'key_object' => array(
           'columns' => array('primaryObjectPHID'),
         ),
+        'key_chronological' => array(
+          'columns' => array('chronologicalKey'),
+        ),
       ),
     ) + parent::getConfiguration();
   }

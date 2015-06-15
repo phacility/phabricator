@@ -83,12 +83,6 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  protected function getRequiredHandlePHIDsForResultList(
-    array $mocks,
-    PhabricatorSavedQuery $query) {
-    return mpull($mocks, 'getAuthorPHID');
-  }
-
   protected function renderResultList(
     array $mocks,
     PhabricatorSavedQuery $query,
@@ -96,6 +90,7 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
     assert_instances_of($mocks, 'PholioMock');
 
     $viewer = $this->requireViewer();
+    $handles = $viewer->loadHandles(mpull($mocks, 'getAuthorPHID'));
 
     $xform = PhabricatorFileTransform::getTransformByKey(
       PhabricatorFileThumbnailTransform::TRANSFORM_PINBOARD);
@@ -109,7 +104,9 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
 
       $header = 'M'.$mock->getID().' '.$mock->getName();
       $item = id(new PHUIPinboardItemView())
+        ->setUser($viewer)
         ->setHeader($header)
+        ->setObject($mock)
         ->setURI('/M'.$mock->getID())
         ->setImageURI($image_uri)
         ->setImageSize($x, $y)

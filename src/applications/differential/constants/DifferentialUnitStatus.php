@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialUnitStatus {
+final class DifferentialUnitStatus extends Phobject {
 
   const UNIT_NONE             = 0;
   const UNIT_OKAY             = 1;

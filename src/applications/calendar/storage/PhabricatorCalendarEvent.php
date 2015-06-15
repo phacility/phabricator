@@ -316,7 +316,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       case 'monthly':
         return 'month';
       case 'yearly':
-        return 'yearly';
+        return 'year';
       default:
         return 'day';
     }

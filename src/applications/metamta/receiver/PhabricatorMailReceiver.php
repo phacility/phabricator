@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorMailReceiver {
+abstract class PhabricatorMailReceiver extends Phobject {
 
   private $applicationEmail;
 

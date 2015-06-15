@@ -1,6 +1,6 @@
 <?php
 
-final class CeleritySpriteGenerator {
+final class CeleritySpriteGenerator extends Phobject {
 
   public function buildMenuSheet() {
     $sprites = array();

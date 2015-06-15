@@ -1,6 +1,7 @@
 <?php
 
 final class DifferentialInlineComment
+  extends Phobject
   implements PhabricatorInlineCommentInterface {
 
   private $proxy;

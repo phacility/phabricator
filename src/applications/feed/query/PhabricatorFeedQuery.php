@@ -101,7 +101,7 @@ final class PhabricatorFeedQuery
       'key' => array(
         'table' => $table,
         'column' => 'chronologicalKey',
-        'type' => 'int',
+        'type' => 'string',
         'unique' => true,
       ),
     );
