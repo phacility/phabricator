@@ -158,7 +158,7 @@ abstract class PhabricatorPHIDType extends Phobject {
    *
    * @return dict<string, PhabricatorPHIDType> Map of type constants to types.
    */
-  public static function getAllTypes() {
+  final public static function getAllTypes() {
     static $types;
     if ($types === null) {
       $objects = id(new PhutilSymbolLoader())

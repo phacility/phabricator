@@ -111,7 +111,7 @@ abstract class PhabricatorSetupCheck extends Phobject {
     }
   }
 
-  final public static function runAllChecks() {
+  final public static function loadAllChecks() {
     $symbols = id(new PhutilSymbolLoader())
       ->setAncestorClass(__CLASS__)
       ->setConcreteOnly(true)
@@ -122,7 +122,11 @@ abstract class PhabricatorSetupCheck extends Phobject {
       $checks[] = newv($symbol['name'], array());
     }
 
-    $checks = msort($checks, 'getExecutionOrder');
+    return msort($checks, 'getExecutionOrder');
+  }
+
+  final public static function runAllChecks() {
+    $checks = self::loadAllChecks();
 
     $issues = array();
     foreach ($checks as $check) {

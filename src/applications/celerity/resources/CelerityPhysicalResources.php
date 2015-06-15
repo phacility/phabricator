@@ -21,6 +21,7 @@ abstract class CelerityPhysicalResources extends CelerityResources {
 
   public static function getAll() {
     static $resources_map;
+
     if ($resources_map === null) {
       $resources_map = array();
 
