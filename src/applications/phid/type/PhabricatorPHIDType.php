@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorPHIDType {
+abstract class PhabricatorPHIDType extends Phobject {
 
   final public function getTypeConstant() {
     $class = new ReflectionClass($this);

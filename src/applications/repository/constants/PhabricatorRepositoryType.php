@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorRepositoryType {
+final class PhabricatorRepositoryType extends Phobject {
 
   const REPOSITORY_TYPE_GIT         = 'git';
   const REPOSITORY_TYPE_SVN         = 'svn';

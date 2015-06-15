@@ -1,6 +1,6 @@
 <?php
 
-abstract class HeraldCustomAction {
+abstract class HeraldCustomAction extends Phobject {
 
   abstract public function appliesToAdapter(HeraldAdapter $adapter);
 

@@ -1,6 +1,6 @@
 <?php
 
-final class ProjectBoardTaskCard {
+final class ProjectBoardTaskCard extends Phobject {
 
   private $viewer;
   private $task;

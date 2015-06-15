@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSlug {
+final class PhabricatorSlug extends Phobject {
 
   public static function normalize($slug) {
     $slug = preg_replace('@/+@', '/', $slug);

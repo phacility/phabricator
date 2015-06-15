@@ -7,7 +7,7 @@
  * @task setup      Setup Cache
  * @task compress   Compression
  */
-final class PhabricatorCaches {
+final class PhabricatorCaches extends Phobject {
 
   private static $requestCache;
 

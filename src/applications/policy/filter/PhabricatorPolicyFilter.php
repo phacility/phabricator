@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorPolicyFilter {
+final class PhabricatorPolicyFilter extends Phobject {
 
   private $viewer;
   private $objects;

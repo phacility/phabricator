@@ -1,6 +1,7 @@
 <?php
 
 final class PhabricatorObjectHandle
+  extends Phobject
   implements PhabricatorPolicyInterface {
 
   const AVAILABILITY_FULL = 'full';

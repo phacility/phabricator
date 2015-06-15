@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSyntaxHighlighter {
+final class PhabricatorSyntaxHighlighter extends Phobject {
 
   public static function newEngine() {
     $engine = PhabricatorEnv::newObjectFromConfig('syntax-highlighter.engine');

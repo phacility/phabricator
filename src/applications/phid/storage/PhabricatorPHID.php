@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorPHID {
+final class PhabricatorPHID extends Phobject {
 
   protected $phid;
   protected $phidType;

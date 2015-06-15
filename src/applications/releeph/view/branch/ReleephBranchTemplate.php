@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephBranchTemplate {
+final class ReleephBranchTemplate extends Phobject {
 
   const KEY = 'releeph.default-branch-template';
 

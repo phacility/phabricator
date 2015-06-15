@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialHunkParser {
+final class DifferentialHunkParser extends Phobject {
 
   private $oldLines;
   private $newLines;

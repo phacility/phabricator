@@ -5,7 +5,7 @@
  * @{function:require_celerity_resource}, and then builds appropriate HTML or
  * Ajax responses.
  */
-final class CelerityStaticResourceResponse {
+final class CelerityStaticResourceResponse extends Phobject {
 
   private $symbols = array();
   private $needsResolve = true;

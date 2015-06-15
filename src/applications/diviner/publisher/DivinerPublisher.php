@@ -1,6 +1,6 @@
 <?php
 
-abstract class DivinerPublisher {
+abstract class DivinerPublisher extends Phobject {
 
   private $atomCache;
   private $atomGraphHashToNodeHashMap;

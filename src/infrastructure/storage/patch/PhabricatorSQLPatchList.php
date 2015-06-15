@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorSQLPatchList {
+abstract class PhabricatorSQLPatchList extends Phobject {
 
   abstract public function getNamespace();
   abstract public function getPatches();

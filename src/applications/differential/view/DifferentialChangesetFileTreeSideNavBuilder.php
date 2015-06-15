@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialChangesetFileTreeSideNavBuilder {
+final class DifferentialChangesetFileTreeSideNavBuilder extends Phobject {
 
   private $title;
   private $baseURI;

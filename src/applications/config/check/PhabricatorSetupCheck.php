@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorSetupCheck {
+abstract class PhabricatorSetupCheck extends Phobject {
 
   private $issues;
 

@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorAuthProvider {
+abstract class PhabricatorAuthProvider extends Phobject {
 
   private $providerConfig;
 

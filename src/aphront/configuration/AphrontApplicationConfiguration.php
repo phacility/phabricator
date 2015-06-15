@@ -3,7 +3,7 @@
 /**
  * @task  routing URI Routing
  */
-abstract class AphrontApplicationConfiguration {
+abstract class AphrontApplicationConfiguration extends Phobject {
 
   private $request;
   private $host;

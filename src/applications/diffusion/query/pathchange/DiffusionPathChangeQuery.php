@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionPathChangeQuery {
+final class DiffusionPathChangeQuery extends Phobject {
 
   private $request;
   private $limit;

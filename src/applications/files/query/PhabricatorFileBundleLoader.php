@@ -4,7 +4,7 @@
  * Callback provider for loading @{class@arcanist:ArcanistBundle} file data
  * stored in the Files application.
  */
-final class PhabricatorFileBundleLoader {
+final class PhabricatorFileBundleLoader extends Phobject {
 
   private $viewer;
 

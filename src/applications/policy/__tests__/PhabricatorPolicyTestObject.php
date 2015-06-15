@@ -4,6 +4,7 @@
  * Configurable test object for implementing Policy unit tests.
  */
 final class PhabricatorPolicyTestObject
+  extends Phobject
   implements
     PhabricatorPolicyInterface,
     PhabricatorExtendedPolicyInterface {

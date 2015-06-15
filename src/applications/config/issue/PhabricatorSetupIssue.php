@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupIssue {
+final class PhabricatorSetupIssue extends Phobject {
 
   private $issueKey;
   private $name;

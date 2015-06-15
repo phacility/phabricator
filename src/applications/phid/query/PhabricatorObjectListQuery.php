@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorObjectListQuery {
+final class PhabricatorObjectListQuery extends Phobject {
 
   private $viewer;
   private $objectList;

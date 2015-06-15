@@ -1,6 +1,6 @@
 <?php
 
-final class DrydockBlueprintScopeGuard {
+final class DrydockBlueprintScopeGuard extends Phobject {
 
   public function __construct(DrydockBlueprintImplementation $blueprint) {
     $this->blueprint = $blueprint;

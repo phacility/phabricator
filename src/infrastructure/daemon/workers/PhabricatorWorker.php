@@ -3,7 +3,7 @@
 /**
  * @task config   Configuring Retries and Failures
  */
-abstract class PhabricatorWorker {
+abstract class PhabricatorWorker extends Phobject {
 
   private $data;
   private static $runAllTasksInProcess = false;

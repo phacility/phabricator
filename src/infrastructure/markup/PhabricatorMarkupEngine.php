@@ -37,7 +37,7 @@
  * @task markup Markup Pipeline
  * @task engine Engine Construction
  */
-final class PhabricatorMarkupEngine {
+final class PhabricatorMarkupEngine extends Phobject {
 
   private $objects = array();
   private $viewer;

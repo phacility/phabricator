@@ -16,7 +16,7 @@
  * button.)
  *
  */
-final class DifferentialReleephRequestFieldSpecification {
+final class DifferentialReleephRequestFieldSpecification extends Phobject {
 
   // TODO: This class is essentially dead right now, see T2222.
 

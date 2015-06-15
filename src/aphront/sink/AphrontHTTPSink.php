@@ -11,7 +11,7 @@
  * @task write  Writing Response Components
  * @task emit   Emitting the Response
  */
-abstract class AphrontHTTPSink {
+abstract class AphrontHTTPSink extends Phobject {
 
 
 /* -(  Writing Response Components  )---------------------------------------- */

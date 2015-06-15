@@ -1,6 +1,6 @@
 <?php
 
-abstract class AphrontResponse {
+abstract class AphrontResponse extends Phobject {
 
   private $request;
   private $cacheable = false;

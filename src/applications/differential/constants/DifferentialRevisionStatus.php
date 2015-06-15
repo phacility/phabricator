@@ -6,7 +6,7 @@
  * application.
  */
 
-final class DifferentialRevisionStatus {
+final class DifferentialRevisionStatus extends Phobject {
 
   const COLOR_STATUS_DEFAULT = 'status';
   const COLOR_STATUS_DARK = 'status-dark';

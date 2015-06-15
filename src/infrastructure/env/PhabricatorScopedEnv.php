@@ -7,7 +7,7 @@
  * @task internal Internals
  * @task override Overriding Environment Configuration
  */
-final class PhabricatorScopedEnv {
+final class PhabricatorScopedEnv extends Phobject {
 
   private $key;
   private $isPopped = false;

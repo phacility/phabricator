@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialUnitTestResult {
+final class DifferentialUnitTestResult extends Phobject {
 
   const RESULT_PASS         = 'pass';
   const RESULT_FAIL         = 'fail';

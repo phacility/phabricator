@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSearchAbstractDocument {
+final class PhabricatorSearchAbstractDocument extends Phobject {
 
   private $phid;
   private $documentType;

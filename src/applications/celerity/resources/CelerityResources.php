@@ -3,7 +3,7 @@
 /**
  * Defines the location of static resources.
  */
-abstract class CelerityResources {
+abstract class CelerityResources extends Phobject {
 
   private $map;
 

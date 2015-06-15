@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorEventEngine {
+final class PhabricatorEventEngine extends Phobject {
 
   public static function initialize() {
     // NOTE: If any of this fails, we just log it and move on. It's important

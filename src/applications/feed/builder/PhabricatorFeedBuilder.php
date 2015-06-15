@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorFeedBuilder {
+final class PhabricatorFeedBuilder extends Phobject {
 
   private $stories;
   private $framed;

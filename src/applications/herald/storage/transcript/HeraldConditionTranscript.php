@@ -1,6 +1,6 @@
 <?php
 
-final class HeraldConditionTranscript {
+final class HeraldConditionTranscript extends Phobject {
 
   protected $ruleID;
   protected $conditionID;

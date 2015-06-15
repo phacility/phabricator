@@ -3,7 +3,7 @@
 /**
  * @task customfield Custom Field Integration
  */
-abstract class HeraldAdapter {
+abstract class HeraldAdapter extends Phobject {
 
   const FIELD_TITLE                  = 'title';
   const FIELD_BODY                   = 'body';

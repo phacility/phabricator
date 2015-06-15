@@ -9,6 +9,7 @@
  * @task policy   Policy Implementation
  */
 abstract class PhabricatorFeedStory
+  extends Phobject
   implements
     PhabricatorPolicyInterface,
     PhabricatorMarkupInterface {

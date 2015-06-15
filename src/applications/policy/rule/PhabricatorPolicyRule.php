@@ -3,7 +3,7 @@
 /**
  * @task objectpolicy Implementing Object Policies
  */
-abstract class PhabricatorPolicyRule {
+abstract class PhabricatorPolicyRule extends Phobject {
 
   const CONTROL_TYPE_TEXT       = 'text';
   const CONTROL_TYPE_SELECT     = 'select';

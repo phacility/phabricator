@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionLintSaveRunner {
+final class DiffusionLintSaveRunner extends Phobject {
   private $arc = 'arc';
   private $severity = ArcanistLintSeverity::SEVERITY_ADVICE;
   private $all = false;

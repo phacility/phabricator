@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorSMSImplementationAdapter {
+abstract class PhabricatorSMSImplementationAdapter extends Phobject {
 
   private $fromNumber;
   private $toNumber;

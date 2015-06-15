@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionPathQuery {
+final class DiffusionPathQuery extends Phobject {
 
   private $pathIDs;
 

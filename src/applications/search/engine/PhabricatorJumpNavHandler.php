@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorJumpNavHandler {
+final class PhabricatorJumpNavHandler extends Phobject {
 
   public static function getJumpResponse(PhabricatorUser $viewer, $jump) {
     $jump = trim($jump);

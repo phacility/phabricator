@@ -4,7 +4,7 @@
  * Responds to IRC messages. You plug a bunch of these into a
  * @{class:PhabricatorBot} to give it special behavior.
  */
-abstract class PhabricatorBotHandler {
+abstract class PhabricatorBotHandler extends Phobject {
 
   private $bot;
 

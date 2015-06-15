@@ -1,14 +1,15 @@
 <?php
 
-final class HeraldEngine {
+final class HeraldEngine extends Phobject {
 
   protected $rules = array();
   protected $results = array();
   protected $stack = array();
-  protected $activeRule = null;
+  protected $activeRule;
+  protected $transcript;
 
   protected $fieldCache = array();
-  protected $object = null;
+  protected $object;
   private $dryRun;
 
   public function setDryRun($dry_run) {

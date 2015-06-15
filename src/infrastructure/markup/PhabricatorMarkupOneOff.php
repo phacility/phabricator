@@ -12,7 +12,9 @@
  * This is less efficient than batching rendering, but appropriate for small
  * amounts of one-off text in form instructions.
  */
-final class PhabricatorMarkupOneOff implements PhabricatorMarkupInterface {
+final class PhabricatorMarkupOneOff
+  extends Phobject
+  implements PhabricatorMarkupInterface {
 
   private $content;
   private $preserveLinebreaks;

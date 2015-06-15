@@ -8,7 +8,9 @@
  * @task  fact  Fact Integration
  * @task  meta  Application Management
  */
-abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
+abstract class PhabricatorApplication
+  extends Phobject
+  implements PhabricatorPolicyInterface {
 
   const MAX_STATUS_ITEMS      = 100;
 
