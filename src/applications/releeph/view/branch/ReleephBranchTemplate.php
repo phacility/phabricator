@@ -5,7 +5,7 @@ final class ReleephBranchTemplate extends Phobject {
   const KEY = 'releeph.default-branch-template';
 
   private $commitHandle;
-  private $branchDate;
+  private $branchDate = null;
   private $projectName;
   private $isSymbolic;
 
@@ -40,11 +40,6 @@ final class ReleephBranchTemplate extends Phobject {
     }
     return $fake_handle;
   }
-
-  private $commitHandle;
-  private $branchDate = null;
-  private $projectName;
-  private $isSymbolic;
 
   public function setCommitHandle(PhabricatorObjectHandle $handle) {
     $this->commitHandle = $handle;
