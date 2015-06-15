@@ -2,6 +2,8 @@
 
 abstract class HarbormasterBuildStepImplementation extends Phobject {
 
+  private $settings;
+
   public static function getImplementations() {
     return id(new PhutilSymbolLoader())
       ->setAncestorClass(__CLASS__)
