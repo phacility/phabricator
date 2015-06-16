@@ -69,15 +69,14 @@ body .phui-header-shell.phui-bleed-header
 }
 
 .phui-header-header {
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 16px;
   line-height: 24px;
   color: {$darkbluetext};
 }
 
 .phui-object-box .phui-header-tall .phui-header-header,
 .phui-document-view .phui-header-tall .phui-header-header {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .phui-header-view .phui-header-header a {

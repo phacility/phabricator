@@ -264,16 +264,6 @@ final class PHUIHeaderView extends AphrontTagView {
       ),
       $this->header);
 
-    if ($this->tags) {
-      $left[] = ' ';
-      $left[] = phutil_tag(
-        'span',
-        array(
-          'class' => 'phui-header-tags',
-        ),
-        array_interleave(' ', $this->tags));
-    }
-
     if ($this->subheader) {
       $left[] = phutil_tag(
         'div',

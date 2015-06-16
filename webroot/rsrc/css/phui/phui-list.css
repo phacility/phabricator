@@ -175,3 +175,10 @@
   border-right: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$thinblueborder};
 }
+
+/* - Info Stack ------------------------------------------------------------ */
+
+.phui-info-view + .phui-list-view {
+  margin-top: 16px;
+  border-top: 1px solid {$thinblueborder};
+}

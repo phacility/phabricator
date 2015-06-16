@@ -34,11 +34,6 @@
   word-break: break-word;
   max-height: 300px;
   overflow: hidden;
-  line-height: 18px;
-}
-
-.phui-feed-story-body.phabricator-remarkup {
-  line-height: inherit;
 }
 
 .phui-feed-story-foot {

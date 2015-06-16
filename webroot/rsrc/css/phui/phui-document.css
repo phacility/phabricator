@@ -166,3 +166,7 @@
 .device-phone .phui-document-view .remarkup-has-toc .phabricator-remarkup-toc {
   display: none;
 }
+
+body .phui-document-view .phui-header-shell.phui-bleed-header {
+  padding: 0;
+}

@@ -613,14 +613,15 @@ ul.phui-object-item-list-view .phui-object-item-selected
   border-top: 1px solid {$thinblueborder};
   border-bottom: 1px solid {$thinblueborder};
   padding: 8px;
-  font-weight: 500;
   background-color: {$lightgreybackground};
 }
 
 .phui-object-box .phui-header-shell + .phui-object-item-list-view
  .phui-object-item-list-header,
 .phui-object-box .phui-object-box-hidden-content + .phui-object-item-list-view
- .phui-object-item-list-header {
+ .phui-object-item-list-header,
+.phui-object-box .phui-object-box-hidden-content +
+  .phui-object-item-list-header {
    border-top: none;
  }
 
@@ -636,19 +637,6 @@ ul.phui-object-item-list-view .phui-object-item-selected
 
 
 /* - Launcher List ---------------------------------------------------------- */
-
-.launcher-header {
-  padding: 8px 4px;
-  font-weight: 500;
-  color: {$blue};
-  font-size: 13px;
-  border-top: 1px solid {$thinblueborder};
-  border-bottom: 1px solid {$thinblueborder};
-}
-
-.phui-header-shell + .launcher-header {
-  border-top: none;
-}
 
 .phui-object-item-image-icon {
   background: none;
