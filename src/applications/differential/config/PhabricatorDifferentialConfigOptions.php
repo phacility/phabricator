@@ -34,9 +34,7 @@ final class PhabricatorDifferentialConfigOptions
       new DifferentialReviewedByField(),
       new DifferentialSubscribersField(),
       new DifferentialRepositoryField(),
-      new DifferentialLintField(),
       new DifferentialProjectsField(),
-      new DifferentialUnitField(),
       new DifferentialViewPolicyField(),
       new DifferentialEditPolicyField(),
 
@@ -54,6 +52,8 @@ final class PhabricatorDifferentialConfigOptions
       new DifferentialBlameRevisionField(),
       new DifferentialPathField(),
       new DifferentialHostField(),
+      new DifferentialLintField(),
+      new DifferentialUnitField(),
       new DifferentialRevertPlanField(),
 
       new DifferentialApplyPatchField(),

@@ -69,7 +69,27 @@ final class PhabricatorPolicyExplainController
       $capability_name = $capobj->getCapabilityName();
     }
 
+    $space_info = null;
+    if ($object instanceof PhabricatorSpacesInterface) {
+      if (PhabricatorSpacesNamespaceQuery::getViewerSpacesExist($viewer)) {
+        $space_phid = PhabricatorSpacesNamespaceQuery::getObjectSpacePHID(
+          $object);
+
+        $handles = $viewer->loadHandles(array($space_phid));
+
+        $space_info = array(
+          pht(
+            'This object is in %s, and can only be seen by users with '.
+            'access to that space.',
+            $handles[$space_phid]->renderLink()),
+          phutil_tag('br'),
+          phutil_tag('br'),
+        );
+      }
+    }
+
     $content = array(
+      $space_info,
       pht('Users with the "%s" capability:', $capability_name),
       $auto_info,
     );

@@ -19,12 +19,20 @@ final class DifferentialBranchField
     return true;
   }
 
-  public function renderPropertyViewLabel() {
+  public function renderPropertyViewValue(array $handles) {
+    return null;
+  }
+
+  public function shouldAppearInDiffPropertyView() {
+    return true;
+  }
+
+  public function renderDiffPropertyViewLabel(DifferentialDiff $diff) {
     return $this->getFieldName();
   }
 
-  public function renderPropertyViewValue(array $handles) {
-    return $this->getBranchDescription($this->getObject()->getActiveDiff());
+  public function renderDiffPropertyViewValue(DifferentialDiff $diff) {
+    return $this->getBranchDescription($diff);
   }
 
   private function getBranchDescription(DifferentialDiff $diff) {

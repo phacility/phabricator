@@ -19,20 +19,37 @@ final class DifferentialLintField
     return true;
   }
 
-  public function renderPropertyViewLabel() {
+  public function renderPropertyViewValue(array $handles) {
+    return null;
+  }
+
+  public function shouldAppearInDiffPropertyView() {
+    return true;
+  }
+
+  public function renderDiffPropertyViewLabel(DifferentialDiff $diff) {
     return $this->getFieldName();
   }
 
-  public function getRequiredDiffPropertiesForRevisionView() {
-    return array(
+  public function renderDiffPropertyViewValue(DifferentialDiff $diff) {
+    // TODO: This load is slightly inefficient, but most of this is moving
+    // to Harbormaster and this simplifies the transition. Eat 1-2 extra
+    // queries for now.
+    $keys = array(
       'arc:lint',
       'arc:lint-excuse',
       'arc:lint-postponed',
     );
-  }
 
-  public function renderPropertyViewValue(array $handles) {
-    $diff = $this->getObject()->getActiveDiff();
+    $properties = id(new DifferentialDiffProperty())->loadAllWhere(
+      'diffID = %d AND name IN (%Ls)',
+      $diff->getID(),
+      $keys);
+    $properties = mpull($properties, 'getData', 'getName');
+
+    foreach ($keys as $key) {
+      $diff->attachProperty($key, idx($properties, $key));
+    }
 
     $path_changesets = mpull($diff->loadChangesets(), 'getID', 'getFilename');
 
