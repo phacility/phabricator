@@ -19,19 +19,34 @@ final class DifferentialUnitField
     return true;
   }
 
-  public function renderPropertyViewLabel() {
+  public function renderPropertyViewValue(array $handles) {
+    return null;
+  }
+
+  public function shouldAppearInDiffPropertyView() {
+    return true;
+  }
+
+  public function renderDiffPropertyViewLabel(DifferentialDiff $diff) {
     return $this->getFieldName();
   }
 
-  public function getRequiredDiffPropertiesForRevisionView() {
-    return array(
+  public function renderDiffPropertyViewValue(DifferentialDiff $diff) {
+    // TODO: See DifferentialLintField.
+    $keys = array(
       'arc:unit',
       'arc:unit-excuse',
     );
-  }
 
-  public function renderPropertyViewValue(array $handles) {
-    $diff = $this->getObject()->getActiveDiff();
+    $properties = id(new DifferentialDiffProperty())->loadAllWhere(
+      'diffID = %d AND name IN (%Ls)',
+      $diff->getID(),
+      $keys);
+    $properties = mpull($properties, 'getData', 'getName');
+
+    foreach ($keys as $key) {
+      $diff->attachProperty($key, idx($properties, $key));
+    }
 
     $ustar = DifferentialRevisionUpdateHistoryView::renderDiffUnitStar($diff);
     $umsg = DifferentialRevisionUpdateHistoryView::getDiffUnitMessage($diff);
