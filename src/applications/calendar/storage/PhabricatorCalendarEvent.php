@@ -50,10 +50,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
     if ($mode == 'public') {
       $view_policy = PhabricatorPolicies::getMostOpenPolicy();
-    } else if ($mode == 'recurring') {
+    }
+
+    if ($mode == 'recurring') {
       $is_recurring = true;
-    } else {
-      $view_policy = $actor->getPHID();
     }
 
     return id(new PhabricatorCalendarEvent())
