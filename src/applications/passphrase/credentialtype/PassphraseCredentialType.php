@@ -131,4 +131,8 @@ abstract class PassphraseCredentialType extends Phobject {
     return $secret;
   }
 
+  public function shouldRequireUsername() {
+    return true;
+  }
+
 }
