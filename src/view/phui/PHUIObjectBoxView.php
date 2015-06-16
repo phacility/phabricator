@@ -24,6 +24,7 @@ final class PHUIObjectBoxView extends AphrontView {
   private $hideAction;
   private $showHideHref;
   private $showHideContent;
+  private $showHideOpen;
 
   private $tabs = array();
   private $propertyLists = array();
@@ -173,11 +174,12 @@ final class PHUIObjectBoxView extends AphrontView {
     return $this;
   }
 
-  public function setShowHide($show, $hide, $content, $href) {
+  public function setShowHide($show, $hide, $content, $href, $open = false) {
     $this->showAction = $show;
     $this->hideAction = $hide;
     $this->showHideContent = $content;
     $this->showHideHref = $href;
+    $this->showHideOpen = $open;
     return $this;
   }
 
@@ -205,10 +207,13 @@ final class PHUIObjectBoxView extends AphrontView {
       $show_action_id = celerity_generate_unique_node_id();
       $content_id = celerity_generate_unique_node_id();
 
+      $hide_style = ($this->showHideOpen ? 'display: none;': null);
+      $show_style = ($this->showHideOpen ? null : 'display: none;');
       $hide_action = id(new PHUIButtonView())
         ->setTag('a')
         ->addSigil('reveal-content')
         ->setID($hide_action_id)
+        ->setStyle($hide_style)
         ->setHref($this->showHideHref)
         ->setMetaData(
           array(
@@ -220,7 +225,7 @@ final class PHUIObjectBoxView extends AphrontView {
       $show_action = id(new PHUIButtonView())
         ->setTag('a')
         ->addSigil('reveal-content')
-        ->setStyle('display: none;')
+        ->setStyle($show_style)
         ->setHref('#')
         ->setID($show_action_id)
         ->setMetaData(
@@ -239,7 +244,7 @@ final class PHUIObjectBoxView extends AphrontView {
           array(
             'class' => 'phui-object-box-hidden-content',
             'id' => $content_id,
-            'style' => 'display: none;',
+            'style' => $show_style,
           ),
           $this->showHideContent),
       );
@@ -352,7 +357,7 @@ final class PHUIObjectBoxView extends AphrontView {
     $content = id(new PHUIBoxView())
       ->appendChild(
         array(
-          $this->anchor,
+          ($this->showHideOpen == false ? $this->anchor : null),
           $header,
           $this->infoView,
           $this->formErrors,
@@ -362,6 +367,7 @@ final class PHUIObjectBoxView extends AphrontView {
           $tabs,
           $tab_lists,
           $showhide,
+          ($this->showHideOpen == true ? $this->anchor : null),
           $property_lists,
           $this->table,
           $this->renderChildren(),

@@ -4,6 +4,7 @@
 
 .phui-object-item-link strong {
   color: {$fire};
+  text-decoration: underline;
 }
 
 .phui-source-fragment {

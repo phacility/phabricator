@@ -193,7 +193,8 @@ final class PhabricatorApplicationSearchController
         pht('Edit Query'),
         pht('Hide Query'),
         $form,
-        $this->getApplicationURI('query/advanced/?query='.$query_key));
+        $this->getApplicationURI('query/advanced/?query='.$query_key),
+        (!$named_query ? true : false));
     } else {
       $box->setForm($form);
     }

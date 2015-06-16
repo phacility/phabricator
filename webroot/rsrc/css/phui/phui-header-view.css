@@ -97,11 +97,6 @@ body .phui-header-shell.phui-bleed-header
   font-size: 13px;
 }
 
-.device-phone .phui-object-box .phui-header-view .phui-header-action-links {
-  margin-right: 4px;
-  margin-top: -1px;
-}
-
 .device-phone .phui-header-action-link .phui-button-text {
   visibility: hidden;
   width: 0;
