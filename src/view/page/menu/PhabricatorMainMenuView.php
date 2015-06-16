@@ -274,13 +274,13 @@ final class PhabricatorMainMenuView extends AphrontView {
           'background-position: 0px 0px; '.
           'background-image: url('.$logo_uri.');';
       }
+    }
+
+    $color = PhabricatorEnv::getEnvConfig('ui.header-color');
+    if ($color == 'light') {
+      $color = 'dark';
     } else {
-      $color = PhabricatorEnv::getEnvConfig('ui.header-color');
-      if ($color == 'light') {
-        $color = 'dark';
-      } else {
-        $color = 'light';
-      }
+      $color = 'light';
     }
 
     return phutil_tag(

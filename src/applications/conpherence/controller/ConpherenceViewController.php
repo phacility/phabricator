@@ -9,7 +9,7 @@ final class ConpherenceViewController extends
     return true;
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = $this->buildConpherenceApplicationCrumbs();
     $crumbs->setBorder(true);
     return $crumbs;

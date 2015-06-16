@@ -116,7 +116,7 @@ ul.phui-object-item-list-view {
   top: 0;
   bottom: 0;
   left: 0;
-  width: 16px;
+  width: 20px;
   background: url('/rsrc/image/texture/grip.png') center center no-repeat;
 }
 
@@ -151,6 +151,7 @@ ul.phui-object-item-list-view {
   width: 20px;
   display: table-cell;
   vertical-align: middle;
+  padding-left: 4px;
 }
 
 .device-phone .phui-object-item-col0 {
