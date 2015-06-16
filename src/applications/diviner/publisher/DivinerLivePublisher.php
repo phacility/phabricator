@@ -8,11 +8,15 @@ final class DivinerLivePublisher extends DivinerPublisher {
     if (!$this->book) {
       $book_name = $this->getConfig('name');
 
-      $book = id(new DivinerLiveBook())->loadOneWhere('name = %s', $book_name);
+      $book = id(new DivinerLiveBook())->loadOneWhere(
+        'name = %s',
+        $book_name);
+
       if (!$book) {
         $book = id(new DivinerLiveBook())
           ->setName($book_name)
           ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
+          ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN)
           ->save();
       }
 
@@ -144,7 +148,6 @@ final class DivinerLivePublisher extends DivinerPublisher {
           ->setContent(null)
           ->save();
       }
-
     }
   }
 

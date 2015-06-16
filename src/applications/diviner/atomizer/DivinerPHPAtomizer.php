@@ -151,9 +151,9 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
       if (count($docs) < count($params)) {
         $atom->addWarning(
           pht(
-            'This call takes %d parameters, but only %d are documented.',
-            count($params),
-            count($docs)));
+            'This call takes %s parameter(s), but only %s are documented.',
+            new PhutilNumber(count($params)),
+            new PhutilNumber(count($docs))));
       }
     }
 
@@ -212,13 +212,13 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
           if (preg_match('/@(return|param|task|author)/', $value, $matches)) {
             $atom->addWarning(
               pht(
-                'Atom "%s" is preceded by a comment containing "@%s", but the '.
-                'comment is not a documentation comment. Documentation '.
-                'comments must begin with "%s", followed by a newline. Did '.
+                'Atom "%s" is preceded by a comment containing `%s`, but '.
+                'the comment is not a documentation comment. Documentation '.
+                'comments must begin with `%s`, followed by a newline. Did '.
                 'you mean to use a documentation comment? (As the comment is '.
                 'not a documentation comment, it will be ignored.)',
                 $atom->getName(),
-                $matches[1],
+                '@'.$matches[1],
                 '/**'));
           }
         }
@@ -248,8 +248,8 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
           if ($matches[1] !== $name) {
             $atom->addWarning(
               pht(
-                'Parameter "%s" is named "%s" in the documentation. The '.
-                'documentation may be out of date.',
+                'Parameter "%s" is named "%s" in the documentation. '.
+                'The documentation may be out of date.',
                 $name,
                 $matches[1]));
           }
@@ -292,8 +292,8 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
       if ($return) {
         $atom->addWarning(
           pht(
-            'Method %s has explicitly documented %s. The %s method always '.
-            'returns %s. Diviner documents this implicitly.',
+            'Method `%s` has explicitly documented `%s`. The `%s` method '.
+            'always returns `%s`. Diviner documents this implicitly.',
             '__construct()',
             '@return',
             '__construct()',
