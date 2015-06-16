@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '9993fd3a',
+    'core.pkg.css' => 'df56364d',
     'core.pkg.js' => '41f5edc5',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => 'fe951924',
@@ -33,7 +33,7 @@ return array(
     'rsrc/css/aphront/typeahead.css' => '0e403212',
     'rsrc/css/application/almanac/almanac.css' => 'dbb9b3af',
     'rsrc/css/application/auth/auth.css' => '44975d4b',
-    'rsrc/css/application/base/main-menu-view.css' => '5e8c1ab7',
+    'rsrc/css/application/base/main-menu-view.css' => '44b4a289',
     'rsrc/css/application/base/notification-menu.css' => '713df25a',
     'rsrc/css/application/base/phabricator-application-launch-view.css' => '9a233ed6',
     'rsrc/css/application/base/phui-theme.css' => '1ccdcc84',
@@ -46,7 +46,7 @@ return array(
     'rsrc/css/application/config/config-welcome.css' => '6abd79be',
     'rsrc/css/application/config/setup-issue.css' => '631c4e92',
     'rsrc/css/application/config/unhandled-exception.css' => '4c96257a',
-    'rsrc/css/application/conpherence/durable-column.css' => '09f1eb27',
+    'rsrc/css/application/conpherence/durable-column.css' => '1c938382',
     'rsrc/css/application/conpherence/menu.css' => 'f9f1d143',
     'rsrc/css/application/conpherence/message-pane.css' => '02d8d6aa',
     'rsrc/css/application/conpherence/notification.css' => '919974b6',
@@ -499,7 +499,7 @@ return array(
     'conduit-api-css' => '7bc725c4',
     'config-options-css' => '7fedf08b',
     'config-welcome-css' => '6abd79be',
-    'conpherence-durable-column-view' => '09f1eb27',
+    'conpherence-durable-column-view' => '1c938382',
     'conpherence-menu-css' => 'f9f1d143',
     'conpherence-message-pane-css' => '02d8d6aa',
     'conpherence-notification-css' => '919974b6',
@@ -722,7 +722,7 @@ return array(
     'phabricator-hovercard-view-css' => '0d665853',
     'phabricator-keyboard-shortcut' => '1ae869f2',
     'phabricator-keyboard-shortcut-manager' => 'c1700f6f',
-    'phabricator-main-menu-view' => '5e8c1ab7',
+    'phabricator-main-menu-view' => '44b4a289',
     'phabricator-nav-view-css' => '0ecd30a1',
     'phabricator-notification' => '0c6946e7',
     'phabricator-notification-css' => '9c279160',
@@ -1103,6 +1103,9 @@ return array(
       'javelin-uri',
       'javelin-install',
     ),
+    '44b4a289' => array(
+      'phui-theme-css',
+    ),
     '453c5375' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1263,9 +1266,6 @@ return array(
       'javelin-behavior',
       'javelin-stratcom',
       'javelin-dom',
-    ),
-    '5e8c1ab7' => array(
-      'phui-theme-css',
     ),
     '5e9f347c' => array(
       'javelin-behavior',
