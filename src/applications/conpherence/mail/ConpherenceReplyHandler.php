@@ -14,13 +14,15 @@ final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof ConpherenceThread)) {
-      throw new Exception('Mail receiver is not a ConpherenceThread!');
+      throw new Exception(
+        pht(
+          'Mail receiver is not a %s!', '
+          ConpherenceThread'));
     }
   }
 
-  public function getPrivateReplyHandlerEmailAddress(
-    PhabricatorObjectHandle $handle) {
-    return $this->getDefaultPrivateReplyHandlerEmailAddress($handle, 'Z');
+  public function getPrivateReplyHandlerEmailAddress(PhabricatorUser $user) {
+    return $this->getDefaultPrivateReplyHandlerEmailAddress($user, 'Z');
   }
 
   public function getPublicReplyHandlerEmailAddress() {
@@ -63,7 +65,7 @@ final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
     $xactions = array();
     if ($this->getMailAddedParticipantPHIDs()) {
       $xactions[] = id(new ConpherenceTransaction())
-        ->setTransactionType(ConpherenceTransactionType::TYPE_PARTICIPANTS)
+        ->setTransactionType(ConpherenceTransaction::TYPE_PARTICIPANTS)
         ->setNewValue(array('+' => $this->getMailAddedParticipantPHIDs()));
     }
 

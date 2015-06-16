@@ -8,7 +8,7 @@ final class ReleephRequestorFieldSpecification
   }
 
   public function getName() {
-    return 'Requestor';
+    return pht('Requestor');
   }
 
   public function getRequiredHandlePHIDsForPropertyView() {
@@ -35,7 +35,7 @@ final class ReleephRequestorFieldSpecification
   }
 
   public function renderLabelForCommitMessage() {
-    return 'Requested By';
+    return pht('Requested By');
   }
 
   public function renderValueForCommitMessage() {

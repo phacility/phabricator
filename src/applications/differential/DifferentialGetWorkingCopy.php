@@ -4,7 +4,7 @@
  * Can't find a good place for this, so I'm putting it in the most notably
  * wrong place.
  */
-final class DifferentialGetWorkingCopy {
+final class DifferentialGetWorkingCopy extends Phobject {
 
   /**
    * Creates and/or cleans a workspace for the requested repo.

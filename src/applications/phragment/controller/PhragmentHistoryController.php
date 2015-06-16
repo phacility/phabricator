@@ -59,7 +59,7 @@ final class PhragmentHistoryController extends PhragmentController {
     $first = true;
     foreach ($versions as $version) {
       $item = id(new PHUIObjectItemView());
-      $item->setHeader('Version '.$version->getSequence());
+      $item->setHeader(pht('Version %s', $version->getSequence()));
       $item->setHref($version->getURI());
       $item->addAttribute(phabricator_datetime(
         $version->getDateCreated(),
@@ -67,7 +67,7 @@ final class PhragmentHistoryController extends PhragmentController {
 
       if ($version->getFilePHID() === null) {
         $item->setDisabled(true);
-        $item->addAttribute('Deletion');
+        $item->addAttribute(pht('Deletion'));
       }
 
       if (!$first && $can_edit) {

@@ -19,8 +19,7 @@ final class DifferentialRevisionIDField
 
   public function getFieldDescription() {
     return pht(
-      'Ties commits to revisions and provides a permananent link between '.
-      'them.');
+      'Ties commits to revisions and provides a permanent link between them.');
   }
 
   public function canDisableField() {

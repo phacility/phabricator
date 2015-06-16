@@ -11,7 +11,7 @@ final class ChatLogQueryConduitAPIMethod extends ChatLogConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Retrieve chatter.';
+    return pht('Retrieve chatter.');
   }
 
   protected function defineParamTypes() {

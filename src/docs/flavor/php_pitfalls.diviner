@@ -4,11 +4,11 @@
 This document discusses difficult traps and pitfalls in PHP, and how to avoid,
 work around, or at least understand them.
 
-= array_merge() in Incredibly Slow When Merging A List of Arrays =
+= `array_merge()` in Incredibly Slow When Merging A List of Arrays =
 
 If you merge a list of arrays like this:
 
-  COUNTEREXAMPLE
+  COUNTEREXAMPLE, lang=php
   $result = array();
   foreach ($list_of_lists as $one_list) {
     $result = array_merge($result, $one_list);
@@ -21,18 +21,19 @@ you iterate.
 In a libphutil environment, you can use @{function@libphutil:array_mergev}
 instead.
 
-= var_export() Hates Baby Animals =
+= `var_export()` Hates Baby Animals =
 
-If you try to var_export() an object that contains recursive references, your
+If you try to `var_export()` an object that contains recursive references, your
 program will terminate. You have no chance to intercept or react to this or
-otherwise stop it from happening. Avoid var_export() unless you are certain
-you have only simple data. You can use print_r() or var_dump() to display
+otherwise stop it from happening. Avoid `var_export()` unless you are certain
+you have only simple data. You can use `print_r()` or `var_dump()` to display
 complex variables safely.
 
-= isset(), empty() and Truthiness =
+= `isset()`, `empty()` and Truthiness =
 
-A value is "truthy" if it evaluates to true in an ##if## clause:
+A value is "truthy" if it evaluates to true in an `if` clause:
 
+  lang=php
   $value = something();
   if ($value) {
     // Value is truthy.
@@ -59,16 +60,16 @@ empty comments) is wrong in PHP:
 
 This is wrong because it prevents users from making the comment "0". //THIS
 COMMENT IS TOTALLY AWESOME AND I MAKE IT ALL THE TIME SO YOU HAD BETTER NOT
-BREAK IT!!!// A better test is probably strlen().
+BREAK IT!!!// A better test is probably `strlen()`.
 
-In addition to truth tests with ##if##, PHP has two special truthiness operators
-which look like functions but aren't: empty() and isset(). These operators help
-deal with undeclared variables.
+In addition to truth tests with `if`, PHP has two special truthiness operators
+which look like functions but aren't: `empty()` and `isset()`. These operators
+help deal with undeclared variables.
 
 In PHP, there are two major cases where you get undeclared variables -- either
 you directly use a variable without declaring it:
 
-  COUNTEREXAMPLE
+  COUNTEREXAMPLE, lang=php
   function f() {
     if ($not_declared) {
       // ...
@@ -84,218 +85,245 @@ you directly use a variable without declaring it:
     }
   }
 
-When you do either of these, PHP issues a warning. Avoid these warnings by using
-empty() and isset() to do tests that are safe to apply to undeclared variables.
+When you do either of these, PHP issues a warning. Avoid these warnings by
+using `empty()` and `isset()` to do tests that are safe to apply to undeclared
+variables.
 
-empty() evaluates truthiness exactly opposite of if(). isset() returns true for
-everything except null. This is the truth table:
+`empty()` evaluates truthiness exactly opposite of `if()`. `isset()` returns
+`true` for everything except `null`. This is the truth table:
 
-  VALUE             if()        empty()     isset()
+| Value | `if()` | `empty()` | `isset()` |
+|-------|--------|-----------|-----------|
+| `null` | `false` | `true` | `false` |
+| `0` | `false` | `true` | `true` |
+| `0.0` | `false` | `true` | `true` |
+| `"0"` | `false` | `true` | `true` |
+| `""` | `false` | `true` | `true` |
+| `false` | `false` | `true` | `true` |
+| `array()` | `false` | `true` | `true` |
+| Everything else | `true` | `false` | `true` |
 
-  null              false       true        false
-  0                 false       true        true
-  0.0               false       true        true
-  "0"               false       true        true
-  ""                false       true        true
-  false             false       true        true
-  array()           false       true        true
-  EVERYTHING ELSE   true        false       true
+The value of these operators is that they accept undeclared variables and do
+not issue a warning. Specifically, if you try to do this you get a warning:
 
-The value of these operators is that they accept undeclared variables and do not
-issue a warning. Specifically, if you try to do this you get a warning:
-
-  COUNTEREXAMPLE
-  if ($not_previously_declared) {         // PHP Notice:  Undefined variable!
-    // ...
-  }
+```lang=php, COUNTEREXAMPLE
+if ($not_previously_declared) {         // PHP Notice:  Undefined variable!
+  // ...
+}
+```
 
 But these are fine:
 
-  if (empty($not_previously_declared)) {  // No notice, returns true.
-    // ...
-  }
-  if (isset($not_previously_declared)) {  // No notice, returns false.
-    // ...
-  }
+```lang=php
+if (empty($not_previously_declared)) {  // No notice, returns true.
+  // ...
+}
+if (isset($not_previously_declared)) {  // No notice, returns false.
+  // ...
+}
+```
 
-So, isset() really means is_declared_and_is_set_to_something_other_than_null().
-empty() really means is_falsey_or_is_not_declared(). Thus:
+So, `isset()` really means
+`is_declared_and_is_set_to_something_other_than_null()`. `empty()` really means
+`is_falsey_or_is_not_declared()`. Thus:
 
-  - If a variable is known to exist, test falsiness with if (!$v), not empty().
-    In particular, test for empty arrays with if (!$array). There is no reason
-    to ever use empty() on a declared variable.
-  - When you use isset() on an array key, like isset($array['key']), it will
-    evaluate to "false" if the key exists but has the value null! Test for index
-    existence with array_key_exists().
+  - If a variable is known to exist, test falsiness with `if (!$v)`, not
+    `empty()`. In particular, test for empty arrays with `if (!$array)`. There
+    is no reason to ever use `empty()` on a declared variable.
+  - When you use `isset()` on an array key, like `isset($array['key'])`, it
+    will evaluate to "false" if the key exists but has the value `null`! Test
+    for index existence with `array_key_exists()`.
 
-Put another way, use isset() if you want to type "if ($value !== null)" but are
-testing something that may not be declared. Use empty() if you want to type
-"if (!$value)" but you are testing something that may not be declared.
+Put another way, use `isset()` if you want to type `if ($value !== null)` but
+are testing something that may not be declared. Use `empty()` if you want to
+type `if (!$value)` but you are testing something that may not be declared.
 
 = usort(), uksort(), and uasort() are Slow =
 
 This family of functions is often extremely slow for large datasets. You should
 avoid them if at all possible. Instead, build an array which contains surrogate
 keys that are naturally sortable with a function that uses native comparison
-(e.g., sort(), asort(), ksort(), or natcasesort()). Sort this array instead, and
-use it to reorder the original array.
+(e.g., `sort()`, `asort()`, `ksort()`, or `natcasesort()`). Sort this array
+instead, and use it to reorder the original array.
 
 In a libphutil environment, you can often do this easily with
 @{function@libphutil:isort} or @{function@libphutil:msort}.
 
-= array_intersect() and array_diff() are Also Slow =
+= `array_intersect()` and `array_diff()` are Also Slow =
 
 These functions are much slower for even moderately large inputs than
-array_intersect_key() and array_diff_key(), because they can not make the
-assumption that their inputs are unique scalars as the ##key## varieties can.
-Strongly prefer the ##key## varieties.
+`array_intersect_key()` and `array_diff_key()`, because they can not make the
+assumption that their inputs are unique scalars as the `key` varieties can.
+Strongly prefer the `key` varieties.
 
-= array_uintersect() and array_udiff() are Definitely Slow Too =
+= `array_uintersect()` and `array_udiff()` are Definitely Slow Too =
 
-These functions have the problems of both the ##usort()## family and the
+These functions have the problems of both the `usort()` family and the
 `array_diff()` family. Avoid them.
 
-= foreach() Does Not Create Scope =
+= `foreach()` Does Not Create Scope =
 
-Variables survive outside of the scope of foreach(). More problematically,
-references survive outside of the scope of foreach(). This code mutates
+Variables survive outside of the scope of `foreach()`. More problematically,
+references survive outside of the scope of `foreach()`. This code mutates
 `$array` because the reference leaks from the first loop to the second:
 
-  COUNTEREXAMPLE
-  $array = range(1, 3);
-  echo implode(',', $array); // Outputs '1,2,3'
-  foreach ($array as &$value) {}
-  echo implode(',', $array); // Outputs '1,2,3'
-  foreach ($array as $value) {}
-  echo implode(',', $array); // Outputs '1,2,2'
+```lang=php, COUNTEREXAMPLE
+$array = range(1, 3);
+echo implode(',', $array); // Outputs '1,2,3'
+foreach ($array as &$value) {}
+echo implode(',', $array); // Outputs '1,2,3'
+foreach ($array as $value) {}
+echo implode(',', $array); // Outputs '1,2,2'
+```
 
 The easiest way to avoid this is to avoid using foreach-by-reference. If you do
 use it, unset the reference after the loop:
 
-  foreach ($array as &$value) {
-    // ...
-  }
-  unset($value);
+```lang=php
+foreach ($array as &$value) {
+  // ...
+}
+unset($value);
+```
 
-= unserialize() is Incredibly Slow on Large Datasets =
+= `unserialize()` is Incredibly Slow on Large Datasets =
 
-The performance of unserialize() is nonlinear in the number of zvals you
-unserialize, roughly O(N^2).
+The performance of `unserialize()` is nonlinear in the number of zvals you
+unserialize, roughly `O(N^2)`.
 
-  zvals       approximate time
-  10000       5ms
-  100000      85ms
-  1000000     8,000ms
-  10000000    72 billion years
+| zvals | Approximate time |
+|-------|------------------|
+| 10000 |5ms |
+| 100000 | 85ms |
+| 1000000 | 8,000ms |
+| 10000000 | 72 billion years |
 
+= `call_user_func()` Breaks References =
 
-= call_user_func() Breaks References =
-
-If you use call_use_func() to invoke a function which takes parameters by
+If you use `call_use_func()` to invoke a function which takes parameters by
 reference, the variables you pass in will have their references broken and will
 emerge unmodified. That is, if you have a function that takes references:
 
-  function add_one(&$v) {
-    $v++;
-  }
+```lang=php
+function add_one(&$v) {
+  $v++;
+}
+```
 
-...and you call it with call_user_func():
+...and you call it with `call_user_func()`:
 
-  COUNTEREXAMPLE
-  $x = 41;
-  call_user_func('add_one', $x);
+```lang=php, COUNTEREXAMPLE
+$x = 41;
+call_user_func('add_one', $x);
+```
 
-...##$x## will not be modified. The solution is to use call_user_func_array()
+...`$x` will not be modified. The solution is to use `call_user_func_array()`
 and wrap the reference in an array:
 
-  $x = 41;
-  call_user_func_array(
-    'add_one',
-    array(&$x)); // Note '&$x'!
+```lang=php
+$x = 41;
+call_user_func_array(
+  'add_one',
+  array(&$x)); // Note '&$x'!
+```
 
 This will work as expected.
 
-= You Can't Throw From __toString() =
+= You Can't Throw From `__toString()` =
 
-If you throw from __toString(), your program will terminate uselessly and you
+If you throw from `__toString()`, your program will terminate uselessly and you
 won't get the exception.
 
 = An Object Can Have Any Scalar as a Property =
 
 Object properties are not limited to legal variable names:
 
-  $property = '!@#$%^&*()';
-  $obj->$property = 'zebra';
-  echo $obj->$property;       // Outputs 'zebra'.
+```lang=php
+$property = '!@#$%^&*()';
+$obj->$property = 'zebra';
+echo $obj->$property;       // Outputs 'zebra'.
+```
 
 So, don't make assumptions about property names.
 
-= There is an (object) Cast =
+= There is an `(object)` Cast =
 
 You can cast a dictionary into an object.
 
-  $obj = (object)array('flavor' => 'coconut');
-  echo $obj->flavor;      // Outputs 'coconut'.
-  echo get_class($obj);   // Outputs 'stdClass'.
+```lang=php
+$obj = (object)array('flavor' => 'coconut');
+echo $obj->flavor;      // Outputs 'coconut'.
+echo get_class($obj);   // Outputs 'stdClass'.
+```
 
 This is occasionally useful, mostly to force an object to become a Javascript
-dictionary (vs a list) when passed to json_encode().
+dictionary (vs a list) when passed to `json_encode()`.
 
-= Invoking "new" With an Argument Vector is Really Hard =
+= Invoking `new` With an Argument Vector is Really Hard =
 
-If you have some ##$class_name## and some ##$argv## of constructor
-arguments and you want to do this:
+If you have some `$class_name` and some `$argv` of constructor arguments
+and you want to do this:
 
-  new $class_name($argv[0], $argv[1], ...);
+```lang=php
+new $class_name($argv[0], $argv[1], ...);
+```
 
 ...you'll probably invent a very interesting, very novel solution that is very
 wrong. In a libphutil environment, solve this problem with
-@{function@libphutil:newv}. Elsewhere, copy newv()'s implementation.
+@{function@libphutil:newv}. Elsewhere, copy `newv()`'s implementation.
 
 = Equality is not Transitive =
 
 This isn't terribly surprising since equality isn't transitive in a lot of
-languages, but the == operator is not transitive:
+languages, but the `==` operator is not transitive:
 
-  $a = ''; $b = 0; $c = '0a';
-  $a == $b; // true
-  $b == $c; // true
-  $c == $a; // false!
+```lang=php
+$a = ''; $b = 0; $c = '0a';
+$a == $b; // true
+$b == $c; // true
+$c == $a; // false!
+```
 
 When either operand is an integer, the other operand is cast to an integer
-before comparison. Avoid this and similar pitfalls by using the === operator,
+before comparison. Avoid this and similar pitfalls by using the `===` operator,
 which is transitive.
 
 = All 676 Letters in the Alphabet =
 
 This doesn't do what you'd expect it to do in C:
 
-  for ($c = 'a'; $c <= 'z'; $c++) {
-    // ...
-  }
+```lang=php
+for ($c = 'a'; $c <= 'z'; $c++) {
+  // ...
+}
+```
 
-This is because the successor to 'z' is 'aa', which is "less than" 'z'. The
-loop will run for ~700 iterations until it reaches 'zz' and terminates. That is,
-`$c` will take on these values:
+This is because the successor to `z` is `aa`, which is "less than" `z`.
+The loop will run for ~700 iterations until it reaches `zz` and terminates.
+That is, `$c` will take on these values:
 
-  a
-  b
-  ...
-  y
-  z
-  aa // loop continues because 'aa' <= 'z'
-  ab
-  ...
-  mf
-  mg
-  ...
-  zw
-  zx
-  zy
-  zz // loop now terminates because 'zz' > 'z'
+```
+a
+b
+...
+y
+z
+aa // loop continues because 'aa' <= 'z'
+ab
+...
+mf
+mg
+...
+zw
+zx
+zy
+zz // loop now terminates because 'zz' > 'z'
+```
 
 Instead, use this loop:
 
-  foreach (range('a', 'z') as $c) {
-    // ...
-  }
+```lang=php
+foreach (range('a', 'z') as $c) {
+  // ...
+}
+```

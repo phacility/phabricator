@@ -19,20 +19,37 @@ final class DifferentialLintField
     return true;
   }
 
-  public function renderPropertyViewLabel() {
+  public function renderPropertyViewValue(array $handles) {
+    return null;
+  }
+
+  public function shouldAppearInDiffPropertyView() {
+    return true;
+  }
+
+  public function renderDiffPropertyViewLabel(DifferentialDiff $diff) {
     return $this->getFieldName();
   }
 
-  public function getRequiredDiffPropertiesForRevisionView() {
-    return array(
+  public function renderDiffPropertyViewValue(DifferentialDiff $diff) {
+    // TODO: This load is slightly inefficient, but most of this is moving
+    // to Harbormaster and this simplifies the transition. Eat 1-2 extra
+    // queries for now.
+    $keys = array(
       'arc:lint',
       'arc:lint-excuse',
       'arc:lint-postponed',
     );
-  }
 
-  public function renderPropertyViewValue(array $handles) {
-    $diff = $this->getObject()->getActiveDiff();
+    $properties = id(new DifferentialDiffProperty())->loadAllWhere(
+      'diffID = %d AND name IN (%Ls)',
+      $diff->getID(),
+      $keys);
+    $properties = mpull($properties, 'getData', 'getName');
+
+    foreach ($keys as $key) {
+      $diff->attachProperty($key, idx($properties, $key));
+    }
 
     $path_changesets = mpull($diff->loadChangesets(), 'getID', 'getFilename');
 
@@ -83,7 +100,7 @@ final class DifferentialLintField
           $name = idx($message, 'name');
           $description = idx($message, 'description');
 
-          $line_link = 'line '.intval($line);
+          $line_link = pht('line %d', intval($line));
           if (isset($path_changesets[$path])) {
             $href = '#C'.$path_changesets[$path].'NL'.max(1, $line);
 
@@ -130,7 +147,9 @@ final class DifferentialLintField
                 idx($location, 'path', $path).
                 ($other_line ? ":{$other_line}" : '');
             }
-            $description .= "\nOther locations: ".implode(', ', $locations);
+            $description .= "\n".pht(
+              'Other locations: %s',
+              implode(', ', $locations));
           }
 
           if (strlen($description)) {
@@ -231,7 +250,9 @@ final class DifferentialLintField
       }
     }
 
-    return 'Show Full Lint Results ('.implode(', ', $show).')';
+    return pht(
+      'Show Full Lint Results (%s)',
+      implode(', ', $show));
   }
 
   public function getWarningsForDetailView() {

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorHandleObjectSelectorDataView {
+final class PhabricatorHandleObjectSelectorDataView extends Phobject {
 
   private $handle;
 

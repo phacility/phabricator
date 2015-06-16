@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorPHIDType {
+abstract class PhabricatorPHIDType extends Phobject {
 
   final public function getTypeConstant() {
     $class = new ReflectionClass($this);
@@ -9,16 +9,20 @@ abstract class PhabricatorPHIDType {
     if ($const === false) {
       throw new Exception(
         pht(
-          'PHIDType class "%s" must define an TYPECONST property.',
-          get_class($this)));
+          '%s class "%s" must define a %s property.',
+          __CLASS__,
+          get_class($this),
+          'TYPECONST'));
     }
 
     if (!is_string($const) || !preg_match('/^[A-Z]{4}$/', $const)) {
       throw new Exception(
         pht(
-          'PHIDType class "%s" has an invalid TYPECONST property. PHID '.
+          '%s class "%s" has an invalid %s property. PHID '.
           'constants must be a four character uppercase string.',
-          get_class($this)));
+          __CLASS__,
+          get_class($this),
+          'TYPECONST'));
     }
 
     return $const;
@@ -154,7 +158,7 @@ abstract class PhabricatorPHIDType {
    *
    * @return dict<string, PhabricatorPHIDType> Map of type constants to types.
    */
-  public static function getAllTypes() {
+  final public static function getAllTypes() {
     static $types;
     if ($types === null) {
       $objects = id(new PhutilSymbolLoader())

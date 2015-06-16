@@ -137,7 +137,7 @@ final class PhabricatorSearchApplicationSearchEngine
           )))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Query')
+          ->setLabel(pht('Query'))
           ->setName('query')
           ->setValue($saved->getParameter('query')))
       ->appendChild($status_control)
@@ -145,25 +145,25 @@ final class PhabricatorSearchApplicationSearchEngine
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setName('authorPHIDs')
-          ->setLabel('Authors')
+          ->setLabel(pht('Authors'))
           ->setDatasource(new PhabricatorPeopleUserFunctionDatasource())
           ->setValue($author_phids))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setName('ownerPHIDs')
-          ->setLabel('Owners')
+          ->setLabel(pht('Owners'))
           ->setDatasource(new PhabricatorPeopleOwnerDatasource())
           ->setValue($owner_phids))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setName('subscriberPHIDs')
-          ->setLabel('Subscribers')
+          ->setLabel(pht('Subscribers'))
           ->setDatasource(new PhabricatorMetaMTAMailableFunctionDatasource())
           ->setValue($subscriber_phids))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setName('projectPHIDs')
-          ->setLabel('In Any Project')
+          ->setLabel(pht('In Any Project'))
           ->setDatasource(new PhabricatorProjectDatasource())
           ->setValue($project_phids));
   }

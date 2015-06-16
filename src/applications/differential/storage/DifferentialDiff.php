@@ -37,7 +37,6 @@ final class DifferentialDiff
 
   private $unsavedChangesets = array();
   private $changesets = self::ATTACHABLE;
-  private $arcanistProject = self::ATTACHABLE;
   private $revision = self::ATTACHABLE;
   private $properties = array();
 
@@ -106,25 +105,6 @@ final class DifferentialDiff
     return id(new DifferentialChangeset())->loadAllWhere(
       'diffID = %d',
       $this->getID());
-  }
-
-  public function attachArcanistProject(
-    PhabricatorRepositoryArcanistProject $project = null) {
-    $this->arcanistProject = $project;
-    return $this;
-  }
-
-  public function getArcanistProject() {
-    return $this->assertAttached($this->arcanistProject);
-  }
-
-  public function getArcanistProjectName() {
-    $name = '';
-    if ($this->arcanistProject) {
-      $project = $this->getArcanistProject();
-      $name = $project->getName();
-    }
-    return $name;
   }
 
   public function save() {
@@ -262,7 +242,6 @@ final class DifferentialDiff
       'lintStatus' => $this->getLintStatus(),
       'changes' => array(),
       'properties' => array(),
-      'projectName' => $this->getArcanistProjectName(),
     );
 
     $dict['changes'] = $this->buildChangesList();

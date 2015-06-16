@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorMetaMTAAttachment {
+final class PhabricatorMetaMTAAttachment extends Phobject {
   protected $data;
   protected $filename;
   protected $mimetype;

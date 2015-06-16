@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialDiffTestCase extends ArcanistPhutilTestCase {
+final class DifferentialDiffTestCase extends PhutilTestCase {
 
   public function testDetectCopiedCode() {
     $copies = $this->detectCopiesIn('lint_engine.diff');

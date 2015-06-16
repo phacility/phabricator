@@ -13,7 +13,8 @@ final class PhabricatorUser
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorSSHPublicKeyInterface {
+    PhabricatorSSHPublicKeyInterface,
+    PhabricatorApplicationTransactionInterface {
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';
@@ -38,6 +39,7 @@ final class PhabricatorUser
   protected $conduitCertificate;
 
   protected $isSystemAgent = 0;
+  protected $isMailingList = 0;
   protected $isAdmin = 0;
   protected $isDisabled = 0;
   protected $isEmailVerified = 0;
@@ -58,6 +60,7 @@ final class PhabricatorUser
 
   private $authorities = array();
   private $handlePool;
+  private $csrfSalt;
 
   protected function readField($field) {
     switch ($field) {
@@ -73,6 +76,8 @@ final class PhabricatorUser
         return (bool)$this->isDisabled;
       case 'isSystemAgent':
         return (bool)$this->isSystemAgent;
+      case 'isMailingList':
+        return (bool)$this->isMailingList;
       case 'isEmailVerified':
         return (bool)$this->isEmailVerified;
       case 'isApproved':
@@ -112,6 +117,42 @@ final class PhabricatorUser
     return true;
   }
 
+  public function canEstablishWebSessions() {
+    if ($this->getIsMailingList()) {
+      return false;
+    }
+
+    if ($this->getIsSystemAgent()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function canEstablishAPISessions() {
+    if (!$this->isUserActivated()) {
+      return false;
+    }
+
+    if ($this->getIsMailingList()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function canEstablishSSHSessions() {
+    if (!$this->isUserActivated()) {
+      return false;
+    }
+
+    if ($this->getIsMailingList()) {
+      return false;
+    }
+
+    return true;
+  }
+
   /**
    * Returns `true` if this is a standard user who is logged in. Returns `false`
    * for logged out, anonymous, or external users.
@@ -140,6 +181,7 @@ final class PhabricatorUser
         'consoleTab' => 'text64',
         'conduitCertificate' => 'text255',
         'isSystemAgent' => 'bool',
+        'isMailingList' => 'bool',
         'isDisabled' => 'bool',
         'isAdmin' => 'bool',
         'timezoneIdentifier' => 'text255',
@@ -184,8 +226,9 @@ final class PhabricatorUser
   public function setPassword(PhutilOpaqueEnvelope $envelope) {
     if (!$this->getPHID()) {
       throw new Exception(
-        'You can not set a password for an unsaved user because their PHID '.
-        'is a salt component in the password hash.');
+        pht(
+          'You can not set a password for an unsaved user because their PHID '.
+          'is a salt component in the password hash.'));
     }
 
     if (!strlen($envelope->openEnvelope())) {
@@ -297,21 +340,26 @@ final class PhabricatorUser
       self::CSRF_TOKEN_LENGTH);
   }
 
-  /**
-   * @phutil-external-symbol class PhabricatorStartup
-   */
   public function getCSRFToken() {
-    $salt = PhabricatorStartup::getGlobal('csrf.salt');
-    if (!$salt) {
-      $salt = Filesystem::readRandomCharacters(self::CSRF_SALT_LENGTH);
-      PhabricatorStartup::setGlobal('csrf.salt', $salt);
+    if ($this->isOmnipotent()) {
+      // We may end up here when called from the daemons. The omnipotent user
+      // has no meaningful CSRF token, so just return `null`.
+      return null;
     }
+
+    if ($this->csrfSalt === null) {
+      $this->csrfSalt = Filesystem::readRandomCharacters(
+        self::CSRF_SALT_LENGTH);
+    }
+
+    $salt = $this->csrfSalt;
 
     // Generate a token hash to mitigate BREACH attacks against SSL. See
     // discussion in T3684.
     $token = $this->getRawCSRFToken();
     $hash = PhabricatorHash::digest($token, $salt);
-    return 'B@'.$salt.substr($hash, 0, self::CSRF_TOKEN_LENGTH);
+    return self::CSRF_BREACH_PREFIX.$salt.substr(
+        $hash, 0, self::CSRF_TOKEN_LENGTH);
   }
 
   public function validateCSRFToken($token) {
@@ -372,7 +420,7 @@ final class PhabricatorUser
           }
           break;
         default:
-          throw new Exception('Unknown CSRF token format!');
+          throw new Exception(pht('Unknown CSRF token format!'));
       }
     }
 
@@ -394,6 +442,10 @@ final class PhabricatorUser
     $vec = $vec.$key.$time_block;
 
     return substr(PhabricatorHash::digest($vec), 0, $len);
+  }
+
+  public function getUserProfile() {
+    return $this->assertAttached($this->profile);
   }
 
   public function attachUserProfile(PhabricatorUserProfile $profile) {
@@ -421,7 +473,7 @@ final class PhabricatorUser
   public function loadPrimaryEmailAddress() {
     $email = $this->loadPrimaryEmail();
     if (!$email) {
-      throw new Exception('User has no primary email address!');
+      throw new Exception(pht('User has no primary email address!'));
     }
     return $email->getAddress();
   }
@@ -560,36 +612,31 @@ final class PhabricatorUser
       $this->loadPrimaryEmail(),
       PhabricatorAuthSessionEngine::ONETIME_WELCOME);
 
-    $body = <<<EOBODY
-Welcome to Phabricator!
-
-{$admin_username} ({$admin_realname}) has created an account for you.
-
-  Username: {$user_username}
-
-To login to Phabricator, follow this link and set a password:
-
-  {$uri}
-
-After you have set a password, you can login in the future by going here:
-
-  {$base_uri}
-
-EOBODY;
+    $body = pht(
+      "Welcome to Phabricator!\n\n".
+      "%s (%s) has created an account for you.\n\n".
+      "  Username: %s\n\n".
+      "To login to Phabricator, follow this link and set a password:\n\n".
+      "  %s\n\n".
+      "After you have set a password, you can login in the future by ".
+      "going here:\n\n".
+      "  %s\n",
+      $admin_username,
+      $admin_realname,
+      $user_username,
+      $uri,
+      $base_uri);
 
     if (!$is_serious) {
-      $body .= <<<EOBODY
-
-Love,
-Phabricator
-
-EOBODY;
+      $body .= sprintf(
+        "\n%s\n",
+        pht("Love,\nPhabricator"));
     }
 
     $mail = id(new PhabricatorMetaMTAMail())
       ->addTos(array($this->getPHID()))
       ->setForceDelivery(true)
-      ->setSubject('[Phabricator] Welcome to Phabricator')
+      ->setSubject(pht('[Phabricator] Welcome to Phabricator'))
       ->setBody($body)
       ->saveAndSend();
   }
@@ -609,31 +656,36 @@ EOBODY;
         $this,
         null,
         PhabricatorAuthSessionEngine::ONETIME_USERNAME);
-      $password_instructions = <<<EOTXT
-If you use a password to login, you'll need to reset it before you can login
-again. You can reset your password by following this link:
-
-  {$uri}
-
-And, of course, you'll need to use your new username to login from now on. If
-you use OAuth to login, nothing should change.
-
-EOTXT;
+      $password_instructions = sprintf(
+        "%s\n\n  %s\n\n%s\n",
+        pht(
+          "If you use a password to login, you'll need to reset it ".
+          "before you can login again. You can reset your password by ".
+          "following this link:"),
+        $uri,
+        pht(
+          "And, of course, you'll need to use your new username to login ".
+          "from now on. If you use OAuth to login, nothing should change."));
     }
 
-    $body = <<<EOBODY
-{$admin_username} ({$admin_realname}) has changed your Phabricator username.
-
-  Old Username: {$old_username}
-  New Username: {$new_username}
-
-{$password_instructions}
-EOBODY;
+    $body = sprintf(
+      "%s\n\n  %s\n  %s\n\n%s",
+      pht(
+        '%s (%s) has changed your Phabricator username.',
+        $admin_username,
+        $admin_realname),
+      pht(
+        'Old Username: %s',
+        $old_username),
+      pht(
+        'New Username: %s',
+        $new_username),
+      $password_instructions);
 
     $mail = id(new PhabricatorMetaMTAMail())
       ->addTos(array($this->getPHID()))
       ->setForceDelivery(true)
-      ->setSubject('[Phabricator] Username Changed')
+      ->setSubject(pht('[Phabricator] Username Changed'))
       ->setBody($body)
       ->saveAndSend();
   }
@@ -700,6 +752,29 @@ EOBODY;
     return id(new PhabricatorUser())->loadOneWhere(
       'phid = %s',
       $email->getUserPHID());
+  }
+
+  public function getDefaultSpacePHID() {
+    // TODO: We might let the user switch which space they're "in" later on;
+    // for now just use the global space if one exists.
+
+    // If the viewer has access to the default space, use that.
+    $spaces = PhabricatorSpacesNamespaceQuery::getViewerActiveSpaces($this);
+    foreach ($spaces as $space) {
+      if ($space->getIsDefaultNamespace()) {
+        return $space->getPHID();
+      }
+    }
+
+    // Otherwise, use the space with the lowest ID that they have access to.
+    // This just tends to keep the default stable and predictable over time,
+    // so adding a new space won't change behavior for users.
+    if ($spaces) {
+      $spaces = msort($spaces, 'getID');
+      return head($spaces)->getPHID();
+    }
+
+    return null;
   }
 
 
@@ -1027,7 +1102,7 @@ EOBODY;
       case PhabricatorPolicyCapability::CAN_VIEW:
         return PhabricatorPolicies::POLICY_PUBLIC;
       case PhabricatorPolicyCapability::CAN_EDIT:
-        if ($this->getIsSystemAgent()) {
+        if ($this->getIsSystemAgent() || $this->getIsMailingList()) {
           return PhabricatorPolicies::POLICY_ADMIN;
         } else {
           return PhabricatorPolicies::POLICY_NOONE;
@@ -1148,6 +1223,28 @@ EOBODY;
 
   public function getSSHKeyDefaultName() {
     return 'id_rsa_phabricator';
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorUserProfileEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorUserTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
   }
 
 }

@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorSetupCheck {
+abstract class PhabricatorSetupCheck extends Phobject {
 
   private $issues;
 
@@ -111,7 +111,7 @@ abstract class PhabricatorSetupCheck {
     }
   }
 
-  final public static function runAllChecks() {
+  final public static function loadAllChecks() {
     $symbols = id(new PhutilSymbolLoader())
       ->setAncestorClass(__CLASS__)
       ->setConcreteOnly(true)
@@ -122,7 +122,11 @@ abstract class PhabricatorSetupCheck {
       $checks[] = newv($symbol['name'], array());
     }
 
-    $checks = msort($checks, 'getExecutionOrder');
+    return msort($checks, 'getExecutionOrder');
+  }
+
+  final public static function runAllChecks() {
+    $checks = self::loadAllChecks();
 
     $issues = array();
     foreach ($checks as $check) {
@@ -130,7 +134,9 @@ abstract class PhabricatorSetupCheck {
       foreach ($check->getIssues() as $key => $issue) {
         if (isset($issues[$key])) {
           throw new Exception(
-            "Two setup checks raised an issue with key '{$key}'!");
+            pht(
+              "Two setup checks raised an issue with key '%s'!",
+              $key));
         }
         $issues[$key] = $issue;
         if ($issue->getIsFatal()) {
@@ -139,8 +145,8 @@ abstract class PhabricatorSetupCheck {
       }
     }
 
-    foreach (PhabricatorEnv::getEnvConfig('config.ignore-issues')
-              as $ignorable => $derp) {
+    $ignore_issues = PhabricatorEnv::getEnvConfig('config.ignore-issues');
+    foreach ($ignore_issues as $ignorable => $derp) {
       if (isset($issues[$ignorable])) {
         $issues[$ignorable]->setIsIgnored(true);
       }

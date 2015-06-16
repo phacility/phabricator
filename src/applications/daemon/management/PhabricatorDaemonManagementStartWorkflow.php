@@ -9,20 +9,21 @@ final class PhabricatorDaemonManagementStartWorkflow
       ->setSynopsis(
         pht(
           'Start the standard configured collection of Phabricator daemons. '.
-          'This is appropriate for most installs. Use **phd launch** to '.
-          'customize which daemons are launched.'))
+          'This is appropriate for most installs. Use **%s** to '.
+          'customize which daemons are launched.',
+          'phd launch'))
       ->setArguments(
         array(
           array(
             'name' => 'keep-leases',
             'help' => pht(
-              'By default, **phd start** will free all task leases held by '.
-              'the daemons. With this flag, this step will be skipped.'),
+              'By default, **%s** will free all task leases held by '.
+              'the daemons. With this flag, this step will be skipped.',
+              'phd start'),
           ),
           array(
             'name' => 'force',
-            'help' => pht(
-              'Start daemons even if daemons are already running.'),
+            'help' => pht('Start daemons even if daemons are already running.'),
           ),
           $this->getAutoscaleReserveArgument(),
         ));

@@ -6,6 +6,8 @@
 class PhabricatorMailImplementationPHPMailerLiteAdapter
   extends PhabricatorMailImplementationAdapter {
 
+  protected $mailer;
+
   /**
    * @phutil-external-symbol class PHPMailerLite
    */

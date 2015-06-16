@@ -102,8 +102,10 @@ final class PhabricatorLocalDiskFileStorageEngine
 
     if (!$root || $root == '/' || $root[0] != '/') {
       throw new PhabricatorFileStorageConfigurationException(
-        "Malformed local disk storage root. You must provide an absolute ".
-        "path, and can not use '/' as the root.");
+        pht(
+          "Malformed local disk storage root. You must provide an absolute ".
+          "path, and can not use '%s' as the root.",
+          '/'));
     }
 
     return rtrim($root, '/');
@@ -123,7 +125,9 @@ final class PhabricatorLocalDiskFileStorageEngine
     // we're only accessing local storage just in case.
     if (!preg_match('@^[a-f0-9]{2}/[a-f0-9]{2}/[a-f0-9]{28}\z@', $handle)) {
       throw new Exception(
-        "Local disk filesystem handle '{$handle}' is malformed!");
+        pht(
+          "Local disk filesystem handle '%s' is malformed!",
+          $handle));
     }
     $root = $this->getLocalDiskFileStorageRoot();
     return $root.'/'.$handle;

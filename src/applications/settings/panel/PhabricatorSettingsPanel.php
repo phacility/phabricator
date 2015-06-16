@@ -13,7 +13,7 @@
  * @task panel    Panel Implementation
  * @task internal Internals
  */
-abstract class PhabricatorSettingsPanel {
+abstract class PhabricatorSettingsPanel extends Phobject {
 
   private $user;
   private $viewer;

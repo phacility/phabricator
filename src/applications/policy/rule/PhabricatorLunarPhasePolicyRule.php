@@ -11,7 +11,11 @@ final class PhabricatorLunarPhasePolicyRule extends PhabricatorPolicyRule {
     return pht('when the moon');
   }
 
-  public function applyRule(PhabricatorUser $viewer, $value) {
+  public function applyRule(
+    PhabricatorUser $viewer,
+    $value,
+    PhabricatorPolicyInterface $object) {
+
     $moon = new PhutilLunarPhase(PhabricatorTime::getNow());
 
     switch ($value) {

@@ -57,8 +57,7 @@ final class PhabricatorStandardCustomFieldLink
   public function appendToApplicationSearchForm(
     PhabricatorApplicationSearchEngine $engine,
     AphrontFormView $form,
-    $value,
-    array $handles) {
+    $value) {
 
     $form->appendChild(
       id(new AphrontFormTextControl())

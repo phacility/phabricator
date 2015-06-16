@@ -16,7 +16,7 @@ final class DifferentialGetRevisionCommentsConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Retrieve Differential Revision Comments.';
+    return pht('Retrieve Differential Revision Comments.');
   }
 
   protected function defineParamTypes() {

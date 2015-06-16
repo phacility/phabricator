@@ -113,6 +113,26 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
   }
 
 
+/* -(  Specialized Query  )-------------------------------------------------- */
+
+  public function existsSymbolsInRepository($repository_phid) {
+    $this
+      ->withRepositoryPHIDs(array($repository_phid))
+      ->setLimit(1);
+
+    $symbol = new PhabricatorRepositorySymbol();
+    $conn_r = $symbol->establishConnection('r');
+
+    $data = queryfx_all(
+      $conn_r,
+      'SELECT * FROM %T %Q %Q',
+      $symbol->getTableName(),
+      $this->buildWhereClause($conn_r),
+      $this->buildLimitClause($conn_r));
+
+    return (!empty($data));
+  }
+
 /* -(  Executing the Query  )------------------------------------------------ */
 
 
@@ -146,10 +166,11 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
         $this->loadPaths($symbols);
       }
       if ($this->needRepositories) {
-        $this->loadRepositories($symbols);
+        $symbols = $this->loadRepositories($symbols);
       }
 
     }
+
 
     return $symbols;
   }
@@ -249,10 +270,16 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
       ->execute();
     $repos = mpull($repos, null, 'getPHID');
 
+    $visible = array();
     foreach ($symbols as $symbol) {
       $repository = idx($repos, $symbol->getRepositoryPHID());
-      $symbol->attachRepository($repository);
+      // repository is null mean "user can't view repo", so hide the symbol
+      if ($repository) {
+        $symbol->attachRepository($repository);
+        $visible[] = $symbol;
+      }
     }
+    return $visible;
   }
 
 }

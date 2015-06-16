@@ -4,14 +4,24 @@
  * Configurable test object for implementing Policy unit tests.
  */
 final class PhabricatorPolicyTestObject
-  implements PhabricatorPolicyInterface {
+  extends Phobject
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorExtendedPolicyInterface {
 
-  private $capabilities           = array();
-  private $policies               = array();
-  private $automaticCapabilities  = array();
+  private $phid;
+  private $capabilities = array();
+  private $policies = array();
+  private $automaticCapabilities = array();
+  private $extendedPolicies = array();
+
+  public function setPHID($phid) {
+    $this->phid = $phid;
+    return $this;
+  }
 
   public function getPHID() {
-    return null;
+    return $this->phid;
   }
 
   public function getCapabilities() {
@@ -44,6 +54,15 @@ final class PhabricatorPolicyTestObject
 
   public function describeAutomaticCapability($capability) {
     return null;
+  }
+
+  public function setExtendedPolicies(array $extended_policies) {
+    $this->extendedPolicies = $extended_policies;
+    return $this;
+  }
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    return idx($this->extendedPolicies, $capability, array());
   }
 
 }

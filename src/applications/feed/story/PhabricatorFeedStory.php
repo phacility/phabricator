@@ -9,6 +9,7 @@
  * @task policy   Policy Implementation
  */
 abstract class PhabricatorFeedStory
+  extends Phobject
   implements
     PhabricatorPolicyInterface,
     PhabricatorMarkupInterface {
@@ -215,7 +216,7 @@ abstract class PhabricatorFeedStory
       case PhabricatorApplicationTransaction::TARGET_TEXT:
         break;
       default:
-        throw new Exception('Unknown rendering target: '.$target);
+        throw new Exception(pht('Unknown rendering target: %s', $target));
         break;
     }
   }
@@ -229,7 +230,9 @@ abstract class PhabricatorFeedStory
     $object = idx($this->objects, $phid);
     if (!$object) {
       throw new Exception(
-        "Story is asking for an object it did not request ('{$phid}')!");
+        pht(
+          "Story is asking for an object it did not request ('%s')!",
+          $phid));
     }
     return $object;
   }
@@ -237,7 +240,7 @@ abstract class PhabricatorFeedStory
   public function getPrimaryObject() {
     $phid = $this->getPrimaryObjectPHID();
     if (!$phid) {
-      throw new Exception('Story has no primary object!');
+      throw new Exception(pht('Story has no primary object!'));
     }
     return $this->getObject($phid);
   }
@@ -308,7 +311,7 @@ abstract class PhabricatorFeedStory
 
     $handle = new PhabricatorObjectHandle();
     $handle->setPHID($phid);
-    $handle->setName("Unloaded Object '{$phid}'");
+    $handle->setName(pht("Unloaded Object '%s'", $phid));
 
     return $handle;
   }

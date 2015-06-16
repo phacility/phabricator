@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialChangeType {
+final class DifferentialChangeType extends Phobject {
 
   const TYPE_ADD        = 1;
   const TYPE_CHANGE     = 2;
@@ -105,7 +105,7 @@ final class DifferentialChangeType {
       self::TYPE_MESSAGE    => pht('Commit Message'),
       self::TYPE_CHILD      => pht('Contents Modified'),
     );
-    return idx($types, coalesce($type, '?'), 'Unknown');
+    return idx($types, coalesce($type, '?'), pht('Unknown'));
   }
 
 }

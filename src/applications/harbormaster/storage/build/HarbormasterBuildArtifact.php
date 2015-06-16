@@ -77,7 +77,7 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
           ->setViewer($viewer)
           ->withIDs(array($data['drydock-lease']))
           ->execute();
-        $lease = $leases[$data['drydock-lease']];
+        $lease = idx($leases, $data['drydock-lease']);
 
         return id(new PHUIObjectItemView())
           ->setObjectName(pht('Drydock Lease'))
@@ -96,7 +96,9 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
   public function loadDrydockLease() {
     if ($this->getArtifactType() !== self::TYPE_HOST) {
       throw new Exception(
-        '`loadDrydockLease` may only be called on host artifacts.');
+        pht(
+          '`%s` may only be called on host artifacts.',
+          __FUNCTION__));
     }
 
     $data = $this->getArtifactData();
@@ -106,12 +108,12 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
     $lease = id(new DrydockLease())->load(
       $data['drydock-lease']);
     if ($lease === null) {
-      throw new Exception('Associated Drydock lease not found!');
+      throw new Exception(pht('Associated Drydock lease not found!'));
     }
     $resource = id(new DrydockResource())->load(
       $lease->getResourceID());
     if ($resource === null) {
-      throw new Exception('Associated Drydock resource not found!');
+      throw new Exception(pht('Associated Drydock resource not found!'));
     }
     $lease->attachResource($resource);
 
@@ -121,7 +123,9 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
   public function loadPhabricatorFile() {
     if ($this->getArtifactType() !== self::TYPE_FILE) {
       throw new Exception(
-        '`loadPhabricatorFile` may only be called on file artifacts.');
+        pht(
+          '`%s` may only be called on file artifacts.',
+          __FUNCTION__));
     }
 
     $data = $this->getArtifactData();
@@ -134,7 +138,7 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
       ->withPHIDs(array($phid))
       ->executeOne();
     if ($file === null) {
-      throw new Exception('Associated file not found!');
+      throw new Exception(pht('Associated file not found!'));
     }
     return $file;
   }
@@ -178,8 +182,7 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht(
-      'Users must be able to see a buildable to see its artifacts.');
+    return pht('Users must be able to see a buildable to see its artifacts.');
   }
 
 }

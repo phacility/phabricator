@@ -43,10 +43,10 @@ final class PhabricatorDeveloperPreferencesSettingsPanel
     $is_console_enabled = PhabricatorEnv::getEnvConfig('darkconsole.enabled');
 
     $preamble = pht(
-      '**DarkConsole** is a developer console which can help build and '.
-      'debug Phabricator applications. It includes tools for understanding '.
-      'errors, performance, service calls, and other low-level aspects of '.
-      'Phabricator\'s inner workings.');
+      "**DarkConsole** is a developer console which can help build and ".
+      "debug Phabricator applications. It includes tools for understanding ".
+      "errors, performance, service calls, and other low-level aspects of ".
+      "Phabricator's inner workings.");
 
     if ($is_console_enabled) {
       $instructions = pht(
@@ -56,15 +56,17 @@ final class PhabricatorDeveloperPreferencesSettingsPanel
         'tools. You may want to disable it again later if you only need it '.
         'temporarily.'.
         "\n\n".
-        'NOTE: After enabling DarkConsole, **press the ##`## key on your '.
+        'NOTE: After enabling DarkConsole, **press the ##%s## key on your '.
         'keyboard** to show or hide it.',
-        $preamble);
+        $preamble,
+        '`');
     } else {
       $instructions = pht(
         "%s\n\n".
         'Before you can turn on DarkConsole, it needs to be enabled in '.
-        'the configuration for this install (`darkconsole.enabled`).',
-        $preamble);
+        'the configuration for this install (`%s`).',
+        $preamble,
+        'darkconsole.enabled');
     }
 
     $form = id(new AphrontFormView())

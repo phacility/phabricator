@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorDashboardLayoutConfig {
+final class PhabricatorDashboardLayoutConfig extends Phobject {
 
   const MODE_FULL                = 'layout-mode-full';
   const MODE_HALF_AND_HALF       = 'layout-mode-half-and-half';
@@ -124,10 +124,10 @@ final class PhabricatorDashboardLayoutConfig {
         );
         break;
       case self::MODE_FULL:
-        throw new Exception('There is only one column in mode full.');
+        throw new Exception(pht('There is only one column in mode full.'));
         break;
       default:
-        throw new Exception('Unknown layout mode!');
+        throw new Exception(pht('Unknown layout mode!'));
         break;
     }
 

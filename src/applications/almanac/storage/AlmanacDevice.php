@@ -240,7 +240,7 @@ final class AlmanacDevice
     PhabricatorDestructionEngine $engine) {
 
     $interfaces = id(new AlmanacInterfaceQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($engine->getViewer())
       ->withDevicePHIDs(array($this->getPHID()))
       ->execute();
     foreach ($interfaces as $interface) {

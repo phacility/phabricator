@@ -10,6 +10,7 @@
  * @task paging Paging
  * @task order Result Ordering
  * @task edgelogic Working with Edge Logic
+ * @task spaces Working with Spaces
  */
 abstract class PhabricatorCursorPagedPolicyAwareQuery
   extends PhabricatorPolicyAwareQuery {
@@ -17,12 +18,14 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $afterID;
   private $beforeID;
   private $applicationSearchConstraints = array();
-  protected $applicationSearchOrders = array();
   private $internalPaging;
   private $orderVector;
+  private $groupVector;
   private $builtinOrder;
   private $edgeLogicConstraints = array();
   private $edgeLogicConstraintsAreValid = false;
+  private $spacePHIDs;
+  private $spaceIsArchived;
 
   protected function getPageCursors(array $page) {
     return array(
@@ -74,6 +77,29 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $this->beforeID;
   }
 
+  protected function loadStandardPage(PhabricatorLiskDAO $table) {
+    $rows = $this->loadStandardPageRows($table);
+    return $table->loadAllFromArray($rows);
+  }
+
+  protected function loadStandardPageRows(PhabricatorLiskDAO $table) {
+    $conn = $table->establishConnection('r');
+
+    $rows = queryfx_all(
+      $conn,
+      '%Q FROM %T %Q %Q %Q %Q %Q %Q %Q',
+      $this->buildSelectClause($conn),
+      $table->getTableName(),
+      (string)$this->getPrimaryTableAlias(),
+      $this->buildJoinClause($conn),
+      $this->buildWhereClause($conn),
+      $this->buildGroupClause($conn),
+      $this->buildHavingClause($conn),
+      $this->buildOrderClause($conn),
+      $this->buildLimitClause($conn));
+
+    return $rows;
+  }
 
   /**
    * Get the viewer for making cursor paging queries.
@@ -175,7 +201,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return null;
   }
 
-  protected function newResultObject() {
+  public function newResultObject() {
     return null;
   }
 
@@ -247,6 +273,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $where = array();
     $where[] = $this->buildPagingClause($conn);
     $where[] = $this->buildEdgeLogicWhereClause($conn);
+    $where[] = $this->buildSpacesWhereClause($conn);
     return $where;
   }
 
@@ -602,19 +629,40 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    * @task order
    */
   public function setOrder($order) {
-    $orders = $this->getBuiltinOrders();
+    $aliases = $this->getBuiltinOrderAliasMap();
 
-    if (empty($orders[$order])) {
+    if (empty($aliases[$order])) {
       throw new Exception(
         pht(
           'Query "%s" does not support a builtin order "%s". Supported orders '.
           'are: %s.',
           get_class($this),
           $order,
-          implode(', ', array_keys($orders))));
+          implode(', ', array_keys($aliases))));
     }
 
-    $this->builtinOrder = $order;
+    $this->builtinOrder = $aliases[$order];
+    $this->orderVector = null;
+
+    return $this;
+  }
+
+
+  /**
+   * Set a grouping order to apply before primary result ordering.
+   *
+   * This allows you to preface the query order vector with additional orders,
+   * so you can effect "group by" queries while still respecting "order by".
+   *
+   * This is a high-level method which works alongside @{method:setOrder}. For
+   * lower-level control over order vectors, use @{method:setOrderVector}.
+   *
+   * @param PhabricatorQueryOrderVector|list<string> List of order keys.
+   * @return this
+   * @task order
+   */
+  public function setGroupVector($vector) {
+    $this->groupVector = $vector;
     $this->orderVector = null;
 
     return $this;
@@ -679,6 +727,35 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     return $orders;
+  }
+
+  public function getBuiltinOrderAliasMap() {
+    $orders = $this->getBuiltinOrders();
+
+    $map = array();
+    foreach ($orders as $key => $order) {
+      $keys = array();
+      $keys[] = $key;
+      foreach (idx($order, 'aliases', array()) as $alias) {
+        $keys[] = $alias;
+      }
+
+      foreach ($keys as $alias) {
+        if (isset($map[$alias])) {
+          throw new Exception(
+            pht(
+              'Two builtin orders ("%s" and "%s") define the same key or '.
+              'alias ("%s"). Each order alias and key must be unique and '.
+              'identify a single order.',
+              $key,
+              $map[$alias],
+              $alias));
+        }
+        $map[$alias] = $key;
+      }
+    }
+
+    return $map;
   }
 
 
@@ -765,6 +842,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       } else {
         $vector = $this->getDefaultOrderVector();
       }
+
+      if ($this->groupVector) {
+        $group = PhabricatorQueryOrderVector::newFromVector($this->groupVector);
+        $group->appendVector($vector);
+        $vector = $group;
+      }
+
       $vector = PhabricatorQueryOrderVector::newFromVector($vector);
 
       // We call setOrderVector() here to apply checks to the default vector.
@@ -818,6 +902,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           'column' => 'indexValue',
           'type' => $index->getIndexValueType(),
           'null' => 'tail',
+          'customfield' => true,
+          'customfield.index.table' => $index->getTableName(),
+          'customfield.index.key' => $digest,
         );
       }
     }
@@ -987,32 +1074,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       'table' => $index->getTableName(),
       'index' => $index->getIndexKey(),
       'value' => array($min, $max),
-    );
-
-    return $this;
-  }
-
-
-  /**
-   * Order the results by an ApplicationSearch index.
-   *
-   * @param PhabricatorCustomField Field to which the index belongs.
-   * @param PhabricatorCustomFieldIndexStorage Table where the index is stored.
-   * @param bool True to sort ascending.
-   * @return this
-   * @task appsearch
-   */
-  public function withApplicationSearchOrder(
-    PhabricatorCustomField $field,
-    PhabricatorCustomFieldIndexStorage $index,
-    $ascending) {
-
-    $this->applicationSearchOrders[] = array(
-      'key' => $field->getFieldKey(),
-      'type' => $index->getIndexValueType(),
-      'table' => $index->getTableName(),
-      'index' => $index->getIndexKey(),
-      'ascending' => $ascending,
     );
 
     return $this;
@@ -1203,11 +1264,19 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
     }
 
-    foreach ($this->applicationSearchOrders as $key => $order) {
-      $table = $order['table'];
-      $index = $order['index'];
-      $alias = 'appsearch_order_'.$index;
-      $phid_column = $this->getApplicationSearchObjectPHIDColumn();
+    $phid_column = $this->getApplicationSearchObjectPHIDColumn();
+    $orderable = $this->getOrderableColumns();
+
+    $vector = $this->getOrderVector();
+    foreach ($vector as $order) {
+      $spec = $orderable[$order->getOrderKey()];
+      if (empty($spec['customfield'])) {
+        continue;
+      }
+
+      $table = $spec['customfield.index.table'];
+      $alias = $spec['table'];
+      $key = $spec['customfield.index.key'];
 
       $joins[] = qsprintf(
         $conn_r,
@@ -1218,7 +1287,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $alias,
         $phid_column,
         $alias,
-        $index);
+        $key);
     }
 
     return implode(' ', $joins);
@@ -1610,5 +1679,174 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $this;
   }
 
+
+/* -(  Spaces  )------------------------------------------------------------- */
+
+
+  /**
+   * Constrain the query to return results from only specific Spaces.
+   *
+   * Pass a list of Space PHIDs, or `null` to represent the default space. Only
+   * results in those Spaces will be returned.
+   *
+   * Queries are always constrained to include only results from spaces the
+   * viewer has access to.
+   *
+   * @param list<phid|null>
+   * @task spaces
+   */
+  public function withSpacePHIDs(array $space_phids) {
+    $object = $this->newResultObject();
+
+    if (!$object) {
+      throw new Exception(
+        pht(
+          'This query (of class "%s") does not implement newResultObject(), '.
+          'but must implement this method to enable support for Spaces.',
+          get_class($this)));
+    }
+
+    if (!($object instanceof PhabricatorSpacesInterface)) {
+      throw new Exception(
+        pht(
+          'This query (of class "%s") returned an object of class "%s" from '.
+          'getNewResultObject(), but it does not implement the required '.
+          'interface ("%s"). Objects must implement this interface to enable '.
+          'Spaces support.',
+          get_class($this),
+          get_class($object),
+          'PhabricatorSpacesInterface'));
+    }
+
+    $this->spacePHIDs = $space_phids;
+
+    return $this;
+  }
+
+  public function withSpaceIsArchived($archived) {
+    $this->spaceIsArchived = $archived;
+    return $this;
+  }
+
+
+  /**
+   * Constrain the query to include only results in valid Spaces.
+   *
+   * This method builds part of a WHERE clause which considers the spaces the
+   * viewer has access to see with any explicit constraint on spaces added by
+   * @{method:withSpacePHIDs}.
+   *
+   * @param AphrontDatabaseConnection Database connection.
+   * @return string Part of a WHERE clause.
+   * @task spaces
+   */
+  private function buildSpacesWhereClause(AphrontDatabaseConnection $conn) {
+    $object = $this->newResultObject();
+    if (!$object) {
+      return null;
+    }
+
+    if (!($object instanceof PhabricatorSpacesInterface)) {
+      return null;
+    }
+
+    $viewer = $this->getViewer();
+
+    $space_phids = array();
+    $include_null = false;
+
+    $all = PhabricatorSpacesNamespaceQuery::getAllSpaces();
+    if (!$all) {
+      // If there are no spaces at all, implicitly give the viewer access to
+      // the default space.
+      $include_null = true;
+    } else {
+      // Otherwise, give them access to the spaces they have permission to
+      // see.
+      $viewer_spaces = PhabricatorSpacesNamespaceQuery::getViewerSpaces(
+        $viewer);
+      foreach ($viewer_spaces as $viewer_space) {
+        if ($this->spaceIsArchived !== null) {
+          if ($viewer_space->getIsArchived() != $this->spaceIsArchived) {
+            continue;
+          }
+        }
+        $phid = $viewer_space->getPHID();
+        $space_phids[$phid] = $phid;
+        if ($viewer_space->getIsDefaultNamespace()) {
+          $include_null = true;
+        }
+      }
+    }
+
+    // If we have additional explicit constraints, evaluate them now.
+    if ($this->spacePHIDs !== null) {
+      $explicit = array();
+      $explicit_null = false;
+      foreach ($this->spacePHIDs as $phid) {
+        if ($phid === null) {
+          $space = PhabricatorSpacesNamespaceQuery::getDefaultSpace();
+        } else {
+          $space = idx($all, $phid);
+        }
+
+        if ($space) {
+          $phid = $space->getPHID();
+          $explicit[$phid] = $phid;
+          if ($space->getIsDefaultNamespace()) {
+            $explicit_null = true;
+          }
+        }
+      }
+
+      // If the viewer can see the default space but it isn't on the explicit
+      // list of spaces to query, don't match it.
+      if ($include_null && !$explicit_null) {
+        $include_null = false;
+      }
+
+      // Include only the spaces common to the viewer and the constraints.
+      $space_phids = array_intersect_key($space_phids, $explicit);
+    }
+
+    if (!$space_phids && !$include_null) {
+      if ($this->spacePHIDs === null) {
+        throw new PhabricatorEmptyQueryException(
+          pht('You do not have access to any spaces.'));
+      } else {
+        throw new PhabricatorEmptyQueryException(
+          pht(
+            'You do not have access to any of the spaces this query '.
+            'is constrained to.'));
+      }
+    }
+
+    $alias = $this->getPrimaryTableAlias();
+    if ($alias) {
+      $col = qsprintf($conn, '%T.spacePHID', $alias);
+    } else {
+      $col = 'spacePHID';
+    }
+
+    if ($space_phids && $include_null) {
+      return qsprintf(
+        $conn,
+        '(%Q IN (%Ls) OR %Q IS NULL)',
+        $col,
+        $space_phids,
+        $col);
+    } else if ($space_phids) {
+      return qsprintf(
+        $conn,
+        '%Q IN (%Ls)',
+        $col,
+        $space_phids);
+    } else {
+      return qsprintf(
+        $conn,
+        '%Q IS NULL',
+        $col);
+    }
+  }
 
 }

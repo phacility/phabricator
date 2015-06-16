@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorRepositoryType {
+final class PhabricatorRepositoryType extends Phobject {
 
   const REPOSITORY_TYPE_GIT         = 'git';
   const REPOSITORY_TYPE_SVN         = 'svn';
@@ -18,7 +18,7 @@ final class PhabricatorRepositoryType {
 
   public static function getNameForRepositoryType($type) {
     $map = self::getAllRepositoryTypes();
-    return idx($map, $type, 'Unknown');
+    return idx($map, $type, pht('Unknown'));
   }
 
 }

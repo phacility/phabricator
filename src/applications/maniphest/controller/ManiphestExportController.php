@@ -30,8 +30,9 @@ final class ManiphestExportController extends ManiphestController {
         'administrator install it from:');
 
       $inst2 = pht(
-        'Your PHP "include_path" needs to be updated to include the '.
-        'PHPExcel Classes directory.');
+        'Your PHP "%s" needs to be updated to include the '.
+        'PHPExcel Classes directory.',
+        'include_path');
 
       $dialog->setTitle(pht('Excel Export Not Configured'));
       $dialog->appendChild(hsprintf(
@@ -78,8 +79,11 @@ final class ManiphestExportController extends ManiphestController {
       $dialog->setUser($user);
 
       $dialog->setTitle(pht('Export Tasks to Excel'));
-      $dialog->appendChild(phutil_tag('p', array(), pht(
-        'Do you want to export the query results to Excel?')));
+      $dialog->appendChild(
+        phutil_tag(
+          'p',
+          array(),
+          pht('Do you want to export the query results to Excel?')));
 
       $form = id(new PHUIFormLayoutView())
         ->appendChild(
@@ -97,7 +101,7 @@ final class ManiphestExportController extends ManiphestController {
 
     $format = idx($formats, $request->getStr('excel-format'));
     if ($format === null) {
-      throw new Exception('Excel format object not found.');
+      throw new Exception(pht('Excel format object not found.'));
     }
 
     $saved->makeEphemeral();

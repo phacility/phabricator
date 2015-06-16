@@ -23,7 +23,7 @@ final class PhabricatorExampleEventListener extends PhabricatorEventListener {
     $console->writeOut(
       "%s\n",
       pht(
-        '% got test event at %d',
+        '%s got test event at %d',
         __CLASS__,
         $event->getValue('time')));
   }

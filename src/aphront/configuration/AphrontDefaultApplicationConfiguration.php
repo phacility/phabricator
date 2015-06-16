@@ -164,14 +164,6 @@ class AphrontDefaultApplicationConfiguration
         return $login_controller->handleRequest($request);
       }
 
-      $list = $ex->getMoreInfo();
-      foreach ($list as $key => $item) {
-        $list[$key] = phutil_tag('li', array(), $item);
-      }
-      if ($list) {
-        $list = phutil_tag('ul', array(), $list);
-      }
-
       $content = array(
         phutil_tag(
           'div',
@@ -179,17 +171,28 @@ class AphrontDefaultApplicationConfiguration
             'class' => 'aphront-policy-rejection',
           ),
           $ex->getRejection()),
-        phutil_tag(
+      );
+
+      if ($ex->getCapabilityName()) {
+        $list = $ex->getMoreInfo();
+        foreach ($list as $key => $item) {
+          $list[$key] = phutil_tag('li', array(), $item);
+        }
+        if ($list) {
+          $list = phutil_tag('ul', array(), $list);
+        }
+
+        $content[] = phutil_tag(
           'div',
           array(
             'class' => 'aphront-capability-details',
           ),
-          pht('Users with the "%s" capability:', $ex->getCapabilityName())),
-        $list,
-      );
+          pht('Users with the "%s" capability:', $ex->getCapabilityName()));
 
-      $dialog = new AphrontDialogView();
-      $dialog
+        $content[] = $list;
+      }
+
+      $dialog = id(new AphrontDialogView())
         ->setTitle($ex->getTitle())
         ->setClass('aphront-access-dialog')
         ->setUser($user)
@@ -229,11 +232,10 @@ class AphrontDefaultApplicationConfiguration
     $message  = $ex->getMessage();
 
     if ($ex instanceof AphrontSchemaQueryException) {
-      $message .=
-        "\n\n".
+      $message .= "\n\n".pht(
         "NOTE: This usually indicates that the MySQL schema has not been ".
-        "properly upgraded. Run 'bin/storage upgrade' to ensure your ".
-        "schema is up to date.";
+        "properly upgraded. Run '%s' to ensure your schema is up to date.",
+        'bin/storage upgrade');
     }
 
     if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
@@ -254,13 +256,13 @@ class AphrontDefaultApplicationConfiguration
 
     $dialog = new AphrontDialogView();
     $dialog
-      ->setTitle('Unhandled Exception ("'.$class.'")')
+      ->setTitle(pht('Unhandled Exception ("%s")', $class))
       ->setClass('aphront-exception-dialog')
       ->setUser($user)
       ->appendChild($content);
 
     if ($this->getRequest()->isAjax()) {
-      $dialog->addCancelButton('/', 'Close');
+      $dialog->addCancelButton('/', pht('Close'));
     }
 
     $response = new AphrontDialogResponse();

@@ -22,8 +22,8 @@ final class DifferentialConflictsField
 
   public function getFieldDescription() {
     return pht(
-      'Parses the "Conflicts" field which Git can inject into commit '.
-      'messages.');
+      'Parses the "%s" field which Git can inject into commit messages.',
+      'Conflicts');
   }
 
   public function canDisableField() {

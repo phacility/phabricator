@@ -54,7 +54,8 @@ final class PhabricatorPhortuneManagementInvoiceWorkflow
     if (!$subscription_phid) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Specify which subscription to invoice with --subscription.'));
+          'Specify which subscription to invoice with %s.',
+          '--subscription'));
     }
 
     $subscription = id(new PhortuneSubscriptionQuery())
@@ -90,30 +91,38 @@ final class PhabricatorPhortuneManagementInvoiceWorkflow
     if (!$auto_range && !$last_arg && !$next_arg) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Specify a billing range with --last and --next, or use '.
-          '--auto-range.'));
+          'Specify a billing range with %s and %s, or use %s.',
+          '--last',
+          '--next',
+          '--auto-range'));
     } else if (!$auto_range & (!$last_arg || !$next_arg)) {
       throw new PhutilArgumentUsageException(
         pht(
-          'When specifying --last or --next, you must specify both arguments '.
-          'to define the beginning and end of the billing range.'));
+          'When specifying %s or %s, you must specify both arguments '.
+          'to define the beginning and end of the billing range.',
+          '--last',
+          '--next'));
     } else if (!$auto_range && ($last_arg && $next_arg)) {
       $last_time = $this->parseTimeArgument($args->getArg('last'));
       $next_time = $this->parseTimeArgument($args->getArg('next'));
     } else if ($auto_range && ($last_arg || $next_arg)) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Use either --auto-range or --last and --next to specify the '.
-          'billing range, but not both.'));
+          'Use either %s or %s and %s to specify the '.
+          'billing range, but not both.',
+          '--auto-range',
+          '--last',
+          '--next'));
     } else {
       $trigger = $subscription->getTrigger();
       $event = $trigger->getEvent();
       if (!$event) {
         throw new PhutilArgumentUsageException(
           pht(
-            'Unable to calculate --auto-range, this subscription has not been '.
+            'Unable to calculate %s, this subscription has not been '.
             'scheduled for billing yet. Wait for the trigger daemon to '.
-            'schedule the subscription.'));
+            'schedule the subscription.',
+            '--auto-range'));
       }
       $last_time = $event->getLastEventEpoch();
       $next_time = $event->getNextEventEpoch();

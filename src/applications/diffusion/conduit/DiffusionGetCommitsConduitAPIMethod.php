@@ -16,7 +16,7 @@ final class DiffusionGetCommitsConduitAPIMethod
   }
 
   public function getMethodStatusDescription() {
-    return pht('Obsoleted by diffusion.querycommits.');
+    return pht('Obsoleted by %s.', 'diffusion.querycommits');
   }
 
   protected function defineParamTypes() {

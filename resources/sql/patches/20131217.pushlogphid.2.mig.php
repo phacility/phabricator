@@ -3,12 +3,12 @@
 $table = new PhabricatorRepositoryPushLog();
 $conn_w = $table->establishConnection('w');
 
-echo "Assigning PHIDs to push logs...\n";
+echo pht('Assigning PHIDs to push logs...')."\n";
 
 $logs = new LiskMigrationIterator($table);
 foreach ($logs as $log) {
   $id = $log->getID();
-  echo "Updating {$id}...\n";
+  echo pht('Updating %s...', $id)."\n";
   queryfx(
     $conn_w,
     'UPDATE %T SET phid = %s WHERE id = %d',
@@ -17,4 +17,4 @@ foreach ($logs as $log) {
     $id);
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

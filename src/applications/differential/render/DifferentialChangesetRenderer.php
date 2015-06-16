@@ -1,6 +1,6 @@
 <?php
 
-abstract class DifferentialChangesetRenderer {
+abstract class DifferentialChangesetRenderer extends Phobject {
 
   private $user;
   private $changeset;
@@ -599,7 +599,7 @@ abstract class DifferentialChangesetRenderer {
         }
 
       } else {
-        throw new Exception("Unknown primitive type '{$primitive}'!");
+        throw new Exception(pht("Unknown primitive type '%s'!", $primitive));
       }
     }
 

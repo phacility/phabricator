@@ -9,8 +9,7 @@ final class PhabricatorPersonaAuthProvider extends PhabricatorAuthProvider {
   }
 
   public function getDescriptionForCreate() {
-    return pht(
-      'Allow users to login or register using Mozilla Persona.');
+    return pht('Allow users to login or register using Mozilla Persona.');
   }
 
   public function getAdapter() {
@@ -54,12 +53,12 @@ final class PhabricatorPersonaAuthProvider extends PhabricatorAuthProvider {
     $response = null;
 
     if (!$request->isAjax()) {
-      throw new Exception('Expected this request to come via Ajax.');
+      throw new Exception(pht('Expected this request to come via Ajax.'));
     }
 
     $assertion = $request->getStr('assertion');
     if (!$assertion) {
-      throw new Exception('Expected identity assertion.');
+      throw new Exception(pht('Expected identity assertion.'));
     }
 
     $adapter->setAssertion($assertion);

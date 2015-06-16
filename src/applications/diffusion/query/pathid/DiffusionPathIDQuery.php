@@ -3,7 +3,9 @@
 /**
  * @task pathutil Path Utilities
  */
-final class DiffusionPathIDQuery {
+final class DiffusionPathIDQuery extends Phobject {
+
+  private $paths = array();
 
   public function __construct(array $paths) {
     $this->paths = $paths;

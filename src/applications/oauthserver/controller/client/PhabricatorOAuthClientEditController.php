@@ -82,13 +82,13 @@ final class PhabricatorOAuthClientEditController
       ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Name')
+          ->setLabel(pht('Name'))
           ->setName('name')
           ->setValue($client->getName())
           ->setError($e_name))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Redirect URI')
+          ->setLabel(pht('Redirect URI'))
           ->setName('redirect_uri')
           ->setValue($client->getRedirectURI())
           ->setError($e_redirect))

@@ -10,9 +10,9 @@ final class PhabricatorFactCountEngine extends PhabricatorFactEngine {
     foreach ($fact_types as $type) {
       if (!strncmp($type, '+N:', 3)) {
         if ($type == '+N:*') {
-          $name = 'Total Objects';
+          $name = pht('Total Objects');
         } else {
-          $name = 'Total Objects of type '.substr($type, 3);
+          $name = pht('Total Objects of type %s', substr($type, 3));
         }
 
         $results[] = id(new PhabricatorFactSimpleSpec($type))
@@ -22,9 +22,9 @@ final class PhabricatorFactCountEngine extends PhabricatorFactEngine {
 
       if (!strncmp($type, 'N:', 2)) {
         if ($type == 'N:*') {
-          $name = 'Objects';
+          $name = pht('Objects');
         } else {
-          $name = 'Objects of type '.substr($type, 2);
+          $name = pht('Objects of type %s', substr($type, 2));
         }
         $results[] = id(new PhabricatorFactSimpleSpec($type))
           ->setName($name)

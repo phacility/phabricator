@@ -1,7 +1,7 @@
 <?php
 
 $key = 'metamta.maniphest.public-create-email';
-echo "Migrating `$key` to new application email infrastructure...\n";
+echo pht("Migrating `%s` to new application email infrastructure...\n", $key);
 $value = PhabricatorEnv::getEnvConfigIfExists($key);
 $maniphest = new PhabricatorManiphestApplication();
 
@@ -13,8 +13,8 @@ if ($value) {
       ->setApplicationPHID($maniphest->getPHID())
       ->save();
   } catch (AphrontDuplicateKeyQueryException $ex) {
-    // already migrated?
+    // Already migrated?
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

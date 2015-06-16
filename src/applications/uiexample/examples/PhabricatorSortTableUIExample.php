@@ -3,11 +3,11 @@
 final class PhabricatorSortTableUIExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Sortable Tables';
+    return pht('Sortable Tables');
   }
 
   public function getDescription() {
-    return 'Using sortable tables.';
+    return pht('Using sortable tables.');
   }
 
   public function renderExample() {
@@ -18,28 +18,28 @@ final class PhabricatorSortTableUIExample extends PhabricatorUIExample {
         'model'   => 'Civic',
         'year'    => 2004,
         'price'   => 3199,
-        'color'   => 'Blue',
+        'color'   => pht('Blue'),
       ),
       array(
         'make'    => 'Ford',
         'model'   => 'Focus',
         'year'    => 2001,
         'price'   => 2549,
-        'color'   => 'Red',
+        'color'   => pht('Red'),
       ),
       array(
         'make'    => 'Toyota',
         'model'   => 'Camry',
         'year'    => 2009,
         'price'   => 4299,
-        'color'   => 'Black',
+        'color'   => pht('Black'),
       ),
       array(
         'make'    => 'NASA',
         'model'   => 'Shuttle',
         'year'    => 1998,
         'price'   => 1000000000,
-        'color'   => 'White',
+        'color'   => pht('White'),
       ),
     );
 
@@ -66,11 +66,11 @@ final class PhabricatorSortTableUIExample extends PhabricatorUIExample {
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Make',
-        'Model',
-        'Year',
-        'Price',
-        'Color',
+        pht('Make'),
+        pht('Model'),
+        pht('Year'),
+        pht('Price'),
+        pht('Color'),
       ));
     $table->setColumnClasses(
       array(
@@ -88,7 +88,7 @@ final class PhabricatorSortTableUIExample extends PhabricatorUIExample {
       $orders);
 
     $panel = new PHUIObjectBoxView();
-    $panel->setHeaderText('Sortable Table of Vehicles');
+    $panel->setHeaderText(pht('Sortable Table of Vehicles'));
     $panel->appendChild($table);
 
     return $panel;

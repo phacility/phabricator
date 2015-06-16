@@ -22,7 +22,7 @@ final class DiffusionCommitRevertsCommitEdgeType extends PhabricatorEdgeType {
     $add_edges) {
 
     return pht(
-      '%s added %s reverting commit(s): %s.',
+      '%s added %s reverted commit(s): %s.',
       $actor,
       $add_count,
       $add_edges);
@@ -34,7 +34,7 @@ final class DiffusionCommitRevertsCommitEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s removed %s reverting commit(s): %s.',
+      '%s removed %s reverted commit(s): %s.',
       $actor,
       $rem_count,
       $rem_edges);
@@ -49,7 +49,7 @@ final class DiffusionCommitRevertsCommitEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s edited reverting commit(s), added %s: %s; removed %s: %s.',
+      '%s edited reverted commit(s), added %s: %s; removed %s: %s.',
       $actor,
       $add_count,
       $add_edges,
@@ -64,7 +64,7 @@ final class DiffusionCommitRevertsCommitEdgeType extends PhabricatorEdgeType {
     $add_edges) {
 
     return pht(
-      '%s added %s reverting commit(s) for %s: %s.',
+      '%s added %s reverted commit(s) for %s: %s.',
       $actor,
       $add_count,
       $object,
@@ -78,7 +78,7 @@ final class DiffusionCommitRevertsCommitEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s removed %s reverting commit(s) for %s: %s.',
+      '%s removed %s reverted commit(s) for %s: %s.',
       $actor,
       $rem_count,
       $object,
@@ -95,7 +95,7 @@ final class DiffusionCommitRevertsCommitEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s edited reverting commit(s) for %s, added %s: %s; removed %s: %s.',
+      '%s edited reverted commit(s) for %s, added %s: %s; removed %s: %s.',
       $actor,
       $object,
       $add_count,

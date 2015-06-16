@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorNotificationClient {
+final class PhabricatorNotificationClient extends Phobject {
 
   const EXPECT_VERSION = 7;
 

@@ -297,6 +297,11 @@ JX.behavior('conpherence-menu', function(config) {
     var widget = 'conpherence-message-pane';
     if (device == 'desktop') {
       widget = 'widgets-people';
+      var uri = JX.$U(location.href);
+      var params = uri.getQueryParams();
+      if ('settings' in params) {
+        widget = 'widgets-settings';
+      }
     }
     return widget;
   }

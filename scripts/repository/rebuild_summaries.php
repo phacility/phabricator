@@ -22,7 +22,7 @@ $maxes = ipull($maxes, 'maxEpoch', 'repositoryID');
 
 $repository_ids = array_keys($sizes + $maxes);
 
-echo 'Updating '.count($repository_ids).' repositories';
+echo pht('Updating %d repositories', count($repository_ids));
 
 foreach ($repository_ids as $repository_id) {
   $last_commit = queryfx_one(
@@ -50,4 +50,4 @@ foreach ($repository_ids as $repository_id) {
     idx($maxes, $repository_id, 0));
   echo '.';
 }
-echo "\ndone.\n";
+echo "\n".pht('Done.')."\n";

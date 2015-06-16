@@ -11,7 +11,8 @@ final class PhortuneCurrencySerializer extends PhabricatorLiskSerializer {
       throw new Exception(
         pht(
           'Trying to save object with a currency column, but the column '.
-          'value is not a PhortuneCurrency object.'));
+          'value is not a %s object.',
+          'PhortuneCurrency'));
     }
 
     return $value->serializeForStorage();

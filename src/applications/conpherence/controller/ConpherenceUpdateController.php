@@ -67,7 +67,7 @@ final class ConpherenceUpdateController
         case ConpherenceUpdateActions::JOIN_ROOM:
           $xactions[] = id(new ConpherenceTransaction())
             ->setTransactionType(
-              ConpherenceTransactionType::TYPE_PARTICIPANTS)
+              ConpherenceTransaction::TYPE_PARTICIPANTS)
             ->setNewValue(array('+' => array($user->getPHID())));
           $delete_draft = true;
           $message = $request->getStr('text');
@@ -101,7 +101,7 @@ final class ConpherenceUpdateController
           if (!empty($person_phids)) {
             $xactions[] = id(new ConpherenceTransaction())
               ->setTransactionType(
-                ConpherenceTransactionType::TYPE_PARTICIPANTS)
+                ConpherenceTransaction::TYPE_PARTICIPANTS)
               ->setNewValue(array('+' => $person_phids));
           }
           break;
@@ -114,7 +114,7 @@ final class ConpherenceUpdateController
           if ($person_phid && $person_phid == $user->getPHID()) {
             $xactions[] = id(new ConpherenceTransaction())
               ->setTransactionType(
-                ConpherenceTransactionType::TYPE_PARTICIPANTS)
+                ConpherenceTransaction::TYPE_PARTICIPANTS)
               ->setNewValue(array('-' => array($person_phid)));
             $response_mode = 'go-home';
           }
@@ -144,7 +144,7 @@ final class ConpherenceUpdateController
               ->withIDs(array($file_id))
               ->executeOne();
             $xactions[] = id(new ConpherenceTransaction())
-              ->setTransactionType(ConpherenceTransactionType::TYPE_PICTURE)
+              ->setTransactionType(ConpherenceTransaction::TYPE_PICTURE)
               ->setNewValue($orig_file);
             $okay = $orig_file->isTransformableImage();
             if ($okay) {
@@ -157,7 +157,7 @@ final class ConpherenceUpdateController
                 ConpherenceImageData::CROP_HEIGHT);
               $xactions[] = id(new ConpherenceTransaction())
                 ->setTransactionType(
-                  ConpherenceTransactionType::TYPE_PICTURE_CROP)
+                  ConpherenceTransaction::TYPE_PICTURE_CROP)
                 ->setNewValue($crop_file->getPHID());
             }
             $response_mode = 'redirect';
@@ -181,12 +181,12 @@ final class ConpherenceUpdateController
 
             $xactions[] = id(new ConpherenceTransaction())
               ->setTransactionType(
-                ConpherenceTransactionType::TYPE_PICTURE_CROP)
+                ConpherenceTransaction::TYPE_PICTURE_CROP)
               ->setNewValue($image_phid);
           }
           $title = $request->getStr('title');
           $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(ConpherenceTransactionType::TYPE_TITLE)
+            ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
             ->setNewValue($title);
           if ($conpherence->getIsRoom()) {
             $xactions[] = id(new ConpherenceTransaction())
@@ -208,7 +208,7 @@ final class ConpherenceUpdateController
           $response_mode = 'ajax';
           break;
         default:
-          throw new Exception('Unknown action: '.$action);
+          throw new Exception(pht('Unknown action: %s', $action));
           break;
       }
 
@@ -528,14 +528,14 @@ final class ConpherenceUpdateController
             ->setUser($this->getRequest()->getUser())
             ->setConpherence($conpherence)
             ->setUpdateURI($widget_uri);
-          $file_widget = $file_widget->render();
+          $file_widget = hsprintf('%s', $file_widget->render());
           break;
         case ConpherenceUpdateActions::ADD_PERSON:
           $people_widget = id(new ConpherencePeopleWidgetView())
             ->setUser($user)
             ->setConpherence($conpherence)
             ->setUpdateURI($widget_uri);
-          $people_widget = $people_widget->render();
+          $people_widget = hsprintf('%s', $people_widget->render());
           break;
         case ConpherenceUpdateActions::REMOVE_PERSON:
         case ConpherenceUpdateActions::NOTIFICATIONS:
@@ -550,7 +550,7 @@ final class ConpherenceUpdateController
     $content = array(
       'non_update' => $non_update,
       'transactions' => hsprintf('%s', $rendered_transactions),
-      'conpherence_title' => (string) $data['title'],
+      'conpherence_title' => (string)$data['title'],
       'latest_transaction_id' => $new_latest_transaction_id,
       'nav_item' => $nav_item,
       'conpherence_phid' => $conpherence->getPHID(),

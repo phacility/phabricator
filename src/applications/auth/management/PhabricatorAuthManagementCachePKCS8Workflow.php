@@ -11,8 +11,8 @@ final class PhabricatorAuthManagementCachePKCS8Workflow
         pht(
           'Cache the PKCS8 format of a public key. When developing on OSX, '.
           'this can be used to work around issues with ssh-keygen. Use '.
-          '`ssh-keygen -e -m PKCS8 -f key.pub` to generate a PKCS8 key to '.
-          'feed to this command.'))
+          '`%s` to generate a PKCS8 key to feed to this command.',
+          'ssh-keygen -e -m PKCS8 -f key.pub'))
       ->setArguments(
         array(
           array(
@@ -35,7 +35,8 @@ final class PhabricatorAuthManagementCachePKCS8Workflow
     if (!strlen($public_keyfile)) {
       throw new PhutilArgumentUsageException(
         pht(
-          'You must specify the path to a public keyfile with --public.'));
+          'You must specify the path to a public keyfile with %s.',
+          '--public'));
     }
 
     if (!Filesystem::pathExists($public_keyfile)) {
@@ -51,7 +52,8 @@ final class PhabricatorAuthManagementCachePKCS8Workflow
     if (!strlen($pkcs8_keyfile)) {
       throw new PhutilArgumentUsageException(
         pht(
-          'You must specify the path to a pkcs8 keyfile with --pkc8s.'));
+          'You must specify the path to a pkcs8 keyfile with %s.',
+          '--pkc8s'));
     }
 
     if (!Filesystem::pathExists($pkcs8_keyfile)) {

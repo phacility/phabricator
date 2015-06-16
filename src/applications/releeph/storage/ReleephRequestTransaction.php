@@ -146,10 +146,6 @@ final class ReleephRequestTransaction
     }
   }
 
-  public function getActionStrength() {
-    return parent::getActionStrength();
-  }
-
   public function getActionName() {
     switch ($this->getTransactionType()) {
       case self::TYPE_REQUEST:

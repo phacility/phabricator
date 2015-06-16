@@ -317,6 +317,7 @@
 
 .phabricator-remarkup-embed-image-full {
   display: inline-block;
+  max-width: 100%;
 }
 
 .phabricator-remarkup-embed-image-full img {

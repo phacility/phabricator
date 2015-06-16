@@ -34,7 +34,7 @@ final class PhabricatorNotificationPanelController
       'a',
       array(
         'sigil' => 'workflow',
-        'href' => (string) $clear_uri,
+        'href' => (string)$clear_uri,
         'class' => $clear_ui_class,
       ),
       pht('Mark All Read'));

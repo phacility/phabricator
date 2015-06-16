@@ -71,10 +71,6 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        return $object->getViewPolicy();
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        return $object->getEditPolicy();
       case DifferentialTransaction::TYPE_ACTION:
         return null;
       case DifferentialTransaction::TYPE_INLINE:
@@ -95,8 +91,6 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case DifferentialTransaction::TYPE_ACTION:
       case DifferentialTransaction::TYPE_UPDATE:
         return $xaction->getNewValue();
@@ -189,17 +183,7 @@ final class DifferentialTransactionEditor
     $status_abandoned = ArcanistDifferentialRevisionStatus::ABANDONED;
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        $object->setViewPolicy($xaction->getNewValue());
-        return;
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        $object->setEditPolicy($xaction->getNewValue());
-        return;
-      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-      case PhabricatorTransactions::TYPE_COMMENT:
       case DifferentialTransaction::TYPE_INLINE:
-        return;
-      case PhabricatorTransactions::TYPE_EDGE:
         return;
       case DifferentialTransaction::TYPE_UPDATE:
         if (!$this->getIsCloseByCommit()) {
@@ -220,7 +204,6 @@ final class DifferentialTransactionEditor
         } else {
           $object->setRepositoryPHID($diff->getRepositoryPHID());
         }
-        $object->setArcanistProjectPHID($diff->getArcanistProjectPHID());
         $object->attachActiveDiff($diff);
 
         // TODO: Update the `diffPHID` once we add that.
@@ -578,12 +561,6 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        return;
-      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-      case PhabricatorTransactions::TYPE_EDGE:
-      case PhabricatorTransactions::TYPE_COMMENT:
       case DifferentialTransaction::TYPE_ACTION:
         return;
       case DifferentialTransaction::TYPE_INLINE:
@@ -632,7 +609,7 @@ final class DifferentialTransactionEditor
             $state,
             $phid);
         }
-        return;
+        break;
     }
 
     return parent::applyBuiltinExternalTransaction($object, $xaction);
@@ -931,8 +908,7 @@ final class DifferentialTransactionEditor
 
       case DifferentialAction::ACTION_REJECT:
         if ($actor_is_author) {
-          return pht(
-            'You can not request changes to your own revision.');
+          return pht('You can not request changes to your own revision.');
         }
 
         if ($revision_status == $status_abandoned) {
@@ -1282,19 +1258,19 @@ final class DifferentialTransactionEditor
 
   public function getMailTagsMap() {
     return array(
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEW_REQUEST =>
+      DifferentialTransaction::MAILTAG_REVIEW_REQUEST =>
         pht('A revision is created.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_UPDATED =>
+      DifferentialTransaction::MAILTAG_UPDATED =>
         pht('A revision is updated.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT =>
+      DifferentialTransaction::MAILTAG_COMMENT =>
         pht('Someone comments on a revision.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED =>
+      DifferentialTransaction::MAILTAG_CLOSED =>
         pht('A revision is closed.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS =>
+      DifferentialTransaction::MAILTAG_REVIEWERS =>
         pht("A revision's reviewers change."),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_CC =>
+      DifferentialTransaction::MAILTAG_CC =>
         pht("A revision's CCs change."),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_OTHER =>
+      DifferentialTransaction::MAILTAG_OTHER =>
         pht('Other revision activity not listed above occurs.'),
     );
   }
@@ -1507,13 +1483,14 @@ final class DifferentialTransactionEditor
           $nested_comments = $this->nestCommentHistory(
             $inline->getComment(), $comments_by_line_number, $authors_by_phid);
 
-          $section->addFragment('================')
-                  ->addFragment('Comment at: '.$file.':'.$range)
-                  ->addPlaintextFragment($patch)
-                  ->addHTMLFragment($this->renderPatchHTMLForMail($patch))
-                  ->addFragment('----------------')
-                  ->addFragment($nested_comments)
-                  ->addFragment(null);
+          $section
+            ->addFragment('================')
+            ->addFragment(pht('Comment at: %s:%s', $file, $range))
+            ->addPlaintextFragment($patch)
+            ->addHTMLFragment($this->renderPatchHTMLForMail($patch))
+            ->addFragment('----------------')
+            ->addFragment($nested_comments)
+            ->addFragment(null);
         }
       }
     }
@@ -1577,13 +1554,6 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $unsubscribed_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $object->getPHID(),
-      PhabricatorObjectHasUnsubscriberEdgeType::EDGECONST);
-
-    $subscribed_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-      $object->getPHID());
-
     $revision = id(new DifferentialRevisionQuery())
       ->setViewer($this->getActor())
       ->withPHIDs(array($object->getPHID()))
@@ -1592,8 +1562,7 @@ final class DifferentialTransactionEditor
       ->executeOne();
     if (!$revision) {
       throw new Exception(
-        pht(
-          'Failed to load revision for Herald adapter construction!'));
+        pht('Failed to load revision for Herald adapter construction!'));
     }
 
     $adapter = HeraldDifferentialRevisionAdapter::newLegacyAdapter(
@@ -1603,9 +1572,7 @@ final class DifferentialTransactionEditor
     $reviewers = $revision->getReviewerStatus();
     $reviewer_phids = mpull($reviewers, 'getReviewerPHID');
 
-    $adapter->setExplicitCCs($subscribed_phids);
     $adapter->setExplicitReviewers($reviewer_phids);
-    $adapter->setForbiddenCCs($unsubscribed_phids);
 
     return $adapter;
   }
@@ -1616,24 +1583,6 @@ final class DifferentialTransactionEditor
     HeraldTranscript $transcript) {
 
     $xactions = array();
-
-    // Build a transaction to adjust CCs.
-    $ccs = array(
-      '+' => array_keys($adapter->getCCsAddedByHerald()),
-      '-' => array_keys($adapter->getCCsRemovedByHerald()),
-    );
-    $value = array();
-    foreach ($ccs as $type => $phids) {
-      foreach ($phids as $phid) {
-        $value[$type][$phid] = $phid;
-      }
-    }
-
-    if ($value) {
-      $xactions[] = id(new DifferentialTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
-        ->setNewValue($value);
-    }
 
     // Build a transaction to adjust reviewers.
     $reviewers = array(
@@ -1924,6 +1873,27 @@ final class DifferentialTransactionEditor
     $section->addPlaintextFragment($patch);
 
     return $section;
+  }
+
+  protected function willPublish(PhabricatorLiskDAO $object, array $xactions) {
+    // Reload to pick up the active diff and reviewer status.
+    return id(new DifferentialRevisionQuery())
+      ->setViewer($this->getActor())
+      ->needReviewerStatus(true)
+      ->needActiveDiffs(true)
+      ->withIDs(array($object->getID()))
+      ->executeOne();
+  }
+
+  protected function getCustomWorkerState() {
+    return array(
+      'changedPriorToCommitURI' => $this->changedPriorToCommitURI,
+    );
+  }
+
+  protected function loadCustomWorkerState(array $state) {
+    $this->changedPriorToCommitURI = idx($state, 'changedPriorToCommitURI');
+    return $this;
   }
 
 }

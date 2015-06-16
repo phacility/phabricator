@@ -199,7 +199,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
           $next_uri = '/'.$document->getMonogram();
           if ($document->getRequireSignature()) {
             $request_uri = $request->getRequestURI();
-            $next_uri = (string) $request_uri;
+            $next_uri = (string)$request_uri;
           }
         } else {
           $this->sendVerifySignatureEmail(
@@ -653,25 +653,21 @@ final class LegalpadDocumentSignController extends LegalpadController {
 
     $name = idx($signature_data, 'name');
 
-    $body = <<<EOBODY
-{$name}:
-
-This email address was used to sign a Legalpad document in Phabricator:
-
-  {$doc_name}
-
-Please verify you own this email address and accept the agreement by clicking
-this link:
-
-  {$link}
-
-Your signature is not valid until you complete this verification step.
-
-You can review the document here:
-
-  {$doc_link}
-
-EOBODY;
+    $body = pht(
+      "%s:\n\n".
+      "This email address was used to sign a Legalpad document ".
+      "in Phabricator:\n\n".
+      "  %s\n\n".
+      "Please verify you own this email address and accept the ".
+      "agreement by clicking this link:\n\n".
+      "  %s\n\n".
+      "Your signature is not valid until you complete this ".
+      "verification step.\n\nYou can review the document here:\n\n".
+      "  %s\n",
+      $name,
+      $doc_name,
+      $link,
+      $doc_link);
 
     id(new PhabricatorMetaMTAMail())
       ->addRawTos(array($email->getAddress()))
@@ -684,9 +680,10 @@ EOBODY;
 
   private function signInResponse() {
     return id(new Aphront403Response())
-      ->setForbiddenText(pht(
-        'The email address specified is associated with an account. '.
-        'Please login to that account and sign this document again.'));
+      ->setForbiddenText(
+        pht(
+          'The email address specified is associated with an account. '.
+          'Please login to that account and sign this document again.'));
   }
 
 }

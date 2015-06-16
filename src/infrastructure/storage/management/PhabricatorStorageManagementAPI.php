@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorStorageManagementAPI {
+final class PhabricatorStorageManagementAPI extends Phobject {
 
   private $host;
   private $user;
@@ -191,7 +191,7 @@ final class PhabricatorStorageManagementAPI {
         $this->applyPatchPHP($name);
         break;
       default:
-        throw new Exception("Unable to apply patch of type '{$type}'.");
+        throw new Exception(pht("Unable to apply patch of type '%s'.", $type));
     }
   }
 

@@ -3,22 +3,17 @@
 final class PhabricatorSearchSelectController
   extends PhabricatorSearchBaseController {
 
-  private $type;
-
-  public function willProcessRequest(array $data) {
-    $this->type = $data['type'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
+    $type = $request->getURIData('type');
+    $action = $request->getURIData('action');
 
     $query = new PhabricatorSavedQuery();
     $query_str = $request->getStr('query');
 
     $query->setEngineClassName('PhabricatorSearchApplicationSearchEngine');
     $query->setParameter('query', $query_str);
-    $query->setParameter('types', array($this->type));
+    $query->setParameter('types', array($type));
 
     $status_open = PhabricatorSearchRelationship::RELATIONSHIP_OPEN;
 
@@ -31,7 +26,7 @@ final class PhabricatorSearchSelectController
         $query->setParameter('authorPHIDs', array($user->getPHID()));
         // TODO - if / when we allow pholio mocks to be archived, etc
         // update this
-        if ($this->type != PholioMockPHIDType::TYPECONST) {
+        if ($type != PholioMockPHIDType::TYPECONST) {
           $query->setParameter('statuses', array($status_open));
         }
         break;
@@ -42,15 +37,25 @@ final class PhabricatorSearchSelectController
 
     $query->setParameter('excludePHIDs', array($request->getStr('exclude')));
 
+    $capabilities = array(PhabricatorPolicyCapability::CAN_VIEW);
+    switch ($action) {
+      case self::ACTION_MERGE:
+        $capabilities[] = PhabricatorPolicyCapability::CAN_EDIT;
+        break;
+      default:
+        break;
+    }
+
     $results = id(new PhabricatorSearchDocumentQuery())
       ->setViewer($user)
+      ->requireObjectCapabilities($capabilities)
       ->withSavedQuery($query)
       ->setOffset(0)
       ->setLimit(100)
       ->execute();
 
     $phids = array_fill_keys(mpull($results, 'getPHID'), true);
-    $phids += $this->queryObjectNames($query_str);
+    $phids += $this->queryObjectNames($query_str, $capabilities);
 
     $phids = array_keys($phids);
     $handles = $this->loadViewerHandles($phids);
@@ -64,12 +69,14 @@ final class PhabricatorSearchSelectController
     return id(new AphrontAjaxResponse())->setContent($data);
   }
 
-  private function queryObjectNames($query) {
-    $viewer = $this->getRequest()->getUser();
+  private function queryObjectNames($query, $capabilities) {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
 
     $objects = id(new PhabricatorObjectQuery())
       ->setViewer($viewer)
-      ->withTypes(array($this->type))
+      ->requireCapabilities($capabilities)
+      ->withTypes(array($request->getURIData('type')))
       ->withNames(array($query))
       ->execute();
 

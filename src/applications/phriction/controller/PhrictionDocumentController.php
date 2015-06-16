@@ -146,7 +146,7 @@ final class PhrictionDocumentController
 
         $core_content = $notice->render();
       } else {
-        throw new Exception("Unknown document status '{$doc_status}'!");
+        throw new Exception(pht("Unknown document status '%s'!", $doc_status));
       }
 
       $move_notice = null;
@@ -192,10 +192,19 @@ final class PhrictionDocumentController
       $crumbs->addCrumb($view);
     }
 
+    $action_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Actions'))
+      ->setHref('#')
+      ->setIconFont('fa-bars')
+      ->addClass('phui-mobile-menu')
+      ->setDropdownMenu($actions);
+
     $header = id(new PHUIHeaderView())
       ->setUser($user)
       ->setPolicyObject($document)
-      ->setHeader($page_title);
+      ->setHeader($page_title)
+      ->addActionLink($action_button);
 
     if ($content) {
       $header->setEpoch($content->getDateCreated());
@@ -206,16 +215,12 @@ final class PhrictionDocumentController
       $prop_list = new PHUIPropertyGroupView();
       $prop_list->addPropertyList($properties);
     }
-    $action_id = celerity_generate_unique_node_id();
-    $actions->setID($action_id);
 
     $page_content = id(new PHUIDocumentView())
       ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
       ->setHeader($header)
-      ->setActionListID($action_id)
       ->appendChild(
         array(
-          $actions,
           $prop_list,
           $version_note,
           $move_notice,

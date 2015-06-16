@@ -35,19 +35,7 @@ final class PhabricatorMetaMTAApplicationEmailQuery
   }
 
   protected function loadPage() {
-    $table  = new PhabricatorMetaMTAApplicationEmail();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T appemail %Q %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildApplicationSearchGroupClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage(new PhabricatorMetaMTAApplicationEmail());
   }
 
   protected function willFilterPage(array $app_emails) {
@@ -71,47 +59,45 @@ final class PhabricatorMetaMTAApplicationEmailQuery
     return $app_emails;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->addresses !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'appemail.address IN (%Ls)',
         $this->addresses);
     }
 
     if ($this->addressPrefix !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'appemail.address LIKE %>',
         $this->addressPrefix);
     }
 
     if ($this->applicationPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'appemail.applicationPHID IN (%Ls)',
         $this->applicationPHIDs);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'appemail.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'appemail.id IN (%Ld)',
         $this->ids);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   protected function getPrimaryTableAlias() {

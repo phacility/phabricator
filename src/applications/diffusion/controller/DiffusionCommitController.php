@@ -83,10 +83,12 @@ final class DiffusionCommitController extends DiffusionController {
       $error_panel->setTitle(pht('Commit Not Tracked'));
       $error_panel->setSeverity(PHUIInfoView::SEVERITY_WARNING);
       $error_panel->appendChild(
-        pht("This Diffusion repository is configured to track only one ".
-        "subdirectory of the entire Subversion repository, and this commit ".
-        "didn't affect the tracked subdirectory ('%s'), so no ".
-        "information is available.", $subpath));
+        pht(
+          "This Diffusion repository is configured to track only one ".
+          "subdirectory of the entire Subversion repository, and this commit ".
+          "didn't affect the tracked subdirectory ('%s'), so no ".
+          "information is available.",
+          $subpath));
       $content[] = $error_panel;
     } else {
       $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
@@ -238,10 +240,10 @@ final class DiffusionCommitController extends DiffusionController {
 
       $change_panel = new PHUIObjectBoxView();
       $header = new PHUIHeaderView();
-      $header->setHeader('Changes ('.number_format($count).')');
+      $header->setHeader(pht('Changes (%s)', new PhutilNumber($count)));
       $change_panel->setID('toc');
-      if ($count > self::CHANGES_LIMIT && !$show_all_details) {
 
+      if ($count > self::CHANGES_LIMIT && !$show_all_details) {
         $icon = id(new PHUIIconView())
           ->setIconFont('fa-files-o');
 
@@ -253,7 +255,7 @@ final class DiffusionCommitController extends DiffusionController {
 
         $warning_view = id(new PHUIInfoView())
           ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
-          ->setTitle('Very Large Commit')
+          ->setTitle(pht('Very Large Commit'))
           ->appendChild(
             pht('This commit is very large. Load each file individually.'));
 
@@ -280,7 +282,7 @@ final class DiffusionCommitController extends DiffusionController {
           $vcs_supports_directory_changes = false;
           break;
         default:
-          throw new Exception('Unknown VCS.');
+          throw new Exception(pht('Unknown VCS.'));
       }
 
       $references = array();
@@ -901,8 +903,8 @@ final class DiffusionCommitController extends DiffusionController {
       $caption->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
       $caption->appendChild(
         pht(
-          'This commit merges a very large number of changes. Only the first '.
-          '%s are shown.',
+          'This commit merges a very large number of changes. '.
+          'Only the first %s are shown.',
           new PhutilNumber($limit)));
     }
 

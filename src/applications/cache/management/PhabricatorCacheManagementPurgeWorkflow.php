@@ -6,24 +6,24 @@ final class PhabricatorCacheManagementPurgeWorkflow
   protected function didConstruct() {
     $this
       ->setName('purge')
-      ->setSynopsis('Drop data from caches.')
+      ->setSynopsis(pht('Drop data from caches.'))
       ->setArguments(
         array(
           array(
             'name'    => 'purge-all',
-            'help'    => 'Purge all caches.',
+            'help'    => pht('Purge all caches.'),
           ),
           array(
             'name'    => 'purge-remarkup',
-            'help'    => 'Purge the remarkup cache.',
+            'help'    => pht('Purge the remarkup cache.'),
           ),
           array(
             'name'    => 'purge-changeset',
-            'help'    => 'Purge the Differential changeset cache.',
+            'help'    => pht('Purge the Differential changeset cache.'),
           ),
           array(
             'name'    => 'purge-general',
-            'help'    => 'Purge the general cache.',
+            'help'    => pht('Purge the general cache.'),
           ),
         ));
   }
@@ -46,27 +46,30 @@ final class PhabricatorCacheManagementPurgeWorkflow
       }
 
       throw new PhutilArgumentUsageException(
-        "Specify which cache or caches to purge, or use '--purge-all'. ".
-        "Available caches are: ".implode(', ', $list).". Use '--help' ".
-        "for more information.");
+        pht(
+          "Specify which cache or caches to purge, or use '%s'. Available ".
+          "caches are: %s. Use '%s' for more information.",
+          '--purge-all',
+          implode(', ', $list),
+          '--help'));
     }
 
     if ($purge['remarkup']) {
-      $console->writeOut('Purging remarkup cache...');
+      $console->writeOut(pht('Purging remarkup cache...'));
       $this->purgeRemarkupCache();
-      $console->writeOut("done.\n");
+      $console->writeOut("%s\n", pht('Done.'));
     }
 
     if ($purge['changeset']) {
-      $console->writeOut('Purging changeset cache...');
+      $console->writeOut(pht('Purging changeset cache...'));
       $this->purgeChangesetCache();
-      $console->writeOut("done.\n");
+      $console->writeOut("%s\n", pht('Done.'));
     }
 
     if ($purge['general']) {
-      $console->writeOut('Purging general cache...');
+      $console->writeOut(pht('Purging general cache...'));
       $this->purgeGeneralCache();
-      $console->writeOut("done.\n");
+      $console->writeOut("%s\n", pht('Done.'));
     }
   }
 

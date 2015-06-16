@@ -75,7 +75,7 @@ final class PhabricatorDaemonManagementStatusWorkflow
         if (!$daemon->isRunning()) {
           $daemon->updateStatus(PhabricatorDaemonLog::STATUS_DEAD);
           $status = 2;
-          $name = '<DEAD> '.$name;
+          $name = pht('<DEAD> %s', $name);
         }
 
         $daemon_log = $daemon->getDaemonLog();

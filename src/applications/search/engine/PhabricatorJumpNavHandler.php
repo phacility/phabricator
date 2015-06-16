@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorJumpNavHandler {
+final class PhabricatorJumpNavHandler extends Phobject {
 
   public static function getJumpResponse(PhabricatorUser $viewer, $jump) {
     $jump = trim($jump);
@@ -69,7 +69,7 @@ final class PhabricatorJumpNavHandler {
                 ->setURI('/maniphest/task/create/?title='
                   .phutil_escape_uri($matches[1]));
             default:
-              throw new Exception("Unknown jump effect '{$effect}'!");
+              throw new Exception(pht("Unknown jump effect '%s'!", $effect));
           }
         }
       }

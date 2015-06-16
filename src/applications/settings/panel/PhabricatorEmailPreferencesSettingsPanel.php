@@ -15,8 +15,17 @@ final class PhabricatorEmailPreferencesSettingsPanel
     return pht('Email');
   }
 
+  public function isEditableByAdministrators() {
+    if ($this->getUser()->getIsMailingList()) {
+      return true;
+    }
+
+    return false;
+  }
+
   public function processRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $this->getViewer();
+    $user = $this->getUser();
 
     $preferences = $user->loadPreferences();
 
@@ -52,7 +61,7 @@ final class PhabricatorEmailPreferencesSettingsPanel
 
     $form = new AphrontFormView();
     $form
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendRemarkupInstructions(
         pht(
           'These settings let you control how Phabricator notifies you about '.

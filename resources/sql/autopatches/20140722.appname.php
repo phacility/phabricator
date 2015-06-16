@@ -74,7 +74,7 @@ foreach ($applications as $application) {
 
 /* -(  User preferences  )--------------------------------------------------- */
 
-echo "Migrating user preferences...\n";
+echo pht('Migrating user preferences...')."\n";
 $table = new PhabricatorUserPreferences();
 $conn_w = $table->establishConnection('w');
 $pref_pinned = PhabricatorUserPreferences::PREFERENCE_APP_PINNED;
@@ -107,7 +107,7 @@ foreach (new LiskMigrationIterator(new PhabricatorUser()) as $user) {
 
 /* -(  Dashboard installs  )------------------------------------------------- */
 
-echo "Migrating dashboard installs...\n";
+echo pht('Migrating dashboard installs...')."\n";
 $table = new PhabricatorDashboardInstall();
 $conn_w = $table->establishConnection('w');
 
@@ -126,7 +126,7 @@ foreach (new LiskMigrationIterator($table) as $dashboard_install) {
 /* -(  Phabricator configuration  )------------------------------------------ */
 
 $config_key = 'phabricator.uninstalled-applications';
-echo "Migrating `{$config_key}` config...\n";
+echo pht('Migrating `%s` config...', $config_key)."\n";
 
 $config = PhabricatorConfigEntry::loadConfigEntry($config_key);
 $old_config = $config->getValue();
@@ -147,7 +147,7 @@ if ($old_config) {
 /* -(  phabricator.application-settings  )----------------------------------- */
 
 $config_key = 'phabricator.application-settings';
-echo "Migrating `{$config_key}` config...\n";
+echo pht('Migrating `%s` config...', $config_key)."\n";
 
 $config = PhabricatorConfigEntry::loadConfigEntry($config_key);
 $old_config = $config->getValue();

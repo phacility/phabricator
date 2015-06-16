@@ -92,12 +92,13 @@ final class PhabricatorSecurityConfigOptions
             "reasonably configure more granular behavior there.\n\n".
 
             "IMPORTANT: Phabricator determines if a request is HTTPS or not ".
-            "by examining the PHP \$_SERVER['HTTPS'] variable. If you run ".
+            "by examining the PHP `%s` variable. If you run ".
             "Apache/mod_php this will probably be set correctly for you ".
             "automatically, but if you run Phabricator as CGI/FCGI (e.g., ".
             "through nginx or lighttpd), you need to configure your web ".
             "server so that it passes the value correctly based on the ".
-            "connection type."))
+            "connection type.",
+            "\$_SERVER['HTTPS']"))
         ->setBoolOptions(
           array(
             pht('Force HTTPS'),
@@ -163,7 +164,8 @@ final class PhabricatorSecurityConfigOptions
             "When users write comments which have URIs, they'll be ".
             "automatically linked if the protocol appears in this set. This ".
             "whitelist is primarily to prevent security issues like ".
-            "javascript:// URIs."))
+            "%s URIs.",
+            'javascript://'))
         ->addExample("http\nhttps", pht('Valid Setting'))
         ->setLocked(true),
       $this->newOption(
@@ -226,7 +228,7 @@ final class PhabricatorSecurityConfigOptions
           pht('Determines whether or not YouTube videos get embedded.'))
         ->setDescription(
           pht(
-            "If you enable this, linked YouTube videos will be embeded ".
+            "If you enable this, linked YouTube videos will be embedded ".
             "inline. This has mild security implications (you'll leak ".
             "referrers to YouTube) and is pretty silly (but sort of ".
             "awesome).")),
@@ -276,22 +278,6 @@ final class PhabricatorSecurityConfigOptions
               'unsecured content over plain HTTP. It is very difficult to '.
               'undo this change once users\' browsers have accepted the '.
               'setting.')),
-        $this->newOption('security.allow-conduit-act-as-user', 'bool', false)
-          ->setBoolOptions(
-            array(
-              pht('Allow'),
-              pht('Disallow'),
-            ))
-          ->setLocked(true)
-          ->setSummary(
-            pht('Allow administrators to use the Conduit API as other users.'))
-          ->setDescription(
-            pht(
-              'DEPRECATED - if you enable this, you are allowing '.
-              'administrators to act as any user via the Conduit API. '.
-              'Enabling this is not advised as it introduces a huge policy '.
-              'violation and has been obsoleted in functionality.')),
-
     );
   }
 
@@ -308,8 +294,10 @@ final class PhabricatorSecurityConfigOptions
         throw new PhabricatorConfigValidationException(
           pht(
             "Config option '%s' is invalid. The URI must start with ".
-            "'http://' or 'https://'.",
-            $key));
+            "'%s' or '%s'.",
+            $key,
+            'http://',
+            'https://'));
       }
 
       $domain = $uri->getDomain();
@@ -317,10 +305,11 @@ final class PhabricatorSecurityConfigOptions
         throw new PhabricatorConfigValidationException(
           pht(
             "Config option '%s' is invalid. The URI must contain a dot ('.'), ".
-            "like 'http://example.com/', not just a bare name like ".
-            "'http://example/'. Some web browsers will not set cookies on ".
-            "domains with no TLD.",
-            $key));
+            "like '%s', not just a bare name like '%s'. ".
+            "Some web browsers will not set cookies on domains with no TLD.",
+            $key,
+            'http://example.com/',
+            'http://example/'));
       }
 
       $path = $uri->getPath();
@@ -328,11 +317,11 @@ final class PhabricatorSecurityConfigOptions
         throw new PhabricatorConfigValidationException(
           pht(
             "Config option '%s' is invalid. The URI must NOT have a path, ".
-            "e.g. 'http://phabricator.example.com/' is OK, but ".
-            "'http://example.com/phabricator/' is not. Phabricator must be ".
-            "installed on an entire domain; it can not be installed on a ".
-            "path.",
-            $key));
+            "e.g. '%s' is OK, but '%s' is not. Phabricator must be installed ".
+            "on an entire domain; it can not be installed on a path.",
+            $key,
+            'http://phabricator.example.com/',
+            'http://example.com/phabricator/'));
       }
     }
   }

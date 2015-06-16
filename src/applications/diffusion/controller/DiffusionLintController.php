@@ -116,7 +116,7 @@ final class DiffusionLintController extends DiffusionController {
             ->setValue($owners))
         ->appendChild(
           id(new AphrontFormSubmitControl())
-            ->setValue('Filter'));
+            ->setValue(pht('Filter')));
       $content[] = id(new AphrontListFilterView())->appendChild($form);
     }
 

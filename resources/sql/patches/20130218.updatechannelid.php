@@ -1,6 +1,6 @@
 <?php
 
-echo "Updating channel IDs of previous chatlog events...\n";
+echo pht('Updating channel IDs of previous chatlog events...')."\n";
 $event_table = new PhabricatorChatLogEvent();
 $channel_table = new PhabricatorChatLogChannel();
 
@@ -61,4 +61,4 @@ $channel_table->endReadLocking();
 $event_table->saveTransaction();
 $channel_table->saveTransaction();
 
-echo "\nDone.\n";
+echo "\n".pht('Done.')."\n";

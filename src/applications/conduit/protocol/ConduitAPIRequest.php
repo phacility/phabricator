@@ -1,6 +1,6 @@
 <?php
 
-final class ConduitAPIRequest {
+final class ConduitAPIRequest extends Phobject {
 
   protected $params;
   private $user;
@@ -36,9 +36,10 @@ final class ConduitAPIRequest {
   public function getUser() {
     if (!$this->user) {
       throw new Exception(
-        'You can not access the user inside the implementation of a Conduit '.
-        'method which does not require authentication (as per '.
-        'shouldRequireAuthentication()).');
+        pht(
+          'You can not access the user inside the implementation of a Conduit '.
+          'method which does not require authentication (as per %s).',
+          'shouldRequireAuthentication()'));
     }
     return $this->user;
   }

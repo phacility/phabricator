@@ -110,14 +110,14 @@ final class PHUIListViewTestCase extends PhabricatorTestCase {
     return id(new PHUIListItemView())
       ->setKey($key)
       ->setHref('#')
-      ->setName('Link');
+      ->setName(pht('Link'));
   }
 
   private function newLabel($key) {
     return id(new PHUIListItemView())
       ->setType(PHUIListItemView::TYPE_LABEL)
       ->setKey($key)
-      ->setName('Label');
+      ->setName(pht('Label'));
   }
 
   private function newABCMenu() {

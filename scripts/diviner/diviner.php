@@ -6,7 +6,7 @@ require_once $root.'/scripts/__init_script__.php';
 
 $args = new PhutilArgumentParser($argv);
 
-$args->setTagline('documentation generator');
+$args->setTagline(pht('documentation generator'));
 $args->setSynopsis(<<<EOHELP
 **diviner** __command__ [__options__]
   Generate documentation.

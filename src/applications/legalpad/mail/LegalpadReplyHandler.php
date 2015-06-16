@@ -5,7 +5,7 @@ final class LegalpadReplyHandler
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof LegalpadDocument)) {
-      throw new Exception('Mail receiver is not a LegalpadDocument!');
+      throw new Exception(pht('Mail receiver is not a LegalpadDocument!'));
     }
   }
 

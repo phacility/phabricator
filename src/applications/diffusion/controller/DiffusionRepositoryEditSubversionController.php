@@ -84,11 +84,11 @@ final class DiffusionRepositoryEditSubversionController
         pht(
           "You can set the **Repository UUID**, which will help Phabriactor ".
           "provide better context in some cases. You can find the UUID of a ".
-          "repository by running `svn info`.".
-          "\n\n".
+          "repository by running `%s`.\n\n".
           "If you want to import only part of a repository, like `trunk/`, ".
           "you can set a path in **Import Only**. Phabricator will ignore ".
-          "commits which do not affect this path."))
+          "commits which do not affect this path.",
+          'svn info'))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('uuid')

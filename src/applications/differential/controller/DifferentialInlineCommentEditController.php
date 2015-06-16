@@ -29,7 +29,7 @@ final class DifferentialInlineCommentEditController
     $revision = $this->loadRevision();
 
     if (!id(new DifferentialChangeset())->load($changeset_id)) {
-      throw new Exception('Invalid changeset ID!');
+      throw new Exception(pht('Invalid changeset ID!'));
     }
 
     return id(new DifferentialInlineComment())
@@ -42,6 +42,7 @@ final class DifferentialInlineCommentEditController
       ->setViewer($this->getViewer())
       ->withIDs(array($id))
       ->withDeletedDrafts(true)
+      ->needHidden(true)
       ->executeOne();
   }
 
@@ -50,6 +51,7 @@ final class DifferentialInlineCommentEditController
       ->setViewer($this->getViewer())
       ->withPHIDs(array($phid))
       ->withDeletedDrafts(true)
+      ->needHidden(true)
       ->executeOne();
   }
 
@@ -59,7 +61,7 @@ final class DifferentialInlineCommentEditController
 
     $inline = $this->loadComment($id);
     if (!$this->canEditInlineComment($user, $inline)) {
-      throw new Exception('That comment is not editable!');
+      throw new Exception(pht('That comment is not editable!'));
     }
     return $inline;
   }
@@ -150,6 +152,40 @@ final class DifferentialInlineCommentEditController
   protected function loadObjectOwnerPHID(
     PhabricatorInlineCommentInterface $inline) {
     return $this->loadRevision()->getAuthorPHID();
+  }
+
+  protected function hideComments(array $ids) {
+    $viewer = $this->getViewer();
+    $table = new DifferentialHiddenComment();
+    $conn_w = $table->establishConnection('w');
+
+    $sql = array();
+    foreach ($ids as $id) {
+      $sql[] = qsprintf(
+        $conn_w,
+        '(%s, %d)',
+        $viewer->getPHID(),
+        $id);
+    }
+
+    queryfx(
+      $conn_w,
+      'INSERT IGNORE INTO %T (userPHID, commentID) VALUES %Q',
+      $table->getTableName(),
+      implode(', ', $sql));
+  }
+
+  protected function showComments(array $ids) {
+    $viewer = $this->getViewer();
+    $table = new DifferentialHiddenComment();
+    $conn_w = $table->establishConnection('w');
+
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE userPHID = %s AND commentID IN (%Ld)',
+      $table->getTableName(),
+      $viewer->getPHID(),
+      $ids);
   }
 
 }

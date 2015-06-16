@@ -167,14 +167,18 @@ final class ManiphestTransactionEditor
         $board_phid = idx($xaction->getNewValue(), 'projectPHID');
         if (!$board_phid) {
           throw new Exception(
-            pht("Expected 'projectPHID' in column transaction."));
+            pht(
+              "Expected '%s' in column transaction.",
+              'projectPHID'));
         }
 
         $old_phids = idx($xaction->getOldValue(), 'columnPHIDs', array());
         $new_phids = idx($xaction->getNewValue(), 'columnPHIDs', array());
         if (count($new_phids) !== 1) {
           throw new Exception(
-            pht("Expected exactly one 'columnPHIDs' in column transaction."));
+            pht(
+              "Expected exactly one '%s' in column transaction.",
+              'columnPHIDs'));
         }
 
         $columns = id(new PhabricatorProjectColumnQuery())
@@ -372,9 +376,7 @@ final class ManiphestTransactionEditor
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-
-    $xactions = mfilter($xactions, 'shouldHide', true);
-    return $xactions;
+    return true;
   }
 
   protected function getMailSubjectPrefix() {
@@ -511,13 +513,6 @@ final class ManiphestTransactionEditor
 
     $xactions = array();
 
-    $cc_phids = $adapter->getCcPHIDs();
-    if ($cc_phids) {
-      $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
-        ->setNewValue(array('+' => $cc_phids));
-    }
-
     $assign_phid = $adapter->getAssignPHID();
     if ($assign_phid) {
       $xactions[] = id(new ManiphestTransaction())
@@ -637,7 +632,7 @@ final class ManiphestTransactionEditor
 
     $query = id(new ManiphestTaskQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
+      ->setOrder(ManiphestTaskQuery::ORDER_PRIORITY)
       ->withPriorities(array($dst->getPriority()))
       ->setLimit(1);
 

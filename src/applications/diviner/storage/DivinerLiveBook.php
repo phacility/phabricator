@@ -42,8 +42,7 @@ final class DivinerLiveBook extends DivinerDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      DivinerBookPHIDType::TYPECONST);
+    return PhabricatorPHID::generateNewPHID(DivinerBookPHIDType::TYPECONST);
   }
 
   public function getTitle() {
@@ -91,10 +90,8 @@ final class DivinerLiveBook extends DivinerDAO
 
     $this->openTransaction();
       $atoms = id(new DivinerAtomQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->setViewer($engine->getViewer())
         ->withBookPHIDs(array($this->getPHID()))
-        ->withIncludeGhosts(true)
-        ->withIncludeUndocumentable(true)
         ->execute();
 
       foreach ($atoms as $atom) {

@@ -1,6 +1,6 @@
 <?php
 
-final class ProjectBoardTaskCard {
+final class ProjectBoardTaskCard extends Phobject {
 
   private $viewer;
   private $task;
@@ -49,6 +49,8 @@ final class ProjectBoardTaskCard {
     $bar_color = idx($color_map, $task->getPriority(), 'grey');
 
     $card = id(new PHUIObjectItemView())
+      ->setObject($task)
+      ->setUser($this->getViewer())
       ->setObjectName('T'.$task->getID())
       ->setHeader($task->getTitle())
       ->setGrippable($can_edit)

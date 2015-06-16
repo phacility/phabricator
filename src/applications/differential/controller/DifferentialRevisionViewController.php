@@ -33,13 +33,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $diffs = id(new DifferentialDiffQuery())
       ->setViewer($request->getUser())
       ->withRevisionIDs(array($this->revisionID))
-      ->needArcanistProjects(true)
       ->execute();
     $diffs = array_reverse($diffs, $preserve_keys = true);
 
     if (!$diffs) {
       throw new Exception(
-        'This revision has no diffs. Something has gone quite wrong.');
+        pht('This revision has no diffs. Something has gone quite wrong.'));
     }
 
     $revision->attachActiveDiff(last($diffs));
@@ -152,7 +151,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     if (count($changesets) > $limit && !$large) {
       $count = count($changesets);
       $warning = new PHUIInfoView();
-      $warning->setTitle('Very Large Diff');
+      $warning->setTitle(pht('Very Large Diff'));
       $warning->setSeverity(PHUIInfoView::SEVERITY_WARNING);
       $warning->appendChild(hsprintf(
         '%s <strong>%s</strong>',
@@ -176,6 +175,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
       $query = id(new DifferentialInlineCommentQuery())
         ->setViewer($user)
+        ->needHidden(true)
         ->withRevisionPHIDs(array($revision->getPHID()));
       $inlines = $query->execute();
       $inlines = $query->adjustInlinesForChangesets(
@@ -204,27 +204,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
     } else {
       $warning = null;
       $visible_changesets = $changesets;
-    }
-
-
-    // TODO: This should be in a DiffQuery or similar.
-    $need_props = array();
-    foreach ($field_list->getFields() as $field) {
-      foreach ($field->getRequiredDiffPropertiesForRevisionView() as $prop) {
-        $need_props[$prop] = $prop;
-      }
-    }
-
-    if ($need_props) {
-      $prop_diff = $revision->getActiveDiff();
-      $load_props = id(new DifferentialDiffProperty())->loadAllWhere(
-        'diffID = %d AND name IN (%Ls)',
-        $prop_diff->getID(),
-        $need_props);
-      $load_props = mpull($load_props, 'getData', 'getName');
-      foreach ($need_props as $need) {
-        $prop_diff->attachProperty($need, idx($load_props, $need));
-      }
     }
 
     $commit_hashes = mpull($diffs, 'getSourceControlBaseRevision');
@@ -260,14 +239,13 @@ final class DifferentialRevisionViewController extends DifferentialController {
       'whitespace',
       DifferentialChangesetParser::WHITESPACE_IGNORE_MOST);
 
-    $arc_project = $target->getArcanistProject();
-    if ($arc_project) {
-      list($symbol_indexes, $project_phids) = $this->buildSymbolIndexes(
-        $arc_project,
+    $repository = $revision->getRepository();
+    if ($repository) {
+      $symbol_indexes = $this->buildSymbolIndexes(
+        $repository,
         $visible_changesets);
     } else {
       $symbol_indexes = array();
-      $project_phids = null;
     }
 
     $revision_detail->setActions($actions);
@@ -286,6 +264,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
         ->setErrors($revision_warnings);
       $revision_detail_box->setInfoView($revision_warnings);
     }
+
+    $diff_detail_box = $this->buildDiffDetailView(
+      array_select_keys($diffs, array($diff_vs, $target->getID())),
+      $revision,
+      $field_list);
 
     $comment_view = $this->buildTransactions(
       $revision,
@@ -306,15 +289,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
         'id' => $wrap_id,
       ),
       $comment_view);
-
-    if ($arc_project) {
-      Javelin::initBehavior(
-        'repository-crossreference',
-        array(
-          'section' => $wrap_id,
-          'projects' => $project_phids,
-        ));
-    }
 
     $changeset_view = new DifferentialChangesetListView();
     $changeset_view->setChangesets($changesets);
@@ -339,7 +313,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $changeset_view->setRepository($repository);
     }
     $changeset_view->setSymbolIndexes($symbol_indexes);
-    $changeset_view->setTitle('Diff '.$target->getID());
+    $changeset_view->setTitle(pht('Diff %s', $target->getID()));
 
     $diff_history = id(new DifferentialRevisionUpdateHistoryView())
       ->setUser($user)
@@ -496,6 +470,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $content = array(
       $revision_detail_box,
+      $diff_detail_box,
       $page_pane,
     );
 
@@ -750,35 +725,44 @@ final class DifferentialRevisionViewController extends DifferentialController {
   }
 
   private function buildSymbolIndexes(
-    PhabricatorRepositoryArcanistProject $arc_project,
+    PhabricatorRepository $repository,
     array $visible_changesets) {
     assert_instances_of($visible_changesets, 'DifferentialChangeset');
 
     $engine = PhabricatorSyntaxHighlighter::newEngine();
 
-    $langs = $arc_project->getSymbolIndexLanguages();
-    if (!$langs) {
-      return array(array(), array());
-    }
+    $langs = $repository->getSymbolLanguages();
+    $langs = nonempty($langs, array());
+
+    $sources = $repository->getSymbolSources();
+    $sources = nonempty($sources, array());
 
     $symbol_indexes = array();
 
-    $project_phids = array_merge(
-      array($arc_project->getPHID()),
-      nonempty($arc_project->getSymbolIndexProjects(), array()));
+    if ($langs && $sources) {
+      $have_symbols = id(new DiffusionSymbolQuery())
+          ->existsSymbolsInRepository($repository->getPHID());
+      if (!$have_symbols) {
+        return $symbol_indexes;
+      }
+    }
+
+    $repository_phids = array_merge(
+      array($repository->getPHID()),
+      $sources);
 
     $indexed_langs = array_fill_keys($langs, true);
     foreach ($visible_changesets as $key => $changeset) {
       $lang = $engine->getLanguageFromFilename($changeset->getFilename());
-      if (isset($indexed_langs[$lang])) {
+      if (empty($indexed_langs) || isset($indexed_langs[$lang])) {
         $symbol_indexes[$key] = array(
-          'lang'      => $lang,
-          'projects'  => $project_phids,
+          'lang'         => $lang,
+          'repositories' => $repository_phids,
         );
       }
     }
 
-    return array($symbol_indexes, $project_phids);
+    return $symbol_indexes;
   }
 
   private function loadOtherRevisions(
@@ -974,5 +958,86 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     return $warnings;
   }
+
+  private function buildDiffDetailView(
+    array $diffs,
+    DifferentialRevision $revision,
+    PhabricatorCustomFieldList $field_list) {
+    $viewer = $this->getViewer();
+
+    $fields = array();
+    foreach ($field_list->getFields() as $field) {
+      if ($field->shouldAppearInDiffPropertyView()) {
+        $fields[] = $field;
+      }
+    }
+
+    if (!$fields) {
+      return null;
+    }
+
+    // Make sure we're only going to render unique diffs.
+    $diffs = mpull($diffs, null, 'getID');
+    $labels = array(pht('Left'), pht('Right'));
+
+    $property_lists = array();
+    foreach ($diffs as $diff) {
+      if (count($diffs) == 2) {
+        $label = array_shift($labels);
+        $label = pht('%s (Diff %d)', $label, $diff->getID());
+      } else {
+        $label = pht('Diff %d', $diff->getID());
+      }
+
+      $property_lists[] = array(
+        $label,
+        $this->buildDiffPropertyList($diff, $revision, $fields),
+      );
+    }
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Diff Detail'))
+      ->setUser($viewer);
+
+    $last_tab = null;
+    foreach ($property_lists as $key => $property_list) {
+      list($tab_name, $list_view) = $property_list;
+
+      $tab = id(new PHUIListItemView())
+        ->setKey($key)
+        ->setName($tab_name);
+
+      $box->addPropertyList($list_view, $tab);
+      $last_tab = $tab;
+    }
+
+    if ($last_tab) {
+      $last_tab->setSelected(true);
+    }
+
+    return $box;
+  }
+
+  private function buildDiffPropertyList(
+    DifferentialDiff $diff,
+    DifferentialRevision $revision,
+    array $fields) {
+    $viewer = $this->getViewer();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setObject($diff);
+
+    foreach ($fields as $field) {
+      $label = $field->renderDiffPropertyViewLabel($diff);
+      $value = $field->renderDiffPropertyViewValue($diff);
+      if ($value !== null) {
+        $view->addProperty($label, $value);
+      }
+    }
+
+    return $view;
+  }
+
 
 }

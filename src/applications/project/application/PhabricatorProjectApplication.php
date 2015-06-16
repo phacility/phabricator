@@ -119,16 +119,16 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
       ProjectDefaultViewCapability::CAPABILITY => array(
-        'caption' => pht(
-          'Default view policy for newly created projects.'),
+        'caption' => pht('Default view policy for newly created projects.'),
+        'template' => PhabricatorProjectProjectPHIDType::TYPECONST,
       ),
       ProjectDefaultEditCapability::CAPABILITY => array(
-        'caption' => pht(
-          'Default edit policy for newly created projects.'),
+        'caption' => pht('Default edit policy for newly created projects.'),
+        'template' => PhabricatorProjectProjectPHIDType::TYPECONST,
       ),
       ProjectDefaultJoinCapability::CAPABILITY => array(
-        'caption' => pht(
-          'Default join policy for newly created projects.'),
+        'caption' => pht('Default join policy for newly created projects.'),
+        'template' => PhabricatorProjectProjectPHIDType::TYPECONST,
       ),
     );
   }

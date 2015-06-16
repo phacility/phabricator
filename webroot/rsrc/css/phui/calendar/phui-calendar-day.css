@@ -2,6 +2,14 @@
  * @provides phui-calendar-day-css
  */
 
+.device .phui-day-view-column {
+  display: none;
+}
+
+.device .phui-calendar-list-container {
+  width: 100%;
+}
+
 .phui-calendar-day-view {
   overflow: scroll;
   width: 100%;
@@ -21,13 +29,22 @@
 
 .phui-calendar-day-view td {
   position: relative;
+  cursor: pointer;
+}
+
+.phui-calendar-day-view td:hover {
+  background: {$lightbluebackground};
 }
 
 .phui-calendar-day-view tr + tr td.phui-calendar-day-events {
   border-top: 1px solid {$lightgreyborder};
 }
 
-.phui-calendar-day-view td div.phui-calendar-day-event {
+.phui-drag {
+  opacity: .25;
+}
+
+div.phui-calendar-day-event {
   width: 100%;
   position: absolute;
   top: 0;
@@ -35,11 +52,19 @@
   min-height: 30px;
 }
 
+.can-drag a {
+  cursor: move;
+}
+
+div.phui-calendar-day-event.all-day {
+  position: relative;
+}
+
 .phui-calendar-day-event-link {
   padding: 8px;
-  border: 1px solid {$blueborder};
-  background-color: {$bluebackground};
-  margin: 0 4px;
+  border: 1px solid {$greyborder};
+  background-color: {$darkgreybackground};
+  margin: 0 1px;
   position: absolute;
   left: 0;
   right: 0;
@@ -49,15 +74,27 @@
   color: {$greytext};
 }
 
+.phui-calendar-day-event-link.viewer-invited-day-event {
+  border-color: {$green};
+  background-color: {$lightgreen};
+  color: {$green};
+}
+
 .day-view-all-day {
-  border: 1px solid {$blueborder};
+  border: 1px solid {$greyborder};
   height: 12px;
   margin: 0;
   display: block;
   padding: 8px;
-  background-color: {$bluebackground};
+  background-color: {$darkgreybackground};
   text-decoration: none;
   color: {$greytext};
+}
+
+.day-view-all-day.viewer-invited-day-event {
+  border-color: {$green};
+  background-color: {$lightgreen};
+  color: {$green};
 }
 
 .phui-calendar-day-event + .phui-calendar-day-event .day-view-all-day {

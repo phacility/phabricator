@@ -49,7 +49,7 @@ final class PhabricatorUserTestCase extends PhabricatorTestCase {
       $this->assertEqual(
         $expect,
         PhabricatorUser::validateUsername($name),
-        "Validity of '{$name}'.");
+        pht("Validity of '%s'.", $name));
     }
   }
 

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorAuditCommitStatusConstants {
+final class PhabricatorAuditCommitStatusConstants extends Phobject {
 
   const NONE                = 0;
   const NEEDS_AUDIT         = 1;
@@ -21,7 +21,7 @@ final class PhabricatorAuditCommitStatusConstants {
   }
 
   public static function getStatusName($code) {
-    return idx(self::getStatusNameMap(), $code, 'Unknown');
+    return idx(self::getStatusNameMap(), $code, pht('Unknown'));
   }
 
   public static function getOpenStatusConstants() {

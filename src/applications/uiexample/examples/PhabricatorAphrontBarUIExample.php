@@ -3,11 +3,11 @@
 final class PhabricatorAphrontBarUIExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Bars';
+    return pht('Bars');
   }
 
   public function getDescription() {
-    return 'Like fractions, but more horizontal.';
+    return pht('Like fractions, but more horizontal.');
   }
 
   public function renderExample() {
@@ -53,7 +53,7 @@ final class PhabricatorAphrontBarUIExample extends PhabricatorUIExample {
     }
 
     return $this->wrap(
-      'Glyph bars in weird order',
+      pht('Glyph bars in weird order'),
       $views);
   }
 
@@ -61,12 +61,13 @@ final class PhabricatorAphrontBarUIExample extends PhabricatorUIExample {
     $bar = id(new AphrontGlyphBarView())
         ->setValue(50)
         ->setMax(100)
-        ->setCaption('Glyphs!')
+        ->setCaption(pht('Glyphs!'))
         ->setNumGlyphs(10)
         ->setGlyph(hsprintf('%s', '*'));
 
     return $this->wrap(
-      'Ascii star glyph bar', $bar);
+      pht('ASCII star glyph bar'),
+      $bar);
   }
 
 }

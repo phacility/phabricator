@@ -12,8 +12,9 @@ final class PhabricatorConfigManagementDeleteWorkflow
         array(
           array(
             'name'  => 'database',
-            'help'  => pht('Delete configuration in the database instead of '.
-            'in local configuration.'),
+            'help'  => pht(
+              'Delete configuration in the database instead of '.
+              'in local configuration.'),
           ),
           array(
             'name'      => 'args',
@@ -27,15 +28,15 @@ final class PhabricatorConfigManagementDeleteWorkflow
 
     $argv = $args->getArg('args');
     if (count($argv) == 0) {
-      throw new PhutilArgumentUsageException(pht(
-        'Specify a configuration key to delete.'));
+      throw new PhutilArgumentUsageException(
+        pht('Specify a configuration key to delete.'));
     }
 
     $key = $argv[0];
 
     if (count($argv) > 1) {
-      throw new PhutilArgumentUsageException(pht(
-        'Too many arguments: expected one key.'));
+      throw new PhutilArgumentUsageException(
+        pht('Too many arguments: expected one key.'));
     }
 
 
@@ -49,10 +50,11 @@ final class PhabricatorConfigManagementDeleteWorkflow
     }
     $values = $config->getKeys(array($key));
     if (!$values) {
-      throw new PhutilArgumentUsageException(pht(
-        "Configuration key '%s' is not set in %s configuration!",
-        $key,
-        $config_type));
+      throw new PhutilArgumentUsageException(
+        pht(
+          "Configuration key '%s' is not set in %s configuration!",
+          $key,
+          $config_type));
     }
 
     if ($use_database) {
@@ -64,7 +66,8 @@ final class PhabricatorConfigManagementDeleteWorkflow
     }
 
     $console->writeOut(
-      pht("Deleted '%s' from %s configuration.", $key, $config_type)."\n");
+      "%s\n",
+      pht("Deleted '%s' from %s configuration.", $key, $config_type));
   }
 
 }

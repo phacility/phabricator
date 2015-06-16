@@ -1,6 +1,6 @@
 <?php
 
-abstract class DivinerDiskCache {
+abstract class DivinerDiskCache extends Phobject {
 
   private $cache;
 

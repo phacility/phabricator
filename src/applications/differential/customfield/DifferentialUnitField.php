@@ -19,19 +19,34 @@ final class DifferentialUnitField
     return true;
   }
 
-  public function renderPropertyViewLabel() {
+  public function renderPropertyViewValue(array $handles) {
+    return null;
+  }
+
+  public function shouldAppearInDiffPropertyView() {
+    return true;
+  }
+
+  public function renderDiffPropertyViewLabel(DifferentialDiff $diff) {
     return $this->getFieldName();
   }
 
-  public function getRequiredDiffPropertiesForRevisionView() {
-    return array(
+  public function renderDiffPropertyViewValue(DifferentialDiff $diff) {
+    // TODO: See DifferentialLintField.
+    $keys = array(
       'arc:unit',
       'arc:unit-excuse',
     );
-  }
 
-  public function renderPropertyViewValue(array $handles) {
-    $diff = $this->getObject()->getActiveDiff();
+    $properties = id(new DifferentialDiffProperty())->loadAllWhere(
+      'diffID = %d AND name IN (%Ls)',
+      $diff->getID(),
+      $keys);
+    $properties = mpull($properties, 'getData', 'getName');
+
+    foreach ($keys as $key) {
+      $diff->attachProperty($key, idx($properties, $key));
+    }
 
     $ustar = DifferentialRevisionUpdateHistoryView::renderDiffUnitStar($diff);
     $umsg = DifferentialRevisionUpdateHistoryView::getDiffUnitMessage($diff);
@@ -49,7 +64,7 @@ final class DifferentialUnitField
     if ($excuse) {
       $rows[] = array(
         'style' => 'excuse',
-        'name'  => 'Excuse',
+        'name'  => pht('Excuse'),
         'value' => phutil_escape_html_newlines($excuse),
         'show'  => true,
       );
@@ -83,8 +98,8 @@ final class DifferentialUnitField
             $userdata = str_replace("\000", '', $userdata);
           }
           $markup_object = id(new PhabricatorMarkupOneOff())
-              ->setContent($userdata)
-              ->setPreserveLinebreaks(true);
+            ->setContent($userdata)
+            ->setPreserveLinebreaks(true);
           $engine->addObject($markup_object, 'default');
           $markup_objects[$key] = $markup_object;
         }
@@ -189,12 +204,12 @@ final class DifferentialUnitField
       )) + $hidden;
 
     $noun = array(
-      ArcanistUnitTestResult::RESULT_BROKEN     => 'Broken',
-      ArcanistUnitTestResult::RESULT_FAIL       => 'Failed',
-      ArcanistUnitTestResult::RESULT_UNSOUND    => 'Unsound',
-      ArcanistUnitTestResult::RESULT_SKIP       => 'Skipped',
-      ArcanistUnitTestResult::RESULT_POSTPONED  => 'Postponed',
-      ArcanistUnitTestResult::RESULT_PASS       => 'Passed',
+      ArcanistUnitTestResult::RESULT_BROKEN     => pht('Broken'),
+      ArcanistUnitTestResult::RESULT_FAIL       => pht('Failed'),
+      ArcanistUnitTestResult::RESULT_UNSOUND    => pht('Unsound'),
+      ArcanistUnitTestResult::RESULT_SKIP       => pht('Skipped'),
+      ArcanistUnitTestResult::RESULT_POSTPONED  => pht('Postponed'),
+      ArcanistUnitTestResult::RESULT_PASS       => pht('Passed'),
     );
 
     $show = array();
@@ -206,7 +221,9 @@ final class DifferentialUnitField
       }
     }
 
-    return 'Show Full Unit Results ('.implode(', ', $show).')';
+    return pht(
+      'Show Full Unit Results (%s)',
+      implode(', ', $show));
   }
 
   public function getWarningsForDetailView() {

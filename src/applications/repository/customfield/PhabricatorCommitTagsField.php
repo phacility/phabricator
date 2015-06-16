@@ -7,13 +7,22 @@ final class PhabricatorCommitTagsField
     return 'diffusion:tags';
   }
 
-  public function shouldAppearInApplicationTransactions() {
+  public function getFieldName() {
+    return pht('Tags');
+  }
+
+  public function getFieldDescription() {
+    return pht('Shows commit tags in email.');
+  }
+
+  public function shouldAppearInTransactionMail() {
     return true;
   }
 
-  public function buildApplicationTransactionMailBody(
-    PhabricatorApplicationTransaction $xaction,
-    PhabricatorMetaMTAMailBody $body) {
+  public function updateTransactionMailBody(
+    PhabricatorMetaMTAMailBody $body,
+    PhabricatorApplicationTransactionEditor $editor,
+    array $xactions) {
 
     $params = array(
       'commit' => $this->getObject()->getCommitIdentifier(),

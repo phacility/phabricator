@@ -67,17 +67,6 @@ final class PhameBlogEditor
         return $object->setDomain($xaction->getNewValue());
       case PhameBlogTransaction::TYPE_SKIN:
         return $object->setSkin($xaction->getNewValue());
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        $object->setViewPolicy($xaction->getNewValue());
-        return;
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        $object->setEditPolicy($xaction->getNewValue());
-        return;
-      case PhabricatorTransactions::TYPE_JOIN_POLICY:
-        $object->setJoinPolicy($xaction->getNewValue());
-        return;
-      case PhabricatorTransactions::TYPE_COMMENT:
-        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -92,10 +81,6 @@ final class PhameBlogEditor
       case PhameBlogTransaction::TYPE_DESCRIPTION:
       case PhameBlogTransaction::TYPE_DOMAIN:
       case PhameBlogTransaction::TYPE_SKIN:
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-      case PhabricatorTransactions::TYPE_JOIN_POLICY:
-      case PhabricatorTransactions::TYPE_COMMENT:
         return;
     }
 

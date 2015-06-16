@@ -9,7 +9,7 @@ $conn_w = $session_table->establishConnection('w');
 foreach (new LiskMigrationIterator($session_table) as $session) {
   $id = $session->getID();
 
-  echo "Migrating session {$id}...\n";
+  echo pht('Migrating session %d...', $id)."\n";
   $old_type = $session->getType();
   $new_type = preg_replace('/-.*$/', '', $old_type);
 
@@ -23,4 +23,4 @@ foreach (new LiskMigrationIterator($session_table) as $session) {
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

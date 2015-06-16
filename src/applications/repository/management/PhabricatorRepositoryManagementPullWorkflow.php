@@ -7,16 +7,16 @@ final class PhabricatorRepositoryManagementPullWorkflow
     $this
       ->setName('pull')
       ->setExamples('**pull** __repository__ ...')
-      ->setSynopsis('Pull __repository__, named by callsign.')
+      ->setSynopsis(pht('Pull __repository__, named by callsign.'))
       ->setArguments(
         array(
           array(
-            'name'        => 'verbose',
-            'help'        => 'Show additional debugging information.',
+            'name'      => 'verbose',
+            'help'      => pht('Show additional debugging information.'),
           ),
           array(
-            'name'        => 'repos',
-            'wildcard'    => true,
+            'name'      => 'repos',
+            'wildcard'  => true,
           ),
         ));
   }
@@ -26,12 +26,12 @@ final class PhabricatorRepositoryManagementPullWorkflow
 
     if (!$repos) {
       throw new PhutilArgumentUsageException(
-        'Specify one or more repositories to pull, by callsign.');
+        pht('Specify one or more repositories to pull, by callsign.'));
     }
 
     $console = PhutilConsole::getConsole();
     foreach ($repos as $repo) {
-      $console->writeOut("Pulling '%s'...\n", $repo->getCallsign());
+      $console->writeOut("%s\n", pht("Pulling '%s'...", $repo->getCallsign()));
 
       id(new PhabricatorRepositoryPullEngine())
         ->setRepository($repo)
@@ -39,7 +39,7 @@ final class PhabricatorRepositoryManagementPullWorkflow
         ->pullRepository();
     }
 
-    $console->writeOut("Done.\n");
+    $console->writeOut("%s\n", pht('Done.'));
 
     return 0;
   }

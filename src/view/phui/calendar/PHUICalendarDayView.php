@@ -8,8 +8,8 @@ final class PHUICalendarDayView extends AphrontView {
   private $month;
   private $year;
   private $browseURI;
+  private $query;
   private $events = array();
-  private $todayEvents = array();
 
   private $allDayEvents = array();
 
@@ -24,6 +24,14 @@ final class PHUICalendarDayView extends AphrontView {
   }
   private function getBrowseURI() {
     return $this->browseURI;
+  }
+
+  public function setQuery($query) {
+    $this->query = $query;
+    return $this;
+  }
+  private function getQuery() {
+    return $this->query;
   }
 
   public function __construct(
@@ -44,13 +52,22 @@ final class PHUICalendarDayView extends AphrontView {
   public function render() {
     require_celerity_resource('phui-calendar-day-css');
 
+    $viewer = $this->getUser();
+
     $hours = $this->getHoursOfDay();
-    $hourly_events = array();
+    $js_hours = array();
+    $js_today_events = array();
+
+    foreach ($hours as $hour) {
+      $js_hours[] = array(
+        'hour' => $hour->format('G'),
+        'hour_meridian' => $hour->format('g A'),
+      );
+    }
 
     $first_event_hour = null;
-
+    $js_today_all_day_events = array();
     $all_day_events = $this->getAllDayEvents();
-    $today_all_day_events = array();
 
     $day_start = $this->getDateTime();
     $day_end = id(clone $day_start)->modify('+1 day');
@@ -63,129 +80,107 @@ final class PHUICalendarDayView extends AphrontView {
       $all_day_end = $all_day_event->getEpochEnd();
 
       if ($all_day_start < $day_end_epoch && $all_day_end > $day_start_epoch) {
-        $today_all_day_events[] = $all_day_event;
-      }
-    }
-
-    foreach ($hours as $hour) {
-      $current_hour_events = array();
-      $hour_start = $hour->format('U');
-      $hour_end = id(clone $hour)->modify('+1 hour')->format('U');
-
-      foreach ($this->events as $event) {
-        if ($event->getIsAllDay()) {
-          continue;
-        }
-        if (($hour == $day_start &&
-          $event->getEpochStart() <= $hour_start &&
-          $event->getEpochEnd() > $day_start_epoch) ||
-          ($event->getEpochStart() >= $hour_start
-          && $event->getEpochStart() < $hour_end)) {
-          $current_hour_events[] = $event;
-          $this->todayEvents[] = $event;
-        }
-      }
-      foreach ($current_hour_events as $event) {
-        $day_start_epoch = $this->getDateTime()->format('U');
-        $event_start = max($event->getEpochStart(), $day_start_epoch);
-        $event_end = min($event->getEpochEnd(), $day_end_epoch);
-
-        $top = (($event_start - $hour_start) / ($hour_end - $hour_start))
-          * 100;
-        $top = max(0, $top);
-
-        $height = (($event_end - $event_start) / ($hour_end - $hour_start))
-          * 100;
-        $height = min(2400, $height);
-
-        if ($first_event_hour === null) {
-          $first_event_hour = $hour;
-        }
-
-        $hourly_events[$event->getEventID()] = array(
-          'hour' => $hour,
-          'event' => $event,
-          'offset' => '0',
-          'width' => '100%',
-          'top' => $top.'%',
-          'height' => $height.'%',
+        $js_today_all_day_events[] = array(
+          'name' => $all_day_event->getName(),
+          'id' => $all_day_event->getEventID(),
+          'viewerIsInvited' => $all_day_event->getViewerIsInvited(),
+          'uri' => $all_day_event->getURI(),
         );
       }
     }
 
-    $clusters = $this->findTodayClusters();
-    foreach ($clusters as $cluster) {
-      $hourly_events = $this->updateEventsFromCluster(
-        $cluster,
-        $hourly_events);
-    }
+    $this->events = msort($this->events, 'getEpochStart');
+    $first_event_hour = $this->getDateTime()->setTime(8, 0, 0);
+    $midnight = $this->getDateTime()->setTime(0, 0, 0);
 
-    $rows = array();
-
-    foreach ($hours as $hour) {
-      $early_hours = array(8);
-      if ($first_event_hour) {
-        $early_hours[] = $first_event_hour->format('G');
-      }
-      if ($hour->format('G') < min($early_hours)) {
+    foreach ($this->events as $event) {
+      if ($event->getIsAllDay()) {
         continue;
       }
+      if ($event->getEpochStart() <= $day_end_epoch &&
+        $event->getEpochEnd() > $day_start_epoch) {
 
-      $drawn_hourly_events = array();
-      $cell_time = phutil_tag(
-        'td',
-        array('class' => 'phui-calendar-day-hour'),
-        $hour->format('g A'));
-
-      foreach ($hourly_events as $hourly_event) {
-        if ($hourly_event['hour'] == $hour) {
-
-          $drawn_hourly_events[] = $this->drawEvent(
-            $hourly_event['event'],
-            $hourly_event['offset'],
-            $hourly_event['width'],
-            $hourly_event['top'],
-            $hourly_event['height']);
+        if ($event->getEpochStart() < $midnight->format('U') &&
+          $event->getEpochEnd() > $midnight->format('U')) {
+          $first_event_hour = clone $midnight;
         }
+
+        if ($event->getEpochStart() < $first_event_hour->format('U') &&
+          $event->getEpochStart() > $midnight->format('U')) {
+          $first_event_hour = PhabricatorTime::getDateTimeFromEpoch(
+            $event->getEpochStart(),
+            $viewer);
+          $first_event_hour->setTime($first_event_hour->format('h'), 0, 0);
+        }
+
+        $event_start = max($event->getEpochStart(), $day_start_epoch);
+        $event_end = min($event->getEpochEnd(), $day_end_epoch);
+
+        $day_duration = ($day_end_epoch - $first_event_hour->format('U')) / 60;
+
+        $top = (($event_start - $first_event_hour->format('U'))
+          / ($day_end_epoch - $first_event_hour->format('U')))
+          * $day_duration;
+        $top = max(0, $top);
+
+        $height = (($event_end - $event_start)
+          / ($day_end_epoch - $first_event_hour->format('U')))
+          * $day_duration;
+        $height = min($day_duration, $height);
+
+        $js_today_events[] = array(
+          'eventStartEpoch' => $event->getEpochStart(),
+          'eventEndEpoch' => $event->getEpochEnd(),
+          'eventName' => $event->getName(),
+          'eventID' => $event->getEventID(),
+          'viewerIsInvited' => $event->getViewerIsInvited(),
+          'uri' => $event->getURI(),
+          'offset' => '0',
+          'width' => '100%',
+          'top' => $top.'px',
+          'height' => $height.'px',
+          'canEdit' => $event->getCanEdit(),
+        );
       }
-      $cell_event = phutil_tag(
-        'td',
-        array('class' => 'phui-calendar-day-events'),
-        $drawn_hourly_events);
-
-      $row = phutil_tag(
-        'tr',
-        array(),
-        array($cell_time, $cell_event));
-
-      $rows[] = $row;
-    }
-
-    $table = phutil_tag(
-      'table',
-      array('class' => 'phui-calendar-day-view'),
-      $rows);
-
-    $all_day_event_box = new PHUIBoxView();
-    foreach ($today_all_day_events as $all_day_event) {
-      $all_day_event_box->appendChild(
-        $this->drawAllDayEvent($all_day_event));
     }
 
     $header = $this->renderDayViewHeader();
     $sidebar = $this->renderSidebar();
     $warnings = $this->getQueryRangeWarning();
 
+    $table_id = celerity_generate_unique_node_id();
+
+    $table_wrapper = phutil_tag(
+      'div',
+      array(
+        'id' => $table_id,
+      ),
+      '');
+
+    Javelin::initBehavior(
+      'day-view',
+      array(
+        'year' => $first_event_hour->format('Y'),
+        'month' => $first_event_hour->format('m'),
+        'day' => $first_event_hour->format('d'),
+        'query' => $this->getQuery(),
+        'allDayEvents' => $js_today_all_day_events,
+        'todayEvents' => $js_today_events,
+        'hours' => $js_hours,
+        'firstEventHour' => $first_event_hour->format('G'),
+        'firstEventHourEpoch' => $first_event_hour->format('U'),
+        'tableID' => $table_id,
+      ));
+
     $table_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($all_day_event_box)
-      ->appendChild($table)
+      ->appendChild($table_wrapper)
       ->setFormErrors($warnings)
       ->setFlush(true);
 
     $layout = id(new AphrontMultiColumnView())
       ->addColumn($sidebar, 'third')
-      ->addColumn($table_box, 'thirds')
+      ->addColumn($table_box, 'thirds phui-day-view-column')
       ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_MEDIUM);
 
@@ -276,7 +271,8 @@ final class PHUICalendarDayView extends AphrontView {
       ->addClass('calendar-day-view-sidebar');
 
     $list = id(new PHUICalendarListView())
-      ->setUser($this->user);
+      ->setUser($this->user)
+      ->setView('day');
 
     if (count($events) == 0) {
       $list->showBlankState(true);
@@ -388,64 +384,6 @@ final class PHUICalendarDayView extends AphrontView {
     }
 
     return $hourly_events;
-  }
-
-  private function drawAllDayEvent(AphrontCalendarEventView $event) {
-    $name = phutil_tag(
-      'a',
-      array(
-        'class' => 'day-view-all-day',
-        'href' => $event->getURI(),
-      ),
-      $event->getName());
-
-    $all_day_label = phutil_tag(
-      'span',
-      array(
-        'class' => 'phui-calendar-all-day-label',
-      ),
-      pht('All Day'));
-
-    $div = phutil_tag(
-      'div',
-      array(
-        'class' => 'phui-calendar-day-event',
-      ),
-      array(
-        $all_day_label,
-        $name,
-      ));
-
-    return $div;
-  }
-
-  private function drawEvent(
-    AphrontCalendarEventView $event,
-    $offset,
-    $width,
-    $top,
-    $height) {
-    $name = phutil_tag(
-      'a',
-      array(
-        'class' => 'phui-calendar-day-event-link',
-        'href' => $event->getURI(),
-      ),
-      $event->getName());
-
-    $div = phutil_tag(
-      'div',
-      array(
-        'class' => 'phui-calendar-day-event',
-        'style' => 'left: '.$offset
-          .'; width: '.$width
-          .'; top: '.$top
-          .'; height: '.$height
-          .';',
-      ),
-      $name);
-
-    return $div;
   }
 
   // returns DateTime of each hour in the day

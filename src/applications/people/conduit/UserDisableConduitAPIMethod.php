@@ -7,7 +7,7 @@ final class UserDisableConduitAPIMethod extends UserConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Permanently disable specified users (admin only).';
+    return pht('Permanently disable specified users (admin only).');
   }
 
   protected function defineParamTypes() {
@@ -22,8 +22,8 @@ final class UserDisableConduitAPIMethod extends UserConduitAPIMethod {
 
   protected function defineErrorTypes() {
     return array(
-      'ERR-PERMISSIONS' => 'Only admins can call this method.',
-      'ERR-BAD-PHID' => 'Non existent user PHID.',
+      'ERR-PERMISSIONS' => pht('Only admins can call this method.'),
+      'ERR-BAD-PHID' => pht('Non existent user PHID.'),
     );
   }
 

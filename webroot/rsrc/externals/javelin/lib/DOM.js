@@ -716,7 +716,7 @@ JX.install('DOM', {
         node.className += ' '+className;
       } else if (has && !add) {
         node.className = node.className.replace(
-          new RegExp('(^|\\s)' + className + '(?:\\s|$)', 'g'), ' ');
+          new RegExp('(^|\\s)' + className + '(?:\\s|$)', 'g'), ' ').trim();
       }
     },
 

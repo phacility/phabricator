@@ -7,7 +7,6 @@ final class DifferentialDiffQuery
   private $phids;
   private $revisionIDs;
   private $needChangesets = false;
-  private $needArcanistProjects = false;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -26,11 +25,6 @@ final class DifferentialDiffQuery
 
   public function needChangesets($bool) {
     $this->needChangesets = $bool;
-    return $this;
-  }
-
-  public function needArcanistProjects($bool) {
-    $this->needArcanistProjects = $bool;
     return $this;
   }
 
@@ -79,10 +73,6 @@ final class DifferentialDiffQuery
       $diffs = $this->loadChangesets($diffs);
     }
 
-    if ($diffs && $this->needArcanistProjects) {
-      $diffs = $this->loadArcanistProjects($diffs);
-    }
-
     return $diffs;
   }
 
@@ -94,29 +84,6 @@ final class DifferentialDiffQuery
       ->needAttachToDiffs(true)
       ->needHunks(true)
       ->execute();
-
-    return $diffs;
-  }
-
-  private function loadArcanistProjects(array $diffs) {
-    $phids = array_filter(mpull($diffs, 'getArcanistProjectPHID'));
-    $projects = array();
-    $project_map = array();
-    if ($phids) {
-      $projects = id(new PhabricatorRepositoryArcanistProject())
-        ->loadAllWhere(
-          'phid IN (%Ls)',
-          $phids);
-      $project_map = mpull($projects, null, 'getPHID');
-    }
-
-    foreach ($diffs as $diff) {
-      $project = null;
-      if ($diff->getArcanistProjectPHID()) {
-        $project = idx($project_map, $diff->getArcanistProjectPHID());
-      }
-      $diff->attachArcanistProject($project);
-    }
 
     return $diffs;
   }

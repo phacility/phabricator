@@ -290,15 +290,8 @@ final class ReleephRequest extends ReleephDAO
   }
 
   public function setStatus($value) {
-    throw new Exception('`status` is now deprecated!');
+    throw new Exception(pht('`%s` is now deprecated!', 'status'));
   }
-
-/* -(  Make magic Lisk methods private  )------------------------------------ */
-
-  private function setUserIntents(array $ar) {
-    return parent::setUserIntents($ar);
-  }
-
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

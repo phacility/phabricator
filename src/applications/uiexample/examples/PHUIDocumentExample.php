@@ -15,35 +15,35 @@ final class PHUIDocumentExample extends PhabricatorUIExample {
     $user = $request->getUser();
 
     $action = id(new PHUIListItemView())
-      ->setName('Actions')
+      ->setName(pht('Actions'))
       ->setType(PHUIListItemView::TYPE_LABEL);
 
     $action1 = id(new PHUIListItemView())
-      ->setName('Edit Document')
+      ->setName(pht('Edit Document'))
       ->setHref('#')
       ->setIcon('fa-edit')
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $action2 = id(new PHUIListItemView())
-      ->setName('Move Document')
+      ->setName(pht('Move Document'))
       ->setHref('#')
       ->setIcon('fa-arrows')
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $action3 = id(new PHUIListItemView())
-      ->setName('Delete Document')
+      ->setName(pht('Delete Document'))
       ->setHref('#')
       ->setIcon('fa-times')
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $action4 = id(new PHUIListItemView())
-      ->setName('View History')
+      ->setName(pht('View History'))
       ->setHref('#')
       ->setIcon('fa-list')
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $action5 = id(new PHUIListItemView())
-      ->setName('Subscribe')
+      ->setName(pht('Subscribe'))
       ->setHref('#')
       ->setIcon('fa-plus-circle')
       ->setType(PHUIListItemView::TYPE_LINK);
@@ -52,33 +52,33 @@ final class PHUIDocumentExample extends PhabricatorUIExample {
       ->setType(PHUIListItemView::TYPE_DIVIDER);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader('Installation');
+      ->setHeader(pht('Installation'));
 
     $label1 = id(new PHUIListItemView())
-      ->setName('Getting Started')
+      ->setName(pht('Getting Started'))
       ->setType(PHUIListItemView::TYPE_LABEL);
 
     $label2 = id(new PHUIListItemView())
-      ->setName('Documentation')
+      ->setName(pht('Documentation'))
       ->setType(PHUIListItemView::TYPE_LABEL);
 
     $item1 = id(new PHUIListItemView())
-      ->setName('Installation')
+      ->setName(pht('Installation'))
       ->setHref('#')
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $item2 = id(new PHUIListItemView())
-      ->setName('Webserver Config')
+      ->setName(pht('Webserver Config'))
       ->setHref('#')
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $item3 = id(new PHUIListItemView())
-      ->setName('Adding Users')
+      ->setName(pht('Adding Users'))
       ->setHref('#')
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $item4 = id(new PHUIListItemView())
-      ->setName('Debugging')
+      ->setName(pht('Debugging'))
       ->setHref('#')
       ->setType(PHUIListItemView::TYPE_LINK);
 
@@ -108,23 +108,23 @@ final class PHUIDocumentExample extends PhabricatorUIExample {
       ->setType(PHUIListItemView::TYPE_ICON);
 
     $item1 = id(new PHUIListItemView())
-      ->setName('Installation')
+      ->setName(pht('Installation'))
       ->setHref('#')
       ->setSelected(true)
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $item2 = id(new PHUIListItemView())
-      ->setName('Webserver Config')
+      ->setName(pht('Webserver Config'))
       ->setHref('#')
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $item3 = id(new PHUIListItemView())
-      ->setName('Adding Users')
+      ->setName(pht('Adding Users'))
       ->setHref('#')
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $item4 = id(new PHUIListItemView())
-      ->setName('Debugging')
+      ->setName(pht('Debugging'))
       ->setHref('#')
       ->setType(PHUIListItemView::TYPE_LINK);
 
@@ -187,7 +187,7 @@ final class PHUIDocumentExample extends PhabricatorUIExample {
       'mollit anim id est laborum.</p>');
 
      $content = new PHUIDocumentView();
-     $content->setBook('Book or Project Name', 'Article');
+     $content->setBook(pht('Book or Project Name'), pht('Article'));
      $content->setHeader($header);
      $content->setFluid(true);
      $content->setTopNav($topnav);

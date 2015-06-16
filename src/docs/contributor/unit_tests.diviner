@@ -9,7 +9,7 @@ libphutil, Arcanist and Phabricator provide and use a simple unit test
 framework. This document is aimed at project contributors and describes how to
 use it to add and run tests in these projects or other libphutil libraries.
 
-In the general case, you can integrate ##arc## with a custom unit test engine
+In the general case, you can integrate `arc` with a custom unit test engine
 (like PHPUnit or any other unit testing library) to run tests in other projects.
 See @{article:Arcanist User Guide: Customizing Lint, Unit Tests and Workflows}
 for information on customizing engines.
@@ -18,20 +18,20 @@ for information on customizing engines.
 
 To add new tests to a libphutil, Arcanist or Phabricator module:
 
-  - Create a ##__tests__/## directory in the module if it doesn't exist yet.
-  - Add classes to the ##__tests__/## directory which extend from
+  - Create a `__tests__/` directory in the module if it doesn't exist yet.
+  - Add classes to the `__tests__/` directory which extend from
     @{class:PhabricatorTestCase} (in Phabricator) or
-    @{class@arcanist:ArcanistPhutilTestCase} (elsewhere).
-  - Run ##arc liberate## on the library root so your classes are loadable.
+    @{class@arcanist:PhutilTestCase} (elsewhere).
+  - Run `arc liberate` on the library root so your classes are loadable.
 
 = Running Tests =
 
 Once you've added test classes, you can run them with:
 
-  - ##arc unit path/to/module/##, to explicitly run module tests.
-  - ##arc unit##, to run tests for all modules affected by changes in the
+  - `arc unit path/to/module/`, to explicitly run module tests.
+  - `arc unit`, to run tests for all modules affected by changes in the
     working copy.
-  - ##arc diff## will also run ##arc unit## for you.
+  - `arc diff` will also run `arc unit` for you.
 
 = Example Test Case =
 
@@ -60,7 +60,7 @@ You can see this class at @{class:PhabricatorTrivialTestCase} and run it with:
    PASS   <1ms*  testAllIsRightWithTheWorld
 
 For more information on writing tests, see
-@{class@arcanist:ArcanistPhutilTestCase} and @{class:PhabricatorTestCase}.
+@{class@arcanist:PhutilTestCase} and @{class:PhabricatorTestCase}.
 
 = Database Isolation =
 
@@ -76,11 +76,11 @@ in a number of ways. From best to worst:
     is reasonable.
   - Build a real database simulation layer (fairly complex).
   - Disable isolation for a single test by using
-    ##LiskDAO::endIsolateAllLiskEffectsToCurrentProcess();## before your test
-    and ##LiskDAO::beginIsolateAllLiskEffectsToCurrentProcess();## after your
+    `LiskDAO::endIsolateAllLiskEffectsToCurrentProcess();` before your test
+    and `LiskDAO::beginIsolateAllLiskEffectsToCurrentProcess();` after your
     test. This will disable isolation for one test. NOT RECOMMENDED.
   - Disable isolation for your entire test case by overriding
-    ##getPhabricatorTestCaseConfiguration()## and providing
-    ##self::PHABRICATOR_TESTCONFIG_ISOLATE_LISK => false## in the configuration
+    `getPhabricatorTestCaseConfiguration()` and providing
+    `self::PHABRICATOR_TESTCONFIG_ISOLATE_LISK => false` in the configuration
     dictionary you return. This will disable isolation entirely. STRONGLY NOT
     RECOMMENDED.

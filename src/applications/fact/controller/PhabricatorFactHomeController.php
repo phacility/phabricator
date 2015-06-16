@@ -109,7 +109,7 @@ final class PhabricatorFactHomeController extends PhabricatorFactController {
       ->setUser($user)
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel('Y-Axis')
+          ->setLabel(pht('Y-Axis'))
           ->setName('y1')
           ->setOptions($options))
       ->appendChild(

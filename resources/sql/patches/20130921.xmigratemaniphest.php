@@ -14,7 +14,7 @@ foreach ($rows as $row) {
   $row_id = $row['id'];
   $task_id = $row['taskID'];
 
-  echo "Migrating row {$row_id} (T{$task_id})...\n";
+  echo pht('Migrating row %d (%s)...', $row_id, "T{$task_id}")."\n";
 
   $task_row = queryfx_one(
     $conn_w,
@@ -22,7 +22,7 @@ foreach ($rows as $row) {
     $task_table->getTableName(),
     $task_id);
   if (!$task_row) {
-    echo "Skipping, no such task.\n";
+    echo pht('Skipping, no such task.')."\n";
     continue;
   }
 
@@ -145,4 +145,4 @@ foreach ($rows as $row) {
 }
 
 $conn_w->saveTransaction();
-echo "Done.\n";
+echo pht('Done.')."\n";

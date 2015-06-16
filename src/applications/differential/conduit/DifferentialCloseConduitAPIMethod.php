@@ -23,7 +23,7 @@ final class DifferentialCloseConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_NOT_FOUND' => 'Revision was not found.',
+      'ERR_NOT_FOUND' => pht('Revision was not found.'),
     );
   }
 

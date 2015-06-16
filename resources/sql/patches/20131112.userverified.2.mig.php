@@ -5,7 +5,7 @@ $conn_w = $table->establishConnection('w');
 
 foreach (new LiskMigrationIterator($table) as $user) {
   $username = $user->getUsername();
-  echo "Migrating {$username}...\n";
+  echo pht('Migrating %s...', $username)."\n";
   if ($user->getIsEmailVerified()) {
     // Email already verified.
     continue;
@@ -30,4 +30,4 @@ foreach (new LiskMigrationIterator($table) as $user) {
     $user->getID());
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

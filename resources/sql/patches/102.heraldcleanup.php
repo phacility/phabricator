@@ -1,6 +1,6 @@
 <?php
 
-echo "Cleaning up old Herald rule applied rows...\n";
+echo pht('Cleaning up old Herald rule applied rows...')."\n";
 $table = new HeraldRule();
 $table->openTransaction();
 $table->beginReadLocking();
@@ -24,7 +24,7 @@ if ($rules) {
     mpull($rules, 'getID'));
 }
 
-echo 'This may take a moment';
+echo pht('This may take a moment')."\n";
 do {
   queryfx(
     $conn_w,
@@ -36,4 +36,4 @@ do {
 
 $table->endReadLocking();
 $table->saveTransaction();
-echo "\nDone.\n";
+echo "\n".pht('Done.')."\n";

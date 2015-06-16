@@ -7,10 +7,10 @@ final class PhabricatorPolicyManagementUnlockWorkflow
     $this
       ->setName('unlock')
       ->setSynopsis(
-        'Unlock an object by setting its policies to allow anyone to view '.
-        'and edit it.')
-      ->setExamples(
-        '**unlock** D123')
+        pht(
+          'Unlock an object by setting its policies to allow anyone to view '.
+          'and edit it.'))
+      ->setExamples('**unlock** D123')
       ->setArguments(
         array(
           array(
@@ -27,12 +27,10 @@ final class PhabricatorPolicyManagementUnlockWorkflow
     $obj_names = $args->getArg('objects');
     if (!$obj_names) {
       throw new PhutilArgumentUsageException(
-        pht(
-          'Specify the name of an object to unlock.'));
+        pht('Specify the name of an object to unlock.'));
     } else if (count($obj_names) > 1) {
       throw new PhutilArgumentUsageException(
-        pht(
-          'Specify the name of exactly one object to unlock.'));
+        pht('Specify the name of exactly one object to unlock.'));
     }
 
     $object = id(new PhabricatorObjectQuery())
@@ -43,9 +41,7 @@ final class PhabricatorPolicyManagementUnlockWorkflow
     if (!$object) {
       $name = head($obj_names);
       throw new PhutilArgumentUsageException(
-        pht(
-          "No such object '%s'!",
-          $name));
+        pht("No such object '%s'!", $name));
     }
 
     $handle = id(new PhabricatorHandleQuery())

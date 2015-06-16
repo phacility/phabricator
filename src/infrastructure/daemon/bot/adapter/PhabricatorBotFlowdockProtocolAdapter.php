@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorBotFlowdockProtocolAdapter
-  extends PhabricatorBotBaseStreamingProtocolAdapter {
+  extends PhabricatorStreamingProtocolAdapter {
 
   public function getServiceType() {
     return 'Flowdock';

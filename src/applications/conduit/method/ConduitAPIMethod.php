@@ -78,7 +78,7 @@ abstract class ConduitAPIMethod
   }
 
   public function getErrorDescription($error_code) {
-    return idx($this->getErrorTypes(), $error_code, 'Unknown Error');
+    return idx($this->getErrorTypes(), $error_code, pht('Unknown Error'));
   }
 
   public function getRequiredScope() {
@@ -90,7 +90,7 @@ abstract class ConduitAPIMethod
     return $this->execute($request);
   }
 
-  public abstract function getAPIMethodName();
+  abstract public function getAPIMethodName();
 
   /**
    * Return a key which sorts methods by application name, then method status,
@@ -115,7 +115,7 @@ abstract class ConduitAPIMethod
     return head(explode('.', $this->getAPIMethodName(), 2));
   }
 
-  public static function getConduitMethod($method_name) {
+  public static function loadAllConduitMethods() {
     static $method_map = null;
 
     if ($method_map === null) {
@@ -134,12 +134,20 @@ abstract class ConduitAPIMethod
         $orig_class = get_class($method_map[$name]);
         $this_class = get_class($method);
         throw new Exception(
-          "Two Conduit API method classes ({$orig_class}, {$this_class}) ".
-          "both have the same method name ({$name}). API methods ".
-          "must have unique method names.");
+          pht(
+            'Two Conduit API method classes (%s, %s) both have the same '.
+            'method name (%s). API methods must have unique method names.',
+            $orig_class,
+            $this_class,
+            $name));
       }
     }
 
+    return $method_map;
+  }
+
+  public static function getConduitMethod($method_name) {
+    $method_map = self::loadAllConduitMethods();
     return idx($method_map, $method_name);
   }
 

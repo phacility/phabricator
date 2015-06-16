@@ -14,7 +14,23 @@ JX.behavior('maniphest-transaction-preview', function(config) {
   var action = JX.$(config.action);
 
   var callback = function(r) {
-    JX.DOM.setContent(JX.$(config.preview), JX.$H(r));
+    var panel = JX.$(config.preview);
+    var data = getdata();
+    var hide = true;
+    for (var field in data) {
+      if (field == 'action') {
+        continue;
+      }
+      if (data[field]) {
+        hide = false;
+      }
+    }
+    if (hide) {
+      JX.DOM.hide(panel);
+    } else {
+      JX.DOM.setContent(panel, JX.$H(r));
+      JX.DOM.show(panel);
+    }
   };
 
   var getdata = function() {

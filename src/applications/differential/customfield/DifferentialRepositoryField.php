@@ -125,20 +125,24 @@ final class DifferentialRepositoryField
     return true;
   }
 
-  public function renderPropertyViewLabel() {
+  public function renderPropertyViewValue(array $handles) {
+    return null;
+  }
+
+  public function shouldAppearInDiffPropertyView() {
+    return true;
+  }
+
+  public function renderDiffPropertyViewLabel(DifferentialDiff $diff) {
     return $this->getFieldName();
   }
 
-  public function getRequiredHandlePHIDsForPropertyView() {
-    $repository_phid = $this->getObject()->getRepositoryPHID();
-    if ($repository_phid) {
-      return array($repository_phid);
+  public function renderDiffPropertyViewValue(DifferentialDiff $diff) {
+    if (!$diff->getRepositoryPHID()) {
+      return null;
     }
-    return array();
-  }
 
-  public function renderPropertyViewValue(array $handles) {
-    return $this->renderHandleList($handles);
+    return $this->getViewer()->renderHandle($diff->getRepositoryPHID());
   }
 
   public function shouldAppearInTransactionMail() {
@@ -155,7 +159,8 @@ final class DifferentialRepositoryField
       return;
     }
 
-    $body->addTextSection(pht('REPOSITORY'),
+    $body->addTextSection(
+      pht('REPOSITORY'),
       $repository->getMonogram().' '.$repository->getName());
   }
 

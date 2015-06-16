@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorCampfireProtocolAdapter
-  extends PhabricatorBotBaseStreamingProtocolAdapter {
+  extends PhabricatorStreamingProtocolAdapter {
 
   public function getServiceType() {
     return 'Campfire';

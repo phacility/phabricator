@@ -41,7 +41,7 @@ final class PhabricatorProjectTransactionEditor
         $slugs = $object->getSlugs();
         $slugs = mpull($slugs, 'getSlug', 'getSlug');
         unset($slugs[$object->getPrimarySlug()]);
-        return $slugs;
+        return array_keys($slugs);
       case PhabricatorProjectTransaction::TYPE_STATUS:
         return $object->getStatus();
       case PhabricatorProjectTransaction::TYPE_IMAGE:
@@ -51,7 +51,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_COLOR:
         return $object->getColor();
       case PhabricatorProjectTransaction::TYPE_LOCKED:
-        return (int) $object->getIsMembershipLocked();
+        return (int)$object->getIsMembershipLocked();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -102,18 +102,6 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_LOCKED:
         $object->setIsMembershipLocked($xaction->getNewValue());
         return;
-      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-      case PhabricatorTransactions::TYPE_EDGE:
-        return;
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        $object->setViewPolicy($xaction->getNewValue());
-        return;
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        $object->setEditPolicy($xaction->getNewValue());
-        return;
-      case PhabricatorTransactions::TYPE_JOIN_POLICY:
-        $object->setJoinPolicy($xaction->getNewValue());
-        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -160,16 +148,22 @@ final class PhabricatorProjectTransactionEditor
         }
 
         return;
-      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-      case PhabricatorTransactions::TYPE_JOIN_POLICY:
       case PhabricatorProjectTransaction::TYPE_STATUS:
       case PhabricatorProjectTransaction::TYPE_IMAGE:
       case PhabricatorProjectTransaction::TYPE_ICON:
       case PhabricatorProjectTransaction::TYPE_COLOR:
       case PhabricatorProjectTransaction::TYPE_LOCKED:
         return;
+     }
+
+    return parent::applyCustomExternalTransaction($object, $xaction);
+  }
+
+  protected function applyBuiltinExternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $xaction->getMetadataValue('edge:type');
         switch ($edge_type) {
@@ -222,10 +216,10 @@ final class PhabricatorProjectTransactionEditor
             }
             break;
         }
-        return;
+        break;
     }
 
-    return parent::applyCustomExternalTransaction($object, $xaction);
+    return parent::applyBuiltinExternalTransaction($object, $xaction);
   }
 
   protected function validateTransaction(
@@ -403,11 +397,73 @@ final class PhabricatorProjectTransactionEditor
     return parent::requireCapabilities($object, $xaction);
   }
 
-  /**
-   * Note: this is implemented for Feed purposes.
-   */
+  protected function willPublish(PhabricatorLiskDAO $object, array $xactions) {
+    $member_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $object->getPHID(),
+      PhabricatorProjectProjectHasMemberEdgeType::EDGECONST);
+    $object->attachMemberPHIDs($member_phids);
+
+    return $object;
+  }
+
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  protected function getMailSubjectPrefix() {
+    return pht('[Project]');
+  }
+
   protected function getMailTo(PhabricatorLiskDAO $object) {
-    return array();
+    return $object->getMemberPHIDs();
+  }
+
+  protected function getMailCC(PhabricatorLiskDAO $object) {
+    $all = parent::getMailCC($object);
+    return array_diff($all, $object->getMemberPHIDs());
+  }
+
+  public function getMailTagsMap() {
+    return array(
+      PhabricatorProjectTransaction::MAILTAG_METADATA =>
+        pht('Project name, hashtags, icon, image, or color changes.'),
+      PhabricatorProjectTransaction::MAILTAG_MEMBERS =>
+        pht('Project membership changes.'),
+      PhabricatorProjectTransaction::MAILTAG_WATCHERS =>
+        pht('Project watcher list changes.'),
+      PhabricatorProjectTransaction::MAILTAG_OTHER =>
+        pht('Other project activity not listed above occurs.'),
+    );
+  }
+
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new ProjectReplyHandler())
+      ->setMailReceiver($object);
+  }
+
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $id = $object->getID();
+    $name = $object->getName();
+
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject("{$name}")
+      ->addHeader('Thread-Topic', "Project {$id}");
+  }
+
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $body = parent::buildMailBody($object, $xactions);
+
+    $uri = '/project/profile/'.$object->getID().'/';
+    $body->addLinkSection(
+      pht('PROJECT DETAIL'),
+      PhabricatorEnv::getProductionURI($uri));
+
+    return $body;
   }
 
   protected function shouldPublishFeedStory(

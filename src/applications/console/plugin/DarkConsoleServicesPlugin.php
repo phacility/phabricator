@@ -5,11 +5,11 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
   protected $observations;
 
   public function getName() {
-    return 'Services';
+    return pht('Services');
   }
 
   public function getDescription() {
-    return 'Information about services.';
+    return pht('Information about services.');
   }
 
   public static function getQueryAnalyzerHeader() {
@@ -44,7 +44,7 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
         $log[$key]['explain'] = array(
           'sev'     => 7,
           'size'    => null,
-          'reason'  => 'Disabled',
+          'reason'  => pht('Disabled'),
         );
         // Query analysis is disabled for this request, so don't do any of it.
         continue;
@@ -102,26 +102,26 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
                 if (preg_match('/Using where/', $table['Extra'])) {
                   if ($table['rows'] < 256 && !empty($table['possible_keys'])) {
                     $cur_badness = 2;
-                    $cur_reason = 'Small Table Scan';
+                    $cur_reason = pht('Small Table Scan');
                   } else {
                     $cur_badness = 6;
-                    $cur_reason = 'TABLE SCAN!';
+                    $cur_reason = pht('TABLE SCAN!');
                   }
                 } else {
                   $cur_badness = 3;
-                  $cur_reason = 'Whole Table';
+                  $cur_reason = pht('Whole Table');
                 }
                 break;
               default:
                 if (preg_match('/No tables used/i', $table['Extra'])) {
                   $cur_badness = 1;
-                  $cur_reason = 'No Tables';
+                  $cur_reason = pht('No Tables');
                 } else if (preg_match('/Impossible/i', $table['Extra'])) {
                   $cur_badness = 1;
-                  $cur_reason = 'Empty';
+                  $cur_reason = pht('Empty');
                 } else {
                   $cur_badness = 4;
-                  $cur_reason = "Can't Analyze";
+                  $cur_reason = pht("Can't Analyze");
                 }
                 break;
             }
@@ -198,7 +198,7 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
       $summary[] = array(
         $type,
         number_format($counts[$type]),
-        number_format((int)(1000000 * $totals[$type])).' us',
+        pht('%s us', new PhutilNumber((int)(1000000 * $totals[$type]))),
         sprintf('%.1f%%', 100 * $totals[$type] / $page_total),
       );
     }
@@ -212,10 +212,10 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
       ));
     $summary_table->setHeaders(
       array(
-        'Type',
-        'Count',
-        'Total Cost',
-        'Page Weight',
+        pht('Type'),
+        pht('Count'),
+        pht('Total Cost'),
+        pht('Page Weight'),
       ));
 
     $results[] = $summary_table->render();
@@ -258,10 +258,12 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
           break;
       }
 
+      $offset = ($row['begin'] - $data['start']);
+
       $rows[] = array(
         $row['type'],
-        '+'.number_format(1000 * ($row['begin'] - $data['start'])).' ms',
-        number_format(1000000 * $row['duration']).' us',
+        pht('+%s ms', new PhutilNumber(1000 * $offset)),
+        pht('%s us', new PhutilNumber(1000000 * $row['duration'])),
         $info,
         $analysis,
       );
@@ -278,11 +280,11 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
       ));
     $table->setHeaders(
       array(
-        'Event',
-        'Start',
-        'Duration',
-        'Details',
-        'Analysis',
+        pht('Event'),
+        pht('Start'),
+        pht('Duration'),
+        pht('Details'),
+        pht('Analysis'),
       ));
 
     $results[] = $table->render();

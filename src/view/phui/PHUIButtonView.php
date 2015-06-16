@@ -103,6 +103,18 @@ final class PHUIButtonView extends AphrontTagView {
     return $this->tag;
   }
 
+  public function setDropdownMenu(PhabricatorActionListView $actions) {
+    Javelin::initBehavior('phui-dropdown-menu');
+
+    $this->addSigil('phui-dropdown-menu');
+    $this->setMetadata(
+      array(
+        'items' => $actions,
+      ));
+
+    return $this;
+  }
+
   protected function getTagAttributes() {
 
     require_celerity_resource('phui-button-css');

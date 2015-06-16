@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorContentSource {
+final class PhabricatorContentSource extends Phobject {
 
   const SOURCE_UNKNOWN  = 'unknown';
   const SOURCE_WEB      = 'web';

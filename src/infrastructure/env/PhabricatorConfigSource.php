@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorConfigSource {
+abstract class PhabricatorConfigSource extends Phobject {
 
   private $name;
 
@@ -21,11 +21,13 @@ abstract class PhabricatorConfigSource {
   }
 
   public function setKeys(array $keys) {
-    throw new Exception('This configuration source does not support writes.');
+    throw new Exception(
+      pht('This configuration source does not support writes.'));
   }
 
   public function deleteKeys(array $keys) {
-    throw new Exception('This configuration source does not support writes.');
+    throw new Exception(
+      pht('This configuration source does not support writes.'));
   }
 
 }

@@ -78,8 +78,10 @@ final class HeraldTranscriptController extends HeraldController {
         $notice = new PHUIInfoView();
         $notice->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
         $notice->setTitle(pht('Dry Run'));
-        $notice->appendChild(pht('This was a dry run to test Herald '.
-          'rules, no actions were executed.'));
+        $notice->appendChild(
+          pht(
+            'This was a dry run to test Herald rules, '.
+            'no actions were executed.'));
         $nav->appendChild($notice);
       }
 
@@ -133,7 +135,7 @@ final class HeraldTranscriptController extends HeraldController {
           // grabbed handles for everything, but be super liberal in what
           // we accept here since we expect all sorts of weird issues as we
           // version the system.
-          $value[$key] = 'Unknown Object #'.$phid;
+          $value[$key] = pht('Unknown Object #%s', $phid);
         }
       }
       sort($value);
@@ -210,7 +212,8 @@ final class HeraldTranscriptController extends HeraldController {
           // TODO: Also total hacks.
           if (is_array($value)) {
             foreach ($value as $phid) {
-              if ($phid) { // TODO: Probably need to make sure this
+              if ($phid) {
+                // TODO: Probably need to make sure this
                 // "looks like" a PHID or decrease the level of hacks here;
                 // this used to be an is_numeric() check in Facebook land.
                 $phids[] = $phid;
@@ -377,7 +380,10 @@ final class HeraldTranscriptController extends HeraldController {
         $item->setState(PHUIObjectItemView::STATE_FAIL);
       }
 
-      $rule = idx($action_names, $apply_xscript->getAction(), pht('Unknown'));
+      $rule = idx(
+        $action_names,
+        $apply_xscript->getAction(),
+        pht('Unknown Action "%s"', $apply_xscript->getAction()));
 
       $item->setHeader(pht('%s: %s', $rule, $target));
       $item->addAttribute($apply_xscript->getReason());

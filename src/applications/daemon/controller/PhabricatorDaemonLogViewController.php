@@ -148,12 +148,10 @@ final class PhabricatorDaemonLogViewController
           phutil_format_relative_time($wait_time));
         break;
       case PhabricatorDaemonLog::STATUS_EXITING:
-        $details = pht(
-          'This daemon is shutting down gracefully.');
+        $details = pht('This daemon is shutting down gracefully.');
         break;
       case PhabricatorDaemonLog::STATUS_EXITED:
-        $details = pht(
-          'This daemon exited normally and is no longer running.');
+        $details = pht('This daemon exited normally and is no longer running.');
         break;
     }
 

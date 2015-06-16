@@ -47,9 +47,6 @@ final class PhabricatorFileEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        $object->setViewPolicy($xaction->getNewValue());
-        break;
       case PhabricatorFileTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
         break;

@@ -1,6 +1,6 @@
 <?php
 
-final class HeraldRuleTypeConfig {
+final class HeraldRuleTypeConfig extends Phobject {
 
   const RULE_TYPE_GLOBAL = 'global';
   const RULE_TYPE_OBJECT = 'object';

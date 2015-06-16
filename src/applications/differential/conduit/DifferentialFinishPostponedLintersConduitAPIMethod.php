@@ -8,8 +8,9 @@ final class DifferentialFinishPostponedLintersConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Update diff with new lint messages and mark postponed '.
-           'linters as finished.';
+    return pht(
+      'Update diff with new lint messages and mark postponed '.
+      'linters as finished.');
   }
 
   protected function defineParamTypes() {
@@ -25,14 +26,13 @@ final class DifferentialFinishPostponedLintersConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR-BAD-DIFF'   => 'Bad diff ID.',
-      'ERR-BAD-LINTER' => 'No postponed linter by the given name',
-      'ERR-NO-LINT'    => 'No postponed lint field available in diff',
+      'ERR-BAD-DIFF'   => pht('Bad diff ID.'),
+      'ERR-BAD-LINTER' => pht('No postponed linter by the given name.'),
+      'ERR-NO-LINT'    => pht('No postponed lint field available in diff.'),
     );
   }
 
   protected function execute(ConduitAPIRequest $request) {
-
     $diff_id = $request->getValue('diffID');
     $linter_map = $request->getValue('linters');
 

@@ -31,6 +31,13 @@ final class HarbormasterUIEventListener
       return;
     }
 
+    if ($object instanceof DifferentialRevision) {
+      // TODO: This is a bit hacky and we could probably find a cleaner fix
+      // eventually, but we show build status on each diff, immediately below
+      // this property list, so it's redundant to show it on the revision view.
+      return;
+    }
+
     if (!($object instanceof HarbormasterBuildableInterface)) {
       return;
     }

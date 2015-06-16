@@ -2,10 +2,9 @@
 
 /**
  * Configuration source which reads from a configuration file on disk (a
- * PHP file in the conf/ directory). This source
+ * PHP file in the `conf/` directory).
  */
-final class PhabricatorConfigFileSource
-  extends PhabricatorConfigProxySource {
+final class PhabricatorConfigFileSource extends PhabricatorConfigProxySource {
 
   /**
    * @phutil-external-symbol function phabricator_read_config_file

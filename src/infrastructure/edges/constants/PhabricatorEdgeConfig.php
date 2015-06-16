@@ -24,7 +24,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
     if (!$class) {
       throw new Exception(
-        "Edges are not available for objects of type '{$phid_type}'!");
+        pht(
+          "Edges are not available for objects of type '%s'!",
+          $phid_type));
     }
 
     return newv($class, array())->establishConnection($conn_type);

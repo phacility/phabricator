@@ -3,13 +3,13 @@
 $table = new PhabricatorRepositoryVCSPassword();
 $conn_w = $table->establishConnection('w');
 
-echo "Upgrading password hashing for VCS passwords.\n";
+echo pht('Upgrading password hashing for VCS passwords.')."\n";
 
 $best_hasher = PhabricatorPasswordHasher::getBestHasher();
 foreach (new LiskMigrationIterator($table) as $password) {
   $id = $password->getID();
 
-  echo "Migrating VCS password {$id}...\n";
+  echo pht('Migrating VCS password %d...', $id)."\n";
 
   $input_hash = $password->getPasswordHash();
   $input_envelope = new PhutilOpaqueEnvelope($input_hash);
@@ -24,4 +24,4 @@ foreach (new LiskMigrationIterator($table) as $password) {
     $id);
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

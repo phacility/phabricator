@@ -6,8 +6,7 @@
  *
  * For example, this clock can trigger an event every 30 seconds.
  */
-final class PhabricatorMetronomicTriggerClock
-  extends PhabricatorTriggerClock {
+final class PhabricatorMetronomicTriggerClock extends PhabricatorTriggerClock {
 
   public function validateProperties(array $properties) {
     PhutilTypeSpec::checkMap(

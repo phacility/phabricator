@@ -44,8 +44,9 @@ final class PhortunePaymentMethodCreateController
     $providers = $this->loadCreatePaymentMethodProvidersForMerchant($merchant);
     if (!$providers) {
       throw new Exception(
-        'There are no payment providers enabled that can add payment '.
-        'methods.');
+        pht(
+          'There are no payment providers enabled that can add payment '.
+          'methods.'));
     }
 
     if (count($providers) == 1) {

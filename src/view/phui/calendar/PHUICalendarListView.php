@@ -4,6 +4,16 @@ final class PHUICalendarListView extends AphrontTagView {
 
   private $events = array();
   private $blankState;
+  private $view;
+
+  private function getView() {
+    return $this->view;
+  }
+
+  public function setView($view) {
+    $this->view = $view;
+    return $this;
+  }
 
   public function addEvent(AphrontCalendarEventView $event) {
     $this->events[] = $event;
@@ -33,31 +43,32 @@ final class PHUICalendarListView extends AphrontTagView {
     $singletons = array();
     $allday = false;
     foreach ($this->events as $event) {
-      $color = $event->getColor();
       $start_epoch = $event->getEpochStart();
 
       if ($event->getIsAllDay()) {
         $timelabel = pht('All Day');
-        $dot = null;
       } else {
         $timelabel = phabricator_time(
           $event->getEpochStart(),
           $this->getUser());
-
-        $dot = phutil_tag(
-          'span',
-          array(
-            'class' => 'phui-calendar-list-dot',
-          ),
-          '');
       }
+
+      if ($event->getViewerIsInvited()) {
+        $icon_color = 'green';
+      } else {
+        $icon_color = null;
+      }
+
+      $dot = id(new PHUIIconView())
+        ->setIconFont($event->getIcon(), $icon_color)
+        ->addClass('phui-calendar-list-item-icon');
 
       $title = phutil_tag(
         'span',
         array(
           'class' => 'phui-calendar-list-title',
         ),
-        $this->renderEventLink($event, $allday));
+        $this->getEventTitle($event, $allday));
       $time = phutil_tag(
         'span',
         array(
@@ -65,21 +76,39 @@ final class PHUICalendarListView extends AphrontTagView {
         ),
         $timelabel);
 
-      $class = 'phui-calendar-list-item phui-calendar-'.$color;
+      $class = 'phui-calendar-list-item';
+      if ($event->getViewerIsInvited()) {
+        $class = $class.' phui-calendar-viewer-invited';
+      }
       if ($event->getIsAllDay()) {
         $class = $class.' all-day';
       }
+
+      $tip = $this->getEventTooltip($event);
+      $tip_align = ($this->getView() == 'day') ? 'E' : 'N';
+      $content = javelin_tag(
+        'a',
+        array(
+          'href' => $event->getURI(),
+          'sigil' => 'has-tooltip',
+          'meta'  => array(
+            'tip'  => $tip,
+            'size' => 200,
+            'align' => $tip_align,
+          ),
+        ),
+        array(
+          $dot,
+          $time,
+          $title,
+        ));
 
       $singletons[] = phutil_tag(
         'li',
         array(
           'class' => $class,
-          ),
-        array(
-          $dot,
-          $title,
-          $time,
-        ));
+        ),
+        $content);
     }
 
     if (empty($singletons)) {
@@ -101,7 +130,22 @@ final class PHUICalendarListView extends AphrontTagView {
     return $list;
   }
 
-  private function renderEventLink($event) {
+  private function getEventTitle($event) {
+    $class = 'phui-calendar-item';
+    return phutil_tag(
+      'span',
+      array(
+        'class' => $class,
+      ),
+      $event->getName());
+  }
+
+  private function getEventTooltip(AphrontCalendarEventView $event) {
+    $viewer = $this->getUser();
+    $preferences = $viewer->loadPreferences();
+    $time_pref = $preferences->getPreference(
+      PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT,
+      'g:i A');
 
     Javelin::initBehavior('phabricator-tooltips');
 
@@ -112,8 +156,11 @@ final class PHUICalendarListView extends AphrontTagView {
       $this->getUser(),
       $event->getEpochEnd()));
 
+    $start_date = $start->getDateTime()->format('m d Y');
+    $end_date = $end->getDateTime()->format('m d Y');
+
     if ($event->getIsAllDay()) {
-      if ($start->getValueDay() == $end->getValueDay()) {
+      if ($start_date == $end_date) {
         $tip = pht('All day');
       } else {
         $tip = pht(
@@ -122,41 +169,27 @@ final class PHUICalendarListView extends AphrontTagView {
           $end->getValueAsFormat('M j, Y'));
       }
     } else {
-      if ($start->getValueDay() == $end->getValueDay() &&
-        $start->getValueMonth() == $end->getValueMonth() &&
-        $start->getValueYear() == $end->getValueYear()) {
+      if ($start->getValueDate() == $end->getValueDate()) {
         $tip = pht(
           '%s - %s',
-          $start->getValueAsFormat('g:i A'),
-          $end->getValueAsFormat('g:i A'));
+          $start->getValueAsFormat($time_pref),
+          $end->getValueAsFormat($time_pref));
       } else {
         $tip = pht(
           '%s - %s',
-          $start->getValueAsFormat('M j, Y, g:i A'),
-          $end->getValueAsFormat('M j, Y, g:i A'));
+          $start->getValueAsFormat('M j, Y, '.$time_pref),
+          $end->getValueAsFormat('M j, Y, '.$time_pref));
       }
     }
+    return $tip;
+  }
 
-    $description = $event->getDescription();
-    if (strlen($description) == 0) {
-      $description = pht('(%s)', $event->getName());
+  public function getIsViewerInvitedOnList() {
+    foreach ($this->events as $event) {
+      if ($event->getViewerIsInvited()) {
+        return true;
+      }
     }
-
-    $class = 'phui-calendar-item-link';
-
-    $anchor = javelin_tag(
-      'a',
-      array(
-        'sigil' => 'has-tooltip',
-        'class' => $class,
-        'href' => '/E'.$event->getEventID(),
-        'meta'  => array(
-          'tip'  => $tip,
-          'size' => 200,
-        ),
-      ),
-      $event->getName());
-
-    return $anchor;
+    return false;
   }
 }

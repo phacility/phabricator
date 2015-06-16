@@ -8,9 +8,11 @@ final class AphrontCalendarEventView extends AphrontView {
   private $epochEnd;
   private $description;
   private $eventID;
-  private $color;
+  private $viewerIsInvited;
   private $uri;
   private $isAllDay;
+  private $icon;
+  private $canEdit;
 
   public function setURI($uri) {
     $this->uri = $uri;
@@ -27,6 +29,14 @@ final class AphrontCalendarEventView extends AphrontView {
   }
   public function getEventID() {
     return $this->eventID;
+  }
+
+  public function setViewerIsInvited($viewer_is_invited) {
+    $this->viewerIsInvited = $viewer_is_invited;
+    return $this;
+  }
+  public function getViewerIsInvited() {
+    return $this->viewerIsInvited;
   }
 
   public function setUserPHID($user_phid) {
@@ -70,18 +80,6 @@ final class AphrontCalendarEventView extends AphrontView {
     return $this->description;
   }
 
-  public function setColor($color) {
-    $this->color = $color;
-    return $this;
-  }
-  public function getColor() {
-    if ($this->color) {
-      return $this->color;
-    } else {
-      return CalendarColors::COLOR_SKY;
-    }
-  }
-
   public function setIsAllDay($is_all_day) {
     $this->isAllDay = $is_all_day;
     return $this;
@@ -91,6 +89,23 @@ final class AphrontCalendarEventView extends AphrontView {
     return $this->isAllDay;
   }
 
+  public function setIcon($icon) {
+    $this->icon = $icon;
+    return $this;
+  }
+
+  public function getIcon() {
+    return $this->icon;
+  }
+
+  public function setCanEdit($can_edit) {
+    $this->canEdit = $can_edit;
+    return $this;
+  }
+
+  public function getCanEdit() {
+    return $this->canEdit;
+  }
 
   public function getMultiDay() {
     $nextday = strtotime('12:00 AM Tomorrow', $this->getEpochStart());
@@ -101,7 +116,7 @@ final class AphrontCalendarEventView extends AphrontView {
   }
 
   public function render() {
-    throw new Exception('Events are only rendered indirectly.');
+    throw new Exception(pht('Events are only rendered indirectly.'));
   }
 
 }

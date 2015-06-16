@@ -11,7 +11,7 @@ abstract class DiffusionController extends PhabricatorController {
 
   protected function getDiffusionRequest() {
     if (!$this->diffusionRequest) {
-      throw new Exception('No Diffusion request object!');
+      throw new Exception(pht('No Diffusion request object!'));
     }
     return $this->diffusionRequest;
   }

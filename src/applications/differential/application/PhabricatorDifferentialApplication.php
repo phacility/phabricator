@@ -50,11 +50,9 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
   }
 
   public function getOverview() {
-    return pht(<<<EOTEXT
-Differential is a **code review application** which allows engineers to review,
-discuss and approve changes to software.
-EOTEXT
-);
+    return pht(
+      'Differential is a **code review application** which allows '.
+      'engineers to review, discuss and approve changes to software.');
   }
 
   public function getRoutes() {
@@ -188,6 +186,7 @@ EOTEXT
     return array(
       DifferentialDefaultViewCapability::CAPABILITY => array(
         'caption' => pht('Default view policy for newly created revisions.'),
+        'template' => DifferentialRevisionPHIDType::TYPECONST,
       ),
     );
   }

@@ -1,7 +1,8 @@
 <?php
 
-final class PhabricatorFeedBuilder {
+final class PhabricatorFeedBuilder extends Phobject {
 
+  private $user;
   private $stories;
   private $framed;
   private $hovercards = false;
@@ -34,7 +35,7 @@ final class PhabricatorFeedBuilder {
 
   public function buildView() {
     if (!$this->user) {
-      throw new Exception('Call setUser() before buildView()!');
+      throw new PhutilInvalidStateException('setUser');
     }
 
     $user = $this->user;

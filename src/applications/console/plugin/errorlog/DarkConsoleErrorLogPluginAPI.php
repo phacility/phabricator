@@ -1,6 +1,6 @@
 <?php
 
-final class DarkConsoleErrorLogPluginAPI {
+final class DarkConsoleErrorLogPluginAPI extends Phobject {
 
   private static $errors = array();
 
@@ -67,7 +67,7 @@ final class DarkConsoleErrorLogPluginAPI {
         );
         break;
       default:
-        error_log('Unknown event : '.$event);
+        error_log(pht('Unknown event: %s', $event));
         break;
     }
   }

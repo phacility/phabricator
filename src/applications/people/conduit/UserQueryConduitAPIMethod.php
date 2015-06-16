@@ -7,7 +7,7 @@ final class UserQueryConduitAPIMethod extends UserConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Query users.';
+    return pht('Query users.');
   }
 
   protected function defineParamTypes() {
@@ -28,7 +28,7 @@ final class UserQueryConduitAPIMethod extends UserConduitAPIMethod {
 
   protected function defineErrorTypes() {
     return array(
-      'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.',
+      'ERR-INVALID-PARAMETER' => pht('Missing or malformed parameter.'),
     );
   }
 

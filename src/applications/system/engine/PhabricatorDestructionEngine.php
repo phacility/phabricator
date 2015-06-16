@@ -4,6 +4,10 @@ final class PhabricatorDestructionEngine extends Phobject {
 
   private $rootLogID;
 
+  public function getViewer() {
+    return PhabricatorUser::getOmnipotentUser();
+  }
+
   public function destroyObject(PhabricatorDestructibleInterface $object) {
     $log = id(new PhabricatorSystemDestructionLog())
       ->setEpoch(time())
@@ -64,8 +68,30 @@ final class PhabricatorDestructionEngine extends Phobject {
     }
 
     // TODO: Remove stuff from search indexes?
-    // TODO: PhabricatorFlaggableInterface
-    // TODO: PhabricatorTokenReceiverInterface
+
+    if ($object instanceof PhabricatorFlaggableInterface) {
+      $flags = id(new PhabricatorFlag())->loadAllWhere(
+        'objectPHID = %s', $object_phid);
+
+      foreach ($flags as $flag) {
+        $flag->delete();
+      }
+    }
+
+    $flags = id(new PhabricatorFlag())->loadAllWhere(
+      'ownerPHID = %s', $object_phid);
+    foreach ($flags as $flag) {
+        $flag->delete();
+      }
+
+    if ($object instanceof PhabricatorTokenReceiverInterface) {
+      $tokens = id(new PhabricatorTokenGiven())->loadAllWhere(
+        'objectPHID = %s', $object_phid);
+
+      foreach ($tokens as $token) {
+        $token->delete();
+      }
+    }
   }
 
   private function destroyEdges($src_phid) {
@@ -112,13 +138,14 @@ final class PhabricatorDestructionEngine extends Phobject {
   }
 
   private function destroyNotifications($object_phid) {
-    $notifications = id(new PhabricatorFeedStoryNotification())->loadAllWhere(
-      'primaryObjectPHID = %s',
-      $object_phid);
+    $table = new PhabricatorFeedStoryNotification();
+    $conn_w = $table->establishConnection('w');
 
-    foreach ($notifications as $notification) {
-      $notification->delete();
-    }
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE primaryObjectPHID = %s',
+      $table->getTableName(),
+      $object_phid);
   }
 
 }

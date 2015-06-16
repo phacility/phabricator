@@ -52,6 +52,7 @@ final class PhabricatorCountdownApplication extends PhabricatorApplication {
     return array(
       PhabricatorCountdownDefaultViewCapability::CAPABILITY => array(
         'caption' => pht('Default view policy for new countdowns.'),
+        'template' => PhabricatorCountdownCountdownPHIDType::TYPECONST,
       ),
     );
   }

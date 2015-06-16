@@ -78,7 +78,7 @@ final class PhragmentBrowseController extends PhragmentController {
           $item->addAttribute(pht('Deleted'));
         }
       } else {
-        $item->addAttribute('Directory');
+        $item->addAttribute(pht('Directory'));
       }
       $list->addItem($item);
     }

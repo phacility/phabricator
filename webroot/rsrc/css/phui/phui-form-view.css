@@ -334,9 +334,24 @@ table.aphront-form-control-checkbox-layout th {
   font-size: 16px;
 }
 
-.aphront-form-date-container input.aphront-form-date-time-input {
+.aphront-form-date-container .aphront-form-time-input-container,
+.aphront-form-date-container .aphront-form-date-input-container {
+  position: relative;
+  display: inline-block;
   width: 7em;
-  display: inline;
+}
+
+.aphront-form-date-container input.aphront-form-time-input,
+.aphront-form-date-container input.aphront-form-date-input {
+  width: 7em;
+}
+
+.aphront-form-time-input-container div.jx-typeahead-results a.jx-result {
+  border: none;
+}
+
+.phui-time-typeahead-value {
+  padding: 4px;
 }
 
 .fancy-datepicker {
@@ -457,7 +472,7 @@ properly, and submit values. */
   opacity: 0.5;
 }
 
-.aphront-form-date-container.no-time .aphront-form-date-time-input{
+.aphront-form-date-container.no-time .aphront-form-time-input{
   display: none;
 }
 

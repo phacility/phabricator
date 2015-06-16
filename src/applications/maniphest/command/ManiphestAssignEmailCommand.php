@@ -17,11 +17,13 @@ final class ManiphestAssignEmailCommand
 
   public function getCommandDescription() {
     return pht(
-      'To assign a task to another user, provide their username. For example, '.
-      'to assign a task to `alincoln`, write `!assign alincoln`.'.
-      "\n\n".
-      'If you omit the username or the username is not valid, this behaves '.
-      'like `!claim` and assigns the task to you instead.');
+      "To assign a task to another user, provide their username. For example, ".
+      "to assign a task to `%s`, write `%s`.\n\n".
+      "If you omit the username or the username is not valid, this behaves ".
+      "like `%s` and assigns the task to you instead.",
+      'alincoln',
+      '!assign alincoln',
+      '!claim');
   }
 
   public function buildTransactions(

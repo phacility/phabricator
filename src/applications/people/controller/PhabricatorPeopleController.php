@@ -45,10 +45,6 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
     return $this->buildSideNavView(true)->getMenu();
   }
 
-  protected function buildApplicationCrumbs() {
-    return parent::buildApplicationCrumbs();
-  }
-
   public function buildIconNavView(PhabricatorUser $user) {
     $viewer = $this->getViewer();
     $picture = $user->getProfileImageURI();

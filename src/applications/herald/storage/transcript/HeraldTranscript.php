@@ -183,9 +183,9 @@ final class HeraldTranscript extends HeraldDAO
 
   public function getMetadataMap() {
     return array(
-      'Run At Epoch' => date('F jS, g:i:s A', $this->time),
-      'Run On Host'  => $this->host,
-      'Run Duration' => (int)(1000 * $this->duration).' ms',
+      pht('Run At Epoch') => date('F jS, g:i:s A', $this->time),
+      pht('Run On Host')  => $this->host,
+      pht('Run Duration') => (int)(1000 * $this->duration).' ms',
     );
   }
 

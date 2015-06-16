@@ -44,7 +44,9 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
 
     return array(
       'diffusion-audit-'.$commit->getPHID(),
-      'Commit r'.$repository->getCallsign().$commit->getCommitIdentifier(),
+      pht(
+        'Commit %s',
+        'r'.$repository->getCallsign().$commit->getCommitIdentifier()),
     );
   }
 

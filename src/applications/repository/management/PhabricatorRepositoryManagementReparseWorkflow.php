@@ -7,18 +7,19 @@ final class PhabricatorRepositoryManagementReparseWorkflow
     $this
       ->setName('reparse')
       ->setExamples('**reparse** [options] __repository__')
-      ->setSynopsis(pht(
-        '**reparse** __what__ __which_parts__ [--trace] [--force]'."\n\n".
-        'Rerun the Diffusion parser on specific commits and repositories. '.
-        'Mostly useful for debugging changes to Diffusion.'."\n\n".
-        'e.g. enqueue reparse owners in the TEST repo for all commits:'."\n".
-        'repository reparse --all TEST --owners'."\n\n".
-        'e.g. do same but exclude before yesterday (local time):'."\n".
-        'repository reparse --all TEST --owners --min-date yesterday'."\n".
-        'repository reparse --all TEST --owners --min-date "today -1 day".'.
-        "\n\n".
-        'e.g. do same but exclude before 03/31/2013 (local time):'."\n".
-        'repository reparse --all TEST --owners --min-date "03/31/2013"'))
+      ->setSynopsis(
+        pht(
+          '**reparse** __what__ __which_parts__ [--trace] [--force]'."\n\n".
+          'Rerun the Diffusion parser on specific commits and repositories. '.
+          'Mostly useful for debugging changes to Diffusion.'."\n\n".
+          'e.g. enqueue reparse owners in the TEST repo for all commits:'."\n".
+          'repository reparse --all TEST --owners'."\n\n".
+          'e.g. do same but exclude before yesterday (local time):'."\n".
+          'repository reparse --all TEST --owners --min-date yesterday'."\n".
+          'repository reparse --all TEST --owners --min-date "today -1 day".'.
+          "\n\n".
+          'e.g. do same but exclude before 03/31/2013 (local time):'."\n".
+          'repository reparse --all TEST --owners --min-date "03/31/2013"'))
       ->setArguments(
         array(
           array(
@@ -31,22 +32,24 @@ final class PhabricatorRepositoryManagementReparseWorkflow
             'help'     => pht(
               'Reparse all commits in the specified repository. This mode '.
               'queues parsers into the task queue; you must run taskmasters '.
-              'to actually do the parses. Use with __--force-local__ to run '.
-              'the tasks locally instead of with taskmasters.'),
+              'to actually do the parses. Use with __%s__ to run '.
+              'the tasks locally instead of with taskmasters.',
+              '--force-local'),
           ),
           array(
             'name'     => 'min-date',
             'param'    => 'date',
             'help'     => pht(
-              'Must be used with __--all__, this will exclude commits which '.
-              'are earlier than __date__.'."\n".
+              "Must be used with __%s__, this will exclude commits which ".
+              "are earlier than __date__.\n".
               "Valid examples:\n".
               "  'today', 'today 2pm', '-1 hour', '-2 hours', '-24 hours',\n".
               "  'yesterday', 'today -1 day', 'yesterday 2pm', '2pm -1 day',\n".
               "  'last Monday', 'last Monday 14:00', 'last Monday 2pm',\n".
               "  '31 March 2013', '31 Mar', '03/31', '03/31/2013',\n".
-              'See __http://www.php.net/manual/en/datetime.formats.php__ for '.
-              'more.'),
+              "See __%s__ for more.",
+              '--all',
+              'http://www.php.net/manual/en/datetime.formats.php'),
           ),
           array(
             'name'     => 'message',
@@ -76,14 +79,16 @@ final class PhabricatorRepositoryManagementReparseWorkflow
           array(
             'name'     => 'force-local',
             'help'     => pht(
-              'Only used with __--all__, use this to run the tasks locally '.
-              'instead of deferring them to taskmaster daemons.'),
+              'Only used with __%s__, use this to run the tasks locally '.
+              'instead of deferring them to taskmaster daemons.',
+              '--all'),
           ),
           array(
             'name'    => 'force-autoclose',
             'help'    => pht(
-              'Only used with __--message__, use this to make sure any '.
-              'pertinent diffs are closed regardless of configuration.'),
+              'Only used with __%s, use this to make sure any '.
+              'pertinent diffs are closed regardless of configuration.',
+              '--message__'),
           ),
         ));
 
@@ -121,8 +126,12 @@ final class PhabricatorRepositoryManagementReparseWorkflow
     if (!$reparse_message && !$reparse_change && !$reparse_herald &&
       !$reparse_owners) {
       throw new PhutilArgumentUsageException(
-        pht('Specify what information to reparse with --message, --change,  '.
-            '--herald, and/or --owners'));
+        pht(
+          'Specify what information to reparse with %s, %s, %s, and/or %s.',
+          '--message',
+          '--change',
+          '--herald',
+          '--owners'));
       }
 
     $min_timestamp = false;
@@ -148,12 +157,14 @@ final class PhabricatorRepositoryManagementReparseWorkflow
     }
 
     if ($reparse_owners && !$force) {
-      $console->writeOut("%s\n", pht(
-        'You are about to recreate the relationship entries between the '.
-        'commits and the packages they touch. This might delete some existing '.
-        'relationship entries for some old commits.'));
+      $console->writeOut(
+        "%s\n",
+        pht(
+          'You are about to recreate the relationship entries between the '.
+          'commits and the packages they touch. This might delete some '.
+          'existing relationship entries for some old commits.'));
 
-      if (!phutil_console_confirm('Are you ready to continue?')) {
+      if (!phutil_console_confirm(pht('Are you ready to continue?'))) {
         throw new PhutilArgumentUsageException(pht('Cancelled.'));
       }
     }
@@ -230,8 +241,8 @@ final class PhabricatorRepositoryManagementReparseWorkflow
         '**NOTE**: This script will queue tasks to reparse the data. Once the '.
         'tasks have been queued, you need to run Taskmaster daemons to '.
         'execute them.'."\n\n".
-        "QUEUEING TASKS (%d Commits):",
-        number_format(count($commits))));
+        "QUEUEING TASKS (%s Commits):",
+        new PhutilNumber(count($commits))));
     }
 
     $progress = new PhutilConsoleProgressBar();

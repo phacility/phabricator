@@ -1,6 +1,7 @@
 <?php
 
 final class PhabricatorAuditInlineComment
+  extends Phobject
   implements PhabricatorInlineCommentInterface {
 
   private $proxy;
@@ -21,6 +22,14 @@ final class PhabricatorAuditInlineComment
 
   public function getTransactionComment() {
     return $this->proxy;
+  }
+
+  public function supportsHiding() {
+    return false;
+  }
+
+  public function isHidden() {
+    return false;
   }
 
   public function getTransactionCommentForSave() {

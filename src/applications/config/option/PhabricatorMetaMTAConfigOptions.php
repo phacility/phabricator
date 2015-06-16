@@ -24,7 +24,7 @@ final class PhabricatorMetaMTAConfigOptions
 When a user takes an action which generates an email notification (like
 commenting on a Differential revision), Phabricator can either send that mail
 "From" the user's email address (like "alincoln@logcabin.com") or "From" the
-'metamta.default-address' address.
+'%s' address.
 
 The user experience is generally better if Phabricator uses the user's real
 address as the "From" since the messages are easier to organize when they appear
@@ -43,7 +43,8 @@ email on behalf of the "From" domain. Practically, this means:
     initially, since the risk in turning it on is that your outgoing mail will
     never arrive.
 EODOC
-));
+  ,
+  'metamta.default-address'));
 
     $one_mail_per_recipient_desc = $this->deformat(pht(<<<EODOC
 When a message is sent to multiple recipients (for example, several reviewers on
@@ -53,6 +54,8 @@ alincoln", "To: usgrant", "To: htaft"). The major advantages and disadvantages
 of each approach are:
 
   - One mail to everyone:
+    - This violates policy controls. The body of the mail is generated without
+      respect for object policies.
     - Recipients can see To/Cc at a glance.
     - If you use mailing lists, you won't get duplicate mail if you're
       a normal recipient and also Cc'd on a mailing list.
@@ -64,6 +67,7 @@ of each approach are:
     - Not supported with a private reply-to address.
     - Mails are sent in the server default translation.
   - One mail to each user:
+    - Policy controls work correctly and are enforced per-user.
     - Recipients need to look in the mail body to see To/Cc.
     - If you use mailing lists, recipients may sometimes get duplicate
       mail.
@@ -73,8 +77,6 @@ of each approach are:
     - Required if private reply-to addresses are configured.
     - Mails are sent in the language of user preference.
 
-In the code, splitting one outbound email into one-per-recipient is sometimes
-referred to as "multiplexing".
 EODOC
 ));
 
@@ -126,21 +128,23 @@ EODOC
     $vary_subjects_description = $this->deformat(pht(<<<EODOC
 If true, allow MetaMTA to change mail subjects to put text like '[Accepted]' and
 '[Commented]' in them. This makes subjects more useful, but might break
-threading on some clients. If you've set 'metamta.one-mail-per-recipient', users
-can override this setting in their preferences.
+threading on some clients. If you've set '%s', users can override this setting
+in their preferences.
 EODOC
-));
+  ,
+  'metamta.one-mail-per-recipient'));
 
     $reply_to_description = $this->deformat(pht(<<<EODOC
-If you enable {{metamta.public-replies}}, Phabricator uses "From" to
-authenticate users. You can additionally enable this setting to try to
-authenticate with 'Reply-To'. Note that this is completely spoofable and
-insecure (any user can set any 'Reply-To' address) but depending on the nature
-of your install or other deliverability conditions this might be okay.
-Generally, you can't do much more by spoofing Reply-To than be annoying (you can
-write but not read content). But this is still **COMPLETELY INSECURE**.
+If you enable `%s`, Phabricator uses "From" to authenticate users. You can
+additionally enable this setting to try to authenticate with 'Reply-To'. Note
+that this is completely spoofable and insecure (any user can set any 'Reply-To'
+address) but depending on the nature of your install or other deliverability
+conditions this might be okay. Generally, you can't do much more by spoofing
+Reply-To than be annoying (you can write but not read content). But this is
+still **COMPLETELY INSECURE**.
 EODOC
-));
+  ,
+  'metamta.public-replies'));
 
     $adapter_description = $this->deformat(pht(<<<EODOC
 Adapter class to use to transmit mail to the MTA. The default uses
@@ -219,6 +223,7 @@ EODOC
         'metamta.one-mail-per-recipient',
         'bool',
         true)
+        ->setLocked(true)
         ->setBoolOptions(
           array(
             pht('Send Mail To Each Recipient'),

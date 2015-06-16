@@ -7,8 +7,12 @@ final class ArcanistProjectInfoConduitAPIMethod
     return 'arcanist.projectinfo';
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
   public function getMethodDescription() {
-    return 'Get information about Arcanist projects.';
+    return pht('Arcanist projects are deprecated.');
   }
 
   protected function defineParamTypes() {
@@ -23,7 +27,7 @@ final class ArcanistProjectInfoConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR-BAD-ARCANIST-PROJECT' => 'No such project exists.',
+      'ERR-BAD-ARCANIST-PROJECT' => pht('No such project exists.'),
     );
   }
 

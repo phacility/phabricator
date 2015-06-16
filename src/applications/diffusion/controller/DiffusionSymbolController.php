@@ -12,7 +12,7 @@ final class DiffusionSymbolController extends DiffusionController {
       ->setViewer($user)
       ->setName($this->name);
 
-    if ($request->getStr('context') !== null) {
+    if ($request->getStr('context')) {
       $query->setContext($request->getStr('context'));
     }
 
@@ -47,63 +47,69 @@ final class DiffusionSymbolController extends DiffusionController {
 
     $symbols = $query->execute();
 
-    // For PHP builtins, jump to php.net documentation.
-    if ($request->getBool('jump') && count($symbols) == 0) {
-      if ($request->getStr('lang', 'php') == 'php') {
-        if ($request->getStr('type', 'function') == 'function') {
-          $functions = get_defined_functions();
-          if (in_array($this->name, $functions['internal'])) {
-            return id(new AphrontRedirectResponse())
-              ->setIsExternal(true)
-              ->setURI('http://www.php.net/function.'.$this->name);
-          }
-        }
-        if ($request->getStr('type', 'class') == 'class') {
-          if (class_exists($this->name, false) ||
-              interface_exists($this->name, false)) {
-            if (id(new ReflectionClass($this->name))->isInternal()) {
-              return id(new AphrontRedirectResponse())
-                ->setIsExternal(true)
-                ->setURI('http://www.php.net/class.'.$this->name);
-            }
-          }
-        }
-      }
+
+
+    $external_query = id(new DiffusionExternalSymbolQuery())
+      ->withNames(array($this->name));
+
+    if ($request->getStr('context')) {
+      $external_query->withContexts(array($request->getStr('context')));
+    }
+
+    if ($request->getStr('type')) {
+      $external_query->withTypes(array($request->getStr('type')));
+    }
+
+    if ($request->getStr('lang')) {
+      $external_query->withLanguages(array($request->getStr('lang')));
+    }
+
+    $external_sources = id(new PhutilSymbolLoader())
+      ->setAncestorClass('DiffusionExternalSymbolsSource')
+      ->loadObjects();
+    $results = array($symbols);
+    foreach ($external_sources as $source) {
+      $results[] = $source->executeQuery($external_query);
+    }
+    $symbols = array_mergev($results);
+
+    if ($request->getBool('jump') && count($symbols) == 1) {
+      // If this is a clickthrough from Differential, just jump them
+      // straight to the target if we got a single hit.
+      $symbol = head($symbols);
+      return id(new AphrontRedirectResponse())
+        ->setIsExternal($symbol->isExternal())
+        ->setURI($symbol->getURI());
     }
 
     $rows = array();
     foreach ($symbols as $symbol) {
-      $file = $symbol->getPath();
-      $line = $symbol->getLineNumber();
+      $href = $symbol->getURI();
 
-      $repo = $symbol->getRepository();
-      if ($repo) {
-        $href = $symbol->getURI();
-
-        if ($request->getBool('jump') && count($symbols) == 1) {
-          // If this is a clickthrough from Differential, just jump them
-          // straight to the target if we got a single hit.
-          return id(new AphrontRedirectResponse())->setURI($href);
-        }
-
-        $location = phutil_tag(
-          'a',
-          array(
-            'href' => $href,
-          ),
-          $file.':'.$line);
-      } else if ($file) {
-        $location = $file.':'.$line;
+      if ($symbol->isExternal()) {
+        $source = $symbol->getSource();
+        $location = $symbol->getLocation();
       } else {
-        $location = '?';
+        $repo = $symbol->getRepository();
+        $file = $symbol->getPath();
+        $line = $symbol->getLineNumber();
+
+        $source = $repo->getMonogram();
+        $location = $file.':'.$line;
       }
+      $location = phutil_tag(
+        'a',
+        array(
+          'href' => $href,
+        ),
+        $location);
 
       $rows[] = array(
         $symbol->getSymbolType(),
         $symbol->getSymbolContext(),
         $symbol->getSymbolName(),
         $symbol->getSymbolLanguage(),
-        $repo->getMonogram(),
+        $source,
         $location,
       );
     }
@@ -115,8 +121,8 @@ final class DiffusionSymbolController extends DiffusionController {
         pht('Context'),
         pht('Name'),
         pht('Language'),
-        pht('Repository'),
-        pht('File'),
+        pht('Source'),
+        pht('Location'),
       ));
     $table->setColumnClasses(
       array(
@@ -128,7 +134,7 @@ final class DiffusionSymbolController extends DiffusionController {
         '',
       ));
     $table->setNoDataString(
-      pht('No matching symbol could be found in any indexed project.'));
+      pht('No matching symbol could be found in any indexed repository.'));
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText(pht('Similar Symbols'));

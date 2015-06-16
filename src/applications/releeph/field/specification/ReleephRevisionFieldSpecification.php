@@ -8,7 +8,7 @@ final class ReleephRevisionFieldSpecification
   }
 
   public function getName() {
-    return 'Revision';
+    return pht('Revision');
   }
 
   public function getRequiredHandlePHIDsForPropertyView() {

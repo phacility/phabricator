@@ -26,7 +26,7 @@ final class PhabricatorContentSourceView extends AphrontView {
       array(
         'class' => 'phabricator-content-source-view',
       ),
-      "Via {$type}");
+      pht('Via %s', $type));
   }
 
 }

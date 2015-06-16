@@ -97,6 +97,8 @@ final class PhabricatorSettingsMainController
 
     $result = array();
     foreach ($panels as $key => $panel) {
+      $panel->setUser($this->user);
+
       if (!$panel->isEnabled()) {
         continue;
       }

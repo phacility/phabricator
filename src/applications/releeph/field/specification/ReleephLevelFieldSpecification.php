@@ -37,7 +37,7 @@ abstract class ReleephLevelFieldSpecification
     }
 
     $control = id(new AphrontFormRadioButtonControl())
-      ->setLabel('Level')
+      ->setLabel(pht('Level'))
       ->setName($control_name)
       ->setValue($level);
 
@@ -75,11 +75,11 @@ abstract class ReleephLevelFieldSpecification
 
   public function validate($value) {
     if ($value === null) {
-      $this->error = 'Required';
+      $this->error = pht('Required');
       $label = $this->getName();
       throw new ReleephFieldParseException(
         $this,
-        "You must provide a {$label} level");
+        pht('You must provide a %s level.', $label));
     }
 
     $levels = $this->getLevels();
@@ -87,7 +87,10 @@ abstract class ReleephLevelFieldSpecification
       $label = $this->getName();
       throw new ReleephFieldParseException(
         $this,
-        "Level '{$value}' is not a valid {$label} level in this project.");
+        pht(
+          "Level '%s' is not a valid %s level in this project.",
+          $value,
+          $label));
     }
   }
 
@@ -101,8 +104,9 @@ abstract class ReleephLevelFieldSpecification
       if (!$level) {
         throw new ReleephFieldParseException(
           $this,
-          "No value given for {$label}, ".
-          "and no default is given for this level!");
+          pht(
+            'No value given for %s, and no default is given for this level!',
+            $label));
       }
     } else {
       $level = $this->getLevelByName($name);
@@ -111,7 +115,7 @@ abstract class ReleephLevelFieldSpecification
     if (!$level) {
       throw new ReleephFieldParseException(
         $this,
-        "Unknown {$label} level name '{$name}'");
+        pht("Unknown %s level name '%s'", $label, $name));
     }
     $this->setValue($level);
   }

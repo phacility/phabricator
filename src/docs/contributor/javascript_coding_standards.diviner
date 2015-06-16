@@ -18,9 +18,9 @@ guidelines, you can probably get away with skimming this document.
 
   - Use two spaces for indentation. Don't use literal tab characters.
   - Use Unix linebreaks ("\n"), not MSDOS ("\r\n") or OS9 ("\r").
-  - Put a space after control keywords like ##if## and ##for##.
+  - Put a space after control keywords like `if` and `for`.
   - Put a space after commas in argument lists.
-  - Put space around operators like ##=##, ##<##, etc.
+  - Put space around operators like `=`, `<`, etc.
   - Don't put spaces after function names.
   - Parentheses should hug their contents.
   - Generally, prefer to wrap code at 80 columns.
@@ -30,26 +30,26 @@ guidelines, you can probably get away with skimming this document.
 The Javascript language unambiguously dictates casing/naming rules; follow those
 rules.
 
-  - Name variables using ##lowercase_with_underscores##.
-  - Name classes using ##UpperCamelCase##.
-  - Name methods and properties using ##lowerCamelCase##.
-  - Name global functions using ##lowerCamelCase##. Avoid defining global
+  - Name variables using `lowercase_with_underscores`.
+  - Name classes using `UpperCamelCase`.
+  - Name methods and properties using `lowerCamelCase`.
+  - Name global functions using `lowerCamelCase`. Avoid defining global
     functions.
-  - Name constants using ##UPPERCASE##.
-  - Write ##true##, ##false##, and ##null## in lowercase.
+  - Name constants using `UPPERCASE`.
+  - Write `true`, `false`, and `null` in lowercase.
   - "Internal" methods and properties should be prefixed with an underscore.
     For more information about what "internal" means, see
     **Leading Underscores**, below.
 
 = Comments =
 
-  - Strongly prefer ##//## comments for making comments inside the bodies of
+  - Strongly prefer `//` comments for making comments inside the bodies of
     functions and methods (this lets someone easily comment out a block of code
     while debugging later).
 
 = Javascript Language =
 
-  - Use ##[]## and ##{}##, not ##new Array## and ##new Object##.
+  - Use `[]` and `{}`, not `new Array` and `new Object`.
   - When creating an object literal, do not quote keys unless required.
 
 = Examples =
@@ -66,7 +66,7 @@ rules.
   }
 
 You should always put braces around the body of an if clause, even if it is only
-one line. Note that operators like ##>## and ##===## are also surrounded by
+one line. Note that operators like `>` and `===` are also surrounded by
 spaces.
 
 **for (iteration):**
@@ -107,10 +107,10 @@ see @{article:Javascript Object and Array}.
   }
 
 `break` statements should be indented to block level. If you don't push them
-in, you end up with an inconsistent rule for conditional ##break## statements,
-as in the ##2## case.
+in, you end up with an inconsistent rule for conditional `break` statements,
+as in the `2` case.
 
-If you insist on having a "fall through" case that does not end with ##break##,
+If you insist on having a "fall through" case that does not end with `break`,
 make it clear in a comment that you wrote this intentionally. For instance:
 
   lang=js

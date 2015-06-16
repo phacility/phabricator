@@ -1,3 +1,3 @@
 <?php
 
-final class PhabricatorAuthHighSecurityToken {}
+final class PhabricatorAuthHighSecurityToken extends Phobject {}

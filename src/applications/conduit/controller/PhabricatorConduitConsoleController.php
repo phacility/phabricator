@@ -46,7 +46,8 @@ final class PhabricatorConduitConsoleController
       ->appendRemarkupInstructions(
         pht(
           'Enter parameters using **JSON**. For instance, to enter a '.
-          'list, type: `["apple", "banana", "cherry"]`'));
+          'list, type: `%s`',
+          '["apple", "banana", "cherry"]'));
 
     $params = $method->getParamTypes();
     foreach ($params as $param => $desc) {
@@ -67,12 +68,12 @@ final class PhabricatorConduitConsoleController
       $form
         ->appendChild(
           id(new AphrontFormSelectControl())
-            ->setLabel('Output Format')
+            ->setLabel(pht('Output Format'))
             ->setName('output')
             ->setOptions(
               array(
-                'human' => 'Human Readable',
-                'json'  => 'JSON',
+                'human' => pht('Human Readable'),
+                'json'  => pht('JSON'),
               )))
         ->appendChild(
           id(new AphrontFormSubmitControl())

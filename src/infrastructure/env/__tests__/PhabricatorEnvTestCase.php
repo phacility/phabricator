@@ -20,7 +20,7 @@ final class PhabricatorEnvTestCase extends PhabricatorTestCase {
       $this->assertEqual(
         $expect,
         PhabricatorEnv::isValidLocalURIForLink($uri),
-        "Valid local resource: {$uri}");
+        pht('Valid local resource: %s', $uri));
     }
   }
 
@@ -37,7 +37,7 @@ final class PhabricatorEnvTestCase extends PhabricatorTestCase {
       $this->assertEqual(
         $expect,
         PhabricatorEnv::isValidRemoteURIForLink($uri),
-        "Valid linkable remote URI: {$uri}");
+        pht('Valid linkable remote URI: %s', $uri));
     }
   }
 
@@ -78,7 +78,7 @@ final class PhabricatorEnvTestCase extends PhabricatorTestCase {
       $this->assertEqual(
         $expect,
         PhabricatorEnv::isValidRemoteURIForFetch($uri, $protocols),
-        "Valid fetchable remote URI: {$uri}");
+        pht('Valid fetchable remote URI: %s', $uri));
     }
   }
 
@@ -185,8 +185,9 @@ final class PhabricatorEnvTestCase extends PhabricatorTestCase {
 
     $this->assertTrue(
       $caught instanceof Exception,
-      'Destroying a scoped environment which is not on the top of the stack '.
-      'should throw.');
+      pht(
+        'Destroying a scoped environment which is not on the top of the '.
+        'stack should throw.'));
 
     if (phutil_is_hiphop_runtime()) {
       $inner->__destruct();

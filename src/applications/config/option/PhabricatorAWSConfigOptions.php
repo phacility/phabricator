@@ -39,8 +39,8 @@ final class PhabricatorAWSConfigOptions
           pht(
             'Explicit S3 endpoint to use. Leave empty to have Phabricator '.
             'select and endpoint. Normally, you do not need to set this.'))
-        ->addExample(null, 'Use default endpoint')
-        ->addExample('s3.amazon.com', 'Use specific endpoint'),
+        ->addExample(null, pht('Use default endpoint'))
+        ->addExample('s3.amazon.com', pht('Use specific endpoint')),
       $this->newOption('amazon-ec2.access-key', 'string', null)
         ->setLocked(true)
         ->setDescription(pht('Access key for Amazon EC2.')),

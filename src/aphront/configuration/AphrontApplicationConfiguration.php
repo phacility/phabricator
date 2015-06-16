@@ -3,7 +3,7 @@
 /**
  * @task  routing URI Routing
  */
-abstract class AphrontApplicationConfiguration {
+abstract class AphrontApplicationConfiguration extends Phobject {
 
   private $request;
   private $host;
@@ -80,7 +80,7 @@ abstract class AphrontApplicationConfiguration {
     // This is the earliest we can get away with this, we need env config first.
     PhabricatorAccessLog::init();
     $access_log = PhabricatorAccessLog::getLog();
-    PhabricatorStartup::setGlobal('log.access', $access_log);
+    PhabricatorStartup::setAccessLog($access_log);
     $access_log->setData(
       array(
         'R' => AphrontRequest::getHTTPHeader('Referer', '-'),
@@ -328,13 +328,14 @@ abstract class AphrontApplicationConfiguration {
           // test) so it's fine that we don't have SERVER_ADDR defined.
         } else {
           throw new AphrontUsageException(
-            pht('No SERVER_ADDR'),
+            pht('No %s', 'SERVER_ADDR'),
             pht(
               'Phabricator is configured to operate in cluster mode, but '.
-              'SERVER_ADDR is not defined in the request context. Your '.
-              'webserver configuration needs to forward SERVER_ADDR to '.
-              'PHP so Phabricator can reject requests received on '.
-              'external interfaces.'));
+              '%s is not defined in the request context. Your webserver '.
+              'configuration needs to forward %s to PHP so Phabricator can '.
+              'reject requests received on external interfaces.',
+              'SERVER_ADDR',
+              'SERVER_ADDR'));
         }
       } else {
         if (!PhabricatorEnv::isClusterAddress($server_addr)) {
@@ -413,20 +414,23 @@ abstract class AphrontApplicationConfiguration {
           ->executeOne();
       } catch (PhabricatorPolicyException $ex) {
         throw new Exception(
-          'This blog is not visible to logged out users, so it can not be '.
-          'visited from a custom domain.');
+          pht(
+            'This blog is not visible to logged out users, so it can not be '.
+            'visited from a custom domain.'));
       }
 
       if (!$blog) {
         if ($prod_uri && $prod_uri != $base_uri) {
-          $prod_str = ' or '.$prod_uri;
+          $prod_str = pht('%s or %s', $base_uri, $prod_uri);
         } else {
-          $prod_str = '';
+          $prod_str = $base_uri;
         }
         throw new Exception(
-          'Specified domain '.$host.' is not configured for Phabricator '.
-          'requests. Please use '.$base_uri.$prod_str.' to visit this instance.'
-        );
+          pht(
+            'Specified domain %s is not configured for Phabricator '.
+            'requests. Please use %s to visit this instance.',
+            $host,
+            $prod_str));
       }
 
       // TODO: Make this more flexible and modular so any application can

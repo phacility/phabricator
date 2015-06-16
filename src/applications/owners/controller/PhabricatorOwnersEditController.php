@@ -3,180 +3,132 @@
 final class PhabricatorOwnersEditController
   extends PhabricatorOwnersController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getUser();
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    if ($this->id) {
-      $package = id(new PhabricatorOwnersPackage())->load($this->id);
+    $id = $request->getURIData('id');
+    if ($id) {
+      $package = id(new PhabricatorOwnersPackageQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            // TODO: Support this capability.
+            // PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
       if (!$package) {
         return new Aphront404Response();
       }
+      $is_new = false;
     } else {
-      $package = new PhabricatorOwnersPackage();
-      $package->setPrimaryOwnerPHID($user->getPHID());
+      $package = PhabricatorOwnersPackage::initializeNewPackage($viewer);
+      $is_new = true;
     }
 
     $e_name = true;
     $e_primary = true;
 
+    $v_name = $package->getName();
+    $v_primary = $package->getPrimaryOwnerPHID();
+    // TODO: Pull these off needOwners() on the Query.
+    $v_owners = mpull($package->loadOwners(), 'getUserPHID');
+    $v_auditing = $package->getAuditingEnabled();
+    $v_description = $package->getDescription();
+
+
     $errors = array();
-
     if ($request->isFormPost()) {
-      $package->setName($request->getStr('name'));
-      $package->setDescription($request->getStr('description'));
-      $old_auditing_enabled = $package->getAuditingEnabled();
-      $package->setAuditingEnabled(
-        ($request->getStr('auditing') === 'enabled')
-          ? 1
-          : 0);
+      $xactions = array();
 
-      $primary = $request->getArr('primary');
-      $primary = reset($primary);
-      $old_primary = $package->getPrimaryOwnerPHID();
-      $package->setPrimaryOwnerPHID($primary);
+      $v_name = $request->getStr('name');
+      $v_primary = head($request->getArr('primary'));
+      $v_owners = $request->getArr('owners');
+      $v_auditing = ($request->getStr('auditing') == 'enabled');
+      $v_description = $request->getStr('description');
 
-      $owners = $request->getArr('owners');
-      if ($primary) {
-        array_unshift($owners, $primary);
+      if ($v_primary) {
+        $v_owners[] = $v_primary;
+        $v_owners = array_unique($v_owners);
       }
-      $owners = array_unique($owners);
 
-      $paths = $request->getArr('path');
-      $repos = $request->getArr('repo');
-      $excludes = $request->getArr('exclude');
+      $type_name = PhabricatorOwnersPackageTransaction::TYPE_NAME;
+      $type_primary = PhabricatorOwnersPackageTransaction::TYPE_PRIMARY;
+      $type_owners = PhabricatorOwnersPackageTransaction::TYPE_OWNERS;
+      $type_auditing = PhabricatorOwnersPackageTransaction::TYPE_AUDITING;
+      $type_description = PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION;
 
-      $path_refs = array();
-      for ($ii = 0; $ii < count($paths); $ii++) {
-        if (empty($paths[$ii]) || empty($repos[$ii])) {
-          continue;
+      $xactions[] = id(new PhabricatorOwnersPackageTransaction())
+        ->setTransactionType($type_name)
+        ->setNewValue($v_name);
+
+      $xactions[] = id(new PhabricatorOwnersPackageTransaction())
+        ->setTransactionType($type_primary)
+        ->setNewValue($v_primary);
+
+      $xactions[] = id(new PhabricatorOwnersPackageTransaction())
+        ->setTransactionType($type_owners)
+        ->setNewValue($v_owners);
+
+      $xactions[] = id(new PhabricatorOwnersPackageTransaction())
+        ->setTransactionType($type_auditing)
+        ->setNewValue($v_auditing);
+
+      $xactions[] = id(new PhabricatorOwnersPackageTransaction())
+        ->setTransactionType($type_description)
+        ->setNewValue($v_description);
+
+      $editor = id(new PhabricatorOwnersPackageTransactionEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true);
+
+      try {
+        $editor->applyTransactions($package, $xactions);
+
+        $id = $package->getID();
+        if ($is_new) {
+          $next_uri = '/owners/paths/'.$id.'/';
+        } else {
+          $next_uri = '/owners/package/'.$id.'/';
         }
-        $path_refs[] = array(
-          'repositoryPHID'  => $repos[$ii],
-          'path'            => $paths[$ii],
-          'excluded'        => $excludes[$ii],
-        );
-      }
 
-      if (!strlen($package->getName())) {
-        $e_name = pht('Required');
-        $errors[] = pht('Package name is required.');
-      } else {
-        $e_name = null;
-      }
+        return id(new AphrontRedirectResponse())->setURI($next_uri);
+      } catch (AphrontDuplicateKeyQueryException $ex) {
+        $e_name = pht('Duplicate');
+        $errors[] = pht('Package name must be unique.');
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
 
-      if (!$package->getPrimaryOwnerPHID()) {
-        $e_primary = pht('Required');
-        $errors[] = pht('Package must have a primary owner.');
-      } else {
-        $e_primary = null;
-      }
-
-      if (!$path_refs) {
-        $errors[] = pht('Package must include at least one path.');
-      }
-
-      if (!$errors) {
-        $package->attachUnsavedOwners($owners);
-        $package->attachUnsavedPaths($path_refs);
-        $package->attachOldAuditingEnabled($old_auditing_enabled);
-        $package->attachOldPrimaryOwnerPHID($old_primary);
-        try {
-          id(new PhabricatorOwnersPackageEditor())
-            ->setActor($user)
-            ->setPackage($package)
-            ->save();
-          return id(new AphrontRedirectResponse())
-            ->setURI('/owners/package/'.$package->getID().'/');
-        } catch (AphrontDuplicateKeyQueryException $ex) {
-          $e_name = pht('Duplicate');
-          $errors[] = pht('Package name must be unique.');
-        }
-      }
-    } else {
-      $owners = $package->loadOwners();
-      $owners = mpull($owners, 'getUserPHID');
-
-      $paths = $package->loadPaths();
-      $path_refs = array();
-      foreach ($paths as $path) {
-        $path_refs[] = array(
-          'repositoryPHID' => $path->getRepositoryPHID(),
-          'path' => $path->getPath(),
-          'excluded' => $path->getExcluded(),
-        );
+        $e_name = $ex->getShortMessage($type_name);
+        $e_primary = $ex->getShortMessage($type_primary);
       }
     }
 
-    $primary = $package->getPrimaryOwnerPHID();
-    if ($primary) {
-      $value_primary_owner = array($primary);
+    if ($v_primary) {
+      $value_primary_owner = array($v_primary);
     } else {
       $value_primary_owner = array();
     }
 
-    if ($package->getID()) {
-      $title = pht('Edit Package');
-      $side_nav_filter = 'edit/'.$this->id;
-    } else {
+    if ($is_new) {
+      $cancel_uri = '/owners/';
       $title = pht('New Package');
-      $side_nav_filter = 'new';
+      $button_text = pht('Continue');
+    } else {
+      $cancel_uri = '/owners/package/'.$package->getID().'/';
+      $title = pht('Edit Package');
+      $button_text = pht('Save Package');
     }
-    $this->setSideNavFilter($side_nav_filter);
-
-    $repos = id(new PhabricatorRepositoryQuery())
-      ->setViewer($user)
-      ->execute();
-
-    $default_paths = array();
-    foreach ($repos as $repo) {
-      $default_path = $repo->getDetail('default-owners-path');
-      if ($default_path) {
-        $default_paths[$repo->getPHID()] = $default_path;
-      }
-    }
-
-    $repos = mpull($repos, 'getCallsign', 'getPHID');
-    asort($repos);
-
-    $template = new AphrontTypeaheadTemplateView();
-    $template = $template->render();
-
-    Javelin::initBehavior(
-      'owners-path-editor',
-      array(
-        'root'                => 'path-editor',
-        'table'               => 'paths',
-        'add_button'          => 'addpath',
-        'repositories'        => $repos,
-        'input_template'      => $template,
-        'pathRefs'            => $path_refs,
-
-        'completeURI'         => '/diffusion/services/path/complete/',
-        'validateURI'         => '/diffusion/services/path/validate/',
-
-        'repositoryDefaultPaths' => $default_paths,
-      ));
-
-    require_celerity_resource('owners-path-editor-css');
-
-    $cancel_uri = $package->getID()
-      ? '/owners/package/'.$package->getID().'/'
-      : '/owners/';
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
           ->setName('name')
-          ->setValue($package->getName())
+          ->setValue($v_name)
           ->setError($e_name))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
@@ -191,56 +143,33 @@ final class PhabricatorOwnersEditController
           ->setDatasource(new PhabricatorProjectOrUserDatasource())
           ->setLabel(pht('Owners'))
           ->setName('owners')
-          ->setValue($owners))
+          ->setValue($v_owners))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('auditing')
           ->setLabel(pht('Auditing'))
           ->setCaption(
-            pht('With auditing enabled, all future commits that touch '.
-                'this package will be reviewed to make sure an owner '.
-                'of the package is involved and the commit message has '.
-                'a valid revision, reviewed by, and author.'))
-          ->setOptions(array(
-            'disabled'  => pht('Disabled'),
-            'enabled'   => pht('Enabled'),
-          ))
-          ->setValue(
-            $package->getAuditingEnabled()
-              ? 'enabled'
-              : 'disabled'))
+            pht(
+              'With auditing enabled, all future commits that touch '.
+              'this package will be reviewed to make sure an owner '.
+              'of the package is involved and the commit message has '.
+              'a valid revision, reviewed by, and author.'))
+          ->setOptions(
+            array(
+              'disabled'  => pht('Disabled'),
+              'enabled'   => pht('Enabled'),
+            ))
+          ->setValue(($v_auditing ? 'enabled' : 'disabled')))
       ->appendChild(
-        id(new PHUIFormInsetView())
-          ->setTitle(pht('Paths'))
-          ->addDivAttributes(array('id' => 'path-editor'))
-          ->setRightButton(javelin_tag(
-              'a',
-              array(
-                'href' => '#',
-                'class' => 'button green',
-                'sigil' => 'addpath',
-                'mustcapture' => true,
-              ),
-              pht('Add New Path')))
-          ->setDescription(
-            pht('Specify the files and directories which comprise '.
-                'this package.'))
-          ->setContent(javelin_tag(
-              'table',
-              array(
-                'class' => 'owners-path-editor-table',
-                'sigil' => 'paths',
-              ),
-              '')))
-      ->appendChild(
-        id(new AphrontFormTextAreaControl())
+        id(new PhabricatorRemarkupControl())
+          ->setUser($viewer)
           ->setLabel(pht('Description'))
           ->setName('description')
-          ->setValue($package->getDescription()))
+          ->setValue($v_description))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)
-          ->setValue(pht('Save Package')));
+          ->setValue($button_text));
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
@@ -249,29 +178,22 @@ final class PhabricatorOwnersEditController
 
     $crumbs = $this->buildApplicationCrumbs();
     if ($package->getID()) {
-      $crumbs->addTextCrumb(pht('Edit %s', $package->getName()));
+      $crumbs->addTextCrumb(
+        $package->getName(),
+        $this->getApplicationURI('package/'.$package->getID().'/'));
+      $crumbs->addTextCrumb(pht('Edit'));
     } else {
       $crumbs->addTextCrumb(pht('New Package'));
     }
 
-    $nav = $this->buildSideNavView();
-    $nav->appendChild($crumbs);
-    $nav->appendChild($form_box);
-
     return $this->buildApplicationPage(
       array(
-        $nav,
+        $crumbs,
+        $form_box,
       ),
       array(
         'title' => $title,
       ));
   }
 
-  protected function getExtraPackageViews(AphrontSideNavFilterView $view) {
-    if ($this->id) {
-      $view->addFilter('edit/'.$this->id, pht('Edit'));
-    } else {
-      $view->addFilter('new', pht('New'));
-    }
-  }
 }

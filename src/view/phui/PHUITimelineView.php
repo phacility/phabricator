@@ -132,7 +132,7 @@ final class PHUITimelineView extends AphrontView {
           javelin_tag(
             'a',
             array(
-              'href' => (string) $uri,
+              'href' => (string)$uri,
               'mustcapture' => true,
               'sigil' => 'show-older-link',
             ),

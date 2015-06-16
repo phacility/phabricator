@@ -8,7 +8,7 @@ final class DiffusionFileContentQueryConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Retrieve file content from a repository.';
+    return pht('Retrieve file content from a repository.');
   }
 
   protected function defineReturnType() {

@@ -53,23 +53,12 @@ final class PholioMockQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new PholioMock();
+  }
+
   protected function loadPage() {
-    $table = new PholioMock();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      '%Q FROM %T mock %Q %Q %Q %Q %Q %Q',
-      $this->buildSelectClause($conn_r),
-      $table->getTableName(),
-      $this->buildJoinClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildGroupClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildHavingClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    $mocks = $table->loadAllFromArray($data);
+    $mocks = $this->loadStandardPage(new PholioMock());
 
     if ($mocks && $this->needImages) {
       self::loadImages($this->getViewer(), $mocks, $this->needInlineComments);
@@ -86,40 +75,38 @@ final class PholioMockQuery
     return $mocks;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
-
-    $where[] = $this->buildWhereClauseParts($conn_r);
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'mock.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'mock.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'mock.authorPHID in (%Ls)',
         $this->authorPHIDs);
     }
 
     if ($this->statuses !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'mock.status IN (%Ls)',
         $this->statuses);
     }
 
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public static function loadImages(

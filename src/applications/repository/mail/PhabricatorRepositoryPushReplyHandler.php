@@ -8,7 +8,7 @@ final class PhabricatorRepositoryPushReplyHandler
   }
 
   public function getPrivateReplyHandlerEmailAddress(
-    PhabricatorObjectHandle $handle) {
+    PhabricatorUser $user) {
     return null;
   }
 

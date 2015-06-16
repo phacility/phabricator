@@ -25,28 +25,28 @@ final class ReleephRequestDifferentialCreateController
     }
     $this->revision = $diff_rev;
 
-    $arc_project = id(new PhabricatorRepositoryArcanistProject())
-      ->loadOneWhere('phid = %s', $this->revision->getArcanistProjectPHID());
+    $repository = $this->revision->getRepository();
 
     $projects = id(new ReleephProject())->loadAllWhere(
-      'arcanistProjectID = %d AND isActive = 1',
-      $arc_project->getID());
+      'repositoryPHID = %s AND isActive = 1',
+      $repository->getPHID());
     if (!$projects) {
-      throw new Exception(sprintf(
-        "D%d belongs to the '%s' Arcanist project, ".
-        "which is not part of any Releeph project!",
-        $this->revision->getID(),
-        $arc_project->getName()));
+      throw new Exception(
+        pht(
+          "%s belongs to the '%s' repository, ".
+          "which is not part of any Releeph project!",
+          'D'.$this->revision->getID(),
+          $repository->getMonogram()));
     }
 
     $branches = id(new ReleephBranch())->loadAllWhere(
       'releephProjectID IN (%Ld) AND isActive = 1',
       mpull($projects, 'getID'));
     if (!$branches) {
-      throw new Exception(sprintf(
-        'D%d could be in the Releeph project(s) %s, '.
+      throw new Exception(pht(
+        '%s could be in the Releeph project(s) %s, '.
         'but this project / none of these projects have open branches.',
-        $this->revision->getID(),
+        'D'.$this->revision->getID(),
         implode(', ', mpull($projects, 'getName'))));
     }
 
@@ -69,9 +69,10 @@ final class ReleephRequestDifferentialCreateController
       ->addCancelButton('/D'.$request->getStr('D'));
 
     $dialog->appendChild(
-      pht('This differential revision changes code that is associated '.
-      'with multiple Releeph branches. '.
-      'Please select the branch where you would like this code to be picked.'));
+      pht(
+        'This differential revision changes code that is associated '.
+        'with multiple Releeph branches. Please select the branch '.
+        'where you would like this code to be picked.'));
 
     foreach ($branch_groups as $project_id => $branches) {
       $project = idx($projects, $project_id);

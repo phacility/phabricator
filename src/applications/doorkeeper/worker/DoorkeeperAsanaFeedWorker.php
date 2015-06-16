@@ -65,7 +65,7 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
     $phid_aid_map = $this->lookupAsanaUserIDs($all_phids);
     if (!$phid_aid_map) {
       throw new PhabricatorWorkerPermanentFailureException(
-        'No related users have linked Asana accounts.');
+        pht('No related users have linked Asana accounts.'));
     }
 
     $owner_asana_id = idx($phid_aid_map, $owner_phid);
@@ -86,8 +86,9 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
 
     if (!$oauth_token) {
       throw new PhabricatorWorkerPermanentFailureException(
-        'Unable to find any Asana user with valid credentials to '.
-        'pull an OAuth token out of.');
+        pht(
+          'Unable to find any Asana user with valid credentials to '.
+          'pull an OAuth token out of.'));
     }
 
     $etype_main = PhabricatorObjectHasAsanaTaskEdgeType::EDGECONST;
@@ -124,21 +125,23 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
       $parent_ref = head($refs);
       if (!$parent_ref) {
         throw new PhabricatorWorkerPermanentFailureException(
-          'DoorkeeperExternalObject could not be loaded.');
+          pht('%s could not be loaded.', 'DoorkeeperExternalObject'));
       }
 
       if ($parent_ref->getSyncFailed()) {
         throw new Exception(
-          'Synchronization of parent task from Asana failed!');
+          pht('Synchronization of parent task from Asana failed!'));
       } else if (!$parent_ref->getIsVisible()) {
-        $this->log("Skipping main task update, object is no longer visible.\n");
+        $this->log(
+          "%s\n",
+          pht('Skipping main task update, object is no longer visible.'));
         $extra_data['gone'] = true;
       } else {
         $edge_cursor = idx($main_edge['data'], 'cursor', 0);
 
         // TODO: This probably breaks, very rarely, on 32-bit systems.
         if ($edge_cursor <= $story->getChronologicalKey()) {
-          $this->log("Updating main task.\n");
+          $this->log("%s\n", pht('Updating main task.'));
           $task_id = $parent_ref->getObjectID();
 
           $this->makeAsanaAPICall(
@@ -148,7 +151,8 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
             $main_data);
         } else {
           $this->log(
-            "Skipping main task update, cursor is ahead of the story.\n");
+            "%s\n",
+            pht('Skipping main task update, cursor is ahead of the story.'));
         }
       }
     } else {
@@ -156,7 +160,9 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
       // (reviewers or auditors), and we haven't synchronized the object before,
       // don't synchronize the object.
       if (!$active_phids && !$passive_phids && !$follow_phids) {
-        $this->log("Object has no followers or active/passive users.\n");
+        $this->log(
+          "%s\n",
+          pht('Object has no followers or active/passive users.'));
         return;
       }
 
@@ -240,8 +246,10 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
 
     if (!$parent_ref->getIsVisible()) {
       throw new PhabricatorWorkerPermanentFailureException(
-        'DoorkeeperExternalObject has no visible object on the other side; '.
-        'this likely indicates the Asana task has been deleted.');
+        pht(
+          '%s has no visible object on the other side; this '.
+          'likely indicates the Asana task has been deleted.',
+          'DoorkeeperExternalObject'));
     }
 
     // Now, handle the subtasks.
@@ -264,7 +272,7 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
       foreach ($refs as $ref) {
         if ($ref->getSyncFailed()) {
           throw new Exception(
-            'Synchronization of child task from Asana failed!');
+            pht('Synchronization of child task from Asana failed!'));
         }
         if (!$ref->getIsVisible()) {
           $ref->getExternalObject()->delete();
@@ -283,8 +291,10 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
       }
 
       $this->log(
-        "Removing subtask edge to %s, foreign object is not visible.\n",
-        $sub_phid);
+        "%s\n",
+        pht(
+          'Removing subtask edge to %s, foreign object is not visible.',
+          $sub_phid));
       $sub_editor->removeEdge($src_phid, $etype_sub, $sub_phid);
       unset($sub_edges[$sub_phid]);
     }
@@ -448,7 +458,7 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
       $provider = PhabricatorAsanaAuthProvider::getAsanaProvider();
       if (!$provider) {
         throw new PhabricatorWorkerPermanentFailureException(
-          'No Asana provider configured.');
+          pht('No Asana provider configured.'));
       }
       $this->provider = $provider;
     }
@@ -500,11 +510,11 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
   }
 
   private function getSynchronizationWarning() {
-    return
+    return pht(
       "\xE2\x9A\xA0 DO NOT EDIT THIS TASK \xE2\x9A\xA0\n".
       "\xE2\x98\xA0 Your changes will not be reflected in Phabricator.\n".
       "\xE2\x98\xA0 Your changes will be destroyed the next time state ".
-      "is synchronized.";
+      "is synchronized.");
   }
 
   private function lookupAsanaUserIDs($all_phids) {

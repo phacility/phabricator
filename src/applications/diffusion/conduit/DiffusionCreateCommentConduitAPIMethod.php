@@ -12,9 +12,15 @@ final class DiffusionCreateCommentConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Add a comment to a Diffusion commit. By specifying an action of '.
-           '"concern", "accept", "resign", or "close", auditing actions can '.
-           'be triggered. Defaults to "comment".';
+    return pht(
+      'Add a comment to a Diffusion commit. By specifying an action '.
+      'of "%s", "%s", "%s", or "%s", auditing actions can '.
+      'be triggered. Defaults to "%s".',
+      'concern',
+      'accept',
+      'resign',
+      'close',
+      'comment');
   }
 
   protected function defineParamTypes() {
@@ -32,9 +38,9 @@ final class DiffusionCreateCommentConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_BAD_COMMIT' => 'No commit found with that PHID',
-      'ERR_BAD_ACTION' => 'Invalid action type',
-      'ERR_MISSING_MESSAGE' => 'Message is required',
+      'ERR_BAD_COMMIT' => pht('No commit found with that PHID.'),
+      'ERR_BAD_ACTION' => pht('Invalid action type.'),
+      'ERR_MISSING_MESSAGE' => pht('Message is required.'),
     );
   }
 

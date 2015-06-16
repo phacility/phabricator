@@ -22,8 +22,8 @@ of Phabricator, let us know so we can adjust priorities.
 Conduit provides an authenticated HTTP API for Phabricator. It is informal and
 extremely simple: you post a JSON blob and you get a JSON blob back. You can
 access Conduit in PHP with @{class@libphutil:ConduitClient}, or in any language
-by executing ##arc call-conduit method## (see ##arc help call-conduit## for
-more information). You can see and test available methods at ##/conduit/## in
+by executing `arc call-conduit method` (see `arc help call-conduit` for
+more information). You can see and test available methods at `/conduit/` in
 the web interface.
 
 Arcanist is implemented using Conduit, and @{class:PhabricatorBot} is
@@ -32,7 +32,7 @@ Phabricator over Conduit.
 
 = Class Relationships =
 
-The primary Conduit workflow is exposed at ##/api/##, which routes to
+The primary Conduit workflow is exposed at `/api/`, which routes to
 @{class:PhabricatorConduitAPIController}. This controller builds a
 @{class:ConduitAPIRequest} representing authentication information and POST
 parameters, instantiates an appropriate subclass of @{class:ConduitAPIMethod},
@@ -49,7 +49,7 @@ Console", implemented by @{class:PhabricatorConduitConsoleController} at
 A log of connections and calls is stored by
 @{class:PhabricatorConduitConnectionLog} and
 @{class:PhabricatorConduitMethodCallLog}, and can be accessed on the web via
-@{class:PhabricatorConduitLogController} at ##/conduit/log/##.
+@{class:PhabricatorConduitLogController} at `/conduit/log/`.
 
 Conduit provides a token-based handshake mechanism used by
 `arc install-certificate` at `/conduit/token/`, implemented by

@@ -4,6 +4,8 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
 
   protected function run() {
     do {
+      PhabricatorCaches::destroyRequestCache();
+
       $tasks = id(new PhabricatorWorkerLeaseQuery())
         ->setLimit(1)
         ->execute();
@@ -15,7 +17,7 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
           $id = $task->getID();
           $class = $task->getTaskClass();
 
-          $this->log("Working on task {$id} ({$class})...");
+          $this->log(pht('Working on task %d (%s)...', $id, $class));
 
           $task = $task->executeTask();
           $ex = $task->getExecutionException();
@@ -27,13 +29,13 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
             } else if ($ex instanceof PhabricatorWorkerYieldException) {
               $this->log(pht('Task %s yielded.', $id));
             } else {
-              $this->log("Task {$id} failed!");
+              $this->log(pht('Task %d failed!', $id));
               throw new PhutilProxyException(
                 pht('Error while executing Task ID %d.', $id),
                 $ex);
             }
           } else {
-            $this->log("Task {$id} complete! Moved to archive.");
+            $this->log(pht('Task %s complete! Moved to archive.', $id));
           }
         }
 

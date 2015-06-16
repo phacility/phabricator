@@ -189,7 +189,7 @@ final class PHUIObjectItemView extends AphrontTagView {
         $this->addIcon('fa-clock-o red', $date, $attr);
         break;
       default:
-        throw new Exception("Unknown age '{$age}'!");
+        throw new Exception(pht("Unknown age '%s'!", $age));
     }
 
     return $this;
@@ -197,7 +197,7 @@ final class PHUIObjectItemView extends AphrontTagView {
 
   public function addAction(PHUIListItemView $action) {
     if (count($this->actions) >= 3) {
-      throw new Exception('Limit 3 actions per item.');
+      throw new Exception(pht('Limit 3 actions per item.'));
     }
     $this->actions[] = $action;
     return $this;
@@ -323,12 +323,21 @@ final class PHUIObjectItemView extends AphrontTagView {
   }
 
   protected function getTagContent() {
+    $viewer = $this->getUser();
+
     $content_classes = array();
     $content_classes[] = 'phui-object-item-content';
 
-    $header_name = null;
+    $header_name = array();
+
+    if ($viewer) {
+      $header_name[] = id(new PHUISpacesNamespaceContextView())
+        ->setUser($viewer)
+        ->setObject($this->object);
+    }
+
     if ($this->objectName) {
-      $header_name = array(
+      $header_name[] = array(
         phutil_tag(
           'span',
           array(
@@ -685,7 +694,5 @@ final class PHUIObjectItemView extends AphrontTagView {
       $options,
       '');
   }
-
-
 
 }

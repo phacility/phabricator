@@ -15,8 +15,16 @@ final class PhabricatorEmailAddressesSettingsPanel
     return pht('Email');
   }
 
+  public function isEditableByAdministrators() {
+    if ($this->getUser()->getIsMailingList()) {
+      return true;
+    }
+
+    return false;
+  }
+
   public function processRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $user = $this->getUser();
     $editable = PhabricatorEnv::getEnvConfig('account.editable');
 
     $uri = $request->getRequestURI();
@@ -157,7 +165,8 @@ final class PhabricatorEmailAddressesSettingsPanel
     PhutilURI $uri,
     $new) {
 
-    $user = $request->getUser();
+    $user = $this->getUser();
+    $viewer = $this->getViewer();
 
     $e_email = true;
     $email   = null;
@@ -171,7 +180,7 @@ final class PhabricatorEmailAddressesSettingsPanel
       }
 
       PhabricatorSystemActionEngine::willTakeAction(
-        array($user->getPHID()),
+        array($viewer->getPHID()),
         new PhabricatorSettingsAddEmailAction(),
         1);
 
@@ -201,11 +210,23 @@ final class PhabricatorEmailAddressesSettingsPanel
           ->setAddress($email)
           ->setIsVerified(0);
 
-        try {
+        // If an administrator is editing a mailing list, automatically verify
+        // the address.
+        if ($viewer->getPHID() != $user->getPHID()) {
+          if ($viewer->getIsAdmin()) {
+            $object->setIsVerified(1);
+          }
+        }
 
+        try {
           id(new PhabricatorUserEditor())
-            ->setActor($user)
+            ->setActor($viewer)
             ->addEmail($user, $object);
+
+          if ($object->getIsVerified()) {
+            // If we autoverified the address, just reload the page.
+            return id(new AphrontReloadResponse())->setURI($uri);
+          }
 
           $object->sendVerificationEmail($user);
 
@@ -242,7 +263,7 @@ final class PhabricatorEmailAddressesSettingsPanel
           ->setError($e_email));
 
     $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->addHiddenInput('new', 'true')
       ->setTitle(pht('New Address'))
       ->appendChild($errors)
@@ -257,8 +278,8 @@ final class PhabricatorEmailAddressesSettingsPanel
     AphrontRequest $request,
     PhutilURI $uri,
     $email_id) {
-
-    $user = $request->getUser();
+    $user = $this->getUser();
+    $viewer = $this->getViewer();
 
     // NOTE: You can only delete your own email addresses, and you can not
     // delete your primary address.
@@ -272,9 +293,8 @@ final class PhabricatorEmailAddressesSettingsPanel
     }
 
     if ($request->isFormPost()) {
-
       id(new PhabricatorUserEditor())
-        ->setActor($user)
+        ->setActor($viewer)
         ->removeEmail($user, $email);
 
       return id(new AphrontRedirectResponse())->setURI($uri);
@@ -283,13 +303,13 @@ final class PhabricatorEmailAddressesSettingsPanel
     $address = $email->getAddress();
 
     $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->addHiddenInput('delete', $email_id)
       ->setTitle(pht("Really delete address '%s'?", $address))
       ->appendParagraph(
         pht(
           'Are you sure you want to delete this address? You will no '.
-            'longer be able to use it to login.'))
+          'longer be able to use it to login.'))
       ->appendParagraph(
         pht(
           'Note: Removing an email address from your account will invalidate '.
@@ -304,8 +324,8 @@ final class PhabricatorEmailAddressesSettingsPanel
     AphrontRequest $request,
     PhutilURI $uri,
     $email_id) {
-
-    $user = $request->getUser();
+    $user = $this->getUser();
+    $viewer = $this->getViewer();
 
     // NOTE: You can only send more email for your unverified addresses.
     $email = id(new PhabricatorUserEmail())->loadOneWhere(
@@ -325,7 +345,7 @@ final class PhabricatorEmailAddressesSettingsPanel
     $address = $email->getAddress();
 
     $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->addHiddenInput('verify', $email_id)
       ->setTitle(pht('Send Another Verification Email?'))
       ->appendChild(phutil_tag('p', array(), pht(
@@ -341,11 +361,11 @@ final class PhabricatorEmailAddressesSettingsPanel
     AphrontRequest $request,
     PhutilURI $uri,
     $email_id) {
-
-    $user = $request->getUser();
+    $user = $this->getUser();
+    $viewer = $this->getViewer();
 
     $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
-      $user,
+      $viewer,
       $request,
       $this->getPanelURI());
 
@@ -360,9 +380,8 @@ final class PhabricatorEmailAddressesSettingsPanel
     }
 
     if ($request->isFormPost()) {
-
       id(new PhabricatorUserEditor())
-        ->setActor($user)
+        ->setActor($viewer)
         ->changePrimaryEmail($user, $email);
 
       return id(new AphrontRedirectResponse())->setURI($uri);
@@ -371,7 +390,7 @@ final class PhabricatorEmailAddressesSettingsPanel
     $address = $email->getAddress();
 
     $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->addHiddenInput('primary', $email_id)
       ->setTitle(pht('Change primary email address?'))
       ->appendParagraph(

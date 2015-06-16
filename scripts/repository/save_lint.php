@@ -11,41 +11,44 @@ $synopsis = <<<EOT
 EOT;
 
 $args = id(new PhutilArgumentParser($argv))
-  ->setTagline('save lint errors to database')
+  ->setTagline(pht('save lint errors to database'))
   ->setSynopsis($synopsis)
   ->parseStandardArguments()
   ->parse(array(
     array(
       'name' => 'all',
-      'help' =>
+      'help' => pht(
         'Discover problems in the whole repository instead of just changes '.
-        'since the last run.',
+        'since the last run.'),
     ),
     array(
       'name' => 'arc',
       'param' => 'path',
       'default' => 'arc',
-      'help' => 'Path to Arcanist executable.',
+      'help' => pht('Path to Arcanist executable.'),
     ),
     array(
       'name' => 'severity',
       'param' => 'string',
       'default' => ArcanistLintSeverity::SEVERITY_ADVICE,
-      'help' => 'Minimum severity, one of ArcanistLintSeverity constants.',
+      'help' => pht(
+        'Minimum severity, one of %s constants.',
+        'ArcanistLintSeverity'),
     ),
     array(
       'name' => 'chunk-size',
       'param' => 'number',
       'default' => 256,
-      'help' => 'Number of paths passed to `arc` at once.',
+      'help' => pht('Number of paths passed to `%s` at once.', 'arc'),
     ),
     array(
       'name' => 'blame',
-      'help' => 'Assign lint errors to authors who last modified the line.',
+      'help' => pht(
+        'Assign lint errors to authors who last modified the line.'),
     ),
   ));
 
-echo "Saving lint errors to database...\n";
+echo pht('Saving lint errors to database...')."\n";
 
 $count = id(new DiffusionLintSaveRunner())
   ->setAll($args->getArg('all', false))
@@ -55,4 +58,4 @@ $count = id(new DiffusionLintSaveRunner())
   ->setNeedsBlame($args->getArg('blame'))
   ->run('.');
 
-echo "\nProcessed {$count} files.\n";
+echo "\n".pht('Processed %d files.', $count)."\n";

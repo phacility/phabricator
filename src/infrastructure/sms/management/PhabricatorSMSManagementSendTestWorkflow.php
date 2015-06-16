@@ -8,22 +8,21 @@ final class PhabricatorSMSManagementSendTestWorkflow
       ->setName('send-test')
       ->setSynopsis(
         pht(
-          'Simulate sending an sms. This may be useful to test your sms '.
-          'configuration, or while developing new sms adapters.'))
-      ->setExamples(
-        "**send-test** --to 12345678 --body 'pizza time yet?'")
+          'Simulate sending an SMS. This may be useful to test your SMS '.
+          'configuration, or while developing new SMS adapters.'))
+      ->setExamples("**send-test** --to 12345678 --body 'pizza time yet?'")
       ->setArguments(
         array(
           array(
             'name'    => 'to',
             'param'   => 'number',
-            'help'    => 'Send sms "To:" the specified number.',
+            'help'    => pht('Send SMS "To:" the specified number.'),
             'repeat'  => true,
           ),
           array(
             'name'    => 'body',
             'param'   => 'text',
-            'help'    => 'Send sms with the specified body.',
+            'help'    => pht('Send SMS with the specified body.'),
           ),
         ));
   }

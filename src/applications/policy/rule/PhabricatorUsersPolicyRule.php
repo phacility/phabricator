@@ -6,12 +6,17 @@ final class PhabricatorUsersPolicyRule extends PhabricatorPolicyRule {
     return pht('users');
   }
 
-  public function applyRule(PhabricatorUser $viewer, $value) {
+  public function applyRule(
+    PhabricatorUser $viewer,
+    $value,
+    PhabricatorPolicyInterface $object) {
+
     foreach ($value as $phid) {
       if ($phid == $viewer->getPHID()) {
         return true;
       }
     }
+
     return false;
   }
 

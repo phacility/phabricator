@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorFactEngine {
+abstract class PhabricatorFactEngine extends Phobject {
 
   final public static function loadAllEngines() {
     $classes = id(new PhutilSymbolLoader())

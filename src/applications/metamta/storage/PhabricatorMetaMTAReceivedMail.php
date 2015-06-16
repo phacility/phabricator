@@ -90,7 +90,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     return $this->loadPHIDsFromAddresses($addresses);
   }
 
-  final public function loadCCPHIDs() {
+  public function loadCCPHIDs() {
     return $this->loadPHIDsFromAddresses($this->getCCAddresses());
   }
 
@@ -100,13 +100,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     }
     $users = id(new PhabricatorUserEmail())
       ->loadAllWhere('address IN (%Ls)', $addresses);
-    $user_phids = mpull($users, 'getUserPHID');
-
-    $mailing_lists = id(new PhabricatorMetaMTAMailingList())
-      ->loadAllWhere('email in (%Ls)', $addresses);
-    $mailing_list_phids = mpull($mailing_lists, 'getPHID');
-
-    return array_merge($user_phids,  $mailing_list_phids);
+    return mpull($users, 'getUserPHID');
   }
 
   public function processReceivedMail() {
@@ -220,8 +214,8 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     throw new PhabricatorMetaMTAReceivedMailProcessingException(
       MetaMTAReceivedMailStatus::STATUS_FROM_PHABRICATOR,
       pht(
-        "Ignoring email with 'X-Phabricator-Sent-This-Message' header to ".
-        "avoid loops."));
+        "Ignoring email with '%s' header to avoid loops.",
+        'X-Phabricator-Sent-This-Message'));
   }
 
   /**

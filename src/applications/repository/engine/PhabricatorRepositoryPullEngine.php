@@ -245,26 +245,31 @@ final class PhabricatorRepositoryPullEngine
       if (is_dir($path)) {
         $files = Filesystem::listDirectory($path, $include_hidden = true);
         if (!$files) {
-          $message =
-            "Expected to find a git repository at '{$path}', but there ".
+          $message = pht(
+            "Expected to find a git repository at '%s', but there ".
             "is an empty directory there. Remove the directory: the daemon ".
-            "will run 'git clone' for you.";
+            "will run '%s' for you.",
+            $path,
+            'git clone');
         } else {
-          $message =
-            "Expected to find a git repository at '{$path}', but there is ".
+          $message = pht(
+            "Expected to find a git repository at '%s', but there is ".
             "a non-repository directory (with other stuff in it) there. Move ".
             "or remove this directory (or reconfigure the repository to use a ".
             "different directory), and then either clone a repository ".
-            "yourself or let the daemon do it.";
+            "yourself or let the daemon do it.",
+            $path);
         }
       } else if (is_file($path)) {
-        $message =
-          "Expected to find a git repository at '{$path}', but there is a ".
+        $message = pht(
+          "Expected to find a git repository at '%s', but there is a ".
           "file there instead. Remove it and let the daemon clone a ".
-          "repository for you.";
+          "repository for you.",
+          $path);
       } else {
-        $message =
-          "Expected to find a git repository at '{$path}', but did not.";
+        $message = pht(
+          "Expected to find a git repository at '%s', but did not.",
+          $path);
       }
     } else {
       $repo_path = rtrim($stdout, "\n");
@@ -277,18 +282,24 @@ final class PhabricatorRepositoryPullEngine
         // we're OK.
       } else if (!Filesystem::pathsAreEquivalent($repo_path, $path)) {
         $err = true;
-        $message =
-          "Expected to find repo at '{$path}', but the actual ".
-          "git repository root for this directory is '{$repo_path}'. ".
-          "Something is misconfigured. The repository's 'Local Path' should ".
-          "be set to some place where the daemon can check out a working ".
-          "copy, and should not be inside another git repository.";
+        $message = pht(
+          "Expected to find repo at '%s', but the actual git repository root ".
+          "for this directory is '%s'. Something is misconfigured. ".
+          "The repository's 'Local Path' should be set to some place where ".
+          "the daemon can check out a working copy, ".
+          "and should not be inside another git repository.",
+          $path,
+          $repo_path);
       }
     }
 
     if ($err && $repository->canDestroyWorkingCopy()) {
-      phlog("Repository working copy at '{$path}' failed sanity check; ".
-            "destroying and re-cloning. {$message}");
+      phlog(
+        pht(
+          "Repository working copy at '%s' failed sanity check; ".
+          "destroying and re-cloning. %s",
+          $path,
+          $message));
       Filesystem::remove($path);
       $this->executeGitCreate();
     } else if ($err) {
@@ -324,9 +335,11 @@ final class PhabricatorRepositoryPullEngine
         }
       } else if ($err) {
         throw new Exception(
-          "git fetch failed with error #{$err}:\n".
-          "stdout:{$stdout}\n\n".
-          "stderr:{$stderr}\n");
+          pht(
+            "git fetch failed with error #%d:\nstdout:%s\n\nstderr:%s\n",
+            $err,
+            $stdout,
+            $stderr));
       } else {
         $retry = false;
       }

@@ -590,10 +590,24 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
+      '%s added %s dependencie(s) for %s: %s.' => array(
+        array(
+          '%s added a dependency for %3$s: %4$s.',
+          '%s added dependencies for %3$s: %4$s.',
+        ),
+      ),
+
       '%s removed %s dependencie(s): %s.' => array(
         array(
           '%s removed a dependency: %3$s.',
           '%s removed dependencies: %3$s.',
+        ),
+      ),
+
+      '%s removed %s dependencie(s) for %s: %s.' => array(
+        array(
+          '%s removed a dependency for %3$s: %4$s.',
+          '%s removed dependencies for %3$s: %4$s.',
         ),
       ),
 
@@ -604,10 +618,24 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
+      '%s added %s dependent revision(s) for %s: %s.' => array(
+        array(
+          '%s added a dependent revision for %3$s: %4$s.',
+          '%s added dependent revisions for %3$s: %4$s.',
+        ),
+      ),
+
       '%s removed %s dependent revision(s): %s.' => array(
         array(
           '%s removed a dependent revision: %3$s.',
           '%s removed dependent revisions: %3$s.',
+        ),
+      ),
+
+      '%s removed %s dependent revision(s) for %s: %s.' => array(
+        array(
+          '%s removed a dependent revision for %3$s: %4$s.',
+          '%s removed dependent revisions for %3$s: %4$s.',
         ),
       ),
 
@@ -1065,6 +1093,35 @@ final class PhabricatorUSEnglishTranslation
           '%s marked an inline comment as not done.',
           '%s marked %s inline comments as not done.',
         ),
+      ),
+
+      'These %s object(s) will be destroyed forever:' => array(
+        'This object will be destroyed forever:',
+        'These objects will be destroyed forever:',
+      ),
+
+      'Are you absolutely certain you want to destroy these %s '.
+      'object(s)?' => array(
+        'Are you absolutely certain you want to destroy this object?',
+        'Are you absolutely certain you want to destroy these objects?',
+      ),
+
+      '%s added %s owner(s): %s.' => array(
+        array(
+          '%s added an owner: %3$s.',
+          '%s added owners: %3$s.',
+        ),
+      ),
+
+      '%s removed %s owner(s): %s.' => array(
+        array(
+          '%s removed an owner: %3$s.',
+          '%s removed owners: %3$s.',
+        ),
+      ),
+
+      '%s changed %s package owner(s), added %s: %s; removed %s: %s.' => array(
+        '%s changed package owners, added: %4$s; removed: %6$s.',
       ),
 
     );

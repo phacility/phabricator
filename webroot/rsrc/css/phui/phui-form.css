@@ -140,7 +140,7 @@ textarea::-webkit-input-placeholder {
   color: {$lightgreytext};
 }
 
-select[disabled="disabled"],
-input[disabled="disabled"] {
+select[disabled],
+input[disabled] {
   opacity: 0.5;
 }

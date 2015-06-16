@@ -16,7 +16,7 @@ final class PhabricatorFactManagementCursorsWorkflow
             'name'    => 'reset',
             'param'   => 'cursor',
             'repeat'  => true,
-            'help'    => 'Reset cursor __cursor__.',
+            'help'    => pht('Reset cursor __cursor__.'),
           ),
         ));
   }

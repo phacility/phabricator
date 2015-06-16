@@ -1,6 +1,6 @@
 <?php
 
-final class ConduitAPIResponse {
+final class ConduitAPIResponse extends Phobject {
 
   private $result;
   private $errorCode;

@@ -437,7 +437,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
         $icon_label = pht('Missing Dependency');
         $has_conflicts = true;
         $error = pht(
-          'This dependency specifies a build step which doesn\'t exist.');
+          "This dependency specifies a build step which doesn't exist.");
       } else {
         $bound = phutil_tag(
           'strong',

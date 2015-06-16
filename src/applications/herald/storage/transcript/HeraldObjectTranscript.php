@@ -1,6 +1,6 @@
 <?php
 
-final class HeraldObjectTranscript {
+final class HeraldObjectTranscript extends Phobject {
 
   protected $phid;
   protected $type;

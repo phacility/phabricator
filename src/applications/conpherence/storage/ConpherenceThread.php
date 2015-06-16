@@ -199,6 +199,23 @@ final class ConpherenceThread extends ConpherenceDAO
     return PhabricatorUser::getDefaultProfileImageURI();
   }
 
+  /**
+   * Get a thread title which doesn't require handles to be attached.
+   *
+   * This is a less rich title than @{method:getDisplayTitle}, but does not
+   * require handles to be attached. We use it to build thread handles without
+   * risking cycles or recursion while querying.
+   *
+   * @return string Lower quality human-readable title.
+   */
+  public function getStaticTitle() {
+    $title = $this->getTitle();
+    if (strlen($title)) {
+      return $title;
+    }
+
+    return pht('Private Correspondence');
+  }
 
   /**
    * Get the thread's display title for a user.
@@ -231,9 +248,14 @@ final class ConpherenceThread extends ConpherenceDAO
     $handles = $this->getHandles();
     $phids = $this->getOtherRecentParticipantPHIDs($viewer);
 
-    $limit = 3;
-    $more = (count($phids) > $limit);
-    $phids = array_slice($phids, 0, $limit);
+    if (count($phids) == 0) {
+      $phids[] = $viewer->getPHID();
+      $more = false;
+    } else {
+      $limit = 3;
+      $more = (count($phids) > $limit);
+      $phids = array_slice($phids, 0, $limit);
+    }
 
     $names = array_select_keys($handles, $phids);
     $names = mpull($names, 'getName');

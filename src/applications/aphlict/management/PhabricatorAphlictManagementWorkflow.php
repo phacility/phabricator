@@ -86,7 +86,7 @@ abstract class PhabricatorAphlictManagementWorkflow
     exit(1);
   }
 
-  protected final function setDebug($debug) {
+  final protected function setDebug($debug) {
     $this->debug = $debug;
   }
 
@@ -97,8 +97,10 @@ abstract class PhabricatorAphlictManagementWorkflow
 
   private static function mustHaveExtension($ext) {
     if (!extension_loaded($ext)) {
-      echo "ERROR: The PHP extension '{$ext}' is not installed. You must ".
-           "install it to run aphlict on this machine.\n";
+      echo pht(
+        "ERROR: The PHP extension '%s' is not installed. You must ".
+        "install it to run Aphlict on this machine.",
+        $ext)."\n";
       exit(1);
     }
 
@@ -106,8 +108,10 @@ abstract class PhabricatorAphlictManagementWorkflow
     foreach ($extension->getFunctions() as $function) {
       $function = $function->name;
       if (!function_exists($function)) {
-        echo "ERROR: The PHP function {$function}() is disabled. You must ".
-             "enable it to run aphlict on this machine.\n";
+        echo pht(
+          'ERROR: The PHP function %s is disabled. You must '.
+          'enable it to run Aphlict on this machine.',
+          $function.'()')."\n";
         exit(1);
       }
     }
@@ -121,7 +125,8 @@ abstract class PhabricatorAphlictManagementWorkflow
       throw new PhutilArgumentUsageException(
         pht(
           'Unable to start notifications server because it is already '.
-          'running. Use `aphlict restart` to restart it.'));
+          'running. Use `%s` to restart it.',
+          'aphlict restart'));
     }
 
     if (posix_getuid() == 0) {
@@ -195,7 +200,9 @@ abstract class PhabricatorAphlictManagementWorkflow
     $console = PhutilConsole::getConsole();
 
     if ($this->debug) {
-      $console->writeOut(pht("Starting Aphlict server in foreground...\n"));
+      $console->writeOut(
+        "%s\n",
+        pht('Starting Aphlict server in foreground...'));
     } else {
       Filesystem::writeFile($this->getPIDPath(), getmypid());
     }
@@ -214,10 +221,13 @@ abstract class PhabricatorAphlictManagementWorkflow
     register_shutdown_function(array($this, 'cleanup'));
 
     if ($this->debug) {
-      $console->writeOut("Launching server:\n\n    $ ".$command."\n\n");
+      $console->writeOut(
+        "%s\n\n    $ %s\n\n",
+        pht('Launching server:'),
+        $command);
 
       $err = phutil_passthru('%C', $command);
-      $console->writeOut(">>> Server exited!\n");
+      $console->writeOut(">>> %s\n", pht('Server exited!'));
       exit($err);
     } else {
       while (true) {
@@ -242,9 +252,12 @@ abstract class PhabricatorAphlictManagementWorkflow
 
     $pid = pcntl_fork();
     if ($pid < 0) {
-      throw new Exception('Failed to fork()!');
+      throw new Exception(
+        pht(
+          'Failed to %s!',
+          'fork()'));
     } else if ($pid) {
-      $console->writeErr(pht("Aphlict Server started.\n"));
+      $console->writeErr("%s\n", pht('Aphlict Server started.'));
       exit(0);
     }
 
@@ -267,11 +280,11 @@ abstract class PhabricatorAphlictManagementWorkflow
 
     $pid = $this->getPID();
     if (!$pid) {
-      $console->writeErr(pht("Aphlict is not running.\n"));
+      $console->writeErr("%s\n", pht('Aphlict is not running.'));
       return 0;
     }
 
-    $console->writeErr(pht("Stopping Aphlict Server (%s)...\n", $pid));
+    $console->writeErr("%s\n", pht('Stopping Aphlict Server (%s)...', $pid));
     posix_kill($pid, SIGINT);
 
     $start = time();
@@ -287,7 +300,7 @@ abstract class PhabricatorAphlictManagementWorkflow
     } while (time() < $start + 5);
 
     if ($pid) {
-      $console->writeErr(pht('Sending %s a SIGKILL.', $pid)."\n");
+      $console->writeErr("%s\n", pht('Sending %s a SIGKILL.', $pid));
       posix_kill($pid, SIGKILL);
       unset($pid);
     }
@@ -307,8 +320,11 @@ abstract class PhabricatorAphlictManagementWorkflow
 
     throw new PhutilArgumentUsageException(
       pht(
-        'No `nodejs` or `node` binary was found in $PATH. You must install '.
-        'Node.js to start the Aphlict server.'));
+        'No `%s` or `%s` binary was found in %s. You must install '.
+        'Node.js to start the Aphlict server.',
+        'nodejs',
+        'node',
+        '$PATH'));
   }
 
 }

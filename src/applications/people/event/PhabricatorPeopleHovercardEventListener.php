@@ -31,10 +31,16 @@ final class PhabricatorPeopleHovercardEventListener
       ->setViewer($viewer)
       ->withIDs(array($user->getID()))
       ->needAvailability(true)
+      ->needProfile(true)
       ->executeOne();
 
     $hovercard->setTitle($user->getUsername());
-    $hovercard->setDetail($user->getRealName());
+    $profile = $user->getUserProfile();
+    $detail = $user->getRealName();
+    if ($profile->getTitle()) {
+      $detail .= ' - '.$profile->getTitle().'.';
+    }
+    $hovercard->setDetail($detail);
 
     if ($user->getIsDisabled()) {
       $hovercard->addField(pht('Account'), pht('Disabled'));
@@ -51,6 +57,13 @@ final class PhabricatorPeopleHovercardEventListener
     $hovercard->addField(
       pht('User Since'),
       phabricator_date($user->getDateCreated(), $viewer));
+
+    if ($profile->getBlurb()) {
+      $hovercard->addField(pht('Blurb'),
+        id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs(120)
+        ->truncateString($profile->getBlurb()));
+    }
 
     $event->setValue('hovercard', $hovercard);
   }

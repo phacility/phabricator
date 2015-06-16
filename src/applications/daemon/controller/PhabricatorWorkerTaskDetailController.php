@@ -95,7 +95,7 @@ final class PhabricatorWorkerTaskDetailController
           $status = pht('Cancelled');
           break;
         default:
-          throw new Exception('Unknown task status!');
+          throw new Exception(pht('Unknown task status!'));
       }
     } else {
       $status = pht('Queued');
@@ -141,7 +141,7 @@ final class PhabricatorWorkerTaskDetailController
       $expires);
 
     if ($task->isArchived()) {
-      $duration = number_format($task->getDuration()).' us';
+      $duration = pht('%s us', new PhutilNumber($task->getDuration()));
     } else {
       $duration = phutil_tag('em', array(), pht('Not Completed'));
     }

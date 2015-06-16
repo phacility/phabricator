@@ -17,15 +17,15 @@ Phabricator to load it.
 In general, you perform these one-time setup steps:
 
   - Create a new directory.
-  - Use ##arc liberate## to initialize and name the library.
+  - Use `arc liberate` to initialize and name the library.
   - Add a dependency on Phabricator if necessary.
-  - Add the library to your Phabricator config or ##.arcconfig## so it will be
+  - Add the library to your Phabricator config or `.arcconfig` so it will be
     loaded at runtime.
 
 Then, to add new code, you do this:
 
   - Write or update classes.
-  - Update the library metadata by running ##arc liberate## again.
+  - Update the library metadata by running `arc liberate` again.
 
 = Creating a New Library =
 
@@ -61,13 +61,13 @@ you should get some details about the library initialization:
 
 This will write three files:
 
-  - ##src/.phutil_module_cache## This is a cache which makes "arc liberate"
+  - `src/.phutil_module_cache` This is a cache which makes "arc liberate"
     faster when you run it to update the library. You can safely remove it at
     any time. If you check your library into version control, you can add this
     file to ignore rules (like .gitignore).
-  - ##src/__phutil_library_init__.php## This records the name of the library and
+  - `src/__phutil_library_init__.php` This records the name of the library and
     tells libphutil that a library exists here.
-  - ##src/__phutil_library_map__.php## This is a map of all the symbols
+  - `src/__phutil_library_map__.php` This is a map of all the symbols
     (functions and classes) in the library, which allows them to be autoloaded
     at runtime and dependencies to be statically managed by "arc liberate".
 
@@ -78,30 +78,29 @@ with Arcanist or are building something else on libphutil) you can skip this
 step.
 
 But, if you intend to use this library with Phabricator, you need to define its
-dependency on Phabricator by creating a ##.arcconfig## file which points at
+dependency on Phabricator by creating a `.arcconfig` file which points at
 Phabricator. For example, you might write this file to
 `libcustom/.arcconfig`:
 
   {
-    "project.name" : "libcustom",
-    "load" : [
+    "load": [
       "phabricator/src/"
     ]
   }
 
-For details on creating a ##.arcconfig##, see
+For details on creating a `.arcconfig`, see
 @{article:Arcanist User Guide: Configuring a New Project}. In general, this
-tells ##arc liberate## that it should look for symbols in Phabricator when
+tells `arc liberate` that it should look for symbols in Phabricator when
 performing static analysis.
 
 NOTE: If Phabricator isn't located next to your custom library, specify a
-path which actually points to the ##phabricator/## directory.
+path which actually points to the `phabricator/` directory.
 
-You do not need to declare dependencies on ##arcanist## or ##libphutil##,
-since ##arc liberate## automatically loads them.
+You do not need to declare dependencies on `arcanist` or `libphutil`,
+since `arc liberate` automatically loads them.
 
 Finally, edit your Phabricator config to tell it to load your library at
-runtime, by adding it to ##load-libraries##:
+runtime, by adding it to `load-libraries`:
 
   ...
   'load-libraries' => array(
@@ -118,7 +117,7 @@ To actually write classes, create a new module and put code in it:
   libcustom/ $ mkdir src/example/
   libcustom/ $ nano src/example/ExampleClass.php # Edit some code.
 
-Now, run ##arc liberate## to regenerate the static resource map:
+Now, run `arc liberate` to regenerate the static resource map:
 
   libcustom/ $ arc liberate src/
 
@@ -127,7 +126,7 @@ This will automatically regenerate the static map of the library.
 = What You Can Extend And Invoke =
 
 libphutil, Arcanist and Phabricator are strict about extensibility of classes
-and visibility of methods and properties. Most classes are marked ##final##, and
+and visibility of methods and properties. Most classes are marked `final`, and
 methods have the minimum required visibility (protected or private). The goal of
 this strictness is to make it clear what you can safely extend, access, and
 invoke, so your code will keep working as the upstream changes.
@@ -138,7 +137,7 @@ should respect method and property visibility and extend only classes marked
 example: @{class@libphutil:AbstractDirectedGraph}). These classes are external
 interfaces intended for extension.
 
-If you want to extend a class but it is not marked ##@stable##, here are some
+If you want to extend a class but it is not marked `@stable`, here are some
 approaches you can take:
 
   - Good: If possible, use composition rather than extension to build your

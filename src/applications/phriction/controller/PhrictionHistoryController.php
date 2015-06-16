@@ -87,7 +87,7 @@ final class PhrictionHistoryController
           $color = 'green';
           break;
         default:
-          throw new Exception('Unknown change type!');
+          throw new Exception(pht('Unknown change type!'));
           break;
       }
 

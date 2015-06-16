@@ -153,7 +153,7 @@ final class PhameBlogEditController
         ->setName('custom_domain')
         ->setValue($custom_domain)
         ->setCaption(
-          pht('Must include at least one dot (.), e.g. blog.example.com'))
+          pht('Must include at least one dot (.), e.g. %s', 'blog.example.com'))
         ->setError($e_custom_domain))
       ->appendChild(
         id(new AphrontFormSelectControl())

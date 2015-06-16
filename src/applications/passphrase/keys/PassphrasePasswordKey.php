@@ -7,7 +7,7 @@ final class PassphrasePasswordKey extends PassphraseAbstractKey {
     return $key->loadAndValidateFromPHID(
       $phid,
       $viewer,
-      PassphraseCredentialTypePassword::PROVIDES_TYPE);
+      PassphrasePasswordCredentialType::PROVIDES_TYPE);
   }
 
   public function getPasswordEnvelope() {

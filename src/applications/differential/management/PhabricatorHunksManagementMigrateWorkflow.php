@@ -48,8 +48,6 @@ final class PhabricatorHunksManagementMigrateWorkflow
             new PhutilNumber($diff_len),
             sprintf('%.1f%%', 100 * ($diff_len / $old_len))));
       }
-
-      break;
     }
 
     if ($saw_any_rows) {

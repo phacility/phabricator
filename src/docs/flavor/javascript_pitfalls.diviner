@@ -27,7 +27,7 @@ insert semicolons after each statement. You should also prefer to break lines in
 places where insertion of a semicolon would not make the unparseable parseable,
 usually after operators.
 
-= ##with## is Bad News =
+= `with` is Bad News =
 
 `with` is a pretty bad feature, for this reason among others:
 
@@ -35,12 +35,12 @@ usually after operators.
     property = 3; // Might be on object, might be on window: who knows.
   }
 
-Avoid ##with##.
+Avoid `with`.
 
-= ##arguments## is not an Array =
+= `arguments` is not an Array =
 
-You can convert ##arguments## to an array using JX.$A() or similar. Note that
-you can pass  ##arguments## to Function.prototype.apply() without converting it.
+You can convert `arguments` to an array using JX.$A() or similar. Note that
+you can pass  `arguments` to Function.prototype.apply() without converting it.
 
 = Object, Array, and iteration are needlessly hard =
 
@@ -82,6 +82,6 @@ objects and can have methods and properties, and inherit from Array.prototype,
 Number.prototype, etc.) and their logical behavior is at best absurd and at
 worst strictly wrong.
 
-**Never use** ##new Number()##, ##new String()## or ##new Boolean()## unless
+**Never use** `new Number()`, `new String()` or `new Boolean()` unless
 your Javascript is God Tier and you are absolutely sure you know what you are
 doing.

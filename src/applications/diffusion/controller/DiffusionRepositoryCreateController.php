@@ -71,7 +71,7 @@ final class DiffusionRepositoryCreateController
         $cancel_uri = $this->getApplicationURI('new/');
         break;
       default:
-        throw new Exception('Invalid edit operation!');
+        throw new Exception(pht('Invalid edit operation!'));
     }
 
     $form = id(new PHUIPagedFormView())
@@ -483,7 +483,7 @@ final class DiffusionRepositoryCreateController
         $is_mercurial = true;
         break;
       default:
-        throw new Exception('Unsupported VCS!');
+        throw new Exception(pht('Unsupported VCS!'));
     }
 
     $has_local = ($is_git || $is_mercurial);
@@ -527,7 +527,7 @@ final class DiffusionRepositoryCreateController
         "repository, use the //Import Only// option at the end of this ".
         "workflow.)");
     } else {
-      throw new Exception('Unsupported VCS!');
+      throw new Exception(pht('Unsupported VCS!'));
     }
 
     $page->addRemarkupInstructions($instructions, 'remoteURI');
@@ -591,8 +591,8 @@ final class DiffusionRepositoryCreateController
     if ($this->isSSHProtocol($proto)) {
       $c_credential->setLabel(pht('SSH Key'));
       $c_credential->setCredentialType(
-        PassphraseCredentialTypeSSHPrivateKeyText::CREDENTIAL_TYPE);
-      $provides_type = PassphraseCredentialTypeSSHPrivateKey::PROVIDES_TYPE;
+        PassphraseSSHPrivateKeyTextCredentialType::CREDENTIAL_TYPE);
+      $provides_type = PassphraseSSHPrivateKeyCredentialType::PROVIDES_TYPE;
 
       $page->addRemarkupInstructions(
         pht(
@@ -607,8 +607,8 @@ final class DiffusionRepositoryCreateController
       $c_credential->setLabel(pht('Password'));
       $c_credential->setAllowNull(true);
       $c_credential->setCredentialType(
-        PassphraseCredentialTypePassword::CREDENTIAL_TYPE);
-      $provides_type = PassphraseCredentialTypePassword::PROVIDES_TYPE;
+        PassphrasePasswordCredentialType::CREDENTIAL_TYPE);
+      $provides_type = PassphrasePasswordCredentialType::PROVIDES_TYPE;
 
       $page->addRemarkupInstructions(
         pht(
@@ -623,7 +623,7 @@ final class DiffusionRepositoryCreateController
           $remote_uri),
         'credential');
     } else {
-      throw new Exception('Unknown URI protocol!');
+      throw new Exception(pht('Unknown URI protocol!'));
     }
 
     if ($provides_type) {
@@ -663,7 +663,7 @@ final class DiffusionRepositoryCreateController
           pht('You must choose an SSH credential to connect over SSH.'));
       }
 
-      $ssh_type = PassphraseCredentialTypeSSHPrivateKey::PROVIDES_TYPE;
+      $ssh_type = PassphraseSSHPrivateKeyCredentialType::PROVIDES_TYPE;
       if ($credential->getProvidesType() !== $ssh_type) {
         $c_credential->setError(pht('Invalid'));
         $page->addPageError(
@@ -674,7 +674,7 @@ final class DiffusionRepositoryCreateController
 
     } else if ($this->isUsernamePasswordProtocol($proto)) {
       if ($credential) {
-        $password_type = PassphraseCredentialTypePassword::PROVIDES_TYPE;
+        $password_type = PassphrasePasswordCredentialType::PROVIDES_TYPE;
         if ($credential->getProvidesType() !== $password_type) {
         $c_credential->setError(pht('Invalid'));
         $page->addPageError(
@@ -734,8 +734,7 @@ final class DiffusionRepositoryCreateController
         ->setAdjustFormPageCallback(array($this, 'adjustPolicyPage'))
         ->setUser($viewer)
         ->addRemarkupInstructions(
-          pht(
-            'Select access policies for this repository.'))
+          pht('Select access policies for this repository.'))
         ->addControl($view_policy)
         ->addControl($edit_policy)
         ->addControl($push_policy);

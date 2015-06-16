@@ -22,7 +22,7 @@ For example:
   arc unit --detailed-coverage src/some/file.php
 
 Depending on how your test engine is configured, this will run tests relevant
-to ##src/some/file.php## and give you a detailed coverage report.
+to `src/some/file.php` and give you a detailed coverage report.
 
 If the test engine enables coverage by default, it will be uploaded to
 Differential and displayed in the right gutter when viewing diffs.
@@ -39,7 +39,7 @@ be automatically enabled.
 
 = Building Coverage Support =
 
-To add coverage support to a unit test engine, just call ##setCoverage()## when
+To add coverage support to a unit test engine, just call `setCoverage()` when
 building @{class@arcanist:ArcanistUnitTestResult} objects. Provide a map of
 file names (relative to the working copy root) to coverage report strings.
 Coverage report strings look like this:
@@ -64,6 +64,6 @@ might look like this:
   );
 
 You may also want to filter coverage information to the paths passed to the
-unit test engine. See @{class@arcanist:ArcanistPhutilTestCase} and
+unit test engine. See @{class@arcanist:PhutilTestCase} and
 @{class@arcanist:PhutilUnitTestEngine} for an example of coverage integration
 in PHP using Xdebug.

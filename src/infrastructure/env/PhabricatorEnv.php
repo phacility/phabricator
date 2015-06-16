@@ -48,7 +48,7 @@
  * @task test     Unit Test Support
  * @task internal Internals
  */
-final class PhabricatorEnv {
+final class PhabricatorEnv extends Phobject {
 
   private static $sourceStack;
   private static $repairSource;
@@ -129,7 +129,19 @@ final class PhabricatorEnv {
     self::setLocaleCode('en_US');
   }
 
+  public static function beginScopedLocale($locale_code) {
+    return new PhabricatorLocaleScopeGuard($locale_code);
+  }
+
+  public static function getLocaleCode() {
+    return self::$localeCode;
+  }
+
   public static function setLocaleCode($locale_code) {
+    if (!$locale_code) {
+      return;
+    }
+
     if ($locale_code == self::$localeCode) {
       return;
     }
@@ -389,7 +401,10 @@ final class PhabricatorEnv {
       self::$cache[$key] = $result[$key];
       return $result[$key];
     } else {
-      throw new Exception("No config value specified for key '{$key}'.");
+      throw new Exception(
+        pht(
+          "No config value specified for key '%s'.",
+          $key));
     }
   }
 
@@ -507,7 +522,9 @@ final class PhabricatorEnv {
 
     if (!$base_uri) {
       throw new Exception(
-        "Define 'phabricator.base-uri' in your configuration to continue.");
+        pht(
+          "Define '%s' in your configuration to continue.",
+          'phabricator.base-uri'));
     }
 
     return $base_uri;
@@ -553,8 +570,9 @@ final class PhabricatorEnv {
     if ($stack_key !== $key) {
       self::$sourceStack->pushSource($source);
       throw new Exception(
-        'Scoped environments were destroyed in a diffent order than they '.
-        'were initialized.');
+        pht(
+          'Scoped environments were destroyed in a different order than they '.
+          'were initialized.'));
     }
   }
 

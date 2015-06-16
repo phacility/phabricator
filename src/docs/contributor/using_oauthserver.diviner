@@ -35,13 +35,13 @@ clients that implement OAuth 2.0.
 
 = Setup - Creating a Client =
 
-# Visit https://phabricator.example.com/oauthserver/client/create/
+# Visit {nav Your Local Install > OAuth Server > Create Application}
 # Fill out the form
 # Profit
 
 = Obtaining an Authorization Code =
 
-POST or GET https://phabricator.example.com/oauthserver/auth/ with the
+POST or GET `https://phabricator.example.com/oauthserver/auth/` with the
 following parameters:
 
 - Required - **client_id** - the id of the newly registered client.
@@ -76,7 +76,7 @@ and include the pertinent error information.
 
 = Obtaining an Access Token =
 
-POST or GET https://phabricator.example.com/oauthserver/token/
+POST or GET `https://phabricator.example.com/oauthserver/token/`
 with the following parameters:
 
 - Required - **client_id** - the id of the client
@@ -101,11 +101,11 @@ message.
 Simply include a query param with the key of "access_token" and the value
 as the earlier obtained access token. For example:
 
-https://phabricator.example.com/api/user.whoami?access_token=ykc7ly7vtibj334oga4fnfbuvnwz4ocp
+```https://phabricator.example.com/api/user.whoami?access_token=ykc7ly7vtibj334oga4fnfbuvnwz4ocp```
 
 If the token has expired or is otherwise invalid, the client will receive
 an error indicating as such. In these cases, the client should re-initiate
-the entire ##Authorization Code Grant## flow.
+the entire `Authorization Code Grant` flow.
 
 NOTE: See "Scopes" section below for more information on what data is
 currently exposed through the OAuth Server.

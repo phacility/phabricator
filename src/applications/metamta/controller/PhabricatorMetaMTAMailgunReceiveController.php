@@ -23,7 +23,7 @@ final class PhabricatorMetaMTAMailgunReceiveController
 
     if (!$this->verifyMessage()) {
       throw new Exception(
-        'Mail signature is not valid. Check your Mailgun API key.');
+        pht('Mail signature is not valid. Check your Mailgun API key.'));
     }
 
     $request = $this->getRequest();

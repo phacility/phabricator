@@ -52,8 +52,9 @@ final class PhabricatorDeveloperConfigOptions
             "even for logged-out users. This is only really useful if you ".
             "need to debug something on a logged-out page. You should not ".
             "enable this option in production.\n\n".
-            "You must enable DarkConsole by setting {{darkconsole.enabled}} ".
-            "before this option will have any effect.")),
+            "You must enable DarkConsole by setting '%s' ".
+            "before this option will have any effect.",
+            'darkconsole.enabled')),
       $this->newOption('debug.time-limit', 'int', null)
         ->setSummary(
           pht(
@@ -170,12 +171,13 @@ final class PhabricatorDeveloperConfigOptions
             pht('Disable deflate compression'),
           ))
         ->setSummary(
-          pht('Toggle gzdeflate()-based compression for some caches.'))
+          pht('Toggle %s-based compression for some caches.', 'gzdeflate()'))
         ->setDescription(
           pht(
-            'Set this to false to disable the use of gzdeflate()-based '.
+            'Set this to false to disable the use of %s-based '.
             'compression in some caches. This may give you less performant '.
-            '(but more debuggable) caching.')),
+            '(but more debuggable) caching.',
+            'gzdeflate()')),
     );
   }
 }

@@ -1,7 +1,6 @@
 <?php
 
-abstract class PhabricatorCustomFieldIndexStorage
-  extends PhabricatorLiskDAO {
+abstract class PhabricatorCustomFieldIndexStorage extends PhabricatorLiskDAO {
 
   protected $objectPHID;
   protected $indexKey;

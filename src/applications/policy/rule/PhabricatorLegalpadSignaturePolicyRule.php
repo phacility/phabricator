@@ -9,7 +9,11 @@ final class PhabricatorLegalpadSignaturePolicyRule
     return pht('signers of legalpad documents');
   }
 
-  public function willApplyRules(PhabricatorUser $viewer, array $values) {
+  public function willApplyRules(
+    PhabricatorUser $viewer,
+    array $values,
+    array $objects) {
+
     $values = array_unique(array_filter(array_mergev($values)));
     if (!$values) {
       return;
@@ -26,12 +30,17 @@ final class PhabricatorLegalpadSignaturePolicyRule
     $this->signatures = mpull($documents, 'getPHID', 'getPHID');
   }
 
-  public function applyRule(PhabricatorUser $viewer, $value) {
+  public function applyRule(
+    PhabricatorUser $viewer,
+    $value,
+    PhabricatorPolicyInterface $object) {
+
     foreach ($value as $document_phid) {
       if (!isset($this->signatures[$document_phid])) {
         return false;
       }
     }
+
     return true;
   }
 

@@ -57,8 +57,6 @@ final class ManiphestTaskListView extends ManiphestView {
     }
 
     foreach ($this->tasks as $task) {
-      $item = new PHUIObjectItemView();
-      $item->setObjectName('T'.$task->getID());
       $field_list = PhabricatorCustomField::getObjectFields(
         $task,
         PhabricatorCustomField::ROLE_VIEW);
@@ -77,8 +75,12 @@ final class ManiphestTaskListView extends ManiphestView {
       } else {
         $header = $task->getTitle();
       }
-      $item->setHeader($header);
-      $item->setHref('/T'.$task->getID());
+      $item = id(new PHUIObjectItemView())
+        ->setUser($this->getUser())
+        ->setObject($task)
+        ->setObjectName('T'.$task->getID())
+        ->setHeader($header)
+        ->setHref('/T'.$task->getID());
 
       if ($task->getOwnerPHID()) {
         $owner = $handles[$task->getOwnerPHID()];

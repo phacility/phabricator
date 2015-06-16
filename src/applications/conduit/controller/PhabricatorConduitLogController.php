@@ -69,7 +69,7 @@ final class PhabricatorConduitLogController
       $conn = idx($conns, $call->getConnectionID());
       if ($conn) {
         $name = $conn->getUserName();
-        $client = ' (via '.$conn->getClient().')';
+        $client = ' '.pht('(via %s)', $conn->getClient());
       } else {
         $name = null;
         $client = null;
@@ -98,7 +98,7 @@ final class PhabricatorConduitLogController
         array($call->getMethod(), $client),
         $status,
         $call->getError(),
-        number_format($call->getDuration()).' us',
+        pht('%s us', new PhutilNumber($call->getDuration())),
         phabricator_datetime($call->getDateCreated(), $viewer),
       );
     }

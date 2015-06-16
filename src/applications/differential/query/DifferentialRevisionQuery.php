@@ -36,7 +36,6 @@ final class DifferentialRevisionQuery
   private $phids = array();
   private $responsibles = array();
   private $branches = array();
-  private $arcanistProjectPHIDs = array();
   private $repositoryPHIDs;
   private $updatedEpochMin;
   private $updatedEpochMax;
@@ -227,19 +226,6 @@ final class DifferentialRevisionQuery
     return $this;
   }
 
-
-  /**
-   * Filter results to only return revisions with a given set of arcanist
-   * projects.
-   *
-   * @param array List of project PHIDs.
-   * @return this
-   * @task config
-   */
-  public function withArcanistProjectPHIDs(array $arc_project_phids) {
-    $this->arcanistProjectPHIDs = $arc_project_phids;
-    return $this;
-  }
 
   public function withRepositoryPHIDs(array $repository_phids) {
     $this->repositoryPHIDs = $repository_phids;
@@ -771,13 +757,6 @@ final class DifferentialRevisionQuery
         $this->branches);
     }
 
-    if ($this->arcanistProjectPHIDs) {
-      $where[] = qsprintf(
-        $conn_r,
-        'r.arcanistProjectPHID in (%Ls)',
-        $this->arcanistProjectPHIDs);
-    }
-
     if ($this->updatedEpochMin !== null) {
       $where[] = qsprintf(
         $conn_r,
@@ -841,7 +820,7 @@ final class DifferentialRevisionQuery
         break;
       default:
         throw new Exception(
-          "Unknown revision status filter constant '{$this->status}'!");
+          pht("Unknown revision status filter constant '%s'!", $this->status));
     }
 
     $where[] = $this->buildWhereClauseParts($conn_r);
@@ -1056,7 +1035,7 @@ final class DifferentialRevisionQuery
             // The author can never have authority unless we allow self-accept.
             $has_authority = false;
           } else {
-            // Otherwise, look up whether th viewer has authority.
+            // Otherwise, look up whether the viewer has authority.
             $has_authority = isset($authority[$reviewer_phid]);
           }
 

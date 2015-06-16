@@ -19,7 +19,7 @@ final class DiffusionCommitRevertedByCommitEdgeType
     $add_edges) {
 
     return pht(
-      '%s added %s reverted commit(s): %s.',
+      '%s added %s reverting commit(s): %s.',
       $actor,
       $add_count,
       $add_edges);
@@ -31,7 +31,7 @@ final class DiffusionCommitRevertedByCommitEdgeType
     $rem_edges) {
 
     return pht(
-      '%s removed %s reverted commit(s): %s.',
+      '%s removed %s reverting commit(s): %s.',
       $actor,
       $rem_count,
       $rem_edges);
@@ -46,7 +46,7 @@ final class DiffusionCommitRevertedByCommitEdgeType
     $rem_edges) {
 
     return pht(
-      '%s edited reverted commit(s), added %s: %s; removed %s: %s.',
+      '%s edited reverting commit(s), added %s: %s; removed %s: %s.',
       $actor,
       $add_count,
       $add_edges,
@@ -61,7 +61,7 @@ final class DiffusionCommitRevertedByCommitEdgeType
     $add_edges) {
 
     return pht(
-      '%s added %s reverted commit(s) for %s: %s.',
+      '%s added %s reverting commit(s) for %s: %s.',
       $actor,
       $add_count,
       $object,
@@ -75,7 +75,7 @@ final class DiffusionCommitRevertedByCommitEdgeType
     $rem_edges) {
 
     return pht(
-      '%s removed %s reverted commit(s) for %s: %s.',
+      '%s removed %s reverting commit(s) for %s: %s.',
       $actor,
       $rem_count,
       $object,
@@ -92,7 +92,7 @@ final class DiffusionCommitRevertedByCommitEdgeType
     $rem_edges) {
 
     return pht(
-      '%s edited reverted commit(s) for %s, added %s: %s; removed %s: %s.',
+      '%s edited reverting commit(s) for %s, added %s: %s; removed %s: %s.',
       $actor,
       $object,
       $add_count,

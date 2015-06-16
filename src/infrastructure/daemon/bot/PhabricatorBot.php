@@ -15,6 +15,7 @@ final class PhabricatorBot extends PhabricatorDaemon {
   private $conduit;
   private $config;
   private $pollFrequency;
+  private $protocolAdapter;
 
   protected function run() {
     $argv = $this->getArgv();
@@ -106,6 +107,8 @@ final class PhabricatorBot extends PhabricatorDaemon {
 
   private function runLoop() {
     do {
+      PhabricatorCaches::destroyRequestCache();
+
       $this->stillWorking();
 
       $messages = $this->protocolAdapter->getNextMessages($this->pollFrequency);
@@ -155,8 +158,12 @@ final class PhabricatorBot extends PhabricatorDaemon {
   public function getConduit() {
     if (empty($this->conduit)) {
       throw new Exception(
-        "This bot is not configured with a Conduit uplink. Set 'conduit.uri', ".
-        "'conduit.user' and 'conduit.cert' in the configuration to connect.");
+        pht(
+          "This bot is not configured with a Conduit uplink. Set '%s', ".
+          "'%s' and '%s' in the configuration to connect.",
+          'conduit.uri',
+          'conduit.user',
+          'conduit.cert'));
     }
     return $this->conduit;
   }

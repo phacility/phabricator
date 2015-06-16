@@ -37,12 +37,13 @@
  * @task markup Markup Pipeline
  * @task engine Engine Construction
  */
-final class PhabricatorMarkupEngine {
+final class PhabricatorMarkupEngine extends Phobject {
 
   private $objects = array();
   private $viewer;
   private $contextObject;
   private $version = 15;
+  private $engineCaches = array();
 
 
 /* -(  Markup Pipeline  )---------------------------------------------------- */
@@ -190,12 +191,17 @@ final class PhabricatorMarkupEngine {
   private function requireKeyProcessed($key) {
     if (empty($this->objects[$key])) {
       throw new Exception(
-        "Call addObject() before using results (key = '{$key}').");
+        pht(
+          "Call %s before using results (key = '%s').",
+          'addObject()',
+          $key));
     }
 
     if (!isset($this->objects[$key]['output'])) {
       throw new Exception(
-        'Call process() before using results.');
+        pht(
+          'Call %s before using results.',
+          'process()'));
     }
   }
 
@@ -417,7 +423,7 @@ final class PhabricatorMarkupEngine {
         $engine->setConfig('pygments.enabled', false);
         break;
       default:
-        throw new Exception("Unknown engine ruleset: {$ruleset}!");
+        throw new Exception(pht('Unknown engine ruleset: %s!', $ruleset));
     }
 
     $engines[$ruleset] = $engine;
@@ -449,7 +455,6 @@ final class PhabricatorMarkupEngine {
    * @task engine
    */
   public static function newMarkupEngine(array $options) {
-
     $options += self::getMarkupEngineDefaultConfiguration();
 
     $engine = new PhutilRemarkupEngine();
