@@ -195,6 +195,10 @@ body .phui-header-shell.phui-bleed-header
   color: {$lightbluetext};
 }
 
+.phui-object-box .phui-header-tall .spaces-name {
+  font-size: 18px;
+}
+
 .spaces-name .phui-handle {
-  color: #000;
+  color: {$sh-redtext};
 }
