@@ -449,14 +449,25 @@ abstract class PhabricatorApplication
     $class,
     PhabricatorUser $viewer) {
 
-    if (!self::isClassInstalled($class)) {
-      return false;
+    $cache = PhabricatorCaches::getRequestCache();
+    $viewer_phid = $viewer->getPHID();
+    $key = 'app.'.$class.'.installed.'.$viewer_phid;
+
+    $result = $cache->getKey($key);
+    if ($result === null) {
+      if (!self::isClassInstalled($class)) {
+        $result = false;
+      } else {
+        $result = PhabricatorPolicyFilter::hasCapability(
+          $viewer,
+          self::getByClass($class),
+          PhabricatorPolicyCapability::CAN_VIEW);
+      }
+
+      $cache->setKey($key, $result);
     }
 
-    return PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      self::getByClass($class),
-      PhabricatorPolicyCapability::CAN_VIEW);
+    return $result;
   }
 
 
