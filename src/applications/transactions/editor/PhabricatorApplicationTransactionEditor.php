@@ -1058,7 +1058,7 @@ abstract class PhabricatorApplicationTransactionEditor
       $mailed = array();
       foreach ($messages as $mail) {
         foreach ($mail->buildRecipientList() as $phid) {
-          $mailed[$phid] = true;
+          $mailed[$phid] = $phid;
         }
       }
 

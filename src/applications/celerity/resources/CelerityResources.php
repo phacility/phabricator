@@ -5,8 +5,6 @@
  */
 abstract class CelerityResources extends Phobject {
 
-  private $map;
-
   abstract public function getName();
   abstract public function getResourceData($name);
 

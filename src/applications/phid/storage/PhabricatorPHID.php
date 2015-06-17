@@ -2,11 +2,6 @@
 
 final class PhabricatorPHID extends Phobject {
 
-  protected $phid;
-  protected $phidType;
-  protected $ownerPHID;
-  protected $parentPHID;
-
   public static function generateNewPHID($type, $subtype = null) {
     if (!$type) {
       throw new Exception(pht('Can not generate PHID with no type.'));
