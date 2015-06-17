@@ -1040,10 +1040,10 @@ abstract class PhabricatorApplicationTransactionEditor
     // Hook for edges or other properties that may need (re-)loading
     $object = $this->willPublish($object, $xactions);
 
-    $mailed = array();
+    $messages = array();
     if (!$this->getDisableEmail()) {
       if ($this->shouldSendMail($object, $xactions)) {
-        $mailed = $this->sendMail($object, $xactions);
+        $messages = $this->buildMail($object, $xactions);
       }
     }
 
@@ -1055,10 +1055,21 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if ($this->shouldPublishFeedStory($object, $xactions)) {
-      $this->publishFeedStory(
-        $object,
-        $xactions,
-        $mailed);
+      $mailed = array();
+      foreach ($messages as $mail) {
+        foreach ($mail->buildRecipientList() as $phid) {
+          $mailed[$phid] = true;
+        }
+      }
+
+      $this->publishFeedStory($object, $xactions, $mailed);
+    }
+
+    // NOTE: This actually sends the mail. We do this last to reduce the chance
+    // that we send some mail, hit an exception, then send the mail again when
+    // retrying.
+    foreach ($messages as $mail) {
+      $mail->save();
     }
 
     return $xactions;
@@ -2241,7 +2252,7 @@ abstract class PhabricatorApplicationTransactionEditor
   /**
    * @task mail
    */
-  protected function sendMail(
+  private function buildMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
 
@@ -2255,8 +2266,7 @@ abstract class PhabricatorApplicationTransactionEditor
     // Set this explicitly before we start swapping out the effective actor.
     $this->setActingAsPHID($this->getActingAsPHID());
 
-
-    $mailed = array();
+    $messages = array();
     foreach ($targets as $target) {
       $original_actor = $this->getActor();
 
@@ -2270,7 +2280,7 @@ abstract class PhabricatorApplicationTransactionEditor
         // Reload handles for the new viewer.
         $this->loadHandles($xactions);
 
-        $mail = $this->sendMailToTarget($object, $xactions, $target);
+        $mail = $this->buildMailForTarget($object, $xactions, $target);
       } catch (Exception $ex) {
         $caught = $ex;
       }
@@ -2283,16 +2293,14 @@ abstract class PhabricatorApplicationTransactionEditor
       }
 
       if ($mail) {
-        foreach ($mail->buildRecipientList() as $phid) {
-          $mailed[$phid] = true;
-        }
+        $messages[] = $mail;
       }
     }
 
-    return array_keys($mailed);
+    return $messages;
   }
 
-  private function sendMailToTarget(
+  private function buildMailForTarget(
     PhabricatorLiskDAO $object,
     array $xactions,
     PhabricatorMailTarget $target) {
@@ -2354,7 +2362,7 @@ abstract class PhabricatorApplicationTransactionEditor
       $mail->setParentMessageID($this->getParentMessageID());
     }
 
-    return $target->sendMail($mail);
+    return $target->willSendMail($mail);
   }
 
   private function addMailProjectMetadata(

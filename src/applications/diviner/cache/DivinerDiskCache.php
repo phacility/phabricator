@@ -26,8 +26,8 @@ abstract class DivinerDiskCache extends Phobject {
    * Convert a long-form hash key like `ccbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaN` into
    * a shortened directory form, like `cc/bb/aaaaaaaaN`. In conjunction with
    * @{class:PhutilDirectoryKeyValueCache}, this gives us nice directories
-   * inside .divinercache instead of a million hash files with huge names at
-   * top level.
+   * inside `.divinercache` instead of a million hash files with huge names at
+   * the top level.
    */
   protected function getHashKey($hash) {
     return implode(

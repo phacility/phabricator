@@ -2,33 +2,24 @@
 
 final class DivinerAtomController extends DivinerController {
 
-  private $bookName;
-  private $atomType;
-  private $atomName;
-  private $atomContext;
-  private $atomIndex;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->bookName = $data['book'];
-    $this->atomType = $data['type'];
-    $this->atomName = $data['name'];
-    $this->atomContext = nonempty(idx($data, 'context'), null);
-    $this->atomIndex = nonempty(idx($data, 'index'), null);
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
+
+    $book_name    = $request->getURIData('book');
+    $atom_type    = $request->getURIData('type');
+    $atom_name    = $request->getURIData('name');
+    $atom_context = nonempty($request->getURIData('context'), null);
+    $atom_index   = nonempty($request->getURIData('index'), null);
 
     require_celerity_resource('diviner-shared-css');
 
     $book = id(new DivinerBookQuery())
       ->setViewer($viewer)
-      ->withNames(array($this->bookName))
+      ->withNames(array($book_name))
       ->executeOne();
 
     if (!$book) {
@@ -38,10 +29,10 @@ final class DivinerAtomController extends DivinerController {
     $symbol = id(new DivinerAtomQuery())
       ->setViewer($viewer)
       ->withBookPHIDs(array($book->getPHID()))
-      ->withTypes(array($this->atomType))
-      ->withNames(array($this->atomName))
-      ->withContexts(array($this->atomContext))
-      ->withIndexes(array($this->atomIndex))
+      ->withTypes(array($atom_type))
+      ->withNames(array($atom_name))
+      ->withContexts(array($atom_context))
+      ->withIndexes(array($atom_index))
       ->withIsDocumentable(true)
       ->needAtoms(true)
       ->needExtends(true)
@@ -75,7 +66,7 @@ final class DivinerAtomController extends DivinerController {
           ->setName(DivinerAtom::getAtomTypeNameString(
             $atom ? $atom->getType() : $symbol->getType())));
 
-    $properties = id(new PHUIPropertyListView());
+    $properties = new PHUIPropertyListView();
 
     $group = $atom ? $atom->getProperty('group') : $symbol->getGroupName();
     if ($group) {
@@ -133,9 +124,7 @@ final class DivinerAtomController extends DivinerController {
       $document->appendChild(
         id(new PHUIInfoView())
           ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
-          ->appendChild(
-            pht(
-              'This atom no longer exists.')));
+          ->appendChild(pht('This atom no longer exists.')));
     }
 
     if ($atom) {
@@ -303,7 +292,6 @@ final class DivinerAtomController extends DivinerController {
         pht('Implements'),
         phutil_implode_html(phutil_tag('br'), $items));
     }
-
   }
 
   private function renderAtomTag(DivinerLiveSymbol $symbol) {
@@ -470,6 +458,7 @@ final class DivinerAtomController extends DivinerController {
   private function renderFullSignature(
     DivinerLiveSymbol $symbol,
     $is_link = false) {
+
     switch ($symbol->getType()) {
       case DivinerAtom::TYPE_CLASS:
       case DivinerAtom::TYPE_INTERFACE:

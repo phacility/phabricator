@@ -850,8 +850,8 @@ abstract class HeraldAdapter extends Phobject {
       case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
         $standard = array(
           self::ACTION_NOTHING      => pht('Do nothing'),
-          self::ACTION_ADD_CC       => pht('Add emails to CC'),
-          self::ACTION_REMOVE_CC    => pht('Remove emails from CC'),
+          self::ACTION_ADD_CC       => pht('Add Subscribers'),
+          self::ACTION_REMOVE_CC    => pht('Remove Subscribers'),
           self::ACTION_EMAIL        => pht('Send an email to'),
           self::ACTION_AUDIT        => pht('Trigger an Audit by'),
           self::ACTION_FLAG         => pht('Mark with flag'),
@@ -868,8 +868,8 @@ abstract class HeraldAdapter extends Phobject {
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         $standard = array(
           self::ACTION_NOTHING      => pht('Do nothing'),
-          self::ACTION_ADD_CC       => pht('Add me to CC'),
-          self::ACTION_REMOVE_CC    => pht('Remove me from CC'),
+          self::ACTION_ADD_CC       => pht('Add me as a subscriber'),
+          self::ACTION_REMOVE_CC    => pht('Remove me as a subscriber'),
           self::ACTION_EMAIL        => pht('Send me an email'),
           self::ACTION_AUDIT        => pht('Trigger an Audit by me'),
           self::ACTION_FLAG         => pht('Mark with flag'),

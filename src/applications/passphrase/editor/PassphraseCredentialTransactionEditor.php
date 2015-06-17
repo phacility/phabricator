@@ -174,6 +174,10 @@ final class PassphraseCredentialTransactionEditor
         }
         break;
       case PassphraseCredentialTransaction::TYPE_USERNAME:
+        $credential_type = $object->getCredentialTypeImplementation();
+        if (!$credential_type->shouldRequireUsername()) {
+          break;
+        }
         $missing = $this->validateIsEmptyTextField(
           $object->getUsername(),
           $xactions);

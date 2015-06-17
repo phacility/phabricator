@@ -79,7 +79,6 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
-
   /**
    * Include or exclude "ghosts", which are symbols which used to exist but do
    * not exist currently (for example, a function which existed in an older
@@ -137,6 +136,7 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     foreach ($atoms as $key => $atom) {
       $book = idx($books, $atom->getBookPHID());
       if (!$book) {
+        $this->didRejectResult($atom);
         unset($atoms[$key]);
         continue;
       }
@@ -158,12 +158,9 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     // Load all of the symbols this symbol extends, recursively. Commonly,
     // this means all the ancestor classes and interfaces it extends and
     // implements.
-
     if ($this->needExtends) {
-
       // First, load all the matching symbols by name. This does 99% of the
       // work in most cases, assuming things are named at all reasonably.
-
       $names = array();
       foreach ($atoms as $atom) {
         if (!$atom->getAtom()) {
@@ -303,6 +300,7 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     if ($this->titles) {
       $hashes = array();
+
       foreach ($this->titles as $title) {
         $slug = DivinerAtomRef::normalizeTitleString($title);
         $hash = PhabricatorHash::digestForIndex($slug);
@@ -318,6 +316,7 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     if ($this->contexts) {
       $with_null = false;
       $contexts = $this->contexts;
+
       foreach ($contexts as $key => $value) {
         if ($value === null) {
           unset($contexts[$key]);
@@ -373,10 +372,9 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     }
 
     if ($this->nameContains) {
-      // NOTE: This CONVERT() call makes queries case-insensitive, since the
-      // column has binary collation. Eventually, this should move into
+      // NOTE: This `CONVERT()` call makes queries case-insensitive, since
+      // the column has binary collation. Eventually, this should move into
       // fulltext.
-
       $where[] = qsprintf(
         $conn_r,
         'CONVERT(name USING utf8) LIKE %~',
@@ -387,7 +385,6 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     return $this->formatWhereClause($where);
   }
-
 
   /**
    * Walk a list of atoms and collect all the node hashes of the atoms'
@@ -413,6 +410,7 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       foreach ($child_hashes as $hash) {
         $hashes[$hash] = $hash;
       }
+
       if ($recurse_up) {
         $hashes += $this->getAllChildHashes($symbol->getExtends(), true);
       }
@@ -420,7 +418,6 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     return $hashes;
   }
-
 
   /**
    * Attach child atoms to existing atoms. In recursive mode, also attach child
@@ -452,7 +449,9 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           $symbol_children[] = $children[$hash];
         }
       }
+
       $symbol->attachChildren($symbol_children);
+
       if ($recurse_up) {
         $this->attachAllChildren($symbol->getExtends(), $children, true);
       }

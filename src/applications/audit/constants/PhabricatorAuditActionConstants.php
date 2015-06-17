@@ -19,7 +19,7 @@ final class PhabricatorAuditActionConstants extends Phobject {
       self::ACCEPT       => pht("Accept Commit \xE2\x9C\x94"),
       self::RESIGN       => pht('Resign from Audit'),
       self::CLOSE        => pht('Close Audit'),
-      self::ADD_CCS      => pht('Add CCs'),
+      self::ADD_CCS      => pht('Add Subscribers'),
       self::ADD_AUDITORS => pht('Add Auditors'),
     );
 

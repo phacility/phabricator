@@ -6,6 +6,8 @@ final class DivinerBookQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $phids;
   private $names;
 
+  private $needProjectPHIDs;
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -18,6 +20,11 @@ final class DivinerBookQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function withNames(array $names) {
     $this->names = $names;
+    return $this;
+  }
+
+  public function needProjectPHIDs($need_phids) {
+    $this->needProjectPHIDs = $need_phids;
     return $this;
   }
 
@@ -34,6 +41,30 @@ final class DivinerBookQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       $this->buildLimitClause($conn_r));
 
     return $table->loadAllFromArray($data);
+  }
+
+  protected function didFilterPage(array $books) {
+    assert_instances_of($books, 'DivinerLiveBook');
+
+    if ($this->needProjectPHIDs) {
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(mpull($books, 'getPHID'))
+        ->withEdgeTypes(
+          array(
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+          ));
+      $edge_query->execute();
+
+      foreach ($books as $book) {
+        $project_phids = $edge_query->getDestinationPHIDs(
+          array(
+            $book->getPHID(),
+          ));
+        $book->attachProjectPHIDs($project_phids);
+      }
+    }
+
+    return $books;
   }
 
   protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {

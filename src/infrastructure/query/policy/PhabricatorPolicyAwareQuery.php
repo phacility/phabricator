@@ -35,7 +35,6 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
   private $workspace = array();
   private $inFlightPHIDs = array();
   private $policyFilteredPHIDs = array();
-  private $canUseApplication;
 
   /**
    * Should we continue or throw an exception when a query result is filtered
@@ -679,21 +678,13 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    *   execute the query.
    */
   public function canViewerUseQueryApplication() {
-    if ($this->canUseApplication === null) {
-      $class = $this->getQueryApplicationClass();
-      if (!$class) {
-        $this->canUseApplication = true;
-      } else {
-        $result = id(new PhabricatorApplicationQuery())
-          ->setViewer($this->getViewer())
-          ->withClasses(array($class))
-          ->execute();
-
-        $this->canUseApplication = (bool)$result;
-      }
+    $class = $this->getQueryApplicationClass();
+    if (!$class) {
+      return true;
     }
 
-    return $this->canUseApplication;
+    $viewer = $this->getViewer();
+    return PhabricatorApplication::isClassInstalledForViewer($class, $viewer);
   }
 
 }

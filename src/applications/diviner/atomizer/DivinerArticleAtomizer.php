@@ -20,7 +20,7 @@ final class DivinerArticleAtomizer extends DivinerAtomizer {
       $atom->setDocblockMetaValue('title', $title);
     }
 
-    // If the article has no @name, use the filename after stripping any
+    // If the article has no `@name`, use the filename after stripping any
     // extension.
     $name = idx($meta, 'name');
     if (!$name) {

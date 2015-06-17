@@ -291,7 +291,9 @@ final class PhabricatorCalendarEventViewController
       if ($event->getInstanceOfEventPHID()) {
         $properties->addProperty(
           pht('Recurrence of Event'),
-          $viewer->renderHandle($event->getInstanceOfEventPHID()));
+          pht('%s of %s',
+            $event->getSequenceIndex(),
+            $viewer->renderHandle($event->getInstanceOfEventPHID())->render()));
       }
     }
 

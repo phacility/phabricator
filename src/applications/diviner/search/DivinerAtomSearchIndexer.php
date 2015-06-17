@@ -27,7 +27,15 @@ final class DivinerAtomSearchIndexer extends PhabricatorSearchDocumentIndexer {
       PhabricatorSearchRelationship::RELATIONSHIP_BOOK,
       $atom->getBookPHID(),
       DivinerBookPHIDType::TYPECONST,
-      $book->getDateCreated());
+      PhabricatorTime::getNow());
+
+    $doc->addRelationship(
+      $atom->getGraphHash()
+        ? PhabricatorSearchRelationship::RELATIONSHIP_CLOSED
+        : PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
+      $atom->getBookPHID(),
+      DivinerBookPHIDType::TYPECONST,
+      PhabricatorTime::getNow());
 
     return $doc;
   }

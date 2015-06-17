@@ -47,7 +47,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
       $is_new = true;
 
       // Prefill username if provided.
-      $credential->setUsername($request->getStr('username'));
+      $credential->setUsername((string)$request->getStr('username'));
 
       if (!$request->getStr('isInitialized')) {
         $type->didInitializeNewCredential($viewer, $credential);
@@ -151,10 +151,11 @@ final class PassphraseCredentialEditController extends PassphraseController {
         $credential->openTransaction();
 
         if (!$credential->getIsLocked()) {
-          $xactions[] = id(new PassphraseCredentialTransaction())
+          if ($type->shouldRequireUsername()) {
+            $xactions[] = id(new PassphraseCredentialTransaction())
             ->setTransactionType($type_username)
             ->setNewValue($v_username);
-
+          }
           // If some value other than a sequence of bullets was provided for
           // the credential, update it. In particular, note that we are
           // explicitly allowing empty secrets: one use case is HTTP auth where
@@ -263,15 +264,18 @@ final class PassphraseCredentialEditController extends PassphraseController {
         pht('This credential is permanently locked and can not be edited.'));
     }
 
-    $form
+    if ($type->shouldRequireUsername()) {
+      $form
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('username')
           ->setLabel(pht('Login/Username'))
           ->setValue($v_username)
           ->setDisabled($credential_is_locked)
-          ->setError($e_username))
-      ->appendChild(
+          ->setError($e_username));
+    }
+       $form
+       ->appendChild(
         $secret_control
           ->setName('secret')
           ->setLabel($type->getSecretLabel())
