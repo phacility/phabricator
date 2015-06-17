@@ -83,7 +83,7 @@ abstract class AphrontController extends Phobject {
   }
 
   public function getDefaultResourceSource() {
-    throw new MethodNotImplementedException(
+    throw new PhutilMethodNotImplementedException(
       pht(
         'A Controller must implement %s before you can invoke %s or %s.',
         'getDefaultResourceSource()',
