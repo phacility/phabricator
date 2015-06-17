@@ -872,6 +872,15 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    * @task order
    */
   public function getOrderableColumns() {
+    $cache = PhabricatorCaches::getRequestCache();
+    $class = get_class($this);
+    $cache_key = 'query.orderablecolumns.'.$class;
+
+    $columns = $cache->getKey($cache_key);
+    if ($columns !== null) {
+      return $columns;
+    }
+
     $columns = array(
       'id' => array(
         'table' => $this->getPrimaryTableAlias(),
@@ -908,6 +917,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         );
       }
     }
+
+    $cache->setKey($cache_key, $columns);
 
     return $columns;
   }
