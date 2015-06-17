@@ -187,10 +187,10 @@ final class AphrontSideNavFilterView extends AphrontView {
   public function render() {
     if ($this->menu->getItems()) {
       if (!$this->baseURI) {
-        throw new Exception(pht('Call setBaseURI() before render()!'));
+        throw new PhutilInvalidStateException('setBaseURI');
       }
       if ($this->selectedFilter === false) {
-        throw new Exception(pht('Call selectFilter() before render()!'));
+        throw new PhutilInvalidStateException('selectFilter');
       }
     }
 
