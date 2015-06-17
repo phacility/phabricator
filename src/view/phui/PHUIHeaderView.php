@@ -355,6 +355,32 @@ final class PHUIHeaderView extends AphrontTagView {
       return null;
     }
 
+    // If an object is in a Space with a strictly stronger (more restrictive)
+    // policy, we show the more restrictive policy. This better aligns the
+    // UI hint with the actual behavior.
+
+    // NOTE: We'll do this even if the viewer has access to only one space, and
+    // show them information about the existence of spaces if they click
+    // through.
+    if ($object instanceof PhabricatorSpacesInterface) {
+      $space_phid = PhabricatorSpacesNamespaceQuery::getObjectSpacePHID(
+        $object);
+
+      $spaces = PhabricatorSpacesNamespaceQuery::getViewerSpaces($viewer);
+      $space = idx($spaces, $space_phid);
+      if ($space) {
+        $space_policies = PhabricatorPolicyQuery::loadPolicies(
+          $viewer,
+          $space);
+        $space_policy = idx($space_policies, $view_capability);
+        if ($space_policy) {
+          if ($space_policy->isStrongerThan($policy)) {
+            $policy = $space_policy;
+          }
+        }
+      }
+    }
+
     $phid = $object->getPHID();
 
     $icon = id(new PHUIIconView())

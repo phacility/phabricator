@@ -771,19 +771,23 @@ final class DifferentialRevisionQuery
         $this->updatedEpochMax);
     }
 
+    // NOTE: Although the status constants are integers in PHP, the column is a
+    // string column in MySQL, and MySQL won't use keys on string columns if
+    // you put integers in the query.
+
     switch ($this->status) {
       case self::STATUS_ANY:
         break;
       case self::STATUS_OPEN:
         $where[] = qsprintf(
           $conn_r,
-          'r.status IN (%Ld)',
+          'r.status IN (%Ls)',
           DifferentialRevisionStatus::getOpenStatuses());
         break;
       case self::STATUS_NEEDS_REVIEW:
         $where[] = qsprintf(
           $conn_r,
-          'r.status IN (%Ld)',
+          'r.status IN (%Ls)',
           array(
             ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
           ));
@@ -791,7 +795,7 @@ final class DifferentialRevisionQuery
       case self::STATUS_NEEDS_REVISION:
         $where[] = qsprintf(
           $conn_r,
-          'r.status IN (%Ld)',
+          'r.status IN (%Ls)',
           array(
             ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
           ));
@@ -799,7 +803,7 @@ final class DifferentialRevisionQuery
       case self::STATUS_ACCEPTED:
         $where[] = qsprintf(
           $conn_r,
-          'r.status IN (%Ld)',
+          'r.status IN (%Ls)',
           array(
             ArcanistDifferentialRevisionStatus::ACCEPTED,
           ));
@@ -807,13 +811,13 @@ final class DifferentialRevisionQuery
       case self::STATUS_CLOSED:
         $where[] = qsprintf(
           $conn_r,
-          'r.status IN (%Ld)',
+          'r.status IN (%Ls)',
           DifferentialRevisionStatus::getClosedStatuses());
         break;
       case self::STATUS_ABANDONED:
         $where[] = qsprintf(
           $conn_r,
-          'r.status IN (%Ld)',
+          'r.status IN (%Ls)',
           array(
             ArcanistDifferentialRevisionStatus::ABANDONED,
           ));
