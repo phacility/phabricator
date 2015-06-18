@@ -127,6 +127,13 @@ final class DarkConsoleCore extends Phobject {
       }
       return $data;
     } else {
+      // Truncate huge strings. Since the data doesn't really matter much,
+      // just truncate bytes to avoid PhutilUTF8StringTruncator overhead.
+      $length = strlen($data);
+      $max = 4096;
+      if ($length > $max) {
+        $data = substr($data, 0, $max).'...<'.$length.' bytes>...';
+      }
       return phutil_utf8ize($data);
     }
   }
