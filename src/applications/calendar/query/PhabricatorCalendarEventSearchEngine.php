@@ -126,15 +126,15 @@ final class PhabricatorCalendarEventSearchEngine
       $query->withDateRange($min_range, $max_range);
     }
 
-    $invited_phids = $saved->getParameter('invitedPHIDs');
+    $invited_phids = $saved->getParameter('invitedPHIDs', array());
+    $invited_phids = $user_datasource->evaluateTokens($invited_phids);
     if ($invited_phids) {
-      $invited_phids = $user_datasource->evaluateTokens($invited_phids);
       $query->withInvitedPHIDs($invited_phids);
     }
 
-    $creator_phids = $saved->getParameter('creatorPHIDs');
+    $creator_phids = $saved->getParameter('creatorPHIDs', array());
+    $creator_phids = $user_datasource->evaluateTokens($creator_phids);
     if ($creator_phids) {
-      $creator_phids = $user_datasource->evaluateTokens($creator_phids);
       $query->withCreatorPHIDs($creator_phids);
     }
 
