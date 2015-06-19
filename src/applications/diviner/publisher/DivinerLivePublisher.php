@@ -50,7 +50,7 @@ final class DivinerLivePublisher extends DivinerPublisher {
   private function loadSymbolForAtom(DivinerAtom $atom) {
     $symbol = id(new DivinerAtomQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withBookPHIDs(array($atom->getBook()))
+      ->withBookPHIDs(array($this->getBook()->getPHID()))
       ->withTypes(array($atom->getType()))
       ->withNames(array($atom->getName()))
       ->withContexts(array($atom->getContext()))
