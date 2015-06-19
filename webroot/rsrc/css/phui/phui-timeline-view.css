@@ -100,11 +100,13 @@
   background-repeat: no-repeat;
   position: absolute;
   border-radius: 3px;
+  box-shadow: {$borderinset};
+  background-size: 100%;
 }
 
 .device-desktop .phui-timeline-major-event .phui-timeline-image {
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   top: 0px;
   left: -62px;
 }

@@ -215,6 +215,7 @@ final class CelerityResourceTransformer extends Phobject {
       'hoverborder'   => '#dfe1e9',
       'hoverselectedgrey' => '#bbc4ca',
       'hoverselectedblue' => '#e6e9ee',
+      'borderinset' => 'inset 0 0 0 1px rgba(55,55,55,.15)',
 
       // Base Greys
       'lightgreyborder'     => '#C7CCD9',

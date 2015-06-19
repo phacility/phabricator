@@ -12,7 +12,7 @@
   background-size: 35px;
   float: left;
   margin-right: 8px;
-  border: 1px solid rgba(55,55,55,.2);
+  box-shadow: {$borderinset};
   border-radius: 3px;
 }
 

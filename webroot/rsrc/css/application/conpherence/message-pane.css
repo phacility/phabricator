@@ -178,6 +178,7 @@
   background-size: 35px;
   position: absolute;
   top: 5px;
+  box-shadow: {$borderinset};
 }
 
 .device-phone .conpherence-message-pane .conpherence-transaction-image {

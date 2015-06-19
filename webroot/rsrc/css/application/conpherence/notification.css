@@ -27,6 +27,8 @@
   width: 30px;
   height: 30px;
   background-size: 100%;
+  box-shadow: {$borderinset};
+  border-radius: 3px;
 }
 
 .phabricator-notification .conpherence-menu-item-view
