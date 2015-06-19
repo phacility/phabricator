@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorTypeaheadResult {
+final class PhabricatorTypeaheadResult extends Phobject {
 
   private $name;
   private $uri;

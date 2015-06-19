@@ -55,7 +55,7 @@ final class PhabricatorMailTarget extends Phobject {
     return $this->viewer;
   }
 
-  public function sendMail(PhabricatorMetaMTAMail $mail) {
+  public function willSendMail(PhabricatorMetaMTAMail $mail) {
     $viewer = $this->getViewer();
 
     $mail->addPHIDHeaders('X-Phabricator-To', $this->rawToPHIDs);
@@ -92,7 +92,7 @@ final class PhabricatorMailTarget extends Phobject {
       $mail->addCCs($cc);
     }
 
-    return $mail->save();
+    return $mail;
   }
 
   private function getRecipientsSummary(

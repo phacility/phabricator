@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialReviewerStatus {
+final class DifferentialReviewerStatus extends Phobject {
 
   const STATUS_BLOCKING = 'blocking';
   const STATUS_ADDED = 'added';

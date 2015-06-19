@@ -1,6 +1,6 @@
 <?php
 
-abstract class DrydockInterface {
+abstract class DrydockInterface extends Phobject {
 
   private $config;
 

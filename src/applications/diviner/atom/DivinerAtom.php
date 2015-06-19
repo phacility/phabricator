@@ -1,6 +1,6 @@
 <?php
 
-final class DivinerAtom {
+final class DivinerAtom extends Phobject {
 
   const TYPE_ARTICLE   = 'article';
   const TYPE_CLASS     = 'class';

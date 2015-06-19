@@ -9,7 +9,8 @@ final class PholioMock extends PholioDAO
     PhabricatorFlaggableInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorSpacesInterface {
 
   const MARKUP_FIELD_DESCRIPTION  = 'markup:description';
 
@@ -26,6 +27,7 @@ final class PholioMock extends PholioDAO
   protected $coverPHID;
   protected $mailKey;
   protected $status;
+  protected $spacePHID;
 
   private $images = self::ATTACHABLE;
   private $allImages = self::ATTACHABLE;
@@ -46,7 +48,8 @@ final class PholioMock extends PholioDAO
       ->attachImages(array())
       ->setStatus(self::STATUS_OPEN)
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($edit_policy);
+      ->setEditPolicy($edit_policy)
+      ->setSpacePHID($actor->getDefaultSpacePHID());
   }
 
   public function getMonogram() {
@@ -307,5 +310,14 @@ final class PholioMock extends PholioDAO
       $this->delete();
     $this->saveTransaction();
   }
+
+
+/* -(  PhabricatorSpacesInterface  )----------------------------------------- */
+
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
+  }
+
 
 }

@@ -37,12 +37,13 @@
  * @task markup Markup Pipeline
  * @task engine Engine Construction
  */
-final class PhabricatorMarkupEngine {
+final class PhabricatorMarkupEngine extends Phobject {
 
   private $objects = array();
   private $viewer;
   private $contextObject;
   private $version = 15;
+  private $engineCaches = array();
 
 
 /* -(  Markup Pipeline  )---------------------------------------------------- */
@@ -197,10 +198,7 @@ final class PhabricatorMarkupEngine {
     }
 
     if (!isset($this->objects[$key]['output'])) {
-      throw new Exception(
-        pht(
-          'Call %s before using results.',
-          'process()'));
+      throw new PhutilInvalidStateException('process');
     }
   }
 

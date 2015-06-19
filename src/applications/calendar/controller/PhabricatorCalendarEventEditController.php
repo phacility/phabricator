@@ -17,7 +17,7 @@ final class PhabricatorCalendarEventEditController
     $viewer = $request->getViewer();
     $user_phid = $viewer->getPHID();
     $error_name = true;
-    $error_recurrence_end_date = true;
+    $error_recurrence_end_date = null;
     $error_start_date = true;
     $error_end_date = true;
     $validation_exception = null;
@@ -144,6 +144,7 @@ final class PhabricatorCalendarEventEditController
     $description = $event->getDescription();
     $is_all_day = $event->getIsAllDay();
     $is_recurring = $event->getIsRecurring();
+    $is_parent = $event->getIsRecurrenceParent();
     $frequency = idx($event->getRecurrenceFrequency(), 'rule');
     $icon = $event->getIcon();
 
@@ -190,7 +191,7 @@ final class PhabricatorCalendarEventEditController
           PhabricatorCalendarEventTransaction::TYPE_NAME)
         ->setNewValue($name);
 
-      if ($this->isCreate()) {
+      if ($is_recurring && $this->isCreate()) {
         $xactions[] = id(new PhabricatorCalendarEventTransaction())
           ->setTransactionType(
             PhabricatorCalendarEventTransaction::TYPE_RECURRING)
@@ -209,25 +210,28 @@ final class PhabricatorCalendarEventEditController
         }
       }
 
-      $xactions[] = id(new PhabricatorCalendarEventTransaction())
-        ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_ALL_DAY)
-        ->setNewValue($is_all_day);
+      if (($is_recurring && $this->isCreate()) || !$is_parent) {
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_ALL_DAY)
+          ->setNewValue($is_all_day);
 
-      $xactions[] = id(new PhabricatorCalendarEventTransaction())
-        ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_ICON)
-        ->setNewValue($icon);
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_ICON)
+          ->setNewValue($icon);
 
-      $xactions[] = id(new PhabricatorCalendarEventTransaction())
-        ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_START_DATE)
-        ->setNewValue($start_value);
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_START_DATE)
+          ->setNewValue($start_value);
 
-      $xactions[] = id(new PhabricatorCalendarEventTransaction())
-        ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_END_DATE)
-        ->setNewValue($end_value);
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_END_DATE)
+          ->setNewValue($end_value);
+      }
+
 
       $xactions[] = id(new PhabricatorCalendarEventTransaction())
         ->setTransactionType(
@@ -296,6 +300,12 @@ final class PhabricatorCalendarEventEditController
     $recurrence_end_date_control = null;
     $recurrence_frequency_select = null;
 
+    $all_day_checkbox = null;
+    $start_control = null;
+    $end_control = null;
+
+    $recurring_date_edit_label = null;
+
     $name = id(new AphrontFormTextControl())
       ->setLabel(pht('Name'))
       ->setName('name')
@@ -325,8 +335,8 @@ final class PhabricatorCalendarEventEditController
         ->setValue($recurrence_end_date_value)
         ->setID($recurrence_end_date_id)
         ->setIsTimeDisabled(true)
-        ->setAllowNull(true)
-        ->setIsDisabled($recurrence_end_date_value->isDisabled());
+        ->setIsDisabled($recurrence_end_date_value->isDisabled())
+        ->setAllowNull(true);
 
       $recurrence_frequency_select = id(new AphrontFormSelectControl())
         ->setName('frequency')
@@ -342,43 +352,96 @@ final class PhabricatorCalendarEventEditController
         ->setDisabled(!$is_recurring);
     }
 
-    Javelin::initBehavior('event-all-day', array(
-      'allDayID' => $all_day_id,
-      'startDateID' => $start_date_id,
-      'endDateID' => $end_date_id,
-    ));
+    if ($this->isCreate() || (!$is_parent && !$this->isCreate())) {
+      Javelin::initBehavior('event-all-day', array(
+        'allDayID' => $all_day_id,
+        'startDateID' => $start_date_id,
+        'endDateID' => $end_date_id,
+      ));
 
-    $all_day_checkbox = id(new AphrontFormCheckboxControl())
-      ->addCheckbox(
-        'isAllDay',
-        1,
-        pht('All Day Event'),
-        $is_all_day,
-        $all_day_id);
+      $all_day_checkbox = id(new AphrontFormCheckboxControl())
+        ->addCheckbox(
+          'isAllDay',
+          1,
+          pht('All Day Event'),
+          $is_all_day,
+          $all_day_id);
 
-    $start_control = id(new AphrontFormDateControl())
-      ->setUser($viewer)
-      ->setName('start')
-      ->setLabel(pht('Start'))
-      ->setError($error_start_date)
-      ->setValue($start_value)
-      ->setID($start_date_id)
-      ->setIsTimeDisabled($is_all_day)
-      ->setEndDateID($end_date_id);
+      $start_control = id(new AphrontFormDateControl())
+        ->setUser($viewer)
+        ->setName('start')
+        ->setLabel(pht('Start'))
+        ->setError($error_start_date)
+        ->setValue($start_value)
+        ->setID($start_date_id)
+        ->setIsTimeDisabled($is_all_day)
+        ->setEndDateID($end_date_id);
 
-    $end_control = id(new AphrontFormDateControl())
-      ->setUser($viewer)
-      ->setName('end')
-      ->setLabel(pht('End'))
-      ->setError($error_end_date)
-      ->setValue($end_value)
-      ->setID($end_date_id)
-      ->setIsTimeDisabled($is_all_day);
+      $end_control = id(new AphrontFormDateControl())
+        ->setUser($viewer)
+        ->setName('end')
+        ->setLabel(pht('End'))
+        ->setError($error_end_date)
+        ->setValue($end_value)
+        ->setID($end_date_id)
+        ->setIsTimeDisabled($is_all_day);
+    } else if ($is_parent) {
+      $recurring_date_edit_label = id(new AphrontFormStaticControl())
+        ->setUser($viewer)
+        ->setValue(pht('Date and time of recurring event cannot be edited.'));
 
-    $description = id(new AphrontFormTextAreaControl())
+      if (!$recurrence_end_date_value->isDisabled()) {
+        $disabled_recurrence_end_date_value =
+          $recurrence_end_date_value->getValueAsFormat('M d, Y');
+        $recurrence_end_date_control = id(new AphrontFormStaticControl())
+          ->setUser($viewer)
+          ->setLabel(pht('Recurrence End Date'))
+          ->setValue($disabled_recurrence_end_date_value)
+          ->setDisabled(true);
+      }
+
+      $recurrence_frequency_select = id(new AphrontFormSelectControl())
+        ->setName('frequency')
+        ->setOptions(array(
+            'daily' => pht('Daily'),
+            'weekly' => pht('Weekly'),
+            'monthly' => pht('Monthly'),
+            'yearly' => pht('Yearly'),
+          ))
+        ->setValue($frequency)
+        ->setLabel(pht('Recurring Event Frequency'))
+        ->setID($frequency_id)
+        ->setDisabled(true);
+
+      $all_day_checkbox = id(new AphrontFormCheckboxControl())
+        ->addCheckbox(
+          'isAllDay',
+          1,
+          pht('All Day Event'),
+          $is_all_day,
+          $all_day_id)
+        ->setDisabled(true);
+
+      $start_disabled = $start_value->getValueAsFormat('M d, Y, g:i A');
+      $end_disabled = $end_value->getValueAsFormat('M d, Y, g:i A');
+
+      $start_control = id(new AphrontFormStaticControl())
+        ->setUser($viewer)
+        ->setLabel(pht('Start'))
+        ->setValue($start_disabled)
+        ->setDisabled(true);
+
+      $end_control = id(new AphrontFormStaticControl())
+        ->setUser($viewer)
+        ->setLabel(pht('End'))
+        ->setValue($end_disabled);
+    }
+
+    $description = id(new PhabricatorRemarkupControl())
       ->setLabel(pht('Description'))
       ->setName('description')
-      ->setValue($description);
+      ->setValue($description)
+      ->setUser($viewer);
 
     $view_policies = id(new AphrontFormPolicyControl())
       ->setUser($viewer)
@@ -427,6 +490,9 @@ final class PhabricatorCalendarEventEditController
       ->setUser($viewer)
       ->appendChild($name);
 
+    if ($recurring_date_edit_label) {
+      $form->appendControl($recurring_date_edit_label);
+    }
     if ($is_recurring_checkbox) {
       $form->appendChild($is_recurring_checkbox);
     }

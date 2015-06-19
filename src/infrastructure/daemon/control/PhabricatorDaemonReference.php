@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorDaemonReference {
+final class PhabricatorDaemonReference extends Phobject {
 
   private $name;
   private $argv;

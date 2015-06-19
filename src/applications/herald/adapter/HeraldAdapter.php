@@ -3,7 +3,7 @@
 /**
  * @task customfield Custom Field Integration
  */
-abstract class HeraldAdapter {
+abstract class HeraldAdapter extends Phobject {
 
   const FIELD_TITLE                  = 'title';
   const FIELD_BODY                   = 'body';
@@ -44,6 +44,7 @@ abstract class HeraldAdapter {
   const FIELD_TASK_STATUS            = 'taskstatus';
   const FIELD_PUSHER_IS_COMMITTER    = 'pusher-is-committer';
   const FIELD_PATH                   = 'path';
+  const FIELD_SPACE = 'space';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -101,6 +102,7 @@ abstract class HeraldAdapter {
   const VALUE_TASK_STATUS     = 'taskstatus';
   const VALUE_LEGAL_DOCUMENTS   = 'legaldocuments';
   const VALUE_APPLICATION_EMAIL = 'applicationemail';
+  const VALUE_SPACE = 'space';
 
   private $contentSource;
   private $isNewObject;
@@ -219,6 +221,19 @@ abstract class HeraldAdapter {
           $value[] = $this->getApplicationEmail()->getPHID();
         }
         return $value;
+      case self::FIELD_SPACE:
+        $object = $this->getObject();
+
+        if (!($object instanceof PhabricatorSpacesInterface)) {
+          throw new Exception(
+            pht(
+              'Adapter object (of class "%s") does not implement interface '.
+              '"%s", so the Space field value can not be determined.',
+              get_class($object),
+              'PhabricatorSpacesInterface'));
+        }
+
+        return PhabricatorSpacesNamespaceQuery::getObjectSpacePHID($object);
       default:
         if ($this->isHeraldCustomKey($field_name)) {
           return $this->getCustomFieldValue($field_name);
@@ -400,6 +415,7 @@ abstract class HeraldAdapter {
       self::FIELD_TASK_STATUS => pht('Task status'),
       self::FIELD_PUSHER_IS_COMMITTER => pht('Pusher same as committer'),
       self::FIELD_PATH => pht('Path'),
+      self::FIELD_SPACE => pht('Space'),
     ) + $this->getCustomFieldNameMap();
   }
 
@@ -453,6 +469,7 @@ abstract class HeraldAdapter {
       case self::FIELD_PUSHER:
       case self::FIELD_TASK_PRIORITY:
       case self::FIELD_TASK_STATUS:
+      case self::FIELD_SPACE:
         return array(
           self::CONDITION_IS_ANY,
           self::CONDITION_IS_NOT_ANY,
@@ -833,8 +850,8 @@ abstract class HeraldAdapter {
       case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
         $standard = array(
           self::ACTION_NOTHING      => pht('Do nothing'),
-          self::ACTION_ADD_CC       => pht('Add emails to CC'),
-          self::ACTION_REMOVE_CC    => pht('Remove emails from CC'),
+          self::ACTION_ADD_CC       => pht('Add Subscribers'),
+          self::ACTION_REMOVE_CC    => pht('Remove Subscribers'),
           self::ACTION_EMAIL        => pht('Send an email to'),
           self::ACTION_AUDIT        => pht('Trigger an Audit by'),
           self::ACTION_FLAG         => pht('Mark with flag'),
@@ -851,8 +868,8 @@ abstract class HeraldAdapter {
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         $standard = array(
           self::ACTION_NOTHING      => pht('Do nothing'),
-          self::ACTION_ADD_CC       => pht('Add me to CC'),
-          self::ACTION_REMOVE_CC    => pht('Remove me from CC'),
+          self::ACTION_ADD_CC       => pht('Add me as a subscriber'),
+          self::ACTION_REMOVE_CC    => pht('Remove me as a subscriber'),
           self::ACTION_EMAIL        => pht('Send me an email'),
           self::ACTION_AUDIT        => pht('Trigger an Audit by me'),
           self::ACTION_FLAG         => pht('Mark with flag'),
@@ -957,6 +974,8 @@ abstract class HeraldAdapter {
             return self::VALUE_TASK_PRIORITY;
           case self::FIELD_TASK_STATUS:
             return self::VALUE_TASK_STATUS;
+          case self::FIELD_SPACE:
+            return self::VALUE_SPACE;
           default:
             return self::VALUE_USER;
         }

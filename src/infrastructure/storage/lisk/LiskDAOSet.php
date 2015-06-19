@@ -20,7 +20,7 @@
  *     'userPHID',
  *     'getPHID');
  */
-final class LiskDAOSet {
+final class LiskDAOSet extends Phobject {
   private $daos = array();
   private $relatives = array();
   private $subsets = array();

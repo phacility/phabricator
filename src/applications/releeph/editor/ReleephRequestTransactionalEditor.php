@@ -166,28 +166,22 @@ final class ReleephRequestTransactionalEditor
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return true;
-  }
-
-  protected function sendMail(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
 
     // Avoid sending emails that only talk about commit discovery.
     $types = array_unique(mpull($xactions, 'getTransactionType'));
     if ($types === array(ReleephRequestTransaction::TYPE_DISCOVERY)) {
-      return null;
+      return false;
     }
 
     // Don't email people when we discover that something picks or reverts OK.
     if ($types === array(ReleephRequestTransaction::TYPE_PICK_STATUS)) {
       if (!mfilter($xactions, 'isBoringPickStatus', true /* negate */)) {
         // If we effectively call "isInterestingPickStatus" and get nothing...
-        return null;
+        return false;
       }
     }
 
-    return parent::sendMail($object, $xactions);
+    return true;
   }
 
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {

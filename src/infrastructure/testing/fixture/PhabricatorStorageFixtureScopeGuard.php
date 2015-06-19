@@ -3,7 +3,7 @@
 /**
  * Used by unit tests to build storage fixtures.
  */
-final class PhabricatorStorageFixtureScopeGuard {
+final class PhabricatorStorageFixtureScopeGuard extends Phobject {
 
   private $name;
 

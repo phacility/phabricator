@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSearchIndexer {
+final class PhabricatorSearchIndexer extends Phobject {
 
   public function queueDocumentForIndexing($phid, $context = null) {
     PhabricatorWorker::scheduleTask(

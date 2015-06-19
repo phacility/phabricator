@@ -60,6 +60,7 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
     return array(
       FilesDefaultViewCapability::CAPABILITY => array(
         'caption' => pht('Default view policy for newly created files.'),
+        'template' => PhabricatorFileFilePHIDType::TYPECONST,
       ),
     );
   }

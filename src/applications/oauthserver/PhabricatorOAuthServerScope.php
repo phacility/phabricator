@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorOAuthServerScope {
+final class PhabricatorOAuthServerScope extends Phobject {
 
   const SCOPE_OFFLINE_ACCESS = 'offline_access';
   const SCOPE_WHOAMI         = 'whoami';

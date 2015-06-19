@@ -131,9 +131,11 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
     return array(
       ManiphestDefaultViewCapability::CAPABILITY => array(
         'caption' => pht('Default view policy for newly created tasks.'),
+        'template' => ManiphestTaskPHIDType::TYPECONST,
       ),
       ManiphestDefaultEditCapability::CAPABILITY => array(
         'caption' => pht('Default edit policy for newly created tasks.'),
+        'template' => ManiphestTaskPHIDType::TYPECONST,
       ),
       ManiphestEditStatusCapability::CAPABILITY => array(),
       ManiphestEditAssignCapability::CAPABILITY => array(),

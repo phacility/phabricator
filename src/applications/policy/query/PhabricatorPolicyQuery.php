@@ -6,6 +6,8 @@ final class PhabricatorPolicyQuery
   private $object;
   private $phids;
 
+  const OBJECT_POLICY_PREFIX = 'obj.';
+
   public function setObject(PhabricatorPolicyInterface $object) {
     $this->object = $object;
     return $this;
@@ -71,7 +73,15 @@ final class PhabricatorPolicyQuery
     $results = array();
 
     // First, load global policies.
-    foreach ($this->getGlobalPolicies() as $phid => $policy) {
+    foreach (self::getGlobalPolicies() as $phid => $policy) {
+      if (isset($phids[$phid])) {
+        $results[$phid] = $policy;
+        unset($phids[$phid]);
+      }
+    }
+
+    // Now, load object policies.
+    foreach (self::getObjectPolicies($this->object) as $phid => $policy) {
       if (isset($phids[$phid])) {
         $results[$phid] = $policy;
         unset($phids[$phid]);
@@ -212,12 +222,16 @@ final class PhabricatorPolicyQuery
     // option unless the object already has a "Public" policy. In this case we
     // retain the policy but enforce it as though it was "All Users".
     $show_public = PhabricatorEnv::getEnvConfig('policy.allow-public');
-    foreach ($this->getGlobalPolicies() as $phid => $policy) {
+    foreach (self::getGlobalPolicies() as $phid => $policy) {
       if ($phid == PhabricatorPolicies::POLICY_PUBLIC) {
         if (!$show_public) {
           continue;
         }
       }
+      $phids[] = $phid;
+    }
+
+    foreach (self::getObjectPolicies($this->object) as $phid => $policy) {
       $phids[] = $phid;
     }
 
@@ -233,5 +247,100 @@ final class PhabricatorPolicyQuery
   public function getQueryApplicationClass() {
     return 'PhabricatorPolicyApplication';
   }
+
+  public static function isSpecialPolicy($identifier) {
+    if (self::isObjectPolicy($identifier)) {
+      return true;
+    }
+
+    if (self::isGlobalPolicy($identifier)) {
+      return true;
+    }
+
+    return false;
+  }
+
+
+/* -(  Object Policies  )---------------------------------------------------- */
+
+
+  public static function isObjectPolicy($identifier) {
+    $prefix = self::OBJECT_POLICY_PREFIX;
+    return !strncmp($identifier, $prefix, strlen($prefix));
+  }
+
+  public static function getObjectPolicy($identifier) {
+    if (!self::isObjectPolicy($identifier)) {
+      return null;
+    }
+
+    $policies = self::getObjectPolicies(null);
+    return idx($policies, $identifier);
+  }
+
+  public static function getObjectPolicyRule($identifier) {
+    if (!self::isObjectPolicy($identifier)) {
+      return null;
+    }
+
+    $rules = self::getObjectPolicyRules(null);
+    return idx($rules, $identifier);
+  }
+
+  public static function getObjectPolicies($object) {
+    $rule_map = self::getObjectPolicyRules($object);
+
+    $results = array();
+    foreach ($rule_map as $key => $rule) {
+      $results[$key] = id(new PhabricatorPolicy())
+        ->setType(PhabricatorPolicyType::TYPE_OBJECT)
+        ->setPHID($key)
+        ->setIcon($rule->getObjectPolicyIcon())
+        ->setName($rule->getObjectPolicyName())
+        ->setShortName($rule->getObjectPolicyShortName())
+        ->makeEphemeral();
+    }
+
+    return $results;
+  }
+
+  public static function getObjectPolicyRules($object) {
+    $rules = id(new PhutilSymbolLoader())
+      ->setAncestorClass('PhabricatorPolicyRule')
+      ->loadObjects();
+
+    $results = array();
+    foreach ($rules as $rule) {
+      $key = $rule->getObjectPolicyKey();
+      if (!$key) {
+        continue;
+      }
+
+      $full_key = $rule->getObjectPolicyFullKey();
+      if (isset($results[$full_key])) {
+        throw new Exception(
+          pht(
+            'Two policy rules (of classes "%s" and "%s") define the same '.
+            'object policy key ("%s"), but each object policy rule must use '.
+            'a unique key.',
+            get_class($rule),
+            get_class($results[$full_key]),
+            $key));
+      }
+
+      $results[$full_key] = $rule;
+    }
+
+    if ($object !== null) {
+      foreach ($results as $key => $rule) {
+        if (!$rule->canApplyToObject($object)) {
+          unset($results[$key]);
+        }
+      }
+    }
+
+    return $results;
+  }
+
 
 }

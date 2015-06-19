@@ -12,6 +12,14 @@ final class DivinerAtomPHIDType extends PhabricatorPHIDType {
     return new DivinerLiveSymbol();
   }
 
+  public function getTypeIcon() {
+    return 'fa-cube';
+  }
+
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorDivinerApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

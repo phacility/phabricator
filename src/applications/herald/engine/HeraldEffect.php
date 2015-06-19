@@ -1,6 +1,6 @@
 <?php
 
-final class HeraldEffect {
+final class HeraldEffect extends Phobject {
 
   private $objectPHID;
   private $action;

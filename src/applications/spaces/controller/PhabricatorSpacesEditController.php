@@ -54,6 +54,7 @@ final class PhabricatorSpacesEditController
     $validation_exception = null;
     $e_name = true;
     $v_name = $space->getNamespaceName();
+    $v_desc = $space->getDescription();
     $v_view = $space->getViewPolicy();
     $v_edit = $space->getEditPolicy();
 
@@ -62,10 +63,12 @@ final class PhabricatorSpacesEditController
       $e_name = null;
 
       $v_name = $request->getStr('name');
+      $v_desc = $request->getStr('description');
       $v_view = $request->getStr('viewPolicy');
       $v_edit = $request->getStr('editPolicy');
 
       $type_name = PhabricatorSpacesNamespaceTransaction::TYPE_NAME;
+      $type_desc = PhabricatorSpacesNamespaceTransaction::TYPE_DESCRIPTION;
       $type_default = PhabricatorSpacesNamespaceTransaction::TYPE_DEFAULT;
       $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -73,6 +76,10 @@ final class PhabricatorSpacesEditController
       $xactions[] = id(new PhabricatorSpacesNamespaceTransaction())
         ->setTransactionType($type_name)
         ->setNewValue($v_name);
+
+      $xactions[] = id(new PhabricatorSpacesNamespaceTransaction())
+        ->setTransactionType($type_desc)
+        ->setNewValue($v_desc);
 
       $xactions[] = id(new PhabricatorSpacesNamespaceTransaction())
         ->setTransactionType($type_view)
@@ -128,6 +135,11 @@ final class PhabricatorSpacesEditController
           ->setName('name')
           ->setValue($v_name)
           ->setError($e_name))
+      ->appendControl(
+        id(new PhabricatorRemarkupControl())
+          ->setLabel(pht('Description'))
+          ->setName('description')
+          ->setValue($v_desc))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setUser($viewer)

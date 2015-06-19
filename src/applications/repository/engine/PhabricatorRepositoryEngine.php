@@ -4,7 +4,7 @@
  * @task config     Configuring Repository Engines
  * @task internal   Internals
  */
-abstract class PhabricatorRepositoryEngine {
+abstract class PhabricatorRepositoryEngine extends Phobject {
 
   private $repository;
   private $verbose;

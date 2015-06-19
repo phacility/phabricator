@@ -99,8 +99,20 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     } else {
       sel = [def];
     }
-    sel = sel.join('\n' + ch);
-    return sel;
+
+    if (ch === '>') {
+      for(var i=0; i < sel.length; i++) {
+        if (sel[i][0] === '>') {
+          ch = '>';
+        } else {
+          ch = '> ';
+        }
+        sel[i] = ch + sel[i];
+      }
+      return sel.join('\n');
+    }
+
+    return sel.join('\n' + ch);
   }
 
   function assist(area, action, root) {
@@ -141,9 +153,9 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
         update(area, code_prefix + '```\n', sel, '\n```');
         break;
       case 'fa-quote-right':
-        ch = '> ';
+        ch = '>';
         sel = prepend_char_to_lines(ch, sel, pht('Quoted Text'));
-        update(area, ((r.start === 0) ? '' : '\n\n') + ch, sel, '\n\n');
+        update(area, ((r.start === 0) ? '' : '\n\n'), sel, '\n\n');
         break;
       case 'fa-table':
         var table_prefix = (r.start === 0 ? '' : '\n\n');

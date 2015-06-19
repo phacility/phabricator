@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorTestDataGenerator {
+abstract class PhabricatorTestDataGenerator extends Phobject {
 
   public function generate() {
     return;

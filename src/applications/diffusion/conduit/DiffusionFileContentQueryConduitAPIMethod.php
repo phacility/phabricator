@@ -20,6 +20,8 @@ final class DiffusionFileContentQueryConduitAPIMethod
       'path' => 'required string',
       'commit' => 'required string',
       'needsBlame' => 'optional bool',
+      'timeout' => 'optional int',
+      'byteLimit' => 'optional int',
     );
   }
 
@@ -31,16 +33,30 @@ final class DiffusionFileContentQueryConduitAPIMethod
     $file_query
       ->setViewer($request->getUser())
       ->setNeedsBlame($needs_blame);
+
+    $timeout = $request->getValue('timeout');
+    if ($timeout) {
+      $file_query->setTimeout($timeout);
+    }
+
+    $byte_limit = $request->getValue('byteLimit');
+    if ($byte_limit) {
+      $file_query->setByteLimit($byte_limit);
+    }
+
     $file_content = $file_query->loadFileContent();
+
     if ($needs_blame) {
       list($text_list, $rev_list, $blame_dict) = $file_query->getBlameData();
     } else {
       $text_list = $rev_list = $blame_dict = array();
     }
+
     $file_content
       ->setBlameDict($blame_dict)
       ->setRevList($rev_list)
       ->setTextList($text_list);
+
     return $file_content->toDictionary();
   }
 

@@ -5,7 +5,7 @@
  * three capabilities: indexing, searching, and reconstruction (this can be
  * stubbed out if an engine can't reasonably do it, it is used for debugging).
  */
-abstract class PhabricatorSearchEngine {
+abstract class PhabricatorSearchEngine extends Phobject {
 
 /* -(  Engine Metadata  )---------------------------------------------------- */
 

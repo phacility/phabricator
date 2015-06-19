@@ -1,0 +1,169 @@
+@title Spaces User Guide
+@group userguide
+
+Guide to the Spaces application.
+
+Overview
+========
+
+IMPORTANT: Spaces is a prototype application.
+
+The Spaces application makes it easier to manage large groups of objects which
+share the same access policy. For example:
+
+  - An organization might make a Space for a project in order to satisfy a
+    contractual obligation to limit access, even internally.
+  - An open source organization might make a Space for work related to
+    internal governance, to separate private and public discussions.
+  - A contracting company might make Spaces for clients, to separate them from
+    one another.
+  - A company might create a Space for consultants, to give them limited
+    access to only the resources they need to do their work.
+  - An ambitious manager might create a Space to hide her team's work from her
+    enemies at the company, that she might use the element of surprise to later
+    expand her domain.
+
+Phabricator's access control policies are generally powerful enough to handle
+these use cases on their own, but applying the same policy to a large group
+of objects requires a lot of effort and is error-prone.
+
+Spaces build on top of policies and make it easier and more reliable to
+configure, review, and manage groups of objects with similar policies.
+
+
+Creating Spaces
+=================
+
+Spaces are optional, and are inactive by default. You don't need to configure
+them if you don't plan to use them. You can always set them up later.
+
+To activate Spaces, you need to create at least two spaces. Create spaces from
+the web UI, by navigating to {nav Spaces > Create Space}. By default, only
+administrators can create new Spaces, but you can configure this in the
+{nav Applications} application.
+
+The first Space you create will be a special "default" Space, and all existing
+objects will be shifted into this space as soon as you create it. Spaces you
+create later will be normal spaces, and begin with no objects inside them.
+
+Create the first space (you may want to name it something like "Default" or
+"Global" or "Public", depending on the nature of your organization), then
+create a second Space. Usually, the second space will be something like
+"Secret Plans" and have a more restrictive "Visible To" policy.
+
+
+Using Spaces
+============
+
+Once you've created at least two spaces, you can begin using them.
+
+Application UIs will change for users who can see at least two Spaces, opening
+up new controls which let them work with spaces. They will now be able to
+choose which space to create new objects into, be able to move objects between
+spaces, and be able to search for objects in a specific space or set of spaces.
+
+In list and detail views, objects will show which space they're in if they're
+in a non-default space.
+
+Users with access to only one space won't see these controls, even if many
+spaces exist. This simplifies the UI for users with limited access.
+
+
+Space Policies
+==============
+
+Briefly, Spaces affect policies like this:
+
+  - Spaces apply their view policy to all objects inside the space.
+  - Space policies are absolute, and stronger than all other policies. A
+    user who can not see a Space can **never** see objects inside the space.
+  - Normal policies are still checked: spaces can only reduce access.
+
+When you create a Space, you choose a view policy for that space by using the
+**Visible To** control. This policy controls both who can see the space, and
+who can see objects inside the space.
+
+Spaces apply their view policy to all objects inside the space: if you can't
+see a space, you can never see objects inside it. This policy check is absolute
+and stronger than all other policy rules, including policy exceptions.
+
+For example, a user can never see a task in a space they can't see, even if
+they are an admin and the author and owner of the task, and subscribed to the
+task and the view and edit policies are set to "All Users", and they created
+the Space originally and the moon is full and they are pure of heart and
+possessed of the noblest purpose. Spaces are impenetrable.
+
+Even if a user satisfies the view policy for a space, they must still pass the
+view policy on the object: the space check is a new check in addition to any
+check on the object, and can only limit access.
+
+The edit policy for a space only affects the Space itself, and is not applied
+to objects inside the space.
+
+
+Archiving Spaces
+================
+
+If you no longer need a Space, you can archive it by choosing
+{nav Archive Space} from the detail view. This hides the space and all the
+objects in it without deleting any data.
+
+New objects can't be created into archived spaces, and existing objects can't
+be shifted into archived spaces. The UI won't give you options to choose
+these spaces when creating or editing objects.
+
+Additionally, objects (like tasks) in archived spaces won't be shown in most
+search result lists by default. If you need to find objects in an archived
+space, use the `Spaces` constraint to specifically search for objects in that
+space.
+
+You can reactivate a space later by choosing {nav Activate Space}.
+
+
+Application Email
+=================
+
+After activating Spaces, you can choose a Space when configuring inbound email
+addresses in {nav Applications}.
+
+Spaces affect policies for application email just like they do for other
+objects: to see or use the address, you must be able to see the space which
+contains it.
+
+Objects created from inbound email will be created in the Space the email is
+associated with.
+
+
+Limitations and Caveats
+=======================
+
+Some information is shared between spaces, so they do not completely isolate
+users from other activity on the install. This section discusses limitations
+of the isolation model. Most of these limitations are intrinsic to the policy
+model Phabricator uses.
+
+**Shared IDs**: Spaces do not have unique object IDs: there is only one `T1`,
+not a separate one in each space. It can be moved between spaces, but `T1`
+always refers to the same object. In most cases, this makes working with
+spaces simpler and easier.
+
+However, because IDs are shared, users in any space can look at object IDs to
+determine how many objects exist in other spaces, even if they can't see those
+objects. If a user creates a new task and sees that it is `T5000`, they can
+know that there are 4,999 other tasks they don't have permission to see.
+
+**Globally Unique Values**: Some values (like usernames, email addresses,
+project hashtags, repository callsigns, and application emails) must be
+globally unique.
+
+As with normal policies, users may be able to determine that a `#yolo` project
+exists, even if they can't see it: they can try to create a project using the
+`#yolo` hashtag, and will receive an error if it is a duplicate.
+
+**User Accounts**: Spaces do not apply to users, and can not hide the existence
+of user accounts.
+
+For example, if you are a contracting company and have Coke and Pepsi as
+clients, the CEO of Coke and the CEO of Pepsi will each be able to see that the
+other has an account on the install, even if all the work you are doing for
+them is separated into "Coke" and "Pepsi" spaces.

@@ -10,7 +10,7 @@
  * a Sunday -> Saturday list, whilest the profile view shows a more simple
  * seven day rolling list of events.
  */
-final class CalendarTimeUtil {
+final class CalendarTimeUtil extends Phobject {
 
   public static function getCalendarEventEpochs(
     PhabricatorUser $user,

@@ -3,7 +3,7 @@
 /**
  * Generate @{class:DivinerAtom}s from source code.
  */
-abstract class DivinerAtomizer {
+abstract class DivinerAtomizer extends Phobject {
 
   private $book;
   private $fileName;

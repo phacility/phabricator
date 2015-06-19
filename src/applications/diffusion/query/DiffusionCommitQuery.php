@@ -193,6 +193,7 @@ final class DiffusionCommitQuery
       if ($repo) {
         $commit->attachRepository($repo);
       } else {
+        $this->didRejectResult($commit);
         unset($commits[$key]);
         continue;
       }

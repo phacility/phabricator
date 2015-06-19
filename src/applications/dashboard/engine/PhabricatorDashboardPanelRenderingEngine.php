@@ -277,9 +277,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
    */
   private function detectRenderingCycle(PhabricatorDashboardPanel $panel) {
     if ($this->parentPanelPHIDs === null) {
-      throw new Exception(
-        pht(
-          'You must call setParentPanelPHIDs() before rendering panels.'));
+      throw new PhutilInvalidStateException('setParentPanelPHIDs');
     }
 
     $max_depth = 4;

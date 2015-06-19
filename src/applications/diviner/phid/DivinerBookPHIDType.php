@@ -12,6 +12,14 @@ final class DivinerBookPHIDType extends PhabricatorPHIDType {
     return new DivinerLiveBook();
   }
 
+  public function getTypeIcon() {
+    return 'fa-book';
+  }
+
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorDivinerApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

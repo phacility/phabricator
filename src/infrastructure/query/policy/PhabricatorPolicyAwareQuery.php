@@ -35,7 +35,6 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
   private $workspace = array();
   private $inFlightPHIDs = array();
   private $policyFilteredPHIDs = array();
-  private $canUseApplication;
 
   /**
    * Should we continue or throw an exception when a query result is filtered
@@ -338,9 +337,25 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
   }
 
   protected function didRejectResult(PhabricatorPolicyInterface $object) {
+    // Some objects (like commits) may be rejected because related objects
+    // (like repositories) can not be loaded. In some cases, we may need these
+    // related objects to determine the object policy, so it's expected that
+    // we may occasionally be unable to determine the policy.
+
+    try {
+      $policy = $object->getPolicy(PhabricatorPolicyCapability::CAN_VIEW);
+    } catch (Exception $ex) {
+      $policy = null;
+    }
+
+    // Mark this object as filtered so handles can render "Restricted" instead
+    // of "Unknown".
+    $phid = $object->getPHID();
+    $this->addPolicyFilteredPHIDs(array($phid => $phid));
+
     $this->getPolicyFilter()->rejectObject(
       $object,
-      $object->getPolicy(PhabricatorPolicyCapability::CAN_VIEW),
+      $policy,
       PhabricatorPolicyCapability::CAN_VIEW);
   }
 
@@ -663,21 +678,13 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    *   execute the query.
    */
   public function canViewerUseQueryApplication() {
-    if ($this->canUseApplication === null) {
-      $class = $this->getQueryApplicationClass();
-      if (!$class) {
-        $this->canUseApplication = true;
-      } else {
-        $result = id(new PhabricatorApplicationQuery())
-          ->setViewer($this->getViewer())
-          ->withClasses(array($class))
-          ->execute();
-
-        $this->canUseApplication = (bool)$result;
-      }
+    $class = $this->getQueryApplicationClass();
+    if (!$class) {
+      return true;
     }
 
-    return $this->canUseApplication;
+    $viewer = $this->getViewer();
+    return PhabricatorApplication::isClassInstalledForViewer($class, $viewer);
   }
 
 }

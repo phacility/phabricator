@@ -127,7 +127,23 @@ final class AphrontFormDateControl extends AphrontFormControl {
   }
 
   private function getDateInputValue() {
-    return $this->valueDate;
+    $date_format = $this->getDateFormat();
+    $timezone = $this->getTimezone();
+
+    $datetime = new DateTime($this->valueDate, $timezone);
+    $date = $datetime->format($date_format);
+
+    return $date;
+  }
+
+  private function getTimeFormat() {
+    return $this->getUser()
+      ->getPreference(PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT);
+  }
+
+  private function getDateFormat() {
+    return $this->getUser()
+      ->getPreference(PhabricatorUserPreferences::PREFERENCE_DATE_FORMAT);
   }
 
   private function getTimeInputValue() {
@@ -219,6 +235,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
       'startTimeID' => $time_id,
       'endTimeID' => $this->endDateID,
       'timeValues' => $values,
+      'format' => $this->getTimeFormat(),
       ));
 
 
@@ -242,7 +259,9 @@ final class AphrontFormDateControl extends AphrontFormControl {
       ),
       $time_sel);
 
-    Javelin::initBehavior('fancy-datepicker', array());
+    Javelin::initBehavior('fancy-datepicker', array(
+      'format' => $this->getDateFormat(),
+      ));
 
     $classes = array();
     $classes[] = 'aphront-form-date-container';
@@ -319,20 +338,31 @@ final class AphrontFormDateControl extends AphrontFormControl {
   }
 
   private function getTimeTypeaheadValues() {
+    $time_format = $this->getTimeFormat();
     $times = array();
-    $am_pm_list = array('AM', 'PM');
 
-    foreach ($am_pm_list as $am_pm) {
-      for ($hour = 0; $hour < 12; $hour++) {
-        $actual_hour = ($hour == 0) ? 12 : $hour;
-        $times[] = $actual_hour.':00 '.$am_pm;
-        $times[] = $actual_hour.':30 '.$am_pm;
+    if ($time_format == 'g:i A') {
+      $am_pm_list = array('AM', 'PM');
+
+      foreach ($am_pm_list as $am_pm) {
+        for ($hour = 0; $hour < 12; $hour++) {
+          $actual_hour = ($hour == 0) ? 12 : $hour;
+          $times[] = $actual_hour.':00 '.$am_pm;
+          $times[] = $actual_hour.':30 '.$am_pm;
+        }
+      }
+    } else if ($time_format == 'H:i') {
+      for ($hour = 0; $hour < 24; $hour++) {
+        $written_hour = ($hour > 9) ? $hour : '0'.$hour;
+        $times[] = $written_hour.':00';
+        $times[] = $written_hour.':30';
       }
     }
 
     foreach ($times as $key => $time) {
       $times[$key] = array($key, $time);
     }
+
     return $times;
   }
 

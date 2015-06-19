@@ -243,10 +243,10 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
-        if (!PhabricatorPolicyQuery::isGlobalPolicy($old)) {
+        if (!PhabricatorPolicyQuery::isSpecialPolicy($old)) {
           $phids[] = array($old);
         }
-        if (!PhabricatorPolicyQuery::isGlobalPolicy($new)) {
+        if (!PhabricatorPolicyQuery::isSpecialPolicy($new)) {
           $phids[] = array($new);
         }
         break;

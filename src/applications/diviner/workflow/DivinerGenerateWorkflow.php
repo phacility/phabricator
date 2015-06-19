@@ -25,6 +25,11 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
             'help' => pht('Specify a subclass of %s.', 'DivinerPublisher'),
             'default' => 'DivinerLivePublisher',
           ),
+          array(
+            'name' => 'repository',
+            'param' => 'callsign',
+            'help' => pht('Repository that the documentation belongs to.'),
+          ),
         ));
   }
 
@@ -50,6 +55,7 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     } else {
       $cwd = getcwd();
       $this->log(pht('FINDING DOCUMENTATION BOOKS'));
+
       $books = id(new FileFinder($cwd))
         ->withType('f')
         ->withSuffix('book')
@@ -92,7 +98,7 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     // amount of work we can, so that regenerating documentation after minor
     // changes is quick.
     //
-    // = ATOM CACHE =
+    // = Atom Cache =
     //
     // In the first stage, we find all the direct changes to source code since
     // the last run. This stage relies on two data structures:
@@ -118,7 +124,7 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     // its methods). The File Hash Map contains an exhaustive list of all atoms
     // with type "file", but not child atoms of those top-level atoms.)
     //
-    // = GRAPH CACHE =
+    // = Graph Cache =
     //
     // We now know which atoms exist, and can compare the Atom Map to some
     // existing cache to figure out what has changed. However, this isn't
@@ -176,8 +182,9 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
       ->setConcreteOnly(true)
       ->setAncestorClass('DivinerPublisher')
       ->selectAndLoadSymbols();
+
     if (!$symbols) {
-      throw new Exception(
+      throw new PhutilArgumentUsageException(
         pht(
           "Publisher class '%s' must be a concrete subclass of %s.",
           $publisher_class,
@@ -185,25 +192,58 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     }
     $publisher = newv($publisher_class, array());
 
+    $callsign = $args->getArg('repository');
+    $repository = null;
+    if ($callsign) {
+      $repository = id(new PhabricatorRepositoryQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withCallsigns(array($callsign))
+        ->executeOne();
+
+      if (!$repository) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            "Repository '%s' does not exist.",
+            $callsign));
+      }
+
+      $publisher->setRepositoryPHID($repository->getPHID());
+    }
+
     $this->publishDocumentation($args->getArg('clean'), $publisher);
   }
 
+
 /* -(  Atom Cache  )--------------------------------------------------------- */
+
 
   private function buildAtomCache() {
     $this->log(pht('BUILDING ATOM CACHE'));
 
     $file_hashes = $this->findFilesInProject();
-    $this->log(pht('Found %d file(s) in project.', count($file_hashes)));
+    $this->log(
+      pht(
+        'Found %s file(s) in project.',
+        new PhutilNumber(count($file_hashes))));
 
     $this->deleteDeadAtoms($file_hashes);
     $atomize = $this->getFilesToAtomize($file_hashes);
-    $this->log(pht('Found %d unatomized, uncached file(s).', count($atomize)));
+    $this->log(
+      pht(
+        'Found %s unatomized, uncached file(s).',
+        new PhutilNumber(count($atomize))));
 
     $file_atomizers = $this->getAtomizersForFiles($atomize);
-    $this->log(pht('Found %d file(s) to atomize.', count($file_atomizers)));
+    $this->log(
+      pht(
+        'Found %s file(s) to atomize.',
+        new PhutilNumber(count($file_atomizers))));
+
     $futures = $this->buildAtomizerFutures($file_atomizers);
-    $this->log(pht('Atomizing %d file(s).', count($file_atomizers)));
+    $this->log(
+      pht(
+        'Atomizing %s file(s).',
+        new PhutilNumber(count($file_atomizers))));
 
     if ($futures) {
       $this->resolveAtomizerFutures($futures, $file_hashes);
@@ -344,6 +384,7 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
       ->setTotal(count($futures));
     $futures = id(new FutureIterator($futures))
       ->limit(4);
+
     foreach ($futures as $key => $future) {
       try {
         $atoms = $future->resolveJSON();
@@ -396,6 +437,7 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
 
 /* -(  Graph Cache  )-------------------------------------------------------- */
 
+
   private function buildGraphCache() {
     $this->log(pht('BUILDING GRAPH CACHE'));
 
@@ -407,7 +449,10 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     $dirty_nhashes = array();
 
     $del_atoms = array_diff_key($symbol_map, $atoms);
-    $this->log(pht('Found %d obsolete atom(s) in graph.', count($del_atoms)));
+    $this->log(
+      pht(
+        'Found %s obsolete atom(s) in graph.',
+        new PhutilNumber(count($del_atoms))));
 
     foreach ($del_atoms as $nhash => $shash) {
       $atom_cache->deleteSymbol($nhash);
@@ -418,7 +463,10 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     }
 
     $new_atoms = array_diff_key($atoms, $symbol_map);
-    $this->log(pht('Found %d new atom(s) in graph.', count($new_atoms)));
+    $this->log(
+      pht(
+        'Found %s new atom(s) in graph.',
+        new PhutilNumber(count($new_atoms))));
 
     foreach ($new_atoms as $nhash => $ignored) {
       $shash = $this->computeSymbolHash($nhash);
@@ -454,7 +502,10 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
       }
     }
 
-    $this->log(pht('Found %d affected atoms.', count($dirty_nhashes)));
+    $this->log(
+      pht(
+        'Found %s affected atoms.',
+        new PhutilNumber(count($dirty_nhashes))));
 
     foreach ($dirty_nhashes as $nhash => $ignored) {
       $atom_cache->addGraph($nhash, $this->computeGraphHash($nhash));

@@ -167,7 +167,7 @@ final class PhabricatorCalendarEventViewController
     } else if ($event->getIsRecurrenceException()) {
       $edit_label = pht('Edit This Instance');
       $edit_uri = "event/edit/{$id}/";
-    } else if (!$event->getIsRecurrenceParent()) {
+    } else {
       $edit_label = pht('Edit');
       $edit_uri = "event/edit/{$id}/";
     }
@@ -291,7 +291,9 @@ final class PhabricatorCalendarEventViewController
       if ($event->getInstanceOfEventPHID()) {
         $properties->addProperty(
           pht('Recurrence of Event'),
-          $viewer->renderHandle($event->getInstanceOfEventPHID()));
+          pht('%s of %s',
+            $event->getSequenceIndex(),
+            $viewer->renderHandle($event->getInstanceOfEventPHID())->render()));
       }
     }
 
@@ -360,10 +362,19 @@ final class PhabricatorCalendarEventViewController
       pht('Icon'),
       $icon_display);
 
-    $properties->addSectionHeader(
-      pht('Description'),
-      PHUIPropertyListView::ICON_SUMMARY);
-    $properties->addTextContent($event->getDescription());
+    if (strlen($event->getDescription())) {
+
+      $description = PhabricatorMarkupEngine::renderOneObject(
+        id(new PhabricatorMarkupOneOff())->setContent($event->getDescription()),
+        'default',
+        $viewer);
+
+      $properties->addSectionHeader(
+        pht('Description'),
+        PHUIPropertyListView::ICON_SUMMARY);
+
+      $properties->addTextContent($description);
+    }
 
     return $properties;
   }

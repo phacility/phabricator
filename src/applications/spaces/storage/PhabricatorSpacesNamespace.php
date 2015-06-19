@@ -11,6 +11,8 @@ final class PhabricatorSpacesNamespace
   protected $viewPolicy;
   protected $editPolicy;
   protected $isDefaultNamespace;
+  protected $description;
+  protected $isArchived;
 
   public static function initializeNewNamespace(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -26,7 +28,9 @@ final class PhabricatorSpacesNamespace
     return id(new PhabricatorSpacesNamespace())
       ->setIsDefaultNamespace(null)
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($edit_policy);
+      ->setEditPolicy($edit_policy)
+      ->setDescription('')
+      ->setIsArchived(0);
   }
 
   protected function getConfiguration() {
@@ -35,6 +39,8 @@ final class PhabricatorSpacesNamespace
       self::CONFIG_COLUMN_SCHEMA => array(
         'namespaceName' => 'text255',
         'isDefaultNamespace' => 'bool?',
+        'description' => 'text',
+        'isArchived' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_default' => array(

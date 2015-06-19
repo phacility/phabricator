@@ -56,6 +56,22 @@ abstract class PhabricatorApplicationTransactionReplyHandler
   final protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     $viewer = $this->getActor();
     $object = $this->getMailReceiver();
+    $app_email = $this->getApplicationEmail();
+
+    $is_new = !$object->getID();
+
+    // If this is a new object which implements the Spaces interface and was
+    // created by sending mail to an ApplicationEmail address, put the object
+    // in the same Space the address is in.
+    if ($is_new) {
+      if ($object instanceof PhabricatorSpacesInterface) {
+        if ($app_email) {
+          $space_phid = PhabricatorSpacesNamespaceQuery::getObjectSpacePHID(
+            $app_email);
+          $object->setSpacePHID($space_phid);
+        }
+      }
+    }
 
     $body_data = $mail->parseBody();
     $body = $body_data['body'];

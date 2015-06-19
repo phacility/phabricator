@@ -8,7 +8,9 @@
  * @task  fact  Fact Integration
  * @task  meta  Application Management
  */
-abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
+abstract class PhabricatorApplication
+  extends Phobject
+  implements PhabricatorPolicyInterface {
 
   const MAX_STATUS_ITEMS      = 100;
 
@@ -17,7 +19,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
   const GROUP_ADMIN           = 'admin';
   const GROUP_DEVELOPER       = 'developer';
 
-  public static function getApplicationGroups() {
+  final public static function getApplicationGroups() {
     return array(
       self::GROUP_CORE          => pht('Core Applications'),
       self::GROUP_UTILITIES     => pht('Utilities'),
@@ -35,7 +37,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     return pht('%s Application', $this->getName());
   }
 
-  public function isInstalled() {
+  final public function isInstalled() {
     if (!$this->canUninstall()) {
       return true;
     }
@@ -133,7 +135,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     return true;
   }
 
-  public function getPHID() {
+  final public function getPHID() {
     return 'PHID-APPS-'.get_class($this);
   }
 
@@ -145,7 +147,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     return null;
   }
 
-  public function getApplicationURI($path = '') {
+  final public function getApplicationURI($path = '') {
     return $this->getBaseURI().ltrim($path, '/');
   }
 
@@ -169,7 +171,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     return null;
   }
 
-  public function getHelpMenuItems(PhabricatorUser $viewer) {
+  final public function getHelpMenuItems(PhabricatorUser $viewer) {
     $items = array();
 
     $articles = $this->getHelpDocumentationArticles($viewer);
@@ -249,7 +251,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     return false;
   }
 
-  protected function getInboundEmailSupportLink() {
+  final protected function getInboundEmailSupportLink() {
     return PhabricatorEnv::getDocLink('Configuring Inbound Email');
   }
 
@@ -286,7 +288,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
    * @return string
    * @task ui
    */
-  public static function formatStatusCount(
+  final public static function formatStatusCount(
     $count,
     $limit_string = '%s',
     $base_string = '%d') {
@@ -359,7 +361,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
 /* -(  Application Management  )--------------------------------------------- */
 
 
-  public static function getByClass($class_name) {
+  final public static function getByClass($class_name) {
     $selected = null;
     $applications = self::getAllApplications();
 
@@ -377,7 +379,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     return $selected;
   }
 
-  public static function getAllApplications() {
+  final public static function getAllApplications() {
     static $applications;
 
     if ($applications === null) {
@@ -401,7 +403,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     return $applications;
   }
 
-  public static function getAllInstalledApplications() {
+  final public static function getAllInstalledApplications() {
     $all_applications = self::getAllApplications();
     $apps = array();
     foreach ($all_applications as $app) {
@@ -426,7 +428,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
    * @return bool   True if the class is installed.
    * @task meta
    */
-  public static function isClassInstalled($class) {
+  final public static function isClassInstalled($class) {
     return self::getByClass($class)->isInstalled();
   }
 
@@ -443,18 +445,29 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
    * @return bool True if the class is installed for the viewer.
    * @task meta
    */
-  public static function isClassInstalledForViewer(
+  final public static function isClassInstalledForViewer(
     $class,
     PhabricatorUser $viewer) {
 
-    if (!self::isClassInstalled($class)) {
-      return false;
+    $cache = PhabricatorCaches::getRequestCache();
+    $viewer_phid = $viewer->getPHID();
+    $key = 'app.'.$class.'.installed.'.$viewer_phid;
+
+    $result = $cache->getKey($key);
+    if ($result === null) {
+      if (!self::isClassInstalled($class)) {
+        $result = false;
+      } else {
+        $result = PhabricatorPolicyFilter::hasCapability(
+          $viewer,
+          self::getByClass($class),
+          PhabricatorPolicyCapability::CAN_VIEW);
+      }
+
+      $cache->setKey($key, $result);
     }
 
-    return PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      self::getByClass($class),
-      PhabricatorPolicyCapability::CAN_VIEW);
+    return $result;
   }
 
 
@@ -502,7 +515,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     return array();
   }
 
-  private function getCustomPolicySetting($capability) {
+  final private function getCustomPolicySetting($capability) {
     if (!$this->isCapabilityEditable($capability)) {
       return null;
     }
@@ -528,7 +541,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
   }
 
 
-  private function getCustomCapabilitySpecification($capability) {
+  final private function getCustomCapabilitySpecification($capability) {
     $custom = $this->getCustomCapabilities();
     if (!isset($custom[$capability])) {
       throw new Exception(pht("Unknown capability '%s'!", $capability));
@@ -536,7 +549,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     return $custom[$capability];
   }
 
-  public function getCapabilityLabel($capability) {
+  final public function getCapabilityLabel($capability) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
         return pht('Can Use Application');
@@ -552,7 +565,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     return null;
   }
 
-  public function isCapabilityEditable($capability) {
+  final public function isCapabilityEditable($capability) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->canUninstall();
@@ -564,7 +577,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     }
   }
 
-  public function getCapabilityCaption($capability) {
+  final public function getCapabilityCaption($capability) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
         if (!$this->canUninstall()) {
@@ -580,6 +593,17 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
         $spec = $this->getCustomCapabilitySpecification($capability);
         return idx($spec, 'caption');
     }
+  }
+
+  final public function getCapabilityTemplatePHIDType($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return null;
+    }
+
+    $spec = $this->getCustomCapabilitySpecification($capability);
+    return idx($spec, 'template');
   }
 
   public function getApplicationSearchDocumentTypes() {

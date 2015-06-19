@@ -1,6 +1,6 @@
 <?php
 
-final class ConduitAPIRequest {
+final class ConduitAPIRequest extends Phobject {
 
   protected $params;
   private $user;

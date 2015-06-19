@@ -144,7 +144,7 @@ final class PHUITagView extends AphrontTagView {
 
   protected function getTagContent() {
     if (!$this->type) {
-      throw new Exception(pht('You must call setType() before render()!'));
+      throw new PhutilInvalidStateException('setType', 'render');
     }
 
     $color = null;

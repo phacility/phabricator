@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorBotMessage {
+final class PhabricatorBotMessage extends Phobject {
 
   private $sender;
   private $command;

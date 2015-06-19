@@ -1,6 +1,6 @@
 <?php
 
-final class PhameSkinSpecification {
+final class PhameSkinSpecification extends Phobject {
 
   const TYPE_ADVANCED   = 'advanced';
   const TYPE_BASIC      = 'basic';

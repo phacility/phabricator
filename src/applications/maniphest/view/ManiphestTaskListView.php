@@ -57,10 +57,12 @@ final class ManiphestTaskListView extends ManiphestView {
     }
 
     foreach ($this->tasks as $task) {
-      $item = new PHUIObjectItemView();
-      $item->setObjectName('T'.$task->getID());
-      $item->setHeader($task->getTitle());
-      $item->setHref('/T'.$task->getID());
+      $item = id(new PHUIObjectItemView())
+        ->setUser($this->getUser())
+        ->setObject($task)
+        ->setObjectName('T'.$task->getID())
+        ->setHeader($task->getTitle())
+        ->setHref('/T'.$task->getID());
 
       if ($task->getOwnerPHID()) {
         $owner = $handles[$task->getOwnerPHID()];

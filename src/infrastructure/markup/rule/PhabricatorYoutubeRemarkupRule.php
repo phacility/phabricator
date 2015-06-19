@@ -2,6 +2,8 @@
 
 final class PhabricatorYoutubeRemarkupRule extends PhutilRemarkupRule {
 
+  private $uri;
+
   public function getPriority() {
     return 350.0;
   }

@@ -15,6 +15,7 @@ final class PhabricatorBot extends PhabricatorDaemon {
   private $conduit;
   private $config;
   private $pollFrequency;
+  private $protocolAdapter;
 
   protected function run() {
     $argv = $this->getArgv();

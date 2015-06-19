@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorAccessLog {
+final class PhabricatorAccessLog extends Phobject {
 
   private static $log;
 

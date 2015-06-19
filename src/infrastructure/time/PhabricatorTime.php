@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorTime {
+final class PhabricatorTime extends Phobject {
 
   private static $stack = array();
   private static $originalZone;

@@ -18,6 +18,7 @@ final class DivinerAtomCache extends DivinerDiskCache {
 
   public function delete() {
     parent::delete();
+
     $this->fileHashMap = null;
     $this->atomMap = null;
     $this->atoms = array();

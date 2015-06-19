@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialChangesetParser {
+final class DifferentialChangesetParser extends Phobject {
 
   const HIGHLIGHT_BYTE_LIMIT = 262144;
 
@@ -54,6 +54,8 @@ final class DifferentialChangesetParser {
   private $rangeStart;
   private $rangeEnd;
   private $mask;
+
+  private $highlightEngine;
 
   public function setRange($start, $end) {
     $this->rangeStart = $start;

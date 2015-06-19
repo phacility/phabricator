@@ -16,7 +16,7 @@
  * @task globalsearch Integration with Global Search
  * @task herald       Integration with Herald
  */
-abstract class PhabricatorCustomField {
+abstract class PhabricatorCustomField extends Phobject {
 
   private $viewer;
   private $object;

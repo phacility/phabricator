@@ -1,6 +1,6 @@
 <?php
 
-abstract class DivinerPublisher {
+abstract class DivinerPublisher extends Phobject {
 
   private $atomCache;
   private $atomGraphHashToNodeHashMap;
@@ -9,6 +9,7 @@ abstract class DivinerPublisher {
   private $config;
   private $symbolReverseMap;
   private $dropCaches;
+  private $repositoryPHID;
 
   final public function setDropCaches($drop_caches) {
     $this->dropCaches = $drop_caches;
@@ -133,10 +134,20 @@ abstract class DivinerPublisher {
       $created = array_keys($created);
     }
 
-    echo pht('Deleting %d documents.', count($deleted))."\n";
+    $console = PhutilConsole::getConsole();
+
+    $console->writeOut(
+      "%s\n",
+      pht(
+        'Deleting %s document(s).',
+        new PhutilNumber(count($deleted))));
     $this->deleteDocumentsByHash($deleted);
 
-    echo pht('Creating %d documents.', count($created))."\n";
+    $console->writeOut(
+      "%s\n",
+      pht(
+        'Creating %s document(s).',
+        new PhutilNumber(count($created))));
     $this->createDocumentsByHash($created);
   }
 
@@ -151,6 +162,15 @@ abstract class DivinerPublisher {
     }
 
     return true;
+  }
+
+  final public function getRepositoryPHID() {
+    return $this->repositoryPHID;
+  }
+
+  final public function setRepositoryPHID($repository_phid) {
+    $this->repositoryPHID = $repository_phid;
+    return $this;
   }
 
 }

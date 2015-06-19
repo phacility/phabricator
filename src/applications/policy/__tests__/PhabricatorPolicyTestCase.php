@@ -353,6 +353,37 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
     $this->assertEqual(array(), $result);
   }
 
+  public function testPolicyStrength() {
+    $public = PhabricatorPolicyQuery::getGlobalPolicy(
+      PhabricatorPolicies::POLICY_PUBLIC);
+    $user = PhabricatorPolicyQuery::getGlobalPolicy(
+      PhabricatorPolicies::POLICY_USER);
+    $admin = PhabricatorPolicyQuery::getGlobalPolicy(
+      PhabricatorPolicies::POLICY_ADMIN);
+    $noone = PhabricatorPolicyQuery::getGlobalPolicy(
+      PhabricatorPolicies::POLICY_NOONE);
+
+    $this->assertFalse($public->isStrongerThan($public));
+    $this->assertFalse($public->isStrongerThan($user));
+    $this->assertFalse($public->isStrongerThan($admin));
+    $this->assertFalse($public->isStrongerThan($noone));
+
+    $this->assertTrue($user->isStrongerThan($public));
+    $this->assertFalse($user->isStrongerThan($user));
+    $this->assertFalse($user->isStrongerThan($admin));
+    $this->assertFalse($user->isStrongerThan($noone));
+
+    $this->assertTrue($admin->isStrongerThan($public));
+    $this->assertTrue($admin->isStrongerThan($user));
+    $this->assertFalse($admin->isStrongerThan($admin));
+    $this->assertFalse($admin->isStrongerThan($noone));
+
+    $this->assertTrue($noone->isStrongerThan($public));
+    $this->assertTrue($noone->isStrongerThan($user));
+    $this->assertTrue($noone->isStrongerThan($admin));
+    $this->assertFalse($admin->isStrongerThan($noone));
+  }
+
 
   /**
    * Test an object for visibility across multiple user specifications.

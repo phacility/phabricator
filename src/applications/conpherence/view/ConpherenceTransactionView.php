@@ -64,7 +64,7 @@ final class ConpherenceTransactionView extends AphrontView {
   public function render() {
     $viewer = $this->getUser();
     if (!$viewer) {
-      throw new Exception(pht('Call setUser() before render()!'));
+      throw new PhutilInvalidStateException('setUser');
     }
 
     require_celerity_resource('conpherence-transaction-css');

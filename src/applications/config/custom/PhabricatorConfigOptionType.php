@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorConfigOptionType {
+abstract class PhabricatorConfigOptionType extends Phobject {
 
   public function validateOption(PhabricatorConfigOption $option, $value) {
     return;

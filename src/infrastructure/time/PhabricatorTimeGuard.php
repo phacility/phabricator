@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorTimeGuard {
+final class PhabricatorTimeGuard extends Phobject {
 
   private $frameKey;
 

@@ -4,7 +4,7 @@
  * @phutil-external-symbol function xhprof_enable
  * @phutil-external-symbol function xhprof_disable
  */
-final class DarkConsoleXHProfPluginAPI {
+final class DarkConsoleXHProfPluginAPI extends Phobject {
 
   private static $profilerStarted;
   private static $profilerRunning;

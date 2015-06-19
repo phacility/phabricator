@@ -48,7 +48,7 @@
  * @task test     Unit Test Support
  * @task internal Internals
  */
-final class PhabricatorEnv {
+final class PhabricatorEnv extends Phobject {
 
   private static $sourceStack;
   private static $repairSource;

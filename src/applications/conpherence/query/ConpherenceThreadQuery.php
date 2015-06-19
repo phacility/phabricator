@@ -355,6 +355,7 @@ final class ConpherenceThreadQuery
     $start_epoch = $epochs['start_epoch'];
     $end_epoch = $epochs['end_epoch'];
 
+    $events = array();
     if ($participant_phids) {
       $events = id(new PhabricatorCalendarEventQuery())
         ->setViewer($this->getViewer())
@@ -363,8 +364,6 @@ final class ConpherenceThreadQuery
         ->withDateRange($start_epoch, $end_epoch)
         ->execute();
       $events = mpull($events, null, 'getPHID');
-    } else {
-      $events = null;
     }
 
     $invitees = array();

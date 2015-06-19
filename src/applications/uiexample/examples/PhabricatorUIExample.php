@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorUIExample {
+abstract class PhabricatorUIExample extends Phobject {
 
   private $request;
 

@@ -4,7 +4,7 @@
  * Indirection layer which provisions for a terrifying future where we need to
  * build multiple resource responses per page.
  */
-final class CelerityAPI {
+final class CelerityAPI extends Phobject {
 
   private static $response;
 

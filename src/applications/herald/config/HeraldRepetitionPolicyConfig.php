@@ -1,6 +1,6 @@
 <?php
 
-final class HeraldRepetitionPolicyConfig {
+final class HeraldRepetitionPolicyConfig extends Phobject {
 
   const FIRST   = 'first';  // only execute the first time (no repeating)
   const EVERY   = 'every';  // repeat every time

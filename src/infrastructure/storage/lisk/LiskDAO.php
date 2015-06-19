@@ -162,7 +162,7 @@
  * @task   xaction Managing Transactions
  * @task   isolate Isolation for Unit Testing
  */
-abstract class LiskDAO {
+abstract class LiskDAO extends Phobject {
 
   const CONFIG_IDS                  = 'id-mechanism';
   const CONFIG_TIMESTAMPS           = 'timestamps';

@@ -1,6 +1,6 @@
 <?php
 
-final class SubscriptionListDialogBuilder {
+final class SubscriptionListDialogBuilder extends Phobject {
 
   private $viewer;
   private $handles;

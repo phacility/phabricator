@@ -4,8 +4,37 @@ final class PhabricatorPolicyEditController
   extends PhabricatorPolicyController {
 
   public function handleRequest(AphrontRequest $request) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
+
+    // TODO: This doesn't do anything yet, but sets up template policies; see
+    // T6860.
+    $is_template = false;
+
+    $object_phid = $request->getURIData('objectPHID');
+    if ($object_phid) {
+      $object = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($object_phid))
+        ->executeOne();
+      if (!$object) {
+        return new Aphront404Response();
+      }
+    } else {
+      $object_type = $request->getURIData('objectType');
+      if (!$object_type) {
+        $object_type = $request->getURIData('templateType');
+        $is_template = true;
+      }
+
+      $phid_types = PhabricatorPHIDType::getAllInstalledTypes($viewer);
+      if (empty($phid_types[$object_type])) {
+        return new Aphront404Response();
+      }
+      $object = $phid_types[$object_type]->newObject();
+      if (!$object) {
+        return new Aphront404Response();
+      }
+    }
 
     $action_options = array(
       PhabricatorPolicy::ACTION_ALLOW => pht('Allow'),
@@ -15,6 +44,13 @@ final class PhabricatorPolicyEditController
     $rules = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorPolicyRule')
       ->loadObjects();
+
+    foreach ($rules as $key => $rule) {
+      if (!$rule->canApplyToObject($object)) {
+        unset($rules[$key]);
+      }
+    }
+
     $rules = msort($rules, 'getRuleOrder');
 
     $default_rule = array(

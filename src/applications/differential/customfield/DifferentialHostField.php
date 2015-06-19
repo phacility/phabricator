@@ -23,12 +23,20 @@ final class DifferentialHostField
     return true;
   }
 
-  public function renderPropertyViewLabel() {
+  public function renderPropertyViewValue(array $handles) {
+    return null;
+  }
+
+  public function shouldAppearInDiffPropertyView() {
+    return true;
+  }
+
+  public function renderDiffPropertyViewLabel(DifferentialDiff $diff) {
     return $this->getFieldName();
   }
 
-  public function renderPropertyViewValue(array $handles) {
-    $host = $this->getObject()->getActiveDiff()->getSourceMachine();
+  public function renderDiffPropertyViewValue(DifferentialDiff $diff) {
+    $host = $diff->getSourceMachine();
     if (!$host) {
       return null;
     }

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorStorageManagementAPI {
+final class PhabricatorStorageManagementAPI extends Phobject {
 
   private $host;
   private $user;

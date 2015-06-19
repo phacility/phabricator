@@ -1,6 +1,6 @@
 <?php
 
-abstract class DarkConsolePlugin {
+abstract class DarkConsolePlugin extends Phobject {
 
   private $data;
   private $request;

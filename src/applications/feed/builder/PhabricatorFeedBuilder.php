@@ -1,7 +1,8 @@
 <?php
 
-final class PhabricatorFeedBuilder {
+final class PhabricatorFeedBuilder extends Phobject {
 
+  private $user;
   private $stories;
   private $framed;
   private $hovercards = false;

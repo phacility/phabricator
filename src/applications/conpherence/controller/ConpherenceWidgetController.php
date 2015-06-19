@@ -310,8 +310,14 @@ final class ConpherenceWidgetController extends ConpherenceController {
                 $user,
                 $time_str);
 
-            $secondary_info = pht('%s, %s',
-              $handles[$status->getUserPHID()]->getName(), $epoch_range);
+            if (isset($handles[$status->getUserPHID()])) {
+              $secondary_info = pht(
+                '%s, %s',
+                $handles[$status->getUserPHID()]->getName(),
+                $epoch_range);
+            } else {
+              $secondary_info = $epoch_range;
+            }
 
             $content[] = phutil_tag(
               'div',

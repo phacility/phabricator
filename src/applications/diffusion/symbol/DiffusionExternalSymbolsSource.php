@@ -1,6 +1,6 @@
 <?php
 
-abstract class DiffusionExternalSymbolsSource {
+abstract class DiffusionExternalSymbolsSource extends Phobject {
 
   /**
    * @return list of PhabricatorRepositorySymbol

@@ -27,14 +27,14 @@ final class PhabricatorAuthSetupCheck extends PhabricatorSetupCheck {
         'You have not configured any authentication providers yet. You '.
         'should add a provider (like username/password, LDAP, or GitHub '.
         'OAuth) so users can register and log in. You can add and configure '.
-        'providers using the [[%s | "Auth" application]].',
-        '/auth/');
+        'providers using the Auth Application.');
 
       $this
         ->newIssue('auth.noproviders')
         ->setShortName(pht('No Auth Providers'))
         ->setName(pht('No Authentication Providers Configured'))
-        ->setMessage($message);
+        ->setMessage($message)
+        ->addLink('/auth/', pht('Auth Application'));
     }
   }
 }

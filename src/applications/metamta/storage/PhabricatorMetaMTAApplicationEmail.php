@@ -2,11 +2,16 @@
 
 final class PhabricatorMetaMTAApplicationEmail
   extends PhabricatorMetaMTADAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorDestructibleInterface,
+    PhabricatorSpacesInterface {
 
   protected $applicationPHID;
   protected $address;
   protected $configData;
+  protected $spacePHID;
 
   private $application = self::ATTACHABLE;
 
@@ -40,6 +45,7 @@ final class PhabricatorMetaMTAApplicationEmail
 
   public static function initializeNewAppEmail(PhabricatorUser $actor) {
     return id(new PhabricatorMetaMTAApplicationEmail())
+      ->setSpacePHID($actor->getDefaultSpacePHID())
       ->setConfigData(array());
   }
 
@@ -107,6 +113,45 @@ final class PhabricatorMetaMTAApplicationEmail
 
   public function describeAutomaticCapability($capability) {
     return $this->getApplication()->describeAutomaticCapability($capability);
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorMetaMTAApplicationEmailEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorMetaMTAApplicationEmailTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+    $this->delete();
+  }
+
+
+/* -(  PhabricatorSpacesInterface  )----------------------------------------- */
+
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
   }
 
 }

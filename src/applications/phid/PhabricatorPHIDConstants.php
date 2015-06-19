@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorPHIDConstants {
+final class PhabricatorPHIDConstants extends Phobject {
 
   const PHID_TYPE_UNKNOWN = '????';
   const PHID_TYPE_MAGIC   = '!!!!';

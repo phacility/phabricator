@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @stable
- */
 interface DatabaseConfigurationProvider {
 
   public function __construct(

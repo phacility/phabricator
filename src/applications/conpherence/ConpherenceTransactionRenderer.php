@@ -1,6 +1,6 @@
 <?php
 
-final class ConpherenceTransactionRenderer {
+final class ConpherenceTransactionRenderer extends Phobject {
 
   public static function renderTransactions(
     PhabricatorUser $user,

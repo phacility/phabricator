@@ -26,7 +26,7 @@ foreach (new LiskMigrationIterator($table) as $repository) {
   if ($proto == 'http' || $proto == 'https' || $proto == 'svn') {
     $username = $repository->getDetail('http-login');
     $secret = $repository->getDetail('http-pass');
-    $type = PassphraseCredentialTypePassword::CREDENTIAL_TYPE;
+    $type = PassphrasePasswordCredentialType::CREDENTIAL_TYPE;
   } else {
     $username = $repository->getDetail('ssh-login');
     if (!$username) {
@@ -42,10 +42,10 @@ foreach (new LiskMigrationIterator($table) as $repository) {
     $file = $repository->getDetail('ssh-keyfile');
     if ($file) {
       $secret = $file;
-      $type = PassphraseCredentialTypeSSHPrivateKeyFile::CREDENTIAL_TYPE;
+      $type = PassphraseSSHPrivateKeyFileCredentialType::CREDENTIAL_TYPE;
     } else {
       $secret = $repository->getDetail('ssh-key');
-      $type = PassphraseCredentialTypeSSHPrivateKeyText::CREDENTIAL_TYPE;
+      $type = PassphraseSSHPrivateKeyTextCredentialType::CREDENTIAL_TYPE;
     }
   }
 

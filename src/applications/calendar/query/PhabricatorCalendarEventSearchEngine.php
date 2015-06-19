@@ -58,6 +58,9 @@ final class PhabricatorCalendarEventSearchEngine
     $min_range = $this->getDateFrom($saved)->getEpoch();
     $max_range = $this->getDateTo($saved)->getEpoch();
 
+    $user_datasource = id(new PhabricatorPeopleUserFunctionDatasource())
+      ->setViewer($viewer);
+
     if ($this->isMonthView($saved) ||
       $this->isDayView($saved)) {
       list($start_year, $start_month, $start_day) =
@@ -123,12 +126,14 @@ final class PhabricatorCalendarEventSearchEngine
       $query->withDateRange($min_range, $max_range);
     }
 
-    $invited_phids = $saved->getParameter('invitedPHIDs');
+    $invited_phids = $saved->getParameter('invitedPHIDs', array());
+    $invited_phids = $user_datasource->evaluateTokens($invited_phids);
     if ($invited_phids) {
       $query->withInvitedPHIDs($invited_phids);
     }
 
-    $creator_phids = $saved->getParameter('creatorPHIDs');
+    $creator_phids = $saved->getParameter('creatorPHIDs', array());
+    $creator_phids = $user_datasource->evaluateTokens($creator_phids);
     if ($creator_phids) {
       $query->withCreatorPHIDs($creator_phids);
     }
@@ -196,13 +201,13 @@ final class PhabricatorCalendarEventSearchEngine
     $form
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
+          ->setDatasource(new PhabricatorPeopleUserFunctionDatasource())
           ->setName('creators')
           ->setLabel(pht('Created By'))
           ->setValue($creator_phids))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
+          ->setDatasource(new PhabricatorPeopleUserFunctionDatasource())
           ->setName('invited')
           ->setLabel(pht('Invited'))
           ->setValue($invited_phids))
@@ -308,17 +313,31 @@ final class PhabricatorCalendarEventSearchEngine
     $list = new PHUIObjectItemListView();
     foreach ($events as $event) {
       $from = phabricator_datetime($event->getDateFrom(), $viewer);
-      $to = phabricator_datetime($event->getDateTo(), $viewer);
+      $duration = '';
       $creator_handle = $handles[$event->getUserPHID()];
 
+      $attendees = array();
+      foreach ($event->getInvitees() as $invitee) {
+        $attendees[] = $invitee->getInviteePHID();
+      }
+
+      $attendees = pht(
+        'Attending: %s',
+        $viewer->renderHandleList($attendees)
+          ->setAsInline(1)
+          ->render());
+
+      if (strlen($event->getDuration()) > 0) {
+        $duration = pht(
+          'Duration: %s',
+          $event->getDuration());
+      }
+
       $item = id(new PHUIObjectItemView())
-        ->setHeader($event->getName())
-        ->setHref($event->getURI())
-        ->addByline(pht('Creator: %s', $creator_handle->renderLink()))
-        ->addAttribute(pht('From %s to %s', $from, $to))
-        ->addAttribute(id(new PhutilUTF8StringTruncator())
-          ->setMaximumGlyphs(64)
-          ->truncateString($event->getDescription()));
+        ->setHeader($viewer->renderHandle($event->getPHID())->render())
+        ->addAttribute($attendees)
+        ->addIcon('none', $from)
+        ->addIcon('none', $duration);
 
       $list->addItem($item);
     }

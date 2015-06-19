@@ -141,7 +141,10 @@ final class PhabricatorMacroSearchEngine
     foreach ($macros as $macro) {
       $file = $macro->getFile();
 
-      $item = new PHUIPinboardItemView();
+      $item = id(new PHUIPinboardItemView())
+        ->setUser($viewer)
+        ->setObject($macro);
+
       if ($file) {
         $item->setImageURI($file->getURIForTransform($xform));
         list($x, $y) = $xform->getTransformedDimensions($file);

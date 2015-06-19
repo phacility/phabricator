@@ -14,7 +14,7 @@
  * @task file Managing File Data
  * @task load Loading Storage Engines
  */
-abstract class PhabricatorFileStorageEngine {
+abstract class PhabricatorFileStorageEngine extends Phobject {
 
   /**
    * Construct a new storage engine.

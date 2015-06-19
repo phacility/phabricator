@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialReviewer {
+final class DifferentialReviewer extends Phobject {
 
   private $reviewerPHID;
   private $status;

@@ -14,10 +14,11 @@ final class PhabricatorProjectTransaction
   // NOTE: This is deprecated, members are just a normal edge now.
   const TYPE_MEMBERS    = 'project:members';
 
-  const MAILTAG_METADATA = 'project-metadata';
-  const MAILTAG_MEMBERS  = 'project-members';
-  const MAILTAG_WATCHERS = 'project-watchers';
-  const MAILTAG_OTHER    = 'project-other';
+  const MAILTAG_METADATA    = 'project-metadata';
+  const MAILTAG_MEMBERS     = 'project-members';
+  const MAILTAG_SUBSCRIBERS = 'project-subscribers';
+  const MAILTAG_WATCHERS    = 'project-watchers';
+  const MAILTAG_OTHER       = 'project-other';
 
   public function getApplicationName() {
     return 'project';
@@ -368,6 +369,9 @@ final class PhabricatorProjectTransaction
       case self::TYPE_ICON:
       case self::TYPE_COLOR:
         $tags[] = self::MAILTAG_METADATA;
+        break;
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+        $tags[] = self::MAILTAG_SUBSCRIBERS;
         break;
       case PhabricatorTransactions::TYPE_EDGE:
         $type = $this->getMetadata('edge:type');

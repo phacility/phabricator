@@ -11,66 +11,37 @@ final class PhabricatorOwnersPackageSearchEngine
     return 'PhabricatorOwnersApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    $saved->setParameter(
-      'ownerPHIDs',
-      $this->readUsersFromRequest(
-        $request,
-        'owners',
-        array(
-          PhabricatorProjectProjectPHIDType::TYPECONST,
-        )));
-
-    $saved->setParameter(
-      'repositoryPHIDs',
-      $this->readPHIDsFromRequest(
-        $request,
-        'repositories',
-        array(
-          PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
-        )));
-
-    return $saved;
+  public function newQuery() {
+    return new PhabricatorOwnersPackageQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorOwnersPackageQuery());
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Owners'))
+        ->setKey('ownerPHIDs')
+        ->setAliases(array('owner', 'owners'))
+        ->setDatasource(new PhabricatorProjectOrUserDatasource()),
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Repositories'))
+        ->setKey('repositoryPHIDs')
+        ->setAliases(array('repository', 'repositories'))
+        ->setDatasource(new DiffusionRepositoryDatasource()),
+    );
+  }
 
-    $owner_phids = $saved->getParameter('ownerPHIDs', array());
-    if ($owner_phids) {
-      $query->withOwnerPHIDs($owner_phids);
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
+
+    if ($map['ownerPHIDs']) {
+      $query->withOwnerPHIDs($map['ownerPHIDs']);
     }
 
-    $repository_phids = $saved->getParameter('repositoryPHIDs', array());
-    if ($repository_phids) {
-      $query->withRepositoryPHIDs($repository_phids);
+    if ($map['repositoryPHIDs']) {
+      $query->withRepositoryPHIDs($map['repositoryPHIDs']);
     }
 
     return $query;
-  }
-
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved) {
-
-    $owner_phids = $saved->getParameter('ownerPHIDs', array());
-    $repository_phids = $saved->getParameter('repositoryPHIDs', array());
-
-    $form
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorProjectOrUserDatasource())
-          ->setName('owners')
-          ->setLabel(pht('Owners'))
-          ->setValue($owner_phids))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new DiffusionRepositoryDatasource())
-          ->setName('repositories')
-          ->setLabel(pht('Repositories'))
-          ->setValue($repository_phids));
   }
 
   protected function getURI($path) {

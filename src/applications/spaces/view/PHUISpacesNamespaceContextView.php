@@ -21,14 +21,27 @@ final class PHUISpacesNamespaceContextView extends AphrontView {
       return null;
     }
 
+    // If the viewer can't see spaces, pretend they don't exist.
     $viewer = $this->getUser();
+    if (!PhabricatorSpacesNamespaceQuery::getViewerSpacesExist($viewer)) {
+      return null;
+    }
+
+    // If this is the default space, don't show a space label.
+    $default = PhabricatorSpacesNamespaceQuery::getDefaultSpace();
+    if ($default) {
+      if ($default->getPHID() == $space_phid) {
+        return null;
+      }
+    }
+
     return phutil_tag(
       'span',
       array(
         'class' => 'spaces-name',
       ),
       array(
-        $viewer->renderHandle($space_phid),
+        $viewer->renderHandle($space_phid)->setUseShortName(true),
         ' | ',
       ));
   }

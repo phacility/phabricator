@@ -25,6 +25,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $edgeLogicConstraints = array();
   private $edgeLogicConstraintsAreValid = false;
   private $spacePHIDs;
+  private $spaceIsArchived;
 
   protected function getPageCursors(array $page) {
     return array(
@@ -871,6 +872,15 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    * @task order
    */
   public function getOrderableColumns() {
+    $cache = PhabricatorCaches::getRequestCache();
+    $class = get_class($this);
+    $cache_key = 'query.orderablecolumns.'.$class;
+
+    $columns = $cache->getKey($cache_key);
+    if ($columns !== null) {
+      return $columns;
+    }
+
     $columns = array(
       'id' => array(
         'table' => $this->getPrimaryTableAlias(),
@@ -907,6 +917,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         );
       }
     }
+
+    $cache->setKey($cache_key, $columns);
 
     return $columns;
   }
@@ -1722,6 +1734,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $this;
   }
 
+  public function withSpaceIsArchived($archived) {
+    $this->spaceIsArchived = $archived;
+    return $this;
+  }
+
 
   /**
    * Constrain the query to include only results in valid Spaces.
@@ -1760,6 +1777,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $viewer_spaces = PhabricatorSpacesNamespaceQuery::getViewerSpaces(
         $viewer);
       foreach ($viewer_spaces as $viewer_space) {
+        if ($this->spaceIsArchived !== null) {
+          if ($viewer_space->getIsArchived() != $this->spaceIsArchived) {
+            continue;
+          }
+        }
         $phid = $viewer_space->getPHID();
         $space_phids[$phid] = $phid;
         if ($viewer_space->getIsDefaultNamespace()) {

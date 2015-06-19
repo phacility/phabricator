@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialChangeType {
+final class DifferentialChangeType extends Phobject {
 
   const TYPE_ADD        = 1;
   const TYPE_CHANGE     = 2;

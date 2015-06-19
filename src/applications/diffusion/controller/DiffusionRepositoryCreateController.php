@@ -591,8 +591,8 @@ final class DiffusionRepositoryCreateController
     if ($this->isSSHProtocol($proto)) {
       $c_credential->setLabel(pht('SSH Key'));
       $c_credential->setCredentialType(
-        PassphraseCredentialTypeSSHPrivateKeyText::CREDENTIAL_TYPE);
-      $provides_type = PassphraseCredentialTypeSSHPrivateKey::PROVIDES_TYPE;
+        PassphraseSSHPrivateKeyTextCredentialType::CREDENTIAL_TYPE);
+      $provides_type = PassphraseSSHPrivateKeyCredentialType::PROVIDES_TYPE;
 
       $page->addRemarkupInstructions(
         pht(
@@ -607,8 +607,8 @@ final class DiffusionRepositoryCreateController
       $c_credential->setLabel(pht('Password'));
       $c_credential->setAllowNull(true);
       $c_credential->setCredentialType(
-        PassphraseCredentialTypePassword::CREDENTIAL_TYPE);
-      $provides_type = PassphraseCredentialTypePassword::PROVIDES_TYPE;
+        PassphrasePasswordCredentialType::CREDENTIAL_TYPE);
+      $provides_type = PassphrasePasswordCredentialType::PROVIDES_TYPE;
 
       $page->addRemarkupInstructions(
         pht(
@@ -663,7 +663,7 @@ final class DiffusionRepositoryCreateController
           pht('You must choose an SSH credential to connect over SSH.'));
       }
 
-      $ssh_type = PassphraseCredentialTypeSSHPrivateKey::PROVIDES_TYPE;
+      $ssh_type = PassphraseSSHPrivateKeyCredentialType::PROVIDES_TYPE;
       if ($credential->getProvidesType() !== $ssh_type) {
         $c_credential->setError(pht('Invalid'));
         $page->addPageError(
@@ -674,7 +674,7 @@ final class DiffusionRepositoryCreateController
 
     } else if ($this->isUsernamePasswordProtocol($proto)) {
       if ($credential) {
-        $password_type = PassphraseCredentialTypePassword::PROVIDES_TYPE;
+        $password_type = PassphrasePasswordCredentialType::PROVIDES_TYPE;
         if ($credential->getProvidesType() !== $password_type) {
         $c_credential->setError(pht('Invalid'));
         $page->addPageError(

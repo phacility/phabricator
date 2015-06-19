@@ -8,7 +8,7 @@
  * Generally, you should not use this class directly. It is used by
  * @{class:PhabricatorCustomField} to manage field storage on objects.
  */
-final class PhabricatorCustomFieldAttachment {
+final class PhabricatorCustomFieldAttachment extends Phobject {
 
   private $lists = array();
 

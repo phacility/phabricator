@@ -1,6 +1,6 @@
 <?php
 
-final class CelerityResourceMapGenerator {
+final class CelerityResourceMapGenerator extends Phobject {
 
   private $debug = false;
   private $resources;

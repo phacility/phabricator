@@ -1,3 +1,3 @@
 <?php
 
-abstract class ManiphestConstants {}
+abstract class ManiphestConstants extends Phobject {}

@@ -4,19 +4,40 @@ final class DivinerLivePublisher extends DivinerPublisher {
 
   private $book;
 
-  private function loadBook() {
+  protected function getBook() {
     if (!$this->book) {
       $book_name = $this->getConfig('name');
 
-      $book = id(new DivinerLiveBook())->loadOneWhere('name = %s', $book_name);
+      $book = id(new DivinerLiveBook())->loadOneWhere(
+        'name = %s',
+        $book_name);
+
       if (!$book) {
         $book = id(new DivinerLiveBook())
           ->setName($book_name)
-          ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+          ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
+          ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN)
           ->save();
       }
 
-      $book->setConfigurationData($this->getConfigurationData())->save();
+      $conn_w = $book->establishConnection('w');
+      $conn_w->openTransaction();
+
+      $book
+        ->setRepositoryPHID($this->getRepositoryPHID())
+        ->setConfigurationData($this->getConfigurationData())
+        ->save();
+
+      // TODO: This is gross. Without this, the repository won't be updated for
+      // atoms which have already been published.
+      queryfx(
+        $conn_w,
+        'UPDATE %T SET repositoryPHID = %s WHERE bookPHID = %s',
+        id(new DivinerLiveSymbol())->getTableName(),
+        $this->getRepositoryPHID(),
+        $book->getPHID());
+
+      $conn_w->saveTransaction();
       $this->book = $book;
 
       id(new PhabricatorSearchIndexer())
@@ -29,7 +50,7 @@ final class DivinerLivePublisher extends DivinerPublisher {
   private function loadSymbolForAtom(DivinerAtom $atom) {
     $symbol = id(new DivinerAtomQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withBookPHIDs(array($this->loadBook()->getPHID()))
+      ->withBookPHIDs(array($this->getBook()->getPHID()))
       ->withTypes(array($atom->getType()))
       ->withNames(array($atom->getName()))
       ->withContexts(array($atom->getContext()))
@@ -41,7 +62,7 @@ final class DivinerLivePublisher extends DivinerPublisher {
     }
 
     return id(new DivinerLiveSymbol())
-      ->setBookPHID($this->loadBook()->getPHID())
+      ->setBookPHID($this->getBook()->getPHID())
       ->setType($atom->getType())
       ->setName($atom->getName())
       ->setContext($atom->getContext())
@@ -64,7 +85,7 @@ final class DivinerLivePublisher extends DivinerPublisher {
   protected function loadAllPublishedHashes() {
     $symbols = id(new DivinerAtomQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withBookPHIDs(array($this->loadBook()->getPHID()))
+      ->withBookPHIDs(array($this->getBook()->getPHID()))
       ->withGhosts(false)
       ->execute();
 
@@ -109,6 +130,7 @@ final class DivinerLivePublisher extends DivinerPublisher {
       $is_documentable = $this->shouldGenerateDocumentForAtom($atom);
 
       $symbol
+        ->setRepositoryPHID($this->getRepositoryPHID())
         ->setGraphHash($hash)
         ->setIsDocumentable((int)$is_documentable)
         ->setTitle($ref->getTitle())
@@ -144,7 +166,6 @@ final class DivinerLivePublisher extends DivinerPublisher {
           ->setContent(null)
           ->save();
       }
-
     }
   }
 

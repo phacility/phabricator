@@ -53,7 +53,7 @@
  * @task query Querying the Graph Cache
  * @task cache Cache Internals
  */
-final class PhabricatorRepositoryGraphCache {
+final class PhabricatorRepositoryGraphCache extends Phobject {
 
   private $rebuiltKeys = array();
 

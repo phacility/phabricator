@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorPHIDType {
+abstract class PhabricatorPHIDType extends Phobject {
 
   final public function getTypeConstant() {
     $class = new ReflectionClass($this);
@@ -158,7 +158,7 @@ abstract class PhabricatorPHIDType {
    *
    * @return dict<string, PhabricatorPHIDType> Map of type constants to types.
    */
-  public static function getAllTypes() {
+  final public static function getAllTypes() {
     static $types;
     if ($types === null) {
       $objects = id(new PhutilSymbolLoader())

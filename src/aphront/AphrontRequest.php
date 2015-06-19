@@ -5,7 +5,7 @@
  * @task cookie   Managing Cookies
  * @task cluster  Working With a Phabricator Cluster
  */
-final class AphrontRequest {
+final class AphrontRequest extends Phobject {
 
   // NOTE: These magic request-type parameters are automatically included in
   // certain requests (e.g., by phabricator_form(), JX.Request,
@@ -27,6 +27,7 @@ final class AphrontRequest {
   private $user;
   private $applicationConfiguration;
   private $uriData;
+  private $cookiePrefix;
 
   public function __construct($host, $path) {
     $this->host = $host;

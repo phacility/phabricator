@@ -20,8 +20,8 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
   public function getInfoDescription() {
     return pht(
       'This linter is intended for use with the Javelin JS library and '.
-      'extensions. Use `javelinsymbols` to run Javelin rules on Javascript '.
-      'source files.');
+      'extensions. Use `%s` to run Javelin rules on Javascript source files.',
+      'javelinsymbols');
   }
 
   private function getBinaryPath() {
