@@ -8,7 +8,6 @@
 
 */
 
-.phui-document-view .phui-header-tall .phui-header-header,
 .diviner-document-section .phui-header-header {
   font-family: 'Slabo', {$fontfamily};
   color: {$darkbluetext};

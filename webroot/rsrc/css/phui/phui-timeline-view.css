@@ -25,6 +25,7 @@
 .phui-timeline-major-event .phui-timeline-group {
   border-left: 1px solid {$lightblueborder};
   border-right: 1px solid {$lightblueborder};
+  border-radius: 3px;
 }
 
 .device-desktop .phui-timeline-event-view {
@@ -62,10 +63,11 @@
 .phui-timeline-major-event .phui-timeline-content {
   border-top: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$lightblueborder};
+  border-radius: 3px;
 }
 
 .phui-timeline-title {
-  line-height: 18px;
+  line-height: 22px;
   min-height: 19px;
   position: relative;
   color: {$bluetext};
@@ -85,18 +87,17 @@
 }
 
 .device-desktop .phui-timeline-major-event .phui-timeline-wedge {
-  top: 24px;
+  top: 26px;
 }
 
 .device-desktop .phui-timeline-minor-event .phui-timeline-wedge {
-  top: 12px;
+  top: 13px;
   left: -18px;
   width: 20px;
 }
 
 .phui-timeline-image {
   background-repeat: no-repeat;
-  background-size: 100%;
   position: absolute;
   border-radius: 3px;
 }
@@ -116,8 +117,13 @@
 }
 
 .phui-timeline-major-event .phui-timeline-title {
-  background: {$lightgreybackground};
-  min-height: 18px;
+  background: {$lightbluebackground};
+  min-height: 22px;
+  border-top-right-radius: 3px;
+}
+
+.phui-timeline-title + .phui-timeline-title {
+  border-radius: 0;
 }
 
 .phui-timeline-title {
@@ -164,6 +170,8 @@
   padding: 16px 12px;
   line-height: 18px;
   background: #fff;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 .phui-timeline-core-content {
@@ -203,8 +211,8 @@
 
 .phui-timeline-icon-fill {
   position: absolute;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   background-color: {$lightblueborder};
   top: 0;
   left: 0;
@@ -212,21 +220,21 @@
 }
 
 .phui-icon-view.phui-timeline-icon:before {
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .phui-timeline-minor-event .phui-timeline-icon-fill {
-  height: 26px;
-  width: 26px;
+  height: 28px;
+  width: 28px;
   border-radius: 3px;
 }
 
 .phui-timeline-icon-fill .phui-timeline-icon {
-  margin-top: 7px;
+  margin-top: 8px;
 }
 
 .phui-timeline-minor-event .phui-timeline-icon-fill .phui-timeline-icon {
-  margin-top: 6px;
+  margin-top: 7px;
 }
 
 .phui-timeline-extra,
@@ -238,7 +246,6 @@
 
 .phui-timeline-title .phui-timeline-extra a {
   font-weight: normal;
-  color: {$bluetext};
 }
 
 .device-desktop .phui-timeline-extra {
@@ -347,7 +354,7 @@
 .phui-timeline-menu {
   position: absolute;
   right: 3px;
-  top: 4px;
+  top: 6px;
   width: 28px;
   height: 22px;
   text-align: center;

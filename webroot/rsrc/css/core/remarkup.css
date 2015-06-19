@@ -43,8 +43,7 @@
   display: block;
   color: #000000;
   overflow: auto;
-  padding: 8px;
-  font-family: "Monaco", monospace;
+  padding: 12px 8px;
 }
 
 .phabricator-remarkup pre.remarkup-counterexample {
@@ -159,12 +158,12 @@
 }
 
 .phabricator-remarkup blockquote {
-  border-left: 3px solid {$lightbluetext};
+  border-left: 3px solid {$sh-blueborder};
   color: {$darkbluetext};
   font-style:  italic;
   margin: 4px 0 12px 0;
   padding: 8px 12px;
-  background-color: #F2F4F9;
+  background-color: {$lightbluebackground};
 }
 
 .phabricator-remarkup blockquote blockquote {

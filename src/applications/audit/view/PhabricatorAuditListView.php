@@ -141,10 +141,13 @@ final class PhabricatorAuditListView extends AphrontView {
           PhabricatorAuditStatusConstants::getStatusName($status_code);
         $status_color =
           PhabricatorAuditStatusConstants::getStatusColor($status_code);
+        $status_icon =
+          PhabricatorAuditStatusConstants::getStatusIcon($status_code);
       } else {
         $reasons = null;
         $status_text = null;
         $status_color = null;
+        $status_icon = null;
       }
       $author_phid = $commit->getAuthorPHID();
       if ($author_phid) {
@@ -167,7 +170,7 @@ final class PhabricatorAuditListView extends AphrontView {
 
       if ($status_color) {
         $item->setStatusIcon(
-          'fa-exclamation-triangle '.$status_color, $status_text);
+          $status_icon.' '.$status_color, $status_text);
       }
 
       $list->addItem($item);
