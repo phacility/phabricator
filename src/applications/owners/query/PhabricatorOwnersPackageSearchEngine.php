@@ -129,6 +129,11 @@ final class PhabricatorOwnersPackageSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No packages found.'));
+
+    return $result;
+
   }
 }
