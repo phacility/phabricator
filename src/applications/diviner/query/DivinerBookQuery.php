@@ -5,6 +5,8 @@ final class DivinerBookQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $ids;
   private $phids;
   private $names;
+  private $nameLike;
+  private $namePrefix;
   private $repositoryPHIDs;
 
   private $needProjectPHIDs;
@@ -20,8 +22,18 @@ final class DivinerBookQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
+  public function withNameLike($name) {
+    $this->nameLike = $name;
+    return $this;
+  }
+
   public function withNames(array $names) {
     $this->names = $names;
+    return $this;
+  }
+
+  public function withNamePrefix($prefix) {
+    $this->namePrefix = $prefix;
     return $this;
   }
 
@@ -121,11 +133,25 @@ final class DivinerBookQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $this->phids);
     }
 
-    if ($this->names) {
+    if (strlen($this->nameLike)) {
+      $where[] = qsprintf(
+        $conn_r,
+        'name LIKE %~',
+        $this->nameLike);
+    }
+
+    if ($this->names !== null) {
       $where[] = qsprintf(
         $conn_r,
         'name IN (%Ls)',
         $this->names);
+    }
+
+    if (strlen($this->namePrefix)) {
+      $where[] = qsprintf(
+        $conn_r,
+        'name LIKE %>',
+        $this->namePrefix);
     }
 
     if ($this->repositoryPHIDs !== null) {
@@ -142,6 +168,34 @@ final class DivinerBookQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function getQueryApplicationClass() {
     return 'PhabricatorDivinerApplication';
+  }
+
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'name' => array(
+        'column' => 'name',
+        'type' => 'string',
+        'reverse' => true,
+        'unique' => true,
+      ),
+    );
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $book = $this->loadCursorObject($cursor);
+
+    return array(
+      'name' => $book->getName(),
+    );
+  }
+
+  public function getBuiltinOrders() {
+    return array(
+      'name' => array(
+        'vector' => array('name'),
+        'name' => pht('Name'),
+      ),
+    ) + parent::getBuiltinOrders();
   }
 
 }
