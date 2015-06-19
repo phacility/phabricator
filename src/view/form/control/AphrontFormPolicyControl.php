@@ -162,10 +162,10 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
 
   protected function renderInput() {
     if (!$this->object) {
-      throw new Exception(pht('Call setPolicyObject() before rendering!'));
+      throw new PhutilInvalidStateException('setPolicyObject');
     }
     if (!$this->capability) {
-      throw new Exception(pht('Call setCapability() before rendering!'));
+      throw new PhutilInvalidStateException('setCapability');
     }
 
     $policy = $this->object->getPolicy($this->capability);

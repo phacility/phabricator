@@ -437,10 +437,11 @@ final class PhabricatorCalendarEventEditController
         ->setValue($end_disabled);
     }
 
-    $description = id(new AphrontFormTextAreaControl())
+    $description = id(new PhabricatorRemarkupControl())
       ->setLabel(pht('Description'))
       ->setName('description')
-      ->setValue($description);
+      ->setValue($description)
+      ->setUser($viewer);
 
     $view_policies = id(new AphrontFormPolicyControl())
       ->setUser($viewer)

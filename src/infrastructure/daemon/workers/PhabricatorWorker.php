@@ -199,7 +199,8 @@ abstract class PhabricatorWorker extends Phobject {
     }
 
     $tasks = id(new PhabricatorWorkerArchiveTaskQuery())
-      ->withIDs($task_ids);
+      ->withIDs($task_ids)
+      ->execute();
 
     foreach ($tasks as $task) {
       if ($task->getResult() != PhabricatorWorkerArchiveTask::RESULT_SUCCESS) {

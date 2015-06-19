@@ -5,8 +5,10 @@ final class DivinerBookQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $ids;
   private $phids;
   private $names;
+  private $repositoryPHIDs;
 
   private $needProjectPHIDs;
+  private $needRepositories;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -23,8 +25,18 @@ final class DivinerBookQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
+  public function withRepositoryPHIDs(array $repository_phids) {
+    $this->repositoryPHIDs = $repository_phids;
+    return $this;
+  }
+
   public function needProjectPHIDs($need_phids) {
     $this->needProjectPHIDs = $need_phids;
+    return $this;
+  }
+
+  public function needRepositories($need_repositories) {
+    $this->needRepositories = $need_repositories;
     return $this;
   }
 
@@ -45,6 +57,31 @@ final class DivinerBookQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   protected function didFilterPage(array $books) {
     assert_instances_of($books, 'DivinerLiveBook');
+
+    if ($this->needRepositories) {
+      $repositories = id(new PhabricatorRepositoryQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs(mpull($books, 'getRepositoryPHID'))
+        ->execute();
+      $repositories = mpull($repositories, null, 'getPHID');
+
+      foreach ($books as $key => $book) {
+        if ($book->getRepositoryPHID() === null) {
+          $book->attachRepository(null);
+          continue;
+        }
+
+        $repository = idx($repositories, $book->getRepositoryPHID());
+
+        if (!$repository) {
+          $this->didRejectResult($book);
+          unset($books[$key]);
+          continue;
+        }
+
+        $book->attachRepository($repository);
+      }
+    }
 
     if ($this->needProjectPHIDs) {
       $edge_query = id(new PhabricatorEdgeQuery())
@@ -89,6 +126,13 @@ final class DivinerBookQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $conn_r,
         'name IN (%Ls)',
         $this->names);
+    }
+
+    if ($this->repositoryPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'repositoryPHID IN (%Ls)',
+        $this->repositoryPHIDs);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

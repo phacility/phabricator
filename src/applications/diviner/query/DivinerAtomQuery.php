@@ -14,10 +14,12 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $nodeHashes;
   private $titles;
   private $nameContains;
+  private $repositoryPHIDs;
 
   private $needAtoms;
   private $needExtends;
   private $needChildren;
+  private $needRepositories;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -109,6 +111,16 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
+  public function withRepositoryPHIDs(array $repository_phids) {
+    $this->repositoryPHIDs = $repository_phids;
+    return $this;
+  }
+
+  public function needRepositories($need_repositories) {
+    $this->needRepositories = $need_repositories;
+    return $this;
+  }
+
   protected function loadPage() {
     $table = new DivinerLiveSymbol();
     $conn_r = $table->establishConnection('r');
@@ -125,6 +137,8 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   }
 
   protected function willFilterPage(array $atoms) {
+    assert_instances_of($atoms, 'DivinerLiveSymbol');
+
     $books = array_unique(mpull($atoms, 'getBookPHID'));
 
     $books = id(new DivinerBookQuery())
@@ -257,6 +271,31 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       $this->attachAllChildren($atoms, $children, $this->needExtends);
     }
 
+    if ($this->needRepositories) {
+      $repositories = id(new PhabricatorRepositoryQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs(mpull($atoms, 'getRepositoryPHID'))
+        ->execute();
+      $repositories = mpull($repositories, null, 'getPHID');
+
+      foreach ($atoms as $key => $atom) {
+        if ($atom->getRepositoryPHID() === null) {
+          $atom->attachRepository(null);
+          continue;
+        }
+
+        $repository = idx($repositories, $atom->getRepositoryPHID());
+
+        if (!$repository) {
+          $this->didRejectResult($atom);
+          unset($atom[$key]);
+          continue;
+        }
+
+        $atom->attachRepository($repository);
+      }
+    }
+
     return $atoms;
   }
 
@@ -379,6 +418,13 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $conn_r,
         'CONVERT(name USING utf8) LIKE %~',
         $this->nameContains);
+    }
+
+    if ($this->repositoryPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'repositoryPHID IN (%Ls)',
+        $this->repositoryPHIDs);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

@@ -14,10 +14,12 @@ final class DivinerAtomSearchEngine extends PhabricatorApplicationSearchEngine {
     $saved = new PhabricatorSavedQuery();
 
     $saved->setParameter(
+      'repositoryPHIDs',
+      $this->readPHIDsFromRequest($request, 'repositoryPHIDs'));
+    $saved->setParameter('name', $request->getStr('name'));
+    $saved->setParameter(
       'types',
       $this->readListFromRequest($request, 'types'));
-
-    $saved->setParameter('name', $request->getStr('name'));
 
     return $saved;
   }
@@ -25,14 +27,19 @@ final class DivinerAtomSearchEngine extends PhabricatorApplicationSearchEngine {
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new DivinerAtomQuery());
 
-    $types = $saved->getParameter('types');
-    if ($types) {
-      $query->withTypes($types);
+    $repository_phids = $saved->getParameter('repositoryPHIDs');
+    if ($repository_phids) {
+      $query->withRepositoryPHIDs($repository_phids);
     }
 
     $name = $saved->getParameter('name');
     if ($name) {
       $query->withNameContains($name);
+    }
+
+    $types = $saved->getParameter('types');
+    if ($types) {
+      $query->withTypes($types);
     }
 
     return $query;
@@ -41,6 +48,12 @@ final class DivinerAtomSearchEngine extends PhabricatorApplicationSearchEngine {
   public function buildSearchForm(
     AphrontFormView $form,
     PhabricatorSavedQuery $saved) {
+
+    $form->appendChild(
+      id(new AphrontFormTextControl())
+        ->setLabel(pht('Name Contains'))
+        ->setName('name')
+        ->setValue($saved->getParameter('name')));
 
     $all_types = array();
     foreach (DivinerAtom::getAllTypes() as $type) {
@@ -59,14 +72,14 @@ final class DivinerAtomSearchEngine extends PhabricatorApplicationSearchEngine {
         $name,
         isset($types[$type]));
     }
+    $form->appendChild($type_control);
 
-    $form
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Name Contains'))
-          ->setName('name')
-          ->setValue($saved->getParameter('name')))
-      ->appendChild($type_control);
+    $form->appendControl(
+       id(new AphrontFormTokenizerControl())
+         ->setLabel(pht('Repositories'))
+         ->setName('repositoryPHIDs')
+         ->setDatasource(new DiffusionRepositoryDatasource())
+         ->setValue($saved->getParameter('repositoryPHIDs')));
   }
 
   protected function getURI($path) {

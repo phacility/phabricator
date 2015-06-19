@@ -738,6 +738,41 @@ final class PhabricatorUser
     return new DateTimeZone($this->getTimezoneIdentifier());
   }
 
+  public function getPreference($key) {
+    $preferences = $this->loadPreferences();
+
+    // TODO: After T4103 and T7707 this should eventually be pushed down the
+    // stack into modular preference definitions and role profiles. This is
+    // just fixing T8601 and mildly anticipating those changes.
+    $value = $preferences->getPreference($key);
+
+    $allowed_values = null;
+    switch ($key) {
+      case PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT:
+        $allowed_values = array(
+          'g:i A',
+          'H:i',
+        );
+        break;
+      case PhabricatorUserPreferences::PREFERENCE_DATE_FORMAT:
+        $allowed_values = array(
+          'Y-m-d',
+          'n/j/Y',
+          'd-m-Y',
+        );
+        break;
+    }
+
+    if ($allowed_values !== null) {
+      $allowed_values = array_fuse($allowed_values);
+      if (empty($allowed_values[$value])) {
+        $value = head($allowed_values);
+      }
+    }
+
+    return $value;
+  }
+
   public function __toString() {
     return $this->getUsername();
   }

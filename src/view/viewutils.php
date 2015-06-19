@@ -31,32 +31,21 @@ function phabricator_relative_date($epoch, $user, $on = false) {
 }
 
 function phabricator_time($epoch, $user) {
+  $time_key = PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT;
   return phabricator_format_local_time(
     $epoch,
     $user,
-    phabricator_time_format($user));
+    $user->getPreference($time_key));
 }
 
 function phabricator_datetime($epoch, $user) {
+  $time_key = PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT;
   return phabricator_format_local_time(
     $epoch,
     $user,
     pht('%s, %s',
       phutil_date_format($epoch),
-      phabricator_time_format($user)));
-}
-
-function phabricator_time_format($user) {
-  $prefs = $user->loadPreferences();
-
-  $pref = $prefs->getPreference(
-    PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT);
-
-  if (strlen($pref)) {
-    return $pref;
-  }
-
-  return pht('g:i A');
+      $user->getPreference($time_key)));
 }
 
 /**

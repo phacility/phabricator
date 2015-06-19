@@ -3288,7 +3288,6 @@ phutil_register_library_map(array(
     'phabricator_format_local_time' => 'view/viewutils.php',
     'phabricator_relative_date' => 'view/viewutils.php',
     'phabricator_time' => 'view/viewutils.php',
-    'phabricator_time_format' => 'view/viewutils.php',
     'phid_get_subtype' => 'applications/phid/utils.php',
     'phid_get_type' => 'applications/phid/utils.php',
     'phid_group_by_type' => 'applications/phid/utils.php',

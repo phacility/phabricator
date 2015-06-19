@@ -9,6 +9,7 @@ abstract class DivinerPublisher extends Phobject {
   private $config;
   private $symbolReverseMap;
   private $dropCaches;
+  private $repositoryPHID;
 
   final public function setDropCaches($drop_caches) {
     $this->dropCaches = $drop_caches;
@@ -161,6 +162,15 @@ abstract class DivinerPublisher extends Phobject {
     }
 
     return true;
+  }
+
+  final public function getRepositoryPHID() {
+    return $this->repositoryPHID;
+  }
+
+  final public function setRepositoryPHID($repository_phid) {
+    $this->repositoryPHID = $repository_phid;
+    return $this;
   }
 
 }

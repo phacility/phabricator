@@ -84,6 +84,7 @@ final class DivinerAtomController extends DivinerController {
     if ($atom) {
       $this->buildDefined($properties, $symbol);
       $this->buildExtendsAndImplements($properties, $symbol);
+      $this->buildRepository($properties, $symbol);
 
       $warnings = $atom->getWarnings();
       if ($warnings) {
@@ -292,6 +293,15 @@ final class DivinerAtomController extends DivinerController {
         pht('Implements'),
         phutil_implode_html(phutil_tag('br'), $items));
     }
+  }
+
+  private function buildRepository(
+    PHUIPropertyListView $view,
+    DivinerLiveSymbol $symbol) {
+
+    $view->addProperty(
+      pht('Repository'),
+      $this->getViewer()->renderHandle($symbol->getRepositoryPHID()));
   }
 
   private function renderAtomTag(DivinerLiveSymbol $symbol) {

@@ -30,6 +30,12 @@ final class DivinerAtomSearchIndexer extends PhabricatorSearchDocumentIndexer {
       PhabricatorTime::getNow());
 
     $doc->addRelationship(
+      PhabricatorSearchRelationship::RELATIONSHIP_REPOSITORY,
+      $atom->getRepositoryPHID(),
+      PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
+      PhabricatorTime::getNow());
+
+    $doc->addRelationship(
       $atom->getGraphHash()
         ? PhabricatorSearchRelationship::RELATIONSHIP_CLOSED
         : PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
