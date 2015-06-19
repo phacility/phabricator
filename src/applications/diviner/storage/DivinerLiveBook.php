@@ -8,11 +8,13 @@ final class DivinerLiveBook extends DivinerDAO
     PhabricatorApplicationTransactionInterface {
 
   protected $name;
+  protected $repositoryPHID;
   protected $viewPolicy;
   protected $editPolicy;
   protected $configurationData = array();
 
   private $projectPHIDs = self::ATTACHABLE;
+  private $repository = self::ATTACHABLE;
 
   protected function getConfiguration() {
     return array(
@@ -22,6 +24,7 @@ final class DivinerLiveBook extends DivinerDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text64',
+        'repositoryPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -68,6 +71,15 @@ final class DivinerLiveBook extends DivinerDAO
     return idx($spec, 'name', $group);
   }
 
+  public function attachRepository(PhabricatorRepository $repository = null) {
+    $this->repository = $repository;
+    return $this;
+  }
+
+  public function getRepository() {
+    return $this->assertAttached($this->repository);
+  }
+
   public function attachProjectPHIDs(array $project_phids) {
     $this->projectPHIDs = $project_phids;
     return $this;
@@ -98,7 +110,7 @@ final class DivinerLiveBook extends DivinerDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-      return false;
+    return false;
   }
 
   public function describeAutomaticCapability($capability) {

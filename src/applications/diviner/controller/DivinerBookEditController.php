@@ -75,6 +75,16 @@ final class DivinerBookEditController extends DivinerController {
           ->setName('projectPHIDs')
           ->setLabel(pht('Projects'))
           ->setValue($book->getProjectPHIDs()))
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource(new DiffusionRepositoryDatasource())
+          ->setName('repositoryPHIDs')
+          ->setLabel(pht('Repository'))
+          ->setDisableBehavior(true)
+          ->setLimit(1)
+          ->setValue($book->getRepositoryPHID()
+            ? array($book->getRepositoryPHID())
+            : null))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setName('viewPolicy')

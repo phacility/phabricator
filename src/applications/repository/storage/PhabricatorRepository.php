@@ -1913,7 +1913,25 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     PhabricatorDestructionEngine $engine) {
 
     $this->openTransaction();
-    $this->delete();
+
+      $this->delete();
+
+      $books = id(new DivinerBookQuery())
+        ->setViewer($engine->getViewer())
+        ->withRepositoryPHIDs(array($this->getPHID()))
+        ->execute();
+      foreach ($books as $book) {
+        $engine->destroyObject($book);
+      }
+
+      $atoms = id(new DivinerAtomQuery())
+        ->setViewer($engine->getViewer())
+        ->withRepositoryPHIDs(array($this->getPHID()))
+        ->execute();
+      foreach ($atoms as $atom) {
+        $engine->destroyObject($atom);
+      }
+
     $this->saveTransaction();
   }
 

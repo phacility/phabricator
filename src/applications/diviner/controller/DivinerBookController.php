@@ -14,6 +14,7 @@ final class DivinerBookController extends DivinerController {
     $book = id(new DivinerBookQuery())
       ->setViewer($viewer)
       ->withNames(array($book_name))
+      ->needRepositories(true)
       ->executeOne();
 
     if (!$book) {
@@ -42,6 +43,15 @@ final class DivinerBookController extends DivinerController {
       ->setPolicyObject($book)
       ->setEpoch($book->getDateModified())
       ->addActionLink($action_button);
+
+    // TODO: This could probably look better.
+    if ($book->getRepositoryPHID()) {
+      $header->addTag(
+        id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_STATE)
+          ->setBackgroundColor(PHUITagView::COLOR_BLUE)
+          ->setName($book->getRepository()->getMonogram()));
+    }
 
     $document = new PHUIDocumentView();
     $document->setHeader($header);

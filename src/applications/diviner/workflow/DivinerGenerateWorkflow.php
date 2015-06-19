@@ -25,6 +25,11 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
             'help' => pht('Specify a subclass of %s.', 'DivinerPublisher'),
             'default' => 'DivinerLivePublisher',
           ),
+          array(
+            'name' => 'repository',
+            'param' => 'callsign',
+            'help' => pht('Repository that the documentation belongs to.'),
+          ),
         ));
   }
 
@@ -186,6 +191,24 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
           'DivinerPublisher'));
     }
     $publisher = newv($publisher_class, array());
+
+    $callsign = $args->getArg('repository');
+    $repository = null;
+    if ($callsign) {
+      $repository = id(new PhabricatorRepositoryQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withCallsigns(array($callsign))
+        ->executeOne();
+
+      if (!$repository) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            "Repository '%s' does not exist.",
+            $callsign));
+      }
+
+      $publisher->setRepositoryPHID($repository->getPHID());
+    }
 
     $this->publishDocumentation($args->getArg('clean'), $publisher);
   }
