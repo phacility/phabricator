@@ -40,6 +40,14 @@
 
 }
 
+.phabricator-notification-list.pm {
+  padding: 0;
+}
+
+.phabricator-notification-list .phabricator-notification {
+  padding: 10px 4px;
+}
+
 .phabricator-notification {
   padding: 6px 8px;
 }

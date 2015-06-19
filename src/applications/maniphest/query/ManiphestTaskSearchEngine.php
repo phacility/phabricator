@@ -316,13 +316,18 @@ final class ManiphestTaskSearchEngine
         ManiphestBulkEditCapability::CAPABILITY);
     }
 
-    return id(new ManiphestTaskResultListView())
+    $list = id(new ManiphestTaskResultListView())
       ->setUser($viewer)
       ->setTasks($tasks)
       ->setSavedQuery($saved)
       ->setCanEditPriority($can_edit_priority)
       ->setCanBatchEdit($can_bulk_edit)
       ->setShowBatchControls($this->showBatchControls);
+
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setContent($list);
+
+    return $result;
   }
 
   protected function willUseSavedQuery(PhabricatorSavedQuery $saved) {

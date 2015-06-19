@@ -185,8 +185,7 @@ final class PhabricatorApplicationSearchController
       $title = pht('Advanced Search');
     }
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title);
+    $box = new PHUIObjectBoxView();
 
     if ($run_query || $named_query) {
       $box->setShowHide(
@@ -228,30 +227,45 @@ final class PhabricatorApplicationSearchController
             $saved_query);
         }
 
-        if ($list instanceof AphrontTableView) {
-          $box->setTable($list);
-        } else {
-          $box->setObjectList($list);
-        }
-
-        // TODO: This is a bit hacky.
-        if ($list instanceof PHUIObjectItemListView) {
-          $list->setNoDataString(pht('No results found for this query.'));
-        } else {
-          if ($pager->willShowPagingControls()) {
-            $pager_box = id(new PHUIBoxView())
-              ->addPadding(PHUI::PADDING_MEDIUM)
-              ->addMargin(PHUI::MARGIN_LARGE)
-              ->setBorder(true)
-              ->appendChild($pager);
-            $nav->appendChild($pager_box);
+        $header = id(new PHUIHeaderView())
+          ->setHeader($title);
+        if ($list->getActions()) {
+          foreach ($list->getActions() as $action) {
+            $header->addActionLink($action);
           }
         }
+
+        $box->setHeader($header);
+
+        if ($list->getObjectList()) {
+          $box->setObjectList($list->getObjectList());
+        }
+        if ($list->getTable()) {
+          $box->setTable($list->getTable());
+        }
+        if ($list->getInfoView()) {
+          $box->setInfoView($list->getInfoView());
+        }
+        if ($list->getContent()) {
+          $box->appendChild($list->getContent());
+        }
+
+        if ($pager->willShowPagingControls()) {
+          $pager_box = id(new PHUIBoxView())
+            ->addPadding(PHUI::PADDING_MEDIUM)
+            ->addMargin(PHUI::MARGIN_LARGE)
+            ->setBorder(true)
+            ->appendChild($pager);
+          $nav->appendChild($pager_box);
+        }
+
       } catch (PhabricatorTypeaheadInvalidTokenException $ex) {
         $errors[] = pht(
           'This query specifies an invalid parameter. Review the '.
           'query parameters and correct errors.');
       }
+    } else {
+      $box->setHeaderText($title);
     }
 
     if ($errors) {

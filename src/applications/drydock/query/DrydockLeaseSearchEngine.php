@@ -89,10 +89,14 @@ final class DrydockLeaseSearchEngine
     PhabricatorSavedQuery $saved,
     array $handles) {
 
-    return id(new DrydockLeaseListView())
+    $list = id(new DrydockLeaseListView())
       ->setUser($this->requireViewer())
-      ->setLeases($leases)
-      ->render();
+      ->setLeases($leases);
+
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setTable($list);
+
+    return $result;
   }
 
 }

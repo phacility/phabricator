@@ -170,7 +170,11 @@ final class PonderQuestionSearchEngine
       $view->addItem($item);
     }
 
-    return $view;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($view);
+    $result->setNoDataString(pht('No questions found.'));
+
+    return $result;
   }
 
 }

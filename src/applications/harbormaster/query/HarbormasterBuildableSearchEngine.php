@@ -216,7 +216,11 @@ final class HarbormasterBuildableSearchEngine
 
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No buildables found.'));
+
+    return $result;
   }
 
 }

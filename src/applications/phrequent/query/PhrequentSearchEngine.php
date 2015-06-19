@@ -189,7 +189,10 @@ final class PhrequentSearchEngine extends PhabricatorApplicationSearchEngine {
       $view->addItem($item);
     }
 
-    return $view;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($view);
+
+    return $result;
   }
 
 }

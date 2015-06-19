@@ -5,6 +5,7 @@ final class PhortuneSubscriptionTableView extends AphrontView {
   private $subscriptions;
   private $handles;
   private $isMerchantView;
+  private $notice;
 
   public function setHandles(array $handles) {
     $this->handles = $handles;
@@ -31,6 +32,11 @@ final class PhortuneSubscriptionTableView extends AphrontView {
 
   public function getIsMerchantView() {
     return $this->isMerchantView;
+  }
+
+  public function setNotice($notice) {
+    $this->notice = $notice;
+    return $this;
   }
 
   public function render() {
@@ -61,6 +67,7 @@ final class PhortuneSubscriptionTableView extends AphrontView {
     }
 
     $table = id(new AphrontTableView($rows))
+      ->setNotice($this->notice)
       ->setHeaders(
         array(
           pht('ID'),

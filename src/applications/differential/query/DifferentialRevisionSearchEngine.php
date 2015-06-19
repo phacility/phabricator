@@ -323,10 +323,15 @@ final class DifferentialRevisionSearchEngine
     if (count($views) == 1) {
       // Reduce this to a PHUIObjectItemListView so we can get the free
       // support from ApplicationSearch.
-      return head($views)->render();
+      $list = head($views)->render();
     } else {
-      return $views;
+      $list = $views;
     }
+
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setContent($list);
+
+    return $result;
   }
 
 }

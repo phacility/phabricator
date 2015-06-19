@@ -121,7 +121,10 @@ final class ReleephProductSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+
+    return $result;
   }
 
 }

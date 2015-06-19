@@ -90,6 +90,10 @@ final class AlmanacServiceSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No Almanac Services found.'));
+
+    return $result;
   }
 }

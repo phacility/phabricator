@@ -186,6 +186,9 @@ final class PhabricatorPeopleLogSearchEngine
       $table->setSearchBaseURI($this->getApplicationURI('logs/'));
     }
 
-    return $table;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setTable($table);
+
+    return $result;
   }
 }

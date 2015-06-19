@@ -275,11 +275,6 @@ span.single-display-line-content {
   display: none;
 }
 
-.aphront-table-view-device-ready {
-  width: 99%;
-  margin: 8px auto;
-}
-
 .aphront-table-view td.link {
   padding: 0;
 }

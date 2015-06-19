@@ -185,9 +185,25 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     if (!$id) {
       $id = celerity_generate_unique_node_id();
     }
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->appendChild($content)
+
+    $box = new PHUIObjectBoxView();
+
+    $interface = 'PhabricatorApplicationSearchResultView';
+    if ($content instanceof $interface) {
+      if ($content->getObjectList()) {
+        $box->setObjectList($content->getObjectList());
+      }
+      if ($content->getTable()) {
+        $box->setTable($content->getTable());
+      }
+      if ($content->getContent()) {
+        $box->appendChild($content->getContent());
+      }
+    } else {
+      $box->appendChild($content);
+    }
+
+    $box->setHeader($header)
       ->setID($id)
       ->addSigil('dashboard-panel')
       ->setMetadata(array('objectPHID' => $panel->getPHID()));

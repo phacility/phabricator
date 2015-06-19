@@ -30,7 +30,6 @@ final class PhortuneMerchantViewController
       $merchant->getName());
 
     $header = id(new PHUIHeaderView())
-      ->setObjectName(pht('Merchant %d', $merchant->getID()))
       ->setHeader($merchant->getName())
       ->setUser($viewer)
       ->setPolicyObject($merchant);

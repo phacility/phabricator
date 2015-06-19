@@ -124,7 +124,10 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
       $board->addItem($item);
     }
 
-    return $board;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setContent($board);
+
+    return $result;
   }
 
 }

@@ -69,7 +69,11 @@ final class DrydockBlueprintSearchEngine
       $view->addItem($item);
     }
 
-    return $view;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($view);
+    $result->setNoDataString(pht('No blueprints found.'));
+
+    return $result;
   }
 
 }

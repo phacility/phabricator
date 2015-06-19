@@ -196,7 +196,10 @@ final class PhabricatorConduitSearchEngine
       $out[] = $list;
     }
 
-    return $out;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setContent($out);
+
+    return $result;
   }
 
 }

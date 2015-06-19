@@ -160,6 +160,10 @@ final class PhabricatorPasteSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No pastes found.'));
+
+    return $result;
   }
 }

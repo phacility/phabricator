@@ -181,7 +181,10 @@ final class PhabricatorMacroSearchEngine
       $pinboard->addItem($item);
     }
 
-    return $pinboard;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setContent($pinboard);
+
+    return $result;
   }
 
 }

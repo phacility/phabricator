@@ -267,7 +267,10 @@ final class PhabricatorAppSearchEngine
       $results[] = $list;
     }
 
-    return $results;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setContent($results);
+
+    return $result;
   }
 
 }

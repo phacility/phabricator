@@ -108,11 +108,10 @@ final class PhabricatorRepositoryPushLogSearchEngine
       ->setHandles($handles)
       ->setLogs($logs);
 
-    $box = id(new PHUIBoxView())
-      ->addMargin(PHUI::MARGIN_LARGE)
-      ->appendChild($table);
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setTable($table);
 
-    return $box;
+    return $result;
   }
 
 }

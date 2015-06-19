@@ -171,7 +171,11 @@ final class PhabricatorFileSearchEngine
     $list_view->appendChild(id(new PhabricatorGlobalUploadTargetView())
       ->setUser($viewer));
 
-    return $list_view;
+
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setContent($list_view);
+
+    return $result;
   }
 
 }

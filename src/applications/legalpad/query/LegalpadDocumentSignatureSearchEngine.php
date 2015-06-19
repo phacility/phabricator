@@ -267,18 +267,17 @@ final class LegalpadDocumentSignatureSearchEngine
           'right',
         ));
 
-    // TODO redesign-2015 : Talk to epriestley about 'correct' way to implelment
-    /* if ($this->document) {
+    $button = null;
+    if ($this->document) {
       $document_id = $this->document->getID();
 
-      $header->addActionLink(
-        id(new PHUIButtonView())
-          ->setText(pht('Add Signature Exemption'))
+      $button = id(new PHUIButtonView())
+          ->setText(pht('Add Exemption'))
           ->setTag('a')
           ->setHref($this->getApplicationURI('addsignature/'.$document_id.'/'))
           ->setWorkflow(true)
-          ->setIcon(id(new PHUIIconView())->setIconFont('fa-pencil')));
-    }*/
+          ->setIcon(id(new PHUIIconView())->setIconFont('fa-pencil'));
+    }
 
     if (!$this->document) {
       $table->setNotice(
@@ -286,7 +285,14 @@ final class LegalpadDocumentSignatureSearchEngine
             'documents you have permission to edit.'));
     }
 
-    return $table;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setTable($table);
+    if ($button) {
+      $result->addAction($button);
+    }
+
+    return $result;
+
   }
 
   private function renderIcon($icon, $color, $title) {

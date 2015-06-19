@@ -1340,6 +1340,7 @@ phutil_register_library_map(array(
     'PhabricatorApplicationSearchController' => 'applications/search/controller/PhabricatorApplicationSearchController.php',
     'PhabricatorApplicationSearchEngine' => 'applications/search/engine/PhabricatorApplicationSearchEngine.php',
     'PhabricatorApplicationSearchEngineTestCase' => 'applications/search/engine/__tests__/PhabricatorApplicationSearchEngineTestCase.php',
+    'PhabricatorApplicationSearchResultView' => 'applications/search/view/PhabricatorApplicationSearchResultView.php',
     'PhabricatorApplicationSearchResultsControllerInterface' => 'applications/search/interface/PhabricatorApplicationSearchResultsControllerInterface.php',
     'PhabricatorApplicationStatusView' => 'applications/meta/view/PhabricatorApplicationStatusView.php',
     'PhabricatorApplicationTestCase' => 'applications/base/__tests__/PhabricatorApplicationTestCase.php',
@@ -4845,6 +4846,7 @@ phutil_register_library_map(array(
     'PhabricatorApplicationSearchController' => 'PhabricatorSearchBaseController',
     'PhabricatorApplicationSearchEngine' => 'Phobject',
     'PhabricatorApplicationSearchEngineTestCase' => 'PhabricatorTestCase',
+    'PhabricatorApplicationSearchResultView' => 'Phobject',
     'PhabricatorApplicationStatusView' => 'AphrontView',
     'PhabricatorApplicationTestCase' => 'PhabricatorTestCase',
     'PhabricatorApplicationTransaction' => array(

@@ -141,7 +141,10 @@ final class FundBackerSearchEngine
           'right',
         ));
 
-    return $table;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setTable($table);
+
+    return $result;
   }
 
 }

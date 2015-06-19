@@ -228,6 +228,9 @@ final class PhortuneCartSearchEngine
     }
     $table->setNotice($notice);
 
-    return $table;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setTable($table);
+
+    return $result;
   }
 }

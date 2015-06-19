@@ -241,7 +241,7 @@ final class PhabricatorSearchApplicationSearchEngine
 
     $viewer = $this->requireViewer();
     $list = new PHUIObjectItemListView();
-    $list->setNoDataString(pht('No results returned for that query.'));
+    $list->setNoDataString(pht('No results found.'));
 
     if ($results) {
       $objects = id(new PhabricatorObjectQuery())
@@ -259,7 +259,10 @@ final class PhabricatorSearchApplicationSearchEngine
       }
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+
+    return $result;
   }
 
   private function readOwnerPHIDs(PhabricatorSavedQuery $saved) {
