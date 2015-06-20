@@ -20,13 +20,20 @@
   float: left;
   width: 100%;
   box-shadow: {$dropshadow};
-  border: 1px solid {$lightblueborder};
+  border: 1px solid {$blueborder};
   border-radius: 3px;
   background-color: #fff;
 }
 
 .phabricator-hovercard-head .phui-header-shell {
   padding: 8px 8px 8px 12px;
+  background-color: {$lightgreybackground};
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}
+
+.phabricator-hovercard-head .phui-header-header {
+  font-size: 14px;
 }
 
 .phabricator-hovercard-head .phui-tag-type-state {
@@ -41,7 +48,7 @@
 }
 
 .phabricator-hovercard-body {
-  padding: 12px 8px;
+  padding: 12px;
   color: {$darkgreytext};
   border-bottom-right-radius: 3px;
   border-bottom-left-radius: 3px;
