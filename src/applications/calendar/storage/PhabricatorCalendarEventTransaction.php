@@ -254,11 +254,37 @@ final class PhabricatorCalendarEventTransaction
         }
         return $text;
       case self::TYPE_RECURRING:
+        $text = pht('%s made this event recurring.',
+          $this->renderHandleLink($author_phid));
+        return $text;
       case self::TYPE_FREQUENCY:
+        $text = '';
+        switch ($new['rule']) {
+          case PhabricatorCalendarEvent::FREQUENCY_DAILY:
+            $text = pht('%s set this event to repeat daily.',
+              $this->renderHandleLink($author_phid));
+            break;
+          case PhabricatorCalendarEvent::FREQUENCY_WEEKLY:
+            $text = pht('%s set this event to repeat weekly.',
+              $this->renderHandleLink($author_phid));
+            break;
+          case PhabricatorCalendarEvent::FREQUENCY_MONTHLY:
+            $text = pht('%s set this event to repeat monthly.',
+              $this->renderHandleLink($author_phid));
+            break;
+          case PhabricatorCalendarEvent::FREQUENCY_YEARLY:
+            $text = pht('%s set this event to repeat yearly.',
+              $this->renderHandleLink($author_phid));
+            break;
+        }
+        return $text;
       case self::TYPE_RECURRENCE_END_DATE:
+        $text = pht('%s has changed the recurrence end date of this event.',
+          $this->renderHandleLink($author_phid));
+        return $text;
       case self::TYPE_INSTANCE_OF_EVENT:
       case self::TYPE_SEQUENCE_INDEX:
-        return pht('Recurring event has been updated');
+        return pht('Recurring event has been updated.');
     }
     return parent::getTitle();
   }
@@ -438,11 +464,44 @@ final class PhabricatorCalendarEventTransaction
         }
         return $text;
       case self::TYPE_RECURRING:
+        $text = pht('%s made %s a recurring event.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+        return $text;
       case self::TYPE_FREQUENCY:
+        $text = '';
+        switch ($new['rule']) {
+          case PhabricatorCalendarEvent::FREQUENCY_DAILY:
+            $text = pht('%s set %s to repeat daily.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+            break;
+          case PhabricatorCalendarEvent::FREQUENCY_WEEKLY:
+            $text = pht('%s set %s to repeat weekly.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+            break;
+          case PhabricatorCalendarEvent::FREQUENCY_MONTHLY:
+            $text = pht('%s set %s to repeat monthly.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+            break;
+          case PhabricatorCalendarEvent::FREQUENCY_YEARLY:
+            $text = pht('%s set %s to repeat yearly.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+            break;
+        }
+        return $text;
       case self::TYPE_RECURRENCE_END_DATE:
+        $text = pht('%s set the recurrence end date of %s to %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid),
+          $new);
+        return $text;
       case self::TYPE_INSTANCE_OF_EVENT:
       case self::TYPE_SEQUENCE_INDEX:
-        return pht('Recurring event has been updated');
+        return pht('Recurring event has been updated.');
     }
 
     return parent::getTitleForFeed();
