@@ -47,7 +47,7 @@ final class PhabricatorUIConfigOptions
 EOJSON;
 
     return array(
-      $this->newOption('ui.header-color', 'enum', 'light')
+      $this->newOption('ui.header-color', 'enum', 'blindigo')
         ->setDescription(
           pht('Sets the color of the main header.'))
         ->setEnumOptions($options),

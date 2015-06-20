@@ -71,3 +71,25 @@
   border-left: 1px solid {$lightblueborder};
   border-right: 1px solid {$lightblueborder};
 }
+
+/*--- Dark "Classic" ---------------------------------------------------------*/
+
+.phui-theme-dark {
+  background-color: #ebecee;
+}
+
+.phui-theme-dark .phui-box-border {
+  border-color: {$lightblueborder};
+  border-bottom-color: {$blueborder};
+}
+
+/*--- Blindigo "Phacility" ---------------------------------------------------*/
+
+.phui-theme-blindigo {
+  background-color: #F1F1F4;
+}
+
+.phui-theme-blindigo .phui-box-border {
+  border-color: {$lightblueborder};
+  border-bottom-color: {$blueborder};
+}
