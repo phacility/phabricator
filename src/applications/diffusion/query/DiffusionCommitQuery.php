@@ -17,6 +17,9 @@ final class DiffusionCommitQuery
   private $auditorPHIDs;
   private $auditAwaitingUser;
   private $auditStatus;
+  private $epochMin;
+  private $epochMax;
+  private $importing;
 
   const AUDIT_STATUS_ANY       = 'audit-status-any';
   const AUDIT_STATUS_OPEN      = 'audit-status-open';
@@ -138,6 +141,17 @@ final class DiffusionCommitQuery
 
   public function withAuditStatus($status) {
     $this->auditStatus = $status;
+    return $this;
+  }
+
+  public function withEpochRange($min, $max) {
+    $this->epochMin = $min;
+    $this->epochMax = $max;
+    return $this;
+  }
+
+  public function withImporting($importing) {
+    $this->importing = $importing;
     return $this;
   }
 
@@ -327,6 +341,36 @@ final class DiffusionCommitQuery
         $conn_r,
         'commit.authorPHID IN (%Ls)',
         $this->authorPHIDs);
+    }
+
+    if ($this->epochMin !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'commit.epoch >= %d',
+        $this->epochMin);
+    }
+
+    if ($this->epochMax !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'commit.epoch <= %d',
+        $this->epochMax);
+    }
+
+    if ($this->importing !== null) {
+      if ($this->importing) {
+        $where[] = qsprintf(
+          $conn_r,
+          '(commit.importStatus & %d) != %d',
+          PhabricatorRepositoryCommit::IMPORTED_ALL,
+          PhabricatorRepositoryCommit::IMPORTED_ALL);
+      } else {
+        $where[] = qsprintf(
+          $conn_r,
+          '(commit.importStatus & %d) = %d',
+          PhabricatorRepositoryCommit::IMPORTED_ALL,
+          PhabricatorRepositoryCommit::IMPORTED_ALL);
+      }
     }
 
     if ($this->identifiers !== null) {
