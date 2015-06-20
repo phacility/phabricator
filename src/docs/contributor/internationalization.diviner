@@ -9,57 +9,370 @@ Overview
 Phabricator partially supports internationalization, but many of the tools
 are missing or in a prototype state.
 
-This document very briefly summarizes some of what exists today.
+This document describes what tools exist today, how to add new translations,
+and how to use the translation tools to make a codebase translatable.
+
+
+Adding a New Locale
+===================
+
+To add a new locale, subclass @{class:PhutilLocale}. This allows you to
+introduce a new locale, like "German" or "Klingon".
+
+Once you've created a locale, applications can add translations for that
+locale.
+
+For instructions on adding new classes, see @{article:Adding New Classes}.
+
+
+Adding Translations to Locale
+=============================
+
+To translate strings, subclass @{class:PhutilTranslation}. Translations need
+to belong to a locale: the locale defines an available language, and each
+translation subclass provides strings for it.
+
+Translations are separated from locales so that third-party applications can
+provide translations into different locales without needing to define those
+locales themselves.
+
+For instructions on adding new classes, see @{article:Adding New Classes}.
+
 
 Writing Translatable Code
-========
+=========================
 
 Strings are marked for translation with @{function@libphutil:pht}.
 
-Adding a New Locale
-=========
+The `pht()` function takes a string (and possibly some parameters) and returns
+the translated version of that string in the current viewer's locale, if a
+translation is available.
 
-To add a new locale, subclass @{class:PhutilLocale}.
+If text strings will ultimately be read by humans, they should essentially
+always be wrapped in `pht()`. For example:
 
-Translating Strings
-========
+```lang=php
+$dialog->appendParagraph(pht('This is an example.'));
+```
 
-To translate strings, subclass @{class:PhutilTranslation}.
+This allows the code to return the correct Spanish or German or Russian
+version of the text, if the viewer is using Phabricator in one of those
+languages and a translation is available.
+
+Using `pht()` properly so that strings are translatable can be tricky. Briefly,
+the major rules are:
+
+  - Only pass static strings as the first parameter to `pht()`.
+  - Use parameters to create strings containing user names, object names, etc.
+  - Translate full sentences, not sentence fragments.
+  - Let the translation framework handle plural rules.
+  - Use @{class@libphutil:PhutilNumber} for numbers.
+  - Let the translation framework handle subject gender rules.
+  - Translate all human-readable text, even exceptions and error messages.
+
+See the next few sections for details on these rules.
+
+
+Use Static Strings
+==================
+
+The first parameter to `pht()` must always be a static string. Broadly, this
+means it should not contain variables or function or method calls (it's OK to
+split it across multiple lines and concatenate the parts together).
+
+These are good:
+
+```lang=php
+pht('The night is dark.');
+pht(
+  'Two roads diverged in a yellow wood, '.
+  'and sorry I could not travel both '.
+  'and be one traveler, long I stood.');
+
+```
+
+These won't work (they might appear to work, but are wrong):
+
+```lang=php, counterexample
+pht(some_function());
+pht('The duck says, '.$quack);
+pht($string);
+```
+
+The first argument must be a static string so it can be extracted by static
+analysis tools and dumped in a big file for translators. If it contains
+functions or variables, it can't be extracted, so translators won't be able to
+translate it.
+
+Lint will warn you about problems with use of static strings in calls to
+`pht()`.
+
+
+Parameters
+==========
+
+You can provide parameters to a translation string by using `sprintf()`-style
+patterns in the input string. For example:
+
+```lang=php
+pht('%s earned an award.', $actor);
+pht('%s closed %s.', $actor, $task);
+```
+
+This is primarily appropriate for usernames, object names, counts, and
+untranslatable strings like URIs or instructions to run commands from the CLI.
+
+Parameters normally should not be used to combine two pieces of translated
+text: see the next section for guidance.
+
+Sentence Fragments
+==================
+
+You should almost always pass the largest block of text to `pht()` that you
+can. Particularly, it's important to pass complete sentences, not try to build
+a translation by stringing together sentence fragments.
+
+There are several reasons for this:
+
+  - It gives translators more context, so they can be more confident they are
+    producing a satisfying, natural-sounding translation which will make sense
+    and sound good to native speakers.
+  - In some languages, one fragment may need to translate differently depending
+    on what the other fragment says.
+  - In some languages, the most natural-sounding translation may change the
+    order of words in the sentence.
+
+For example, suppose we want to translate these sentence to give the user some
+instructions about how to use an interface:
+
+> Turn the switch to the right.
+
+> Turn the switch to the left.
+
+> Turn the dial to the right.
+
+> Turn the dial to the left.
+
+Maybe we have a function like this:
+
+```
+function get_string($is_switch, $is_right) {
+  // ...
+}
+```
+
+One way to write the function body would be like this:
+
+```lang=php, counterexample
+$what = $is_switch ? pht('switch') : pht('dial');
+$dir = $is_right ? pht('right') : pht('left');
+
+return pht('Turn the ').$what.pht(' to the ').$dir.pht('.');
+```
+
+This will work fine in English, but won't work well in other languages.
+
+One problem with doing this is handling gendered nouns. Languages like Spanish
+have gendered nouns, where some nouns are "masculine" and others are
+"feminine". The gender of a noun affects which article (in English, the word
+"the" is an article) should be used with it.
+
+In English, we say "**the** knob" and "**the** switch", but a Spanish speaker
+would say "**la** perilla" and "**el** interruptor", because the noun for
+"knob" in Spanish is feminine (so it is used with the article "la") while the
+noun for "switch" is masculine (so it is used with the article "el").
+
+A Spanish speaker can not translate the string "Turn the" correctly without
+knowing which gender the noun has. Spanish has //two// translations for this
+string ("Gira el", "Gira la"), and the form depends on which noun is being
+used.
+
+Another problem is that this reduces flexibility. Translating fragments like
+this locks translators into a specific word order, when rearranging the words
+might make the sentence sound much more natural to a native speaker.
+
+For example, if the string read "The knob, to the right, turn it.", it
+would technically be English and most English readers would understand the
+meaning, but no native English speaker would speak or write like this.
+
+However, some languages have different subject-verb order rules or
+colloquisalisms, and a word order which transliterates like this may sound more
+natural to a native speaker. By translating fragments instead of complete
+sentences, you lock translators into English word order.
+
+Finally, the last fragment is just a period. If a translator is presented with
+this string in an interface without much context, they have no hope of guessing
+how it is used in the software (it could be an end-of-sentence marker, or a
+decimal point, or a date separator, or a currency separator, all of which have
+very different translations in many locales). It will also conflict with all
+other translations of the same string in the codebase, so even if they are
+given context they can't translate it without technical problems.
+
+To avoid these issues, provide complete sentences for translation. This almost
+always takes the form of writing out alternatives in full. This is a good way
+to implement the example function:
+
+```lang=php
+if ($is_switch) {
+  if ($is_right) {
+    return pht('Turn the switch to the right.');
+  } else {
+    return pht('Turn the switch to the left.');
+  }
+} else {
+  if ($is_right) {
+    return pht('Turn the dial to the right.');
+  } else {
+    return pht('Turn the dial to the left.');
+  }
+}
+```
+
+Although this is more verbose, translators can now get genders correct,
+rearrange word order, and have far more context when translating. This enables
+better, natural-sounding translations which are more satisfying to native
+speakers.
+
 
 Singular and Plural
-========
+===================
 
-Different languages have various rules for using singular and plural. All you
-need to do is to call @{function@libphutil:pht} with a text that is suitable for
-both forms. Example:
+Different languages have various rules for plural nouns.
 
-  pht('%d beer(s)', $count);
+In English there are usually two plural noun forms: for one thing, and any
+other number of things. For example, we say that one chair is a "chair" and any
+other number of chairs are "chairs": "0 chairs", "1 chair", "2 chairs", etc.
 
-Translators will translate this text for all different forms the language uses:
+In other languages, there are different (and, in some cases, more) plural
+forms. For example, in Czech, there are separate forms for "one", "several",
+and "many".
 
-  // English translation
-  array('%d beer', '%d beers');
+Because plural noun rules depend on the language, you should not write code
+which hard-codes English rules. For example, this won't translate well:
 
-  // Czech translation
-  array('%d pivo', '%d piva', '%d piv');
+```lang=php, counterexample
+if ($count == 1) {
+  return pht('This will take an hour.');
+} else {
+  return pht('This will take hours.');
+}
+```
 
-The ugly identifier passed to @{function@libphutil:pht} will remain in the text
-only if the translation doesn't exist.
+This code is hard-coding the English rule for plural nouns. In languages like
+Czech, the correct word for "hours" may be different if the count is 2 or 15,
+but a translator won't be able to provide the correct translation if the string
+is written like this.
+
+Instead, pass a generic string to the translation engine which //includes// the
+number of objects, and let it handle plural nouns. This is the correct way to
+write the translation:
+
+```lang=php
+return pht('This will take %s hour(s).', new PhutilNumber($count));
+```
+
+If you now load the web UI, you'll see "hour(s)" literally in the UI. To fix
+this so the translation sounds better in English, provide translations for this
+string in the @{class@phabricator:PhabricatorUSEnglishTranslation} file:
+
+```lang=php
+'This will take %s hour(s).' => array(
+  'This will take an hour.',
+  'This will take hours.',
+),
+```
+
+The string will then sound natural in English, but non-English translators will
+also be able to produce a natural translation.
+
+Note that the translations don't actually include the number in this case. The
+number is being passed from the code, but that just lets the translation engine
+get the rules right: the number does not need to appear in the final
+translations shown to the user.
+
+Using PhutilNumber
+==================
+
+When translating numbers, you should almost always use `%s` and wrap the count
+or number in `new PhutilNumber($count)`. For example:
+
+```lang=php
+pht('You have %s experience point(s).', new PhutilNumber($xp));
+```
+
+This will let the translation engine handle plural noun rules correctly, and
+also format large numbers correctly in a locale-aware way with proper unit and
+decimal separators (for example, `1000000` may be printed as "1,000,000",
+with commas for readability).
+
+The exception to this rule is IDs which should not be written with unit
+separators. For example, this is correct for an object ID:
+
+```lang=php
+pht('This diff has ID %d.', $diff->getID());
+```
 
 Male and Female
-========
+===============
 
-Different languages use different words for talking about males, females and
-unknown genders. Callsites have to call @{function@libphutil:pht} passing
-@{class:PhabricatorUser} (or other implementation of
-@{interface@libphutil:PhutilPerson}) if talking about the user. Example:
+Different languages also use different words for talking about subjects who are
+male, female or have an unknown gender. In English this is mostly just
+pronouns (like "he" and "she") but there are more complex rules in other
+languages, and languages like Czech also require verb agreement.
 
-  pht('%s wrote', $actor);
+When a parameter refers to a gendered person, pass an object which implements
+@{interface@libphutil:PhutilPerson} to `pht()` so translators can provide
+gendered translation variants.
 
-Translators will create this translations:
+```lang=php
+pht('%s wrote', $actor);
+```
 
-  // English translation
-  '%s wrote';
+Translators will create these translations:
 
-  // Czech translation
-  array('%s napsal', '%s napsala');
+```lang=php
+// English translation
+'%s wrote';
+
+// Czech translation
+array('%s napsal', '%s napsala');
+```
+
+(You usually don't need to worry very much about this rule, it is difficult to
+get wrong in standard code.)
+
+
+Exceptions and Errors
+=====================
+
+You should translate all human-readable text, even exceptions and error
+messages. This is primarily a rule of convenience which is straightforward
+and easy to follow, not a technical rule.
+
+Some exceptions and error messages don't //technically// need to be translated,
+as they will never be shown to a user, but many exceptions and error messages
+are (or will become) user-facing on some way. When writing a message, there is
+often no clear and objective way to determine which type of message you are
+writing. Rather than try to distinguish which are which, we simply translate
+all human-readable text. This rule is unambiguous and easy to follow.
+
+In cases where similar error or exception text is often repeated, it is
+probably appropriate to define an exception for that category of error rather
+than write the text out repeatedly, anyway. Two examples are
+@{class@libphutil:PhutilInvalidStateException} and
+@{class@libphutil:PhutilMethodNotImplementedException}, which mostly exist to
+produce a consistent message about a common error state in a convenient way.
+
+There are a handful of error strings in the codebase which may be used before
+the translation framework is loaded, or may be used during handling other
+errors, possibly rasised from within the translation framework. This handful
+of special cases are left untranslated to prevent fatals and cycles in the
+error handler.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - adding a new locale or translation file with @{article:Adding New Classes}.

@@ -27,10 +27,10 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
       new HarbormasterBuildPlanTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    $title = pht('Plan %d', $id);
+    $title = $plan->getName();
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($title)
+      ->setHeader($plan->getName())
       ->setUser($viewer)
       ->setPolicyObject($plan);
 

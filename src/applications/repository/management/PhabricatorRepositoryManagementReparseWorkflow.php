@@ -84,11 +84,16 @@ final class PhabricatorRepositoryManagementReparseWorkflow
               '--all'),
           ),
           array(
+            'name' => 'importing',
+            'help' => pht(
+              'Reparse all steps which have not yet completed.'),
+          ),
+          array(
             'name'    => 'force-autoclose',
             'help'    => pht(
-              'Only used with __%s, use this to make sure any '.
+              'Only used with __%s__, use this to make sure any '.
               'pertinent diffs are closed regardless of configuration.',
-              '--message__'),
+              '--message'),
           ),
         ));
 
@@ -106,6 +111,7 @@ final class PhabricatorRepositoryManagementReparseWorkflow
     $force = $args->getArg('force');
     $force_local = $args->getArg('force-local');
     $min_date = $args->getArg('min-date');
+    $importing = $args->getArg('importing');
 
     if (!$all_from_repo && !$reparse_what) {
       throw new PhutilArgumentUsageException(
@@ -123,16 +129,31 @@ final class PhabricatorRepositoryManagementReparseWorkflow
           $commits));
     }
 
-    if (!$reparse_message && !$reparse_change && !$reparse_herald &&
-      !$reparse_owners) {
+    $any_step = ($reparse_message ||
+      $reparse_change ||
+      $reparse_herald ||
+      $reparse_owners);
+
+    if ($any_step && $importing) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Specify what information to reparse with %s, %s, %s, and/or %s.',
+          'Choosing steps with %s conflicts with flags which select '.
+          'specific steps.',
+          '--importing'));
+    } else if ($any_step) {
+      // OK.
+    } else if ($importing) {
+      // OK.
+    } else if (!$any_step && !$importing) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Specify which steps to reparse with %s, or %s, %s, %s, or %s.',
+          '--importing',
           '--message',
           '--change',
           '--herald',
           '--owners'));
-      }
+    }
 
     $min_timestamp = false;
     if ($min_date) {
@@ -179,27 +200,28 @@ final class PhabricatorRepositoryManagementReparseWorkflow
         throw new PhutilArgumentUsageException(
           pht('Unknown repository %s!', $all_from_repo));
       }
-      $constraint = '';
+
+
+      $query = id(new DiffusionCommitQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withRepository($repository);
+
       if ($min_timestamp) {
-        $console->writeOut("%s\n", pht(
-          'Excluding entries before UNIX timestamp: %s',
-          $min_timestamp));
-        $table = new PhabricatorRepositoryCommit();
-        $conn_r = $table->establishConnection('r');
-        $constraint = qsprintf(
-          $conn_r,
-          'AND epoch >= %d',
-          $min_timestamp);
+        $query->withEpochRange($min_timestamp, null);
       }
-      $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
-        'repositoryID = %d %Q',
-        $repository->getID(),
-        $constraint);
+
+      if ($importing) {
+        $query->withImporting(true);
+      }
+
+      $commits = $query->execute();
+
       $callsign = $repository->getCallsign();
       if (!$commits) {
-        throw new PhutilArgumentUsageException(pht(
-          "No commits have been discovered in %s repository!\n",
-          $callsign));
+        throw new PhutilArgumentUsageException(
+          pht(
+            'No commits have been discovered in %s repository!',
+            $callsign));
       }
     } else {
       $commits = array();
@@ -250,6 +272,26 @@ final class PhabricatorRepositoryManagementReparseWorkflow
 
     $tasks = array();
     foreach ($commits as $commit) {
+      if ($importing) {
+        $status = $commit->getImportStatus();
+        // Find the first missing import step and queue that up.
+        $reparse_message = false;
+        $reparse_change = false;
+        $reparse_owners = false;
+        $reparse_herald = false;
+        if (!($status & PhabricatorRepositoryCommit::IMPORTED_MESSAGE)) {
+          $reparse_message = true;
+        } else if (!($status & PhabricatorRepositoryCommit::IMPORTED_CHANGE)) {
+          $reparse_change = true;
+        } else if (!($status & PhabricatorRepositoryCommit::IMPORTED_OWNERS)) {
+          $reparse_owners = true;
+        } else if (!($status & PhabricatorRepositoryCommit::IMPORTED_HERALD)) {
+          $reparse_herald = true;
+        } else {
+          continue;
+        }
+      }
+
       $classes = array();
       switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
@@ -287,9 +329,13 @@ final class PhabricatorRepositoryManagementReparseWorkflow
         $classes[] = 'PhabricatorRepositoryCommitOwnersWorker';
       }
 
+      // NOTE: With "--importing", we queue the first unparsed step and let
+      // it queue the other ones normally. Without "--importing", we queue
+      // all the requested steps explicitly.
+
       $spec = array(
         'commitID'  => $commit->getID(),
-        'only'      => true,
+        'only'      => !$importing,
         'forceAutoclose' => $args->getArg('force-autoclose'),
       );
 
