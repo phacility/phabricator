@@ -2,7 +2,7 @@
   "name": "phabcontrib",
   "title": "Phabricator Contributor Documentation",
   "short": "Phabricator Contributor Docs",
-  "preface": "Information for Phabricator contributors.",
+  "preface": "Information for Phabricator contributors and developers.",
   "root": "../../../",
   "uri.source":
     "https://secure.phabricator.com/diffusion/P/browse/master/%f$%l",

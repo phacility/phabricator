@@ -21,7 +21,7 @@ To install event listeners in Phabricator, follow these steps:
 
   - Write a listener class which extends @{class@libphutil:PhutilEventListener}.
   - Add it to a libphutil library, or create a new library (for instructions,
-    see @{article:libphutil Libraries User Guide}.
+    see @{article@contributor:Adding New Classes}.
   - Configure Phabricator to load the library by adding it to `load-libraries`
     in the Phabricator config.
   - Configure Phabricator to install the event listener by adding the class
@@ -38,7 +38,7 @@ To install event listeners in Arcanist, follow these steps:
 
   - Write a listener class which extends @{class@libphutil:PhutilEventListener}.
   - Add it to a libphutil library, or create a new library (for instructions,
-    see @{article:libphutil Libraries User Guide}.
+    see @{article@contributor:Adding New Classes}.
   - Configure Phabricator to load the library by adding it to `load`
     in the Arcanist config (e.g., `.arcconfig`, or user/global config).
   - Configure Arcanist to install the event listener by adding the class
