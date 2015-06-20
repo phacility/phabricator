@@ -75,7 +75,7 @@
 /*--- Dark "Classic" ---------------------------------------------------------*/
 
 .phui-theme-dark {
-  background-color: #ebecee;
+  background-color: {$page.background.dark};
 }
 
 .phui-theme-dark .phui-box-border {

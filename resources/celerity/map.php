@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '87e6e18f',
+    'core.pkg.css' => '173fc33c',
     'core.pkg.js' => 'f1e8abd7',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => 'fe951924',
@@ -33,7 +33,7 @@ return array(
     'rsrc/css/aphront/typeahead.css' => '0e403212',
     'rsrc/css/application/almanac/almanac.css' => 'dbb9b3af',
     'rsrc/css/application/auth/auth.css' => 'dc62cb0e',
-    'rsrc/css/application/base/main-menu-view.css' => '44b4a289',
+    'rsrc/css/application/base/main-menu-view.css' => '3cd48671',
     'rsrc/css/application/base/notification-menu.css' => 'f31c0bde',
     'rsrc/css/application/base/phabricator-application-launch-view.css' => '9a233ed6',
     'rsrc/css/application/base/phui-theme.css' => 'd4a49411',
@@ -107,7 +107,7 @@ return array(
     'rsrc/css/application/slowvote/slowvote.css' => '266df6a1',
     'rsrc/css/application/tokens/tokens.css' => '3d0f239e',
     'rsrc/css/application/uiexample/example.css' => '528b19de',
-    'rsrc/css/core/core.css' => '47adcf87',
+    'rsrc/css/core/core.css' => 'a76cefc9',
     'rsrc/css/core/remarkup.css' => 'a4f23e80',
     'rsrc/css/core/syntax.css' => '9fd11da8',
     'rsrc/css/core/z-index.css' => '63689f49',
@@ -708,7 +708,7 @@ return array(
     'phabricator-busy' => '59a7976a',
     'phabricator-chatlog-css' => 'f1971c1c',
     'phabricator-content-source-view-css' => '4b8b05d4',
-    'phabricator-core-css' => '47adcf87',
+    'phabricator-core-css' => 'a76cefc9',
     'phabricator-countdown-css' => '86b7b0a0',
     'phabricator-dashboard-css' => 'eb458607',
     'phabricator-drag-and-drop-file-upload' => '07de8873',
@@ -722,7 +722,7 @@ return array(
     'phabricator-hovercard-view-css' => '0a08eb6c',
     'phabricator-keyboard-shortcut' => '1ae869f2',
     'phabricator-keyboard-shortcut-manager' => 'c1700f6f',
-    'phabricator-main-menu-view' => '44b4a289',
+    'phabricator-main-menu-view' => '3cd48671',
     'phabricator-nav-view-css' => '0ecd30a1',
     'phabricator-notification' => '0c6946e7',
     'phabricator-notification-css' => '9c279160',
@@ -1063,6 +1063,9 @@ return array(
       'javelin-util',
       'javelin-uri',
     ),
+    '3cd48671' => array(
+      'phui-theme-css',
+    ),
     '3ee3408b' => array(
       'javelin-behavior',
       'javelin-behavior-device',
@@ -1093,9 +1096,6 @@ return array(
       'javelin-util',
       'javelin-uri',
       'javelin-install',
-    ),
-    '44b4a289' => array(
-      'phui-theme-css',
     ),
     '453c5375' => array(
       'javelin-behavior',

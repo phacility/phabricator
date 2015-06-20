@@ -322,7 +322,9 @@ final class PhabricatorFileComposeController
   private function composeImage($color, $icon_data) {
     $icon_img = imagecreatefromstring($icon_data);
 
-    $map = CelerityResourceTransformer::getCSSVariableMap();
+    $map = id(new CelerityResourceTransformer())
+      ->getCSSVariableMap();
+
     $color_string = idx($map, $color, '#ff00ff');
     $color_const = hexdec(trim($color_string, '#'));
 

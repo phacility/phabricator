@@ -59,6 +59,19 @@ final class AphrontAjaxResponse extends AphrontResponse {
     $this->encodeJSONForHTTPResponse($content);
 
     $response = CelerityAPI::getStaticResourceResponse();
+
+    $request = $this->getRequest();
+    if ($request) {
+      $viewer = $request->getViewer();
+      if ($viewer) {
+        $postprocessor_key = $viewer->getPreference(
+          PhabricatorUserPreferences::PREFERENCE_RESOURCE_POSTPROCESSOR);
+        if (strlen($postprocessor_key)) {
+          $response->setPostprocessorKey($postprocessor_key);
+        }
+      }
+    }
+
     $object = $response->buildAjaxResponse(
       $content['payload'],
       $this->error);

@@ -17,7 +17,7 @@
 
 .phabricator-main-menu-background {
   min-height: 43px;
-  background: #ebecee;
+  background-color: #ebecee;
   border-bottom: 1px solid rgba(0,0,0,.1);
 }
 
