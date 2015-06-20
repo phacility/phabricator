@@ -31,6 +31,7 @@
 }
 
 .phui-document-view .phabricator-remarkup h2.remarkup-header {
+  font-size: 22px;
   padding: 24px 24px 8px 0;
   border-bottom: 1px solid {$thinblueborder};
   color: #000;
