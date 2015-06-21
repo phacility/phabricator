@@ -354,13 +354,16 @@ final class PHUITimelineEventView extends AphrontView {
       ),
       '');
 
-    $image = phutil_tag(
-      'div',
-      array(
-        'style' => 'background-image: url('.$image_uri.')',
-        'class' => 'phui-timeline-image',
-      ),
-      '');
+    $image = null;
+    if ($image_uri) {
+      $image = phutil_tag(
+        'div',
+        array(
+          'style' => 'background-image: url('.$image_uri.')',
+          'class' => 'phui-timeline-image',
+        ),
+        '');
+    }
 
     $content_classes = array();
     $content_classes[] = 'phui-timeline-content';

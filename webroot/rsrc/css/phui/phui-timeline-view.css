@@ -105,16 +105,16 @@
 }
 
 .device-desktop .phui-timeline-major-event .phui-timeline-image {
-  width: 48px;
-  height: 48px;
+  width: 50px;
+  height: 50px;
   top: 0px;
   left: -62px;
 }
 
 .device-desktop .phui-timeline-minor-event .phui-timeline-image {
-  width: 26px;
-  height: 26px;
-  background-size: 26px auto;
+  width: 28px;
+  height: 28px;
+  background-size: 28px auto;
   left: -41px;
 }
 
