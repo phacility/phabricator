@@ -300,6 +300,10 @@ final class DivinerAtomController extends DivinerController {
     PHUIPropertyListView $view,
     DivinerLiveSymbol $symbol) {
 
+    if (!$symbol->getRepositoryPHID()) {
+      return;
+    }
+
     $view->addProperty(
       pht('Repository'),
       $this->getViewer()->renderHandle($symbol->getRepositoryPHID()));
