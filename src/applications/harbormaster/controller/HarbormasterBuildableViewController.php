@@ -248,7 +248,13 @@ final class HarbormasterBuildableViewController
       $build_list->addItem($item);
     }
 
-    return $build_list;
+    $build_list->setFlush(true);
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Builds'))
+      ->appendChild($build_list);
+
+    return $box;
   }
 
 }

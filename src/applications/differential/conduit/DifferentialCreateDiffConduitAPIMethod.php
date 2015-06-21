@@ -160,7 +160,8 @@ final class DifferentialCreateDiffConduitAPIMethod
 
     return array(
       'diffid' => $diff->getID(),
-      'uri'    => $uri,
+      'phid' => $diff->getPHID(),
+      'uri' => $uri,
     );
   }
 
