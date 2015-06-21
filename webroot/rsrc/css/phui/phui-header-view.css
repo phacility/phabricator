@@ -146,20 +146,31 @@ body .phui-header-shell.phui-bleed-header
 
 .phui-header-subheader .phui-header-status-dark {
   color: {$sh-indigotext};
+  background: {$sh-indigobackground};
   margin-right: 8px;
+  padding: 4px 8px;
+  border-radius: 3px;
 }
 
 .phui-header-subheader .phui-header-status-dark .phui-icon-view {
-  color: {$indigo};
+  color: {$sh-indigotext};
 }
 
 .phui-header-subheader .phui-header-status-red {
   color: {$sh-redtext};
+  background: {$sh-redbackground};
+  margin-right: 8px;
+  padding: 4px 8px;
+  border-radius: 3px;
   margin-right: 8px;
 }
 
 .phui-header-subheader .phui-header-status-green {
   color: {$sh-greentext};
+  background: {$sh-greenbackground};
+  margin-right: 8px;
+  padding: 4px 8px;
+  border-radius: 3px;
   margin-right: 8px;
 }
 
