@@ -102,12 +102,17 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
   public function getPolicy($capability) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::getMostOpenPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        // NOTE: In practice, this policy is always limited by the "Mangage
+        // Build Plans" policy.
         return PhabricatorPolicies::getMostOpenPolicy();
     }
   }
@@ -119,4 +124,5 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
   public function describeAutomaticCapability($capability) {
     return null;
   }
+
 }
