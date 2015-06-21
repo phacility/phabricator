@@ -50,6 +50,7 @@ final class ManiphestTaskListView extends ManiphestView {
 
     $status_map = ManiphestTaskStatus::getTaskStatusMap();
     $color_map = ManiphestTaskPriority::getColorMap();
+    $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
 
     if ($this->showBatchControls) {
       Javelin::initBehavior('maniphest-list-editor');
@@ -69,6 +70,10 @@ final class ManiphestTaskListView extends ManiphestView {
       }
 
       $status = $task->getStatus();
+      $pri = idx($priority_map, $task->getPriority());
+      $status_name = idx($status_map, $task->getStatus());
+      $tooltip = pht('%s, %s', $status_name, $pri);
+
       // TODO: redesign-2015 move icon map to maniphest.statuses
       $icon = 'fa-exclamation-circle ';
       $icon .= idx($color_map, $task->getPriority(), 'grey');
@@ -76,7 +81,8 @@ final class ManiphestTaskListView extends ManiphestView {
         $item->setDisabled(true);
         $icon = 'fa-check-square-o grey';
       }
-      $item->setStatusIcon($icon, idx($status_map, $task->getStatus()));
+
+      $item->setStatusIcon($icon, $tooltip);
 
       $item->addIcon(
         'none',

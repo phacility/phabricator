@@ -672,7 +672,7 @@ final class PHUIObjectItemView extends AphrontTagView {
 
     if (strlen($label)) {
       $options['sigil'] = 'has-tooltip';
-      $options['meta']  = array('tip' => $label);
+      $options['meta']  = array('tip' => $label, 'size' => 300);
     }
 
     return javelin_tag('div', $options, $icon);
