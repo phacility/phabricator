@@ -341,10 +341,10 @@ final class PhabricatorCalendarEventEditController
       $recurrence_frequency_select = id(new AphrontFormSelectControl())
         ->setName('frequency')
         ->setOptions(array(
-            'daily' => pht('Daily'),
-            'weekly' => pht('Weekly'),
-            'monthly' => pht('Monthly'),
-            'yearly' => pht('Yearly'),
+            PhabricatorCalendarEvent::FREQUENCY_DAILY => pht('Daily'),
+            PhabricatorCalendarEvent::FREQUENCY_WEEKLY => pht('Weekly'),
+            PhabricatorCalendarEvent::FREQUENCY_MONTHLY => pht('Monthly'),
+            PhabricatorCalendarEvent::FREQUENCY_YEARLY => pht('Yearly'),
           ))
         ->setValue($frequency)
         ->setLabel(pht('Recurring Event Frequency'))

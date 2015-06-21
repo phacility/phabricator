@@ -180,4 +180,3 @@ them to get it working.
  - @{article:Arcanist User Guide: Customizing Existing Linters}
  - @{article:Arcanist User Guide: Customizing Lint, Unit Tests and Workflows}
  - @{article:Arcanist User Guide: Code Coverage}
- - @{article:Arcanist User Guide: Repository Hooks}
