@@ -3,27 +3,20 @@
 final class HarbormasterBuildableViewController
   extends HarbormasterController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $id = $this->id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $buildable = id(new HarbormasterBuildableQuery())
       ->setViewer($viewer)
-      ->withIDs(array($id))
+      ->withIDs(array($request->getURIData('id')))
       ->needBuildableHandles(true)
       ->needContainerHandles(true)
       ->executeOne();
     if (!$buildable) {
       return new Aphront404Response();
     }
+
+    $id = $buildable->getID();
 
     // Pull builds and build targets.
     $builds = id(new HarbormasterBuildQuery())
@@ -33,6 +26,7 @@ final class HarbormasterBuildableViewController
       ->execute();
 
     $buildable->attachBuilds($builds);
+    $object = $buildable->getBuildableObject();
 
     $build_list = $this->buildBuildList($buildable);
 
@@ -55,7 +49,7 @@ final class HarbormasterBuildableViewController
     $this->buildPropertyLists($box, $buildable, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb("B{$id}");
+    $crumbs->addTextCrumb($buildable->getMonogram());
 
     return $this->buildApplicationPage(
       array(
@@ -144,15 +138,15 @@ final class HarbormasterBuildableViewController
       ->setActionList($actions);
     $box->addPropertyList($properties);
 
-    $properties->addProperty(
-      pht('Buildable'),
-      $buildable->getBuildableHandle()->renderLink());
-
     if ($buildable->getContainerHandle() !== null) {
       $properties->addProperty(
         pht('Container'),
         $buildable->getContainerHandle()->renderLink());
     }
+
+    $properties->addProperty(
+      pht('Buildable'),
+      $buildable->getBuildableHandle()->renderLink());
 
     $properties->addProperty(
       pht('Origin'),
