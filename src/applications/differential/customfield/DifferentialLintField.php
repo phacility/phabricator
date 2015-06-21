@@ -56,7 +56,6 @@ final class DifferentialLintField
 
     // TODO: Look for Harbormaster messages here.
 
-
     if (!$lint) {
       // No Harbormaster messages, so look for legacy messages and make them
       // look like modern messages.
@@ -71,10 +70,14 @@ final class DifferentialLintField
 
         $target = new HarbormasterBuildTarget();
         foreach ($legacy_lint as $message) {
-          $modern = HarbormasterBuildLintMessage::newFromDictionary(
-            $target,
-            $this->getModernLintMessageDictionary($message));
-          $lint[] = $modern;
+          try {
+            $modern = HarbormasterBuildLintMessage::newFromDictionary(
+              $target,
+              $this->getModernLintMessageDictionary($message));
+            $lint[] = $modern;
+          } catch (Exception $ex) {
+            // Ignore any poorly formatted messages.
+          }
         }
       }
     }
@@ -160,6 +163,13 @@ final class DifferentialLintField
   }
 
   private function getModernLintMessageDictionary(array $map) {
+    // Strip out `null` values to satisfy stricter typechecks.
+    foreach ($map as $key => $value) {
+      if ($value === null) {
+        unset($map[$key]);
+      }
+    }
+
     // TODO: We might need to remap some stuff here?
     return $map;
   }
