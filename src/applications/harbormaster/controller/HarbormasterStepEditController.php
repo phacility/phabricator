@@ -47,6 +47,11 @@ final class HarbormasterStepEditController extends HarbormasterController {
         return new Aphront404Response();
       }
 
+      if ($impl->shouldRequireAutotargeting()) {
+        // No manual creation of autotarget steps.
+        return new Aphront404Response();
+      }
+
       $step = HarbormasterBuildStep::initializeNewStep($viewer)
         ->setBuildPlanPHID($plan->getPHID())
         ->setClassName($class);

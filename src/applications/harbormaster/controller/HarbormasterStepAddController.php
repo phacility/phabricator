@@ -24,10 +24,17 @@ final class HarbormasterStepAddController extends HarbormasterController {
     $plan_id = $plan->getID();
     $cancel_uri = $this->getApplicationURI("plan/{$plan_id}/");
 
+    $all = HarbormasterBuildStepImplementation::getImplementations();
+    foreach ($all as $key => $impl) {
+      if ($impl->shouldRequireAutotargeting()) {
+        unset($all[$key]);
+      }
+    }
+
     $errors = array();
     if ($request->isFormPost()) {
       $class = $request->getStr('class');
-      if (!HarbormasterBuildStepImplementation::getImplementation($class)) {
+      if (empty($all[$class])) {
         $errors[] = pht('Choose the type of build step you want to add.');
       }
       if (!$errors) {
@@ -39,7 +46,6 @@ final class HarbormasterStepAddController extends HarbormasterController {
     $control = id(new AphrontFormRadioButtonControl())
       ->setName('class');
 
-    $all = HarbormasterBuildStepImplementation::getImplementations();
     foreach ($all as $class => $implementation) {
       $control->addButton(
         $class,

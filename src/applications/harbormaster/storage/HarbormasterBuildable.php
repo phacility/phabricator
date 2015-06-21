@@ -141,8 +141,14 @@ final class HarbormasterBuildable extends HarbormasterDAO
     $build = HarbormasterBuild::initializeNewBuild($viewer)
       ->setBuildablePHID($this->getPHID())
       ->setBuildPlanPHID($plan->getPHID())
-      ->setBuildStatus(HarbormasterBuild::STATUS_PENDING)
-      ->save();
+      ->setBuildStatus(HarbormasterBuild::STATUS_PENDING);
+
+    $auto_key = $plan->getPlanAutoKey();
+    if ($auto_key) {
+      $build->setPlanAutoKey($auto_key);
+    }
+
+    $build->save();
 
     PhabricatorWorker::scheduleTask(
       'HarbormasterBuildWorker',
