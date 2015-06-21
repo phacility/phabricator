@@ -2,7 +2,7 @@
 
 final class HarbormasterUnitPropertyView extends AphrontView {
 
-  private $pathURIMap;
+  private $pathURIMap = array();
   private $unitMessages = array();
 
   public function setPathURIMap(array $map) {

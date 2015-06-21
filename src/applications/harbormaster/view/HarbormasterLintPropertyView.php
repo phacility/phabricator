@@ -2,7 +2,7 @@
 
 final class HarbormasterLintPropertyView extends AphrontView {
 
-  private $pathURIMap;
+  private $pathURIMap = array();
   private $lintMessages = array();
 
   public function setPathURIMap(array $map) {
