@@ -606,6 +606,23 @@ abstract class PhabricatorApplication
     return idx($spec, 'template');
   }
 
+  final public function getDefaultObjectTypePolicyMap() {
+    $map = array();
+
+    foreach ($this->getCustomCapabilities() as $capability => $spec) {
+      if (empty($spec['template'])) {
+        continue;
+      }
+      if (empty($spec['capability'])) {
+        continue;
+      }
+      $default = $this->getPolicy($capability);
+      $map[$spec['template']][$spec['capability']] = $default;
+    }
+
+    return $map;
+  }
+
   public function getApplicationSearchDocumentTypes() {
     return array();
   }

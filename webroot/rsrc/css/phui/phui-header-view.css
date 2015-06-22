@@ -116,6 +116,41 @@ body.device-phone .phui-header-view {
   color: {$darkbluetext};
 }
 
+.policy-header-callout.policy-adjusted {
+  padding: 0 4px;
+  border-radius: 3px;
+}
+
+.policy-header-callout.policy-adjusted-weaker {
+  background: {$lightgreen};
+  border: 1px solid {$green};
+}
+
+.policy-header-callout.policy-adjusted-weaker .policy-link,
+.policy-header-callout.policy-adjusted-weaker .phui-icon-view {
+  color: {$green};
+}
+
+.policy-header-callout.policy-adjusted-stronger {
+  background: {$lightred};
+  border: 1px solid {$red};
+}
+
+.policy-header-callout.policy-adjusted-stronger .policy-link,
+.policy-header-callout.policy-adjusted-stronger .phui-icon-view {
+  color: {$red};
+}
+
+.policy-header-callout.policy-adjusted-different {
+  background: {$lightorange};
+  border: 1px solid {$orange};
+}
+
+.policy-header-callout.policy-adjusted-different .policy-link,
+.policy-header-callout.policy-adjusted-different .phui-icon-view {
+  color: {$orange};
+}
+
 .phui-header-subheader .phui-header-status-dark {
   color: {$indigo};
   text-shadow: 0 1px #fff;

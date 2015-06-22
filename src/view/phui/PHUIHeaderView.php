@@ -292,6 +292,7 @@ final class PHUIHeaderView extends AphrontTagView {
     // NOTE: We'll do this even if the viewer has access to only one space, and
     // show them information about the existence of spaces if they click
     // through.
+    $use_space_policy = false;
     if ($object instanceof PhabricatorSpacesInterface) {
       $space_phid = PhabricatorSpacesNamespaceQuery::getObjectSpacePHID(
         $object);
@@ -306,12 +307,45 @@ final class PHUIHeaderView extends AphrontTagView {
         if ($space_policy) {
           if ($space_policy->isStrongerThan($policy)) {
             $policy = $space_policy;
+            $use_space_policy = true;
           }
         }
       }
     }
 
+    $container_classes = array();
+    $container_classes[] = 'policy-header-callout';
     $phid = $object->getPHID();
+
+    // If we're going to show the object policy, try to determine if the object
+    // policy differs from the default policy. If it does, we'll call it out
+    // as changed.
+    if (!$use_space_policy) {
+      $default_policy = PhabricatorPolicyQuery::getDefaultPolicyForObject(
+        $viewer,
+        $object,
+        $view_capability);
+      if ($default_policy) {
+        if ($default_policy->getPHID() != $policy->getPHID()) {
+          $container_classes[] = 'policy-adjusted';
+          if ($default_policy->isStrongerThan($policy)) {
+            // The policy has strictly been weakened. For example, the
+            // default might be "All Users" and the current policy is "Public".
+            $container_classes[] = 'policy-adjusted-weaker';
+          } else if ($policy->isStrongerThan($default_policy)) {
+            // The policy has strictly been strengthened, and is now more
+            // restrictive than the default. For example, "All Users" has
+            // been replaced with "No One".
+            $container_classes[] = 'policy-adjusted-stronger';
+          } else {
+            // The policy has been adjusted but not strictly strengthened
+            // or weakened. For example, "Members of X" has been replaced with
+            // "Members of Y".
+            $container_classes[] = 'policy-adjusted-different';
+          }
+        }
+      }
+    }
 
     $icon = id(new PHUIIconView())
       ->setIconFont($policy->getIcon().' bluegrey');
@@ -325,7 +359,12 @@ final class PHUIHeaderView extends AphrontTagView {
       ),
       $policy->getShortName());
 
-    return array($icon, $link);
+    return phutil_tag(
+      'span',
+      array(
+        'class' => implode(' ', $container_classes),
+      ),
+      array($icon, $link));
   }
 
 }
