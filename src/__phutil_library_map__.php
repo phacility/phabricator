@@ -2549,6 +2549,7 @@ phutil_register_library_map(array(
     'PhabricatorSearchDAO' => 'applications/search/storage/PhabricatorSearchDAO.php',
     'PhabricatorSearchDatasource' => 'applications/search/typeahead/PhabricatorSearchDatasource.php',
     'PhabricatorSearchDatasourceField' => 'applications/search/field/PhabricatorSearchDatasourceField.php',
+    'PhabricatorSearchDateControlField' => 'applications/search/field/PhabricatorSearchDateControlField.php',
     'PhabricatorSearchDateField' => 'applications/search/field/PhabricatorSearchDateField.php',
     'PhabricatorSearchDeleteController' => 'applications/search/controller/PhabricatorSearchDeleteController.php',
     'PhabricatorSearchDocument' => 'applications/search/storage/document/PhabricatorSearchDocument.php',
@@ -5086,6 +5087,7 @@ phutil_register_library_map(array(
     'PhabricatorCalendarEvent' => array(
       'PhabricatorCalendarDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorProjectInterface',
       'PhabricatorMarkupInterface',
       'PhabricatorApplicationTransactionInterface',
       'PhabricatorSubscribableInterface',
@@ -6286,6 +6288,7 @@ phutil_register_library_map(array(
     'PhabricatorSearchDAO' => 'PhabricatorLiskDAO',
     'PhabricatorSearchDatasource' => 'PhabricatorTypeaheadCompositeDatasource',
     'PhabricatorSearchDatasourceField' => 'PhabricatorSearchTokenizerField',
+    'PhabricatorSearchDateControlField' => 'PhabricatorSearchField',
     'PhabricatorSearchDateField' => 'PhabricatorSearchField',
     'PhabricatorSearchDeleteController' => 'PhabricatorSearchBaseController',
     'PhabricatorSearchDocument' => 'PhabricatorSearchDAO',

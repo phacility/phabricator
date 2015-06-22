@@ -434,8 +434,15 @@ final class PHUICalendarMonthView extends AphrontView {
   private function getQueryRangeWarning() {
     $errors = array();
 
-    $range_start_epoch = $this->rangeStart->getEpoch();
-    $range_end_epoch = $this->rangeEnd->getEpoch();
+    $range_start_epoch = null;
+    $range_end_epoch = null;
+
+    if ($this->rangeStart) {
+      $range_start_epoch = $this->rangeStart->getEpoch();
+    }
+    if ($this->rangeEnd) {
+      $range_end_epoch = $this->rangeEnd->getEpoch();
+    }
 
     $month_start = $this->getDateTime();
     $month_end = id(clone $month_start)->modify('+1 month');
@@ -452,10 +459,10 @@ final class PHUICalendarMonthView extends AphrontView {
       $errors[] = pht('Part of the month is out of range');
     }
 
-    if (($this->rangeEnd->getEpoch() != null &&
-        $this->rangeEnd->getEpoch() < $month_start) ||
-      ($this->rangeStart->getEpoch() != null &&
-        $this->rangeStart->getEpoch() > $month_end)) {
+    if (($range_end_epoch != null &&
+        $range_end_epoch < $month_start) ||
+      ($range_start_epoch != null &&
+        $range_start_epoch > $month_end)) {
       $errors[] = pht('Month is out of query range');
     }
 

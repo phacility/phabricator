@@ -140,6 +140,15 @@ final class PhabricatorCalendarEventEditController
       $cancel_uri = '/'.$event->getMonogram();
     }
 
+    if ($this->isCreate()) {
+      $projects = array();
+    } else {
+      $projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $event->getPHID(),
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+      $projects = array_reverse($projects);
+    }
+
     $name = $event->getName();
     $description = $event->getDescription();
     $is_all_day = $event->getIsAllDay();
@@ -167,6 +176,7 @@ final class PhabricatorCalendarEventEditController
         $request,
         'recurrenceEndDate');
       $recurrence_end_date_value->setOptional(true);
+      $projects = $request->getArr('projects');
       $description = $request->getStr('description');
       $subscribers = $request->getArr('subscribers');
       $edit_policy = $request->getStr('editPolicy');
@@ -262,6 +272,12 @@ final class PhabricatorCalendarEventEditController
         ->setContinueOnNoEffect(true);
 
       try {
+        $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+          ->setMetadataValue('edge:type', $proj_edge_type)
+          ->setNewValue(array('=' => array_fuse($projects)));
+
         $xactions = $editor->applyTransactions($event, $xactions);
         $response = id(new AphrontRedirectResponse());
         switch ($next_workflow) {
@@ -437,6 +453,13 @@ final class PhabricatorCalendarEventEditController
         ->setValue($end_disabled);
     }
 
+    $projects = id(new AphrontFormTokenizerControl())
+      ->setLabel(pht('Projects'))
+      ->setName('projects')
+      ->setValue($projects)
+      ->setUser($viewer)
+      ->setDatasource(new PhabricatorProjectDatasource());
+
     $description = id(new PhabricatorRemarkupControl())
       ->setLabel(pht('Description'))
       ->setName('description')
@@ -511,6 +534,7 @@ final class PhabricatorCalendarEventEditController
       ->appendControl($edit_policies)
       ->appendControl($subscribers)
       ->appendControl($invitees)
+      ->appendChild($projects)
       ->appendChild($description)
       ->appendChild($icon);
 

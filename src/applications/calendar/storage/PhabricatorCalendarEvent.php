@@ -2,6 +2,7 @@
 
 final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   implements PhabricatorPolicyInterface,
+  PhabricatorProjectInterface,
   PhabricatorMarkupInterface,
   PhabricatorApplicationTransactionInterface,
   PhabricatorSubscribableInterface,
