@@ -60,6 +60,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
     $e_name = true;
 
     $v_desc = $credential->getDescription();
+    $v_space = $credential->getSpacePHID();
 
     $v_username = $credential->getUsername();
     $e_username = true;
@@ -93,6 +94,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
       $v_is_locked = $request->getStr('lock');
 
       $v_secret = $request->getStr('secret');
+      $v_space = $request->getStr('spacePHID');
       $v_password = $request->getStr('password');
       $v_decrypt = $v_secret;
 
@@ -127,6 +129,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
         $type_is_locked = PassphraseCredentialTransaction::TYPE_LOCK;
         $type_view_policy = PhabricatorTransactions::TYPE_VIEW_POLICY;
         $type_edit_policy = PhabricatorTransactions::TYPE_EDIT_POLICY;
+        $type_space = PhabricatorTransactions::TYPE_SPACE;
 
         $xactions = array();
 
@@ -145,6 +148,10 @@ final class PassphraseCredentialEditController extends PassphraseController {
         $xactions[] = id(new PassphraseCredentialTransaction())
           ->setTransactionType($type_edit_policy)
           ->setNewValue($v_edit_policy);
+
+        $xactions[] = id(new PassphraseCredentialTransaction())
+          ->setTransactionType($type_space)
+          ->setNewValue($v_space);
 
         // Open a transaction in case we're writing a new secret; this limits
         // the amount of code which handles secret plaintexts.
@@ -244,13 +251,13 @@ final class PassphraseCredentialEditController extends PassphraseController {
           ->setValue($type->getCredentialTypeName()))
       ->appendChild(
         id(new AphrontFormDividerControl()))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormPolicyControl())
           ->setName('viewPolicy')
           ->setPolicyObject($credential)
           ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
           ->setPolicies($policies))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormPolicyControl())
           ->setName('editPolicy')
           ->setPolicyObject($credential)

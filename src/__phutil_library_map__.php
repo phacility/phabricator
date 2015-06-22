@@ -4781,6 +4781,7 @@ phutil_register_library_map(array(
       'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorDestructibleInterface',
+      'PhabricatorSpacesInterface',
     ),
     'PassphraseCredentialAuthorPolicyRule' => 'PhabricatorPolicyRule',
     'PassphraseCredentialConduitController' => 'PassphraseController',
