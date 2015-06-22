@@ -187,7 +187,8 @@ final class PhabricatorPeopleLogSearchEngine
     }
 
     $result = new PhabricatorApplicationSearchResultView();
-    $result->setTable($table);
+    $result->setContent($table);
+    $result->setCollapsed(true);
 
     return $result;
   }

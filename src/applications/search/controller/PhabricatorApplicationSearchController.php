@@ -249,6 +249,9 @@ final class PhabricatorApplicationSearchController
         if ($list->getContent()) {
           $box->appendChild($list->getContent());
         }
+        if ($list->getCollapsed()) {
+          $box->setCollapsed(true);
+        }
 
         if ($pager->willShowPagingControls()) {
           $pager_box = id(new PHUIBoxView())
