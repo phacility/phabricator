@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorNotificationAdHocFeedStory extends PhabricatorFeedStory {
+final class PhabricatorNotificationTestFeedStory extends PhabricatorFeedStory {
 
   public function getPrimaryObjectPHID() {
     return $this->getAuthorPHID();

@@ -208,8 +208,15 @@ final class PHUICalendarDayView extends AphrontView {
   private function getQueryRangeWarning() {
     $errors = array();
 
-    $range_start_epoch = $this->rangeStart->getEpoch();
-    $range_end_epoch = $this->rangeEnd->getEpoch();
+    $range_start_epoch = null;
+    $range_end_epoch = null;
+
+    if ($this->rangeStart) {
+      $range_start_epoch = $this->rangeStart->getEpoch();
+    }
+    if ($this->rangeEnd) {
+      $range_end_epoch = $this->rangeEnd->getEpoch();
+    }
 
     $day_start = $this->getDateTime();
     $day_end = id(clone $day_start)->modify('+1 day');
@@ -226,10 +233,10 @@ final class PHUICalendarDayView extends AphrontView {
       $errors[] = pht('Part of the day is out of range');
     }
 
-    if (($this->rangeEnd->getEpoch() != null &&
-        $this->rangeEnd->getEpoch() < $day_start) ||
-      ($this->rangeStart->getEpoch() != null &&
-        $this->rangeStart->getEpoch() > $day_end)) {
+    if (($range_end_epoch != null &&
+        $range_end_epoch < $day_start) ||
+      ($range_start_epoch != null &&
+        $range_start_epoch > $day_end)) {
       $errors[] = pht('Day is out of query range');
     }
     return $errors;

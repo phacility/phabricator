@@ -3,9 +3,11 @@
 final class PhabricatorNotificationBuilder extends Phobject {
 
   private $stories;
+  private $parsedStories;
   private $user = null;
 
   public function __construct(array $stories) {
+    assert_instances_of($stories, 'PhabricatorFeedStory');
     $this->stories = $stories;
   }
 
@@ -14,7 +16,11 @@ final class PhabricatorNotificationBuilder extends Phobject {
     return $this;
   }
 
-  public function buildView() {
+  private function parseStories() {
+
+    if ($this->parsedStories) {
+      return $this->parsedStories;
+    }
 
     $stories = $this->stories;
     $stories = mpull($stories, null, 'getChronologicalKey');
@@ -100,6 +106,12 @@ final class PhabricatorNotificationBuilder extends Phobject {
     $stories = mpull($stories, null, 'getChronologicalKey');
     krsort($stories);
 
+    $this->parsedStories = $stories;
+    return $stories;
+  }
+
+  public function buildView() {
+    $stories = $this->parseStories();
     $null_view = new AphrontNullView();
 
     foreach ($stories as $story) {
@@ -113,5 +125,40 @@ final class PhabricatorNotificationBuilder extends Phobject {
     }
 
     return $null_view;
+  }
+
+  public function buildDict() {
+    $stories = $this->parseStories();
+    $dict = array();
+
+    foreach ($stories as $story) {
+      if ($story instanceof PhabricatorApplicationTransactionFeedStory) {
+        $dict[] = array(
+          'desktopReady' => true,
+          'title'        => $story->renderText(),
+          'body'         => $story->renderTextBody(),
+          'href'         => $story->getURI(),
+          'icon'         => $story->getImageURI(),
+        );
+      } else if ($story instanceof PhabricatorNotificationTestFeedStory) {
+        $dict[] = array(
+          'desktopReady' => true,
+          'title'        => pht('Test Notification'),
+          'body'         => $story->renderText(),
+          'href'         => null,
+          'icon'         => PhabricatorUser::getDefaultProfileImageURI(),
+        );
+      } else {
+        $dict[] = array(
+          'desktopReady' => false,
+          'title'        => null,
+          'body'         => null,
+          'href'         => null,
+          'icon'         => null,
+        );
+      }
+    }
+
+    return $dict;
   }
 }
