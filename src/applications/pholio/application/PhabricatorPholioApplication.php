@@ -73,9 +73,11 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
     return array(
       PholioDefaultViewCapability::CAPABILITY => array(
         'template' => PholioMockPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_VIEW,
       ),
       PholioDefaultEditCapability::CAPABILITY => array(
         'template' => PholioMockPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_EDIT,
       ),
     );
   }

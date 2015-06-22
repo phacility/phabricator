@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @task autotarget Automatic Targets
+ */
 abstract class HarbormasterBuildStepImplementation extends Phobject {
 
   private $settings;
@@ -247,6 +250,22 @@ abstract class HarbormasterBuildStepImplementation extends Phobject {
         return $future->resolve();
       }
     }
+  }
+
+
+/* -(  Automatic Targets  )-------------------------------------------------- */
+
+
+  public function getBuildStepAutotargetStepKey() {
+    return null;
+  }
+
+  public function getBuildStepAutotargetPlanKey() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  public function shouldRequireAutotargeting() {
+    return false;
   }
 
 }

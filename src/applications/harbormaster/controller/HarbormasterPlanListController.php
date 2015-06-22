@@ -2,19 +2,13 @@
 
 final class HarbormasterPlanListController extends HarbormasterPlanController {
 
-  private $queryKey;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey');
-  }
-
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
     $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($this->queryKey)
+      ->setQueryKey($request->getURIData('queryKey'))
       ->setSearchEngine(new HarbormasterBuildPlanSearchEngine())
       ->setNavigation($this->buildSideNavView());
 
@@ -43,5 +37,23 @@ final class HarbormasterPlanListController extends HarbormasterPlanController {
   public function buildApplicationMenu() {
     return $this->buildSideNavView(true)->getMenu();
   }
+
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $can_create = $this->hasApplicationCapability(
+      HarbormasterManagePlansCapability::CAPABILITY);
+
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setName(pht('New Build Plan'))
+        ->setHref($this->getApplicationURI('plan/edit/'))
+        ->setDisabled(!$can_create)
+        ->setWorkflow(!$can_create)
+        ->setIcon('fa-plus-square'));
+
+    return $crumbs;
+  }
+
 
 }

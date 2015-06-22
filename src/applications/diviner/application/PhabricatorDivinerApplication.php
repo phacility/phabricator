@@ -57,10 +57,12 @@ final class PhabricatorDivinerApplication extends PhabricatorApplication {
     return array(
       DivinerDefaultViewCapability::CAPABILITY => array(
         'template' => DivinerBookPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_VIEW,
       ),
       DivinerDefaultEditCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
         'template' => DivinerBookPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_EDIT,
       ),
     );
   }

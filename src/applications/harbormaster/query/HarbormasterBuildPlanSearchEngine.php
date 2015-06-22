@@ -88,6 +88,10 @@ final class HarbormasterBuildPlanSearchEngine
         $item->setDisabled(true);
       }
 
+      if ($plan->isAutoplan()) {
+        $item->addIcon('fa-lock grey', pht('Autoplan'));
+      }
+
       $item->setHref($this->getApplicationURI("plan/{$id}/"));
 
       $list->addItem($item);

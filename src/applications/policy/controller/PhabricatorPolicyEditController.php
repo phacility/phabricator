@@ -6,9 +6,6 @@ final class PhabricatorPolicyEditController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
-    // TODO: This doesn't do anything yet, but sets up template policies; see
-    // T6860.
-    $is_template = false;
 
     $object_phid = $request->getURIData('objectPHID');
     if ($object_phid) {
@@ -23,7 +20,6 @@ final class PhabricatorPolicyEditController
       $object_type = $request->getURIData('objectType');
       if (!$object_type) {
         $object_type = $request->getURIData('templateType');
-        $is_template = true;
       }
 
       $phid_types = PhabricatorPHIDType::getAllInstalledTypes($viewer);

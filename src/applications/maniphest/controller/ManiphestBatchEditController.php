@@ -25,6 +25,12 @@ final class ManiphestBatchEditController extends ManiphestController {
       $task_ids = $request->getStrList('batch');
     }
 
+    if (!$task_ids) {
+      throw new Exception(
+        pht(
+          'No tasks are selected.'));
+    }
+
     $tasks = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
       ->withIDs($task_ids)
@@ -36,6 +42,12 @@ final class ManiphestBatchEditController extends ManiphestController {
       ->needSubscriberPHIDs(true)
       ->needProjectPHIDs(true)
       ->execute();
+
+    if (!$tasks) {
+      throw new Exception(
+        pht(
+          "You don't have permission to edit any of the selected tasks."));
+    }
 
     if ($project) {
       $cancel_uri = '/project/board/'.$project->getID().'/';
