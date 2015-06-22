@@ -14,6 +14,7 @@ final class PhabricatorMetaMTAMail
 
   const RETRY_DELAY   = 5;
 
+  protected $actorPHID;
   protected $parameters;
   protected $status;
   protected $message;
@@ -36,6 +37,7 @@ final class PhabricatorMetaMTAMail
         'parameters'  => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
+        'actorPHID' => 'phid?',
         'status' => 'text32',
         'relatedPHID' => 'phid?',
 
@@ -46,6 +48,9 @@ final class PhabricatorMetaMTAMail
       self::CONFIG_KEY_SCHEMA => array(
         'status' => array(
           'columns' => array('status'),
+        ),
+        'key_actorPHID' => array(
+          'columns' => array('actorPHID'),
         ),
         'relatedPHID' => array(
           'columns' => array('relatedPHID'),
@@ -219,7 +224,12 @@ final class PhabricatorMetaMTAMail
 
   public function setFrom($from) {
     $this->setParam('from', $from);
+    $this->setActorPHID($from);
     return $this;
+  }
+
+  public function getFrom() {
+    return $this->getParam('from');
   }
 
   public function setRawFrom($raw_email, $raw_name) {
