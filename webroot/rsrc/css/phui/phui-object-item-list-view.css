@@ -226,17 +226,17 @@ ul.phui-object-item-list-view {
 }
 
 .phui-object-item-with-1-actions .phui-object-item-content-box {
-  margin-right: 24px;
+  margin-right: 28px;
   overflow: hidden;
 }
 
 .phui-object-item-with-2-actions .phui-object-item-content-box {
-  margin-right: 48px;
+  margin-right: 54px;
   overflow: hidden;
 }
 
 .phui-object-item-with-3-actions .phui-object-item-content-box {
-  margin-right: 72px;
+  margin-right: 76px;
   overflow: hidden;
 }
 
@@ -315,7 +315,7 @@ ul.phui-object-item-list-view {
 }
 
 .phui-object-item-icons {
-  padding: 0 10px 0 0;
+  padding: 0 4px 0 0;
 }
 
 .device-phone .phui-object-item-icons {
@@ -530,7 +530,7 @@ ul.phui-object-item-list-view .phui-object-item-selected
 */
 
 .phui-object-item-bylines {
-  padding: 0 10px;
+  padding: 0 4px 0 8px;
   margin: 4px 0 8px;
   font-size: 12px;
   color: {$greytext};
