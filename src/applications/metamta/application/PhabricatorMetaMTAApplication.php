@@ -37,6 +37,9 @@ final class PhabricatorMetaMTAApplication extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/mail/' => array(
+        '(query/(?P<queryKey>[^/]+)/)?' =>
+          'PhabricatorMetaMTAMailListController',
+        'detail/(?P<id>[1-9]\d*)/' => 'PhabricatorMetaMTAMailViewController',
         'sendgrid/' => 'PhabricatorMetaMTASendGridReceiveController',
         'mailgun/'  => 'PhabricatorMetaMTAMailgunReceiveController',
       ),
