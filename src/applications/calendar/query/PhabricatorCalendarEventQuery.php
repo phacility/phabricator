@@ -15,6 +15,10 @@ final class PhabricatorCalendarEventQuery
 
   private $generateGhosts = false;
 
+  public function newResultObject() {
+    return new PhabricatorCalendarEvent();
+  }
+
   public function setGenerateGhosts($generate_ghosts) {
     $this->generateGhosts = $generate_ghosts;
     return $this;

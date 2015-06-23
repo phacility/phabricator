@@ -7,6 +7,8 @@ final class HarbormasterBuildPlanQuery
   private $phids;
   private $statuses;
   private $datasourceQuery;
+  private $planAutoKeys;
+  private $needBuildSteps;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -28,12 +30,42 @@ final class HarbormasterBuildPlanQuery
     return $this;
   }
 
+  public function withPlanAutoKeys(array $keys) {
+    $this->planAutoKeys = $keys;
+    return $this;
+  }
+
+  public function needBuildSteps($need) {
+    $this->needBuildSteps = $need;
+    return $this;
+  }
+
   public function newResultObject() {
     return new HarbormasterBuildPlan();
   }
 
   protected function loadPage() {
     return $this->loadStandardPage($this->newResultObject());
+  }
+
+  protected function didFilterPage(array $page) {
+    if ($this->needBuildSteps) {
+      $plan_phids = mpull($page, 'getPHID');
+
+      $steps = id(new HarbormasterBuildStepQuery())
+        ->setParentQuery($this)
+        ->setViewer($this->getViewer())
+        ->withBuildPlanPHIDs($plan_phids)
+        ->execute();
+      $steps = mgroup($steps, 'getBuildPlanPHID');
+
+      foreach ($page as $plan) {
+        $plan_steps = idx($steps, $plan->getPHID(), array());
+        $plan->attachBuildSteps($plan_steps);
+      }
+    }
+
+    return $page;
   }
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
@@ -65,6 +97,13 @@ final class HarbormasterBuildPlanQuery
         $conn,
         'name LIKE %>',
         $this->datasourceQuery);
+    }
+
+    if ($this->planAutoKeys !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'planAutoKey IN (%Ls)',
+        $this->planAutoKeys);
     }
 
     return $where;

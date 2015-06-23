@@ -54,6 +54,10 @@ final class PHUIFeedStoryView extends AphrontView {
     return $this;
   }
 
+  public function getImage() {
+    return $this->image;
+  }
+
   public function setImageHref($image_href) {
     $this->imageHref = $image_href;
     return $this;

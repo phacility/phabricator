@@ -113,3 +113,11 @@ issues, using the `--trace` flag to get full details:
 
 To catch potential issues with permissions, run this command as the same user
 that the daemons run as.
+
+Next Steps
+==========
+
+Continue by:
+
+  - troubleshooting in greater depth with
+    @{article:Troubleshooting Repository Imports}.

@@ -3,7 +3,9 @@
 /**
  * @task recipients   Managing Recipients
  */
-final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
+final class PhabricatorMetaMTAMail
+  extends PhabricatorMetaMTADAO
+  implements PhabricatorPolicyInterface {
 
   const STATUS_QUEUE = 'queued';
   const STATUS_SENT  = 'sent';
@@ -12,6 +14,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
   const RETRY_DELAY   = 5;
 
+  protected $actorPHID;
   protected $parameters;
   protected $status;
   protected $message;
@@ -29,10 +32,12 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
   protected function getConfiguration() {
     return array(
+      self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'parameters'  => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
+        'actorPHID' => 'phid?',
         'status' => 'text32',
         'relatedPHID' => 'phid?',
 
@@ -44,6 +49,9 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         'status' => array(
           'columns' => array('status'),
         ),
+        'key_actorPHID' => array(
+          'columns' => array('actorPHID'),
+        ),
         'relatedPHID' => array(
           'columns' => array('relatedPHID'),
         ),
@@ -52,6 +60,11 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorMetaMTAMailPHIDType::TYPECONST);
   }
 
   protected function setParam($param, $value) {
@@ -211,7 +224,12 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
   public function setFrom($from) {
     $this->setParam('from', $from);
+    $this->setActorPHID($from);
     return $this;
+  }
+
+  public function getFrom() {
+    return $this->getParam('from');
   }
 
   public function setRawFrom($raw_email, $raw_name) {
@@ -990,6 +1008,31 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     } catch (PhabricatorSystemActionRateLimitException $ex) {
       return true;
     }
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_NOONE;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    $actor_phids = $this->getAllActorPHIDs();
+    $actor_phids = $this->expandRecipients($actor_phids);
+    return in_array($viewer->getPHID(), $actor_phids);
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return pht(
+      'The mail sender and message recipients can always see the mail.');
   }
 
 

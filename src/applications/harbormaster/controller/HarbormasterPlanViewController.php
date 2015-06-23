@@ -2,17 +2,10 @@
 
 final class HarbormasterPlanViewController extends HarbormasterPlanController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getviewer();
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $id = $this->id;
+    $id = $request->getURIData('id');
 
     $plan = id(new HarbormasterBuildPlanQuery())
       ->setViewer($viewer)
@@ -27,10 +20,10 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
       new HarbormasterBuildPlanTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    $title = pht('Plan %d', $id);
+    $title = $plan->getName();
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($title)
+      ->setHeader($plan->getName())
       ->setUser($viewer)
       ->setPolicyObject($plan);
 
@@ -79,11 +72,9 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
   }
 
   private function buildStepList(HarbormasterBuildPlan $plan) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
 
-    $run_order =
-      HarbormasterBuildGraph::determineDependencyExecution($plan);
+    $run_order = HarbormasterBuildGraph::determineDependencyExecution($plan);
 
     $steps = id(new HarbormasterBuildStepQuery())
       ->setViewer($viewer)
@@ -91,8 +82,15 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
       ->execute();
     $steps = mpull($steps, null, 'getPHID');
 
-    $can_edit = $this->hasApplicationCapability(
+    $has_manage = $this->hasApplicationCapability(
       HarbormasterManagePlansCapability::CAPABILITY);
+
+    $has_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $plan,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $can_edit = ($has_manage && $has_edit);
 
     $step_list = id(new PHUIObjectItemListView())
       ->setUser($viewer)
@@ -222,12 +220,32 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
       $step_list->addItem($item);
     }
 
-    return array($step_list, $has_any_conflicts, $is_deadlocking);
+    $step_list->setFlush(true);
+
+    $plan_id = $plan->getID();
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Build Steps'))
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setText(pht('Add Build Step'))
+          ->setHref($this->getApplicationURI("step/add/{$plan_id}/"))
+          ->setTag('a')
+          ->setIcon(
+            id(new PHUIIconView())
+              ->setIconFont('fa-plus'))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+
+    $step_box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($step_list);
+
+    return array($step_box, $has_any_conflicts, $is_deadlocking);
   }
 
   private function buildActionList(HarbormasterBuildPlan $plan) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
     $id = $plan->getID();
 
     $list = id(new PhabricatorActionListView())
@@ -235,8 +253,15 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
       ->setObject($plan)
       ->setObjectURI($this->getApplicationURI("plan/{$id}/"));
 
-    $can_edit = $this->hasApplicationCapability(
+    $has_manage = $this->hasApplicationCapability(
       HarbormasterManagePlansCapability::CAPABILITY);
+
+    $has_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $plan,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $can_edit = ($has_manage && $has_edit);
 
     $list->addAction(
       id(new PhabricatorActionView())
@@ -266,18 +291,10 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
 
     $list->addAction(
       id(new PhabricatorActionView())
-        ->setName(pht('Add Build Step'))
-        ->setHref($this->getApplicationURI("step/add/{$id}/"))
-        ->setWorkflow(true)
-        ->setDisabled(!$can_edit)
-        ->setIcon('fa-plus'));
-
-    $list->addAction(
-      id(new PhabricatorActionView())
         ->setName(pht('Run Plan Manually'))
         ->setHref($this->getApplicationURI("plan/run/{$id}/"))
         ->setWorkflow(true)
-        ->setDisabled(!$can_edit)
+        ->setDisabled(!$has_manage)
         ->setIcon('fa-play-circle'));
 
     return $list;

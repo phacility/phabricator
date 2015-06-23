@@ -75,6 +75,12 @@ JX.behavior('aphlict-listen', function(config) {
     // Show the notification itself.
     new JX.Notification()
       .setContent(JX.$H(response.content))
+      .setDesktopReady(response.desktopReady)
+      .setKey(response.primaryObjectPHID)
+      .setTitle(response.title)
+      .setBody(response.body)
+      .setHref(response.href)
+      .setIcon(response.icon)
       .show();
 
     // If the notification affected an object on this page, show a

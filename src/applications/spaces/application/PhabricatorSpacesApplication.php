@@ -74,11 +74,13 @@ final class PhabricatorSpacesApplication extends PhabricatorApplication {
       PhabricatorSpacesCapabilityDefaultView::CAPABILITY => array(
         'caption' => pht('Default view policy for newly created spaces.'),
         'template' => PhabricatorSpacesNamespacePHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_VIEW,
       ),
       PhabricatorSpacesCapabilityDefaultEdit::CAPABILITY => array(
         'caption' => pht('Default edit policy for newly created spaces.'),
         'default' => PhabricatorPolicies::POLICY_ADMIN,
         'template' => PhabricatorSpacesNamespacePHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_EDIT,
       ),
     );
   }

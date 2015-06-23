@@ -2,27 +2,22 @@
 
 final class HarbormasterStepEditController extends HarbormasterController {
 
-  private $id;
-  private $planID;
-  private $className;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-    $this->planID = idx($data, 'plan');
-    $this->className = idx($data, 'class');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $this->requireApplicationCapability(
       HarbormasterManagePlansCapability::CAPABILITY);
 
-    if ($this->id) {
+    $id = $request->getURIData('id');
+    if ($id) {
       $step = id(new HarbormasterBuildStepQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
         ->executeOne();
       if (!$step) {
         return new Aphront404Response();
@@ -31,23 +26,35 @@ final class HarbormasterStepEditController extends HarbormasterController {
 
       $is_new = false;
     } else {
+      $plan_id = $request->getURIData('plan');
+      $class = $request->getURIData('class');
+
       $plan = id(new HarbormasterBuildPlanQuery())
-          ->setViewer($viewer)
-          ->withIDs(array($this->planID))
-          ->executeOne();
+        ->setViewer($viewer)
+        ->withIDs(array($plan_id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
       if (!$plan) {
         return new Aphront404Response();
       }
 
-      $impl = HarbormasterBuildStepImplementation::getImplementation(
-        $this->className);
+      $impl = HarbormasterBuildStepImplementation::getImplementation($class);
       if (!$impl) {
+        return new Aphront404Response();
+      }
+
+      if ($impl->shouldRequireAutotargeting()) {
+        // No manual creation of autotarget steps.
         return new Aphront404Response();
       }
 
       $step = HarbormasterBuildStep::initializeNewStep($viewer)
         ->setBuildPlanPHID($plan->getPHID())
-        ->setClassName($this->className);
+        ->setClassName($class);
 
       $is_new = true;
     }

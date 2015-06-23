@@ -43,4 +43,13 @@ final class PhabricatorMultimeterApplication
     );
   }
 
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Multimeter User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Multimeter User Guide'),
+      ),
+    );
+  }
+
 }

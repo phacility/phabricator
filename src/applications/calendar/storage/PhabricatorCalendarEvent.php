@@ -2,6 +2,7 @@
 
 final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   implements PhabricatorPolicyInterface,
+  PhabricatorProjectInterface,
   PhabricatorMarkupInterface,
   PhabricatorApplicationTransactionInterface,
   PhabricatorSubscribableInterface,
@@ -36,6 +37,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   private $parentEvent = self::ATTACHABLE;
   private $invitees = self::ATTACHABLE;
   private $appliedViewer;
+
+  // Frequency Constants
+  const FREQUENCY_DAILY = 'daily';
+  const FREQUENCY_WEEKLY = 'weekly';
+  const FREQUENCY_MONTHLY = 'monthly';
+  const FREQUENCY_YEARLY = 'yearly';
 
   public static function initializeNewCalendarEvent(
     PhabricatorUser $actor,

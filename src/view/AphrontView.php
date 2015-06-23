@@ -143,6 +143,7 @@ abstract class AphrontView extends Phobject
       $name,
       $config,
       $this->getDefaultResourceSource());
+    return $this;
   }
 
 

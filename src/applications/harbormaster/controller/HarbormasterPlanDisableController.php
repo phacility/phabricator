@@ -3,22 +3,20 @@
 final class HarbormasterPlanDisableController
   extends HarbormasterPlanController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $this->requireApplicationCapability(
       HarbormasterManagePlansCapability::CAPABILITY);
 
     $plan = id(new HarbormasterBuildPlanQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($request->getURIData('id')))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->executeOne();
     if (!$plan) {
       return new Aphront404Response();
@@ -63,14 +61,11 @@ final class HarbormasterPlanDisableController
       $button = pht('Disable Plan');
     }
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setTitle($title)
       ->appendChild($body)
       ->addSubmitButton($button)
       ->addCancelButton($plan_uri);
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
 }

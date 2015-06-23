@@ -14,6 +14,9 @@ final class DivinerAtomSearchEngine extends PhabricatorApplicationSearchEngine {
     $saved = new PhabricatorSavedQuery();
 
     $saved->setParameter(
+      'bookPHIDs',
+      $this->readPHIDsFromRequest($request, 'bookPHIDs'));
+    $saved->setParameter(
       'repositoryPHIDs',
       $this->readPHIDsFromRequest($request, 'repositoryPHIDs'));
     $saved->setParameter('name', $request->getStr('name'));
@@ -26,6 +29,11 @@ final class DivinerAtomSearchEngine extends PhabricatorApplicationSearchEngine {
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new DivinerAtomQuery());
+
+    $books = $saved->getParameter('bookPHIDs');
+    if ($books) {
+      $query->withBookPHIDs($books);
+    }
 
     $repository_phids = $saved->getParameter('repositoryPHIDs');
     if ($repository_phids) {
@@ -73,6 +81,13 @@ final class DivinerAtomSearchEngine extends PhabricatorApplicationSearchEngine {
         isset($types[$type]));
     }
     $form->appendChild($type_control);
+
+    $form->appendControl(
+      id(new AphrontFormTokenizerControl())
+        ->setDatasource(new DivinerBookDatasource())
+        ->setName('bookPHIDs')
+        ->setLabel(pht('Books'))
+        ->setValue($saved->getParameter('bookPHIDs')));
 
     $form->appendControl(
        id(new AphrontFormTokenizerControl())

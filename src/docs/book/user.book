@@ -28,6 +28,9 @@
     },
     "userguide": {
       "name": "Application User Guides"
+    },
+    "fieldmanual": {
+      "name": "Field Manuals"
     }
   }
 }
