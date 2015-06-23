@@ -118,6 +118,7 @@ final class PhabricatorMetaMTAMailSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setContent($list);
   }
 }

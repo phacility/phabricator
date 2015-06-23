@@ -91,8 +91,7 @@ final class PhabricatorWorkerBulkJobSearchEngine
       $list->addItem($item);
     }
 
-    // TODO: Needs new wrapper when merging to redesign.
-
-    return $list;
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setContent($list);
   }
 }

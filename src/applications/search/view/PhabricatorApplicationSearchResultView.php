@@ -54,6 +54,7 @@ final class PhabricatorApplicationSearchResultView extends Phobject {
 
   public function setContent($content) {
     $this->content = $content;
+    return $this;
   }
 
   public function getContent() {
