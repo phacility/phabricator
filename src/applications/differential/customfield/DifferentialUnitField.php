@@ -48,182 +48,67 @@ final class DifferentialUnitField
       $diff->attachProperty($key, idx($properties, $key));
     }
 
-    $ustar = DifferentialRevisionUpdateHistoryView::renderDiffUnitStar($diff);
-    $umsg = DifferentialRevisionUpdateHistoryView::getDiffUnitMessage($diff);
+    $status = $this->renderUnitStatus($diff);
 
-    $rows = array();
+    $unit = array();
 
-    $rows[] = array(
-      'style' => 'star',
-      'name'  => $ustar,
-      'value' => $umsg,
-      'show'  => true,
-    );
+    $buildable = $diff->getBuildable();
+    if ($buildable) {
+      $target_phids = array();
+      foreach ($buildable->getBuilds() as $build) {
+        foreach ($build->getBuildTargets() as $target) {
+          $target_phids[] = $target->getPHID();
+        }
+      }
 
-    $excuse = $diff->getProperty('arc:unit-excuse');
-    if ($excuse) {
-      $rows[] = array(
-        'style' => 'excuse',
-        'name'  => pht('Excuse'),
-        'value' => phutil_escape_html_newlines($excuse),
-        'show'  => true,
-      );
+      $unit = id(new HarbormasterBuildUnitMessage())->loadAllWhere(
+        'buildTargetPHID IN (%Ls) LIMIT 25',
+        $target_phids);
     }
 
-    $show_limit = 10;
-    $hidden = array();
+    if (!$unit) {
+      $legacy_unit = $diff->getProperty('arc:unit');
+      if ($legacy_unit) {
+        // Show the top 100 legacy unit messages.
+        $legacy_unit = array_slice($legacy_unit, 0, 100);
 
-    $udata = $diff->getProperty('arc:unit');
-    if ($udata) {
-      $sort_map = array(
-        ArcanistUnitTestResult::RESULT_BROKEN     => 0,
-        ArcanistUnitTestResult::RESULT_FAIL       => 1,
-        ArcanistUnitTestResult::RESULT_UNSOUND    => 2,
-        ArcanistUnitTestResult::RESULT_SKIP       => 3,
-        ArcanistUnitTestResult::RESULT_POSTPONED  => 4,
-        ArcanistUnitTestResult::RESULT_PASS       => 5,
-      );
-
-      foreach ($udata as $key => $test) {
-        $udata[$key]['sort'] = idx($sort_map, idx($test, 'result'));
-      }
-      $udata = isort($udata, 'sort');
-      $engine = new PhabricatorMarkupEngine();
-      $engine->setViewer($this->getViewer());
-      $markup_objects = array();
-      foreach ($udata as $key => $test) {
-        $userdata = idx($test, 'userdata');
-        if ($userdata) {
-          if ($userdata !== false) {
-            $userdata = str_replace("\000", '', $userdata);
+        $target = new HarbormasterBuildTarget();
+        foreach ($legacy_unit as $message) {
+          try {
+            $modern = HarbormasterBuildUnitMessage::newFromDictionary(
+              $target,
+              $this->getModernUnitMessageDictionary($message));
+            $unit[] = $modern;
+          } catch (Exception $ex) {
+            // Just ignore it if legacy messages aren't formatted like
+            // we expect.
           }
-          $markup_object = id(new PhabricatorMarkupOneOff())
-            ->setContent($userdata)
-            ->setPreserveLinebreaks(true);
-          $engine->addObject($markup_object, 'default');
-          $markup_objects[$key] = $markup_object;
-        }
-      }
-      $engine->process();
-      foreach ($udata as $key => $test) {
-        $result = idx($test, 'result');
-
-        $default_hide = false;
-        switch ($result) {
-          case ArcanistUnitTestResult::RESULT_POSTPONED:
-          case ArcanistUnitTestResult::RESULT_PASS:
-            $default_hide = true;
-            break;
-        }
-
-        if ($show_limit && !$default_hide) {
-          --$show_limit;
-          $show = true;
-        } else {
-          $show = false;
-          if (empty($hidden[$result])) {
-            $hidden[$result] = 0;
-          }
-          $hidden[$result]++;
-        }
-
-        $value = idx($test, 'name');
-
-        $namespace = idx($test, 'namespace');
-        if ($namespace) {
-          $value = $namespace.'::'.$value;
-        }
-
-        if (!empty($test['link'])) {
-          $value = phutil_tag(
-            'a',
-            array(
-              'href' => $test['link'],
-              'target' => '_blank',
-            ),
-            $value);
-        }
-        $rows[] = array(
-          'style' => $this->getResultStyle($result),
-          'name'  => ucwords($result),
-          'value' => $value,
-          'show'  => $show,
-        );
-
-        if (isset($markup_objects[$key])) {
-          $rows[] = array(
-            'style' => 'details',
-            'value' => $engine->getOutput($markup_objects[$key], 'default'),
-            'show'  => false,
-          );
-          if (empty($hidden['details'])) {
-            $hidden['details'] = 0;
-          }
-          $hidden['details']++;
         }
       }
     }
 
-    $show_string = $this->renderShowString($hidden);
+    if ($unit) {
+      $path_map = mpull($diff->loadChangesets(), 'getID', 'getFilename');
+      foreach ($path_map as $path => $id) {
+        $href = '#C'.$id.'NL';
 
-    $view = new DifferentialResultsTableView();
-    $view->setRows($rows);
-    $view->setShowMoreString($show_string);
+        // TODO: When the diff is not the right-hand-size diff, we should
+        // ideally adjust this URI to be absolute.
 
-    return $view->render();
-  }
+        $path_map[$path] = $href;
+      }
 
-  private function getResultStyle($result) {
-    $map = array(
-      ArcanistUnitTestResult::RESULT_PASS       => 'green',
-      ArcanistUnitTestResult::RESULT_FAIL       => 'red',
-      ArcanistUnitTestResult::RESULT_SKIP       => 'blue',
-      ArcanistUnitTestResult::RESULT_BROKEN     => 'red',
-      ArcanistUnitTestResult::RESULT_UNSOUND    => 'yellow',
-      ArcanistUnitTestResult::RESULT_POSTPONED  => 'blue',
+      $view = id(new HarbormasterUnitPropertyView())
+        ->setPathURIMap($path_map)
+        ->setUnitMessages($unit);
+    } else {
+      $view = null;
+    }
+
+    return array(
+      $status,
+      $view,
     );
-    return idx($map, $result);
-  }
-
-  private function renderShowString(array $hidden) {
-    if (!$hidden) {
-      return null;
-    }
-
-    // Reorder hidden things by severity.
-    $hidden = array_select_keys(
-      $hidden,
-      array(
-        ArcanistUnitTestResult::RESULT_BROKEN,
-        ArcanistUnitTestResult::RESULT_FAIL,
-        ArcanistUnitTestResult::RESULT_UNSOUND,
-        ArcanistUnitTestResult::RESULT_SKIP,
-        ArcanistUnitTestResult::RESULT_POSTPONED,
-        ArcanistUnitTestResult::RESULT_PASS,
-        'details',
-      )) + $hidden;
-
-    $noun = array(
-      ArcanistUnitTestResult::RESULT_BROKEN     => pht('Broken'),
-      ArcanistUnitTestResult::RESULT_FAIL       => pht('Failed'),
-      ArcanistUnitTestResult::RESULT_UNSOUND    => pht('Unsound'),
-      ArcanistUnitTestResult::RESULT_SKIP       => pht('Skipped'),
-      ArcanistUnitTestResult::RESULT_POSTPONED  => pht('Postponed'),
-      ArcanistUnitTestResult::RESULT_PASS       => pht('Passed'),
-    );
-
-    $show = array();
-    foreach ($hidden as $key => $value) {
-      if ($key == 'details') {
-        $show[] = pht('%d Detail(s)', $value);
-      } else {
-        $show[] = $value.' '.idx($noun, $key);
-      }
-    }
-
-    return pht(
-      'Show Full Unit Results (%s)',
-      implode(', ', $show));
   }
 
   public function getWarningsForDetailView() {
@@ -245,6 +130,53 @@ final class DifferentialUnitField
     }
 
     return $warnings;
+  }
+
+
+  private function renderUnitStatus(DifferentialDiff $diff) {
+    $colors = array(
+      DifferentialUnitStatus::UNIT_NONE => 'grey',
+      DifferentialUnitStatus::UNIT_OKAY => 'green',
+      DifferentialUnitStatus::UNIT_WARN => 'yellow',
+      DifferentialUnitStatus::UNIT_FAIL => 'red',
+      DifferentialUnitStatus::UNIT_SKIP => 'blue',
+      DifferentialUnitStatus::UNIT_AUTO_SKIP => 'blue',
+      DifferentialUnitStatus::UNIT_POSTPONED => 'blue',
+    );
+    $icon_color = idx($colors, $diff->getUnitStatus(), 'grey');
+
+    $message = DifferentialRevisionUpdateHistoryView::getDiffUnitMessage($diff);
+
+    $excuse = $diff->getProperty('arc:unit-excuse');
+    if (strlen($excuse)) {
+      $excuse = array(
+        phutil_tag('strong', array(), pht('Excuse:')),
+        ' ',
+        phutil_escape_html_newlines($excuse),
+      );
+    }
+
+    $status = id(new PHUIStatusListView())
+      ->addItem(
+        id(new PHUIStatusItemView())
+          ->setIcon(PHUIStatusItemView::ICON_STAR, $icon_color)
+          ->setTarget($message)
+          ->setNote($excuse));
+
+    return $status;
+  }
+
+  private function getModernUnitMessageDictionary(array $map) {
+    // Strip out `null` values to satisfy stricter typechecks.
+    foreach ($map as $key => $value) {
+      if ($value === null) {
+        unset($map[$key]);
+      }
+    }
+
+    // TODO: Remap more stuff here?
+
+    return $map;
   }
 
 

@@ -38,7 +38,6 @@ final class DifferentialLintField
     $keys = array(
       'arc:lint',
       'arc:lint-excuse',
-      'arc:lint-postponed',
     );
 
     $properties = id(new DifferentialDiffProperty())->loadAllWhere(
@@ -51,208 +50,72 @@ final class DifferentialLintField
       $diff->attachProperty($key, idx($properties, $key));
     }
 
-    $path_changesets = mpull($diff->loadChangesets(), 'getID', 'getFilename');
+    $status = $this->renderLintStatus($diff);
 
-    $lstar = DifferentialRevisionUpdateHistoryView::renderDiffLintStar($diff);
-    $lmsg = DifferentialRevisionUpdateHistoryView::getDiffLintMessage($diff);
-    $ldata = $diff->getProperty('arc:lint');
-    $ltail = null;
+    $lint = array();
 
-    $rows = array();
+    $buildable = $diff->getBuildable();
+    if ($buildable) {
+      $target_phids = array();
+      foreach ($buildable->getBuilds() as $build) {
+        foreach ($build->getBuildTargets() as $target) {
+          $target_phids[] = $target->getPHID();
+        }
+      }
 
-    $rows[] = array(
-      'style'     => 'star',
-      'name'      => $lstar,
-      'value'     => $lmsg,
-      'show'      => true,
-    );
-
-    $excuse = $diff->getProperty('arc:lint-excuse');
-    if ($excuse) {
-      $rows[] = array(
-        'style'   => 'excuse',
-        'name'    => 'Excuse',
-        'value'   => phutil_escape_html_newlines($excuse),
-        'show'    => true,
-      );
+      $lint = id(new HarbormasterBuildLintMessage())->loadAllWhere(
+        'buildTargetPHID IN (%Ls) LIMIT 25',
+        $target_phids);
     }
 
-    $show_limit = 10;
-    $hidden = array();
+    if (!$lint) {
+      // No Harbormaster messages, so look for legacy messages and make them
+      // look like modern messages.
+      $legacy_lint = $diff->getProperty('arc:lint');
+      if ($legacy_lint) {
+        // Show the top 100 legacy lint messages. Previously, we showed some
+        // by default and let the user toggle the rest. With modern messages,
+        // we can send the user to the Harbormaster detail page. Just show
+        // "a lot" of messages in legacy cases to try to strike a balance
+        // between implementation simplicitly and compatibility.
+        $legacy_lint = array_slice($legacy_lint, 0, 100);
 
-    if ($ldata) {
-      $ldata = igroup($ldata, 'path');
-      foreach ($ldata as $path => $messages) {
-
-        $rows[] = array(
-          'style' => 'section',
-          'name'  => $path,
-          'show'  => $show_limit,
-        );
-
-        foreach ($messages as $message) {
-          $path = idx($message, 'path');
-          $line = idx($message, 'line');
-
-          $code = idx($message, 'code');
-          $severity = idx($message, 'severity');
-
-          $name = idx($message, 'name');
-          $description = idx($message, 'description');
-
-          $line_link = pht('line %d', intval($line));
-          if (isset($path_changesets[$path])) {
-            $href = '#C'.$path_changesets[$path].'NL'.max(1, $line);
-
-            // TODO: We are always showing the active diff
-            // if ($diff->getID() != $this->getDiff()->getID()) {
-            //  $href = '/D'.$diff->getRevisionID().'?id='.$diff->getID().$href;
-            // }
-
-            $line_link = phutil_tag(
-              'a',
-              array(
-                'href' => $href,
-              ),
-              $line_link);
-          }
-
-          if ($show_limit) {
-            --$show_limit;
-            $show = true;
-          } else {
-            $show = false;
-            if (empty($hidden[$severity])) {
-              $hidden[$severity] = 0;
-            }
-            $hidden[$severity]++;
-          }
-
-          $rows[] = array(
-            'style' => $this->getSeverityStyle($severity),
-            'name'  => ucwords($severity),
-            'value' => hsprintf(
-              '(%s) %s at %s',
-              $code,
-              $name,
-              $line_link),
-            'show'  => $show,
-          );
-
-          if (!empty($message['locations'])) {
-            $locations = array();
-            foreach ($message['locations'] as $location) {
-              $other_line = idx($location, 'line');
-              $locations[] =
-                idx($location, 'path', $path).
-                ($other_line ? ":{$other_line}" : '');
-            }
-            $description .= "\n".pht(
-              'Other locations: %s',
-              implode(', ', $locations));
-          }
-
-          if (strlen($description)) {
-            $rows[] = array(
-              'style' => 'details',
-              'value' => phutil_escape_html_newlines($description),
-              'show'  => false,
-            );
-            if (empty($hidden['details'])) {
-              $hidden['details'] = 0;
-            }
-            $hidden['details']++;
+        $target = new HarbormasterBuildTarget();
+        foreach ($legacy_lint as $message) {
+          try {
+            $modern = HarbormasterBuildLintMessage::newFromDictionary(
+              $target,
+              $this->getModernLintMessageDictionary($message));
+            $lint[] = $modern;
+          } catch (Exception $ex) {
+            // Ignore any poorly formatted messages.
           }
         }
       }
     }
 
-    $postponed = $diff->getProperty('arc:lint-postponed');
-    if ($postponed) {
-      foreach ($postponed as $linter) {
-        $rows[] = array(
-          'style' => $this->getPostponedStyle(),
-          'name' => 'Postponed',
-          'value' => $linter,
-          'show'  => false,
-          );
-        if (empty($hidden['postponed'])) {
-          $hidden['postponed'] = 0;
-        }
-        $hidden['postponed']++;
+    if ($lint) {
+      $path_map = mpull($diff->loadChangesets(), 'getID', 'getFilename');
+      foreach ($path_map as $path => $id) {
+        $href = '#C'.$id.'NL';
+
+        // TODO: When the diff is not the right-hand-size diff, we should
+        // ideally adjust this URI to be absolute.
+
+        $path_map[$path] = $href;
       }
+
+      $view = id(new HarbormasterLintPropertyView())
+        ->setPathURIMap($path_map)
+        ->setLintMessages($lint);
+    } else {
+      $view = null;
     }
 
-    $show_string = $this->renderShowString($hidden);
-
-    $view = new DifferentialResultsTableView();
-    $view->setRows($rows);
-    $view->setShowMoreString($show_string);
-
-    return $view->render();
-  }
-
-  private function getSeverityStyle($severity) {
-    $map = array(
-      ArcanistLintSeverity::SEVERITY_ERROR      => 'red',
-      ArcanistLintSeverity::SEVERITY_WARNING    => 'yellow',
-      ArcanistLintSeverity::SEVERITY_AUTOFIX    => 'yellow',
-      ArcanistLintSeverity::SEVERITY_ADVICE     => 'yellow',
+    return array(
+      $status,
+      $view,
     );
-    return idx($map, $severity);
-  }
-
-  private function getPostponedStyle() {
-    return 'blue';
-  }
-
-  private function renderShowString(array $hidden) {
-    if (!$hidden) {
-      return null;
-    }
-
-    // Reorder hidden things by severity.
-    $hidden = array_select_keys(
-      $hidden,
-      array(
-        ArcanistLintSeverity::SEVERITY_ERROR,
-        ArcanistLintSeverity::SEVERITY_WARNING,
-        ArcanistLintSeverity::SEVERITY_AUTOFIX,
-        ArcanistLintSeverity::SEVERITY_ADVICE,
-        'details',
-        'postponed',
-      )) + $hidden;
-
-    $show = array();
-    foreach ($hidden as $key => $value) {
-      switch ($key) {
-        case ArcanistLintSeverity::SEVERITY_ERROR:
-          $show[] = pht('%d Error(s)', $value);
-          break;
-        case ArcanistLintSeverity::SEVERITY_WARNING:
-          $show[] = pht('%d Warning(s)', $value);
-          break;
-        case ArcanistLintSeverity::SEVERITY_AUTOFIX:
-          $show[] = pht('%d Auto-Fix(es)', $value);
-          break;
-        case ArcanistLintSeverity::SEVERITY_ADVICE:
-          $show[] = pht('%d Advice(s)', $value);
-          break;
-        case 'details':
-          $show[] = pht('%d Detail(s)', $value);
-          break;
-        case 'postponed':
-          $show[] = pht('%d Postponed', $value);
-          break;
-        default:
-          $show[] = $value;
-          break;
-      }
-    }
-
-    return pht(
-      'Show Full Lint Results (%s)',
-      implode(', ', $show));
   }
 
   public function getWarningsForDetailView() {
@@ -277,5 +140,51 @@ final class DifferentialLintField
 
     return $warnings;
   }
+
+  private function renderLintStatus(DifferentialDiff $diff) {
+    $colors = array(
+      DifferentialLintStatus::LINT_NONE => 'grey',
+      DifferentialLintStatus::LINT_OKAY => 'green',
+      DifferentialLintStatus::LINT_WARN => 'yellow',
+      DifferentialLintStatus::LINT_FAIL => 'red',
+      DifferentialLintStatus::LINT_SKIP => 'blue',
+      DifferentialLintStatus::LINT_AUTO_SKIP => 'blue',
+      DifferentialLintStatus::LINT_POSTPONED => 'blue',
+    );
+    $icon_color = idx($colors, $diff->getLintStatus(), 'grey');
+
+    $message = DifferentialRevisionUpdateHistoryView::getDiffLintMessage($diff);
+
+    $excuse = $diff->getProperty('arc:lint-excuse');
+    if (strlen($excuse)) {
+      $excuse = array(
+        phutil_tag('strong', array(), pht('Excuse:')),
+        ' ',
+        phutil_escape_html_newlines($excuse),
+      );
+    }
+
+    $status = id(new PHUIStatusListView())
+      ->addItem(
+        id(new PHUIStatusItemView())
+          ->setIcon(PHUIStatusItemView::ICON_STAR, $icon_color)
+          ->setTarget($message)
+          ->setNote($excuse));
+
+    return $status;
+  }
+
+  private function getModernLintMessageDictionary(array $map) {
+    // Strip out `null` values to satisfy stricter typechecks.
+    foreach ($map as $key => $value) {
+      if ($value === null) {
+        unset($map[$key]);
+      }
+    }
+
+    // TODO: We might need to remap some stuff here?
+    return $map;
+  }
+
 
 }
