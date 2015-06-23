@@ -6726,6 +6726,7 @@ phutil_register_library_map(array(
       'PhabricatorProjectInterface',
       'PhabricatorDestructibleInterface',
       'PhabricatorSpacesInterface',
+      'PhabricatorMentionableInterface',
     ),
     'PholioMockCommentController' => 'PholioController',
     'PholioMockEditController' => 'PholioController',
