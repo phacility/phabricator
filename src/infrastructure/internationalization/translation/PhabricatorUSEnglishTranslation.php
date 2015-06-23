@@ -1177,6 +1177,11 @@ final class PhabricatorUSEnglishTranslation
       '%s Broken Test(s)' => '%s Broken',
       '%s Unsound Test(s)' => '%s Unsound',
       '%s Other Test(s)' => '%s Other',
+
+      '%s Bulk Task(s)' => array(
+        '%s Task',
+        '%s Tasks',
+      ),
     );
   }
 
