@@ -54,7 +54,19 @@ final class DifferentialLintField
 
     $lint = array();
 
-    // TODO: Look for Harbormaster messages here.
+    $buildable = $diff->getBuildable();
+    if ($buildable) {
+      $target_phids = array();
+      foreach ($buildable->getBuilds() as $build) {
+        foreach ($build->getBuildTargets() as $target) {
+          $target_phids[] = $target->getPHID();
+        }
+      }
+
+      $lint = id(new HarbormasterBuildLintMessage())->loadAllWhere(
+        'buildTargetPHID IN (%Ls) LIMIT 25',
+        $target_phids);
+    }
 
     if (!$lint) {
       // No Harbormaster messages, so look for legacy messages and make them

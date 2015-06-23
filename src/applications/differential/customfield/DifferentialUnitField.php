@@ -52,7 +52,19 @@ final class DifferentialUnitField
 
     $unit = array();
 
-    // TODO: Look for Harbormaster results here.
+    $buildable = $diff->getBuildable();
+    if ($buildable) {
+      $target_phids = array();
+      foreach ($buildable->getBuilds() as $build) {
+        foreach ($build->getBuildTargets() as $target) {
+          $target_phids[] = $target->getPHID();
+        }
+      }
+
+      $unit = id(new HarbormasterBuildUnitMessage())->loadAllWhere(
+        'buildTargetPHID IN (%Ls) LIMIT 25',
+        $target_phids);
+    }
 
     if (!$unit) {
       $legacy_unit = $diff->getProperty('arc:unit');
