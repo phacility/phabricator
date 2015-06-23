@@ -4,6 +4,7 @@ final class HarbormasterLintPropertyView extends AphrontView {
 
   private $pathURIMap = array();
   private $lintMessages = array();
+  private $limit;
 
   public function setPathURIMap(array $map) {
     $this->pathURIMap = $map;
@@ -16,9 +17,21 @@ final class HarbormasterLintPropertyView extends AphrontView {
     return $this;
   }
 
+  public function setLimit($limit) {
+    $this->limit = $limit;
+    return $this;
+  }
+
   public function render() {
+    $messages = $this->lintMessages;
+    $messages = msort($messages, 'getSortKey');
+
+    if ($this->limit) {
+      $messages = array_slice($messages, 0, $this->limit);
+    }
+
     $rows = array();
-    foreach ($this->lintMessages as $message) {
+    foreach ($messages as $message) {
       $path = $message->getPath();
       $line = $message->getLine();
 
@@ -40,8 +53,8 @@ final class HarbormasterLintPropertyView extends AphrontView {
       }
 
       $rows[] = array(
-        $location,
         $severity,
+        $location,
         $message->getCode(),
         $message->getName(),
       );
@@ -50,15 +63,15 @@ final class HarbormasterLintPropertyView extends AphrontView {
     $table = id(new AphrontTableView($rows))
       ->setHeaders(
         array(
-          pht('Location'),
           pht('Severity'),
+          pht('Location'),
           pht('Code'),
           pht('Message'),
         ))
       ->setColumnClasses(
         array(
-          'pri',
           null,
+          'pri',
           null,
           'wide',
         ));

@@ -1,7 +1,7 @@
 <?php
 
 final class DifferentialUnitField
-  extends DifferentialCustomField {
+  extends DifferentialHarbormasterField {
 
   public function getFieldKey() {
     return 'differential:unit';
@@ -31,84 +31,44 @@ final class DifferentialUnitField
     return $this->getFieldName();
   }
 
-  public function renderDiffPropertyViewValue(DifferentialDiff $diff) {
-    // TODO: See DifferentialLintField.
-    $keys = array(
+  protected function getLegacyProperty() {
+    return 'arc:unit';
+  }
+
+  protected function getDiffPropertyKeys() {
+    return array(
       'arc:unit',
       'arc:unit-excuse',
     );
+  }
 
-    $properties = id(new DifferentialDiffProperty())->loadAllWhere(
-      'diffID = %d AND name IN (%Ls)',
-      $diff->getID(),
-      $keys);
-    $properties = mpull($properties, 'getData', 'getName');
+  protected function loadHarbormasterTargetMessages(array $target_phids) {
+    return id(new HarbormasterBuildUnitMessage())->loadAllWhere(
+      'buildTargetPHID IN (%Ls)',
+      $target_phids);
+  }
 
-    foreach ($keys as $key) {
-      $diff->attachProperty($key, idx($properties, $key));
-    }
+  protected function newModernMessage(array $message) {
+    return HarbormasterBuildUnitMessage::newFromDictionary(
+      new HarbormasterBuildTarget(),
+      $this->getModernUnitMessageDictionary($message));
+  }
 
-    $status = $this->renderUnitStatus($diff);
-
-    $unit = array();
-
-    $buildable = $diff->getBuildable();
-    if ($buildable) {
-      $target_phids = array();
-      foreach ($buildable->getBuilds() as $build) {
-        foreach ($build->getBuildTargets() as $target) {
-          $target_phids[] = $target->getPHID();
-        }
-      }
-
-      $unit = id(new HarbormasterBuildUnitMessage())->loadAllWhere(
-        'buildTargetPHID IN (%Ls) LIMIT 25',
-        $target_phids);
-    }
-
-    if (!$unit) {
-      $legacy_unit = $diff->getProperty('arc:unit');
-      if ($legacy_unit) {
-        // Show the top 100 legacy unit messages.
-        $legacy_unit = array_slice($legacy_unit, 0, 100);
-
-        $target = new HarbormasterBuildTarget();
-        foreach ($legacy_unit as $message) {
-          try {
-            $modern = HarbormasterBuildUnitMessage::newFromDictionary(
-              $target,
-              $this->getModernUnitMessageDictionary($message));
-            $unit[] = $modern;
-          } catch (Exception $ex) {
-            // Just ignore it if legacy messages aren't formatted like
-            // we expect.
-          }
-        }
+  protected function newHarbormasterMessageView(array $messages) {
+    foreach ($messages as $key => $message) {
+      if ($message->getResult() == ArcanistUnitTestResult::RESULT_PASS) {
+        unset($messages[$key]);
       }
     }
 
-    if ($unit) {
-      $path_map = mpull($diff->loadChangesets(), 'getID', 'getFilename');
-      foreach ($path_map as $path => $id) {
-        $href = '#C'.$id.'NL';
-
-        // TODO: When the diff is not the right-hand-size diff, we should
-        // ideally adjust this URI to be absolute.
-
-        $path_map[$path] = $href;
-      }
-
-      $view = id(new HarbormasterUnitPropertyView())
-        ->setPathURIMap($path_map)
-        ->setUnitMessages($unit);
-    } else {
-      $view = null;
+    if (!$messages) {
+      return null;
     }
 
-    return array(
-      $status,
-      $view,
-    );
+    return id(new HarbormasterUnitPropertyView())
+      ->setLimit(10)
+      ->setHidePassingTests(true)
+      ->setUnitMessages($messages);
   }
 
   public function getWarningsForDetailView() {
@@ -132,8 +92,10 @@ final class DifferentialUnitField
     return $warnings;
   }
 
+  protected function renderHarbormasterStatus(
+    DifferentialDiff $diff,
+    array $messages) {
 
-  private function renderUnitStatus(DifferentialDiff $diff) {
     $colors = array(
       DifferentialUnitStatus::UNIT_NONE => 'grey',
       DifferentialUnitStatus::UNIT_OKAY => 'green',
@@ -147,6 +109,55 @@ final class DifferentialUnitField
 
     $message = DifferentialRevisionUpdateHistoryView::getDiffUnitMessage($diff);
 
+    $note = array();
+
+    $groups = mgroup($messages, 'getResult');
+
+    $groups = array_select_keys(
+      $groups,
+      array(
+        ArcanistUnitTestResult::RESULT_FAIL,
+        ArcanistUnitTestResult::RESULT_BROKEN,
+        ArcanistUnitTestResult::RESULT_UNSOUND,
+        ArcanistUnitTestResult::RESULT_SKIP,
+        ArcanistUnitTestResult::RESULT_PASS,
+      )) + $groups;
+
+    foreach ($groups as $result => $group) {
+      $count = new PhutilNumber(count($group));
+      switch ($result) {
+        case ArcanistUnitTestResult::RESULT_PASS:
+          $note[] = pht('%s Passed Test(s)', $count);
+          break;
+        case ArcanistUnitTestResult::RESULT_FAIL:
+          $note[] = pht('%s Failed Test(s)', $count);
+          break;
+        case ArcanistUnitTestResult::RESULT_SKIP:
+          $note[] = pht('%s Skipped Test(s)', $count);
+          break;
+        case ArcanistUnitTestResult::RESULT_BROKEN:
+          $note[] = pht('%s Broken Test(s)', $count);
+          break;
+        case ArcanistUnitTestResult::RESULT_UNSOUND:
+          $note[] = pht('%s Unsound Test(s)', $count);
+          break;
+        default:
+          $note[] = pht('%s Other Test(s)', $count);
+          break;
+      }
+    }
+
+    $buildable = $diff->getBuildable();
+    if ($buildable) {
+      $full_results = '/harbormaster/unit/'.$buildable->getID().'/';
+      $note[] = phutil_tag(
+        'a',
+        array(
+          'href' => $full_results,
+        ),
+        pht('View Full Results'));
+    }
+
     $excuse = $diff->getProperty('arc:unit-excuse');
     if (strlen($excuse)) {
       $excuse = array(
@@ -154,14 +165,17 @@ final class DifferentialUnitField
         ' ',
         phutil_escape_html_newlines($excuse),
       );
+      $note[] = $excuse;
     }
+
+    $note = phutil_implode_html(" \xC2\xB7 ", $note);
 
     $status = id(new PHUIStatusListView())
       ->addItem(
         id(new PHUIStatusItemView())
           ->setIcon(PHUIStatusItemView::ICON_STAR, $icon_color)
           ->setTarget($message)
-          ->setNote($excuse));
+          ->setNote($note));
 
     return $status;
   }

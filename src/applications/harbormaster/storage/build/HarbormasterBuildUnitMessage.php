@@ -97,4 +97,26 @@ final class HarbormasterBuildUnitMessage
     return $this;
   }
 
+  public function getSortKey() {
+    // TODO: Maybe use more numeric values after T6861.
+    $map = array(
+      ArcanistUnitTestResult::RESULT_FAIL => 'A',
+      ArcanistUnitTestResult::RESULT_BROKEN => 'B',
+      ArcanistUnitTestResult::RESULT_UNSOUND => 'C',
+      ArcanistUnitTestResult::RESULT_PASS => 'Z',
+    );
+
+    $result = idx($map, $this->getResult(), 'N');
+
+    $parts = array(
+      $result,
+      $this->getEngine(),
+      $this->getNamespace(),
+      $this->getName(),
+      $this->getID(),
+    );
+
+    return implode("\0", $parts);
+  }
+
 }

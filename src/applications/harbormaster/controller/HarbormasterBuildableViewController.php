@@ -25,7 +25,7 @@ final class HarbormasterBuildableViewController
       ->needBuildTargets(true)
       ->execute();
 
-    list($lint, $unit) = $this->renderLintAndUnit($builds);
+    list($lint, $unit) = $this->renderLintAndUnit($buildable, $builds);
 
     $buildable->attachBuilds($builds);
     $object = $buildable->getBuildableObject();
@@ -257,7 +257,10 @@ final class HarbormasterBuildableViewController
     return $box;
   }
 
-  private function renderLintAndUnit(array $builds) {
+  private function renderLintAndUnit(
+    HarbormasterBuildable $buildable,
+    array $builds) {
+
     $viewer = $this->getViewer();
 
     $targets = array();
@@ -274,20 +277,32 @@ final class HarbormasterBuildableViewController
     $target_phids = mpull($targets, 'getPHID');
 
     $lint_data = id(new HarbormasterBuildLintMessage())->loadAllWhere(
-      'buildTargetPHID IN (%Ls) LIMIT 25',
+      'buildTargetPHID IN (%Ls)',
       $target_phids);
 
     $unit_data = id(new HarbormasterBuildUnitMessage())->loadAllWhere(
-      'buildTargetPHID IN (%Ls) LIMIT 25',
+      'buildTargetPHID IN (%Ls)',
       $target_phids);
 
     if ($lint_data) {
       $lint_table = id(new HarbormasterLintPropertyView())
         ->setUser($viewer)
+        ->setLimit(10)
         ->setLintMessages($lint_data);
 
+      $lint_href = $this->getApplicationURI('lint/'.$buildable->getID().'/');
+
+      $lint_header = id(new PHUIHeaderView())
+        ->setHeader(pht('Lint Messages'))
+        ->addActionLink(
+          id(new PHUIButtonView())
+            ->setTag('a')
+            ->setHref($lint_href)
+            ->setIconFont('fa-list-ul')
+            ->setText('View All'));
+
       $lint = id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Lint Messages'))
+        ->setHeader($lint_header)
         ->appendChild($lint_table);
     } else {
       $lint = null;
@@ -296,10 +311,22 @@ final class HarbormasterBuildableViewController
     if ($unit_data) {
       $unit_table = id(new HarbormasterUnitPropertyView())
         ->setUser($viewer)
+        ->setLimit(25)
         ->setUnitMessages($unit_data);
 
+      $unit_href = $this->getApplicationURI('unit/'.$buildable->getID().'/');
+
+      $unit_header = id(new PHUIHeaderView())
+        ->setHeader(pht('Unit Tests'))
+        ->addActionLink(
+          id(new PHUIButtonView())
+            ->setTag('a')
+            ->setHref($unit_href)
+            ->setIconFont('fa-list-ul')
+            ->setText('View All'));
+
       $unit = id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Unit Tests'))
+        ->setHeader($unit_header)
         ->appendChild($unit_table);
     } else {
       $unit = null;

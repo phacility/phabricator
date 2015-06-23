@@ -1,7 +1,7 @@
 <?php
 
 final class DifferentialLintField
-  extends DifferentialCustomField {
+  extends DifferentialHarbormasterField {
 
   public function getFieldKey() {
     return 'differential:lint';
@@ -31,91 +31,33 @@ final class DifferentialLintField
     return $this->getFieldName();
   }
 
-  public function renderDiffPropertyViewValue(DifferentialDiff $diff) {
-    // TODO: This load is slightly inefficient, but most of this is moving
-    // to Harbormaster and this simplifies the transition. Eat 1-2 extra
-    // queries for now.
-    $keys = array(
+  protected function getLegacyProperty() {
+    return 'arc:lint';
+  }
+
+  protected function getDiffPropertyKeys() {
+    return array(
       'arc:lint',
       'arc:lint-excuse',
     );
+  }
 
-    $properties = id(new DifferentialDiffProperty())->loadAllWhere(
-      'diffID = %d AND name IN (%Ls)',
-      $diff->getID(),
-      $keys);
-    $properties = mpull($properties, 'getData', 'getName');
+  protected function loadHarbormasterTargetMessages(array $target_phids) {
+    return id(new HarbormasterBuildLintMessage())->loadAllWhere(
+      'buildTargetPHID IN (%Ls) LIMIT 25',
+      $target_phids);
+  }
 
-    foreach ($keys as $key) {
-      $diff->attachProperty($key, idx($properties, $key));
-    }
+  protected function newHarbormasterMessageView(array $messages) {
+    return id(new HarbormasterLintPropertyView())
+      ->setLimit(25)
+      ->setLintMessages($messages);
+  }
 
-    $status = $this->renderLintStatus($diff);
-
-    $lint = array();
-
-    $buildable = $diff->getBuildable();
-    if ($buildable) {
-      $target_phids = array();
-      foreach ($buildable->getBuilds() as $build) {
-        foreach ($build->getBuildTargets() as $target) {
-          $target_phids[] = $target->getPHID();
-        }
-      }
-
-      $lint = id(new HarbormasterBuildLintMessage())->loadAllWhere(
-        'buildTargetPHID IN (%Ls) LIMIT 25',
-        $target_phids);
-    }
-
-    if (!$lint) {
-      // No Harbormaster messages, so look for legacy messages and make them
-      // look like modern messages.
-      $legacy_lint = $diff->getProperty('arc:lint');
-      if ($legacy_lint) {
-        // Show the top 100 legacy lint messages. Previously, we showed some
-        // by default and let the user toggle the rest. With modern messages,
-        // we can send the user to the Harbormaster detail page. Just show
-        // "a lot" of messages in legacy cases to try to strike a balance
-        // between implementation simplicitly and compatibility.
-        $legacy_lint = array_slice($legacy_lint, 0, 100);
-
-        $target = new HarbormasterBuildTarget();
-        foreach ($legacy_lint as $message) {
-          try {
-            $modern = HarbormasterBuildLintMessage::newFromDictionary(
-              $target,
-              $this->getModernLintMessageDictionary($message));
-            $lint[] = $modern;
-          } catch (Exception $ex) {
-            // Ignore any poorly formatted messages.
-          }
-        }
-      }
-    }
-
-    if ($lint) {
-      $path_map = mpull($diff->loadChangesets(), 'getID', 'getFilename');
-      foreach ($path_map as $path => $id) {
-        $href = '#C'.$id.'NL';
-
-        // TODO: When the diff is not the right-hand-size diff, we should
-        // ideally adjust this URI to be absolute.
-
-        $path_map[$path] = $href;
-      }
-
-      $view = id(new HarbormasterLintPropertyView())
-        ->setPathURIMap($path_map)
-        ->setLintMessages($lint);
-    } else {
-      $view = null;
-    }
-
-    return array(
-      $status,
-      $view,
-    );
+  protected function newModernMessage(array $message) {
+    return HarbormasterBuildLintMessage::newFromDictionary(
+      new HarbormasterBuildTarget(),
+      $this->getModernLintMessageDictionary($message));
   }
 
   public function getWarningsForDetailView() {
@@ -141,7 +83,10 @@ final class DifferentialLintField
     return $warnings;
   }
 
-  private function renderLintStatus(DifferentialDiff $diff) {
+  protected function renderHarbormasterStatus(
+    DifferentialDiff $diff,
+    array $messages) {
+
     $colors = array(
       DifferentialLintStatus::LINT_NONE => 'grey',
       DifferentialLintStatus::LINT_OKAY => 'green',

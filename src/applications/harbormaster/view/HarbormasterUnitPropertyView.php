@@ -4,6 +4,7 @@ final class HarbormasterUnitPropertyView extends AphrontView {
 
   private $pathURIMap = array();
   private $unitMessages = array();
+  private $limit;
 
   public function setPathURIMap(array $map) {
     $this->pathURIMap = $map;
@@ -16,11 +17,22 @@ final class HarbormasterUnitPropertyView extends AphrontView {
     return $this;
   }
 
+  public function setLimit($limit) {
+    $this->limit = $limit;
+    return $this;
+  }
+
   public function render() {
+    $messages = $this->unitMessages;
+    $messages = msort($messages, 'getSortKey');
+
+    if ($this->limit) {
+      $messages = array_slice($messages, 0, $this->limit);
+    }
 
     $rows = array();
     $any_duration = false;
-    foreach ($this->unitMessages as $message) {
+    foreach ($messages as $message) {
       $result = $this->renderResult($message->getResult());
 
       $duration = $message->getDuration();
@@ -47,7 +59,6 @@ final class HarbormasterUnitPropertyView extends AphrontView {
         $name,
       );
     }
-
 
     $table = id(new AphrontTableView($rows))
       ->setHeaders(
