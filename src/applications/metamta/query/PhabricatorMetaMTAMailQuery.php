@@ -63,12 +63,14 @@ final class PhabricatorMetaMTAMailQuery
         $this->recipientPHIDs);
     }
 
-    $viewer = $this->getViewer();
-    $where[] = qsprintf(
-      $conn_r,
-      'edge.dst = %s OR actorPHID = %s',
-      $viewer->getPHID(),
-      $viewer->getPHID());
+    if ($this->actorPHIDs === null && $this->recipientPHIDs === null) {
+      $viewer = $this->getViewer();
+      $where[] = qsprintf(
+        $conn_r,
+        'edge.dst = %s OR actorPHID = %s',
+        $viewer->getPHID(),
+        $viewer->getPHID());
+    }
 
     $where[] = $this->buildPagingClause($conn_r);
 
@@ -78,11 +80,13 @@ final class PhabricatorMetaMTAMailQuery
   protected function buildJoinClause(AphrontDatabaseConnection $conn) {
     $joins = array();
 
-    $joins[] = qsprintf(
-      $conn,
-      'LEFT JOIN %T edge ON mail.phid = edge.src AND edge.type = %d',
-      PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-      PhabricatorMetaMTAMailHasRecipientEdgeType::EDGECONST);
+    if ($this->actorPHIDs === null && $this->recipientPHIDs === null) {
+      $joins[] = qsprintf(
+        $conn,
+        'LEFT JOIN %T edge ON mail.phid = edge.src AND edge.type = %d',
+        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+        PhabricatorMetaMTAMailHasRecipientEdgeType::EDGECONST);
+    }
 
     if ($this->recipientPHIDs !== null) {
       $joins[] = qsprintf(

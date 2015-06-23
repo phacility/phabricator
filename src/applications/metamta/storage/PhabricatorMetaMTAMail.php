@@ -25,7 +25,7 @@ final class PhabricatorMetaMTAMail
   public function __construct() {
 
     $this->status     = self::STATUS_QUEUE;
-    $this->parameters = array();
+    $this->parameters = array('sensitive' => true);
 
     parent::__construct();
   }
@@ -262,6 +262,15 @@ final class PhabricatorMetaMTAMail
     return $this;
   }
 
+  public function setSensitiveContent($bool) {
+    $this->setParam('sensitive', $bool);
+    return $this;
+  }
+
+  public function hasSensitiveContent() {
+    return $this->getParam('sensitive', true);
+  }
+
   public function setHTMLBody($html) {
     $this->setParam('html-body', $html);
     return $this;
@@ -372,11 +381,15 @@ final class PhabricatorMetaMTAMail
       // Write the recipient edges.
       $editor = new PhabricatorEdgeEditor();
       $edge_type = PhabricatorMetaMTAMailHasRecipientEdgeType::EDGECONST;
-      $actor_phids = array_unique(array_merge(
-        $this->getAllActorPHIDs(),
-        $this->getExpandedRecipientPHIDs()));
-      foreach ($actor_phids as $actor_phid) {
-        $editor->addEdge($this->getPHID(), $edge_type, $actor_phid);
+      $recipient_phids = array_merge(
+        $this->getToPHIDs(),
+        $this->getCcPHIDs());
+      $expanded_phids = $this->expandRecipients($recipient_phids);
+      $all_phids = array_unique(array_merge(
+        $recipient_phids,
+        $expanded_phids));
+      foreach ($all_phids as $curr_phid) {
+        $editor->addEdge($this->getPHID(), $edge_type, $curr_phid);
       }
       $editor->save();
 

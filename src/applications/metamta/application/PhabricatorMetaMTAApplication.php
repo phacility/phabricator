@@ -6,6 +6,10 @@ final class PhabricatorMetaMTAApplication extends PhabricatorApplication {
     return pht('MetaMTA');
   }
 
+  public function getBaseURI() {
+    return '/mail/';
+  }
+
   public function getFontIcon() {
     return 'fa-send';
   }
