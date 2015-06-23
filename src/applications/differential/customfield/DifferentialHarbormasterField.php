@@ -81,10 +81,21 @@ abstract class DifferentialHarbormasterField
         $path_map[$path] = $href;
       }
 
-      $view = $this->newHarbormasterMessageView($messages)
-        ->setPathURIMap($path_map);
+      $view = $this->newHarbormasterMessageView($messages);
+      if ($view) {
+        $view->setPathURIMap($path_map);
+      }
     } else {
       $view = null;
+    }
+
+    if ($view) {
+      $view = phutil_tag(
+        'div',
+        array(
+          'class' => 'differential-harbormaster-table-view',
+        ),
+        $view);
     }
 
     return array(

@@ -50,6 +50,7 @@ final class DifferentialLintField
 
   protected function newHarbormasterMessageView(array $messages) {
     return id(new HarbormasterLintPropertyView())
+      ->setLimit(25)
       ->setLintMessages($messages);
   }
 

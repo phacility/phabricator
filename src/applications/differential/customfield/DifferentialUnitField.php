@@ -44,7 +44,7 @@ final class DifferentialUnitField
 
   protected function loadHarbormasterTargetMessages(array $target_phids) {
     return id(new HarbormasterBuildUnitMessage())->loadAllWhere(
-      'buildTargetPHID IN (%Ls) LIMIT 25',
+      'buildTargetPHID IN (%Ls)',
       $target_phids);
   }
 
@@ -55,7 +55,19 @@ final class DifferentialUnitField
   }
 
   protected function newHarbormasterMessageView(array $messages) {
+    foreach ($messages as $key => $message) {
+      if ($message->getResult() == ArcanistUnitTestResult::RESULT_PASS) {
+        unset($messages[$key]);
+      }
+    }
+
+    if (!$messages) {
+      return null;
+    }
+
     return id(new HarbormasterUnitPropertyView())
+      ->setLimit(10)
+      ->setHidePassingTests(true)
       ->setUnitMessages($messages);
   }
 
@@ -97,6 +109,55 @@ final class DifferentialUnitField
 
     $message = DifferentialRevisionUpdateHistoryView::getDiffUnitMessage($diff);
 
+    $note = array();
+
+    $groups = mgroup($messages, 'getResult');
+
+    $groups = array_select_keys(
+      $groups,
+      array(
+        ArcanistUnitTestResult::RESULT_FAIL,
+        ArcanistUnitTestResult::RESULT_BROKEN,
+        ArcanistUnitTestResult::RESULT_UNSOUND,
+        ArcanistUnitTestResult::RESULT_SKIP,
+        ArcanistUnitTestResult::RESULT_PASS,
+      )) + $groups;
+
+    foreach ($groups as $result => $group) {
+      $count = new PhutilNumber(count($group));
+      switch ($result) {
+        case ArcanistUnitTestResult::RESULT_PASS:
+          $note[] = pht('%s Passed Test(s)', $count);
+          break;
+        case ArcanistUnitTestResult::RESULT_FAIL:
+          $note[] = pht('%s Failed Test(s)', $count);
+          break;
+        case ArcanistUnitTestResult::RESULT_SKIP:
+          $note[] = pht('%s Skipped Test(s)', $count);
+          break;
+        case ArcanistUnitTestResult::RESULT_BROKEN:
+          $note[] = pht('%s Broken Test(s)', $count);
+          break;
+        case ArcanistUnitTestResult::RESULT_UNSOUND:
+          $note[] = pht('%s Unsound Test(s)', $count);
+          break;
+        default:
+          $note[] = pht('%s Other Test(s)', $count);
+          break;
+      }
+    }
+
+    $buildable = $diff->getBuildable();
+    if ($buildable) {
+      $full_results = '/harbormaster/unit/'.$buildable->getID().'/';
+      $note[] = phutil_tag(
+        'a',
+        array(
+          'href' => $full_results,
+        ),
+        pht('View Full Results'));
+    }
+
     $excuse = $diff->getProperty('arc:unit-excuse');
     if (strlen($excuse)) {
       $excuse = array(
@@ -104,14 +165,17 @@ final class DifferentialUnitField
         ' ',
         phutil_escape_html_newlines($excuse),
       );
+      $note[] = $excuse;
     }
+
+    $note = phutil_implode_html(" \xC2\xB7 ", $note);
 
     $status = id(new PHUIStatusListView())
       ->addItem(
         id(new PHUIStatusItemView())
           ->setIcon(PHUIStatusItemView::ICON_STAR, $icon_color)
           ->setTarget($message)
-          ->setNote($excuse));
+          ->setNote($note));
 
     return $status;
   }

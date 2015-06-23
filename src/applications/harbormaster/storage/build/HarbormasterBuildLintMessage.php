@@ -95,4 +95,26 @@ final class HarbormasterBuildLintMessage
     return $this;
   }
 
+  public function getSortKey() {
+    // TODO: Maybe use more numeric values after T6861.
+    $map = array(
+      ArcanistLintSeverity::SEVERITY_ERROR => 'A',
+      ArcanistLintSeverity::SEVERITY_WARNING => 'B',
+      ArcanistLintSeverity::SEVERITY_AUTOFIX => 'C',
+      ArcanistLintSeverity::SEVERITY_ADVICE => 'Y',
+      ArcanistLintSeverity::SEVERITY_DISABLED => 'Z',
+    );
+
+    $severity = idx($map, $this->getSeverity(), 'N');
+
+    $parts = array(
+      $severity,
+      $this->getPath(),
+      sprintf('%08d', $this->getLine()),
+      $this->getCode(),
+    );
+
+    return implode("\0", $parts);
+  }
+
 }
