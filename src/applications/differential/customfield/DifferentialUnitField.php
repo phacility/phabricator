@@ -1,7 +1,7 @@
 <?php
 
 final class DifferentialUnitField
-  extends DifferentialCustomField {
+  extends DifferentialHarbormasterField {
 
   public function getFieldKey() {
     return 'differential:unit';
@@ -31,84 +31,32 @@ final class DifferentialUnitField
     return $this->getFieldName();
   }
 
-  public function renderDiffPropertyViewValue(DifferentialDiff $diff) {
-    // TODO: See DifferentialLintField.
-    $keys = array(
+  protected function getLegacyProperty() {
+    return 'arc:unit';
+  }
+
+  protected function getDiffPropertyKeys() {
+    return array(
       'arc:unit',
       'arc:unit-excuse',
     );
+  }
 
-    $properties = id(new DifferentialDiffProperty())->loadAllWhere(
-      'diffID = %d AND name IN (%Ls)',
-      $diff->getID(),
-      $keys);
-    $properties = mpull($properties, 'getData', 'getName');
+  protected function loadHarbormasterTargetMessages(array $target_phids) {
+    return id(new HarbormasterBuildUnitMessage())->loadAllWhere(
+      'buildTargetPHID IN (%Ls) LIMIT 25',
+      $target_phids);
+  }
 
-    foreach ($keys as $key) {
-      $diff->attachProperty($key, idx($properties, $key));
-    }
+  protected function newModernMessage(array $message) {
+    return HarbormasterBuildUnitMessage::newFromDictionary(
+      new HarbormasterBuildTarget(),
+      $this->getModernUnitMessageDictionary($message));
+  }
 
-    $status = $this->renderUnitStatus($diff);
-
-    $unit = array();
-
-    $buildable = $diff->getBuildable();
-    if ($buildable) {
-      $target_phids = array();
-      foreach ($buildable->getBuilds() as $build) {
-        foreach ($build->getBuildTargets() as $target) {
-          $target_phids[] = $target->getPHID();
-        }
-      }
-
-      $unit = id(new HarbormasterBuildUnitMessage())->loadAllWhere(
-        'buildTargetPHID IN (%Ls) LIMIT 25',
-        $target_phids);
-    }
-
-    if (!$unit) {
-      $legacy_unit = $diff->getProperty('arc:unit');
-      if ($legacy_unit) {
-        // Show the top 100 legacy unit messages.
-        $legacy_unit = array_slice($legacy_unit, 0, 100);
-
-        $target = new HarbormasterBuildTarget();
-        foreach ($legacy_unit as $message) {
-          try {
-            $modern = HarbormasterBuildUnitMessage::newFromDictionary(
-              $target,
-              $this->getModernUnitMessageDictionary($message));
-            $unit[] = $modern;
-          } catch (Exception $ex) {
-            // Just ignore it if legacy messages aren't formatted like
-            // we expect.
-          }
-        }
-      }
-    }
-
-    if ($unit) {
-      $path_map = mpull($diff->loadChangesets(), 'getID', 'getFilename');
-      foreach ($path_map as $path => $id) {
-        $href = '#C'.$id.'NL';
-
-        // TODO: When the diff is not the right-hand-size diff, we should
-        // ideally adjust this URI to be absolute.
-
-        $path_map[$path] = $href;
-      }
-
-      $view = id(new HarbormasterUnitPropertyView())
-        ->setPathURIMap($path_map)
-        ->setUnitMessages($unit);
-    } else {
-      $view = null;
-    }
-
-    return array(
-      $status,
-      $view,
-    );
+  protected function newHarbormasterMessageView(array $messages) {
+    return id(new HarbormasterUnitPropertyView())
+      ->setUnitMessages($messages);
   }
 
   public function getWarningsForDetailView() {
@@ -132,8 +80,10 @@ final class DifferentialUnitField
     return $warnings;
   }
 
+  protected function renderHarbormasterStatus(
+    DifferentialDiff $diff,
+    array $messages) {
 
-  private function renderUnitStatus(DifferentialDiff $diff) {
     $colors = array(
       DifferentialUnitStatus::UNIT_NONE => 'grey',
       DifferentialUnitStatus::UNIT_OKAY => 'green',
