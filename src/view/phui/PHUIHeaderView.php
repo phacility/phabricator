@@ -110,7 +110,7 @@ final class PHUIHeaderView extends AphrontTagView {
     $tag = phutil_tag(
       'span',
       array(
-        'class' => "{$header_class} plr",
+        'class' => "phui-header-status {$header_class}",
       ),
       array(
         $img,

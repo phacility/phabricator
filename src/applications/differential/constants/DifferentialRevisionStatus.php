@@ -68,7 +68,7 @@ final class DifferentialRevisionStatus extends Phobject {
     $tag = phutil_tag(
       'span',
       array(
-        'class' => 'phui-header-'.$color.' plr',
+        'class' => 'phui-header-status phui-header-'.$color,
       ),
       array(
         $img,

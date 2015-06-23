@@ -144,47 +144,45 @@ body .phui-header-shell.phui-bleed-header
   color: {$darkbluetext};
 }
 
-.policy-header-callout.policy-adjusted {
-  padding: 0 4px;
+.policy-header-callout,
+.phui-header-subheader .phui-header-status {
+  padding: 3px 9px;
   border-radius: 3px;
+  background: {$lightbluebackground};
+  margin-right: 8px;
 }
 
 .policy-header-callout.policy-adjusted-weaker {
-  background: {$lightgreen};
-  border: 1px solid {$green};
+  background: {$sh-greenbackground};
 }
 
 .policy-header-callout.policy-adjusted-weaker .policy-link,
 .policy-header-callout.policy-adjusted-weaker .phui-icon-view {
-  color: {$green};
+  color: {$sh-greentext};
 }
 
 .policy-header-callout.policy-adjusted-stronger {
-  background: {$lightred};
-  border: 1px solid {$red};
+  background: {$sh-redbackground};
 }
 
 .policy-header-callout.policy-adjusted-stronger .policy-link,
 .policy-header-callout.policy-adjusted-stronger .phui-icon-view {
-  color: {$red};
+  color: {$sh-redtext};
 }
 
 .policy-header-callout.policy-adjusted-different {
-  background: {$lightorange};
-  border: 1px solid {$orange};
+  background: {$sh-orangebackground};
 }
 
 .policy-header-callout.policy-adjusted-different .policy-link,
 .policy-header-callout.policy-adjusted-different .phui-icon-view {
-  color: {$orange};
+  color: {$sh-orangetext};
 }
 
 .phui-header-subheader .phui-header-status-dark {
   color: {$sh-indigotext};
   background: {$sh-indigobackground};
   margin-right: 8px;
-  padding: 4px 8px;
-  border-radius: 3px;
 }
 
 .phui-header-subheader .phui-header-status-dark .phui-icon-view {
@@ -194,19 +192,11 @@ body .phui-header-shell.phui-bleed-header
 .phui-header-subheader .phui-header-status-red {
   color: {$sh-redtext};
   background: {$sh-redbackground};
-  margin-right: 8px;
-  padding: 4px 8px;
-  border-radius: 3px;
-  margin-right: 8px;
 }
 
 .phui-header-subheader .phui-header-status-green {
   color: {$sh-greentext};
   background: {$sh-greenbackground};
-  margin-right: 8px;
-  padding: 4px 8px;
-  border-radius: 3px;
-  margin-right: 8px;
 }
 
 .phui-header-action-links .phui-mobile-menu {
