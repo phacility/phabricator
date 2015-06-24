@@ -11,7 +11,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     PhabricatorFlaggableInterface,
     PhabricatorMarkupInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorProjectInterface {
+    PhabricatorProjectInterface,
+    PhabricatorSpacesInterface {
 
   /**
    * Shortest hash we'll recognize in raw "a829f32" form.
@@ -54,6 +55,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   protected $details = array();
   protected $credentialPHID;
   protected $almanacServicePHID;
+  protected $spacePHID;
 
   private $commitCount = self::ATTACHABLE;
   private $mostRecentCommit = self::ATTACHABLE;
@@ -72,7 +74,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $repository = id(new PhabricatorRepository())
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
-      ->setPushPolicy($push_policy);
+      ->setPushPolicy($push_policy)
+      ->setSpacePHID($actor->getDefaultSpacePHID());
 
     // Put the repository in "Importing" mode until we finish
     // parsing it.
@@ -1909,6 +1912,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
+
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
 
@@ -1933,6 +1937,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       }
 
     $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorSpacesInterface  )----------------------------------------- */
+
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
   }
 
 }

@@ -386,9 +386,17 @@ final class DiffusionRepositoryEditMainController
       $viewer,
       $repository);
 
+    $view_parts = array();
+    if (PhabricatorSpacesNamespaceQuery::getViewerSpacesExist($viewer)) {
+      $space_phid = PhabricatorSpacesNamespaceQuery::getObjectSpacePHID(
+        $repository);
+      $view_parts[] = $viewer->renderHandle($space_phid);
+    }
+    $view_parts[] = $descriptions[PhabricatorPolicyCapability::CAN_VIEW];
+
     $view->addProperty(
       pht('Visible To'),
-      $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
+      phutil_implode_html(" \xC2\xB7 ", $view_parts));
 
     $view->addProperty(
       pht('Editable By'),

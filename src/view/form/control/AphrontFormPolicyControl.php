@@ -39,6 +39,22 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
     return $this;
   }
 
+  public function readValueFromDictionary(array $dictionary) {
+    // TODO: This is a little hacky but will only get us into trouble if we
+    // have multiple view policy controls in multiple paged form views on the
+    // same page, which seems unlikely.
+    $this->setSpacePHID(idx($dictionary, 'spacePHID'));
+
+    return parent::readValueFromDictionary($dictionary);
+  }
+
+  public function readValueFromRequest(AphrontRequest $request) {
+    // See note in readValueFromDictionary().
+    $this->setSpacePHID($request->getStr('spacePHID'));
+
+    return parent::readValueFromRequest($request);
+  }
+
   public function setCapability($capability) {
     $this->capability = $capability;
 
