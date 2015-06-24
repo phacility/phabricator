@@ -104,6 +104,7 @@ final class PHUICalendarMonthView extends AphrontView {
         if ($counter <= $max_daily) {
           $list->addEvent($item);
         }
+        $counter++;
       }
 
       $uri = $this->getBrowseURI();
