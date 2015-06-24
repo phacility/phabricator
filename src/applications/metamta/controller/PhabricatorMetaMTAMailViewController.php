@@ -49,6 +49,26 @@ final class PhabricatorMetaMTAMailViewController
       ->setUser($viewer)
       ->setObject($mail);
 
+    $properties->addProperty(
+      pht('ID'),
+      $mail->getID());
+
+    $properties->addProperty(
+      pht('Status'),
+      $mail->getStatus());
+
+    if ($mail->getMessage()) {
+      $properties->addProperty(
+        pht('Status Details'),
+        $mail->getMessage());
+    }
+
+    if ($mail->getRelatedPHID()) {
+      $properties->addProperty(
+        pht('Related Object'),
+        $viewer->renderHandle($mail->getRelatedPHID()));
+    }
+
     if ($mail->getActorPHID()) {
       $actor_str = $viewer->renderHandle($mail->getActorPHID());
     } else {

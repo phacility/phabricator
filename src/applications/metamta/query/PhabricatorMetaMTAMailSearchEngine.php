@@ -101,18 +101,16 @@ final class PhabricatorMetaMTAMailSearchEngine
 
     foreach ($mails as $mail) {
       if ($mail->hasSensitiveContent()) {
-        $header = pht(
-          'Mail %d: < content redacted >',
-          $mail->getID());
+        $header = pht('< content redacted >');
       } else {
-        $header = pht(
-          'Mail %d: %s',
-          $mail->getID(),
-          $mail->getSubject());
+        $header = $mail->getSubject();
       }
 
       $item = id(new PHUIObjectItemView())
+        ->setUser($viewer)
         ->setObject($mail)
+        ->setEpoch($mail->getDateCreated())
+        ->setObjectName('Mail '.$mail->getID())
         ->setHeader($header)
         ->setHref($this->getURI('detail/'.$mail->getID()));
       $list->addItem($item);
