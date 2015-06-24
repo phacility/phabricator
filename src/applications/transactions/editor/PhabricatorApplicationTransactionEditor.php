@@ -2334,6 +2334,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     $mail
+      ->setSensitiveContent(false)
       ->setFrom($this->getActingAsPHID())
       ->setSubjectPrefix($this->getMailSubjectPrefix())
       ->setVarySubjectPrefix('['.$action.']')

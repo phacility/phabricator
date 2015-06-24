@@ -1170,6 +1170,18 @@ final class PhabricatorUSEnglishTranslation
           'This call takes %s parameters, but only %s are documented.',
         ),
       ),
+
+      '%s Passed Test(s)' => '%s Passed',
+      '%s Failed Test(s)' => '%s Failed',
+      '%s Skipped Test(s)' => '%s Skipped',
+      '%s Broken Test(s)' => '%s Broken',
+      '%s Unsound Test(s)' => '%s Unsound',
+      '%s Other Test(s)' => '%s Other',
+
+      '%s Bulk Task(s)' => array(
+        '%s Task',
+        '%s Tasks',
+      ),
     );
   }
 

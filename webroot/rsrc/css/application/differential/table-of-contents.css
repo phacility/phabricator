@@ -83,3 +83,8 @@ table.aphront-table-view td.differential-toc-ftype {
   border-top: 1px solid {$thinblueborder};
   padding: 8px;
 }
+
+.differential-harbormaster-table-view {
+  margin: 4px 0;
+  border: 1px solid {$thinblueborder};
+}

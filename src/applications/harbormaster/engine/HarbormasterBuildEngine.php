@@ -332,6 +332,11 @@ final class HarbormasterBuildEngine extends Phobject {
         $message->save();
 
         $target->setTargetStatus($new_status);
+
+        if ($target->isComplete()) {
+          $target->setDateCompleted(PhabricatorTime::getNow());
+        }
+
         $target->save();
       }
     }

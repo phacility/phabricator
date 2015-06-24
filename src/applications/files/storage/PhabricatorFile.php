@@ -542,7 +542,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
           // just bail out.
           throw $status;
         } else {
-          // This is HTTP 2XX, so use the the response body to save the
+          // This is HTTP 2XX, so use the response body to save the
           // file data.
           $params = $params + array(
             'name' => basename($uri),

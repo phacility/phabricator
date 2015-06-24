@@ -15,7 +15,7 @@ final class HarbormasterBuildUnitMessage
 
   public static function initializeNewUnitMessage(
     HarbormasterBuildTarget $build_target) {
-    return id(new HarbormasterBuildLintMessage())
+    return id(new HarbormasterBuildUnitMessage())
       ->setBuildTargetPHID($build_target->getPHID());
   }
 
@@ -95,6 +95,28 @@ final class HarbormasterBuildUnitMessage
   public function setProperty($key, $value) {
     $this->properties[$key] = $value;
     return $this;
+  }
+
+  public function getSortKey() {
+    // TODO: Maybe use more numeric values after T6861.
+    $map = array(
+      ArcanistUnitTestResult::RESULT_FAIL => 'A',
+      ArcanistUnitTestResult::RESULT_BROKEN => 'B',
+      ArcanistUnitTestResult::RESULT_UNSOUND => 'C',
+      ArcanistUnitTestResult::RESULT_PASS => 'Z',
+    );
+
+    $result = idx($map, $this->getResult(), 'N');
+
+    $parts = array(
+      $result,
+      $this->getEngine(),
+      $this->getNamespace(),
+      $this->getName(),
+      $this->getID(),
+    );
+
+    return implode("\0", $parts);
   }
 
 }

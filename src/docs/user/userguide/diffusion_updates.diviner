@@ -99,7 +99,7 @@ which calls `diffusion.looksoon`. This should make an external repository about
 as responsive as a hosted repository.
 
 If a repository has an update scheduled, the Diffusion > (Choose a
-Repository) > Edit Repository interface will show that the the repository is
+Repository) > Edit Repository interface will show that the repository is
 prioritized and will be updated soon.
 
 

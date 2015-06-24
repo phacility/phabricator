@@ -1,0 +1,15 @@
+CREATE TABLE {$NAMESPACE}_worker.worker_bulkjob (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  phid VARBINARY(64) NOT NULL,
+  authorPHID VARBINARY(64) NOT NULL,
+  jobTypeKey VARCHAR(32) COLLATE {$COLLATE_TEXT} NOT NULL,
+  status VARCHAR(32) COLLATE {$COLLATE_TEXT} NOT NULL,
+  parameters LONGTEXT COLLATE {$COLLATE_TEXT} NOT NULL,
+  size INT UNSIGNED NOT NULL,
+  dateCreated INT UNSIGNED NOT NULL,
+  dateModified INT UNSIGNED NOT NULL,
+  UNIQUE KEY `key_phid` (phid),
+  KEY `key_type` (jobTypeKey),
+  KEY `key_author` (authorPHID),
+  KEY `key_status` (status)
+) ENGINE=InnoDB, COLLATE {$COLLATE_TEXT};

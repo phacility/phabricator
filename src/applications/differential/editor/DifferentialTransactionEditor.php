@@ -587,6 +587,21 @@ final class DifferentialTransactionEditor
 
         $diff->setRevisionID($object->getID());
         $diff->save();
+
+        // Update Harbormaster to set the containerPHID correctly for any
+        // existing buildables. We may otherwise have buildables stuck with
+        // the old (`null`) container.
+
+        // TODO: This is a bit iffy, maybe we can find a cleaner approach?
+        $table = new HarbormasterBuildable();
+        $conn_w = $table->establishConnection('w');
+        queryfx(
+          $conn_w,
+          'UPDATE %T SET containerPHID = %s WHERE buildablePHID = %s',
+          $table->getTableName(),
+          $object->getPHID(),
+          $diff->getPHID());
+
         return;
     }
 

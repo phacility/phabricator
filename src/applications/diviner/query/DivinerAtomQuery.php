@@ -219,7 +219,7 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           }
 
           // If we found matches in the same documentation book, prefer them
-          // over other matches. Otherwise, look at all the the matches.
+          // over other matches. Otherwise, look at all the matches.
           $matches = $xatoms[$xref->getName()][$xref->getType()];
           if (isset($matches[$atom->getBookPHID()])) {
             $maybe = $matches[$atom->getBookPHID()];

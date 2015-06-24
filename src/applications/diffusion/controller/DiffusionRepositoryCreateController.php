@@ -596,7 +596,7 @@ final class DiffusionRepositoryCreateController
 
       $page->addRemarkupInstructions(
         pht(
-          'Choose or add the SSH credentials to use to connect to the the '.
+          'Choose or add the SSH credentials to use to connect to the '.
           'repository hosted at:'.
           "\n\n".
           "  lang=text\n".

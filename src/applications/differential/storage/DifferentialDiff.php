@@ -39,6 +39,7 @@ final class DifferentialDiff
   private $changesets = self::ATTACHABLE;
   private $revision = self::ATTACHABLE;
   private $properties = array();
+  private $buildable = self::ATTACHABLE;
 
   protected function getConfiguration() {
     return array(
@@ -321,6 +322,15 @@ final class DifferentialDiff
 
   public function getProperty($key) {
     return $this->assertAttachedKey($this->properties, $key);
+  }
+
+  public function attachBuildable(HarbormasterBuildable $buildable = null) {
+    $this->buildable = $buildable;
+    return $this;
+  }
+
+  public function getBuildable() {
+    return $this->assertAttached($this->buildable);
   }
 
 
