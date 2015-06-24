@@ -67,7 +67,6 @@ final class DifferentialUnitField
 
     return id(new HarbormasterUnitPropertyView())
       ->setLimit(10)
-      ->setHidePassingTests(true)
       ->setUnitMessages($messages);
   }
 
