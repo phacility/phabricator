@@ -52,7 +52,7 @@ final class HarbormasterBuildUnitMessage
     }
 
     $coverage = idx($dict, 'coverage');
-    if (strlen($coverage)) {
+    if ($coverage) {
       $obj->setProperty('coverage', $coverage);
     }
 
