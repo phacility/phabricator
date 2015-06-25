@@ -26,6 +26,7 @@
 .phui-header-col2 {
   display: table-cell;
   vertical-align: middle;
+  word-break: break-word;
 }
 
 .phui-header-col3 {
