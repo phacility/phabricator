@@ -82,7 +82,7 @@ final class CelerityDefaultPostprocessor
       'blueborder'          => '#8C98B8',
       'darkblueborder'      => '#626E82',
       'lightbluebackground' => '#F8F9FC',
-      'bluebackground'      => '#DAE7FF',
+      'bluebackground'      => '#ECEEF4',
       'lightbluetext'       => '#8C98B8',
       'bluetext'            => '#6B748C',
       'darkbluetext'        => '#464C5C',

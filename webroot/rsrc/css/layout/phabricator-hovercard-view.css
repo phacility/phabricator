@@ -26,8 +26,8 @@
 }
 
 .phabricator-hovercard-head .phui-header-shell {
-  padding: 8px 8px 8px 12px;
-  background-color: {$lightgreybackground};
+  padding: 6px 8px 6px 12px;
+  background-color: {$bluebackground};
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
 }

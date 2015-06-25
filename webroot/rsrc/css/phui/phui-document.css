@@ -10,7 +10,7 @@
 
 .phui-document-view .phui-header-shell {
   padding: 16px;
-  background-color: #F5F7FA;
+  background-color: {$bluebackground};
 }
 
 .phui-document-content {
@@ -73,7 +73,7 @@
 
 .phui-document-content .phui-header-shell {
   border-top: none;
-  border-bottom: 1px solid {$thinblueborder};
+  border-bottom: 1px solid {$lightblueborder};
 }
 
 .phui-document-content
