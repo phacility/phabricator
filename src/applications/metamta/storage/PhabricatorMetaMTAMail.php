@@ -1038,6 +1038,20 @@ final class PhabricatorMetaMTAMail
     }
   }
 
+  public function delete() {
+    $this->openTransaction();
+      queryfx(
+        $this->establishConnection('w'),
+        'DELETE FROM %T WHERE src = %s AND type = %d',
+        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+        $this->getPHID(),
+        PhabricatorMetaMTAMailHasRecipientEdgeType::EDGECONST);
+      $ret = parent::delete();
+    $this->saveTransaction();
+
+    return $ret;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
