@@ -22,6 +22,11 @@
   line-height: 1.6em;
 }
 
+.phui-info-view-body tt {
+  padding: 0 2px;
+  background-color: rgba(55,55,55,.1);
+}
+
 .phui-info-view-actions {
   margin-top: -3px;
   margin-bottom: -4px;

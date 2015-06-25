@@ -1,0 +1,14 @@
+/**
+ * @provides font-roboto-slab
+ * @requires phui-fontkit-css
+ */
+
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  src: local('RobotoSlab'),
+       url(/rsrc/externals/font/robotoslab/RobotoSlab.woff2)
+        format('woff2'),
+       url(/rsrc/externals/font/robotoslab/RobotoSlab.woff)
+        format('woff');
+}

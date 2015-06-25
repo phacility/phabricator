@@ -2,22 +2,16 @@
  * @provides phui-fontkit-css
  */
 
-/* - Slabo ---------------------------------------------------------------------
+/* - Roboto Slab ---------------------------------------------------------------
 
   Used as Primary Headers in Object Boxes, Headers in Documents
 
 */
 
 .diviner-document-section .phui-header-header {
-  font-family: 'Slabo', {$fontfamily};
-  color: {$darkbluetext};
-  font-size: 22px;
-}
-
-.diviner-document-section .phui-header-header {
-  font-family: 'Slabo', {$fontfamily};
-  color: {$darkbluetext};
+  font-family: 'Roboto Slab', {$fontfamily};
   font-size: 20px;
+  color: #000;
 }
 
 .phui-document-view .phabricator-remarkup h1.remarkup-header,
@@ -26,14 +20,11 @@
 .phui-document-view .phabricator-remarkup h4.remarkup-header,
 .phui-document-view .phabricator-remarkup h5.remarkup-header,
 .phui-document-view .phabricator-remarkup h6.remarkup-header {
-  font-family: 'Slabo', {$fontfamily};
-  color: #000;
+  font-family: 'Roboto Slab', {$fontfamily};
 }
 
 .phui-document-view .phabricator-remarkup h2.remarkup-header {
-  font-size: 22px;
-  padding: 24px 24px 8px 0;
+  padding: 0 24px 8px 0;
   border-bottom: 1px solid {$thinblueborder};
-  color: #000;
-  margin: 0 0 16px;
+  margin: 24px 0 16px;
 }

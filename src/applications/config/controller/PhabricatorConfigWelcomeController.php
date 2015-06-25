@@ -352,17 +352,23 @@ final class PhabricatorConfigWelcomeController
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Welcome to Phabricator'));
 
-    $setup_header = id(new PHUIHeaderView())
-      ->setHeader(pht('Setup and Configuration'))
-      ->setBleedHeader(true);
+    $setup_header = PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())
+        ->setContent(pht('=Setup and Configuration')),
+      'default',
+      $viewer);
 
-    $explore_header = id(new PHUIHeaderView())
-      ->setHeader(pht('Explore Phabricator'))
-      ->setBleedHeader(true);
+    $explore_header = PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())
+        ->setContent(pht('=Explore Phabricator')),
+      'default',
+      $viewer);
 
-    $quick_header = id(new PHUIHeaderView())
-      ->setHeader(pht('Quick Start Guides'))
-      ->setBleedHeader(true);
+    $quick_header = PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())
+        ->setContent(pht('=Quick Start Guides')),
+      'default',
+      $viewer);
 
     return id(new PHUIDocumentView())
       ->setHeader($header)

@@ -44,7 +44,7 @@ final class PhrictionDocumentController
       $create_uri = '/phriction/edit/?slug='.$slug;
 
       $notice = new PHUIInfoView();
-      $notice->setSeverity(PHUIInfoView::SEVERITY_NODATA);
+      $notice->setSeverity(PHUIInfoView::SEVERITY_WARNING);
       $notice->setTitle(pht('No content here!'));
       $notice->appendChild(
         pht(

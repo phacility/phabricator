@@ -155,9 +155,9 @@ body .diviner-document-section .phui-header-shell.phui-bleed-header {
 }
 
 .diviner-book-item-title {
-  font-weight: 700;
+  font-weight: bold;
   font-size: 15px;
-  color: {$bluetext};
+  color: {$darkbluetext};
 }
 
 .diviner-book-item-type {
