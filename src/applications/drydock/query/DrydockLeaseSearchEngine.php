@@ -93,10 +93,8 @@ final class DrydockLeaseSearchEngine
       ->setUser($this->requireViewer())
       ->setLeases($leases);
 
-    $result = new PhabricatorApplicationSearchResultView();
-    $result->setTable($list);
-
-    return $result;
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setContent($list);
   }
 
 }
