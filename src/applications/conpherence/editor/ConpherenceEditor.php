@@ -10,7 +10,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
   }
 
   public function getEditorObjectsDescription() {
-    return pht('Conpherence Threads');
+    return pht('Conpherence Rooms');
   }
 
   public static function createThread(
@@ -20,7 +20,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $message,
     PhabricatorContentSource $source) {
 
-    $conpherence = ConpherenceThread::initializeNewThread($creator);
+    $conpherence = ConpherenceThread::initializeNewRoom($creator);
     $files = array();
     $errors = array();
     if (empty($participant_phids)) {
@@ -456,7 +456,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         $is_leave = (($rem === array($actor_phid)) && !$add);
 
         if ($is_join) {
-          // You need CAN_JOIN to join a thread / room.
+          // You need CAN_JOIN to join a room.
           PhabricatorPolicyFilter::requireCapability(
             $this->requireActor(),
             $object,
@@ -583,11 +583,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
     $href = PhabricatorEnv::getProductionURI(
       '/'.$object->getMonogram().'?settings');
-    if ($object->getIsRoom()) {
-      $label = pht('EMAIL PREFERENCES FOR THIS ROOM');
-    } else {
-      $label = pht('EMAIL PREFERENCES FOR THIS MESSAGE');
-    }
+    $label = pht('EMAIL PREFERENCES FOR THIS ROOM');
     $body->addLinkSection($label, $href);
   }
 
@@ -644,19 +640,15 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
     switch ($type) {
       case ConpherenceTransaction::TYPE_TITLE:
-        if (!$object->getIsRoom()) {
-          continue;
+        if (empty($xactions)) {
+          break;
         }
         $missing = $this->validateIsEmptyTextField(
           $object->getTitle(),
           $xactions);
 
         if ($missing) {
-          if ($object->getIsRoom()) {
-            $detail = pht('Room title is required.');
-          } else {
-            $detail = pht('Thread title can not be blank.');
-          }
+          $detail = pht('Room title is required.');
           $error = new PhabricatorApplicationTransactionValidationError(
             $type,
             pht('Required'),
@@ -704,7 +696,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
             $errors[] = new PhabricatorApplicationTransactionValidationError(
               $type,
               pht('Invalid'),
-              pht('New thread member "%s" is not a valid user.', $phid),
+              pht('New room participant "%s" is not a valid user.', $phid),
               $xaction);
           }
         }

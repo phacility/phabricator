@@ -8,15 +8,19 @@ final class ConpherenceThreadMembersPolicyRule
   }
 
   public function getObjectPolicyName() {
-    return pht('Thread Members');
+    return pht('Room Participants');
   }
 
   public function getPolicyExplanation() {
-    return pht('Members of this thread can take this action.');
+    return pht('Participants in this room can take this action.');
   }
 
   public function getRuleDescription() {
-    return pht('thread members');
+    return pht('room participants');
+  }
+
+  public function getObjectPolicyIcon() {
+    return 'fa-comments';
   }
 
   public function canApplyToObject(PhabricatorPolicyInterface $object) {
