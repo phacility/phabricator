@@ -266,8 +266,8 @@ td.cov-I {
 .differential-changeset h1 {
   font-size: 15px;
   padding: 2px 0 12px 12px;
-  line-height: 18px;
-  font-weight: 500;
+  line-height: 20px;
+  color: #000;
 }
 
 .device-phone .differential-changeset h1 {
