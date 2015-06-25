@@ -585,6 +585,8 @@ final class DifferentialTransactionEditor
               'a race?'));
         }
 
+        // TODO: This can race with diff updates, particularly those from
+        // Harbormaster. See discussion in T8650.
         $diff->setRevisionID($object->getID());
         $diff->save();
 
@@ -593,6 +595,8 @@ final class DifferentialTransactionEditor
         // the old (`null`) container.
 
         // TODO: This is a bit iffy, maybe we can find a cleaner approach?
+        // In particular, this could (rarely) be overwritten by Harbormaster
+        // workers.
         $table = new HarbormasterBuildable();
         $conn_w = $table->establishConnection('w');
         queryfx(
