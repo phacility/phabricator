@@ -228,9 +228,11 @@ final class PhabricatorCalendarEventSearchEngine
       case 'day':
         return $query->setParameter('display', 'day');
       case 'upcoming':
-        return $query->setParameter('upcoming', array(
-          0 => 'upcoming',
-        ));
+        return $query
+          ->setParameter('display', 'list')
+          ->setParameter('upcoming', array(
+            0 => 'upcoming',
+          ));
       case 'all':
         return $query;
     }
