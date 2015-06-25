@@ -245,7 +245,8 @@ final class LegalpadDocumentEditController extends LegalpadController {
     $preview = id(new PHUIRemarkupPreviewPanel())
       ->setHeader(pht('Document Preview'))
       ->setPreviewURI($this->getApplicationURI('document/preview/'))
-      ->setControlID('document-text');
+      ->setControlID('document-text')
+      ->addClass('phui-document-view');
 
     return $this->buildApplicationPage(
       array(
