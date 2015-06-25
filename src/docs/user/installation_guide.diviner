@@ -167,23 +167,10 @@ If it doesn't show up, add:
 
 ..to "/etc/php.d/apc.ini" or the "php.ini" file indicated by "php -i".
 
-= Updating Phabricator =
-
-Since Phabricator is under active development, you should update frequently. To
-update Phabricator:
-
-  - Stop the webserver (including `php-fpm`, if you use it).
-  - Run `git pull` in `libphutil/`, `arcanist/` and `phabricator/`.
-  - Run `phabricator/bin/storage upgrade`.
-  - Restart the webserver (and `php-fpm`, if you stopped it earlier).
-
-For more details, see @{article:Configuration Guide}. You can use a script
-similar to this one to automate the process:
-
-http://www.phabricator.com/rsrc/install/update_phabricator.sh
-
 = Next Steps =
 
 Continue by:
 
-  - configuring Phabricator with the @{article:Configuration Guide}.
+  - configuring Phabricator with the @{article:Configuration Guide}; or
+  - learning how to keep Phabricator up to date with
+    @{article:Upgrading Phabricator}.
