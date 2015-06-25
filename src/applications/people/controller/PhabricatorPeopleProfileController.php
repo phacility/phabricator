@@ -64,7 +64,9 @@ final class PhabricatorPeopleProfileController
 
     $class = 'PhabricatorConpherenceApplication';
     if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
-      $href = '/conpherence/new/?participant='.$user->getPHID();
+      $href = id(new PhutilURI('/conpherence/new/'))
+        ->setQueryParam('participant', $user->getPHID());
+
       $actions->addAction(
         id(new PhabricatorActionView())
           ->setIcon('fa-comments')

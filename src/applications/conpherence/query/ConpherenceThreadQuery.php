@@ -8,7 +8,6 @@ final class ConpherenceThreadQuery
   private $phids;
   private $ids;
   private $participantPHIDs;
-  private $isRoom;
   private $needParticipants;
   private $needWidgetData;
   private $needCropPics;
@@ -68,11 +67,6 @@ final class ConpherenceThreadQuery
 
   public function withParticipantPHIDs(array $phids) {
     $this->participantPHIDs = $phids;
-    return $this;
-  }
-
-  public function withIsRoom($bool) {
-    $this->isRoom = $bool;
     return $this;
   }
 
@@ -166,16 +160,6 @@ final class ConpherenceThreadQuery
         id(new ConpherenceParticipant())->getTableName());
     }
 
-    $viewer = $this->getViewer();
-    if ($this->shouldJoinForViewer($viewer)) {
-      $joins[] = qsprintf(
-        $conn_r,
-        'LEFT JOIN %T v ON v.conpherencePHID = conpherence_thread.phid '.
-        'AND v.participantPHID = %s',
-        id(new ConpherenceParticipant())->getTableName(),
-        $viewer->getPHID());
-    }
-
     if (strlen($this->fulltext)) {
       $joins[] = qsprintf(
         $conn_r,
@@ -185,15 +169,6 @@ final class ConpherenceThreadQuery
 
     $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
     return implode(' ', $joins);
-  }
-
-  private function shouldJoinForViewer(PhabricatorUser $viewer) {
-    if ($viewer->isLoggedIn() &&
-      $this->ids === null &&
-      $this->phids === null) {
-      return true;
-    }
-    return false;
   }
 
   protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
@@ -222,29 +197,11 @@ final class ConpherenceThreadQuery
         $this->participantPHIDs);
     }
 
-    if ($this->isRoom !== null) {
-      $where[] = qsprintf(
-        $conn_r,
-        'conpherence_thread.isRoom = %d',
-        (int)$this->isRoom);
-    }
-
     if (strlen($this->fulltext)) {
       $where[] = qsprintf(
         $conn_r,
         'MATCH(idx.corpus) AGAINST (%s IN BOOLEAN MODE)',
         $this->fulltext);
-    }
-
-    $viewer = $this->getViewer();
-    if ($this->shouldJoinForViewer($viewer)) {
-      $where[] = qsprintf(
-        $conn_r,
-        'conpherence_thread.isRoom = 1 OR v.participantPHID IS NOT NULL');
-    } else if ($this->phids === null && $this->ids === null) {
-      $where[] = qsprintf(
-        $conn_r,
-        'conpherence_thread.isRoom = 1');
     }
 
     return $this->formatWhereClause($where);

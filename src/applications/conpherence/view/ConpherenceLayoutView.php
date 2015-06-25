@@ -137,7 +137,7 @@ final class ConpherenceLayoutView extends AphrontView {
                   array(
                     'class' => 'text',
                   ),
-                  pht('You do not have any messages yet.')),
+                  pht('You are not in any rooms yet.')),
                 javelin_tag(
                   'a',
                   array(
@@ -145,7 +145,7 @@ final class ConpherenceLayoutView extends AphrontView {
                     'class' => 'button grey',
                     'sigil' => 'workflow',
                   ),
-                  pht('Send a Message')),
+                  pht('Create a Room')),
             )),
             javelin_tag(
               'div',

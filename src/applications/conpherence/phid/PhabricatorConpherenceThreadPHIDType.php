@@ -5,7 +5,7 @@ final class PhabricatorConpherenceThreadPHIDType extends PhabricatorPHIDType {
   const TYPECONST = 'CONP';
 
   public function getTypeName() {
-    return pht('Conpherence Thread');
+    return pht('Conpherence Room');
   }
 
   public function newObject() {

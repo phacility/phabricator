@@ -118,21 +118,9 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         'quicksandConfig' => $this->getQuicksandConfig(),
       ));
 
-    $policies = array();
-    $conpherences = $this->getConpherences();
-    foreach ($conpherences as $conpherence) {
-      if (!$conpherence->getIsRoom()) {
-        continue;
-      }
-      $policies[] = $conpherence->getViewPolicy();
-    }
-    $policy_objects = array();
-    if ($policies) {
-      $policy_objects = id(new PhabricatorPolicyQuery())
-        ->setViewer($this->getUser())
-        ->withPHIDs($policies)
-        ->execute();
-    }
+    $policy_objects = ConpherenceThread::loadViewPolicyObjects(
+      $this->getUser(),
+      $this->getConpherences());
     $this->setPolicyObjects($policy_objects);
 
     $classes = array();
@@ -223,13 +211,10 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
     assert_instances_of($policy_objects, 'PhabricatorPolicy');
 
-    $icon = null;
-    if ($conpherence->getIsRoom()) {
-      $icon = $conpherence->getPolicyIconName($policy_objects);
-      $icon = id(new PHUIIconView())
-        ->addClass('mmr')
-        ->setIconFont($icon);
-    }
+    $icon = $conpherence->getPolicyIconName($policy_objects);
+    $icon = id(new PHUIIconView())
+      ->addClass('mmr')
+      ->setIconFont($icon);
     return $icon;
   }
 
@@ -390,11 +375,6 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
   }
 
   private function getHeaderActionsConfig(ConpherenceThread $conpherence) {
-    if ($conpherence->getIsRoom()) {
-      $rename_label = pht('Edit Room');
-    } else {
-      $rename_label = pht('Rename Thread');
-    }
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $this->getUser(),
       $conpherence,
@@ -409,7 +389,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         'key' => ConpherenceUpdateActions::ADD_PERSON,
       ),
       array(
-        'name' => $rename_label,
+        'name' => pht('Edit Room'),
         'disabled' => !$can_edit,
         'href' => '/conpherence/update/'.$conpherence->getID().'/?nopic',
         'icon' => 'fa-pencil',
@@ -444,7 +424,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
           array(
             'class' => 'mmb',
           ),
-          pht('You do not have any messages yet.')),
+          pht('You are not in any rooms yet.')),
         javelin_tag(
           'a',
           array(
@@ -452,7 +432,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
             'class' => 'button grey',
             'sigil' => 'workflow',
           ),
-          pht('Send a Message')),
+          pht('Create a Room')),
       );
     }
 

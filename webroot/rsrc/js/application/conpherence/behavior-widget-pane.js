@@ -321,6 +321,7 @@ JX.behavior('conpherence-widget-pane', function(config) {
               });
           }
         });
+
       threadManager.syncWorkflow(workflow, 'submit');
     }
   );
@@ -331,9 +332,25 @@ JX.behavior('conpherence-widget-pane', function(config) {
     function (e) {
       var href = config.widgetBaseUpdateURI + _loadedWidgetsID + '/';
       var data = e.getNodeData('remove-person');
-      // we end up re-directing to conpherence home
+
+      // While the user is removing themselves, disable the notification
+      // update behavior. If we don't do this, the user can get an error
+      // when they remove themselves about permissions as the notification
+      // code tries to load what jist happened.
+      var threadManager = JX.ConpherenceThreadManager.getInstance();
+      var loadedPhid = threadManager.getLoadedThreadPHID();
+      threadManager.setLoadedThreadPHID(null);
+
       new JX.Workflow(href, data)
-      .start();
+        .setCloseHandler(function() {
+          threadManager.setLoadedThreadPHID(loadedPhid);
+        })
+        // we re-direct to conpherence home so the thread manager will
+        // fix itself there
+        .setHandler(function(r) {
+          JX.$U(r.href).go();
+        })
+        .start();
     }
   );
 

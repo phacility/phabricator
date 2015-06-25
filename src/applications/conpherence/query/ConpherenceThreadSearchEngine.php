@@ -4,7 +4,7 @@ final class ConpherenceThreadSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
-    return pht('Threads');
+    return pht('Rooms');
   }
 
   public function getApplicationClassName() {
@@ -19,10 +19,6 @@ final class ConpherenceThreadSearchEngine
       $this->readUsersFromRequest($request, 'participants'));
 
     $saved->setParameter('fulltext', $request->getStr('fulltext'));
-
-    $saved->setParameter(
-      'threadType',
-      $request->getStr('threadType'));
 
     return $saved;
   }
@@ -39,21 +35,6 @@ final class ConpherenceThreadSearchEngine
     $fulltext = $saved->getParameter('fulltext');
     if (strlen($fulltext)) {
       $query->withFulltext($fulltext);
-    }
-
-    $thread_type = $saved->getParameter('threadType');
-    if (idx($this->getTypeOptions(), $thread_type)) {
-      switch ($thread_type) {
-        case 'rooms':
-          $query->withIsRoom(true);
-          break;
-        case 'messages':
-          $query->withIsRoom(false);
-          break;
-        case 'both':
-          $query->withIsRoom(null);
-          break;
-      }
     }
 
     return $query;
@@ -77,13 +58,7 @@ final class ConpherenceThreadSearchEngine
         id(new AphrontFormTextControl())
           ->setName('fulltext')
           ->setLabel(pht('Contains Words'))
-          ->setValue($fulltext))
-      ->appendControl(
-        id(new AphrontFormSelectControl())
-        ->setLabel(pht('Type'))
-        ->setName('threadType')
-        ->setOptions($this->getTypeOptions())
-        ->setValue($saved->getParameter('threadType')));
+          ->setValue($fulltext));
   }
 
   protected function getURI($path) {
@@ -99,7 +74,6 @@ final class ConpherenceThreadSearchEngine
 
     if ($this->requireViewer()->isLoggedIn()) {
       $names['participant'] = pht('Joined Rooms');
-      $names['messages'] = pht('All Messages');
     }
 
     return $names;
@@ -112,15 +86,8 @@ final class ConpherenceThreadSearchEngine
 
     switch ($query_key) {
       case 'all':
-        $query->setParameter('threadType', 'rooms');
         return $query;
       case 'participant':
-        $query->setParameter('threadType', 'rooms');
-        return $query->setParameter(
-          'participantPHIDs',
-          array($this->requireViewer()->getPHID()));
-      case 'messages':
-        $query->setParameter('threadType', 'messages');
         return $query->setParameter(
           'participantPHIDs',
           array($this->requireViewer()->getPHID()));
@@ -145,7 +112,7 @@ final class ConpherenceThreadSearchEngine
 
     $viewer = $this->requireViewer();
 
-    $policy_objects = ConpherenceThread::loadPolicyObjects(
+    $policy_objects = ConpherenceThread::loadViewPolicyObjects(
       $viewer,
       $conpherences);
 
@@ -192,11 +159,7 @@ final class ConpherenceThreadSearchEngine
       $title = $conpherence->getDisplayTitle($viewer);
       $monogram = $conpherence->getMonogram();
 
-      if ($conpherence->getIsRoom()) {
-        $icon_name = $conpherence->getPolicyIconName($policy_objects);
-      } else {
-        $icon_name = 'fa-envelope-o';
-      }
+      $icon_name = $conpherence->getPolicyIconName($policy_objects);
       $icon = id(new PHUIIconView())
         ->setIconFont($icon_name);
       $item = id(new PHUIObjectItemView())
@@ -258,14 +221,6 @@ final class ConpherenceThreadSearchEngine
     $result->setNoDataString(pht('No threads found.'));
 
     return $result;
-  }
-
-  private function getTypeOptions() {
-    return array(
-      'rooms' => pht('Rooms'),
-      'messages' => pht('Messages'),
-      'both' => pht('Both'),
-    );
   }
 
   private function loadContextMessages(array $threads, $fulltext) {
