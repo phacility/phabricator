@@ -6189,6 +6189,7 @@ phutil_register_library_map(array(
       'PhabricatorMarkupInterface',
       'PhabricatorDestructibleInterface',
       'PhabricatorProjectInterface',
+      'PhabricatorSpacesInterface',
     ),
     'PhabricatorRepositoryArcanistProject' => array(
       'PhabricatorRepositoryDAO',

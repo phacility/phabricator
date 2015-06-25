@@ -234,7 +234,7 @@ you can use `help` to learn more about what it does and which flag it takes:
 phabricator/ $ bin/repository help <command>
 ```
 
-In particular, you can use flags with the the `repository reparse` command to
+In particular, you can use flags with the `repository reparse` command to
 manually run parse steps in the foreground, including re-running steps and
 running steps out of order.
 

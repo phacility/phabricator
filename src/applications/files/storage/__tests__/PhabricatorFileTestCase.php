@@ -161,7 +161,7 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
 
     $second_file = PhabricatorFile::newFromFileData($other_data, $params);
 
-    // Test that the the second file uses  different storage handle from
+    // Test that the second file uses  different storage handle from
     // the first file.
     $first_handle = $first_file->getStorageHandle();
     $second_handle = $second_file->getStorageHandle();

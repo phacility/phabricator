@@ -153,6 +153,7 @@ final class PhabricatorRepositorySearchEngine
 
       $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
+        ->setObject($repository)
         ->setHeader($repository->getName())
         ->setObjectName('r'.$repository->getCallsign())
         ->setHref($this->getApplicationURI($repository->getCallsign().'/'));

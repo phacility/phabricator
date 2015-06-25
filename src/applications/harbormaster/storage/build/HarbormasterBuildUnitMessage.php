@@ -32,7 +32,7 @@ final class HarbormasterBuildUnitMessage
       'result' => 'string',
       'duration' => 'optional float',
       'path' => 'optional string',
-      'coverage' => 'optional string',
+      'coverage' => 'optional map<string, wild>',
     );
 
     // We're just going to ignore extra keys for now, to make it easier to
