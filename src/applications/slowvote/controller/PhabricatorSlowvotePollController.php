@@ -67,12 +67,7 @@ final class PhabricatorSlowvotePollController
       array(
         $crumbs,
         $object_box,
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'mlt mml mmr',
-          ),
-          $poll_view),
+        $poll_view,
         $timeline,
         $add_comment,
       ),
