@@ -48,8 +48,14 @@ final class ConpherenceWidgetConfigConstants extends ConpherenceConstants {
         ),
       ),
       'widgets-settings' => array(
-        'name' => pht('Settings'),
+        'name' => pht('Notifications'),
         'icon' => 'fa-wrench',
+        'deviceOnly' => false,
+        'hasCreate' => false,
+      ),
+      'widgets-edit' => array(
+        'name' => pht('Edit Room'),
+        'icon' => 'fa-pencil',
         'deviceOnly' => false,
         'hasCreate' => false,
       ),
