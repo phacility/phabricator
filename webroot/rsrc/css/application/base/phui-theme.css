@@ -43,6 +43,11 @@
   background-image: none;
 }
 
+.device-desktop.phui-theme-light .phabricator-main-menu-brand:hover {
+  background-color: rgba(55,55,55,.08);
+  cursor: hand;
+}
+
 /*--- Messages / Notifications -----------------------------------------------*/
 
 .device-desktop .phui-theme-light .alert-notifications:hover .phui-icon-view {

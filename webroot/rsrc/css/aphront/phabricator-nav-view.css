@@ -32,7 +32,11 @@
   white-space: nowrap;
   overflow-x: hidden;
   overflow-y: auto;
-  padding-top: 8px;
+  margin-top: 8px;
+}
+
+.phabricator-side-menu-home .phabricator-nav-local {
+  margin-top: 16px;
 }
 
 .phabricator-nav-drag {
@@ -74,4 +78,5 @@
 
 .device-phone .phabricator-side-menu-home .phabricator-nav-local {
   width: 100%;
+  padding-top: 0;
 }
