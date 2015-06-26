@@ -34,7 +34,7 @@
   white-space: nowrap;
   background: #F8F9FC;
   font-family: "Menlo", "Consolas", monospace;
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   color: {$bluetext};
   border-right: 1px solid {$thinblueborder};
 }

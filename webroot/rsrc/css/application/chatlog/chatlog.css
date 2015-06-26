@@ -43,7 +43,7 @@
 }
 
 .phabricator-chat-log tr.alternate td.author {
-  background: {$darkgreybackground};
+  background: {$lightgreybackground};
 }
 
 .phabricator-chat-log tr.highlight td {
@@ -58,7 +58,7 @@
 
 .phabricator-chat-log td.message .timestamp {
   color: {$bluetext};
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   float: right;
   margin-left: 5px;
 }

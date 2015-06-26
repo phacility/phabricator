@@ -241,7 +241,7 @@
 
 .phui-timeline-extra,
 .phui-timeline-extra .phabricator-content-source-view {
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   font-weight: normal;
   color: {$lightbluetext};
 }

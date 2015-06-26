@@ -155,7 +155,7 @@
   margin-left: 40px;
   text-align: left;
   font-weight: bold;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   color: {$darkbluetext};
   text-shadow: 0px 1px 1px #fff;
   overflow: hidden;
@@ -177,7 +177,7 @@
   color: #fff;
   font-weight: bold;
   padding: 0 5px 1px;
-  font-size: 11px;
+  font-size: {$smallestfontsize};
 }
 
 .conpherence-menu .hide-unread-count .conpherence-menu-item-unread-count,
@@ -190,7 +190,7 @@
   top: 15px;
   right: 16px;
   color: {$bluetext};
-  font-size: 11px;
+  font-size: {$smallestfontsize};
 }
 
 .conpherence-menu-item-header {

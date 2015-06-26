@@ -10,7 +10,7 @@
   vertical-align: middle;
   color: {$greytext};
   text-align: right;
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   background:
     url('/rsrc/image/icon/fatcow/key_question.png') right center no-repeat;
 }

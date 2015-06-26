@@ -37,7 +37,7 @@
 }
 
 .phui-feed-story-foot {
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   padding: 8px 4px 12px;
 }
 

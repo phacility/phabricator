@@ -16,7 +16,7 @@
 
 .slowvote-description {
   color: {$greytext};
-  font-size: 14px;
+  font-size: {$biggerfontsize};
   padding: 12px 4px 4px;
 }
 
@@ -82,7 +82,7 @@
   padding: 2px 0;
   line-height: 15px;
   text-align: right;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   top: 0;
   right: 8px;
   position: absolute;

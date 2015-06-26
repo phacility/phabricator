@@ -126,7 +126,7 @@ div.phui-object-box.phui-object-box-flush {
 }
 
 .phui-object-box .phui-object-box .phui-header-shell .phui-header-header {
-  font-size: 13px;
+  font-size: {$normalfontsize};
   margin: 0;
   color: {$darkbluetext};
   font-weight: bold;

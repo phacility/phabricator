@@ -31,7 +31,7 @@
 #batch-select-status-cell {
   text-align: right;
   color: {$greytext};
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   vertical-align: middle;
   width: 100%;
 }

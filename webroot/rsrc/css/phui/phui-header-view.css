@@ -66,7 +66,7 @@ body .phui-header-shell.phui-bleed-header
 
 .phui-header-view {
   position: relative;
-  font-size: 13px;
+  font-size: {$normalfontsize};
 }
 
 .phui-header-header {
@@ -95,7 +95,7 @@ body .phui-header-shell.phui-bleed-header
 
 .phui-object-box .phui-header-view .phui-header-action-links {
   margin-right: 4px;
-  font-size: 13px;
+  font-size: {$normalfontsize};
 }
 
 .device-phone .phui-header-action-link .phui-button-text {
@@ -112,7 +112,7 @@ body .phui-header-shell.phui-bleed-header
 
 .phui-header-tags {
   margin-left: 12px;
-  font-size: 13px;
+  font-size: {$normalfontsize};
 }
 
 .phui-header-tags .phui-tag-view {
@@ -130,7 +130,7 @@ body .phui-header-shell.phui-bleed-header
 
 .phui-header-subheader {
   font-weight: normal;
-  font-size: 14px;
+  font-size: {$biggerfontsize};
   margin-top: 8px;
 }
 

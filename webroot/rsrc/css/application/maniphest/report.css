@@ -4,7 +4,7 @@
 
 table.aphront-table-view tr.aggregate,
 table.aphront-table-view tr.alt-aggregate {
-  font-size: 13px;
+  font-size: {$normalfontsize};
   font-weight: bold;
 }
 

@@ -7,7 +7,7 @@
 }
 
 .phui-preview-header {
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   font-weight: bold;
   color: {$bluetext};
   text-transform: uppercase;

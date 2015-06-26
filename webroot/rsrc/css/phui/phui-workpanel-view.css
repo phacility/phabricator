@@ -11,7 +11,7 @@
 }
 
 .phui-workpanel-view .phui-header-shell .phui-header-header {
-  font-size: 14px;
+  font-size: {$biggerfontsize};
   line-height: 18px;
   color: {$darkbluetext};
 }

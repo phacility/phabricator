@@ -86,7 +86,7 @@
   .phui-header-shell.phui-header-no-backgound
   .phui-header-view {
   padding: 8px 0 4px;
-  font-size: 15px;
+  font-size: {$biggestfontsize};
 }
 
 .phui-document-content .phui-property-list-container {

@@ -31,7 +31,7 @@ input[type="submit"] {
   color: white;
   cursor: pointer;
   font-weight: bold;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   display: inline-block;
   padding: 4px 14px 5px;
   text-align: center;
@@ -146,7 +146,7 @@ a.small,
 a.small:visited {
   padding: 2px 8px;
   height: auto;
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   line-height: 16px;
 }
 
@@ -285,13 +285,13 @@ a.policy-control .caret {
 
 .button.big.has-icon .phui-button-text {
   margin-left: 40px;
-  font-size: 14px;
+  font-size: {$biggerfontsize};
   display: block;
 }
 
 .button.big.has-icon .phui-button-subtext {
   color: {$lightgreytext};
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   line-height: 15px;
   font-weight: normal;
 }

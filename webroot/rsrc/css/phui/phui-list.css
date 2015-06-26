@@ -106,7 +106,7 @@
 .phui-list-navbar .phui-list-item-href {
   color: {$bluetext};
   padding: 8px 16px;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   letter-spacing: 0.5px;
 }
 

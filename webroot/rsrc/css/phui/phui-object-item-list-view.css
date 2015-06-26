@@ -328,7 +328,7 @@ ul.phui-object-item-icons {
 
 .phui-object-item-icon {
   vertical-align: middle;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   color: {$greytext};
   text-align: right;
   white-space: nowrap;
@@ -532,7 +532,7 @@ ul.phui-object-item-list-view .phui-object-item-selected
 .phui-object-item-bylines {
   padding: 0 4px 0 8px;
   margin: 4px 0 8px;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   color: {$greytext};
   text-align: right;
 }
@@ -547,7 +547,7 @@ ul.phui-object-item-list-view .phui-object-item-selected
   float: none;
   text-align: left;
   padding: 0 8px;
-  font-size: 13px;
+  font-size: {$normalfontsize};
 }
 
 
@@ -609,7 +609,7 @@ ul.phui-object-item-list-view .phui-object-item-selected
 }
 
 .phui-object-box .phui-object-item-list-header {
-  font-size: 13px;
+  font-size: {$normalfontsize};
   color: {$darkbluetext};
   border-top: 1px solid {$thinblueborder};
   border-bottom: 1px solid {$thinblueborder};

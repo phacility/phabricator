@@ -202,7 +202,7 @@
 .conpherence-durable-column-transactions
   .conpherence-transaction-view.conpherence-edited {
     color: {$lightgreytext};
-    font-size: 12px;
+    font-size: {$smallerfontsize};
     margin: 0;
     padding: 0;
 }
@@ -244,7 +244,7 @@
 .conpherence-durable-column-transactions
 .conpherence-transaction-view.date-marker .date {
   left: 0;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   top: -14px;
   padding: 0 6px 0 0;
 }
@@ -253,7 +253,7 @@
 .conpherence-transaction-header .conpherence-transaction-info {
   color: {$lightbluetext};
   float: none;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
 }
 
 .conpherence-transaction-header .epoch-link {
@@ -333,6 +333,6 @@ img {
 .conpherence-durable-column-status {
   vertical-align: middle;
   line-height: 24px;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   color: {$lightbluetext};
 }

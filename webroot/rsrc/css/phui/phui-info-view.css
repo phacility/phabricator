@@ -43,7 +43,7 @@
 
 h1.phui-info-view-head {
   font-weight: bold;
-  font-size: 14px;
+  font-size: {$biggerfontsize};
   line-height: 1.2em;
 }
 

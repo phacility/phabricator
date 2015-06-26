@@ -60,13 +60,13 @@ div.phabricator-application-launch-container {
   display: block;
   font-weight: bold;
   color: {$darkbluetext};
-  font-size: 13px;
+  font-size: {$normalfontsize};
   margin: 6px 0 2px 38px;
 }
 
 .phabricator-application-launch-description {
   color: {$bluetext};
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   margin-left: 38px;
   text-overflow: ellipsis;
   width: 150px;
@@ -81,7 +81,7 @@ div.phabricator-application-launch-container {
   right: 8px;
   color: {$darkbluetext};
   font-weight: bold;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
 }
 
 .phabricator-application-attention-count {

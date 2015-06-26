@@ -35,6 +35,13 @@ final class CelerityDefaultPostprocessor
       // Anchors
       'anchor' => '#136CB2',
 
+      // Font Sizes
+      'biggestfontsize' => '15px',
+      'biggerfontsize' => '14px',
+      'normalfontsize' => '13px',
+      'smallerfontsize' => '12px',
+      'smallestfontsize' => '11px',
+
       // Base Colors
       'red'           => '#c0392b',
       'lightred'      => '#f4dddb',

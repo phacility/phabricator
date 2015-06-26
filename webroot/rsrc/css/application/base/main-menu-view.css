@@ -156,7 +156,7 @@
   width: 100%;
   right: 0;
   position: absolute;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   border-width: 1px;
   border-color: {$blueborder};
   border-radius: 3px;
@@ -169,7 +169,7 @@
 
 .device .phabricator-main-menu-search input {
   height: 32px;
-  font-size: 15px;
+  font-size: {$biggestfontsize};
   width: 100%;
   padding-left: 50px;
 }
@@ -308,14 +308,14 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 
 .phabricator-main-search-typeahead-result .result-name {
   display: block;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   font-weight: bold;
   color: {$darkgreytext};
 }
 
 .phabricator-main-search-typeahead-result .result-type {
   color: {$lightgreytext};
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   font-weight: normal;
 }
 
@@ -325,11 +325,11 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 }
 
 .device-phone .phabricator-main-search-typeahead-result .result-name {
-  font-size: 15px;
+  font-size: {$biggestfontsize};
 }
 
 .device-phone .phabricator-main-search-typeahead-result .result-type {
-  font-size: 13px;
+  font-size: {$normalfontsize};
 }
 
 .device .phabricator-dark-menu .phui-list-item-type-link
@@ -396,7 +396,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
   display: none;
   float: left;
   margin: 11px 6px 0 -2px;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
 }
 
 .device-phone .alert-unread .phabricator-main-menu-alert-count,
@@ -430,7 +430,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 
 .device .phabricator-dark-menu .phui-list-item-type-label {
   text-transform: uppercase;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   background-color: #fff;
   padding: 6px 0 6px 12px;
   display: block;

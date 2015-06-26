@@ -3,11 +3,11 @@
  */
 
 .device-desktop .phabricator-action-list-view {
-  font-size: 12px;
+  font-size: {$smallerfontsize};
 }
 
 .phuix-dropdown-menu .phabricator-action-list-view {
-  font-size: 13px;
+  font-size: {$normalfontsize};
 }
 
 .device .phabricator-action-list-view {
@@ -74,7 +74,7 @@
 }
 
 .phabricator-action-view-label .phabricator-action-view-item {
-  font-size: 13px;
+  font-size: {$normalfontsize};
   font-weight: bold;
   color: {$bluetext};
   padding: 4px 8px 6px 8px;

@@ -17,7 +17,7 @@
 
 .aphront-table-view td.aphront-table-notice {
   padding: 12px 16px;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   color: {$darkbluetext};
   border-bottom: 1px solid {$thinblueborder};
 }
@@ -28,7 +28,7 @@
 
 .aphront-table-view th {
   font-weight: bold;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   white-space: nowrap;
   color: {$bluetext};
   text-shadow: 0 1px 0 white;
@@ -103,12 +103,12 @@ th.aphront-table-view-sortable-selected {
 
 .aphront-table-view th {
   padding: 10px 10px;
-  font-size: 13px;
+  font-size: {$normalfontsize};
 }
 
 .aphront-table-view td {
   padding: 8px 10px;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
 }
 
 .device-tablet .aphront-table-view td,
@@ -146,7 +146,7 @@ th.aphront-table-view-sortable-selected {
 }
 
 .aphront-table-view td.larger {
-  font-size: 14px;
+  font-size: {$biggerfontsize};
 }
 
 .aphront-table-view td.pri {
@@ -166,12 +166,12 @@ th.aphront-table-view-sortable-selected {
 
 .aphront-table-view td.mono {
   font-family: "Monaco", monospace;
-  font-size: 11px;
+  font-size: {$smallestfontsize};
 }
 
 .aphront-table-view td.n {
   font-family: "Monaco", monospace;
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   text-align: right;
 }
 
@@ -181,7 +181,7 @@ th.aphront-table-view-sortable-selected {
 
 .aphront-table-view td.prewrap {
   font-family: "Monaco", monospace;
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   white-space: pre-wrap;
 }
 

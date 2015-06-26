@@ -3,7 +3,7 @@
  */
 
 button.icon-button {
-  background: #f7f7f7;
+  background: {$lightgreybackground};
   border: 1px solid {$lightblueborder};
   position: relative;
   width: 16px;

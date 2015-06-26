@@ -65,7 +65,7 @@
   padding: 0 8px 8px;
   overflow: hidden;
   color: {$bluetext};
-  font-size: 12px;
+  font-size: {$smallerfontsize};
 }
 
 .phui-pinboard-item-count {
