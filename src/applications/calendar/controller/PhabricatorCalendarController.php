@@ -61,6 +61,8 @@ abstract class PhabricatorCalendarController extends PhabricatorController {
       ->setID(null)
       ->setPHID(null)
       ->removeViewerTimezone($viewer)
+      ->setViewPolicy($event->getViewPolicy())
+      ->setEditPolicy($event->getEditPolicy())
       ->save();
     $ghost_invitees = array();
     foreach ($invitees as $invitee) {

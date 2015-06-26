@@ -156,11 +156,8 @@ final class PhabricatorCalendarEventEditController
     $is_parent = $event->getIsRecurrenceParent();
     $frequency = idx($event->getRecurrenceFrequency(), 'rule');
     $icon = $event->getIcon();
-
-    $current_policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($viewer)
-      ->setObject($event)
-      ->execute();
+    $edit_policy = $event->getEditPolicy();
+    $view_policy = $event->getViewPolicy();
 
     if ($request->isFormPost()) {
       $xactions = array();
@@ -306,9 +303,6 @@ final class PhabricatorCalendarEventEditController
             PhabricatorCalendarEventTransaction::TYPE_END_DATE);
         $error_recurrence_end_date = $ex->getShortMessage(
             PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE);
-
-        $event->setViewPolicy($view_policy);
-        $event->setEditPolicy($edit_policy);
       }
     }
 
@@ -321,6 +315,11 @@ final class PhabricatorCalendarEventEditController
     $end_control = null;
 
     $recurring_date_edit_label = null;
+
+    $current_policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($viewer)
+      ->setObject($event)
+      ->execute();
 
     $name = id(new AphrontFormTextControl())
       ->setLabel(pht('Name'))
@@ -468,12 +467,14 @@ final class PhabricatorCalendarEventEditController
 
     $view_policies = id(new AphrontFormPolicyControl())
       ->setUser($viewer)
+      ->setValue($view_policy)
       ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
       ->setPolicyObject($event)
       ->setPolicies($current_policies)
       ->setName('viewPolicy');
     $edit_policies = id(new AphrontFormPolicyControl())
       ->setUser($viewer)
+      ->setValue($edit_policy)
       ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
       ->setPolicyObject($event)
       ->setPolicies($current_policies)
