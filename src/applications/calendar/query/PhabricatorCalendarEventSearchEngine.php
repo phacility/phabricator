@@ -288,6 +288,8 @@ final class PhabricatorCalendarEventSearchEngine
       }
 
       $item = id(new PHUIObjectItemView())
+        ->setUser($viewer)
+        ->setObject($event)
         ->setHeader($viewer->renderHandle($event->getPHID())->render())
         ->addAttribute($event_date_info)
         ->addAttribute($attendees)

@@ -158,6 +158,7 @@ final class PhabricatorCalendarEventEditController
     $icon = $event->getIcon();
     $edit_policy = $event->getEditPolicy();
     $view_policy = $event->getViewPolicy();
+    $space = $event->getSpacePHID();
 
     if ($request->isFormPost()) {
       $xactions = array();
@@ -178,6 +179,7 @@ final class PhabricatorCalendarEventEditController
       $subscribers = $request->getArr('subscribers');
       $edit_policy = $request->getStr('editPolicy');
       $view_policy = $request->getStr('viewPolicy');
+      $space = $request->getStr('spacePHID');
       $is_recurring = $request->getStr('isRecurring') ? 1 : 0;
       $frequency = $request->getStr('frequency');
       $is_all_day = $request->getStr('isAllDay');
@@ -262,6 +264,10 @@ final class PhabricatorCalendarEventEditController
       $xactions[] = id(new PhabricatorCalendarEventTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
         ->setNewValue($request->getStr('editPolicy'));
+
+      $xactions[] = id(new PhabricatorCalendarEventTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_SPACE)
+        ->setNewValue($space);
 
       $editor = id(new PhabricatorCalendarEventEditor())
         ->setActor($viewer)
@@ -471,6 +477,7 @@ final class PhabricatorCalendarEventEditController
       ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
       ->setPolicyObject($event)
       ->setPolicies($current_policies)
+      ->setSpacePHID($space)
       ->setName('viewPolicy');
     $edit_policies = id(new AphrontFormPolicyControl())
       ->setUser($viewer)
