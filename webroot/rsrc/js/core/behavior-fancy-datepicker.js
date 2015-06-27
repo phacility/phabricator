@@ -46,6 +46,16 @@ JX.behavior('fancy-datepicker', function(config, statics) {
     return format;
   };
 
+  var get_week_start = function() {
+    var week_start = config.weekStart;
+
+    if (week_start === null) {
+      week_start = 0;
+    }
+
+    return week_start;
+  };
+
   var onopen = function(e) {
     e.kill();
 
@@ -277,9 +287,12 @@ JX.behavior('fancy-datepicker', function(config, statics) {
     // First, render the weekday names.
     var weekdays = 'SMTWTFS';
     var weekday_names = [];
-    var ii;
-    for (ii = 0; ii < weekdays.length; ii++) {
-      weekday_names.push(cell(weekdays.charAt(ii), null, false, 'day-name'));
+    var week_start = parseInt(get_week_start(), 10);
+    var week_end = weekdays.length + week_start;
+
+    for (var ii = week_start; ii < week_end; ii++) {
+      var index = ii%7;
+      weekday_names.push(cell(weekdays.charAt(index), null, false, 'day-name'));
     }
     weeks.push(JX.$N('tr', {}, weekday_names));
 
@@ -290,7 +303,7 @@ JX.behavior('fancy-datepicker', function(config, statics) {
     var start = new Date(
       valid_date.getYear() + 1900,
       valid_date.getMonth(),
-      1).getDay();
+      1).getDay() - week_start;
 
     while (start--) {
       days.push(cell('', null, false, 'day-placeholder'));

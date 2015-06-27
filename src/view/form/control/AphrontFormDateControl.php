@@ -259,8 +259,13 @@ final class AphrontFormDateControl extends AphrontFormControl {
       ),
       $time_sel);
 
+    $preferences = $this->user->loadPreferences();
+    $pref_week_start = PhabricatorUserPreferences::PREFERENCE_WEEK_START_DAY;
+    $week_start = $preferences->getPreference($pref_week_start, 0);
+
     Javelin::initBehavior('fancy-datepicker', array(
       'format' => $this->getDateFormat(),
+      'weekStart' => $week_start,
       ));
 
     $classes = array();
