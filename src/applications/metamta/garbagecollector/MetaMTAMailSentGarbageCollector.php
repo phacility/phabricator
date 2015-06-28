@@ -8,7 +8,7 @@ final class MetaMTAMailSentGarbageCollector
 
     $mails = id(new PhabricatorMetaMTAMail())->loadAllWhere(
       'dateCreated < %d LIMIT 100',
-      PhabricatorTime::getNow());
+      PhabricatorTime::getNow() - $ttl);
 
     foreach ($mails as $mail) {
       $mail->delete();
