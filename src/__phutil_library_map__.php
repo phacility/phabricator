@@ -5131,6 +5131,7 @@ phutil_register_library_map(array(
       'PhabricatorDestructibleInterface',
       'PhabricatorMentionableInterface',
       'PhabricatorFlaggableInterface',
+      'PhabricatorSpacesInterface',
     ),
     'PhabricatorCalendarEventCancelController' => 'PhabricatorCalendarController',
     'PhabricatorCalendarEventCommentController' => 'PhabricatorCalendarController',

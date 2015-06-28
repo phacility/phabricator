@@ -313,7 +313,7 @@ final class PhabricatorRepositoryGraphCache extends Phobject {
     // Find all the Git and Mercurial commits in the block which have completed
     // change import. We can't fill the cache accurately for commits which have
     // not completed change import, so just pretend we don't know about them.
-    // In these cases, we will will ultimately fall back to VCS queries.
+    // In these cases, we will ultimately fall back to VCS queries.
 
     $commit_rows = queryfx_all(
       $conn_r,

@@ -332,13 +332,13 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         ));
 
       $item = id(new PHUIListItemView())
-        ->setName(pht('Settings'))
+        ->setName(pht('Room Actions'))
         ->setIcon('fa-bars')
         ->addClass('core-menu-item')
         ->addSigil('conpherence-settings-menu')
         ->setID($bubble_id)
         ->setHref('#')
-        ->setAural(pht('Settings'))
+        ->setAural(pht('Room Actions'))
         ->setOrder(300);
       $settings_button = id(new PHUIListView())
         ->addMenuItem($item)

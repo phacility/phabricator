@@ -960,7 +960,7 @@ abstract class PhabricatorApplicationTransactionEditor
       // Maybe this makes more sense to move into the search index itself? For
       // now I'm putting it here since I think we might end up with things that
       // need it to be up to date once the next page loads, but if we don't go
-      // there we we could move it into search once search moves to the daemons.
+      // there we could move it into search once search moves to the daemons.
 
       // It now happens in the search indexer as well, but the search indexer is
       // always daemonized, so the logic above still potentially holds. We could

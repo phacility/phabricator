@@ -83,8 +83,7 @@ abstract class ConpherenceController extends PhabricatorController {
     $crumbs->addCrumb(
       id(new PHUICrumbView())
       ->setName($data['title'])
-      ->setHref($this->getApplicationURI('update/'.$conpherence->getID().'/'))
-      ->setWorkflow(true));
+      ->setHref('/'.$conpherence->getMonogram()));
 
     return hsprintf(
       '%s',

@@ -194,11 +194,11 @@ final class AlmanacServiceQuery
     );
   }
 
-  protected function getValueMap($cursor, array $keys) {
+  protected function getPagingValueMap($cursor, array $keys) {
     $service = $this->loadCursorObject($cursor);
     return array(
       'id' => $service->getID(),
-      'name' => $service->getServiceName(),
+      'name' => $service->getName(),
     );
   }
 

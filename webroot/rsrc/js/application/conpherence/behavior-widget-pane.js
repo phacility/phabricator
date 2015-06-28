@@ -81,16 +81,34 @@ JX.behavior('conpherence-widget-pane', function(config) {
         continue;
       }
 
+      var handler;
+      var href;
+      if (widget == 'widgets-edit') {
+        var threadManager = JX.ConpherenceThreadManager.getInstance();
+        handler = function(e) {
+          e.prevent();
+          menu.close();
+          threadManager.runUpdateWorkflowFromLink(
+            e.getTarget(),
+            {
+              action : 'metadata',
+              force_ajax : true,
+              stage : 'submit'
+            });
+        };
+        href = threadManager._getUpdateURI();
+      } else {
+        handler = JX.bind(null, function(widget, e) {
+          toggleWidget({widget: widget});
+          e.prevent();
+          menu.close();
+        }, widget);
+      }
       var item = new JX.PHUIXActionView()
         .setIcon(widget_data.icon || 'none')
         .setName(widget_data.name)
-        .setHandler(
-          JX.bind(null, function(widget, e) {
-            toggleWidget({widget: widget});
-            e.prevent();
-            menu.close();
-          }, widget));
-
+        .setHref(href)
+        .setHandler(handler);
       map[widget_data.name] = item;
       list.addItem(item);
     }
