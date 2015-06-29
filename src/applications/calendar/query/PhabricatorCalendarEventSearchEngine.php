@@ -228,9 +228,11 @@ final class PhabricatorCalendarEventSearchEngine
       case 'day':
         return $query->setParameter('display', 'day');
       case 'upcoming':
-        return $query->setParameter('upcoming', array(
-          0 => 'upcoming',
-        ));
+        return $query
+          ->setParameter('display', 'list')
+          ->setParameter('upcoming', array(
+            0 => 'upcoming',
+          ));
       case 'all':
         return $query;
     }
@@ -286,6 +288,8 @@ final class PhabricatorCalendarEventSearchEngine
       }
 
       $item = id(new PHUIObjectItemView())
+        ->setUser($viewer)
+        ->setObject($event)
         ->setHeader($viewer->renderHandle($event->getPHID())->render())
         ->addAttribute($event_date_info)
         ->addAttribute($attendees)

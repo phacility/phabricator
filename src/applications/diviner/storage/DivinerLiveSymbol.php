@@ -150,7 +150,7 @@ final class DivinerLiveSymbol extends DivinerDAO
 
   public function save() {
     // NOTE: The identity hash is just a sanity check because the unique tuple
-    // on this table is way way too long to fit into a normal `UNIQUE KEY`.
+    // on this table is way too long to fit into a normal `UNIQUE KEY`.
     // We don't use it directly, but its existence prevents duplicate records.
 
     if (!$this->identityHash) {

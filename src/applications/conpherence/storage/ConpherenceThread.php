@@ -9,7 +9,6 @@ final class ConpherenceThread extends ConpherenceDAO
 
   protected $title;
   protected $imagePHIDs = array();
-  protected $isRoom = 0;
   protected $messageCount;
   protected $recentParticipantPHIDs = array();
   protected $mailKey;
@@ -24,30 +23,18 @@ final class ConpherenceThread extends ConpherenceDAO
   private $widgetData = self::ATTACHABLE;
   private $images = self::ATTACHABLE;
 
-  public static function initializeNewThread(PhabricatorUser $sender) {
+  public static function initializeNewRoom(PhabricatorUser $sender) {
+    $default_policy = id(new ConpherenceThreadMembersPolicyRule())
+      ->getObjectPolicyFullKey();
     return id(new ConpherenceThread())
       ->setMessageCount(0)
       ->setTitle('')
       ->attachParticipants(array())
       ->attachFilePHIDs(array())
       ->attachImages(array())
-      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
-      ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
-      ->setJoinPolicy(PhabricatorPolicies::POLICY_USER);
-  }
-
-  public static function initializeNewRoom(PhabricatorUser $creator) {
-
-    return id(new ConpherenceThread())
-      ->setIsRoom(1)
-      ->setMessageCount(0)
-      ->setTitle('')
-      ->attachParticipants(array())
-      ->attachFilePHIDs(array())
-      ->attachImages(array())
-      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
-      ->setEditPolicy($creator->getPHID())
-      ->setJoinPolicy(PhabricatorPolicies::POLICY_USER);
+      ->setViewPolicy($default_policy)
+      ->setEditPolicy($default_policy)
+      ->setJoinPolicy($default_policy);
   }
 
   protected function getConfiguration() {
@@ -59,15 +46,11 @@ final class ConpherenceThread extends ConpherenceDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255?',
-        'isRoom' => 'bool',
         'messageCount' => 'uint64',
         'mailKey' => 'text20',
         'joinPolicy' => 'policy',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_room' => array(
-          'columns' => array('isRoom', 'dateModified'),
-        ),
         'key_phid' => null,
         'phid' => array(
           'columns' => array('phid'),
@@ -214,7 +197,7 @@ final class ConpherenceThread extends ConpherenceDAO
       return $title;
     }
 
-    return pht('Private Correspondence');
+    return pht('Private Room');
   }
 
   /**
@@ -382,15 +365,13 @@ final class ConpherenceThread extends ConpherenceDAO
   }
 
   public function getPolicy($capability) {
-    if ($this->getIsRoom()) {
-      switch ($capability) {
-        case PhabricatorPolicyCapability::CAN_VIEW:
-          return $this->getViewPolicy();
-        case PhabricatorPolicyCapability::CAN_EDIT:
-          return $this->getEditPolicy();
-        case PhabricatorPolicyCapability::CAN_JOIN:
-          return $this->getJoinPolicy();
-      }
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->getViewPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return $this->getEditPolicy();
+      case PhabricatorPolicyCapability::CAN_JOIN:
+        return $this->getJoinPolicy();
     }
     return PhabricatorPolicies::POLICY_NOONE;
   }
@@ -401,12 +382,10 @@ final class ConpherenceThread extends ConpherenceDAO
       return true;
     }
 
-    if ($this->getIsRoom()) {
-      switch ($capability) {
-        case PhabricatorPolicyCapability::CAN_EDIT:
-        case PhabricatorPolicyCapability::CAN_JOIN:
-          return false;
-      }
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_EDIT:
+      case PhabricatorPolicyCapability::CAN_JOIN:
+        return false;
     }
 
     $participants = $this->getParticipants();
@@ -414,35 +393,28 @@ final class ConpherenceThread extends ConpherenceDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    if ($this->getIsRoom()) {
-      switch ($capability) {
-        case PhabricatorPolicyCapability::CAN_VIEW:
-          return pht('Participants in a room can always view it.');
-          break;
-      }
-    } else {
-      return pht('Participants in a thread can always view and edit it.');
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return pht('Participants in a room can always view it.');
+        break;
     }
   }
 
-  public static function loadPolicyObjects(
+  public static function loadViewPolicyObjects(
     PhabricatorUser $viewer,
     array $conpherences) {
 
     assert_instances_of($conpherences, __CLASS__);
 
-    $grouped = mgroup($conpherences, 'getIsRoom');
-    $rooms = idx($grouped, 1, array());
-
     $policies = array();
-    foreach ($rooms as $room) {
-      $policies[] = $room->getViewPolicy();
+    foreach ($conpherences as $room) {
+      $policies[$room->getViewPolicy()] = 1;
     }
     $policy_objects = array();
     if ($policies) {
       $policy_objects = id(new PhabricatorPolicyQuery())
         ->setViewer($viewer)
-        ->withPHIDs($policies)
+        ->withPHIDs(array_keys($policies))
         ->execute();
     }
 
@@ -452,13 +424,7 @@ final class ConpherenceThread extends ConpherenceDAO
   public function getPolicyIconName(array $policy_objects) {
     assert_instances_of($policy_objects, 'PhabricatorPolicy');
 
-    if ($this->getIsRoom()) {
-      $icon = $policy_objects[$this->getViewPolicy()]->getIcon();
-    } else if (count($this->getRecentParticipantPHIDs()) > 2) {
-      $icon = 'fa-users';
-    } else {
-      $icon = 'fa-user';
-    }
+    $icon = $policy_objects[$this->getViewPolicy()]->getIcon();
     return $icon;
   }
 

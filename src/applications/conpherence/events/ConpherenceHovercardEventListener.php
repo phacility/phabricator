@@ -30,8 +30,8 @@ final class ConpherenceHovercardEventListener extends PhabricatorEventListener {
       return;
     }
 
-    $conpherence_uri = new PhutilURI(
-      '/conpherence/new/?participant='.$user->getPHID());
+    $conpherence_uri = id(new PhutilURI('/conpherence/new/'))
+      ->setQueryParam('participant', $user->getPHID());
     $name = pht('Send a Message');
     $hovercard->addAction($name, $conpherence_uri, true);
 

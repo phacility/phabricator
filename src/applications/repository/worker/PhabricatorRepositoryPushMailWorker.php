@@ -30,8 +30,14 @@ final class PhabricatorRepositoryPushMailWorker
     $targets = id(new PhabricatorRepositoryPushReplyHandler())
       ->setMailReceiver($repository)
       ->getMailTargets($email_phids, array());
+
+    $messages = array();
     foreach ($targets as $target) {
-      $this->sendMail($target, $repository, $event);
+      $messages[] = $this->sendMail($target, $repository, $event);
+    }
+
+    foreach ($messages as $message) {
+      $message->save();
     }
   }
 
@@ -121,7 +127,7 @@ final class PhabricatorRepositoryPushMailWorker
       ->addHeader('Thread-Topic', $subject)
       ->setIsBulk(true);
 
-    $target->sendMail($mail);
+    return $target->willSendMail($mail);
   }
 
   public function renderForDisplay(PhabricatorUser $viewer) {

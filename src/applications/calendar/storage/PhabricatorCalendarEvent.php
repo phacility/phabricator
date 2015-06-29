@@ -9,7 +9,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   PhabricatorTokenReceiverInterface,
   PhabricatorDestructibleInterface,
   PhabricatorMentionableInterface,
-  PhabricatorFlaggableInterface {
+  PhabricatorFlaggableInterface,
+  PhabricatorSpacesInterface {
 
   protected $name;
   protected $userPHID;
@@ -31,6 +32,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   protected $viewPolicy;
   protected $editPolicy;
+
+  protected $spacePHID;
 
   const DEFAULT_ICON = 'fa-calendar';
 
@@ -71,6 +74,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setIcon(self::DEFAULT_ICON)
       ->setViewPolicy($view_policy)
       ->setEditPolicy($actor->getPHID())
+      ->setSpacePHID($actor->getDefaultSpacePHID())
       ->attachInvitees(array())
       ->applyViewerTimezone($actor);
   }
@@ -550,5 +554,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $this->openTransaction();
     $this->delete();
     $this->saveTransaction();
+  }
+
+/* -(  PhabricatorSpacesInterface  )----------------------------------------- */
+
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
   }
 }

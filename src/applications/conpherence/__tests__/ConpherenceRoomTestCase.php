@@ -69,20 +69,6 @@ final class ConpherenceRoomTestCase extends ConpherenceTestCase {
       $participant_phids,
       $conpherence->getRecentParticipantPHIDs());
 
-    // test policy error as another user tries to add
-    $caught = null;
-    try {
-      $this->addParticipants(
-        $friend_2,
-        $conpherence,
-        array($friend_3->getPHID()));
-    } catch (PhabricatorPolicyException $ex) {
-      $caught = $ex;
-    }
-    $this->assertTrue($caught instanceof PhabricatorPolicyException);
-
-    // update edit policy so user has a chance
-    $this->changeEditPolicy($creator, $conpherence, 'users');
     // test add by other participant, so recent participation should
     // meaningfully change
     $participant_phids = array(
@@ -129,7 +115,6 @@ final class ConpherenceRoomTestCase extends ConpherenceTestCase {
   public function testAddMessageWithFileAttachments() {
     $creator = $this->generateNewTestUser();
     $friend_1 = $this->generateNewTestUser();
-    $join_via_add = $this->generateNewTestUser();
 
     $participant_map = array(
       $creator->getPHID() => $creator,
@@ -144,9 +129,6 @@ final class ConpherenceRoomTestCase extends ConpherenceTestCase {
       $xactions = $this->addMessageWithFile($user, $conpherence);
       $this->assertEqual(2, count($xactions));
     }
-
-    $xactions = $this->addMessageWithFile($join_via_add, $conpherence);
-    $this->assertEqual(2, count($xactions));
   }
 
   private function createRoom(

@@ -11,7 +11,7 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Send Messages');
+    return pht('Chat with Others');
   }
 
   public function getFontIcon() {
@@ -44,8 +44,7 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
         '(?P<id>[1-9]\d*)/(?P<messageID>[1-9]\d*)/'
                                    => 'ConpherenceViewController',
         'columnview/'              => 'ConpherenceColumnViewController',
-        'new/'                     => 'ConpherenceNewController',
-        'room/new/'                => 'ConpherenceNewRoomController',
+        'new/'                     => 'ConpherenceNewRoomController',
         'search/(?:query/(?P<queryKey>[^/]+)/)?'
            => 'ConpherenceRoomListController',
         'panel/'                   => 'ConpherenceNotificationPanelController',
@@ -59,7 +58,7 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
     $items = array();
 
     $item = id(new PHUIListItemView())
-      ->setName(pht('Conpherence Thread'))
+      ->setName(pht('Conpherence Room'))
       ->setIcon('fa-comments')
       ->setWorkflow(true)
       ->setHref($this->getBaseURI().'new/');

@@ -449,6 +449,10 @@ abstract class PhabricatorApplication
     $class,
     PhabricatorUser $viewer) {
 
+    if ($viewer->isOmnipotent()) {
+      return true;
+    }
+
     $cache = PhabricatorCaches::getRequestCache();
     $viewer_phid = $viewer->getPHID();
     $key = 'app.'.$class.'.installed.'.$viewer_phid;
