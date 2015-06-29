@@ -9,6 +9,7 @@
 JX.behavior('repository-crossreference', function(config, statics) {
 
   var highlighted;
+  var currentTarget;
   var linked = [];
 
   var isMac = navigator.platform.indexOf('Mac') > -1;
@@ -31,6 +32,18 @@ JX.behavior('repository-crossreference', function(config, statics) {
     n : null,
     };
 
+  function highlightCurrent() {
+    var target = currentTarget;
+    while (target !== document.body) {
+      if (JX.DOM.isNode(target, 'span') && (target.className in class_map)) {
+        highlighted = target;
+        JX.DOM.alterClass(highlighted, classHighlight, true);
+        break;
+      }
+      target = target.parentNode;
+    }
+  }
+
   function link(element, lang) {
     JX.DOM.alterClass(element, 'repository-crossreference', true);
     linked.push(element);
@@ -47,18 +60,11 @@ JX.behavior('repository-crossreference', function(config, statics) {
         if (!isSignalkey(e)) {
           return;
         }
-        if (e.getType() === 'mouseover') {
-          var target = e.getTarget();
-          while (target !== document.body) {
-            if (JX.DOM.isNode(target, 'span') &&
-               (target.className in class_map)) {
-              highlighted = target;
-              JX.DOM.alterClass(highlighted, classHighlight, true);
-              break;
-            }
-            target = target.parentNode;
-          }
-        } else if (e.getType() === 'click') {
+
+        currentTarget = e.getTarget();
+        highlightCurrent();
+
+        if (e.getType() === 'click') {
           openSearch(highlighted, lang);
         }
       });
@@ -104,6 +110,13 @@ JX.behavior('repository-crossreference', function(config, statics) {
   }
 
   JX.Stratcom.listen(
+    'mousemove',
+    null,
+    function(e) {
+      currentTarget = e.getTarget();
+    });
+
+  JX.Stratcom.listen(
     'differential-preview-update',
     null,
     function(e) {
@@ -121,6 +134,10 @@ JX.behavior('repository-crossreference', function(config, statics) {
       linked.forEach(function(element) {
         JX.DOM.alterClass(element, classMouseCursor, statics.active);
       });
+
+      if (statics.active && !highlighted) {
+        highlightCurrent();
+      }
 
       if (!statics.active) {
         highlighted && JX.DOM.alterClass(highlighted, classHighlight, false);
