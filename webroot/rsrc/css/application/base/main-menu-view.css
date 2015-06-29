@@ -158,7 +158,7 @@
   position: absolute;
   font-size: {$normalfontsize};
   border-width: 1px;
-  border-color: {$blueborder};
+  border-color: {$lightblueborder};
   border-radius: 3px;
   background-color: #fff;
   height: 28px;
@@ -177,7 +177,7 @@
 .phabricator-main-menu .phabricator-main-menu-search input:focus {
   background: #fff;
   opacity: 1;
-  color: #333;
+  color: {$darkbluetext};
   border-color: {$sky};
   box-shadow: none;
 }
