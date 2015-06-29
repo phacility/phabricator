@@ -79,4 +79,5 @@
 .device-phone .phabricator-side-menu-home .phabricator-nav-local {
   width: 100%;
   padding-top: 0;
+  margin-top: 0;
 }
