@@ -191,16 +191,17 @@ final class PHUIDiffInlineCommentDetailView
     }
 
     $action_buttons = new PHUIButtonBarView();
-    $action_buttons->addClass('mml');
+    $action_buttons->setBorderless(true);
+    $action_buttons->addClass('inline-button-divider');
     $nextprev = null;
     if (!$this->preview) {
       $nextprev = new PHUIButtonBarView();
-      $nextprev->addClass('mml');
+      $nextprev->setBorderless(true);
+      $nextprev->addClass('inline-button-divider');
 
 
       $up = id(new PHUIButtonView())
         ->setTag('a')
-        ->setColor(PHUIButtonView::SIMPLE)
         ->setTooltip(pht('Previous'))
         ->setIconFont('fa-chevron-up')
         ->addSigil('differential-inline-prev')
@@ -208,7 +209,6 @@ final class PHUIDiffInlineCommentDetailView
 
       $down = id(new PHUIButtonView())
         ->setTag('a')
-        ->setColor(PHUIButtonView::SIMPLE)
         ->setTooltip(pht('Next'))
         ->setIconFont('fa-chevron-down')
         ->addSigil('differential-inline-next')
@@ -216,7 +216,6 @@ final class PHUIDiffInlineCommentDetailView
 
       $hide = id(new PHUIButtonView())
         ->setTag('a')
-        ->setColor(PHUIButtonView::SIMPLE)
         ->setTooltip(pht('Hide Comment'))
         ->setIconFont('fa-times')
         ->addSigil('hide-inline')
@@ -240,7 +239,6 @@ final class PHUIDiffInlineCommentDetailView
 
           $reply_button = id(new PHUIButtonView())
             ->setTag('a')
-            ->setColor(PHUIButtonView::SIMPLE)
             ->setIconFont('fa-reply')
             ->setTooltip(pht('Reply'))
             ->addSigil('differential-inline-reply')
@@ -256,7 +254,6 @@ final class PHUIDiffInlineCommentDetailView
     if ($this->editable && !$this->preview) {
       $edit_button = id(new PHUIButtonView())
         ->setTag('a')
-        ->setColor(PHUIButtonView::SIMPLE)
         ->setIconFont('fa-pencil')
         ->setTooltip(pht('Edit'))
         ->addSigil('differential-inline-edit')
@@ -265,7 +262,6 @@ final class PHUIDiffInlineCommentDetailView
 
       $delete_button = id(new PHUIButtonView())
         ->setTag('a')
-        ->setColor(PHUIButtonView::SIMPLE)
         ->setIconFont('fa-trash-o')
         ->setTooltip(pht('Delete'))
         ->addSigil('differential-inline-delete')
@@ -276,7 +272,7 @@ final class PHUIDiffInlineCommentDetailView
       $links[] = javelin_tag(
         'a',
         array(
-          'class' => 'button simple msl',
+          'class' => 'inline-button-divider pml msl',
           'meta'        => array(
             'anchor' => $anchor_name,
           ),
@@ -286,7 +282,6 @@ final class PHUIDiffInlineCommentDetailView
 
       $delete_button = id(new PHUIButtonView())
         ->setTag('a')
-        ->setColor(PHUIButtonView::SIMPLE)
         ->setTooltip(pht('Delete'))
         ->setIconFont('fa-trash-o')
         ->addSigil('differential-inline-delete')

@@ -264,7 +264,7 @@ a.policy-control .caret {
 }
 
 .phui-button-bar .button .phui-icon-view {
-  left: 11px;
+  left: 9px;
 }
 
 .button.has-icon .phui-button-text {
@@ -298,9 +298,34 @@ a.policy-control .caret {
 
 /* PHUI Button Bar */
 
+.phui-button-bar-borderless .button {
+  border: 0;
+  background-color: transparent;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.phui-button-bar-borderless .button .phui-icon-view {
+  font-size: 15px;
+  color: rgba(55,55,55,.4);
+}
+
+.phui-button-bar-borderless .button:hover {
+  background-color: transparent;
+  border-radius: 3px;
+}
+
+.phui-button-bar-borderless .button:hover .phui-icon-view {
+  color: rgba(55,55,55,.9);
+}
+
+.phui-button-bar-borderless .button {
+  border: 0;
+}
+
 .phui-button-bar a.button.has-icon {
   display: inline-block;
-  height: 16px;
+  height: 18px;
   width: 6px;
 }
 
