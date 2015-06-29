@@ -140,6 +140,25 @@ final class AphrontDialogView extends AphrontView {
         $paragraph));
   }
 
+  public function appendList(array $items) {
+    $listitems = array();
+    foreach ($items as $item) {
+      $listitems[] = phutil_tag(
+        'li',
+        array(
+          'class' => 'remarkup-list-item',
+        ),
+        $item);
+    }
+    return $this->appendChild(
+      phutil_tag(
+        'ul',
+        array(
+          'class' => 'remarkup-list',
+        ),
+        $listitems));
+  }
+
   public function appendForm(AphrontFormView $form) {
     return $this->appendChild($form->buildLayoutView());
   }
@@ -332,7 +351,7 @@ final class AphrontDialogView extends AphrontView {
         $header),
       phutil_tag('div',
         array(
-          'class' => 'aphront-dialog-body grouped',
+          'class' => 'aphront-dialog-body phabricator-remarkup grouped',
         ),
         $children),
       $tail,

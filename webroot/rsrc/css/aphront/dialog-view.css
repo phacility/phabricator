@@ -7,6 +7,7 @@
   margin: 32px auto 16px;
   border: 1px solid {$lightblueborder};
   border-radius: 3px;
+  background-color: #fff;
 }
 
 .device-phone .aphront-dialog-view {
@@ -20,9 +21,6 @@
 
 .aphront-dialog-head {
   padding: 12px 12px 0 12px;
-  background: #fff;
-  border-top-left-radius: 3px;
-  border-top-right-radius: 3px;
 }
 
 .aphront-dialog-flush .aphront-dialog-body {
@@ -48,13 +46,13 @@
   background: {$lightgreybackground};
   padding: 8px 16px;
   border-top: 1px solid {$thinblueborder};
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 .aphront-dialog-foot {
   padding: 6px 0;
   float: left;
-  border-bottom-left-radius: 3px;
-  border-bottom-right-radius: 3px;
 }
 
 .aphront-dialog-tail button,

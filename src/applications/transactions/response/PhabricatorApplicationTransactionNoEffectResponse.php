@@ -66,13 +66,12 @@ final class PhabricatorApplicationTransactionNoEffectResponse
 
     $list = array();
     foreach ($xactions as $xaction) {
-      $list[] = phutil_tag(
-        'li',
-        array(),
-        $xaction->getNoEffectDescription());
+      $list[] = $xaction->getNoEffectDescription();
     }
 
-    $dialog->appendChild(phutil_tag('ul', array(), $list));
+    if ($list) {
+      $dialog->appendList($list);
+    }
     $dialog->appendChild($tail);
 
     if ($continue) {
