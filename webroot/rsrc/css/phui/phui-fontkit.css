@@ -14,6 +14,10 @@
   color: #000;
 }
 
+.phui-document-view .phui-header-tall .phui-header-header {
+  font-family: 'Roboto Slab', {$fontfamily};
+}
+
 .phui-document-view .phabricator-remarkup h1.remarkup-header,
 .phui-document-view .phabricator-remarkup h2.remarkup-header,
 .phui-document-view .phabricator-remarkup h3.remarkup-header,
