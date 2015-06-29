@@ -8,6 +8,7 @@
   overflow-y: hidden;
   border: 1px solid {$sh-lightyellowborder};
   border-radius: 3px;
+  background-color: #FCFBF7;
 }
 
 .phui-object-item .phabricator-source-code-container {

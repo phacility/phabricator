@@ -12,12 +12,12 @@
 
 .PhabricatorMonospaced,
 .phabricator-remarkup .remarkup-code-block .remarkup-code {
-  font: 10px "Menlo", "Consolas", "Monaco", monospace;
+  font: 10px/13px "Menlo", "Consolas", "Monaco", monospace;
 }
 
 .platform-windows .PhabricatorMonospaced,
 .platform-windows .phabricator-remarkup .remarkup-code-block .remarkup-code {
-  font: 11px "Menlo", "Consolas", "Monaco", monospace;
+  font: 11px/13px "Menlo", "Consolas", "Monaco", monospace;
 }
 
 .phabricator-remarkup .remarkup-code-block {
