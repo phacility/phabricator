@@ -34,7 +34,7 @@ final class PhabricatorApplicationSearchResultView extends Phobject {
     return $list;
   }
 
-  public function setTable(AphrontTableView $table) {
+  public function setTable($table) {
     $this->table = $table;
     return $this;
   }

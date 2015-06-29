@@ -276,7 +276,7 @@ final class PhabricatorOwnersDetailController
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Paths'))
-      ->appendChild($table);
+      ->setTable($table);
 
     if ($info) {
       $box->setInfoView($info);
