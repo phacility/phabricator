@@ -103,15 +103,13 @@ final class PhabricatorRepositoryPushLogSearchEngine
     PhabricatorSavedQuery $query,
     array $handles) {
 
-    $table = id(new DiffusionPushLogListView())
+    $content = id(new DiffusionPushLogListView())
       ->setUser($this->requireViewer())
       ->setHandles($handles)
       ->setLogs($logs);
 
-    $result = new PhabricatorApplicationSearchResultView();
-    $result->setTable($table);
-
-    return $result;
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setContent($content);
   }
 
 }
