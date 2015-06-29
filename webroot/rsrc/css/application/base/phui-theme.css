@@ -93,3 +93,7 @@
 .phui-theme-blindigo {
   background-color: #F1F1F4;
 }
+
+.phui-theme-blindigo .phui-workpanel-view .phui-header-shell {
+  background-color: #F1F1F4;
+}

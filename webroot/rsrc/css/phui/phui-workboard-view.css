@@ -9,14 +9,14 @@
 .device-desktop .phui-workboard-view-shadow {
   overflow-x: auto;
   position: absolute;
-  top: 110px;
+  top: 96px;
   bottom: 0;
   left: 0;
   right: 0;
 }
 
 .device-desktop .page-has-warning .phui-workboard-view-shadow {
-  top: 138px;
+  top: 132px;
 }
 
 .device-desktop.with-durable-column .phui-workboard-view-shadow {
@@ -99,8 +99,19 @@
   margin-right: 8px;
 }
 
+.project-board-header {
+  background-color: #fff;
+  border-bottom: 1px solid {$lightblueborder};
+  padding: 12px;
+}
+
+.device .project-board-header {
+  padding: 0;
+}
+
 .project-board-header .phui-header-shell {
-  padding: 20px 16px 20px 20px;
+  padding: 0;
+  border-bottom: 1px solid {$blueborder};
 }
 
 .device .project-board-header .phui-header-shell {
@@ -115,4 +126,14 @@
   display: inline-block;
   margin: 0;
   padding: 0 8px;
+}
+
+.device-desktop .phabricator-icon-nav.project-board-nav
+  .phabricator-nav-local {
+    margin-top: 64px;
+}
+
+.device-desktop .phabricator-icon-nav.project-board-nav
+  .phabricator-nav-content {
+    margin: 0;
 }

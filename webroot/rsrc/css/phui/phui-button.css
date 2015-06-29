@@ -255,12 +255,12 @@ a.policy-control .caret {
   display: inline-block;
   position: absolute;
   top: 6px;
-  left: 12px;
+  left: 10px;
 }
 
 .button.icon-last .phui-icon-view {
   left: auto;
-  right: 12px;
+  right: 10px;
 }
 
 .phui-button-bar .button .phui-icon-view {
