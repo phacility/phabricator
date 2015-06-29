@@ -144,12 +144,8 @@ final class PhabricatorPolicyExplainController
     $items = array();
     $items[] = $space_explanation;
 
-    foreach ($items as $key => $item) {
-      $items[$key] = phutil_tag('li', array(), $item);
-    }
-
     $dialog->appendParagraph(pht('Users who can see objects in this space:'));
-    $dialog->appendChild(phutil_tag('ul', array(), $items));
+    $dialog->appendList($items);
 
     $view_capability = PhabricatorPolicyCapability::CAN_VIEW;
     if ($capability == $view_capability) {
