@@ -39,6 +39,22 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
     return $this;
   }
 
+  public function getSerializedValue() {
+    return json_encode(array(
+      $this->getValue(),
+      $this->getSpacePHID(),
+    ));
+  }
+
+  public function readSerializedValue($value) {
+    $decoded = phutil_json_decode($value);
+    $policy_value = $decoded[0];
+    $space_phid = $decoded[1];
+    $this->setValue($policy_value);
+    $this->setSpacePHID($space_phid);
+    return $this;
+  }
+
   public function readValueFromDictionary(array $dictionary) {
     // TODO: This is a little hacky but will only get us into trouble if we
     // have multiple view policy controls in multiple paged form views on the
