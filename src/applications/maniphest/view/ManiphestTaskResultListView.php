@@ -86,7 +86,7 @@ final class ManiphestTaskResultListView extends ManiphestView {
 
       $lists[] = id(new PHUIObjectBoxView())
         ->setHeader($header)
-        ->appendChild($task_list);
+        ->setObjectList($task_list);
 
     }
 
