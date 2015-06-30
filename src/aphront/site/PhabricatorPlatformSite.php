@@ -11,8 +11,15 @@ final class PhabricatorPlatformSite extends PhabricatorSite {
   }
 
   public function newSiteForRequest(AphrontRequest $request) {
+    // If no base URI has been configured yet, match this site so the user
+    // can follow setup instructions.
+    $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
+    if (!strlen($base_uri)) {
+      return new PhabricatorPlatformSite();
+    }
+
     $uris = array();
-    $uris[] = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
+    $uris[] = $base_uri;
     $uris[] = PhabricatorEnv::getEnvConfig('phabricator.production-uri');
 
     $allowed = PhabricatorEnv::getEnvConfig('phabricator.allowed-uris');
