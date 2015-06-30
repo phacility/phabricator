@@ -74,15 +74,14 @@ final class ManiphestTaskListView extends ManiphestView {
       $status_name = idx($status_map, $task->getStatus());
       $tooltip = pht('%s, %s', $status_name, $pri);
 
-      // TODO: redesign-2015 move icon map to maniphest.statuses
-      $icon = 'fa-exclamation-circle ';
-      $icon .= idx($color_map, $task->getPriority(), 'grey');
+      $icon = ManiphestTaskStatus::getStatusIcon($task->getStatus());
+      $color = idx($color_map, $task->getPriority(), 'grey');
       if ($task->isClosed()) {
         $item->setDisabled(true);
-        $icon = 'fa-check-square-o grey';
+        $color = 'grey';
       }
 
-      $item->setStatusIcon($icon, $tooltip);
+      $item->setStatusIcon($icon.' '.$color, $tooltip);
 
       $item->addIcon(
         'none',

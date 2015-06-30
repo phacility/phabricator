@@ -174,7 +174,7 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     }
 
     if (self::isOpenStatus($status)) {
-      return 'fa-square-o';
+      return 'fa-exclamation-circle';
     } else {
       return 'fa-check-square-o';
     }
