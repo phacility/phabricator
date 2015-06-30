@@ -16,8 +16,9 @@ final class PhabricatorCalendarEventViewController
   public function processRequest() {
     $request = $this->getRequest();
     $viewer = $request->getUser();
-
     $sequence = $request->getURIData('sequence');
+
+    $timeline = null;
 
     $event = id(new PhabricatorCalendarEventQuery())
       ->setViewer($viewer)
@@ -60,9 +61,11 @@ final class PhabricatorCalendarEventViewController
       $crumbs->addTextCrumb($title, '/E'.$event->getID());
     }
 
-    $timeline = $this->buildTransactionTimeline(
-      $event,
-      new PhabricatorCalendarEventTransactionQuery());
+    if (!$event->getIsGhostEvent()) {
+      $timeline = $this->buildTransactionTimeline(
+        $event,
+        new PhabricatorCalendarEventTransactionQuery());
+    }
 
     $header = $this->buildHeaderView($event);
     $actions = $this->buildActionView($event);
@@ -78,13 +81,19 @@ final class PhabricatorCalendarEventViewController
       ? pht('Add Comment')
       : pht('Add To Plate');
     $draft = PhabricatorDraft::newFromUserAndKey($viewer, $event->getPHID());
+    if ($sequence) {
+      $comment_uri = $this->getApplicationURI(
+          '/event/comment/'.$event->getID().'/'.$sequence.'/');
+    } else {
+      $comment_uri = $this->getApplicationURI(
+          '/event/comment/'.$event->getID().'/');
+    }
     $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($viewer)
       ->setObjectPHID($event->getPHID())
       ->setDraft($draft)
       ->setHeaderText($add_comment_header)
-      ->setAction(
-        $this->getApplicationURI('/event/comment/'.$event->getID().'/'))
+      ->setAction($comment_uri)
       ->setSubmitButtonName(pht('Add Comment'));
 
     return $this->buildApplicationPage(
