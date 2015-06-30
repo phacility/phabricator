@@ -406,8 +406,8 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    *
    * **Fully enrich objects pulled from the workspace.** After pulling objects
    * from the workspace, you still need to load and attach any additional
-   * content the query requests. Otherwise, a query might return objects without
-   * requested content.
+   * content the query requests. Otherwise, a query might return objects
+   * without requested content.
    *
    * Generally, you do not need to update the workspace yourself: it is
    * automatically populated as a side effect of objects surviving policy
@@ -419,16 +419,22 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    * @task workspace
    */
   public function putObjectsInWorkspace(array $objects) {
-    assert_instances_of($objects, 'PhabricatorPolicyInterface');
-
-    $viewer_phid = $this->getViewer()->getPHID();
-
-    // The workspace is scoped per viewer to prevent accidental contamination.
-    if (empty($this->workspace[$viewer_phid])) {
-      $this->workspace[$viewer_phid] = array();
+    $parent = $this->getParentQuery();
+    if ($parent) {
+      $parent->putObjectsInWorkspace($objects);
+      return $this;
     }
 
-    $this->workspace[$viewer_phid] += $objects;
+    assert_instances_of($objects, 'PhabricatorPolicyInterface');
+
+    $viewer_fragment = $this->getViewer()->getCacheFragment();
+
+    // The workspace is scoped per viewer to prevent accidental contamination.
+    if (empty($this->workspace[$viewer_fragment])) {
+      $this->workspace[$viewer_fragment] = array();
+    }
+
+    $this->workspace[$viewer_fragment] += $objects;
 
     return $this;
   }
@@ -445,18 +451,19 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    * @task workspace
    */
   public function getObjectsFromWorkspace(array $phids) {
-    $viewer_phid = $this->getViewer()->getPHID();
+    $parent = $this->getParentQuery();
+    if ($parent) {
+      return $parent->getObjectsFromWorkspace($phids);
+    }
+
+    $viewer_fragment = $this->getViewer()->getCacheFragment();
 
     $results = array();
     foreach ($phids as $key => $phid) {
-      if (isset($this->workspace[$viewer_phid][$phid])) {
-        $results[$phid] = $this->workspace[$viewer_phid][$phid];
+      if (isset($this->workspace[$viewer_fragment][$phid])) {
+        $results[$phid] = $this->workspace[$viewer_fragment][$phid];
         unset($phids[$key]);
       }
-    }
-
-    if ($phids && $this->getParentQuery()) {
-      $results += $this->getParentQuery()->getObjectsFromWorkspace($phids);
     }
 
     return $results;
