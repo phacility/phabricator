@@ -20,7 +20,7 @@
 
 .phabricator-side-menu .phui-list-item-selected {
   background-color: rgba(0,0,0,.05);
-  border-left: 4px solid {$blue};
+  border-left: 4px solid {$sky};
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
   font-weight: bold;
