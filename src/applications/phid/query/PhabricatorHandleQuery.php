@@ -33,6 +33,7 @@ final class PhabricatorHandleQuery
 
     $object_query = id(new PhabricatorObjectQuery())
       ->withPHIDs($phids)
+      ->setParentQuery($this)
       ->requireCapabilities($this->getRequiredObjectCapabilities())
       ->setViewer($this->getViewer());
 

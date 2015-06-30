@@ -106,19 +106,6 @@ final class PhabricatorObjectQuery
   private function loadObjectsByPHID(array $types, array $phids) {
     $results = array();
 
-    $workspace = $this->getObjectsFromWorkspace($phids);
-
-    foreach ($phids as $key => $phid) {
-      if (isset($workspace[$phid])) {
-        $results[$phid] = $workspace[$phid];
-        unset($phids[$key]);
-      }
-    }
-
-    if (!$phids) {
-      return $results;
-    }
-
     $groups = array();
     foreach ($phids as $phid) {
       $type = phid_get_type($phid);
@@ -127,6 +114,21 @@ final class PhabricatorObjectQuery
 
     $in_flight = $this->getPHIDsInFlight();
     foreach ($groups as $type => $group) {
+      // We check the workspace for each group, because some groups may trigger
+      // other groups to load (for example, transactions load their objects).
+      $workspace = $this->getObjectsFromWorkspace($group);
+
+      foreach ($group as $key => $phid) {
+        if (isset($workspace[$phid])) {
+          $results[$phid] = $workspace[$phid];
+          unset($group[$key]);
+        }
+      }
+
+      if (!$group) {
+        continue;
+      }
+
       // Don't try to load PHIDs which are already "in flight"; this prevents
       // us from recursing indefinitely if policy checks or edges form a loop.
       // We will decline to load the corresponding objects.
@@ -139,7 +141,10 @@ final class PhabricatorObjectQuery
       if ($group && isset($types[$type])) {
         $this->putPHIDsInFlight($group);
         $objects = $types[$type]->loadObjects($this, $group);
-        $results += mpull($objects, null, 'getPHID');
+
+        $map = mpull($objects, null, 'getPHID');
+        $this->putObjectsInWorkspace($map);
+        $results += $map;
       }
     }
 

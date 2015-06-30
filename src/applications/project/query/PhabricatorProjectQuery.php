@@ -196,12 +196,18 @@ final class PhabricatorProjectQuery
       $default = null;
 
       $file_phids = mpull($projects, 'getProfileImagePHID');
-      $files = id(new PhabricatorFileQuery())
-        ->setParentQuery($this)
-        ->setViewer($this->getViewer())
-        ->withPHIDs($file_phids)
-        ->execute();
-      $files = mpull($files, null, 'getPHID');
+      $file_phids = array_filter($file_phids);
+      if ($file_phids) {
+        $files = id(new PhabricatorFileQuery())
+          ->setParentQuery($this)
+          ->setViewer($this->getViewer())
+          ->withPHIDs($file_phids)
+          ->execute();
+        $files = mpull($files, null, 'getPHID');
+      } else {
+        $files = array();
+      }
+
       foreach ($projects as $project) {
         $file = idx($files, $project->getProfileImagePHID());
         if (!$file) {

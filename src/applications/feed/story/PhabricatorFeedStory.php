@@ -78,10 +78,11 @@ abstract class PhabricatorFeedStory
       $object_phids += $phids;
     }
 
-    $objects = id(new PhabricatorObjectQuery())
+    $object_query = id(new PhabricatorObjectQuery())
       ->setViewer($viewer)
-      ->withPHIDs(array_keys($object_phids))
-      ->execute();
+      ->withPHIDs(array_keys($object_phids));
+
+    $objects = $object_query->execute();
 
     foreach ($key_phids as $key => $phids) {
       if (!$phids) {
@@ -142,8 +143,13 @@ abstract class PhabricatorFeedStory
       $handle_phids += $key_phids[$key];
     }
 
+    // NOTE: This setParentQuery() is a little sketchy. Ideally, this whole
+    // method should be inside FeedQuery and it should be the parent query of
+    // both subqueries. We're just trying to share the workspace cache.
+
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer($viewer)
+      ->setParentQuery($object_query)
       ->withPHIDs(array_keys($handle_phids))
       ->execute();
 
@@ -514,7 +520,7 @@ abstract class PhabricatorFeedStory
   }
 
   public function newMarkupEngine($field) {
-    return PhabricatorMarkupEngine::newMarkupEngine(array());
+    return PhabricatorMarkupEngine::getEngine();
   }
 
   public function getMarkupText($field) {

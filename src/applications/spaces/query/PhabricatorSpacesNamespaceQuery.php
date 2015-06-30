@@ -143,7 +143,7 @@ final class PhabricatorSpacesNamespaceQuery
 
   public static function getViewerSpaces(PhabricatorUser $viewer) {
     $cache = PhabricatorCaches::getRequestCache();
-    $cache_key = self::KEY_VIEWER.'('.$viewer->getPHID().')';
+    $cache_key = self::KEY_VIEWER.'('.$viewer->getCacheFragment().')';
 
     $result = $cache->getKey($cache_key);
     if ($result === null) {
