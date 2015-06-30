@@ -6,6 +6,10 @@
   border-bottom: 1px solid {$thinblueborder};
 }
 
+.phui-object-box .phui-box.phui-feed-story:last-child {
+  border: none;
+}
+
 .phui-feed-story-head .phui-feed-story-actor-image {
   width: 35px;
   height: 35px;
@@ -21,6 +25,7 @@
   overflow: hidden;
   color: {$greytext};
   line-height: 16px;
+  word-break: break-word;
 }
 
 .phui-feed-story-head .phui-link-person {
