@@ -48,10 +48,16 @@ ul.phui-object-item-list-view {
 }
 
 .phui-object-item-frame {
-  border: 1px solid {$lightgreyborder};
+  border-color: {$lightblueborder};
+  border-width: 1px 1px 1px 0;
+  border-style: solid;
   position: relative;
   min-height: 33px;
   overflow: hidden;
+}
+
+.phui-object-item-no-bar .phui-object-item-frame {
+  border-width: 1px;
 }
 
 .device-desktop .phui-object-item {

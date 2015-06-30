@@ -268,6 +268,8 @@ final class PHUIObjectItemView extends AphrontTagView {
 
     if ($this->barColor) {
       $item_classes[] = 'phui-object-item-bar-color-'.$this->barColor;
+    } else {
+      $item_classes[] = 'phui-object-item-no-bar';
     }
 
     if ($this->actions) {
