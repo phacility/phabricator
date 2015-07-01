@@ -129,7 +129,7 @@
 
 .phabricator-main-menu-search-target {
   position: absolute;
-  top: 46px;
+  top: 42px;
 }
 
 .device-desktop .phabricator-main-menu-search-target {
@@ -160,6 +160,7 @@
   border-width: 1px;
   border-color: {$lightblueborder};
   border-radius: 3px;
+  border-style: solid;
   background-color: #fff;
   height: 28px;
   padding: 3px 30px 3px 6px;
@@ -277,7 +278,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
   word-wrap: break-word;
   overflow-y: auto;
   box-shadow: {$dropshadow};
-  border: {$blueborder};
+  border: 1px solid {$blueborder};
   border-radius: 3px;
   margin-left: 40px;
 }
@@ -559,10 +560,10 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 .phabricator-main-menu-dropdown {
   position: absolute;
   background: #fff;
-  top: 38px;
+  top: 42px;
   padding: 2px;
   box-shadow: {$dropshadow};
-  border: {$blueborder};
+  border: 1px solid {$blueborder};
   border-radius: 3px;
 }
 
@@ -576,10 +577,10 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 .device .phabricator-application-menu-expanded .phabricator-application-menu {
   display: block;
   position: absolute;
-  border: 1px solid {$lightblueborder};
+  border: 1px solid {$blueborder};
   border-radius: 3px;
   box-shadow: {$dropshadow};
-  top: 38px;
+  top: 42px;
   right: 8px;
   width: 240px;
 }

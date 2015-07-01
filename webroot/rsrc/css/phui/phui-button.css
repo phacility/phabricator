@@ -177,8 +177,7 @@ button.link:hover {
   margin-top: -1px;
   padding: 5px 0;
   box-shadow: {$dropshadow};
-  border: 1px solid {$lightgreyborder};
-  border-bottom: 1px solid {$greyborder};
+  border: 1px solid {$blueborder};
   border-radius: 3px;
   margin-bottom: 16px;
 }
