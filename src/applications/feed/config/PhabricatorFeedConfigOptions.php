@@ -21,24 +21,6 @@ final class PhabricatorFeedConfigOptions
 
   public function getOptions() {
     return array(
-      $this->newOption('feed.public', 'bool', false)
-        ->setLocked(true)
-        ->setBoolOptions(
-          array(
-            pht('Allow anyone to view the feed'),
-            pht('Require authentication'),
-          ))
-        ->setSummary(pht('Should the feed be public?'))
-        ->setDescription(
-          pht(
-            "If you set this to true, you can embed Phabricator activity ".
-            "feeds in other pages using iframes. These feeds are completely ".
-            "public, and a login is not required to view them! This is ".
-            "intended for things like open source projects that want to ".
-            "expose an activity feed on the project homepage.\n\n".
-            "NOTE: You must also set `%s` to true for this ".
-            "setting to work properly.",
-            'policy.allow-public')),
       $this->newOption('feed.http-hooks', 'list<string>', array())
         ->setLocked(true)
         ->setSummary(pht('POST notifications of feed events.'))
