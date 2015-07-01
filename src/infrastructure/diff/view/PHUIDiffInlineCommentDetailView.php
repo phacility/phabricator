@@ -190,9 +190,6 @@ final class PHUIDiffInlineCommentDetailView
       }
     }
 
-    $action_buttons = new PHUIButtonBarView();
-    $action_buttons->setBorderless(true);
-    $action_buttons->addClass('inline-button-divider');
     $nextprev = null;
     if (!$this->preview) {
       $nextprev = new PHUIButtonBarView();
@@ -228,6 +225,7 @@ final class PHUIDiffInlineCommentDetailView
       $nextprev->addButton($up);
       $nextprev->addButton($down);
 
+      $action_buttons = array();
       if ($this->allowReply) {
 
         if (!$is_synthetic) {
@@ -237,13 +235,12 @@ final class PHUIDiffInlineCommentDetailView
           // file/line information, and synthetic comments don't have an inline
           // comment ID.
 
-          $reply_button = id(new PHUIButtonView())
+          $action_buttons[] = id(new PHUIButtonView())
             ->setTag('a')
             ->setIconFont('fa-reply')
             ->setTooltip(pht('Reply'))
             ->addSigil('differential-inline-reply')
             ->setMustCapture(true);
-          $action_buttons->addButton($reply_button);
         }
 
       }
@@ -252,21 +249,19 @@ final class PHUIDiffInlineCommentDetailView
     $anchor_name = $this->getAnchorName();
 
     if ($this->editable && !$this->preview) {
-      $edit_button = id(new PHUIButtonView())
+      $action_buttons[] = id(new PHUIButtonView())
         ->setTag('a')
         ->setIconFont('fa-pencil')
         ->setTooltip(pht('Edit'))
         ->addSigil('differential-inline-edit')
         ->setMustCapture(true);
-      $action_buttons->addButton($edit_button);
 
-      $delete_button = id(new PHUIButtonView())
+      $action_buttons[] = id(new PHUIButtonView())
         ->setTag('a')
         ->setIconFont('fa-trash-o')
         ->setTooltip(pht('Delete'))
         ->addSigil('differential-inline-delete')
         ->setMustCapture(true);
-      $action_buttons->addButton($delete_button);
 
     } else if ($this->preview) {
       $links[] = javelin_tag(
@@ -280,13 +275,12 @@ final class PHUIDiffInlineCommentDetailView
         ),
         pht('Not Visible'));
 
-      $delete_button = id(new PHUIButtonView())
+      $action_buttons[] = id(new PHUIButtonView())
         ->setTag('a')
         ->setTooltip(pht('Delete'))
         ->setIconFont('fa-trash-o')
         ->addSigil('differential-inline-delete')
         ->setMustCapture(true);
-      $action_buttons->addButton($delete_button);
     }
 
     $done_button = null;
@@ -407,6 +401,16 @@ final class PHUIDiffInlineCommentDetailView
       }
     }
 
+    $actions = null;
+    if ($action_buttons) {
+      $actions = new PHUIButtonBarView();
+      $actions->setBorderless(true);
+      $actions->addClass('inline-button-divider');
+      foreach ($action_buttons as $button) {
+        $actions->addButton($button);
+      }
+    }
+
     $group_left = phutil_tag(
       'div',
       array(
@@ -428,7 +432,7 @@ final class PHUIDiffInlineCommentDetailView
         $anchor,
         $done_button,
         $links,
-        $action_buttons,
+        $actions,
         $nextprev,
       ));
 

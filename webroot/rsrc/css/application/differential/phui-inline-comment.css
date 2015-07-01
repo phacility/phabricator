@@ -46,7 +46,7 @@
   font-weight:  bold;
   color: {$darkbluetext};
   border-bottom: 1px solid {$sh-lightyellowborder};
-  padding: 4px 5px 4px 12px;
+  padding: 4px 5px 4px 8px;
   background-color: {$sh-yellowbackground};
 }
 
@@ -75,7 +75,7 @@
 
 .differential-inline-comment .inline-head-left {
   float: left;
-  padding: 5px 0;
+  padding: 4px;
 }
 
 .device-phone .differential-inline-comment .inline-head-left {
@@ -344,9 +344,8 @@
 }
 
 .ghost-icon {
-  background: {$darkgreybackground};
+  background: rgba(55,55,55,.07);
   float: left;
-  margin-right: 8px;
   padding: 2px 4px 2px 2px;
   position: absolute;
   top: 0;
@@ -355,12 +354,12 @@
 
 .ghost-icon .phui-icon-view {
   padding: 8px 7px;
-  font-size: 15px;
+  font-size: 16px;
   color: {$lightbluetext};
 }
 
 .device-desktop .ghost-icon .phui-icon-view:hover {
-  color: {$sky};
+  color: {$fire};
 }
 
 .differential-inline-comment.inline-comment-ghost
@@ -396,4 +395,8 @@
 .inline-button-divider {
   border-left: 1px solid rgba(55,55,55,.25);
   margin-left: 8px;
+}
+
+.differential-inline-comment-synthetic .inline-button-divider {
+  border: none;
 }
