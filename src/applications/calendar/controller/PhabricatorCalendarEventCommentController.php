@@ -11,11 +11,13 @@ final class PhabricatorCalendarEventCommentController
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
-
     if (!$request->isFormPost()) {
       return new Aphront400Response();
     }
+
+    $user = $request->getUser();
+    $is_preview = $request->isPreviewRequest();
+    $draft = PhabricatorDraft::buildFromRequest($request);
 
     $event = id(new PhabricatorCalendarEventQuery())
       ->setViewer($user)
@@ -25,8 +27,23 @@ final class PhabricatorCalendarEventCommentController
       return new Aphront404Response();
     }
 
-    $is_preview = $request->isPreviewRequest();
-    $draft = PhabricatorDraft::buildFromRequest($request);
+    $index = $request->getURIData('sequence');
+    if ($index && !$is_preview) {
+      $result = $this->getEventAtIndexForGhostPHID(
+        $user,
+        $event->getPHID(),
+        $index);
+
+      if ($result) {
+        $event = $result;
+      } else {
+        $event = $this->createEventFromGhost(
+          $user,
+          $event,
+          $index);
+        $event->applyViewerTimezone($user);
+      }
+    }
 
     $view_uri = '/'.$event->getMonogram();
 
