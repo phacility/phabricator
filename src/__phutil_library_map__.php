@@ -1889,7 +1889,6 @@ phutil_register_library_map(array(
     'PhabricatorFeedListController' => 'applications/feed/controller/PhabricatorFeedListController.php',
     'PhabricatorFeedManagementRepublishWorkflow' => 'applications/feed/management/PhabricatorFeedManagementRepublishWorkflow.php',
     'PhabricatorFeedManagementWorkflow' => 'applications/feed/management/PhabricatorFeedManagementWorkflow.php',
-    'PhabricatorFeedPublicStreamController' => 'applications/feed/controller/PhabricatorFeedPublicStreamController.php',
     'PhabricatorFeedQuery' => 'applications/feed/query/PhabricatorFeedQuery.php',
     'PhabricatorFeedSearchEngine' => 'applications/feed/query/PhabricatorFeedSearchEngine.php',
     'PhabricatorFeedStory' => 'applications/feed/story/PhabricatorFeedStory.php',
@@ -5527,7 +5526,6 @@ phutil_register_library_map(array(
     'PhabricatorFeedListController' => 'PhabricatorFeedController',
     'PhabricatorFeedManagementRepublishWorkflow' => 'PhabricatorFeedManagementWorkflow',
     'PhabricatorFeedManagementWorkflow' => 'PhabricatorManagementWorkflow',
-    'PhabricatorFeedPublicStreamController' => 'PhabricatorFeedController',
     'PhabricatorFeedQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorFeedSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorFeedStory' => array(

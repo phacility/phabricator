@@ -238,7 +238,7 @@ final class PhabricatorCalendarEventTransaction
           } else if ($count_added > 0 && $count_uninvited > 0) {
             $added_text = $this->renderHandleList($added);
             $uninvited_text = $this->renderHandleList($uninvited);
-            $text = pht('%s invited %s and uninvited: %s',
+            $text = pht('%s invited %s and uninvited %s.',
               $this->renderHandleLink($author_phid),
               $added_text,
               $uninvited_text);
@@ -303,7 +303,7 @@ final class PhabricatorCalendarEventTransaction
       case self::TYPE_NAME:
         if ($old === null) {
           return pht(
-            '%s created %s',
+            '%s created %s.',
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($object_phid));
         } else {
@@ -445,7 +445,7 @@ final class PhabricatorCalendarEventTransaction
           } else if ($count_added > 0 && $count_uninvited > 0) {
             $added_text = $this->renderHandleList($added);
             $uninvited_text = $this->renderHandleList($uninvited);
-            $text = pht('%s invited %s and uninvited %s to %s',
+            $text = pht('%s invited %s and uninvited %s to %s.',
               $this->renderHandleLink($author_phid),
               $added_text,
               $uninvited_text,
