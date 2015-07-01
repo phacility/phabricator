@@ -256,7 +256,6 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
       }
 
       if ($visible) {
-        $this->putObjectsInWorkspace($this->getWorkspaceMapForPage($visible));
         $visible = $this->didFilterPage($visible);
       }
 
@@ -467,27 +466,6 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
     }
 
     return $results;
-  }
-
-
-  /**
-   * Convert a result page to a `<phid, PhabricatorPolicyInterface>` map.
-   *
-   * @param list<PhabricatorPolicyInterface> Objects.
-   * @return map<phid, PhabricatorPolicyInterface> Map of objects which can
-   *   be put into the workspace.
-   * @task workspace
-   */
-  protected function getWorkspaceMapForPage(array $results) {
-    $map = array();
-    foreach ($results as $result) {
-      $phid = $result->getPHID();
-      if ($phid !== null) {
-        $map[$phid] = $result;
-      }
-    }
-
-    return $map;
   }
 
 
