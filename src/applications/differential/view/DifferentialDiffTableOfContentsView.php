@@ -56,6 +56,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
     $this->requireResource('differential-core-view-css');
     $this->requireResource('differential-table-of-contents-css');
+    $this->requireResource('phui-text-css');
 
     $rows = array();
 
@@ -130,6 +131,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       $char = DifferentialChangeType::getSummaryCharacterForChangeType($type);
       $chartitle = DifferentialChangeType::getFullNameForChangeType($type);
       $desc = DifferentialChangeType::getShortNameForFileType($ftype);
+      $color = DifferentialChangeType::getSummaryColorForChangeType($type);
       if ($desc) {
         $desc = '('.$desc.')';
       }
@@ -169,6 +171,8 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
         $paths[] =
           $changeset->getAbsoluteRepositoryPath($this->repository, $this->diff);
       }
+
+      $char = phutil_tag('span', array('class' => 'phui-text-'.$color), $char);
 
       $rows[] = array(
         $char,

@@ -38,6 +38,22 @@ final class DifferentialChangeType extends Phobject {
     return idx($types, coalesce($type, '?'), '~');
   }
 
+  public static function getSummaryColorForChangeType($type) {
+    static $types = array(
+      self::TYPE_ADD        => 'green',
+      self::TYPE_CHANGE     => 'black',
+      self::TYPE_DELETE     => 'red',
+      self::TYPE_MOVE_AWAY  => 'orange',
+      self::TYPE_COPY_AWAY  => 'black',
+      self::TYPE_MOVE_HERE  => 'green',
+      self::TYPE_COPY_HERE  => 'green',
+      self::TYPE_MULTICOPY  => 'orange',
+      self::TYPE_MESSAGE    => 'black',
+      self::TYPE_CHILD      => 'black',
+    );
+    return idx($types, coalesce($type, '?'), 'black');
+  }
+
   public static function getShortNameForFileType($type) {
     static $names = array(
       self::FILE_TEXT       => null,
