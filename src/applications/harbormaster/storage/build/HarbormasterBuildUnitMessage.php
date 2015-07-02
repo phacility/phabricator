@@ -30,7 +30,7 @@ final class HarbormasterBuildUnitMessage
       'namespace' => 'optional string',
       'name' => 'string',
       'result' => 'string',
-      'duration' => 'optional float',
+      'duration' => 'optional float|int',
       'path' => 'optional string',
       'coverage' => 'optional map<string, wild>',
     );
@@ -44,7 +44,7 @@ final class HarbormasterBuildUnitMessage
     $obj->setNamespace(idx($dict, 'namespace', ''));
     $obj->setName($dict['name']);
     $obj->setResult($dict['result']);
-    $obj->setDuration(idx($dict, 'duration'));
+    $obj->setDuration((float)idx($dict, 'duration'));
 
     $path = idx($dict, 'path');
     if (strlen($path)) {
