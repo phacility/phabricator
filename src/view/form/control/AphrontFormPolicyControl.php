@@ -351,6 +351,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
         $space_phid),
       array(
         'name' => 'spacePHID',
+        'class' => 'aphront-space-select-control-knob',
       ));
 
     return $select;
