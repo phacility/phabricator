@@ -49,6 +49,8 @@ final class ManiphestTaskEditBulkJobType
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->withPHIDs(array($task->getObjectPHID()))
+      ->needProjectPHIDs(true)
+      ->needSubscriberPHIDs(true)
       ->executeOne();
     if (!$object) {
       return;
