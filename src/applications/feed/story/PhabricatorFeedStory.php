@@ -16,7 +16,6 @@ abstract class PhabricatorFeedStory
 
   private $data;
   private $hasViewed;
-  private $framed;
   private $hovercard = false;
   private $renderingTarget = PhabricatorApplicationTransaction::TARGET_HTML;
 
@@ -78,10 +77,11 @@ abstract class PhabricatorFeedStory
       $object_phids += $phids;
     }
 
-    $objects = id(new PhabricatorObjectQuery())
+    $object_query = id(new PhabricatorObjectQuery())
       ->setViewer($viewer)
-      ->withPHIDs(array_keys($object_phids))
-      ->execute();
+      ->withPHIDs(array_keys($object_phids));
+
+    $objects = $object_query->execute();
 
     foreach ($key_phids as $key => $phids) {
       if (!$phids) {
@@ -142,8 +142,13 @@ abstract class PhabricatorFeedStory
       $handle_phids += $key_phids[$key];
     }
 
+    // NOTE: This setParentQuery() is a little sketchy. Ideally, this whole
+    // method should be inside FeedQuery and it should be the parent query of
+    // both subqueries. We're just trying to share the workspace cache.
+
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer($viewer)
+      ->setParentQuery($object_query)
       ->withPHIDs(array_keys($handle_phids))
       ->execute();
 
@@ -283,11 +288,6 @@ abstract class PhabricatorFeedStory
     return $this->hasViewed;
   }
 
-  final public function setFramed($framed) {
-    $this->framed = $framed;
-    return $this;
-  }
-
   final public function setHandles(array $handles) {
     assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
@@ -361,24 +361,7 @@ abstract class PhabricatorFeedStory
         return $handle->getLinkName();
     }
 
-    // NOTE: We render our own link here to customize the styling and add
-    // the '_top' target for framed feeds.
-
-    $class = null;
-    if ($handle->getType() == PhabricatorPeopleUserPHIDType::TYPECONST) {
-      $class = 'phui-link-person';
-    }
-
-    return javelin_tag(
-      'a',
-      array(
-        'href'    => $handle->getURI(),
-        'target'  => $this->framed ? '_top' : null,
-        'sigil'   => $this->hovercard ? 'hovercard' : null,
-        'meta'    => $this->hovercard ? array('hoverPHID' => $phid) : null,
-        'class'   => $class,
-      ),
-      $handle->getLinkName());
+    return $handle->renderLink();
   }
 
   final protected function renderString($str) {
@@ -456,16 +439,10 @@ abstract class PhabricatorFeedStory
    * @task policy
    */
   public function getPolicy($capability) {
-    $policy_object = $this->getPrimaryPolicyObject();
-    if ($policy_object) {
-      return $policy_object->getPolicy($capability);
-    }
-
-    // TODO: Remove this once all objects are policy-aware. For now, keep
-    // respecting the `feed.public` setting.
-    return PhabricatorEnv::getEnvConfig('feed.public')
-      ? PhabricatorPolicies::POLICY_PUBLIC
-      : PhabricatorPolicies::POLICY_USER;
+    // NOTE: We enforce that a user can see all the objects a story is about
+    // when loading it, so we don't need to perform a equivalent secondary
+    // policy check later.
+    return PhabricatorPolicies::getMostOpenPolicy();
   }
 
 
@@ -473,35 +450,11 @@ abstract class PhabricatorFeedStory
    * @task policy
    */
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    $policy_object = $this->getPrimaryPolicyObject();
-    if ($policy_object) {
-      return $policy_object->hasAutomaticCapability($capability, $viewer);
-    }
-
     return false;
   }
 
+
   public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
-
-  /**
-   * Get the policy object this story is about, if such a policy object
-   * exists.
-   *
-   * @return PhabricatorPolicyInterface|null Policy object, if available.
-   * @task policy
-   */
-  private function getPrimaryPolicyObject() {
-    $primary_phid = $this->getPrimaryObjectPHID();
-    if (empty($this->objects[$primary_phid])) {
-      $object = $this->objects[$primary_phid];
-      if ($object instanceof PhabricatorPolicyInterface) {
-        return $object;
-      }
-    }
-
     return null;
   }
 
@@ -514,7 +467,7 @@ abstract class PhabricatorFeedStory
   }
 
   public function newMarkupEngine($field) {
-    return PhabricatorMarkupEngine::newMarkupEngine(array());
+    return PhabricatorMarkupEngine::getEngine();
   }
 
   public function getMarkupText($field) {

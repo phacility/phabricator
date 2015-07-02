@@ -274,6 +274,8 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
 
       'security.allow-conduit-act-as-user' => pht(
         'Impersonating users over the API is no longer supported.'),
+
+      'feed.public' => pht('The framable public feed is no longer supported.'),
     );
 
     return $ancient_config;

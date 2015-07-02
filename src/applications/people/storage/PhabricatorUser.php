@@ -1073,6 +1073,29 @@ final class PhabricatorUser
   }
 
 
+  /**
+   * Get a scalar string identifying this user.
+   *
+   * This is similar to using the PHID, but distinguishes between ominpotent
+   * and public users explicitly. This allows safe construction of cache keys
+   * or cache buckets which do not conflate public and omnipotent users.
+   *
+   * @return string Scalar identifier.
+   */
+  public function getCacheFragment() {
+    if ($this->isOmnipotent()) {
+      return 'u.omnipotent';
+    }
+
+    $phid = $this->getPHID();
+    if ($phid) {
+      return 'u.'.$phid;
+    }
+
+    return 'u.public';
+  }
+
+
 /* -(  Managing Handles  )--------------------------------------------------- */
 
 

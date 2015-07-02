@@ -56,6 +56,17 @@ final class PhabricatorStandardCustomFieldRemarkup
       $this->getFieldName());
   }
 
+  public function getApplicationTransactionTitleForFeed(
+    PhabricatorApplicationTransaction $xaction) {
+    $author_phid = $xaction->getAuthorPHID();
+    $object_phid = $xaction->getObjectPHID();
+    return pht(
+      '%s edited %s on %s.',
+      $xaction->renderHandleLink($author_phid),
+      $this->getFieldName(),
+      $xaction->renderHandleLink($object_phid));
+  }
+
   public function getApplicationTransactionHasChangeDetails(
     PhabricatorApplicationTransaction $xaction) {
     return true;
