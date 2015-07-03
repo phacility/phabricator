@@ -157,19 +157,6 @@ abstract class PhabricatorController extends AphrontController {
       }
     }
 
-    $event = new PhabricatorEvent(
-      PhabricatorEventType::TYPE_CONTROLLER_CHECKREQUEST,
-      array(
-        'request' => $request,
-        'controller' => $this,
-      ));
-    $event->setUser($user);
-    PhutilEventEngine::dispatchEvent($event);
-    $checker_controller = $event->getValue('controller');
-    if ($checker_controller != $this) {
-      return $this->delegateToController($checker_controller);
-    }
-
     $auth_class = 'PhabricatorAuthApplication';
     $auth_application = PhabricatorApplication::getByClass($auth_class);
 
