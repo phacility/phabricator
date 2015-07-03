@@ -6,20 +6,18 @@ Guide to the Spaces application.
 Overview
 ========
 
-IMPORTANT: Spaces is a prototype application.
-
 The Spaces application makes it easier to manage large groups of objects which
 share the same access policy. For example:
 
-  - An organization might make a Space for a project in order to satisfy a
+  - An organization might make a space for a project in order to satisfy a
     contractual obligation to limit access, even internally.
-  - An open source organization might make a Space for work related to
+  - An open source organization might make a space for work related to
     internal governance, to separate private and public discussions.
-  - A contracting company might make Spaces for clients, to separate them from
+  - A contracting company might make spaces for clients, to separate them from
     one another.
-  - A company might create a Space for consultants, to give them limited
+  - A company might create a spaces for consultants, to give them limited
     access to only the resources they need to do their work.
-  - An ambitious manager might create a Space to hide her team's work from her
+  - An ambitious manager might create a space to hide her team's work from her
     enemies at the company, that she might use the element of surprise to later
     expand her domain.
 
@@ -39,16 +37,16 @@ them if you don't plan to use them. You can always set them up later.
 
 To activate Spaces, you need to create at least two spaces. Create spaces from
 the web UI, by navigating to {nav Spaces > Create Space}. By default, only
-administrators can create new Spaces, but you can configure this in the
+administrators can create new spaces, but you can configure this in the
 {nav Applications} application.
 
-The first Space you create will be a special "default" Space, and all existing
+The first space you create will be a special "default" space, and all existing
 objects will be shifted into this space as soon as you create it. Spaces you
 create later will be normal spaces, and begin with no objects inside them.
 
 Create the first space (you may want to name it something like "Default" or
 "Global" or "Public", depending on the nature of your organization), then
-create a second Space. Usually, the second space will be something like
+create a second space. Usually, the second space will be something like
 "Secret Plans" and have a more restrictive "Visible To" policy.
 
 
@@ -57,7 +55,7 @@ Using Spaces
 
 Once you've created at least two spaces, you can begin using them.
 
-Application UIs will change for users who can see at least two Spaces, opening
+Application UIs will change for users who can see at least two spaces, opening
 up new controls which let them work with spaces. They will now be able to
 choose which space to create new objects into, be able to move objects between
 spaces, and be able to search for objects in a specific space or set of spaces.
@@ -72,14 +70,14 @@ spaces exist. This simplifies the UI for users with limited access.
 Space Policies
 ==============
 
-Briefly, Spaces affect policies like this:
+Briefly, spacess affect policies like this:
 
   - Spaces apply their view policy to all objects inside the space.
   - Space policies are absolute, and stronger than all other policies. A
-    user who can not see a Space can **never** see objects inside the space.
+    user who can not see a space can **never** see objects inside the space.
   - Normal policies are still checked: spaces can only reduce access.
 
-When you create a Space, you choose a view policy for that space by using the
+When you create a space, you choose a view policy for that space by using the
 **Visible To** control. This policy controls both who can see the space, and
 who can see objects inside the space.
 
@@ -90,21 +88,21 @@ and stronger than all other policy rules, including policy exceptions.
 For example, a user can never see a task in a space they can't see, even if
 they are an admin and the author and owner of the task, and subscribed to the
 task and the view and edit policies are set to "All Users", and they created
-the Space originally and the moon is full and they are pure of heart and
+the space originally and the moon is full and they are pure of heart and
 possessed of the noblest purpose. Spaces are impenetrable.
 
 Even if a user satisfies the view policy for a space, they must still pass the
 view policy on the object: the space check is a new check in addition to any
 check on the object, and can only limit access.
 
-The edit policy for a space only affects the Space itself, and is not applied
+The edit policy for a space only affects the space itself, and is not applied
 to objects inside the space.
 
 
 Archiving Spaces
 ================
 
-If you no longer need a Space, you can archive it by choosing
+If you no longer need a space, you can archive it by choosing
 {nav Archive Space} from the detail view. This hides the space and all the
 objects in it without deleting any data.
 
@@ -123,14 +121,14 @@ You can reactivate a space later by choosing {nav Activate Space}.
 Application Email
 =================
 
-After activating Spaces, you can choose a Space when configuring inbound email
+After activating spaces, you can choose a space when configuring inbound email
 addresses in {nav Applications}.
 
 Spaces affect policies for application email just like they do for other
 objects: to see or use the address, you must be able to see the space which
 contains it.
 
-Objects created from inbound email will be created in the Space the email is
+Objects created from inbound email will be created in the space the email is
 associated with.
 
 

@@ -2661,6 +2661,7 @@ phutil_register_library_map(array(
     'PhabricatorSpacesNamespaceSearchEngine' => 'applications/spaces/query/PhabricatorSpacesNamespaceSearchEngine.php',
     'PhabricatorSpacesNamespaceTransaction' => 'applications/spaces/storage/PhabricatorSpacesNamespaceTransaction.php',
     'PhabricatorSpacesNamespaceTransactionQuery' => 'applications/spaces/query/PhabricatorSpacesNamespaceTransactionQuery.php',
+    'PhabricatorSpacesNoAccessController' => 'applications/spaces/controller/PhabricatorSpacesNoAccessController.php',
     'PhabricatorSpacesRemarkupRule' => 'applications/spaces/remarkup/PhabricatorSpacesRemarkupRule.php',
     'PhabricatorSpacesSchemaSpec' => 'applications/spaces/storage/PhabricatorSpacesSchemaSpec.php',
     'PhabricatorSpacesTestCase' => 'applications/spaces/__tests__/PhabricatorSpacesTestCase.php',
@@ -4670,6 +4671,7 @@ phutil_register_library_map(array(
     'NuanceItem' => array(
       'NuanceDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorApplicationTransactionInterface',
     ),
     'NuanceItemEditController' => 'NuanceController',
     'NuanceItemEditor' => 'PhabricatorApplicationTransactionEditor',
@@ -6455,6 +6457,7 @@ phutil_register_library_map(array(
     'PhabricatorSpacesNamespaceSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorSpacesNamespaceTransaction' => 'PhabricatorApplicationTransaction',
     'PhabricatorSpacesNamespaceTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
+    'PhabricatorSpacesNoAccessController' => 'PhabricatorSpacesController',
     'PhabricatorSpacesRemarkupRule' => 'PhabricatorObjectRemarkupRule',
     'PhabricatorSpacesSchemaSpec' => 'PhabricatorConfigSchemaSpec',
     'PhabricatorSpacesTestCase' => 'PhabricatorTestCase',
