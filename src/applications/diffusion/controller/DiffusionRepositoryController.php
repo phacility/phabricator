@@ -628,6 +628,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $header->addActionLink($button);
     $browse_panel->setHeader($header);
 
+    $locate_panel = null;
     if ($repository->canUsePathTree()) {
       Javelin::initBehavior(
         'diffusion-locate-file',
