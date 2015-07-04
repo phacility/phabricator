@@ -156,13 +156,17 @@ final class PhrictionHistoryController
 
     $obj_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setObjectList($list)
+      ->setObjectList($list);
+
+    $pager = id(new PHUIBoxView())
+      ->addClass('ml')
       ->appendChild($pager);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $obj_box,
+        $pager,
       ),
       array(
         'title'     => pht('Document History'),

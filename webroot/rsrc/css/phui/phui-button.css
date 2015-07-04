@@ -73,6 +73,10 @@ a.simple:visited {
   border: 1px solid {$blue};
 }
 
+a.simple.current {
+  background: {$lightblue};
+}
+
 button.simple .phui-icon-view,
 input[type="submit"].simple .phui-icon-view,
 a.simple .phui-icon-view,
