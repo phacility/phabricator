@@ -4,11 +4,19 @@
  */
 
 @font-face {
-  font-family: 'Roboto Slab';
-  font-style: normal;
-  src: local('RobotoSlab'),
-       url(/rsrc/externals/font/robotoslab/RobotoSlab.woff2)
-        format('woff2'),
-       url(/rsrc/externals/font/robotoslab/RobotoSlab.woff)
-        format('woff');
+    font-family: 'Roboto Slab';
+    font-weight: normal;
+    font-style: normal;
+    src: url(/rsrc/externals/font/robotoslab/robotoslab-regular.eot);
+    src: url(/rsrc/externals/font/robotoslab/robotoslab-regular.eot?#iefix)
+          format('embedded-opentype'),
+         url(/rsrc/externals/font/robotoslab/robotoslab-regular.woff2)
+          format('woff2'),
+         url(/rsrc/externals/font/robotoslab/robotoslab-regular.woff)
+          format('woff'),
+         url(/rsrc/externals/font/robotoslab/robotoslab-regular.ttf)
+          format('truetype'),
+         url(/rsrc/externals/font/robotoslab/robotoslab-regular.svg#roboto_slabregular)
+          format('svg');
+
 }

@@ -114,7 +114,7 @@ return array(
     'rsrc/css/diviner/diviner-shared.css' => '5a337049',
     'rsrc/css/font/font-awesome.css' => 'e2e712fe',
     'rsrc/css/font/font-lato.css' => '564bfc7a',
-    'rsrc/css/font/font-roboto-slab.css' => 'cda88637',
+    'rsrc/css/font/font-roboto-slab.css' => 'f24a53cb',
     'rsrc/css/font/phui-font-icon-base.css' => '3dad2ae3',
     'rsrc/css/layout/phabricator-filetree-view.css' => 'fccf9f82',
     'rsrc/css/layout/phabricator-hovercard-view.css' => '3a8553e7',
@@ -170,8 +170,10 @@ return array(
     'rsrc/externals/font/lato/Lato-italic.woff2' => '2cc75b43',
     'rsrc/externals/font/lato/Lato-regular.woff' => 'c139f3a4',
     'rsrc/externals/font/lato/Lato-regular.woff2' => 'e3488ae9',
-    'rsrc/externals/font/robotoslab/RobotoSlab.woff' => '706dd595',
-    'rsrc/externals/font/robotoslab/RobotoSlab.woff2' => '94a26562',
+    'rsrc/externals/font/robotoslab/robotoslab-regular.eot' => 'eaefe21c',
+    'rsrc/externals/font/robotoslab/robotoslab-regular.ttf' => '4bfef7d5',
+    'rsrc/externals/font/robotoslab/robotoslab-regular.woff' => '7f0552f9',
+    'rsrc/externals/font/robotoslab/robotoslab-regular.woff2' => '23bdd43c',
     'rsrc/externals/javelin/core/Event.js' => '85ea0626',
     'rsrc/externals/javelin/core/Stratcom.js' => '6c53634d',
     'rsrc/externals/javelin/core/__tests__/event-stop-and-kill.js' => '717554e4',
@@ -523,7 +525,7 @@ return array(
     'diviner-shared-css' => '5a337049',
     'font-fontawesome' => 'e2e712fe',
     'font-lato' => '564bfc7a',
-    'font-roboto-slab' => 'cda88637',
+    'font-roboto-slab' => 'f24a53cb',
     'global-drag-and-drop-css' => '697324ad',
     'harbormaster-css' => '49d64eb4',
     'herald-css' => '826075fa',
@@ -1785,9 +1787,6 @@ return array(
       'javelin-util',
       'phabricator-notification-css',
     ),
-    'cda88637' => array(
-      'phui-fontkit-css',
-    ),
     'cf86d16a' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1948,6 +1947,9 @@ return array(
     'efe49472' => array(
       'javelin-install',
       'javelin-util',
+    ),
+    'f24a53cb' => array(
+      'phui-fontkit-css',
     ),
     'f36e01af' => array(
       'javelin-behavior',
