@@ -42,12 +42,13 @@ final class PhabricatorRemarkupGraphvizBlockInterpreter
       return '<'.$file->getBestURI().'>';
     }
 
-    return phutil_tag(
+    $img = phutil_tag(
       'img',
       array(
         'src' => $file->getBestURI(),
         'width' => nonempty($width, null),
       ));
+    return phutil_tag_div('phabricator-remarkup-embed-image-full', $img);
   }
 
   // TODO: This is duplicated from PhabricatorEmbedFileRemarkupRule since they
