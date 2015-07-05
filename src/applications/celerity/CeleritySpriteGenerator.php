@@ -232,7 +232,8 @@ final class CeleritySpriteGenerator extends Phobject {
       $retina_rules = <<<EOCSS
 @media
 only screen and (min-device-pixel-ratio: 1.5),
-only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+only screen and (-webkit-min-device-pixel-ratio: 1.5),
+only screen and (min-resolution: 1.5dppx) {
   .sprite-{$name}{$extra_css} {
     background-image: url(/rsrc/image/sprite-{$name}-X2.png);
     background-size: {X}px {Y}px;
