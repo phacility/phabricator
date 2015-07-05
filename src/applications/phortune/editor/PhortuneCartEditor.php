@@ -145,7 +145,7 @@ final class PhortuneCartEditor
         "%s",
         $issues);
 
-      $body->addRemarkupSection($overview);
+      $body->addRemarkupSection(null, $overview);
 
       $body->addLinkSection(
         pht('PAY NOW'),

@@ -2668,7 +2668,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $body->addRawSection(implode("\n", $headers));
 
     foreach ($comments as $comment) {
-      $body->addRemarkupSection($comment);
+      $body->addRemarkupSection(null, $comment);
     }
   }
 
