@@ -216,7 +216,7 @@ abstract class PhabricatorController extends AphrontController {
       // later on.
       $spaces = PhabricatorSpacesNamespaceQuery::getSpacesExist();
       if ($spaces) {
-        $viewer_spaces = PhabricatorSpacesNamespaceQuery::getViewerSpacesExist(
+        $viewer_spaces = PhabricatorSpacesNamespaceQuery::getViewerSpaces(
           $user);
         if (!$viewer_spaces) {
           $controller = new PhabricatorSpacesNoAccessController();
