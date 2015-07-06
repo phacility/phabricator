@@ -27,7 +27,7 @@ final class PhabricatorWorkerBulkJobSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
-      id(new PhabricatorSearchUsersField())
+      id(new PhabricatorUsersSearchField())
         ->setLabel(pht('Authors'))
         ->setKey('authorPHIDs')
         ->setAliases(array('author', 'authors')),

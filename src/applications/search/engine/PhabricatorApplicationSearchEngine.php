@@ -245,7 +245,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       }
 
       if ($object instanceof PhabricatorProjectInterface) {
-        $fields[] = id(new PhabricatorSearchProjectsField())
+        $fields[] = id(new PhabricatorProjectSearchField())
           ->setKey('projectPHIDs')
           ->setAliases(array('project', 'projects'))
           ->setLabel(pht('Projects'));
@@ -253,7 +253,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
       if ($object instanceof PhabricatorSpacesInterface) {
         if (PhabricatorSpacesNamespaceQuery::getSpacesExist()) {
-          $fields[] = id(new PhabricatorSearchSpacesField())
+          $fields[] = id(new PhabricatorSpacesSearchField())
             ->setKey('spacePHIDs')
             ->setAliases(array('space', 'spaces'))
             ->setLabel(pht('Spaces'));

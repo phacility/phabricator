@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSearchSpacesField
+final class PhabricatorSpacesSearchField
   extends PhabricatorSearchTokenizerField {
 
   protected function getDefaultValue() {

@@ -45,11 +45,11 @@ final class ManiphestTaskSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
-      id(new PhabricatorSearchOwnersField())
+      id(new PhabricatorOwnersSearchField())
         ->setLabel(pht('Assigned To'))
         ->setKey('assignedPHIDs')
         ->setAliases(array('assigned')),
-      id(new PhabricatorSearchUsersField())
+      id(new PhabricatorUsersSearchField())
         ->setLabel(pht('Authors'))
         ->setKey('authorPHIDs')
         ->setAliases(array('author', 'authors')),

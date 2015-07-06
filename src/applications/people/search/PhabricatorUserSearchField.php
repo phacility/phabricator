@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSearchOwnersField
+final class PhabricatorUsersSearchField
   extends PhabricatorSearchTokenizerField {
 
   protected function getDefaultValue() {
@@ -12,7 +12,7 @@ final class PhabricatorSearchOwnersField
   }
 
   protected function newDatasource() {
-    return new PhabricatorPeopleOwnerDatasource();
+    return new PhabricatorPeopleUserFunctionDatasource();
   }
 
 }

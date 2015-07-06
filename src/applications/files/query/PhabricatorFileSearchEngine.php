@@ -17,7 +17,7 @@ final class PhabricatorFileSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
-      id(new PhabricatorSearchUsersField())
+      id(new PhabricatorUsersSearchField())
         ->setKey('authorPHIDs')
         ->setAliases(array('author', 'authors'))
         ->setLabel(pht('Authors')),

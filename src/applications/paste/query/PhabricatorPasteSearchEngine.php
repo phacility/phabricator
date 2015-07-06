@@ -40,7 +40,7 @@ final class PhabricatorPasteSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
-      id(new PhabricatorSearchUsersField())
+      id(new PhabricatorUsersSearchField())
         ->setAliases(array('authors'))
         ->setKey('authorPHIDs')
         ->setLabel(pht('Authors')),

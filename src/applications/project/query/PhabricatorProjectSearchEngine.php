@@ -21,7 +21,7 @@ final class PhabricatorProjectSearchEngine
       id(new PhabricatorSearchTextField())
         ->setLabel(pht('Name'))
         ->setKey('name'),
-      id(new PhabricatorSearchUsersField())
+      id(new PhabricatorUsersSearchField())
         ->setLabel(pht('Members'))
         ->setKey('memberPHIDs')
         ->setAliases(array('member', 'members')),

@@ -21,11 +21,11 @@ final class PhabricatorMetaMTAMailSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
-      id(new PhabricatorSearchUsersField())
+      id(new PhabricatorUsersSearchField())
       ->setLabel(pht('Actors'))
       ->setKey('actorPHIDs')
       ->setAliases(array('actor', 'actors')),
-      id(new PhabricatorSearchUsersField())
+      id(new PhabricatorUsersSearchField())
       ->setLabel(pht('Recipients'))
       ->setKey('recipientPHIDs')
       ->setAliases(array('recipient', 'recipients')),
