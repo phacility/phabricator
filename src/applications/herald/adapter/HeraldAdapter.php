@@ -29,7 +29,6 @@ abstract class HeraldAdapter extends Phobject {
   const FIELD_BRANCHES               = 'branches';
   const FIELD_AUTHOR_RAW             = 'author-raw';
   const FIELD_COMMITTER_RAW          = 'committer-raw';
-  const FIELD_APPLICATION_EMAIL      = 'applicaton-email';
   const FIELD_TASK_PRIORITY          = 'taskpriority';
   const FIELD_TASK_STATUS            = 'taskstatus';
   const FIELD_PUSHER_IS_COMMITTER    = 'pusher-is-committer';
@@ -164,6 +163,10 @@ abstract class HeraldAdapter extends Phobject {
     return $this;
   }
 
+  public function supportsApplicationEmail() {
+    return false;
+  }
+
   public function setApplicationEmail(
     PhabricatorMetaMTAApplicationEmail $email) {
     $this->applicationEmail = $email;
@@ -183,18 +186,7 @@ abstract class HeraldAdapter extends Phobject {
       return $impl->getHeraldFieldValue($this->getObject());
     }
 
-    switch ($field_name) {
-      case self::FIELD_APPLICATION_EMAIL:
-        $value = array();
-        // while there is only one match by implementation, we do set
-        // comparisons on phids, so return an array with just the phid
-        if ($this->getApplicationEmail()) {
-          $value[] = $this->getApplicationEmail()->getPHID();
-        }
-        return $value;
-      default:
-        throw new Exception(pht("Unknown field '%s'!", $field_name));
-    }
+    throw new Exception(pht("Unknown field '%s'!", $field_name));
   }
 
   abstract public function applyHeraldEffects(array $effects);
@@ -391,7 +383,6 @@ abstract class HeraldAdapter extends Phobject {
       self::FIELD_BRANCHES => pht('Commit\'s branches'),
       self::FIELD_AUTHOR_RAW => pht('Raw author name'),
       self::FIELD_COMMITTER_RAW => pht('Raw committer name'),
-      self::FIELD_APPLICATION_EMAIL => pht('Receiving email address'),
       self::FIELD_TASK_PRIORITY => pht('Task priority'),
       self::FIELD_TASK_STATUS => pht('Task status'),
       self::FIELD_PUSHER_IS_COMMITTER => pht('Pusher same as committer'),
@@ -476,13 +467,6 @@ abstract class HeraldAdapter extends Phobject {
       case self::FIELD_REPOSITORY_PROJECTS:
         return array(
           self::CONDITION_INCLUDE_ALL,
-          self::CONDITION_INCLUDE_ANY,
-          self::CONDITION_INCLUDE_NONE,
-          self::CONDITION_EXISTS,
-          self::CONDITION_NOT_EXISTS,
-        );
-      case self::FIELD_APPLICATION_EMAIL:
-        return array(
           self::CONDITION_INCLUDE_ANY,
           self::CONDITION_INCLUDE_NONE,
           self::CONDITION_EXISTS,
@@ -944,8 +928,6 @@ abstract class HeraldAdapter extends Phobject {
             return self::VALUE_PROJECT;
           case self::FIELD_REVIEWERS:
             return self::VALUE_USER_OR_PROJECT;
-          case self::FIELD_APPLICATION_EMAIL:
-            return self::VALUE_APPLICATION_EMAIL;
           default:
             return self::VALUE_USER;
         }

@@ -21,6 +21,10 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
     $this->task = $this->newObject();
   }
 
+  public function supportsApplicationEmail() {
+    return true;
+  }
+
   public function getRepetitionOptions() {
     return array(
       HeraldRepetitionPolicyConfig::EVERY,
@@ -72,7 +76,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         self::FIELD_ASSIGNEE,
         self::FIELD_TASK_PRIORITY,
         self::FIELD_TASK_STATUS,
-        self::FIELD_APPLICATION_EMAIL,
       ),
       parent::getFields());
   }
