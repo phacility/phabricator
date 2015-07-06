@@ -67,17 +67,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
     return pht('Maniphest Tasks');
   }
 
-  public function getFields() {
-    return array_merge(
-      array(
-        self::FIELD_TITLE,
-        self::FIELD_BODY,
-        self::FIELD_AUTHOR,
-        self::FIELD_ASSIGNEE,
-      ),
-      parent::getFields());
-  }
-
   public function getActions($rule_type) {
     switch ($rule_type) {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
@@ -110,21 +99,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
 
   public function getHeraldName() {
     return 'T'.$this->getTask()->getID();
-  }
-
-  public function getHeraldField($field) {
-    switch ($field) {
-      case self::FIELD_TITLE:
-        return $this->getTask()->getTitle();
-      case self::FIELD_BODY:
-        return $this->getTask()->getDescription();
-      case self::FIELD_AUTHOR:
-        return $this->getTask()->getAuthorPHID();
-      case self::FIELD_ASSIGNEE:
-        return $this->getTask()->getOwnerPHID();
-    }
-
-    return parent::getHeraldField($field);
   }
 
   public function applyHeraldEffects(array $effects) {

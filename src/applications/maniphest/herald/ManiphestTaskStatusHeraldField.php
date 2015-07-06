@@ -1,12 +1,12 @@
 <?php
 
 final class ManiphestTaskStatusHeraldField
-  extends ManiphestHeraldField {
+  extends ManiphestTaskHeraldField {
 
   const FIELDCONST = 'taskstatus';
 
   public function getHeraldFieldName() {
-    return pht('Task status');
+    return pht('Status');
   }
 
   public function getHeraldFieldValue($object) {

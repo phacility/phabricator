@@ -6,7 +6,9 @@ abstract class HeraldField extends Phobject {
 
   const STANDARD_LIST = 'standard.list';
   const STANDARD_BOOL = 'standard.bool';
+  const STANDARD_TEXT = 'standard.text';
   const STANDARD_PHID = 'standard.phid';
+  const STANDARD_PHID_NULLABLE = 'standard.phid.nullable';
 
   abstract public function getHeraldFieldName();
   abstract public function getHeraldFieldValue($object);
@@ -26,12 +28,26 @@ abstract class HeraldField extends Phobject {
           HeraldAdapter::CONDITION_IS_TRUE,
           HeraldAdapter::CONDITION_IS_FALSE,
         );
+      case self::STANDARD_TEXT:
+        return array(
+          HeraldAdapter::CONDITION_CONTAINS,
+          HeraldAdapter::CONDITION_NOT_CONTAINS,
+          HeraldAdapter::CONDITION_IS,
+          HeraldAdapter::CONDITION_IS_NOT,
+          HeraldAdapter::CONDITION_REGEXP,
+        );
       case self::STANDARD_PHID:
         return array(
           HeraldAdapter::CONDITION_IS_ANY,
           HeraldAdapter::CONDITION_IS_NOT_ANY,
         );
-
+      case self::STANDARD_PHID_NULLABLE:
+        return array(
+          HeraldAdapter::CONDITION_IS_ANY,
+          HeraldAdapter::CONDITION_IS_NOT_ANY,
+          HeraldAdapter::CONDITION_EXISTS,
+          HeraldAdapter::CONDITION_NOT_EXISTS,
+        );
     }
 
     throw new Exception(pht('Unknown standard condition set.'));

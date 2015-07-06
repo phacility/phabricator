@@ -1,12 +1,12 @@
 <?php
 
 final class ManiphestTaskPriorityHeraldField
-  extends ManiphestHeraldField {
+  extends ManiphestTaskHeraldField {
 
   const FIELDCONST = 'taskpriority';
 
   public function getHeraldFieldName() {
-    return pht('Task priority');
+    return pht('Priority');
   }
 
   public function getHeraldFieldValue($object) {

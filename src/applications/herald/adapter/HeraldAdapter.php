@@ -5,7 +5,6 @@ abstract class HeraldAdapter extends Phobject {
   const FIELD_TITLE                  = 'title';
   const FIELD_BODY                   = 'body';
   const FIELD_AUTHOR                 = 'author';
-  const FIELD_ASSIGNEE               = 'assignee';
   const FIELD_REVIEWER               = 'reviewer';
   const FIELD_REVIEWERS              = 'reviewers';
   const FIELD_COMMITTER              = 'committer';
@@ -355,7 +354,6 @@ abstract class HeraldAdapter extends Phobject {
       self::FIELD_TITLE => pht('Title'),
       self::FIELD_BODY => pht('Body'),
       self::FIELD_AUTHOR => pht('Author'),
-      self::FIELD_ASSIGNEE => pht('Assignee'),
       self::FIELD_COMMITTER => pht('Committer'),
       self::FIELD_REVIEWER => pht('Reviewer'),
       self::FIELD_REVIEWERS => pht('Reviewers'),
@@ -444,7 +442,6 @@ abstract class HeraldAdapter extends Phobject {
           self::CONDITION_IS_NOT_ANY,
         );
       case self::FIELD_REPOSITORY:
-      case self::FIELD_ASSIGNEE:
       case self::FIELD_AUTHOR:
       case self::FIELD_COMMITTER:
         return array(
