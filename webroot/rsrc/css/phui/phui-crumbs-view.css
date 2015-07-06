@@ -101,7 +101,7 @@ a.phui-crumbs-action .phui-icon-view {
 }
 
 .phui-crumbs-view.phui-crumbs-border {
-  border-bottom: 1px solid {$thinblueborder};
+  border-bottom: 1px solid rgba(55,55,55,.1);
 }
 
 body .phui-crumbs-view + .phui-object-box {
