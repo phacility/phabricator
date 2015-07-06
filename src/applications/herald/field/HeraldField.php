@@ -71,17 +71,23 @@ abstract class HeraldField extends Phobject {
           'FIELDCONST'));
     }
 
-    if (!is_string($const) || (strlen($const) > 32)) {
+    $limit = self::getFieldConstantByteLimit();
+    if (!is_string($const) || (strlen($const) > $limit)) {
       throw new Exception(
         pht(
           '"%s" class "%s" has an invalid "%s" property. Field constants '.
-          'must be strings and no more than 32 bytes in length.',
+          'must be strings and no more than %s bytes in length.',
           __CLASS__,
           get_class($this),
-          'FIELDCONST'));
+          'FIELDCONST',
+          new PhutilNumber($limit)));
     }
 
     return $const;
+  }
+
+  final public static function getFieldConstantByteLimit() {
+    return 64;
   }
 
   final public static function getAllFields() {

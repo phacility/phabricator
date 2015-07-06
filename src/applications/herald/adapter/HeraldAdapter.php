@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @task customfield Custom Field Integration
- */
 abstract class HeraldAdapter extends Phobject {
 
   const FIELD_TITLE                  = 'title';
@@ -100,7 +97,6 @@ abstract class HeraldAdapter extends Phobject {
   private $contentSource;
   private $isNewObject;
   private $applicationEmail;
-  private $customFields = false;
   private $customActions = null;
   private $queuedTransactions = array();
   private $emailPHIDs = array();
@@ -199,10 +195,6 @@ abstract class HeraldAdapter extends Phobject {
         }
         return $value;
       default:
-        if ($this->isHeraldCustomKey($field_name)) {
-          return $this->getCustomFieldValue($field_name);
-        }
-
         throw new Exception(pht("Unknown field '%s'!", $field_name));
     }
   }
@@ -365,17 +357,7 @@ abstract class HeraldAdapter extends Phobject {
   }
 
   public function getFields() {
-    $fields = array_keys($this->getFieldImplementationMap());
-
-    $custom_fields = $this->getCustomFields();
-    if ($custom_fields) {
-      foreach ($custom_fields->getFields() as $custom_field) {
-        $key = $custom_field->getFieldKey();
-        $fields[] = $this->getHeraldKeyFromCustomKey($key);
-      }
-    }
-
-    return $fields;
+    return array_keys($this->getFieldImplementationMap());
   }
 
   public function getFieldNameMap() {
@@ -417,7 +399,7 @@ abstract class HeraldAdapter extends Phobject {
       self::FIELD_TASK_STATUS => pht('Task status'),
       self::FIELD_PUSHER_IS_COMMITTER => pht('Pusher same as committer'),
       self::FIELD_PATH => pht('Path'),
-    ) + $this->getCustomFieldNameMap();
+    );
   }
 
 
@@ -552,9 +534,6 @@ abstract class HeraldAdapter extends Phobject {
           self::CONDITION_IS_FALSE,
         );
       default:
-        if ($this->isHeraldCustomKey($field)) {
-          return $this->getCustomFieldConditions($field);
-        }
         throw new Exception(
           pht(
             "This adapter does not define conditions for field '%s'!",
@@ -933,15 +912,6 @@ abstract class HeraldAdapter extends Phobject {
       return $impl->getHeraldFieldValueType($condition);
     }
 
-    if ($this->isHeraldCustomKey($field)) {
-      $value_type = $this->getCustomFieldValueTypeForFieldAndCondition(
-        $field,
-        $condition);
-      if ($value_type !== null) {
-        return $value_type;
-      }
-    }
-
     switch ($condition) {
       case self::CONDITION_CONTAINS:
       case self::CONDITION_NOT_CONTAINS:
@@ -1205,9 +1175,7 @@ abstract class HeraldAdapter extends Phobject {
 
     $field_type = $condition->getFieldName();
 
-    $default = $this->isHeraldCustomKey($field_type)
-      ? pht('(Unknown Custom Field "%s")', $field_type)
-      : pht('(Unknown Field "%s")', $field_type);
+    $default = pht('(Unknown Field "%s")', $field_type);
 
     $field_name = idx($this->getFieldNameMap(), $field_type, $default);
 
@@ -1226,9 +1194,7 @@ abstract class HeraldAdapter extends Phobject {
 
     $action_type = $action->getAction();
 
-    $default = $this->isHeraldCustomKey($action_type)
-      ? pht('(Unknown Custom Action "%s") equals', $action_type)
-      : pht('(Unknown Action "%s") equals', $action_type);
+    $default = pht('(Unknown Action "%s") equals', $action_type);
 
     $action_name = idx(
       $this->getActionNameMap($rule_global),
@@ -1361,186 +1327,6 @@ abstract class HeraldAdapter extends Phobject {
 
     return $phids;
   }
-
-/* -(  Custom Field Integration  )------------------------------------------- */
-
-
-  /**
-   * Returns the prefix used to namespace Herald fields which are based on
-   * custom fields.
-   *
-   * @return string Key prefix.
-   * @task customfield
-   */
-  private function getCustomKeyPrefix() {
-    return 'herald.custom/';
-  }
-
-
-  /**
-   * Determine if a field key is based on a custom field or a regular internal
-   * field.
-   *
-   * @param string Field key.
-   * @return bool True if the field key is based on a custom field.
-   * @task customfield
-   */
-  private function isHeraldCustomKey($key) {
-    $prefix = $this->getCustomKeyPrefix();
-    return (strncmp($key, $prefix, strlen($prefix)) == 0);
-  }
-
-
-  /**
-   * Convert a custom field key into a Herald field key.
-   *
-   * @param string Custom field key.
-   * @return string Herald field key.
-   * @task customfield
-   */
-  private function getHeraldKeyFromCustomKey($key) {
-    return $this->getCustomKeyPrefix().$key;
-  }
-
-
-  /**
-   * Get custom fields for this adapter, if appliable. This will either return
-   * a field list or `null` if the adapted object does not implement custom
-   * fields or the adapter does not support them.
-   *
-   * @return PhabricatorCustomFieldList|null List of fields, or `null`.
-   * @task customfield
-   */
-  private function getCustomFields() {
-    if ($this->customFields === false) {
-      $this->customFields = null;
-
-
-      $template_object = $this->newObject();
-      if ($template_object instanceof PhabricatorCustomFieldInterface) {
-        $object = $this->getObject();
-        if (!$object) {
-          $object = $template_object;
-        }
-
-        $fields = PhabricatorCustomField::getObjectFields(
-          $object,
-          PhabricatorCustomField::ROLE_HERALD);
-        $fields->setViewer(PhabricatorUser::getOmnipotentUser());
-        $fields->readFieldsFromStorage($object);
-
-        $this->customFields = $fields;
-      }
-    }
-
-    return $this->customFields;
-  }
-
-
-  /**
-   * Get a custom field by Herald field key, or `null` if it does not exist
-   * or custom fields are not supported.
-   *
-   * @param string Herald field key.
-   * @return PhabricatorCustomField|null Matching field, if it exists.
-   * @task customfield
-   */
-  private function getCustomField($herald_field_key) {
-    $fields = $this->getCustomFields();
-    if (!$fields) {
-      return null;
-    }
-
-    foreach ($fields->getFields() as $custom_field) {
-      $key = $custom_field->getFieldKey();
-      if ($this->getHeraldKeyFromCustomKey($key) == $herald_field_key) {
-        return $custom_field;
-      }
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Get the field map for custom fields.
-   *
-   * @return map<string, string> Map of Herald field keys to field names.
-   * @task customfield
-   */
-  private function getCustomFieldNameMap() {
-    $fields = $this->getCustomFields();
-    if (!$fields) {
-      return array();
-    }
-
-    $map = array();
-    foreach ($fields->getFields() as $field) {
-      $key = $field->getFieldKey();
-      $name = $field->getHeraldFieldName();
-      $map[$this->getHeraldKeyFromCustomKey($key)] = $name;
-    }
-
-    return $map;
-  }
-
-
-  /**
-   * Get the value for a custom field.
-   *
-   * @param string Herald field key.
-   * @return wild Custom field value.
-   * @task customfield
-   */
-  private function getCustomFieldValue($field_key) {
-    $field = $this->getCustomField($field_key);
-    if (!$field) {
-      return null;
-    }
-
-    return $field->getHeraldFieldValue();
-  }
-
-
-  /**
-   * Get the Herald conditions for a custom field.
-   *
-   * @param string Herald field key.
-   * @return list<const> List of Herald conditions.
-   * @task customfield
-   */
-  private function getCustomFieldConditions($field_key) {
-    $field = $this->getCustomField($field_key);
-    if (!$field) {
-      return array(
-        self::CONDITION_NEVER,
-      );
-    }
-
-    return $field->getHeraldFieldConditions();
-  }
-
-
-  /**
-   * Get the Herald value type for a custom field and condition.
-   *
-   * @param string Herald field key.
-   * @param const Herald condition constant.
-   * @return const|null Herald value type constant, or null to use the default.
-   * @task customfield
-   */
-  private function getCustomFieldValueTypeForFieldAndCondition(
-    $field_key,
-    $condition) {
-
-    $field = $this->getCustomField($field_key);
-    if (!$field) {
-      return self::VALUE_NONE;
-    }
-
-    return $field->getHeraldFieldValueType($condition);
-  }
-
 
 /* -(  Applying Effects  )--------------------------------------------------- */
 
