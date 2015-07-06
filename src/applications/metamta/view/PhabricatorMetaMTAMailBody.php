@@ -20,6 +20,7 @@ final class PhabricatorMetaMTAMailBody extends Phobject {
 
   public function setViewer($viewer) {
     $this->viewer = $viewer;
+    return $this;
   }
 
 /* -(  Composition  )-------------------------------------------------------- */

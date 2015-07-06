@@ -370,6 +370,7 @@ final class DivinerAtom extends Phobject {
 
   public function setProperty($key, $value) {
     $this->properties[$key] = $value;
+    return $this;
   }
 
   public function getProperties() {

@@ -513,6 +513,8 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
         $constraints);
     }
+
+    return $this;
   }
 
 
