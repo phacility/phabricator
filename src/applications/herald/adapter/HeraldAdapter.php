@@ -186,7 +186,16 @@ abstract class HeraldAdapter extends Phobject {
     throw new Exception(pht("Unknown field '%s'!", $field_name));
   }
 
-  abstract public function applyHeraldEffects(array $effects);
+  public function applyHeraldEffects(array $effects) {
+    assert_instances_of($effects, 'HeraldEffect');
+
+    $result = array();
+    foreach ($effects as $effect) {
+      $result[] = $this->applyStandardEffect($effect);
+    }
+
+    return $result;
+  }
 
   protected function handleCustomHeraldEffect(HeraldEffect $effect) {
     $custom_action = idx($this->getCustomActions(), $effect->getAction());

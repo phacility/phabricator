@@ -47,16 +47,6 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
     }
   }
 
-  public function getFields() {
-    return array_merge(
-      array(
-        self::FIELD_TITLE,
-        self::FIELD_BODY,
-        self::FIELD_AUTHOR,
-      ),
-      parent::getFields());
-  }
-
   public function getActions($rule_type) {
     switch ($rule_type) {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
@@ -85,34 +75,6 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
 
   public function getHeraldName() {
     return 'M'.$this->getMock()->getID();
-  }
-
-  public function getHeraldField($field) {
-    switch ($field) {
-      case self::FIELD_TITLE:
-        return $this->getMock()->getName();
-      case self::FIELD_BODY:
-        return $this->getMock()->getDescription();
-      case self::FIELD_AUTHOR:
-        return $this->getMock()->getAuthorPHID();
-    }
-
-    return parent::getHeraldField($field);
-  }
-
-  public function applyHeraldEffects(array $effects) {
-    assert_instances_of($effects, 'HeraldEffect');
-
-    $result = array();
-    foreach ($effects as $effect) {
-      $action = $effect->getAction();
-      switch ($action) {
-        default:
-          $result[] = $this->applyStandardEffect($effect);
-          break;
-      }
-    }
-    return $result;
   }
 
 }
