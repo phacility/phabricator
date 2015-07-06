@@ -29,8 +29,6 @@ abstract class HeraldAdapter extends Phobject {
   const FIELD_BRANCHES               = 'branches';
   const FIELD_AUTHOR_RAW             = 'author-raw';
   const FIELD_COMMITTER_RAW          = 'committer-raw';
-  const FIELD_TASK_PRIORITY          = 'taskpriority';
-  const FIELD_TASK_STATUS            = 'taskstatus';
   const FIELD_PUSHER_IS_COMMITTER    = 'pusher-is-committer';
   const FIELD_PATH                   = 'path';
 
@@ -383,8 +381,6 @@ abstract class HeraldAdapter extends Phobject {
       self::FIELD_BRANCHES => pht('Commit\'s branches'),
       self::FIELD_AUTHOR_RAW => pht('Raw author name'),
       self::FIELD_COMMITTER_RAW => pht('Raw committer name'),
-      self::FIELD_TASK_PRIORITY => pht('Task priority'),
-      self::FIELD_TASK_STATUS => pht('Task status'),
       self::FIELD_PUSHER_IS_COMMITTER => pht('Pusher same as committer'),
       self::FIELD_PATH => pht('Path'),
     );
@@ -443,8 +439,6 @@ abstract class HeraldAdapter extends Phobject {
         );
       case self::FIELD_REVIEWER:
       case self::FIELD_PUSHER:
-      case self::FIELD_TASK_PRIORITY:
-      case self::FIELD_TASK_STATUS:
         return array(
           self::CONDITION_IS_ANY,
           self::CONDITION_IS_NOT_ANY,
@@ -906,10 +900,6 @@ abstract class HeraldAdapter extends Phobject {
         switch ($field) {
           case self::FIELD_REPOSITORY:
             return self::VALUE_REPOSITORY;
-          case self::FIELD_TASK_PRIORITY:
-            return self::VALUE_TASK_PRIORITY;
-          case self::FIELD_TASK_STATUS:
-            return self::VALUE_TASK_STATUS;
           default:
             return self::VALUE_USER;
         }
@@ -1070,9 +1060,34 @@ abstract class HeraldAdapter extends Phobject {
     return $map;
   }
 
+  public function getEditorValueForCondition(
+    PhabricatorUser $viewer,
+    HeraldCondition $condition,
+    array $handles) {
+
+    $impl = $this->getFieldImplementation($condition->getFieldName());
+    if ($impl) {
+      return $impl->getEditorValue(
+        $viewer,
+        $condition->getValue());
+    }
+
+    $value = $condition->getValue();
+    if (is_array($value)) {
+      $value_map = array();
+      foreach ($value as $k => $phid) {
+        $value_map[$phid] = $handles[$phid]->getName();
+      }
+      $value = $value_map;
+    }
+
+    return $value;
+  }
+
   public function renderRuleAsText(
     HeraldRule $rule,
-    PhabricatorHandleList $handles) {
+    PhabricatorHandleList $handles,
+    PhabricatorUser $viewer) {
 
     require_celerity_resource('herald-css');
 
@@ -1102,7 +1117,7 @@ abstract class HeraldAdapter extends Phobject {
         ),
         array(
           $icon,
-          $this->renderConditionAsText($condition, $handles),
+          $this->renderConditionAsText($condition, $handles, $viewer),
         ));
     }
 
@@ -1147,7 +1162,8 @@ abstract class HeraldAdapter extends Phobject {
 
   private function renderConditionAsText(
     HeraldCondition $condition,
-    PhabricatorHandleList $handles) {
+    PhabricatorHandleList $handles,
+    PhabricatorUser $viewer) {
 
     $field_type = $condition->getFieldName();
 
@@ -1158,7 +1174,7 @@ abstract class HeraldAdapter extends Phobject {
     $condition_type = $condition->getFieldCondition();
     $condition_name = idx($this->getConditionNameMap(), $condition_type);
 
-    $value = $this->renderConditionValueAsText($condition, $handles);
+    $value = $this->renderConditionValueAsText($condition, $handles, $viewer);
 
     return hsprintf('    %s %s %s', $field_name, $condition_name, $value);
   }
@@ -1184,31 +1200,22 @@ abstract class HeraldAdapter extends Phobject {
 
   private function renderConditionValueAsText(
     HeraldCondition $condition,
-    PhabricatorHandleList $handles) {
+    PhabricatorHandleList $handles,
+    PhabricatorUser $viewer) {
+
+    $impl = $this->getFieldImplementation($condition->getFieldName());
+    if ($impl) {
+      return $impl->renderConditionValue(
+        $viewer,
+        $condition->getValue());
+    }
 
     $value = $condition->getValue();
     if (!is_array($value)) {
       $value = array($value);
     }
+
     switch ($condition->getFieldName()) {
-      case self::FIELD_TASK_PRIORITY:
-        $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
-        foreach ($value as $index => $val) {
-          $name = idx($priority_map, $val);
-          if ($name) {
-            $value[$index] = $name;
-          }
-        }
-        break;
-      case self::FIELD_TASK_STATUS:
-        $status_map = ManiphestTaskStatus::getTaskStatusMap();
-        foreach ($value as $index => $val) {
-          $name = idx($status_map, $val);
-          if ($name) {
-            $value[$index] = $name;
-          }
-        }
-        break;
       case HeraldPreCommitRefAdapter::FIELD_REF_CHANGE:
         $change_map =
           PhabricatorRepositoryPushLog::getHeraldChangeFlagConditionOptions();

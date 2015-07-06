@@ -74,8 +74,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         self::FIELD_BODY,
         self::FIELD_AUTHOR,
         self::FIELD_ASSIGNEE,
-        self::FIELD_TASK_PRIORITY,
-        self::FIELD_TASK_STATUS,
       ),
       parent::getFields());
   }
@@ -124,10 +122,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         return $this->getTask()->getAuthorPHID();
       case self::FIELD_ASSIGNEE:
         return $this->getTask()->getOwnerPHID();
-      case self::FIELD_TASK_PRIORITY:
-        return $this->getTask()->getPriority();
-      case self::FIELD_TASK_STATUS:
-        return $this->getTask()->getStatus();
     }
 
     return parent::getHeraldField($field);

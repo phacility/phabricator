@@ -49,6 +49,51 @@ abstract class HeraldField extends Phobject {
     return array($this->getFieldConstant() => $this);
   }
 
+  public function renderConditionValue(
+    PhabricatorUser $viewer,
+    $value) {
+
+    // TODO: While this is less of a mess than it used to be, it would still
+    // be nice to push this down into individual fields better eventually and
+    // stop guessing which values are PHIDs and which aren't.
+
+    if (!is_array($value)) {
+      return $value;
+    }
+
+    $type_unknown = PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN;
+
+    foreach ($value as $key => $val) {
+      if (is_string($val)) {
+        if (phid_get_type($val) !== $type_unknown) {
+          $value[$key] = $viewer->renderHandle($val);
+        }
+      }
+    }
+
+    return phutil_implode_html(', ', $value);
+  }
+
+  public function getEditorValue(
+    PhabricatorUser $viewer,
+    $value) {
+
+    // TODO: This should be better structured and pushed down into individual
+    // fields. As it is used to manually build tokenizer tokens, it can
+    // probably be removed entirely.
+
+    if (is_array($value)) {
+      $handles = $viewer->loadHandles($value);
+      $value_map = array();
+      foreach ($value as $k => $phid) {
+        $value_map[$phid] = $handles[$phid]->getName();
+      }
+      $value = $value_map;
+    }
+
+    return $value;
+  }
+
   final public function setAdapter(HeraldAdapter $adapter) {
     $this->adapter = $adapter;
     return $this;
