@@ -178,3 +178,14 @@ body .phui-document-view .phui-header-shell.phui-bleed-header {
 .phui-document-view .phui-property-list-text-content {
   padding: 0;
 }
+
+.phui-document-view .PhabricatorMonospaced,
+.phui-document-view .phabricator-remarkup .remarkup-code-block .remarkup-code {
+  font: 11px/14px "Menlo", "Consolas", "Monaco", monospace;
+}
+
+.platform-windows .phui-document-view .PhabricatorMonospaced,
+.platform-windows .phui-document-view .phabricator-remarkup .remarkup-code-block
+  .remarkup-code {
+  font: 12px/14px "Menlo", "Consolas", "Monaco", monospace;
+}
