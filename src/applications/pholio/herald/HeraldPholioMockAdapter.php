@@ -69,10 +69,6 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
     }
   }
 
-  public function getPHID() {
-    return $this->getMock()->getPHID();
-  }
-
   public function getHeraldName() {
     return 'M'.$this->getMock()->getID();
   }

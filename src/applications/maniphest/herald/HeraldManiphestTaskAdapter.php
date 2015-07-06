@@ -93,10 +93,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
     }
   }
 
-  public function getPHID() {
-    return $this->getTask()->getPHID();
-  }
-
   public function getHeraldName() {
     return 'T'.$this->getTask()->getID();
   }

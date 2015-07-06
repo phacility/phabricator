@@ -29,7 +29,6 @@ abstract class HeraldAdapter extends Phobject {
   const FIELD_AUTHOR_RAW             = 'author-raw';
   const FIELD_COMMITTER_RAW          = 'committer-raw';
   const FIELD_PUSHER_IS_COMMITTER    = 'pusher-is-committer';
-  const FIELD_PATH                   = 'path';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -174,7 +173,10 @@ abstract class HeraldAdapter extends Phobject {
     return $this->applicationEmail;
   }
 
-  abstract public function getPHID();
+  public function getPHID() {
+    return $this->getObject()->getPHID();
+  }
+
   abstract public function getHeraldName();
 
   public function getHeraldField($field_name) {
@@ -389,7 +391,6 @@ abstract class HeraldAdapter extends Phobject {
       self::FIELD_AUTHOR_RAW => pht('Raw author name'),
       self::FIELD_COMMITTER_RAW => pht('Raw committer name'),
       self::FIELD_PUSHER_IS_COMMITTER => pht('Pusher same as committer'),
-      self::FIELD_PATH => pht('Path'),
     );
   }
 
@@ -436,7 +437,6 @@ abstract class HeraldAdapter extends Phobject {
       case self::FIELD_BODY:
       case self::FIELD_COMMITTER_RAW:
       case self::FIELD_AUTHOR_RAW:
-      case self::FIELD_PATH:
         return array(
           self::CONDITION_CONTAINS,
           self::CONDITION_NOT_CONTAINS,
