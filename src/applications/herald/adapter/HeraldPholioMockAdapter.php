@@ -12,6 +12,10 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
     return pht('React to mocks being created or updated.');
   }
 
+  protected function initializeNewAdapter() {
+    $this->mock = $this->newObject();
+  }
+
   protected function newObject() {
     return new PholioMock();
   }
@@ -49,10 +53,6 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
         self::FIELD_TITLE,
         self::FIELD_BODY,
         self::FIELD_AUTHOR,
-        self::FIELD_CC,
-        self::FIELD_PROJECTS,
-        self::FIELD_IS_NEW_OBJECT,
-        self::FIELD_SPACE,
       ),
       parent::getFields());
   }
@@ -95,10 +95,6 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
         return $this->getMock()->getDescription();
       case self::FIELD_AUTHOR:
         return $this->getMock()->getAuthorPHID();
-      case self::FIELD_PROJECTS:
-        return PhabricatorEdgeQuery::loadDestinationPHIDs(
-          $this->getMock()->getPHID(),
-          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
     }
 
     return parent::getHeraldField($field);

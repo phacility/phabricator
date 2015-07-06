@@ -117,7 +117,7 @@ final class HeraldTranscriptController extends HeraldController {
 
   protected function renderConditionTestValue($condition, $handles) {
     switch ($condition->getFieldName()) {
-      case HeraldAdapter::FIELD_RULE:
+      case HeraldAnotherRuleField::FIELDCONST:
         $value = array($condition->getTestValue());
         break;
       default:
@@ -204,7 +204,7 @@ final class HeraldTranscriptController extends HeraldController {
     }
     foreach ($condition_xscripts as $condition_xscript) {
       switch ($condition_xscript->getFieldName()) {
-        case HeraldAdapter::FIELD_RULE:
+        case HeraldAnotherRuleField::FIELDCONST:
           $phids[] = $condition_xscript->getTestValue();
           break;
         default:

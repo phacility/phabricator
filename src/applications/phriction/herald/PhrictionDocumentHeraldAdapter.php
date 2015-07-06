@@ -12,6 +12,10 @@ final class PhrictionDocumentHeraldAdapter extends HeraldAdapter {
     return pht('React to wiki documents being created or updated.');
   }
 
+  protected function initializeNewAdapter() {
+    $this->document = $this->newObject();
+  }
+
   protected function newObject() {
     return new PhrictionDocument();
   }
@@ -50,8 +54,6 @@ final class PhrictionDocumentHeraldAdapter extends HeraldAdapter {
         self::FIELD_TITLE,
         self::FIELD_BODY,
         self::FIELD_AUTHOR,
-        self::FIELD_IS_NEW_OBJECT,
-        self::FIELD_CC,
         self::FIELD_PATH,
       ),
       parent::getFields());

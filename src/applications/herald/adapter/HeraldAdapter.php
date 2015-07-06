@@ -12,7 +12,6 @@ abstract class HeraldAdapter extends Phobject {
   const FIELD_REVIEWER               = 'reviewer';
   const FIELD_REVIEWERS              = 'reviewers';
   const FIELD_COMMITTER              = 'committer';
-  const FIELD_CC                     = 'cc';
   const FIELD_TAGS                   = 'tags';
   const FIELD_DIFF_FILE              = 'diff-file';
   const FIELD_DIFF_CONTENT           = 'diff-content';
@@ -21,12 +20,9 @@ abstract class HeraldAdapter extends Phobject {
   const FIELD_DIFF_ENORMOUS          = 'diff-enormous';
   const FIELD_REPOSITORY             = 'repository';
   const FIELD_REPOSITORY_PROJECTS    = 'repository-projects';
-  const FIELD_RULE                   = 'rule';
   const FIELD_AFFECTED_PACKAGE       = 'affected-package';
   const FIELD_AFFECTED_PACKAGE_OWNER = 'affected-package-owner';
-  const FIELD_ALWAYS                 = 'always';
   const FIELD_AUTHOR_PROJECTS        = 'authorprojects';
-  const FIELD_PROJECTS               = 'projects';
   const FIELD_PUSHER                 = 'pusher';
   const FIELD_PUSHER_PROJECTS        = 'pusher-projects';
   const FIELD_DIFFERENTIAL_REVISION  = 'differential-revision';
@@ -37,13 +33,11 @@ abstract class HeraldAdapter extends Phobject {
   const FIELD_BRANCHES               = 'branches';
   const FIELD_AUTHOR_RAW             = 'author-raw';
   const FIELD_COMMITTER_RAW          = 'committer-raw';
-  const FIELD_IS_NEW_OBJECT          = 'new-object';
   const FIELD_APPLICATION_EMAIL      = 'applicaton-email';
   const FIELD_TASK_PRIORITY          = 'taskpriority';
   const FIELD_TASK_STATUS            = 'taskstatus';
   const FIELD_PUSHER_IS_COMMITTER    = 'pusher-is-committer';
   const FIELD_PATH                   = 'path';
-  const FIELD_SPACE = 'space';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -196,26 +190,6 @@ abstract class HeraldAdapter extends Phobject {
     }
 
     switch ($field_name) {
-      case self::FIELD_RULE:
-        return null;
-      case self::FIELD_ALWAYS:
-        return true;
-      case self::FIELD_IS_NEW_OBJECT:
-        return $this->getIsNewObject();
-      case self::FIELD_CC:
-        $object = $this->getObject();
-
-        if (!($object instanceof PhabricatorSubscribableInterface)) {
-          throw new Exception(
-            pht(
-              'Adapter object (of class "%s") does not implement interface '.
-              '"%s", so the subscribers field value can not be determined.',
-              get_class($object),
-              'PhabricatorSubscribableInterface'));
-        }
-
-        $phid = $object->getPHID();
-        return PhabricatorSubscribersQuery::loadSubscribersForPHID($phid);
       case self::FIELD_APPLICATION_EMAIL:
         $value = array();
         // while there is only one match by implementation, we do set
@@ -224,19 +198,6 @@ abstract class HeraldAdapter extends Phobject {
           $value[] = $this->getApplicationEmail()->getPHID();
         }
         return $value;
-      case self::FIELD_SPACE:
-        $object = $this->getObject();
-
-        if (!($object instanceof PhabricatorSpacesInterface)) {
-          throw new Exception(
-            pht(
-              'Adapter object (of class "%s") does not implement interface '.
-              '"%s", so the Space field value can not be determined.',
-              get_class($object),
-              'PhabricatorSpacesInterface'));
-        }
-
-        return PhabricatorSpacesNamespaceQuery::getObjectSpacePHID($object);
       default:
         if ($this->isHeraldCustomKey($field_name)) {
           return $this->getCustomFieldValue($field_name);
@@ -367,6 +328,8 @@ abstract class HeraldAdapter extends Phobject {
       $map = array();
       $all = HeraldField::getAllFields();
       foreach ($all as $key => $field) {
+        $field = id(clone $field)->setAdapter($this);
+
         if (!$field->supportsObject($object)) {
           continue;
         }
@@ -404,9 +367,6 @@ abstract class HeraldAdapter extends Phobject {
   public function getFields() {
     $fields = array_keys($this->getFieldImplementationMap());
 
-    $fields[] = self::FIELD_ALWAYS;
-    $fields[] = self::FIELD_RULE;
-
     $custom_fields = $this->getCustomFields();
     if ($custom_fields) {
       foreach ($custom_fields->getFields() as $custom_field) {
@@ -429,7 +389,6 @@ abstract class HeraldAdapter extends Phobject {
       self::FIELD_COMMITTER => pht('Committer'),
       self::FIELD_REVIEWER => pht('Reviewer'),
       self::FIELD_REVIEWERS => pht('Reviewers'),
-      self::FIELD_CC => pht('CCs'),
       self::FIELD_TAGS => pht('Tags'),
       self::FIELD_DIFF_FILE => pht('Any changed filename'),
       self::FIELD_DIFF_CONTENT => pht('Any changed file content'),
@@ -438,13 +397,10 @@ abstract class HeraldAdapter extends Phobject {
       self::FIELD_DIFF_ENORMOUS => pht('Change is enormous'),
       self::FIELD_REPOSITORY => pht('Repository'),
       self::FIELD_REPOSITORY_PROJECTS => pht('Repository\'s projects'),
-      self::FIELD_RULE => pht('Another Herald rule'),
       self::FIELD_AFFECTED_PACKAGE => pht('Any affected package'),
       self::FIELD_AFFECTED_PACKAGE_OWNER =>
         pht("Any affected package's owner"),
-      self::FIELD_ALWAYS => pht('Always'),
       self::FIELD_AUTHOR_PROJECTS => pht("Author's projects"),
-      self::FIELD_PROJECTS => pht('Projects'),
       self::FIELD_PUSHER => pht('Pusher'),
       self::FIELD_PUSHER_PROJECTS => pht("Pusher's projects"),
       self::FIELD_DIFFERENTIAL_REVISION => pht('Differential revision'),
@@ -456,13 +412,11 @@ abstract class HeraldAdapter extends Phobject {
       self::FIELD_BRANCHES => pht('Commit\'s branches'),
       self::FIELD_AUTHOR_RAW => pht('Raw author name'),
       self::FIELD_COMMITTER_RAW => pht('Raw committer name'),
-      self::FIELD_IS_NEW_OBJECT => pht('Is newly created?'),
       self::FIELD_APPLICATION_EMAIL => pht('Receiving email address'),
       self::FIELD_TASK_PRIORITY => pht('Task priority'),
       self::FIELD_TASK_STATUS => pht('Task status'),
       self::FIELD_PUSHER_IS_COMMITTER => pht('Pusher same as committer'),
       self::FIELD_PATH => pht('Path'),
-      self::FIELD_SPACE => pht('Space'),
     ) + $this->getCustomFieldNameMap();
   }
 
@@ -521,7 +475,6 @@ abstract class HeraldAdapter extends Phobject {
       case self::FIELD_PUSHER:
       case self::FIELD_TASK_PRIORITY:
       case self::FIELD_TASK_STATUS:
-      case self::FIELD_SPACE:
         return array(
           self::CONDITION_IS_ANY,
           self::CONDITION_IS_NOT_ANY,
@@ -538,9 +491,7 @@ abstract class HeraldAdapter extends Phobject {
         );
       case self::FIELD_TAGS:
       case self::FIELD_REVIEWERS:
-      case self::FIELD_CC:
       case self::FIELD_AUTHOR_PROJECTS:
-      case self::FIELD_PROJECTS:
       case self::FIELD_AFFECTED_PACKAGE:
       case self::FIELD_AFFECTED_PACKAGE_OWNER:
       case self::FIELD_PUSHER_PROJECTS:
@@ -573,15 +524,6 @@ abstract class HeraldAdapter extends Phobject {
           self::CONDITION_REGEXP,
           self::CONDITION_REGEXP_PAIR,
         );
-      case self::FIELD_RULE:
-        return array(
-          self::CONDITION_RULE,
-          self::CONDITION_NOT_RULE,
-        );
-      case self::FIELD_ALWAYS:
-        return array(
-          self::CONDITION_UNCONDITIONALLY,
-        );
       case self::FIELD_DIFFERENTIAL_REVIEWERS:
         return array(
           self::CONDITION_EXISTS,
@@ -604,7 +546,6 @@ abstract class HeraldAdapter extends Phobject {
         );
       case self::FIELD_IS_MERGE_COMMIT:
       case self::FIELD_DIFF_ENORMOUS:
-      case self::FIELD_IS_NEW_OBJECT:
       case self::FIELD_PUSHER_IS_COMMITTER:
         return array(
           self::CONDITION_IS_TRUE,
@@ -1019,8 +960,6 @@ abstract class HeraldAdapter extends Phobject {
             return self::VALUE_TASK_PRIORITY;
           case self::FIELD_TASK_STATUS:
             return self::VALUE_TASK_STATUS;
-          case self::FIELD_SPACE:
-            return self::VALUE_SPACE;
           default:
             return self::VALUE_USER;
         }
@@ -1031,15 +970,12 @@ abstract class HeraldAdapter extends Phobject {
         switch ($field) {
           case self::FIELD_REPOSITORY:
             return self::VALUE_REPOSITORY;
-          case self::FIELD_CC:
-            return self::VALUE_EMAIL;
           case self::FIELD_TAGS:
             return self::VALUE_TAG;
           case self::FIELD_AFFECTED_PACKAGE:
             return self::VALUE_OWNERS_PACKAGE;
           case self::FIELD_AUTHOR_PROJECTS:
           case self::FIELD_PUSHER_PROJECTS:
-          case self::FIELD_PROJECTS:
           case self::FIELD_REPOSITORY_PROJECTS:
             return self::VALUE_PROJECT;
           case self::FIELD_REVIEWERS:
@@ -1059,9 +995,6 @@ abstract class HeraldAdapter extends Phobject {
       case self::CONDITION_IS_TRUE:
       case self::CONDITION_IS_FALSE:
         return self::VALUE_NONE;
-      case self::CONDITION_RULE:
-      case self::CONDITION_NOT_RULE:
-        return self::VALUE_RULE;
       default:
         throw new Exception(pht("Unknown condition '%s'.", $condition));
     }
@@ -1133,6 +1066,20 @@ abstract class HeraldAdapter extends Phobject {
     );
   }
 
+  abstract protected function initializeNewAdapter();
+
+  /**
+   * Does this adapter's event fire only once?
+   *
+   * Single use adapters (like pre-commit and diff adapters) only fire once,
+   * so fields like "Is new object" don't make sense to apply to their content.
+   *
+   * @return bool
+   */
+  public function isSingleEventAdapter() {
+    return false;
+  }
+
   public static function getAllAdapters() {
     static $adapters;
     if (!$adapters) {
@@ -1149,6 +1096,8 @@ abstract class HeraldAdapter extends Phobject {
 
     foreach ($adapters as $adapter) {
       if ($adapter->getAdapterContentType() == $content_type) {
+        $adapter = id(clone $adapter);
+        $adapter->initializeNewAdapter();
         return $adapter;
       }
     }

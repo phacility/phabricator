@@ -6,6 +6,14 @@ final class HeraldDifferentialDiffAdapter extends HeraldDifferentialAdapter {
     return 'PhabricatorDifferentialApplication';
   }
 
+  protected function initializeNewAdapter() {
+    $this->setDiff(new DifferentialDiff());
+  }
+
+  public function isSingleEventAdapter() {
+    return true;
+  }
+
   protected function loadChangesets() {
     return $this->loadChangesetsWithHunks();
   }

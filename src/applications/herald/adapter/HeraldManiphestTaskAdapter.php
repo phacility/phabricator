@@ -17,6 +17,10 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
     return pht('React to tasks being created or updated.');
   }
 
+  protected function initializeNewAdapter() {
+    $this->task = $this->newObject();
+  }
+
   public function getRepetitionOptions() {
     return array(
       HeraldRepetitionPolicyConfig::EVERY,
@@ -66,13 +70,9 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         self::FIELD_BODY,
         self::FIELD_AUTHOR,
         self::FIELD_ASSIGNEE,
-        self::FIELD_CC,
-        self::FIELD_PROJECTS,
         self::FIELD_TASK_PRIORITY,
         self::FIELD_TASK_STATUS,
-        self::FIELD_IS_NEW_OBJECT,
         self::FIELD_APPLICATION_EMAIL,
-        self::FIELD_SPACE,
       ),
       parent::getFields());
   }
@@ -121,10 +121,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         return $this->getTask()->getAuthorPHID();
       case self::FIELD_ASSIGNEE:
         return $this->getTask()->getOwnerPHID();
-      case self::FIELD_PROJECTS:
-        return PhabricatorEdgeQuery::loadDestinationPHIDs(
-          $this->getTask()->getPHID(),
-          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
       case self::FIELD_TASK_PRIORITY:
         return $this->getTask()->getPriority();
       case self::FIELD_TASK_STATUS:
