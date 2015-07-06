@@ -9,7 +9,6 @@ abstract class HeraldAdapter extends Phobject {
   const FIELD_REVIEWER               = 'reviewer';
   const FIELD_REVIEWERS              = 'reviewers';
   const FIELD_COMMITTER              = 'committer';
-  const FIELD_TAGS                   = 'tags';
   const FIELD_DIFF_FILE              = 'diff-file';
   const FIELD_DIFF_CONTENT           = 'diff-content';
   const FIELD_DIFF_ADDED_CONTENT     = 'diff-added-content';
@@ -79,7 +78,6 @@ abstract class HeraldAdapter extends Phobject {
   const VALUE_NONE            = 'none';
   const VALUE_EMAIL           = 'email';
   const VALUE_USER            = 'user';
-  const VALUE_TAG             = 'tag';
   const VALUE_RULE            = 'rule';
   const VALUE_REPOSITORY      = 'repository';
   const VALUE_OWNERS_PACKAGE  = 'package';
@@ -371,7 +369,6 @@ abstract class HeraldAdapter extends Phobject {
       self::FIELD_COMMITTER => pht('Committer'),
       self::FIELD_REVIEWER => pht('Reviewer'),
       self::FIELD_REVIEWERS => pht('Reviewers'),
-      self::FIELD_TAGS => pht('Tags'),
       self::FIELD_DIFF_FILE => pht('Any changed filename'),
       self::FIELD_DIFF_CONTENT => pht('Any changed file content'),
       self::FIELD_DIFF_ADDED_CONTENT => pht('Any added file content'),
@@ -471,7 +468,6 @@ abstract class HeraldAdapter extends Phobject {
           self::CONDITION_EXISTS,
           self::CONDITION_NOT_EXISTS,
         );
-      case self::FIELD_TAGS:
       case self::FIELD_REVIEWERS:
       case self::FIELD_AUTHOR_PROJECTS:
       case self::FIELD_AFFECTED_PACKAGE:
@@ -940,8 +936,6 @@ abstract class HeraldAdapter extends Phobject {
         switch ($field) {
           case self::FIELD_REPOSITORY:
             return self::VALUE_REPOSITORY;
-          case self::FIELD_TAGS:
-            return self::VALUE_TAG;
           case self::FIELD_AFFECTED_PACKAGE:
             return self::VALUE_OWNERS_PACKAGE;
           case self::FIELD_AUTHOR_PROJECTS:
