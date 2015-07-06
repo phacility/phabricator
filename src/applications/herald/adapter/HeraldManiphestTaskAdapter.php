@@ -67,7 +67,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         self::FIELD_AUTHOR,
         self::FIELD_ASSIGNEE,
         self::FIELD_CC,
-        self::FIELD_CONTENT_SOURCE,
         self::FIELD_PROJECTS,
         self::FIELD_TASK_PRIORITY,
         self::FIELD_TASK_STATUS,

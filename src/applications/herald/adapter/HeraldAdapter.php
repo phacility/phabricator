@@ -24,7 +24,6 @@ abstract class HeraldAdapter extends Phobject {
   const FIELD_RULE                   = 'rule';
   const FIELD_AFFECTED_PACKAGE       = 'affected-package';
   const FIELD_AFFECTED_PACKAGE_OWNER = 'affected-package-owner';
-  const FIELD_CONTENT_SOURCE         = 'contentsource';
   const FIELD_ALWAYS                 = 'always';
   const FIELD_AUTHOR_PROJECTS        = 'authorprojects';
   const FIELD_PROJECTS               = 'projects';
@@ -113,6 +112,7 @@ abstract class HeraldAdapter extends Phobject {
   private $emailPHIDs = array();
   private $forcedEmailPHIDs = array();
   private $unsubscribedPHIDs;
+  private $fieldMap;
 
   public function getEmailPHIDs() {
     return array_values($this->emailPHIDs);
@@ -190,11 +190,14 @@ abstract class HeraldAdapter extends Phobject {
   abstract public function getHeraldName();
 
   public function getHeraldField($field_name) {
+    $impl = $this->getFieldImplementation($field_name);
+    if ($impl) {
+      return $impl->getHeraldFieldValue($this->getObject());
+    }
+
     switch ($field_name) {
       case self::FIELD_RULE:
         return null;
-      case self::FIELD_CONTENT_SOURCE:
-        return $this->getContentSource()->getSource();
       case self::FIELD_ALWAYS:
         return true;
       case self::FIELD_IS_NEW_OBJECT:
@@ -354,9 +357,52 @@ abstract class HeraldAdapter extends Phobject {
 
 /* -(  Fields  )------------------------------------------------------------- */
 
+  private function getFieldImplementationMap() {
+    if ($this->fieldMap === null) {
+      // We can't use PhutilClassMapQuery here because field expansion
+      // depends on the adapter and object.
+
+      $object = $this->getObject();
+
+      $map = array();
+      $all = HeraldField::getAllFields();
+      foreach ($all as $key => $field) {
+        if (!$field->supportsObject($object)) {
+          continue;
+        }
+        $subfields = $field->getFieldsForObject($object);
+        foreach ($subfields as $subkey => $subfield) {
+          if (isset($map[$subkey])) {
+            throw new Exception(
+              pht(
+                'Two HeraldFields (of classes "%s" and "%s") have the same '.
+                'field key ("%s") after expansion for an object of class '.
+                '"%s" inside adapter "%s". Each field must have a unique '.
+                'field key.',
+                get_class($subfield),
+                get_class($map[$subkey]),
+                $subkey,
+                get_class($object),
+                get_class($this)));
+          }
+
+          $subfield = id(clone $subfield)->setAdapter($this);
+
+          $map[$subkey] = $subfield;
+        }
+      }
+      $this->fieldMap = $map;
+    }
+
+    return $this->fieldMap;
+  }
+
+  private function getFieldImplementation($key) {
+    return idx($this->getFieldImplementationMap(), $key);
+  }
 
   public function getFields() {
-    $fields = array();
+    $fields = array_keys($this->getFieldImplementationMap());
 
     $fields[] = self::FIELD_ALWAYS;
     $fields[] = self::FIELD_RULE;
@@ -373,7 +419,9 @@ abstract class HeraldAdapter extends Phobject {
   }
 
   public function getFieldNameMap() {
-    return array(
+    $map = mpull($this->getFieldImplementationMap(), 'getHeraldFieldName');
+
+    return $map + array(
       self::FIELD_TITLE => pht('Title'),
       self::FIELD_BODY => pht('Body'),
       self::FIELD_AUTHOR => pht('Author'),
@@ -394,7 +442,6 @@ abstract class HeraldAdapter extends Phobject {
       self::FIELD_AFFECTED_PACKAGE => pht('Any affected package'),
       self::FIELD_AFFECTED_PACKAGE_OWNER =>
         pht("Any affected package's owner"),
-      self::FIELD_CONTENT_SOURCE => pht('Content Source'),
       self::FIELD_ALWAYS => pht('Always'),
       self::FIELD_AUTHOR_PROJECTS => pht("Author's projects"),
       self::FIELD_PROJECTS => pht('Projects'),
@@ -452,6 +499,11 @@ abstract class HeraldAdapter extends Phobject {
   }
 
   public function getConditionsForField($field) {
+    $impl = $this->getFieldImplementation($field);
+    if ($impl) {
+      return $impl->getHeraldFieldConditions();
+    }
+
     switch ($field) {
       case self::FIELD_TITLE:
       case self::FIELD_BODY:
@@ -525,11 +577,6 @@ abstract class HeraldAdapter extends Phobject {
         return array(
           self::CONDITION_RULE,
           self::CONDITION_NOT_RULE,
-        );
-      case self::FIELD_CONTENT_SOURCE:
-        return array(
-          self::CONDITION_IS,
-          self::CONDITION_IS_NOT,
         );
       case self::FIELD_ALWAYS:
         return array(
@@ -940,6 +987,10 @@ abstract class HeraldAdapter extends Phobject {
 
 
   public function getValueTypeForFieldAndCondition($field, $condition) {
+    $impl = $this->getFieldImplementation($field);
+    if ($impl) {
+      return $impl->getHeraldFieldValueType($condition);
+    }
 
     if ($this->isHeraldCustomKey($field)) {
       $value_type = $this->getCustomFieldValueTypeForFieldAndCondition(
@@ -958,13 +1009,7 @@ abstract class HeraldAdapter extends Phobject {
         return self::VALUE_TEXT;
       case self::CONDITION_IS:
       case self::CONDITION_IS_NOT:
-        switch ($field) {
-          case self::FIELD_CONTENT_SOURCE:
-            return self::VALUE_CONTENT_SOURCE;
-          default:
-            return self::VALUE_TEXT;
-        }
-        break;
+        return self::VALUE_TEXT;
       case self::CONDITION_IS_ANY:
       case self::CONDITION_IS_NOT_ANY:
         switch ($field) {
