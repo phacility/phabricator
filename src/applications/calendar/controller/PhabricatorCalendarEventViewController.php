@@ -105,6 +105,7 @@ final class PhabricatorCalendarEventViewController
       ),
       array(
         'title' => $page_title,
+        'pageObjects' => array($event->getPHID()),
       ));
   }
 
