@@ -18,7 +18,7 @@ final class ConpherenceThreadSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
-      id(new PhabricatorSearchUsersField())
+      id(new PhabricatorUsersSearchField())
         ->setLabel(pht('Participants'))
         ->setKey('participants')
         ->setAliases(array('participant')),
