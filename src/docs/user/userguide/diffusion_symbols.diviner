@@ -9,13 +9,14 @@ Phabricator can maintain a symbol index, which keeps track of where classes
 and functions are defined in the codebase. Once you set up indexing, you can
 use the index to do things like:
 
-  - link symbol uses in Differential code reviews and Diffusion code browsing
-    to their definitions
-  - allow you to search for symbols
+  - jump to symbol definitions from Differential code reviews and Diffusion
+    code browsing by ctrl-clicking (cmd-click on Mac) symbols
+  - search for symbols from the quick-search
   - let the IRC bot answer questions like "Where is SomeClass?"
 
-NOTE: Symbol indexing is somewhat new, and has broader support for PHP than for
-other languages.
+NOTE: Because this feature depends on the syntax highlighter, it will work
+better for some languages than others. It currently works fairly well for PHP,
+but your mileage may vary for other languages.
 
 = Populating the Index =
 
@@ -85,6 +86,12 @@ You can configure some more options by going to {nav Diffusion > (Select
     Phabricator lists "Arcanist" and "libphutil" because it uses classes and
     functions from these repositories.
 
-NOTE: Because this feature depends on the syntax highlighter, it will work
-better for some languages than others. It currently works fairly well for PHP,
-but your mileage may vary for other languages.
+== External Symbols ==
+
+By @{article:Adding New Classes}, you can teach Phabricator
+about symbols from the outside world.
+Extend @{class:DiffusionExternalSymbolsSource}; Once loaded, your new
+implementation will be used any time a symbol is queried.
+
+See @{class:DiffusionPhpExternalSymbolsSource} and
+@{class:DiffusionPythonExternalSymbolsSource} for example implementations.
