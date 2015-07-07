@@ -410,8 +410,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     if (!$object) {
       throw new Exception(
         pht(
-          'Cursor "%s" does not identify a valid object.',
-          $cursor));
+          'Cursor "%s" does not identify a valid object in query "%s".',
+          $cursor,
+          get_class($this)));
     }
 
     return $object;
