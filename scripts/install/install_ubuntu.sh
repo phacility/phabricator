@@ -87,6 +87,6 @@ echo
 echo
 echo "Install probably worked mostly correctly. Continue with the 'Configuration Guide':";
 echo
-echo "    http://www.phabricator.com/docs/phabricator/article/Configuration_Guide.html";
+echo "    https://secure.phabricator.com/book/phabricator/article/configuration_guide/";
 echo
 echo "You can delete any php5-* stuff that's left over in this directory if you want.";
