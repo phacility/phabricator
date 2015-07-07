@@ -7,7 +7,10 @@ abstract class HeraldField extends Phobject {
   const STANDARD_LIST = 'standard.list';
   const STANDARD_BOOL = 'standard.bool';
   const STANDARD_TEXT = 'standard.text';
+  const STANDARD_TEXT_LIST = 'standard.text.list';
+  const STANDARD_TEXT_MAP = 'standard.text.map';
   const STANDARD_PHID = 'standard.phid';
+  const STANDARD_PHID_BOOL = 'standard.phid.bool';
   const STANDARD_PHID_NULLABLE = 'standard.phid.nullable';
 
   abstract public function getHeraldFieldName();
@@ -41,12 +44,28 @@ abstract class HeraldField extends Phobject {
           HeraldAdapter::CONDITION_IS_ANY,
           HeraldAdapter::CONDITION_IS_NOT_ANY,
         );
+      case self::STANDARD_PHID_BOOL:
+        return array(
+          HeraldAdapter::CONDITION_EXISTS,
+          HeraldAdapter::CONDITION_NOT_EXISTS,
+        );
       case self::STANDARD_PHID_NULLABLE:
         return array(
           HeraldAdapter::CONDITION_IS_ANY,
           HeraldAdapter::CONDITION_IS_NOT_ANY,
           HeraldAdapter::CONDITION_EXISTS,
           HeraldAdapter::CONDITION_NOT_EXISTS,
+        );
+      case self::STANDARD_TEXT_LIST:
+        return array(
+          HeraldAdapter::CONDITION_CONTAINS,
+          HeraldAdapter::CONDITION_REGEXP,
+        );
+      case self::STANDARD_TEXT_MAP:
+        return array(
+          HeraldAdapter::CONDITION_CONTAINS,
+          HeraldAdapter::CONDITION_REGEXP,
+          HeraldAdapter::CONDITION_REGEXP_PAIR,
         );
     }
 

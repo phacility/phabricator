@@ -2,9 +2,6 @@
 
 final class HeraldCommitAdapter extends HeraldAdapter {
 
-  const FIELD_NEED_AUDIT_FOR_PACKAGE      = 'need-audit-for-package';
-  const FIELD_REPOSITORY_AUTOCLOSE_BRANCH = 'repository-autoclose-branch';
-
   protected $diff;
   protected $revision;
 
@@ -86,57 +83,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     return pht('This rule can trigger for **repositories** and **projects**.');
   }
 
-  public function getFieldNameMap() {
-    return array(
-      self::FIELD_NEED_AUDIT_FOR_PACKAGE =>
-        pht('Affected packages that need audit'),
-      self::FIELD_REPOSITORY_AUTOCLOSE_BRANCH
-        => pht('Commit is on closing branch'),
-    ) + parent::getFieldNameMap();
-  }
-
-  public function getFields() {
-    return array_merge(
-      array(
-        self::FIELD_BODY,
-        self::FIELD_AUTHOR,
-        self::FIELD_COMMITTER,
-        self::FIELD_REVIEWER,
-        self::FIELD_REPOSITORY,
-        self::FIELD_REPOSITORY_PROJECTS,
-        self::FIELD_DIFF_FILE,
-        self::FIELD_DIFF_CONTENT,
-        self::FIELD_DIFF_ADDED_CONTENT,
-        self::FIELD_DIFF_REMOVED_CONTENT,
-        self::FIELD_DIFF_ENORMOUS,
-        self::FIELD_AFFECTED_PACKAGE,
-        self::FIELD_AFFECTED_PACKAGE_OWNER,
-        self::FIELD_NEED_AUDIT_FOR_PACKAGE,
-        self::FIELD_DIFFERENTIAL_REVISION,
-        self::FIELD_DIFFERENTIAL_ACCEPTED,
-        self::FIELD_DIFFERENTIAL_REVIEWERS,
-        self::FIELD_DIFFERENTIAL_CCS,
-        self::FIELD_BRANCHES,
-        self::FIELD_REPOSITORY_AUTOCLOSE_BRANCH,
-      ),
-      parent::getFields());
-  }
-
-  public function getConditionsForField($field) {
-    switch ($field) {
-      case self::FIELD_NEED_AUDIT_FOR_PACKAGE:
-        return array(
-          self::CONDITION_INCLUDE_ANY,
-          self::CONDITION_INCLUDE_NONE,
-        );
-      case self::FIELD_REPOSITORY_AUTOCLOSE_BRANCH:
-        return array(
-          self::CONDITION_UNCONDITIONALLY,
-        );
-    }
-    return parent::getConditionsForField($field);
-  }
-
   public function getActions($rule_type) {
     switch ($rule_type) {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
@@ -163,17 +109,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
           ),
           parent::getActions($rule_type));
     }
-  }
-
-  public function getValueTypeForFieldAndCondition($field, $condition) {
-    switch ($field) {
-      case self::FIELD_DIFFERENTIAL_CCS:
-        return self::VALUE_EMAIL;
-      case self::FIELD_NEED_AUDIT_FOR_PACKAGE:
-        return self::VALUE_OWNERS_PACKAGE;
-    }
-
-    return parent::getValueTypeForFieldAndCondition($field, $condition);
   }
 
   public static function newLegacyAdapter(
@@ -221,10 +156,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     return $this;
   }
 
-  public function getPHID() {
-    return $this->commit->getPHID();
-  }
-
   public function getAuditMap() {
     return $this->auditMap;
   }
@@ -261,7 +192,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     return $this->affectedPackages;
   }
 
-  public function loadAuditNeededPackage() {
+  public function loadAuditNeededPackages() {
     if ($this->auditNeededPackages === null) {
       $status_arr = array(
         PhabricatorAuditStatusConstants::AUDIT_REQUIRED,
@@ -351,7 +282,12 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     return $diff;
   }
 
-  private function getDiffContent($type) {
+  public function isDiffEnormous() {
+    $this->loadDiffContent('*');
+    return ($this->commitDiff instanceof Exception);
+  }
+
+  public function loadDiffContent($type) {
     if ($this->commitDiff === null) {
       try {
         $this->commitDiff = $this->loadCommitDiff();
@@ -395,94 +331,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     }
 
     return $result;
-  }
-
-  public function getHeraldField($field) {
-    $data = $this->commitData;
-    switch ($field) {
-      case self::FIELD_BODY:
-        return $data->getCommitMessage();
-      case self::FIELD_AUTHOR:
-        return $data->getCommitDetail('authorPHID');
-      case self::FIELD_COMMITTER:
-        return $data->getCommitDetail('committerPHID');
-      case self::FIELD_REVIEWER:
-        return $data->getCommitDetail('reviewerPHID');
-      case self::FIELD_DIFF_FILE:
-        return $this->loadAffectedPaths();
-      case self::FIELD_REPOSITORY:
-        return $this->repository->getPHID();
-      case self::FIELD_REPOSITORY_PROJECTS:
-        return $this->repository->getProjectPHIDs();
-      case self::FIELD_DIFF_CONTENT:
-        return $this->getDiffContent('*');
-      case self::FIELD_DIFF_ADDED_CONTENT:
-        return $this->getDiffContent('+');
-      case self::FIELD_DIFF_REMOVED_CONTENT:
-        return $this->getDiffContent('-');
-      case self::FIELD_DIFF_ENORMOUS:
-        $this->getDiffContent('*');
-        return ($this->commitDiff instanceof Exception);
-      case self::FIELD_AFFECTED_PACKAGE:
-        $packages = $this->loadAffectedPackages();
-        return mpull($packages, 'getPHID');
-      case self::FIELD_AFFECTED_PACKAGE_OWNER:
-        $packages = $this->loadAffectedPackages();
-        $owners = PhabricatorOwnersOwner::loadAllForPackages($packages);
-        return mpull($owners, 'getUserPHID');
-      case self::FIELD_NEED_AUDIT_FOR_PACKAGE:
-        return $this->loadAuditNeededPackage();
-      case self::FIELD_DIFFERENTIAL_REVISION:
-        $revision = $this->loadDifferentialRevision();
-        if (!$revision) {
-          return null;
-        }
-        return $revision->getID();
-      case self::FIELD_DIFFERENTIAL_ACCEPTED:
-        $revision = $this->loadDifferentialRevision();
-        if (!$revision) {
-          return null;
-        }
-
-        $status = $data->getCommitDetail(
-          'precommitRevisionStatus',
-          $revision->getStatus());
-        switch ($status) {
-          case ArcanistDifferentialRevisionStatus::ACCEPTED:
-          case ArcanistDifferentialRevisionStatus::CLOSED:
-            return $revision->getPHID();
-        }
-
-        return null;
-      case self::FIELD_DIFFERENTIAL_REVIEWERS:
-        $revision = $this->loadDifferentialRevision();
-        if (!$revision) {
-          return array();
-        }
-        return $revision->getReviewers();
-      case self::FIELD_DIFFERENTIAL_CCS:
-        $revision = $this->loadDifferentialRevision();
-        if (!$revision) {
-          return array();
-        }
-        return $revision->getCCPHIDs();
-      case self::FIELD_BRANCHES:
-        $params = array(
-          'callsign' => $this->repository->getCallsign(),
-          'contains' => $this->commit->getCommitIdentifier(),
-        );
-
-        $result = id(new ConduitCall('diffusion.branchquery', $params))
-          ->setUser(PhabricatorUser::getOmnipotentUser())
-          ->execute();
-
-        $refs = DiffusionRepositoryRef::loadAllFromDictionaries($result);
-        return mpull($refs, 'getShortName');
-      case self::FIELD_REPOSITORY_AUTOCLOSE_BRANCH:
-        return $this->repository->shouldAutocloseCommit($this->commit);
-    }
-
-    return parent::getHeraldField($field);
   }
 
   public function applyHeraldEffects(array $effects) {

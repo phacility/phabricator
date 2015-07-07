@@ -1,20 +1,22 @@
 <?php
 
-final class HeraldSubscribersField extends HeraldField {
+final class DiffusionCommitRevisionReviewersHeraldField
+  extends DiffusionCommitHeraldField {
 
-  const FIELDCONST = 'cc';
+  const FIELDCONST = 'diffusion.commit.revision.reviewers';
 
   public function getHeraldFieldName() {
-    return pht('Subscribers');
-  }
-
-  public function supportsObject($object) {
-    return ($object instanceof PhabricatorSubscribableInterface);
+    return pht('Differential reviewers');
   }
 
   public function getHeraldFieldValue($object) {
-    $phid = $object->getPHID();
-    return PhabricatorSubscribersQuery::loadSubscribersForPHID($phid);
+    $revision = $this->getAdapter()->loadDifferentialRevision();
+
+    if (!$revision) {
+      return array();
+    }
+
+    return $revision->getReviewers();
   }
 
   protected function getHeraldFieldStandardConditions() {

@@ -1,20 +1,17 @@
 <?php
 
-final class HeraldSubscribersField extends HeraldField {
+final class DiffusionCommitPackageHeraldField
+  extends DiffusionCommitHeraldField {
 
-  const FIELDCONST = 'cc';
+  const FIELDCONST = 'diffusion.commit.package';
 
   public function getHeraldFieldName() {
-    return pht('Subscribers');
-  }
-
-  public function supportsObject($object) {
-    return ($object instanceof PhabricatorSubscribableInterface);
+    return pht('Affected packages');
   }
 
   public function getHeraldFieldValue($object) {
-    $phid = $object->getPHID();
-    return PhabricatorSubscribersQuery::loadSubscribersForPHID($phid);
+    $packages = $this->getAdapter()->loadAffectedPackages();
+    return mpull($packages, 'getPHID');
   }
 
   protected function getHeraldFieldStandardConditions() {
@@ -27,7 +24,7 @@ final class HeraldSubscribersField extends HeraldField {
       case HeraldAdapter::CONDITION_NOT_EXISTS:
         return HeraldAdapter::VALUE_NONE;
       default:
-        return HeraldAdapter::VALUE_USER_OR_PROJECT;
+        return HeraldAdapter::VALUE_OWNERS_PACKAGE;
     }
   }
 

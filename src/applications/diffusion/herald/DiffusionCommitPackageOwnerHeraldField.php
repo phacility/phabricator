@@ -1,20 +1,27 @@
 <?php
 
-final class ManiphestTaskAssigneeHeraldField
-  extends ManiphestTaskHeraldField {
+final class DiffusionCommitPackageOwnerHeraldField
+  extends DiffusionCommitHeraldField {
 
-  const FIELDCONST = 'maniphest.task.assignee';
+  const FIELDCONST = 'diffusion.commit.package.owners';
 
   public function getHeraldFieldName() {
-    return pht('Assignee');
+    return pht('Affected package owners');
   }
 
   public function getHeraldFieldValue($object) {
-    return $object->getOwnerPHID();
+    $packages = $this->getAdapter()->loadAffectedPackages();
+    if (!$packages) {
+      return array();
+    }
+
+    $owners = PhabricatorOwnersOwner::loadAllForPackages($packages);
+
+    return mpull($owners, 'getUserPHID');
   }
 
   protected function getHeraldFieldStandardConditions() {
-    return self::STANDARD_PHID_NULLABLE;
+    return self::STANDARD_LIST;
   }
 
   public function getHeraldFieldValueType($condition) {

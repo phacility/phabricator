@@ -1,16 +1,16 @@
 <?php
 
-final class ManiphestTaskAssigneeHeraldField
-  extends ManiphestTaskHeraldField {
+final class DiffusionCommitReviewerHeraldField
+  extends DiffusionCommitHeraldField {
 
-  const FIELDCONST = 'maniphest.task.assignee';
+  const FIELDCONST = 'diffusion.commit.reviewer';
 
   public function getHeraldFieldName() {
-    return pht('Assignee');
+    return pht('Reviewer');
   }
 
   public function getHeraldFieldValue($object) {
-    return $object->getOwnerPHID();
+    return $object->getCommitData()->getCommitDetail('reviewerPHID');
   }
 
   protected function getHeraldFieldStandardConditions() {
