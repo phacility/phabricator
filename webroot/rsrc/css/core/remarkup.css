@@ -469,8 +469,8 @@ var.remarkup-assist-textarea {
 
 .remarkup-interpreter-error {
   padding: 8px;
-  border: 1px solid {$red};
-  background-color: {$lightred};
+  border: 1px solid {$sh-redborder};
+  background-color: {$sh-redbackground};
 }
 
 .remarkup-cowsay {
