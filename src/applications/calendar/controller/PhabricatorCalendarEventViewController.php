@@ -83,10 +83,10 @@ final class PhabricatorCalendarEventViewController
     $draft = PhabricatorDraft::newFromUserAndKey($viewer, $event->getPHID());
     if ($sequence) {
       $comment_uri = $this->getApplicationURI(
-          '/event/comment/'.$event->getID().'/'.$sequence.'/');
+        '/event/comment/'.$event->getID().'/'.$sequence.'/');
     } else {
       $comment_uri = $this->getApplicationURI(
-          '/event/comment/'.$event->getID().'/');
+        '/event/comment/'.$event->getID().'/');
     }
     $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($viewer)
@@ -372,7 +372,6 @@ final class PhabricatorCalendarEventViewController
       $icon_display);
 
     if (strlen($event->getDescription())) {
-
       $description = PhabricatorMarkupEngine::renderOneObject(
         id(new PhabricatorMarkupOneOff())->setContent($event->getDescription()),
         'default',

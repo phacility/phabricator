@@ -54,8 +54,7 @@ final class PhabricatorCalendarEventJoinController
       $new_status = array($viewer->getPHID() => $new_status);
 
       $xaction = id(new PhabricatorCalendarEventTransaction())
-        ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_INVITE)
+        ->setTransactionType(PhabricatorCalendarEventTransaction::TYPE_INVITE)
         ->setNewValue($new_status);
 
       $editor = id(new PhabricatorCalendarEventEditor())

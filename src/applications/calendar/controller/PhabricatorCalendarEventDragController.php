@@ -43,13 +43,11 @@ final class PhabricatorCalendarEventDragController
 
 
     $xactions[] = id(new PhabricatorCalendarEventTransaction())
-      ->setTransactionType(
-        PhabricatorCalendarEventTransaction::TYPE_START_DATE)
+      ->setTransactionType(PhabricatorCalendarEventTransaction::TYPE_START_DATE)
       ->setNewValue($start_value);
 
     $xactions[] = id(new PhabricatorCalendarEventTransaction())
-      ->setTransactionType(
-        PhabricatorCalendarEventTransaction::TYPE_END_DATE)
+      ->setTransactionType(PhabricatorCalendarEventTransaction::TYPE_END_DATE)
       ->setNewValue($end_value);
 
 

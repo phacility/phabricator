@@ -5,7 +5,6 @@ final class PhabricatorCalendarEventCommentController
 
   private $id;
 
-
   public function willProcessRequest(array $data) {
     $this->id = idx($data, 'id');
   }
