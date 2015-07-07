@@ -36,34 +36,10 @@ abstract class CelerityPostprocessor
   }
 
   final public static function getAllPostprocessors() {
-    static $postprocessors;
-
-    if ($postprocessors === null) {
-      $objects = id(new PhutilSymbolLoader())
-        ->setAncestorClass(__CLASS__)
-        ->loadObjects();
-
-      $map = array();
-      foreach ($objects as $object) {
-        $key = $object->getPostprocessorKey();
-        if (empty($map[$key])) {
-          $map[$key] = $object;
-          continue;
-        }
-
-        throw new Exception(
-          pht(
-            'Two postprocessors (of classes "%s" and "%s") define the same '.
-            'postprocessor key ("%s"). Each postprocessor must define a '.
-            'unique key.',
-            get_class($object),
-            get_class($map[$key]),
-            $key));
-      }
-      $postprocessors = $map;
-    }
-
-    return $postprocessors;
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->setUniqueMethod('getPostprocessorKey')
+      ->execute();
   }
 
 }

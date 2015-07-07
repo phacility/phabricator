@@ -1023,14 +1023,11 @@ abstract class HeraldAdapter extends Phobject {
   }
 
   public static function getAllAdapters() {
-    static $adapters;
-    if (!$adapters) {
-      $adapters = id(new PhutilSymbolLoader())
-        ->setAncestorClass(__CLASS__)
-        ->loadObjects();
-      $adapters = msort($adapters, 'getAdapterSortKey');
-    }
-    return $adapters;
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->setUniqueMethod('getAdapterContentType')
+      ->setSortMethod('getAdapterSortKey')
+      ->execute();
   }
 
   public static function getAdapterForContentType($content_type) {

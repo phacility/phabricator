@@ -212,11 +212,11 @@ abstract class PhabricatorPasswordHasher extends Phobject {
    * @task hashing
    */
   public static function getAllHashers() {
-    $objects = id(new PhutilSymbolLoader())
+    $objects = id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
-      ->loadObjects();
+      ->setUniqueMethod('getHashName')
+      ->execute();
 
-    $map = array();
     foreach ($objects as $object) {
       $name = $object->getHashName();
 
@@ -233,20 +233,9 @@ abstract class PhabricatorPasswordHasher extends Phobject {
             $maximum_length,
             $potential_length));
       }
-
-      if (isset($map[$name])) {
-        throw new Exception(
-          pht(
-            'Two hashers use the same hash name ("%s"), "%s" and "%s". Each '.
-            'hasher must have a unique name.',
-            $name,
-            get_class($object),
-            get_class($map[$name])));
-      }
-      $map[$name] = $object;
     }
 
-    return $map;
+    return $objects;
   }
 
 

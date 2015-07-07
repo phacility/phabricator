@@ -112,17 +112,10 @@ abstract class PhabricatorSetupCheck extends Phobject {
   }
 
   final public static function loadAllChecks() {
-    $symbols = id(new PhutilSymbolLoader())
+    return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
-      ->setConcreteOnly(true)
-      ->selectAndLoadSymbols();
-
-    $checks = array();
-    foreach ($symbols as $symbol) {
-      $checks[] = newv($symbol['name'], array());
-    }
-
-    return msort($checks, 'getExecutionOrder');
+      ->setSortMethod('getExecutionOrder')
+      ->execute();
   }
 
   final public static function runAllChecks() {

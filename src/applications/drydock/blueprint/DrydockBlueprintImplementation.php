@@ -372,21 +372,9 @@ abstract class DrydockBlueprintImplementation extends Phobject {
 
 
   public static function getAllBlueprintImplementations() {
-    static $list = null;
-
-    if ($list === null) {
-      $blueprints = id(new PhutilSymbolLoader())
-        ->setType('class')
-        ->setAncestorClass(__CLASS__)
-        ->setConcreteOnly(true)
-        ->selectAndLoadSymbols();
-      $list = ipull($blueprints, 'name', 'name');
-      foreach ($list as $class_name => $ignored) {
-        $list[$class_name] = newv($class_name, array());
-      }
-    }
-
-    return $list;
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->execute();
   }
 
   public static function getAllBlueprintImplementationsForResource($type) {
