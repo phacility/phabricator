@@ -18,7 +18,7 @@ final class PhabricatorMetaMTAApplicationEmailHeraldField
 
     $email = $this->getAdapter()->getApplicationEmail();
     if ($email) {
-      $phids[] = $email;
+      $phids[] = $email->getPHID();
     }
 
     return $phids;
