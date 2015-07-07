@@ -190,10 +190,10 @@ final class PHUIObjectBoxView extends AphrontView {
   }
 
   public function render() {
-
     require_celerity_resource('phui-object-box-css');
 
     $header = $this->header;
+
     if ($this->headerText) {
       $header = id(new PHUIHeaderView())
         ->setHeader($this->headerText);
@@ -201,6 +201,10 @@ final class PHUIObjectBoxView extends AphrontView {
 
     $showhide = null;
     if ($this->showAction !== null) {
+      if (!$header) {
+        $header = id(new PHUIHeaderView());
+      }
+
       Javelin::initBehavior('phabricator-reveal-content');
 
       $hide_action_id = celerity_generate_unique_node_id();

@@ -185,7 +185,11 @@ final class PhabricatorApplicationSearchController
       $title = pht('Advanced Search');
     }
 
-    $box = new PHUIObjectBoxView();
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title);
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header);
 
     if ($run_query || $named_query) {
       $box->setShowHide(
@@ -227,15 +231,11 @@ final class PhabricatorApplicationSearchController
             $saved_query);
         }
 
-        $header = id(new PHUIHeaderView())
-          ->setHeader($title);
         if ($list->getActions()) {
           foreach ($list->getActions() as $action) {
             $header->addActionLink($action);
           }
         }
-
-        $box->setHeader($header);
 
         if ($list->getObjectList()) {
           $box->setObjectList($list->getObjectList());
@@ -267,8 +267,6 @@ final class PhabricatorApplicationSearchController
           'This query specifies an invalid parameter. Review the '.
           'query parameters and correct errors.');
       }
-    } else {
-      $box->setHeaderText($title);
     }
 
     if ($errors) {
