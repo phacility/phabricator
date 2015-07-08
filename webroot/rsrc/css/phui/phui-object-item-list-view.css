@@ -78,6 +78,14 @@ ul.phui-object-item-list-view {
   font-size: 16px;
 }
 
+.phui-object-item-list-view .phui-object-item-col0 .phui-icon-view {
+  width: 17px;
+  text-align: center;
+  overflow: visible;
+  position: relative;
+  left: -1px;
+}
+
 .phui-object-item-name {
   padding: 8px 8px 0;
   white-space: nowrap;
