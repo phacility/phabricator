@@ -27,7 +27,6 @@ final class DifferentialDiff
   protected $branch;
   protected $bookmark;
 
-  protected $arcanistProjectPHID;
   protected $creationMethod;
   protected $repositoryUUID;
 
@@ -58,7 +57,6 @@ final class DifferentialDiff
         'lineCount' => 'uint32',
         'branch' => 'text255?',
         'bookmark' => 'text255?',
-        'arcanistProjectPHID' => 'phid?',
         'repositoryUUID' => 'text64?',
 
         // T6203/NULLABILITY
