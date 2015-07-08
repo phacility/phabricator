@@ -1,7 +1,6 @@
 <?php
 
-final class ReleephBranchViewController extends ReleephBranchController
-  implements PhabricatorApplicationSearchResultsControllerInterface {
+final class ReleephBranchViewController extends ReleephBranchController {
 
   private $queryKey;
   private $branchID;
@@ -37,50 +36,6 @@ final class ReleephBranchViewController extends ReleephBranchController
     return $this->delegateToController($controller);
   }
 
-  public function renderResultsList(
-    array $requests,
-    PhabricatorSavedQuery $query) {
-
-    assert_instances_of($requests, 'ReleephRequest');
-    $viewer = $this->getRequest()->getUser();
-
-    // TODO: This is generally a bit sketchy, but we don't do this kind of
-    // thing elsewhere at the moment. For the moment it shouldn't be hugely
-    // costly, and we can batch things later. Generally, this commits fewer
-    // sins than the old code did.
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-
-    $list = array();
-    foreach ($requests as $pull) {
-      $field_list = PhabricatorCustomField::getObjectFields(
-        $pull,
-        PhabricatorCustomField::ROLE_VIEW);
-
-      $field_list
-        ->setViewer($viewer)
-        ->readFieldsFromStorage($pull);
-
-      foreach ($field_list->getFields() as $field) {
-        if ($field->shouldMarkup()) {
-          $field->setMarkupEngine($engine);
-        }
-      }
-
-      $list[] = id(new ReleephRequestView())
-        ->setUser($viewer)
-        ->setCustomFields($field_list)
-        ->setPullRequest($pull)
-        ->setIsListView(true);
-    }
-
-    // This is quite sketchy, but the list has not actually rendered yet, so
-    // this still allows us to batch the markup rendering.
-    $engine->process();
-
-    return $list;
-  }
 
   public function buildSideNavView($for_app = false) {
     $user = $this->getRequest()->getUser();

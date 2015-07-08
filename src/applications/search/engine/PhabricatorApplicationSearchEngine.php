@@ -1038,12 +1038,10 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     return array();
   }
 
-  protected function renderResultList(
+  abstract protected function renderResultList(
     array $objects,
     PhabricatorSavedQuery $query,
-    array $handles) {
-    throw new Exception(pht('Not supported here yet!'));
-  }
+    array $handles);
 
 
 /* -(  Application Search  )------------------------------------------------- */

@@ -1397,7 +1397,6 @@ phutil_register_library_map(array(
     'PhabricatorApplicationSearchEngine' => 'applications/search/engine/PhabricatorApplicationSearchEngine.php',
     'PhabricatorApplicationSearchEngineTestCase' => 'applications/search/engine/__tests__/PhabricatorApplicationSearchEngineTestCase.php',
     'PhabricatorApplicationSearchResultView' => 'applications/search/view/PhabricatorApplicationSearchResultView.php',
-    'PhabricatorApplicationSearchResultsControllerInterface' => 'applications/search/interface/PhabricatorApplicationSearchResultsControllerInterface.php',
     'PhabricatorApplicationStatusView' => 'applications/meta/view/PhabricatorApplicationStatusView.php',
     'PhabricatorApplicationTestCase' => 'applications/base/__tests__/PhabricatorApplicationTestCase.php',
     'PhabricatorApplicationTransaction' => 'applications/transactions/storage/PhabricatorApplicationTransaction.php',
@@ -7256,10 +7255,7 @@ phutil_register_library_map(array(
     'ReleephBranchTemplate' => 'Phobject',
     'ReleephBranchTransaction' => 'PhabricatorApplicationTransaction',
     'ReleephBranchTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
-    'ReleephBranchViewController' => array(
-      'ReleephBranchController',
-      'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'ReleephBranchViewController' => 'ReleephBranchController',
     'ReleephCommitFinder' => 'Phobject',
     'ReleephCommitFinderException' => 'Exception',
     'ReleephCommitMessageFieldSpecification' => 'ReleephFieldSpecification',
@@ -7293,10 +7289,7 @@ phutil_register_library_map(array(
     'ReleephProductSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'ReleephProductTransaction' => 'PhabricatorApplicationTransaction',
     'ReleephProductTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
-    'ReleephProductViewController' => array(
-      'ReleephProductController',
-      'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'ReleephProductViewController' => 'ReleephProductController',
     'ReleephProject' => array(
       'ReleephDAO',
       'PhabricatorApplicationTransactionInterface',
