@@ -9,12 +9,16 @@ abstract class PhabricatorCalendarController extends PhabricatorController {
       ->setUser($this->getViewer())
       ->addAction(
         id(new PhabricatorActionView())
-          ->setName(pht('Create Private Event'))
-          ->setHref('/calendar/event/create/?mode=private'))
+          ->setName(pht('Create Event'))
+          ->setHref('/calendar/event/create/'))
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Create Public Event'))
-          ->setHref('/calendar/event/create/?mode=public'));
+          ->setHref('/calendar/event/create/?mode=public'))
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Create Recurring Event'))
+          ->setHref('/calendar/event/create/?mode=recurring'));
 
     $crumbs->addAction(
       id(new PHUIListItemView())
@@ -57,6 +61,8 @@ abstract class PhabricatorCalendarController extends PhabricatorController {
       ->setID(null)
       ->setPHID(null)
       ->removeViewerTimezone($viewer)
+      ->setViewPolicy($event->getViewPolicy())
+      ->setEditPolicy($event->getEditPolicy())
       ->save();
     $ghost_invitees = array();
     foreach ($invitees as $invitee) {

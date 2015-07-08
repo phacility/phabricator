@@ -39,6 +39,38 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
     return $this;
   }
 
+  public function getSerializedValue() {
+    return json_encode(array(
+      $this->getValue(),
+      $this->getSpacePHID(),
+    ));
+  }
+
+  public function readSerializedValue($value) {
+    $decoded = phutil_json_decode($value);
+    $policy_value = $decoded[0];
+    $space_phid = $decoded[1];
+    $this->setValue($policy_value);
+    $this->setSpacePHID($space_phid);
+    return $this;
+  }
+
+  public function readValueFromDictionary(array $dictionary) {
+    // TODO: This is a little hacky but will only get us into trouble if we
+    // have multiple view policy controls in multiple paged form views on the
+    // same page, which seems unlikely.
+    $this->setSpacePHID(idx($dictionary, 'spacePHID'));
+
+    return parent::readValueFromDictionary($dictionary);
+  }
+
+  public function readValueFromRequest(AphrontRequest $request) {
+    // See note in readValueFromDictionary().
+    $this->setSpacePHID($request->getStr('spacePHID'));
+
+    return parent::readValueFromRequest($request);
+  }
+
   public function setCapability($capability) {
     $this->capability = $capability;
 
@@ -162,10 +194,10 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
 
   protected function renderInput() {
     if (!$this->object) {
-      throw new Exception(pht('Call setPolicyObject() before rendering!'));
+      throw new PhutilInvalidStateException('setPolicyObject');
     }
     if (!$this->capability) {
-      throw new Exception(pht('Call setCapability() before rendering!'));
+      throw new PhutilInvalidStateException('setCapability');
     }
 
     $policy = $this->object->getPolicy($this->capability);
@@ -319,6 +351,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
         $space_phid),
       array(
         'name' => 'spacePHID',
+        'class' => 'aphront-space-select-control-knob',
       ));
 
     return $select;

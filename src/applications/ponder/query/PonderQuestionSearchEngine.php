@@ -144,14 +144,18 @@ final class PonderQuestionSearchEngine
       ->setUser($viewer);
 
     foreach ($questions as $question) {
+      $color = PonderQuestionStatus::getQuestionStatusTagColor(
+          $question->getStatus());
+      $icon = PonderQuestionStatus::getQuestionStatusIcon(
+          $question->getStatus());
+      $full_status = PonderQuestionStatus::getQuestionStatusFullName(
+          $question->getStatus());
       $item = new PHUIObjectItemView();
       $item->setObjectName('Q'.$question->getID());
       $item->setHeader($question->getTitle());
       $item->setHref('/Q'.$question->getID());
       $item->setObject($question);
-      $item->setBarColor(
-        PonderQuestionStatus::getQuestionStatusTagColor(
-          $question->getStatus()));
+      $item->setStatusIcon($icon.' '.$color, $full_status);
 
       $created_date = phabricator_date($question->getDateCreated(), $viewer);
       $item->addIcon('none', $created_date);
@@ -166,7 +170,11 @@ final class PonderQuestionSearchEngine
       $view->addItem($item);
     }
 
-    return $view;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($view);
+    $result->setNoDataString(pht('No questions found.'));
+
+    return $result;
   }
 
 }

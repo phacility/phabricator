@@ -17,7 +17,7 @@ final class PhabricatorFileSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
-      id(new PhabricatorSearchUsersField())
+      id(new PhabricatorUsersSearchField())
         ->setKey('authorPHIDs')
         ->setAliases(array('author', 'authors'))
         ->setLabel(pht('Authors')),
@@ -171,7 +171,11 @@ final class PhabricatorFileSearchEngine
     $list_view->appendChild(id(new PhabricatorGlobalUploadTargetView())
       ->setUser($viewer));
 
-    return $list_view;
+
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setContent($list_view);
+
+    return $result;
   }
 
 }

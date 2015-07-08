@@ -112,7 +112,7 @@ final class ReleephProductViewController extends ReleephProductController
 
       $open_count = count(idx($requests, $branch->getID(), array()));
       if ($open_count) {
-        $item->setBarColor('orange');
+        $item->setStatusIcon('fa-code-fork orange');
         $item->addIcon(
           'fa-code-fork',
           pht('%d Open Pull Request(s)', new PhutilNumber($open_count)));

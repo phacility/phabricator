@@ -2,110 +2,33 @@
  * @provides phui-fontkit-css
  */
 
-.phui-font-source-sans {
-  font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 20px;
+/* - Roboto Slab ---------------------------------------------------------------
+
+  Used as Primary Headers in Object Boxes, Headers in Documents
+
+*/
+
+.diviner-document-section .phui-header-header {
+  font-family: 'Roboto Slab', {$fontfamily};
+  font-size: 20px;
+  color: #000;
 }
 
-.phui-font-source-sans.conpherence-message-pane,
-.phui-font-source-sans.conpherence-message-pane .remarkup-assist-textarea,
-.conpherence-durable-column-body,
-.conpherence-durable-column-body .remarkup-assist-textarea  {
-  font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif;
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 18px;
+.phui-document-view .phui-header-tall .phui-header-header {
+  font-family: 'Roboto Slab', {$fontfamily};
 }
 
-.PhabricatorMonospaced .phui-document-view .phui-font-source-sans,
-.phui-document-view .phui-font-source-sans .phabricator-remarkup
-  .remarkup-code-block .remarkup-code {
-  font-size: 11px;
-  line-height: 1.3em;
+.phui-document-view .phabricator-remarkup h1.remarkup-header,
+.phui-document-view .phabricator-remarkup h2.remarkup-header,
+.phui-document-view .phabricator-remarkup h3.remarkup-header,
+.phui-document-view .phabricator-remarkup h4.remarkup-header,
+.phui-document-view .phabricator-remarkup h5.remarkup-header,
+.phui-document-view .phabricator-remarkup h6.remarkup-header {
+  font-family: 'Roboto Slab', {$fontfamily};
 }
 
-.platform-windows .PhabricatorMonospaced .phui-document-view
-  .phui-font-source-sans,
-.platform-windows .phui-document-view .phui-font-source-sans
-  .phabricator-remarkup .remarkup-code-block .remarkup-code {
-  font-size: 12px;
-  line-height: 1.3em;
-}
-
-.phui-font-source-sans .phabricator-remarkup h1.remarkup-header,
-.phui-font-source-sans .phabricator-remarkup h2.remarkup-header,
-.phui-font-source-sans .phabricator-remarkup h3.remarkup-header,
-.phui-font-source-sans .phabricator-remarkup h4.remarkup-header,
-.phui-font-source-sans .phabricator-remarkup h5.remarkup-header,
-.phui-font-source-sans .phabricator-remarkup h6.remarkup-header {
-  color: {$darkbluetext};
-  font-weight: 600;
-}
-
-.phui-font-source-sans .phabricator-remarkup h2.remarkup-header {
-  padding: 24px 24px 8px 0;
+.phui-document-view .phabricator-remarkup h2.remarkup-header {
+  padding: 0 24px 8px 0;
   border-bottom: 1px solid {$thinblueborder};
-  font-size: 22px;
-  font-weight: 400;
-  color: {$bluetext};
-  margin: 0 0 16px;
-}
-
-.phui-font-source-sans .phabricator-remarkup ol li.remarkup-list-item,
-.phui-font-source-sans .phabricator-remarkup ul li.remarkup-list-item {
-  margin-bottom: 4px;
-}
-
-.phui-font-source-sans .phabricator-remarkup tt.remarkup-monospaced {
-  font-size: 13px;
-  padding: 1px 3px 2px;
-}
-
-.diviner-view .phui-font-source-sans .phui-property-list-section,
-.legalpad .phui-font-source-sans .phui-property-list-section {
-  border-bottom: 1px solid {$thinblueborder};
-  margin-bottom: 8px;
-  background: {$lightgreybackground};
-}
-
-.phui-font-source-sans .phui-property-list-text-content {
-  background: {$lightgreybackground};
-  padding: 0;
-}
-
-.phui-font-source-sans .phui-property-list-container {
-  padding-bottom: 6px;
-  font: {$basefont};
-  line-height: 16px;
-}
-
-.phui-font-source-sans .phabricator-action-view {
-  font: {$basefont};
-  font-size: 12px;
-}
-
-.phui-font-source-sans a.atom-ref,
-.phui-font-source-sans a.remarkup-link,
-.phui-font-source-sans a.phriction-link,
-.phui-font-source-sans a.phabricator-remarkup-embed-layout-link {
-  color: {$blue};
-}
-
-body .phui-font-source-sans
-  .phui-header-shell.phui-bleed-header .phui-header-view {
-  font-size: 18px;
-  font-weight: normal;
-}
-
-.phui-font-source-sans .phui-form-view {
-  font: {$basefont};
-  font-weight: normal;
-}
-
-.phui-font-source-sans .phui-tag-shade .phui-icon-view {
-  font-size: 13px;
-  top: 4px;
-  left: 6px;
+  margin: 24px 0 16px;
 }

@@ -15,7 +15,7 @@ final class PhabricatorTimezoneSetupCheck extends PhabricatorSetupCheck {
 
       if (!$ok) {
         $message = pht(
-          'Your PHP configuration configuration selects an invalid timezone. '.
+          'Your PHP configuration selects an invalid timezone. '.
           'Select a valid timezone.');
 
         $this

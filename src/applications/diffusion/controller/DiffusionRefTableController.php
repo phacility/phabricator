@@ -127,7 +127,7 @@ final class DiffusionRefTableController extends DiffusionController {
 
     $content = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Ref "%s"', $ref_name))
-      ->appendChild($table);
+      ->setTable($table);
 
     $crumbs = $this->buildCrumbs(array());
     $crumbs->addTextCrumb(pht('Refs'));

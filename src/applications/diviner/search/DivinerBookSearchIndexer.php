@@ -18,6 +18,17 @@ final class DivinerBookSearchIndexer extends PhabricatorSearchDocumentIndexer {
       PhabricatorSearchDocumentFieldType::FIELD_BODY,
       $book->getPreface());
 
+    $doc->addRelationship(
+      PhabricatorSearchRelationship::RELATIONSHIP_REPOSITORY,
+      $book->getRepositoryPHID(),
+      PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
+      $book->getDateCreated());
+
+    $this->indexTransactions(
+      $doc,
+      new DivinerLiveBookTransactionQuery(),
+      array($phid));
+
     return $doc;
   }
 

@@ -109,7 +109,7 @@ This daemon will daemonize and run normally.
     just those started with `phd start`. If you're writing a restart script,
     have it launch any custom daemons explicitly after `phd restart`.
   - You can write your own daemons and manage them with `phd` by extending
-    @{class:PhabricatorDaemon}. See @{article:libphutil Libraries User Guide}.
+    @{class:PhabricatorDaemon}. See {article@contributor:Adding New Classes}.
   - See @{article:Diffusion User Guide} for details about tuning the repository
     daemon.
 
@@ -137,4 +137,4 @@ Continue by:
 
   - learning about the repository daemon with @{article:Diffusion User Guide};
     or
-  - writing your own daemons with @{article:libphutil Libraries User Guide}.
+  - writing your own daemons with {article@contributor:Adding New Classes}.

@@ -41,18 +41,17 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
     require_celerity_resource('phabricator-ui-example-css');
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->setBorder(true);
     $crumbs->addTextCrumb($example->getName());
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('%s (%s)', $example->getName(), get_class($example)))
-      ->setSubheader($example->getDescription())
-      ->setNoBackground(true);
+    $note = id(new PHUIInfoView())
+      ->setTitle(pht('%s (%s)', $example->getName(), get_class($example)))
+      ->appendChild($example->getDescription())
+      ->setSeverity(PHUIInfoView::SEVERITY_NODATA);
 
     $nav->appendChild(
       array(
         $crumbs,
-        $header,
+        $note,
         $result,
       ));
 

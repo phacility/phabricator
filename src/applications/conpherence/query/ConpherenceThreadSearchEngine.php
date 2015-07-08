@@ -4,86 +4,51 @@ final class ConpherenceThreadSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
-    return pht('Threads');
+    return pht('Rooms');
   }
 
   public function getApplicationClassName() {
     return 'PhabricatorConpherenceApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    $saved->setParameter(
-      'participantPHIDs',
-      $this->readUsersFromRequest($request, 'participants'));
-
-    $saved->setParameter('fulltext', $request->getStr('fulltext'));
-
-    $saved->setParameter(
-      'threadType',
-      $request->getStr('threadType'));
-
-    return $saved;
+  public function newQuery() {
+    return id(new ConpherenceThreadQuery())
+      ->needParticipantCache(true);
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new ConpherenceThreadQuery())
-      ->needParticipantCache(true);
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorUsersSearchField())
+        ->setLabel(pht('Participants'))
+        ->setKey('participants')
+        ->setAliases(array('participant')),
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Contains Words'))
+        ->setKey('fulltext'),
+    );
+  }
 
-    $participant_phids = $saved->getParameter('participantPHIDs', array());
-    if ($participant_phids && is_array($participant_phids)) {
-      $query->withParticipantPHIDs($participant_phids);
+  protected function getDefaultFieldOrder() {
+    return array(
+      'participants',
+      '...',
+    );
+  }
+
+  protected function shouldShowOrderField() {
+    return false;
+  }
+
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
+    if ($map['participants']) {
+      $query->withParticipantPHIDs($map['participants']);
     }
-
-    $fulltext = $saved->getParameter('fulltext');
-    if (strlen($fulltext)) {
-      $query->withFulltext($fulltext);
-    }
-
-    $thread_type = $saved->getParameter('threadType');
-    if (idx($this->getTypeOptions(), $thread_type)) {
-      switch ($thread_type) {
-        case 'rooms':
-          $query->withIsRoom(true);
-          break;
-        case 'messages':
-          $query->withIsRoom(false);
-          break;
-        case 'both':
-          $query->withIsRoom(null);
-          break;
-      }
+    if ($map['fulltext']) {
+      $query->withFulltext($map['fulltext']);
     }
 
     return $query;
-  }
-
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved) {
-
-    $participant_phids = $saved->getParameter('participantPHIDs', array());
-    $fulltext = $saved->getParameter('fulltext');
-
-    $form
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('participants')
-          ->setLabel(pht('Participants'))
-          ->setValue($participant_phids))
-      ->appendControl(
-        id(new AphrontFormTextControl())
-          ->setName('fulltext')
-          ->setLabel(pht('Contains Words'))
-          ->setValue($fulltext))
-      ->appendControl(
-        id(new AphrontFormSelectControl())
-        ->setLabel(pht('Type'))
-        ->setName('threadType')
-        ->setOptions($this->getTypeOptions())
-        ->setValue($saved->getParameter('threadType')));
   }
 
   protected function getURI($path) {
@@ -93,14 +58,11 @@ final class ConpherenceThreadSearchEngine
   protected function getBuiltinQueryNames() {
     $names = array();
 
-    $names = array(
-      'all' => pht('All Rooms'),
-    );
-
     if ($this->requireViewer()->isLoggedIn()) {
       $names['participant'] = pht('Joined Rooms');
-      $names['messages'] = pht('All Messages');
     }
+
+    $names['all'] = pht('All Rooms');
 
     return $names;
   }
@@ -112,17 +74,10 @@ final class ConpherenceThreadSearchEngine
 
     switch ($query_key) {
       case 'all':
-        $query->setParameter('threadType', 'rooms');
         return $query;
       case 'participant':
-        $query->setParameter('threadType', 'rooms');
         return $query->setParameter(
-          'participantPHIDs',
-          array($this->requireViewer()->getPHID()));
-      case 'messages':
-        $query->setParameter('threadType', 'messages');
-        return $query->setParameter(
-          'participantPHIDs',
+          'participants',
           array($this->requireViewer()->getPHID()));
     }
 
@@ -145,7 +100,7 @@ final class ConpherenceThreadSearchEngine
 
     $viewer = $this->requireViewer();
 
-    $policy_objects = ConpherenceThread::loadPolicyObjects(
+    $policy_objects = ConpherenceThread::loadViewPolicyObjects(
       $viewer,
       $conpherences);
 
@@ -192,11 +147,7 @@ final class ConpherenceThreadSearchEngine
       $title = $conpherence->getDisplayTitle($viewer);
       $monogram = $conpherence->getMonogram();
 
-      if ($conpherence->getIsRoom()) {
-        $icon_name = $conpherence->getPolicyIconName($policy_objects);
-      } else {
-        $icon_name = 'fa-envelope-o';
-      }
+      $icon_name = $conpherence->getPolicyIconName($policy_objects);
       $icon = id(new PHUIIconView())
         ->setIconFont($icon_name);
       $item = id(new PHUIObjectItemView())
@@ -253,15 +204,11 @@ final class ConpherenceThreadSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
-  }
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No threads found.'));
 
-  private function getTypeOptions() {
-    return array(
-      'rooms' => pht('Rooms'),
-      'messages' => pht('Messages'),
-      'both' => pht('Both'),
-    );
+    return $result;
   }
 
   private function loadContextMessages(array $threads, $fulltext) {

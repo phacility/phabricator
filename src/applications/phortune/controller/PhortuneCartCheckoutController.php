@@ -113,7 +113,7 @@ final class PhortuneCartCheckoutController
     $cart_box = id(new PHUIObjectBoxView())
       ->setFormErrors($errors)
       ->setHeaderText(pht('Cart Contents'))
-      ->appendChild($cart_table);
+      ->setTable($cart_table);
 
     $title = $cart->getName();
 

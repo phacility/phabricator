@@ -6,7 +6,6 @@ final class PHUIWorkpanelView extends AphrontTagView {
   private $header;
   private $subheader = null;
   private $footerAction;
-  private $headerColor = PHUIActionHeaderView::HEADER_GREY;
   private $headerActions = array();
   private $headerTag;
   private $headerIcon;
@@ -37,11 +36,6 @@ final class PHUIWorkpanelView extends AphrontTagView {
 
   public function setFooterAction(PHUIListItemView $footer_action) {
     $this->footerAction = $footer_action;
-    return $this;
-  }
-
-  public function setHeaderColor($header_color) {
-    $this->headerColor = $header_color;
     return $this;
   }
 
@@ -77,24 +71,21 @@ final class PHUIWorkpanelView extends AphrontTagView {
           $footer_tag);
     }
 
-    $header = id(new PHUIActionHeaderView())
-      ->setHeaderTitle($this->header)
-      ->setHeaderSubtitle($this->subheader)
-      ->setHeaderColor($this->headerColor);
+    $header = id(new PHUIHeaderView())
+      ->setHeader($this->header)
+      ->setSubheader($this->subheader);
 
     if ($this->headerIcon) {
       $header->setHeaderIcon($this->headerIcon);
     }
 
     if ($this->headerTag) {
-      $header->setTag($this->headerTag);
+      $header->addTag($this->headerTag);
     }
 
     foreach ($this->headerActions as $action) {
-      $header->addAction($action);
+      $header->addActionIcon($action);
     }
-
-    $classes[] = 'phui-workpanel-'.$this->headerColor;
 
     $body = phutil_tag(
       'div',

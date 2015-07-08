@@ -92,6 +92,9 @@ You can optionally omit the trailing `=` signs -- that is, these are the same:
 This produces headers like the ones in this document. Make sure you have an
 empty line before and after the header.
 
+Lists
+=====
+
 Make **lists** by beginning each item with a `-` or a `*`:
 
   lang=text
@@ -116,6 +119,21 @@ You can make numbered lists with a `#` instead of `-` or `*`:
   # Articuno
   # Zapdos
   # Moltres
+
+Numbered lists can also be started with `1.` or `1)`. If you use a number other
+than `1`, the list will start at that number instead. For example, this:
+
+```
+  200) OK
+  201) Created
+  202) Accepted
+```
+
+...produces this:
+
+  200) OK
+  201) Created
+  202) Accepted
 
 You can also nest lists:
 

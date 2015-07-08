@@ -141,7 +141,7 @@ final class AlmanacDeviceEditController
     $box = id(new PHUIObjectBoxView())
       ->setValidationException($validation_exception)
       ->setHeaderText($title)
-      ->appendChild($form);
+      ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     if ($is_new) {

@@ -22,6 +22,7 @@ final class PHUIStatusItemView extends AphrontTagView {
   const ICON_MINUS = 'fa-minus-circle';
   const ICON_OPEN = 'fa-circle-o';
   const ICON_CLOCK = 'fa-clock-o';
+  const ICON_STAR = 'fa-star';
 
   /* render_textarea */
   public function setIcon($icon, $color = null, $label = null) {

@@ -46,14 +46,8 @@
   font-weight:  bold;
   color: {$darkbluetext};
   border-bottom: 1px solid {$sh-lightyellowborder};
-  padding: 4px 5px 4px 12px;
+  padding: 4px 5px 4px 8px;
   background-color: {$sh-yellowbackground};
-}
-
-.device-desktop .differential-inline-comment .button.simple:hover
-  .phui-icon-view,
-.device-desktop .differential-inline-comment .button.simple:hover {
-  color: {$sky};
 }
 
 .differential-inline-comment-content {
@@ -72,6 +66,7 @@
 
 .differential-inline-comment .inline-head-right {
   float: right;
+  padding-right: 4px;
 }
 
 .differential-inline-comment .inline-head-right .button {
@@ -80,7 +75,7 @@
 
 .differential-inline-comment .inline-head-left {
   float: left;
-  padding: 5px 0;
+  padding: 4px;
 }
 
 .device-phone .differential-inline-comment .inline-head-left {
@@ -117,16 +112,6 @@
 }
 
 .differential-inline-comment.differential-inline-comment-synthetic
-  .button.simple {
-  border-color: {$blue};
-}
-
-.differential-inline-comment.differential-inline-comment-synthetic
-  .button.simple .phui-icon-view {
-  color: {$blue};
-}
-
-.differential-inline-comment.differential-inline-comment-synthetic
   .differential-inline-comment-head {
     padding-bottom: 4px;
 }
@@ -146,11 +131,6 @@
   .differential-inline-comment-head {
     border-bottom: 1px solid {$lightgreyborder};
     background-color: {$lightgreybackground};
-}
-
-.differential-inline-comment.inline-comment-ghost
-  .button.simple .phui-icon-view {
-  color: {$lightgreytext};
 }
 
 /* - New/Edit Inline Comment --------------------------------------------------
@@ -198,15 +178,7 @@
   font-weight: bold;
   color: {$darkbluetext};
   padding: 4px 0 12px;
-  font-size: 14px;
-}
-
-.inline-state-is-draft .phui-button-bar .button {
-  border-color: {$lightgreyborder};
-}
-
-.inline-state-is-draft .phui-button-bar .phui-icon-view {
-  color: {$lightgreytext};
+  font-size: {$biggerfontsize};
 }
 
 .differential-inline-comment-edit {
@@ -237,13 +209,8 @@
 
 */
 
-.differential-inline-comment .differential-inline-done-label,
-.differential-inline-comment .button.simple {
+.differential-inline-comment .differential-inline-done-label {
   border-color: {$sh-yellowborder};
-  color: {$sh-yellowicon};
-}
-
-.differential-inline-comment .button.simple .phui-icon-view {
   color: {$sh-yellowicon};
 }
 
@@ -253,18 +220,7 @@
   .button.simple,
 .differential-inline-comment.inline-comment-ghost
   .button.simple {
-  border-color: {$lightgreyborder};
   color: {$lightgreytext};
-}
-
-.differential-inline-comment.inline-state-is-draft
-  .button.simple .phui-icon-view {
-  color: {$lightgreytext};
-}
-
-.device-desktop .inline-state-is-draft
-  a.button.simple:hover {
-    border-color: {$lightgreyborder};
 }
 
 /* - Done Button --------------------------------------------------------------
@@ -277,7 +233,7 @@
   border: 1px solid {$sh-yellowborder};
   border-radius: 3px;
   display: inline-block;
-  padding: 4px 8px 5px;
+  padding: 3px 8px 4px;
   cursor: pointer;
 }
 
@@ -285,15 +241,6 @@
   margin: 0 6px 0 0;
   display: inline;
   cursor: pointer;
-}
-
-.device-desktop .differential-inline-comment.inline-is-done
-  .differential-inline-done-label:hover,
-.device-desktop .differential-inline-comment
-  .differential-inline-done-label:hover {
-    background-color: #fff;
-    color: {$sky};
-    border-color: {$lightblueborder};
 }
 
 .differential-inline-comment.inline-is-done
@@ -345,13 +292,6 @@
     border-color: {$sky};
 }
 
-.differential-inline-comment.inline-is-done
-  .button.simple .phui-icon-view {
-    color: {$lightgreytext};
-}
-
-
-
 /* - Inline State is Draft ----------------------------------------------------
 
   The Unsubmitted state of the comment / done checkbox styles.
@@ -385,7 +325,7 @@
   margin: 4px 0;
   color: {$darkgreytext};
   font: {$basefont};
-  font-size: 13px;
+  font-size: {$normalfontsize};
   border-radius: 3px;
 }
 
@@ -404,9 +344,8 @@
 }
 
 .ghost-icon {
-  background: {$darkgreybackground};
+  background: rgba(55,55,55,.07);
   float: left;
-  margin-right: 8px;
   padding: 2px 4px 2px 2px;
   position: absolute;
   top: 0;
@@ -415,12 +354,12 @@
 
 .ghost-icon .phui-icon-view {
   padding: 8px 7px;
-  font-size: 15px;
+  font-size: 16px;
   color: {$lightbluetext};
 }
 
 .device-desktop .ghost-icon .phui-icon-view:hover {
-  color: {$sky};
+  color: {$fire};
 }
 
 .differential-inline-comment.inline-comment-ghost
@@ -451,4 +390,13 @@
 
 .reveal-inlines:hover span.phui-icon-view {
   color: {$darkbluetext};
+}
+
+.inline-button-divider {
+  border-left: 1px solid rgba(55,55,55,.25);
+  margin-left: 8px;
+}
+
+.differential-inline-comment-synthetic .inline-button-divider {
+  border: none;
 }

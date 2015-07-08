@@ -79,26 +79,15 @@ final class ManiphestTaskResultListView extends ManiphestView {
       $task_list->setTasks($list);
       $task_list->setHandles($handles);
 
-      $header = javelin_tag(
-        'h1',
-        array(
-          'class' => 'maniphest-task-group-header',
-          'sigil' => 'task-group',
-          'meta'  => array(
-            'priority' => head($list)->getPriority(),
-          ),
-        ),
-        pht('%s (%s)', $group, new PhutilNumber(count($list))));
+      $header = id(new PHUIHeaderView())
+        ->addSigil('task-group')
+        ->setMetadata(array('priority' => head($list)->getPriority()))
+        ->setHeader(pht('%s (%s)', $group, new PhutilNumber(count($list))));
 
-      $lists[] = phutil_tag(
-        'div',
-        array(
-          'class' => 'maniphest-task-group',
-        ),
-        array(
-          $header,
-          $task_list,
-        ));
+      $lists[] = id(new PHUIObjectBoxView())
+        ->setHeader($header)
+        ->setObjectList($task_list);
+
     }
 
     if ($can_drag) {
@@ -109,15 +98,10 @@ final class ManiphestTaskResultListView extends ManiphestView {
         ));
     }
 
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'maniphest-list-container',
-      ),
-      array(
-        $lists,
-        $this->showBatchControls ? $this->renderBatchEditor($query) : null,
-      ));
+    return array(
+      $lists,
+      $this->showBatchControls ? $this->renderBatchEditor($query) : null,
+    );
   }
 
 
@@ -251,8 +235,6 @@ final class ManiphestTaskResultListView extends ManiphestView {
       '');
 
     $editor = hsprintf(
-      '<div class="maniphest-batch-editor">'.
-        '<div class="batch-editor-header">%s</div>'.
         '<table class="maniphest-batch-editor-layout">'.
           '<tr>'.
             '<td>%s%s</td>'.
@@ -260,9 +242,7 @@ final class ManiphestTaskResultListView extends ManiphestView {
             '<td id="batch-select-status-cell">%s</td>'.
             '<td class="batch-select-submit-cell">%s%s</td>'.
           '</tr>'.
-        '</table>'.
-      '</div>',
-      pht('Batch Task Editor'),
+        '</table>',
       $select_all,
       $select_none,
       $export,
@@ -279,6 +259,12 @@ final class ManiphestTaskResultListView extends ManiphestView {
       ),
       $editor);
 
-    return $editor;
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Batch Task Editor'))
+      ->appendChild($editor);
+
+    $content = phutil_tag_div('maniphest-batch-editor', $box);
+
+    return $content;
   }
 }

@@ -40,7 +40,7 @@ final class PhabricatorPasteSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
-      id(new PhabricatorSearchUsersField())
+      id(new PhabricatorUsersSearchField())
         ->setAliases(array('authors'))
         ->setKey('authorPHIDs')
         ->setLabel(pht('Authors')),
@@ -160,6 +160,10 @@ final class PhabricatorPasteSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No pastes found.'));
+
+    return $result;
   }
 }

@@ -182,9 +182,11 @@ final class PassphraseCredentialViewController extends PassphraseController {
       pht('Editable By'),
       $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
 
-    $properties->addProperty(
-      pht('Username'),
-      $credential->getUsername());
+    if ($type->shouldRequireUsername()) {
+      $properties->addProperty(
+        pht('Username'),
+        $credential->getUsername());
+    }
 
     $used_by_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $credential->getPHID(),

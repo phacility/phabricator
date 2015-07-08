@@ -95,6 +95,7 @@ final class PhabricatorSubscriptionsEditController
       $editor = id($object->getApplicationTransactionEditor())
         ->setActor($user)
         ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
         ->setContentSourceFromRequest($request);
 
       $editor->applyTransactions(

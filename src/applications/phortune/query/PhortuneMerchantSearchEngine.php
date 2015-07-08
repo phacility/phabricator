@@ -78,6 +78,10 @@ final class PhortuneMerchantSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No merchants found.'));
+
+    return $result;
   }
 }

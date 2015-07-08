@@ -58,31 +58,10 @@ abstract class NuanceSourceDefinition extends Phobject {
   }
 
   public static function getAllDefinitions() {
-    static $definitions;
-
-    if ($definitions === null) {
-      $definitions = array();
-
-      $objects = id(new PhutilSymbolLoader())
-        ->setAncestorClass(__CLASS__)
-        ->loadObjects();
-      foreach ($objects as $definition) {
-        $key = $definition->getSourceTypeConstant();
-        $name = $definition->getName();
-        if (isset($definitions[$key])) {
-          $conflict = $definitions[$key];
-          throw new Exception(
-            pht(
-              'Definition %s conflicts with definition %s. This is a '.
-              'programming error.',
-              $conflict,
-              $name));
-        }
-        $definitions[$key] = $definition;
-      }
-    }
-
-    return $definitions;
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->setUniqueMethod('getSourceTypeConstant')
+      ->execute();
   }
 
   /**

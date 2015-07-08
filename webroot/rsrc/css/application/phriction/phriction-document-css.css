@@ -2,45 +2,8 @@
  * @provides phriction-document-css
  */
 
-.phriction-header {
-  background: #eeeeee;
-  border-bottom: 1px solid #dddddd;
-  padding: 1em;
-}
-
-.phriction-header a.button {
-  float: right;
-  margin: 0em 0em 0em 1%;
-}
-
-.phriction-header h1 {
-  margin: 4px 0;
-}
-
-.phriction-breadcrumbs {
-  font-size: 12px;
-  color: {$greytext};
-}
-
 .phriction-document-crumbs a {
   font-weight: bold;
-}
-
-.phriction-children ul {
-  margin-left: 30px;
-  padding-bottom: 10px;
-  list-style: circle;
-  color: {$lightgreytext};
-}
-
-.phriction-children-header {
-  background: {$lightgreybackground};
-  padding: 8px 0 8px 16px;
-  font-weight: bold;
-  margin-bottom: 15px;
-  border-bottom: 1px solid {$lightblueborder};
-  color: {$bluetext};
-  text-shadow: 0 1px 2px #fff;
 }
 
 .phriction-revert-table {
@@ -52,7 +15,6 @@
   width: 50%;
   padding: 8px 0;
   margin: 0 16px;
-  background-color: {$lightbluebackground};
   border-top: 1px solid {$lightblueborder};
 }
 
@@ -64,7 +26,7 @@
   width: 50%;
   color: {$darkgreytext};
   padding: 12px;
-  background-color: #E5E8EE;
+  background-color: {$lightgreybackground};
 }
 
 .phriction-history-nav-table td.nav-next {

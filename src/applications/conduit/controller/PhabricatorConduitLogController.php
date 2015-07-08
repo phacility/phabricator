@@ -37,7 +37,7 @@ final class PhabricatorConduitLogController
     $table = $this->renderCallTable($calls, $conns);
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Call Logs'))
-      ->appendChild($table);
+      ->setTable($table);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Call Logs'));

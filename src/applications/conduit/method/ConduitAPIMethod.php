@@ -30,7 +30,7 @@ abstract class ConduitAPIMethod
 
     $query = $this->newQueryObject();
     if ($query) {
-      $types['order'] = 'order';
+      $types['order'] = 'optional order';
       $types += $this->getPagerParamTypes();
     }
 

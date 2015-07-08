@@ -1124,6 +1124,64 @@ final class PhabricatorUSEnglishTranslation
         '%s changed package owners, added: %4$s; removed: %6$s.',
       ),
 
+      'Found %s book(s).' => array(
+        'Found %s book.',
+        'Found %s books.',
+      ),
+      'Found %s file(s) in project.' => array(
+        'Found %s file in project.',
+        'Found %s files in project.',
+      ),
+      'Found %s unatomized, uncached file(s).' => array(
+        'Found %s unatomized, uncached file.',
+        'Found %s unatomized, uncached files.',
+      ),
+      'Found %s file(s) to atomize.' => array(
+        'Found %s file to atomize.',
+        'Found %s files to atomize.',
+      ),
+      'Atomizing %s file(s).' => array(
+        'Atomizing %s file.',
+        'Atomizing %s files.',
+      ),
+      'Creating %s document(s).' => array(
+        'Creating %s document.',
+        'Creating %s documents.',
+      ),
+      'Deleting %s document(s).' => array(
+        'Deleting %s document.',
+        'Deleting %s documents.',
+      ),
+      'Found %s obsolete atom(s) in graph.' => array(
+        'Found %s obsolete atom in graph.',
+        'Found %s obsolete atoms in graph.',
+      ),
+      'Found %s new atom(s) in graph.' => array(
+        'Found %s new atom in graph.',
+        'Found %s new atoms in graph.',
+      ),
+      'This call takes %s parameter(s), but only %s are documented.' => array(
+        array(
+          'This call takes %s parameter, but only %s is documented.',
+          'This call takes %s parameter, but only %s are documented.',
+        ),
+        array(
+          'This call takes %s parameters, but only %s is documented.',
+          'This call takes %s parameters, but only %s are documented.',
+        ),
+      ),
+
+      '%s Passed Test(s)' => '%s Passed',
+      '%s Failed Test(s)' => '%s Failed',
+      '%s Skipped Test(s)' => '%s Skipped',
+      '%s Broken Test(s)' => '%s Broken',
+      '%s Unsound Test(s)' => '%s Unsound',
+      '%s Other Test(s)' => '%s Other',
+
+      '%s Bulk Task(s)' => array(
+        '%s Task',
+        '%s Tasks',
+      ),
     );
   }
 

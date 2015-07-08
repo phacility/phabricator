@@ -12,7 +12,6 @@ final class AphrontDialogView extends AphrontView {
   private $class;
   private $renderAsForm = true;
   private $formID;
-  private $headerColor = PHUIActionHeaderView::HEADER_LIGHTBLUE;
   private $footers = array();
   private $isStandalone;
   private $method = 'POST';
@@ -131,11 +130,6 @@ final class AphrontDialogView extends AphrontView {
     return $this;
   }
 
-  public function setHeaderColor($color) {
-    $this->headerColor = $color;
-    return $this;
-  }
-
   public function appendParagraph($paragraph) {
     return $this->appendChild(
       phutil_tag(
@@ -144,6 +138,25 @@ final class AphrontDialogView extends AphrontView {
           'class' => 'aphront-dialog-view-paragraph',
         ),
         $paragraph));
+  }
+
+  public function appendList(array $items) {
+    $listitems = array();
+    foreach ($items as $item) {
+      $listitems[] = phutil_tag(
+        'li',
+        array(
+          'class' => 'remarkup-list-item',
+        ),
+        $item);
+    }
+    return $this->appendChild(
+      phutil_tag(
+        'ul',
+        array(
+          'class' => 'remarkup-list',
+        ),
+        $listitems));
   }
 
   public function appendForm(AphrontFormView $form) {
@@ -303,9 +316,8 @@ final class AphrontDialogView extends AphrontView {
       );
     }
 
-    $header = new PHUIActionHeaderView();
-    $header->setHeaderTitle($this->title);
-    $header->setHeaderColor($this->headerColor);
+    $header = new PHUIHeaderView();
+    $header->setHeader($this->title);
 
     $footer = null;
     if ($this->footers) {
@@ -339,7 +351,7 @@ final class AphrontDialogView extends AphrontView {
         $header),
       phutil_tag('div',
         array(
-          'class' => 'aphront-dialog-body grouped',
+          'class' => 'aphront-dialog-body phabricator-remarkup grouped',
         ),
         $children),
       $tail,

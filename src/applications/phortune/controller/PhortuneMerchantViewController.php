@@ -30,7 +30,6 @@ final class PhortuneMerchantViewController
       $merchant->getName());
 
     $header = id(new PHUIHeaderView())
-      ->setObjectName(pht('Merchant %d', $merchant->getID()))
       ->setHeader($merchant->getName())
       ->setUser($viewer)
       ->setPolicyObject($merchant);
@@ -50,7 +49,7 @@ final class PhortuneMerchantViewController
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($properties);
+      ->addPropertyList($properties);
 
     $timeline = $this->buildTransactionTimeline(
       $merchant,
@@ -229,9 +228,9 @@ final class PhortuneMerchantViewController
 
       if ($provider->isEnabled()) {
         if ($provider->isAcceptingLivePayments()) {
-          $item->setBarColor('green');
+          $item->setStatusIcon('fa-check green');
         } else {
-          $item->setBarColor('yellow');
+          $item->setStatusIcon('fa-warning yellow');
           $item->addIcon('fa-exclamation-triangle', pht('Test Mode'));
         }
 
@@ -293,7 +292,7 @@ final class PhortuneMerchantViewController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($provider_list);
+      ->setObjectList($provider_list);
   }
 
 

@@ -156,39 +156,22 @@ abstract class PhabricatorEdgeType extends Phobject {
     static $type_map;
 
     if ($type_map === null) {
-      $types = id(new PhutilSymbolLoader())
+      $types = id(new PhutilClassMapQuery())
         ->setAncestorClass(__CLASS__)
-        ->loadObjects();
-
-      $map = array();
-
-      foreach ($types as $class => $type) {
-        $const = $type->getEdgeConstant();
-
-        if (isset($map[$const])) {
-          throw new Exception(
-            pht(
-              'Two edge types ("%s", "%s") share the same edge constant '.
-              '(%d). Each edge type must have a unique constant.',
-              $class,
-              get_class($map[$const]),
-              $const));
-        }
-
-        $map[$const] = $type;
-      }
+        ->setUniqueMethod('getEdgeConstant')
+        ->execute();
 
       // Check that all the inverse edge definitions actually make sense. If
       // edge type A says B is its inverse, B must exist and say that A is its
       // inverse.
 
-      foreach ($map as $const => $type) {
+      foreach ($types as $const => $type) {
         $inverse = $type->getInverseEdgeConstant();
         if ($inverse === null) {
           continue;
         }
 
-        if (empty($map[$inverse])) {
+        if (empty($types[$inverse])) {
           throw new Exception(
             pht(
               'Edge type "%s" ("%d") defines an inverse type ("%d") which '.
@@ -198,7 +181,7 @@ abstract class PhabricatorEdgeType extends Phobject {
               $inverse));
         }
 
-        $inverse_inverse = $map[$inverse]->getInverseEdgeConstant();
+        $inverse_inverse = $types[$inverse]->getInverseEdgeConstant();
         if ($inverse_inverse !== $const) {
           throw new Exception(
             pht(
@@ -212,7 +195,7 @@ abstract class PhabricatorEdgeType extends Phobject {
         }
       }
 
-      $type_map = $map;
+      $type_map = $types;
     }
 
     return $type_map;

@@ -77,7 +77,7 @@
 }
 
 .blog-detail .bloggers {
-  font-size: 11px;
+  font-size: {$smallerfontsize};
 }
 
 .blog-post,
@@ -102,7 +102,7 @@
 .blog-post .header .last-updated {
   color: {$greytext};
   clear: none;
-  font-size: 11px;
+  font-size: {$smallerfontsize};
 }
 
 .blog-post .header .buttons {

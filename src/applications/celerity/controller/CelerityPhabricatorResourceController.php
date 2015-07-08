@@ -11,6 +11,7 @@ final class CelerityPhabricatorResourceController
   private $path;
   private $hash;
   private $library;
+  private $postprocessorKey;
 
   public function getCelerityResourceMap() {
     return CelerityResourceMap::getNamedInstance($this->library);
@@ -20,6 +21,7 @@ final class CelerityPhabricatorResourceController
     $this->path = $data['path'];
     $this->hash = $data['hash'];
     $this->library = $data['library'];
+    $this->postprocessorKey = idx($data, 'postprocessor');
   }
 
   public function processRequest() {
@@ -42,7 +44,12 @@ final class CelerityPhabricatorResourceController
 
     return id(new CelerityResourceTransformer())
       ->setMinify($should_minify)
+      ->setPostprocessorKey($this->postprocessorKey)
       ->setCelerityMap($this->getCelerityResourceMap());
+  }
+
+  protected function getCacheKey($path) {
+    return parent::getCacheKey($path.';'.$this->postprocessorKey);
   }
 
 }

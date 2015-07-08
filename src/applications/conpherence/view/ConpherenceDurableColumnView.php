@@ -109,7 +109,6 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
   protected function getTagContent() {
     $column_key = PhabricatorUserPreferences::PREFERENCE_CONPHERENCE_COLUMN;
-    require_celerity_resource('font-source-sans-pro');
 
     Javelin::initBehavior(
       'durable-column',
@@ -119,27 +118,15 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         'quicksandConfig' => $this->getQuicksandConfig(),
       ));
 
-    $policies = array();
-    $conpherences = $this->getConpherences();
-    foreach ($conpherences as $conpherence) {
-      if (!$conpherence->getIsRoom()) {
-        continue;
-      }
-      $policies[] = $conpherence->getViewPolicy();
-    }
-    $policy_objects = array();
-    if ($policies) {
-      $policy_objects = id(new PhabricatorPolicyQuery())
-        ->setViewer($this->getUser())
-        ->withPHIDs($policies)
-        ->execute();
-    }
+    $policy_objects = ConpherenceThread::loadViewPolicyObjects(
+      $this->getUser(),
+      $this->getConpherences());
     $this->setPolicyObjects($policy_objects);
 
     $classes = array();
     $classes[] = 'conpherence-durable-column-header';
+    $classes[] = 'phabricator-main-menu-background';
     $classes[] = 'sprite-main-header';
-    $classes[] = 'main-header-'.PhabricatorEnv::getEnvConfig('ui.header-color');
 
     $loading_mask = phutil_tag(
       'div',
@@ -224,13 +211,10 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
     assert_instances_of($policy_objects, 'PhabricatorPolicy');
 
-    $icon = null;
-    if ($conpherence->getIsRoom()) {
-      $icon = $conpherence->getPolicyIconName($policy_objects);
-      $icon = id(new PHUIIconView())
-        ->addClass('mmr')
-        ->setIconFont($icon);
-    }
+    $icon = $conpherence->getPolicyIconName($policy_objects);
+    $icon = id(new PHUIIconView())
+      ->addClass('mmr')
+      ->setIconFont($icon);
     return $icon;
   }
 
@@ -348,13 +332,13 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         ));
 
       $item = id(new PHUIListItemView())
-        ->setName(pht('Settings'))
+        ->setName(pht('Room Actions'))
         ->setIcon('fa-bars')
         ->addClass('core-menu-item')
         ->addSigil('conpherence-settings-menu')
         ->setID($bubble_id)
         ->setHref('#')
-        ->setAural(pht('Settings'))
+        ->setAural(pht('Room Actions'))
         ->setOrder(300);
       $settings_button = id(new PHUIListView())
         ->addMenuItem($item)
@@ -391,11 +375,6 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
   }
 
   private function getHeaderActionsConfig(ConpherenceThread $conpherence) {
-    if ($conpherence->getIsRoom()) {
-      $rename_label = pht('Edit Room');
-    } else {
-      $rename_label = pht('Rename Thread');
-    }
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $this->getUser(),
       $conpherence,
@@ -410,7 +389,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         'key' => ConpherenceUpdateActions::ADD_PERSON,
       ),
       array(
-        'name' => $rename_label,
+        'name' => pht('Edit Room'),
         'disabled' => !$can_edit,
         'href' => '/conpherence/update/'.$conpherence->getID().'/?nopic',
         'icon' => 'fa-pencil',
@@ -445,7 +424,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
           array(
             'class' => 'mmb',
           ),
-          pht('You do not have any messages yet.')),
+          pht('You are not in any rooms yet.')),
         javelin_tag(
           'a',
           array(
@@ -453,7 +432,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
             'class' => 'button grey',
             'sigil' => 'workflow',
           ),
-          pht('Send a Message')),
+          pht('Create a Room')),
       );
     }
 

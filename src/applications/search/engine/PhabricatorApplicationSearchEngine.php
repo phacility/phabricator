@@ -245,7 +245,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       }
 
       if ($object instanceof PhabricatorProjectInterface) {
-        $fields[] = id(new PhabricatorSearchProjectsField())
+        $fields[] = id(new PhabricatorProjectSearchField())
           ->setKey('projectPHIDs')
           ->setAliases(array('project', 'projects'))
           ->setLabel(pht('Projects'));
@@ -253,7 +253,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
       if ($object instanceof PhabricatorSpacesInterface) {
         if (PhabricatorSpacesNamespaceQuery::getSpacesExist()) {
-          $fields[] = id(new PhabricatorSearchSpacesField())
+          $fields[] = id(new PhabricatorSpacesSearchField())
             ->setKey('spacePHIDs')
             ->setAliases(array('space', 'spaces'))
             ->setLabel(pht('Spaces'));
@@ -266,7 +266,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     }
 
     $query = $this->newQuery();
-    if ($query) {
+    if ($query && $this->shouldShowOrderField()) {
       $orders = $query->getBuiltinOrders();
       $orders = ipull($orders, 'name');
 
@@ -291,6 +291,10 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     }
 
     return $field_map;
+  }
+
+  protected function shouldShowOrderField() {
+    return true;
   }
 
   private function adjustFieldsForDisplay(array $field_map) {
@@ -509,6 +513,8 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
         $constraints);
     }
+
+    return $this;
   }
 
 
@@ -553,11 +559,9 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
    * @task construct
    */
   public static function getAllEngines() {
-    $engines = id(new PhutilSymbolLoader())
+    return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
-      ->loadObjects();
-
-    return $engines;
+      ->execute();
   }
 
 
@@ -962,7 +966,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
   public function newPagerForSavedQuery(PhabricatorSavedQuery $saved) {
     if ($this->shouldUseOffsetPaging()) {
-      $pager = new AphrontPagerView();
+      $pager = new PHUIPagerView();
     } else {
       $pager = new AphrontCursorPagerView();
     }

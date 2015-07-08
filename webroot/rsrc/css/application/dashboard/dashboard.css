@@ -10,8 +10,12 @@
   margin: 8px;
 }
 
-.dashboard-panel + .dashboard-panel {
-  margin-top: 16px;
+.dashboard-view .phui-object-box {
+  margin: 0 0 16px 0;
+}
+
+.dashboard-view .phui-object-box .phui-object-box {
+  margin: 0;
 }
 
 .device-desktop .aphront-multi-column-fluid .aphront-multi-column-2-up
@@ -31,7 +35,7 @@
 
 .aphront-multi-column-fluid
 .aphront-multi-column-column-outer.grippable
-.aphront-multi-column-column .dashboard-panel {
+.aphront-multi-column-column .dashboard-pane {
   cursor: move;
 }
 
@@ -68,20 +72,4 @@
 .aphront-multi-column-column-outer
 .aphront-multi-column-column .phui-info-view {
   margin: 0;
-}
-
-.dashboard-panel .phui-object-item-empty .phui-info-view {
-  margin: 0;
-}
-
-.dashboard-panel .dashboard-box {
-  padding: 12px;
-  background: #fff;
-  border-left: 1px solid {$lightblueborder};
-  border-right: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
-}
-
-.dashboard-panel .sprite-gradient .phui-action-header-title {
-  padding: 10px 4px;
 }

@@ -5,7 +5,6 @@ final class PHUIDocumentView extends AphrontTagView {
   /* For mobile displays, where do you want the sidebar */
   const NAV_BOTTOM = 'nav_bottom';
   const NAV_TOP = 'nav_top';
-  const FONT_SOURCE_SANS = 'source-sans';
 
   private $offset;
   private $header;
@@ -15,7 +14,6 @@ final class PHUIDocumentView extends AphrontTagView {
   private $bookname;
   private $bookdescription;
   private $mobileview;
-  private $fontKit;
   private $fluid;
 
   public function setOffset($offset) {
@@ -24,7 +22,7 @@ final class PHUIDocumentView extends AphrontTagView {
   }
 
   public function setHeader(PHUIHeaderView $header) {
-    $header->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE);
+    $header->setTall(true);
     $this->header = $header;
     return $this;
   }
@@ -53,11 +51,6 @@ final class PHUIDocumentView extends AphrontTagView {
     return $this;
   }
 
-  public function setFontKit($kit) {
-    $this->fontKit = $kit;
-    return $this;
-  }
-
   public function setFluid($fluid) {
     $this->fluid = $fluid;
     return $this;
@@ -81,15 +74,6 @@ final class PHUIDocumentView extends AphrontTagView {
 
   protected function getTagContent() {
     require_celerity_resource('phui-document-view-css');
-    if ($this->fontKit) {
-      require_celerity_resource('phui-fontkit-css');
-    }
-
-    switch ($this->fontKit) {
-      case self::FONT_SOURCE_SANS:
-        require_celerity_resource('font-source-sans-pro');
-        break;
-    }
 
     $classes = array();
     $classes[] = 'phui-document-view';
@@ -112,21 +96,7 @@ final class PHUIDocumentView extends AphrontTagView {
 
     $book = null;
     if ($this->bookname) {
-      $book = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-document-bookname grouped',
-        ),
-        array(
-          phutil_tag(
-            'span',
-            array('class' => 'bookname'),
-            $this->bookname),
-          phutil_tag(
-            'span',
-            array('class' => 'bookdescription'),
-          $this->bookdescription),
-        ));
+      $book = pht('%s (%s)', $this->bookname, $this->bookdescription);
     }
 
     $topnav = null;
@@ -149,24 +119,17 @@ final class PHUIDocumentView extends AphrontTagView {
         $this->bookName);
     }
 
-    if ($this->fontKit) {
-      $main_content = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-font-'.$this->fontKit,
-        ),
-        $this->renderChildren());
-    } else {
-      $main_content = $this->renderChildren();
-    }
+    $main_content = $this->renderChildren();
 
+    if ($book) {
+      $this->header->setSubheader($book);
+    }
     $content_inner = phutil_tag(
         'div',
         array(
           'class' => 'phui-document-inner',
         ),
         array(
-          $book,
           $this->header,
           $topnav,
           $main_content,

@@ -6,13 +6,13 @@
  */
 final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
-  private $taskIDs             = array();
-  private $taskPHIDs           = array();
-  private $authorPHIDs         = array();
-  private $ownerPHIDs          = array();
+  private $taskIDs;
+  private $taskPHIDs;
+  private $authorPHIDs;
+  private $ownerPHIDs;
   private $noOwner;
   private $anyOwner;
-  private $subscriberPHIDs     = array();
+  private $subscriberPHIDs;
   private $dateCreatedAfter;
   private $dateCreatedBefore;
   private $dateModifiedAfter;
@@ -216,75 +216,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     $task_dao = new ManiphestTask();
     $conn = $task_dao->establishConnection('r');
 
-    $where = array();
-    $where[] = $this->buildTaskIDsWhereClause($conn);
-    $where[] = $this->buildTaskPHIDsWhereClause($conn);
-    $where[] = $this->buildStatusWhereClause($conn);
-    $where[] = $this->buildStatusesWhereClause($conn);
-    $where[] = $this->buildDependenciesWhereClause($conn);
-    $where[] = $this->buildAuthorWhereClause($conn);
-    $where[] = $this->buildOwnerWhereClause($conn);
-    $where[] = $this->buildFullTextWhereClause($conn);
-
-    if ($this->dateCreatedAfter) {
-      $where[] = qsprintf(
-        $conn,
-        'task.dateCreated >= %d',
-        $this->dateCreatedAfter);
-    }
-
-    if ($this->dateCreatedBefore) {
-      $where[] = qsprintf(
-        $conn,
-        'task.dateCreated <= %d',
-        $this->dateCreatedBefore);
-    }
-
-    if ($this->dateModifiedAfter) {
-      $where[] = qsprintf(
-        $conn,
-        'task.dateModified >= %d',
-        $this->dateModifiedAfter);
-    }
-
-    if ($this->dateModifiedBefore) {
-      $where[] = qsprintf(
-        $conn,
-        'task.dateModified <= %d',
-        $this->dateModifiedBefore);
-    }
-
-    if ($this->priorities) {
-      $where[] = qsprintf(
-        $conn,
-        'task.priority IN (%Ld)',
-        $this->priorities);
-    }
-
-    if ($this->subpriorities) {
-      $where[] = qsprintf(
-        $conn,
-        'task.subpriority IN (%Lf)',
-        $this->subpriorities);
-    }
-
-    if ($this->subpriorityMin) {
-      $where[] = qsprintf(
-        $conn,
-        'task.subpriority >= %f',
-        $this->subpriorityMin);
-    }
-
-    if ($this->subpriorityMax) {
-      $where[] = qsprintf(
-        $conn,
-        'task.subpriority <= %f',
-        $this->subpriorityMax);
-    }
-
-    $where[] = $this->buildWhereClauseParts($conn);
-
-    $where = $this->formatWhereClause($where);
+    $where = $this->buildWhereClause($conn);
 
     $group_column = '';
     switch ($this->groupBy) {
@@ -392,26 +324,99 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $tasks;
   }
 
-  private function buildTaskIDsWhereClause(AphrontDatabaseConnection $conn) {
-    if (!$this->taskIDs) {
-      return null;
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
+
+    $where[] = $this->buildStatusWhereClause($conn);
+    $where[] = $this->buildDependenciesWhereClause($conn);
+    $where[] = $this->buildOwnerWhereClause($conn);
+    $where[] = $this->buildFullTextWhereClause($conn);
+
+    if ($this->taskIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.id in (%Ld)',
+        $this->taskIDs);
     }
 
-    return qsprintf(
-      $conn,
-      'task.id in (%Ld)',
-      $this->taskIDs);
-  }
-
-  private function buildTaskPHIDsWhereClause(AphrontDatabaseConnection $conn) {
-    if (!$this->taskPHIDs) {
-      return null;
+    if ($this->taskPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.phid in (%Ls)',
+        $this->taskPHIDs);
     }
 
-    return qsprintf(
-      $conn,
-      'task.phid in (%Ls)',
-      $this->taskPHIDs);
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.status IN (%Ls)',
+        $this->statuses);
+    }
+
+    if ($this->authorPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.authorPHID in (%Ls)',
+        $this->authorPHIDs);
+    }
+
+    if ($this->dateCreatedAfter) {
+      $where[] = qsprintf(
+        $conn,
+        'task.dateCreated >= %d',
+        $this->dateCreatedAfter);
+    }
+
+    if ($this->dateCreatedBefore) {
+      $where[] = qsprintf(
+        $conn,
+        'task.dateCreated <= %d',
+        $this->dateCreatedBefore);
+    }
+
+    if ($this->dateModifiedAfter) {
+      $where[] = qsprintf(
+        $conn,
+        'task.dateModified >= %d',
+        $this->dateModifiedAfter);
+    }
+
+    if ($this->dateModifiedBefore) {
+      $where[] = qsprintf(
+        $conn,
+        'task.dateModified <= %d',
+        $this->dateModifiedBefore);
+    }
+
+    if ($this->priorities !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.priority IN (%Ld)',
+        $this->priorities);
+    }
+
+    if ($this->subpriorities !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.subpriority IN (%Lf)',
+        $this->subpriorities);
+    }
+
+    if ($this->subpriorityMin !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.subpriority >= %f',
+        $this->subpriorityMin);
+    }
+
+    if ($this->subpriorityMax !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.subpriority <= %f',
+        $this->subpriorityMax);
+    }
+
+    return $where;
   }
 
   private function buildStatusWhereClause(AphrontDatabaseConnection $conn) {
@@ -446,27 +451,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           'task.status = %s',
           $constant);
     }
-  }
-
-  private function buildStatusesWhereClause(AphrontDatabaseConnection $conn) {
-    if ($this->statuses) {
-      return qsprintf(
-        $conn,
-        'task.status IN (%Ls)',
-        $this->statuses);
-    }
-    return null;
-  }
-
-  private function buildAuthorWhereClause(AphrontDatabaseConnection $conn) {
-    if (!$this->authorPHIDs) {
-      return null;
-    }
-
-    return qsprintf(
-      $conn,
-      'task.authorPHID in (%Ls)',
-      $this->authorPHIDs);
   }
 
   private function buildOwnerWhereClause(AphrontDatabaseConnection $conn) {
@@ -590,7 +574,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         id(new ManiphestTask())->getTableName());
     }
 
-    if ($this->subscriberPHIDs) {
+    if ($this->subscriberPHIDs !== null) {
       $joins[] = qsprintf(
         $conn_r,
         'JOIN %T e_ccs ON e_ccs.src = task.phid '.

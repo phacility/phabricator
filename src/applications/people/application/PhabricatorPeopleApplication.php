@@ -73,8 +73,6 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
         => 'PhabricatorPeopleProfileController',
       '/p/(?P<username>[\w._-]+)/calendar/'
         => 'PhabricatorPeopleCalendarController',
-      '/p/(?P<username>[\w._-]+)/feed/'
-        => 'PhabricatorPeopleFeedController',
     );
   }
 

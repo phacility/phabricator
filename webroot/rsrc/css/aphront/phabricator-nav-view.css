@@ -6,40 +6,16 @@
   cursor: col-resize;
 }
 
-.phabricator-nav {
-  /* Force top margins in page content not to collapse with the top margin of
-     the navigation container by giving it padding. Then put it in the right
-     position by undoing the padding with a margin. */
-  padding-top: 1px;
-  margin-top: -1px;
-}
-
-.phabricator-nav-column-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  /* On the iPhone, scrolling down causes the revealed area to fill with white,
-     then draw with the texture after the action completes. Just make the
-     element extend off the bottom of the screen to prevent this. */
-  bottom: -480px;
-  width: 204px;
-  background: #dbdde0;
-  border-right: 1px solid {$hovergrey};
-}
-
-.phabricator-nav-column-background,
 .phabricator-nav-local,
 .phabricator-nav-drag {
   display: none;
 }
 
-.device-desktop .has-local-nav .phabricator-nav-column-background,
 .device-desktop .has-local-nav .phabricator-nav-local,
 .device-desktop .has-local-nav .phabricator-nav-drag {
   display: block;
 }
 
-.device .phabricator-side-menu-home .phabricator-nav-column-background,
 .device .phabricator-side-menu-home .phabricator-nav-local {
   display: block;
 }
@@ -56,6 +32,11 @@
   white-space: nowrap;
   overflow-x: hidden;
   overflow-y: auto;
+  margin-top: 8px;
+}
+
+.phabricator-side-menu-home .phabricator-nav-local {
+  margin-top: 16px;
 }
 
 .phabricator-nav-drag {
@@ -78,6 +59,10 @@
   background-repeat: no-repeat;
 }
 
+.phabricator-nav-content {
+  overflow: hidden;
+}
+
 .device-desktop .phabricator-standard-page-body .has-drag-nav
   .phabricator-nav-content {
   margin-left: 212px;
@@ -91,7 +76,8 @@
   display: none;
 }
 
-.device-phone .phabricator-side-menu-home .phabricator-nav-column-background,
 .device-phone .phabricator-side-menu-home .phabricator-nav-local {
   width: 100%;
+  padding-top: 0;
+  margin-top: 0;
 }

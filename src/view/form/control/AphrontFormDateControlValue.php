@@ -10,7 +10,6 @@ final class AphrontFormDateControlValue extends Phobject {
   private $zone;
   private $optional;
 
-
   public function getValueDate() {
     return $this->valueDate;
   }
@@ -56,6 +55,10 @@ final class AphrontFormDateControlValue extends Phobject {
     return $this->optional;
   }
 
+  public function getViewer() {
+    return $this->viewer;
+  }
+
   public static function newFromParts(
     PhabricatorUser $viewer,
     $year,
@@ -71,8 +74,7 @@ final class AphrontFormDateControlValue extends Phobject {
         $year,
         $month,
         $day,
-        coalesce($time, '12:00 AM'),
-        $value);
+        coalesce($time, '12:00 AM'));
     $value->valueEnabled = $enabled;
 
     return $value;
@@ -85,8 +87,7 @@ final class AphrontFormDateControlValue extends Phobject {
     list($value->valueDate, $value->valueTime) =
       $value->getFormattedDateFromDate(
         $request->getStr($key.'_d'),
-        $request->getStr($key.'_t'),
-        $value);
+        $request->getStr($key.'_t'));
 
     $value->valueEnabled = $request->getStr($key.'_e');
     return $value;
@@ -108,8 +109,7 @@ final class AphrontFormDateControlValue extends Phobject {
         $year,
         $month,
         $day,
-        $time,
-        $value);
+        $time);
 
     return $value;
   }
@@ -123,8 +123,7 @@ final class AphrontFormDateControlValue extends Phobject {
     list($value->valueDate, $value->valueTime) =
       $value->getFormattedDateFromDate(
         idx($dictionary, 'd'),
-        idx($dictionary, 't'),
-        $value);
+        idx($dictionary, 't'));
 
     $value->valueEnabled = idx($dictionary, 'e');
 
@@ -205,29 +204,25 @@ final class AphrontFormDateControlValue extends Phobject {
   }
 
   private function getTimeFormat() {
-    $preferences = $this->viewer->loadPreferences();
-    $pref_time_format = PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT;
-
-    return $preferences->getPreference($pref_time_format, 'g:i A');
+    return $this->getViewer()
+      ->getPreference(PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT);
   }
 
   private function getDateFormat() {
-    $preferences = $this->viewer->loadPreferences();
-    $pref_date_format = PhabricatorUserPreferences::PREFERENCE_DATE_FORMAT;
-
-    return $preferences->getPreference($pref_date_format, 'Y-m-d');
+    return $this->getViewer()
+      ->getPreference(PhabricatorUserPreferences::PREFERENCE_DATE_FORMAT);
   }
 
-  private function getFormattedDateFromDate($date, $time, $value) {
+  private function getFormattedDateFromDate($date, $time) {
     $original_input = $date;
-    $zone = $value->getTimezone();
-    $separator = $value->getFormatSeparator();
+    $zone = $this->getTimezone();
+    $separator = $this->getFormatSeparator();
     $parts = preg_split('@[,./:-]@', $date);
     $date = implode($separator, $parts);
     $date = id(new DateTime($date, $zone));
 
     if ($date) {
-      $date = $date->format($value->getDateFormat());
+      $date = $date->format($this->getDateFormat());
     } else {
       $date = $original_input;
     }
@@ -235,8 +230,8 @@ final class AphrontFormDateControlValue extends Phobject {
     $date = id(new DateTime("{$date} {$time}", $zone));
 
     return array(
-      $date->format($value->getDateFormat()),
-      $date->format($value->getTimeFormat()),
+      $date->format($this->getDateFormat()),
+      $date->format($this->getTimeFormat()),
     );
   }
 
@@ -244,14 +239,14 @@ final class AphrontFormDateControlValue extends Phobject {
     $year,
     $month,
     $day,
-    $time,
-    $value) {
-    $zone = $value->getTimezone();
+    $time) {
+
+    $zone = $this->getTimezone();
     $date_time = id(new DateTime("{$year}-{$month}-{$day} {$time}", $zone));
 
     return array(
-      $date_time->format($value->getDateFormat()),
-      $date_time->format($value->getTimeFormat()),
+      $date_time->format($this->getDateFormat()),
+      $date_time->format($this->getTimeFormat()),
     );
   }
 

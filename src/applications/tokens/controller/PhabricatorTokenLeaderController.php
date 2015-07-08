@@ -11,7 +11,7 @@ final class PhabricatorTokenLeaderController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $pager = new AphrontPagerView();
+    $pager = new PHUIPagerView();
     $pager->setURI($request->getRequestURI(), 'page');
     $pager->setOffset($request->getInt('page'));
 
@@ -30,7 +30,6 @@ final class PhabricatorTokenLeaderController
     }
 
     $list = new PHUIObjectItemListView();
-    $list->setStackable(true);
     foreach ($phids as $object) {
       $count = idx($counts, $object, 0);
       $item = id(new PHUIObjectItemView());
@@ -46,7 +45,7 @@ final class PhabricatorTokenLeaderController
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->appendChild($list);
+      ->setObjectList($list);
 
     $nav = $this->buildSideNav();
     $nav->setCrumbs(

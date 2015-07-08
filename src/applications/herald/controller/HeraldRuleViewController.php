@@ -152,7 +152,8 @@ final class HeraldRuleViewController extends HeraldController {
         PHUIPropertyListView::ICON_SUMMARY);
 
       $handles = $viewer->loadHandles(HeraldAdapter::getHandlePHIDs($rule));
-      $view->addTextContent($adapter->renderRuleAsText($rule, $handles));
+      $rule_text = $adapter->renderRuleAsText($rule, $handles, $viewer);
+      $view->addTextContent($rule_text);
     }
 
     return $view;

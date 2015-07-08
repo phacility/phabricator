@@ -81,9 +81,8 @@ final class PhabricatorMainMenuView extends AphrontView {
 
     $application_menu = $this->renderApplicationMenu();
     $classes = array();
-    $classes[] = 'phabricator-main-menu';
-    $classes[] = 'sprite-main-header';
-    $classes[] = 'main-header-'.PhabricatorEnv::getEnvConfig('ui.header-color');
+    $classes[] = 'phabricator-main-menu sprite-main-header';
+    $classes[] = 'phabricator-main-menu-background';
 
     return phutil_tag(
       'div',
@@ -161,7 +160,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'meta'  => array(
           'map' => array(
             $header_id => 'phabricator-application-menu-expanded',
-            $button_id => 'white',
+            $button_id => 'menu-icon-selected',
           ),
         ),
       ),
@@ -224,7 +223,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'meta'  => array(
           'map' => array(
             $header_id => 'phabricator-search-menu-expanded',
-            $button_id => 'white',
+            $button_id => 'menu-icon-selected',
           ),
         ),
       ),
@@ -277,6 +276,13 @@ final class PhabricatorMainMenuView extends AphrontView {
       }
     }
 
+    $color = PhabricatorEnv::getEnvConfig('ui.header-color');
+    if ($color == 'light') {
+      $color = 'dark';
+    } else {
+      $color = 'light';
+    }
+
     return phutil_tag(
       'a',
       array(
@@ -293,13 +299,13 @@ final class PhabricatorMainMenuView extends AphrontView {
         phutil_tag(
           'span',
           array(
-            'class' => 'sprite-menu phabricator-main-menu-eye',
+            'class' => 'sprite-menu phabricator-main-menu-eye '.$color.'-eye',
           ),
           ''),
           phutil_tag(
           'span',
           array(
-            'class' => 'sprite-menu phabricator-main-menu-logo',
+            'class' => 'sprite-menu phabricator-main-menu-logo '.$color.'-logo',
             'style' => $style_logo,
           ),
           ''),

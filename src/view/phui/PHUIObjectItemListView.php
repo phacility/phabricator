@@ -5,13 +5,10 @@ final class PHUIObjectItemListView extends AphrontTagView {
   private $header;
   private $items;
   private $pager;
-  private $stackable;
   private $noDataString;
   private $flush;
-  private $plain;
   private $allowEmptyList;
   private $states;
-
 
   public function setAllowEmptyList($allow_empty_list) {
     $this->allowEmptyList = $allow_empty_list;
@@ -24,11 +21,6 @@ final class PHUIObjectItemListView extends AphrontTagView {
 
   public function setFlush($flush) {
     $this->flush = $flush;
-    return $this;
-  }
-
-  public function setPlain($plain) {
-    $this->plain = $plain;
     return $this;
   }
 
@@ -52,11 +44,6 @@ final class PHUIObjectItemListView extends AphrontTagView {
     return $this;
   }
 
-  public function setStackable($stackable) {
-    $this->stackable = $stackable;
-    return $this;
-  }
-
   public function setStates($states) {
     $this->states = $states;
     return $this;
@@ -70,18 +57,11 @@ final class PHUIObjectItemListView extends AphrontTagView {
     $classes = array();
 
     $classes[] = 'phui-object-item-list-view';
-    if ($this->stackable) {
-      $classes[] = 'phui-object-list-stackable';
-    }
     if ($this->states) {
       $classes[] = 'phui-object-list-states';
-      $classes[] = 'phui-object-list-stackable';
     }
     if ($this->flush) {
       $classes[] = 'phui-object-list-flush';
-    }
-    if ($this->plain) {
-      $classes[] = 'phui-object-list-plain';
     }
 
     return array(

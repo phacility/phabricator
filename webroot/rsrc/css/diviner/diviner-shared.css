@@ -65,10 +65,16 @@
   padding: 0 8px 16px 0;
 }
 
-body .diviner-document-section .phui-header-view {
+body .diviner-document-section .phui-header-header {
   width: 100%;
   font-size: 20px;
-  font-weight: 400;
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+}
+
+body .diviner-document-section .phui-header-shell.phui-bleed-header {
+  padding: 0;
 }
 
 .phui-property-list-view + .diviner-document-section {
@@ -149,8 +155,8 @@ body .diviner-document-section .phui-header-view {
 }
 
 .diviner-book-item-title {
-  font-weight: 700;
-  font-size: 16px;
+  font-weight: bold;
+  font-size: 15px;
   color: {$darkbluetext};
 }
 

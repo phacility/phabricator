@@ -56,12 +56,8 @@ be able to resolve it more easily if you file a report based on HEAD. (For
 example, an old stack trace may not have the right line numbers, which will
 make it more difficult for us to figure out what's going wrong.)
 
-To update Phabricator, use a script like this one:
-
-http://www.phabricator.com/rsrc/install/update_phabricator.sh
-
-This script will require some adjustments depending on how your setup is
-configured, which webserver you are using, etc.
+To update Phabricator, use a script like the one described in
+@{article:Upgrading Phabricator}.
 
 **If you can not update** for some reason, please include the version of
 Phabricator you are running in your report. The version is just the Git hash

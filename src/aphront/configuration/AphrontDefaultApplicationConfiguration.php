@@ -173,13 +173,11 @@ class AphrontDefaultApplicationConfiguration
           $ex->getRejection()),
       );
 
+      $list = null;
       if ($ex->getCapabilityName()) {
         $list = $ex->getMoreInfo();
         foreach ($list as $key => $item) {
-          $list[$key] = phutil_tag('li', array(), $item);
-        }
-        if ($list) {
-          $list = phutil_tag('ul', array(), $list);
+          $list[$key] = $item;
         }
 
         $content[] = phutil_tag(
@@ -189,7 +187,6 @@ class AphrontDefaultApplicationConfiguration
           ),
           pht('Users with the "%s" capability:', $ex->getCapabilityName()));
 
-        $content[] = $list;
       }
 
       $dialog = id(new AphrontDialogView())
@@ -197,6 +194,10 @@ class AphrontDefaultApplicationConfiguration
         ->setClass('aphront-access-dialog')
         ->setUser($user)
         ->appendChild($content);
+
+      if ($list) {
+        $dialog->appendList($list);
+      }
 
       if ($this->getRequest()->isAjax()) {
         $dialog->addCancelButton('/', pht('Close'));

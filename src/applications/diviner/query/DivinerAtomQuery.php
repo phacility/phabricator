@@ -14,10 +14,12 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $nodeHashes;
   private $titles;
   private $nameContains;
+  private $repositoryPHIDs;
 
   private $needAtoms;
   private $needExtends;
   private $needChildren;
+  private $needRepositories;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -79,7 +81,6 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
-
   /**
    * Include or exclude "ghosts", which are symbols which used to exist but do
    * not exist currently (for example, a function which existed in an older
@@ -110,6 +111,16 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
+  public function withRepositoryPHIDs(array $repository_phids) {
+    $this->repositoryPHIDs = $repository_phids;
+    return $this;
+  }
+
+  public function needRepositories($need_repositories) {
+    $this->needRepositories = $need_repositories;
+    return $this;
+  }
+
   protected function loadPage() {
     $table = new DivinerLiveSymbol();
     $conn_r = $table->establishConnection('r');
@@ -126,6 +137,8 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   }
 
   protected function willFilterPage(array $atoms) {
+    assert_instances_of($atoms, 'DivinerLiveSymbol');
+
     $books = array_unique(mpull($atoms, 'getBookPHID'));
 
     $books = id(new DivinerBookQuery())
@@ -137,6 +150,7 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     foreach ($atoms as $key => $atom) {
       $book = idx($books, $atom->getBookPHID());
       if (!$book) {
+        $this->didRejectResult($atom);
         unset($atoms[$key]);
         continue;
       }
@@ -158,12 +172,9 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     // Load all of the symbols this symbol extends, recursively. Commonly,
     // this means all the ancestor classes and interfaces it extends and
     // implements.
-
     if ($this->needExtends) {
-
       // First, load all the matching symbols by name. This does 99% of the
       // work in most cases, assuming things are named at all reasonably.
-
       $names = array();
       foreach ($atoms as $atom) {
         if (!$atom->getAtom()) {
@@ -208,7 +219,7 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           }
 
           // If we found matches in the same documentation book, prefer them
-          // over other matches. Otherwise, look at all the the matches.
+          // over other matches. Otherwise, look at all the matches.
           $matches = $xatoms[$xref->getName()][$xref->getType()];
           if (isset($matches[$atom->getBookPHID()])) {
             $maybe = $matches[$atom->getBookPHID()];
@@ -260,6 +271,31 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       $this->attachAllChildren($atoms, $children, $this->needExtends);
     }
 
+    if ($this->needRepositories) {
+      $repositories = id(new PhabricatorRepositoryQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs(mpull($atoms, 'getRepositoryPHID'))
+        ->execute();
+      $repositories = mpull($repositories, null, 'getPHID');
+
+      foreach ($atoms as $key => $atom) {
+        if ($atom->getRepositoryPHID() === null) {
+          $atom->attachRepository(null);
+          continue;
+        }
+
+        $repository = idx($repositories, $atom->getRepositoryPHID());
+
+        if (!$repository) {
+          $this->didRejectResult($atom);
+          unset($atom[$key]);
+          continue;
+        }
+
+        $atom->attachRepository($repository);
+      }
+    }
+
     return $atoms;
   }
 
@@ -303,6 +339,7 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     if ($this->titles) {
       $hashes = array();
+
       foreach ($this->titles as $title) {
         $slug = DivinerAtomRef::normalizeTitleString($title);
         $hash = PhabricatorHash::digestForIndex($slug);
@@ -318,6 +355,7 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     if ($this->contexts) {
       $with_null = false;
       $contexts = $this->contexts;
+
       foreach ($contexts as $key => $value) {
         if ($value === null) {
           unset($contexts[$key]);
@@ -373,21 +411,26 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     }
 
     if ($this->nameContains) {
-      // NOTE: This CONVERT() call makes queries case-insensitive, since the
-      // column has binary collation. Eventually, this should move into
+      // NOTE: This `CONVERT()` call makes queries case-insensitive, since
+      // the column has binary collation. Eventually, this should move into
       // fulltext.
-
       $where[] = qsprintf(
         $conn_r,
         'CONVERT(name USING utf8) LIKE %~',
         $this->nameContains);
     }
 
+    if ($this->repositoryPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'repositoryPHID IN (%Ls)',
+        $this->repositoryPHIDs);
+    }
+
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
   }
-
 
   /**
    * Walk a list of atoms and collect all the node hashes of the atoms'
@@ -413,6 +456,7 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       foreach ($child_hashes as $hash) {
         $hashes[$hash] = $hash;
       }
+
       if ($recurse_up) {
         $hashes += $this->getAllChildHashes($symbol->getExtends(), true);
       }
@@ -420,7 +464,6 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     return $hashes;
   }
-
 
   /**
    * Attach child atoms to existing atoms. In recursive mode, also attach child
@@ -452,7 +495,9 @@ final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           $symbol_children[] = $children[$hash];
         }
       }
+
       $symbol->attachChildren($symbol_children);
+
       if ($recurse_up) {
         $this->attachAllChildren($symbol->getExtends(), $children, true);
       }

@@ -59,7 +59,7 @@ final class DiffusionBrowseDirectoryController
 
       $browse_panel = new PHUIObjectBoxView();
       $browse_panel->setHeaderText($drequest->getPath(), '/');
-      $browse_panel->appendChild($browse_table);
+      $browse_panel->setTable($browse_table);
 
       $content[] = $browse_panel;
     }

@@ -22,6 +22,7 @@ final class PhabricatorCelerityApplication extends PhabricatorApplication {
     return array(
       '/res/' => array(
         '(?:(?P<mtime>[0-9]+)T/)?'.
+        '(?:(?P<postprocessor>[^/]+)X/)?'.
         '(?P<library>[^/]+)/'.
         '(?P<hash>[a-f0-9]{8})/'.
         '(?P<path>.+\.(?:'.$extensions.'))'

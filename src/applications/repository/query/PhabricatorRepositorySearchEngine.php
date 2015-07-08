@@ -153,6 +153,7 @@ final class PhabricatorRepositorySearchEngine
 
       $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
+        ->setObject($repository)
         ->setHeader($repository->getName())
         ->setObjectName('r'.$repository->getCallsign())
         ->setHref($this->getApplicationURI($repository->getCallsign().'/'));
@@ -209,7 +210,11 @@ final class PhabricatorRepositorySearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No repositories found for this query.'));
+
+    return $result;
   }
 
   protected function willUseSavedQuery(PhabricatorSavedQuery $saved) {

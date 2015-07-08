@@ -8,7 +8,7 @@ final class ConpherenceUpdateThreadConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return pht('Update an existing conpherence thread.');
+    return pht('Update an existing conpherence room.');
   }
 
   protected function defineParamTypes() {
@@ -28,13 +28,13 @@ final class ConpherenceUpdateThreadConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_USAGE_NO_THREAD_ID' => pht(
-        'You must specify a thread id or thread phid to query transactions '.
+      'ERR_USAGE_NO_ROOM_ID' => pht(
+        'You must specify a room id or room phid to query transactions '.
         'from.'),
-      'ERR_USAGE_THREAD_NOT_FOUND' => pht(
-        'Thread does not exist or logged in user can not see it.'),
+      'ERR_USAGE_ROOM_NOT_FOUND' => pht(
+        'room does not exist or logged in user can not see it.'),
       'ERR_USAGE_ONLY_SELF_REMOVE' => pht(
-        'Only a user can remove themselves from a thread.'),
+        'Only a user can remove themselves from a room.'),
       'ERR_USAGE_NO_UPDATES' => pht(
         'You must specify data that actually updates the conpherence.'),
     );
@@ -52,11 +52,11 @@ final class ConpherenceUpdateThreadConduitAPIMethod
     } else if ($phid) {
       $query->withPHIDs(array($phid));
     } else {
-      throw new ConduitException('ERR_USAGE_NO_THREAD_ID');
+      throw new ConduitException('ERR_USAGE_NO_ROOM_ID');
     }
     $conpherence = $query->executeOne();
     if (!$conpherence) {
-      throw new ConduitException('ERR_USAGE_THREAD_NOT_FOUND');
+      throw new ConduitException('ERR_USAGE_ROOM_NOT_FOUND');
     }
 
     $source = PhabricatorContentSource::newFromConduitRequest($request);

@@ -137,19 +137,13 @@ final class AphrontFormDateControl extends AphrontFormControl {
   }
 
   private function getTimeFormat() {
-    $viewer = $this->getUser();
-    $preferences = $viewer->loadPreferences();
-    $pref_time_format = PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT;
-
-    return $preferences->getPreference($pref_time_format, 'g:i A');
+    return $this->getUser()
+      ->getPreference(PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT);
   }
 
   private function getDateFormat() {
-    $viewer = $this->getUser();
-    $preferences = $viewer->loadPreferences();
-    $pref_date_format = PhabricatorUserPreferences::PREFERENCE_DATE_FORMAT;
-
-    return $preferences->getPreference($pref_date_format, 'Y-m-d');
+    return $this->getUser()
+      ->getPreference(PhabricatorUserPreferences::PREFERENCE_DATE_FORMAT);
   }
 
   private function getTimeInputValue() {
@@ -265,8 +259,13 @@ final class AphrontFormDateControl extends AphrontFormControl {
       ),
       $time_sel);
 
+    $preferences = $this->user->loadPreferences();
+    $pref_week_start = PhabricatorUserPreferences::PREFERENCE_WEEK_START_DAY;
+    $week_start = $preferences->getPreference($pref_week_start, 0);
+
     Javelin::initBehavior('fancy-datepicker', array(
       'format' => $this->getDateFormat(),
+      'weekStart' => $week_start,
       ));
 
     $classes = array();

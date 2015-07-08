@@ -116,6 +116,35 @@ class PhabricatorApplicationTransactionFeedStory
     return $text;
   }
 
+  public function renderTextBody() {
+    $all_bodies = '';
+    $new_target = PhabricatorApplicationTransaction::TARGET_TEXT;
+    $xaction_phids = $this->getValue('transactionPHIDs');
+    foreach ($xaction_phids as $xaction_phid) {
+      $secondary_xaction = $this->getObject($xaction_phid);
+      $old_target = $secondary_xaction->getRenderingTarget();
+      $secondary_xaction->setRenderingTarget($new_target);
+      $secondary_xaction->setHandles($this->getHandles());
+
+      $body = $secondary_xaction->getBodyForMail();
+      if (nonempty($body)) {
+        $all_bodies .= $body."\n";
+      }
+      $secondary_xaction->setRenderingTarget($old_target);
+    }
+    return trim($all_bodies);
+  }
+
+  public function getImageURI() {
+    $author_phid = $this->getPrimaryTransaction()->getAuthorPHID();
+    return $this->getHandle($author_phid)->getImageURI();
+  }
+
+  public function getURI() {
+    $handle = $this->getHandle($this->getPrimaryObjectPHID());
+    return PhabricatorEnv::getProductionURI($handle->getURI());
+  }
+
   public function renderAsTextForDoorkeeper(
     DoorkeeperFeedStoryPublisher $publisher) {
 

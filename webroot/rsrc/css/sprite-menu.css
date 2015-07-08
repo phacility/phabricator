@@ -10,18 +10,27 @@
 
 @media
 only screen and (min-device-pixel-ratio: 1.5),
-only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+only screen and (-webkit-min-device-pixel-ratio: 1.5),
+only screen and (min-resolution: 1.5dppx) {
   .sprite-menu {
     background-image: url(/rsrc/image/sprite-menu-X2.png);
-    background-size: 97px 82px;
+    background-size: 97px 123px;
   }
 }
 
 
-.phabricator-main-menu-logo {
+.dark-logo {
   background-position: 0px 0px;
 }
 
-.phabricator-main-menu-eye {
+.dark-eye {
+  background-position: 0px -82px;
+}
+
+.light-logo {
   background-position: 0px -41px;
+}
+
+.light-eye {
+  background-position: -41px -82px;
 }

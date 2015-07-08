@@ -2,7 +2,7 @@
 
 final class ConpherenceThreadListView extends AphrontView {
 
-  const SEE_MORE_LIMIT = 5;
+  const SEE_MORE_LIMIT = 15;
 
   private $baseURI;
   private $threads;
@@ -25,40 +25,25 @@ final class ConpherenceThreadListView extends AphrontView {
       ->addClass('conpherence-menu')
       ->setID('conpherence-menu');
 
-    $policy_objects = ConpherenceThread::loadPolicyObjects(
+    $policy_objects = ConpherenceThread::loadViewPolicyObjects(
       $this->getUser(),
       $this->threads);
 
-    $grouped = mgroup($this->threads, 'getIsRoom');
-    $rooms = idx($grouped, 1, array());
-    $this->addRoomsToMenu($menu, $rooms, $policy_objects);
-    $messages = idx($grouped, 0, array());
-    $this->addMessagesToMenu($menu, $messages);
+    $this->addRoomsToMenu($menu, $this->threads, $policy_objects);
 
     return $menu;
   }
 
-  public function renderSingleThread(ConpherenceThread $thread) {
-    $policy_objects = id(new PhabricatorPolicyQuery())
-      ->setViewer($this->getUser())
-      ->setObject($thread)
-      ->execute();
+  public function renderSingleThread(
+    ConpherenceThread $thread,
+    array $policy_objects) {
+    assert_instances_of($policy_objects, 'PhabricatorPolicy');
     return $this->renderThread($thread, $policy_objects);
-  }
-
-  public function renderThreadsHTML() {
-    $thread_html = array();
-
-    foreach ($this->threads as $thread) {
-      $thread_html[] = $this->renderSingleThread($thread);
-    }
-
-    return phutil_implode_html('', $thread_html);
   }
 
   private function renderThreadItem(
     ConpherenceThread $thread,
-    $policy_objects = array()) {
+    array $policy_objects) {
     return id(new PHUIListItemView())
       ->setType(PHUIListItemView::TYPE_CUSTOM)
       ->setName($this->renderThread($thread, $policy_objects));
@@ -72,12 +57,9 @@ final class ConpherenceThreadListView extends AphrontView {
 
     $uri = '/'.$thread->getMonogram();
     $data = $thread->getDisplayData($user);
-    $icon = null;
-    if ($thread->getIsRoom()) {
-      $icon = id(new PHUIIconView())
-        ->addClass('msr')
-        ->setIconFont($thread->getPolicyIconName($policy_objects));
-    }
+    $icon = id(new PHUIIconView())
+      ->addClass('msr')
+      ->setIconFont($thread->getPolicyIconName($policy_objects));
     $title = phutil_tag(
       'span',
       array(),
@@ -141,7 +123,7 @@ final class ConpherenceThreadListView extends AphrontView {
 
       $create_item = id(new PHUIListItemView())
         ->setType(PHUIListItemView::TYPE_LINK)
-        ->setHref('/conpherence/room/new/')
+        ->setHref('/conpherence/new/')
         ->setWorkflow(true)
         ->setName(pht('Create a Room'));
       $menu->addMenuItem($create_item);
@@ -150,25 +132,6 @@ final class ConpherenceThreadListView extends AphrontView {
     }
 
     $this->addThreadsToMenu($menu, $rooms, $policy_objects);
-    return $menu;
-  }
-
-  private function addMessagesToMenu(
-    PHUIListView $menu,
-    array $conpherences) {
-
-    $header = $this->renderMenuItemHeader(
-      pht('Messages'),
-      'conpherence-message-list-header');
-    $menu->addMenuItem($header);
-
-    if (empty($conpherences)) {
-      $menu->addMenuItem($this->getNoMessagesMenuItem());
-      return $menu;
-    }
-
-    $this->addThreadsToMenu($menu, $conpherences, array());
-
     return $menu;
   }
 
@@ -187,21 +150,14 @@ final class ConpherenceThreadListView extends AphrontView {
       $more_threads = array_slice($threads, self::SEE_MORE_LIMIT);
     }
 
-    $is_room = false;
     foreach ($show_threads as $thread) {
       $item = $this->renderThreadItem($thread, $policy_objects);
       $menu->addMenuItem($item);
-      $is_room = $thread->getIsRoom();
     }
 
     if ($more_threads) {
-      if ($is_room) {
-        $search_uri = '/conpherence/search/query/participant/';
-        $sigil = 'more-room';
-      } else {
-        $search_uri = '/conpherence/search/query/messages/';
-        $sigil = 'more-message';
-      }
+      $search_uri = '/conpherence/search/query/participant/';
+      $sigil = 'more-room';
 
       $more_item = id(new PHUIListItemView())
         ->setType(PHUIListItemView::TYPE_LINK)
@@ -249,19 +205,6 @@ final class ConpherenceThreadListView extends AphrontView {
       ->setName($title)
       ->addClass($class);
     return $item;
-  }
-
-  private function getNoMessagesMenuItem() {
-    $message = phutil_tag(
-      'div',
-      array(
-        'class' => 'no-conpherences-menu-item',
-      ),
-      pht('No Messages'));
-
-    return id(new PHUIListItemView())
-      ->setType(PHUIListItemView::TYPE_CUSTOM)
-      ->setName($message);
   }
 
   private function getNoRoomsMenuItem() {

@@ -141,7 +141,7 @@ final class AlmanacServiceViewController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
+      ->setTable($table);
   }
 
 }

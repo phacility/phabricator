@@ -224,36 +224,11 @@ abstract class PhabricatorFileStorageEngine extends Phobject {
    * @task load
    */
   public static function loadAllEngines() {
-    static $engines;
-
-    if ($engines === null) {
-      $objects = id(new PhutilSymbolLoader())
-        ->setAncestorClass(__CLASS__)
-        ->loadObjects();
-
-      $map = array();
-      foreach ($objects as $engine) {
-        $key = $engine->getEngineIdentifier();
-        if (empty($map[$key])) {
-          $map[$key] = $engine;
-        } else {
-          throw new Exception(
-            pht(
-              'Storage engines "%s" and "%s" have the same engine '.
-              'identifier "%s". Each storage engine must have a unique '.
-              'identifier.',
-              get_class($engine),
-              get_class($map[$key]),
-              $key));
-        }
-      }
-
-      $map = msort($map, 'getEnginePriority');
-
-      $engines = $map;
-    }
-
-    return $engines;
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->setUniqueMethod('getEngineIdentifier')
+      ->setSortMethod('getEnginePriority')
+      ->execute();
   }
 
 

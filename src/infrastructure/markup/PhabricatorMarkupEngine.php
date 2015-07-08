@@ -198,10 +198,7 @@ final class PhabricatorMarkupEngine extends Phobject {
     }
 
     if (!isset($this->objects[$key]['output'])) {
-      throw new Exception(
-        pht(
-          'Call %s before using results.',
-          'process()'));
+      throw new PhutilInvalidStateException('process');
     }
   }
 

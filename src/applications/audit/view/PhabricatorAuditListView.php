@@ -141,10 +141,13 @@ final class PhabricatorAuditListView extends AphrontView {
           PhabricatorAuditStatusConstants::getStatusName($status_code);
         $status_color =
           PhabricatorAuditStatusConstants::getStatusColor($status_code);
+        $status_icon =
+          PhabricatorAuditStatusConstants::getStatusIcon($status_code);
       } else {
         $reasons = null;
         $status_text = null;
         $status_color = null;
+        $status_icon = null;
       }
       $author_phid = $commit->getAuthorPHID();
       if ($author_phid) {
@@ -157,14 +160,17 @@ final class PhabricatorAuditListView extends AphrontView {
         ->setObjectName($commit_name)
         ->setHeader($commit_desc)
         ->setHref($commit_link)
-        ->setBarColor($status_color)
-        ->addAttribute($status_text)
+        ->addAttribute(pht('Author: %s', $author_name))
         ->addAttribute($reasons)
-        ->addIcon('none', $committed)
-        ->setSubHead(pht('Author: %s', $author_name));
+        ->addIcon('none', $committed);
 
       if (!empty($auditors)) {
         $item->addByLine(pht('Auditors: %s', $auditors));
+      }
+
+      if ($status_color) {
+        $item->setStatusIcon(
+          $status_icon.' '.$status_color, $status_text);
       }
 
       $list->addItem($item);

@@ -2,46 +2,60 @@
 
 final class DivinerBookController extends DivinerController {
 
-  private $bookName;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->bookName = $data['book'];
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $book_name = $request->getURIData('book');
 
     $book = id(new DivinerBookQuery())
       ->setViewer($viewer)
-      ->withNames(array($this->bookName))
+      ->withNames(array($book_name))
+      ->needRepositories(true)
       ->executeOne();
 
     if (!$book) {
       return new Aphront404Response();
     }
 
+    $actions = $this->buildActionView($viewer, $book);
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setBorder(true);
-
     $crumbs->addTextCrumb(
       $book->getShortTitle(),
       '/book/'.$book->getName().'/');
+
+    $action_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Actions'))
+      ->setHref('#')
+      ->setIconFont('fa-bars')
+      ->addClass('phui-mobile-menu')
+      ->setDropdownMenu($actions);
 
     $header = id(new PHUIHeaderView())
       ->setHeader($book->getTitle())
       ->setUser($viewer)
       ->setPolicyObject($book)
-      ->setEpoch($book->getDateModified());
+      ->setEpoch($book->getDateModified())
+      ->addActionLink($action_button);
+
+    // TODO: This could probably look better.
+    if ($book->getRepositoryPHID()) {
+      $header->addTag(
+        id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_STATE)
+          ->setBackgroundColor(PHUITagView::COLOR_BLUE)
+          ->setName($book->getRepository()->getMonogram()));
+    }
 
     $document = new PHUIDocumentView();
     $document->setHeader($header);
     $document->addClass('diviner-view');
-    $document->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS);
 
     $atoms = id(new DivinerAtomQuery())
       ->setViewer($viewer)
@@ -98,6 +112,30 @@ final class DivinerBookController extends DivinerController {
       array(
         'title' => $book->getTitle(),
       ));
+  }
+
+  private function buildActionView(
+    PhabricatorUser $user,
+    DivinerLiveBook $book) {
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $book,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $action_view = id(new PhabricatorActionListView())
+      ->setUser($user)
+      ->setObject($book)
+      ->setObjectURI($this->getRequest()->getRequestURI());
+
+    $action_view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Book'))
+        ->setIcon('fa-pencil')
+        ->setHref('/book/'.$book->getName().'/edit/')
+        ->setDisabled(!$can_edit));
+
+    return $action_view;
   }
 
 }

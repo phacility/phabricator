@@ -332,6 +332,11 @@ final class HarbormasterBuildEngine extends Phobject {
         $message->save();
 
         $target->setTargetStatus($new_status);
+
+        if ($target->isComplete()) {
+          $target->setDateCompleted(PhabricatorTime::getNow());
+        }
+
         $target->save();
       }
     }
@@ -401,43 +406,59 @@ final class HarbormasterBuildEngine extends Phobject {
     $should_publish = $did_update &&
                       $new_status != HarbormasterBuildable::STATUS_BUILDING &&
                       !$buildable->getIsManualBuildable();
-    if ($should_publish) {
-      $object = id(new PhabricatorObjectQuery())
-        ->setViewer($viewer)
-        ->withPHIDs(array($buildable->getBuildablePHID()))
-        ->executeOne();
 
-      if ($object instanceof PhabricatorApplicationTransactionInterface) {
-        $template = $object->getApplicationTransactionTemplate();
-        if ($template) {
-          $template
-            ->setTransactionType(PhabricatorTransactions::TYPE_BUILDABLE)
-            ->setMetadataValue(
-              'harbormaster:buildablePHID',
-              $buildable->getPHID())
-            ->setOldValue($old_status)
-            ->setNewValue($new_status);
-
-          $harbormaster_phid = id(new PhabricatorHarbormasterApplication())
-            ->getPHID();
-
-          $daemon_source = PhabricatorContentSource::newForSource(
-            PhabricatorContentSource::SOURCE_DAEMON,
-            array());
-
-          $editor = $object->getApplicationTransactionEditor()
-            ->setActor($viewer)
-            ->setActingAsPHID($harbormaster_phid)
-            ->setContentSource($daemon_source)
-            ->setContinueOnNoEffect(true)
-            ->setContinueOnMissingFields(true);
-
-          $editor->applyTransactions(
-            $object->getApplicationTransactionObject(),
-            array($template));
-        }
-      }
+    if (!$should_publish) {
+      return;
     }
+
+    $object = id(new PhabricatorObjectQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($buildable->getBuildablePHID()))
+      ->executeOne();
+    if (!$object) {
+      return;
+    }
+
+    if (!($object instanceof PhabricatorApplicationTransactionInterface)) {
+      return;
+    }
+
+    // TODO: Publishing these transactions is causing a race. See T8650.
+    // We shouldn't be publishing to diffs anyway.
+    if ($object instanceof DifferentialDiff) {
+      return;
+    }
+
+    $template = $object->getApplicationTransactionTemplate();
+    if (!$template) {
+      return;
+    }
+
+    $template
+      ->setTransactionType(PhabricatorTransactions::TYPE_BUILDABLE)
+      ->setMetadataValue(
+        'harbormaster:buildablePHID',
+        $buildable->getPHID())
+      ->setOldValue($old_status)
+      ->setNewValue($new_status);
+
+    $harbormaster_phid = id(new PhabricatorHarbormasterApplication())
+      ->getPHID();
+
+    $daemon_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_DAEMON,
+      array());
+
+    $editor = $object->getApplicationTransactionEditor()
+      ->setActor($viewer)
+      ->setActingAsPHID($harbormaster_phid)
+      ->setContentSource($daemon_source)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
+
+    $editor->applyTransactions(
+      $object->getApplicationTransactionObject(),
+      array($template));
   }
 
   private function releaseAllArtifacts(HarbormasterBuild $build) {

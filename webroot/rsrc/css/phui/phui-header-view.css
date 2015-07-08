@@ -3,11 +3,39 @@
  */
 
 .phui-header-shell {
-  background-color: #e0e3ec;
-  border-width: 1px 0;
-  border-style: solid;
-  border-color: {$hovergrey};
+  border-bottom: 1px solid {$thinblueborder};
   overflow: hidden;
+  padding: 0 4px 12px;
+}
+
+.phui-header-view {
+  display: table;
+  width: 100%
+}
+
+.phui-header-row {
+  display: table-row;
+}
+
+.phui-header-col1 {
+  display: table-cell;
+  vertical-align: middle;
+  width: 62px;
+}
+
+.phui-header-col2 {
+  display: table-cell;
+  vertical-align: middle;
+  word-break: break-word;
+}
+
+.phui-header-col3 {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.device-phone .phui-header-col3 {
+  vertical-align: top;
 }
 
 body .phui-header-shell.phui-header-no-backgound {
@@ -25,7 +53,7 @@ body .phui-header-shell.phui-bleed-header {
 body .phui-header-shell.phui-bleed-header
   .phui-header-view {
   padding: 8px 24px 8px 0;
-  color: {$bluetext};
+  color: {$darkbluetext};
 }
 
 .phui-header-shell + .phabricator-form-view {
@@ -37,15 +65,28 @@ body .phui-header-shell.phui-bleed-header
 }
 
 .phui-header-view {
-  padding: 16px;
-  font-size: 15px;
-  color: {$darkbluetext};
   position: relative;
+  font-size: {$normalfontsize};
 }
 
-.phui-header-view a,
-.phui-header-view a.simple {
+.phui-header-header {
+  font-size: 16px;
+  line-height: 24px;
   color: {$darkbluetext};
+}
+
+.phui-object-box .phui-header-tall .phui-header-header,
+.phui-document-view .phui-header-tall .phui-header-header {
+  font-size: 18px;
+}
+
+.phui-header-view .phui-header-header a {
+  color: {$darkbluetext};
+}
+
+.device-desktop .phui-header-view .phui-header-header a:hover {
+  text-decoration: none;
+  color: {$blue};
 }
 
 .phui-header-view .phui-header-action-links {
@@ -53,13 +94,8 @@ body .phui-header-shell.phui-bleed-header
 }
 
 .phui-object-box .phui-header-view .phui-header-action-links {
-  margin-right: 12px;
-  margin-top: 4px;
-}
-
-.device-phone .phui-object-box .phui-header-view .phui-header-action-links {
   margin-right: 4px;
-  margin-top: -1px;
+  font-size: {$normalfontsize};
 }
 
 .device-phone .phui-header-action-link .phui-button-text {
@@ -74,13 +110,9 @@ body .phui-header-shell.phui-bleed-header
   color: {$lightbluetext};
 }
 
-body.device-phone .phui-header-view {
-  padding: 12px 8px;
-}
-
 .phui-header-tags {
   margin-left: 12px;
-  font-size: 13px;
+  font-size: {$normalfontsize};
 }
 
 .phui-header-tags .phui-tag-view {
@@ -91,18 +123,15 @@ body.device-phone .phui-header-view {
   display: inline-block;
   background-repeat: no-repeat;
   background-size: 100%;
-  border: 2px solid white;
+  box-shadow: {$borderinset};
   width: 50px;
   height: 50px;
-  margin: 12px;
-  float: left;
-  border-radius: 2px;
 }
 
 .phui-header-subheader {
   font-weight: normal;
-  font-size: 14px;
-  margin-top: 6px;
+  font-size: {$biggerfontsize};
+  margin-top: 8px;
 }
 
 .phui-header-subheader .phui-icon-view {
@@ -116,21 +145,59 @@ body.device-phone .phui-header-view {
   color: {$darkbluetext};
 }
 
+.policy-header-callout,
+.phui-header-subheader .phui-header-status {
+  padding: 3px 9px;
+  border-radius: 3px;
+  background: rgba(71, 87, 120, 0.06);
+  margin-right: 8px;
+}
+
+.policy-header-callout.policy-adjusted-weaker {
+  background: {$sh-greenbackground};
+}
+
+.policy-header-callout.policy-adjusted-weaker .policy-link,
+.policy-header-callout.policy-adjusted-weaker .phui-icon-view {
+  color: {$sh-greentext};
+}
+
+.policy-header-callout.policy-adjusted-stronger {
+  background: {$sh-redbackground};
+}
+
+.policy-header-callout.policy-adjusted-stronger .policy-link,
+.policy-header-callout.policy-adjusted-stronger .phui-icon-view {
+  color: {$sh-redtext};
+}
+
+.policy-header-callout.policy-adjusted-different {
+  background: {$sh-orangebackground};
+}
+
+.policy-header-callout.policy-adjusted-different .policy-link,
+.policy-header-callout.policy-adjusted-different .phui-icon-view {
+  color: {$sh-orangetext};
+}
+
 .phui-header-subheader .phui-header-status-dark {
-  color: {$indigo};
-  text-shadow: 0 1px #fff;
+  color: {$sh-indigotext};
+  background: {$sh-indigobackground};
+  margin-right: 8px;
 }
 
 .phui-header-subheader .phui-header-status-dark .phui-icon-view {
-  color: {$indigo};
+  color: {$sh-indigotext};
 }
 
 .phui-header-subheader .phui-header-status-red {
-  color: {$red};
+  color: {$sh-redtext};
+  background: {$sh-redbackground};
 }
 
 .phui-header-subheader .phui-header-status-green {
-  color: {$green};
+  color: {$sh-greentext};
+  background: {$sh-greenbackground};
 }
 
 .phui-header-action-links .phui-mobile-menu {
@@ -141,10 +208,34 @@ body.device-phone .phui-header-view {
   display: inline-block;
 }
 
+.phui-header-action-list {
+  float: right;
+}
+
+.phui-header-action-list li {
+  margin: 0 0 0 8px;
+  float: right;
+}
+
+.phui-header-action-list li.phui-header-action-icon {
+  height: 18px;
+  width: 16px;
+}
+
+.phui-header-action-list .phui-header-action-icon .phui-icon-view {
+  font-size: 16px;
+  line-height: 20px;
+  display: block;
+}
+
 .spaces-name {
   color: {$lightbluetext};
 }
 
+.phui-object-box .phui-header-tall .spaces-name {
+  font-size: 18px;
+}
+
 .spaces-name .phui-handle {
-  color: #000;
+  color: {$sh-redtext};
 }

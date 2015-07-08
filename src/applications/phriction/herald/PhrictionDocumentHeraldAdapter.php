@@ -12,6 +12,10 @@ final class PhrictionDocumentHeraldAdapter extends HeraldAdapter {
     return pht('React to wiki documents being created or updated.');
   }
 
+  protected function initializeNewAdapter() {
+    $this->document = $this->newObject();
+  }
+
   protected function newObject() {
     return new PhrictionDocument();
   }
@@ -44,19 +48,6 @@ final class PhrictionDocumentHeraldAdapter extends HeraldAdapter {
     }
   }
 
-  public function getFields() {
-    return array_merge(
-      array(
-        self::FIELD_TITLE,
-        self::FIELD_BODY,
-        self::FIELD_AUTHOR,
-        self::FIELD_IS_NEW_OBJECT,
-        self::FIELD_CC,
-        self::FIELD_PATH,
-      ),
-      parent::getFields());
-  }
-
   public function getActions($rule_type) {
     switch ($rule_type) {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
@@ -81,38 +72,9 @@ final class PhrictionDocumentHeraldAdapter extends HeraldAdapter {
     }
   }
 
-  public function getPHID() {
-    return $this->getDocument()->getPHID();
-  }
 
   public function getHeraldName() {
     return pht('Wiki Document %d', $this->getDocument()->getID());
-  }
-
-  public function getHeraldField($field) {
-    switch ($field) {
-      case self::FIELD_TITLE:
-        return $this->getDocument()->getContent()->getTitle();
-      case self::FIELD_BODY:
-        return $this->getDocument()->getContent()->getContent();
-      case self::FIELD_AUTHOR:
-        return $this->getDocument()->getContent()->getAuthorPHID();
-      case self::FIELD_PATH:
-        return $this->getDocument()->getContent()->getSlug();
-    }
-
-    return parent::getHeraldField($field);
-  }
-
-  public function applyHeraldEffects(array $effects) {
-    assert_instances_of($effects, 'HeraldEffect');
-
-    $result = array();
-    foreach ($effects as $effect) {
-      $result[] = $this->applyStandardEffect($effect);
-    }
-
-    return $result;
   }
 
 }

@@ -38,6 +38,9 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
   const PREFERENCE_CONPH_NOTIFICATIONS = 'conph-notifications';
   const PREFERENCE_CONPHERENCE_COLUMN  = 'conpherence-column';
 
+  const PREFERENCE_RESOURCE_POSTPROCESSOR = 'resource-postprocessor';
+  const PREFERENCE_DESKTOP_NOTIFICATIONS = 'desktop-notifications';
+
   // These are in an unusual order for historic reasons.
   const MAILTAG_PREFERENCE_NOTIFY       = 0;
   const MAILTAG_PREFERENCE_EMAIL        = 1;

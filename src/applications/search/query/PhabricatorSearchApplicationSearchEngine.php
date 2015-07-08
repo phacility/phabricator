@@ -240,6 +240,8 @@ final class PhabricatorSearchApplicationSearchEngine
     array $handles) {
 
     $viewer = $this->requireViewer();
+    $list = new PHUIObjectItemListView();
+    $list->setNoDataString(pht('No results found.'));
 
     if ($results) {
       $objects = id(new PhabricatorObjectQuery())
@@ -247,7 +249,6 @@ final class PhabricatorSearchApplicationSearchEngine
         ->withPHIDs(mpull($results, 'getPHID'))
         ->execute();
 
-      $list = new PHUIObjectItemListView();
       foreach ($results as $phid => $handle) {
         $view = id(new PhabricatorSearchResultView())
           ->setHandle($handle)
@@ -256,15 +257,12 @@ final class PhabricatorSearchApplicationSearchEngine
           ->render();
         $list->addItem($view);
       }
-
-      $results = $list;
-    } else {
-      $results = id(new PHUIInfoView())
-        ->appendChild(pht('No results returned for that query.'))
-        ->setSeverity(PHUIInfoView::SEVERITY_NODATA);
     }
 
-    return $results;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+
+    return $result;
   }
 
   private function readOwnerPHIDs(PhabricatorSavedQuery $saved) {

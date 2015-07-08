@@ -3,21 +3,13 @@
 final class PhabricatorApplicationTransactionCommentEditController
   extends PhabricatorApplicationTransactionController {
 
-  private $phid;
-
-  public function willProcessRequest(array $data) {
-    $this->phid = $data['phid'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $xaction = id(new PhabricatorObjectQuery())
-      ->withPHIDs(array($this->phid))
-      ->setViewer($user)
+      ->setViewer($viewer)
+      ->withPHIDs(array($request->getURIData('phid')))
       ->executeOne();
-
     if (!$xaction) {
       return new Aphront404Response();
     }
@@ -33,11 +25,9 @@ final class PhabricatorApplicationTransactionCommentEditController
       return new Aphront400Response();
     }
 
-    $obj_phid = $xaction->getObjectPHID();
-    $obj_handle = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
-      ->withPHIDs(array($obj_phid))
-      ->executeOne();
+    $phid = $xaction->getObjectPHID();
+    $handles = $viewer->loadHandles(array($phid));
+    $obj_handle = $handles[$phid];
 
     if ($request->isDialogFormPost()) {
       $text = $request->getStr('text');
@@ -49,7 +39,7 @@ final class PhabricatorApplicationTransactionCommentEditController
       }
 
       $editor = id(new PhabricatorApplicationTransactionCommentEditor())
-        ->setActor($user)
+        ->setActor($viewer)
         ->setContentSource(PhabricatorContentSource::newFromRequest($request))
         ->applyEdit($xaction, $comment);
 
@@ -60,28 +50,20 @@ final class PhabricatorApplicationTransactionCommentEditController
       }
     }
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($user)
-      ->setSubmitURI(
-        $this->getApplicationURI('/transactions/edit/'.$xaction->getPHID().'/'))
-      ->setTitle(pht('Edit Comment'));
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->setFullWidth(true)
+      ->appendControl(
+        id(new PhabricatorRemarkupControl())
+        ->setName('text')
+        ->setValue($xaction->getComment()->getContent()));
 
-    $dialog
+    return $this->newDialog()
+      ->setTitle(pht('Edit Comment'))
       ->addHiddenInput('anchor', $request->getStr('anchor'))
-      ->appendChild(
-        id(new PHUIFormLayoutView())
-        ->setFullWidth(true)
-        ->appendChild(
-          id(new PhabricatorRemarkupControl())
-          ->setUser($user)
-          ->setName('text')
-          ->setValue($xaction->getComment()->getContent())));
-
-    $dialog
+      ->appendForm($form)
       ->addSubmitButton(pht('Save Changes'))
       ->addCancelButton($obj_handle->getURI());
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
 }

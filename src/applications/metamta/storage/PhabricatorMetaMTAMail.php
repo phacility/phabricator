@@ -3,7 +3,9 @@
 /**
  * @task recipients   Managing Recipients
  */
-final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
+final class PhabricatorMetaMTAMail
+  extends PhabricatorMetaMTADAO
+  implements PhabricatorPolicyInterface {
 
   const STATUS_QUEUE = 'queued';
   const STATUS_SENT  = 'sent';
@@ -12,6 +14,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
   const RETRY_DELAY   = 5;
 
+  protected $actorPHID;
   protected $parameters;
   protected $status;
   protected $message;
@@ -22,17 +25,19 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   public function __construct() {
 
     $this->status     = self::STATUS_QUEUE;
-    $this->parameters = array();
+    $this->parameters = array('sensitive' => true);
 
     parent::__construct();
   }
 
   protected function getConfiguration() {
     return array(
+      self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'parameters'  => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
+        'actorPHID' => 'phid?',
         'status' => 'text32',
         'relatedPHID' => 'phid?',
 
@@ -44,6 +49,9 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         'status' => array(
           'columns' => array('status'),
         ),
+        'key_actorPHID' => array(
+          'columns' => array('actorPHID'),
+        ),
         'relatedPHID' => array(
           'columns' => array('relatedPHID'),
         ),
@@ -52,6 +60,11 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorMetaMTAMailPHIDType::TYPECONST);
   }
 
   protected function setParam($param, $value) {
@@ -211,7 +224,12 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
   public function setFrom($from) {
     $this->setParam('from', $from);
+    $this->setActorPHID($from);
     return $this;
+  }
+
+  public function getFrom() {
+    return $this->getParam('from');
   }
 
   public function setRawFrom($raw_email, $raw_name) {
@@ -242,6 +260,15 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   public function setBody($body) {
     $this->setParam('body', $body);
     return $this;
+  }
+
+  public function setSensitiveContent($bool) {
+    $this->setParam('sensitive', $bool);
+    return $this;
+  }
+
+  public function hasSensitiveContent() {
+    return $this->getParam('sensitive', true);
   }
 
   public function setHTMLBody($html) {
@@ -348,8 +375,23 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     // method.
 
     $this->openTransaction();
-      // Save to generate a task ID.
+      // Save to generate a mail ID and PHID.
       $result = parent::save();
+
+      // Write the recipient edges.
+      $editor = new PhabricatorEdgeEditor();
+      $edge_type = PhabricatorMetaMTAMailHasRecipientEdgeType::EDGECONST;
+      $recipient_phids = array_merge(
+        $this->getToPHIDs(),
+        $this->getCcPHIDs());
+      $expanded_phids = $this->expandRecipients($recipient_phids);
+      $all_phids = array_unique(array_merge(
+        $recipient_phids,
+        $expanded_phids));
+      foreach ($all_phids as $curr_phid) {
+        $editor->addEdge($this->getPHID(), $edge_type, $curr_phid);
+      }
+      $editor->save();
 
       // Queue a task to send this mail.
       $mailer_task = PhabricatorWorker::scheduleTask(
@@ -795,9 +837,13 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   }
 
   public function loadAllActors() {
-    $actor_phids = $this->getAllActorPHIDs();
-    $actor_phids = $this->expandRecipients($actor_phids);
+    $actor_phids = $this->getExpandedRecipientPHIDs();
     return $this->loadActors($actor_phids);
+  }
+
+  public function getExpandedRecipientPHIDs() {
+    $actor_phids = $this->getAllActorPHIDs();
+    return $this->expandRecipients($actor_phids);
   }
 
   private function getAllActorPHIDs() {
@@ -990,6 +1036,44 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     } catch (PhabricatorSystemActionRateLimitException $ex) {
       return true;
     }
+  }
+
+  public function delete() {
+    $this->openTransaction();
+      queryfx(
+        $this->establishConnection('w'),
+        'DELETE FROM %T WHERE src = %s AND type = %d',
+        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+        $this->getPHID(),
+        PhabricatorMetaMTAMailHasRecipientEdgeType::EDGECONST);
+      $ret = parent::delete();
+    $this->saveTransaction();
+
+    return $ret;
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_NOONE;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    $actor_phids = $this->getExpandedRecipientPHIDs();
+    return in_array($viewer->getPHID(), $actor_phids);
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return pht(
+      'The mail sender and message recipients can always see the mail.');
   }
 
 

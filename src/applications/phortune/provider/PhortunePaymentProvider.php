@@ -117,9 +117,9 @@ abstract class PhortunePaymentProvider extends Phobject {
 
 
   public static function getAllProviders() {
-    return id(new PhutilSymbolLoader())
+    return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
-      ->loadObjects();
+      ->execute();
   }
 
   public function isEnabled() {

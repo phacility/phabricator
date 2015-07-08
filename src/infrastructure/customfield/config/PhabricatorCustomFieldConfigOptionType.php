@@ -79,7 +79,7 @@ final class PhabricatorCustomFieldConfigOptionType
           ->addSigil('field-spec-toggle')
           ->setIcon('fa-plus'));
 
-      $enabled_item->setBarColor('green');
+      $enabled_item->setStatusIcon('fa-check green');
 
       if (!$field->canDisableField()) {
         $enabled_item->addAction(

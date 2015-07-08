@@ -27,7 +27,7 @@ final class PHUIPinboardView extends AphrontView {
     }
 
     return phutil_tag(
-      'div',
+      'ul',
       array(
         'class' => 'phui-pinboard-view',
       ),

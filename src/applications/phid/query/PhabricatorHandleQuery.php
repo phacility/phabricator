@@ -33,8 +33,15 @@ final class PhabricatorHandleQuery
 
     $object_query = id(new PhabricatorObjectQuery())
       ->withPHIDs($phids)
+      ->setParentQuery($this)
       ->requireCapabilities($this->getRequiredObjectCapabilities())
       ->setViewer($this->getViewer());
+
+    // We never want the subquery to raise policy exceptions, even if this
+    // query is being executed via executeOne(). Policy exceptions are not
+    // meaningful or relevant for handles, which load in an "Unknown" or
+    // "Restricted" state after encountering a policy violation.
+    $object_query->setRaisePolicyExceptions(false);
 
     $objects = $object_query->execute();
     $filtered = $object_query->getPolicyFilteredPHIDs();

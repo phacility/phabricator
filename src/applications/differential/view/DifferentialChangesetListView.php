@@ -251,6 +251,7 @@ final class DifferentialChangesetListView extends AphrontView {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setCollapsed(true)
       ->appendChild($content);
 
     return $object_box;
@@ -328,7 +329,7 @@ final class DifferentialChangesetListView extends AphrontView {
     return javelin_tag(
       'a',
       array(
-        'class'   => 'button grey small dropdown',
+        'class'   => 'button grey dropdown',
         'meta'    => $meta,
         'href'    => idx($meta, 'detailURI', '#'),
         'target'  => '_blank',

@@ -34,7 +34,7 @@
 
 .conpherence-layout .phui-crumbs-view {
   padding: 0 0 0 8px;
-  background: #EBECEE;
+  background: #f7f7f7;
 }
 
 .conpherence-show-more-messages {
@@ -178,6 +178,7 @@
   background-size: 35px;
   position: absolute;
   top: 5px;
+  box-shadow: {$borderinset};
 }
 
 .device-phone .conpherence-message-pane .conpherence-transaction-image {
@@ -227,7 +228,7 @@
 .conpherence-message-pane .conpherence-transaction-view.date-marker
   .date {
     left: 40px;
-    font-size: 13px;
+    font-size: {$normalfontsize};
     padding: 0px 4px;
 }
 
@@ -245,7 +246,7 @@
 
 .conpherence-message-pane .conpherence-edited .conpherence-transaction-content {
   color: {$lightgreytext};
-  font-size: 13px;
+  font-size: {$normalfontsize};
   margin: 0;
   padding: 0;
   float: left;
@@ -283,9 +284,9 @@
 .conpherence-message-pane .conpherence-transaction-info,
 .conpherence-message-pane .anchor-link,
 .conpherence-message-pane .phabricator-content-source-view {
-  color: {$lightbluetext};
+  color: {$lightgreytext};
   line-height: 16px;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
 }
 
 .conpherence-message-pane .conpherence-transaction-info {

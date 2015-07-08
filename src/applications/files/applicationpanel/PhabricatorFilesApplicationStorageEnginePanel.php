@@ -85,7 +85,7 @@ final class PhabricatorFilesApplicationStorageEnginePanel
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Storage Engines'))
-      ->appendChild($table);
+      ->setTable($table);
 
     return $box;
   }

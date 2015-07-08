@@ -7,7 +7,7 @@ final class PhabricatorNotificationTestController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $story_type = 'PhabricatorNotificationAdHocFeedStory';
+    $story_type = 'PhabricatorNotificationTestFeedStory';
     $story_data = array(
       'title' => pht(
         'This is a test notification, sent at %s.',

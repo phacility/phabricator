@@ -267,38 +267,32 @@ final class LegalpadDocumentSignatureSearchEngine
           'right',
         ));
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Signatures'));
-
+    $button = null;
     if ($this->document) {
       $document_id = $this->document->getID();
 
-      $header->addActionLink(
-        id(new PHUIButtonView())
-          ->setText(pht('Add Signature Exemption'))
+      $button = id(new PHUIButtonView())
+          ->setText(pht('Add Exemption'))
           ->setTag('a')
           ->setHref($this->getApplicationURI('addsignature/'.$document_id.'/'))
           ->setWorkflow(true)
-          ->setIcon(id(new PHUIIconView())->setIconFont('fa-pencil')));
+          ->setIcon(id(new PHUIIconView())->setIconFont('fa-pencil'));
     }
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->appendChild($table);
 
     if (!$this->document) {
-      $policy_notice = id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
-        ->setErrors(
-          array(
-            pht(
-              'NOTE: You can only see your own signatures and signatures on '.
-              'documents you have permission to edit.'),
-          ));
-      $box->setInfoView($policy_notice);
+      $table->setNotice(
+        pht('NOTE: You can only see your own signatures and signatures on '.
+            'documents you have permission to edit.'));
     }
 
-    return $box;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setTable($table);
+    if ($button) {
+      $result->addAction($button);
+    }
+
+    return $result;
+
   }
 
   private function renderIcon($icon, $color, $title) {

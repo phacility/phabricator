@@ -410,8 +410,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     if (!$object) {
       throw new Exception(
         pht(
-          'Cursor "%s" does not identify a valid object.',
-          $cursor));
+          'Cursor "%s" does not identify a valid object in query "%s".',
+          $cursor,
+          get_class($this)));
     }
 
     return $object;
@@ -872,6 +873,15 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    * @task order
    */
   public function getOrderableColumns() {
+    $cache = PhabricatorCaches::getRequestCache();
+    $class = get_class($this);
+    $cache_key = 'query.orderablecolumns.'.$class;
+
+    $columns = $cache->getKey($cache_key);
+    if ($columns !== null) {
+      return $columns;
+    }
+
     $columns = array(
       'id' => array(
         'table' => $this->getPrimaryTableAlias(),
@@ -908,6 +918,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         );
       }
     }
+
+    $cache->setKey($cache_key, $columns);
 
     return $columns;
   }
@@ -1751,6 +1763,16 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     $viewer = $this->getViewer();
+
+    // If we have an omnipotent viewer and no formal space constraints, don't
+    // emit a clause. This primarily enables older migrations to run cleanly,
+    // without fataling because they try to match a `spacePHID` column which
+    // does not exist yet. See T8743, T8746.
+    if ($viewer->isOmnipotent()) {
+      if ($this->spaceIsArchived === null && $this->spacePHIDs === null) {
+        return null;
+      }
+    }
 
     $space_phids = array();
     $include_null = false;

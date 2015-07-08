@@ -18,7 +18,6 @@ final class PhabricatorHovercardView extends AphrontView {
   private $fields = array();
   private $actions = array();
 
-  private $color = 'lightblue';
   public function setObjectHandle(PhabricatorObjectHandle $handle) {
     $this->handle = $handle;
     return $this;
@@ -65,11 +64,6 @@ final class PhabricatorHovercardView extends AphrontView {
     return $this;
   }
 
-  public function setColor($color) {
-    $this->color = $color;
-    return $this;
-  }
-
   public function render() {
     if (!$this->handle) {
       throw new PhutilInvalidStateException('setObjectHandle');
@@ -90,12 +84,11 @@ final class PhabricatorHovercardView extends AphrontView {
         $this->title ? $this->title : $handle->getName()),
     );
 
-    $header = new PHUIActionHeaderView();
-    $header->setHeaderColor($this->color);
-    $header->setHeaderTitle($title);
+    $header = new PHUIHeaderView();
+    $header->setHeader($title);
     if ($this->tags) {
       foreach ($this->tags as $tag) {
-        $header->setTag($tag);
+        $header->addTag($tag);
       }
     }
 

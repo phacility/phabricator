@@ -391,6 +391,10 @@ final class PhrictionTransactionEditor
         pht("A document's content changes."),
       PhrictionTransaction::MAILTAG_DELETE =>
         pht('A document is deleted.'),
+      PhrictionTransaction::MAILTAG_SUBSCRIBERS =>
+        pht('A document\'s subscribers change.'),
+      PhrictionTransaction::MAILTAG_OTHER =>
+        pht('Other document activity not listed above occurs.'),
     );
   }
 

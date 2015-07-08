@@ -33,10 +33,17 @@ final class PhabricatorNotificationIndividualController
 
     $builder = new PhabricatorNotificationBuilder(array($story));
     $content = $builder->buildView()->render();
+    $dict = $builder->buildDict();
+    $data = $dict[0];
 
     $response = array(
       'pertinent'         => true,
       'primaryObjectPHID' => $story->getPrimaryObjectPHID(),
+      'desktopReady'      => $data['desktopReady'],
+      'href'              => $data['href'],
+      'icon'              => $data['icon'],
+      'title'             => $data['title'],
+      'body'              => $data['body'],
       'content'           => hsprintf('%s', $content),
     );
 

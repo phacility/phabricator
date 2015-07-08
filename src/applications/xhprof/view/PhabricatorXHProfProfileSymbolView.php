@@ -117,7 +117,7 @@ final class PhabricatorXHProfProfileSymbolView
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText(pht('XHProf Profile'));
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     return $panel->render();
   }

@@ -193,7 +193,6 @@ final class PHUIDocumentExample extends PhabricatorUIExample {
      $content->setTopNav($topnav);
      $content->setSidenav($sidenav);
      $content->appendChild($document);
-     $content->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS);
 
     return $content;
   }

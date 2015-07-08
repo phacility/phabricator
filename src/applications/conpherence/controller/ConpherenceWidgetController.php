@@ -68,17 +68,22 @@ final class ConpherenceWidgetController extends ConpherenceController {
       ->setHref($this->getWidgetURI())
       ->setMetadata(array('widget' => null))
       ->addSigil('conpherence-widget-adder');
+    $header = javelin_tag(
+      'a',
+      array(
+        'href' => '#',
+        'sigil' => 'widgets-selector',
+      ),
+      pht('Participants'));
+
     $widgets[] = phutil_tag(
       'div',
       array(
         'class' => 'widgets-header',
       ),
-      id(new PHUIActionHeaderView())
-      ->setHeaderTitle(pht('Participants'))
-      ->setHeaderHref('#')
-      ->setDropdown(true)
-      ->addAction($new_icon)
-      ->addHeaderSigil('widgets-selector'));
+      id(new PHUIHeaderView())
+      ->setHeader($header)
+      ->addActionIcon($new_icon));
     $user = $this->getRequest()->getUser();
     // now the widget bodies
     $widgets[] = javelin_tag(
@@ -114,6 +119,13 @@ final class ConpherenceWidgetController extends ConpherenceController {
         'style' => 'display: none',
       ),
       $this->renderSettingsWidgetPaneContent());
+    $widgets[] = phutil_tag(
+      'div',
+      array(
+        'class' => 'widgets-body',
+        'id' => 'widgets-edit',
+        'style' => 'display: none',
+      ));
 
     // without this implosion we get "," between each element in our widgets
     // array
@@ -144,12 +156,15 @@ final class ConpherenceWidgetController extends ConpherenceController {
         $conpherence,
         PhabricatorPolicyCapability::CAN_JOIN);
       if ($can_join) {
-        $text = pht('Settings are available after joining the room.');
+        $text = pht(
+          'Notification settings are available after joining the room.');
       } else if ($viewer->isLoggedIn()) {
-        $text = pht('Settings not applicable to rooms you can not join.');
+        $text = pht(
+          'Notification settings not applicable to rooms you can not join.');
       } else {
         $text = pht(
-          'Settings are available after logging in and joining the room.');
+          'Notification settings are available after logging in and joining '.
+          'the room.');
       }
       return phutil_tag(
         'div',

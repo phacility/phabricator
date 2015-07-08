@@ -265,8 +265,25 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $revision_detail_box->setInfoView($revision_warnings);
     }
 
+    $detail_diffs = array_select_keys(
+      $diffs,
+      array($diff_vs, $target->getID()));
+    $detail_diffs = mpull($detail_diffs, null, 'getPHID');
+
+    $buildables = id(new HarbormasterBuildableQuery())
+      ->setViewer($user)
+      ->withBuildablePHIDs(array_keys($detail_diffs))
+      ->withManualBuildables(false)
+      ->needBuilds(true)
+      ->needTargets(true)
+      ->execute();
+    $buildables = mpull($buildables, null, 'getBuildablePHID');
+    foreach ($detail_diffs as $diff_phid => $detail_diff) {
+      $detail_diff->attachBuildable(idx($buildables, $diff_phid));
+    }
+
     $diff_detail_box = $this->buildDiffDetailView(
-      array_select_keys($diffs, array($diff_vs, $target->getID())),
+      $detail_diffs,
       $revision,
       $field_list);
 
@@ -821,9 +838,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $viewer = $this->getViewer();
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Similar Open Revisions'))
-      ->setSubheader(
-        pht('Recently updated open revisions affecting the same files.'));
+      ->setHeader(pht('Recent Similar Open Revisions'));
 
     $view = id(new DifferentialRevisionListView())
       ->setHeader($header)

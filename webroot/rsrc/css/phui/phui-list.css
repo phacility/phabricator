@@ -29,7 +29,7 @@
 
 .phui-list-sidenav .phui-list-item-type-divider {
   margin: 8px 8px 12px 8px;
-  border-bottom: 1px solid #e7e7e7;
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 .phui-list-sidenav .phui-list-item-icon {
@@ -37,7 +37,8 @@
   width: 14px;
   display: inline-block;
   position: absolute;
-  top: 4px;
+  top: 6px;
+  text-align: center;
 }
 
 .phui-list-sidenav .phui-list-item-icon + .phui-list-item-name {
@@ -66,7 +67,7 @@
 }
 
 .phui-list-sidenav .phui-list-item-has-icon .phui-list-item-href {
-  padding: 2px 10px;
+  padding: 4px 10px;
 }
 
 .device-desktop .phui-list-sidenav .phui-list-item-href:hover {
@@ -89,15 +90,14 @@
 .phui-list-view.phui-list-navbar {
   list-style: none;
   overflow: hidden;
-  border-bottom: 1px solid #e7e7e7;
-  background: {$lightgreybackground};
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 .phui-list-view.phui-list-navbar > li {
   list-style: none;
   float: left;
   display: block;
-  border-right: 1px solid #e7e7e7;
+  border-right: 1px solid {$thinblueborder};
 }
 
 .phui-list-view.phui-list-navbar > li > * {
@@ -105,19 +105,19 @@
 }
 
 .phui-list-navbar .phui-list-item-href {
-  color: {$lightbluetext};
+  color: {$bluetext};
   padding: 8px 16px;
-  font-size: 12px;
-  letter-spacing: 0.5px;
+  line-height: 16px;
 }
 
 .phui-list-navbar .phui-list-item-selected .phui-list-item-href {
-  background: {$greybackground};
+  background: {$lightbluebackground};
   color: {$darkbluetext};
+  font-weight: bold;
 }
 
 .phui-list-navbar .phui-list-item-href:hover {
-  background: #DEE0E4;
+  background: rgba(100,100,100,.1);
   color: {$darkgreytext};
   text-decoration: none;
 }
@@ -174,4 +174,11 @@
   border-left: 1px solid {$lightblueborder};
   border-right: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$thinblueborder};
+}
+
+/* - Info Stack ------------------------------------------------------------ */
+
+.phui-info-view + .phui-list-view {
+  margin-top: 16px;
+  border-top: 1px solid {$thinblueborder};
 }

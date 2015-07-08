@@ -25,6 +25,8 @@ final class PhabricatorDisplayPreferencesSettingsPanel
     $pref_titles       = PhabricatorUserPreferences::PREFERENCE_TITLES;
     $pref_monospaced_textareas =
       PhabricatorUserPreferences::PREFERENCE_MONOSPACED_TEXTAREAS;
+    $pref_postprocessor =
+      PhabricatorUserPreferences::PREFERENCE_RESOURCE_POSTPROCESSOR;
 
     $errors = array();
     $e_editor = null;
@@ -42,6 +44,9 @@ final class PhabricatorDisplayPreferencesSettingsPanel
       $preferences->setPreference(
         $pref_monospaced_textareas,
         $request->getStr($pref_monospaced_textareas));
+      $preferences->setPreference(
+        $pref_postprocessor,
+        $request->getStr($pref_postprocessor));
 
       $editor_pattern = $preferences->getPreference($pref_editor);
       if (strlen($editor_pattern)) {
@@ -106,8 +111,25 @@ EXAMPLE;
       'Input should be valid CSS "font" declaration, such as '.
       '"13px Consolas"');
 
+    $postprocessor_map = CelerityPostprocessor::getAllPostprocessors();
+    $postprocessor_map = mpull($postprocessor_map, 'getPostprocessorName');
+    asort($postprocessor_map);
+    $postprocessor_order = array(
+      CelerityDefaultPostprocessor::POSTPROCESSOR_KEY,
+    );
+
+    $postprocessor_map = array_select_keys(
+      $postprocessor_map,
+      $postprocessor_order) + $postprocessor_map;
+
     $form = id(new AphrontFormView())
       ->setUser($user)
+      ->appendControl(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Accessibility'))
+          ->setName($pref_postprocessor)
+          ->setValue($preferences->getPreference($pref_postprocessor))
+          ->setOptions($postprocessor_map))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Page Titles'))

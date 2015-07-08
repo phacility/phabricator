@@ -52,7 +52,6 @@ final class ManiphestReportController extends ManiphestController {
     $nav->appendChild($core);
     $nav->setCrumbs(
       $this->buildApplicationCrumbs()
-        ->setBorder(true)
         ->addTextCrumb(pht('Reports')));
 
     return $this->buildApplicationPage(
@@ -272,7 +271,7 @@ final class ManiphestReportController extends ManiphestController {
     if ($caption) {
       $panel->setInfoView($caption);
     }
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     $tokens = array();
     if ($handle) {
@@ -653,7 +652,7 @@ final class ManiphestReportController extends ManiphestController {
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText($header);
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     $tokens = array();
     if ($project_handle) {

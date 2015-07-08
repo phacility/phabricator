@@ -1,5 +1,6 @@
 /**
  * @provides phabricator-main-menu-view
+ * @requires phui-theme-css
  */
 
 
@@ -11,13 +12,17 @@
 */
 
 .phabricator-main-menu {
-  background-repeat: repeat-x;
   position: relative;
-  min-height: 44px;
+}
+
+.phabricator-main-menu-background {
+  min-height: 43px;
+  background-color: #ebecee;
+  border-bottom: 1px solid rgba(0,0,0,.1);
 }
 
 .device-desktop .phabricator-main-menu {
-  height: 44px;
+  height: 43px;
   padding-right: 4px;
 }
 
@@ -62,7 +67,7 @@
 }
 
 .device-desktop .phabricator-main-menu-brand:hover {
-  background-color: rgba(0,0,0,.33);
+  background-color: rgba(55,55,55,.2);
   cursor: hand;
 }
 
@@ -84,7 +89,7 @@
   font-size: 20px;
   height: 20px;
   width: 20px;
-  color: rgba(255,255,255,.8);
+  color: {$hoverwhite};
   text-align: center;
   vertical-align: middle;
   line-height: 24px;
@@ -124,7 +129,7 @@
 
 .phabricator-main-menu-search-target {
   position: absolute;
-  top: 46px;
+  top: 42px;
 }
 
 .device-desktop .phabricator-main-menu-search-target {
@@ -147,31 +152,25 @@
   box-shadow: none;
   transition: none;
 
-  color: {$lightgreytext};
+  color: {$bluetext};
   width: 100%;
   right: 0;
   position: absolute;
-  font-size: 13px;
-  border-width: 2px;
-  border-color: rgba(0,0,0,.6);
+  font-size: {$normalfontsize};
+  border-width: 1px;
+  border-color: {$lightblueborder};
   border-radius: 3px;
-  background-color: rgba(0,0,0,.5);
-  opacity: .8;
+  border-style: solid;
+  background-color: #fff;
   height: 28px;
-  box-shadow: 0px 1px 1px rgba(128, 128, 128, 0.25);
   padding: 3px 30px 3px 6px;
   float: left;
   width: 205px;
 }
 
-.phabricator-main-menu.main-header-dark .phabricator-main-menu-search input {
-  background-color: rgba(150,150,150,.5);
-  border-color: #333;
-}
-
 .device .phabricator-main-menu-search input {
   height: 32px;
-  font-size: 15px;
+  font-size: {$biggestfontsize};
   width: 100%;
   padding-left: 50px;
 }
@@ -179,19 +178,19 @@
 .phabricator-main-menu .phabricator-main-menu-search input:focus {
   background: #fff;
   opacity: 1;
-  color: #333;
+  color: {$darkbluetext};
   border-color: {$sky};
   box-shadow: none;
 }
 
 .phabricator-main-menu-search input.jx-typeahead-placeholder {
-  color: #fff;
+  color: {$bluetext};
 }
 
 .phabricator-main-menu-search button {
-  color: rgba(255,255,255,.8);
+  color: {$bluetext};
   position: absolute;
-  background: #000;
+  background: {$greybackground};
   border: none;
   outline: none;
   box-shadow: none;
@@ -215,6 +214,12 @@
 }
 
 .device-desktop .phabricator-main-menu-search
+  button.phabricator-main-menu-search-dropdown {
+    height: 28px;
+    top: 8px;
+  }
+
+.device-desktop .phabricator-main-menu-search
   button.phabricator-main-menu-search-dropdown:hover .phui-icon-view {
     color: #fff;
 }
@@ -222,39 +227,43 @@
 .device .phabricator-main-menu-search
   button.phabricator-main-menu-search-dropdown {
     left: 2px;
-    background: #000;
-}
-
-.device .phabricator-main-menu-search
-  button.phabricator-main-menu-search-dropdown .phui-icon-view {
-    margin-top: 2px;
-  }
-
-.device .phabricator-main-menu-search
-  button.phabricator-main-menu-search-dropdown .caret {
-    margin-top: 3px;
+    background: {$greybackground};
 }
 
 button.phabricator-main-menu-search-dropdown .caret:before {
   content: "\f107";
   font-family: FontAwesome;
+  color: {$hoverwhite};
 }
 
 .phabricator-main-menu-search button.phabricator-main-menu-search-dropdown
   .phui-icon-view {
-  color: rgba(255,255,255,.8);
+  color: {$hoverwhite};
+  font-size: 15px;
+  top: 6px;
+  left: 8px;
+}
+
+.device
+  .phabricator-main-menu-search button.phabricator-main-menu-search-dropdown
+  .phui-icon-view {
+  color: {$bluetext};
+}
+
+.device button.phabricator-main-menu-search-dropdown .caret:before {
+  color: {$bluetext};
 }
 
 .phabricator-main-menu-search-dropdown .caret {
   position: absolute;
-  right: 13px;
-  top: 3px;
+  right: 15px;
+  top: 5px;
   border: none;
   margin-top: 1px;
 }
 
 .phabricator-main-menu-search button:hover {
-  color: #fff;
+  color: {$sky};
 }
 
 .device .phabricator-main-menu-search button {
@@ -269,7 +278,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
   word-wrap: break-word;
   overflow-y: auto;
   box-shadow: {$dropshadow};
-  border: {$blueborder};
+  border: 1px solid {$blueborder};
   border-radius: 3px;
   margin-left: 40px;
 }
@@ -300,14 +309,14 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 
 .phabricator-main-search-typeahead-result .result-name {
   display: block;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   font-weight: bold;
   color: {$darkgreytext};
 }
 
 .phabricator-main-search-typeahead-result .result-type {
   color: {$lightgreytext};
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   font-weight: normal;
 }
 
@@ -317,17 +326,19 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 }
 
 .device-phone .phabricator-main-search-typeahead-result .result-name {
-  font-size: 15px;
+  font-size: {$biggestfontsize};
 }
 
 .device-phone .phabricator-main-search-typeahead-result .result-type {
-  font-size: 13px;
+  font-size: {$normalfontsize};
 }
 
 .device .phabricator-dark-menu .phui-list-item-type-link
   .phabricator-main-search-typeahead-result {
   line-height: 18px;
 }
+
+
 
 /* - Alert ---------------------------------------------------------------------
 
@@ -346,8 +357,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 }
 
 .alert-notifications .phui-icon-view {
-  color: rgba(200,200,200, .4);
-  text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.1);
+  color: {$hoverwhite};
 }
 
 .device-desktop .alert-notifications:hover {
@@ -365,10 +375,14 @@ button.phabricator-main-menu-search-dropdown .caret:before {
   height: 18px;
   float: left;
   padding: 8px 6px 8px 4px;
-  color: white;
+  color: #fff;
   font-size: 18px;
   line-height: 20px;
   text-align: right;
+}
+
+.phui-icon-view.menu-icon-selected {
+  color: #fff;
 }
 
 .phabricator-main-menu-alert-icon {
@@ -383,7 +397,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
   display: none;
   float: left;
   margin: 11px 6px 0 -2px;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
 }
 
 .device-phone .alert-unread .phabricator-main-menu-alert-count,
@@ -411,24 +425,22 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 
 .device .phabricator-dark-menu,
 .device .phabricator-dark-menu a.phui-list-item-href {
-  color: #fff;
+  color: {$darkbluetext};
   -webkit-font-smoothing: antialiased;
 }
 
 .device .phabricator-dark-menu .phui-list-item-type-label {
   text-transform: uppercase;
-  font-size: 13px;
-  background-color: #151719;
-  padding: 6px 0 6px 20px;
+  font-size: {$normalfontsize};
+  background-color: #fff;
+  padding: 6px 0 6px 12px;
   display: block;
   font-weight: bold;
+  color: #000;
 }
 
 .device .phabricator-dark-menu .phui-list-item-href {
-  border-width: 1px 0;
-  border-style: solid;
-  border-color: #34373b transparent #282c2d;
-  background-color: #272c2f;
+  background-color: #fff;
   padding: 4px 0 4px 20px;
   display: block;
 }
@@ -454,19 +466,19 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 
 .device .phabricator-search-menu-expanded .phabricator-search-menu {
   display: block;
-  padding-top: 44px;
+  position: absolute;
+  top: 38px;
+  left: 8px;
+  right: 8px;
+  border: 1px solid {$lightblueborder};
+  border-radius: 3px;
+  box-shadow: {$dropshadow};
 }
 
 .device .phabricator-dark-menu .phui-list-item-type-link {
-  font-size: 15px;
-  min-height: 30px;
-  line-height: 28px;
-  background: #000;
-}
-
-.device .phui-list-item-type-link
-  .phabricator-core-menu-icon + .phui-list-item-name {
-  margin-left: 32px;
+  min-height: 24px;
+  line-height: 20px;
+  background: #fff;
 }
 
 .device-desktop .phabricator-application-menu {
@@ -486,10 +498,16 @@ button.phabricator-main-menu-search-dropdown .caret:before {
   font-size: 20px;
   height: 20px;
   width: 20px;
-  color: rgba(255,255,255,.8);
+  color: {$hoverwhite};
   margin: 8px;
   text-align: center;
   vertical-align: middle;
+}
+
+.device .phabricator-dark-menu.phabricator-application-menu
+  .phui-list-item-icon.phui-font-fa,
+.device .phabricator-dark-menu .phabricator-core-menu-icon {
+  display: none;
 }
 
 .device .phabricator-application-menu .phui-list-item-icon.phui-font-fa {
@@ -509,12 +527,6 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 .device-desktop .phabricator-application-menu
   .phui-list-item-view.core-menu-item {
   display: block;
-}
-
-.device-desktop .phabricator-application-menu
- .core-menu-item.phui-list-item-view:hover {
-  background-color: rgba(0,0,0,.33);
-  border-radius: 3px;
 }
 
 .device-desktop .phabricator-application-menu .phui-list-item-view {
@@ -548,10 +560,10 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 .phabricator-main-menu-dropdown {
   position: absolute;
   background: #fff;
-  top: 38px;
+  top: 42px;
   padding: 2px;
   box-shadow: {$dropshadow};
-  border: {$blueborder};
+  border: 1px solid {$blueborder};
   border-radius: 3px;
 }
 
@@ -564,7 +576,13 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 
 .device .phabricator-application-menu-expanded .phabricator-application-menu {
   display: block;
-  padding-top: 44px;
+  position: absolute;
+  border: 1px solid {$blueborder};
+  border-radius: 3px;
+  box-shadow: {$dropshadow};
+  top: 42px;
+  right: 8px;
+  width: 240px;
 }
 
 .device .phabricator-application-menu,

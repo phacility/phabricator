@@ -25,7 +25,6 @@ final class PhabricatorFeedApplication extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/feed/' => array(
-        'public/' => 'PhabricatorFeedPublicStreamController',
         '(?P<id>\d+)/' => 'PhabricatorFeedDetailController',
         '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorFeedListController',
       ),

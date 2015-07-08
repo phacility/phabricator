@@ -57,7 +57,7 @@ final class FundInitiativeViewController
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($properties);
+      ->addPropertyList($properties);
 
 
     $timeline = $this->buildTransactionTimeline(

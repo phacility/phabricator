@@ -57,7 +57,7 @@ final class PhabricatorConfigAllController
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText(pht('Current Settings'));
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     $versions = $this->loadVersions();
 

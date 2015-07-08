@@ -23,11 +23,10 @@ abstract class CelerityPhysicalResources extends CelerityResources {
     static $resources_map;
 
     if ($resources_map === null) {
-      $resources_map = array();
-
-      $resources_list = id(new PhutilSymbolLoader())
+      $resources_list = id(new PhutilClassMapQuery())
         ->setAncestorClass(__CLASS__)
-        ->loadObjects();
+        ->setUniqueMethod('getName')
+        ->execute();
 
       foreach ($resources_list as $resources) {
         $name = $resources->getName();
@@ -39,21 +38,9 @@ abstract class CelerityPhysicalResources extends CelerityResources {
               'lowercase latin letters and digits.',
               $name));
         }
-
-        if (empty($resources_map[$name])) {
-          $resources_map[$name] = $resources;
-        } else {
-          $old = get_class($resources_map[$name]);
-          $new = get_class($resources);
-          throw new Exception(
-            pht(
-              'Celerity resource maps must have unique names, but maps %s and '.
-              '%s share the same name, "%s".',
-              $old,
-              $new,
-              $name));
-        }
       }
+
+      $resources_map = $resources_list;
     }
 
     return $resources_map;

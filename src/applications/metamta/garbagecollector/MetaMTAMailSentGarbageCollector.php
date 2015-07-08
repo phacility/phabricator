@@ -6,16 +6,15 @@ final class MetaMTAMailSentGarbageCollector
   public function collectGarbage() {
     $ttl = phutil_units('90 days in seconds');
 
-    $table = new PhabricatorMetaMTAMail();
-    $conn_w = $table->establishConnection('w');
+    $mails = id(new PhabricatorMetaMTAMail())->loadAllWhere(
+      'dateCreated < %d LIMIT 100',
+      PhabricatorTime::getNow() - $ttl);
 
-    queryfx(
-      $conn_w,
-      'DELETE FROM %T WHERE dateCreated < %d LIMIT 100',
-      $table->getTableName(),
-      time() - $ttl);
+    foreach ($mails as $mail) {
+      $mail->delete();
+    }
 
-    return ($conn_w->getAffectedRows() == 100);
+    return (count($mails) == 100);
   }
 
 }

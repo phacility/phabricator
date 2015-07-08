@@ -2,7 +2,9 @@
 
 final class NuanceItem
   extends NuanceDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorApplicationTransactionInterface {
 
   const STATUS_OPEN     = 0;
   const STATUS_ASSIGNED = 10;
@@ -143,4 +145,27 @@ final class NuanceItem
       'dateNuanced' => $this->getDateNuanced(),
     );
   }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new NuanceItemEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new NuanceItemTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
+  }
+
 }

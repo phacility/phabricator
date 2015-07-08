@@ -39,7 +39,7 @@ final class PhabricatorMetaMTAApplicationEmailPanel
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
+      ->setTable($table);
 
     return $box;
   }
@@ -100,7 +100,7 @@ final class PhabricatorMetaMTAApplicationEmailPanel
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
+      ->setTable($table);
 
     $title = $application->getName();
 

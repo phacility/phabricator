@@ -5,6 +5,7 @@ final class PhabricatorSpacesNamespaceQuery
 
   const KEY_ALL = 'spaces.all';
   const KEY_DEFAULT = 'spaces.default';
+  const KEY_VIEWER = 'spaces.viewer';
 
   private $ids;
   private $phids;
@@ -141,17 +142,25 @@ final class PhabricatorSpacesNamespaceQuery
   }
 
   public static function getViewerSpaces(PhabricatorUser $viewer) {
-    $spaces = self::getAllSpaces();
+    $cache = PhabricatorCaches::getRequestCache();
+    $cache_key = self::KEY_VIEWER.'('.$viewer->getCacheFragment().')';
 
-    $result = array();
-    foreach ($spaces as $key => $space) {
-      $can_see = PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $space,
-        PhabricatorPolicyCapability::CAN_VIEW);
-      if ($can_see) {
-        $result[$key] = $space;
+    $result = $cache->getKey($cache_key);
+    if ($result === null) {
+      $spaces = self::getAllSpaces();
+
+      $result = array();
+      foreach ($spaces as $key => $space) {
+        $can_see = PhabricatorPolicyFilter::hasCapability(
+          $viewer,
+          $space,
+          PhabricatorPolicyCapability::CAN_VIEW);
+        if ($can_see) {
+          $result[$key] = $space;
+        }
       }
+
+      $cache->setKey($cache_key, $result);
     }
 
     return $result;

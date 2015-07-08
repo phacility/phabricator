@@ -66,7 +66,7 @@ final class DiffusionLintDetailsController extends DiffusionController {
 
     $content = array();
 
-    $pager = id(new AphrontPagerView())
+    $pager = id(new PHUIPagerView())
       ->setPageSize($limit)
       ->setOffset($offset)
       ->setHasMorePages(count($messages) >= $limit)
@@ -74,7 +74,7 @@ final class DiffusionLintDetailsController extends DiffusionController {
 
     $content[] = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Lint Details'))
-      ->appendChild($table);
+      ->setTable($table);
 
     $crumbs = $this->buildCrumbs(
       array(

@@ -183,13 +183,16 @@ final class PhrequentSearchEngine extends PhabricatorApplicationSearchEngine {
                 '/phrequent/track/stop/'.
                 $usertime->getObjectPHID().'/'));
         }
-        $item->setBarColor('green');
+        $item->setStatusIcon('fa-clock-o green');
       }
 
       $view->addItem($item);
     }
 
-    return $view;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($view);
+
+    return $result;
   }
 
 }

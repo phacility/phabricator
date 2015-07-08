@@ -6,9 +6,8 @@ final class DivinerMainController extends DivinerController {
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $books = id(new DivinerBookQuery())
       ->setViewer($viewer)
@@ -33,7 +32,6 @@ final class DivinerMainController extends DivinerController {
 
     $document = new PHUIDocumentView();
     $document->setHeader($header);
-    $document->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS);
     $document->addClass('diviner-view');
 
     if ($books) {
@@ -54,24 +52,20 @@ final class DivinerMainController extends DivinerController {
         ->appendChild($list);
 
       $document->appendChild($list);
-
     } else {
       $text = pht(
-        "(NOTE) **Looking for Phabricator documentation?** If you're looking ".
-        "for help and information about Phabricator, you can ".
-        "[[ https://secure.phabricator.com/diviner/ | browse the public ".
-        "Phabricator documentation ]] on the live site.\n\n".
-        "Diviner is the documentation generator used to build the Phabricator ".
-        "documentation.\n\n".
+        "(NOTE) **Looking for Phabricator documentation?** ".
+        "If you're looking for help and information about Phabricator, ".
+        "you can [[https://secure.phabricator.com/diviner/ | ".
+        "browse the public Phabricator documentation]] on the live site.\n\n".
+        "Diviner is the documentation generator used to build the ".
+        "Phabricator documentation.\n\n".
         "You haven't generated any Diviner documentation books yet, so ".
         "there's nothing to show here. If you'd like to generate your own ".
         "local copy of the Phabricator documentation and have it appear ".
         "here, run this command:\n\n".
-        "  phabricator/ $ ./bin/diviner generate\n\n".
-        "Right now, Diviner isn't very useful for generating documentation ".
-        "for projects other than Phabricator. If you're interested in using ".
-        "it in your own projects, leave feedback for us on ".
-        "[[ https://secure.phabricator.com/T4558 | T4558 ]].");
+        "  %s\n\n",
+        'phabricator/ $ ./bin/diviner generate');
 
       $text = PhabricatorMarkupEngine::renderOneObject(
         id(new PhabricatorMarkupOneOff())->setContent($text),

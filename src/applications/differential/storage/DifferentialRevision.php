@@ -102,6 +102,14 @@ final class DifferentialRevision extends DifferentialDAO
         'repositoryPHID' => array(
           'columns' => array('repositoryPHID'),
         ),
+        // If you (or a project you are a member of) is reviewing a significant
+        // fraction of the revisions on an install, the result set of open
+        // revisions may be smaller than the result set of revisions where you
+        // are a reviewer. In these cases, this key is better than keys on the
+        // edge table.
+        'key_status' => array(
+          'columns' => array('status', 'phid'),
+        ),
       ),
     ) + parent::getConfiguration();
   }

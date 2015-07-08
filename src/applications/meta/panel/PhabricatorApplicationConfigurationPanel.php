@@ -47,27 +47,10 @@ abstract class PhabricatorApplicationConfigurationPanel
     PhabricatorController $controller);
 
   public static function loadAllPanels() {
-    $objects = id(new PhutilSymbolLoader())
+    return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
-      ->loadObjects();
-
-    $panels = array();
-    foreach ($objects as $object) {
-      $key = $object->getPanelKey();
-      if (empty($panels[$key])) {
-        $panels[$key] = $object;
-      } else {
-        throw new Exception(
-          pht(
-            'Application configuration panels "%s" and "%s" have the same '.
-            'panel key, "%s". Each panel must have a unique key.',
-            get_class($object),
-            get_class($panels[$key]),
-            $key));
-      }
-    }
-
-    return $panels;
+      ->setUniqueMethod('getPanelKey')
+      ->execute();
   }
 
   public static function loadAllPanelsForApplication(

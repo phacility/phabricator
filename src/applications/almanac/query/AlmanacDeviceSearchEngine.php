@@ -78,7 +78,11 @@ final class AlmanacDeviceSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No Almanac Devices found.'));
+
+    return $result;
   }
 
 }
