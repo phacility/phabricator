@@ -25,7 +25,6 @@ abstract class HeraldDifferentialAdapter extends HeraldAdapter {
         $repository = id(new PhabricatorRepositoryQuery())
           ->setViewer(PhabricatorUser::getOmnipotentUser())
           ->withPHIDs(array($repository_phid))
-          ->needProjectPHIDs(true)
           ->executeOne();
       } else {
         $repository = null;
@@ -38,7 +37,7 @@ abstract class HeraldDifferentialAdapter extends HeraldAdapter {
   }
 
 
-  protected function loadAffectedPaths() {
+  public function loadAffectedPaths() {
     $changesets = $this->loadChangesets();
 
     $paths = array();
@@ -62,18 +61,18 @@ abstract class HeraldDifferentialAdapter extends HeraldAdapter {
     return $changeset->getAbsoluteRepositoryPath($repository, $diff);
   }
 
-  protected function loadContentDictionary() {
+  public function loadContentDictionary() {
     $add_lines = DifferentialHunk::FLAG_LINES_ADDED;
     $rem_lines = DifferentialHunk::FLAG_LINES_REMOVED;
     $mask = ($add_lines | $rem_lines);
     return $this->loadContentWithMask($mask);
   }
 
-  protected function loadAddedContentDictionary() {
+  public function loadAddedContentDictionary() {
     return $this->loadContentWithMask(DifferentialHunk::FLAG_LINES_ADDED);
   }
 
-  protected function loadRemovedContentDictionary() {
+  public function loadRemovedContentDictionary() {
     return $this->loadContentWithMask(DifferentialHunk::FLAG_LINES_REMOVED);
   }
 
