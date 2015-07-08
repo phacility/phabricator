@@ -265,7 +265,7 @@ final class PhrictionEditController
       ->setHeader(pht('Document Preview'))
       ->setPreviewURI('/phriction/preview/')
       ->setControlID('document-textarea')
-      ->setSkin('document');
+      ->addClass('phui-document-view');
 
     $crumbs = $this->buildApplicationCrumbs();
     if ($document->getID()) {

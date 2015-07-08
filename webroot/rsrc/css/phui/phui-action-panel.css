@@ -44,7 +44,7 @@
 .phui-action-panel-header {
   padding: 0 8px 4px 8px;
   font-weight: bold;
-  font-size: 14px;
+  font-size: {$biggerfontsize};
   color: {$darkbluetext};
 }
 
@@ -54,7 +54,7 @@
 
 .phui-action-panel-subheader {
   padding: 0 8px 4px 8px;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   color: {$bluetext};
 }
 

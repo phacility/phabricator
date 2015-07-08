@@ -14,7 +14,6 @@ final class PhabricatorConfigWelcomeController
 
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->setBorder(true)
       ->addTextCrumb(pht('Welcome'));
 
     $nav->setCrumbs($crumbs);
@@ -32,7 +31,7 @@ final class PhabricatorConfigWelcomeController
     $this->requireResource('config-welcome-css');
 
     $content = pht(
-      "==== Install Phabricator ====\n\n".
+      "=== Install Phabricator ===\n\n".
       "You have successfully installed Phabricator. This screen will guide ".
       "you through configuration and orientation. ".
       "These steps are optional, and you can go through them in any order. ".
@@ -51,7 +50,7 @@ final class PhabricatorConfigWelcomeController
     $setup_href = PhabricatorEnv::getURI('/config/issue/');
     if ($issues_resolved) {
       $content = pht(
-        "==== Resolve Setup Issues ====\n\n".
+        "=== Resolve Setup Issues ===\n\n".
         "You've resolved (or ignored) all outstanding setup issues. ".
         "You can review issues in the **Config** application, under ".
         "**[[ %s | Setup Issues ]]**.",
@@ -59,7 +58,7 @@ final class PhabricatorConfigWelcomeController
         $icon = 'fa-check-square-o green';
     } else {
       $content = pht(
-        "==== Resolve Setup Issues ====\n\n".
+        "=== Resolve Setup Issues ===\n\n".
         "You have some unresolved setup issues to take care of. Click ".
         "the link in the yellow banner at the top of the screen to see ".
         "them, or find them in the **Config** application under ".
@@ -86,7 +85,7 @@ final class PhabricatorConfigWelcomeController
     $have_auth = (bool)$configs;
     if ($have_auth) {
       $content = pht(
-        "==== Login and Registration ====\n\n".
+        "=== Login and Registration ===\n\n".
         "You've configured at least one authentication provider, so users ".
         "can register or log in. ".
         "To configure more providers or adjust settings, use the ".
@@ -95,7 +94,7 @@ final class PhabricatorConfigWelcomeController
         $icon = 'fa-check-square-o green';
     } else {
       $content = pht(
-        "==== Login and Registration ====\n\n".
+        "=== Login and Registration ===\n\n".
         "You haven't configured any authentication providers yet. ".
         "Authentication providers allow users to register accounts and ".
         "log in to Phabricator. You can configure Phabricator to accept ".
@@ -120,7 +119,7 @@ final class PhabricatorConfigWelcomeController
 
     if ($have_config) {
       $content = pht(
-        "==== Configure Phabricator Settings ====\n\n".
+        "=== Configure Phabricator Settings ===\n\n".
         "You've configured at least one setting from the web interface. ".
         "To configure more settings later, use the ".
         "**[[ %s | Config Application ]]**.",
@@ -128,7 +127,7 @@ final class PhabricatorConfigWelcomeController
         $icon = 'fa-check-square-o green';
     } else {
       $content = pht(
-        "==== Configure Phabricator Settings ====\n\n".
+        "=== Configure Phabricator Settings ===\n\n".
         'Many aspects of Phabricator are configurable. To explore and '.
         'adjust settings, use the **[[ %s | Config Application ]]**.',
         $config_href);
@@ -145,7 +144,7 @@ final class PhabricatorConfigWelcomeController
     $have_settings = !empty($prefs);
     if ($have_settings) {
       $content = pht(
-        "==== Adjust Account Settings ====\n\n".
+        "=== Adjust Account Settings ===\n\n".
         "You've adjusted at least one setting on your account. ".
         "To make more adjustments, visit the ".
         "**[[ %s | Settings Application ]]**.",
@@ -153,7 +152,7 @@ final class PhabricatorConfigWelcomeController
         $icon = 'fa-check-square-o green';
     } else {
       $content = pht(
-        "==== Adjust Account Settings ====\n\n".
+        "=== Adjust Account Settings ===\n\n".
         'You can configure settings for your account by clicking the '.
         'wrench icon in the main menu bar, or visiting the '.
         '**[[ %s | Settings Application ]]** directly.',
@@ -173,7 +172,7 @@ final class PhabricatorConfigWelcomeController
       'PhabricatorHomeApplication');
     if ($have_dashboard) {
       $content = pht(
-        "==== Customize Home Page ====\n\n".
+        "=== Customize Home Page ===\n\n".
         "You've installed a default dashboard to replace this welcome screen ".
         "on the home page. ".
         "You can still visit the welcome screen here at any time if you ".
@@ -185,7 +184,7 @@ final class PhabricatorConfigWelcomeController
         $icon = 'fa-check-square-o green';
     } else {
       $content = pht(
-        "==== Customize Home Page ====\n\n".
+        "=== Customize Home Page ===\n\n".
         "When you're done setting things up, you can create a custom ".
         "dashboard and install it. Your dashboard will replace this ".
         "welcome screen on the Phabricator home page. ".
@@ -209,7 +208,7 @@ final class PhabricatorConfigWelcomeController
 
     $apps_href = PhabricatorEnv::getURI('/applications/');
     $content = pht(
-      "==== Explore Applications ====\n\n".
+      "=== Explore Applications ===\n\n".
       "Phabricator is a large suite of applications that work together to ".
       "help you develop software, manage tasks, and communicate. A few of ".
       "the most commonly used applications are pinned to the left navigation ".
@@ -229,7 +228,7 @@ final class PhabricatorConfigWelcomeController
 
     $support_href = PhabricatorEnv::getDoclink('Give Feedback! Get Support!');
     $content = pht(
-      "==== Need Help with Setup? ====\n\n".
+      "=== Need Help with Setup? ===\n\n".
       'Having trouble getting something set up? See '.
       '**[[ %s | Give Feedback! Get Support! ]]** for ways to get in touch '.
       'to get answers to questions, report bugs, and request features.',
@@ -255,7 +254,7 @@ final class PhabricatorConfigWelcomeController
       $request,
       'fa-gear',
       pht(
-        "==== Quick Start: Code Review ====\n\n".
+        "=== Quick Start: Code Review ===\n\n".
         "Review code with **[[ %s | Differential ]]**. ".
         "Engineers can use Differential to share, review, and approve ".
         "changes to source code. ".
@@ -283,7 +282,7 @@ final class PhabricatorConfigWelcomeController
       $request,
       'fa-anchor',
       pht(
-        "==== Quick Start: Bugs and Tasks ====\n\n".
+        "=== Quick Start: Bugs and Tasks ===\n\n".
         "Track bugs and tasks in Phabricator with ".
         "**[[ %s | Maniphest ]]**. ".
         "Users in all roles can use Maniphest to manage current and ".
@@ -304,7 +303,7 @@ final class PhabricatorConfigWelcomeController
       $request,
       'fa-camera-retro',
       pht(
-        "==== Quick Start: Design Review ====\n\n".
+        "=== Quick Start: Design Review ===\n\n".
         "Review proposed designs with **[[ %s | Pholio ]]**. ".
         "Designers can use Pholio to share images of what they're working on ".
         "and show off things they've made. ".
@@ -328,7 +327,7 @@ final class PhabricatorConfigWelcomeController
       $request,
       'fa-code',
       pht(
-        "==== Quick Start: Repositories ====\n\n".
+        "=== Quick Start: Repositories ===\n\n".
         "Manage and browse source code repositories with ".
         "**[[ %s | Diffusion ]]**. ".
         "Engineers can use Diffusion to browse and audit source code. ".
@@ -353,23 +352,27 @@ final class PhabricatorConfigWelcomeController
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Welcome to Phabricator'));
 
-    $setup_header = id(new PHUIHeaderView())
-      ->setHeader(pht('Setup and Configuration'))
-      ->setBleedHeader(true);
+    $setup_header = PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())
+        ->setContent(pht('=Setup and Configuration')),
+      'default',
+      $viewer);
 
-    $explore_header = id(new PHUIHeaderView())
-      ->setHeader(pht('Explore Phabricator'))
-      ->setBleedHeader(true);
+    $explore_header = PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())
+        ->setContent(pht('=Explore Phabricator')),
+      'default',
+      $viewer);
 
-    $quick_header = id(new PHUIHeaderView())
-      ->setHeader(pht('Quick Start Guides'))
-      ->setBleedHeader(true);
+    $quick_header = PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())
+        ->setContent(pht('=Quick Start Guides')),
+      'default',
+      $viewer);
 
     return id(new PHUIDocumentView())
       ->setHeader($header)
       ->setFluid(true)
-      ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
-      // ->setSidenav($sidenav)
       ->appendChild($setup_header)
       ->appendChild($setup)
       ->appendChild($explore_header)

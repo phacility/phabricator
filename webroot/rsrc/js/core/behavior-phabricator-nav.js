@@ -17,7 +17,6 @@ JX.behavior('phabricator-nav', function(config) {
   var local = JX.$(config.localID);
   var main = JX.$(config.mainID);
   var drag = JX.$(config.dragID);
-  var background = JX.$(config.backgroundID);
 
 
 // - Flexible Navigation Column ------------------------------------------------
@@ -42,12 +41,6 @@ JX.behavior('phabricator-nav', function(config) {
         parameter: 'width',
         start: JX.Vector.getDim(local).x,
         width: JX.Vector.getDim(local).x,
-        minWidth: 1
-      },
-      {
-        element: background,
-        parameter: 'width',
-        start: JX.Vector.getDim(background).x,
         minWidth: 1
       },
       {
@@ -106,7 +99,6 @@ JX.behavior('phabricator-nav', function(config) {
 
   function resetdrag() {
     local.style.width = '';
-    background.style.width = '';
     drag.style.left = '';
     content.style.marginLeft = '';
   }

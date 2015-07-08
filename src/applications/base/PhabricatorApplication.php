@@ -383,13 +383,13 @@ abstract class PhabricatorApplication
     static $applications;
 
     if ($applications === null) {
-      $apps = id(new PhutilSymbolLoader())
+      $apps = id(new PhutilClassMapQuery())
         ->setAncestorClass(__CLASS__)
-        ->loadObjects();
+        ->setSortMethod('getApplicationOrder')
+        ->execute();
 
       // Reorder the applications into "application order". Notably, this
       // ensures their event handlers register in application order.
-      $apps = msort($apps, 'getApplicationOrder');
       $apps = mgroup($apps, 'getApplicationGroup');
 
       $group_order = array_keys(self::getApplicationGroups());

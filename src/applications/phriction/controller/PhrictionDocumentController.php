@@ -44,7 +44,7 @@ final class PhrictionDocumentController
       $create_uri = '/phriction/edit/?slug='.$slug;
 
       $notice = new PHUIInfoView();
-      $notice->setSeverity(PHUIInfoView::SEVERITY_NODATA);
+      $notice->setSeverity(PHUIInfoView::SEVERITY_WARNING);
       $notice->setTitle(pht('No content here!'));
       $notice->appendChild(
         pht(
@@ -217,7 +217,6 @@ final class PhrictionDocumentController
     }
 
     $page_content = id(new PHUIDocumentView())
-      ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
       ->setHeader($header)
       ->appendChild(
         array(
@@ -396,13 +395,13 @@ final class PhrictionDocumentController
 
     $list = array();
     foreach ($children_dicts as $child) {
-      $list[] = hsprintf('<li>');
+      $list[] = hsprintf('<li class="remarkup-list-item">');
       $list[] = $this->renderChildDocumentLink($child);
       $grand = idx($grandchildren_dicts, $child['slug'], array());
       if ($grand) {
-        $list[] = hsprintf('<ul>');
+        $list[] = hsprintf('<ul class="remarkup-list">');
         foreach ($grand as $grandchild) {
-          $list[] = hsprintf('<li>');
+          $list[] = hsprintf('<li class="remarkup-list-item">');
           $list[] = $this->renderChildDocumentLink($grandchild);
           $list[] = hsprintf('</li>');
         }
@@ -411,27 +410,32 @@ final class PhrictionDocumentController
       $list[] = hsprintf('</li>');
     }
     if ($more_children) {
-      $list[] = phutil_tag('li', array(), pht('More...'));
+      $list[] = phutil_tag(
+        'li',
+        array(
+          'class' => 'remarkup-list-item',
+        ),
+        pht('More...'));
     }
 
-    $content = array(
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'phriction-children-header '.
-            'sprite-gradient gradient-lightblue-header',
-        ),
-        pht('Document Hierarchy')),
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'phriction-children',
-        ),
-        phutil_tag('ul', array(), $list)),
-    );
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Document Hierarchy'));
 
-    return id(new PHUIDocumentView())
-      ->appendChild($content);
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild(phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-remarkup mlt mlb',
+        ),
+        phutil_tag(
+          'ul',
+          array(
+            'class' => 'remarkup-list',
+          ),
+          $list)));
+
+     return phutil_tag_div('phui-document-box', $box);
   }
 
   private function renderChildDocumentLink(array $info) {

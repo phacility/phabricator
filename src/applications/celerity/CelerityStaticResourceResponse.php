@@ -15,6 +15,7 @@ final class CelerityStaticResourceResponse extends Phobject {
   private $metadataBlock = 0;
   private $behaviors = array();
   private $hasRendered = array();
+  private $postprocessorKey;
 
   public function __construct() {
     if (isset($_REQUEST['__metablock__'])) {
@@ -30,6 +31,15 @@ final class CelerityStaticResourceResponse extends Phobject {
 
   public function getMetadataBlock() {
     return $this->metadataBlock;
+  }
+
+  public function setPostprocessorKey($postprocessor_key) {
+    $this->postprocessorKey = $postprocessor_key;
+    return $this;
+  }
+
+  public function getPostprocessorKey() {
+    return $this->postprocessorKey;
   }
 
   /**
@@ -299,6 +309,12 @@ final class CelerityStaticResourceResponse extends Phobject {
     $use_primary_domain = false) {
 
     $uri = $map->getURIForName($name);
+
+    // If we have a postprocessor selected, add it to the URI.
+    $postprocessor_key = $this->getPostprocessorKey();
+    if ($postprocessor_key) {
+      $uri = preg_replace('@^/res/@', '/res/'.$postprocessor_key.'X/', $uri);
+    }
 
     // In developer mode, we dump file modification times into the URI. When a
     // page is reloaded in the browser, any resources brought in by Ajax calls

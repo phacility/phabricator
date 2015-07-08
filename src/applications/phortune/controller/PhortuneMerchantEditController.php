@@ -164,7 +164,7 @@ final class PhortuneMerchantEditController
     $box = id(new PHUIObjectBoxView())
       ->setValidationException($validation_exception)
       ->setHeaderText($title)
-      ->appendChild($form);
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(

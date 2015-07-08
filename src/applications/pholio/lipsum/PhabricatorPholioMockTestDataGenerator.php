@@ -92,7 +92,11 @@ final class PhabricatorPholioMockTestDataGenerator
     $quantity = min($quantity, count($images));
 
     if ($quantity) {
-      foreach (array_rand($images, $quantity) as $random) {
+      $random_images = $quantity === 1 ?
+        array(array_rand($images, $quantity)) :
+        array_rand($images, $quantity);
+
+      foreach ($random_images as $random) {
         $rand_images[] = $images[$random]->getPHID();
       }
     }

@@ -12,7 +12,7 @@ final class DiffusionBranchTableController extends DiffusionController {
 
     $repository = $drequest->getRepository();
 
-    $pager = new AphrontPagerView();
+    $pager = new PHUIPagerView();
     $pager->setURI($request->getRequestURI(), 'offset');
     $pager->setOffset($request->getInt('offset'));
 
@@ -47,7 +47,7 @@ final class DiffusionBranchTableController extends DiffusionController {
 
       $panel = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Branches'))
-        ->appendChild($view);
+        ->setTable($view);
 
       $content = $panel;
     }

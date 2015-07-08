@@ -838,9 +838,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $viewer = $this->getViewer();
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Similar Open Revisions'))
-      ->setSubheader(
-        pht('Recently updated open revisions affecting the same files.'));
+      ->setHeader(pht('Recent Similar Open Revisions'));
 
     $view = id(new DifferentialRevisionListView())
       ->setHeader($header)

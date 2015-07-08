@@ -6,7 +6,7 @@ $conn_w = $table->establishConnection('w');
 echo pht(
   "Migrating Herald conditions of type Herald rule from IDs to PHIDs...\n");
 foreach (new LiskMigrationIterator($table) as $condition) {
-  if ($condition->getFieldName() != HeraldAdapter::FIELD_RULE) {
+  if ($condition->getFieldName() != HeraldAnotherRuleField::FIELDCONST) {
     continue;
   }
 

@@ -50,8 +50,8 @@ final class DrydockLogListView extends AphrontView {
       ));
     $table->setShortHeaders(
       array(
-        'R',
-        'L',
+        pht('R'),
+        pht('L'),
         pht('Message'),
         '',
       ));

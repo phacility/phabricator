@@ -201,13 +201,12 @@ final class PhabricatorAppSearchEngine
         $results[] = phutil_tag(
           'h1',
           array(
-            'class' => 'launcher-header',
+            'class' => 'phui-object-item-list-header',
           ),
           idx($group_names, $group, $group));
       }
 
       $list = new PHUIObjectItemListView();
-      $list->addClass('phui-object-item-launcher-list');
 
       foreach ($applications as $application) {
         $icon = $application->getFontIcon();
@@ -268,7 +267,10 @@ final class PhabricatorAppSearchEngine
       $results[] = $list;
     }
 
-    return $results;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setContent($results);
+
+    return $result;
   }
 
 }

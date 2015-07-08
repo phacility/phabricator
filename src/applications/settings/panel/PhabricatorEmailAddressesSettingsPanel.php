@@ -155,7 +155,7 @@ final class PhabricatorEmailAddressesSettingsPanel
       $header->addActionLink($button);
     }
     $view->setHeader($header);
-    $view->appendChild($table);
+    $view->setTable($table);
 
     return $view;
   }

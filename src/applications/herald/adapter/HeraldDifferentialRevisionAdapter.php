@@ -24,6 +24,10 @@ final class HeraldDifferentialRevisionAdapter
     return new DifferentialRevision();
   }
 
+  protected function initializeNewAdapter() {
+    $this->revision = $this->newObject();
+  }
+
   public function getObject() {
     return $this->revision;
   }
@@ -66,7 +70,6 @@ final class HeraldDifferentialRevisionAdapter
         self::FIELD_AUTHOR,
         self::FIELD_AUTHOR_PROJECTS,
         self::FIELD_REVIEWERS,
-        self::FIELD_CC,
         self::FIELD_REPOSITORY,
         self::FIELD_REPOSITORY_PROJECTS,
         self::FIELD_DIFF_FILE,
@@ -75,7 +78,6 @@ final class HeraldDifferentialRevisionAdapter
         self::FIELD_DIFF_REMOVED_CONTENT,
         self::FIELD_AFFECTED_PACKAGE,
         self::FIELD_AFFECTED_PACKAGE_OWNER,
-        self::FIELD_IS_NEW_OBJECT,
       ),
       parent::getFields());
   }

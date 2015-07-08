@@ -6,6 +6,10 @@
   padding: 16px;
 }
 
+.device-phone .phui-object-box .phui-form-view {
+  padding: 0;
+}
+
 .phui-form-view.phui-form-full-width {
   padding: 0;
 }
@@ -22,7 +26,7 @@
   float: left;
   text-align: right;
   font-weight: bold;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   color: {$bluetext};
   -webkit-font-smoothing: antialiased;
 }
@@ -77,10 +81,6 @@
   display: none;
 }
 
-.aphront-dialog-body .phui-form-full-width {
-  margin-top: -10px;
-}
-
 .aphront-dialog-body .phui-form-view {
   padding: 0;
 }
@@ -105,7 +105,7 @@
 .aphront-form-required {
   font-weight: normal;
   color: {$lightgreytext};
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   -webkit-font-smoothing: antialiased;
 }
 
@@ -159,13 +159,13 @@
 }
 
 .phui-form-view .aphront-form-caption {
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   color: {$bluetext};
   padding: 8px 0;
   margin-right: 20%;
   margin-left: 20%;
   -webkit-font-smoothing: antialiased;
-  line-height: 15px;
+  line-height: 16px;
 }
 
 .device-phone .phui-form-view .aphront-form-caption,
@@ -199,7 +199,7 @@
 .aphront-form-control-static .aphront-form-input,
 .aphront-form-control-markup .aphront-form-input {
   padding-top: 6px;
-  font-size: 13px;
+  font-size: {$normalfontsize};
 }
 
 .aphront-form-control-togglebuttons .aphront-form-input {
@@ -209,7 +209,7 @@
 table.aphront-form-control-radio-layout,
 table.aphront-form-control-checkbox-layout {
   margin-top: 3px;
-  font-size: 13px;
+  font-size: {$normalfontsize};
 }
 
 table.aphront-form-control-radio-layout th {
@@ -241,9 +241,9 @@ table.aphront-form-control-checkbox-layout th {
 
 .aphront-form-radio-caption {
   margin-top: 4px;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   font-weight: normal;
-  color: #555;
+  color: {$bluetext};
 }
 
 .aphront-form-control-image span {
@@ -275,7 +275,7 @@ table.aphront-form-control-checkbox-layout th {
   color: {$bluetext};
   padding-bottom: 8px;
   margin-bottom: 8px;
-  font-size: 14px;
+  font-size: {$biggerfontsize};
   border-bottom: 1px solid {$thinblueborder};
 }
 
@@ -285,7 +285,7 @@ table.aphront-form-control-checkbox-layout th {
 
 .drag-and-drop-instructions {
   color: {$darkgreytext};
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   padding: 6px 8px;
 }
 
@@ -361,7 +361,7 @@ table.aphront-form-control-checkbox-layout th {
 
 .fancy-datepicker-core {
   padding: 1px;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   text-align: center;
 }
 
@@ -375,7 +375,7 @@ table.aphront-form-control-checkbox-layout th {
 
 .fancy-datepicker-core .month-table {
   margin-bottom: 6px;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   background-color: {$hoverblue};
   border-radius: 2px;
 }

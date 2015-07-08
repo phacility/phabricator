@@ -39,7 +39,6 @@ final class DifferentialCreateDiffConduitAPIMethod
       'sourceControlPath'         => 'required string',
       'sourceControlBaseRevision' => 'required string',
       'creationMethod'            => 'optional string',
-      'arcanistProject'           => 'deprecated',
       'lintStatus'                => 'required '.$status_const,
       'unitStatus'                => 'required '.$status_const,
       'repositoryPHID'            => 'optional phid',

@@ -42,6 +42,7 @@ abstract class PhabricatorStandardCustomFieldPHIDs
       }
     }
     $this->setFieldValue($value);
+    return $this;
   }
 
   public function readApplicationSearchValueFromRequest(

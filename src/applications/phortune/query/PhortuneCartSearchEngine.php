@@ -222,13 +222,15 @@ final class PhortuneCartSearchEngine
 
     $merchant = $this->getMerchant();
     if ($merchant) {
-      $header = pht('Orders for %s', $merchant->getName());
+      $notice = pht('Orders for %s', $merchant->getName());
     } else {
-      $header = pht('Your Orders');
+      $notice = pht('Your Orders');
     }
+    $table->setNotice($notice);
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText($header)
-      ->appendChild($table);
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setTable($table);
+
+    return $result;
   }
 }

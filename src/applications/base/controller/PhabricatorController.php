@@ -157,19 +157,6 @@ abstract class PhabricatorController extends AphrontController {
       }
     }
 
-    $event = new PhabricatorEvent(
-      PhabricatorEventType::TYPE_CONTROLLER_CHECKREQUEST,
-      array(
-        'request' => $request,
-        'controller' => $this,
-      ));
-    $event->setUser($user);
-    PhutilEventEngine::dispatchEvent($event);
-    $checker_controller = $event->getValue('controller');
-    if ($checker_controller != $this) {
-      return $this->delegateToController($checker_controller);
-    }
-
     $auth_class = 'PhabricatorAuthApplication';
     $auth_application = PhabricatorApplication::getByClass($auth_class);
 
@@ -200,7 +187,8 @@ abstract class PhabricatorController extends AphrontController {
     if ($this->shouldRequireLogin()) {
       // This actually means we need either:
       //   - a valid user, or a public controller; and
-      //   - permission to see the application.
+      //   - permission to see the application; and
+      //   - permission to see at least one Space if spaces are configured.
 
       $allow_public = $this->shouldAllowPublic() &&
                       PhabricatorEnv::getEnvConfig('policy.allow-public');
@@ -223,10 +211,22 @@ abstract class PhabricatorController extends AphrontController {
         }
       }
 
+      // If Spaces are configured, require that the user have access to at
+      // least one. If we don't do this, they'll get confusing error messages
+      // later on.
+      $spaces = PhabricatorSpacesNamespaceQuery::getSpacesExist();
+      if ($spaces) {
+        $viewer_spaces = PhabricatorSpacesNamespaceQuery::getViewerSpaces(
+          $user);
+        if (!$viewer_spaces) {
+          $controller = new PhabricatorSpacesNoAccessController();
+          return $this->delegateToController($controller);
+        }
+      }
+
       // If the user doesn't have access to the application, don't let them use
       // any of its controllers. We query the application in order to generate
       // a policy exception if the viewer doesn't have permission.
-
       $application = $this->getCurrentApplication();
       if ($application) {
         id(new PhabricatorApplicationQuery())

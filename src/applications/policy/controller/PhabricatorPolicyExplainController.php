@@ -47,13 +47,6 @@ final class PhabricatorPolicyExplainController
       $auto_info);
     $auto_info = array_filter($auto_info);
 
-    foreach ($auto_info as $key => $info) {
-      $auto_info[$key] = phutil_tag('li', array(), $info);
-    }
-    if ($auto_info) {
-      $auto_info = phutil_tag('ul', array(), $auto_info);
-    }
-
     $capability_name = $capability;
     $capobj = PhabricatorPolicyCapability::getCapabilityByKey($capability);
     if ($capobj) {
@@ -78,8 +71,11 @@ final class PhabricatorPolicyExplainController
     $dialog
       ->setTitle(pht('Policy Details: %s', $object_name))
       ->appendParagraph($intro)
-      ->appendChild($auto_info)
       ->addCancelButton($object_uri, pht('Done'));
+
+    if ($auto_info) {
+      $dialog->appendList($auto_info);
+    }
 
     $this->appendStrengthInformation($dialog, $object, $policy, $capability);
 
@@ -148,12 +144,8 @@ final class PhabricatorPolicyExplainController
     $items = array();
     $items[] = $space_explanation;
 
-    foreach ($items as $key => $item) {
-      $items[$key] = phutil_tag('li', array(), $item);
-    }
-
     $dialog->appendParagraph(pht('Users who can see objects in this space:'));
-    $dialog->appendChild(phutil_tag('ul', array(), $items));
+    $dialog->appendList($items);
 
     $view_capability = PhabricatorPolicyCapability::CAN_VIEW;
     if ($capability == $view_capability) {

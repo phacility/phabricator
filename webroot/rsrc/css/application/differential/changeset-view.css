@@ -211,7 +211,7 @@ td.cov-I {
 .differential-diff td.show-more,
 .differential-diff td.differential-shield {
   font: {$basefont};
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   white-space: normal;
 }
 
@@ -264,9 +264,10 @@ td.cov-I {
 }
 
 .differential-changeset h1 {
-  font-size: 15px;
+  font-size: {$biggestfontsize};
   padding: 2px 0 12px 12px;
-  line-height: 18px;
+  line-height: 20px;
+  color: #000;
 }
 
 .device-phone .differential-changeset h1 {
@@ -321,7 +322,7 @@ td.cov-I {
 
 .differential-changeset-buttons {
   float: right;
-  margin-right: 16px;
+  margin-right: 8px;
 }
 
 .device-phone .differential-changeset-buttons {

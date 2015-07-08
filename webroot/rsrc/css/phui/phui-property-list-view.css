@@ -2,10 +2,6 @@
  * @provides phui-property-list-view-css
  */
 
-.phui-property-list-view {
-  background-color: #fff;
-}
-
 .phui-property-list-view .keyboard-shortcuts-available {
   float: right;
   height: 16px;
@@ -14,7 +10,7 @@
   vertical-align: middle;
   color: {$greytext};
   text-align: right;
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   background:
     url('/rsrc/image/icon/fatcow/key_question.png') right center no-repeat;
 }
@@ -63,7 +59,7 @@
 .device .phui-property-list-key,
 .phui-property-list-stacked .phui-property-list-properties
   .phui-property-list-key {
-    padding-left: 12px;
+    padding-left: 4px;
     text-align: left;
     margin-left: 0;
     width: auto;
@@ -85,7 +81,7 @@
 .device .phui-property-list-value,
 .phui-property-list-stacked .phui-property-list-properties
   .phui-property-list-value {
-    padding: 0 16px;
+    padding: 0 8px;
     margin-bottom: 8px;
     width: auto;
     word-break: break-word;
@@ -94,7 +90,7 @@
 
 .phui-property-list-section-header {
   color: {$bluetext};
-  padding: 12px 16px 0px;
+  padding: 16px 4px 0px;
   text-transform: uppercase;
   font-weight: 700;
   border-color: {$thinblueborder};
@@ -107,7 +103,7 @@
 }
 
 .device .phui-property-list-section-header {
-  padding-left: 8px;
+  padding-left: 4px;
 }
 
 .phui-property-list-section-header-icon .phui-icon-view {
@@ -116,18 +112,12 @@
 }
 
 .phui-property-list-text-content {
-  padding: 12px 16px;
-  background: #fff;
+  padding: 12px 4px;
   overflow: hidden;
-}
-
-.device .phui-property-list-text-content {
-  padding: 8px;
 }
 
 .phui-property-list-raw-content {
   padding: 0px;
-  background: #fff;
   overflow: hidden;
 }
 

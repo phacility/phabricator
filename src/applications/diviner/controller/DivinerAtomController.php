@@ -75,12 +75,14 @@ final class DivinerAtomController extends DivinerController {
       $group_name = null;
     }
 
+    $prop_list = new PHUIPropertyGroupView();
+    $prop_list->addPropertyList($properties);
+
     $document = id(new PHUIDocumentView())
       ->setBook($book->getTitle(), $group_name)
       ->setHeader($header)
       ->addClass('diviner-view')
-      ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
-      ->appendChild($properties);
+      ->appendChild($prop_list);
 
     if ($atom) {
       $this->buildDefined($properties, $symbol);

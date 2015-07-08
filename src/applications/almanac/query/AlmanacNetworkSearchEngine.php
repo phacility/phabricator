@@ -80,6 +80,10 @@ final class AlmanacNetworkSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No Almanac Networks found.'));
+
+    return $result;
   }
 }

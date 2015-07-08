@@ -22,7 +22,7 @@ final class PhabricatorMacroSearchEngine
         ->setLabel(pht('Status'))
         ->setKey('status')
         ->setOptions(PhabricatorMacroQuery::getStatusOptions()),
-      id(new PhabricatorSearchUsersField())
+      id(new PhabricatorUsersSearchField())
         ->setLabel(pht('Authors'))
         ->setKey('authorPHIDs')
         ->setAliases(array('author', 'authors')),
@@ -181,7 +181,10 @@ final class PhabricatorMacroSearchEngine
       $pinboard->addItem($item);
     }
 
-    return $pinboard;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setContent($pinboard);
+
+    return $result;
   }
 
 }

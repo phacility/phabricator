@@ -30,10 +30,9 @@ final class DivinerMainController extends DivinerController {
       ->setHeader(pht('Documentation Books'))
       ->addActionLink($query_button);
 
-    $document = id(new PHUIDocumentView())
-      ->setHeader($header)
-      ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
-      ->addClass('diviner-view');
+    $document = new PHUIDocumentView();
+    $document->setHeader($header);
+    $document->addClass('diviner-view');
 
     if ($books) {
       $books = msort($books, 'getTitle');

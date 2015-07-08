@@ -302,6 +302,8 @@ final class ReleephRequestTransactionalEditor
             'RQ'.$id));
         break;
     }
+
+    return $this;
   }
 
 }

@@ -126,7 +126,8 @@ final class PhrictionDiffController extends PhrictionController {
     $title = pht('Version %s vs %s', $l, $r);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($title);
+      ->setHeader($title)
+      ->setTall(true);
 
     $crumbs->addTextCrumb($title, $request->getRequestURI());
 
@@ -149,7 +150,7 @@ final class PhrictionDiffController extends PhrictionController {
           'a',
           array(
             'href' => $uri->alter('l', $l - 1)->alter('r', $r - 1),
-            'class' => 'button',
+            'class' => 'button simple',
           ),
           pht("\xC2\xAB Previous Change"));
       } else {
@@ -168,7 +169,7 @@ final class PhrictionDiffController extends PhrictionController {
           'a',
           array(
             'href' => $uri->alter('l', $l + 1)->alter('r', $r + 1),
-            'class' => 'button',
+            'class' => 'button simple',
           ),
           pht("Next Change \xC2\xBB"));
       } else {
@@ -243,7 +244,7 @@ final class PhrictionDiffController extends PhrictionController {
         'a',
         array(
           'href'  => '/phriction/edit/'.$document_id.'/',
-          'class' => 'button grey',
+          'class' => 'button simple',
         ),
         pht('Edit Current Version'));
     }
@@ -253,7 +254,7 @@ final class PhrictionDiffController extends PhrictionController {
       'a',
       array(
         'href'  => '/phriction/edit/'.$document_id.'/?revert='.$version,
-        'class' => 'button grey',
+        'class' => 'button simple',
       ),
       pht('Revert to Version %s...', $version));
   }
@@ -267,7 +268,6 @@ final class PhrictionDiffController extends PhrictionController {
     $handles = $this->loadViewerHandles($phids);
 
     $list = new PHUIObjectItemListView();
-    $list->setFlush(true);
 
     $first = true;
     foreach ($content as $c) {
@@ -286,10 +286,10 @@ final class PhrictionDiffController extends PhrictionController {
       }
 
       if ($first == true) {
-        $item->setBarColor('green');
+        $item->setStatusIcon('fa-file green');
         $first = false;
       } else {
-        $item->setBarColor('red');
+        $item->setStatusIcon('fa-file red');
       }
 
       $list->addItem($item);

@@ -3,17 +3,9 @@
 abstract class PhabricatorFactEngine extends Phobject {
 
   final public static function loadAllEngines() {
-    $classes = id(new PhutilSymbolLoader())
+    return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
-      ->setConcreteOnly(true)
-      ->selectAndLoadSymbols();
-
-    $objects = array();
-    foreach ($classes as $class) {
-      $objects[] = newv($class['name'], array());
-    }
-
-    return $objects;
+      ->execute();
   }
 
   public function getFactSpecs(array $fact_types) {

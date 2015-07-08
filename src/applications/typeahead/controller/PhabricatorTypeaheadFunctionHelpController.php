@@ -131,7 +131,6 @@ final class PhabricatorTypeaheadFunctionHelpController
 
     $document = id(new PHUIDocumentView())
       ->setHeader($header)
-      ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
       ->appendChild($content_box);
 
     $crumbs = $this->buildApplicationCrumbs();

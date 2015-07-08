@@ -17,10 +17,10 @@ ul.phui-object-item-list-view {
 
 .phui-object-item-list-view.phui-object-list-flush {
   padding: 0;
+  margin: 0;
 }
 
-.phui-object-box .phui-object-list-flush .phui-object-item,
-.homepage-panel .phui-object-list-flush .phui-object-item {
+.phui-object-box .phui-object-item-list-view .phui-object-item {
   margin: 0;
 }
 
@@ -39,7 +39,6 @@ ul.phui-object-item-list-view {
   border-color: {$lightgreyborder};
   margin: 5px 0;
   overflow: hidden;
-  border-left-width: 4px;
   background: #fff;
   margin-bottom: 4px;
 }
@@ -49,12 +48,16 @@ ul.phui-object-item-list-view {
 }
 
 .phui-object-item-frame {
-  border-style: solid;
-  border-color: {$lightgreyborder};
+  border-color: {$lightblueborder};
   border-width: 1px 1px 1px 0;
+  border-style: solid;
   position: relative;
   min-height: 33px;
   overflow: hidden;
+}
+
+.phui-object-item-no-bar .phui-object-item-frame {
+  border-width: 1px;
 }
 
 .device-desktop .phui-object-item {
@@ -65,18 +68,38 @@ ul.phui-object-item-list-view {
   margin: 0;
 }
 
-.phui-object-item-name {
+.phui-object-box .phui-object-item-list-view {
+  margin: 0;
+}
+
+.phui-object-item-status-icon {
   font-weight: bold;
+  padding: 3px;
+  font-size: 16px;
+}
+
+.phui-object-item-list-view .phui-object-item-col0 .phui-icon-view {
+  width: 17px;
+  text-align: center;
+  overflow: visible;
+  position: relative;
+  left: -1px;
+}
+
+.phui-object-item-name {
   padding: 8px 8px 0;
   white-space: nowrap;
   word-wrap: break-word;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
 }
 
 .device-phone .phui-object-item-name {
   overflow: normal;
   white-space: normal;
+  font-weight: bold;
 }
 
 .phui-object-item-link {
@@ -84,8 +107,9 @@ ul.phui-object-item-list-view {
 }
 
 .phui-object-item-objname {
-  color: {$darkgreytext};
+  color: #000;
   cursor: text;
+  font-weight: bold;
 }
 
 .phui-object-item-content {
@@ -106,7 +130,7 @@ ul.phui-object-item-list-view {
   top: 0;
   bottom: 0;
   left: 0;
-  width: 17px;
+  width: 20px;
   background: url('/rsrc/image/texture/grip.png') center center no-repeat;
 }
 
@@ -115,7 +139,7 @@ ul.phui-object-item-list-view {
 }
 
 .phui-object-item-grippable .phui-object-item-frame {
-  padding-left: 11px;
+  padding-left: 16px;
 }
 
 .device .phui-object-item-grippable .phui-object-item-frame {
@@ -135,6 +159,18 @@ ul.phui-object-item-list-view {
 
 .phui-object-item-table-row {
   display: table-row;
+}
+
+.phui-object-item-col0 {
+  width: 20px;
+  display: table-cell;
+  vertical-align: middle;
+  padding-left: 4px;
+}
+
+.device-phone .phui-object-item-col0 {
+  vertical-align: top;
+  padding-top: 8px;
 }
 
 .phui-object-item-col1 {
@@ -162,12 +198,11 @@ ul.phui-object-item-list-view {
 
 .phui-object-item-actions {
   position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
+  right: 4px;
+  top: 4px;
+  bottom: 4px;
   vertical-align: middle;
   text-align: right;
-  border-left: 1px solid {$lightgreyborder};
 }
 
 .phui-object-item-actions .phui-list-item-view {
@@ -176,11 +211,6 @@ ul.phui-object-item-list-view {
   width: 24px;
   display: inline-block;
   position: relative;
-}
-
-.phui-object-item-actions .phui-list-item-view +
-.phui-list-item-view {
-  border-right: 1px solid #d6d6e9;
 }
 
 .phui-object-item-actions .phui-list-item-href {
@@ -192,6 +222,7 @@ ul.phui-object-item-list-view {
 
 .device-desktop .phui-object-item-actions .phui-list-item-href:hover {
   background: {$hoverblue};
+  border-radius: 3px;
 }
 
 .phui-object-item-actions .phui-list-item-icon {
@@ -209,47 +240,37 @@ ul.phui-object-item-list-view {
 }
 
 .phui-object-item-with-1-actions .phui-object-item-content-box {
-  margin-right: 24px;
+  margin-right: 28px;
   overflow: hidden;
 }
 
 .phui-object-item-with-2-actions .phui-object-item-content-box {
-  margin-right: 48px;
+  margin-right: 54px;
   overflow: hidden;
 }
 
 .phui-object-item-with-3-actions .phui-object-item-content-box {
-  margin-right: 72px;
+  margin-right: 76px;
   overflow: hidden;
 }
 
 
-/* - Stackable List ------------------------------------------------------------
+/* - Object Box List -----------------------------------------------------------
 
-  Tighter, stacking list.
+  Tighter, stacking list when inside an Object Box
 
 */
 
-.phui-object-item-list-view.phui-object-list-stackable
-  .phui-object-item {
-  margin: -1px 0 0 0;
-  border-left-width: 1px;
-  background: #fff;
-}
-
-.phui-object-box .phui-object-list-stackable {
+.phui-object-box .phui-object-item-list-view {
   padding: 0;
-}
-
-.phui-object-box .phui-object-list-stackable .phui-object-item {
   border: none;
 }
 
-.phui-object-box .phui-object-list-stackable .phui-object-item-frame {
+.phui-object-box .phui-object-item-frame {
   border-right: none;
 }
 
-.phui-object-box .phui-object-list-stackable:last-child
+.phui-object-box .phui-object-item:last-child
   .phui-object-item-frame {
   border-bottom: none;
 }
@@ -308,7 +329,7 @@ ul.phui-object-item-list-view {
 }
 
 .phui-object-item-icons {
-  padding: 0 10px 0 0;
+  padding: 0 4px 0 0;
 }
 
 .device-phone .phui-object-item-icons {
@@ -321,8 +342,8 @@ ul.phui-object-item-icons {
 
 .phui-object-item-icon {
   vertical-align: middle;
-  font-size: 12px;
-  color: {$lightgreytext};
+  font-size: {$smallerfontsize};
+  color: {$greytext};
   text-align: right;
   white-space: nowrap;
   overflow: hidden;
@@ -350,13 +371,18 @@ ul.phui-object-item-icons {
   margin-right: 4px;
 }
 
-
 /* - Bar Colors ----------------------------------------------------------------
-
   Colors for the left-hand border bars, used to indicate object status or other
   attributes.
-
 */
+
+.phui-workboard-view .phui-object-item {
+  border-left-width: 4px;
+}
+
+.phui-object-item {
+  border-left-width: 0;
+}
 
 .phui-object-item-bar-color-red {
   border-left-color: {$red};
@@ -398,15 +424,13 @@ ul.phui-object-item-icons {
   border-left-color: #333333;
 }
 
+
 /* - Disabled ------------------------------------------------------------------
 
   Disabled/inactive objects.
 
 */
 
-.phui-object-item-disabled {
-  border-left-color: #d7d7d7;
-}
 
 .phui-object-item-disabled .phui-object-item-link,
 .phui-object-item-disabled .phui-object-item-link a {
@@ -430,21 +454,21 @@ ul.phui-object-item-icons {
 */
 
 .phui-object-item.phui-object-item-highlighted {
-  background: {$lightyellow};
-  border-left-color: {$yellow};
+  background: {$sh-yellowbackground};
 }
 
-.phui-object-item-highlighted .phui-object-item-frame {
-  border-color: {$yellow};
+ul.phui-object-item-list-view .phui-object-item-highlighted
+  .phui-object-item-frame {
+  border-color: {$sh-yellowborder};
 }
 
 .phui-object-item-selected {
-  background: {$lightblue};
-  border-left-color: {$blue};
+  background: {$sh-bluebackground};
 }
 
-.phui-object-item-selected .phui-object-item-frame {
-  border-color: {$blue};
+ul.phui-object-item-list-view .phui-object-item-selected
+  .phui-object-item-frame {
+  border-color: {$sh-blueborder};
 }
 
 
@@ -520,10 +544,10 @@ ul.phui-object-item-icons {
 */
 
 .phui-object-item-bylines {
-  padding: 0 10px;
+  padding: 0 4px 0 8px;
   margin: 4px 0 8px;
-  font-size: 12px;
-  color: {$lightgreytext};
+  font-size: {$smallerfontsize};
+  color: {$greytext};
   text-align: right;
 }
 
@@ -537,7 +561,7 @@ ul.phui-object-item-icons {
   float: none;
   text-align: left;
   padding: 0 8px;
-  font-size: 13px;
+  font-size: {$normalfontsize};
 }
 
 
@@ -549,68 +573,20 @@ ul.phui-object-item-icons {
 
 .drag-ghost {
   position: relative;
-  border: 1px dashed #fff;
-  background: rgba(255,255,255,.5);
+  background: {$sh-indigobackground};
+  border-radius: 3px;
   margin-bottom: 4px;
-}
-
-.phui-object-list-stackable .drag-ghost {
-  background: {$hoverblue};
-  margin: 0;
-  border: none;
-  border-top: 1px solid {$lightgreyborder}
+  border: 1px dashed {$sh-indigoborder};
 }
 
 .drag-dragging {
   position: relative;
-  opacity: 0.85;
-}
-
-.phui-object-box .phui-object-list-stackable .drag-dragging
- .phui-object-item-frame {
-  border-bottom: 1px solid {$lightgreyborder};
+  background: {$sh-yellowbackground};
+  opacity: 0.9;
 }
 
 .drag-sending {
   opacity: 0.5;
-}
-
-/* - Plain ---------------------------------------------------------------------
-
-  Remove all border styles, just a list of objects
-
-*/
-
-.phui-object-list-plain .phui-object-item {
-  background: transparent;
-}
-
-.phui-object-list-plain .phui-object-item,
-.phui-object-list-plain .phui-object-item-frame {
-  border: none;
-}
-
-.phui-object-list-plain .phui-object-item-attributes,
-.phui-object-list-plain .phui-object-item-name {
-  padding-left: 0;
-  padding-top: 0;
-}
-
-.phui-object-item-image {
-  width: 40px;
-  height: 40px;
-  background-size: 100%;
-  margin: 6px;
-  position: absolute;
-  background-color: {$lightbluebackground};
-}
-
-.phui-object-item-with-image .phui-object-item-frame {
-  min-height: 52px;
-}
-
-.phui-object-item-with-image .phui-object-item-content-box {
-  margin-left: 46px;
 }
 
 /* - State ---------------------------------------------------------------------
@@ -643,41 +619,31 @@ ul.phui-object-item-icons {
 
 /* - Dashboards ------------------------------------------------------------ */
 
-.dashboard-panel .phui-object-item-list-view {
-  padding: 0;
-  border-left: 1px solid {$lightblueborder};
-  border-right: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
-  margin-bottom: -1px;
-}
-
-.dashboard-panel .phui-object-item-list-view .phui-object-item,
-.phui-object-box .phui-object-item-list-view.phui-object-list-flush {
-  margin: 0;
-  background-image: none;
-  background-color: #fff;
-  border-left-width: 4px;
-}
-
-.dashboard-panel .phui-object-item-frame,
-.phui-object-box .phui-object-list-flush .phui-object-item-frame {
+.phui-object-box .phui-object-item-list-view .phui-object-item-frame {
   border: none;
   border-bottom: 1px solid {$thinblueborder};
 }
 
-.dashboard-panel .phui-object-item-list-header,
-.dashboard-panel .maniphest-task-group-header {
-  font-size: 13px;
-  color: {$bluetext};
-  background: {$lightgreybackground};
+.phui-object-box .phui-object-item-list-header {
+  font-size: {$normalfontsize};
+  color: {$darkbluetext};
+  border-top: 1px solid {$thinblueborder};
   border-bottom: 1px solid {$thinblueborder};
-  padding: 8px 12px;
-  -webkit-font-smoothing: antialiased;
+  padding: 8px;
+  background-color: {$lightgreybackground};
 }
 
-.dashboard-panel .phui-object-item-empty .phui-info-view {
+.phui-object-box .phui-header-shell + .phui-object-item-list-view
+ .phui-object-item-list-header,
+.phui-object-box .phui-object-box-hidden-content + .phui-object-item-list-view
+ .phui-object-item-list-header,
+.phui-object-box .phui-object-box-hidden-content +
+  .phui-object-item-list-header {
+   border-top: none;
+ }
+
+.dashboard-pane .phui-object-item-empty .phui-info-view {
   border: none;
-  border-bottom: 1px solid {$thinblueborder};
   margin: 0;
 }
 
@@ -686,46 +652,14 @@ ul.phui-object-item-icons {
    display: none;
  }
 
- .dashboard-panel .phui-object-box .phui-header-shell {
-   display: none;
- }
-
- .dashboard-panel .phui-object-box {
-   margin: 0;
- }
-
 
 /* - Launcher List ---------------------------------------------------------- */
 
-.launcher-header {
-  margin: 8px 16px -4px;
-  clear: both;
-  color: {$darkbluetext};
-}
-
-.launcher-header:nth-of-type(1) {
-  margin-top: 24px;
-}
-
-.phui-object-item-launcher-list {
-  overflow: hidden;
-}
-
-.device-desktop .phui-object-item-launcher-list .phui-object-item {
-  width: 49%;
-  float: left;
-  margin-right: 1%;
-  box-sizing: border-box;
-}
-
 .phui-object-item-image-icon {
   background: none;
-}
-
-.phui-object-item-image-icon {
   width: 30px;
   height: 30px;
-  margin: 4px;
+  margin: 4px 0;
   position: absolute;
 }
 
@@ -754,4 +688,20 @@ ul.phui-object-item-icons {
 
 .device-desktop .phui-object-item-launcher-list .phui-object-icon-pane {
   width: auto;
+}
+
+.phui-object-item-image {
+  width: 40px;
+  height: 40px;
+  background-size: 100%;
+  margin: 6px;
+  position: absolute;
+}
+
+.phui-object-item-with-image .phui-object-item-frame {
+  min-height: 52px;
+}
+
+.phui-object-item-with-image .phui-object-item-content-box {
+  margin-left: 46px;
 }

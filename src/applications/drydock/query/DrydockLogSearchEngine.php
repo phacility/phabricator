@@ -49,10 +49,14 @@ final class DrydockLogSearchEngine extends PhabricatorApplicationSearchEngine {
     PhabricatorSavedQuery $query,
     array $handles) {
 
-    return id(new DrydockLogListView())
+    $list = id(new DrydockLogListView())
       ->setUser($this->requireViewer())
-      ->setLogs($logs)
-      ->render();
+      ->setLogs($logs);
+
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setTable($list);
+
+    return $result;
   }
 
 }

@@ -4,7 +4,7 @@
 
 .phabricator-notification-menu {
   background: #fff;
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   word-wrap: break-word;
   overflow-y: auto;
   box-shadow: {$dropshadow};
@@ -40,6 +40,14 @@
 
 }
 
+.phabricator-notification-list.pm {
+  padding: 0;
+}
+
+.phabricator-notification-list .phabricator-notification {
+  padding: 10px 4px;
+}
+
 .phabricator-notification {
   padding: 6px 8px;
 }
@@ -73,7 +81,7 @@
 .phabricator-notification-header {
   font-weight: bold;
   padding: 10px 8px;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   border-bottom: 1px solid {$thinblueborder};
 }
 
@@ -86,7 +94,7 @@
 }
 
 .phabricator-notification-header .phabricator-notification-clear-all {
-  color: #18559D;
+  color: {$anchor};
   float: right;
   font-weight: normal;
 }
@@ -97,7 +105,7 @@
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
   padding: 8px;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   color: {$darkgreytext};
 }
 

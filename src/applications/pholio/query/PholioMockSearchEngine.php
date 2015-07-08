@@ -19,7 +19,7 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
 
   protected function buildCustomSearchFields() {
     return array(
-      id(new PhabricatorSearchUsersField())
+      id(new PhabricatorUsersSearchField())
         ->setKey('authorPHIDs')
         ->setAliases(array('authors'))
         ->setLabel(pht('Authors')),
@@ -124,7 +124,10 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
       $board->addItem($item);
     }
 
-    return $board;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setContent($board);
+
+    return $result;
   }
 
 }

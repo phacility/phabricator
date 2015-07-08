@@ -3,7 +3,7 @@
 final class PHUIObjectBoxView extends AphrontView {
 
   private $headerText;
-  private $headerColor;
+  private $color;
   private $formErrors = null;
   private $formSaved = false;
   private $infoView;
@@ -15,9 +15,24 @@ final class PHUIObjectBoxView extends AphrontView {
   private $sigils = array();
   private $metadata;
   private $actionListID;
+  private $objectList;
+  private $table;
+  private $collapsed = false;
+  private $anchor;
+
+  private $showAction;
+  private $hideAction;
+  private $showHideHref;
+  private $showHideContent;
+  private $showHideOpen;
 
   private $tabs = array();
   private $propertyLists = array();
+
+  const COLOR_RED = 'red';
+  const COLOR_BLUE = 'blue';
+  const COLOR_GREEN = 'green';
+  const COLOR_YELLOW = 'yellow';
 
   public function addSigil($sigil) {
     $this->sigils[] = $sigil;
@@ -86,8 +101,8 @@ final class PHUIObjectBoxView extends AphrontView {
     return $this;
   }
 
-  public function setHeaderColor($color) {
-    $this->headerColor = $color;
+  public function setColor($color) {
+    $this->color = $color;
     return $this;
   }
 
@@ -138,6 +153,36 @@ final class PHUIObjectBoxView extends AphrontView {
     return $this;
   }
 
+  public function setObjectList($list) {
+    $this->objectList = $list;
+    return $this;
+  }
+
+  public function setTable($table) {
+    $this->collapsed = true;
+    $this->table = $table;
+    return $this;
+  }
+
+  public function setCollapsed($collapsed) {
+    $this->collapsed = $collapsed;
+    return $this;
+  }
+
+  public function setAnchor(PhabricatorAnchorView $anchor) {
+    $this->anchor = $anchor;
+    return $this;
+  }
+
+  public function setShowHide($show, $hide, $content, $href, $open = false) {
+    $this->showAction = $show;
+    $this->hideAction = $hide;
+    $this->showHideContent = $content;
+    $this->showHideHref = $href;
+    $this->showHideOpen = $open;
+    return $this;
+  }
+
   public function setValidationException(
     PhabricatorApplicationTransactionValidationException $ex = null) {
     $this->validationException = $ex;
@@ -145,23 +190,70 @@ final class PHUIObjectBoxView extends AphrontView {
   }
 
   public function render() {
-
     require_celerity_resource('phui-object-box-css');
 
-    if ($this->headerColor) {
-      $header_color = $this->headerColor;
-    } else {
-      $header_color = PHUIActionHeaderView::HEADER_LIGHTBLUE;
+    $header = $this->header;
+
+    if ($this->headerText) {
+      $header = id(new PHUIHeaderView())
+        ->setHeader($this->headerText);
     }
 
-    if ($this->header) {
-      $header = $this->header;
-      $header->setHeaderColor($header_color);
-    } else {
-      $header = id(new PHUIHeaderView())
-        ->setHeader($this->headerText)
-        ->setHeaderColor($header_color);
+    $showhide = null;
+    if ($this->showAction !== null) {
+      if (!$header) {
+        $header = id(new PHUIHeaderView());
+      }
+
+      Javelin::initBehavior('phabricator-reveal-content');
+
+      $hide_action_id = celerity_generate_unique_node_id();
+      $show_action_id = celerity_generate_unique_node_id();
+      $content_id = celerity_generate_unique_node_id();
+
+      $hide_style = ($this->showHideOpen ? 'display: none;': null);
+      $show_style = ($this->showHideOpen ? null : 'display: none;');
+      $hide_action = id(new PHUIButtonView())
+        ->setTag('a')
+        ->addSigil('reveal-content')
+        ->setID($hide_action_id)
+        ->setStyle($hide_style)
+        ->setHref($this->showHideHref)
+        ->setMetaData(
+          array(
+            'hideIDs' => array($hide_action_id),
+            'showIDs' => array($content_id, $show_action_id),
+          ))
+        ->setText($this->showAction);
+
+      $show_action = id(new PHUIButtonView())
+        ->setTag('a')
+        ->addSigil('reveal-content')
+        ->setStyle($show_style)
+        ->setHref('#')
+        ->setID($show_action_id)
+        ->setMetaData(
+          array(
+            'hideIDs' => array($content_id, $show_action_id),
+            'showIDs' => array($hide_action_id),
+          ))
+        ->setText($this->hideAction);
+
+      $header->addActionLink($hide_action);
+      $header->addActionLink($show_action);
+
+      $showhide = array(
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'phui-object-box-hidden-content',
+            'id' => $content_id,
+            'style' => $show_style,
+          ),
+          $this->showHideContent),
+      );
     }
+
 
     if ($this->actionListID) {
       $icon_id = celerity_generate_unique_node_id();
@@ -269,6 +361,7 @@ final class PHUIObjectBoxView extends AphrontView {
     $content = id(new PHUIBoxView())
       ->appendChild(
         array(
+          ($this->showHideOpen == false ? $this->anchor : null),
           $header,
           $this->infoView,
           $this->formErrors,
@@ -277,7 +370,10 @@ final class PHUIObjectBoxView extends AphrontView {
           $this->form,
           $tabs,
           $tab_lists,
+          $showhide,
+          ($this->showHideOpen == true ? $this->anchor : null),
           $property_lists,
+          $this->table,
           $this->renderChildren(),
         ))
       ->setBorder(true)
@@ -286,6 +382,14 @@ final class PHUIObjectBoxView extends AphrontView {
       ->addMargin(PHUI::MARGIN_LARGE_LEFT)
       ->addMargin(PHUI::MARGIN_LARGE_RIGHT)
       ->addClass('phui-object-box');
+
+    if ($this->color) {
+      $content->addClass('phui-object-box-'.$this->color);
+    }
+
+    if ($this->collapsed) {
+      $content->addClass('phui-object-box-collapsed');
+    }
 
     if ($this->tabs) {
       $content->addSigil('phui-object-box');
@@ -299,14 +403,16 @@ final class PHUIObjectBoxView extends AphrontView {
       $content->addClass('phui-object-box-flush');
     }
 
-    $content->addClass('phui-object-box-'.$header_color);
-
     foreach ($this->sigils as $sigil) {
       $content->addSigil($sigil);
     }
 
     if ($this->metadata !== null) {
       $content->setMetadata($this->metadata);
+    }
+
+    if ($this->objectList) {
+      $content->appendChild($this->objectList);
     }
 
     return $content;

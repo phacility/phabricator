@@ -73,7 +73,6 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
     $source_code = id(new PHUIBoxView())
       ->appendChild($source_code)
-      ->setBorder(true)
       ->addMargin(PHUI::MARGIN_LARGE_LEFT)
       ->addMargin(PHUI::MARGIN_LARGE_RIGHT)
       ->addMargin(PHUI::MARGIN_LARGE_TOP);

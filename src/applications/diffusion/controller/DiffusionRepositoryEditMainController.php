@@ -264,6 +264,7 @@ final class DiffusionRepositoryEditMainController
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
+      ->setObject($repository)
       ->setActionList($actions);
 
     $type = PhabricatorRepositoryType::getNameForRepositoryType(
@@ -271,7 +272,6 @@ final class DiffusionRepositoryEditMainController
 
     $view->addProperty(pht('Type'), $type);
     $view->addProperty(pht('Callsign'), $repository->getCallsign());
-
 
     $clone_name = $repository->getDetail('clone-name');
 
@@ -283,17 +283,7 @@ final class DiffusionRepositoryEditMainController
           : phutil_tag('em', array(), $repository->getCloneName().'/'));
     }
 
-    $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $repository->getPHID(),
-      PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
-    if ($project_phids) {
-      $project_text = $viewer->renderHandleList($project_phids);
-    } else {
-      $project_text = phutil_tag('em', array(), pht('None'));
-    }
-    $view->addProperty(
-      pht('Projects'),
-      $project_text);
+    $view->invokeWillRenderEvent();
 
     $view->addProperty(
       pht('Status'),

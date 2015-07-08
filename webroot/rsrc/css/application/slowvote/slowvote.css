@@ -3,14 +3,9 @@
  */
 
 .slowvote-embed {
-  margin: 24px 12px;
-  background: #ffffff;
-  border-color: {$lightgreytext};
-  border-style: solid;
-  border-width: 1px;
-  border-radius: 4px;
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.20),
-              inset 0 0 2px rgba(0, 0, 0, 0.10);
+  background: #fff;
+  border-color: {$lightblueborder};
+  border-radius: 3px;
 }
 
 .slowvote-header {
@@ -21,30 +16,31 @@
 
 .slowvote-description {
   color: {$greytext};
-  padding: 8px;
-  border-bottom: 1px solid #bbbbbb;
+  font-size: {$biggerfontsize};
+  padding: 12px 4px 4px;
 }
 
 .slowvote-header-content {
   padding: 8px;
 }
 
-.slowvote-body {
-}
-
 .slowvote-body-content {
-  padding: 4px 16px;
+  padding: 8px 4px 0;
 }
 
 .slowvote-option-label {
-  border: 1px solid {$greytext};
+  border: 1px solid {$sh-lightgreyborder};
   display: block;
   position: relative;
   padding: 8px 4px;
   cursor: pointer;
   font-weight: bold;
   overflow: hidden;
-  background-color: {$lightblue};
+  background-color: {$lightgreybackground};
+}
+
+.device-desktop .slowvote-option-label:hover {
+  border-color: {$sh-blueborder};
 }
 
 .slowvote-bar {
@@ -53,7 +49,7 @@
   left: 0;
   bottom: 0;
   overflow: hidden;
-  background-color: {$blue};
+  background-color: {$sh-bluebackground};
 }
 
 .slowvote-control-offset {
@@ -62,17 +58,12 @@
   left: 32px;
   top: 8px;
   width: 100%;
-  color: #000000;
-  text-shadow: 0 1px 0 #ffffff;
-}
-
-.slowvote-bar .slowvote-control-offset {
-  color: #ffffff;
-  text-shadow: 0 1px 0 #000000;
+  color: {$darkbluetext};
+  text-shadow: {$whitetextshadow};
 }
 
 .slowvote-option-label-group {
-  margin: 8px 0 16px;
+  margin: 0 0 12px;
 }
 
 .slowvote-option-label input[type="radio"],
@@ -86,27 +77,36 @@
 }
 
 .slowvote-status {
-  text-align: right;
-  color: #333333;
+  color: {$darkbluetext};
   font-weight: normal;
   padding: 2px 0;
   line-height: 15px;
   text-align: right;
-  font-size: 11px;
+  font-size: {$smallerfontsize};
+  top: 0;
+  right: 8px;
+  position: absolute;
+  text-shadow: {$whitetextshadow};
+}
+
+.slowvote-voters {
+  padding-top: 8px;
 }
 
 .slowvote-voter {
   display: inline-block;
   width: 25px;
   height: 25px;
-  background: #f3f3f3;
   background-size: 25px 25px;
+  border-radius: 3px;
+  margin: 0 4px;
+  box-shadow: {$borderinset};
 }
 
 .slowvote-footer {
   border-top-width: 1px;
   border-top-style: solid;
-  border-top-color: #bbbbbb;
+  border-top-color: {$thinblueborder};
   position: relative;
 }
 

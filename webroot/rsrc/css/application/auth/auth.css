@@ -40,6 +40,7 @@
 
   background-repeat: no-repeat;
   background-size: 100%;
+  box-shadow: {$borderinset};
   position: absolute;
 }
 

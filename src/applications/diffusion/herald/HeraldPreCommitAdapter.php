@@ -23,6 +23,14 @@ abstract class HeraldPreCommitAdapter extends HeraldAdapter {
     return 'PhabricatorDiffusionApplication';
   }
 
+  protected function initializeNewAdapter() {
+    $this->log = new PhabricatorRepositoryPushLog();
+  }
+
+  public function isSingleEventAdapter() {
+    return true;
+  }
+
   public function getObject() {
     return $this->log;
   }

@@ -136,7 +136,7 @@ final class PhabricatorXHProfProfileTopLevelView
     }
 
     $panel->setHeader($header);
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     return $panel->render();
   }

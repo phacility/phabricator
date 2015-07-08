@@ -75,7 +75,7 @@ final class PhabricatorSSHKeysSettingsPanel extends PhabricatorSettingsPanel {
     $header->addActionLink($upload_button);
 
     $panel->setHeader($header);
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     return $panel;
   }

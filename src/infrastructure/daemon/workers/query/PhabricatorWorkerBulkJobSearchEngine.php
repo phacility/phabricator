@@ -27,7 +27,7 @@ final class PhabricatorWorkerBulkJobSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
-      id(new PhabricatorSearchUsersField())
+      id(new PhabricatorUsersSearchField())
         ->setLabel(pht('Authors'))
         ->setKey('authorPHIDs')
         ->setAliases(array('author', 'authors')),
@@ -91,8 +91,7 @@ final class PhabricatorWorkerBulkJobSearchEngine
       $list->addItem($item);
     }
 
-    // TODO: Needs new wrapper when merging to redesign.
-
-    return $list;
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setContent($list);
   }
 }

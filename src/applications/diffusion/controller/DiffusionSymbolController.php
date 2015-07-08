@@ -138,7 +138,7 @@ final class DiffusionSymbolController extends DiffusionController {
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText(pht('Similar Symbols'));
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     return $this->buildApplicationPage(
       $panel,

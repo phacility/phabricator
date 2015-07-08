@@ -101,17 +101,6 @@ final class PhabricatorProjectColumn
 
     if ($this->isHidden()) {
       $icon = 'fa-eye-slash';
-      $text = pht('Hidden');
-    }
-
-    if ($icon) {
-      return id(new PHUIIconView())
-        ->setIconFont($icon)
-        ->addSigil('has-tooltip')
-        ->setMetadata(
-          array(
-            'tip' => $text,
-          ));
     }
 
     return null;

@@ -120,7 +120,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
         $item = id(new PHUIObjectItemView())
           ->setObjectName(pht('Step %d.%d', $depth, $i))
           ->setHeader(pht('Unknown Implementation'))
-          ->setBarColor('red')
+          ->setStatusIcon('fa-warning red')
           ->addAttribute(pht(
             'This step has an invalid implementation (%s).',
             $step->getClassName()))
@@ -206,7 +206,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
 
       if ($has_conflicts) {
         $has_any_conflicts = true;
-        $item->setBarColor('red');
+        $item->setStatusIcon('fa-warning red');
       }
 
       if ($run_ref['cycle']) {
@@ -214,7 +214,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
       }
 
       if ($is_deadlocking) {
-        $item->setBarColor('red');
+        $item->setStatusIcon('fa-warning red');
       }
 
       $step_list->addItem($item);

@@ -18,7 +18,7 @@ final class ConpherenceThreadSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
-      id(new PhabricatorSearchUsersField())
+      id(new PhabricatorUsersSearchField())
         ->setLabel(pht('Participants'))
         ->setKey('participants')
         ->setAliases(array('participant')),
@@ -204,7 +204,11 @@ final class ConpherenceThreadSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No threads found.'));
+
+    return $result;
   }
 
   private function loadContextMessages(array $threads, $fulltext) {

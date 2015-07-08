@@ -173,7 +173,7 @@ a.phui-tag-view:hover
 }
 
 .phui-tag-shade-slim .phui-tag-core {
-  font-size: 12px;
+  font-size: {$smallerfontsize};
 }
 
 /* - Red -------------------------------------------------------------------- */

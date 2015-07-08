@@ -111,11 +111,15 @@ final class PhabricatorDashboardQueryPanelType
     PhabricatorUser $viewer,
     PhabricatorDashboardPanel $panel,
     PhabricatorDashboardPanelRenderingEngine $engine,
-    PHUIActionHeaderView $header) {
+    PHUIHeaderView $header) {
 
     $search_engine = $this->getSearchEngine($panel);
     $key = $panel->getProperty('key');
-    $header->setHeaderHref($search_engine->getQueryResultsPageURI($key));
+    $href = $search_engine->getQueryResultsPageURI($key);
+    $icon = id(new PHUIIconView())
+        ->setIconFont('fa-search')
+        ->setHref($href);
+    $header->addActionIcon($icon);
 
     return $header;
   }

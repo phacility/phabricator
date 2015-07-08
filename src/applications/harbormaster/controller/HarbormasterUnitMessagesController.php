@@ -40,7 +40,7 @@ final class HarbormasterUnitMessagesController
 
     $unit = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Unit Tests'))
-      ->appendChild($unit_table);
+      ->setTable($unit_table);
 
     $crumbs = $this->buildApplicationCrumbs();
     $this->addBuildableCrumb($crumbs, $buildable);

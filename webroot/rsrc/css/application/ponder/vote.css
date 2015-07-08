@@ -10,8 +10,7 @@
 .ponder-votebox {
   border-radius: 4px;
   background: #f3f3f3;
-  border: 1px solid #d7d7d7;
-  box-shadow: 1px 1px rgba(0, 0, 0, 0.05);
+  border: 1px solid {$blueborder};
   text-align: center;
   width: 24px;
 }
@@ -36,8 +35,8 @@
 }
 
 .ponder-vote-count {
-  color: #333333;
-  font-size: 14px;
+  color: {$darkbluetext};
+  font-size: {$biggerfontsize};
   line-height: 20px;
   font-weight: bold;
 }

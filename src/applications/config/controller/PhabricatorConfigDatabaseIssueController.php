@@ -150,7 +150,7 @@ final class PhabricatorConfigDatabaseIssueController
     $table_box = id(new PHUIObjectBoxView())
       ->setHeader($this->buildHeaderWithDocumentationLink($title))
       ->setFormErrors($errors)
-      ->appendChild($table);
+      ->setTable($table);
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('dbissue/');

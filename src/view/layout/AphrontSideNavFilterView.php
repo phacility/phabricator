@@ -248,24 +248,14 @@ final class AphrontSideNavFilterView extends AphrontView {
         $nav_classes[] = 'has-local-nav';
       }
 
-      $menu_background = phutil_tag(
-        'div',
-        array(
-          'class' => 'phabricator-nav-column-background',
-          'id'    => $background_id,
-        ),
-        '');
-
-      $local_menu = array(
-        $menu_background,
+      $local_menu =
         phutil_tag(
           'div',
           array(
             'class' => 'phabricator-nav-local phabricator-side-menu',
             'id'    => $local_id,
           ),
-          $this->menu->setID($this->getMenuID())),
-      );
+          $this->menu->setID($this->getMenuID()));
     }
 
     $crumbs = null;

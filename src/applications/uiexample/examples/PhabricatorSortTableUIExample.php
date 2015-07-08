@@ -89,7 +89,7 @@ final class PhabricatorSortTableUIExample extends PhabricatorUIExample {
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText(pht('Sortable Table of Vehicles'));
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     return $panel;
   }

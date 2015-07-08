@@ -15,6 +15,7 @@ final class LegalpadDocumentEditor
 
   private function setIsContribution($is_contribution) {
     $this->isContribution = $is_contribution;
+    return $this;
   }
 
   private function isContribution() {

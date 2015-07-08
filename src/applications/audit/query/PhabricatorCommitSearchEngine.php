@@ -206,8 +206,12 @@ final class PhabricatorCommitSearchEngine
     }
 
     $view->setHandles($handles);
+    $list = $view->buildList();
 
-    return $view->buildList();
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setContent($list);
+
+    return $result;
   }
 
 }

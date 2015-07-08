@@ -10,14 +10,16 @@ final class PHUIHeaderView extends AphrontTagView {
   private $image;
   private $imageURL = null;
   private $subheader;
-  private $headerColor;
+  private $headerIcon;
   private $noBackground;
   private $bleedHeader;
+  private $tall;
   private $properties = array();
   private $actionLinks = array();
   private $buttonBar = null;
   private $policyObject;
   private $epoch;
+  private $actionIcons = array();
 
   public function setHeader($header) {
     $this->header = $header;
@@ -31,6 +33,11 @@ final class PHUIHeaderView extends AphrontTagView {
 
   public function setNoBackground($nada) {
     $this->noBackground = $nada;
+    return $this;
+  }
+
+  public function setTall($tall) {
+    $this->tall = $tall;
     return $this;
   }
 
@@ -59,8 +66,8 @@ final class PHUIHeaderView extends AphrontTagView {
     return $this;
   }
 
-  public function setHeaderColor($color) {
-    $this->headerColor = $color;
+  public function setHeaderIcon($icon) {
+    $this->headerIcon = $icon;
     return $this;
   }
 
@@ -76,6 +83,11 @@ final class PHUIHeaderView extends AphrontTagView {
 
   public function addActionLink(PHUIButtonView $button) {
     $this->actionLinks[] = $button;
+    return $this;
+  }
+
+  public function addActionIcon(PHUIIconView $action) {
+    $this->actionIcons[] = $action;
     return $this;
   }
 
@@ -98,7 +110,7 @@ final class PHUIHeaderView extends AphrontTagView {
     $tag = phutil_tag(
       'span',
       array(
-        'class' => "{$header_class} plr",
+        'class' => "phui-header-status {$header_class}",
       ),
       array(
         $img,
@@ -141,17 +153,9 @@ final class PHUIHeaderView extends AphrontTagView {
       $classes[] = 'phui-bleed-header';
     }
 
-    if ($this->headerColor) {
-      $classes[] = 'sprite-gradient';
-      $classes[] = 'gradient-'.$this->headerColor.'-header';
-    }
-
-    if ($this->properties || $this->policyObject || $this->subheader) {
+    if ($this->properties || $this->policyObject ||
+        $this->subheader || $this->tall) {
       $classes[] = 'phui-header-tall';
-    }
-
-    if ($this->image) {
-      $classes[] = 'phui-header-has-image';
     }
 
     return array(
@@ -174,15 +178,17 @@ final class PHUIHeaderView extends AphrontTagView {
 
     $viewer = $this->getUser();
 
-    $header = array();
+    $left = array();
+    $right = array();
+
     if ($viewer) {
-      $header[] = id(new PHUISpacesNamespaceContextView())
+      $left[] = id(new PHUISpacesNamespaceContextView())
         ->setUser($viewer)
         ->setObject($this->policyObject);
     }
 
     if ($this->objectName) {
-      $header[] = array(
+      $left[] = array(
         phutil_tag(
           'a',
           array(
@@ -201,7 +207,7 @@ final class PHUIHeaderView extends AphrontTagView {
         $button->addClass('phui-header-action-link');
         $actions[] = $button;
       }
-      $header[] = phutil_tag(
+      $right[] = phutil_tag(
         'div',
         array(
           'class' => 'phui-header-action-links',
@@ -210,27 +216,56 @@ final class PHUIHeaderView extends AphrontTagView {
     }
 
     if ($this->buttonBar) {
-      $header[] = phutil_tag(
+      $right[] = phutil_tag(
         'div',
         array(
           'class' => 'phui-header-action-links',
         ),
         $this->buttonBar);
     }
-    $header[] = $this->header;
 
-    if ($this->tags) {
-      $header[] = ' ';
-      $header[] = phutil_tag(
-        'span',
-        array(
-          'class' => 'phui-header-tags',
-        ),
-        array_interleave(' ', $this->tags));
+    if ($this->actionIcons || $this->tags) {
+      $action_list = array();
+      if ($this->actionIcons) {
+        foreach ($this->actionIcons as $icon) {
+          $action_list[] = phutil_tag(
+            'li',
+            array(
+              'class' => 'phui-header-action-icon',
+            ),
+            $icon);
+        }
+      }
+      if ($this->tags) {
+        $action_list[] = phutil_tag(
+          'li',
+          array(
+            'class' => 'phui-header-action-tag',
+          ),
+          array_interleave(' ', $this->tags));
+      }
+      $right[] = phutil_tag(
+        'ul',
+          array(
+            'class' => 'phui-header-action-list',
+          ),
+          $action_list);
     }
 
+    if ($this->headerIcon) {
+      $icon = id(new PHUIIconView())
+        ->setIconFont($this->headerIcon);
+      $left[] = $icon;
+    }
+    $left[] = phutil_tag(
+      'span',
+      array(
+        'class' => 'phui-header-header',
+      ),
+      $this->header);
+
     if ($this->subheader) {
-      $header[] = phutil_tag(
+      $left[] = phutil_tag(
         'div',
         array(
           'class' => 'phui-header-subheader',
@@ -255,7 +290,7 @@ final class PHUIHeaderView extends AphrontTagView {
         $property_list[] = $this->renderPolicyProperty($this->policyObject);
       }
 
-      $header[] = phutil_tag(
+      $left[] = phutil_tag(
         'div',
         array(
           'class' => 'phui-header-subheader',
@@ -263,15 +298,50 @@ final class PHUIHeaderView extends AphrontTagView {
         $property_list);
     }
 
-    return array(
-      $image,
-      phutil_tag(
-        'h1',
-        array(
-          'class' => 'phui-header-view grouped',
-        ),
-        $header),
-      );
+    // We here at @phabricator
+    $header_image = null;
+    if ($image) {
+    $header_image = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-header-col1',
+      ),
+      $image);
+    }
+
+    // All really love
+    $header_left = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-header-col2',
+      ),
+      $left);
+
+    // Tables and Pokemon.
+    $header_right = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-header-col3',
+      ),
+      $right);
+
+    $header_row = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-header-row',
+      ),
+      array(
+        $header_image,
+        $header_left,
+        $header_right,
+      ));
+
+    return phutil_tag(
+      'h1',
+      array(
+        'class' => 'phui-header-view',
+      ),
+      $header_row);
   }
 
   private function renderPolicyProperty(PhabricatorPolicyInterface $object) {

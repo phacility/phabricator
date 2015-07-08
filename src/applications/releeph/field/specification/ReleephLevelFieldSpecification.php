@@ -118,6 +118,7 @@ abstract class ReleephLevelFieldSpecification
         pht("Unknown %s level name '%s'", $label, $name));
     }
     $this->setValue($level);
+    return $this;
   }
 
   private $nameMap = array();

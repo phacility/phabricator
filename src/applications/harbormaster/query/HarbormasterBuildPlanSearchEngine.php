@@ -97,7 +97,12 @@ final class HarbormasterBuildPlanSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No build plans found.'));
+
+    return $result;
+
   }
 
 }

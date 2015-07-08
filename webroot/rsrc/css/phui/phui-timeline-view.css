@@ -9,8 +9,12 @@
   background-position: 94px;
 }
 
+.device .phui-timeline-view {
+  padding: 0 8px;
+}
+
 .device-tablet .phui-timeline-view {
-  background-position: 31px;
+  background-position: 24px;
 }
 
 .device-phone .phui-timeline-view {
@@ -21,6 +25,7 @@
 .phui-timeline-major-event .phui-timeline-group {
   border-left: 1px solid {$lightblueborder};
   border-right: 1px solid {$lightblueborder};
+  border-radius: 3px;
 }
 
 .device-desktop .phui-timeline-event-view {
@@ -58,10 +63,11 @@
 .phui-timeline-major-event .phui-timeline-content {
   border-top: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$lightblueborder};
+  border-radius: 3px;
 }
 
 .phui-timeline-title {
-  line-height: 18px;
+  line-height: 22px;
   min-height: 19px;
   position: relative;
   color: {$bluetext};
@@ -81,20 +87,21 @@
 }
 
 .device-desktop .phui-timeline-major-event .phui-timeline-wedge {
-  top: 24px;
+  top: 26px;
 }
 
 .device-desktop .phui-timeline-minor-event .phui-timeline-wedge {
-  top: 12px;
+  top: 13px;
   left: -18px;
   width: 20px;
 }
 
 .phui-timeline-image {
   background-repeat: no-repeat;
-  background-size: 100%;
   position: absolute;
   border-radius: 3px;
+  box-shadow: {$borderinset};
+  background-size: 100%;
 }
 
 .device-desktop .phui-timeline-major-event .phui-timeline-image {
@@ -105,15 +112,20 @@
 }
 
 .device-desktop .phui-timeline-minor-event .phui-timeline-image {
-  width: 26px;
-  height: 26px;
-  background-size: 26px auto;
+  width: 28px;
+  height: 28px;
+  background-size: 28px auto;
   left: -41px;
 }
 
 .phui-timeline-major-event .phui-timeline-title {
-  background: {$lightgreybackground};
-  min-height: 18px;
+  background: {$lightbluebackground};
+  min-height: 22px;
+  border-top-right-radius: 3px;
+}
+
+.phui-timeline-title + .phui-timeline-title {
+  border-radius: 0;
 }
 
 .phui-timeline-title {
@@ -160,6 +172,8 @@
   padding: 16px 12px;
   line-height: 18px;
   background: #fff;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 .phui-timeline-core-content {
@@ -199,8 +213,8 @@
 
 .phui-timeline-icon-fill {
   position: absolute;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   background-color: {$lightblueborder};
   top: 0;
   left: 0;
@@ -208,33 +222,32 @@
 }
 
 .phui-icon-view.phui-timeline-icon:before {
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .phui-timeline-minor-event .phui-timeline-icon-fill {
-  height: 26px;
-  width: 26px;
+  height: 28px;
+  width: 28px;
   border-radius: 3px;
 }
 
 .phui-timeline-icon-fill .phui-timeline-icon {
-  margin-top: 7px;
+  margin-top: 8px;
 }
 
 .phui-timeline-minor-event .phui-timeline-icon-fill .phui-timeline-icon {
-  margin-top: 6px;
+  margin-top: 7px;
 }
 
 .phui-timeline-extra,
 .phui-timeline-extra .phabricator-content-source-view {
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   font-weight: normal;
   color: {$lightbluetext};
 }
 
 .phui-timeline-title .phui-timeline-extra a {
   font-weight: normal;
-  color: {$bluetext};
 }
 
 .device-desktop .phui-timeline-extra {
@@ -314,18 +327,18 @@
 }
 
 .phui-timeline-older-transactions-are-hidden {
-  background: {$lightyellow};
-  border: 1px solid {$yellow};
+  background: {$sh-yellowbackground};
+  border: 1px solid {$sh-yellowborder};
   text-align: center;
   padding: 12px;
   color: {$darkgreytext};
   cursor: pointer;
+  border-radius: 3px;
 }
 
 .device-phone .phui-timeline-older-transactions-are-hidden {
   margin: 0 8px;
 }
-
 
 .phui-timeline-title .phui-timeline-extra-information a {
   font-weight: normal;
@@ -343,7 +356,7 @@
 .phui-timeline-menu {
   position: absolute;
   right: 3px;
-  top: 4px;
+  top: 6px;
   width: 28px;
   height: 22px;
   text-align: center;

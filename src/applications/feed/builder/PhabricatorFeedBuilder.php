@@ -51,8 +51,9 @@ final class PhabricatorFeedBuilder extends Phobject {
             phutil_tag_div('phabricator-feed-story-date-separator'));
         }
         $last_date = $date;
-        $header = new PHUIActionHeaderView();
-        $header->setHeaderTitle($date);
+        $header = new PHUIHeaderView();
+        $header->setHeader($date);
+        $header->setHeaderIcon('fa-calendar msr');
 
         $null_view->appendChild($header);
       }
@@ -76,22 +77,23 @@ final class PhabricatorFeedBuilder extends Phobject {
       $null_view->appendChild($view);
     }
 
+    $box = id(new PHUIObjectBoxView())
+      ->appendChild($null_view);
+
     if (empty($stories)) {
       $nodatastring = pht('No Stories.');
       if ($this->noDataString) {
         $nodatastring = $this->noDataString;
       }
 
-      $view = id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
+      $view = id(new PHUIBoxView())
+        ->addClass('mlt mlb msr msl')
         ->appendChild($nodatastring);
-      $null_view->appendChild($view);
+      $box->appendChild($view);
     }
 
+    return $box;
 
-
-    return id(new AphrontNullView())
-      ->appendChild($null_view->render());
   }
 
 }

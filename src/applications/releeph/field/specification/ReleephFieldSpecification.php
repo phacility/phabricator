@@ -110,6 +110,7 @@ abstract class ReleephFieldSpecification
       $this->getRequiredStorageKey());
     $this->validate($value);
     $this->setValue($value);
+    return $this;
   }
 
 

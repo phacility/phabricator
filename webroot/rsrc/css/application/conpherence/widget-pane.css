@@ -46,8 +46,12 @@
   border: 0;
 }
 
-.conpherence-widget-pane .widgets-header {
-  border-bottom: 1px solid {$thinblueborder};
+.conpherence-widget-pane .widgets-header .phui-header-shell {
+  padding: 6px 8px;
+}
+
+.conpherence-widget-pane .widgets-header .phui-header-header {
+  font-size: {$biggerfontsize};
 }
 
 .device .conpherence-widget-pane .widgets-header {
@@ -58,7 +62,7 @@
   float: none;
   height: 0px;
   width: 0px;
-  margin-right: 0px;
+  margin: 10px 0 0 4px;
   border-top-color: #000;
 }
 
@@ -83,7 +87,7 @@
 }
 
 .device-desktop .conpherence-widget-pane .widgets-body {
-  top: 108px;
+  top: 111px;
   width: 240px;
 }
 
@@ -142,7 +146,7 @@
   top: 0;
   left: 0;
   width: 180px;
-  font-size: 11px;
+  font-size: {$smallestfontsize};
 }
 
 .device .conpherence-widget-pane #widgets-files .file-title,
@@ -233,11 +237,11 @@
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
  .day-name {
   padding: 5px 0px 0px 0px;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
 }
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
  .day-number {
-  font-size: 16px;
+  font-size: {$biggestfontsize};
   padding: 0 0 5px 0;
 }
 
@@ -257,13 +261,13 @@
   color: {$bluetext};
   font-weight: bold;
   text-transform: uppercase;
-  font-size: 11px;
+  font-size: {$smallestfontsize};
 }
 
 .conpherence-widget-pane #widgets-calendar .day-header .day-date {
   float: right;
   color: {$lightbluetext};
-  font-size: 11px;
+  font-size: {$smallestfontsize};
 }
 
 .conpherence-widget-pane #widgets-calendar .top-border {
@@ -298,7 +302,7 @@
 }
 
 .conpherence-widget-pane #widgets-calendar .user-status .participant {
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   color: {$lightgreytext};
   padding-top: 2px;
 }

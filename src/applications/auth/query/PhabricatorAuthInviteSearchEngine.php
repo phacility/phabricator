@@ -102,8 +102,9 @@ final class PhabricatorAuthInviteSearchEngine
           'right',
         ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Email Invitations'))
-      ->appendChild($table);
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setTable($table);
+
+    return $result;
   }
 }

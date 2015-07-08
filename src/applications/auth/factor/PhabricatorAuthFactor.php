@@ -34,35 +34,10 @@ abstract class PhabricatorAuthFactor extends Phobject {
   }
 
   public static function getAllFactors() {
-    static $factors;
-
-    if ($factors === null) {
-      $map = id(new PhutilSymbolLoader())
-        ->setAncestorClass(__CLASS__)
-        ->loadObjects();
-
-      $factors = array();
-      foreach ($map as $factor) {
-        $key = $factor->getFactorKey();
-        if (empty($factors[$key])) {
-          $factors[$key] = $factor;
-        } else {
-          $this_class = get_class($factor);
-          $that_class = get_class($factors[$key]);
-
-          throw new Exception(
-            pht(
-              'Two auth factors (with classes "%s" and "%s") both provide '.
-              'implementations with the same key ("%s"). Each factor must '.
-              'have a unique key.',
-              $this_class,
-              $that_class,
-              $key));
-        }
-      }
-    }
-
-    return $factors;
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->setUniqueMethod('getFactorKey')
+      ->execute();
   }
 
   protected function newConfigForUser(PhabricatorUser $user) {

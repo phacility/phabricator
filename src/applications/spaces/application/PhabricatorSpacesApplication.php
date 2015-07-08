@@ -31,11 +31,7 @@ final class PhabricatorSpacesApplication extends PhabricatorApplication {
   }
 
   public function canUninstall() {
-    return true;
-  }
-
-  public function isPrototype() {
-    return true;
+    return false;
   }
 
   public function getHelpDocumentationArticles(PhabricatorUser $viewer) {

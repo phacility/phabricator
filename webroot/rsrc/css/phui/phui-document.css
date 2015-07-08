@@ -4,19 +4,37 @@
 
 .phui-document-view {
   margin-bottom: 16px;
+  border-radius: 3px;
   position: relative;
+}
+
+.phui-document-view .phui-header-shell {
+  padding: 16px;
+  background-color: {$bluebackground};
+}
+
+.phui-document-content {
+  border-radius: 3px;
 }
 
 .device-desktop .phui-document-view {
   border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
   max-width: 960px;
   margin: 16px auto;
+}
+
+.device-desktop .phui-document-box {
+  max-width: 996px;
+  margin: 24px auto;
 }
 
 .device-desktop .phui-document-fluid .phui-document-view {
   max-width: none;
   margin: 16px;
+}
+
+.phui-crumbs-view + .phui-document-fluid .phui-document-view {
+  margin-top: 0;
 }
 
 .device-desktop .phui-document-view.phui-offset-view {
@@ -39,8 +57,8 @@
 .device-phone .phui-document-sidenav {
   position: static;
   width: auto;
-  border-top: 1px solid #d7d7d7;
-  border-bottom: 1px solid #d7d7d7;
+  border-top: 1px solid {$thinblueborder};
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 .device-phone .phui-sidenav-view .phui-document-inner {
@@ -49,27 +67,8 @@
 
 .phui-sidenav-view .phui-document-inner {
   margin-right: 200px;
-  border-right: 1px solid #e7e7e7;
+  border-right: 1px solid {$thinblueborder};
   background: #fff;
-}
-
-.phui-document-bookname {
-  padding: 8px 16px;
-  color: #9ca5b5;
-  background-color: #fff;
-  border-bottom: 1px solid {$lightblueborder};
-}
-
-.device-phone .phui-document-bookname {
-  padding: 8px;
-}
-
-.phui-document-bookname .bookname {
-  float: left;
-}
-
-.phui-document-bookname .bookdescription {
-  float: right;
 }
 
 .phui-document-content .phui-header-shell {
@@ -87,23 +86,18 @@
   .phui-header-shell.phui-header-no-backgound
   .phui-header-view {
   padding: 8px 0 4px;
-  font-size: 15px;
-}
-
-.phui-document-content .phui-header-view {
-  color: {$darkbluetext};
-  text-shadow: 0 1px 2px #fff;
+  font-size: {$biggestfontsize};
 }
 
 .phui-document-content .phui-property-list-container {
-  border-color: #dde8ef;
+  border-color: {$thinblueborder};
 }
 
 .phui-document-content .phui-property-list-view {
   border: none;
   box-shadow: none;
   margin: 0;
-  background-color: #f6f7f8;
+  background-color: {$lightgreybackground};
 }
 
 .phui-document-content {
@@ -113,6 +107,7 @@
 
 .phui-document-content .phabricator-remarkup {
   padding: 16px;
+  font-size: 14px;
 }
 
 .phui-document-view .phui-header-action-links .phui-mobile-menu {
@@ -161,6 +156,7 @@
   border-left: 1px solid {$thinblueborder};
   padding: 16px 12px;
   margin: 0;
+  font-size: 12px;
 }
 
 .device-phone .phui-document-view .phabricator-remarkup.remarkup-has-toc {
@@ -169,4 +165,27 @@
 
 .device-phone .phui-document-view .remarkup-has-toc .phabricator-remarkup-toc {
   display: none;
+}
+
+body .phui-document-view .phui-header-shell.phui-bleed-header {
+  padding: 0;
+}
+
+.phui-document-view .phui-property-list-section-header {
+  padding: 12px 16px 0px;
+}
+
+.phui-document-view .phui-property-list-text-content {
+  padding: 0;
+}
+
+.phui-document-view .PhabricatorMonospaced,
+.phui-document-view .phabricator-remarkup .remarkup-code-block .remarkup-code {
+  font: 11px/14px "Menlo", "Consolas", "Monaco", monospace;
+}
+
+.platform-windows .phui-document-view .PhabricatorMonospaced,
+.platform-windows .phui-document-view .phabricator-remarkup .remarkup-code-block
+  .remarkup-code {
+  font: 12px/14px "Menlo", "Consolas", "Monaco", monospace;
 }

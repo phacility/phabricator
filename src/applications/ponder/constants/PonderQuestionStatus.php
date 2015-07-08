@@ -22,7 +22,17 @@ final class PonderQuestionStatus extends PonderConstants {
 
   public static function getQuestionStatusTagColor($status) {
     $map = array(
+      self::STATUS_OPEN => PHUITagView::COLOR_BLUE,
       self::STATUS_CLOSED => PHUITagView::COLOR_BLACK,
+    );
+
+    return idx($map, $status);
+  }
+
+  public static function getQuestionStatusIcon($status) {
+    $map = array(
+      self::STATUS_OPEN => 'fa-question-circle',
+      self::STATUS_CLOSED => 'fa-check-square-o',
     );
 
     return idx($map, $status);

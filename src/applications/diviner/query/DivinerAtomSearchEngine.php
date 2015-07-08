@@ -144,7 +144,11 @@ final class DivinerAtomSearchEngine extends PhabricatorApplicationSearchEngine {
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No books found.'));
+
+    return $result;
   }
 
 }

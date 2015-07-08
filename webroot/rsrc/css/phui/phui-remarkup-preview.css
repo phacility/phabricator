@@ -2,22 +2,29 @@
  * @provides phui-remarkup-preview-css
  */
 
+.phui-remarkup-preview .phui-object-box {
+  padding: 0;
+}
+
 .phui-preview-header {
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   font-weight: bold;
-  color: #9ca5b5;
+  color: {$bluetext};
   text-transform: uppercase;
-  padding-bottom: 8px;
+  padding: 8px;
+  background-color: {$lightgreybackground};
+  border-bottom: 1px solid {$thinblueborder};
   display: block;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}
+
+.phui-preview-body {
+  padding: 16px;
 }
 
 .phui-document-inner .phui-preview-header {
   padding: 16px 0 0 16px;
-}
-
-.phui-remarkup-preview-skin-document {
-  background: transparent;
-  border: none;
 }
 
 .device-phone .phui-panel-preview {

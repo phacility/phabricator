@@ -48,6 +48,10 @@ abstract class DiffusionBrowseController extends DiffusionController {
         '#');
     }
 
+    $filter = id(new PHUIBoxView())
+      ->addClass('mlt mlb')
+      ->appendChild($filter);
+
     return $filter;
   }
 

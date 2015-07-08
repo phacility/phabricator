@@ -93,7 +93,7 @@ final class PhabricatorPeopleCreateController
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->appendChild($form);
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(

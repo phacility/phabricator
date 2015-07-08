@@ -1,19 +1,13 @@
 <?php
 
-/**
- * @task customfield Custom Field Integration
- */
 abstract class HeraldAdapter extends Phobject {
 
   const FIELD_TITLE                  = 'title';
   const FIELD_BODY                   = 'body';
   const FIELD_AUTHOR                 = 'author';
-  const FIELD_ASSIGNEE               = 'assignee';
   const FIELD_REVIEWER               = 'reviewer';
   const FIELD_REVIEWERS              = 'reviewers';
   const FIELD_COMMITTER              = 'committer';
-  const FIELD_CC                     = 'cc';
-  const FIELD_TAGS                   = 'tags';
   const FIELD_DIFF_FILE              = 'diff-file';
   const FIELD_DIFF_CONTENT           = 'diff-content';
   const FIELD_DIFF_ADDED_CONTENT     = 'diff-added-content';
@@ -21,13 +15,9 @@ abstract class HeraldAdapter extends Phobject {
   const FIELD_DIFF_ENORMOUS          = 'diff-enormous';
   const FIELD_REPOSITORY             = 'repository';
   const FIELD_REPOSITORY_PROJECTS    = 'repository-projects';
-  const FIELD_RULE                   = 'rule';
   const FIELD_AFFECTED_PACKAGE       = 'affected-package';
   const FIELD_AFFECTED_PACKAGE_OWNER = 'affected-package-owner';
-  const FIELD_CONTENT_SOURCE         = 'contentsource';
-  const FIELD_ALWAYS                 = 'always';
   const FIELD_AUTHOR_PROJECTS        = 'authorprojects';
-  const FIELD_PROJECTS               = 'projects';
   const FIELD_PUSHER                 = 'pusher';
   const FIELD_PUSHER_PROJECTS        = 'pusher-projects';
   const FIELD_DIFFERENTIAL_REVISION  = 'differential-revision';
@@ -38,13 +28,7 @@ abstract class HeraldAdapter extends Phobject {
   const FIELD_BRANCHES               = 'branches';
   const FIELD_AUTHOR_RAW             = 'author-raw';
   const FIELD_COMMITTER_RAW          = 'committer-raw';
-  const FIELD_IS_NEW_OBJECT          = 'new-object';
-  const FIELD_APPLICATION_EMAIL      = 'applicaton-email';
-  const FIELD_TASK_PRIORITY          = 'taskpriority';
-  const FIELD_TASK_STATUS            = 'taskstatus';
   const FIELD_PUSHER_IS_COMMITTER    = 'pusher-is-committer';
-  const FIELD_PATH                   = 'path';
-  const FIELD_SPACE = 'space';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -89,7 +73,6 @@ abstract class HeraldAdapter extends Phobject {
   const VALUE_NONE            = 'none';
   const VALUE_EMAIL           = 'email';
   const VALUE_USER            = 'user';
-  const VALUE_TAG             = 'tag';
   const VALUE_RULE            = 'rule';
   const VALUE_REPOSITORY      = 'repository';
   const VALUE_OWNERS_PACKAGE  = 'package';
@@ -107,12 +90,12 @@ abstract class HeraldAdapter extends Phobject {
   private $contentSource;
   private $isNewObject;
   private $applicationEmail;
-  private $customFields = false;
   private $customActions = null;
   private $queuedTransactions = array();
   private $emailPHIDs = array();
   private $forcedEmailPHIDs = array();
   private $unsubscribedPHIDs;
+  private $fieldMap;
 
   public function getEmailPHIDs() {
     return array_values($this->emailPHIDs);
@@ -176,6 +159,10 @@ abstract class HeraldAdapter extends Phobject {
     return $this;
   }
 
+  public function supportsApplicationEmail() {
+    return false;
+  }
+
   public function setApplicationEmail(
     PhabricatorMetaMTAApplicationEmail $email) {
     $this->applicationEmail = $email;
@@ -186,64 +173,31 @@ abstract class HeraldAdapter extends Phobject {
     return $this->applicationEmail;
   }
 
-  abstract public function getPHID();
+  public function getPHID() {
+    return $this->getObject()->getPHID();
+  }
+
   abstract public function getHeraldName();
 
   public function getHeraldField($field_name) {
-    switch ($field_name) {
-      case self::FIELD_RULE:
-        return null;
-      case self::FIELD_CONTENT_SOURCE:
-        return $this->getContentSource()->getSource();
-      case self::FIELD_ALWAYS:
-        return true;
-      case self::FIELD_IS_NEW_OBJECT:
-        return $this->getIsNewObject();
-      case self::FIELD_CC:
-        $object = $this->getObject();
-
-        if (!($object instanceof PhabricatorSubscribableInterface)) {
-          throw new Exception(
-            pht(
-              'Adapter object (of class "%s") does not implement interface '.
-              '"%s", so the subscribers field value can not be determined.',
-              get_class($object),
-              'PhabricatorSubscribableInterface'));
-        }
-
-        $phid = $object->getPHID();
-        return PhabricatorSubscribersQuery::loadSubscribersForPHID($phid);
-      case self::FIELD_APPLICATION_EMAIL:
-        $value = array();
-        // while there is only one match by implementation, we do set
-        // comparisons on phids, so return an array with just the phid
-        if ($this->getApplicationEmail()) {
-          $value[] = $this->getApplicationEmail()->getPHID();
-        }
-        return $value;
-      case self::FIELD_SPACE:
-        $object = $this->getObject();
-
-        if (!($object instanceof PhabricatorSpacesInterface)) {
-          throw new Exception(
-            pht(
-              'Adapter object (of class "%s") does not implement interface '.
-              '"%s", so the Space field value can not be determined.',
-              get_class($object),
-              'PhabricatorSpacesInterface'));
-        }
-
-        return PhabricatorSpacesNamespaceQuery::getObjectSpacePHID($object);
-      default:
-        if ($this->isHeraldCustomKey($field_name)) {
-          return $this->getCustomFieldValue($field_name);
-        }
-
-        throw new Exception(pht("Unknown field '%s'!", $field_name));
+    $impl = $this->getFieldImplementation($field_name);
+    if ($impl) {
+      return $impl->getHeraldFieldValue($this->getObject());
     }
+
+    throw new Exception(pht("Unknown field '%s'!", $field_name));
   }
 
-  abstract public function applyHeraldEffects(array $effects);
+  public function applyHeraldEffects(array $effects) {
+    assert_instances_of($effects, 'HeraldEffect');
+
+    $result = array();
+    foreach ($effects as $effect) {
+      $result[] = $this->applyStandardEffect($effect);
+    }
+
+    return $result;
+  }
 
   protected function handleCustomHeraldEffect(HeraldEffect $effect) {
     $custom_action = idx($this->getCustomActions(), $effect->getAction());
@@ -354,35 +308,66 @@ abstract class HeraldAdapter extends Phobject {
 
 /* -(  Fields  )------------------------------------------------------------- */
 
+  private function getFieldImplementationMap() {
+    if ($this->fieldMap === null) {
+      // We can't use PhutilClassMapQuery here because field expansion
+      // depends on the adapter and object.
 
-  public function getFields() {
-    $fields = array();
+      $object = $this->getObject();
 
-    $fields[] = self::FIELD_ALWAYS;
-    $fields[] = self::FIELD_RULE;
+      $map = array();
+      $all = HeraldField::getAllFields();
+      foreach ($all as $key => $field) {
+        $field = id(clone $field)->setAdapter($this);
 
-    $custom_fields = $this->getCustomFields();
-    if ($custom_fields) {
-      foreach ($custom_fields->getFields() as $custom_field) {
-        $key = $custom_field->getFieldKey();
-        $fields[] = $this->getHeraldKeyFromCustomKey($key);
+        if (!$field->supportsObject($object)) {
+          continue;
+        }
+        $subfields = $field->getFieldsForObject($object);
+        foreach ($subfields as $subkey => $subfield) {
+          if (isset($map[$subkey])) {
+            throw new Exception(
+              pht(
+                'Two HeraldFields (of classes "%s" and "%s") have the same '.
+                'field key ("%s") after expansion for an object of class '.
+                '"%s" inside adapter "%s". Each field must have a unique '.
+                'field key.',
+                get_class($subfield),
+                get_class($map[$subkey]),
+                $subkey,
+                get_class($object),
+                get_class($this)));
+          }
+
+          $subfield = id(clone $subfield)->setAdapter($this);
+
+          $map[$subkey] = $subfield;
+        }
       }
+      $this->fieldMap = $map;
     }
 
-    return $fields;
+    return $this->fieldMap;
+  }
+
+  private function getFieldImplementation($key) {
+    return idx($this->getFieldImplementationMap(), $key);
+  }
+
+  public function getFields() {
+    return array_keys($this->getFieldImplementationMap());
   }
 
   public function getFieldNameMap() {
-    return array(
+    $map = mpull($this->getFieldImplementationMap(), 'getHeraldFieldName');
+
+    return $map + array(
       self::FIELD_TITLE => pht('Title'),
       self::FIELD_BODY => pht('Body'),
       self::FIELD_AUTHOR => pht('Author'),
-      self::FIELD_ASSIGNEE => pht('Assignee'),
       self::FIELD_COMMITTER => pht('Committer'),
       self::FIELD_REVIEWER => pht('Reviewer'),
       self::FIELD_REVIEWERS => pht('Reviewers'),
-      self::FIELD_CC => pht('CCs'),
-      self::FIELD_TAGS => pht('Tags'),
       self::FIELD_DIFF_FILE => pht('Any changed filename'),
       self::FIELD_DIFF_CONTENT => pht('Any changed file content'),
       self::FIELD_DIFF_ADDED_CONTENT => pht('Any added file content'),
@@ -390,14 +375,10 @@ abstract class HeraldAdapter extends Phobject {
       self::FIELD_DIFF_ENORMOUS => pht('Change is enormous'),
       self::FIELD_REPOSITORY => pht('Repository'),
       self::FIELD_REPOSITORY_PROJECTS => pht('Repository\'s projects'),
-      self::FIELD_RULE => pht('Another Herald rule'),
       self::FIELD_AFFECTED_PACKAGE => pht('Any affected package'),
       self::FIELD_AFFECTED_PACKAGE_OWNER =>
         pht("Any affected package's owner"),
-      self::FIELD_CONTENT_SOURCE => pht('Content Source'),
-      self::FIELD_ALWAYS => pht('Always'),
       self::FIELD_AUTHOR_PROJECTS => pht("Author's projects"),
-      self::FIELD_PROJECTS => pht('Projects'),
       self::FIELD_PUSHER => pht('Pusher'),
       self::FIELD_PUSHER_PROJECTS => pht("Pusher's projects"),
       self::FIELD_DIFFERENTIAL_REVISION => pht('Differential revision'),
@@ -409,14 +390,8 @@ abstract class HeraldAdapter extends Phobject {
       self::FIELD_BRANCHES => pht('Commit\'s branches'),
       self::FIELD_AUTHOR_RAW => pht('Raw author name'),
       self::FIELD_COMMITTER_RAW => pht('Raw committer name'),
-      self::FIELD_IS_NEW_OBJECT => pht('Is newly created?'),
-      self::FIELD_APPLICATION_EMAIL => pht('Receiving email address'),
-      self::FIELD_TASK_PRIORITY => pht('Task priority'),
-      self::FIELD_TASK_STATUS => pht('Task status'),
       self::FIELD_PUSHER_IS_COMMITTER => pht('Pusher same as committer'),
-      self::FIELD_PATH => pht('Path'),
-      self::FIELD_SPACE => pht('Space'),
-    ) + $this->getCustomFieldNameMap();
+    );
   }
 
 
@@ -452,12 +427,16 @@ abstract class HeraldAdapter extends Phobject {
   }
 
   public function getConditionsForField($field) {
+    $impl = $this->getFieldImplementation($field);
+    if ($impl) {
+      return $impl->getHeraldFieldConditions();
+    }
+
     switch ($field) {
       case self::FIELD_TITLE:
       case self::FIELD_BODY:
       case self::FIELD_COMMITTER_RAW:
       case self::FIELD_AUTHOR_RAW:
-      case self::FIELD_PATH:
         return array(
           self::CONDITION_CONTAINS,
           self::CONDITION_NOT_CONTAINS,
@@ -467,15 +446,11 @@ abstract class HeraldAdapter extends Phobject {
         );
       case self::FIELD_REVIEWER:
       case self::FIELD_PUSHER:
-      case self::FIELD_TASK_PRIORITY:
-      case self::FIELD_TASK_STATUS:
-      case self::FIELD_SPACE:
         return array(
           self::CONDITION_IS_ANY,
           self::CONDITION_IS_NOT_ANY,
         );
       case self::FIELD_REPOSITORY:
-      case self::FIELD_ASSIGNEE:
       case self::FIELD_AUTHOR:
       case self::FIELD_COMMITTER:
         return array(
@@ -484,24 +459,14 @@ abstract class HeraldAdapter extends Phobject {
           self::CONDITION_EXISTS,
           self::CONDITION_NOT_EXISTS,
         );
-      case self::FIELD_TAGS:
       case self::FIELD_REVIEWERS:
-      case self::FIELD_CC:
       case self::FIELD_AUTHOR_PROJECTS:
-      case self::FIELD_PROJECTS:
       case self::FIELD_AFFECTED_PACKAGE:
       case self::FIELD_AFFECTED_PACKAGE_OWNER:
       case self::FIELD_PUSHER_PROJECTS:
       case self::FIELD_REPOSITORY_PROJECTS:
         return array(
           self::CONDITION_INCLUDE_ALL,
-          self::CONDITION_INCLUDE_ANY,
-          self::CONDITION_INCLUDE_NONE,
-          self::CONDITION_EXISTS,
-          self::CONDITION_NOT_EXISTS,
-        );
-      case self::FIELD_APPLICATION_EMAIL:
-        return array(
           self::CONDITION_INCLUDE_ANY,
           self::CONDITION_INCLUDE_NONE,
           self::CONDITION_EXISTS,
@@ -520,20 +485,6 @@ abstract class HeraldAdapter extends Phobject {
           self::CONDITION_CONTAINS,
           self::CONDITION_REGEXP,
           self::CONDITION_REGEXP_PAIR,
-        );
-      case self::FIELD_RULE:
-        return array(
-          self::CONDITION_RULE,
-          self::CONDITION_NOT_RULE,
-        );
-      case self::FIELD_CONTENT_SOURCE:
-        return array(
-          self::CONDITION_IS,
-          self::CONDITION_IS_NOT,
-        );
-      case self::FIELD_ALWAYS:
-        return array(
-          self::CONDITION_UNCONDITIONALLY,
         );
       case self::FIELD_DIFFERENTIAL_REVIEWERS:
         return array(
@@ -557,16 +508,12 @@ abstract class HeraldAdapter extends Phobject {
         );
       case self::FIELD_IS_MERGE_COMMIT:
       case self::FIELD_DIFF_ENORMOUS:
-      case self::FIELD_IS_NEW_OBJECT:
       case self::FIELD_PUSHER_IS_COMMITTER:
         return array(
           self::CONDITION_IS_TRUE,
           self::CONDITION_IS_FALSE,
         );
       default:
-        if ($this->isHeraldCustomKey($field)) {
-          return $this->getCustomFieldConditions($field);
-        }
         throw new Exception(
           pht(
             "This adapter does not define conditions for field '%s'!",
@@ -940,14 +887,9 @@ abstract class HeraldAdapter extends Phobject {
 
 
   public function getValueTypeForFieldAndCondition($field, $condition) {
-
-    if ($this->isHeraldCustomKey($field)) {
-      $value_type = $this->getCustomFieldValueTypeForFieldAndCondition(
-        $field,
-        $condition);
-      if ($value_type !== null) {
-        return $value_type;
-      }
+    $impl = $this->getFieldImplementation($field);
+    if ($impl) {
+      return $impl->getHeraldFieldValueType($condition);
     }
 
     switch ($condition) {
@@ -958,24 +900,12 @@ abstract class HeraldAdapter extends Phobject {
         return self::VALUE_TEXT;
       case self::CONDITION_IS:
       case self::CONDITION_IS_NOT:
-        switch ($field) {
-          case self::FIELD_CONTENT_SOURCE:
-            return self::VALUE_CONTENT_SOURCE;
-          default:
-            return self::VALUE_TEXT;
-        }
-        break;
+        return self::VALUE_TEXT;
       case self::CONDITION_IS_ANY:
       case self::CONDITION_IS_NOT_ANY:
         switch ($field) {
           case self::FIELD_REPOSITORY:
             return self::VALUE_REPOSITORY;
-          case self::FIELD_TASK_PRIORITY:
-            return self::VALUE_TASK_PRIORITY;
-          case self::FIELD_TASK_STATUS:
-            return self::VALUE_TASK_STATUS;
-          case self::FIELD_SPACE:
-            return self::VALUE_SPACE;
           default:
             return self::VALUE_USER;
         }
@@ -986,21 +916,14 @@ abstract class HeraldAdapter extends Phobject {
         switch ($field) {
           case self::FIELD_REPOSITORY:
             return self::VALUE_REPOSITORY;
-          case self::FIELD_CC:
-            return self::VALUE_EMAIL;
-          case self::FIELD_TAGS:
-            return self::VALUE_TAG;
           case self::FIELD_AFFECTED_PACKAGE:
             return self::VALUE_OWNERS_PACKAGE;
           case self::FIELD_AUTHOR_PROJECTS:
           case self::FIELD_PUSHER_PROJECTS:
-          case self::FIELD_PROJECTS:
           case self::FIELD_REPOSITORY_PROJECTS:
             return self::VALUE_PROJECT;
           case self::FIELD_REVIEWERS:
             return self::VALUE_USER_OR_PROJECT;
-          case self::FIELD_APPLICATION_EMAIL:
-            return self::VALUE_APPLICATION_EMAIL;
           default:
             return self::VALUE_USER;
         }
@@ -1014,9 +937,6 @@ abstract class HeraldAdapter extends Phobject {
       case self::CONDITION_IS_TRUE:
       case self::CONDITION_IS_FALSE:
         return self::VALUE_NONE;
-      case self::CONDITION_RULE:
-      case self::CONDITION_NOT_RULE:
-        return self::VALUE_RULE;
       default:
         throw new Exception(pht("Unknown condition '%s'.", $condition));
     }
@@ -1088,15 +1008,26 @@ abstract class HeraldAdapter extends Phobject {
     );
   }
 
+  abstract protected function initializeNewAdapter();
+
+  /**
+   * Does this adapter's event fire only once?
+   *
+   * Single use adapters (like pre-commit and diff adapters) only fire once,
+   * so fields like "Is new object" don't make sense to apply to their content.
+   *
+   * @return bool
+   */
+  public function isSingleEventAdapter() {
+    return false;
+  }
+
   public static function getAllAdapters() {
-    static $adapters;
-    if (!$adapters) {
-      $adapters = id(new PhutilSymbolLoader())
-        ->setAncestorClass(__CLASS__)
-        ->loadObjects();
-      $adapters = msort($adapters, 'getAdapterSortKey');
-    }
-    return $adapters;
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->setUniqueMethod('getAdapterContentType')
+      ->setSortMethod('getAdapterSortKey')
+      ->execute();
   }
 
   public static function getAdapterForContentType($content_type) {
@@ -1104,6 +1035,8 @@ abstract class HeraldAdapter extends Phobject {
 
     foreach ($adapters as $adapter) {
       if ($adapter->getAdapterContentType() == $content_type) {
+        $adapter = id(clone $adapter);
+        $adapter->initializeNewAdapter();
         return $adapter;
       }
     }
@@ -1130,9 +1063,34 @@ abstract class HeraldAdapter extends Phobject {
     return $map;
   }
 
+  public function getEditorValueForCondition(
+    PhabricatorUser $viewer,
+    HeraldCondition $condition,
+    array $handles) {
+
+    $impl = $this->getFieldImplementation($condition->getFieldName());
+    if ($impl) {
+      return $impl->getEditorValue(
+        $viewer,
+        $condition->getValue());
+    }
+
+    $value = $condition->getValue();
+    if (is_array($value)) {
+      $value_map = array();
+      foreach ($value as $k => $phid) {
+        $value_map[$phid] = $handles[$phid]->getName();
+      }
+      $value = $value_map;
+    }
+
+    return $value;
+  }
+
   public function renderRuleAsText(
     HeraldRule $rule,
-    PhabricatorHandleList $handles) {
+    PhabricatorHandleList $handles,
+    PhabricatorUser $viewer) {
 
     require_celerity_resource('herald-css');
 
@@ -1162,7 +1120,7 @@ abstract class HeraldAdapter extends Phobject {
         ),
         array(
           $icon,
-          $this->renderConditionAsText($condition, $handles),
+          $this->renderConditionAsText($condition, $handles, $viewer),
         ));
     }
 
@@ -1207,20 +1165,19 @@ abstract class HeraldAdapter extends Phobject {
 
   private function renderConditionAsText(
     HeraldCondition $condition,
-    PhabricatorHandleList $handles) {
+    PhabricatorHandleList $handles,
+    PhabricatorUser $viewer) {
 
     $field_type = $condition->getFieldName();
 
-    $default = $this->isHeraldCustomKey($field_type)
-      ? pht('(Unknown Custom Field "%s")', $field_type)
-      : pht('(Unknown Field "%s")', $field_type);
+    $default = pht('(Unknown Field "%s")', $field_type);
 
     $field_name = idx($this->getFieldNameMap(), $field_type, $default);
 
     $condition_type = $condition->getFieldCondition();
     $condition_name = idx($this->getConditionNameMap(), $condition_type);
 
-    $value = $this->renderConditionValueAsText($condition, $handles);
+    $value = $this->renderConditionValueAsText($condition, $handles, $viewer);
 
     return hsprintf('    %s %s %s', $field_name, $condition_name, $value);
   }
@@ -1232,9 +1189,7 @@ abstract class HeraldAdapter extends Phobject {
 
     $action_type = $action->getAction();
 
-    $default = $this->isHeraldCustomKey($action_type)
-      ? pht('(Unknown Custom Action "%s") equals', $action_type)
-      : pht('(Unknown Action "%s") equals', $action_type);
+    $default = pht('(Unknown Action "%s") equals', $action_type);
 
     $action_name = idx(
       $this->getActionNameMap($rule_global),
@@ -1248,31 +1203,22 @@ abstract class HeraldAdapter extends Phobject {
 
   private function renderConditionValueAsText(
     HeraldCondition $condition,
-    PhabricatorHandleList $handles) {
+    PhabricatorHandleList $handles,
+    PhabricatorUser $viewer) {
+
+    $impl = $this->getFieldImplementation($condition->getFieldName());
+    if ($impl) {
+      return $impl->renderConditionValue(
+        $viewer,
+        $condition->getValue());
+    }
 
     $value = $condition->getValue();
     if (!is_array($value)) {
       $value = array($value);
     }
+
     switch ($condition->getFieldName()) {
-      case self::FIELD_TASK_PRIORITY:
-        $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
-        foreach ($value as $index => $val) {
-          $name = idx($priority_map, $val);
-          if ($name) {
-            $value[$index] = $name;
-          }
-        }
-        break;
-      case self::FIELD_TASK_STATUS:
-        $status_map = ManiphestTaskStatus::getTaskStatusMap();
-        foreach ($value as $index => $val) {
-          $name = idx($status_map, $val);
-          if ($name) {
-            $value[$index] = $name;
-          }
-        }
-        break;
       case HeraldPreCommitRefAdapter::FIELD_REF_CHANGE:
         $change_map =
           PhabricatorRepositoryPushLog::getHeraldChangeFlagConditionOptions();
@@ -1367,186 +1313,6 @@ abstract class HeraldAdapter extends Phobject {
 
     return $phids;
   }
-
-/* -(  Custom Field Integration  )------------------------------------------- */
-
-
-  /**
-   * Returns the prefix used to namespace Herald fields which are based on
-   * custom fields.
-   *
-   * @return string Key prefix.
-   * @task customfield
-   */
-  private function getCustomKeyPrefix() {
-    return 'herald.custom/';
-  }
-
-
-  /**
-   * Determine if a field key is based on a custom field or a regular internal
-   * field.
-   *
-   * @param string Field key.
-   * @return bool True if the field key is based on a custom field.
-   * @task customfield
-   */
-  private function isHeraldCustomKey($key) {
-    $prefix = $this->getCustomKeyPrefix();
-    return (strncmp($key, $prefix, strlen($prefix)) == 0);
-  }
-
-
-  /**
-   * Convert a custom field key into a Herald field key.
-   *
-   * @param string Custom field key.
-   * @return string Herald field key.
-   * @task customfield
-   */
-  private function getHeraldKeyFromCustomKey($key) {
-    return $this->getCustomKeyPrefix().$key;
-  }
-
-
-  /**
-   * Get custom fields for this adapter, if appliable. This will either return
-   * a field list or `null` if the adapted object does not implement custom
-   * fields or the adapter does not support them.
-   *
-   * @return PhabricatorCustomFieldList|null List of fields, or `null`.
-   * @task customfield
-   */
-  private function getCustomFields() {
-    if ($this->customFields === false) {
-      $this->customFields = null;
-
-
-      $template_object = $this->newObject();
-      if ($template_object instanceof PhabricatorCustomFieldInterface) {
-        $object = $this->getObject();
-        if (!$object) {
-          $object = $template_object;
-        }
-
-        $fields = PhabricatorCustomField::getObjectFields(
-          $object,
-          PhabricatorCustomField::ROLE_HERALD);
-        $fields->setViewer(PhabricatorUser::getOmnipotentUser());
-        $fields->readFieldsFromStorage($object);
-
-        $this->customFields = $fields;
-      }
-    }
-
-    return $this->customFields;
-  }
-
-
-  /**
-   * Get a custom field by Herald field key, or `null` if it does not exist
-   * or custom fields are not supported.
-   *
-   * @param string Herald field key.
-   * @return PhabricatorCustomField|null Matching field, if it exists.
-   * @task customfield
-   */
-  private function getCustomField($herald_field_key) {
-    $fields = $this->getCustomFields();
-    if (!$fields) {
-      return null;
-    }
-
-    foreach ($fields->getFields() as $custom_field) {
-      $key = $custom_field->getFieldKey();
-      if ($this->getHeraldKeyFromCustomKey($key) == $herald_field_key) {
-        return $custom_field;
-      }
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Get the field map for custom fields.
-   *
-   * @return map<string, string> Map of Herald field keys to field names.
-   * @task customfield
-   */
-  private function getCustomFieldNameMap() {
-    $fields = $this->getCustomFields();
-    if (!$fields) {
-      return array();
-    }
-
-    $map = array();
-    foreach ($fields->getFields() as $field) {
-      $key = $field->getFieldKey();
-      $name = $field->getHeraldFieldName();
-      $map[$this->getHeraldKeyFromCustomKey($key)] = $name;
-    }
-
-    return $map;
-  }
-
-
-  /**
-   * Get the value for a custom field.
-   *
-   * @param string Herald field key.
-   * @return wild Custom field value.
-   * @task customfield
-   */
-  private function getCustomFieldValue($field_key) {
-    $field = $this->getCustomField($field_key);
-    if (!$field) {
-      return null;
-    }
-
-    return $field->getHeraldFieldValue();
-  }
-
-
-  /**
-   * Get the Herald conditions for a custom field.
-   *
-   * @param string Herald field key.
-   * @return list<const> List of Herald conditions.
-   * @task customfield
-   */
-  private function getCustomFieldConditions($field_key) {
-    $field = $this->getCustomField($field_key);
-    if (!$field) {
-      return array(
-        self::CONDITION_NEVER,
-      );
-    }
-
-    return $field->getHeraldFieldConditions();
-  }
-
-
-  /**
-   * Get the Herald value type for a custom field and condition.
-   *
-   * @param string Herald field key.
-   * @param const Herald condition constant.
-   * @return const|null Herald value type constant, or null to use the default.
-   * @task customfield
-   */
-  private function getCustomFieldValueTypeForFieldAndCondition(
-    $field_key,
-    $condition) {
-
-    $field = $this->getCustomField($field_key);
-    if (!$field) {
-      return self::VALUE_NONE;
-    }
-
-    return $field->getHeraldFieldValueType($condition);
-  }
-
 
 /* -(  Applying Effects  )--------------------------------------------------- */
 

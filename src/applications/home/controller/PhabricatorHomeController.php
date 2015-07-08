@@ -74,7 +74,7 @@ abstract class PhabricatorHomeController extends PhabricatorController {
 
     $nav->addFilter(
       '',
-      pht('Customize Applications...'),
+      pht('Customize Menu...'),
       '/settings/panel/home/');
 
     $nav->addClass('phabricator-side-menu-home');

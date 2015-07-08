@@ -30,7 +30,6 @@ final class DifferentialRevision extends DifferentialDAO
 
   protected $mailKey;
   protected $branchName;
-  protected $arcanistProjectPHID;
   protected $repositoryPHID;
   protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
   protected $editPolicy = PhabricatorPolicies::POLICY_USER;
@@ -87,7 +86,6 @@ final class DifferentialRevision extends DifferentialDAO
         'lineCount' => 'uint32?',
         'mailKey' => 'bytes40',
         'branchName' => 'text255?',
-        'arcanistProjectPHID' => 'phid?',
         'repositoryPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(

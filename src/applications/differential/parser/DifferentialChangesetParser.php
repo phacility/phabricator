@@ -257,6 +257,7 @@ final class DifferentialChangesetParser extends Phobject {
 
     $this->originalLeft = $left;
     $this->originalRight = $right;
+    return $this;
   }
 
   public function diffOriginals() {

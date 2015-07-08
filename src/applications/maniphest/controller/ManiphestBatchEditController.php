@@ -197,7 +197,7 @@ final class ManiphestBatchEditController extends ManiphestController {
 
     $task_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Selected Tasks'))
-      ->appendChild($list);
+      ->setObjectList($list);
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Batch Editor'))

@@ -10,7 +10,7 @@ final class PhabricatorPagerUIExample extends PhabricatorUIExample {
     return pht(
       'Use %s to create a control which allows '.
       'users to paginate through large amounts of content.',
-      phutil_tag('tt', array(), 'AphrontPagerView'));
+      phutil_tag('tt', array(), 'PHUIPagerView'));
   }
 
   public function renderExample() {
@@ -40,9 +40,9 @@ final class PhabricatorPagerUIExample extends PhabricatorUIExample {
       '<p class="phabricator-ui-example-note">%s</p>',
       pht(
         'Use %s to render a pager element.',
-        phutil_tag('tt', array(), 'AphrontPagerView'))));
+        phutil_tag('tt', array(), 'PHUIPagerView'))));
 
-    $pager = new AphrontPagerView();
+    $pager = new PHUIPagerView();
     $pager->setPageSize($page_size);
     $pager->setOffset($offset);
     $pager->setCount($item_count);
@@ -53,7 +53,7 @@ final class PhabricatorPagerUIExample extends PhabricatorUIExample {
       '<p class="phabricator-ui-example-note">%s</p>',
       pht('You can show more or fewer pages of surrounding context.')));
 
-    $many_pages_pager = new AphrontPagerView();
+    $many_pages_pager = new PHUIPagerView();
     $many_pages_pager->setPageSize($page_size);
     $many_pages_pager->setOffset($offset);
     $many_pages_pager->setCount($item_count);
@@ -69,7 +69,7 @@ final class PhabricatorPagerUIExample extends PhabricatorUIExample {
         '%s if it exists, creating an inexact pager.',
         phutil_tag('tt', array(), 'hasMorePages(true)'))));
 
-    $inexact_pager = new AphrontPagerView();
+    $inexact_pager = new PHUIPagerView();
     $inexact_pager->setPageSize($page_size);
     $inexact_pager->setOffset($offset);
     $inexact_pager->setHasMorePages($offset < ($item_count - $page_size));

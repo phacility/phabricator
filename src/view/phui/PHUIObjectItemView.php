@@ -11,7 +11,7 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $barColor;
   private $object;
   private $effect;
-  private $footIcons = array();
+  private $statusIcon;
   private $handleIcons = array();
   private $bylines = array();
   private $grippable;
@@ -212,8 +212,8 @@ final class PHUIObjectItemView extends AphrontTagView {
     return $this;
   }
 
-  public function addFootIcon($icon, $label = null) {
-    $this->footIcons[] = array(
+  public function setStatusIcon($icon, $label = null) {
+    $this->statusIcon = array(
       'icon' => $icon,
       'label' => $label,
     );
@@ -268,10 +268,8 @@ final class PHUIObjectItemView extends AphrontTagView {
 
     if ($this->barColor) {
       $item_classes[] = 'phui-object-item-bar-color-'.$this->barColor;
-    }
-
-    if ($this->footIcons) {
-      $item_classes[] = 'phui-object-item-with-foot-icons';
+    } else {
+      $item_classes[] = 'phui-object-item-no-bar';
     }
 
     if ($this->actions) {
@@ -435,8 +433,9 @@ final class PHUIObjectItemView extends AphrontTagView {
 
     if ($this->handleIcons) {
       $handle_bar = array();
-      foreach ($this->handleIcons as $icon) {
-        $handle_bar[] = $this->renderHandleIcon($icon['icon'], $icon['label']);
+      foreach ($this->handleIcons as $handleicon) {
+        $handle_bar[] =
+          $this->renderHandleIcon($handleicon['icon'], $handleicon['label']);
       }
       $icons[] = phutil_tag(
         'div',
@@ -514,18 +513,10 @@ final class PHUIObjectItemView extends AphrontTagView {
         $attrs);
     }
 
-    $foot = null;
-    if ($this->footIcons) {
-      $foot_bar = array();
-      foreach ($this->footIcons as $icon) {
-        $foot_bar[] = $this->renderFootIcon($icon['icon'], $icon['label']);
-      }
-      $foot = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-object-item-foot-icons',
-        ),
-        $foot_bar);
+    $status = null;
+    if ($this->statusIcon) {
+      $icon = $this->statusIcon;
+      $status = $this->renderStatusIcon($icon['icon'], $icon['label']);
     }
 
     $grippable = null;
@@ -547,7 +538,6 @@ final class PHUIObjectItemView extends AphrontTagView {
         $subhead,
         $attrs,
         $this->renderChildren(),
-        $foot,
       ));
 
     $image = null;
@@ -588,6 +578,16 @@ final class PHUIObjectItemView extends AphrontTagView {
     }
 
     /* Build a fake table */
+    $column0 = null;
+    if ($status) {
+      $column0 = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-object-item-col0',
+        ),
+        $status);
+    }
+
     $column1 = phutil_tag(
       'div',
       array(
@@ -616,7 +616,13 @@ final class PHUIObjectItemView extends AphrontTagView {
       array(
         'class' => 'phui-object-item-table',
       ),
-      phutil_tag_div('phui-object-item-table-row', array($column1, $column2)));
+      phutil_tag_div(
+        'phui-object-item-table-row',
+        array(
+          $column0,
+          $column1,
+          $column2,
+        )));
 
     $box = phutil_tag(
       'div',
@@ -656,23 +662,22 @@ final class PHUIObjectItemView extends AphrontTagView {
       ));
   }
 
-  private function renderFootIcon($icon, $label) {
+  private function renderStatusIcon($icon, $label) {
+    Javelin::initBehavior('phabricator-tooltips');
 
     $icon = id(new PHUIIconView())
       ->setIconFont($icon);
 
-    $label = phutil_tag(
-      'span',
-      array(
-      ),
-      $label);
+    $options = array(
+      'class' => 'phui-object-item-status-icon',
+    );
 
-    return phutil_tag(
-      'span',
-      array(
-        'class' => 'phui-object-item-foot-icon',
-      ),
-      array($icon, $label));
+    if (strlen($label)) {
+      $options['sigil'] = 'has-tooltip';
+      $options['meta']  = array('tip' => $label, 'size' => 300);
+    }
+
+    return javelin_tag('div', $options, $icon);
   }
 
 
@@ -689,10 +694,7 @@ final class PHUIObjectItemView extends AphrontTagView {
       $options['meta']  = array('tip' => $label);
     }
 
-    return javelin_tag(
-      'span',
-      $options,
-      '');
+    return javelin_tag('span', $options, '');
   }
 
 }

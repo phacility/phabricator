@@ -527,11 +527,11 @@ final class PhabricatorConduitAPIController
 
     $param_panel = new PHUIObjectBoxView();
     $param_panel->setHeaderText(pht('Method Parameters'));
-    $param_panel->appendChild($param_table);
+    $param_panel->setTable($param_table);
 
     $result_panel = new PHUIObjectBoxView();
     $result_panel->setHeaderText(pht('Method Result'));
-    $result_panel->appendChild($result_table);
+    $result_panel->setTable($result_table);
 
     $method_uri = $this->getApplicationURI('method/'.$method.'/');
 

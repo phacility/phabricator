@@ -173,7 +173,9 @@ final class HarbormasterBuildableViewController
         ->setHref($view_uri);
 
       $status = $build->getBuildStatus();
-      $item->setBarColor(HarbormasterBuild::getBuildStatusColor($status));
+      $item->setStatusIcon(
+        'fa-dot-circle-o '.HarbormasterBuild::getBuildStatusColor($status),
+        HarbormasterBuild::getBuildStatusName($status));
 
       $item->addAttribute(HarbormasterBuild::getBuildStatusName($status));
 
@@ -301,7 +303,7 @@ final class HarbormasterBuildableViewController
 
       $lint = id(new PHUIObjectBoxView())
         ->setHeader($lint_header)
-        ->appendChild($lint_table);
+        ->setTable($lint_table);
     } else {
       $lint = null;
     }
@@ -325,7 +327,7 @@ final class HarbormasterBuildableViewController
 
       $unit = id(new PHUIObjectBoxView())
         ->setHeader($unit_header)
-        ->appendChild($unit_table);
+        ->setTable($unit_table);
     } else {
       $unit = null;
     }

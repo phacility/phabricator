@@ -1,8 +1,6 @@
 /**
  * @provides setup-issue-css
  */
-
-
 .setup-issue-background {
   padding: 12px 0;
 }
@@ -15,7 +13,8 @@
 .setup-issue {
   background: #fff;
   border: 1px solid #BFCFDA;
-  border-bottom: 1px solid #8C98B8;
+  padding: 8px;
+  border-radius: 3px;
 }
 
 .setup-issue p {
@@ -78,13 +77,10 @@
 
 .setup-issue-name {
   color: #464C5C;
-  text-shadow: 0 1px #fff;
-  padding: 16px 12px;
+  padding: 4px 8px 12px;
   border-bottom: 1px solid #BFCFDA;
   font-size: 15px;
   font-weight: bold;
-  background-image: url(/rsrc/image/lightblue-header.png);
-  background-repeat: repeat-x;
 }
 
 .setup-issue-tail {
@@ -92,31 +88,37 @@
 }
 
 .setup-issue-status {
+  margin: 12px 4px 0;
   padding: 12px;
   background: #FDF5D4;
   color: #bc7837;
-  border-bottom: 1px solid #BFCFDA;
+  border: 1px solid #bc7837;
+  border-radius: 3px;
 }
 
 .setup-issue-actions {
-  padding: 12px;
-  background: #f3f3f3;
+  padding: 8px 12px;
   border-top: 1px solid #dfdfdf;
+  background-color: #f7f7f7;
+  border-bottom-right-radius: 3px;
+  border-bottom-left-radius: 3px;
   overflow: hidden;
+  margin: 0 -8px -8px -8px;
 }
 
 .setup-issue-next {
   padding: 12px;
-  border-top: 1px solid #BFCFDA;
+  border: 1px solid #BFCFDA;
   background: #daeaf3;
   text-align: center;
-  font-size: 15px;
+  font-size: 16px;
+  margin: 12px 0;
   color: #2980b9;
+  border-radius: 3px;
 }
 
 .setup-issue-config {
-  padding: 0 12px;
-  background: #fff;
+  padding: 8px 12px;
 }
 
 .setup-issue ul {

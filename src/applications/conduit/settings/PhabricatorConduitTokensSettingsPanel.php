@@ -112,7 +112,7 @@ final class PhabricatorConduitTokensSettingsPanel
 
     $panel = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
+      ->setTable($table);
 
     return $panel;
   }

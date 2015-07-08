@@ -11,46 +11,50 @@
 
 
 
-.main-header-applebloom {
+.phui-theme-applebloom .phabricator-main-menu-background {
   background-position: 0px 0px;
 }
 
-.main-header-blindigo {
+.phui-theme-blindigo .phabricator-main-menu-background {
   background-position: 0px -45px;
 }
 
-.main-header-blue {
+.phui-theme-blue .phabricator-main-menu-background {
   background-position: 0px -90px;
 }
 
-.main-header-dark {
+.phui-theme-dark .phabricator-main-menu-background {
   background-position: 0px -135px;
 }
 
-.main-header-fluttershy {
+.phui-theme-fluttershy .phabricator-main-menu-background {
   background-position: 0px -180px;
 }
 
-.main-header-green {
+.phui-theme-green .phabricator-main-menu-background {
   background-position: 0px -225px;
 }
 
-.main-header-indigo {
+.phui-theme-indigo .phabricator-main-menu-background {
   background-position: 0px -270px;
 }
 
-.main-header-nightmaremoon {
+.phui-theme-light .phabricator-main-menu-background {
   background-position: 0px -315px;
 }
 
-.main-header-red {
+.phui-theme-nightmaremoon .phabricator-main-menu-background {
   background-position: 0px -360px;
 }
 
-.main-header-scootaloo {
+.phui-theme-red .phabricator-main-menu-background {
   background-position: 0px -405px;
 }
 
-.main-header-yellow {
+.phui-theme-scootaloo .phabricator-main-menu-background {
   background-position: 0px -450px;
+}
+
+.phui-theme-yellow .phabricator-main-menu-background {
+  background-position: 0px -495px;
 }

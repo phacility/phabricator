@@ -27,6 +27,8 @@
   width: 30px;
   height: 30px;
   background-size: 100%;
+  box-shadow: {$borderinset};
+  border-radius: 3px;
 }
 
 .phabricator-notification .conpherence-menu-item-view
@@ -36,7 +38,7 @@
   margin-left: 46px;
   text-align: left;
   font-weight: bold;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   color: {$darkgreytext};
   width: 314px;
   text-overflow: ellipsis;
@@ -48,7 +50,7 @@
 .conpherence-menu-item-subtitle {
   display: block;
   color: {$lightgreytext};
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   margin-top: 2px;
   margin-left: 46px;
   width: 290px;
@@ -67,5 +69,5 @@
   color: #fff;
   font-weight: bold;
   padding: 0 5px 1px;
-  font-size: 11px;
+  font-size: {$smallestfontsize};
 }

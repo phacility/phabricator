@@ -3,10 +3,8 @@
  */
 
 .phui-object-item-link strong {
-  background-color: {$lightyellow};
-  color: black;
-  padding: 0 4px;
-  border-radius: 3px;
+  color: {$fire};
+  text-decoration: underline;
 }
 
 .phui-source-fragment {
@@ -16,5 +14,5 @@
 .phui-source-fragment strong {
   background-color: {$lightyellow};
   font-weight: normal;
-  color: #000000;
+  color: #000;
 }

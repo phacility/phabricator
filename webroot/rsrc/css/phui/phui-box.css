@@ -4,8 +4,8 @@
 
 .phui-box-border {
   border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
   background-color: #fff;
+  border-radius: 3px;
 }
 
 .phui-box.focus {

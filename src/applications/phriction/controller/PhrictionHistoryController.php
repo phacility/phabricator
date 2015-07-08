@@ -29,7 +29,7 @@ final class PhrictionHistoryController
 
     $current = $document->getContent();
 
-    $pager = new AphrontPagerView();
+    $pager = new PHUIPagerView();
     $pager->setOffset($request->getInt('page'));
     $pager->setURI($request->getRequestURI(), 'page');
 
@@ -75,7 +75,7 @@ final class PhrictionHistoryController
           $color = 'red';
           break;
         case PhrictionChangeType::CHANGE_EDIT:
-          $color = 'blue';
+          $color = 'lightbluetext';
           break;
         case PhrictionChangeType::CHANGE_MOVE_HERE:
             $color = 'yellow';
@@ -93,7 +93,7 @@ final class PhrictionHistoryController
 
       $item = id(new PHUIObjectItemView())
         ->setHeader(pht('%s by %s', $change_type, $author))
-        ->setBarColor($color)
+        ->setStatusIcon('fa-file '.$color)
         ->addAttribute(
           phutil_tag(
             'a',
@@ -148,21 +148,25 @@ final class PhrictionHistoryController
       PhrictionDocument::getSlugURI($document->getSlug(), 'history'));
 
     $header = new PHUIHeaderView();
-    $header->setHeader(pht('Document History for %s',
-      phutil_tag(
+    $header->setHeader(phutil_tag(
         'a',
         array('href' => PhrictionDocument::getSlugURI($document->getSlug())),
-        head($history)->getTitle())));
+        head($history)->getTitle()));
+    $header->setSubheader(pht('Document History'));
 
     $obj_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($list)
+      ->setObjectList($list);
+
+    $pager = id(new PHUIBoxView())
+      ->addClass('ml')
       ->appendChild($pager);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $obj_box,
+        $pager,
       ),
       array(
         'title'     => pht('Document History'),

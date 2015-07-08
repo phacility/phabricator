@@ -122,7 +122,7 @@ final class DiffusionLintController extends DiffusionController {
 
     $content[] = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Lint'))
-      ->appendChild($table);
+      ->setTable($table);
 
     $title = array('Lint');
     $crumbs = $this->buildCrumbs(

@@ -101,17 +101,17 @@ final class PhabricatorPeopleLdapController
 
         $header = pht('Successfully added %s', $username);
         $attribute = null;
-        $color = 'green';
+        $color = 'fa-check green';
       } catch (Exception $ex) {
         $header = pht('Failed to add %s', $username);
         $attribute = $ex->getMessage();
-        $color = 'red';
+        $color = 'fa-times red';
       }
 
       $item = id(new PHUIObjectItemView())
         ->setHeader($header)
         ->addAttribute($attribute)
-        ->setBarColor($color);
+        ->setStatusIcon($color);
 
       $list->addItem($item);
     }

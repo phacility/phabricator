@@ -92,7 +92,7 @@ final class PhabricatorConfigCacheController
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Data Cache'))
       ->addPropertyList($properties)
-      ->appendChild($table);
+      ->setTable($table);
   }
 
   private function renderCommonProperties(

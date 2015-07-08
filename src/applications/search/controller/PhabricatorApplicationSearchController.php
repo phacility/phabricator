@@ -174,35 +174,39 @@ final class PhabricatorApplicationSearchController
     // we sort out T5307.
 
     $form->appendChild($submit);
-    $filter_view = id(new AphrontListFilterView())->appendChild($form);
-
-    if ($run_query && $named_query) {
-      if ($named_query->getIsBuiltin()) {
-        $description = pht(
-          'Showing results for query "%s".',
-          $named_query->getQueryName());
-      } else {
-        $description = pht(
-          'Showing results for saved query "%s".',
-          $named_query->getQueryName());
-      }
-
-      $filter_view->setCollapsed(
-        pht('Edit Query...'),
-        pht('Hide Query'),
-        $description,
-        $this->getApplicationURI('query/advanced/?query='.$query_key));
-    }
 
     if ($this->getPreface()) {
       $nav->appendChild($this->getPreface());
     }
 
-    $nav->appendChild($filter_view);
+    if ($named_query) {
+      $title = $named_query->getQueryName();
+    } else {
+      $title = pht('Advanced Search');
+    }
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title);
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header);
+
+    if ($run_query || $named_query) {
+      $box->setShowHide(
+        pht('Edit Query'),
+        pht('Hide Query'),
+        $form,
+        $this->getApplicationURI('query/advanced/?query='.$query_key),
+        (!$named_query ? true : false));
+    } else {
+      $box->setForm($form);
+    }
+
+    $nav->appendChild($box);
 
     if ($run_query) {
-      $nav->appendChild(
-        $anchor = id(new PhabricatorAnchorView())
+      $box->setAnchor(
+        id(new PhabricatorAnchorView())
           ->setAnchorName('R'));
 
       try {
@@ -213,36 +217,49 @@ final class PhabricatorApplicationSearchController
 
         $objects = $engine->executeQuery($query, $pager);
 
-        // TODO: To support Dashboard panels, rendering is moving into
-        // SearchEngines. Move it all the way in and then get rid of this.
+        $engine->setRequest($request);
+        $list = $engine->renderResults($objects, $saved_query);
 
-        $interface = 'PhabricatorApplicationSearchResultsControllerInterface';
-        if ($parent instanceof $interface) {
-          $list = $parent->renderResultsList($objects, $saved_query);
-        } else {
-          $engine->setRequest($request);
-
-          $list = $engine->renderResults(
-            $objects,
-            $saved_query);
+        if (!($list instanceof PhabricatorApplicationSearchResultView)) {
+          throw new Exception(
+            pht(
+              'SearchEngines must render a "%s" object, but this engine '.
+              '(of class "%s") rendered something else.',
+              'PhabricatorApplicationSearchResultView',
+              get_class($engine)));
         }
 
-        $nav->appendChild($list);
-
-        // TODO: This is a bit hacky.
-        if ($list instanceof PHUIObjectItemListView) {
-          $list->setNoDataString(pht('No results found for this query.'));
-          $list->setPager($pager);
-        } else {
-          if ($pager->willShowPagingControls()) {
-            $pager_box = id(new PHUIBoxView())
-              ->addPadding(PHUI::PADDING_MEDIUM)
-              ->addMargin(PHUI::MARGIN_LARGE)
-              ->setBorder(true)
-              ->appendChild($pager);
-            $nav->appendChild($pager_box);
+        if ($list->getActions()) {
+          foreach ($list->getActions() as $action) {
+            $header->addActionLink($action);
           }
         }
+
+        if ($list->getObjectList()) {
+          $box->setObjectList($list->getObjectList());
+        }
+        if ($list->getTable()) {
+          $box->setTable($list->getTable());
+        }
+        if ($list->getInfoView()) {
+          $box->setInfoView($list->getInfoView());
+        }
+        if ($list->getContent()) {
+          $box->appendChild($list->getContent());
+        }
+        if ($list->getCollapsed()) {
+          $box->setCollapsed(true);
+        }
+
+        if ($pager->willShowPagingControls()) {
+          $pager_box = id(new PHUIBoxView())
+            ->addPadding(PHUI::PADDING_MEDIUM)
+            ->addMargin(PHUI::MARGIN_LARGE)
+            ->setBorder(true)
+            ->appendChild($pager);
+          $nav->appendChild($pager_box);
+        }
+
       } catch (PhabricatorTypeaheadInvalidTokenException $ex) {
         $errors[] = pht(
           'This query specifies an invalid parameter. Review the '.
@@ -251,24 +268,11 @@ final class PhabricatorApplicationSearchController
     }
 
     if ($errors) {
-      $errors = id(new PHUIInfoView())
-        ->setTitle(pht('Query Errors'))
-        ->setErrors($errors);
-    }
-
-    if ($errors) {
-      $nav->appendChild($errors);
-    }
-
-    if ($named_query) {
-      $title = $named_query->getQueryName();
-    } else {
-      $title = pht('Advanced Search');
+      $box->setFormErrors($errors, pht('Query Errors'));
     }
 
     $crumbs = $parent
       ->buildApplicationCrumbs()
-      ->setBorder(true)
       ->addTextCrumb($title);
 
     $nav->setCrumbs($crumbs);
@@ -354,7 +358,12 @@ final class PhabricatorApplicationSearchController
 
     $nav->selectFilter('query/edit');
     $nav->setCrumbs($crumbs);
-    $nav->appendChild($list);
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Saved Queries'))
+      ->setObjectList($list);
+
+    $nav->appendChild($box);
 
     return $parent->buildApplicationPage(
       $nav,

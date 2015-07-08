@@ -192,7 +192,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       array(
         'class' => 'setup-issue-tail',
       ),
-      array($actions, $next));
+      array($actions));
 
     $issue = phutil_tag(
       'div',
@@ -219,6 +219,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       ),
       array(
         $issue,
+        $next,
         $debug_info,
       ));
   }

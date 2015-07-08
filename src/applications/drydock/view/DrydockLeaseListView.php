@@ -42,9 +42,9 @@ final class DrydockLeaseListView extends AphrontView {
       $item->setEpoch($lease->getDateCreated());
 
       if ($lease->isActive()) {
-        $item->setBarColor('green');
+        $item->setStatusIcon('fa-dot-circle-o green');
       } else {
-        $item->setBarColor('red');
+        $item->setStatusIcon('fa-dot-circle-o red');
       }
 
       $view->addItem($item);

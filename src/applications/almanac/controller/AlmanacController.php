@@ -176,7 +176,7 @@ abstract class AlmanacController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
+      ->setTable($table);
   }
 
   protected function addLockMessage(PHUIObjectBoxView $box, $message) {
