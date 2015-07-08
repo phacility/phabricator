@@ -21,6 +21,10 @@ final class HeraldPreCommitContentAdapter extends HeraldPreCommitAdapter {
       "Hook rules can block changes and send push summary mail.");
   }
 
+  public function isPreCommitRefAdapter() {
+    return false;
+  }
+
   public function getFields() {
     return array_merge(
       array(

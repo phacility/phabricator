@@ -1213,26 +1213,13 @@ abstract class HeraldAdapter extends Phobject {
       $value = array($value);
     }
 
-    switch ($condition->getFieldName()) {
-      case HeraldPreCommitRefAdapter::FIELD_REF_CHANGE:
-        $change_map =
-          PhabricatorRepositoryPushLog::getHeraldChangeFlagConditionOptions();
-        foreach ($value as $index => $val) {
-          $name = idx($change_map, $val);
-          if ($name) {
-            $value[$index] = $name;
-          }
-        }
-        break;
-      default:
-        foreach ($value as $index => $val) {
-          $handle = $handles->getHandleIfExists($val);
-          if ($handle) {
-            $value[$index] = $handle->renderLink();
-          }
-        }
-        break;
+    foreach ($value as $index => $val) {
+      $handle = $handles->getHandleIfExists($val);
+      if ($handle) {
+        $value[$index] = $handle->renderLink();
+      }
     }
+
     $value = phutil_implode_html(', ', $value);
     return $value;
   }
