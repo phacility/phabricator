@@ -134,7 +134,7 @@ final class SlowvoteEmbedView extends AphrontView {
               'button',
               array(
               ),
-              pht('Enrage in Deliberations')),
+              pht('Engage in Deliberations')),
           )));
     }
 
