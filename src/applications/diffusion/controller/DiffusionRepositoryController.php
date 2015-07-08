@@ -227,16 +227,8 @@ final class DiffusionRepositoryController extends DiffusionController {
     $actions = $this->buildActionList($repository);
 
     $view = id(new PHUIPropertyListView())
+      ->setObject($repository)
       ->setUser($user);
-
-    $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $repository->getPHID(),
-      PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
-    if ($project_phids) {
-      $view->addProperty(
-        pht('Projects'),
-        $user->renderHandleList($project_phids));
-    }
 
     if ($repository->isHosted()) {
       $ssh_uri = $repository->getSSHCloneURIObject();
@@ -289,6 +281,8 @@ final class DiffusionRepositoryController extends DiffusionController {
           break;
       }
     }
+
+    $view->invokeWillRenderEvent();
 
     $description = $repository->getDetail('description');
     if (strlen($description)) {
