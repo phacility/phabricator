@@ -6,7 +6,6 @@ abstract class HeraldAdapter extends Phobject {
   const FIELD_BODY                   = 'body';
   const FIELD_AUTHOR                 = 'author';
   const FIELD_REVIEWER               = 'reviewer';
-  const FIELD_REVIEWERS              = 'reviewers';
   const FIELD_COMMITTER              = 'committer';
   const FIELD_DIFF_FILE              = 'diff-file';
   const FIELD_DIFF_CONTENT           = 'diff-content';
@@ -367,7 +366,6 @@ abstract class HeraldAdapter extends Phobject {
       self::FIELD_AUTHOR => pht('Author'),
       self::FIELD_COMMITTER => pht('Committer'),
       self::FIELD_REVIEWER => pht('Reviewer'),
-      self::FIELD_REVIEWERS => pht('Reviewers'),
       self::FIELD_DIFF_FILE => pht('Any changed filename'),
       self::FIELD_DIFF_CONTENT => pht('Any changed file content'),
       self::FIELD_DIFF_ADDED_CONTENT => pht('Any added file content'),
@@ -459,7 +457,6 @@ abstract class HeraldAdapter extends Phobject {
           self::CONDITION_EXISTS,
           self::CONDITION_NOT_EXISTS,
         );
-      case self::FIELD_REVIEWERS:
       case self::FIELD_AUTHOR_PROJECTS:
       case self::FIELD_AFFECTED_PACKAGE:
       case self::FIELD_AFFECTED_PACKAGE_OWNER:
@@ -922,8 +919,6 @@ abstract class HeraldAdapter extends Phobject {
           case self::FIELD_PUSHER_PROJECTS:
           case self::FIELD_REPOSITORY_PROJECTS:
             return self::VALUE_PROJECT;
-          case self::FIELD_REVIEWERS:
-            return self::VALUE_USER_OR_PROJECT;
           default:
             return self::VALUE_USER;
         }

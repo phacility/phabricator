@@ -3,7 +3,6 @@
 final class HeraldDifferentialRevisionAdapter
   extends HeraldDifferentialAdapter {
 
-  protected $diff;
   protected $revision;
 
   protected $explicitReviewers;
@@ -32,10 +31,6 @@ final class HeraldDifferentialRevisionAdapter
     return $this->revision;
   }
 
-  public function getDiff() {
-    return $this->diff;
-  }
-
   public function getAdapterContentType() {
     return 'differential';
   }
@@ -62,26 +57,6 @@ final class HeraldDifferentialRevisionAdapter
     }
   }
 
-  public function getFields() {
-    return array_merge(
-      array(
-        self::FIELD_TITLE,
-        self::FIELD_BODY,
-        self::FIELD_AUTHOR,
-        self::FIELD_AUTHOR_PROJECTS,
-        self::FIELD_REVIEWERS,
-        self::FIELD_REPOSITORY,
-        self::FIELD_REPOSITORY_PROJECTS,
-        self::FIELD_DIFF_FILE,
-        self::FIELD_DIFF_CONTENT,
-        self::FIELD_DIFF_ADDED_CONTENT,
-        self::FIELD_DIFF_REMOVED_CONTENT,
-        self::FIELD_AFFECTED_PACKAGE,
-        self::FIELD_AFFECTED_PACKAGE_OWNER,
-      ),
-      parent::getFields());
-  }
-
   public function getRepetitionOptions() {
     return array(
       HeraldRepetitionPolicyConfig::EVERY,
@@ -103,7 +78,7 @@ final class HeraldDifferentialRevisionAdapter
       ->executeOne();
 
     $object->revision = $revision;
-    $object->diff = $diff;
+    $object->setDiff($diff);
 
     return $object;
   }
@@ -129,17 +104,13 @@ final class HeraldDifferentialRevisionAdapter
     return $this->buildPlans;
   }
 
-  public function getPHID() {
-    return $this->revision->getPHID();
-  }
-
   public function getHeraldName() {
     return $this->revision->getTitle();
   }
 
   protected function loadChangesets() {
     if ($this->changesets === null) {
-      $this->changesets = $this->diff->loadChangesets();
+      $this->changesets = $this->getDiff()->loadChangesets();
     }
     return $this->changesets;
   }
@@ -175,66 +146,15 @@ final class HeraldDifferentialRevisionAdapter
     return $this->affectedPackages;
   }
 
-  public function getHeraldField($field) {
-    switch ($field) {
-      case self::FIELD_TITLE:
-        return $this->revision->getTitle();
-        break;
-      case self::FIELD_BODY:
-        return $this->revision->getSummary()."\n".
-               $this->revision->getTestPlan();
-        break;
-      case self::FIELD_AUTHOR:
-        return $this->revision->getAuthorPHID();
-        break;
-      case self::FIELD_AUTHOR_PROJECTS:
-        $author_phid = $this->revision->getAuthorPHID();
-        if (!$author_phid) {
-          return array();
-        }
-
-        $projects = id(new PhabricatorProjectQuery())
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withMemberPHIDs(array($author_phid))
-          ->execute();
-
-        return mpull($projects, 'getPHID');
-      case self::FIELD_DIFF_FILE:
-        return $this->loadAffectedPaths();
-      case self::FIELD_REVIEWERS:
-        if (isset($this->explicitReviewers)) {
-          return array_keys($this->explicitReviewers);
-        } else {
-          return $this->revision->getReviewers();
-        }
-      case self::FIELD_REPOSITORY:
-        $repository = $this->loadRepository();
-        if (!$repository) {
-          return null;
-        }
-        return $repository->getPHID();
-      case self::FIELD_REPOSITORY_PROJECTS:
-        $repository = $this->loadRepository();
-        if (!$repository) {
-          return array();
-        }
-        return $repository->getProjectPHIDs();
-      case self::FIELD_DIFF_CONTENT:
-        return $this->loadContentDictionary();
-      case self::FIELD_DIFF_ADDED_CONTENT:
-        return $this->loadAddedContentDictionary();
-      case self::FIELD_DIFF_REMOVED_CONTENT:
-        return $this->loadRemovedContentDictionary();
-      case self::FIELD_AFFECTED_PACKAGE:
-        $packages = $this->loadAffectedPackages();
-        return mpull($packages, 'getPHID');
-      case self::FIELD_AFFECTED_PACKAGE_OWNER:
-        $packages = $this->loadAffectedPackages();
-        return PhabricatorOwnersOwner::loadAffiliatedUserPHIDs(
-          mpull($packages, 'getID'));
+  public function loadReviewers() {
+    // TODO: This can probably go away as I believe it's just a performance
+    // optimization, just retaining it while modularizing fields to limit the
+    // scope of that change.
+    if (isset($this->explicitReviewers)) {
+      return array_keys($this->explicitReviewers);
+    } else {
+      return $this->revision->getReviewers();
     }
-
-    return parent::getHeraldField($field);
   }
 
   public function getActions($rule_type) {
