@@ -1,23 +1,23 @@
 <?php
 
-final class DiffusionCommitPackageOwnerHeraldField
-  extends DiffusionCommitHeraldField {
+final class DifferentialDiffRepositoryProjectsHeraldField
+  extends DifferentialDiffHeraldField {
 
-  const FIELDCONST = 'diffusion.commit.package.owners';
+  const FIELDCONST = 'differential.diff.repository.projects';
 
   public function getHeraldFieldName() {
-    return pht('Affected package owners');
+    return pht('Repository projects');
   }
 
   public function getHeraldFieldValue($object) {
-    $packages = $this->getAdapter()->loadAffectedPackages();
-    if (!$packages) {
+    $repository = $this->getAdapter()->loadRepository();
+    if (!$repository) {
       return array();
     }
 
-    $owners = PhabricatorOwnersOwner::loadAllForPackages($packages);
-
-    return mpull($owners, 'getUserPHID');
+    return PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $repository->getPHID(),
+      PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
   }
 
   protected function getHeraldFieldStandardConditions() {
@@ -30,7 +30,7 @@ final class DiffusionCommitPackageOwnerHeraldField
       case HeraldAdapter::CONDITION_NOT_EXISTS:
         return HeraldAdapter::VALUE_NONE;
       default:
-        return HeraldAdapter::VALUE_USER_OR_PROJECT;
+        return HeraldAdapter::VALUE_PROJECT;
     }
   }
 

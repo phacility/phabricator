@@ -1,23 +1,22 @@
 <?php
 
-final class DiffusionCommitPackageOwnerHeraldField
-  extends DiffusionCommitHeraldField {
+final class DiffusionPreCommitContentRevisionReviewersHeraldField
+  extends DiffusionPreCommitContentHeraldField {
 
-  const FIELDCONST = 'diffusion.commit.package.owners';
+  const FIELDCONST = 'diffusion.pre.content.revision.reviewers';
 
   public function getHeraldFieldName() {
-    return pht('Affected package owners');
+    return pht('Differential reviewers');
   }
 
   public function getHeraldFieldValue($object) {
-    $packages = $this->getAdapter()->loadAffectedPackages();
-    if (!$packages) {
+    $revision = $this->getAdapter()->getRevision();
+
+    if (!$revision) {
       return array();
     }
 
-    $owners = PhabricatorOwnersOwner::loadAllForPackages($packages);
-
-    return mpull($owners, 'getUserPHID');
+    return $revision->getReviewers();
   }
 
   protected function getHeraldFieldStandardConditions() {

@@ -2,34 +2,6 @@
 
 abstract class HeraldAdapter extends Phobject {
 
-  const FIELD_TITLE                  = 'title';
-  const FIELD_BODY                   = 'body';
-  const FIELD_AUTHOR                 = 'author';
-  const FIELD_REVIEWER               = 'reviewer';
-  const FIELD_REVIEWERS              = 'reviewers';
-  const FIELD_COMMITTER              = 'committer';
-  const FIELD_DIFF_FILE              = 'diff-file';
-  const FIELD_DIFF_CONTENT           = 'diff-content';
-  const FIELD_DIFF_ADDED_CONTENT     = 'diff-added-content';
-  const FIELD_DIFF_REMOVED_CONTENT   = 'diff-removed-content';
-  const FIELD_DIFF_ENORMOUS          = 'diff-enormous';
-  const FIELD_REPOSITORY             = 'repository';
-  const FIELD_REPOSITORY_PROJECTS    = 'repository-projects';
-  const FIELD_AFFECTED_PACKAGE       = 'affected-package';
-  const FIELD_AFFECTED_PACKAGE_OWNER = 'affected-package-owner';
-  const FIELD_AUTHOR_PROJECTS        = 'authorprojects';
-  const FIELD_PUSHER                 = 'pusher';
-  const FIELD_PUSHER_PROJECTS        = 'pusher-projects';
-  const FIELD_DIFFERENTIAL_REVISION  = 'differential-revision';
-  const FIELD_DIFFERENTIAL_REVIEWERS = 'differential-reviewers';
-  const FIELD_DIFFERENTIAL_CCS       = 'differential-ccs';
-  const FIELD_DIFFERENTIAL_ACCEPTED  = 'differential-accepted';
-  const FIELD_IS_MERGE_COMMIT        = 'is-merge-commit';
-  const FIELD_BRANCHES               = 'branches';
-  const FIELD_AUTHOR_RAW             = 'author-raw';
-  const FIELD_COMMITTER_RAW          = 'committer-raw';
-  const FIELD_PUSHER_IS_COMMITTER    = 'pusher-is-committer';
-
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
   const CONDITION_IS              = 'is';
@@ -179,13 +151,9 @@ abstract class HeraldAdapter extends Phobject {
 
   abstract public function getHeraldName();
 
-  public function getHeraldField($field_name) {
-    $impl = $this->getFieldImplementation($field_name);
-    if ($impl) {
-      return $impl->getHeraldFieldValue($this->getObject());
-    }
-
-    throw new Exception(pht("Unknown field '%s'!", $field_name));
+  public function getHeraldField($field_key) {
+    return $this->requireFieldImplementation($field_key)
+      ->getHeraldFieldValue($this->getObject());
   }
 
   public function applyHeraldEffects(array $effects) {
@@ -359,39 +327,7 @@ abstract class HeraldAdapter extends Phobject {
   }
 
   public function getFieldNameMap() {
-    $map = mpull($this->getFieldImplementationMap(), 'getHeraldFieldName');
-
-    return $map + array(
-      self::FIELD_TITLE => pht('Title'),
-      self::FIELD_BODY => pht('Body'),
-      self::FIELD_AUTHOR => pht('Author'),
-      self::FIELD_COMMITTER => pht('Committer'),
-      self::FIELD_REVIEWER => pht('Reviewer'),
-      self::FIELD_REVIEWERS => pht('Reviewers'),
-      self::FIELD_DIFF_FILE => pht('Any changed filename'),
-      self::FIELD_DIFF_CONTENT => pht('Any changed file content'),
-      self::FIELD_DIFF_ADDED_CONTENT => pht('Any added file content'),
-      self::FIELD_DIFF_REMOVED_CONTENT => pht('Any removed file content'),
-      self::FIELD_DIFF_ENORMOUS => pht('Change is enormous'),
-      self::FIELD_REPOSITORY => pht('Repository'),
-      self::FIELD_REPOSITORY_PROJECTS => pht('Repository\'s projects'),
-      self::FIELD_AFFECTED_PACKAGE => pht('Any affected package'),
-      self::FIELD_AFFECTED_PACKAGE_OWNER =>
-        pht("Any affected package's owner"),
-      self::FIELD_AUTHOR_PROJECTS => pht("Author's projects"),
-      self::FIELD_PUSHER => pht('Pusher'),
-      self::FIELD_PUSHER_PROJECTS => pht("Pusher's projects"),
-      self::FIELD_DIFFERENTIAL_REVISION => pht('Differential revision'),
-      self::FIELD_DIFFERENTIAL_REVIEWERS => pht('Differential reviewers'),
-      self::FIELD_DIFFERENTIAL_CCS => pht('Differential CCs'),
-      self::FIELD_DIFFERENTIAL_ACCEPTED
-        => pht('Accepted Differential revision'),
-      self::FIELD_IS_MERGE_COMMIT => pht('Commit is a merge'),
-      self::FIELD_BRANCHES => pht('Commit\'s branches'),
-      self::FIELD_AUTHOR_RAW => pht('Raw author name'),
-      self::FIELD_COMMITTER_RAW => pht('Raw committer name'),
-      self::FIELD_PUSHER_IS_COMMITTER => pht('Pusher same as committer'),
-    );
+    return mpull($this->getFieldImplementationMap(), 'getHeraldFieldName');
   }
 
 
@@ -427,98 +363,22 @@ abstract class HeraldAdapter extends Phobject {
   }
 
   public function getConditionsForField($field) {
-    $impl = $this->getFieldImplementation($field);
-    if ($impl) {
-      return $impl->getHeraldFieldConditions();
+    return $this->requireFieldImplementation($field)
+      ->getHeraldFieldConditions();
+  }
+
+  private function requireFieldImplementation($field_key) {
+    $field = $this->getFieldImplementation($field_key);
+
+    if (!$field) {
+      throw new Exception(
+        pht(
+          'No field with key "%s" is available to Herald adapter "%s".',
+          $field_key,
+          get_class($this)));
     }
 
-    switch ($field) {
-      case self::FIELD_TITLE:
-      case self::FIELD_BODY:
-      case self::FIELD_COMMITTER_RAW:
-      case self::FIELD_AUTHOR_RAW:
-        return array(
-          self::CONDITION_CONTAINS,
-          self::CONDITION_NOT_CONTAINS,
-          self::CONDITION_IS,
-          self::CONDITION_IS_NOT,
-          self::CONDITION_REGEXP,
-        );
-      case self::FIELD_REVIEWER:
-      case self::FIELD_PUSHER:
-        return array(
-          self::CONDITION_IS_ANY,
-          self::CONDITION_IS_NOT_ANY,
-        );
-      case self::FIELD_REPOSITORY:
-      case self::FIELD_AUTHOR:
-      case self::FIELD_COMMITTER:
-        return array(
-          self::CONDITION_IS_ANY,
-          self::CONDITION_IS_NOT_ANY,
-          self::CONDITION_EXISTS,
-          self::CONDITION_NOT_EXISTS,
-        );
-      case self::FIELD_REVIEWERS:
-      case self::FIELD_AUTHOR_PROJECTS:
-      case self::FIELD_AFFECTED_PACKAGE:
-      case self::FIELD_AFFECTED_PACKAGE_OWNER:
-      case self::FIELD_PUSHER_PROJECTS:
-      case self::FIELD_REPOSITORY_PROJECTS:
-        return array(
-          self::CONDITION_INCLUDE_ALL,
-          self::CONDITION_INCLUDE_ANY,
-          self::CONDITION_INCLUDE_NONE,
-          self::CONDITION_EXISTS,
-          self::CONDITION_NOT_EXISTS,
-        );
-      case self::FIELD_DIFF_FILE:
-      case self::FIELD_BRANCHES:
-        return array(
-          self::CONDITION_CONTAINS,
-          self::CONDITION_REGEXP,
-        );
-      case self::FIELD_DIFF_CONTENT:
-      case self::FIELD_DIFF_ADDED_CONTENT:
-      case self::FIELD_DIFF_REMOVED_CONTENT:
-        return array(
-          self::CONDITION_CONTAINS,
-          self::CONDITION_REGEXP,
-          self::CONDITION_REGEXP_PAIR,
-        );
-      case self::FIELD_DIFFERENTIAL_REVIEWERS:
-        return array(
-          self::CONDITION_EXISTS,
-          self::CONDITION_NOT_EXISTS,
-          self::CONDITION_INCLUDE_ALL,
-          self::CONDITION_INCLUDE_ANY,
-          self::CONDITION_INCLUDE_NONE,
-        );
-      case self::FIELD_DIFFERENTIAL_CCS:
-        return array(
-          self::CONDITION_INCLUDE_ALL,
-          self::CONDITION_INCLUDE_ANY,
-          self::CONDITION_INCLUDE_NONE,
-        );
-      case self::FIELD_DIFFERENTIAL_REVISION:
-      case self::FIELD_DIFFERENTIAL_ACCEPTED:
-        return array(
-          self::CONDITION_EXISTS,
-          self::CONDITION_NOT_EXISTS,
-        );
-      case self::FIELD_IS_MERGE_COMMIT:
-      case self::FIELD_DIFF_ENORMOUS:
-      case self::FIELD_PUSHER_IS_COMMITTER:
-        return array(
-          self::CONDITION_IS_TRUE,
-          self::CONDITION_IS_FALSE,
-        );
-      default:
-        throw new Exception(
-          pht(
-            "This adapter does not define conditions for field '%s'!",
-            $field));
-    }
+    return $field;
   }
 
   public function doesConditionMatch(
@@ -887,59 +747,8 @@ abstract class HeraldAdapter extends Phobject {
 
 
   public function getValueTypeForFieldAndCondition($field, $condition) {
-    $impl = $this->getFieldImplementation($field);
-    if ($impl) {
-      return $impl->getHeraldFieldValueType($condition);
-    }
-
-    switch ($condition) {
-      case self::CONDITION_CONTAINS:
-      case self::CONDITION_NOT_CONTAINS:
-      case self::CONDITION_REGEXP:
-      case self::CONDITION_REGEXP_PAIR:
-        return self::VALUE_TEXT;
-      case self::CONDITION_IS:
-      case self::CONDITION_IS_NOT:
-        return self::VALUE_TEXT;
-      case self::CONDITION_IS_ANY:
-      case self::CONDITION_IS_NOT_ANY:
-        switch ($field) {
-          case self::FIELD_REPOSITORY:
-            return self::VALUE_REPOSITORY;
-          default:
-            return self::VALUE_USER;
-        }
-        break;
-      case self::CONDITION_INCLUDE_ALL:
-      case self::CONDITION_INCLUDE_ANY:
-      case self::CONDITION_INCLUDE_NONE:
-        switch ($field) {
-          case self::FIELD_REPOSITORY:
-            return self::VALUE_REPOSITORY;
-          case self::FIELD_AFFECTED_PACKAGE:
-            return self::VALUE_OWNERS_PACKAGE;
-          case self::FIELD_AUTHOR_PROJECTS:
-          case self::FIELD_PUSHER_PROJECTS:
-          case self::FIELD_REPOSITORY_PROJECTS:
-            return self::VALUE_PROJECT;
-          case self::FIELD_REVIEWERS:
-            return self::VALUE_USER_OR_PROJECT;
-          default:
-            return self::VALUE_USER;
-        }
-        break;
-      case self::CONDITION_IS_ME:
-      case self::CONDITION_IS_NOT_ME:
-      case self::CONDITION_EXISTS:
-      case self::CONDITION_NOT_EXISTS:
-      case self::CONDITION_UNCONDITIONALLY:
-      case self::CONDITION_NEVER:
-      case self::CONDITION_IS_TRUE:
-      case self::CONDITION_IS_FALSE:
-        return self::VALUE_NONE;
-      default:
-        throw new Exception(pht("Unknown condition '%s'.", $condition));
-    }
+    return $this->requireFieldImplementation($field)
+      ->getHeraldFieldValueType($condition);
   }
 
   public function getValueTypeForAction($action, $rule_type) {
@@ -1218,26 +1027,13 @@ abstract class HeraldAdapter extends Phobject {
       $value = array($value);
     }
 
-    switch ($condition->getFieldName()) {
-      case HeraldPreCommitRefAdapter::FIELD_REF_CHANGE:
-        $change_map =
-          PhabricatorRepositoryPushLog::getHeraldChangeFlagConditionOptions();
-        foreach ($value as $index => $val) {
-          $name = idx($change_map, $val);
-          if ($name) {
-            $value[$index] = $name;
-          }
-        }
-        break;
-      default:
-        foreach ($value as $index => $val) {
-          $handle = $handles->getHandleIfExists($val);
-          if ($handle) {
-            $value[$index] = $handle->renderLink();
-          }
-        }
-        break;
+    foreach ($value as $index => $val) {
+      $handle = $handles->getHandleIfExists($val);
+      if ($handle) {
+        $value[$index] = $handle->renderLink();
+      }
     }
+
     $value = phutil_implode_html(', ', $value);
     return $value;
   }
