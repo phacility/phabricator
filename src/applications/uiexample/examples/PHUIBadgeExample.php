@@ -113,6 +113,34 @@ final class PHUIBadgeExample extends PhabricatorUIExample {
       ->addByline(pht('Dec 31, 1969'))
       ->addByline('1 Awarded (0.4%)');
 
+    $badges3 = array();
+    $badges3[] = id(new PHUIBadgeMiniView())
+      ->setIcon('fa-book')
+      ->setHeader(pht('Documenter'));
+
+    $badges3[] = id(new PHUIBadgeMiniView())
+      ->setIcon('fa-star')
+      ->setHeader(pht('Contributor'));
+
+    $badges3[] = id(new PHUIBadgeMiniView())
+      ->setIcon('fa-bug')
+      ->setHeader(pht('Bugmeister'));
+
+    $badges3[] = id(new PHUIBadgeMiniView())
+      ->setIcon('fa-heart')
+      ->setHeader(pht('Funder'))
+      ->setQuality(PHUIBadgeView::UNCOMMON);
+
+    $badges3[] = id(new PHUIBadgeMiniView())
+      ->setIcon('fa-user')
+      ->setHeader(pht('Administrator'))
+      ->setQuality(PHUIBadgeView::RARE);
+
+    $badges3[] = id(new PHUIBadgeMiniView())
+      ->setIcon('fa-camera-retro')
+      ->setHeader(pht('Designer'))
+      ->setQuality(PHUIBadgeView::EPIC);
+
     $flex1 = new PHUIBadgeBoxView();
     $flex1->addItems($badges1);
 
@@ -127,6 +155,15 @@ final class PHUIBadgeExample extends PhabricatorUIExample {
       ->setHeaderText(pht('Acheivements'))
       ->appendChild($flex2);
 
-    return array($box1, $box2);
+    $flex3 = new PHUIBadgeBoxView();
+    $flex3->addItems($badges3);
+    $flex3->setCollapsed(true);
+    $flex3->addClass('ml');
+
+    $box3 = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('PHUIBadgeMiniView'))
+      ->appendChild($flex3);
+
+    return array($box1, $box2, $box3);
   }
 }
