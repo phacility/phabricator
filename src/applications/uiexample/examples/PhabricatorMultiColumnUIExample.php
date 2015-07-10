@@ -106,7 +106,7 @@ final class PhabricatorMultiColumnUIExample extends PhabricatorUIExample {
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel(pht('Name'))
-        ->setDisableAu4tocomplete(true)
+        ->setDisableAutocomplete(true)
         ->setSigil('name-input'))
       ->appendChild(
         id(new AphrontFormTextControl())
