@@ -3,9 +3,15 @@
 final class PHUIBadgeBoxView extends AphrontTagView {
 
   private $items = array();
+  private $collapsed;
 
   public function addItem($item) {
     $this->items[] = $item;
+    return $this;
+  }
+
+  public function setCollapsed($collapsed) {
+    $this->collapsed = $collapsed;
     return $this;
   }
 
@@ -26,6 +32,9 @@ final class PHUIBadgeBoxView extends AphrontTagView {
     $classes = array();
     $classes[] = 'phui-badge-flex-view';
     $classes[] = 'grouped';
+    if ($this->collapsed) {
+      $classes[] = 'flex-view-collapsed';
+    }
 
     return array(
       'class' => implode(' ', $classes),

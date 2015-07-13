@@ -13,6 +13,14 @@
   padding: 4px 8px;
 }
 
+.phui-badge-flex-view.flex-view-collapsed {
+  padding: 0;
+}
+
+.flex-view-collapsed .phui-badge-flex-item {
+  padding: 1px;
+}
+
 .phui-badge-view {
   display: inline-block;
   position: relative;
@@ -156,4 +164,54 @@
 .phui-badge-view-yellow .phui-badge-card {
   background-color: {$sh-yellowbackground};
   border-color: {$sh-lightyellowborder};
+}
+
+/** Mini View ****************************************************************/
+
+.phui-badge-mini {
+  background-color: {$greyborder};
+  border-radius: 18px;
+  height: 25px;
+  width: 25px;
+  line-height: 24px;
+  text-align: center;
+  display: inline-block;
+  opacity: 0.7;
+}
+
+.phui-badge-mini:hover {
+  opacity: 1;
+}
+
+.phui-badge-mini .phui-icon-view {
+  color: #fff;
+  font-size: 12px;
+}
+
+.phui-badge-mini-grey {
+  background-color: {$greyborder};
+}
+
+.phui-badge-mini-white {
+  background-color: {$lightblueborder};
+}
+
+.phui-badge-mini-green {
+  background-color: {$sh-greenicon};
+}
+
+.phui-badge-mini-blue {
+  background-color: {$blue};
+}
+
+.phui-badge-mini-indigo {
+  background-color: {$sh-indigoicon};
+}
+
+.phui-badge-mini-orange {
+  background-color: {$sh-orangeicon};
+}
+
+.phui-badge-mini-yellow {
+  background-color: {$sh-yellowicon};
 }
