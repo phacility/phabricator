@@ -6606,6 +6606,7 @@ phutil_register_library_map(array(
       'PhabricatorTokenReceiverInterface',
       'PhabricatorProjectInterface',
       'PhabricatorDestructibleInterface',
+      'PhabricatorSpacesInterface',
     ),
     'PhabricatorSlowvotePollController' => 'PhabricatorSlowvoteController',
     'PhabricatorSlowvotePollPHIDType' => 'PhabricatorPHIDType',

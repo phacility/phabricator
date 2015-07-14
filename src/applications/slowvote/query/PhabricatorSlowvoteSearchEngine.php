@@ -147,6 +147,8 @@ final class PhabricatorSlowvoteSearchEngine
       }
 
       $item = id(new PHUIObjectItemView())
+        ->setUser($viewer)
+        ->setObject($poll)
         ->setObjectName('V'.$poll->getID())
         ->setHeader($poll->getQuestion())
         ->setHref('/V'.$poll->getID())
