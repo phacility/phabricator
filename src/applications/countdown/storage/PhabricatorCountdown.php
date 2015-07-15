@@ -2,12 +2,15 @@
 
 final class PhabricatorCountdown
   extends PhabricatorCountdownDAO
-  implements PhabricatorPolicyInterface {
+  implements PhabricatorPolicyInterface,
+  PhabricatorSpacesInterface {
 
   protected $title;
   protected $authorPHID;
   protected $epoch;
   protected $viewPolicy;
+
+  protected $spacePHID;
 
   public static function initializeNewCountdown(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -21,7 +24,8 @@ final class PhabricatorCountdown
     return id(new PhabricatorCountdown())
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
-      ->setEpoch(PhabricatorTime::getNow());
+      ->setEpoch(PhabricatorTime::getNow())
+      ->setSpacePHID($actor->getDefaultSpacePHID());
   }
 
   protected function getConfiguration() {
@@ -64,6 +68,12 @@ final class PhabricatorCountdown
 
   public function describeAutomaticCapability($capability) {
     return pht('The author of a countdown can always view and edit it.');
+  }
+
+/* -( PhabricatorSpacesInterface )------------------------------------------- */
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
   }
 
 }
