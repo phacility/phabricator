@@ -86,11 +86,11 @@ abstract class HeraldField extends Phobject {
     switch ($standard_type) {
       case self::STANDARD_BOOL:
       case self::STANDARD_PHID_BOOL:
-        return HeraldAdapter::VALUE_NONE;
+        return new HeraldEmptyFieldValue();
       case self::STANDARD_TEXT:
       case self::STANDARD_TEXT_LIST:
       case self::STANDARD_TEXT_MAP:
-        return HeraldAdapter::VALUE_TEXT;
+        return new HeraldTextFieldValue();
     }
 
     throw new Exception(

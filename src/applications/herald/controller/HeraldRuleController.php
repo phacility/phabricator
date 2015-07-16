@@ -440,6 +440,7 @@ final class HeraldRuleController extends HeraldController {
     $config_info['fields'] = $field_map;
     $config_info['conditions'] = $all_conditions;
     $config_info['actions'] = $action_map;
+    $config_info['valueMap'] = array();
 
     foreach ($config_info['fields'] as $field => $name) {
       try {
@@ -452,10 +453,17 @@ final class HeraldRuleController extends HeraldController {
 
     foreach ($config_info['fields'] as $field => $fname) {
       foreach ($config_info['conditionMap'][$field] as $condition) {
-        $value_type = $adapter->getValueTypeForFieldAndCondition(
+        $value_key = $adapter->getValueTypeForFieldAndCondition(
           $field,
           $condition);
-        $config_info['values'][$field][$condition] = $value_type;
+
+        if ($value_key instanceof HeraldFieldValue) {
+          $spec = $value_key->getControlSpecificationDictionary();
+          $value_key = $value_key->getFieldValueKey();
+          $config_info['valueMap'][$value_key] = $spec;
+        }
+
+        $config_info['values'][$field][$condition] = $value_key;
       }
     }
 
@@ -482,10 +490,6 @@ final class HeraldRuleController extends HeraldController {
         'conditions' => (object)$serial_conditions,
         'actions' => (object)$serial_actions,
         'select' => array(
-          HeraldAdapter::VALUE_CONTENT_SOURCE => array(
-            'options' => PhabricatorContentSource::getSourceNameMap(),
-            'default' => PhabricatorContentSource::SOURCE_WEB,
-          ),
           HeraldAdapter::VALUE_FLAG_COLOR => array(
             'options' => PhabricatorFlagColor::getColorNameMap(),
             'default' => PhabricatorFlagColor::COLOR_BLUE,
@@ -508,10 +512,6 @@ final class HeraldRuleController extends HeraldController {
         ),
         'template' => $this->buildTokenizerTemplates($handles) + array(
           'rules' => $all_rules,
-        ),
-        'author' => array(
-          $rule->getAuthorPHID() =>
-            $handles[$rule->getAuthorPHID()]->getName(),
         ),
         'info' => $config_info,
       ));

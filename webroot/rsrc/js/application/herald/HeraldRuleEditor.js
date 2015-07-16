@@ -200,7 +200,48 @@ JX.install('HeraldRuleEditor', {
       return node;
     },
 
+    _buildStandardInput: function(spec) {
+      var input;
+      var get_fn;
+      var set_fn;
+      switch (spec.control) {
+        case 'herald.control.none':
+          input = null;
+          get_fn = JX.bag;
+          set_fn = JX.bag;
+          break;
+        case 'herald.control.text':
+          input = JX.$N('input', {type: 'text'});
+          get_fn = function() { return input.value; };
+          set_fn = function(v) { input.value = v; };
+          break;
+        case 'herald.control.select':
+          input = this._renderSelect(spec.template.options);
+          get_fn = function() { return input.value; };
+          set_fn = function(v) { input.value = v; };
+          if (spec.template.default) {
+            set_fn(spec.template.default);
+          }
+          break;
+        case 'herald.control.tokenizer':
+          var tokenizer = this._newTokenizer(spec.template.tokenizer, true);
+          input = tokenizer[0];
+          get_fn = tokenizer[1];
+          set_fn = tokenizer[2];
+          break;
+        default:
+          JX.$E('No rules to build control "' + spec.control + '".');
+          break;
+      }
+
+      return [input, get_fn, set_fn];
+    },
+
     _buildInput : function(type) {
+      if (this._config.info.valueMap[type]) {
+        return this._buildStandardInput(this._config.info.valueMap[type]);
+      }
+
       var input;
       var get_fn;
       var set_fn;
@@ -233,7 +274,6 @@ JX.install('HeraldRuleEditor', {
           get_fn = JX.bag;
           set_fn = JX.bag;
           break;
-        case 'contentsource':
         case 'flagcolor':
         case 'value-ref-type':
         case 'value-ref-change':
@@ -276,14 +316,20 @@ JX.install('HeraldRuleEditor', {
       return node;
     },
 
-    _newTokenizer : function(type) {
-      var tokenizerConfig = {
-        src : this._config.template.source[type].uri,
-        placeholder: this._config.template.source[type].placeholder,
-        browseURI: this._config.template.source[type].browseURI,
-        icons : this._config.template.icons,
-        username : this._config.username
-      };
+    _newTokenizer : function(type, is_config) {
+      var tokenizerConfig;
+
+      if (is_config) {
+        tokenizerConfig = type;
+      } else {
+        tokenizerConfig = {
+          src : this._config.template.source[type].uri,
+          placeholder: this._config.template.source[type].placeholder,
+          browseURI: this._config.template.source[type].browseURI,
+          icons : this._config.template.icons,
+          username : this._config.username
+        };
+      }
 
       var build = JX.Prefab.newTokenizerFromTemplate(
         this._config.template.markup,
