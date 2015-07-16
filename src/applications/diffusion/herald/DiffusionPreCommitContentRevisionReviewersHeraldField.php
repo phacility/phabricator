@@ -9,6 +9,10 @@ final class DiffusionPreCommitContentRevisionReviewersHeraldField
     return pht('Differential reviewers');
   }
 
+  public function getFieldGroupKey() {
+    return HeraldRelatedFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     $revision = $this->getAdapter()->getRevision();
 

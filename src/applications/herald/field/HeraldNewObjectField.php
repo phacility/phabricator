@@ -8,6 +8,10 @@ final class HeraldNewObjectField extends HeraldField {
     return pht('Is newly created');
   }
 
+  public function getFieldGroupKey() {
+    return HeraldEditFieldGroup::FIELDGROUPKEY;
+  }
+
   public function supportsObject($object) {
     return !$this->getAdapter()->isSingleEventAdapter();
   }

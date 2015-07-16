@@ -9,6 +9,10 @@ final class DifferentialRevisionAffectedFilesHeraldField
     return pht('Affected files');
   }
 
+  public function getFieldGroupKey() {
+    return DifferentialChangeHeraldFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     return $this->getAdapter()->loadAffectedPaths();
   }

@@ -9,6 +9,10 @@ final class DiffusionCommitDiffContentHeraldField
     return pht('Diff content');
   }
 
+  public function getFieldGroupKey() {
+    return DiffusionChangeHeraldFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     return $this->getAdapter()->loadDiffContent('*');
   }

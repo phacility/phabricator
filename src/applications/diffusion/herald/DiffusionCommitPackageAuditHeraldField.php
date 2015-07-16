@@ -9,6 +9,10 @@ final class DiffusionCommitPackageAuditHeraldField
     return pht('Affected packages that need audit');
   }
 
+  public function getFieldGroupKey() {
+    return HeraldRelatedFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     $packages = $this->getAdapter()->loadAuditNeededPackages();
     if (!$packages) {

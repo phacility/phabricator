@@ -6,4 +6,8 @@ abstract class DiffusionCommitHeraldField extends HeraldField {
     return ($object instanceof PhabricatorRepositoryCommit);
   }
 
+  public function getFieldGroupKey() {
+    return DiffusionCommitHeraldFieldGroup::FIELDGROUPKEY;
+  }
+
 }

@@ -8,6 +8,10 @@ final class HeraldSpaceField extends HeraldField {
     return pht('Space');
   }
 
+  public function getFieldGroupKey() {
+    return HeraldSupportFieldGroup::FIELDGROUPKEY;
+  }
+
   public function supportsObject($object) {
     return ($object instanceof PhabricatorSpacesInterface);
   }

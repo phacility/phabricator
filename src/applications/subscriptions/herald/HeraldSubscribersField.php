@@ -8,6 +8,10 @@ final class HeraldSubscribersField extends HeraldField {
     return pht('Subscribers');
   }
 
+  public function getFieldGroupKey() {
+    return HeraldSupportFieldGroup::FIELDGROUPKEY;
+  }
+
   public function supportsObject($object) {
     return ($object instanceof PhabricatorSubscribableInterface);
   }

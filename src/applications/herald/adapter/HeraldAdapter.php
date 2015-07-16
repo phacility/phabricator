@@ -312,6 +312,16 @@ abstract class HeraldAdapter extends Phobject {
     return mpull($this->getFieldImplementationMap(), 'getHeraldFieldName');
   }
 
+  public function getFieldGroupKey($field_key) {
+    $field = $this->getFieldImplementation($field_key);
+
+    if (!$field) {
+      return null;
+    }
+
+    return $field->getFieldGroupKey();
+  }
+
 
 /* -(  Conditions  )--------------------------------------------------------- */
 

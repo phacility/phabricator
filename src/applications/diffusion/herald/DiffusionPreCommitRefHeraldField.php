@@ -14,4 +14,8 @@ abstract class DiffusionPreCommitRefHeraldField extends HeraldField {
     return true;
   }
 
+  public function getFieldGroupKey() {
+    return DiffusionPreCommitRefHeraldFieldGroup::FIELDGROUPKEY;
+  }
+
 }

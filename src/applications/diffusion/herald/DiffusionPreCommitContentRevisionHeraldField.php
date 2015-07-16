@@ -9,6 +9,10 @@ final class DiffusionPreCommitContentRevisionHeraldField
     return pht('Differential revision');
   }
 
+  public function getFieldGroupKey() {
+    return HeraldRelatedFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     $revision = $this->getAdapter()->getRevision();
 

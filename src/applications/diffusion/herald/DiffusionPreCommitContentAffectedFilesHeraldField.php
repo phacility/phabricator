@@ -9,6 +9,10 @@ final class DiffusionPreCommitContentAffectedFilesHeraldField
     return pht('Affected files');
   }
 
+  public function getFieldGroupKey() {
+    return DiffusionChangeHeraldFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     return $this->getAdapter()->getDiffContent('name');
   }

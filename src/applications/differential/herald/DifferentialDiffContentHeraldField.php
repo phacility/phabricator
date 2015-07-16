@@ -9,6 +9,10 @@ final class DifferentialDiffContentHeraldField
     return pht('Changed file content');
   }
 
+  public function getFieldGroupKey() {
+    return DifferentialChangeHeraldFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     return $this->getAdapter()->loadContentDictionary();
   }

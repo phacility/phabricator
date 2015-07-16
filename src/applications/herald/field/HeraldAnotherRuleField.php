@@ -8,6 +8,10 @@ final class HeraldAnotherRuleField extends HeraldField {
     return pht('Another Herald rule');
   }
 
+  public function getFieldGroupKey() {
+    return HeraldBasicFieldGroup::FIELDGROUPKEY;
+  }
+
   public function supportsObject($object) {
     return true;
   }

@@ -8,6 +8,10 @@ final class HeraldAlwaysField extends HeraldField {
     return pht('Always');
   }
 
+  public function getFieldGroupKey() {
+    return HeraldBasicFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     return true;
   }

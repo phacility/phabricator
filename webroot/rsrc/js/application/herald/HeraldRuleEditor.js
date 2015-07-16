@@ -320,10 +320,25 @@ JX.install('HeraldRuleEditor', {
       this._onfieldchange(r);
     },
     _renderCondition : function(row_id) {
-      var field_select = this._renderSelect(
-        this._config.info.fields,
-        this._config.conditions[row_id][0],
-        'field-select');
+      var groups = this._config.info.fields;
+
+      var optgroups = [];
+      for (var ii = 0; ii < groups.length; ii++) {
+        var group = groups[ii];
+        var options = [];
+        for (var k in group.options) {
+          options.push(JX.$N('option', {value: k}, group.options[k]));
+        }
+        optgroups.push(JX.$N('optgroup', {label: group.label}, options));
+      }
+
+      var attrs = {
+        sigil: 'field-select'
+      };
+
+      var field_select = JX.$N('select', attrs, optgroups);
+      field_select.value = this._config.conditions[row_id][0];
+
       var field_cell = JX.$N('td', {sigil: 'field-cell'}, field_select);
 
       var condition_cell = JX.$N('td', {sigil: 'condition-cell'});

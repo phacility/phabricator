@@ -6,4 +6,8 @@ abstract class DifferentialRevisionHeraldField extends HeraldField {
     return ($object instanceof DifferentialRevision);
   }
 
+  public function getFieldGroupKey() {
+    return DifferentialRevisionHeraldFieldGroup::FIELDGROUPKEY;
+  }
+
 }

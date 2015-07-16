@@ -9,6 +9,10 @@ final class DifferentialRevisionContentRemovedHeraldField
     return pht('Removed file content');
   }
 
+  public function getFieldGroupKey() {
+    return DifferentialChangeHeraldFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     return $this->getAdapter()->loadRemovedContentDictionary();
   }

@@ -9,6 +9,10 @@ final class DifferentialRevisionPackageHeraldField
     return pht('Affected packages');
   }
 
+  public function getFieldGroupKey() {
+    return HeraldRelatedFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     $packages = $this->getAdapter()->loadAffectedPackages();
     return mpull($packages, 'getPHID');

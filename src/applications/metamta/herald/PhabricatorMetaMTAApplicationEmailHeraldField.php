@@ -6,7 +6,11 @@ final class PhabricatorMetaMTAApplicationEmailHeraldField
   const FIELDCONST = 'application-email';
 
   public function getHeraldFieldName() {
-    return pht('Receiving email address');
+    return pht('Receiving email addresses');
+  }
+
+  public function getFieldGroupKey() {
+    return HeraldEditFieldGroup::FIELDGROUPKEY;
   }
 
   public function supportsObject($object) {

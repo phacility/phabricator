@@ -435,14 +435,43 @@ final class HeraldRuleController extends HeraldController {
       }
     }
 
+    $group_map = array();
+    foreach ($field_map as $field_key => $field_name) {
+      $group_key = $adapter->getFieldGroupKey($field_key);
+      $group_map[$group_key][$field_key] = $field_name;
+    }
+
+    $field_groups = HeraldFieldGroup::getAllFieldGroups();
+
+    $groups = array();
+    foreach ($group_map as $group_key => $options) {
+      asort($options);
+
+      $field_group = idx($field_groups, $group_key);
+      if ($field_group) {
+        $group_label = $field_group->getGroupLabel();
+        $group_order = $field_group->getSortKey();
+      } else {
+        $group_label = nonempty($group_key, pht('Other'));
+        $group_order = 'Z';
+      }
+
+      $groups[] = array(
+        'label' => $group_label,
+        'options' => $options,
+        'order' => $group_order,
+      );
+    }
+
+    $groups = array_values(isort($groups, 'order'));
 
     $config_info = array();
-    $config_info['fields'] = $field_map;
+    $config_info['fields'] = $groups;
     $config_info['conditions'] = $all_conditions;
     $config_info['actions'] = $action_map;
     $config_info['valueMap'] = array();
 
-    foreach ($config_info['fields'] as $field => $name) {
+    foreach ($field_map as $field => $name) {
       try {
         $field_conditions = $adapter->getConditionsForField($field);
       } catch (Exception $ex) {
@@ -451,7 +480,7 @@ final class HeraldRuleController extends HeraldController {
       $config_info['conditionMap'][$field] = $field_conditions;
     }
 
-    foreach ($config_info['fields'] as $field => $fname) {
+    foreach ($field_map as $field => $fname) {
       foreach ($config_info['conditionMap'][$field] as $condition) {
         $value_key = $adapter->getValueTypeForFieldAndCondition(
           $field,

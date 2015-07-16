@@ -16,6 +16,10 @@ abstract class HeraldField extends Phobject {
   abstract public function getHeraldFieldName();
   abstract public function getHeraldFieldValue($object);
 
+  public function getFieldGroupKey() {
+    return null;
+  }
+
   protected function getHeraldFieldStandardType() {
     throw new PhutilMethodNotImplementedException();
   }

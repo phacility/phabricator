@@ -9,6 +9,10 @@ final class DiffusionCommitDiffEnormousHeraldField
     return pht('Change is enormous');
   }
 
+  public function getFieldGroupKey() {
+    return DiffusionChangeHeraldFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     return $this->getAdapter()->isDiffEnormous();
   }

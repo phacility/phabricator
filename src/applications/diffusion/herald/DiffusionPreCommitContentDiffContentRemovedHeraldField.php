@@ -9,6 +9,10 @@ final class DiffusionPreCommitContentDiffContentRemovedHeraldField
     return pht('Removed diff content');
   }
 
+  public function getFieldGroupKey() {
+    return DiffusionChangeHeraldFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     return $this->getAdapter()->getDiffContent('-');
   }

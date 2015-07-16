@@ -8,6 +8,10 @@ final class HeraldContentSourceField extends HeraldField {
     return pht('Content source');
   }
 
+  public function getFieldGroupKey() {
+    return HeraldEditFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     return $this->getAdapter()->getContentSource()->getSource();
   }

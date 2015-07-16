@@ -9,6 +9,10 @@ final class DiffusionCommitPackageOwnerHeraldField
     return pht('Affected package owners');
   }
 
+  public function getFieldGroupKey() {
+    return HeraldRelatedFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     $packages = $this->getAdapter()->loadAffectedPackages();
     if (!$packages) {
