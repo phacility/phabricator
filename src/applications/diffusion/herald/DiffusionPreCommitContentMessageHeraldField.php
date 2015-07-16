@@ -13,12 +13,8 @@ final class DiffusionPreCommitContentMessageHeraldField
     return $this->getAdapter()->getCommitRef()->getMessage();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_TEXT;
-  }
-
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_TEXT;
   }
 
 }

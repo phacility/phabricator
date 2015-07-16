@@ -16,7 +16,7 @@ final class HeraldSpaceField extends HeraldField {
     return PhabricatorSpacesNamespaceQuery::getObjectSpacePHID($object);
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_PHID;
   }
 

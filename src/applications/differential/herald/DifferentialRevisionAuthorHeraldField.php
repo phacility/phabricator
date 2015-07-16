@@ -13,7 +13,7 @@ final class DifferentialRevisionAuthorHeraldField
     return $object->getAuthorPHID();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_PHID;
   }
 

@@ -29,12 +29,8 @@ final class DiffusionCommitRevisionAcceptedHeraldField
     return null;
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_PHID_BOOL;
-  }
-
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_NONE;
   }
 
 }

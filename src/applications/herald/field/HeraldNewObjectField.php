@@ -16,12 +16,8 @@ final class HeraldNewObjectField extends HeraldField {
     return $this->getAdapter()->getIsNewObject();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_BOOL;
-  }
-
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_NONE;
   }
 
 }

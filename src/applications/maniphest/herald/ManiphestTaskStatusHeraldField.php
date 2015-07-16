@@ -13,7 +13,7 @@ final class ManiphestTaskStatusHeraldField
     return $object->getStatus();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_PHID;
   }
 

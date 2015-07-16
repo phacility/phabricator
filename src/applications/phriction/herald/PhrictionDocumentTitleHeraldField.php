@@ -13,12 +13,8 @@ final class PhrictionDocumentTitleHeraldField
     return $object->getContent()->getTitle();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_TEXT;
-  }
-
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_TEXT;
   }
 
 }

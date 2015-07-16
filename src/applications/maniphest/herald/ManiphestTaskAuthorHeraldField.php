@@ -13,7 +13,7 @@ final class ManiphestTaskAuthorHeraldField
     return $object->getAuthorPHID();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_PHID;
   }
 

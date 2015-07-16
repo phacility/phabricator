@@ -13,7 +13,7 @@ final class DiffusionCommitReviewerHeraldField
     return $object->getCommitData()->getCommitDetail('reviewerPHID');
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_PHID_NULLABLE;
   }
 

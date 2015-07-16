@@ -19,8 +19,8 @@ final class DiffusionPreCommitContentRevisionReviewersHeraldField
     return $revision->getReviewers();
   }
 
-  protected function getHeraldFieldStandardConditions() {
-    return self::STANDARD_LIST;
+  protected function getHeraldFieldStandardType() {
+    return self::STANDARD_PHID_LIST;
   }
 
   public function getHeraldFieldValueType($condition) {

@@ -16,12 +16,8 @@ final class DiffusionPreCommitContentPusherIsCommitterHeraldField
     return ($pusher === $committer);
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return HeraldField::STANDARD_BOOL;
-  }
-
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_NONE;
   }
 
 }

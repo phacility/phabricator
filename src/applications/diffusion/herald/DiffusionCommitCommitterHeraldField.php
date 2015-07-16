@@ -13,7 +13,7 @@ final class DiffusionCommitCommitterHeraldField
     return $object->getCommitData()->getCommitDetail('committerPHID');
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_PHID_NULLABLE;
   }
 

@@ -15,8 +15,8 @@ final class DiffusionPreCommitContentRepositoryProjectsHeraldField
       PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
   }
 
-  protected function getHeraldFieldStandardConditions() {
-    return HeraldField::STANDARD_LIST;
+  protected function getHeraldFieldStandardType() {
+    return HeraldField::STANDARD_PHID_LIST;
   }
 
   public function getHeraldFieldValueType($condition) {

@@ -4,28 +4,25 @@ abstract class HeraldField extends Phobject {
 
   private $adapter;
 
-  const STANDARD_LIST = 'standard.list';
   const STANDARD_BOOL = 'standard.bool';
   const STANDARD_TEXT = 'standard.text';
   const STANDARD_TEXT_LIST = 'standard.text.list';
   const STANDARD_TEXT_MAP = 'standard.text.map';
   const STANDARD_PHID = 'standard.phid';
+  const STANDARD_PHID_LIST = 'standard.phid.list';
   const STANDARD_PHID_BOOL = 'standard.phid.bool';
   const STANDARD_PHID_NULLABLE = 'standard.phid.nullable';
 
   abstract public function getHeraldFieldName();
   abstract public function getHeraldFieldValue($object);
 
+  protected function getHeraldFieldStandardType() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
   public function getHeraldFieldConditions() {
-    switch ($this->getHeraldFieldStandardConditions()) {
-      case self::STANDARD_LIST:
-        return array(
-          HeraldAdapter::CONDITION_INCLUDE_ALL,
-          HeraldAdapter::CONDITION_INCLUDE_ANY,
-          HeraldAdapter::CONDITION_INCLUDE_NONE,
-          HeraldAdapter::CONDITION_EXISTS,
-          HeraldAdapter::CONDITION_NOT_EXISTS,
-        );
+    $standard_type = $this->getHeraldFieldStandardType();
+    switch ($standard_type) {
       case self::STANDARD_BOOL:
         return array(
           HeraldAdapter::CONDITION_IS_TRUE,
@@ -43,6 +40,14 @@ abstract class HeraldField extends Phobject {
         return array(
           HeraldAdapter::CONDITION_IS_ANY,
           HeraldAdapter::CONDITION_IS_NOT_ANY,
+        );
+      case self::STANDARD_PHID_LIST:
+        return array(
+          HeraldAdapter::CONDITION_INCLUDE_ALL,
+          HeraldAdapter::CONDITION_INCLUDE_ANY,
+          HeraldAdapter::CONDITION_INCLUDE_NONE,
+          HeraldAdapter::CONDITION_EXISTS,
+          HeraldAdapter::CONDITION_NOT_EXISTS,
         );
       case self::STANDARD_PHID_BOOL:
         return array(
@@ -69,14 +74,31 @@ abstract class HeraldField extends Phobject {
         );
     }
 
-    throw new Exception(pht('Unknown standard condition set.'));
+    throw new Exception(
+      pht(
+        'Herald field "%s" has unknown standard type "%s".',
+        get_class($this),
+        $standard_type));
   }
 
-  protected function getHeraldFieldStandardConditions() {
-    throw new PhutilMethodNotImplementedException();
-  }
+  public function getHeraldFieldValueType($condition) {
+    $standard_type = $this->getHeraldFieldStandardType();
+    switch ($standard_type) {
+      case self::STANDARD_BOOL:
+      case self::STANDARD_PHID_BOOL:
+        return HeraldAdapter::VALUE_NONE;
+      case self::STANDARD_TEXT:
+      case self::STANDARD_TEXT_LIST:
+      case self::STANDARD_TEXT_MAP:
+        return HeraldAdapter::VALUE_TEXT;
+    }
 
-  abstract public function getHeraldFieldValueType($condition);
+    throw new Exception(
+      pht(
+        'Herald field "%s" has unknown standard type "%s".',
+        get_class($this),
+        $standard_type));
+  }
 
   abstract public function supportsObject($object);
 

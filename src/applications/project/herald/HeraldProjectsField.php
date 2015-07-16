@@ -18,8 +18,8 @@ final class HeraldProjectsField extends HeraldField {
       PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
   }
 
-  protected function getHeraldFieldStandardConditions() {
-    return self::STANDARD_LIST;
+  protected function getHeraldFieldStandardType() {
+    return self::STANDARD_PHID_LIST;
   }
 
   public function getHeraldFieldValueType($condition) {

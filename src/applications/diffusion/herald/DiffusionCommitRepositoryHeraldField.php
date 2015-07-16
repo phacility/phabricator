@@ -13,7 +13,7 @@ final class DiffusionCommitRepositoryHeraldField
     return $object->getRepository()->getPHID();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_PHID;
   }
 

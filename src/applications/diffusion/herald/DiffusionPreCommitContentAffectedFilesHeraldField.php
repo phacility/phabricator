@@ -13,12 +13,8 @@ final class DiffusionPreCommitContentAffectedFilesHeraldField
     return $this->getAdapter()->getDiffContent('name');
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_TEXT_LIST;
-  }
-
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_TEXT;
   }
 
 }

@@ -16,12 +16,8 @@ final class DifferentialRevisionSummaryHeraldField
     return $object->getSummary()."\n\n".$object->getTestPlan();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_TEXT;
-  }
-
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_TEXT;
   }
 
 }

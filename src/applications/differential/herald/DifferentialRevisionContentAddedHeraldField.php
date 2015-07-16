@@ -13,12 +13,8 @@ final class DifferentialRevisionContentAddedHeraldField
     return $this->getAdapter()->loadAddedContentDictionary();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_TEXT_MAP;
-  }
-
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_TEXT;
   }
 
 }

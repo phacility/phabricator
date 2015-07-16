@@ -13,7 +13,7 @@ final class DiffusionPreCommitRefRepositoryHeraldField
     return $this->getAdapter()->getHookEngine()->getRepository()->getPHID();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return HeraldField::STANDARD_PHID;
   }
 

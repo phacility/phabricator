@@ -13,7 +13,7 @@ final class ManiphestTaskAssigneeHeraldField
     return $object->getOwnerPHID();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_PHID_NULLABLE;
   }
 

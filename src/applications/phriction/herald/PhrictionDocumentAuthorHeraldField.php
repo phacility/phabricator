@@ -13,7 +13,7 @@ final class PhrictionDocumentAuthorHeraldField
     return $object->getContent()->getAuthorPHID();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_PHID;
   }
 

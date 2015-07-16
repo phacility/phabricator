@@ -13,7 +13,7 @@ final class DiffusionPreCommitContentAuthorHeraldField
     return $this->getAdapter()->getAuthorPHID();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_PHID_NULLABLE;
   }
 
