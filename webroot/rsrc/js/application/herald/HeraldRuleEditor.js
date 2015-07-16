@@ -269,19 +269,6 @@ JX.install('HeraldRuleEditor', {
           get_fn = tokenizer[1];
           set_fn = tokenizer[2];
           break;
-        case 'none':
-          input = '';
-          get_fn = JX.bag;
-          set_fn = JX.bag;
-          break;
-        case 'flagcolor':
-        case 'value-ref-type':
-        case 'value-ref-change':
-          input = this._renderSelect(this._config.select[type].options);
-          get_fn = function() { return input.value; };
-          set_fn = function(v) { input.value = v; };
-          set_fn(this._config.select[type]['default']);
-          break;
         default:
           input = JX.$N('input', {type: 'text'});
           get_fn = function() { return input.value; };

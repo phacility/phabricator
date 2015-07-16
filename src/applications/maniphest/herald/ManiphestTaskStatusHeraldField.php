@@ -23,6 +23,7 @@ final class ManiphestTaskStatusHeraldField
 
   public function renderConditionValue(
     PhabricatorUser $viewer,
+    $condition,
     $value) {
 
     $status_map = ManiphestTaskStatus::getTaskStatusMap();

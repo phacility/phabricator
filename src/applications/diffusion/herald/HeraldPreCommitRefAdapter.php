@@ -2,9 +2,6 @@
 
 final class HeraldPreCommitRefAdapter extends HeraldPreCommitAdapter {
 
-  const VALUE_REF_TYPE = 'value-ref-type';
-  const VALUE_REF_CHANGE = 'value-ref-change';
-
   public function getAdapterContentName() {
     return pht('Commit Hook: Branches/Tags/Bookmarks');
   }

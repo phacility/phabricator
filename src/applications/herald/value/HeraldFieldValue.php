@@ -9,6 +9,7 @@ abstract class HeraldFieldValue extends Phobject {
 
   abstract public function getFieldValueKey();
   abstract public function getControlType();
+  abstract public function renderValue(PhabricatorUser $viewer, $value);
 
   final public function getControlSpecificationDictionary() {
     return array(

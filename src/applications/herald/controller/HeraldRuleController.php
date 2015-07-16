@@ -471,45 +471,28 @@ final class HeraldRuleController extends HeraldController {
 
     foreach ($config_info['actions'] as $action => $name) {
       try {
-        $action_value = $adapter->getValueTypeForAction(
+        $value_key = $adapter->getValueTypeForAction(
           $action,
          $rule->getRuleType());
       } catch (Exception $ex) {
-        $action_value = array(HeraldAdapter::VALUE_NONE);
+        $value_key = new HeraldEmptyFieldValue();
       }
 
-      $config_info['targets'][$action] = $action_value;
+      if ($value_key instanceof HeraldFieldValue) {
+        $spec = $value_key->getControlSpecificationDictionary();
+        $value_key = $value_key->getFieldValueKey();
+        $config_info['valueMap'][$value_key] = $spec;
+      }
+
+      $config_info['targets'][$action] = $value_key;
     }
 
-    $changeflag_options =
-      PhabricatorRepositoryPushLog::getHeraldChangeFlagConditionOptions();
     Javelin::initBehavior(
       'herald-rule-editor',
       array(
         'root' => 'herald-rule-edit-form',
         'conditions' => (object)$serial_conditions,
         'actions' => (object)$serial_actions,
-        'select' => array(
-          HeraldAdapter::VALUE_FLAG_COLOR => array(
-            'options' => PhabricatorFlagColor::getColorNameMap(),
-            'default' => PhabricatorFlagColor::COLOR_BLUE,
-          ),
-          HeraldPreCommitRefAdapter::VALUE_REF_TYPE => array(
-            'options' => array(
-              PhabricatorRepositoryPushLog::REFTYPE_BRANCH
-                => pht('branch (git/hg)'),
-              PhabricatorRepositoryPushLog::REFTYPE_TAG
-                => pht('tag (git)'),
-              PhabricatorRepositoryPushLog::REFTYPE_BOOKMARK
-                => pht('bookmark (hg)'),
-            ),
-            'default' => PhabricatorRepositoryPushLog::REFTYPE_BRANCH,
-          ),
-          HeraldPreCommitRefAdapter::VALUE_REF_CHANGE => array(
-            'options' => $changeflag_options,
-            'default' => PhabricatorRepositoryPushLog::CHANGEFLAG_ADD,
-          ),
-        ),
         'template' => $this->buildTokenizerTemplates($handles) + array(
           'rules' => $all_rules,
         ),

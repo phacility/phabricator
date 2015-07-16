@@ -41,7 +41,6 @@ abstract class HeraldAdapter extends Phobject {
   const ACTION_BLOCK = 'block';
   const ACTION_REQUIRE_SIGNATURE = 'signature';
 
-  const VALUE_TEXT            = 'text';
   const VALUE_NONE            = 'none';
   const VALUE_EMAIL           = 'email';
   const VALUE_USER            = 'user';
@@ -49,8 +48,6 @@ abstract class HeraldAdapter extends Phobject {
   const VALUE_REPOSITORY      = 'repository';
   const VALUE_OWNERS_PACKAGE  = 'package';
   const VALUE_PROJECT         = 'project';
-  const VALUE_FLAG_COLOR      = 'flagcolor';
-  const VALUE_CONTENT_SOURCE  = 'contentsource';
   const VALUE_USER_OR_PROJECT = 'userorproject';
   const VALUE_BUILD_PLAN      = 'buildplan';
   const VALUE_TASK_PRIORITY   = 'taskpriority';
@@ -766,7 +763,7 @@ abstract class HeraldAdapter extends Phobject {
         case self::ACTION_ADD_BLOCKING_REVIEWERS:
           return self::VALUE_NONE;
         case self::ACTION_FLAG:
-          return self::VALUE_FLAG_COLOR;
+          return $this->buildFlagColorFieldValue();
         case self::ACTION_ADD_PROJECTS:
         case self::ACTION_REMOVE_PROJECTS:
           return self::VALUE_PROJECT;
@@ -783,7 +780,7 @@ abstract class HeraldAdapter extends Phobject {
         case self::ACTION_REMOVE_PROJECTS:
           return self::VALUE_PROJECT;
         case self::ACTION_FLAG:
-          return self::VALUE_FLAG_COLOR;
+          return $this->buildFlagColorFieldValue();
         case self::ACTION_ASSIGN_TASK:
           return self::VALUE_USER;
         case self::ACTION_AUDIT:
@@ -795,7 +792,7 @@ abstract class HeraldAdapter extends Phobject {
         case self::ACTION_REQUIRE_SIGNATURE:
           return self::VALUE_LEGAL_DOCUMENTS;
         case self::ACTION_BLOCK:
-          return self::VALUE_TEXT;
+          return new HeraldTextFieldValue();
       }
     }
 
@@ -807,6 +804,12 @@ abstract class HeraldAdapter extends Phobject {
     throw new Exception(pht("Unknown or invalid action '%s'.", $action));
   }
 
+  private function buildFlagColorFieldValue() {
+    return id(new HeraldSelectFieldValue())
+      ->setKey('flag.color')
+      ->setOptions(PhabricatorFlagColor::getColorNameMap())
+      ->setDefault(PhabricatorFlagColor::COLOR_BLUE);
+  }
 
 /* -(  Repetition  )--------------------------------------------------------- */
 
@@ -1019,6 +1022,7 @@ abstract class HeraldAdapter extends Phobject {
     if ($impl) {
       return $impl->renderConditionValue(
         $viewer,
+        $condition->getFieldCondition(),
         $condition->getValue());
     }
 

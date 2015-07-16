@@ -11,4 +11,9 @@ final class HeraldTextFieldValue
     return self::CONTROL_TEXT;
   }
 
+
+  public function renderValue(PhabricatorUser $viewer, $value) {
+    return $value;
+  }
+
 }

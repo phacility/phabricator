@@ -21,23 +21,11 @@ final class DiffusionPreCommitRefChangeHeraldField
   }
 
   public function getHeraldFieldValueType($condition) {
-    return HeraldPreCommitRefAdapter::VALUE_REF_CHANGE;
-  }
-
-  public function renderConditionValue(
-    PhabricatorUser $viewer,
-    $value) {
-
-    $change_map =
-      PhabricatorRepositoryPushLog::getHeraldChangeFlagConditionOptions();
-    foreach ($value as $index => $val) {
-      $name = idx($change_map, $val);
-      if ($name) {
-        $value[$index] = $name;
-      }
-    }
-
-    return phutil_implode_html(', ', $value);
+    return id(new HeraldSelectFieldValue())
+      ->setKey(self::FIELDCONST)
+      ->setOptions(
+        PhabricatorRepositoryPushLog::getHeraldChangeFlagConditionOptions())
+      ->setDefault(PhabricatorRepositoryPushLog::CHANGEFLAG_ADD);
   }
 
 }

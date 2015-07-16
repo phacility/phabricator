@@ -108,7 +108,13 @@ abstract class HeraldField extends Phobject {
 
   public function renderConditionValue(
     PhabricatorUser $viewer,
+    $condition,
     $value) {
+
+    $value_type = $this->getHeraldFieldValueType($condition);
+    if ($value_type instanceof HeraldFieldValue) {
+      return $value_type->renderValue($viewer, $value);
+    }
 
     // TODO: While this is less of a mess than it used to be, it would still
     // be nice to push this down into individual fields better eventually and

@@ -23,6 +23,7 @@ final class ManiphestTaskPriorityHeraldField
 
   public function renderConditionValue(
     PhabricatorUser $viewer,
+    $condition,
     $value) {
 
     $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
