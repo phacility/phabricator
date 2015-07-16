@@ -48,7 +48,7 @@ software does not run on Windows. It does run on most other operating systems,
 so choose one of these instead:
 
   - **Linux**: Most installs use Linux.
-  - **Mac OS X**: Mac OS X is an acceptable flavor of Linux.
+  - **Mac OS X**: Mac OS X is an acceptable flavor of Unix.
   - **FreeBSD**: While FreeBSD is certainly not a flavor of Linux, it is a fine
     operating system possessed of many desirable qualities, and Phabricator will
     install and run properly on FreeBSD.
