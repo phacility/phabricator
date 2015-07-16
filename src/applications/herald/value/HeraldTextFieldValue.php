@@ -12,7 +12,7 @@ final class HeraldTextFieldValue
   }
 
 
-  public function renderValue(PhabricatorUser $viewer, $value) {
+  public function renderFieldValue($value) {
     return $value;
   }
 

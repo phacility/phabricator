@@ -1057,6 +1057,7 @@ phutil_register_library_map(array(
     'HeraldSubscribersField' => 'applications/subscriptions/herald/HeraldSubscribersField.php',
     'HeraldTestConsoleController' => 'applications/herald/controller/HeraldTestConsoleController.php',
     'HeraldTextFieldValue' => 'applications/herald/value/HeraldTextFieldValue.php',
+    'HeraldTokenizerFieldValue' => 'applications/herald/value/HeraldTokenizerFieldValue.php',
     'HeraldTransactionQuery' => 'applications/herald/query/HeraldTransactionQuery.php',
     'HeraldTranscript' => 'applications/herald/storage/transcript/HeraldTranscript.php',
     'HeraldTranscriptController' => 'applications/herald/controller/HeraldTranscriptController.php',
@@ -4664,6 +4665,7 @@ phutil_register_library_map(array(
     'HeraldSubscribersField' => 'HeraldField',
     'HeraldTestConsoleController' => 'HeraldController',
     'HeraldTextFieldValue' => 'HeraldFieldValue',
+    'HeraldTokenizerFieldValue' => 'HeraldFieldValue',
     'HeraldTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'HeraldTranscript' => array(
       'HeraldDAO',

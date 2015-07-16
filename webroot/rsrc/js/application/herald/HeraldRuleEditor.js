@@ -200,7 +200,9 @@ JX.install('HeraldRuleEditor', {
       return node;
     },
 
-    _buildStandardInput: function(spec) {
+    _buildInput : function(type) {
+      var spec = this._config.info.valueMap[type];
+
       var input;
       var get_fn;
       var set_fn;
@@ -216,7 +218,18 @@ JX.install('HeraldRuleEditor', {
           set_fn = function(v) { input.value = v; };
           break;
         case 'herald.control.select':
-          input = this._renderSelect(spec.template.options);
+          var options;
+
+          // NOTE: This is a hacky special case for "Another Herald Rule",
+          // which we don't currently generate normal options for.
+
+          if (spec.key == 'select.rule') {
+            options = this._config.template.rules;
+          } else {
+            options = spec.template.options;
+          }
+
+          input = this._renderSelect(options);
           get_fn = function() { return input.value; };
           set_fn = function(v) { input.value = v; };
           if (spec.template.default) {
@@ -224,55 +237,13 @@ JX.install('HeraldRuleEditor', {
           }
           break;
         case 'herald.control.tokenizer':
-          var tokenizer = this._newTokenizer(spec.template.tokenizer, true);
+          var tokenizer = this._newTokenizer(spec.template.tokenizer);
           input = tokenizer[0];
           get_fn = tokenizer[1];
           set_fn = tokenizer[2];
           break;
         default:
           JX.$E('No rules to build control "' + spec.control + '".');
-          break;
-      }
-
-      return [input, get_fn, set_fn];
-    },
-
-    _buildInput : function(type) {
-      if (this._config.info.valueMap[type]) {
-        return this._buildStandardInput(this._config.info.valueMap[type]);
-      }
-
-      var input;
-      var get_fn;
-      var set_fn;
-      switch (type) {
-        case 'rule':
-          input = this._renderSelect(this._config.template.rules);
-          get_fn = function() { return input.value; };
-          set_fn = function(v) { input.value = v; };
-          break;
-        case 'email':
-        case 'user':
-        case 'repository':
-        case 'tag':
-        case 'package':
-        case 'project':
-        case 'userorproject':
-        case 'buildplan':
-        case 'taskpriority':
-        case 'taskstatus':
-        case 'legaldocuments':
-        case 'applicationemail':
-        case 'space':
-          var tokenizer = this._newTokenizer(type);
-          input = tokenizer[0];
-          get_fn = tokenizer[1];
-          set_fn = tokenizer[2];
-          break;
-        default:
-          input = JX.$N('input', {type: 'text'});
-          get_fn = function() { return input.value; };
-          set_fn = function(v) { input.value = v; };
           break;
       }
 
@@ -303,20 +274,12 @@ JX.install('HeraldRuleEditor', {
       return node;
     },
 
-    _newTokenizer : function(type, is_config) {
-      var tokenizerConfig;
-
-      if (is_config) {
-        tokenizerConfig = type;
-      } else {
-        tokenizerConfig = {
-          src : this._config.template.source[type].uri,
-          placeholder: this._config.template.source[type].placeholder,
-          browseURI: this._config.template.source[type].browseURI,
-          icons : this._config.template.icons,
-          username : this._config.username
-        };
-      }
+    _newTokenizer : function(spec) {
+      var tokenizerConfig = {
+        src: spec.datasourceURI,
+        placeholder: spec.placeholder,
+        browseURI: spec.browseURI
+      };
 
       var build = JX.Prefab.newTokenizerFromTemplate(
         this._config.template.markup,

@@ -41,7 +41,9 @@ final class PhabricatorStandardCustomFieldUsers
   }
 
   public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_USER;
+    return id(new HeraldTokenizerFieldValue())
+      ->setKey('custom.'.$this->getFieldKey())
+      ->setDatasource(new PhabricatorPeopleDatasource());
   }
 
 }

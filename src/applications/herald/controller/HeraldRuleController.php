@@ -458,6 +458,8 @@ final class HeraldRuleController extends HeraldController {
           $condition);
 
         if ($value_key instanceof HeraldFieldValue) {
+          $value_key->setViewer($this->getViewer());
+
           $spec = $value_key->getControlSpecificationDictionary();
           $value_key = $value_key->getFieldValueKey();
           $config_info['valueMap'][$value_key] = $spec;
@@ -479,6 +481,8 @@ final class HeraldRuleController extends HeraldController {
       }
 
       if ($value_key instanceof HeraldFieldValue) {
+        $value_key->setViewer($this->getViewer());
+
         $spec = $value_key->getControlSpecificationDictionary();
         $value_key = $value_key->getFieldValueKey();
         $config_info['valueMap'][$value_key] = $spec;
@@ -493,7 +497,7 @@ final class HeraldRuleController extends HeraldController {
         'root' => 'herald-rule-edit-form',
         'conditions' => (object)$serial_conditions,
         'actions' => (object)$serial_actions,
-        'template' => $this->buildTokenizerTemplates($handles) + array(
+        'template' => $this->buildTokenizerTemplates() + array(
           'rules' => $all_rules,
         ),
         'info' => $config_info,
@@ -576,39 +580,10 @@ final class HeraldRuleController extends HeraldController {
   }
 
 
-  protected function buildTokenizerTemplates(array $handles) {
+  protected function buildTokenizerTemplates() {
     $template = new AphrontTokenizerTemplateView();
     $template = $template->render();
-
-    $sources = array(
-      'repository' => new DiffusionRepositoryDatasource(),
-      'legaldocuments' => new LegalpadDocumentDatasource(),
-      'taskpriority' => new ManiphestTaskPriorityDatasource(),
-      'taskstatus' => new ManiphestTaskStatusDatasource(),
-      'buildplan' => new HarbormasterBuildPlanDatasource(),
-      'package' => new PhabricatorOwnersPackageDatasource(),
-      'project' => new PhabricatorProjectDatasource(),
-      'user' => new PhabricatorPeopleDatasource(),
-      'email' => new PhabricatorMetaMTAMailableDatasource(),
-      'userorproject' => new PhabricatorProjectOrUserDatasource(),
-      'applicationemail' => new PhabricatorMetaMTAApplicationEmailDatasource(),
-      'space' => new PhabricatorSpacesNamespaceDatasource(),
-    );
-
-    foreach ($sources as $key => $source) {
-      $source->setViewer($this->getViewer());
-
-      $sources[$key] = array(
-        'uri' => $source->getDatasourceURI(),
-        'placeholder' => $source->getPlaceholderText(),
-        'browseURI' => $source->getBrowseURI(),
-      );
-    }
-
     return array(
-      'source' => $sources,
-      'username' => $this->getRequest()->getUser()->getUserName(),
-      'icons' => mpull($handles, 'getTypeIcon', 'getPHID'),
       'markup' => $template,
     );
   }

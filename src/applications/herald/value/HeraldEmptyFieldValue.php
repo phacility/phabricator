@@ -11,7 +11,7 @@ final class HeraldEmptyFieldValue
     return self::CONTROL_NONE;
   }
 
-  public function renderValue(PhabricatorUser $viewer, $value) {
+  public function renderFieldValue($value) {
     return null;
   }
 

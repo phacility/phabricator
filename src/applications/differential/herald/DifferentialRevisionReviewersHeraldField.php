@@ -17,14 +17,8 @@ final class DifferentialRevisionReviewersHeraldField
     return self::STANDARD_PHID_LIST;
   }
 
-  public function getHeraldFieldValueType($condition) {
-    switch ($condition) {
-      case HeraldAdapter::CONDITION_EXISTS:
-      case HeraldAdapter::CONDITION_NOT_EXISTS:
-        return HeraldAdapter::VALUE_NONE;
-      default:
-        return HeraldAdapter::VALUE_USER_OR_PROJECT;
-    }
+  protected function getDatasource() {
+    return new PhabricatorProjectOrUserDatasource();
   }
 
 }

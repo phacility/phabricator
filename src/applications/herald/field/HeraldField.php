@@ -20,6 +20,10 @@ abstract class HeraldField extends Phobject {
     throw new PhutilMethodNotImplementedException();
   }
 
+  protected function getDatasource() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
   public function getHeraldFieldConditions() {
     $standard_type = $this->getHeraldFieldStandardType();
     switch ($standard_type) {
@@ -91,6 +95,20 @@ abstract class HeraldField extends Phobject {
       case self::STANDARD_TEXT_LIST:
       case self::STANDARD_TEXT_MAP:
         return new HeraldTextFieldValue();
+      case self::STANDARD_PHID:
+      case self::STANDARD_PHID_NULLABLE:
+      case self::STANDARD_PHID_LIST:
+        switch ($condition) {
+          case HeraldAdapter::CONDITION_EXISTS:
+          case HeraldAdapter::CONDITION_NOT_EXISTS:
+            return new HeraldEmptyFieldValue();
+          default:
+            return id(new HeraldTokenizerFieldValue())
+              ->setKey($this->getHeraldFieldName())
+              ->setDatasource($this->getDatasource());
+        }
+        break;
+
     }
 
     throw new Exception(
@@ -113,7 +131,8 @@ abstract class HeraldField extends Phobject {
 
     $value_type = $this->getHeraldFieldValueType($condition);
     if ($value_type instanceof HeraldFieldValue) {
-      return $value_type->renderValue($viewer, $value);
+      $value_type->setViewer($viewer);
+      return $value_type->renderFieldValue($value);
     }
 
     // TODO: While this is less of a mess than it used to be, it would still

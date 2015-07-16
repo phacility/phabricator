@@ -56,7 +56,7 @@ final class HeraldSelectFieldValue
     );
   }
 
-  public function renderValue(PhabricatorUser $viewer, $value) {
+  public function renderFieldValue($value) {
     $options = $this->getOptions();
     return idx($options, $value, $value);
   }

@@ -17,8 +17,8 @@ final class ManiphestTaskStatusHeraldField
     return self::STANDARD_PHID;
   }
 
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_TASK_STATUS;
+  protected function getDatasource() {
+    return new ManiphestTaskStatusDatasource();
   }
 
   public function renderConditionValue(

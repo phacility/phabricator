@@ -24,8 +24,11 @@ final class HeraldAnotherRuleField extends HeraldField {
   }
 
   public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_RULE;
+    // NOTE: This is a bit magical because we don't currently have a reasonable
+    // way to populate it from here.
+    return id(new HeraldSelectFieldValue())
+      ->setKey(self::FIELDCONST)
+      ->setOptions(array());
   }
-
 
 }

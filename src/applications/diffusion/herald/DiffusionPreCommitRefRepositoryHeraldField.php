@@ -17,8 +17,8 @@ final class DiffusionPreCommitRefRepositoryHeraldField
     return HeraldField::STANDARD_PHID;
   }
 
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_REPOSITORY;
+  protected function getDatasource() {
+    return new DiffusionRepositoryDatasource();
   }
 
 }

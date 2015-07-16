@@ -17,8 +17,8 @@ final class ManiphestTaskPriorityHeraldField
     return self::STANDARD_PHID;
   }
 
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_TASK_PRIORITY;
+  protected function getDatasource() {
+    return new ManiphestTaskPriorityDatasource();
   }
 
   public function renderConditionValue(

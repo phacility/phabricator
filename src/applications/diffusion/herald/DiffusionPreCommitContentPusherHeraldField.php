@@ -17,8 +17,8 @@ final class DiffusionPreCommitContentPusherHeraldField
     return HeraldField::STANDARD_PHID;
   }
 
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_USER;
+  protected function getDatasource() {
+    return new PhabricatorPeopleDatasource();
   }
 
 }

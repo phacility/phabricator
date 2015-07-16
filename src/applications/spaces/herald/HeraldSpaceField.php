@@ -20,8 +20,8 @@ final class HeraldSpaceField extends HeraldField {
     return self::STANDARD_PHID;
   }
 
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_SPACE;
+  protected function getDatasource() {
+    return new PhabricatorSpacesNamespaceDatasource();
   }
 
 }
