@@ -5496,6 +5496,7 @@ phutil_register_library_map(array(
     'PhabricatorCountdown' => array(
       'PhabricatorCountdownDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorSpacesInterface',
     ),
     'PhabricatorCountdownApplication' => 'PhabricatorApplication',
     'PhabricatorCountdownController' => 'PhabricatorController',
@@ -6606,6 +6607,7 @@ phutil_register_library_map(array(
       'PhabricatorTokenReceiverInterface',
       'PhabricatorProjectInterface',
       'PhabricatorDestructibleInterface',
+      'PhabricatorSpacesInterface',
     ),
     'PhabricatorSlowvotePollController' => 'PhabricatorSlowvoteController',
     'PhabricatorSlowvotePollPHIDType' => 'PhabricatorPHIDType',

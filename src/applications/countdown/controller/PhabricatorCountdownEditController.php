@@ -41,9 +41,11 @@ final class PhabricatorCountdownEditController
     $e_epoch = null;
 
     $v_text = $countdown->getTitle();
+    $v_space = $countdown->getSpacePHID();
 
     if ($request->isFormPost()) {
       $v_text = $request->getStr('title');
+      $v_space = $request->getStr('spacePHID');
       $date_value = AphrontFormDateControlValue::newFromRequest(
         $request,
         'epoch');
@@ -63,6 +65,7 @@ final class PhabricatorCountdownEditController
         $countdown->setTitle($v_text);
         $countdown->setEpoch($date_value->getEpoch());
         $countdown->setViewPolicy($view_policy);
+        $countdown->setSpacePHID($v_space);
         $countdown->save();
         return id(new AphrontRedirectResponse())
           ->setURI('/countdown/'.$countdown->getID().'/');
@@ -109,6 +112,7 @@ final class PhabricatorCountdownEditController
           ->setName('viewPolicy')
           ->setPolicyObject($countdown)
           ->setPolicies($policies)
+          ->setSpacePHID($v_space)
           ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
       ->appendChild(
         id(new AphrontFormSubmitControl())
