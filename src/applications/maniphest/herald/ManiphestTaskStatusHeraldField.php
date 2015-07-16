@@ -21,36 +21,8 @@ final class ManiphestTaskStatusHeraldField
     return new ManiphestTaskStatusDatasource();
   }
 
-  public function renderConditionValue(
-    PhabricatorUser $viewer,
-    $condition,
-    $value) {
-
-    $status_map = ManiphestTaskStatus::getTaskStatusMap();
-
-    $value = (array)$value;
-    foreach ($value as $index => $val) {
-      $name = idx($status_map, $val);
-      if ($name !== null) {
-        $value[$index] = $name;
-      }
-    }
-
-    return implode(', ', $value);
-  }
-
-  public function getEditorValue(
-    PhabricatorUser $viewer,
-    $value) {
-
-    $status_map = ManiphestTaskStatus::getTaskStatusMap();
-
-    $value_map = array();
-    foreach ($value as $status) {
-      $value_map[$status] = idx($status_map, $status, $status);
-    }
-
-    return $value_map;
+  protected function getDatasourceValueMap() {
+    return ManiphestTaskStatus::getTaskStatusMap();
   }
 
 }

@@ -15,4 +15,8 @@ final class HeraldEmptyFieldValue
     return null;
   }
 
+  public function renderEditorValue($value) {
+    return null;
+  }
+
 }

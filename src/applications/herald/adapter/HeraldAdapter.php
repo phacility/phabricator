@@ -882,23 +882,12 @@ abstract class HeraldAdapter extends Phobject {
     HeraldCondition $condition,
     array $handles) {
 
-    $impl = $this->getFieldImplementation($condition->getFieldName());
-    if ($impl) {
-      return $impl->getEditorValue(
-        $viewer,
-        $condition->getValue());
-    }
+    $field = $this->requireFieldImplementation($condition->getFieldName());
 
-    $value = $condition->getValue();
-    if (is_array($value)) {
-      $value_map = array();
-      foreach ($value as $k => $phid) {
-        $value_map[$phid] = $handles[$phid]->getName();
-      }
-      $value = $value_map;
-    }
-
-    return $value;
+    return $field->getEditorValue(
+      $viewer,
+      $condition->getFieldCondition(),
+      $condition->getValue());
   }
 
   public function renderRuleAsText(
@@ -1020,28 +1009,12 @@ abstract class HeraldAdapter extends Phobject {
     PhabricatorHandleList $handles,
     PhabricatorUser $viewer) {
 
-    $impl = $this->getFieldImplementation($condition->getFieldName());
-    if ($impl) {
-      return $impl->renderConditionValue(
-        $viewer,
-        $condition->getFieldCondition(),
-        $condition->getValue());
-    }
+    $field = $this->requireFieldImplementation($condition->getFieldName());
 
-    $value = $condition->getValue();
-    if (!is_array($value)) {
-      $value = array($value);
-    }
-
-    foreach ($value as $index => $val) {
-      $handle = $handles->getHandleIfExists($val);
-      if ($handle) {
-        $value[$index] = $handle->renderLink();
-      }
-    }
-
-    $value = phutil_implode_html(', ', $value);
-    return $value;
+    return $field->renderConditionValue(
+      $viewer,
+      $condition->getFieldCondition(),
+      $condition->getValue());
   }
 
   private function renderActionTargetAsText(

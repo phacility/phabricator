@@ -24,6 +24,10 @@ abstract class HeraldField extends Phobject {
     throw new PhutilMethodNotImplementedException();
   }
 
+  protected function getDatasourceValueMap() {
+    return null;
+  }
+
   public function getHeraldFieldConditions() {
     $standard_type = $this->getHeraldFieldStandardType();
     switch ($standard_type) {
@@ -103,9 +107,16 @@ abstract class HeraldField extends Phobject {
           case HeraldAdapter::CONDITION_NOT_EXISTS:
             return new HeraldEmptyFieldValue();
           default:
-            return id(new HeraldTokenizerFieldValue())
+            $tokenizer = id(new HeraldTokenizerFieldValue())
               ->setKey($this->getHeraldFieldName())
               ->setDatasource($this->getDatasource());
+
+            $value_map = $this->getDatasourceValueMap();
+            if ($value_map !== null) {
+              $tokenizer->setValueMap($value_map);
+            }
+
+            return $tokenizer;
         }
         break;
 
@@ -130,50 +141,18 @@ abstract class HeraldField extends Phobject {
     $value) {
 
     $value_type = $this->getHeraldFieldValueType($condition);
-    if ($value_type instanceof HeraldFieldValue) {
-      $value_type->setViewer($viewer);
-      return $value_type->renderFieldValue($value);
-    }
-
-    // TODO: While this is less of a mess than it used to be, it would still
-    // be nice to push this down into individual fields better eventually and
-    // stop guessing which values are PHIDs and which aren't.
-
-    if (!is_array($value)) {
-      return $value;
-    }
-
-    $type_unknown = PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN;
-
-    foreach ($value as $key => $val) {
-      if (is_string($val)) {
-        if (phid_get_type($val) !== $type_unknown) {
-          $value[$key] = $viewer->renderHandle($val);
-        }
-      }
-    }
-
-    return phutil_implode_html(', ', $value);
+    $value_type->setViewer($viewer);
+    return $value_type->renderFieldValue($value);
   }
 
   public function getEditorValue(
     PhabricatorUser $viewer,
+    $condition,
     $value) {
 
-    // TODO: This should be better structured and pushed down into individual
-    // fields. As it is used to manually build tokenizer tokens, it can
-    // probably be removed entirely.
-
-    if (is_array($value)) {
-      $handles = $viewer->loadHandles($value);
-      $value_map = array();
-      foreach ($value as $k => $phid) {
-        $value_map[$phid] = $handles[$phid]->getName();
-      }
-      $value = $value_map;
-    }
-
-    return $value;
+    $value_type = $this->getHeraldFieldValueType($condition);
+    $value_type->setViewer($viewer);
+    return $value_type->renderEditorValue($value);
   }
 
   final public function setAdapter(HeraldAdapter $adapter) {

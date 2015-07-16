@@ -61,4 +61,8 @@ final class HeraldSelectFieldValue
     return idx($options, $value, $value);
   }
 
+  public function renderEditorValue($value) {
+    return $value;
+  }
+
 }

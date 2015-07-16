@@ -116,6 +116,9 @@ final class HeraldTranscriptController extends HeraldController {
   }
 
   protected function renderConditionTestValue($condition, $handles) {
+    // TODO: This is all a hacky mess and should be driven through FieldValue
+    // eventually.
+
     switch ($condition->getFieldName()) {
       case HeraldAnotherRuleField::FIELDCONST:
         $value = array($condition->getTestValue());
@@ -128,14 +131,12 @@ final class HeraldTranscriptController extends HeraldController {
     if (!is_scalar($value) && $value !== null) {
       foreach ($value as $key => $phid) {
         $handle = idx($handles, $phid);
-        if ($handle) {
+        if ($handle && $handle->isComplete()) {
           $value[$key] = $handle->getName();
         } else {
-          // This shouldn't ever really happen as we are supposed to have
-          // grabbed handles for everything, but be super liberal in what
-          // we accept here since we expect all sorts of weird issues as we
-          // version the system.
-          $value[$key] = pht('Unknown Object #%s', $phid);
+          // This happens for things like task priorities, statuses, and
+          // custom fields.
+          $value[$key] = $phid;
         }
       }
       sort($value);

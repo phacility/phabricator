@@ -11,8 +11,11 @@ final class HeraldTextFieldValue
     return self::CONTROL_TEXT;
   }
 
-
   public function renderFieldValue($value) {
+    return $value;
+  }
+
+  public function renderEditorValue($value) {
     return $value;
   }
 

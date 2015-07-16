@@ -5,6 +5,7 @@ final class HeraldTokenizerFieldValue
 
   private $key;
   private $datasource;
+  private $valueMap;
 
   public function setKey($key) {
     $this->key = $key;
@@ -22,6 +23,15 @@ final class HeraldTokenizerFieldValue
 
   public function getDatasource() {
     return $this->datasource;
+  }
+
+  public function setValueMap(array $value_map) {
+    $this->valueMap = $value_map;
+    return $this;
+  }
+
+  public function getValueMap() {
+    return $this->valueMap;
   }
 
   public function getFieldValueKey() {
@@ -54,7 +64,40 @@ final class HeraldTokenizerFieldValue
 
   public function renderFieldValue($value) {
     $viewer = $this->getViewer();
+    $value = (array)$value;
+
+    if ($this->valueMap !== null) {
+      foreach ($value as $k => $v) {
+        $value[$k] = idx($this->valueMap, $v, $v);
+      }
+      return implode(', ', $value);
+    }
+
     return $viewer->renderHandleList((array)$value)->setAsInline(true);
+  }
+
+  public function renderEditorValue($value) {
+    $viewer = $this->getViewer();
+    $value = (array)$value;
+
+    // TODO: This should eventually render properly through the datasource
+    // to get icons and colors.
+
+    if ($this->valueMap !== null) {
+      $map = array();
+      foreach ($value as $v) {
+        $map[$v] = idx($this->valueMap, $v, $v);
+      }
+      return $map;
+    }
+
+    $handles = $viewer->loadHandles($value);
+
+    $map = array();
+    foreach ($value as $v) {
+      $map[$v] = $handles[$v]->getName();
+    }
+    return $map;
   }
 
 }
