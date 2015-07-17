@@ -103,6 +103,7 @@
   background-color: #fff;
   border-bottom: 1px solid {$lightblueborder};
   padding: 12px;
+  position: relative;
 }
 
 .device .project-board-header {
