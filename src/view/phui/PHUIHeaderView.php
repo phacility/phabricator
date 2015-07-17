@@ -4,7 +4,6 @@ final class PHUIHeaderView extends AphrontTagView {
 
   const PROPERTY_STATUS = 1;
 
-  private $objectName;
   private $header;
   private $tags = array();
   private $image;
@@ -24,11 +23,6 @@ final class PHUIHeaderView extends AphrontTagView {
 
   public function setHeader($header) {
     $this->header = $header;
-    return $this;
-  }
-
-  public function setObjectName($object_name) {
-    $this->objectName = $object_name;
     return $this;
   }
 
@@ -191,18 +185,6 @@ final class PHUIHeaderView extends AphrontTagView {
       $left[] = id(new PHUISpacesNamespaceContextView())
         ->setUser($viewer)
         ->setObject($this->policyObject);
-    }
-
-    if ($this->objectName) {
-      $left[] = array(
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/'.$this->objectName,
-          ),
-          $this->objectName),
-        ' ',
-      );
     }
 
     if ($this->actionLinks) {
