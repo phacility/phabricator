@@ -125,7 +125,7 @@ final class CeleritySpriteGenerator extends Phobject {
       '2x' => 2,
     );
     $template = id(new PhutilSprite())
-      ->setSourceSize(34, 34);
+      ->setSourceSize(28, 28);
 
     $sprites = array();
     $prefix = 'login_';
