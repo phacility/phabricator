@@ -322,21 +322,11 @@ JX.install('HeraldRuleEditor', {
     _renderCondition : function(row_id) {
       var groups = this._config.info.fields;
 
-      var optgroups = [];
-      for (var ii = 0; ii < groups.length; ii++) {
-        var group = groups[ii];
-        var options = [];
-        for (var k in group.options) {
-          options.push(JX.$N('option', {value: k}, group.options[k]));
-        }
-        optgroups.push(JX.$N('optgroup', {label: group.label}, options));
-      }
-
       var attrs = {
         sigil: 'field-select'
       };
 
-      var field_select = JX.$N('select', attrs, optgroups);
+      var field_select = this._renderGroupSelect(groups, attrs);
       field_select.value = this._config.conditions[row_id][0];
 
       var field_cell = JX.$N('td', {sigil: 'field-cell'}, field_select);
@@ -352,6 +342,21 @@ JX.install('HeraldRuleEditor', {
         delete actions[k];
       }
     },
+
+    _renderGroupSelect: function(groups, attrs) {
+      var optgroups = [];
+      for (var ii = 0; ii < groups.length; ii++) {
+        var group = groups[ii];
+        var options = [];
+        for (var k in group.options) {
+          options.push(JX.$N('option', {value: k}, group.options[k]));
+        }
+        optgroups.push(JX.$N('optgroup', {label: group.label}, options));
+      }
+
+      return JX.$N('select', attrs, optgroups);
+    },
+
     _newAction : function(data) {
       data = data || [];
       var temprow = this._actionsRowManager.addRow([]);
@@ -361,11 +366,16 @@ JX.install('HeraldRuleEditor', {
                                                 this._renderAction(data));
       this._onactionchange(r);
     },
+
     _renderAction : function(action) {
-      var action_select = this._renderSelect(
-        this._config.info.actions,
-        action[0],
-        'action-select');
+      var groups = this._config.info.actions;
+      var attrs = {
+        sigil: 'action-select'
+      };
+
+      var action_select = this._renderGroupSelect(groups, attrs);
+      action_select.value = action[0];
+
       var action_cell = JX.$N('td', {sigil: 'action-cell'}, action_select);
 
       var target_cell = JX.$N(

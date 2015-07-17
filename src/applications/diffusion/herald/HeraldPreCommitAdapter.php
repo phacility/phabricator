@@ -81,14 +81,12 @@ abstract class HeraldPreCommitAdapter extends HeraldAdapter {
           array(
             self::ACTION_BLOCK,
             self::ACTION_EMAIL,
-            self::ACTION_NOTHING,
           ),
           parent::getActions($rule_type));
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         return array_merge(
           array(
             self::ACTION_EMAIL,
-            self::ACTION_NOTHING,
           ),
           parent::getActions($rule_type));
     }

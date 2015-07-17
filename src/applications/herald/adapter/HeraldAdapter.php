@@ -29,7 +29,6 @@ abstract class HeraldAdapter extends Phobject {
   const ACTION_ADD_CC       = 'addcc';
   const ACTION_REMOVE_CC    = 'remcc';
   const ACTION_EMAIL        = 'email';
-  const ACTION_NOTHING      = 'nothing';
   const ACTION_AUDIT        = 'audit';
   const ACTION_FLAG         = 'flag';
   const ACTION_ASSIGN_TASK  = 'assigntask';
@@ -50,6 +49,7 @@ abstract class HeraldAdapter extends Phobject {
   private $forcedEmailPHIDs = array();
   private $unsubscribedPHIDs;
   private $fieldMap;
+  private $actionMap;
 
   public function getEmailPHIDs() {
     return array_values($this->emailPHIDs);
@@ -615,6 +615,78 @@ abstract class HeraldAdapter extends Phobject {
 
 /* -(  Actions  )------------------------------------------------------------ */
 
+  private function getActionImplementationMap() {
+    if ($this->actionMap === null) {
+      // We can't use PhutilClassMapQuery here because action expansion
+      // depends on the adapter and object.
+
+      $object = $this->getObject();
+
+      $map = array();
+      $all = HeraldAction::getAllActions();
+      foreach ($all as $key => $action) {
+        $action = id(clone $action)->setAdapter($this);
+
+        if (!$action->supportsObject($object)) {
+          continue;
+        }
+
+        $subactions = $action->getActionsForObject($object);
+        foreach ($subactions as $subkey => $subaction) {
+          if (isset($map[$subkey])) {
+            throw new Exception(
+              pht(
+                'Two HeraldActions (of classes "%s" and "%s") have the same '.
+                'action key ("%s") after expansion for an object of class '.
+                '"%s" inside adapter "%s". Each action must have a unique '.
+                'action key.',
+                get_class($subaction),
+                get_class($map[$subkey]),
+                $subkey,
+                get_class($object),
+                get_class($this)));
+          }
+
+          $subaction = id(clone $subaction)->setAdapter($this);
+
+          $map[$subkey] = $subaction;
+        }
+      }
+      $this->actionMap = $map;
+    }
+
+    return $this->actionMap;
+  }
+
+  private function getActionsForRuleType($rule_type) {
+    $actions = $this->getActionImplementationMap();
+
+    foreach ($actions as $key => $action) {
+      if (!$action->supportsRuleType($rule_type)) {
+        unset($actions[$key]);
+      }
+    }
+
+    return $actions;
+  }
+
+  private function getActionImplementation($key) {
+    return idx($this->getActionImplementationMap(), $key);
+  }
+
+  public function getActionKeys() {
+    return array_keys($this->getActionImplementationMap());
+  }
+
+  public function getActionGroupKey($action_key) {
+    $action = $this->getActionImplementation($action_key);
+    if (!$action) {
+      return null;
+    }
+
+    return $action->getActionGroupKey();
+  }
+
   public function getCustomActionsForRuleType($rule_type) {
     $results = array();
     foreach ($this->getCustomActions() as $custom_action) {
@@ -640,6 +712,10 @@ abstract class HeraldAdapter extends Phobject {
       }
     }
 
+    foreach ($this->getActionsForRuleType($rule_type) as $key => $action) {
+      $actions[] = $key;
+    }
+
     return $actions;
   }
 
@@ -648,7 +724,6 @@ abstract class HeraldAdapter extends Phobject {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
       case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
         $standard = array(
-          self::ACTION_NOTHING      => pht('Do nothing'),
           self::ACTION_ADD_CC       => pht('Add Subscribers'),
           self::ACTION_REMOVE_CC    => pht('Remove Subscribers'),
           self::ACTION_EMAIL        => pht('Send an email to'),
@@ -666,7 +741,6 @@ abstract class HeraldAdapter extends Phobject {
         break;
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         $standard = array(
-          self::ACTION_NOTHING      => pht('Do nothing'),
           self::ACTION_ADD_CC       => pht('Add me as a subscriber'),
           self::ACTION_REMOVE_CC    => pht('Remove me as a subscriber'),
           self::ACTION_EMAIL        => pht('Send me an email'),
@@ -685,12 +759,24 @@ abstract class HeraldAdapter extends Phobject {
     $custom_actions = $this->getCustomActionsForRuleType($rule_type);
     $standard += mpull($custom_actions, 'getActionName', 'getActionKey');
 
+    foreach ($this->getActionsForRuleType($rule_type) as $key => $action) {
+      $standard[$key] = $action->getHeraldActionName();
+    }
+
     return $standard;
   }
 
   public function willSaveAction(
     HeraldRule $rule,
     HeraldActionRecord $action) {
+
+    $impl = $this->getActionImplementation($action->getAction());
+    if ($impl) {
+      $target = $action->getTarget();
+      $target = $impl->willSaveActionValue($target);
+      $action->setTarget($target);
+      return;
+    }
 
     $target = $action->getTarget();
     if (is_array($target)) {
@@ -720,7 +806,6 @@ abstract class HeraldAdapter extends Phobject {
           }
           break;
         case self::ACTION_BLOCK:
-        case self::ACTION_NOTHING:
           break;
         default:
           throw new HeraldInvalidActionException(
@@ -744,6 +829,11 @@ abstract class HeraldAdapter extends Phobject {
   }
 
   public function getValueTypeForAction($action, $rule_type) {
+    $impl = $this->getActionImplementation($action);
+    if ($impl) {
+      return $impl->getHeraldActionValueType();
+    }
+
     $is_personal = ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL);
 
     if ($is_personal) {
@@ -751,7 +841,6 @@ abstract class HeraldAdapter extends Phobject {
         case self::ACTION_ADD_CC:
         case self::ACTION_REMOVE_CC:
         case self::ACTION_EMAIL:
-        case self::ACTION_NOTHING:
         case self::ACTION_AUDIT:
         case self::ACTION_ASSIGN_TASK:
         case self::ACTION_ADD_REVIEWERS:
@@ -771,8 +860,6 @@ abstract class HeraldAdapter extends Phobject {
         case self::ACTION_EMAIL:
           return $this->buildTokenizerFieldValue(
             new PhabricatorMetaMTAMailableDatasource());
-        case self::ACTION_NOTHING:
-          return new HeraldEmptyFieldValue();
         case self::ACTION_ADD_PROJECTS:
         case self::ACTION_REMOVE_PROJECTS:
           return $this->buildTokenizerFieldValue(
@@ -1108,6 +1195,12 @@ abstract class HeraldAdapter extends Phobject {
   protected function applyStandardEffect(HeraldEffect $effect) {
     $action = $effect->getAction();
 
+    $impl = $this->getActionImplementation($action);
+    if ($impl) {
+      $impl->applyEffect($this->getObject(), $effect);
+      return $impl->getApplyTranscript($effect);
+    }
+
     $rule_type = $effect->getRule()->getRuleType();
     $supported = $this->getActions($rule_type);
     $supported = array_fuse($supported);
@@ -1133,8 +1226,6 @@ abstract class HeraldAdapter extends Phobject {
         return $this->applyFlagEffect($effect);
       case self::ACTION_EMAIL:
         return $this->applyEmailEffect($effect);
-      case self::ACTION_NOTHING:
-        return $this->applyNothingEffect($effect);
       default:
         break;
     }
@@ -1151,13 +1242,6 @@ abstract class HeraldAdapter extends Phobject {
     }
 
     return $result;
-  }
-
-  private function applyNothingEffect(HeraldEffect $effect) {
-    return new HeraldApplyTranscript(
-      $effect,
-      true,
-      pht('Did nothing.'));
   }
 
   /**

@@ -54,7 +54,6 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
           array(
             self::ACTION_ADD_CC,
             self::ACTION_REMOVE_CC,
-            self::ACTION_NOTHING,
           ),
           parent::getActions($rule_type));
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
@@ -63,7 +62,6 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
             self::ACTION_ADD_CC,
             self::ACTION_REMOVE_CC,
             self::ACTION_FLAG,
-            self::ACTION_NOTHING,
           ),
           parent::getActions($rule_type));
     }

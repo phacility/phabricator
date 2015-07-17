@@ -169,7 +169,6 @@ final class HeraldDifferentialRevisionAdapter
             self::ACTION_ADD_BLOCKING_REVIEWERS,
             self::ACTION_APPLY_BUILD_PLANS,
             self::ACTION_REQUIRE_SIGNATURE,
-            self::ACTION_NOTHING,
           ),
           parent::getActions($rule_type));
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
@@ -181,7 +180,6 @@ final class HeraldDifferentialRevisionAdapter
             self::ACTION_FLAG,
             self::ACTION_ADD_REVIEWERS,
             self::ACTION_ADD_BLOCKING_REVIEWERS,
-            self::ACTION_NOTHING,
           ),
           parent::getActions($rule_type));
     }

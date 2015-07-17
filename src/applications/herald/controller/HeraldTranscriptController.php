@@ -347,9 +347,6 @@ final class HeraldTranscriptController extends HeraldController {
 
       $target = $apply_xscript->getTarget();
       switch ($apply_xscript->getAction()) {
-        case HeraldAdapter::ACTION_NOTHING:
-          $target = null;
-          break;
         case HeraldAdapter::ACTION_FLAG:
           $target = PhabricatorFlagColor::getColorName($target);
           break;
@@ -358,6 +355,8 @@ final class HeraldTranscriptController extends HeraldController {
           $target = $target;
           break;
         default:
+          // TODO: This should be driven by HeraldActions.
+
           if (is_array($target) && $target) {
             foreach ($target as $k => $phid) {
               if (isset($handles[$phid])) {
@@ -388,6 +387,9 @@ final class HeraldTranscriptController extends HeraldController {
 
       $item->setHeader(pht('%s: %s', $rule, $target));
       $item->addAttribute($apply_xscript->getReason());
+
+      // TODO: This is a bit of a mess while actions convert.
+
       $item->addAttribute(
         pht('Outcome: %s', $apply_xscript->getAppliedReason()));
 

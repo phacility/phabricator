@@ -75,7 +75,6 @@ final class HeraldDifferentialDiffAdapter extends HeraldDifferentialAdapter {
         return array_merge(
           array(
             self::ACTION_BLOCK,
-            self::ACTION_NOTHING,
           ),
           parent::getActions($rule_type));
     }

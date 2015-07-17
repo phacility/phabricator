@@ -76,7 +76,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
             self::ACTION_REMOVE_CC,
             self::ACTION_EMAIL,
             self::ACTION_ASSIGN_TASK,
-            self::ACTION_NOTHING,
           ),
           parent::getActions($rule_type));
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
@@ -87,7 +86,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
             self::ACTION_EMAIL,
             self::ACTION_FLAG,
             self::ACTION_ASSIGN_TASK,
-            self::ACTION_NOTHING,
           ),
           parent::getActions($rule_type));
     }
