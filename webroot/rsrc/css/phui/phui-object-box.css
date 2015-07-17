@@ -120,11 +120,6 @@ div.phui-object-box.phui-object-box-flush {
   margin: 0;
 }
 
-.phui-object-box .phui-object-box .phui-header-shell .phui-header-view {
-  padding: 4px 8px;
-  background-color: {$lightgreybackground};
-}
-
 .phui-object-box .phui-object-box .phui-header-shell .phui-header-header {
   font-size: {$normalfontsize};
   margin: 0;
@@ -134,5 +129,6 @@ div.phui-object-box.phui-object-box-flush {
 
 .phui-object-box .phui-object-box .phui-header-shell {
   margin: 0;
-  padding: 0;
+  padding: 4px 8px;
+  background-color: {$lightgreybackground};
 }
