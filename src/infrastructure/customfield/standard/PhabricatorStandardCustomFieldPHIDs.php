@@ -118,7 +118,7 @@ abstract class PhabricatorStandardCustomFieldPHIDs
       $old = array();
     }
 
-    $new = phutil_json_decode($xaction->getNewValue());
+    $new = json_decode($xaction->getNewValue());
     if (!is_array($new)) {
       $new = array();
     }
