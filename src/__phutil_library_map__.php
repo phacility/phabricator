@@ -5060,6 +5060,7 @@ phutil_register_library_map(array(
       'PassphraseDAO',
       'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
+      'PhabricatorFlaggableInterface',
       'PhabricatorDestructibleInterface',
       'PhabricatorSpacesInterface',
     ),
