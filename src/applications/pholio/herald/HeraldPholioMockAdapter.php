@@ -61,7 +61,6 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
           array(
             self::ACTION_ADD_CC,
             self::ACTION_REMOVE_CC,
-            self::ACTION_FLAG,
           ),
           parent::getActions($rule_type));
     }

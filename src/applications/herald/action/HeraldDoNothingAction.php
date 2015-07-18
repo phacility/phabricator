@@ -22,11 +22,29 @@ final class HeraldDoNothingAction extends HeraldAction {
   }
 
   public function applyEffect($object, HeraldEffect $effect) {
-    $this->logEffect($effect, self::DO_NOTHING);
+    $this->logEffect(self::DO_NOTHING);
   }
 
   public function getHeraldActionStandardType() {
     return self::STANDARD_NONE;
+  }
+
+  protected function getActionEffectMap() {
+    return array(
+      self::DO_NOTHING => array(
+        'icon' => 'fa-check',
+        'color' => 'grey',
+        'name' => pht('Did Nothing'),
+      ),
+    );
+  }
+
+  public function renderActionDescription($value) {
+    return pht('Do nothing.');
+  }
+
+  public function renderActionEffectDescription($type, $data) {
+    return pht('Did nothing.');
   }
 
 }

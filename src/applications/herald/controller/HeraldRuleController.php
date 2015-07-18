@@ -367,7 +367,6 @@ final class HeraldRuleController extends HeraldController {
       $serial_actions = array();
       foreach ($rule->getActions() as $action) {
         switch ($action->getAction()) {
-          case HeraldAdapter::ACTION_FLAG:
           case HeraldAdapter::ACTION_BLOCK:
             $current_value = $action->getTarget();
             break;

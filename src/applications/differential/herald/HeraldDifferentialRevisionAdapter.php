@@ -177,7 +177,6 @@ final class HeraldDifferentialRevisionAdapter
             self::ACTION_ADD_CC,
             self::ACTION_REMOVE_CC,
             self::ACTION_EMAIL,
-            self::ACTION_FLAG,
             self::ACTION_ADD_REVIEWERS,
             self::ACTION_ADD_BLOCKING_REVIEWERS,
           ),

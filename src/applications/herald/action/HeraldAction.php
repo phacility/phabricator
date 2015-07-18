@@ -3,6 +3,7 @@
 abstract class HeraldAction extends Phobject {
 
   private $adapter;
+  private $viewer;
   private $applyLog = array();
 
   const STANDARD_NONE = 'standard.none';
@@ -12,6 +13,7 @@ abstract class HeraldAction extends Phobject {
   abstract public function supportsObject($object);
   abstract public function supportsRuleType($rule_type);
   abstract public function applyEffect($object, HeraldEffect $effect);
+  abstract public function renderActionEffectDescription($type, $data);
 
   public function getActionGroupKey() {
     return null;
@@ -66,6 +68,15 @@ abstract class HeraldAction extends Phobject {
     return $this->adapter;
   }
 
+  final public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  final public function getViewer() {
+    return $this->viewer;
+  }
+
   final public function getActionConstant() {
     $class = new ReflectionClass($this);
 
@@ -106,13 +117,49 @@ abstract class HeraldAction extends Phobject {
   }
 
   protected function logEffect($type, $data = null) {
-    return;
+    if (!is_string($type)) {
+      throw new Exception(
+        pht(
+          'Effect type passed to "%s" must be a scalar string.',
+          'logEffect()'));
+    }
+
+    $this->applyLog[] = array(
+      'type' => $type,
+      'data' => $data,
+    );
+
+    return $this;
   }
 
   final public function getApplyTranscript(HeraldEffect $effect) {
-    $context = 'v2/'.phutil_json_encode($this->applyLog);
+    $context = $this->applyLog;
     $this->applyLog = array();
     return new HeraldApplyTranscript($effect, true, $context);
+  }
+
+  protected function getActionEffectMap() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  private function getActionEffectSpec($type) {
+    $map = $this->getActionEffectMap();
+    return idx($map, $type, array());
+  }
+
+  public function renderActionEffectIcon($type, $data) {
+    $map = $this->getActionEffectSpec($type);
+    return idx($map, 'icon');
+  }
+
+  public function renderActionEffectColor($type, $data) {
+    $map = $this->getActionEffectSpec($type);
+    return idx($map, 'color');
+  }
+
+  public function renderActionEffectName($type, $data) {
+    $map = $this->getActionEffectSpec($type);
+    return idx($map, 'name');
   }
 
 }

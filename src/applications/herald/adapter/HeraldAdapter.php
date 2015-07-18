@@ -30,7 +30,6 @@ abstract class HeraldAdapter extends Phobject {
   const ACTION_REMOVE_CC    = 'remcc';
   const ACTION_EMAIL        = 'email';
   const ACTION_AUDIT        = 'audit';
-  const ACTION_FLAG         = 'flag';
   const ACTION_ASSIGN_TASK  = 'assigntask';
   const ACTION_ADD_PROJECTS = 'addprojects';
   const ACTION_REMOVE_PROJECTS = 'removeprojects';
@@ -670,7 +669,7 @@ abstract class HeraldAdapter extends Phobject {
     return $actions;
   }
 
-  private function getActionImplementation($key) {
+  public function getActionImplementation($key) {
     return idx($this->getActionImplementationMap(), $key);
   }
 
@@ -728,7 +727,6 @@ abstract class HeraldAdapter extends Phobject {
           self::ACTION_REMOVE_CC    => pht('Remove Subscribers'),
           self::ACTION_EMAIL        => pht('Send an email to'),
           self::ACTION_AUDIT        => pht('Trigger an Audit by'),
-          self::ACTION_FLAG         => pht('Mark with flag'),
           self::ACTION_ASSIGN_TASK  => pht('Assign task to'),
           self::ACTION_ADD_PROJECTS => pht('Add projects'),
           self::ACTION_REMOVE_PROJECTS => pht('Remove projects'),
@@ -745,7 +743,6 @@ abstract class HeraldAdapter extends Phobject {
           self::ACTION_REMOVE_CC    => pht('Remove me as a subscriber'),
           self::ACTION_EMAIL        => pht('Send me an email'),
           self::ACTION_AUDIT        => pht('Trigger an Audit by me'),
-          self::ACTION_FLAG         => pht('Mark with flag'),
           self::ACTION_ASSIGN_TASK  => pht('Assign task to me'),
           self::ACTION_ADD_REVIEWERS => pht('Add me as a reviewer'),
           self::ACTION_ADD_BLOCKING_REVIEWERS =>
@@ -798,13 +795,6 @@ abstract class HeraldAdapter extends Phobject {
           // For personal rules, force these actions to target the rule owner.
           $target = array($author_phid);
           break;
-        case self::ACTION_FLAG:
-          // Make sure flag color is valid; set to blue if not.
-          $color_map = PhabricatorFlagColor::getColorNameMap();
-          if (empty($color_map[$target])) {
-            $target = PhabricatorFlagColor::COLOR_BLUE;
-          }
-          break;
         case self::ACTION_BLOCK:
           break;
         default:
@@ -846,8 +836,6 @@ abstract class HeraldAdapter extends Phobject {
         case self::ACTION_ADD_REVIEWERS:
         case self::ACTION_ADD_BLOCKING_REVIEWERS:
           return new HeraldEmptyFieldValue();
-        case self::ACTION_FLAG:
-          return $this->buildFlagColorFieldValue();
         case self::ACTION_ADD_PROJECTS:
         case self::ACTION_REMOVE_PROJECTS:
           return $this->buildTokenizerFieldValue(
@@ -864,8 +852,6 @@ abstract class HeraldAdapter extends Phobject {
         case self::ACTION_REMOVE_PROJECTS:
           return $this->buildTokenizerFieldValue(
             new PhabricatorProjectDatasource());
-        case self::ACTION_FLAG:
-          return $this->buildFlagColorFieldValue();
         case self::ACTION_ASSIGN_TASK:
           return $this->buildTokenizerFieldValue(
             new PhabricatorPeopleDatasource());
@@ -891,13 +877,6 @@ abstract class HeraldAdapter extends Phobject {
     }
 
     throw new Exception(pht("Unknown or invalid action '%s'.", $action));
-  }
-
-  private function buildFlagColorFieldValue() {
-    return id(new HeraldSelectFieldValue())
-      ->setKey('flag.color')
-      ->setOptions(PhabricatorFlagColor::getColorNameMap())
-      ->setDefault(PhabricatorFlagColor::COLOR_BLUE);
   }
 
   private function buildTokenizerFieldValue(
@@ -1051,7 +1030,7 @@ abstract class HeraldAdapter extends Phobject {
         ),
         array(
           $icon,
-          $this->renderActionAsText($action, $handles),
+          $this->renderActionAsText($viewer, $action, $handles),
         ));
     }
 
@@ -1083,8 +1062,16 @@ abstract class HeraldAdapter extends Phobject {
   }
 
   private function renderActionAsText(
+    PhabricatorUser $viewer,
     HeraldActionRecord $action,
     PhabricatorHandleList $handles) {
+
+    $impl = $this->getActionImplementation($action->getAction());
+    if ($impl) {
+      $value = $action->getTarget();
+      return $impl->renderActionDescription($viewer, $value);
+    }
+
     $rule_global = HeraldRuleTypeConfig::RULE_TYPE_GLOBAL;
 
     $action_type = $action->getAction();
@@ -1118,15 +1105,14 @@ abstract class HeraldAdapter extends Phobject {
     HeraldActionRecord $action,
     PhabricatorHandleList $handles) {
 
+    // TODO: This should be driven through HeraldAction.
+
     $target = $action->getTarget();
     if (!is_array($target)) {
       $target = array($target);
     }
     foreach ($target as $index => $val) {
       switch ($action->getAction()) {
-        case self::ACTION_FLAG:
-          $target[$index] = PhabricatorFlagColor::getColorName($val);
-          break;
         default:
           $handle = $handles->getHandleIfExists($val);
           if ($handle) {
@@ -1222,8 +1208,6 @@ abstract class HeraldAdapter extends Phobject {
       case self::ACTION_ADD_CC:
       case self::ACTION_REMOVE_CC:
         return $this->applySubscribersEffect($effect);
-      case self::ACTION_FLAG:
-        return $this->applyFlagEffect($effect);
       case self::ACTION_EMAIL:
         return $this->applyEmailEffect($effect);
       default:
@@ -1363,50 +1347,6 @@ abstract class HeraldAdapter extends Phobject {
 
     return new HeraldApplyTranscript($effect, true, $message);
   }
-
-
-  /**
-   * @task apply
-   */
-  private function applyFlagEffect(HeraldEffect $effect) {
-    $phid = $this->getPHID();
-    $color = $effect->getTarget();
-
-    $rule = $effect->getRule();
-    $user = $rule->getAuthor();
-
-    $flag = PhabricatorFlagQuery::loadUserFlag($user, $phid);
-    if ($flag) {
-      return new HeraldApplyTranscript(
-        $effect,
-        false,
-        pht('Object already flagged.'));
-    }
-
-    $handle = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
-      ->withPHIDs(array($phid))
-      ->executeOne();
-
-    $flag = new PhabricatorFlag();
-    $flag->setOwnerPHID($user->getPHID());
-    $flag->setType($handle->getType());
-    $flag->setObjectPHID($handle->getPHID());
-
-    // TOOD: Should really be transcript PHID, but it doesn't exist yet.
-    $flag->setReasonPHID($user->getPHID());
-
-    $flag->setColor($color);
-    $flag->setNote(
-      pht('Flagged by Herald Rule "%s".', $rule->getName()));
-    $flag->save();
-
-    return new HeraldApplyTranscript(
-      $effect,
-      true,
-      pht('Added flag.'));
-  }
-
 
   /**
    * @task apply

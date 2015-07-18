@@ -84,7 +84,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
             self::ACTION_ADD_CC,
             self::ACTION_REMOVE_CC,
             self::ACTION_EMAIL,
-            self::ACTION_FLAG,
             self::ACTION_ASSIGN_TASK,
           ),
           parent::getActions($rule_type));
