@@ -5536,6 +5536,7 @@ phutil_register_library_map(array(
     'PhabricatorCountdown' => array(
       'PhabricatorCountdownDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorFlaggableInterface',
       'PhabricatorSpacesInterface',
     ),
     'PhabricatorCountdownApplication' => 'PhabricatorApplication',

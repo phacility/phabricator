@@ -70,6 +70,7 @@ final class PhabricatorCountdownViewController
     $id = $countdown->getID();
 
     $view = id(new PhabricatorActionListView())
+      ->setObject($countdown)
       ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(

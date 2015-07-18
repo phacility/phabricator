@@ -1,9 +1,10 @@
 <?php
 
-final class PhabricatorCountdown
-  extends PhabricatorCountdownDAO
-  implements PhabricatorPolicyInterface,
-  PhabricatorSpacesInterface {
+final class PhabricatorCountdown extends PhabricatorCountdownDAO
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorFlaggableInterface,
+    PhabricatorSpacesInterface {
 
   protected $title;
   protected $authorPHID;
