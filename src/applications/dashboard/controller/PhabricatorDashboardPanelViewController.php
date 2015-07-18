@@ -91,6 +91,7 @@ final class PhabricatorDashboardPanelViewController
 
     $actions = id(new PhabricatorActionListView())
       ->setObjectURI('/'.$panel->getMonogram())
+      ->setObject($panel)
       ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(

@@ -7,6 +7,7 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
+    PhabricatorFlaggableInterface,
     PhabricatorDestructibleInterface {
 
   protected $name;

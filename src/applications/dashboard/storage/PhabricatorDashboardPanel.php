@@ -9,6 +9,7 @@ final class PhabricatorDashboardPanel
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface,
+    PhabricatorFlaggableInterface,
     PhabricatorDestructibleInterface {
 
   protected $name;
