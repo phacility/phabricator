@@ -41,7 +41,7 @@ abstract class HeraldAction extends Phobject {
         return new HeraldEmptyFieldValue();
       case self::STANDARD_PHID_LIST:
         $tokenizer = id(new HeraldTokenizerFieldValue())
-          ->setKey($this->getHeraldFieldName())
+          ->setKey($this->getHeraldActionName())
           ->setDatasource($this->getDatasource());
 
         $value_map = $this->getDatasourceValueMap();
@@ -56,6 +56,17 @@ abstract class HeraldAction extends Phobject {
   }
 
   public function willSaveActionValue($value) {
+    try {
+      $type = $this->getHeraldActionStandardType();
+    } catch (PhutilMethodNotImplementedException $ex) {
+      return $value;
+    }
+
+    switch ($type) {
+      case self::STANDARD_PHID_LIST:
+        return array_keys($value);
+    }
+
     return $value;
   }
 
@@ -160,6 +171,17 @@ abstract class HeraldAction extends Phobject {
   public function renderActionEffectName($type, $data) {
     $map = $this->getActionEffectSpec($type);
     return idx($map, 'name');
+  }
+
+  protected function renderHandleList($phids) {
+    if (!is_array($phids)) {
+      return pht('(Invalid List)');
+    }
+
+    return $this->getViewer()
+      ->renderHandleList($phids)
+      ->setAsInline(true)
+      ->render();
   }
 
 }

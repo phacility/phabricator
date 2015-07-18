@@ -1182,6 +1182,7 @@ final class PhabricatorUSEnglishTranslation
         '%s Task',
         '%s Tasks',
       ),
+
       '%s added %s badge(s) for %s: %s.' => array(
         array(
           '%s added a badge for %s: %3$s.',
@@ -1254,6 +1255,39 @@ final class PhabricatorUSEnglishTranslation
           '%s revoked a recipient: %3$s.',
           '%s revoked multiple recipients: %3$s.',
         ),
+      ),
+
+      '%s automatically subscribed target(s) were not affected: %s.' => array(
+        'An automatically subscribed target was not affected: %2$s.',
+        'Automatically subscribed targets were not affected: %2$s.',
+      ),
+
+      'Declined to resubscribe %s target(s) because they previously '.
+      'unsubscribed: %s.' => array(
+        'Delined to resubscribe a target because they previously '.
+        'unsubscribed: %2$s.',
+        'Declined to resubscribe targets because they previously '.
+        'unsubscribed: %2$s.',
+      ),
+
+      '%s target(s) are not subscribed: %s.' => array(
+        'A target is not subscribed: %2$s.',
+        'Targets are not subscribed: %2$s.',
+      ),
+
+      '%s target(s) are already subscribed: %s.' => array(
+        'A target is already subscribed: %2$s.',
+        'Targets are already subscribed: %2$s.',
+      ),
+
+      'Added %s subscriber(s): %s.' => array(
+        'Added a subscriber: %2$s.',
+        'Added subscribers: %2$s.',
+      ),
+
+      'Removed %s subscriber(s): %s.' => array(
+        'Removed a subscriber: %2$s.',
+        'Removed subscribers: %2$s.',
       ),
 
     );

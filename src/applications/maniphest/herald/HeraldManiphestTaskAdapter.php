@@ -72,8 +72,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
         return array_merge(
           array(
-            self::ACTION_ADD_CC,
-            self::ACTION_REMOVE_CC,
             self::ACTION_EMAIL,
             self::ACTION_ASSIGN_TASK,
           ),
@@ -81,8 +79,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         return array_merge(
           array(
-            self::ACTION_ADD_CC,
-            self::ACTION_REMOVE_CC,
             self::ACTION_EMAIL,
             self::ACTION_ASSIGN_TASK,
           ),

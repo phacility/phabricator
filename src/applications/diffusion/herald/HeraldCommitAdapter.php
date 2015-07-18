@@ -89,8 +89,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
       case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
         return array_merge(
           array(
-            self::ACTION_ADD_CC,
-            self::ACTION_REMOVE_CC,
             self::ACTION_EMAIL,
             self::ACTION_AUDIT,
             self::ACTION_APPLY_BUILD_PLANS,
@@ -99,8 +97,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         return array_merge(
           array(
-            self::ACTION_ADD_CC,
-            self::ACTION_REMOVE_CC,
             self::ACTION_EMAIL,
             self::ACTION_AUDIT,
           ),

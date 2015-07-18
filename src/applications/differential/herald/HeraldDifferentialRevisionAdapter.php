@@ -162,8 +162,6 @@ final class HeraldDifferentialRevisionAdapter
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
         return array_merge(
           array(
-            self::ACTION_ADD_CC,
-            self::ACTION_REMOVE_CC,
             self::ACTION_EMAIL,
             self::ACTION_ADD_REVIEWERS,
             self::ACTION_ADD_BLOCKING_REVIEWERS,
@@ -174,8 +172,6 @@ final class HeraldDifferentialRevisionAdapter
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         return array_merge(
           array(
-            self::ACTION_ADD_CC,
-            self::ACTION_REMOVE_CC,
             self::ACTION_EMAIL,
             self::ACTION_ADD_REVIEWERS,
             self::ACTION_ADD_BLOCKING_REVIEWERS,

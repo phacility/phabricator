@@ -26,8 +26,6 @@ abstract class HeraldAdapter extends Phobject {
   const CONDITION_IS_TRUE         = 'true';
   const CONDITION_IS_FALSE        = 'false';
 
-  const ACTION_ADD_CC       = 'addcc';
-  const ACTION_REMOVE_CC    = 'remcc';
   const ACTION_EMAIL        = 'email';
   const ACTION_AUDIT        = 'audit';
   const ACTION_ASSIGN_TASK  = 'assigntask';
@@ -46,9 +44,9 @@ abstract class HeraldAdapter extends Phobject {
   private $queuedTransactions = array();
   private $emailPHIDs = array();
   private $forcedEmailPHIDs = array();
-  private $unsubscribedPHIDs;
   private $fieldMap;
   private $actionMap;
+  private $edgeCache = array();
 
   public function getEmailPHIDs() {
     return array_values($this->emailPHIDs);
@@ -179,7 +177,7 @@ abstract class HeraldAdapter extends Phobject {
     return $this->queuedTransactions;
   }
 
-  protected function newTransaction() {
+  public function newTransaction() {
     $object = $this->newObject();
 
     if (!($object instanceof PhabricatorApplicationTransactionInterface)) {
@@ -723,8 +721,6 @@ abstract class HeraldAdapter extends Phobject {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
       case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
         $standard = array(
-          self::ACTION_ADD_CC       => pht('Add Subscribers'),
-          self::ACTION_REMOVE_CC    => pht('Remove Subscribers'),
           self::ACTION_EMAIL        => pht('Send an email to'),
           self::ACTION_AUDIT        => pht('Trigger an Audit by'),
           self::ACTION_ASSIGN_TASK  => pht('Assign task to'),
@@ -739,8 +735,6 @@ abstract class HeraldAdapter extends Phobject {
         break;
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         $standard = array(
-          self::ACTION_ADD_CC       => pht('Add me as a subscriber'),
-          self::ACTION_REMOVE_CC    => pht('Remove me as a subscriber'),
           self::ACTION_EMAIL        => pht('Send me an email'),
           self::ACTION_AUDIT        => pht('Trigger an Audit by me'),
           self::ACTION_ASSIGN_TASK  => pht('Assign task to me'),
@@ -786,8 +780,6 @@ abstract class HeraldAdapter extends Phobject {
     if ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
       switch ($action->getAction()) {
         case self::ACTION_EMAIL:
-        case self::ACTION_ADD_CC:
-        case self::ACTION_REMOVE_CC:
         case self::ACTION_AUDIT:
         case self::ACTION_ASSIGN_TASK:
         case self::ACTION_ADD_REVIEWERS:
@@ -828,8 +820,6 @@ abstract class HeraldAdapter extends Phobject {
 
     if ($is_personal) {
       switch ($action) {
-        case self::ACTION_ADD_CC:
-        case self::ACTION_REMOVE_CC:
         case self::ACTION_EMAIL:
         case self::ACTION_AUDIT:
         case self::ACTION_ASSIGN_TASK:
@@ -843,8 +833,6 @@ abstract class HeraldAdapter extends Phobject {
       }
     } else {
       switch ($action) {
-        case self::ACTION_ADD_CC:
-        case self::ACTION_REMOVE_CC:
         case self::ACTION_EMAIL:
           return $this->buildTokenizerFieldValue(
             new PhabricatorMetaMTAMailableDatasource());
@@ -1048,17 +1036,24 @@ abstract class HeraldAdapter extends Phobject {
     PhabricatorUser $viewer) {
 
     $field_type = $condition->getFieldName();
+    $field = $this->getFieldImplementation($field_type);
 
-    $default = pht('(Unknown Field "%s")', $field_type);
+    if (!$field) {
+      return pht('Unknown Field: "%s"', $field_type);
+    }
 
-    $field_name = idx($this->getFieldNameMap(), $field_type, $default);
+    $field_name = $field->getHeraldFieldName();
 
     $condition_type = $condition->getFieldCondition();
     $condition_name = idx($this->getConditionNameMap(), $condition_type);
 
     $value = $this->renderConditionValueAsText($condition, $handles, $viewer);
 
-    return hsprintf('    %s %s %s', $field_name, $condition_name, $value);
+    return array(
+      $field_name,
+      $condition_name,
+      $value,
+    );
   }
 
   private function renderActionAsText(
@@ -1068,8 +1063,10 @@ abstract class HeraldAdapter extends Phobject {
 
     $impl = $this->getActionImplementation($action->getAction());
     if ($impl) {
+      $impl->setViewer($viewer);
+
       $value = $action->getTarget();
-      return $impl->renderActionDescription($viewer, $value);
+      return $impl->renderActionDescription($value);
     }
 
     $rule_global = HeraldRuleTypeConfig::RULE_TYPE_GLOBAL;
@@ -1180,14 +1177,16 @@ abstract class HeraldAdapter extends Phobject {
    */
   protected function applyStandardEffect(HeraldEffect $effect) {
     $action = $effect->getAction();
+    $rule_type = $effect->getRule()->getRuleType();
 
     $impl = $this->getActionImplementation($action);
     if ($impl) {
-      $impl->applyEffect($this->getObject(), $effect);
-      return $impl->getApplyTranscript($effect);
+      if ($impl->supportsRuleType($rule_type)) {
+        $impl->applyEffect($this->getObject(), $effect);
+        return $impl->getApplyTranscript($effect);
+      }
     }
 
-    $rule_type = $effect->getRule()->getRuleType();
     $supported = $this->getActions($rule_type);
     $supported = array_fuse($supported);
     if (empty($supported[$action])) {
@@ -1205,9 +1204,6 @@ abstract class HeraldAdapter extends Phobject {
       case self::ACTION_ADD_PROJECTS:
       case self::ACTION_REMOVE_PROJECTS:
         return $this->applyProjectsEffect($effect);
-      case self::ACTION_ADD_CC:
-      case self::ACTION_REMOVE_CC:
-        return $this->applySubscribersEffect($effect);
       case self::ACTION_EMAIL:
         return $this->applyEmailEffect($effect);
       default:
@@ -1257,96 +1253,6 @@ abstract class HeraldAdapter extends Phobject {
       pht('Added projects.'));
   }
 
-  /**
-   * @task apply
-   */
-  private function applySubscribersEffect(HeraldEffect $effect) {
-    if ($effect->getAction() == self::ACTION_ADD_CC) {
-      $kind = '+';
-      $is_add = true;
-    } else {
-      $kind = '-';
-      $is_add = false;
-    }
-
-    $subscriber_phids = array_fuse($effect->getTarget());
-    if (!$subscriber_phids) {
-      return new HeraldApplyTranscript(
-        $effect,
-        false,
-        pht('This action lists no users or objects to affect.'));
-    }
-
-    // The "Add Subscribers" rule only adds subscribers who haven't previously
-    // unsubscribed from the object explicitly. Filter these subscribers out
-    // before continuing.
-    $unsubscribed = array();
-    if ($is_add) {
-      if ($this->unsubscribedPHIDs === null) {
-        $this->unsubscribedPHIDs = PhabricatorEdgeQuery::loadDestinationPHIDs(
-          $this->getObject()->getPHID(),
-          PhabricatorObjectHasUnsubscriberEdgeType::EDGECONST);
-      }
-
-      foreach ($this->unsubscribedPHIDs as $phid) {
-        if (isset($subscriber_phids[$phid])) {
-          $unsubscribed[$phid] = $phid;
-          unset($subscriber_phids[$phid]);
-        }
-      }
-    }
-
-    if (!$subscriber_phids) {
-      return new HeraldApplyTranscript(
-        $effect,
-        false,
-        pht('All targets have previously unsubscribed explicitly.'));
-    }
-
-    // Filter out PHIDs which aren't valid subscribers. Lower levels of the
-    // stack will fail loudly if we try to add subscribers with invalid PHIDs
-    // or unknown PHID types, so drop them here.
-    $invalid = array();
-    foreach ($subscriber_phids as $phid) {
-      $type = phid_get_type($phid);
-      switch ($type) {
-        case PhabricatorPeopleUserPHIDType::TYPECONST:
-        case PhabricatorProjectProjectPHIDType::TYPECONST:
-          break;
-        default:
-          $invalid[$phid] = $phid;
-          unset($subscriber_phids[$phid]);
-          break;
-      }
-    }
-
-    if (!$subscriber_phids) {
-      return new HeraldApplyTranscript(
-        $effect,
-        false,
-        pht('All targets are invalid as subscribers.'));
-    }
-
-    $xaction = $this->newTransaction()
-      ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
-      ->setNewValue(
-        array(
-          $kind => $subscriber_phids,
-        ));
-
-    $this->queueTransaction($xaction);
-
-    // TODO: We could be more detailed about this, but doing it meaningfully
-    // probably requires substantial changes to how transactions are rendered
-    // first.
-    if ($is_add) {
-      $message = pht('Subscribed targets.');
-    } else {
-      $message = pht('Unsubscribed targets.');
-    }
-
-    return new HeraldApplyTranscript($effect, true, $message);
-  }
 
   /**
    * @task apply
@@ -1370,5 +1276,15 @@ abstract class HeraldAdapter extends Phobject {
       pht('Added mailable to mail targets.'));
   }
 
+  public function loadEdgePHIDs($type) {
+    if (!isset($this->edgeCache[$type])) {
+      $phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $this->getObject()->getPHID(),
+        $type);
+
+      $this->edgeCache[$type] = array_fuse($phids);
+    }
+    return $this->edgeCache[$type];
+  }
 
 }
