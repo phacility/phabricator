@@ -11,10 +11,10 @@
       "rule": ".login-Asana",
       "hash": "f8d322843355da1abce614983044c0f8"
     },
-    "login-BitBucket": {
-      "name": "login-BitBucket",
-      "rule": ".login-BitBucket",
-      "hash": "0221f1d8c50d99477f1b16d62ecf7284"
+    "login-Bitbucket": {
+      "name": "login-Bitbucket",
+      "rule": ".login-Bitbucket",
+      "hash": "32f7cf08badb1181f883c211eddd89f5"
     },
     "login-Disqus": {
       "name": "login-Disqus",
@@ -61,10 +61,10 @@
       "rule": ".login-LDAP",
       "hash": "e31df2e9faf8ca0925ef93128a82fa7a"
     },
-    "login-LinkedIn": {
-      "name": "login-LinkedIn",
-      "rule": ".login-LinkedIn",
-      "hash": "39baad0c7b9c33f59221f3f7689dc298"
+    "login-Linkedin": {
+      "name": "login-Linkedin",
+      "rule": ".login-Linkedin",
+      "hash": "b7ee1e92c923462531f3a34093e57127"
     },
     "login-MediaWiki": {
       "name": "login-MediaWiki",
@@ -76,10 +76,10 @@
       "rule": ".login-Openid",
       "hash": "886f65ad44435344a1fa1c13e7758155"
     },
-    "login-Paypal": {
-      "name": "login-Paypal",
-      "rule": ".login-Paypal",
-      "hash": "183882a1c7bf5c60f0a6b77a81be2aa8"
+    "login-PayPal": {
+      "name": "login-PayPal",
+      "rule": ".login-PayPal",
+      "hash": "dfa09f45369c93bb0fd82a333b0fe927"
     },
     "login-Persona": {
       "name": "login-Persona",
@@ -116,10 +116,10 @@
       "rule": ".login-WePay",
       "hash": "39a4c5ec26ee8400239b246761b83aa3"
     },
-    "login-WordpressCOM": {
-      "name": "login-WordpressCOM",
-      "rule": ".login-WordpressCOM",
-      "hash": "866d6c9192cafcb5395861d55a6917e5"
+    "login-WordPressCOM": {
+      "name": "login-WordPressCOM",
+      "rule": ".login-WordPressCOM",
+      "hash": "9eae4205dbed0c42a18ee4f8e0fa151b"
     },
     "login-Yahoo": {
       "name": "login-Yahoo",
