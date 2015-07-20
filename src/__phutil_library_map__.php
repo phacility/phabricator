@@ -6836,6 +6836,7 @@ phutil_register_library_map(array(
       'PhabricatorCustomFieldInterface',
       'PhabricatorDestructibleInterface',
       'PhabricatorSSHPublicKeyInterface',
+      'PhabricatorFlaggableInterface',
       'PhabricatorApplicationTransactionInterface',
     ),
     'PhabricatorUserBlurbField' => 'PhabricatorUserCustomField',
