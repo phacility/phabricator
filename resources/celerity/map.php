@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '5b0a985d',
+    'core.pkg.css' => 'b5cc2f39',
     'core.pkg.js' => 'a590b451',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '9451634c',
@@ -35,7 +35,7 @@ return array(
     'rsrc/css/application/auth/auth.css' => '0877ed6e',
     'rsrc/css/application/base/main-menu-view.css' => '2f670a96',
     'rsrc/css/application/base/notification-menu.css' => 'f31c0bde',
-    'rsrc/css/application/base/phabricator-application-launch-view.css' => '077e63cb',
+    'rsrc/css/application/base/phabricator-application-launch-view.css' => '95351601',
     'rsrc/css/application/base/phui-theme.css' => '6b451f24',
     'rsrc/css/application/base/standard-page-view.css' => '4d176b67',
     'rsrc/css/application/calendar/calendar-icon.css' => 'c69aa59f',
@@ -717,7 +717,7 @@ return array(
     'path-typeahead' => 'f7fc67ec',
     'people-profile-css' => '25970776',
     'phabricator-action-list-view-css' => 'c5eba19d',
-    'phabricator-application-launch-view-css' => '077e63cb',
+    'phabricator-application-launch-view-css' => '95351601',
     'phabricator-busy' => '59a7976a',
     'phabricator-chatlog-css' => 'd295b020',
     'phabricator-content-source-view-css' => '4b8b05d4',
