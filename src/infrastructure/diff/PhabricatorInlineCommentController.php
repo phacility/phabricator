@@ -12,6 +12,8 @@ abstract class PhabricatorInlineCommentController
     PhabricatorInlineCommentInterface $inline);
   abstract protected function deleteComment(
     PhabricatorInlineCommentInterface $inline);
+  abstract protected function undeleteComment(
+    PhabricatorInlineCommentInterface $inline);
   abstract protected function saveComment(
     PhabricatorInlineCommentInterface $inline);
 
@@ -167,7 +169,12 @@ abstract class PhabricatorInlineCommentController
         $is_delete = ($op == 'delete' || $op == 'refdelete');
 
         $inline = $this->loadCommentForEdit($this->getCommentID());
-        $inline->setIsDeleted((int)$is_delete)->save();
+
+        if ($is_delete) {
+          $this->deleteComment($inline);
+        } else {
+          $this->undeleteComment($inline);
+        }
 
         return $this->buildEmptyResponse();
       case 'edit':
