@@ -11,18 +11,13 @@ final class PhabricatorDashboardSearchEngine
     return 'PhabricatorDashboardApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    return new PhabricatorSavedQuery();
+  public function newQuery() {
+    return id(new PhabricatorDashboardQuery())
+      ->needProjects(true);
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    return new PhabricatorDashboardQuery();
-  }
-
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
-    return;
+  protected function buildCustomSearchFields() {
+    return array();
   }
 
   protected function getURI($path) {
@@ -48,6 +43,11 @@ final class PhabricatorDashboardSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
+    return $query;
+  }
+
   protected function renderResultList(
     array $dashboards,
     PhabricatorSavedQuery $query,
@@ -69,6 +69,18 @@ final class PhabricatorDashboardSearchEngine
     } else {
       $installs = array();
     }
+
+    $proj_phids = array();
+    foreach ($dashboards as $dashboard) {
+      foreach ($dashboard->getProjectPHIDs() as $project_phid) {
+        $proj_phids[] = $project_phid;
+      }
+    }
+
+    $proj_handles = id(new PhabricatorHandleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($proj_phids)
+      ->execute();
 
     $list = new PHUIObjectItemListView();
     $list->setUser($viewer);
@@ -101,6 +113,17 @@ final class PhabricatorDashboardSearchEngine
         }
       }
 
+      $project_handles = array_select_keys(
+        $proj_handles,
+        $dashboard->getProjectPHIDs());
+
+      $item->addAttribute(
+        id(new PHUIHandleTagListView())
+          ->setLimit(4)
+          ->setNoDataString(pht('No Projects'))
+          ->setSlim(true)
+          ->setHandles($project_handles));
+
       $list->addItem($item);
     }
 
@@ -109,7 +132,6 @@ final class PhabricatorDashboardSearchEngine
     $result->setNoDataString(pht('No dashboards found.'));
 
     return $result;
-
   }
 
 }

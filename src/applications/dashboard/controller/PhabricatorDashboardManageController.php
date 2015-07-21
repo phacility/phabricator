@@ -170,6 +170,8 @@ final class PhabricatorDashboardManageController
       pht('Panels'),
       $viewer->renderHandleList($dashboard->getPanelPHIDs()));
 
+    $properties->invokeWillRenderEvent();
+
     return $properties;
   }
 
