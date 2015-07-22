@@ -9,17 +9,12 @@ final class PhrictionHistoryController
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->slug = $data['slug'];
-  }
-
-  public function processRequest() {
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $this->slug = $request->getURIData('slug');
 
     $document = id(new PhrictionDocumentQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withSlugs(array(PhabricatorSlug::normalize($this->slug)))
       ->needContent(true)
       ->executeOne();
@@ -102,8 +97,8 @@ final class PhrictionHistoryController
             ),
             pht('Version %s', $version)))
         ->addAttribute(pht('%s %s',
-          phabricator_date($content->getDateCreated(), $user),
-          phabricator_time($content->getDateCreated(), $user)));
+          phabricator_date($content->getDateCreated(), $viewer),
+          phabricator_time($content->getDateCreated(), $viewer)));
 
       if ($content->getDescription()) {
         $item->addAttribute($content->getDescription());
