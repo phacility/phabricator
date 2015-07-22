@@ -2,9 +2,8 @@
 
 final class PonderVoteSaveController extends PonderController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
     $phid = $request->getStr('phid');
     $newvote = $request->getInt('vote');
 

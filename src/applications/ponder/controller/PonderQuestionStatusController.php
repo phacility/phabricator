@@ -3,21 +3,14 @@
 final class PonderQuestionStatusController
   extends PonderController {
 
-  private $status;
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->status = idx($data, 'status');
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $status = $request->getURIData('status');
 
     $question = id(new PonderQuestionQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -28,7 +21,7 @@ final class PonderQuestionStatusController
       return new Aphront404Response();
     }
 
-    switch ($this->status) {
+    switch ($status) {
       case 'open':
         $status = PonderQuestionStatus::STATUS_OPEN;
         break;
