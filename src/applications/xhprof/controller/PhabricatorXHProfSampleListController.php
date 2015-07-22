@@ -5,6 +5,10 @@ final class PhabricatorXHProfSampleListController
 
   private $view;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->view = idx($data, 'view', 'all');
   }

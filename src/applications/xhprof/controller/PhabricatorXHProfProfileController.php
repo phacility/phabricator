@@ -5,6 +5,10 @@ final class PhabricatorXHProfProfileController
 
   private $phid;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->phid = $data['phid'];
   }
