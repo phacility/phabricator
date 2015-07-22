@@ -38,6 +38,7 @@ final class PhabricatorCountdownApplication extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
+      '/C(?P<id>[1-9]\d*)' => 'PhabricatorCountdownViewController',
       '/countdown/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorCountdownListController',
@@ -54,6 +55,11 @@ final class PhabricatorCountdownApplication extends PhabricatorApplication {
         'caption' => pht('Default view policy for new countdowns.'),
         'template' => PhabricatorCountdownCountdownPHIDType::TYPECONST,
         'capability' => PhabricatorPolicyCapability::CAN_VIEW,
+      ),
+      PhabricatorCountdownDefaultEditCapability::CAPABILITY => array(
+        'caption' => pht('Default edit policy for new countdowns.'),
+        'template' => PhabricatorCountdownCountdownPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_EDIT,
       ),
     );
   }
