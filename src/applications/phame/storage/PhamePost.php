@@ -5,6 +5,7 @@ final class PhamePost extends PhameDAO
     PhabricatorPolicyInterface,
     PhabricatorMarkupInterface,
     PhabricatorFlaggableInterface,
+    PhabricatorProjectInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorSubscribableInterface,
     PhabricatorTokenReceiverInterface {
