@@ -6,6 +6,10 @@ abstract class PhabricatorXHPASTViewPanelController
   private $id;
   private $storageTree;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
     $this->storageTree = id(new PhabricatorXHPASTViewParseTree())
