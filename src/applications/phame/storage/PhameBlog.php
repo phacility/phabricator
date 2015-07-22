@@ -5,6 +5,7 @@ final class PhameBlog extends PhameDAO
     PhabricatorPolicyInterface,
     PhabricatorMarkupInterface,
     PhabricatorSubscribableInterface,
+    PhabricatorFlaggableInterface,
     PhabricatorApplicationTransactionInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:description';
