@@ -5,6 +5,7 @@ final class PhamePost extends PhameDAO
     PhabricatorPolicyInterface,
     PhabricatorMarkupInterface,
     PhabricatorApplicationTransactionInterface,
+    PhabricatorSubscribableInterface,
     PhabricatorTokenReceiverInterface {
 
   const MARKUP_FIELD_BODY    = 'markup:body';
@@ -285,6 +286,22 @@ final class PhamePost extends PhameDAO
     return array(
       $this->getBloggerPHID(),
     );
+  }
+
+
+/* -(  PhabricatorSubscribableInterface Implementation  )-------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+    return ($this->bloggerPHID == $phid);
+  }
+
+  public function shouldShowSubscribersProperty() {
+    return true;
+  }
+
+  public function shouldAllowSubscription($phid) {
+    return true;
   }
 
 }
