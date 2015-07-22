@@ -98,6 +98,12 @@
   border-width: 1px 0 0;
 }
 
+.phui-property-list-container + .phui-property-list-text-content {
+  border-color: {$thinblueborder};
+  border-style: solid;
+  border-width: 1px 0 0;
+}
+
 .phui-property-list-section-noninitial .phui-property-list-section-header {
   border-top: none;
 }

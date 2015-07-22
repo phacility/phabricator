@@ -617,6 +617,17 @@ ul.phui-object-item-list-view .phui-object-item-selected
   border: none;
 }
 
+/* - Badges ---------------------------------------------------------------- */
+
+.phui-object-item-col0.phui-object-item-badge {
+  width: 28px;
+}
+
+.phui-object-item-col0.phui-object-item-badge .phui-icon-view {
+  left: 0;
+}
+
+
 /* - Dashboards ------------------------------------------------------------ */
 
 .phui-object-box .phui-object-item-list-view .phui-object-item-frame {

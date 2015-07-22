@@ -1182,6 +1182,80 @@ final class PhabricatorUSEnglishTranslation
         '%s Task',
         '%s Tasks',
       ),
+      '%s added %s badge(s) for %s: %s.' => array(
+        array(
+          '%s added a badge for %s: %3$s.',
+          '%s added badges for %s: %3$s.',
+        ),
+      ),
+      '%s added %s badge(s): %s.' => array(
+        array(
+          '%s added a badge: %3$s.',
+          '%s added badges: %3$s.',
+        ),
+      ),
+      '%s awarded %s recipient(s) for %s: %s.' => array(
+        array(
+          '%s awarded %3$s to %4$s.',
+          '%s awarded %3$s to multiple recipients: %4$s.',
+        ),
+      ),
+      '%s awarded %s recipients(s): %s.' => array(
+        array(
+          '%s awarded a recipient: %3$s.',
+          '%s awarded multiple recipients: %3$s.',
+        ),
+      ),
+      '%s edited badge(s) for %s, added %s: %s; revoked %s: %s.' => array(
+        array(
+          '%s edited badges for %s, added %s: %s; revoked %s: %s.',
+          '%s edited badges for %s, added %s: %s; revoked %s: %s.',
+        ),
+      ),
+      '%s edited badge(s), added %s: %s; revoked %s: %s.' => array(
+        array(
+          '%s edited badges, added %s: %s; revoked %s: %s.',
+          '%s edited badges, added %s: %s; revoked %s: %s.',
+        ),
+      ),
+      '%s edited recipient(s) for %s, awarded %s: %s; revoked %s: %s.' => array(
+        array(
+          '%s edited recipients for %s, awarded %s: %s; revoked %s: %s.',
+          '%s edited recipients for %s, awarded %s: %s; revoked %s: %s.',
+        ),
+      ),
+      '%s edited recipient(s), awarded %s: %s; revoked %s: %s.' => array(
+        array(
+          '%s edited recipients, awarded %s: %s; revoked %s: %s.',
+          '%s edited recipients, awarded %s: %s; revoked %s: %s.',
+        ),
+      ),
+      '%s revoked %s badge(s) for %s: %s.' => array(
+        array(
+          '%s revoked a badge for %3$s: %4$s.',
+          '%s revoked multiple badges for %3$s: %4$s.',
+        ),
+      ),
+      '%s revoked %s badge(s): %s.' => array(
+        array(
+          '%s revoked a badge: %3$s.',
+          '%s revoked multiple badges: %3$s.',
+        ),
+      ),
+      '%s revoked %s recipient(s) for %s: %s.' => array(
+        array(
+          '%s revoked %3$s from %4$s.',
+          '%s revoked multiple recipients for %3$s: %4$s.',
+        ),
+      ),
+
+      '%s revoked %s recipients(s): %s.' => array(
+        array(
+          '%s revoked a recipient: %3$s.',
+          '%s revoked multiple recipients: %3$s.',
+        ),
+      ),
+
     );
   }
 
