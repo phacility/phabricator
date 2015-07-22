@@ -81,61 +81,59 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $posts;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'p.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'p.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->bloggerPHIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'p.bloggerPHID IN (%Ls)',
         $this->bloggerPHIDs);
     }
 
     if ($this->phameTitles) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'p.phameTitle IN (%Ls)',
         $this->phameTitles);
     }
 
     if ($this->visibility !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'p.visibility = %d',
         $this->visibility);
     }
 
     if ($this->publishedAfter !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'p.datePublished > %d',
         $this->publishedAfter);
     }
 
     if ($this->blogPHIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'p.blogPHID in (%Ls)',
         $this->blogPHIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {
