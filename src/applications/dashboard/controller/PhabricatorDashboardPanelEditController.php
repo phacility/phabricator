@@ -3,15 +3,9 @@
 final class PhabricatorDashboardPanelEditController
   extends PhabricatorDashboardController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     // If the user is trying to create a panel directly on a dashboard, make
     // sure they have permission to see and edit the dashboard.
@@ -35,7 +29,7 @@ final class PhabricatorDashboardPanelEditController
       $manage_uri = $this->getApplicationURI('manage/'.$dashboard_id.'/');
     }
 
-    if ($this->id) {
+    if ($id) {
       $is_create = false;
 
       if ($dashboard) {
@@ -51,7 +45,7 @@ final class PhabricatorDashboardPanelEditController
 
       $panel = id(new PhabricatorDashboardPanelQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->requireCapabilities($capabilities)
         ->executeOne();
       if (!$panel) {

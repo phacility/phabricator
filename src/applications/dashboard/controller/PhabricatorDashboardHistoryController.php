@@ -3,22 +3,16 @@
 final class PhabricatorDashboardHistoryController
   extends PhabricatorDashboardController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-    $id = $this->id;
     $dashboard_view_uri = $this->getApplicationURI('view/'.$id.'/');
     $dashboard_manage_uri = $this->getApplicationURI('manage/'.$id.'/');
 
     $dashboard = id(new PhabricatorDashboardQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$dashboard) {
       return new Aphront404Response();
