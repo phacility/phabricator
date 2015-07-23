@@ -9,7 +9,7 @@ final class PhabricatorCountdownTransaction
 
   const MAILTAG_TITLE = 'countdown:title';
   const MAILTAG_EPOCH = 'countdown:epoch';
-  const MAILTAG_DESRICPTION = 'countdown:description';
+  const MAILTAG_DESCRIPTION = 'countdown:description';
   const MAILTAG_OTHER  = 'countdown:other';
 
   public function getApplicationName() {
