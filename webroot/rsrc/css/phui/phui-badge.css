@@ -186,6 +186,7 @@
 .phui-badge-mini .phui-icon-view {
   color: #fff;
   font-size: 12px;
+  margin: 0;
 }
 
 .phui-badge-mini-grey {

@@ -8,6 +8,10 @@ final class HeraldContentSourceField extends HeraldField {
     return pht('Content source');
   }
 
+  public function getFieldGroupKey() {
+    return HeraldEditFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     return $this->getAdapter()->getContentSource()->getSource();
   }
@@ -20,7 +24,13 @@ final class HeraldContentSourceField extends HeraldField {
   }
 
   public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_CONTENT_SOURCE;
+    $map = PhabricatorContentSource::getSourceNameMap();
+    asort($map);
+
+    return id(new HeraldSelectFieldValue())
+      ->setKey(self::FIELDCONST)
+      ->setDefault(PhabricatorContentSource::SOURCE_WEB)
+      ->setOptions($map);
   }
 
   public function supportsObject($object) {

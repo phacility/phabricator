@@ -5,6 +5,10 @@ final class PhabricatorPeopleProfileController
 
   private $username;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function shouldRequireAdmin() {
     return false;
   }

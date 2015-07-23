@@ -2,20 +2,14 @@
 
 final class PonderQuestionEditController extends PonderController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $user = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    if ($this->id) {
+    if ($id) {
       $question = id(new PonderQuestionQuery())
         ->setViewer($user)
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,

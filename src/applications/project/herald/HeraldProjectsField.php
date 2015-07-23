@@ -8,6 +8,10 @@ final class HeraldProjectsField extends HeraldField {
     return pht('Projects');
   }
 
+  public function getFieldGroupKey() {
+    return HeraldSupportFieldGroup::FIELDGROUPKEY;
+  }
+
   public function supportsObject($object) {
     return ($object instanceof PhabricatorProjectInterface);
   }
@@ -18,18 +22,12 @@ final class HeraldProjectsField extends HeraldField {
       PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
   }
 
-  protected function getHeraldFieldStandardConditions() {
-    return self::STANDARD_LIST;
+  protected function getHeraldFieldStandardType() {
+    return self::STANDARD_PHID_LIST;
   }
 
-  public function getHeraldFieldValueType($condition) {
-    switch ($condition) {
-      case HeraldAdapter::CONDITION_EXISTS:
-      case HeraldAdapter::CONDITION_NOT_EXISTS:
-        return HeraldAdapter::VALUE_NONE;
-      default:
-        return HeraldAdapter::VALUE_PROJECT;
-    }
+  protected function getDatasource() {
+    return new PhabricatorProjectDatasource();
   }
 
 }

@@ -89,7 +89,7 @@ final class PHUIBadgeExample extends PhabricatorUIExample {
     $badges2[] = id(new PHUIBadgeView())
       ->setIcon('fa-users')
       ->setHeader(pht('Security Team'))
-      ->setSubhead(pht('<sripts>alert(1);</script>'))
+      ->setSubhead(pht('<script>alert(1);</script>'))
       ->setQuality(PHUIBadgeView::EPIC)
       ->setSource('Projects (automatic)')
       ->addByline(pht('Dec 31, 1969'))
@@ -152,7 +152,7 @@ final class PHUIBadgeExample extends PhabricatorUIExample {
     $flex2->addItems($badges2);
 
     $box2 = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Acheivements'))
+      ->setHeaderText(pht('Achievements'))
       ->appendChild($flex2);
 
     $flex3 = new PHUIBadgeBoxView();

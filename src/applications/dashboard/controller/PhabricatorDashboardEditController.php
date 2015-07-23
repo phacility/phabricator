@@ -3,20 +3,14 @@
 final class PhabricatorDashboardEditController
   extends PhabricatorDashboardController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    if ($this->id) {
+    if ($id) {
       $dashboard = id(new PhabricatorDashboardQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->needPanels(true)
         ->requireCapabilities(
           array(
@@ -27,7 +21,10 @@ final class PhabricatorDashboardEditController
       if (!$dashboard) {
         return new Aphront404Response();
       }
-
+      $v_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $dashboard->getPHID(),
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+      $v_projects = array_reverse($v_projects);
       $is_new = false;
     } else {
       if (!$request->getStr('edit')) {
@@ -44,7 +41,7 @@ final class PhabricatorDashboardEditController
       }
 
       $dashboard = PhabricatorDashboard::initializeNewDashboard($viewer);
-
+      $v_projects = array();
       $is_new = true;
     }
 
@@ -79,6 +76,7 @@ final class PhabricatorDashboardEditController
       $v_layout_mode = $request->getStr('layout_mode');
       $v_view_policy = $request->getStr('viewPolicy');
       $v_edit_policy = $request->getStr('editPolicy');
+      $v_projects = $request->getArr('projects');
 
       $xactions = array();
 
@@ -99,6 +97,12 @@ final class PhabricatorDashboardEditController
       $xactions[] = id(new PhabricatorDashboardTransaction())
         ->setTransactionType($type_edit_policy)
         ->setNewValue($v_edit_policy);
+
+      $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+      $xactions[] = id(new PhabricatorDashboardTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $proj_edge_type)
+        ->setNewValue(array('=' => array_fuse($v_projects)));
 
       try {
         $editor = id(new PhabricatorDashboardTransactionEditor())
@@ -153,8 +157,16 @@ final class PhabricatorDashboardEditController
           ->setLabel(pht('Layout Mode'))
           ->setName('layout_mode')
           ->setValue($v_layout_mode)
-          ->setOptions($layout_mode_options))
-      ->appendChild(
+          ->setOptions($layout_mode_options));
+
+    $form->appendControl(
+      id(new AphrontFormTokenizerControl())
+        ->setLabel(pht('Projects'))
+        ->setName('projects')
+        ->setValue($v_projects)
+        ->setDatasource(new PhabricatorProjectDatasource()));
+
+    $form->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($button)
           ->addCancelButton($cancel_uri));

@@ -6,4 +6,8 @@ abstract class DifferentialDiffHeraldField extends HeraldField {
     return ($object instanceof DifferentialDiff);
   }
 
+  public function getFieldGroupKey() {
+    return DifferentialDiffHeraldFieldGroup::FIELDGROUPKEY;
+  }
+
 }

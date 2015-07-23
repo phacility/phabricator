@@ -72,8 +72,10 @@ final class PhameBlogViewController extends PhameController {
     require_celerity_resource('aphront-tooltip-css');
     Javelin::initBehavior('phabricator-tooltips');
 
-    $properties = new PHUIPropertyListView();
-    $properties->setActionList($actions);
+    $properties = id(new PHUIPropertyListView())
+      ->setUser($user)
+      ->setObject($blog)
+      ->setActionList($actions);
 
     $properties->addProperty(
       pht('Skin'),
@@ -115,13 +117,18 @@ final class PhameBlogViewController extends PhameController {
       ->addObject($blog, PhameBlog::MARKUP_FIELD_DESCRIPTION)
       ->process();
 
-    $properties->addTextContent(
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'phabricator-remarkup',
-        ),
-        $engine->getOutput($blog, PhameBlog::MARKUP_FIELD_DESCRIPTION)));
+    $properties->invokeWillRenderEvent();
+
+    if (strlen($blog->getDescription())) {
+      $description = PhabricatorMarkupEngine::renderOneObject(
+        id(new PhabricatorMarkupOneOff())->setContent($blog->getDescription()),
+        'default',
+        $user);
+      $properties->addSectionHeader(
+        pht('Description'),
+        PHUIPropertyListView::ICON_SUMMARY);
+      $properties->addTextContent($description);
+    }
 
     return $properties;
   }

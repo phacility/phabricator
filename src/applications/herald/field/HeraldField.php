@@ -4,28 +4,37 @@ abstract class HeraldField extends Phobject {
 
   private $adapter;
 
-  const STANDARD_LIST = 'standard.list';
   const STANDARD_BOOL = 'standard.bool';
   const STANDARD_TEXT = 'standard.text';
   const STANDARD_TEXT_LIST = 'standard.text.list';
   const STANDARD_TEXT_MAP = 'standard.text.map';
   const STANDARD_PHID = 'standard.phid';
+  const STANDARD_PHID_LIST = 'standard.phid.list';
   const STANDARD_PHID_BOOL = 'standard.phid.bool';
   const STANDARD_PHID_NULLABLE = 'standard.phid.nullable';
 
   abstract public function getHeraldFieldName();
   abstract public function getHeraldFieldValue($object);
 
+  public function getFieldGroupKey() {
+    return null;
+  }
+
+  protected function getHeraldFieldStandardType() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  protected function getDatasource() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  protected function getDatasourceValueMap() {
+    return null;
+  }
+
   public function getHeraldFieldConditions() {
-    switch ($this->getHeraldFieldStandardConditions()) {
-      case self::STANDARD_LIST:
-        return array(
-          HeraldAdapter::CONDITION_INCLUDE_ALL,
-          HeraldAdapter::CONDITION_INCLUDE_ANY,
-          HeraldAdapter::CONDITION_INCLUDE_NONE,
-          HeraldAdapter::CONDITION_EXISTS,
-          HeraldAdapter::CONDITION_NOT_EXISTS,
-        );
+    $standard_type = $this->getHeraldFieldStandardType();
+    switch ($standard_type) {
       case self::STANDARD_BOOL:
         return array(
           HeraldAdapter::CONDITION_IS_TRUE,
@@ -43,6 +52,14 @@ abstract class HeraldField extends Phobject {
         return array(
           HeraldAdapter::CONDITION_IS_ANY,
           HeraldAdapter::CONDITION_IS_NOT_ANY,
+        );
+      case self::STANDARD_PHID_LIST:
+        return array(
+          HeraldAdapter::CONDITION_INCLUDE_ALL,
+          HeraldAdapter::CONDITION_INCLUDE_ANY,
+          HeraldAdapter::CONDITION_INCLUDE_NONE,
+          HeraldAdapter::CONDITION_EXISTS,
+          HeraldAdapter::CONDITION_NOT_EXISTS,
         );
       case self::STANDARD_PHID_BOOL:
         return array(
@@ -69,14 +86,52 @@ abstract class HeraldField extends Phobject {
         );
     }
 
-    throw new Exception(pht('Unknown standard condition set.'));
+    throw new Exception(
+      pht(
+        'Herald field "%s" has unknown standard type "%s".',
+        get_class($this),
+        $standard_type));
   }
 
-  protected function getHeraldFieldStandardConditions() {
-    throw new PhutilMethodNotImplementedException();
-  }
+  public function getHeraldFieldValueType($condition) {
+    $standard_type = $this->getHeraldFieldStandardType();
+    switch ($standard_type) {
+      case self::STANDARD_BOOL:
+      case self::STANDARD_PHID_BOOL:
+        return new HeraldEmptyFieldValue();
+      case self::STANDARD_TEXT:
+      case self::STANDARD_TEXT_LIST:
+      case self::STANDARD_TEXT_MAP:
+        return new HeraldTextFieldValue();
+      case self::STANDARD_PHID:
+      case self::STANDARD_PHID_NULLABLE:
+      case self::STANDARD_PHID_LIST:
+        switch ($condition) {
+          case HeraldAdapter::CONDITION_EXISTS:
+          case HeraldAdapter::CONDITION_NOT_EXISTS:
+            return new HeraldEmptyFieldValue();
+          default:
+            $tokenizer = id(new HeraldTokenizerFieldValue())
+              ->setKey($this->getHeraldFieldName())
+              ->setDatasource($this->getDatasource());
 
-  abstract public function getHeraldFieldValueType($condition);
+            $value_map = $this->getDatasourceValueMap();
+            if ($value_map !== null) {
+              $tokenizer->setValueMap($value_map);
+            }
+
+            return $tokenizer;
+        }
+        break;
+
+    }
+
+    throw new Exception(
+      pht(
+        'Herald field "%s" has unknown standard type "%s".',
+        get_class($this),
+        $standard_type));
+  }
 
   abstract public function supportsObject($object);
 
@@ -86,47 +141,22 @@ abstract class HeraldField extends Phobject {
 
   public function renderConditionValue(
     PhabricatorUser $viewer,
+    $condition,
     $value) {
 
-    // TODO: While this is less of a mess than it used to be, it would still
-    // be nice to push this down into individual fields better eventually and
-    // stop guessing which values are PHIDs and which aren't.
-
-    if (!is_array($value)) {
-      return $value;
-    }
-
-    $type_unknown = PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN;
-
-    foreach ($value as $key => $val) {
-      if (is_string($val)) {
-        if (phid_get_type($val) !== $type_unknown) {
-          $value[$key] = $viewer->renderHandle($val);
-        }
-      }
-    }
-
-    return phutil_implode_html(', ', $value);
+    $value_type = $this->getHeraldFieldValueType($condition);
+    $value_type->setViewer($viewer);
+    return $value_type->renderFieldValue($value);
   }
 
   public function getEditorValue(
     PhabricatorUser $viewer,
+    $condition,
     $value) {
 
-    // TODO: This should be better structured and pushed down into individual
-    // fields. As it is used to manually build tokenizer tokens, it can
-    // probably be removed entirely.
-
-    if (is_array($value)) {
-      $handles = $viewer->loadHandles($value);
-      $value_map = array();
-      foreach ($value as $k => $phid) {
-        $value_map[$phid] = $handles[$phid]->getName();
-      }
-      $value = $value_map;
-    }
-
-    return $value;
+    $value_type = $this->getHeraldFieldValueType($condition);
+    $value_type->setViewer($viewer);
+    return $value_type->renderEditorValue($value);
   }
 
   final public function setAdapter(HeraldAdapter $adapter) {

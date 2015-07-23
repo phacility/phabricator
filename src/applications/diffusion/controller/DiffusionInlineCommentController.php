@@ -108,7 +108,12 @@ final class DiffusionInlineCommentController
   }
 
   protected function deleteComment(PhabricatorInlineCommentInterface $inline) {
-    return $inline->delete();
+    $inline->setIsDeleted(1)->save();
+  }
+
+  protected function undeleteComment(
+    PhabricatorInlineCommentInterface $inline) {
+    $inline->setIsDeleted(0)->save();
   }
 
   protected function saveComment(PhabricatorInlineCommentInterface $inline) {

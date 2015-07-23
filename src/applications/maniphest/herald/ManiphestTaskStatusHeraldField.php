@@ -13,43 +13,16 @@ final class ManiphestTaskStatusHeraldField
     return $object->getStatus();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_PHID;
   }
 
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_TASK_STATUS;
+  protected function getDatasource() {
+    return new ManiphestTaskStatusDatasource();
   }
 
-  public function renderConditionValue(
-    PhabricatorUser $viewer,
-    $value) {
-
-    $status_map = ManiphestTaskStatus::getTaskStatusMap();
-
-    $value = (array)$value;
-    foreach ($value as $index => $val) {
-      $name = idx($status_map, $val);
-      if ($name !== null) {
-        $value[$index] = $name;
-      }
-    }
-
-    return implode(', ', $value);
-  }
-
-  public function getEditorValue(
-    PhabricatorUser $viewer,
-    $value) {
-
-    $status_map = ManiphestTaskStatus::getTaskStatusMap();
-
-    $value_map = array();
-    foreach ($value as $status) {
-      $value_map[$status] = idx($status_map, $status, $status);
-    }
-
-    return $value_map;
+  protected function getDatasourceValueMap() {
+    return ManiphestTaskStatus::getTaskStatusMap();
   }
 
 }

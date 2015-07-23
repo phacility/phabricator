@@ -2,20 +2,13 @@
 
 final class PonderQuestionViewController extends PonderController {
 
-  private $questionID;
-
-  public function willProcessRequest(array $data) {
-    $this->questionID = $data['id'];
-  }
-
-  public function processRequest() {
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $user = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $question = id(new PonderQuestionQuery())
       ->setViewer($user)
-      ->withIDs(array($this->questionID))
+      ->withIDs(array($id))
       ->needAnswers(true)
       ->needViewerVotes(true)
       ->executeOne();
@@ -61,7 +54,7 @@ final class PonderQuestionViewController extends PonderController {
       ->addPropertyList($properties);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
-    $crumbs->addTextCrumb('Q'.$this->questionID, '/Q'.$this->questionID);
+    $crumbs->addTextCrumb('Q'.$id, '/Q'.$id);
 
     return $this->buildApplicationPage(
       array(

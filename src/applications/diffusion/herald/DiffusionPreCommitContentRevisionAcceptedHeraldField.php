@@ -9,6 +9,10 @@ final class DiffusionPreCommitContentRevisionAcceptedHeraldField
     return pht('Accepted Differential revision');
   }
 
+  public function getFieldGroupKey() {
+    return HeraldRelatedFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     $revision = $this->getAdapter()->getRevision();
 
@@ -24,12 +28,8 @@ final class DiffusionPreCommitContentRevisionAcceptedHeraldField
     return $revision->getPHID();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_PHID_BOOL;
-  }
-
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_NONE;
   }
 
 }

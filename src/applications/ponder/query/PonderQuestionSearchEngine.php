@@ -11,36 +11,22 @@ final class PonderQuestionSearchEngine
     return 'PhabricatorPonderApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    $saved->setParameter(
-      'authorPHIDs',
-      $this->readUsersFromRequest($request, 'authors'));
-
-    $saved->setParameter(
-      'answererPHIDs',
-      $this->readUsersFromRequest($request, 'answerers'));
-
-    $saved->setParameter('status', $request->getStr('status'));
-
-    return $saved;
+  public function newQuery() {
+    return new PonderQuestionQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PonderQuestionQuery());
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
 
-    $author_phids = $saved->getParameter('authorPHIDs');
-    if ($author_phids) {
-      $query->withAuthorPHIDs($author_phids);
+    if ($map['authorPHIDs']) {
+      $query->withAuthorPHIDs($map['authorPHIDs']);
     }
 
-    $answerer_phids = $saved->getParameter('answererPHIDs');
-    if ($answerer_phids) {
-      $query->withAnswererPHIDs($answerer_phids);
+    if ($map['answerers']) {
+      $query->withAnswererPHIDs($map['answerers']);
     }
 
-    $status = $saved->getParameter('status');
+    $status = $map['status'];
     if ($status != null) {
       switch ($status) {
         case 0:
@@ -55,34 +41,21 @@ final class PonderQuestionSearchEngine
     return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
-
-    $author_phids = $saved_query->getParameter('authorPHIDs', array());
-    $answerer_phids = $saved_query->getParameter('answererPHIDs', array());
-    $status = $saved_query->getParameter(
-      'status', PonderQuestionStatus::STATUS_OPEN);
-
-    $form
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('authors')
-          ->setLabel(pht('Authors'))
-          ->setValue($author_phids))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('answerers')
-          ->setLabel(pht('Answered By'))
-          ->setValue($answerer_phids))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Status'))
-          ->setName('status')
-          ->setValue($status)
-          ->setOptions(PonderQuestionStatus::getQuestionStatusMap()));
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorUsersSearchField())
+        ->setKey('authorPHIDs')
+        ->setAliases(array('authors'))
+        ->setLabel(pht('Authors')),
+      id(new PhabricatorUsersSearchField())
+        ->setKey('answerers')
+        ->setAliases(array('answerers'))
+        ->setLabel(pht('Answered By')),
+      id(new PhabricatorSearchSelectField())
+        ->setLabel(pht('Status'))
+        ->setKey('status')
+        ->setOptions(PonderQuestionStatus::getQuestionStatusMap()),
+    );
   }
 
   protected function getURI($path) {
@@ -104,7 +77,6 @@ final class PonderQuestionSearchEngine
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 

@@ -13,12 +13,12 @@ final class DifferentialRevisionAuthorHeraldField
     return $object->getAuthorPHID();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_PHID;
   }
 
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_USER;
+  protected function getDatasource() {
+    return new PhabricatorPeopleDatasource();
   }
 
 }

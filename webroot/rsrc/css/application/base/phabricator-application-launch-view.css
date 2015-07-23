@@ -40,10 +40,10 @@ div.phabricator-application-launch-container {
 
 .phabricator-application-launch-icon {
   position: absolute;
-  width: 18px;
+  width: 38px;
   height: 18px;
-  top: 12px;
-  left: 10px;
+  top: 6px;
+  left: 0;
   font-size: 18px;
   text-align: center;
   vertical-align: bottom;

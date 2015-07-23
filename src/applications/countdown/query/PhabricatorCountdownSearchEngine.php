@@ -11,53 +11,39 @@ final class PhabricatorCountdownSearchEngine
     return 'PhabricatorCountdownApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-    $saved->setParameter(
-      'authorPHIDs',
-      $this->readUsersFromRequest($request, 'authors'));
-
-    $saved->setParameter('upcoming', $request->getBool('upcoming'));
-
-    return $saved;
+  public function newQuery() {
+    return new PhabricatorCountdownQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorCountdownQuery());
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
 
-    $author_phids = $saved->getParameter('authorPHIDs', array());
-    if ($author_phids) {
-      $query->withAuthorPHIDs($author_phids);
+    if ($map['authorPHIDs']) {
+      $query->withAuthorPHIDs($map['authorPHIDs']);
     }
 
-    if ($saved->getParameter('upcoming')) {
-      $query->withUpcoming(true);
+    if ($map['upcoming'] && $map['upcoming'][0] == 'upcoming') {
+      $query->withUpcoming();
     }
 
     return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
+  protected function buildCustomSearchFields() {
 
-    $author_phids = $saved_query->getParameter('authorPHIDs', array());
-    $upcoming = $saved_query->getParameter('upcoming');
-
-    $form
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('authors')
+    return array(
+        id(new PhabricatorUsersSearchField())
           ->setLabel(pht('Authors'))
-          ->setValue($author_phids))
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->addCheckbox(
-            'upcoming',
-            1,
-            pht('Show only countdowns that are still counting down.'),
-            $upcoming));
+          ->setKey('authorPHIDs')
+          ->setAliases(array('author', 'authors')),
+
+        id(new PhabricatorSearchCheckboxesField())
+          ->setKey('upcoming')
+          ->setOptions(array(
+            'upcoming' => pht('Show only upcoming countdowns.'),
+          )),
+      );
+
   }
 
   protected function getURI($path) {
@@ -89,7 +75,7 @@ final class PhabricatorCountdownSearchEngine
           'authorPHIDs',
           array($this->requireViewer()->getPHID()));
       case 'upcoming':
-        return $query->setParameter('upcoming', true);
+        return $query->setParameter('upcoming', array('upcoming'));
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
@@ -115,28 +101,35 @@ final class PhabricatorCountdownSearchEngine
     $list->setUser($viewer);
     foreach ($countdowns as $countdown) {
       $id = $countdown->getID();
+      $ended = false;
+      $icon = 'fa-clock-o';
+      $color = 'green';
+      $epoch = $countdown->getEpoch();
+      if ($epoch <= PhabricatorTime::getNow()) {
+        $ended = true;
+        $icon = 'fa-check-square-o';
+        $color = 'grey';
+      }
 
       $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
         ->setObject($countdown)
         ->setObjectName("C{$id}")
         ->setHeader($countdown->getTitle())
+        ->setStatusIcon($icon.' '.$color)
         ->setHref($this->getApplicationURI("{$id}/"))
         ->addByline(
           pht(
             'Created by %s',
             $handles[$countdown->getAuthorPHID()]->renderLink()));
 
-      $epoch = $countdown->getEpoch();
-      if ($epoch >= time()) {
-        $item->addIcon(
-          'none',
-          pht('Ends %s', phabricator_datetime($epoch, $viewer)));
-      } else {
-        $item->addIcon(
-          'delete',
-          pht('Ended %s', phabricator_datetime($epoch, $viewer)));
+      if ($ended) {
+        $item->addAttribute(
+          pht('Launched on %s', phabricator_datetime($epoch, $viewer)));
         $item->setDisabled(true);
+      } else {
+        $item->addAttribute(
+          phabricator_datetime($epoch, $viewer));
       }
 
       $list->addItem($item);

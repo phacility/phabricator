@@ -13,12 +13,8 @@ final class DiffusionPreCommitRefNameHeraldField
     return $object->getRefName();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return HeraldField::STANDARD_TEXT;
-  }
-
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_TEXT;
   }
 
 }

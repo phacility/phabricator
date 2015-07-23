@@ -3,6 +3,10 @@
 final class PhabricatorXHPASTViewTreeController
   extends PhabricatorXHPASTViewPanelController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $storage = $this->getStorageTree();
     $input = $storage->getInput();

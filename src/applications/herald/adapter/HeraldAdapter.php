@@ -41,24 +41,6 @@ abstract class HeraldAdapter extends Phobject {
   const ACTION_BLOCK = 'block';
   const ACTION_REQUIRE_SIGNATURE = 'signature';
 
-  const VALUE_TEXT            = 'text';
-  const VALUE_NONE            = 'none';
-  const VALUE_EMAIL           = 'email';
-  const VALUE_USER            = 'user';
-  const VALUE_RULE            = 'rule';
-  const VALUE_REPOSITORY      = 'repository';
-  const VALUE_OWNERS_PACKAGE  = 'package';
-  const VALUE_PROJECT         = 'project';
-  const VALUE_FLAG_COLOR      = 'flagcolor';
-  const VALUE_CONTENT_SOURCE  = 'contentsource';
-  const VALUE_USER_OR_PROJECT = 'userorproject';
-  const VALUE_BUILD_PLAN      = 'buildplan';
-  const VALUE_TASK_PRIORITY   = 'taskpriority';
-  const VALUE_TASK_STATUS     = 'taskstatus';
-  const VALUE_LEGAL_DOCUMENTS   = 'legaldocuments';
-  const VALUE_APPLICATION_EMAIL = 'applicationemail';
-  const VALUE_SPACE = 'space';
-
   private $contentSource;
   private $isNewObject;
   private $applicationEmail;
@@ -328,6 +310,16 @@ abstract class HeraldAdapter extends Phobject {
 
   public function getFieldNameMap() {
     return mpull($this->getFieldImplementationMap(), 'getHeraldFieldName');
+  }
+
+  public function getFieldGroupKey($field_key) {
+    $field = $this->getFieldImplementation($field_key);
+
+    if (!$field) {
+      return null;
+    }
+
+    return $field->getFieldGroupKey();
   }
 
 
@@ -764,38 +756,45 @@ abstract class HeraldAdapter extends Phobject {
         case self::ACTION_ASSIGN_TASK:
         case self::ACTION_ADD_REVIEWERS:
         case self::ACTION_ADD_BLOCKING_REVIEWERS:
-          return self::VALUE_NONE;
+          return new HeraldEmptyFieldValue();
         case self::ACTION_FLAG:
-          return self::VALUE_FLAG_COLOR;
+          return $this->buildFlagColorFieldValue();
         case self::ACTION_ADD_PROJECTS:
         case self::ACTION_REMOVE_PROJECTS:
-          return self::VALUE_PROJECT;
+          return $this->buildTokenizerFieldValue(
+            new PhabricatorProjectDatasource());
       }
     } else {
       switch ($action) {
         case self::ACTION_ADD_CC:
         case self::ACTION_REMOVE_CC:
         case self::ACTION_EMAIL:
-          return self::VALUE_EMAIL;
+          return $this->buildTokenizerFieldValue(
+            new PhabricatorMetaMTAMailableDatasource());
         case self::ACTION_NOTHING:
-          return self::VALUE_NONE;
+          return new HeraldEmptyFieldValue();
         case self::ACTION_ADD_PROJECTS:
         case self::ACTION_REMOVE_PROJECTS:
-          return self::VALUE_PROJECT;
+          return $this->buildTokenizerFieldValue(
+            new PhabricatorProjectDatasource());
         case self::ACTION_FLAG:
-          return self::VALUE_FLAG_COLOR;
+          return $this->buildFlagColorFieldValue();
         case self::ACTION_ASSIGN_TASK:
-          return self::VALUE_USER;
+          return $this->buildTokenizerFieldValue(
+            new PhabricatorPeopleDatasource());
         case self::ACTION_AUDIT:
         case self::ACTION_ADD_REVIEWERS:
         case self::ACTION_ADD_BLOCKING_REVIEWERS:
-          return self::VALUE_USER_OR_PROJECT;
+          return $this->buildTokenizerFieldValue(
+            new PhabricatorProjectOrUserDatasource());
         case self::ACTION_APPLY_BUILD_PLANS:
-          return self::VALUE_BUILD_PLAN;
+          return $this->buildTokenizerFieldValue(
+            new HarbormasterBuildPlanDatasource());
         case self::ACTION_REQUIRE_SIGNATURE:
-          return self::VALUE_LEGAL_DOCUMENTS;
+          return $this->buildTokenizerFieldValue(
+            new LegalpadDocumentDatasource());
         case self::ACTION_BLOCK:
-          return self::VALUE_TEXT;
+          return new HeraldTextFieldValue();
       }
     }
 
@@ -807,6 +806,22 @@ abstract class HeraldAdapter extends Phobject {
     throw new Exception(pht("Unknown or invalid action '%s'.", $action));
   }
 
+  private function buildFlagColorFieldValue() {
+    return id(new HeraldSelectFieldValue())
+      ->setKey('flag.color')
+      ->setOptions(PhabricatorFlagColor::getColorNameMap())
+      ->setDefault(PhabricatorFlagColor::COLOR_BLUE);
+  }
+
+  private function buildTokenizerFieldValue(
+    PhabricatorTypeaheadDatasource $datasource) {
+
+    $key = 'action.'.get_class($datasource);
+
+    return id(new HeraldTokenizerFieldValue())
+      ->setKey($key)
+      ->setDatasource($datasource);
+  }
 
 /* -(  Repetition  )--------------------------------------------------------- */
 
@@ -877,23 +892,12 @@ abstract class HeraldAdapter extends Phobject {
     HeraldCondition $condition,
     array $handles) {
 
-    $impl = $this->getFieldImplementation($condition->getFieldName());
-    if ($impl) {
-      return $impl->getEditorValue(
-        $viewer,
-        $condition->getValue());
-    }
+    $field = $this->requireFieldImplementation($condition->getFieldName());
 
-    $value = $condition->getValue();
-    if (is_array($value)) {
-      $value_map = array();
-      foreach ($value as $k => $phid) {
-        $value_map[$phid] = $handles[$phid]->getName();
-      }
-      $value = $value_map;
-    }
-
-    return $value;
+    return $field->getEditorValue(
+      $viewer,
+      $condition->getFieldCondition(),
+      $condition->getValue());
   }
 
   public function renderRuleAsText(
@@ -1015,27 +1019,12 @@ abstract class HeraldAdapter extends Phobject {
     PhabricatorHandleList $handles,
     PhabricatorUser $viewer) {
 
-    $impl = $this->getFieldImplementation($condition->getFieldName());
-    if ($impl) {
-      return $impl->renderConditionValue(
-        $viewer,
-        $condition->getValue());
-    }
+    $field = $this->requireFieldImplementation($condition->getFieldName());
 
-    $value = $condition->getValue();
-    if (!is_array($value)) {
-      $value = array($value);
-    }
-
-    foreach ($value as $index => $val) {
-      $handle = $handles->getHandleIfExists($val);
-      if ($handle) {
-        $value[$index] = $handle->renderLink();
-      }
-    }
-
-    $value = phutil_implode_html(', ', $value);
-    return $value;
+    return $field->renderConditionValue(
+      $viewer,
+      $condition->getFieldCondition(),
+      $condition->getValue());
   }
 
   private function renderActionTargetAsText(

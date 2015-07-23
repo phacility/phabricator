@@ -9,16 +9,16 @@ final class DifferentialDiffContentAddedHeraldField
     return pht('Added file content');
   }
 
+  public function getFieldGroupKey() {
+    return DifferentialChangeHeraldFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     return $this->getAdapter()->loadAddedContentDictionary();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_TEXT_MAP;
-  }
-
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_TEXT;
   }
 
 }

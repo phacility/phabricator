@@ -7,16 +7,15 @@ final class PhabricatorTokenLeaderController
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+ public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $pager = new PHUIPagerView();
     $pager->setURI($request->getRequestURI(), 'page');
     $pager->setOffset($request->getInt('page'));
 
     $query = id(new PhabricatorTokenReceiverQuery());
-    $objects = $query->setViewer($user)->executeWithOffsetPager($pager);
+    $objects = $query->setViewer($viewer)->executeWithOffsetPager($pager);
     $counts = $query->getTokenCounts();
 
     $handles = array();
@@ -24,7 +23,7 @@ final class PhabricatorTokenLeaderController
     if ($counts) {
       $phids = mpull($objects, 'getPHID');
       $handles = id(new PhabricatorHandleQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withPHIDs($phids)
         ->execute();
     }

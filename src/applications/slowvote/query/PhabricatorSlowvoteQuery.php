@@ -53,20 +53,12 @@ final class PhabricatorSlowvoteQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new PhabricatorSlowvotePoll();
+  }
+
   protected function loadPage() {
-    $table = new PhabricatorSlowvotePoll();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT p.* FROM %T p %Q %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildJoinsClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $polls) {
@@ -125,53 +117,50 @@ final class PhabricatorSlowvoteQuery
     return $polls;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'p.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'p.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->authorPHIDs) {
+    if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'p.authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
     if ($this->isClosed !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'p.isClosed = %d',
         (int)$this->isClosed);
     }
-
-    $where[] = $this->buildPagingClause($conn_r);
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
-  private function buildJoinsClause(AphrontDatabaseConnection $conn_r) {
-    $joins = array();
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
 
-    if ($this->withVotesByViewer) {
+    if ($this->withVotesByViewer !== null) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T vv ON vv.pollID = p.id AND vv.authorPHID = %s',
         id(new PhabricatorSlowvoteChoice())->getTableName(),
         $this->getViewer()->getPHID());
     }
-
-    return implode(' ', $joins);
+    return $joins;
   }
 
   protected function getPrimaryTableAlias() {

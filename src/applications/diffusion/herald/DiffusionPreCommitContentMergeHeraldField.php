@@ -13,12 +13,8 @@ final class DiffusionPreCommitContentMergeHeraldField
     return $this->getAdapter()->getIsMergeCommit();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return HeraldField::STANDARD_BOOL;
-  }
-
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_NONE;
   }
 
 }

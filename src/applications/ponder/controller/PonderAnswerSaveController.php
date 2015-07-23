@@ -2,9 +2,8 @@
 
 final class PonderAnswerSaveController extends PonderController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     if (!$request->isFormPost()) {
       return new Aphront400Response();

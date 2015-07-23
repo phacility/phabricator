@@ -93,6 +93,7 @@ final class PhabricatorDashboardManageController
 
     $actions = id(new PhabricatorActionListView())
       ->setObjectURI($this->getApplicationURI('view/'.$dashboard->getID().'/'))
+      ->setObject($dashboard)
       ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -168,6 +169,8 @@ final class PhabricatorDashboardManageController
     $properties->addProperty(
       pht('Panels'),
       $viewer->renderHandleList($dashboard->getPanelPHIDs()));
+
+    $properties->invokeWillRenderEvent();
 
     return $properties;
   }

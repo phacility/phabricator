@@ -11,7 +11,7 @@ final class PhabricatorTokensApplication extends PhabricatorApplication {
   }
 
   public function getFontIcon() {
-    return 'fa-trophy';
+    return 'fa-thumbs-up';
   }
 
   public function getTitleGlyph() {

@@ -13,12 +13,8 @@ final class DiffusionPreCommitContentCommitterRawHeraldField
     return $this->getAdapter()->getCommitterRaw();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_TEXT;
-  }
-
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_TEXT;
   }
 
 }

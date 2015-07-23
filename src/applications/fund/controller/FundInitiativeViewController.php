@@ -45,7 +45,6 @@ final class FundInitiativeViewController
       $initiative->getStatus());
 
     $header = id(new PHUIHeaderView())
-      ->setObjectName($initiative->getMonogram())
       ->setHeader($initiative->getName())
       ->setUser($viewer)
       ->setPolicyObject($initiative)

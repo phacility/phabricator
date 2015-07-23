@@ -436,7 +436,7 @@ var.remarkup-assist-textarea {
 
 .remarkup-assist-button {
   display: block;
-  padding: 5px;
+  padding: 4px 5px;
   float: left;
 }
 

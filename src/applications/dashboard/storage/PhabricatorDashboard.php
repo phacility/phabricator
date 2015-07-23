@@ -7,7 +7,9 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorFlaggableInterface,
+    PhabricatorDestructibleInterface,
+    PhabricatorProjectInterface {
 
   protected $name;
   protected $viewPolicy;
@@ -16,6 +18,8 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
 
   private $panelPHIDs = self::ATTACHABLE;
   private $panels = self::ATTACHABLE;
+  private $edgeProjectPHIDs = self::ATTACHABLE;
+
 
   public static function initializeNewDashboard(PhabricatorUser $actor) {
     return id(new PhabricatorDashboard())
@@ -61,6 +65,15 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
   public function setLayoutConfigFromObject(
     PhabricatorDashboardLayoutConfig $object) {
     $this->setLayoutConfig($object->toDictionary());
+    return $this;
+  }
+
+  public function getProjectPHIDs() {
+    return $this->assertAttached($this->edgeProjectPHIDs);
+  }
+
+  public function attachProjectPHIDs(array $phids) {
+    $this->edgeProjectPHIDs = $phids;
     return $this;
   }
 

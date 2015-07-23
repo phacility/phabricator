@@ -52,6 +52,10 @@ div.phui-calendar-day-event {
   z-index: 4;
 }
 
+.project-board-header {
+  z-index: 4;
+}
+
 .conpherence-layout .conpherence-no-threads {
   z-index: 4;
 }

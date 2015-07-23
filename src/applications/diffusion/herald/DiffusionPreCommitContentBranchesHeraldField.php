@@ -13,12 +13,8 @@ final class DiffusionPreCommitContentBranchesHeraldField
     return $this->getAdapter()->getBranches();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_TEXT_LIST;
-  }
-
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_TEXT;
   }
 
 }

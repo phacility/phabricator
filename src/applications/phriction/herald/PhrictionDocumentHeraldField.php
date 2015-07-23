@@ -6,4 +6,7 @@ abstract class PhrictionDocumentHeraldField extends HeraldField {
     return ($object instanceof PhrictionDocument);
   }
 
+  public function getFieldGroupKey() {
+    return PhrictionDocumentHeraldFieldGroup::FIELDGROUPKEY;
+  }
 }

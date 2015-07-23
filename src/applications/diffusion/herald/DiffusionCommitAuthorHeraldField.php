@@ -13,18 +13,12 @@ final class DiffusionCommitAuthorHeraldField
     return $object->getCommitData()->getCommitDetail('authorPHID');
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_PHID_NULLABLE;
   }
 
-  public function getHeraldFieldValueType($condition) {
-    switch ($condition) {
-      case HeraldAdapter::CONDITION_EXISTS:
-      case HeraldAdapter::CONDITION_NOT_EXISTS:
-        return HeraldAdapter::VALUE_NONE;
-      default:
-        return HeraldAdapter::VALUE_USER;
-    }
+  protected function getDatasource() {
+    return new PhabricatorPeopleDatasource();
   }
 
 }

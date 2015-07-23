@@ -9,22 +9,16 @@ final class DifferentialRevisionAffectedFilesHeraldField
     return pht('Affected files');
   }
 
+  public function getFieldGroupKey() {
+    return DifferentialChangeHeraldFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     return $this->getAdapter()->loadAffectedPaths();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_TEXT_LIST;
-  }
-
-  public function getHeraldFieldValueType($condition) {
-    switch ($condition) {
-      case HeraldAdapter::CONDITION_EXISTS:
-      case HeraldAdapter::CONDITION_NOT_EXISTS:
-        return HeraldAdapter::VALUE_NONE;
-      default:
-        return HeraldAdapter::VALUE_TEXT;
-    }
   }
 
 }

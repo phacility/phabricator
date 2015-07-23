@@ -3,31 +3,24 @@
 final class PhabricatorCountdownViewController
   extends PhabricatorCountdownController {
 
-  private $id;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $countdown = id(new PhabricatorCountdownQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->executeOne();
     if (!$countdown) {
       return new Aphront404Response();
     }
 
     $countdown_view = id(new PhabricatorCountdownView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setCountdown($countdown)
       ->setHeadless(true);
 
@@ -38,10 +31,22 @@ final class PhabricatorCountdownViewController
       ->buildApplicationCrumbs()
       ->addTextCrumb("C{$id}");
 
+    $epoch = $countdown->getEpoch();
+    if ($epoch >= PhabricatorTime::getNow()) {
+      $icon = 'fa-clock-o';
+      $color = '';
+      $status = pht('Running');
+    } else {
+      $icon = 'fa-check-square-o';
+      $color = 'dark';
+      $status = pht('Launched');
+    }
+
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
-      ->setUser($user)
-      ->setPolicyObject($countdown);
+      ->setUser($viewer)
+      ->setPolicyObject($countdown)
+      ->setStatus($icon, $color, $status);
 
     $actions = $this->buildActionListView($countdown);
     $properties = $this->buildPropertyListView($countdown, $actions);
@@ -50,10 +55,16 @@ final class PhabricatorCountdownViewController
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    $timeline = $this->buildTransactionTimeline(
+      $countdown,
+      new PhabricatorCountdownTransactionQuery());
+    $timeline->setShouldTerminate(true);
+
     $content = array(
       $crumbs,
       $object_box,
       $countdown_view,
+      $timeline,
     );
 
     return $this->buildApplicationPage(
@@ -70,6 +81,7 @@ final class PhabricatorCountdownViewController
     $id = $countdown->getID();
 
     $view = id(new PhabricatorActionListView())
+      ->setObject($countdown)
       ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -104,6 +116,7 @@ final class PhabricatorCountdownViewController
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
+      ->setObject($countdown)
       ->setActionList($actions);
 
     $view->addProperty(

@@ -13,12 +13,12 @@ final class DiffusionPreCommitContentPusherHeraldField
     return $this->getAdapter()->getHookEngine()->getViewer()->getPHID();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return HeraldField::STANDARD_PHID;
   }
 
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_USER;
+  protected function getDatasource() {
+    return new PhabricatorPeopleDatasource();
   }
 
 }

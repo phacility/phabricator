@@ -14,6 +14,7 @@ final class PhabricatorUser
     PhabricatorCustomFieldInterface,
     PhabricatorDestructibleInterface,
     PhabricatorSSHPublicKeyInterface,
+    PhabricatorFlaggableInterface,
     PhabricatorApplicationTransactionInterface {
 
   const SESSION_TABLE = 'phabricator_session';

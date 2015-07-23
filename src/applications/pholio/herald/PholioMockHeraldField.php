@@ -6,4 +6,8 @@ abstract class PholioMockHeraldField extends HeraldField {
     return ($object instanceof PholioMock);
   }
 
+  public function getFieldGroupKey() {
+    return PholioMockHeraldFieldGroup::FIELDGROUPKEY;
+  }
+
 }

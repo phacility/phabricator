@@ -116,10 +116,6 @@ final class ReleephRequestView extends AphrontView {
     $text = ReleephRequestStatus::getStatusDescriptionFor($pull->getStatus());
     $header->setStatus($icon, $color, $text);
 
-    if ($this->getIsListView()) {
-      $header->setObjectName($pull->getMonogram());
-    }
-
     return $header;
   }
 

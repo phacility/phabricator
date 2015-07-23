@@ -15,18 +15,12 @@ final class DiffusionPreCommitContentRepositoryProjectsHeraldField
       PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
   }
 
-  protected function getHeraldFieldStandardConditions() {
-    return HeraldField::STANDARD_LIST;
+  protected function getHeraldFieldStandardType() {
+    return HeraldField::STANDARD_PHID_LIST;
   }
 
-  public function getHeraldFieldValueType($condition) {
-    switch ($condition) {
-      case HeraldAdapter::CONDITION_EXISTS:
-      case HeraldAdapter::CONDITION_NOT_EXISTS:
-        return HeraldAdapter::VALUE_NONE;
-      default:
-        return HeraldAdapter::VALUE_PROJECT;
-    }
+  protected function getDatasource() {
+    return new PhabricatorProjectDatasource();
   }
 
 }

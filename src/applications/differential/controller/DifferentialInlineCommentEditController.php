@@ -131,11 +131,26 @@ final class DifferentialInlineCommentEditController
 
   protected function deleteComment(PhabricatorInlineCommentInterface $inline) {
     $inline->openTransaction();
+
+      $inline->setIsDeleted(1)->save();
       DifferentialDraft::deleteHasDraft(
         $inline->getAuthorPHID(),
         $inline->getRevisionPHID(),
         $inline->getPHID());
-      $inline->delete();
+
+    $inline->saveTransaction();
+  }
+
+  protected function undeleteComment(
+    PhabricatorInlineCommentInterface $inline) {
+    $inline->openTransaction();
+
+      $inline->setIsDeleted(0)->save();
+      DifferentialDraft::markHasDraft(
+        $inline->getAuthorPHID(),
+        $inline->getRevisionPHID(),
+        $inline->getPHID());
+
     $inline->saveTransaction();
   }
 

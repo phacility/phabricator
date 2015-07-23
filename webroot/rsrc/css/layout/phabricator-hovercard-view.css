@@ -56,7 +56,7 @@
 }
 
 .phabricator-hovercard-body-item {
-  margin: 2px 0 0 0px;
+  margin: 4px 0 0 0;
 }
 
 .phabricator-hovercard-body-header {
@@ -82,6 +82,15 @@
   background-repeat: no-repeat;
   background-size: 100%;
 }
+
+.hovercard-badges {
+  margin: 8px 0 0 0;
+}
+
+.hovercard-badges .phui-badge-flex-item {
+  float: left;
+}
+
 .phabricator-hovercard-tail {
   width: 396px;
   float: left;

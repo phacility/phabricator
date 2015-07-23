@@ -6,7 +6,7 @@
   padding: 16px 0 8px;
   border-color: {$lightgreyborder};
   width: 300px;
-  background-color: {$lightgreybackground};
+  background-color: transparent;
 }
 
 .phui-workpanel-view .phui-header-shell .phui-header-header {

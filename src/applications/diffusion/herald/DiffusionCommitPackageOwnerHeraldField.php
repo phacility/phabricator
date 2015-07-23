@@ -9,6 +9,10 @@ final class DiffusionCommitPackageOwnerHeraldField
     return pht('Affected package owners');
   }
 
+  public function getFieldGroupKey() {
+    return HeraldRelatedFieldGroup::FIELDGROUPKEY;
+  }
+
   public function getHeraldFieldValue($object) {
     $packages = $this->getAdapter()->loadAffectedPackages();
     if (!$packages) {
@@ -20,18 +24,12 @@ final class DiffusionCommitPackageOwnerHeraldField
     return mpull($owners, 'getUserPHID');
   }
 
-  protected function getHeraldFieldStandardConditions() {
-    return self::STANDARD_LIST;
+  protected function getHeraldFieldStandardType() {
+    return self::STANDARD_PHID_LIST;
   }
 
-  public function getHeraldFieldValueType($condition) {
-    switch ($condition) {
-      case HeraldAdapter::CONDITION_EXISTS:
-      case HeraldAdapter::CONDITION_NOT_EXISTS:
-        return HeraldAdapter::VALUE_NONE;
-      default:
-        return HeraldAdapter::VALUE_USER_OR_PROJECT;
-    }
+  protected function getDatasource() {
+    return new PhabricatorProjectOrUserDatasource();
   }
 
 }

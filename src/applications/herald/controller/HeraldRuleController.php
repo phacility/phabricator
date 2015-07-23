@@ -435,13 +435,43 @@ final class HeraldRuleController extends HeraldController {
       }
     }
 
+    $group_map = array();
+    foreach ($field_map as $field_key => $field_name) {
+      $group_key = $adapter->getFieldGroupKey($field_key);
+      $group_map[$group_key][$field_key] = $field_name;
+    }
+
+    $field_groups = HeraldFieldGroup::getAllFieldGroups();
+
+    $groups = array();
+    foreach ($group_map as $group_key => $options) {
+      asort($options);
+
+      $field_group = idx($field_groups, $group_key);
+      if ($field_group) {
+        $group_label = $field_group->getGroupLabel();
+        $group_order = $field_group->getSortKey();
+      } else {
+        $group_label = nonempty($group_key, pht('Other'));
+        $group_order = 'Z';
+      }
+
+      $groups[] = array(
+        'label' => $group_label,
+        'options' => $options,
+        'order' => $group_order,
+      );
+    }
+
+    $groups = array_values(isort($groups, 'order'));
 
     $config_info = array();
-    $config_info['fields'] = $field_map;
+    $config_info['fields'] = $groups;
     $config_info['conditions'] = $all_conditions;
     $config_info['actions'] = $action_map;
+    $config_info['valueMap'] = array();
 
-    foreach ($config_info['fields'] as $field => $name) {
+    foreach ($field_map as $field => $name) {
       try {
         $field_conditions = $adapter->getConditionsForField($field);
       } catch (Exception $ex) {
@@ -450,12 +480,21 @@ final class HeraldRuleController extends HeraldController {
       $config_info['conditionMap'][$field] = $field_conditions;
     }
 
-    foreach ($config_info['fields'] as $field => $fname) {
+    foreach ($field_map as $field => $fname) {
       foreach ($config_info['conditionMap'][$field] as $condition) {
-        $value_type = $adapter->getValueTypeForFieldAndCondition(
+        $value_key = $adapter->getValueTypeForFieldAndCondition(
           $field,
           $condition);
-        $config_info['values'][$field][$condition] = $value_type;
+
+        if ($value_key instanceof HeraldFieldValue) {
+          $value_key->setViewer($this->getViewer());
+
+          $spec = $value_key->getControlSpecificationDictionary();
+          $value_key = $value_key->getFieldValueKey();
+          $config_info['valueMap'][$value_key] = $spec;
+        }
+
+        $config_info['values'][$field][$condition] = $value_key;
       }
     }
 
@@ -463,55 +502,32 @@ final class HeraldRuleController extends HeraldController {
 
     foreach ($config_info['actions'] as $action => $name) {
       try {
-        $action_value = $adapter->getValueTypeForAction(
+        $value_key = $adapter->getValueTypeForAction(
           $action,
          $rule->getRuleType());
       } catch (Exception $ex) {
-        $action_value = array(HeraldAdapter::VALUE_NONE);
+        $value_key = new HeraldEmptyFieldValue();
       }
 
-      $config_info['targets'][$action] = $action_value;
+      if ($value_key instanceof HeraldFieldValue) {
+        $value_key->setViewer($this->getViewer());
+
+        $spec = $value_key->getControlSpecificationDictionary();
+        $value_key = $value_key->getFieldValueKey();
+        $config_info['valueMap'][$value_key] = $spec;
+      }
+
+      $config_info['targets'][$action] = $value_key;
     }
 
-    $changeflag_options =
-      PhabricatorRepositoryPushLog::getHeraldChangeFlagConditionOptions();
     Javelin::initBehavior(
       'herald-rule-editor',
       array(
         'root' => 'herald-rule-edit-form',
         'conditions' => (object)$serial_conditions,
         'actions' => (object)$serial_actions,
-        'select' => array(
-          HeraldAdapter::VALUE_CONTENT_SOURCE => array(
-            'options' => PhabricatorContentSource::getSourceNameMap(),
-            'default' => PhabricatorContentSource::SOURCE_WEB,
-          ),
-          HeraldAdapter::VALUE_FLAG_COLOR => array(
-            'options' => PhabricatorFlagColor::getColorNameMap(),
-            'default' => PhabricatorFlagColor::COLOR_BLUE,
-          ),
-          HeraldPreCommitRefAdapter::VALUE_REF_TYPE => array(
-            'options' => array(
-              PhabricatorRepositoryPushLog::REFTYPE_BRANCH
-                => pht('branch (git/hg)'),
-              PhabricatorRepositoryPushLog::REFTYPE_TAG
-                => pht('tag (git)'),
-              PhabricatorRepositoryPushLog::REFTYPE_BOOKMARK
-                => pht('bookmark (hg)'),
-            ),
-            'default' => PhabricatorRepositoryPushLog::REFTYPE_BRANCH,
-          ),
-          HeraldPreCommitRefAdapter::VALUE_REF_CHANGE => array(
-            'options' => $changeflag_options,
-            'default' => PhabricatorRepositoryPushLog::CHANGEFLAG_ADD,
-          ),
-        ),
-        'template' => $this->buildTokenizerTemplates($handles) + array(
+        'template' => $this->buildTokenizerTemplates() + array(
           'rules' => $all_rules,
-        ),
-        'author' => array(
-          $rule->getAuthorPHID() =>
-            $handles[$rule->getAuthorPHID()]->getName(),
         ),
         'info' => $config_info,
       ));
@@ -593,39 +609,10 @@ final class HeraldRuleController extends HeraldController {
   }
 
 
-  protected function buildTokenizerTemplates(array $handles) {
+  protected function buildTokenizerTemplates() {
     $template = new AphrontTokenizerTemplateView();
     $template = $template->render();
-
-    $sources = array(
-      'repository' => new DiffusionRepositoryDatasource(),
-      'legaldocuments' => new LegalpadDocumentDatasource(),
-      'taskpriority' => new ManiphestTaskPriorityDatasource(),
-      'taskstatus' => new ManiphestTaskStatusDatasource(),
-      'buildplan' => new HarbormasterBuildPlanDatasource(),
-      'package' => new PhabricatorOwnersPackageDatasource(),
-      'project' => new PhabricatorProjectDatasource(),
-      'user' => new PhabricatorPeopleDatasource(),
-      'email' => new PhabricatorMetaMTAMailableDatasource(),
-      'userorproject' => new PhabricatorProjectOrUserDatasource(),
-      'applicationemail' => new PhabricatorMetaMTAApplicationEmailDatasource(),
-      'space' => new PhabricatorSpacesNamespaceDatasource(),
-    );
-
-    foreach ($sources as $key => $source) {
-      $source->setViewer($this->getViewer());
-
-      $sources[$key] = array(
-        'uri' => $source->getDatasourceURI(),
-        'placeholder' => $source->getPlaceholderText(),
-        'browseURI' => $source->getBrowseURI(),
-      );
-    }
-
     return array(
-      'source' => $sources,
-      'username' => $this->getRequest()->getUser()->getUserName(),
-      'icons' => mpull($handles, 'getTypeIcon', 'getPHID'),
       'markup' => $template,
     );
   }
