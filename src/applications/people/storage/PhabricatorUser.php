@@ -55,6 +55,7 @@ final class PhabricatorUser
   private $preferences = null;
   private $omnipotent = false;
   private $customFields = self::ATTACHABLE;
+  private $badgePHIDs = self::ATTACHABLE;
 
   private $alternateCSRFString = self::ATTACHABLE;
   private $session = self::ATTACHABLE;
@@ -1143,6 +1144,15 @@ final class PhabricatorUser
    */
   public function renderHandleList(array $phids) {
     return $this->loadHandles($phids)->renderList();
+  }
+
+  public function attachBadgePHIDs(array $phids) {
+    $this->badgePHIDs = $phids;
+    return $this;
+  }
+
+  public function getBadgePHIDs() {
+    return $this->assertAttached($this->badgePHIDs);
   }
 
 
