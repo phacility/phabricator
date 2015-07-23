@@ -174,11 +174,11 @@ final class PhabricatorCoreConfigOptions
             "The current value of PATH after configuration is applied is:\n\n".
             "  lang=text\n".
             "  %s",
+            'pygmentize',
             '$PATH',
             '$PATH',
             'phabricator/support/bin/',
-            $path,
-            'pygmentize'))
+            $path))
         ->setLocked(true)
         ->addExample('/usr/local/bin', pht('Add One Path'))
         ->addExample("/usr/bin\n/usr/local/bin", pht('Add Multiple Paths')),
