@@ -3,7 +3,7 @@
 /**
  * @task config Configuration
  */
-abstract class DoorkeeperFeedStoryPublisher {
+abstract class DoorkeeperFeedStoryPublisher extends Phobject {
 
   private $feedStory;
   private $viewer;

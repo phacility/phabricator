@@ -15,19 +15,19 @@ final class PhragmentQueryFragmentsConduitAPIMethod
     return pht('Query fragments based on their paths.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'paths' => 'required list<string>',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR_BAD_FRAGMENT' => 'No such fragment exists',
+      'ERR_BAD_FRAGMENT' => pht('No such fragment exists.'),
     );
   }
 

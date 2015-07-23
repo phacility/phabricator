@@ -48,9 +48,7 @@ final class HarbormasterBuildViewController
     $this->buildPropertyLists($box, $build, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(
-      $build->getBuildable()->getMonogram(),
-      '/'.$build->getBuildable()->getMonogram());
+    $this->addBuildableCrumb($crumbs, $build->getBuildable());
     $crumbs->addTextCrumb($title);
 
     if ($generation === null || $generation > $build->getBuildGeneration() ||
@@ -99,28 +97,51 @@ final class HarbormasterBuildViewController
       $item->setIcon($icon, $color);
       $status_view->addItem($item);
 
-      $properties->addProperty(pht('Name'), $build_target->getName());
+      $when = array();
+      $started = $build_target->getDateStarted();
+      $now = PhabricatorTime::getNow();
+      if ($started) {
+        $ended = $build_target->getDateCompleted();
+        if ($ended) {
+          $when[] = pht(
+            'Completed at %s',
+            phabricator_datetime($started, $viewer));
 
-      if ($build_target->getDateStarted() !== null) {
-        $properties->addProperty(
-          pht('Started'),
-          phabricator_datetime($build_target->getDateStarted(), $viewer));
-        if ($build_target->isComplete()) {
-          $properties->addProperty(
-            pht('Completed'),
-            phabricator_datetime($build_target->getDateCompleted(), $viewer));
-          $properties->addProperty(
-            pht('Duration'),
-            phutil_format_relative_time_detailed(
-              $build_target->getDateCompleted() -
-              $build_target->getDateStarted()));
+          $duration = ($ended - $started);
+          if ($duration) {
+            $when[] = pht(
+              'Built for %s',
+              phutil_format_relative_time_detailed($duration));
+          } else {
+            $when[] = pht('Built instantly');
+          }
         } else {
-          $properties->addProperty(
-            pht('Elapsed'),
-            phutil_format_relative_time_detailed(
-              time() - $build_target->getDateStarted()));
+          $when[] = pht(
+            'Started at %s',
+            phabricator_datetime($started, $viewer));
+          $duration = ($now - $started);
+          if ($duration) {
+            $when[] = pht(
+              'Running for %s',
+              phutil_format_relative_time_detailed($duration));
+          }
+        }
+      } else {
+        $created = $build_target->getDateCreated();
+        $when[] = pht(
+          'Queued at %s',
+          phabricator_datetime($started, $viewer));
+        $duration = ($now - $created);
+        if ($duration) {
+          $when[] = pht(
+            'Waiting for %s',
+            phutil_format_relative_time_detailed($duration));
         }
       }
+
+      $properties->addProperty(
+        pht('When'),
+        phutil_implode_html(" \xC2\xB7 ", $when));
 
       $properties->addProperty(pht('Status'), $status_view);
 
@@ -162,9 +183,7 @@ final class HarbormasterBuildViewController
       $variables = $build_target->getVariables();
       if ($variables) {
         $properties = new PHUIPropertyListView();
-        foreach ($variables as $key => $value) {
-          $properties->addProperty($key, $value);
-        }
+        $properties->addRawContent($this->buildProperties($variables));
         $target_box->addPropertyList($properties, pht('Variables'));
       }
 
@@ -183,7 +202,12 @@ final class HarbormasterBuildViewController
       }
 
       $properties = new PHUIPropertyListView();
-      $properties->addProperty('Build Target ID', $build_target->getID());
+      $properties->addProperty(
+        pht('Build Target ID'),
+        $build_target->getID());
+      $properties->addProperty(
+        pht('Build Target PHID'),
+        $build_target->getPHID());
       $target_box->addPropertyList($properties, pht('Metadata'));
 
       $targets[] = $target_box;
@@ -528,6 +552,30 @@ final class HarbormasterBuildViewController
     return $table;
   }
 
+  private function buildProperties(array $properties) {
+    ksort($properties);
 
+    $rows = array();
+    foreach ($properties as $key => $value) {
+      $rows[] = array(
+        $key,
+        $value,
+      );
+    }
+
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('Key'),
+          pht('Value'),
+        ))
+      ->setColumnClasses(
+        array(
+          'pri right',
+          'wide',
+        ));
+
+    return $table;
+  }
 
 }

@@ -10,7 +10,8 @@ final class PhabricatorPasteTestDataGenerator
   );
 
   public function generate() {
-    $authorphid = $this->loadPhabrictorUserPHID();
+    $author = $this->loadPhabrictorUser();
+    $authorphid = $author->getPHID();
     $language = $this->generateLanguage();
     $content = $this->generateContent($language);
     $title = $this->generateTitle($language);
@@ -24,12 +25,12 @@ final class PhabricatorPasteTestDataGenerator
     $policy = $this->generatePolicy();
     $filephid = $paste_file->getPHID();
     $parentphid = $this->loadPhabrictorPastePHID();
-    $paste = id(new PhabricatorPaste())
+    $paste = PhabricatorPaste::initializeNewPaste($author)
       ->setParentPHID($parentphid)
-      ->setAuthorPHID($authorphid)
       ->setTitle($title)
       ->setLanguage($language)
       ->setViewPolicy($policy)
+      ->setEditPolicy($policy)
       ->setFilePHID($filephid)
       ->save();
     return $paste;

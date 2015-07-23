@@ -10,19 +10,18 @@ final class ProjectCreateConduitAPIMethod extends ProjectConduitAPIMethod {
     return pht('Create a project.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'name'       => 'required string',
       'members'    => 'optional list<phid>',
+      'icon'       => 'optional string',
+      'color'      => 'optional string',
+      'tags'       => 'optional list<string>',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {
@@ -40,6 +39,24 @@ final class ProjectCreateConduitAPIMethod extends ProjectConduitAPIMethod {
     $xactions[] = id(new PhabricatorProjectTransaction())
       ->setTransactionType($type_name)
       ->setNewValue($request->getValue('name'));
+
+    if ($request->getValue('icon')) {
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorProjectTransaction::TYPE_ICON)
+        ->setNewValue($request->getValue('icon'));
+    }
+
+    if ($request->getValue('color')) {
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorProjectTransaction::TYPE_COLOR)
+        ->setNewValue($request->getValue('color'));
+    }
+
+    if ($request->getValue('tags')) {
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorProjectTransaction::TYPE_SLUGS)
+        ->setNewValue($request->getValue('tags'));
+    }
 
     $xactions[] = id(new PhabricatorProjectTransaction())
       ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)

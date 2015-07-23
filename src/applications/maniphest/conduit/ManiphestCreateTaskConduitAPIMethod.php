@@ -8,20 +8,20 @@ final class ManiphestCreateTaskConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Create a new Maniphest task.';
+    return pht('Create a new Maniphest task.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return $this->getTaskFields($is_new = true);
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.',
+      'ERR-INVALID-PARAMETER' => pht('Missing or malformed parameter.'),
     );
   }
 

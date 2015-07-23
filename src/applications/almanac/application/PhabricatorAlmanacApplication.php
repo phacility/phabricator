@@ -14,8 +14,8 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
     return pht('Service Directory');
   }
 
-  public function getIconName() {
-    return 'almanac';
+  public function getFontIcon() {
+    return 'fa-server';
   }
 
   public function getTitleGlyph() {
@@ -26,8 +26,13 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Almanac User Guide');
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Alamanac User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Almanac User Guide'),
+      ),
+    );
   }
 
   public function isPrototype() {

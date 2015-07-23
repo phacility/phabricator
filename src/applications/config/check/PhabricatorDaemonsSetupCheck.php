@@ -2,18 +2,21 @@
 
 final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_IMPORTANT;
+  }
+
   protected function executeChecks() {
 
     $task_daemon = id(new PhabricatorDaemonLogQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
+      ->withStatus(PhabricatorDaemonLogQuery::STATUS_RUNNING)
       ->withDaemonClasses(array('PhabricatorTaskmasterDaemon'))
       ->setLimit(1)
       ->execute();
 
     if (!$task_daemon) {
-      $doc_href = PhabricatorEnv::getDocLink(
-        'Managing Daemons with phd');
+      $doc_href = PhabricatorEnv::getDocLink('Managing Daemons with phd');
 
       $summary = pht(
         'You must start the Phabricator daemons to send email, rebuild '.
@@ -53,24 +56,29 @@ final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
 
       if ($phd_user) {
         if ($daemon->getRunningAsUser() != $phd_user) {
-          $doc_href = PhabricatorEnv::getDocLink(
-            'Managing Daemons with phd');
+          $doc_href = PhabricatorEnv::getDocLink('Managing Daemons with phd');
 
           $summary = pht(
             'At least one daemon is currently running as a different '.
-            'user than configured in the Phabricator phd.user setting');
+            'user than configured in the Phabricator %s setting',
+            'phd.user');
 
           $message = pht(
             'A daemon is running as user %s while the Phabricator config '.
-            'specifies phd.user to be %s.'.
+            'specifies %s to be %s.'.
             "\n\n".
-            'Either adjust phd.user to match %s or start '.
+            'Either adjust %s to match %s or start '.
             'the daemons as the correct user. '.
             "\n\n".
-            'phd Daemons will try to '.
-            'use sudo to start as the configured user. '.
-            'Make sure that the user who starts phd has the correct '.
-            'sudo permissions to start phd daemons as %s',
+            '%s Daemons will try to use %s to start as the configured user. '.
+            'Make sure that the user who starts %s has the correct '.
+            'sudo permissions to start %s daemons as %s',
+            'phd.user',
+            'phd.user',
+            'phd',
+            'sudo',
+            'phd',
+            'phd',
             phutil_tag('tt', array(), $daemon->getRunningAsUser()),
             phutil_tag('tt', array(), $phd_user),
             phutil_tag('tt', array(), $daemon->getRunningAsUser()),
@@ -92,11 +100,36 @@ final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
           'At least one daemon is currently running with different '.
           'configuration than the Phabricator web application.');
 
+        $list_section = null;
+        $env_info = $daemon->getEnvInfo();
+        if ($env_info) {
+          $issues = PhabricatorEnv::compareEnvironmentInfo(
+            PhabricatorEnv::calculateEnvironmentInfo(),
+            $env_info);
+
+          if ($issues) {
+            foreach ($issues as $key => $issue) {
+              $issues[$key] = phutil_tag('li', array(), $issue);
+            }
+
+            $list_section = array(
+              pht(
+                'The configurations differ in the following %s way(s):',
+                new PhutilNumber(count($issues))),
+              phutil_tag(
+                'ul',
+                array(),
+                $issues),
+            );
+          }
+        }
+
+
         $message = pht(
           'At least one daemon is currently running with a different '.
           'configuration (config checksum %s) than the web application '.
           '(config checksum %s).'.
-          "\n\n".
+          "\n\n%s".
           'This usually means that you have just made a configuration change '.
           'from the web UI, but have not yet restarted the daemons. You '.
           'need to restart the daemons after making configuration changes '.
@@ -130,6 +163,7 @@ final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
 
           phutil_tag('tt', array(), substr($daemon->getEnvHash(), 0, 12)),
           phutil_tag('tt', array(), substr($environment_hash, 0, 12)),
+          $list_section,
           phutil_tag('tt', array(), 'bin/phd restart'),
           phutil_tag(
             'a',

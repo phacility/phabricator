@@ -11,6 +11,7 @@ final class AphrontTableView extends AphrontView {
   protected $zebraStripes = true;
   protected $noDataString;
   protected $className;
+  protected $notice;
   protected $columnVisibility = array();
   private $deviceVisibility = array();
 
@@ -52,6 +53,11 @@ final class AphrontTableView extends AphrontView {
 
   public function setClassName($class_name) {
     $this->className = $class_name;
+    return $this;
+  }
+
+  public function setNotice($notice) {
+    $this->notice = $notice;
     return $this;
   }
 
@@ -124,6 +130,7 @@ final class AphrontTableView extends AphrontView {
 
     $visibility = array_values($this->columnVisibility);
     $device_visibility = array_values($this->deviceVisibility);
+
     $headers = $this->headers;
     $short_headers = $this->shortHeaders;
     $sort_values = $this->sortValues;
@@ -139,6 +146,21 @@ final class AphrontTableView extends AphrontView {
       }
       while (count($headers) > count($sort_values)) {
         $sort_values[] = null;
+      }
+
+      if ($this->notice) {
+        $colspan = max(count(array_filter($visibility)), 1);
+        $table[] = phutil_tag(
+          'tr',
+          array(),
+          phutil_tag(
+            'td',
+            array(
+              'colspan' => $colspan,
+              'class' => 'aphront-table-notice',
+            ),
+            $this->notice));
+
       }
 
       $tr = array();
@@ -235,11 +257,15 @@ final class AphrontTableView extends AphrontView {
     if ($data) {
       $row_num = 0;
       foreach ($data as $row) {
+        $row_size = count($row);
         while (count($row) > count($col_classes)) {
           $col_classes[] = null;
         }
         while (count($row) > count($visibility)) {
           $visibility[] = true;
+        }
+        while (count($row) > count($device_visibility)) {
+          $device_visibility[] = true;
         }
         $tr = array();
         // NOTE: Use of a separate column counter is to allow this to work
@@ -284,15 +310,21 @@ final class AphrontTableView extends AphrontView {
           coalesce($this->noDataString, pht('No data available.'))));
     }
 
-    $table_class = 'aphront-table-view';
+    $classes = array();
+    $classes[] = 'aphront-table-view';
     if ($this->className !== null) {
-      $table_class .= ' '.$this->className;
+      $classes[] = $this->className;
     }
     if ($this->deviceReadyTable) {
-      $table_class .= ' aphront-table-view-device-ready';
+      $classes[] = 'aphront-table-view-device-ready';
     }
 
-    $html = phutil_tag('table', array('class' => $table_class), $table);
+    $html = phutil_tag(
+      'table',
+      array(
+        'class' => implode(' ', $classes),
+      ),
+      $table);
     return phutil_tag_div('aphront-table-wrap', $html);
   }
 

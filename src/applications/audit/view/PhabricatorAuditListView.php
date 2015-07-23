@@ -59,7 +59,7 @@ final class PhabricatorAuditListView extends AphrontView {
   private function getHandle($phid) {
     $handle = idx($this->handles, $phid);
     if (!$handle) {
-      throw new Exception("No handle for '{$phid}'!");
+      throw new Exception(pht("No handle for '%s'!", $phid));
     }
     return $handle;
   }
@@ -98,7 +98,11 @@ final class PhabricatorAuditListView extends AphrontView {
   public function buildList() {
     $user = $this->getUser();
     if (!$user) {
-      throw new Exception('you must setUser() before buildList()!');
+      throw new Exception(
+        pht(
+          'You must %s before %s!',
+          'setUser()',
+          __FUNCTION__.'()'));
     }
     $rowc = array();
 
@@ -137,25 +141,36 @@ final class PhabricatorAuditListView extends AphrontView {
           PhabricatorAuditStatusConstants::getStatusName($status_code);
         $status_color =
           PhabricatorAuditStatusConstants::getStatusColor($status_code);
+        $status_icon =
+          PhabricatorAuditStatusConstants::getStatusIcon($status_code);
       } else {
         $reasons = null;
         $status_text = null;
         $status_color = null;
+        $status_icon = null;
       }
-      $author_name = $commit->getCommitData()->getAuthorName();
+      $author_phid = $commit->getAuthorPHID();
+      if ($author_phid) {
+        $author_name = $this->getHandle($author_phid)->renderLink();
+      } else {
+        $author_name = $commit->getCommitData()->getAuthorName();
+      }
 
       $item = id(new PHUIObjectItemView())
         ->setObjectName($commit_name)
         ->setHeader($commit_desc)
         ->setHref($commit_link)
-        ->setBarColor($status_color)
-        ->addAttribute($status_text)
+        ->addAttribute(pht('Author: %s', $author_name))
         ->addAttribute($reasons)
-        ->addIcon('none', $committed)
-        ->addByline($author_name);
+        ->addIcon('none', $committed);
 
       if (!empty($auditors)) {
-        $item->addAttribute(pht('Auditors: %s', $auditors));
+        $item->addByLine(pht('Auditors: %s', $auditors));
+      }
+
+      if ($status_color) {
+        $item->setStatusIcon(
+          $status_icon.' '.$status_color, $status_text);
       }
 
       $list->addItem($item);

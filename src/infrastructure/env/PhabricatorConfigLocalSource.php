@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorConfigLocalSource
-  extends PhabricatorConfigProxySource {
+final class PhabricatorConfigLocalSource extends PhabricatorConfigProxySource {
 
   public function __construct() {
     $config = $this->loadConfig();

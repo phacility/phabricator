@@ -8,7 +8,8 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
     PhabricatorFlaggableInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorProjectInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorSpacesInterface {
 
   const RESPONSES_VISIBLE = 0;
   const RESPONSES_VOTERS  = 1;
@@ -25,6 +26,7 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   protected $method;
   protected $viewPolicy;
   protected $isClosed = 0;
+  protected $spacePHID;
 
   private $options = self::ATTACHABLE;
   private $choices = self::ATTACHABLE;
@@ -41,7 +43,8 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
 
     return id(new PhabricatorSlowvotePoll())
       ->setAuthorPHID($actor->getPHID())
-      ->setViewPolicy($view_policy);
+      ->setViewPolicy($view_policy)
+      ->setSpacePHID($actor->getDefaultSpacePHID());
   }
 
   protected function getConfiguration() {
@@ -199,6 +202,12 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
       }
       $this->delete();
     $this->saveTransaction();
+  }
+
+  /* -(  PhabricatorSpacesInterface  )--------------------------------------- */
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
   }
 
 }

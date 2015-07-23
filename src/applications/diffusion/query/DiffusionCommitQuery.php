@@ -17,6 +17,9 @@ final class DiffusionCommitQuery
   private $auditorPHIDs;
   private $auditAwaitingUser;
   private $auditStatus;
+  private $epochMin;
+  private $epochMax;
+  private $importing;
 
   const AUDIT_STATUS_ANY       = 'audit-status-any';
   const AUDIT_STATUS_OPEN      = 'audit-status-open';
@@ -141,16 +144,29 @@ final class DiffusionCommitQuery
     return $this;
   }
 
+  public function withEpochRange($min, $max) {
+    $this->epochMin = $min;
+    $this->epochMax = $max;
+    return $this;
+  }
+
+  public function withImporting($importing) {
+    $this->importing = $importing;
+    return $this;
+  }
+
   public function getIdentifierMap() {
     if ($this->identifierMap === null) {
       throw new Exception(
-        'You must execute() the query before accessing the identifier map.');
+        pht(
+          'You must %s the query before accessing the identifier map.',
+          'execute()'));
     }
     return $this->identifierMap;
   }
 
-  protected function getPagingColumn() {
-    return 'commit.id';
+  protected function getPrimaryTableAlias() {
+    return 'commit';
   }
 
   protected function willExecute() {
@@ -191,6 +207,7 @@ final class DiffusionCommitQuery
       if ($repo) {
         $commit->attachRepository($repo);
       } else {
+        $this->didRejectResult($commit);
         unset($commits[$key]);
         continue;
       }
@@ -279,7 +296,7 @@ final class DiffusionCommitQuery
     return $commits;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->repositoryPHIDs !== null) {
@@ -324,6 +341,36 @@ final class DiffusionCommitQuery
         $conn_r,
         'commit.authorPHID IN (%Ls)',
         $this->authorPHIDs);
+    }
+
+    if ($this->epochMin !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'commit.epoch >= %d',
+        $this->epochMin);
+    }
+
+    if ($this->epochMax !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'commit.epoch <= %d',
+        $this->epochMax);
+    }
+
+    if ($this->importing !== null) {
+      if ($this->importing) {
+        $where[] = qsprintf(
+          $conn_r,
+          '(commit.importStatus & %d) != %d',
+          PhabricatorRepositoryCommit::IMPORTED_ALL,
+          PhabricatorRepositoryCommit::IMPORTED_ALL);
+      } else {
+        $where[] = qsprintf(
+          $conn_r,
+          '(commit.importStatus & %d) = %d',
+          PhabricatorRepositoryCommit::IMPORTED_ALL,
+          PhabricatorRepositoryCommit::IMPORTED_ALL);
+      }
     }
 
     if ($this->identifiers !== null) {
@@ -491,8 +538,10 @@ final class DiffusionCommitQuery
             self::AUDIT_STATUS_PARTIAL,
           );
           throw new Exception(
-            "Unknown audit status '{$status}'! Valid statuses are: ".
-            implode(', ', $valid));
+            pht(
+              "Unknown audit status '%s'! Valid statuses are: %s.",
+              $status,
+              implode(', ', $valid)));
       }
     }
 
@@ -511,7 +560,7 @@ final class DiffusionCommitQuery
     }
   }
 
-  private function buildJoinClause($conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     $joins = array();
     $audit_request = new PhabricatorRepositoryAuditRequest();
 
@@ -542,7 +591,7 @@ final class DiffusionCommitQuery
     }
   }
 
-  private function buildGroupClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
     $should_group = $this->shouldJoinAudits();
 
     // TODO: Currently, the audit table is missing a unique key, so we may

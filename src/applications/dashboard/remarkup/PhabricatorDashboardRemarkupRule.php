@@ -14,10 +14,13 @@ final class PhabricatorDashboardRemarkupRule
       ->setViewer($viewer)
       ->withIDs($ids)
       ->execute();
-
   }
 
-  protected function renderObjectEmbed($object, $handle, $options) {
+  protected function renderObjectEmbed(
+    $object,
+    PhabricatorObjectHandle $handle,
+    $options) {
+
     $viewer = $this->getEngine()->getConfig('viewer');
 
     return id(new PhabricatorDashboardPanelRenderingEngine())

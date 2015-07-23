@@ -3,12 +3,12 @@
 final class PHUIFeedStoryExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Feed Story';
+    return pht('Feed Story');
   }
 
   public function getDescription() {
-    return 'An outlandish exaggeration of intricate tales from '.
-      'around the realm';
+    return pht(
+      'An outlandish exaggeration of intricate tales from around the realm');
   }
 
   public function renderExample() {
@@ -24,7 +24,7 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
       ->setImage(celerity_get_resource_uri('/rsrc/image/people/harding.png'))
       ->setImageHref('http://en.wikipedia.org/wiki/Warren_G._Harding')
       ->setEpoch(1)
-      ->setAppIcon('differential-dark')
+      ->setAppIcon('fa-star')
       ->setUser($user);
 
     /* Text Story, useful in Blogs, Ponders, Status */
@@ -41,17 +41,19 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
           ->setSpriteSheet(PHUIIconView::SPRITE_TOKENS)
           ->setSpriteIcon($token);
     }
-    $text = hsprintf('<strong><a>lincoln (Honest Abe)</a></strong> wrote a '.
+    $text = hsprintf(
+      '<strong><a>lincoln (Honest Abe)</a></strong> wrote a '.
       'new blog post.');
     $story2 = id(new PHUIFeedStoryView())
       ->setTitle($text)
       ->setImage(celerity_get_resource_uri('/rsrc/image/people/lincoln.png'))
       ->setImageHref('http://en.wikipedia.org/wiki/Abraham_Lincoln')
       ->setEpoch(strtotime('November 19, 1863'))
-      ->setAppIcon('phame-dark')
+      ->setAppIcon('fa-star')
       ->setUser($user)
       ->setTokenBar($tokenview)
-      ->setPontification('Four score and seven years ago our fathers brought '.
+      ->setPontification(
+        'Four score and seven years ago our fathers brought '.
         'forth on this continent, a new nation, conceived in Liberty, and '.
         'dedicated to the proposition that all men are created equal. '.
         'Now we are engaged in a great civil war, testing whether that '.
@@ -64,7 +66,8 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
 
     /* Action Story, let's give people tokens! */
 
-    $text = hsprintf('<strong><a>harding (Tom Harding)</a></strong> awarded '.
+    $text = hsprintf(
+      '<strong><a>harding (Tom Harding)</a></strong> awarded '.
       '<a>M10: Workboards</a> a token.');
     $action1 = id(new PHUIIconView())
       ->setIconFont('fa-trophy bluegrey')
@@ -80,11 +83,12 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
       ->appendChild($token)
       ->setEpoch(1)
       ->addAction($action1)
-      ->setAppIcon('token-dark')
+      ->setAppIcon('fa-trophy')
       ->setUser($user);
 
     /* Image Story, used in Pholio, Macro */
-    $text = hsprintf('<strong><a>wgharding (Warren Harding)</a></strong> '.
+    $text = hsprintf(
+      '<strong><a>wgharding (Warren Harding)</a></strong> '.
       'asked a new question.');
     $action1 = id(new PHUIIconView())
       ->setIconFont('fa-chevron-up bluegrey')
@@ -97,25 +101,27 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
       ->setImage(celerity_get_resource_uri('/rsrc/image/people/harding.png'))
       ->setImageHref('http://en.wikipedia.org/wiki/Warren_G._Harding')
       ->setEpoch(1)
-      ->setAppIcon('ponder-dark')
-      ->setPontification('Why does inline-block add space under my spans and '.
-        'anchors?')
+      ->setAppIcon('fa-cogs')
+      ->setPontification(
+        'Why does inline-block add space under my spans and anchors?')
       ->addAction($action1)
       ->addAction($action2)
       ->setUser($user);
 
     /* Text Story, useful in Blogs, Ponders, Status */
-    $text = hsprintf('<strong><a>lincoln (Honest Abe)</a></strong> updated '.
+    $text = hsprintf(
+      '<strong><a>lincoln (Honest Abe)</a></strong> updated '.
       'his status.');
     $story5 = id(new PHUIFeedStoryView())
       ->setTitle($text)
       ->setImage(celerity_get_resource_uri('/rsrc/image/people/lincoln.png'))
       ->setImageHref('http://en.wikipedia.org/wiki/Abraham_Lincoln')
       ->setEpoch(strtotime('November 19, 1863'))
-      ->setAppIcon('phame-dark')
+      ->setAppIcon('fa-rocket')
       ->setUser($user)
-      ->setPontification('If we ever create a lightweight status app '.
-      'this story would be how that would be displayed.');
+      ->setPontification(
+        'If we ever create a lightweight status app '.
+        'this story would be how that would be displayed.');
 
     /* Basic "One Line" Story */
     $text = hsprintf(
@@ -126,7 +132,7 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
       ->setImage(celerity_get_resource_uri('/rsrc/image/people/harding.png'))
       ->setImageHref('http://en.wikipedia.org/wiki/Warren_G._Harding')
       ->setEpoch(1)
-      ->setAppIcon('differential-dark')
+      ->setAppIcon('fa-wifi')
       ->setUser($user);
 
 

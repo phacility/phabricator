@@ -11,13 +11,16 @@ final class PhabricatorPasteConfigOptions
     return pht('Configure Paste.');
   }
 
+  public function getFontIcon() {
+    return 'fa-paste';
+  }
+
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array(
-      $this->newOption(
-        'metamta.paste.public-create-email',
-        'string',
-        null)
-        ->setDescription(pht('Allow creating pastes via email.')),
       $this->newOption(
         'metamta.paste.subject-prefix',
         'string',

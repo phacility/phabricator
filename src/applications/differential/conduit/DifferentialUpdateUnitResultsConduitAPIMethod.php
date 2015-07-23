@@ -8,10 +8,10 @@ final class DifferentialUpdateUnitResultsConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Update arc unit results for a postponed test.';
+    return pht('Update arc unit results for a postponed test.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'diff_id'   => 'required diff_id',
       'file'      => 'required string',
@@ -23,19 +23,18 @@ final class DifferentialUpdateUnitResultsConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'void';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR_BAD_DIFF'   => 'Bad diff ID.',
-      'ERR_NO_RESULTS' => 'Could not find the postponed test',
+      'ERR_BAD_DIFF'   => pht('Bad diff ID.'),
+      'ERR_NO_RESULTS' => pht('Could not find the postponed test'),
     );
   }
 
   protected function execute(ConduitAPIRequest $request) {
-
     $diff_id = $request->getValue('diff_id');
     if (!$diff_id) {
       throw new ConduitException('ERR_BAD_DIFF');

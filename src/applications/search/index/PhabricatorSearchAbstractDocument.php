@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSearchAbstractDocument {
+final class PhabricatorSearchAbstractDocument extends Phobject {
 
   private $phid;
   private $documentType;
@@ -22,7 +22,7 @@ final class PhabricatorSearchAbstractDocument {
 
   public function setDocumentTitle($title) {
     $this->documentTitle = $title;
-    $this->addField(PhabricatorSearchField::FIELD_TITLE, $title);
+    $this->addField(PhabricatorSearchDocumentFieldType::FIELD_TITLE, $title);
     return $this;
   }
 

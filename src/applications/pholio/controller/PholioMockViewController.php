@@ -42,8 +42,6 @@ final class PholioMockViewController extends PholioController {
       $mock->getPHID(),
       PholioMockHasTaskEdgeType::EDGECONST);
     $this->setManiphestTaskPHIDs($phids);
-    $phids[] = $mock->getAuthorPHID();
-    $this->loadHandles($phids);
 
     $engine = id(new PhabricatorMarkupEngine())
       ->setViewer($user);
@@ -80,16 +78,18 @@ final class PholioMockViewController extends PholioController {
     require_celerity_resource('pholio-inline-comments-css');
 
     $comment_form_id = celerity_generate_unique_node_id();
-    $output = id(new PholioMockImagesView())
+    $mock_view = id(new PholioMockImagesView())
       ->setRequestURI($request->getRequestURI())
       ->setCommentFormID($comment_form_id)
       ->setUser($user)
       ->setMock($mock)
       ->setImageID($this->imageID);
+    $this->addExtraQuicksandConfig(
+      array('mockViewConfig' => $mock_view->getBehaviorConfig()));
 
     $output = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Image'))
-      ->appendChild($output);
+      ->appendChild($mock_view);
 
     $add_comment = $this->buildAddCommentView($mock, $comment_form_id);
 
@@ -167,7 +167,7 @@ final class PholioMockViewController extends PholioController {
 
     $properties->addProperty(
       pht('Author'),
-      $this->getHandle($mock->getAuthorPHID())->renderLink());
+      $user->renderHandle($mock->getAuthorPHID()));
 
     $properties->addProperty(
       pht('Created'),
@@ -176,7 +176,7 @@ final class PholioMockViewController extends PholioController {
     if ($this->getManiphestTaskPHIDs()) {
       $properties->addProperty(
         pht('Maniphest Tasks'),
-        $this->renderHandlesForPHIDs($this->getManiphestTaskPHIDs()));
+        $user->renderHandleList($this->getManiphestTaskPHIDs()));
     }
 
     $properties->invokeWillRenderEvent();

@@ -17,8 +17,17 @@ abstract class PhabricatorApplicationsController extends PhabricatorController {
     return $nav;
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return $this->buildSideNavView(true)->getMenu();
+  }
+
+  protected function addApplicationCrumb(
+    PHUICrumbsView $crumbs,
+    PhabricatorApplication $application) {
+
+    $crumbs->addTextCrumb(
+      $application->getName(),
+      '/applications/view/'.get_class($application).'/');
   }
 
 }

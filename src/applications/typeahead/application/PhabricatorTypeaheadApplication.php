@@ -9,8 +9,10 @@ final class PhabricatorTypeaheadApplication extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/typeahead/' => array(
-        'class/(?:(?P<class>\w+)/)?'
+        '(?P<action>browse|class)/(?:(?P<class>\w+)/)?'
           => 'PhabricatorTypeaheadModularDatasourceController',
+        'help/(?P<class>\w+)/'
+          => 'PhabricatorTypeaheadFunctionHelpController',
       ),
     );
   }

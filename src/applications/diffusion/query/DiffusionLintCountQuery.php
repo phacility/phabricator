@@ -23,11 +23,11 @@ final class DiffusionLintCountQuery extends PhabricatorQuery {
 
   public function execute() {
     if (!$this->paths) {
-      throw new Exception(pht('Call withPaths() before execute()!'));
+      throw new PhutilInvalidStateException('withPaths');
     }
 
     if (!$this->branchIDs) {
-      throw new Exception(pht('Call withBranchIDs() before execute()!'));
+      throw new PhutilInvalidStateException('withBranchIDs');
     }
 
     $conn_r = id(new PhabricatorRepositoryCommit())->establishConnection('r');
@@ -56,7 +56,7 @@ final class DiffusionLintCountQuery extends PhabricatorQuery {
         'SELECT %s path_prefix, COUNT(*) N FROM %T %Q',
         $key,
         PhabricatorRepository::TABLE_LINTMESSAGE,
-        $this->buildWhereClause($conn_r, $part));
+        $this->buildCustomWhereClause($conn_r, $part));
     }
 
     $huge_union_query = '('.implode(') UNION ALL (', $queries).')';
@@ -69,7 +69,10 @@ final class DiffusionLintCountQuery extends PhabricatorQuery {
     return $this->processResults($data);
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r, $part) {
+  protected function buildCustomWhereClause(
+    AphrontDatabaseConnection $conn_r,
+    $part) {
+
     $where = array();
 
     $where[] = $part;

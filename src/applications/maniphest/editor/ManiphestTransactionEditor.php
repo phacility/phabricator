@@ -3,8 +3,6 @@
 final class ManiphestTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
-  private $heraldEmailPHIDs = array();
-
   public function getEditorApplicationClass() {
     return 'PhabricatorManiphestApplication';
   }
@@ -147,12 +145,7 @@ final class ManiphestTransactionEditor
 
         return $object->setOwnerPHID($phid);
       case ManiphestTransaction::TYPE_SUBPRIORITY:
-        $data = $xaction->getNewValue();
-        $new_sub = $this->getNextSubpriority(
-          $data['newPriority'],
-          $data['newSubpriorityBase'],
-          $data['direction']);
-        $object->setSubpriority($new_sub);
+        $object->setSubpriority($xaction->getNewValue());
         return;
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
         // these do external (edge) updates
@@ -165,28 +158,6 @@ final class ManiphestTransactionEditor
     }
   }
 
-  protected function expandTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    $xactions = parent::expandTransaction($object, $xaction);
-    switch ($xaction->getTransactionType()) {
-      case ManiphestTransaction::TYPE_SUBPRIORITY:
-        $data = $xaction->getNewValue();
-        $new_pri = $data['newPriority'];
-        if ($new_pri != $object->getPriority()) {
-          $xactions[] = id(new ManiphestTransaction())
-            ->setTransactionType(ManiphestTransaction::TYPE_PRIORITY)
-            ->setNewValue($new_pri);
-        }
-        break;
-      default:
-        break;
-    }
-
-    return $xactions;
-  }
-
   protected function applyCustomExternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
@@ -196,14 +167,18 @@ final class ManiphestTransactionEditor
         $board_phid = idx($xaction->getNewValue(), 'projectPHID');
         if (!$board_phid) {
           throw new Exception(
-            pht("Expected 'projectPHID' in column transaction."));
+            pht(
+              "Expected '%s' in column transaction.",
+              'projectPHID'));
         }
 
         $old_phids = idx($xaction->getOldValue(), 'columnPHIDs', array());
         $new_phids = idx($xaction->getNewValue(), 'columnPHIDs', array());
         if (count($new_phids) !== 1) {
           throw new Exception(
-            pht("Expected exactly one 'columnPHIDs' in column transaction."));
+            pht(
+              "Expected exactly one '%s' in column transaction.",
+              'columnPHIDs'));
         }
 
         $columns = id(new PhabricatorProjectColumnQuery())
@@ -401,9 +376,7 @@ final class ManiphestTransactionEditor
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-
-    $xactions = mfilter($xactions, 'shouldHide', true);
-    return $xactions;
+    return true;
   }
 
   protected function getMailSubjectPrefix() {
@@ -415,22 +388,12 @@ final class ManiphestTransactionEditor
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
-    return array(
-      $object->getOwnerPHID(),
-      $this->getActingAsPHID(),
-    );
-  }
-
-  protected function getMailCC(PhabricatorLiskDAO $object) {
     $phids = array();
 
-    foreach (parent::getMailCC($object) as $phid) {
-      $phids[] = $phid;
+    if ($object->getOwnerPHID()) {
+      $phids[] = $object->getOwnerPHID();
     }
-
-    foreach ($this->heraldEmailPHIDs as $phid) {
-      $phids[] = $phid;
-    }
+    $phids[] = $this->getActingAsPHID();
 
     return $phids;
   }
@@ -548,33 +511,13 @@ final class ManiphestTransactionEditor
     HeraldAdapter $adapter,
     HeraldTranscript $transcript) {
 
-    $this->heraldEmailPHIDs = $adapter->getEmailPHIDs();
     $xactions = array();
-
-    $cc_phids = $adapter->getCcPHIDs();
-    if ($cc_phids) {
-      $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
-        ->setNewValue(array('+' => $cc_phids));
-    }
 
     $assign_phid = $adapter->getAssignPHID();
     if ($assign_phid) {
       $xactions[] = id(new ManiphestTransaction())
         ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
         ->setNewValue($assign_phid);
-    }
-
-    $project_phids = $adapter->getProjectPHIDs();
-    if ($project_phids) {
-      $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
-      $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-        ->setMetadataValue('edge:type', $project_type)
-        ->setNewValue(
-          array(
-            '+' => array_fuse($project_phids),
-          ));
     }
 
     return $xactions;
@@ -643,54 +586,152 @@ final class ManiphestTransactionEditor
     return $copy;
   }
 
-  private function getNextSubpriority($pri, $sub, $dir = '>') {
-    switch ($dir) {
-      case '>':
-        $order = 'ASC';
-        break;
-      case '<':
-        $order = 'DESC';
-        break;
-      default:
-        throw new Exception('$dir must be ">" or "<".');
-        break;
-    }
+  /**
+   * Get priorities for moving a task to a new priority.
+   */
+  public static function getEdgeSubpriority(
+    $priority,
+    $is_end) {
 
-    if ($sub === null) {
-      $base = 0;
+    $query = id(new ManiphestTaskQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPriorities(array($priority))
+      ->setLimit(1);
+
+    if ($is_end) {
+      $query->setOrderVector(array('-priority', '-subpriority', '-id'));
     } else {
-      $base = $sub;
+      $query->setOrderVector(array('priority', 'subpriority', 'id'));
     }
 
-    if ($sub === null) {
-      $next = id(new ManiphestTask())->loadOneWhere(
-        'priority = %d ORDER BY subpriority %Q LIMIT 1',
-        $pri,
-        $order);
-      if ($next) {
-        if ($dir == '>') {
-          return $next->getSubpriority() - ((double)(2 << 16));
+    $result = $query->executeOne();
+    $step = (double)(2 << 32);
+
+    if ($result) {
+      $base = $result->getSubpriority();
+      if ($is_end) {
+        $sub = ($base - $step);
+      } else {
+        $sub = ($base + $step);
+      }
+    } else {
+      $sub = 0;
+    }
+
+    return array($priority, $sub);
+  }
+
+
+  /**
+   * Get priorities for moving a task before or after another task.
+   */
+  public static function getAdjacentSubpriority(
+    ManiphestTask $dst,
+    $is_after,
+    $allow_recursion = true) {
+
+    $query = id(new ManiphestTaskQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setOrder(ManiphestTaskQuery::ORDER_PRIORITY)
+      ->withPriorities(array($dst->getPriority()))
+      ->setLimit(1);
+
+    if ($is_after) {
+      $query->setAfterID($dst->getID());
+    } else {
+      $query->setBeforeID($dst->getID());
+    }
+
+    $adjacent = $query->executeOne();
+
+    $base = $dst->getSubpriority();
+    $step = (double)(2 << 32);
+
+    // If we find an adjacent task, we average the two subpriorities and
+    // return the result.
+    if ($adjacent) {
+      $epsilon = 0.01;
+
+      // If the adjacent task has a subpriority that is identical or very
+      // close to the task we're looking at, we're going to move it and all
+      // tasks with the same subpriority a little farther down the subpriority
+      // scale.
+      if ($allow_recursion &&
+          (abs($adjacent->getSubpriority() - $base) < $epsilon)) {
+        $conn_w = $adjacent->establishConnection('w');
+
+        $min = ($adjacent->getSubpriority() - ($epsilon));
+        $max = ($adjacent->getSubpriority() + ($epsilon));
+
+        // Get all of the tasks with the similar subpriorities to the adjacent
+        // task, including the adjacent task itself.
+        $query = id(new ManiphestTaskQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withPriorities(array($adjacent->getPriority()))
+          ->withSubpriorityBetween($min, $max);
+
+        if (!$is_after) {
+          $query->setOrderVector(array('-priority', '-subpriority', '-id'));
         } else {
-          return $next->getSubpriority() + ((double)(2 << 16));
+          $query->setOrderVector(array('priority', 'subpriority', 'id'));
+        }
+
+        $shift_all = $query->execute();
+        $shift_last = last($shift_all);
+
+        // Select the most extreme subpriority in the result set as the
+        // base value.
+        $shift_base = head($shift_all)->getSubpriority();
+
+        // Find the subpriority before or after the task at the end of the
+        // block.
+        list($shift_pri, $shift_sub) = self::getAdjacentSubpriority(
+          $shift_last,
+          $is_after,
+          $allow_recursion = false);
+
+        $delta = ($shift_sub - $shift_base);
+        $count = count($shift_all);
+
+        $shift = array();
+        $cursor = 1;
+        foreach ($shift_all as $shift_task) {
+          $shift_target = $shift_base + (($cursor / $count) * $delta);
+          $cursor++;
+
+          queryfx(
+            $conn_w,
+            'UPDATE %T SET subpriority = %f WHERE id = %d',
+            $adjacent->getTableName(),
+            $shift_target,
+            $shift_task->getID());
+
+          // If we're shifting the adjacent task, update it.
+          if ($shift_task->getID() == $adjacent->getID()) {
+            $adjacent->setSubpriority($shift_target);
+          }
+
+          // If we're shifting the original target task, update the base
+          // subpriority.
+          if ($shift_task->getID() == $dst->getID()) {
+            $base = $shift_target;
+          }
         }
       }
+
+      $sub = ($adjacent->getSubpriority() + $base) / 2;
     } else {
-      $next = id(new ManiphestTask())->loadOneWhere(
-        'priority = %d AND subpriority %Q %f ORDER BY subpriority %Q LIMIT 1',
-        $pri,
-        $dir,
-        $sub,
-        $order);
-      if ($next) {
-        return ($sub + $next->getSubpriority()) / 2;
+      // Otherwise, we take a step away from the target's subpriority and
+      // use that.
+      if ($is_after) {
+        $sub = ($base - $step);
+      } else {
+        $sub = ($base + $step);
       }
     }
 
-    if ($dir == '>') {
-      return $base + (double)(2 << 32);
-    } else {
-      return $base - (double)(2 << 32);
-    }
+    return array($dst->getPriority(), $sub);
   }
+
 
 }

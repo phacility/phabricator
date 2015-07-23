@@ -1,16 +1,21 @@
-@title Jump Nav User Guide
+@title Search User Guide: Shortcuts
 @group userguide
 
-Command reference for the jump nav.
+Command reference for global search shorcuts.
 
-= Overview =
+Overview
+========
 
-The jump nav provides a quick way to navigate to tools and objects: just type
-a navigational command into the box and press return.
+Phabricator's global search bar automatically interprets certain commands as
+shortcuts to make it easy to navigate to specific places.
 
-= Supported Commands =
+To use these shortcuts, just type them into the global search bar in the main
+menu and press return. For example, enter `T123` to jump to the corresponding
+task quickly.
 
-  - **help** - Jump to this document.
+Supported Commands
+========
+
   - **T** - Jump to Maniphest.
   - **T123** - Jump to Maniphest Task 123.
   - **D** - Jump to Differential.
@@ -26,3 +31,10 @@ a navigational command into the box and press return.
   - **s SymbolName** - Jump to Symbol SymbolName
   - **task: (new title)** - Jumps to Task Creation Page with pre-filled title.
   - **(default)** - Search for input.
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to the @{article:Search User Guide}.

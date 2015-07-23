@@ -71,7 +71,7 @@ final class DiffusionRepositoryCreateController
         $cancel_uri = $this->getApplicationURI('new/');
         break;
       default:
-        throw new Exception('Invalid edit operation!');
+        throw new Exception(pht('Invalid edit operation!'));
     }
 
     $form = id(new PHUIPagedFormView())
@@ -137,6 +137,7 @@ final class DiffusionRepositoryCreateController
         $type_credential = PhabricatorRepositoryTransaction::TYPE_CREDENTIAL;
         $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
         $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
+        $type_space = PhabricatorTransactions::TYPE_SPACE;
         $type_push = PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY;
         $type_service = PhabricatorRepositoryTransaction::TYPE_SERVICE;
 
@@ -151,10 +152,6 @@ final class DiffusionRepositoryCreateController
           // initially, and it's immutable, so we don't bother using
           // transactions to apply this change.
           $repository->setCallsign($callsign);
-
-          // Put the repository in "Importing" mode until we finish
-          // parsing it.
-          $repository->setDetail('importing', true);
 
           $xactions[] = id(clone $template)
             ->setTransactionType($type_name)
@@ -229,22 +226,26 @@ final class DiffusionRepositoryCreateController
         }
 
         if ($is_policy) {
+          $policy_page = $form->getPage('policy');
+
           $xactions[] = id(clone $template)
             ->setTransactionType($type_view)
-            ->setNewValue(
-              $form->getPage('policy')->getControl('viewPolicy')->getValue());
+            ->setNewValue($policy_page->getControl('viewPolicy')->getValue());
 
           $xactions[] = id(clone $template)
             ->setTransactionType($type_edit)
-            ->setNewValue(
-              $form->getPage('policy')->getControl('editPolicy')->getValue());
+            ->setNewValue($policy_page->getControl('editPolicy')->getValue());
 
           if ($is_init || $repository->isHosted()) {
             $xactions[] = id(clone $template)
               ->setTransactionType($type_push)
-              ->setNewValue(
-                $form->getPage('policy')->getControl('pushPolicy')->getValue());
+              ->setNewValue($policy_page->getControl('pushPolicy')->getValue());
           }
+
+          $xactions[] = id(clone $template)
+            ->setTransactionType($type_space)
+            ->setNewValue(
+              $policy_page->getControl('viewPolicy')->getSpacePHID());
         }
 
         id(new PhabricatorRepositoryEditor())
@@ -265,6 +266,7 @@ final class DiffusionRepositoryCreateController
           'viewPolicy' => $repository->getViewPolicy(),
           'editPolicy' => $repository->getEditPolicy(),
           'pushPolicy' => $repository->getPushPolicy(),
+          'spacePHID' => $repository->getSpacePHID(),
         );
       }
       $form->readFromObject($dict);
@@ -487,7 +489,7 @@ final class DiffusionRepositoryCreateController
         $is_mercurial = true;
         break;
       default:
-        throw new Exception('Unsupported VCS!');
+        throw new Exception(pht('Unsupported VCS!'));
     }
 
     $has_local = ($is_git || $is_mercurial);
@@ -531,7 +533,7 @@ final class DiffusionRepositoryCreateController
         "repository, use the //Import Only// option at the end of this ".
         "workflow.)");
     } else {
-      throw new Exception('Unsupported VCS!');
+      throw new Exception(pht('Unsupported VCS!'));
     }
 
     $page->addRemarkupInstructions($instructions, 'remoteURI');
@@ -595,12 +597,12 @@ final class DiffusionRepositoryCreateController
     if ($this->isSSHProtocol($proto)) {
       $c_credential->setLabel(pht('SSH Key'));
       $c_credential->setCredentialType(
-        PassphraseCredentialTypeSSHPrivateKeyText::CREDENTIAL_TYPE);
-      $provides_type = PassphraseCredentialTypeSSHPrivateKey::PROVIDES_TYPE;
+        PassphraseSSHPrivateKeyTextCredentialType::CREDENTIAL_TYPE);
+      $provides_type = PassphraseSSHPrivateKeyCredentialType::PROVIDES_TYPE;
 
       $page->addRemarkupInstructions(
         pht(
-          'Choose or add the SSH credentials to use to connect to the the '.
+          'Choose or add the SSH credentials to use to connect to the '.
           'repository hosted at:'.
           "\n\n".
           "  lang=text\n".
@@ -611,8 +613,8 @@ final class DiffusionRepositoryCreateController
       $c_credential->setLabel(pht('Password'));
       $c_credential->setAllowNull(true);
       $c_credential->setCredentialType(
-        PassphraseCredentialTypePassword::CREDENTIAL_TYPE);
-      $provides_type = PassphraseCredentialTypePassword::PROVIDES_TYPE;
+        PassphrasePasswordCredentialType::CREDENTIAL_TYPE);
+      $provides_type = PassphrasePasswordCredentialType::PROVIDES_TYPE;
 
       $page->addRemarkupInstructions(
         pht(
@@ -627,7 +629,7 @@ final class DiffusionRepositoryCreateController
           $remote_uri),
         'credential');
     } else {
-      throw new Exception('Unknown URI protocol!');
+      throw new Exception(pht('Unknown URI protocol!'));
     }
 
     if ($provides_type) {
@@ -667,7 +669,7 @@ final class DiffusionRepositoryCreateController
           pht('You must choose an SSH credential to connect over SSH.'));
       }
 
-      $ssh_type = PassphraseCredentialTypeSSHPrivateKey::PROVIDES_TYPE;
+      $ssh_type = PassphraseSSHPrivateKeyCredentialType::PROVIDES_TYPE;
       if ($credential->getProvidesType() !== $ssh_type) {
         $c_credential->setError(pht('Invalid'));
         $page->addPageError(
@@ -678,7 +680,7 @@ final class DiffusionRepositoryCreateController
 
     } else if ($this->isUsernamePasswordProtocol($proto)) {
       if ($credential) {
-        $password_type = PassphraseCredentialTypePassword::PROVIDES_TYPE;
+        $password_type = PassphrasePasswordCredentialType::PROVIDES_TYPE;
         if ($credential->getProvidesType() !== $password_type) {
         $c_credential->setError(pht('Invalid'));
         $page->addPageError(
@@ -733,16 +735,15 @@ final class DiffusionRepositoryCreateController
       ->setName('pushPolicy');
 
     return id(new PHUIFormPageView())
-        ->setPageName(pht('Policies'))
-        ->setValidateFormPageCallback(array($this, 'validatePolicyPage'))
-        ->setAdjustFormPageCallback(array($this, 'adjustPolicyPage'))
-        ->setUser($viewer)
-        ->addRemarkupInstructions(
-          pht(
-            'Select access policies for this repository.'))
-        ->addControl($view_policy)
-        ->addControl($edit_policy)
-        ->addControl($push_policy);
+      ->setPageName(pht('Policies'))
+      ->setValidateFormPageCallback(array($this, 'validatePolicyPage'))
+      ->setAdjustFormPageCallback(array($this, 'adjustPolicyPage'))
+      ->setUser($viewer)
+      ->addRemarkupInstructions(
+        pht('Select access policies for this repository.'))
+      ->addControl($view_policy)
+      ->addControl($edit_policy)
+      ->addControl($push_policy);
   }
 
   public function adjustPolicyPage(PHUIFormPageView $page) {

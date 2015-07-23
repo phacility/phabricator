@@ -9,7 +9,7 @@ final class DiffusionMercurialWireSSHTestCase extends PhabricatorTestCase {
       $raw = Filesystem::readFile($data.$file);
       $raw = explode("\n~~~~~~~~~~\n", $raw, 2);
       $this->assertEqual(2, count($raw));
-      $expect = json_decode($raw[1], true);
+      $expect = phutil_json_decode($raw[1]);
       $this->assertTrue(is_array($expect), $file);
 
       $this->assertParserResult($expect, $raw[0], $file);
@@ -50,7 +50,7 @@ final class DiffusionMercurialWireSSHTestCase extends PhabricatorTestCase {
 
     $this->assertTrue(
       ($caught instanceof Exception),
-      "No extra messages for '{$file}'.");
+      pht("No extra messages for '%s'.", $file));
   }
 
 }

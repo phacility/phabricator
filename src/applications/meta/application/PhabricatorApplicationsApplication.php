@@ -24,8 +24,8 @@ final class PhabricatorApplicationsApplication extends PhabricatorApplication {
     return pht('Explore More Applications');
   }
 
-  public function getIconName() {
-    return 'application';
+  public function getFontIcon() {
+    return 'fa-globe';
   }
 
   public function getTitleGlyph() {
@@ -41,8 +41,12 @@ final class PhabricatorApplicationsApplication extends PhabricatorApplication {
           => 'PhabricatorApplicationDetailViewController',
         'edit/(?P<application>\w+)/'
           => 'PhabricatorApplicationEditController',
+        'mailcommands/(?P<application>\w+)/(?P<type>\w+)/'
+          => 'PhabricatorApplicationEmailCommandsController',
         '(?P<application>\w+)/(?P<action>install|uninstall)/'
           => 'PhabricatorApplicationUninstallController',
+        'panel/(?P<application>\w+)/(?P<panel>\w+)/(?P<path>.*)'
+          => 'PhabricatorApplicationPanelController',
       ),
     );
   }

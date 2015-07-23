@@ -1,41 +1,17 @@
 <?php
 
-final class PhrictionReplyHandler extends PhabricatorMailReplyHandler {
+final class PhrictionReplyHandler
+  extends PhabricatorApplicationTransactionReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof PhrictionDocument)) {
-      throw new Exception('Mail receiver is not a PhrictionDocument!');
+      throw new Exception(
+        pht('Mail receiver is not a %s!', 'PhrictionDocument'));
     }
   }
 
-  public function getPrivateReplyHandlerEmailAddress(
-    PhabricatorObjectHandle $handle) {
-    return $this->getDefaultPrivateReplyHandlerEmailAddress(
-      $handle,
-      PhrictionDocumentPHIDType::TYPECONST);
-  }
-
-  public function getPublicReplyHandlerEmailAddress() {
-    return $this->getDefaultPublicReplyHandlerEmailAddress(
-      PhrictionDocumentPHIDType::TYPECONST);
-  }
-
-  public function getReplyHandlerDomain() {
-    return PhabricatorEnv::getEnvConfig('metamta.reply-handler-domain');
-  }
-
-  public function getReplyHandlerInstructions() {
-    if ($this->supportsReplies()) {
-      // TODO: Implement.
-      return null;
-    } else {
-      return null;
-    }
-  }
-
-  protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
-    // TODO: Implement.
-    return null;
+  public function getObjectPrefix() {
+    return PhrictionDocumentPHIDType::TYPECONST;
   }
 
 }

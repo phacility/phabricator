@@ -1,38 +1,16 @@
 <?php
 
-final class PhortuneCartReplyHandler extends PhabricatorMailReplyHandler {
+final class PhortuneCartReplyHandler
+  extends PhabricatorApplicationTransactionReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof PhortuneCart)) {
-      throw new Exception('Mail receiver is not a PhortuneCart!');
+      throw new Exception(pht('Mail receiver is not a %s!', 'PhortuneCart'));
     }
   }
 
-  public function getPrivateReplyHandlerEmailAddress(
-    PhabricatorObjectHandle $handle) {
-    return $this->getDefaultPrivateReplyHandlerEmailAddress($handle, 'CART');
-  }
-
-  public function getPublicReplyHandlerEmailAddress() {
-    return $this->getDefaultPublicReplyHandlerEmailAddress('CART');
-  }
-
-  public function getReplyHandlerDomain() {
-    return PhabricatorEnv::getEnvConfig('metamta.reply-handler-domain');
-  }
-
-  public function getReplyHandlerInstructions() {
-    if ($this->supportsReplies()) {
-      // TODO: Implement.
-      return null;
-    } else {
-      return null;
-    }
-  }
-
-  protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
-    // TODO: Implement.
-    return null;
+  public function getObjectPrefix() {
+    return 'CART';
   }
 
 }

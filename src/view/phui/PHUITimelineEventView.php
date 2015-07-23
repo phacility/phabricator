@@ -26,6 +26,7 @@ final class PHUITimelineEventView extends AphrontView {
   private $quoteRef;
   private $reallyMajorEvent;
   private $hideCommentOptions = false;
+  private $badges = array();
 
   public function setQuoteRef($quote_ref) {
     $this->quoteRef = $quote_ref;
@@ -147,6 +148,11 @@ final class PHUITimelineEventView extends AphrontView {
 
   public function addClass($class) {
     $this->classes[] = $class;
+    return $this;
+  }
+
+  public function addBadge(PHUIBadgeMiniView $badge) {
+    $this->badges[] = $badge;
     return $this;
   }
 
@@ -290,8 +296,8 @@ final class PHUITimelineEventView extends AphrontView {
         pht('Comment Actions'));
 
       if ($items) {
-        $sigil = 'phui-timeline-menu';
-        Javelin::initBehavior('phui-timeline-dropdown-menu');
+        $sigil = 'phui-dropdown-menu';
+        Javelin::initBehavior('phui-dropdown-menu');
       } else {
         $sigil = null;
       }
@@ -354,13 +360,28 @@ final class PHUITimelineEventView extends AphrontView {
       ),
       '');
 
-    $image = phutil_tag(
-      'div',
-      array(
-        'style' => 'background-image: url('.$image_uri.')',
-        'class' => 'phui-timeline-image',
-      ),
-      '');
+    $image = null;
+    $badges = null;
+    if ($image_uri) {
+      $image = phutil_tag(
+        'div',
+        array(
+          'style' => 'background-image: url('.$image_uri.')',
+          'class' => 'phui-timeline-image',
+        ),
+        '');
+      if ($this->badges) {
+        $flex = new PHUIBadgeBoxView();
+        $flex->addItems($this->badges);
+        $flex->setCollapsed(true);
+        $badges = phutil_tag(
+          'div',
+          array(
+            'class' => 'phui-timeline-badges',
+          ),
+          $flex);
+      }
+    }
 
     $content_classes = array();
     $content_classes[] = 'phui-timeline-content';
@@ -401,7 +422,7 @@ final class PHUITimelineEventView extends AphrontView {
       array(
         'class' => implode(' ', $content_classes),
       ),
-      array($image, $wedge, $content));
+      array($image, $badges, $wedge, $content));
 
     $outer_classes = $this->classes;
     $outer_classes[] = 'phui-timeline-shell';
@@ -435,7 +456,8 @@ final class PHUITimelineEventView extends AphrontView {
           'class' => 'phui-timeline-event-view '.
                      'phui-timeline-spacer '.
                      'phui-timeline-spacer-bold',
-        '',));
+          '',
+        ));
     }
 
     return array(
@@ -453,7 +475,8 @@ final class PHUITimelineEventView extends AphrontView {
             'class' => implode(' ', $classes),
           ),
           $content)),
-      $major_event,);
+      $major_event,
+    );
   }
 
   private function renderExtra(array $events) {

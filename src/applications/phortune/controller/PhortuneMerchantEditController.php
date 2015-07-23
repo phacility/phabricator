@@ -119,8 +119,6 @@ final class PhortuneMerchantEditController
       ->setObject($merchant)
       ->execute();
 
-    $member_handles = $this->loadViewerHandles($v_members);
-
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->appendChild(
@@ -135,12 +133,12 @@ final class PhortuneMerchantEditController
           ->setName('desc')
           ->setLabel(pht('Description'))
           ->setValue($v_desc))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setLabel(pht('Members'))
           ->setName('memberPHIDs')
-          ->setValue($member_handles)
+          ->setValue($v_members)
           ->setError($e_members))
       ->appendChild(
         id(new AphrontFormPolicyControl())
@@ -166,7 +164,7 @@ final class PhortuneMerchantEditController
     $box = id(new PHUIObjectBoxView())
       ->setValidationException($validation_exception)
       ->setHeaderText($title)
-      ->appendChild($form);
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(

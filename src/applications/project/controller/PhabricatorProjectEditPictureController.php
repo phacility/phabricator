@@ -28,7 +28,7 @@ final class PhabricatorProjectEditPictureController
       return new Aphront404Response();
     }
 
-    $edit_uri = $this->getApplicationURI('edit/'.$project->getID().'/');
+    $edit_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
     $view_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
 
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
@@ -68,12 +68,9 @@ final class PhabricatorProjectEditPictureController
             'This server only supports these image formats: %s.',
             implode(', ', $supported_formats));
         } else {
-          $xformer = new PhabricatorImageTransformer();
-          $xformed = $xformer->executeProfileTransform(
-            $file,
-            $width = 50,
-            $min_height = 50,
-            $max_height = 50);
+          $xform = PhabricatorFileTransform::getTransformByKey(
+            PhabricatorFileThumbnailTransform::TRANSFORM_PROFILE);
+          $xformed = $xform->executeTransform($file);
         }
       }
 
@@ -296,9 +293,7 @@ final class PhabricatorProjectEditPictureController
     $nav->appendChild($upload_box);
 
     return $this->buildApplicationPage(
-      array(
-        $nav,
-      ),
+      $nav,
       array(
         'title' => $title,
       ));

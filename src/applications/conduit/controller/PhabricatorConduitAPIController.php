@@ -21,24 +21,34 @@ final class PhabricatorConduitAPIController
     $method = $this->method;
 
     $api_request = null;
+    $method_implementation = null;
 
     $log = new PhabricatorConduitMethodCallLog();
     $log->setMethod($method);
     $metadata = array();
+
+    $multimeter = MultimeterControl::getInstance();
+    if ($multimeter) {
+      $multimeter->setEventContext('api.'.$method);
+    }
 
     try {
 
       list($metadata, $params) = $this->decodeConduitParams($request, $method);
 
       $call = new ConduitCall($method, $params);
+      $method_implementation = $call->getMethodImplementation();
 
       $result = null;
 
-      // TODO: Straighten out the auth pathway here. We shouldn't be creating
-      // a ConduitAPIRequest at this level, but some of the auth code expects
-      // it. Landing a halfway version of this to unblock T945.
+      // TODO: The relationship between ConduitAPIRequest and ConduitCall is a
+      // little odd here and could probably be improved. Specifically, the
+      // APIRequest is a sub-object of the Call, which does not parallel the
+      // role of AphrontRequest (which is an indepenent object).
+      // In particular, the setUser() and getUser() existing independently on
+      // the Call and APIRequest is very awkward.
 
-      $api_request = new ConduitAPIRequest($params);
+      $api_request = $call->getAPIRequest();
 
       $allow_unguarded_writes = false;
       $auth_error = null;
@@ -49,10 +59,6 @@ final class PhabricatorConduitAPIController
         // If we've explicitly authenticated the user here and either done
         // CSRF validation or are using a non-web authentication mechanism.
         $allow_unguarded_writes = true;
-
-        if (isset($metadata['actAsUser'])) {
-          $this->actAsUser($api_request, $metadata['actAsUser']);
-        }
 
         if ($auth_error === null) {
           $conduit_user = $api_request->getUser();
@@ -143,46 +149,14 @@ final class PhabricatorConduitAPIController
         return $this->buildHumanReadableResponse(
           $method,
           $api_request,
-          $response->toDictionary());
+          $response->toDictionary(),
+          $method_implementation);
       case 'json':
       default:
         return id(new AphrontJSONResponse())
           ->setAddJSONShield(false)
           ->setContent($response->toDictionary());
     }
-  }
-
-  /**
-   * Change the api request user to the user that we want to act as.
-   * Only admins can use actAsUser
-   *
-   * @param   ConduitAPIRequest Request being executed.
-   * @param   string            The username of the user we want to act as
-   */
-  private function actAsUser(
-    ConduitAPIRequest $api_request,
-    $user_name) {
-
-    $config_key = 'security.allow-conduit-act-as-user';
-    if (!PhabricatorEnv::getEnvConfig($config_key)) {
-      throw new Exception('security.allow-conduit-act-as-user is disabled');
-    }
-
-    if (!$api_request->getUser()->getIsAdmin()) {
-      throw new Exception('Only administrators can use actAsUser');
-    }
-
-    $user = id(new PhabricatorUser())->loadOneWhere(
-      'userName = %s',
-      $user_name);
-
-    if (!$user) {
-      throw new Exception(
-        "The actAsUser username '{$user_name}' is not a valid user."
-      );
-    }
-
-    $api_request->setUser($user);
   }
 
   /**
@@ -213,7 +187,8 @@ final class PhabricatorConduitAPIController
         return array(
           'ERR-INVALID-AUTH',
           pht(
-            'Request is missing required "auth.host" parameter.'),
+            'Request is missing required "%s" parameter.',
+            'auth.host'),
         );
       }
 
@@ -255,8 +230,7 @@ final class PhabricatorConduitAPIController
       if (!$stored_key) {
         return array(
           'ERR-INVALID-AUTH',
-          pht(
-            'No user or device is associated with that public key.'),
+          pht('No user or device is associated with that public key.'),
         );
       }
 
@@ -280,10 +254,14 @@ final class PhabricatorConduitAPIController
             pht(
               'This request originates from outside of the Phabricator '.
               'cluster address range. Requests signed with trusted '.
-              'device keys must originate from within the cluster.'),);
+              'device keys must originate from within the cluster.'),
+          );
         }
 
         $user = PhabricatorUser::getOmnipotentUser();
+
+        // Flag this as an intracluster request.
+        $api_request->setIsClusterRequest(true);
       }
 
       return $this->validateAuthenticatedUser(
@@ -296,7 +274,8 @@ final class PhabricatorConduitAPIController
       return array(
         'ERR-INVALID-AUTH',
         pht(
-          'Provided "auth.type" ("%s") is not recognized.',
+          'Provided "%s" ("%s") is not recognized.',
+          'auth.type',
           $auth_type),
       );
     }
@@ -378,16 +357,19 @@ final class PhabricatorConduitAPIController
             pht(
               'This request originates from outside of the Phabricator '.
               'cluster address range. Requests signed with cluster API '.
-              'tokens must originate from within the cluster.'),);
+              'tokens must originate from within the cluster.'),
+          );
         }
+
+        // Flag this as an intracluster request.
+        $api_request->setIsClusterRequest(true);
       }
 
       $user = $token->getObject();
       if (!($user instanceof PhabricatorUser)) {
         return array(
           'ERR-INVALID-AUTH',
-          pht(
-            'API token is not associated with a valid user.'),
+          pht('API token is not associated with a valid user.'),
         );
       }
 
@@ -402,12 +384,11 @@ final class PhabricatorConduitAPIController
     if ($access_token &&
         $method_scope != PhabricatorOAuthServerScope::SCOPE_NOT_ACCESSIBLE) {
       $token = id(new PhabricatorOAuthServerAccessToken())
-        ->loadOneWhere('token = %s',
-                       $access_token);
+        ->loadOneWhere('token = %s', $access_token);
       if (!$token) {
         return array(
           'ERR-INVALID-AUTH',
-          'Access token does not exist.',
+          pht('Access token does not exist.'),
         );
       }
 
@@ -417,19 +398,18 @@ final class PhabricatorConduitAPIController
       if (!$valid) {
         return array(
           'ERR-INVALID-AUTH',
-          'Access token is invalid.',
+          pht('Access token is invalid.'),
         );
       }
 
       // valid token, so let's log in the user!
       $user_phid = $token->getUserPHID();
       $user = id(new PhabricatorUser())
-        ->loadOneWhere('phid = %s',
-                       $user_phid);
+        ->loadOneWhere('phid = %s', $user_phid);
       if (!$user) {
         return array(
           'ERR-INVALID-AUTH',
-          'Access token is for invalid user.',
+          pht('Access token is for invalid user.'),
         );
       }
       return $this->validateAuthenticatedUser(
@@ -448,7 +428,7 @@ final class PhabricatorConduitAPIController
       if (!$user) {
         return array(
           'ERR-INVALID-AUTH',
-          'Authentication is invalid.',
+          pht('Authentication is invalid.'),
         );
       }
       $token = idx($metadata, 'authToken');
@@ -457,7 +437,7 @@ final class PhabricatorConduitAPIController
       if (sha1($token.$certificate) !== $signature) {
         return array(
           'ERR-INVALID-AUTH',
-          'Authentication is invalid.',
+          pht('Authentication is invalid.'),
         );
       }
       return $this->validateAuthenticatedUser(
@@ -472,7 +452,7 @@ final class PhabricatorConduitAPIController
     if (!$session_key) {
       return array(
         'ERR-INVALID-SESSION',
-        'Session key is not present.',
+        pht('Session key is not present.'),
       );
     }
 
@@ -482,7 +462,7 @@ final class PhabricatorConduitAPIController
     if (!$user) {
       return array(
         'ERR-INVALID-SESSION',
-        'Session key is invalid.',
+        pht('Session key is invalid.'),
       );
     }
 
@@ -495,10 +475,10 @@ final class PhabricatorConduitAPIController
     ConduitAPIRequest $request,
     PhabricatorUser $user) {
 
-    if (!$user->isUserActivated()) {
+    if (!$user->canEstablishAPISessions()) {
       return array(
-        'ERR-USER-DISABLED',
-        pht('User account is not activated.'),
+        'ERR-INVALID-AUTH',
+        pht('User account is not permitted to use the API.'),
       );
     }
 
@@ -509,7 +489,8 @@ final class PhabricatorConduitAPIController
   private function buildHumanReadableResponse(
     $method,
     ConduitAPIRequest $request = null,
-    $result = null) {
+    $result = null,
+    ConduitAPIMethod $method_implementation = null) {
 
     $param_rows = array();
     $param_rows[] = array('Method', $this->renderAPIValue($method));
@@ -523,7 +504,6 @@ final class PhabricatorConduitAPIController
     }
 
     $param_table = new AphrontTableView($param_rows);
-    $param_table->setDeviceReadyTable(true);
     $param_table->setColumnClasses(
       array(
         'header',
@@ -539,26 +519,19 @@ final class PhabricatorConduitAPIController
     }
 
     $result_table = new AphrontTableView($result_rows);
-    $result_table->setDeviceReadyTable(true);
     $result_table->setColumnClasses(
       array(
         'header',
         'wide',
       ));
 
-    $param_panel = new AphrontPanelView();
-    $param_panel->setHeader('Method Parameters');
-    $param_panel->appendChild($param_table);
+    $param_panel = new PHUIObjectBoxView();
+    $param_panel->setHeaderText(pht('Method Parameters'));
+    $param_panel->setTable($param_table);
 
-    $result_panel = new AphrontPanelView();
-    $result_panel->setHeader('Method Result');
-    $result_panel->appendChild($result_table);
-
-    $param_head = id(new PHUIHeaderView())
-      ->setHeader(pht('Method Parameters'));
-
-    $result_head = id(new PHUIHeaderView())
-      ->setHeader(pht('Method Result'));
+    $result_panel = new PHUIObjectBoxView();
+    $result_panel->setHeaderText(pht('Method Result'));
+    $result_panel->setTable($result_table);
 
     $method_uri = $this->getApplicationURI('method/'.$method.'/');
 
@@ -566,16 +539,23 @@ final class PhabricatorConduitAPIController
       ->addTextCrumb($method, $method_uri)
       ->addTextCrumb(pht('Call'));
 
+    $example_panel = null;
+    if ($request && $method_implementation) {
+      $params = $request->getAllParameters();
+      $example_panel = $this->renderExampleBox(
+        $method_implementation,
+        $params);
+    }
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $param_head,
-        $param_table,
-        $result_head,
-        $result_table,
+        $param_panel,
+        $result_panel,
+        $example_panel,
       ),
       array(
-        'title' => 'Method Call Result',
+        'title' => pht('Method Call Result'),
       ));
   }
 
@@ -623,10 +603,13 @@ final class PhabricatorConduitAPIController
           // actually do type checking, it might be reasonable to treat it as
           // a string if the parameter type is string.
           throw new Exception(
-            "The value for parameter '{$key}' is not valid JSON. All ".
-            "parameters must be encoded as JSON values, including strings ".
-            "(which means you need to surround them in double quotes). ".
-            "Check your syntax. Value was: {$value}");
+            pht(
+              "The value for parameter '%s' is not valid JSON. All ".
+              "parameters must be encoded as JSON values, including strings ".
+              "(which means you need to surround them in double quotes). ".
+              "Check your syntax. Value was: %s.",
+              $key,
+              $value));
         }
         $params[$key] = $decoded_value;
       }
@@ -641,12 +624,15 @@ final class PhabricatorConduitAPIController
     // entire param dictionary JSON encoded.
     $params_json = $request->getStr('params');
     if (strlen($params_json)) {
-      $params = json_decode($params_json, true);
-      if (!is_array($params)) {
-        throw new Exception(
-          "Invalid parameter information was passed to method ".
-          "'{$method}', could not decode JSON serialization. Data: ".
-          $params_json);
+      $params = null;
+      try {
+        $params = phutil_json_decode($params_json);
+      } catch (PhutilJSONParserException $ex) {
+        throw new PhutilProxyException(
+          pht(
+            "Invalid parameter information was passed to method '%s'.",
+            $method),
+          $ex);
       }
 
       $metadata = idx($params, '__conduit__', array());

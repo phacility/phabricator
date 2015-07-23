@@ -2,22 +2,16 @@
 
 final class PhamePostNewController extends PhameController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
+    $id = $request->getURIData('id');
 
     $post = null;
     $view_uri = null;
-    if ($this->id) {
+    if ($id) {
       $post = id(new PhamePostQuery())
         ->setViewer($user)
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_EDIT,
@@ -70,8 +64,8 @@ final class PhamePostNewController extends PhameController {
     $nav->appendChild($crumbs);
 
     if (!$blogs) {
-      $notification = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
+      $notification = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
         ->appendChild(
           pht('You do not have permission to join any blogs. Create a blog '.
               'first, then you can post to it.'));

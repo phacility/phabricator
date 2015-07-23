@@ -3,45 +3,52 @@
  */
 
 .phabricator-remarkup {
-  line-height: 1.45em;
+  line-height: 1.51em;
 }
 
 .phabricator-remarkup p {
   margin: 0 0 12px;
 }
 
+.PhabricatorMonospaced,
+.phabricator-remarkup .remarkup-code-block .remarkup-code {
+  font: 10px/13px "Menlo", "Consolas", "Monaco", monospace;
+}
+
+.platform-windows .PhabricatorMonospaced,
+.platform-windows .phabricator-remarkup .remarkup-code-block .remarkup-code {
+  font: 11px/13px "Menlo", "Consolas", "Monaco", monospace;
+}
+
 .phabricator-remarkup .remarkup-code-block {
-  margin: 12px;
+  margin: 12px 0;
   white-space: pre;
-  font-family: "Monaco", monospace;
-  font-size: 10px;
 }
 
 .phabricator-remarkup .remarkup-code-header {
-  padding: 6px 8px;
-  background: {$lightyellow};
-  color: rgba(0,0,0,.75);
+  padding: 2px 8px;
+  font-size: 13px;
   font-weight: bold;
+  background: {$sh-yellowbackground};
   display: inline-block;
-  border-top: 1px solid {$yellow};
-  border-left: 1px solid {$yellow};
-  border-right: 1px solid {$yellow};
-  margin-bottom: -1px;
+}
+
+.phabricator-remarkup .code-block-counterexample .remarkup-code-header {
+  background-color: {$sh-redbackground};
 }
 
 .phabricator-remarkup .remarkup-code-block pre {
-  background: {$lightyellow};
-  border: 1px solid {$yellow};
+  background: {$sh-yellowbackground};
+  border: 1px solid {$sh-lightyellowborder};
   display: block;
   color: #000000;
   overflow: auto;
-  padding: 8px;
-  font-family: "Monaco", monospace;
+  padding: 12px 8px;
 }
 
 .phabricator-remarkup pre.remarkup-counterexample {
-  border: 1px solid {$red};
-  background-color: {$lightred};
+  border: 1px solid {$sh-lightredborder};
+  background-color: {$sh-redbackground};
 }
 
 .phabricator-remarkup tt.remarkup-monospaced {
@@ -54,7 +61,7 @@
 /* NOTE: You can currently produce this with [[link | `name`]]. Restore the
    link color. */
 .phabricator-remarkup a tt.remarkup-monospaced {
-  color: #18559d;
+  color: {$anchor};
 }
 
 .phabricator-remarkup ul.remarkup-list {
@@ -65,6 +72,20 @@
 .phabricator-remarkup ol.remarkup-list {
   list-style: decimal;
   margin: 12px 0 12px 30px;
+}
+
+.phabricator-remarkup ol ol.remarkup-list {
+  list-style: upper-alpha;
+}
+
+
+.phabricator-remarkup ol ol ol.remarkup-list {
+  list-style: lower-alpha;
+}
+
+
+.phabricator-remarkup ol ol ol ol.remarkup-list {
+  list-style: lower-roman;
 }
 
 .phabricator-remarkup ul.remarkup-list-with-checkmarks {
@@ -87,54 +108,62 @@
   margin: 4px 0 4px 24px;
 }
 
+.phabricator-remarkup .remarkup-list-item {
+  line-height: 1.6em;
+}
+
 .phabricator-remarkup li.phantom-item,
 .phabricator-remarkup li.phantom-item {
   list-style-type: none;
 }
 
 .phabricator-remarkup h1.remarkup-header {
-  font-size: 1.625em;
+  font-size: 24px;
   line-height: 1.625em;
-  margin: 8px 0;
+  margin: 24px 0 4px;
 }
 
 .phabricator-remarkup h2.remarkup-header {
-  font-size: 1.5em;
+  font-size: 20px;
   line-height: 1.5em;
-  margin: 8px 0;
+  margin: 20px 0 4px;
 }
 
 .phabricator-remarkup h3.remarkup-header {
-  font-size: 1.375em;
+  font-size: 18px;
   line-height: 1.375em;
-  margin: 8px 0;
+  margin: 20px 0 4px;
 }
 
 .phabricator-remarkup h4.remarkup-header {
-  font-size: 1.25em;
+  font-size: 16px;
   line-height: 1.25em;
-  margin: 8px 0;
+  margin: 12px 0 4px;
 }
 
 .phabricator-remarkup h5.remarkup-header {
-  font-size: 1.125em;
+  font-size: 15px;
   line-height: 1.125em;
-  margin: 4px 0;
+  margin: 8px 0 4px;
 }
 
 .phabricator-remarkup h6.remarkup-header {
-  font-size: 1em;
+  font-size: 14px;
   line-height: 1em;
   margin: 4px 0;
 }
 
+.phabricator-remarkup .remarkup-header + .remarkup-header {
+  margin-top: 0px;
+}
+
 .phabricator-remarkup blockquote {
-  border-left: 3px solid {$lightbluetext};
+  border-left: 3px solid {$sh-blueborder};
   color: {$darkbluetext};
   font-style:  italic;
   margin: 4px 0 12px 0;
   padding: 8px 12px;
-  background-color: #F8F9FC;
+  background-color: {$lightbluebackground};
 }
 
 .phabricator-remarkup blockquote blockquote {
@@ -234,7 +263,7 @@
 
 .phabricator-remarkup-toc-header {
   font-size: 13px;
-  line-height: 12px;
+  line-height: 13px;
   color: {$darkbluetext};
   font-weight: bold;
   margin-bottom: 4px;
@@ -254,7 +283,7 @@
 .phabricator-remarkup-toc ul li {
   padding: 0;
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -295,23 +324,25 @@
 
 .phabricator-remarkup-embed-image-full {
   display: inline-block;
+  max-width: 100%;
 }
 
 .phabricator-remarkup-embed-image-full img {
+  height: auto;
   max-width: 100%;
 }
 
 .phabricator-remarkup table.remarkup-table {
   border-collapse: separate;
   border-spacing: 1px;
-  background: #d3d3d3;
+  background: {$lightblueborder};
   margin: 12px 0;
 }
 
 .phabricator-remarkup table.remarkup-table th {
   font-weight: bold;
-  padding: 3px 6px;
-  background: #e3e3e3;
+  padding: 4px 6px;
+  background: #F8F9FC;
 }
 
 .phabricator-remarkup table.remarkup-table td {
@@ -319,33 +350,41 @@
   padding: 3px 6px;
 }
 
-.phabricator-remarkup p:first-child,
-.phabricator-remarkup ul.remarkup-list:first-child,
-.phabricator-remarkup ol.remarkup-list:first-child,
-.phabricator-remarkup .remarkup-code-block:first-child,
-.phabricator-remarkup h1.remarkup-header:first-child,
-.phabricator-remarkup h2.remarkup-header:first-child,
-.phabricator-remarkup h3.remarkup-header:first-child,
-.phabricator-remarkup h4.remarkup-header:first-child,
-.phabricator-remarkup h5.remarkup-header:first-child,
-.phabricator-remarkup h6.remarkup-header:first-child,
-.phabricator-remarkup blockquote:first-child,
-.phabricator-remarkup table.remarkup-table:first-child {
+body div.phabricator-remarkup.remarkup-has-toc
+  .phabricator-remarkup-toc + .remarkup-header {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+body .phabricator-remarkup p:first-child,
+body .phabricator-remarkup ul.remarkup-list:first-child,
+body .phabricator-remarkup ol.remarkup-list:first-child,
+body .phabricator-remarkup .remarkup-code-block:first-child,
+body .phabricator-remarkup h1.remarkup-header:first-child,
+body .phabricator-remarkup h2.remarkup-header:first-child,
+body .phabricator-remarkup h3.remarkup-header:first-child,
+body .phabricator-remarkup h4.remarkup-header:first-child,
+body .phabricator-remarkup h5.remarkup-header:first-child,
+body .phabricator-remarkup h6.remarkup-header:first-child,
+body .phabricator-remarkup blockquote:first-child,
+body .phabricator-remarkup table.remarkup-table:first-child,
+body .phabricator-remarkup .remarkup-note:first-child {
   margin-top: 0;
 }
 
-.phabricator-remarkup p:last-child,
-.phabricator-remarkup ul.remarkup-list:last-child,
-.phabricator-remarkup ol.remarkup-list:last-child,
-.phabricator-remarkup .remarkup-code-block:last-child,
-.phabricator-remarkup h1.remarkup-header:last-child,
-.phabricator-remarkup h2.remarkup-header:last-child,
-.phabricator-remarkup h3.remarkup-header:last-child,
-.phabricator-remarkup h4.remarkup-header:last-child,
-.phabricator-remarkup h5.remarkup-header:last-child,
-.phabricator-remarkup h6.remarkup-header:last-child,
-.phabricator-remarkup blockquote:last-child,
-.phabricator-remarkup table.remarkup-table:last-child {
+body .phabricator-remarkup p:last-child,
+body .phabricator-remarkup ul.remarkup-list:last-child,
+body .phabricator-remarkup ol.remarkup-list:last-child,
+body .phabricator-remarkup .remarkup-code-block:last-child,
+body .phabricator-remarkup h1.remarkup-header:last-child,
+body .phabricator-remarkup h2.remarkup-header:last-child,
+body .phabricator-remarkup h3.remarkup-header:last-child,
+body .phabricator-remarkup h4.remarkup-header:last-child,
+body .phabricator-remarkup h5.remarkup-header:last-child,
+body .phabricator-remarkup h6.remarkup-header:last-child,
+body .phabricator-remarkup blockquote:last-child,
+body .phabricator-remarkup table.remarkup-table:last-child,
+body .phabricator-remarkup .remarkup-note:last-child {
   margin-bottom: 0;
 }
 
@@ -430,8 +469,8 @@ var.remarkup-assist-textarea {
 
 .remarkup-interpreter-error {
   padding: 8px;
-  border: 1px solid {$red};
-  background-color: {$lightred};
+  border: 1px solid {$sh-redborder};
+  background-color: {$sh-redbackground};
 }
 
 .remarkup-cowsay {
@@ -455,7 +494,7 @@ var.remarkup-assist-textarea {
 }
 
 .jx-order-mask {
-  background: #ffffff;
+  background: white;
   opacity: 1.0;
 }
 
@@ -484,6 +523,16 @@ var.remarkup-assist-textarea {
   max-width: 95%;
 }
 
+.phabricator-remarkup-macro {
+  height: auto;
+  max-width: 100%;
+}
+
 .remarkup-nav-sequence-arrow {
   color: {$lightgreytext};
+}
+
+.phabricator-remarkup hr {
+  background: {$thinblueborder};
+  margin: 24px 0;
 }

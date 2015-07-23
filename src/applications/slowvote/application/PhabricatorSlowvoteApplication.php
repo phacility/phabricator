@@ -6,8 +6,8 @@ final class PhabricatorSlowvoteApplication extends PhabricatorApplication {
     return '/vote/';
   }
 
-  public function getIconName() {
-    return 'slowvote';
+  public function getFontIcon() {
+    return 'fa-bar-chart';
   }
 
   public function getName() {
@@ -22,8 +22,13 @@ final class PhabricatorSlowvoteApplication extends PhabricatorApplication {
     return "\xE2\x9C\x94";
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Slowvote User Guide');
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Slowvote User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Slowvote User Guide'),
+      ),
+    );
   }
 
   public function getFlavorText() {
@@ -59,6 +64,8 @@ final class PhabricatorSlowvoteApplication extends PhabricatorApplication {
     return array(
       PhabricatorSlowvoteDefaultViewCapability::CAPABILITY => array(
         'caption' => pht('Default view policy for new polls.'),
+        'template' => PhabricatorSlowvotePollPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_VIEW,
       ),
     );
   }

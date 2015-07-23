@@ -3,7 +3,7 @@
 final class PhabricatorSystemRemoveLogWorkflow
   extends PhabricatorSystemRemoveWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('log')
       ->setSynopsis(pht('Show a log of permanently destroyed objects.'))

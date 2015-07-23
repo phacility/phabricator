@@ -11,7 +11,7 @@ final class PhabricatorEdgeGraph extends AbstractDirectedGraph {
 
   protected function loadEdges(array $nodes) {
     if (!$this->edgeType) {
-      throw new Exception('Set edge type before loading graph!');
+      throw new Exception(pht('Set edge type before loading graph!'));
     }
 
     $edges = id(new PhabricatorEdgeQuery())

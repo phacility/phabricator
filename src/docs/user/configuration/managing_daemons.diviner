@@ -1,7 +1,7 @@
 @title Managing Daemons with phd
 @group config
 
-Explains Phabricator daemons and the daemon control program ##phd##.
+Explains Phabricator daemons and the daemon control program `phd`.
 
 = Overview =
 
@@ -23,8 +23,8 @@ daemons.
 
 = phd =
 
-**phd** is a command-line script (located at ##phabricator/bin/phd##). To get
-a list of commands, run ##phd help##:
+**phd** is a command-line script (located at `phabricator/bin/phd`). To get
+a list of commands, run `phd help`:
 
   phabricator/ $ ./bin/phd help
   NAME
@@ -49,7 +49,7 @@ the daemons by running `phd restart`.
 = Daemon Console =
 
 You can view status and debugging information for daemons in the Daemon Console
-via the web interface. Go to ##/daemon/## in your install or click
+via the web interface. Go to `/daemon/` in your install or click
 **Daemon Console** from "More Stuff".
 
 The Daemon Console shows a list of all the daemons that have ever launched, and
@@ -70,7 +70,8 @@ You can get a list of launchable daemons with **phd list**:
   - **PhabricatorTaskmasterDaemon** performs work from a task queue;
   - **PhabricatorRepositoryPullLocalDaemon** daemons track repositories, for
     more information see @{article:Diffusion User Guide}; and
-  - **PhabricatorGarbageCollectorDaemon** cleans up old logs and caches.
+  - **PhabricatorTriggerDaemon** schedules event triggers and cleans up old
+    logs and caches.
 
 = Debugging and Tuning =
 
@@ -99,15 +100,16 @@ This daemon will daemonize and run normally.
 
 == General Tips ==
 
-  - You can set the number of taskmasters that `phd start` starts by the config
-    key `phd.start-taskmasters`. If you have a task backlog, try increasing it.
+  - You can set the maximum number of taskmasters that will run at once
+    by adjusting `phd.taskmasters`. If you have a task backlog, try increasing
+    it.
   - When you `phd launch` or `phd debug` a daemon, you can type any unique
     substring of its name, so `phd launch pull` will work correctly.
   - `phd stop` and `phd restart` stop **all** of the daemons on the machine, not
     just those started with `phd start`. If you're writing a restart script,
     have it launch any custom daemons explicitly after `phd restart`.
   - You can write your own daemons and manage them with `phd` by extending
-    @{class:PhabricatorDaemon}. See @{article:libphutil Libraries User Guide}.
+    @{class:PhabricatorDaemon}. See {article@contributor:Adding New Classes}.
   - See @{article:Diffusion User Guide} for details about tuning the repository
     daemon.
 
@@ -119,7 +121,7 @@ daemons launch, and split daemons across machines like this:
   - `PhabricatorRepositoryPullLocalDaemon`: Run one copy on any machine.
     On each web frontend which is not running a normal copy, run a copy
     with the `--no-discovery` flag.
-  - `PhabricatorGarbageCollectorDaemon`: Run one copy on any machine.
+  - `PhabricatorTriggerDaemon`: Run one copy on any machine.
   - `PhabricatorTaskmasterDaemon`: Run as many copies as you need to keep
     tasks from backing up. You can run them all on one machine or split them
     across machines.
@@ -135,4 +137,4 @@ Continue by:
 
   - learning about the repository daemon with @{article:Diffusion User Guide};
     or
-  - writing your own daemons with @{article:libphutil Libraries User Guide}.
+  - writing your own daemons with {article@contributor:Adding New Classes}.

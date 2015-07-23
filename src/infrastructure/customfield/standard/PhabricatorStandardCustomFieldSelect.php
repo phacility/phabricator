@@ -38,8 +38,7 @@ final class PhabricatorStandardCustomFieldSelect
   public function appendToApplicationSearchForm(
     PhabricatorApplicationSearchEngine $engine,
     AphrontFormView $form,
-    $value,
-    array $handles) {
+    $value) {
 
     if (!is_array($value)) {
       $value = array();

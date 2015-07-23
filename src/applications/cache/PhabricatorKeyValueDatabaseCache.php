@@ -136,7 +136,7 @@ final class PhabricatorKeyValueDatabaseCache
 
   private function willWriteValue($key, $value) {
     if (!is_string($value)) {
-      throw new Exception('Only strings may be written to the DB cache!');
+      throw new Exception(pht('Only strings may be written to the DB cache!'));
     }
 
     static $can_deflate;
@@ -162,7 +162,7 @@ final class PhabricatorKeyValueDatabaseCache
       case self::CACHE_FORMAT_DEFLATE:
         return PhabricatorCaches::inflateData($value);
       default:
-        throw new Exception('Unknown cache format.');
+        throw new Exception(pht('Unknown cache format.'));
     }
   }
 

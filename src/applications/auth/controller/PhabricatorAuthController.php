@@ -15,7 +15,7 @@ abstract class PhabricatorAuthController extends PhabricatorController {
   }
 
   protected function renderErrorPage($title, array $messages) {
-    $view = new AphrontErrorView();
+    $view = new PHUIInfoView();
     $view->setTitle($title);
     $view->setErrors($messages);
 
@@ -108,6 +108,9 @@ abstract class PhabricatorAuthController extends PhabricatorController {
 
     // Clear the client ID / OAuth state key.
     $request->clearCookie(PhabricatorCookies::COOKIE_CLIENTID);
+
+    // Clear the invite cookie.
+    $request->clearCookie(PhabricatorCookies::COOKIE_INVITE);
   }
 
   private function buildLoginValidateResponse(PhabricatorUser $user) {
@@ -244,6 +247,59 @@ abstract class PhabricatorAuthController extends PhabricatorController {
     }
 
     return array($account, $provider, null);
+  }
+
+  protected function loadInvite() {
+    $invite_cookie = PhabricatorCookies::COOKIE_INVITE;
+    $invite_code = $this->getRequest()->getCookie($invite_cookie);
+    if (!$invite_code) {
+      return null;
+    }
+
+    $engine = id(new PhabricatorAuthInviteEngine())
+      ->setViewer($this->getViewer())
+      ->setUserHasConfirmedVerify(true);
+
+    try {
+      return $engine->processInviteCode($invite_code);
+    } catch (Exception $ex) {
+      // If this fails for any reason, just drop the invite. In normal
+      // circumstances, we gave them a detailed explanation of any error
+      // before they jumped into this workflow.
+      return null;
+    }
+  }
+
+  protected function renderInviteHeader(PhabricatorAuthInvite $invite) {
+    $viewer = $this->getViewer();
+
+    $invite_author = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($invite->getAuthorPHID()))
+      ->needProfileImage(true)
+      ->executeOne();
+
+    // If we can't load the author for some reason, just drop this message.
+    // We lose the value of contextualizing things without author details.
+    if (!$invite_author) {
+      return null;
+    }
+
+    $invite_item = id(new PHUIObjectItemView())
+      ->setHeader(pht('Welcome to Phabricator!'))
+      ->setImageURI($invite_author->getProfileImageURI())
+      ->addAttribute(
+        pht(
+          '%s has invited you to join Phabricator.',
+          $invite_author->getFullName()));
+
+    $invite_list = id(new PHUIObjectItemListView())
+      ->addItem($invite_item)
+      ->setFlush(true);
+
+    return id(new PHUIBoxView())
+      ->addMargin(PHUI::MARGIN_LARGE)
+      ->appendChild($invite_list);
   }
 
 }

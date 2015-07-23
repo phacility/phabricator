@@ -4,8 +4,8 @@ final class LegalpadTransactionComment
   extends PhabricatorApplicationTransactionComment {
 
   protected $documentID;
-  protected $lineNumber;
-  protected $lineLength;
+  protected $lineNumber = 0;
+  protected $lineLength = 0;
   protected $fixedState;
   protected $hasReplies = 0;
   protected $replyToCommentPHID;

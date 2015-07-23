@@ -20,7 +20,8 @@ final class DrydockPreallocatedHostBlueprintImplementation
   }
 
   protected function executeAllocateResource(DrydockLease $lease) {
-    throw new Exception("Preallocated hosts can't be dynamically allocated.");
+    throw new Exception(
+      pht("Preallocated hosts can't be dynamically allocated."));
   }
 
   protected function canAllocateLease(
@@ -76,18 +77,7 @@ final class DrydockPreallocatedHostBlueprintImplementation
 
     $cmd = $lease->getInterface('command');
 
-    if ($v_platform !== 'windows') {
-      $cmd->execx('mkdir %s', $full_path);
-    } else {
-      // Windows is terrible. The mkdir command doesn't even support putting
-      // the path in quotes. IN QUOTES. ARGUHRGHUGHHGG!! Do some terribly
-      // inaccurate sanity checking since we can't safely escape the path.
-      if (preg_match('/^[A-Z]\\:\\\\[a-zA-Z0-9\\\\\\ ]/', $full_path) === 0) {
-        throw new Exception(
-          'Unsafe path detected for Windows platform: "'.$full_path.'".');
-      }
-      $cmd->execx('mkdir %C', $full_path);
-    }
+    $cmd->execx('mkdir %s', $full_path);
 
     $lease->setAttribute('path', $full_path);
   }
@@ -120,7 +110,7 @@ final class DrydockPreallocatedHostBlueprintImplementation
           ));
     }
 
-    throw new Exception("No interface of type '{$type}'.");
+    throw new Exception(pht("No interface of type '%s'.", $type));
   }
 
 }

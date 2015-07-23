@@ -6,8 +6,12 @@ final class PhabricatorMetaMTAApplication extends PhabricatorApplication {
     return pht('MetaMTA');
   }
 
-  public function getIconName() {
-    return 'metamta';
+  public function getBaseURI() {
+    return '/mail/';
+  }
+
+  public function getFontIcon() {
+    return 'fa-send';
   }
 
   public function getShortDescription() {
@@ -37,6 +41,9 @@ final class PhabricatorMetaMTAApplication extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/mail/' => array(
+        '(query/(?P<queryKey>[^/]+)/)?' =>
+          'PhabricatorMetaMTAMailListController',
+        'detail/(?P<id>[1-9]\d*)/' => 'PhabricatorMetaMTAMailViewController',
         'sendgrid/' => 'PhabricatorMetaMTASendGridReceiveController',
         'mailgun/'  => 'PhabricatorMetaMTAMailgunReceiveController',
       ),

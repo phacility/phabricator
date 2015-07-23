@@ -16,6 +16,11 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.page-has-warning .conpherence-widget-pane,
+.page-had-warning .loading .widgets-loading-mask {
+  top: 110px;
+}
+
 .device .conpherence-widget-pane,
 .device .loading .widgets-loading-mask {
   top: 44px;
@@ -41,9 +46,12 @@
   border: 0;
 }
 
-.conpherence-widget-pane .widgets-header {
-  background: #F5F5F5;
-  border-bottom: 1px solid #ccc;
+.conpherence-widget-pane .widgets-header .phui-header-shell {
+  padding: 6px 8px;
+}
+
+.conpherence-widget-pane .widgets-header .phui-header-header {
+  font-size: {$biggerfontsize};
 }
 
 .device .conpherence-widget-pane .widgets-header {
@@ -54,8 +62,12 @@
   float: none;
   height: 0px;
   width: 0px;
-  margin-right: 0px;
+  margin: 10px 0 0 4px;
   border-top-color: #000;
+}
+
+.conpherence-widget-pane .widgets-header .phui-icon-view.disabled {
+  color: {$lightgreytext};
 }
 
 .device-desktop .conpherence-layout .device-widgets-selector {
@@ -75,8 +87,12 @@
 }
 
 .device-desktop .conpherence-widget-pane .widgets-body {
-  top: 108px;
+  top: 111px;
   width: 240px;
+}
+
+.device-desktop .page-has-warning .conpherence-widget-pane .widgets-body {
+  top: 142px;
 }
 
 /* files widget */
@@ -85,28 +101,39 @@
   width: 200px;
   padding: 20px;
   text-align: center;
-  color: #555;
+  color: {$greytext};
 }
+
 .device .conpherence-widget-pane #widgets-files .no-files {
   width: 60px;
-  margin: 0px auto 0px auto;
+  margin: 0 auto 0 auto;
 }
+
 .conpherence-widget-pane #widgets-files .file-entry {
-  padding: 10px 0;
-  margin: 0 5px 0 10px;
-  border-bottom: 1px solid #e7e7e7;
+  padding: 8px 0;
+  margin: 0 4px 0 8px;
+  border-bottom: 1px solid {$thinblueborder};
 }
+
+.conpherence-widget-pane #widgets-files .file-entry a {
+  color: {$darkbluetext};
+  font-weight: bold;
+}
+
 .conpherence-widget-pane #widgets-files .file-icon {
   width: 32px;
   height: 32px;
   float: left;
-  font-size: 30px;
+  font-size: 24px;
+  color: {$blue};
+  margin: 2px 0 2px 4px;
 }
+
 .conpherence-widget-pane #widgets-files .file-title {
   display: block;
   position: relative;
   top: -4px;
-  left: 2px;
+  left: 0;
   overflow-x: hidden;
   width: 180px;
   font-weight: bold;
@@ -114,12 +141,12 @@
   white-space: nowrap;
 }
 .conpherence-widget-pane #widgets-files .file-uploaded-by {
-  color: #a1a5a9;
+  color: {$lightgreytext};
   position: relative;
-  top: 0px;
-  left: 2px;
-  width: 170px;
-  font-size: 11px;
+  top: 0;
+  left: 0;
+  width: 180px;
+  font-size: {$smallestfontsize};
 }
 
 .device .conpherence-widget-pane #widgets-files .file-title,
@@ -147,7 +174,7 @@
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
 .aphront-multi-column-column {
   background: white;
-  border-right: 1px solid #bfbfbf;
+  border-right: 1px solid {$thinblueborder};
   text-align: center;
 }
 .device-phone .conpherence-widget-pane #widgets-calendar
@@ -210,51 +237,41 @@
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
  .day-name {
   padding: 5px 0px 0px 0px;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
 }
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
  .day-number {
-  font-size: 16px;
+  font-size: {$biggestfontsize};
   padding: 0 0 5px 0;
 }
 
 .conpherence-widget-pane #widgets-calendar .day-header {
   overflow: hidden;
-  background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
-  background-image: -webkit-linear-gradient(top, #ffffff, #e6e6e6);
-  border-top: 1px solid #e7e7e7;
-  border-bottom: 1px solid #d7d7d7;
-  padding: 5px 10px 5px 10px;
-}
-
-.conpherence-widget-pane #widgets-calendar .day-header.today {
-  background-image: linear-gradient(to bottom, #3b86c4, #2b628f);
-  background-image: -webkit-linear-gradient(top, #3b86c4, #2b628f);
-  border-top: none;
-  border-bottom: none;
+  border-top: 1px solid {$thinblueborder};
+  padding: 8px 8px 0px 8px;
 }
 
 .conpherence-widget-pane #widgets-calendar .day-header.today .day-name,
 .conpherence-widget-pane #widgets-calendar .day-header.today .day-date {
-  color: #fff;
+  color: {$sky};
 }
 
 .conpherence-widget-pane #widgets-calendar .day-header .day-name {
   float: left;
-  color: #555759;
+  color: {$bluetext};
   font-weight: bold;
   text-transform: uppercase;
-  font-size: 11px;
+  font-size: {$smallestfontsize};
 }
 
 .conpherence-widget-pane #widgets-calendar .day-header .day-date {
   float: right;
-  color: #555759;
-  font-size: 11px;
+  color: {$lightbluetext};
+  font-size: {$smallestfontsize};
 }
 
 .conpherence-widget-pane #widgets-calendar .top-border {
-  border-top: 1px solid #E7E7E7;
+  border-top: 1px solid {$thinblueborder};
 }
 
 .conpherence-widget-pane #widgets-calendar .user-status {
@@ -264,28 +281,28 @@
 
 .conpherence-widget-pane #widgets-calendar .user-status .icon {
   border-radius: 8px;
-  height: 14px;
-  width: 14px;
-  margin-top: 7px;
+  height: 8px;
+  width: 8px;
+  margin-top: 4px;
   float: left;
 }
 
 .conpherence-widget-pane #widgets-calendar .sporadic .icon {
-  background-color: rgb(222, 226, 232);
+  background-color: {$orange};
 }
 
 .conpherence-widget-pane #widgets-calendar .away .icon {
-  background-color: rgb(102, 204, 255);
+  background-color: {$red};
 }
 
 .conpherence-widget-pane #widgets-calendar .user-status .description {
   width: 195px;
   text-overflow: ellipsis;
-  margin: 0 0 0px 20px;
+  margin: 0 0 0 16px;
 }
 
 .conpherence-widget-pane #widgets-calendar .user-status .participant {
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   color: {$lightgreytext};
   padding-top: 2px;
 }
@@ -330,33 +347,45 @@
   padding: 3px 16px 4px 16px;
 }
 
+#widgets-people {
+  margin-top: 4px;
+}
+
 .conpherence-widget-pane .person-entry {
-  padding: 8px 0 0 8px;
+  padding: 4px 8px;
+}
+
+.conpherence-widget-pane .person-entry:hover {
+  background-color: {$lightgreybackground};
 }
 
 .conpherence-widget-pane .person-entry a {
   float: left;
   font-weight: bold;
-  line-height: 20px;
+  line-height: 22px;
+  color: {$darkbluetext};
 }
 
 .conpherence-widget-pane .person-entry a img {
-  height: 35px;
-  width: 35px;
+  height: 24px;
+  width: 24px;
+  border-radius: 3px;
 }
 
 .conpherence-widget-pane .person-entry .pic {
   float: left;
-  margin: 0 8px 0 0;
-  width: 35px;
-  padding: 0;
+  width: 30px;
 }
 
 .conpherence-widget-pane .person-entry .remove {
   float: right;
   width: 20px;
+  height: 20px;
   font-size: 18px;
-  padding: 5px 0 8px 0;
+}
+
+.person-entry .remove:hover .phui-icon-view {
+  color: {$red};
 }
 
 .conpherence-widget-pane .person-entry .remove:hover {
@@ -375,4 +404,16 @@
 .conpherence-widget-pane .title-update,
 .conpherence-widget-pane .notifications-update {
   margin: 3px 0px 0px 4px;
+}
+
+.conpherence-widget-pane .no-settings {
+  width: 200px;
+  padding: 20px;
+  text-align: center;
+  color: {$greytext};
+}
+
+.device .conpherence-widget-pane .no-settings {
+  width: 60px;
+  margin: 0 auto 0 auto;
 }

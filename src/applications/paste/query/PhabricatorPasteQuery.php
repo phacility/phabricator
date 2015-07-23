@@ -67,21 +67,12 @@ final class PhabricatorPasteQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new PhabricatorPaste();
+  }
+
   protected function loadPage() {
-    $table = new PhabricatorPaste();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT paste.* FROM %T paste %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    $pastes = $table->loadAllFromArray($data);
-
-    return $pastes;
+    return $this->loadStandardPage(new PhabricatorPaste());
   }
 
   protected function didFilterPage(array $pastes) {
@@ -96,61 +87,59 @@ final class PhabricatorPasteQuery
     return $pastes;
   }
 
-  protected function buildWhereClause($conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->authorPHIDs) {
+    if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
-    if ($this->parentPHIDs) {
+    if ($this->parentPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'parentPHID IN (%Ls)',
         $this->parentPHIDs);
     }
 
-    if ($this->languages) {
+    if ($this->languages !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'language IN (%Ls)',
         $this->languages);
     }
 
-    if ($this->dateCreatedAfter) {
+    if ($this->dateCreatedAfter !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'dateCreated >= %d',
         $this->dateCreatedAfter);
     }
 
-    if ($this->dateCreatedBefore) {
+    if ($this->dateCreatedBefore !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'dateCreated <= %d',
         $this->dateCreatedBefore);
     }
 
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   private function getContentCacheKey(PhabricatorPaste $paste) {
@@ -203,37 +192,48 @@ final class PhabricatorPasteQuery
     }
 
     $caches = $cache->getKeys($keys);
-    $results = array();
 
     $need_raw = array();
-    foreach ($pastes as $key => $paste) {
+    $have_cache = array();
+    foreach ($pastes as $paste) {
       $key = $this->getContentCacheKey($paste);
       if (isset($caches[$key])) {
         $paste->attachContent(phutil_safe_html($caches[$key]));
-        $results[$paste->getID()] = $paste;
+        $have_cache[$paste->getPHID()] = true;
       } else {
         $need_raw[$key] = $paste;
       }
     }
 
     if (!$need_raw) {
-      return $results;
+      return $pastes;
     }
 
     $write_data = array();
 
-    $need_raw = $this->loadRawContent($need_raw);
-    foreach ($need_raw as $key => $paste) {
+    $have_raw = $this->loadRawContent($need_raw);
+    $have_raw = mpull($have_raw, null, 'getPHID');
+    foreach ($pastes as $key => $paste) {
+      $paste_phid = $paste->getPHID();
+      if (isset($have_cache[$paste_phid])) {
+        continue;
+      }
+
+      if (empty($have_raw[$paste_phid])) {
+        unset($pastes[$key]);
+        continue;
+      }
+
       $content = $this->buildContent($paste);
       $paste->attachContent($content);
-
       $write_data[$this->getContentCacheKey($paste)] = (string)$content;
-      $results[$paste->getID()] = $paste;
     }
 
-    $cache->setKeys($write_data);
+    if ($write_data) {
+      $cache->setKeys($write_data);
+    }
 
-    return $results;
+    return $pastes;
   }
 
   private function buildContent(PhabricatorPaste $paste) {

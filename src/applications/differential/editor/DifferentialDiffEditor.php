@@ -62,9 +62,6 @@ final class DifferentialDiffEditor
         $dict = $this->diffDataDict;
         $this->updateDiffFromDict($object, $dict);
         return;
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        $object->setViewPolicy($xaction->getNewValue());
-        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -76,7 +73,6 @@ final class DifferentialDiffEditor
 
     switch ($xaction->getTransactionType()) {
       case DifferentialDiffTransaction::TYPE_DIFF_CREATE:
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
         return;
     }
 
@@ -145,12 +141,7 @@ final class DifferentialDiffEditor
           }
 
           if ($blocking_effect) {
-            $rule = idx($rules, $effect->getRuleID());
-            if ($rule && strlen($rule->getName())) {
-              $rule_name = $rule->getName();
-            } else {
-              $rule_name = pht('Unnamed Herald Rule');
-            }
+            $rule = $blocking_effect->getRule();
 
             $message = $effect->getTarget();
             if (!strlen($message)) {
@@ -164,8 +155,8 @@ final class DifferentialDiffEditor
                 "Creation of this diff was rejected by Herald rule %s.\n".
                 "  Rule: %s\n".
                 "Reason: %s",
-                'H'.$effect->getRuleID(),
-                $rule_name,
+                $rule->getMonogram(),
+                $rule->getName(),
                 $message));
           }
           break;
@@ -239,8 +230,7 @@ final class DifferentialDiffEditor
       ->setSourceControlPath(idx($dict, 'sourceControlPath'))
       ->setSourceControlBaseRevision(idx($dict, 'sourceControlBaseRevision'))
       ->setLintStatus(idx($dict, 'lintStatus'))
-      ->setUnitStatus(idx($dict, 'unitStatus'))
-      ->setArcanistProjectPHID(idx($dict, 'arcanistProjectPHID'));
+      ->setUnitStatus(idx($dict, 'unitStatus'));
 
     return $diff;
   }

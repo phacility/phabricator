@@ -111,11 +111,15 @@ final class PhabricatorDashboardQueryPanelType
     PhabricatorUser $viewer,
     PhabricatorDashboardPanel $panel,
     PhabricatorDashboardPanelRenderingEngine $engine,
-    PHUIActionHeaderView $header) {
+    PHUIHeaderView $header) {
 
     $search_engine = $this->getSearchEngine($panel);
     $key = $panel->getProperty('key');
-    $header->setHeaderHref($search_engine->getQueryResultsPageURI($key));
+    $href = $search_engine->getQueryResultsPageURI($key);
+    $icon = id(new PHUIIconView())
+        ->setIconFont('fa-search')
+        ->setHref($href);
+    $header->addActionIcon($icon);
 
     return $header;
   }
@@ -127,6 +131,14 @@ final class PhabricatorDashboardQueryPanelType
       throw new Exception(
         pht(
           'The application search engine "%s" is not known to Phabricator!',
+          $class));
+    }
+
+    if (!$engine->canUseInPanelContext()) {
+      throw new Exception(
+        pht(
+          'Application search engines of class "%s" can not be used to build '.
+          'dashboard panels.',
           $class));
     }
 

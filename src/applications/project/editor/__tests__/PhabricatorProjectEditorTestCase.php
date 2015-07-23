@@ -100,11 +100,13 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $proj = $this->refreshProject($proj, $user, true);
     $this->assertTrue(
       (bool)$proj,
-      'Assumption that projects are default visible to any user when created.');
+      pht(
+        'Assumption that projects are default visible '.
+        'to any user when created.'));
 
     $this->assertFalse(
       $proj->isUserMember($user->getPHID()),
-      'Arbitrary user not member of project.');
+      pht('Arbitrary user not member of project.'));
 
     // Join the project.
     $this->joinProject($proj, $user);
@@ -114,7 +116,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
 
     $this->assertTrue(
       $proj->isUserMember($user->getPHID()),
-      'Join works.');
+      pht('Join works.'));
 
 
     // Join the project again.
@@ -125,7 +127,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
 
     $this->assertTrue(
       $proj->isUserMember($user->getPHID()),
-      'Joining an already-joined project is a no-op.');
+      pht('Joining an already-joined project is a no-op.'));
 
 
     // Leave the project.
@@ -136,7 +138,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
 
     $this->assertFalse(
       $proj->isUserMember($user->getPHID()),
-      'Leave works.');
+      pht('Leave works.'));
 
 
     // Leave the project again.
@@ -147,7 +149,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
 
     $this->assertFalse(
       $proj->isUserMember($user->getPHID()),
-      'Leaving an already-left project is a no-op.');
+      pht('Leaving an already-left project is a no-op.'));
 
 
     // If a user can't edit or join a project, joining fails.
@@ -175,7 +177,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $proj = $this->refreshProject($proj, $user, true);
     $this->assertTrue(
       $proj->isUserMember($user->getPHID()),
-      'Join allowed with edit permission.');
+      pht('Join allowed with edit permission.'));
     $this->leaveProject($proj, $user);
 
 
@@ -189,7 +191,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $proj = $this->refreshProject($proj, $user, true);
     $this->assertTrue(
       $proj->isUserMember($user->getPHID()),
-      'Join allowed with join permission.');
+      pht('Join allowed with join permission.'));
 
 
     // A user can leave a project even if they can't edit it or join.
@@ -202,7 +204,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $proj = $this->refreshProject($proj, $user, true);
     $this->assertFalse(
       $proj->isUserMember($user->getPHID()),
-      'Leave allowed without any permission.');
+      pht('Leave allowed without any permission.'));
   }
 
   private function refreshProject(
@@ -225,7 +227,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
 
   private function createProject(PhabricatorUser $user) {
     $project = PhabricatorProject::initializeNewProject($user);
-    $project->setName('Test Project '.mt_rand());
+    $project->setName(pht('Test Project %d', mt_rand()));
     $project->save();
 
     return $project;
@@ -245,7 +247,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
 
     $user = new PhabricatorUser();
     $user->setUsername('unittestuser'.$rand);
-    $user->setRealName('Unit Test User '.$rand);
+    $user->setRealName(pht('Unit Test User %d', $rand));
 
     return $user;
   }

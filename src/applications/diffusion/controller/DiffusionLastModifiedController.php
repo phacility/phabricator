@@ -11,8 +11,9 @@ final class DiffusionLastModifiedController extends DiffusionController {
     $viewer = $request->getUser();
 
     $paths = $request->getStr('paths');
-    $paths = json_decode($paths, true);
-    if (!is_array($paths)) {
+    try {
+      $paths = phutil_json_decode($paths);
+    } catch (PhutilJSONParserException $ex) {
       return new Aphront400Response();
     }
 
@@ -151,6 +152,12 @@ final class DiffusionLastModifiedController extends DiffusionController {
           )),
         ),
         number_format($lint));
+    }
+
+    // The client treats these results as markup, so make sure they have been
+    // escaped correctly.
+    foreach ($return as $key => $value) {
+      $return[$key] = hsprintf('%s', $value);
     }
 
     return $return;

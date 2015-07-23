@@ -119,7 +119,7 @@ final class AlmanacInterface
     PhabricatorDestructionEngine $engine) {
 
     $bindings = id(new AlmanacBindingQuery())
-      ->setViewer($this->getViewer())
+      ->setViewer($engine->getViewer())
       ->withInterfacePHIDs(array($this->getPHID()))
       ->execute();
     foreach ($bindings as $binding) {

@@ -11,6 +11,26 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
   private $needsBlame;
   private $fileContent;
   private $viewer;
+  private $timeout;
+  private $byteLimit;
+
+  public function setTimeout($timeout) {
+    $this->timeout = $timeout;
+    return $this;
+  }
+
+  public function getTimeout() {
+    return $this->timeout;
+  }
+
+  public function setByteLimit($byte_limit) {
+    $this->byteLimit = $byte_limit;
+    return $this;
+  }
+
+  public function getByteLimit() {
+    return $this->byteLimit;
+  }
 
   final public static function newFromDiffusionRequest(
     DiffusionRequest $request) {
@@ -21,7 +41,31 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
   abstract protected function executeQueryFromFuture(Future $future);
 
   final public function loadFileContentFromFuture(Future $future) {
-    $this->fileContent = $this->executeQueryFromFuture($future);
+
+    if ($this->timeout) {
+      $future->setTimeout($this->timeout);
+    }
+
+    if ($this->getByteLimit()) {
+      $future->setStdoutSizeLimit($this->getByteLimit());
+    }
+
+    try {
+      $file_content = $this->executeQueryFromFuture($future);
+    } catch (CommandException $ex) {
+      if (!$future->getWasKilledByTimeout()) {
+        throw $ex;
+      }
+
+      $message = pht(
+        '<Attempt to load this file was terminated after %s second(s).>',
+        $this->timeout);
+
+      $file_content = new DiffusionFileContent();
+      $file_content->setCorpus($message);
+    }
+
+    $this->fileContent = $file_content;
 
     $repository = $this->getRequest()->getRepository();
     $try_encoding = $repository->getDetail('encoding');

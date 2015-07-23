@@ -3,21 +3,21 @@
 final class DrydockManagementLeaseWorkflow
   extends DrydockManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('lease')
-      ->setSynopsis('Lease a resource.')
+      ->setSynopsis(pht('Lease a resource.'))
       ->setArguments(
         array(
           array(
             'name'      => 'type',
             'param'     => 'resource_type',
-            'help'      => 'Resource type.',
+            'help'      => pht('Resource type.'),
           ),
           array(
             'name'      => 'attributes',
             'param'     => 'name=value,...',
-            'help'      => 'Resource specficiation.',
+            'help'      => pht('Resource specficiation.'),
           ),
         ));
   }
@@ -28,7 +28,9 @@ final class DrydockManagementLeaseWorkflow
     $resource_type = $args->getArg('type');
     if (!$resource_type) {
       throw new PhutilArgumentUsageException(
-        'Specify a resource type with `--type`.');
+        pht(
+          'Specify a resource type with `%s`.',
+          '--type'));
     }
 
     $attributes = $args->getArg('attributes');
@@ -49,7 +51,7 @@ final class DrydockManagementLeaseWorkflow
       ->queueForActivation()
       ->waitUntilActive();
 
-    $console->writeOut("Acquired Lease %s\n", $lease->getID());
+    $console->writeOut("%s\n", pht('Acquired Lease %s', $lease->getID()));
     return 0;
   }
 

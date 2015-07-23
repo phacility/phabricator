@@ -1,10 +1,12 @@
 <?php
 
 final class DifferentialInlineComment
+  extends Phobject
   implements PhabricatorInlineCommentInterface {
 
   private $proxy;
   private $syntheticAuthor;
+  private $isGhost;
 
   public function __construct() {
     $this->proxy = new DifferentialTransactionComment();
@@ -23,6 +25,7 @@ final class DifferentialInlineComment
       ->setViewPolicy('public')
       ->setEditPolicy($this->getAuthorPHID())
       ->setContentSource($content_source)
+      ->attachIsHidden(false)
       ->setCommentVersion(1);
 
     return $this->proxy;
@@ -46,6 +49,20 @@ final class DifferentialInlineComment
     $this->proxy->delete();
 
     return $this;
+  }
+
+  public function supportsHiding() {
+    if ($this->getSyntheticAuthor()) {
+      return false;
+    }
+    return true;
+  }
+
+  public function isHidden() {
+    if (!$this->supportsHiding()) {
+      return false;
+    }
+    return $this->proxy->getIsHidden();
   }
 
   public function getID() {
@@ -188,6 +205,57 @@ final class DifferentialInlineComment
         DifferentialRevisionPHIDType::TYPECONST));
     return $this;
   }
+
+  public function setReplyToCommentPHID($phid) {
+    $this->proxy->setReplyToCommentPHID($phid);
+    return $this;
+  }
+
+  public function getReplyToCommentPHID() {
+    return $this->proxy->getReplyToCommentPHID();
+  }
+
+  public function setHasReplies($has_replies) {
+    $this->proxy->setHasReplies($has_replies);
+    return $this;
+  }
+
+  public function getHasReplies() {
+    return $this->proxy->getHasReplies();
+  }
+
+  public function setIsDeleted($is_deleted) {
+    $this->proxy->setIsDeleted($is_deleted);
+    return $this;
+  }
+
+  public function getIsDeleted() {
+    return $this->proxy->getIsDeleted();
+  }
+
+  public function setFixedState($state) {
+    $this->proxy->setFixedState($state);
+    return $this;
+  }
+
+  public function getFixedState() {
+    return $this->proxy->getFixedState();
+  }
+
+  public function setIsGhost($is_ghost) {
+    $this->isGhost = $is_ghost;
+    return $this;
+  }
+
+  public function getIsGhost() {
+    return $this->isGhost;
+  }
+
+  public function makeEphemeral() {
+    $this->proxy->makeEphemeral();
+    return $this;
+  }
+
 
 /* -(  PhabricatorMarkupInterface Implementation  )-------------------------- */
 

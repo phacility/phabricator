@@ -2,19 +2,13 @@
 
 final class PhameBlogViewController extends PhameController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
+    $id = $request->getURIData('id');
 
     $blog = id(new PhameBlogQuery())
       ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$blog) {
       return new Aphront404Response();
@@ -34,11 +28,6 @@ final class PhameBlogViewController extends PhameController {
       ->setHeader($blog->getName())
       ->setUser($user)
       ->setPolicyObject($blog);
-
-    $handle_phids = array_merge(
-      mpull($posts, 'getBloggerPHID'),
-      mpull($posts, 'getBlogPHID'));
-    $this->loadHandles($handle_phids);
 
     $actions = $this->renderActions($blog, $user);
     $properties = $this->renderProperties($blog, $user, $actions);
@@ -172,7 +161,7 @@ final class PhameBlogViewController extends PhameController {
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI('blog/edit/'.$blog->getID().'/'))
-        ->setName('Edit Blog')
+        ->setName(pht('Edit Blog'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
@@ -180,7 +169,7 @@ final class PhameBlogViewController extends PhameController {
       id(new PhabricatorActionView())
         ->setIcon('fa-times')
         ->setHref($this->getApplicationURI('blog/delete/'.$blog->getID().'/'))
-        ->setName('Delete Blog')
+        ->setName(pht('Delete Blog'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
 

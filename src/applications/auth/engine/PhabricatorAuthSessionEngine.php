@@ -134,6 +134,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
           s.sessionStart AS s_sessionStart,
           s.highSecurityUntil AS s_highSecurityUntil,
           s.isPartial AS s_isPartial,
+          s.signedLegalpadDocuments as s_signedLegalpadDocuments,
           u.*
         FROM %T u JOIN %T s ON u.phid = s.userPHID
         AND s.type = %s AND s.sessionKey = %s',
@@ -157,6 +158,21 @@ final class PhabricatorAuthSessionEngine extends Phobject {
         $session_dict[substr($key, 2)] = $value;
       }
     }
+
+    $user = $user_table->loadFromArray($info);
+    switch ($session_type) {
+      case PhabricatorAuthSession::TYPE_WEB:
+        // Explicitly prevent bots and mailing lists from establishing web
+        // sessions. It's normally impossible to attach authentication to these
+        // accounts, and likewise impossible to generate sessions, but it's
+        // technically possible that a session could exist in the database. If
+        // one does somehow, refuse to load it.
+        if (!$user->canEstablishWebSessions()) {
+          return null;
+        }
+        break;
+    }
+
     $session = id(new PhabricatorAuthSession())->loadFromArray($session_dict);
 
     $ttl = PhabricatorAuthSession::getSessionTypeTTL($session_type);
@@ -180,7 +196,6 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       unset($unguarded);
     }
 
-    $user = $user_table->loadFromArray($info);
     $user->attachSession($session);
     return $user;
   }
@@ -232,6 +247,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
         ->setSessionStart(time())
         ->setSessionExpires(time() + $session_ttl)
         ->setIsPartial($partial ? 1 : 0)
+        ->setSignedLegalpadDocuments(0)
         ->save();
 
       $log = PhabricatorUserLog::initializeNewLog(
@@ -549,6 +565,52 @@ final class PhabricatorAuthSessionEngine extends Phobject {
         $viewer->getPHID(),
         PhabricatorUserLog::ACTION_LOGIN_FULL);
       $log->save();
+    unset($unguarded);
+  }
+
+
+/* -(  Legalpad Documents )-------------------------------------------------- */
+
+
+  /**
+   * Upgrade a session to have all legalpad documents signed.
+   *
+   * @param PhabricatorUser User whose session should upgrade.
+   * @param array LegalpadDocument objects
+   * @return void
+   * @task partial
+   */
+  public function signLegalpadDocuments(PhabricatorUser $viewer, array $docs) {
+
+    if (!$viewer->hasSession()) {
+      throw new Exception(
+        pht('Signing session legalpad documents of user with no session!'));
+    }
+
+    $session = $viewer->getSession();
+
+    if ($session->getSignedLegalpadDocuments()) {
+      throw new Exception(pht(
+        'Session has already signed required legalpad documents!'));
+    }
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $session->setSignedLegalpadDocuments(1);
+
+      queryfx(
+        $session->establishConnection('w'),
+        'UPDATE %T SET signedLegalpadDocuments = %d WHERE id = %d',
+        $session->getTableName(),
+        1,
+        $session->getID());
+
+      if (!empty($docs)) {
+        $log = PhabricatorUserLog::initializeNewLog(
+          $viewer,
+          $viewer->getPHID(),
+          PhabricatorUserLog::ACTION_LOGIN_LEGALPAD);
+        $log->save();
+      }
     unset($unguarded);
   }
 

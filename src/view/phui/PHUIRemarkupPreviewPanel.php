@@ -9,7 +9,6 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
   private $loadingText;
   private $controlID;
   private $previewURI;
-  private $skin = 'default';
 
   protected function canAppendChild() {
     return false;
@@ -35,21 +34,6 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
     return $this;
   }
 
-  public function setSkin($skin) {
-    static $skins = array(
-      'default' => true,
-      'document' => true,
-    );
-
-    if (empty($skins[$skin])) {
-      $valid = implode(', ', array_keys($skins));
-      throw new Exception("Invalid skin '{$skin}'. Valid skins are: {$valid}.");
-    }
-
-    $this->skin = $skin;
-    return $this;
-  }
-
   protected function getTagName() {
     return 'div';
   }
@@ -58,10 +42,6 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
     $classes = array();
     $classes[] = 'phui-remarkup-preview';
 
-    if ($this->skin) {
-      $classes[] = 'phui-remarkup-preview-skin-'.$this->skin;
-    }
-
     return array(
       'class' => $classes,
     );
@@ -69,10 +49,10 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
 
   protected function getTagContent() {
     if ($this->previewURI === null) {
-      throw new Exception('Call setPreviewURI() before rendering!');
+      throw new PhutilInvalidStateException('setPreviewURI');
     }
     if ($this->controlID === null) {
-      throw new Exception('Call setControlID() before rendering!');
+      throw new PhutilInvalidStateException('setControlID');
     }
 
     $preview_id = celerity_generate_unique_node_id();
@@ -107,29 +87,15 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
       'div',
       array(
         'id' => $preview_id,
-        'class' => 'phabricator-remarkup',
+        'class' => 'phabricator-remarkup phui-preview-body',
       ),
       $loading);
 
     $content = array($header, $preview);
 
-    switch ($this->skin) {
-      case 'document':
-        $content = id(new PHUIDocumentView())
-          ->appendChild($content)
-          ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS);
-        break;
-      default:
-        $content = id(new PHUIBoxView())
-          ->appendChild($content)
-          ->setBorder(true)
-          ->addMargin(PHUI::MARGIN_LARGE)
-          ->addPadding(PHUI::PADDING_LARGE)
-          ->addClass('phui-panel-preview');
-        break;
-    }
-
-    return $content;
+    return id(new PHUIObjectBoxView())
+      ->appendChild($content)
+      ->setCollapsed(true);
   }
 
 }

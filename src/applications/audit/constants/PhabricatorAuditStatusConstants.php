@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorAuditStatusConstants {
+final class PhabricatorAuditStatusConstants extends Phobject {
 
   const NONE                    = '';
   const AUDIT_NOT_REQUIRED      = 'audit-not-required';
@@ -60,19 +60,19 @@ final class PhabricatorAuditStatusConstants {
 
   public static function getStatusIcon($code) {
     switch ($code) {
-      case PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED:
-      case PhabricatorAuditStatusConstants::RESIGNED:
+      case self::AUDIT_NOT_REQUIRED:
+      case self::RESIGNED:
         $icon = PHUIStatusItemView::ICON_OPEN;
         break;
-      case PhabricatorAuditStatusConstants::AUDIT_REQUIRED:
-      case PhabricatorAuditStatusConstants::AUDIT_REQUESTED:
+      case self::AUDIT_REQUIRED:
+      case self::AUDIT_REQUESTED:
         $icon = PHUIStatusItemView::ICON_WARNING;
         break;
-      case PhabricatorAuditStatusConstants::CONCERNED:
+      case self::CONCERNED:
         $icon = PHUIStatusItemView::ICON_REJECT;
         break;
-      case PhabricatorAuditStatusConstants::ACCEPTED:
-      case PhabricatorAuditStatusConstants::CLOSED:
+      case self::ACCEPTED:
+      case self::CLOSED:
         $icon = PHUIStatusItemView::ICON_ACCEPT;
         break;
       default:

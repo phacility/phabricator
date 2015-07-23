@@ -1,8 +1,7 @@
 {
   "exclude": [
     "(^externals/)",
-    "(^webroot/rsrc/externals/(?!javelin/))",
-    "(/__tests__/data/)"
+    "(^webroot/rsrc/externals/(?!javelin/))"
   ],
   "linters": {
     "chmod": {
@@ -69,21 +68,7 @@
       "type": "spelling"
     },
     "text": {
-      "type": "text",
-      "exclude": [
-        "(^\\.arclint)",
-        "(^resources/sql/quickstart.sql)"
-      ]
-    },
-    "text-without-length": {
-      "type": "text",
-      "severity": {
-        "3": "disabled"
-      },
-      "include": [
-        "(^\\.arclint)",
-        "(^resources/sql/quickstart.sql)"
-      ]
+      "type": "text"
     },
     "xhpast": {
       "type": "xhpast",

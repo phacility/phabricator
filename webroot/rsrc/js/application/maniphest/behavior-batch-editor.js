@@ -24,12 +24,14 @@ JX.behavior('maniphest-batch-editor', function(config) {
         'add_comment': 'Comment',
         'assign': 'Assign',
         'add_ccs' : 'Add CCs',
-        'remove_ccs' : 'Remove CCs'
+        'remove_ccs' : 'Remove CCs',
+        'space': 'Shift to Space'
       });
 
     var proj_tokenizer = build_tokenizer(config.sources.project);
     var owner_tokenizer = build_tokenizer(config.sources.owner);
     var cc_tokenizer = build_tokenizer(config.sources.cc);
+    var space_tokenizer = build_tokenizer(config.sources.spaces);
 
     var priority_select = JX.Prefab.renderSelect(config.priorityMap);
     var status_select = JX.Prefab.renderSelect(config.statusMap);
@@ -58,6 +60,12 @@ JX.behavior('maniphest-batch-editor', function(config) {
           JX.DOM.setContent(cell, owner_tokenizer.template);
           vfunc = function() {
             return JX.keys(owner_tokenizer.object.getTokens());
+          };
+          break;
+        case 'space':
+          JX.DOM.setContent(cell, space_tokenizer.template);
+          vfunc = function() {
+            return JX.keys(space_tokenizer.object.getTokens());
           };
           break;
         case 'add_comment':
@@ -136,18 +144,14 @@ JX.behavior('maniphest-batch-editor', function(config) {
     });
 
   function build_tokenizer(tconfig) {
-    var template = JX.$N('div', JX.$H(config.tokenizerTemplate)).firstChild;
-    template.id = '';
-
-    var build_config = JX.copy({}, tconfig);
-    build_config.root = template;
-
-    var built = JX.Prefab.buildTokenizer(build_config);
+    var built = JX.Prefab.newTokenizerFromTemplate(
+      config.tokenizerTemplate,
+      JX.copy({}, tconfig));
     built.tokenizer.start();
 
     return {
       object: built.tokenizer,
-      template: template
+      template: built.node
     };
   }
 

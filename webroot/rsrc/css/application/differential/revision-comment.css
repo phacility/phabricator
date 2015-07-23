@@ -2,14 +2,6 @@
  * @provides differential-revision-comment-css
  */
 
-.differential-comment-list {
-  margin: 0 16px;
-}
-
-.differential-comment-list .phabricator-transaction-content {
-  background: #ffffff;
-}
-
 /*  Spooky haunted panel which floats on the bottom of the screen.
     Haunt modes are:
 
@@ -54,57 +46,4 @@
 
 .differential-haunt-mode-1 {
   padding-bottom: 250px;
-}
-
-.differential-comment-list .anchor-target {
-  background-color: #ffffdd;
-  border-color: #ffff00;
-}
-
-.differential-inline-comment-content {
-  overflow: auto;
-}
-
-.phabricator-transaction-view .differential-comment-action-testplan {
-  border-color:     #660099;
-}
-
-.phabricator-transaction-view .differential-comment-action-abandon {
-  border-color:     #222222;
-}
-
-.phabricator-transaction-view .differential-comment-action-accept {
-  border-color:     #009966;
-}
-
-.phabricator-transaction-view .differential-comment-action-reject {
-  border-color:     #aa0000;
-}
-
-.phabricator-transaction-view .differential-comment-action-rethink {
-  border-color:     #aa0000;
-}
-
-.phabricator-transaction-view .differential-comment-action-commit {
-  border-color:     #006699;
-}
-
-.phabricator-transaction-view .differential-comment-action-reclaim {
-  border-color:     #0099aa;
-}
-
-.phabricator-transaction-view .differential-comment-action-update {
-  border-color:     #6699cc;
-}
-
-.phabricator-transaction-view .differential-comment-action-add_reviewers {
-  border-color:     #aa99cc;
-}
-
-.phabricator-transaction-view .differential-comment-action-request_review {
-  border-color:     #cc9966;
-}
-
-.phabricator-transaction-view .differential-comment-action-claim {
-  border-color:     #ffdd33;
 }

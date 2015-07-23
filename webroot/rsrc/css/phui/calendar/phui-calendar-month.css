@@ -10,59 +10,135 @@
 
 tr.phui-calendar-day-of-week-header th {
   text-align: center;
-  font-size: 11px;
+  font-size: 13px;
   padding: 3px;
   color: {$lightbluetext};
   background: {$lightgreybackground};
 }
 
+tr.phui-calendar-day-of-week-header th.weekend-day-header {
+  background: {$greybackground};
+}
+
+.device tr.phui-calendar-day-of-week-header th .long-weekday-name {
+  display: none;
+}
+
+tr.phui-calendar-day-of-week-header th .short-weekday-name {
+  display: none;
+}
+
+.device tr.phui-calendar-day-of-week-header th .short-weekday-name {
+  display: inline;
+}
+
 table.phui-calendar-view td {
-  border: 1px solid #dfdfdf;
+  border: solid #dfdfdf;
+  border-width: 1px 1px 0 1px;
   width: 14.2857%; /* This is one seventh, approximately. */
 }
 
-table.phui-calendar-view td div.phui-calendar-day {
-  min-height: 125px;
+.phui-calendar-month-cell-div {
   position: relative;
 }
 
-.phui-calendar-holiday {
-  color: {$greytext};
-  padding: .5em;
-  max-height: 1em;
-  overflow: hidden;
+.phui-calendar-month-event-list .phui-calendar-month-cell-div {
+  min-height: 125px;
 }
 
-table.phui-calendar-view td.phui-calendar-month-weekstart {
-  border-left: none;
+.device .phui-calendar-month-event-list .phui-calendar-month-cell-div {
+  min-height: 32px;
 }
 
-.phui-calendar-date-number {
-  font-weight: normal;
-  color: {$lightgreytext};
-  padding: 4px;
-  border-color: {$thinblueborder};
-  border-style: solid;
-  border-width: 0 0 1px 1px;
+a.phui-calendar-month-secret-link {
   position: absolute;
-  background: #ffffff;
-  width: 16px;
-  height: 16px;
-  text-align: center;
-  top: 0;
+  left: 0;
   right: 0;
 }
 
-.phui-calendar-not-work-day {
-  background-color: {$lightgreybackground};
+table.phui-calendar-view tr td:first-child {
+  border-left-width: 0px;
 }
 
-.phui-calendar-today {
-  background-color: {$lightgreen};
+.device table.phui-calendar-view .phui-calendar-event-list {
+  display: none;
 }
 
-.phui-calendar-empty {
-  background-color: {$greybackground};
+.phui-calendar-month-event-count {
+  display: none;
+}
+
+.device .phui-calendar-month-event-count {
+  display: block;
+  text-align: center;
+  padding-top: 8px;
+}
+
+.phui-calendar-month-event-count .phui-calendar-month-count-badge {
+  border: 1px solid {$lightgreyborder};
+  color: {$lightgreytext};
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  text-align: center;
+  vertical-align: middle;
+  padding: 4px 2px 0px 2px;
+  margin: 0 auto;
+}
+
+.phui-calendar-month-count-badge.viewer-invited-day-badge {
+  border-color: {$green};
+  color: {$green};
+}
+
+table.phui-calendar-view a.phui-calendar-week-number {
+  color: {$lightgreyborder};
+  padding: 4px;
+  display: inline-block;
+  width: 16px;
+  text-align: center;
+  float: left;
+}
+
+table.phui-calendar-view a.phui-calendar-date-number {
+  color: {$lightgreytext};
+  padding: 4px;
+  display: inline-block;
+  width: 16px;
+  text-align: center;
+}
+
+.device table.phui-calendar-view a.phui-calendar-week-number,
+.device table.phui-calendar-view a.phui-calendar-date-number {
+  width: 12px;
+}
+
+table.phui-calendar-view td.phui-calendar-date-number-container {
+  font-weight: normal;
+  color: {$lightgreytext};
+  border-width: 0 1px 0 1px;
+  text-align: right;
+}
+
+.phui-calendar-today-slot {
+  display: block;
+  height: 4px;
+  position: absolute;
+  left: 0;
+  right: -1px;
+  bottom: 0;
+}
+
+.phui-calendar-today-slot.last-weekday {
+  right: 0px;
+}
+
+.phui-calendar-today-slot.phui-calendar-this-week {
+  background-color: {$blueborder};
+}
+
+.phui-calendar-today-slot.phui-calendar-today {
+  background-color: {$lightblueborder};
 }
 
 .phui-calendar-event-empty {
@@ -70,31 +146,67 @@ table.phui-calendar-view td.phui-calendar-month-weekstart {
   background: transparent;
 }
 
-.phui-calendar-view .phui-calendar-list {
-  padding: 8px;
-}
-
-.phui-calendar-view .phui-calendar-list li:first-child {
-  margin-right: 16px;
-}
-
-.phui-calendar-view .phui-calendar-list-dot {
-  width: 3px;
-  height: 3px;
-  margin-right: 4px;
-  border-radius: 10px;
-  position: absolute;
-  top: 5px;
-  left: 0;
-}
-
-.phui-calendar-view .phui-calendar-list-title {
+.phui-calendar-view .phui-calendar-list,
+.phui-calendar-view .phui-calendar-month-list {
+  padding: 1px;
   width: auto;
-  margin-left: 10px;
-  white-space: normal;
-  word-break: break-word;
 }
 
-.phui-calendar-view .phui-calendar-list-time {
-  display: none;
+.phui-calendar-list-item.all-day span {
+  padding: 0;
+  margin: 0;
+}
+
+.phui-calendar-view .phui-calendar-list li.phui-calendar-list-item.all-day {
+  height: 20px;
+  background-color: {$darkgreybackground};
+  display: block;
+  float: none;
+}
+
+.phui-calendar-view
+.phui-calendar-list
+li.phui-calendar-viewer-invited.all-day {
+  background-color: {$lightgreen};
+}
+
+.phui-calendar-view .phui-calendar-list li {
+  padding: 0px 4px;
+}
+
+.phui-calendar-view .phui-calendar-list li a {
+  display: block;
+  overflow: hidden;
+  position: relative;
+  height: 18px;
+}
+
+.phui-calendar-view li.phui-calendar-list-item {
+  white-space: nowrap;
+  width: auto;
+}
+
+.phui-calendar-list-item-icon {
+  display: block;
+  left: 0px;
+}
+
+.phui-calendar-view li.phui-calendar-list-item .phui-calendar-list-title {
+  width: auto;
+  position: absolute;
+  left: 20px;
+  right: 60px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.phui-calendar-view li.phui-calendar-list-item .phui-calendar-list-time {
+  position: absolute;
+  top: 0;
+  right: 0px;
+  padding: 0;
+  width: 60px;
+  color: {$lightgreytext};
+  text-align: right;
 }

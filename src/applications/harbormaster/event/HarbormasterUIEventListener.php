@@ -31,6 +31,13 @@ final class HarbormasterUIEventListener
       return;
     }
 
+    if ($object instanceof DifferentialRevision) {
+      // TODO: This is a bit hacky and we could probably find a cleaner fix
+      // eventually, but we show build status on each diff, immediately below
+      // this property list, so it's redundant to show it on the revision view.
+      return;
+    }
+
     if (!($object instanceof HarbormasterBuildableInterface)) {
       return;
     }
@@ -44,22 +51,17 @@ final class HarbormasterUIEventListener
       return;
     }
 
-    $buildables = id(new HarbormasterBuildableQuery())
+    $buildable = id(new HarbormasterBuildableQuery())
       ->setViewer($user)
       ->withManualBuildables(false)
       ->withBuildablePHIDs(array($buildable_phid))
-      ->execute();
-    if (!$buildables) {
+      ->needBuilds(true)
+      ->executeOne();
+    if (!$buildable) {
       return;
     }
 
-    $builds = id(new HarbormasterBuildQuery())
-      ->setViewer($user)
-      ->withBuildablePHIDs(mpull($buildables, 'getPHID'))
-      ->execute();
-    if (!$builds) {
-      return;
-    }
+    $builds = $buildable->getBuilds();
 
     $build_handles = id(new PhabricatorHandleQuery())
       ->setViewer($user)
@@ -67,6 +69,29 @@ final class HarbormasterUIEventListener
       ->execute();
 
     $status_view = new PHUIStatusListView();
+
+    $buildable_status = $buildable->getBuildableStatus();
+    $buildable_icon = HarbormasterBuildable::getBuildableStatusIcon(
+      $buildable_status);
+    $buildable_color = HarbormasterBuildable::getBuildableStatusColor(
+      $buildable_status);
+    $buildable_name = HarbormasterBuildable::getBuildableStatusName(
+      $buildable_status);
+
+    $target = phutil_tag(
+      'a',
+      array(
+        'href' => '/'.$buildable->getMonogram(),
+      ),
+      pht('Buildable %d', $buildable->getID()));
+
+    $target = phutil_tag('strong', array(), $target);
+
+    $status_view
+      ->addItem(
+        id(new PHUIStatusItemView())
+          ->setIcon($buildable_icon, $buildable_color, $buildable_name)
+          ->setTarget($target));
 
     foreach ($builds as $build) {
       $item = new PHUIStatusItemView();

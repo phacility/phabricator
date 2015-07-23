@@ -10,6 +10,7 @@ final class LegalpadDocumentQuery
   private $signerPHIDs;
   private $dateCreatedAfter;
   private $dateCreatedBefore;
+  private $signatureRequired;
 
   private $needDocumentBodies;
   private $needContributors;
@@ -38,6 +39,11 @@ final class LegalpadDocumentQuery
 
   public function withSignerPHIDs(array $phids) {
     $this->signerPHIDs = $phids;
+    return $this;
+  }
+
+  public function withSignatureRequired($bool) {
+    $this->signatureRequired = $bool;
     return $this;
   }
 
@@ -128,7 +134,7 @@ final class LegalpadDocumentQuery
     return $documents;
   }
 
-  private function buildJoinClause($conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     $joins = array();
 
     if ($this->contributorPHIDs !== null) {
@@ -151,7 +157,7 @@ final class LegalpadDocumentQuery
     return implode(' ', $joins);
   }
 
-  private function buildGroupClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
     if ($this->contributorPHIDs || $this->signerPHIDs) {
       return 'GROUP BY d.id';
     } else {
@@ -159,7 +165,7 @@ final class LegalpadDocumentQuery
     }
   }
 
-  protected function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->ids !== null) {
@@ -202,6 +208,13 @@ final class LegalpadDocumentQuery
         $conn_r,
         'contributor.dst IN (%Ls)',
         $this->contributorPHIDs);
+    }
+
+    if ($this->signatureRequired !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'd.requireSignature = %d',
+        $this->signatureRequired);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

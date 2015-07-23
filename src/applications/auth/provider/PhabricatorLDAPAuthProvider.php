@@ -110,18 +110,18 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
       ->setFullWidth(true)
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('LDAP Username')
+          ->setLabel(pht('LDAP Username'))
           ->setName('ldap_username')
           ->setValue($v_user)
           ->setError($e_user))
       ->appendChild(
         id(new AphrontFormPasswordControl())
-          ->setLabel('LDAP Password')
+          ->setLabel(pht('LDAP Password'))
           ->setName('ldap_password')
           ->setError($e_pass));
 
     if ($errors) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
+      $errors = id(new PHUIInfoView())->setErrors($errors);
     }
 
     $dialog->appendChild($errors);
@@ -166,7 +166,7 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
             $account_id = $adapter->getAccountID();
           DarkConsoleErrorLogPluginAPI::disableDiscardMode();
         } else {
-          throw new Exception('Username and password are required!');
+          throw new Exception(pht('Username and password are required!'));
         }
       } catch (PhutilAuthCredentialException $ex) {
         $response = $controller->buildProviderPageResponse(
@@ -258,8 +258,9 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
           'Before you can set up or use LDAP, you need to install the PHP '.
           'LDAP extension. It is not currently installed, so PHP can not '.
           'talk to LDAP. Usually you can install it with '.
-          '`yum install php-ldap`, `apt-get install php5-ldap`, or a '.
-          'similar package manager command.'));
+          '`%s`, `%s`, or a similar package manager command.',
+          'yum install php-ldap',
+          'apt-get install php5-ldap'));
     }
   }
 

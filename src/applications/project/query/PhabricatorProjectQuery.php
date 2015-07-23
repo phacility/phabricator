@@ -9,7 +9,7 @@ final class PhabricatorProjectQuery
   private $slugs;
   private $phrictionSlugs;
   private $names;
-  private $datasourceQuery;
+  private $nameTokens;
   private $icons;
   private $colors;
 
@@ -60,8 +60,8 @@ final class PhabricatorProjectQuery
     return $this;
   }
 
-  public function withDatasourceQuery($string) {
-    $this->datasourceQuery = $string;
+  public function withNameTokens(array $tokens) {
+    $this->nameTokens = array_values($tokens);
     return $this;
   }
 
@@ -95,43 +95,45 @@ final class PhabricatorProjectQuery
     return $this;
   }
 
-  protected function getPagingColumn() {
-    return 'name';
+  public function newResultObject() {
+    return new PhabricatorProject();
   }
 
-  protected function getPagingValue($result) {
-    return $result->getName();
+  protected function getDefaultOrderVector() {
+    return array('name');
   }
 
-  protected function getReversePaging() {
-    return true;
+  public function getBuiltinOrders() {
+    return array(
+      'name' => array(
+        'vector' => array('name'),
+        'name' => pht('Name'),
+      ),
+    ) + parent::getBuiltinOrders();
+  }
+
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'name' => array(
+        'table' => $this->getPrimaryTableAlias(),
+        'column' => 'name',
+        'reverse' => true,
+        'type' => 'string',
+        'unique' => true,
+      ),
+    );
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $project = $this->loadCursorObject($cursor);
+    return array(
+      'name' => $project->getName(),
+    );
   }
 
   protected function loadPage() {
     $table = new PhabricatorProject();
-    $conn_r = $table->establishConnection('r');
-
-    // NOTE: Because visibility checks for projects depend on whether or not
-    // the user is a project member, we always load their membership. If we're
-    // loading all members anyway we can piggyback on that; otherwise we
-    // do an explicit join.
-
-    $select_clause = '';
-    if (!$this->needMembers) {
-      $select_clause = ', vm.dst viewerIsMember';
-    }
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT p.* %Q FROM %T p %Q %Q %Q %Q %Q',
-      $select_clause,
-      $table->getTableName(),
-      $this->buildJoinClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildGroupClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
+    $data = $this->loadStandardPageRows($table);
     $projects = $table->loadAllFromArray($data);
 
     if ($projects) {
@@ -194,12 +196,18 @@ final class PhabricatorProjectQuery
       $default = null;
 
       $file_phids = mpull($projects, 'getProfileImagePHID');
-      $files = id(new PhabricatorFileQuery())
-        ->setParentQuery($this)
-        ->setViewer($this->getViewer())
-        ->withPHIDs($file_phids)
-        ->execute();
-      $files = mpull($files, null, 'getPHID');
+      $file_phids = array_filter($file_phids);
+      if ($file_phids) {
+        $files = id(new PhabricatorFileQuery())
+          ->setParentQuery($this)
+          ->setViewer($this->getViewer())
+          ->withPHIDs($file_phids)
+          ->execute();
+        $files = mpull($files, null, 'getPHID');
+      } else {
+        $files = array();
+      }
+
       foreach ($projects as $project) {
         $file = idx($files, $project->getProfileImagePHID());
         if (!$file) {
@@ -229,8 +237,22 @@ final class PhabricatorProjectQuery
     return $projects;
   }
 
-  private function buildWhereClause($conn_r) {
-    $where = array();
+  protected function buildSelectClauseParts(AphrontDatabaseConnection $conn) {
+    $select = parent::buildSelectClauseParts($conn);
+
+    // NOTE: Because visibility checks for projects depend on whether or not
+    // the user is a project member, we always load their membership. If we're
+    // loading all members anyway we can piggyback on that; otherwise we
+    // do an explicit join.
+    if (!$this->needMembers) {
+      $select[] = 'vm.dst viewerIsMember';
+    }
+
+    return $select;
+  }
+
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->status != self::STATUS_ANY) {
       switch ($this->status) {
@@ -248,94 +270,88 @@ final class PhabricatorProjectQuery
           break;
         default:
           throw new Exception(
-            "Unknown project status '{$this->status}'!");
+            pht(
+              "Unknown project status '%s'!",
+              $this->status));
       }
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'status IN (%Ld)',
         $filter);
     }
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->memberPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'e.dst IN (%Ls)',
         $this->memberPHIDs);
     }
 
     if ($this->slugs !== null) {
-      $slugs = array();
-      foreach ($this->slugs as $slug) {
-        $slugs[] = rtrim(PhabricatorSlug::normalize($slug), '/');
-      }
-
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'slug.slug IN (%Ls)',
-        $slugs);
+        $this->slugs);
     }
 
     if ($this->phrictionSlugs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phrictionSlug IN (%Ls)',
         $this->phrictionSlugs);
     }
 
     if ($this->names !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'name IN (%Ls)',
         $this->names);
     }
 
     if ($this->icons !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'icon IN (%Ls)',
         $this->icons);
     }
 
     if ($this->colors !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'color IN (%Ls)',
         $this->colors);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
-  private function buildGroupClause($conn_r) {
-    if ($this->memberPHIDs || $this->datasourceQuery) {
-      return 'GROUP BY p.id';
-    } else {
-      return $this->buildApplicationSearchGroupClause($conn_r);
+  protected function shouldGroupQueryResultRows() {
+    if ($this->memberPHIDs || $this->nameTokens) {
+      return true;
     }
+    return parent::shouldGroupQueryResultRows();
   }
 
-  private function buildJoinClause($conn_r) {
-    $joins = array();
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
 
     if (!$this->needMembers !== null) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'LEFT JOIN %T vm ON vm.src = p.phid AND vm.type = %d AND vm.dst = %s',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
         PhabricatorProjectProjectHasMemberEdgeType::EDGECONST,
@@ -344,7 +360,7 @@ final class PhabricatorProjectQuery
 
     if ($this->memberPHIDs !== null) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T e ON e.src = p.phid AND e.type = %d',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
         PhabricatorProjectProjectHasMemberEdgeType::EDGECONST);
@@ -352,41 +368,34 @@ final class PhabricatorProjectQuery
 
     if ($this->slugs !== null) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T slug on slug.projectPHID = p.phid',
         id(new PhabricatorProjectSlug())->getTableName());
     }
 
-    if ($this->datasourceQuery !== null) {
-      $tokens = PhabricatorTypeaheadDatasource::tokenizeString(
-        $this->datasourceQuery);
-      if (!$tokens) {
-        throw new PhabricatorEmptyQueryException();
+    if ($this->nameTokens !== null) {
+      foreach ($this->nameTokens as $key => $token) {
+        $token_table = 'token_'.$key;
+        $joins[] = qsprintf(
+          $conn,
+          'JOIN %T %T ON %T.projectID = p.id AND %T.token LIKE %>',
+          PhabricatorProject::TABLE_DATASOURCE_TOKEN,
+          $token_table,
+          $token_table,
+          $token_table,
+          $token);
       }
-
-      $likes = array();
-      foreach ($tokens as $token) {
-        $likes[] = qsprintf($conn_r, 'token.token LIKE %>', $token);
-      }
-
-      $joins[] = qsprintf(
-        $conn_r,
-        'JOIN %T token ON token.projectID = p.id AND (%Q)',
-        PhabricatorProject::TABLE_DATASOURCE_TOKEN,
-        '('.implode(') OR (', $likes).')');
     }
 
-    $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
-
-    return implode(' ', $joins);
+    return $joins;
   }
 
   public function getQueryApplicationClass() {
     return 'PhabricatorProjectApplication';
   }
 
-  protected function getApplicationSearchObjectPHIDColumn() {
-    return 'p.phid';
+  protected function getPrimaryTableAlias() {
+    return 'p';
   }
 
 }

@@ -7,7 +7,6 @@ abstract class PhabricatorApplicationTransactionQuery
   private $objectPHIDs;
   private $authorPHIDs;
   private $transactionTypes;
-  private $reversePaging = true;
 
   private $needComments = true;
   private $needHandles  = true;
@@ -16,15 +15,6 @@ abstract class PhabricatorApplicationTransactionQuery
 
   protected function buildMoreWhereClauses(AphrontDatabaseConnection $conn_r) {
     return array();
-  }
-
-  public function setReversePaging($bool) {
-    $this->reversePaging = $bool;
-    return $this;
-  }
-
-  protected function getReversePaging() {
-    return $this->reversePaging;
   }
 
   public function withPHIDs(array $phids) {
@@ -80,11 +70,12 @@ abstract class PhabricatorApplicationTransactionQuery
 
       $comments = array();
       if ($comment_phids) {
-        $comments = id(new PhabricatorApplicationTransactionCommentQuery())
-          ->setTemplate($table->getApplicationTransactionCommentObject())
-          ->setViewer($this->getViewer())
-          ->withPHIDs($comment_phids)
-          ->execute();
+        $comments =
+          id(new PhabricatorApplicationTransactionTemplatedCommentQuery())
+            ->setTemplate($table->getApplicationTransactionCommentObject())
+            ->setViewer($this->getViewer())
+            ->withPHIDs($comment_phids)
+            ->execute();
         $comments = mpull($comments, null, 'getPHID');
       }
 
@@ -135,10 +126,8 @@ abstract class PhabricatorApplicationTransactionQuery
       $handles = array();
       $merged = array_mergev($phids);
       if ($merged) {
-        $handles = id(new PhabricatorHandleQuery())
-          ->setViewer($this->getViewer())
-          ->withPHIDs($merged)
-          ->execute();
+        $handles = $this->getViewer()->loadHandles($merged);
+        $handles = iterator_to_array($handles);
       }
       foreach ($xactions as $xaction) {
         $xaction->setHandles(
@@ -151,7 +140,7 @@ abstract class PhabricatorApplicationTransactionQuery
     return $xactions;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->phids) {

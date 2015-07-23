@@ -93,8 +93,8 @@ final class ReleephRequestEditController extends ReleephBranchController {
         if ($request_identifier ===
           ReleephRequestTypeaheadControl::PLACEHOLDER) {
 
-          $errors[] = 'No commit ID was provided.';
-          $e_request_identifier = 'Required';
+          $errors[] = pht('No commit ID was provided.');
+          $e_request_identifier = pht('Required');
         } else {
           $pr_commit = null;
           $finder = id(new ReleephCommitFinder())
@@ -103,9 +103,10 @@ final class ReleephRequestEditController extends ReleephBranchController {
           try {
             $pr_commit = $finder->fromPartial($request_identifier);
           } catch (Exception $e) {
-            $e_request_identifier = 'Invalid';
-            $errors[] =
-              "Request {$request_identifier} is probably not a valid commit";
+            $e_request_identifier = pht('Invalid');
+            $errors[] = pht(
+              'Request %s is probably not a valid commit.',
+              $request_identifier);
             $errors[] = $e->getMessage();
           }
 
@@ -126,7 +127,7 @@ final class ReleephRequestEditController extends ReleephBranchController {
           if ($existing) {
             return id(new AphrontRedirectResponse())
               ->setURI('/releeph/request/edit/'.$existing->getID().
-                       '?existing=1');
+                '?existing=1');
           }
 
           $xactions[] = id(new ReleephRequestTransaction())
@@ -204,14 +205,14 @@ final class ReleephRequestEditController extends ReleephBranchController {
     $notice_view = null;
     if ($request->getInt('existing')) {
       $notice_messages = array(
-        'You are editing an existing pick request!',
-        hsprintf(
+        pht('You are editing an existing pick request!'),
+        pht(
           'Requested %s by %s',
           $age_string,
           $handles[$pull->getRequestUserPHID()]->renderLink()),
       );
-      $notice_view = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+      $notice_view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->setErrors($notice_messages);
     }
 
@@ -222,12 +223,12 @@ final class ReleephRequestEditController extends ReleephBranchController {
       $form
         ->appendChild(
           id(new AphrontFormMarkupControl())
-            ->setLabel('Original Commit')
+            ->setLabel(pht('Original Commit'))
             ->setValue(
               $handles[$pull->getRequestCommitPHID()]->renderLink()))
         ->appendChild(
           id(new AphrontFormMarkupControl())
-            ->setLabel('Requestor')
+            ->setLabel(pht('Requestor'))
             ->setValue(hsprintf(
               '%s %s',
               $handles[$pull->getRequestUserPHID()]->renderLink(),
@@ -249,7 +250,7 @@ final class ReleephRequestEditController extends ReleephBranchController {
           ->addHiddenInput('requestIdentifierRaw', 'D'.$diff_rev_id)
           ->appendChild(
             id(new AphrontFormStaticControl())
-              ->setLabel('Diff')
+              ->setLabel(pht('Diff'))
               ->setValue($title));
       } else {
         $origin = $branch->getURI();
@@ -261,14 +262,15 @@ final class ReleephRequestEditController extends ReleephBranchController {
         $form->appendChild(
           id(new ReleephRequestTypeaheadControl())
             ->setName('requestIdentifierRaw')
-            ->setLabel('Commit ID')
+            ->setLabel(pht('Commit ID'))
             ->setRepo($repo)
             ->setValue($request_identifier)
             ->setError($e_request_identifier)
             ->setStartTime($branch_cut_point->getEpoch())
             ->setCaption(
-              'Start typing to autocomplete on commit title, '.
-              'or give a Phabricator commit identifier like rFOO1234'));
+              pht(
+                'Start typing to autocomplete on commit title, '.
+                'or give a Phabricator commit identifier like rFOO1234.')));
       }
     }
 
@@ -291,7 +293,7 @@ final class ReleephRequestEditController extends ReleephBranchController {
 
     $form->appendChild(
       id(new AphrontFormSubmitControl())
-        ->addCancelButton($cancel_uri, 'Cancel')
+        ->addCancelButton($cancel_uri, pht('Cancel'))
         ->setValue($submit_name));
 
     $box = id(new PHUIObjectBoxView())

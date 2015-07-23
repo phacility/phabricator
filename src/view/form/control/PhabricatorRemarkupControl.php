@@ -24,8 +24,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
 
     $viewer = $this->getUser();
     if (!$viewer) {
-      throw new Exception(
-        pht('Call setUser() before rendering a PhabricatorRemarkupControl!'));
+      throw new PhutilInvalidStateException('setUser');
     }
 
     // We need to have this if previews render images, since Ajax can not
@@ -35,9 +34,10 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
     Javelin::initBehavior(
       'aphront-drag-and-drop-textarea',
       array(
-        'target'          => $id,
-        'activatedClass'  => 'aphront-textarea-drag-and-drop',
-        'uri'             => '/file/dropupload/',
+        'target' => $id,
+        'activatedClass' => 'aphront-textarea-drag-and-drop',
+        'uri' => '/file/dropupload/',
+        'chunkThreshold' => PhabricatorFileStorageEngine::getChunkThreshold(),
       ));
 
     Javelin::initBehavior(
@@ -48,6 +48,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
           'italic text' => pht('italic text'),
           'monospaced text' => pht('monospaced text'),
           'List Item' => pht('List Item'),
+          'Quoted Text' => pht('Quoted Text'),
           'data' => pht('data'),
           'name' => pht('name'),
           'URL' => pht('URL'),
@@ -79,6 +80,9 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       ),
       'fa-code' => array(
         'tip' => pht('Code Block'),
+      ),
+      'fa-quote-right' => array(
+        'tip' => pht('Quote'),
       ),
       'fa-table' => array(
         'tip' => pht('Table'),

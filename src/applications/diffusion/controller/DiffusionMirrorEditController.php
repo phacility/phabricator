@@ -84,7 +84,7 @@ final class DiffusionMirrorEditController
 
     $form_errors = null;
     if ($errors) {
-      $form_errors = id(new AphrontErrorView())
+      $form_errors = id(new PHUIInfoView())
         ->setErrors($errors);
     }
 

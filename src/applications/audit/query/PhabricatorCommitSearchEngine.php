@@ -7,6 +7,10 @@ final class PhabricatorCommitSearchEngine
     return pht('Commits');
   }
 
+  public function getApplicationClassName() {
+    return 'PhabricatorDiffusionApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -78,43 +82,31 @@ final class PhabricatorCommitSearchEngine
     $audit_status = $saved->getParameter('auditStatus', null);
     $repository_phids = $saved->getParameter('repositoryPHIDs', array());
 
-    $phids = array_mergev(
-      array(
-        $auditor_phids,
-        $commit_author_phids,
-        $repository_phids,
-      ));
-
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
-
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new DiffusionAuditorDatasource())
           ->setName('auditorPHIDs')
           ->setLabel(pht('Auditors'))
-          ->setValue(array_select_keys($handles, $auditor_phids)))
-      ->appendChild(
+          ->setValue($auditor_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('authors')
           ->setLabel(pht('Commit Authors'))
-          ->setValue(array_select_keys($handles, $commit_author_phids)))
+          ->setValue($commit_author_phids))
        ->appendChild(
          id(new AphrontFormSelectControl())
-         ->setName('auditStatus')
-         ->setLabel(pht('Audit Status'))
-         ->setOptions($this->getAuditStatusOptions())
-         ->setValue($audit_status))
-       ->appendChild(
+           ->setName('auditStatus')
+           ->setLabel(pht('Audit Status'))
+           ->setOptions($this->getAuditStatusOptions())
+           ->setValue($audit_status))
+       ->appendControl(
          id(new AphrontFormTokenizerControl())
-         ->setLabel(pht('Repositories'))
-         ->setName('repositoryPHIDs')
-         ->setDatasource(new DiffusionRepositoryDatasource())
-         ->setValue(array_select_keys($handles, $repository_phids)));
+           ->setLabel(pht('Repositories'))
+           ->setName('repositoryPHIDs')
+           ->setDatasource(new DiffusionRepositoryDatasource())
+           ->setValue($repository_phids));
 
   }
 
@@ -214,8 +206,12 @@ final class PhabricatorCommitSearchEngine
     }
 
     $view->setHandles($handles);
+    $list = $view->buildList();
 
-    return $view->buildList();
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setContent($list);
+
+    return $result;
   }
 
 }

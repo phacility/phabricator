@@ -7,14 +7,14 @@ final class PhameQueryPostsConduitAPIMethod extends PhameConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Query phame posts.';
+    return pht('Query phame posts.');
   }
 
   public function getMethodStatus() {
     return self::METHOD_STATUS_UNSTABLE;
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'ids'            => 'optional list<int>',
       'phids'          => 'optional list<phid>',
@@ -29,13 +29,8 @@ final class PhameQueryPostsConduitAPIMethod extends PhameConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

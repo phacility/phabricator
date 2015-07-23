@@ -2,139 +2,151 @@
 
 final class LegalpadDocumentSignController extends LegalpadController {
 
-  private $id;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
+  public function shouldAllowLegallyNonCompliantUsers() {
+    return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
 
     $document = id(new LegalpadDocumentQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($request->getURIData('id')))
       ->needDocumentBodies(true)
       ->executeOne();
     if (!$document) {
       return new Aphront404Response();
     }
 
-    list($signer_phid, $signature_data) = $this->readSignerInformation(
+    $information = $this->readSignerInformation(
       $document,
       $request);
+    if ($information instanceof AphrontResponse) {
+      return $information;
+    }
+    list($signer_phid, $signature_data) = $information;
 
     $signature = null;
 
     $type_individual = LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL;
     $is_individual = ($document->getSignatureType() == $type_individual);
-    if ($is_individual) {
-      if ($signer_phid) {
-        // TODO: This is odd and should probably be adjusted after grey/external
-        // accounts work better, but use the omnipotent viewer to check for a
-        // signature so we can pick up anonymous/grey signatures.
+    switch ($document->getSignatureType()) {
+      case LegalpadDocument::SIGNATURE_TYPE_NONE:
+        // nothing to sign means this should be true
+        $has_signed = true;
+        // this is a status UI element
+        $signed_status = null;
+        break;
+      case LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL:
+        if ($signer_phid) {
+          // TODO: This is odd and should probably be adjusted after
+          // grey/external accounts work better, but use the omnipotent
+          // viewer to check for a signature so we can pick up
+          // anonymous/grey signatures.
 
-        $signature = id(new LegalpadDocumentSignatureQuery())
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withDocumentPHIDs(array($document->getPHID()))
-          ->withSignerPHIDs(array($signer_phid))
-          ->executeOne();
+          $signature = id(new LegalpadDocumentSignatureQuery())
+            ->setViewer(PhabricatorUser::getOmnipotentUser())
+            ->withDocumentPHIDs(array($document->getPHID()))
+            ->withSignerPHIDs(array($signer_phid))
+            ->executeOne();
 
-        if ($signature && !$viewer->isLoggedIn()) {
+          if ($signature && !$viewer->isLoggedIn()) {
           return $this->newDialog()
             ->setTitle(pht('Already Signed'))
             ->appendParagraph(pht('You have already signed this document!'))
             ->addCancelButton('/'.$document->getMonogram(), pht('Okay'));
+          }
         }
-      }
 
-      $signed_status = null;
-      if (!$signature) {
-        $has_signed = false;
+        $signed_status = null;
+        if (!$signature) {
+          $has_signed = false;
+          $signature = id(new LegalpadDocumentSignature())
+            ->setSignerPHID($signer_phid)
+            ->setDocumentPHID($document->getPHID())
+            ->setDocumentVersion($document->getVersions());
+
+          // If the user is logged in, show a notice that they haven't signed.
+          // If they aren't logged in, we can't be as sure, so don't show
+          // anything.
+          if ($viewer->isLoggedIn()) {
+            $signed_status = id(new PHUIInfoView())
+              ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+              ->setErrors(
+                array(
+                  pht('You have not signed this document yet.'),
+                ));
+          }
+        } else {
+          $has_signed = true;
+          $signature_data = $signature->getSignatureData();
+
+          // In this case, we know they've signed.
+          $signed_at = $signature->getDateCreated();
+
+          if ($signature->getIsExemption()) {
+            $exemption_phid = $signature->getExemptionPHID();
+            $handles = $this->loadViewerHandles(array($exemption_phid));
+            $exemption_handle = $handles[$exemption_phid];
+
+            $signed_text = pht(
+              'You do not need to sign this document. '.
+              '%s added a signature exemption for you on %s.',
+              $exemption_handle->renderLink(),
+              phabricator_datetime($signed_at, $viewer));
+          } else {
+            $signed_text = pht(
+              'You signed this document on %s.',
+              phabricator_datetime($signed_at, $viewer));
+          }
+
+          $signed_status = id(new PHUIInfoView())
+            ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+            ->setErrors(array($signed_text));
+        }
+
+        $field_errors = array(
+          'name' => true,
+          'email' => true,
+          'agree' => true,
+        );
+        $signature->setSignatureData($signature_data);
+        break;
+
+      case LegalpadDocument::SIGNATURE_TYPE_CORPORATION:
         $signature = id(new LegalpadDocumentSignature())
-          ->setSignerPHID($signer_phid)
           ->setDocumentPHID($document->getPHID())
           ->setDocumentVersion($document->getVersions());
 
-        // If the user is logged in, show a notice that they haven't signed.
-        // If they aren't logged in, we can't be as sure, so don't show
-        // anything.
         if ($viewer->isLoggedIn()) {
-          $signed_status = id(new AphrontErrorView())
-            ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
-            ->setErrors(
-              array(
-                pht('You have not signed this document yet.'),
-              ));
-        }
-      } else {
-        $has_signed = true;
-        $signature_data = $signature->getSignatureData();
+          $has_signed = false;
 
-        // In this case, we know they've signed.
-        $signed_at = $signature->getDateCreated();
-
-        if ($signature->getIsExemption()) {
-          $exemption_phid = $signature->getExemptionPHID();
-          $handles = $this->loadViewerHandles(array($exemption_phid));
-          $exemption_handle = $handles[$exemption_phid];
-
-          $signed_text = pht(
-            'You do not need to sign this document. '.
-            '%s added a signature exemption for you on %s.',
-            $exemption_handle->renderLink(),
-            phabricator_datetime($signed_at, $viewer));
+          $signed_status = null;
         } else {
-          $signed_text = pht(
-            'You signed this document on %s.',
-            phabricator_datetime($signed_at, $viewer));
+          // This just hides the form.
+          $has_signed = true;
+
+          $login_text = pht(
+            'This document requires a corporate signatory. You must log in to '.
+            'accept this document on behalf of a company you represent.');
+          $signed_status = id(new PHUIInfoView())
+            ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+            ->setErrors(array($login_text));
         }
 
-        $signed_status = id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-          ->setErrors(array($signed_text));
-      }
-
-      $field_errors = array(
-        'name' => true,
-        'email' => true,
-        'agree' => true,
-      );
-    } else {
-      $signature = id(new LegalpadDocumentSignature())
-        ->setDocumentPHID($document->getPHID())
-        ->setDocumentVersion($document->getVersions());
-
-      if ($viewer->isLoggedIn()) {
-        $has_signed = false;
-
-        $signed_status = null;
-      } else {
-        // This just hides the form.
-        $has_signed = true;
-
-        $login_text = pht(
-          'This document requires a corporate signatory. You must log in to '.
-          'accept this document on behalf of a company you represent.');
-        $signed_status = id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
-          ->setErrors(array($login_text));
-      }
-
-      $field_errors = array(
-        'name' => true,
-        'address' => true,
-        'contact.name' => true,
-        'email' => true,
-      );
+        $field_errors = array(
+          'name' => true,
+          'address' => true,
+          'contact.name' => true,
+          'email' => true,
+        );
+        $signature->setSignatureData($signature_data);
+        break;
     }
-
-    $signature->setSignatureData($signature_data);
 
     $errors = array();
     if ($request->isFormOrHisecPost() && !$has_signed) {
@@ -176,11 +188,19 @@ final class LegalpadDocumentSignController extends LegalpadController {
       if (!$errors) {
         $signature->save();
 
-        // If the viewer is logged in, send them to the document page, which
-        // will show that they have signed the document. Otherwise, send them
-        // to a completion page.
+        // If the viewer is logged in, signing for themselves, send them to
+        // the document page, which will show that they have signed the
+        // document. Unless of course they were required to sign the
+        // document to use Phabricator; in that case try really hard to
+        // re-direct them to where they wanted to go.
+        //
+        // Otherwise, send them to a completion page.
         if ($viewer->isLoggedIn() && $is_individual) {
           $next_uri = '/'.$document->getMonogram();
+          if ($document->getRequireSignature()) {
+            $request_uri = $request->getRequestURI();
+            $next_uri = (string)$request_uri;
+          }
         } else {
           $this->sendVerifySignatureEmail(
             $document,
@@ -216,6 +236,9 @@ final class LegalpadDocumentSignController extends LegalpadController {
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
+      ->setUser($viewer)
+      ->setPolicyObject($document)
+      ->setEpoch($document->getDateModified())
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')
@@ -227,7 +250,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit));
 
-    $preamble = null;
+    $preamble_box = null;
     if (strlen($document->getPreamble())) {
       $preamble_text = PhabricatorMarkupEngine::renderOneObject(
         id(new PhabricatorMarkupOneOff())->setContent(
@@ -236,25 +259,30 @@ final class LegalpadDocumentSignController extends LegalpadController {
         $viewer);
 
       $preamble = id(new PHUIPropertyListView())
+        ->setUser($viewer)
+        ->setObject($document)
         ->addSectionHeader(pht('Preamble'))
         ->addTextContent($preamble_text);
+
+      $preamble_box = new PHUIPropertyGroupView();
+      $preamble_box->addPropertyList($preamble);
+
     }
 
     $content = id(new PHUIDocumentView())
       ->addClass('legalpad')
       ->setHeader($header)
-      ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
       ->appendChild(
         array(
           $signed_status,
-          $preamble,
+          $preamble_box,
           $document_markup,
         ));
 
     if (!$has_signed) {
       $error_view = null;
       if ($errors) {
-        $error_view = id(new AphrontErrorView())
+        $error_view = id(new PHUIInfoView())
           ->setErrors($errors);
       }
 
@@ -263,9 +291,17 @@ final class LegalpadDocumentSignController extends LegalpadController {
         $signature,
         $field_errors);
 
-      $subheader = id(new PHUIHeaderView())
-        ->setHeader(pht('Agree and Sign Document'))
-        ->setBleedHeader(true);
+      switch ($document->getSignatureType()) {
+        case LegalpadDocument::SIGNATURE_TYPE_NONE:
+          $subheader = null;
+          break;
+        case LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL:
+        case LegalpadDocument::SIGNATURE_TYPE_CORPORATION:
+          $subheader = id(new PHUIHeaderView())
+            ->setHeader(pht('Agree and Sign Document'))
+            ->setBleedHeader(true);
+          break;
+      }
 
       $content->appendChild(
         array(
@@ -276,6 +312,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
     }
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb($document->getMonogram());
 
     return $this->buildApplicationPage(
@@ -298,6 +335,8 @@ final class LegalpadDocumentSignController extends LegalpadController {
     $signature_data = array();
 
     switch ($document->getSignatureType()) {
+      case LegalpadDocument::SIGNATURE_TYPE_NONE:
+        break;
       case LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL:
         if ($viewer->isLoggedIn()) {
           $signer_phid = $viewer->getPHID();
@@ -354,6 +393,9 @@ final class LegalpadDocumentSignController extends LegalpadController {
 
     $signature_type = $document->getSignatureType();
     switch ($signature_type) {
+      case LegalpadDocument::SIGNATURE_TYPE_NONE:
+        // bail out of here quick
+        return;
       case LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL:
         $this->buildIndividualSignatureForm(
           $form,
@@ -383,11 +425,19 @@ final class LegalpadDocumentSignController extends LegalpadController {
             'agree',
             'agree',
             pht('I agree to the terms laid forth above.'),
-            false))
+            false));
+    if ($document->getRequireSignature()) {
+      $cancel_uri = '/logout/';
+      $cancel_text = pht('Log Out');
+    } else {
+      $cancel_uri = $this->getApplicationURI();
+      $cancel_text = pht('Cancel');
+    }
+    $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Sign Document'))
-          ->addCancelButton($this->getApplicationURI()));
+          ->addCancelButton($cancel_uri, $cancel_text));
 
     return $form;
   }
@@ -608,25 +658,21 @@ final class LegalpadDocumentSignController extends LegalpadController {
 
     $name = idx($signature_data, 'name');
 
-    $body = <<<EOBODY
-{$name}:
-
-This email address was used to sign a Legalpad document in Phabricator:
-
-  {$doc_name}
-
-Please verify you own this email address and accept the agreement by clicking
-this link:
-
-  {$link}
-
-Your signature is not valid until you complete this verification step.
-
-You can review the document here:
-
-  {$doc_link}
-
-EOBODY;
+    $body = pht(
+      "%s:\n\n".
+      "This email address was used to sign a Legalpad document ".
+      "in Phabricator:\n\n".
+      "  %s\n\n".
+      "Please verify you own this email address and accept the ".
+      "agreement by clicking this link:\n\n".
+      "  %s\n\n".
+      "Your signature is not valid until you complete this ".
+      "verification step.\n\nYou can review the document here:\n\n".
+      "  %s\n",
+      $name,
+      $doc_name,
+      $link,
+      $doc_link);
 
     id(new PhabricatorMetaMTAMail())
       ->addRawTos(array($email->getAddress()))
@@ -639,9 +685,10 @@ EOBODY;
 
   private function signInResponse() {
     return id(new Aphront403Response())
-      ->setForbiddenText(pht(
-        'The email address specified is associated with an account. '.
-        'Please login to that account and sign this document again.'));
+      ->setForbiddenText(
+        pht(
+          'The email address specified is associated with an account. '.
+          'Please login to that account and sign this document again.'));
   }
 
 }

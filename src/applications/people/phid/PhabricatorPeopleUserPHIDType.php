@@ -27,7 +27,7 @@ final class PhabricatorPeopleUserPHIDType extends PhabricatorPHIDType {
     return id(new PhabricatorPeopleQuery())
       ->withPHIDs($phids)
       ->needProfileImage(true)
-      ->needStatus(true);
+      ->needAvailability(true);
   }
 
   public function loadHandles(
@@ -42,12 +42,24 @@ final class PhabricatorPeopleUserPHIDType extends PhabricatorPHIDType {
       $handle->setName($user->getUsername());
       $handle->setURI('/p/'.$user->getUsername().'/');
       $handle->setFullName($user->getFullName());
-      $handle->setImageURI($user->loadProfileImageURI());
-      $handle->setDisabled(!$user->isUserActivated());
-      if ($user->hasStatus()) {
-        $status = $user->getStatus();
-        $handle->setStatus($status->getTextStatus());
-        $handle->setTitle($status->getTerseSummary($query->getViewer()));
+      $handle->setImageURI($user->getProfileImageURI());
+
+      if ($user->getIsMailingList()) {
+        $handle->setIcon('fa-envelope-o');
+      }
+
+      $availability = null;
+      if (!$user->isUserActivated()) {
+        $availability = PhabricatorObjectHandle::AVAILABILITY_DISABLED;
+      } else {
+        $until = $user->getAwayUntil();
+        if ($until) {
+          $availability = PhabricatorObjectHandle::AVAILABILITY_NONE;
+        }
+      }
+
+      if ($availability) {
+        $handle->setAvailability($availability);
       }
     }
   }

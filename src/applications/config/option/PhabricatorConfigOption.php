@@ -16,7 +16,6 @@ final class PhabricatorConfigOption
   private $locked;
   private $lockedMessage;
   private $hidden;
-  private $masked;
   private $baseClass;
   private $customData;
   private $customObject;
@@ -28,26 +27,6 @@ final class PhabricatorConfigOption
 
   public function getBaseClass() {
     return $this->baseClass;
-  }
-
-  public function setMasked($masked) {
-    $this->masked = $masked;
-    return $this;
-  }
-
-  public function getMasked() {
-    if ($this->masked) {
-      return true;
-    }
-
-    if ($this->getHidden()) {
-      return true;
-    }
-
-    return idx(
-      PhabricatorEnv::getEnvConfig('config.mask'),
-      $this->getKey(),
-      false);
   }
 
   public function setHidden($hidden) {
@@ -97,7 +76,9 @@ final class PhabricatorConfigOption
     }
     return pht(
       'This configuration is locked and can not be edited from the web '.
-      'interface. Use `./bin/config` in `phabricator/` to edit it.');
+      'interface. Use `%s` in `%s` to edit it.',
+      './bin/config',
+      'phabricator/');
   }
 
   public function addExample($value, $description) {
@@ -143,8 +124,7 @@ final class PhabricatorConfigOption
       return $this->enumOptions;
     }
 
-    throw new Exception(
-      'Call setEnumOptions() before trying to access them!');
+    throw new PhutilInvalidStateException('setEnumOptions');
   }
 
   public function setKey($key) {
@@ -202,7 +182,7 @@ final class PhabricatorConfigOption
   public function getCustomObject() {
     if (!$this->customObject) {
       if (!$this->isCustomType()) {
-        throw new Exception('This option does not have a custom type!');
+        throw new Exception(pht('This option does not have a custom type!'));
       }
       $this->customObject = newv(substr($this->getType(), 7), array());
     }

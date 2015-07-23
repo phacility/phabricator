@@ -52,7 +52,7 @@ final class PhabricatorRepositoryURINormalizer extends Phobject {
       case self::TYPE_MERCURIAL:
         break;
       default:
-        throw new Exception(pht('Unknown URI type "%s"!'));
+        throw new Exception(pht('Unknown URI type "%s"!', $type));
     }
 
     $this->type = $type;

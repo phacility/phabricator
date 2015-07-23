@@ -3,14 +3,10 @@
 final class PhabricatorRepositoryGitCommitMessageParserWorker
   extends PhabricatorRepositoryCommitMessageParserWorker {
 
-  protected function parseCommit(
+  protected function parseCommitWithRef(
     PhabricatorRepository $repository,
-    PhabricatorRepositoryCommit $commit) {
-
-    $ref = id(new DiffusionLowLevelCommitQuery())
-      ->setRepository($repository)
-      ->withIdentifier($commit->getCommitIdentifier())
-      ->execute();
+    PhabricatorRepositoryCommit $commit,
+    DiffusionCommitRef $ref) {
 
     $this->updateCommitData($ref);
 

@@ -13,6 +13,8 @@ final class PhabricatorAuditTransactionComment
   protected $replyToCommentPHID;
   protected $legacyCommentID;
 
+  private $replyToComment = self::ATTACHABLE;
+
   public function getApplicationTransactionObject() {
     return new PhabricatorAuditTransaction();
   }
@@ -53,6 +55,16 @@ final class PhabricatorAuditTransactionComment
     ) + $config[self::CONFIG_KEY_SCHEMA];
 
     return $config;
+  }
+
+  public function attachReplyToComment(
+    PhabricatorAuditTransactionComment $comment = null) {
+    $this->replyToComment = $comment;
+    return $this;
+  }
+
+  public function getReplyToComment() {
+    return $this->assertAttached($this->replyToComment);
   }
 
 }

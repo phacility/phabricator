@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorContentSource {
+final class PhabricatorContentSource extends Phobject {
 
   const SOURCE_UNKNOWN  = 'unknown';
   const SOURCE_WEB      = 'web';
@@ -15,6 +15,7 @@ final class PhabricatorContentSource {
   const SOURCE_DAEMON   = 'daemon';
   const SOURCE_LIPSUM   = 'lipsum';
   const SOURCE_PHORTUNE = 'phortune';
+  const SOURCE_BULK = 'bulk';
 
   private $source;
   private $params = array();
@@ -46,13 +47,13 @@ final class PhabricatorContentSource {
 
   public static function newConsoleSource() {
     return self::newForSource(
-      PhabricatorContentSource::SOURCE_CONSOLE,
+      self::SOURCE_CONSOLE,
       array());
   }
 
   public static function newFromRequest(AphrontRequest $request) {
     return self::newForSource(
-      PhabricatorContentSource::SOURCE_WEB,
+      self::SOURCE_WEB,
       array(
         'ip' => $request->getRemoteAddr(),
       ));
@@ -60,7 +61,7 @@ final class PhabricatorContentSource {
 
   public static function newFromConduitRequest(ConduitAPIRequest $request) {
     return self::newForSource(
-      PhabricatorContentSource::SOURCE_CONDUIT,
+      self::SOURCE_CONDUIT,
       array());
   }
 
@@ -79,6 +80,7 @@ final class PhabricatorContentSource {
       self::SOURCE_LIPSUM   => pht('Lipsum'),
       self::SOURCE_UNKNOWN  => pht('Old World'),
       self::SOURCE_PHORTUNE => pht('Phortune'),
+      self::SOURCE_BULK => pht('Bulk Edit'),
     );
   }
 

@@ -3,7 +3,7 @@
 final class PhabricatorAphlictManagementRestartWorkflow
   extends PhabricatorAphlictManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     parent::didConstruct();
     $this
       ->setName('restart')

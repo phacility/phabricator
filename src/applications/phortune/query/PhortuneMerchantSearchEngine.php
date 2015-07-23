@@ -7,6 +7,10 @@ final class PhortuneMerchantSearchEngine
     return pht('Phortune Merchants');
   }
 
+  public function getApplicationClassName() {
+    return 'PhabricatorPhortuneApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -74,6 +78,10 @@ final class PhortuneMerchantSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No merchants found.'));
+
+    return $result;
   }
 }

@@ -7,7 +7,10 @@ $table = new PhabricatorFile();
 $conn_w = $table->establishConnection('w');
 foreach (new LiskMigrationIterator($table) as $file) {
   $id = $file->getID();
-  echo "Updating capitalization of canCDN property for file {$id}...\n";
+  echo pht(
+    "Updating capitalization of %s property for file %d...\n",
+    'canCDN',
+    $id);
   $meta = $file->getMetadata();
 
   if (isset($meta['cancdn'])) {

@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorAuthProvider {
+abstract class PhabricatorAuthProvider extends Phobject {
 
   private $providerConfig;
 
@@ -15,8 +15,7 @@ abstract class PhabricatorAuthProvider {
 
   public function getProviderConfig() {
     if ($this->providerConfig === null) {
-      throw new Exception(
-        'Call attachProviderConfig() before getProviderConfig()!');
+      throw new PhutilInvalidStateException('attachProviderConfig');
     }
     return $this->providerConfig;
   }
@@ -56,16 +55,9 @@ abstract class PhabricatorAuthProvider {
   }
 
   public static function getAllBaseProviders() {
-    static $providers;
-
-    if ($providers === null) {
-      $objects = id(new PhutilSymbolLoader())
-        ->setAncestorClass(__CLASS__)
-        ->loadObjects();
-      $providers = $objects;
-    }
-
-    return $providers;
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->execute();
   }
 
   public static function getAllProviders() {
@@ -158,6 +150,10 @@ abstract class PhabricatorAuthProvider {
     return $this->renderLoginForm($controller->getRequest(), $mode = 'start');
   }
 
+  public function buildInviteForm(PhabricatorAuthStartController $controller) {
+    return $this->renderLoginForm($controller->getRequest(), $mode = 'invite');
+  }
+
   abstract public function processLoginRequest(
     PhabricatorAuthLoginController $controller);
 
@@ -192,7 +188,7 @@ abstract class PhabricatorAuthProvider {
 
   protected function loadOrCreateAccount($account_id) {
     if (!strlen($account_id)) {
-      throw new Exception('loadOrCreateAccount(...): empty account ID!');
+      throw new Exception(pht('Empty account ID!'));
     }
 
     $adapter = $this->getAdapter();
@@ -200,14 +196,18 @@ abstract class PhabricatorAuthProvider {
 
     if (!strlen($adapter->getAdapterType())) {
       throw new Exception(
-        "AuthAdapter (of class '{$adapter_class}') has an invalid ".
-        "implementation: no adapter type.");
+        pht(
+          "AuthAdapter (of class '%s') has an invalid implementation: ".
+          "no adapter type.",
+          $adapter_class));
     }
 
     if (!strlen($adapter->getAdapterDomain())) {
       throw new Exception(
-        "AuthAdapter (of class '{$adapter_class}') has an invalid ".
-        "implementation: no adapter domain.");
+        pht(
+          "AuthAdapter (of class '%s') has an invalid implementation: ".
+          "no adapter domain.",
+          $adapter_class));
     }
 
     $account = id(new PhabricatorExternalAccount())->loadOneWhere(
@@ -243,13 +243,19 @@ abstract class PhabricatorAuthProvider {
             $image_uri,
             array(
               'name' => $name,
-              'canCDN' => true,
+              'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
             ));
+          if ($image_file->isViewableImage()) {
+            $image_file
+              ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
+              ->setCanCDN(true)
+              ->save();
+            $account->setProfileImagePHID($image_file->getPHID());
+          } else {
+            $image_file->delete();
+          }
         unset($unguarded);
 
-        if ($image_file) {
-          $account->setProfileImagePHID($image_file->getPHID());
-        }
       } catch (Exception $ex) {
         // Log this but proceed, it's not especially important that we
         // be able to pull profile images.
@@ -401,6 +407,8 @@ abstract class PhabricatorAuthProvider {
       $button_text = pht('Link External Account');
     } else if ($mode == 'refresh') {
       $button_text = pht('Refresh Account Link');
+    } else if ($mode == 'invite') {
+      $button_text = pht('Register Account');
     } else if ($this->shouldAllowRegistration()) {
       $button_text = pht('Login or Register');
     } else {
@@ -449,7 +457,7 @@ abstract class PhabricatorAuthProvider {
     return null;
   }
 
-  protected function getAuthCSRFCode(AphrontRequest $request) {
+  public function getAuthCSRFCode(AphrontRequest $request) {
     $phcid = $request->getCookie(PhabricatorCookies::COOKIE_CLIENTID);
     if (!strlen($phcid)) {
       throw new Exception(

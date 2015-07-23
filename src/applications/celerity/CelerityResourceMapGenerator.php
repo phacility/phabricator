@@ -1,6 +1,6 @@
 <?php
 
-final class CelerityResourceMapGenerator {
+final class CelerityResourceMapGenerator extends Phobject {
 
   private $debug = false;
   private $resources;
@@ -244,7 +244,10 @@ EOFILE;
 
     if (count($provides) > 1) {
       throw new Exception(
-        pht('Resource "%s" must @provide at most one Celerity target.', $name));
+        pht(
+          'Resource "%s" must %s at most one Celerity target.',
+          $name,
+          '@provide'));
     }
 
     return array(head($provides), $requires);
@@ -268,7 +271,9 @@ EOFILE;
       $cycle = $graph->detectCycles($provides);
       if ($cycle) {
         throw new Exception(
-          pht('Cycle detected in resource graph: %s', implode(' > ', $cycle)));
+          pht(
+            'Cycle detected in resource graph: %s',
+            implode(' > ', $cycle)));
       }
     }
   }
@@ -298,9 +303,10 @@ EOFILE;
           throw new Exception(
             pht(
               'Package specification for "%s" includes "%s", but that symbol '.
-              'is not @provided by any resource.',
+              'is not %s by any resource.',
               $package_name,
-              $symbol));
+              $symbol,
+              '@provided'));
         }
 
         $resource_name = $reverse_map[$symbol_hash];

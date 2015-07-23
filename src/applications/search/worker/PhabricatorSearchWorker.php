@@ -2,7 +2,7 @@
 
 final class PhabricatorSearchWorker extends PhabricatorWorker {
 
-  public function doWork() {
+  protected function doWork() {
     $data = $this->getTaskData();
 
     $phid = idx($data, 'documentPHID');

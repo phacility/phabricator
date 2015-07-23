@@ -7,79 +7,64 @@ final class PhabricatorFileSearchEngine
     return pht('Files');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorFilesApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-    $saved->setParameter(
-      'authorPHIDs',
-      $this->readUsersFromRequest($request, 'authors'));
-
-    $saved->setParameter('explicit', $request->getBool('explicit'));
-    $saved->setParameter('createdStart', $request->getStr('createdStart'));
-    $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
-
-    return $saved;
+  public function newQuery() {
+    return new PhabricatorFileQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorFileQuery())
-      ->withAuthorPHIDs($saved->getParameter('authorPHIDs', array()));
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorUsersSearchField())
+        ->setKey('authorPHIDs')
+        ->setAliases(array('author', 'authors'))
+        ->setLabel(pht('Authors')),
+      id(new PhabricatorSearchThreeStateField())
+        ->setKey('explicit')
+        ->setLabel(pht('Upload Source'))
+        ->setOptions(
+          pht('(Show All)'),
+          pht('Show Only Manually Uploaded Files'),
+          pht('Hide Manually Uploaded Files')),
+      id(new PhabricatorSearchDateField())
+        ->setKey('createdStart')
+        ->setLabel(pht('Created After')),
+      id(new PhabricatorSearchDateField())
+        ->setKey('createdEnd')
+        ->setLabel(pht('Created Before')),
+    );
+  }
 
-    if ($saved->getParameter('explicit')) {
-      $query->showOnlyExplicitUploads(true);
+  protected function getDefaultFieldOrder() {
+    return array(
+      '...',
+      'createdStart',
+      'createdEnd',
+    );
+  }
+
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
+
+    if ($map['authorPHIDs']) {
+      $query->withAuthorPHIDs($map['authorPHIDs']);
     }
 
-    $start = $this->parseDateTime($saved->getParameter('createdStart'));
-    $end = $this->parseDateTime($saved->getParameter('createdEnd'));
-
-    if ($start) {
-      $query->withDateCreatedAfter($start);
+    if ($map['explicit'] !== null) {
+      $query->showOnlyExplicitUploads($map['explicit']);
     }
 
-    if ($end) {
-      $query->withDateCreatedBefore($end);
+    if ($map['createdStart']) {
+      $query->withDateCreatedAfter($map['createdStart']);
+    }
+
+    if ($map['createdEnd']) {
+      $query->withDateCreatedBefore($map['createdEnd']);
     }
 
     return $query;
-  }
-
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
-
-    $phids = $saved_query->getParameter('authorPHIDs', array());
-    $author_handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
-
-    $explicit = $saved_query->getParameter('explicit');
-
-    $form
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('authors')
-          ->setLabel(pht('Authors'))
-          ->setValue($author_handles))
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->addCheckbox(
-            'explicit',
-            1,
-            pht('Show only manually uploaded files.'),
-            $explicit));
-
-    $this->buildDateRange(
-      $form,
-      $saved_query,
-      'createdStart',
-      pht('Created After'),
-      'createdEnd',
-      pht('Created Before'));
   }
 
   protected function getURI($path) {
@@ -172,6 +157,10 @@ final class PhabricatorFileSearchEngine
         $item->addIcon('blame', pht('Temporary'));
       }
 
+      if ($file->getIsPartial()) {
+        $item->addIcon('fa-exclamation-triangle orange', pht('Partial'));
+      }
+
       if (isset($highlighted_ids[$id])) {
         $item->setEffect('highlighted');
       }
@@ -182,7 +171,11 @@ final class PhabricatorFileSearchEngine
     $list_view->appendChild(id(new PhabricatorGlobalUploadTargetView())
       ->setUser($viewer));
 
-    return $list_view;
+
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setContent($list_view);
+
+    return $result;
   }
 
 }

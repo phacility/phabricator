@@ -3,8 +3,8 @@
 final class PhabricatorMacroMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
-    $app_class = 'PhabricatorManiphestApplication';
-    return PhabricatorApplication::isClassInstalled($app_class);
+    return PhabricatorApplication::isClassInstalled(
+      'PhabricatorManiphestApplication');
   }
 
   protected function getObjectPattern() {
@@ -20,13 +20,8 @@ final class PhabricatorMacroMailReceiver extends PhabricatorObjectMailReceiver {
       ->executeOne();
   }
 
-  protected function processReceivedObjectMail(
-    PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorLiskDAO $object,
-    PhabricatorUser $sender) {
-
-    // TODO: For now, we just drop this mail on the floor.
-
+  protected function getTransactionReplyHandler() {
+    return new PhabricatorMacroReplyHandler();
   }
 
 }

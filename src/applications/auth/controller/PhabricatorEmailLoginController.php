@@ -72,7 +72,7 @@ final class PhabricatorEmailLoginController
             $target_email->getUserPHID());
           if ($verified_addresses) {
             $errors[] = pht(
-              'That email addess is not verified. You can only send '.
+              'That email address is not verified. You can only send '.
               'password reset links to a verified address.');
             $e_email = pht('Unverified');
           }
@@ -86,26 +86,22 @@ final class PhabricatorEmailLoginController
             PhabricatorAuthSessionEngine::ONETIME_RESET);
 
           if ($is_serious) {
-            $body = <<<EOBODY
-You can use this link to reset your Phabricator password:
-
-  {$uri}
-
-EOBODY;
+            $body = pht(
+              "You can use this link to reset your Phabricator password:".
+              "\n\n  %s\n",
+              $uri);
           } else {
-            $body = <<<EOBODY
-Condolences on forgetting your password. You can use this link to reset it:
+            $body = pht(
+              "Condolences on forgetting your password. You can use this ".
+              "link to reset it:\n\n".
+              "  %s\n\n".
+              "After you set a new password, consider writing it down on a ".
+              "sticky note and attaching it to your monitor so you don't ".
+              "forget again! Choosing a very short, easy-to-remember password ".
+              "like \"cat\" or \"1234\" might also help.\n\n".
+              "Best Wishes,\nPhabricator\n",
+              $uri);
 
-  {$uri}
-
-After you set a new password, consider writing it down on a sticky note and
-attaching it to your monitor so you don't forget again! Choosing a very short,
-easy-to-remember password like "cat" or "1234" might also help.
-
-Best Wishes,
-Phabricator
-
-EOBODY;
           }
 
           $mail = id(new PhabricatorMetaMTAMail())
@@ -123,12 +119,11 @@ EOBODY;
             ->addCancelButton('/', pht('Done'));
         }
       }
-
     }
 
     $error_view = null;
     if ($errors) {
-      $error_view = new AphrontErrorView();
+      $error_view = new PHUIInfoView();
       $error_view->setErrors($errors);
     }
 
@@ -153,8 +148,7 @@ EOBODY;
 
     $dialog = new AphrontDialogView();
     $dialog->setUser($request->getUser());
-    $dialog->setTitle(pht(
-      'Forgot Password / Email Login'));
+    $dialog->setTitle(pht('Forgot Password / Email Login'));
     $dialog->appendChild($email_auth);
     $dialog->addSubmitButton(pht('Send Email'));
     $dialog->setSubmitURI('/login/email/');

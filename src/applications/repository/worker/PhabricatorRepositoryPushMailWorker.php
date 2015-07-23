@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryPushMailWorker
   extends PhabricatorWorker {
 
-  public function doWork() {
+  protected function doWork() {
     $viewer = PhabricatorUser::getOmnipotentUser();
 
     $task_data = $this->getTaskData();
@@ -22,15 +22,34 @@ final class PhabricatorRepositoryPushMailWorker
       ->executeOne();
 
     $repository = $event->getRepository();
-    if ($repository->isImporting()) {
+    if (!$repository->shouldPublish()) {
       // If the repository is still importing, don't send email.
       return;
     }
 
-    if ($repository->getDetail('herald-disabled')) {
-      // If publishing is disabled, don't send email.
-      return;
+    $targets = id(new PhabricatorRepositoryPushReplyHandler())
+      ->setMailReceiver($repository)
+      ->getMailTargets($email_phids, array());
+
+    $messages = array();
+    foreach ($targets as $target) {
+      $messages[] = $this->sendMail($target, $repository, $event);
     }
+
+    foreach ($messages as $message) {
+      $message->save();
+    }
+  }
+
+  private function sendMail(
+    PhabricatorMailTarget $target,
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryPushEvent $event) {
+
+    $task_data = $this->getTaskData();
+    $viewer = $target->getViewer();
+
+    $locale = PhabricatorEnv::beginScopedLocale($viewer->getTranslation());
 
     $logs = $event->getLogs();
 
@@ -108,20 +127,7 @@ final class PhabricatorRepositoryPushMailWorker
       ->addHeader('Thread-Topic', $subject)
       ->setIsBulk(true);
 
-    $to_handles = id(new PhabricatorHandleQuery())
-      ->setViewer($viewer)
-      ->withPHIDs($email_phids)
-      ->execute();
-
-    $reply_handler = new PhabricatorRepositoryPushReplyHandler();
-    $mails = $reply_handler->multiplexMail(
-      $mail,
-      $to_handles,
-      array());
-
-    foreach ($mails as $mail) {
-      $mail->saveAndSend();
-    }
+    return $target->willSendMail($mail);
   }
 
   public function renderForDisplay(PhabricatorUser $viewer) {

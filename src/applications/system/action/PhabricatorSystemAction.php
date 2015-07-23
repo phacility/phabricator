@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorSystemAction {
+abstract class PhabricatorSystemAction extends Phobject {
 
   abstract public function getActionConstant();
   abstract public function getScoreThreshold();

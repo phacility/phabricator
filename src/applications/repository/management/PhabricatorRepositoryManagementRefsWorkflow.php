@@ -3,16 +3,16 @@
 final class PhabricatorRepositoryManagementRefsWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('refs')
       ->setExamples('**refs** [__options__] __repository__ ...')
-      ->setSynopsis('Update refs in __repository__, named by callsign.')
+      ->setSynopsis(pht('Update refs in __repository__, named by callsign.'))
       ->setArguments(
         array(
           array(
             'name'        => 'verbose',
-            'help'        => 'Show additional debugging information.',
+            'help'        => pht('Show additional debugging information.'),
           ),
           array(
             'name'        => 'repos',
@@ -33,7 +33,9 @@ final class PhabricatorRepositoryManagementRefsWorkflow
 
     $console = PhutilConsole::getConsole();
     foreach ($repos as $repo) {
-      $console->writeOut("Updating refs in '%s'...\n", $repo->getCallsign());
+      $console->writeOut(
+        "%s\n",
+        pht("Updating refs in '%s'...", $repo->getCallsign()));
 
       $engine = id(new PhabricatorRepositoryRefEngine())
         ->setRepository($repo)
@@ -41,7 +43,7 @@ final class PhabricatorRepositoryManagementRefsWorkflow
         ->updateRefs();
     }
 
-    $console->writeOut("Done.\n");
+    $console->writeOut("%s\n", pht('Done.'));
 
     return 0;
   }

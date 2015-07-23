@@ -3,17 +3,19 @@
 final class PhabricatorStorageManagementDestroyWorkflow
   extends PhabricatorStorageManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('destroy')
       ->setExamples('**destroy** [__options__]')
-      ->setSynopsis('Permanently destroy all storage and data.')
+      ->setSynopsis(pht('Permanently destroy all storage and data.'))
       ->setArguments(
         array(
           array(
             'name'  => 'unittest-fixtures',
-            'help'  => 'Restrict **destroy** operations to databases created '.
-                       'by PhabricatorTestCase test fixtures.',
+            'help'  => pht(
+              'Restrict **destroy** operations to databases created '.
+              'by %s test fixtures.',
+              'PhabricatorTestCase'),
           ),
         ));
   }
@@ -24,17 +26,18 @@ final class PhabricatorStorageManagementDestroyWorkflow
 
     if (!$is_dry && !$is_force) {
       echo phutil_console_wrap(
-        'Are you completely sure you really want to permanently destroy all '.
-        'storage for Phabricator data? This operation can not be undone and '.
-        'your data will not be recoverable if you proceed.');
+        pht(
+          'Are you completely sure you really want to permanently destroy all '.
+          'storage for Phabricator data? This operation can not be undone and '.
+          'your data will not be recoverable if you proceed.'));
 
-      if (!phutil_console_confirm('Permanently destroy all data?')) {
-        echo "Cancelled.\n";
+      if (!phutil_console_confirm(pht('Permanently destroy all data?'))) {
+        echo pht('Cancelled.')."\n";
         exit(1);
       }
 
-      if (!phutil_console_confirm('Really destroy all data forever?')) {
-        echo "Cancelled.\n";
+      if (!phutil_console_confirm(pht('Really destroy all data forever?'))) {
+        echo pht('Cancelled.')."\n";
         exit(1);
       }
     }
@@ -61,9 +64,9 @@ final class PhabricatorStorageManagementDestroyWorkflow
 
     foreach ($databases as $database) {
       if ($is_dry) {
-        echo "DRYRUN: Would drop database '{$database}'.\n";
+        echo pht("DRYRUN: Would drop database '%s'.", $database)."\n";
       } else {
-        echo "Dropping database '{$database}'...\n";
+        echo pht("Dropping database '%s'...", $database)."\n";
         queryfx(
           $api->getConn(null),
           'DROP DATABASE IF EXISTS %T',
@@ -72,7 +75,7 @@ final class PhabricatorStorageManagementDestroyWorkflow
     }
 
     if (!$is_dry) {
-      echo "Storage was destroyed.\n";
+      echo pht('Storage was destroyed.')."\n";
     }
 
     return 0;

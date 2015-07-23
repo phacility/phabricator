@@ -50,11 +50,6 @@ final class PhabricatorDashboardInstallController
       'applicationClass',
       'PhabricatorHomeApplication');
 
-    $handles = $this->loadHandles(array(
-      $object_phid,
-      $installer_phid,
-    ));
-
     if ($request->isFormPost()) {
       $dashboard_install = id(new PhabricatorDashboardInstall())
         ->loadOneWhere(
@@ -121,7 +116,7 @@ final class PhabricatorDashboardInstallController
               phutil_tag(
                 'strong',
                 array(),
-                $this->getHandle($object_phid)->getName())));
+                $viewer->renderHandle($object_phid))));
         }
         break;
       default:

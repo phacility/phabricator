@@ -7,25 +7,31 @@ final class AlmanacServiceSearchEngine
     return pht('Almanac Services');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorAlmanacApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    return $saved;
+  public function newQuery() {
+    return new AlmanacServiceQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new AlmanacServiceQuery());
+  public function newResultObject() {
+    // NOTE: We need to attach a service type in order to generate custom
+    // field definitions.
+    return AlmanacService::initializeNewService()
+      ->attachServiceType(new AlmanacCustomServiceType());
+  }
+
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
 
     return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {}
+
+  protected function buildCustomSearchFields() {
+    return array();
+  }
 
   protected function getURI($path) {
     return '/almanac/service/'.$path;
@@ -50,12 +56,6 @@ final class AlmanacServiceSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
-  }
-
-  protected function getRequiredHandlePHIDsForResultList(
-    array $services,
-    PhabricatorSavedQuery $query) {
-    return array();
   }
 
   protected function renderResultList(
@@ -90,6 +90,10 @@ final class AlmanacServiceSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No Almanac Services found.'));
+
+    return $result;
   }
 }

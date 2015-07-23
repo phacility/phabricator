@@ -38,6 +38,37 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     return ipull(self::getEnabledStatusMap(), 'name');
   }
 
+
+  /**
+   * Get the statuses and their command keywords.
+   *
+   * @return map Statuses to lists of command keywords.
+   */
+  public static function getTaskStatusKeywordsMap() {
+    $map = self::getEnabledStatusMap();
+    foreach ($map as $key => $spec) {
+      $words = idx($spec, 'keywords', array());
+      if (!is_array($words)) {
+        $words = array($words);
+      }
+
+      // For statuses, we include the status name because it's usually
+      // at least somewhat meaningful.
+      $words[] = $key;
+
+      foreach ($words as $word_key => $word) {
+        $words[$word_key] = phutil_utf8_strtolower($word);
+      }
+
+      $words = array_unique($words);
+
+      $map[$key] = $words;
+    }
+
+    return $map;
+  }
+
+
   public static function getTaskStatusName($status) {
     return self::getStatusAttribute($status, 'name', pht('Unknown Status'));
   }
@@ -54,19 +85,21 @@ final class ManiphestTaskStatus extends ManiphestConstants {
   public static function renderFullDescription($status) {
     if (self::isOpenStatus($status)) {
       $color = 'status';
-      $icon = 'fa-square-o bluegrey';
+      $icon_color = 'bluegrey';
     } else {
       $color = 'status-dark';
-      $icon = 'fa-check-square-o';
+      $icon_color = '';
     }
 
+    $icon = self::getStatusIcon($status);
+
     $img = id(new PHUIIconView())
-      ->setIconFont($icon);
+      ->setIconFont($icon.' '.$icon_color);
 
     $tag = phutil_tag(
       'span',
       array(
-        'class' => 'phui-header-'.$color.' plr',
+        'class' => 'phui-header-status phui-header-'.$color,
       ),
       array(
         $img,
@@ -135,7 +168,16 @@ final class ManiphestTaskStatus extends ManiphestConstants {
   }
 
   public static function getStatusIcon($status) {
-    return self::getStatusAttribute($status, 'transaction.icon');
+    $icon = self::getStatusAttribute($status, 'transaction.icon');
+    if ($icon) {
+      return $icon;
+    }
+
+    if (self::isOpenStatus($status)) {
+      return 'fa-exclamation-circle';
+    } else {
+      return 'fa-check-square-o';
+    }
   }
 
   public static function getStatusPrefixMap() {
@@ -231,6 +273,7 @@ final class ManiphestTaskStatus extends ManiphestConstants {
           'silly' => 'optional bool',
           'prefixes' => 'optional list<string>',
           'suffixes' => 'optional list<string>',
+          'keywords' => 'optional list<string>',
         ));
     }
 

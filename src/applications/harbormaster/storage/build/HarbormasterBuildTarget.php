@@ -175,8 +175,16 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
     return $this->implementation;
   }
 
+  public function isAutotarget() {
+    try {
+      return (bool)$this->getImplementation()->getBuildStepAutotargetPlanKey();
+    } catch (Exception $e) {
+      return false;
+    }
+  }
+
   public function getName() {
-    if (strlen($this->name)) {
+    if (strlen($this->name) && !$this->isAutotarget()) {
       return $this->name;
     }
 

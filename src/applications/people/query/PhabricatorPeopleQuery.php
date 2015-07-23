@@ -12,14 +12,16 @@ final class PhabricatorPeopleQuery
   private $dateCreatedBefore;
   private $isAdmin;
   private $isSystemAgent;
+  private $isMailingList;
   private $isDisabled;
   private $isApproved;
   private $nameLike;
+  private $nameTokens;
 
   private $needPrimaryEmail;
   private $needProfile;
   private $needProfileImage;
-  private $needStatus;
+  private $needAvailability;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -66,6 +68,11 @@ final class PhabricatorPeopleQuery
     return $this;
   }
 
+  public function withIsMailingList($mailing_list) {
+    $this->isMailingList = $mailing_list;
+    return $this;
+  }
+
   public function withIsDisabled($disabled) {
     $this->isDisabled = $disabled;
     return $this;
@@ -78,6 +85,11 @@ final class PhabricatorPeopleQuery
 
   public function withNameLike($like) {
     $this->nameLike = $like;
+    return $this;
+  }
+
+  public function withNameTokens(array $tokens) {
+    $this->nameTokens = array_values($tokens);
     return $this;
   }
 
@@ -96,24 +108,18 @@ final class PhabricatorPeopleQuery
     return $this;
   }
 
-  public function needStatus($need) {
-    $this->needStatus = $need;
+  public function needAvailability($need) {
+    $this->needAvailability = $need;
     return $this;
   }
 
-  protected function loadPage() {
-    $table  = new PhabricatorUser();
-    $conn_r = $table->establishConnection('r');
+  public function newResultObject() {
+    return new PhabricatorUser();
+  }
 
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T user %Q %Q %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildJoinsClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildApplicationSearchGroupClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
+  protected function loadPage() {
+    $table = new PhabricatorUser();
+    $data = $this->loadStandardPageRows($table);
 
     if ($this->needPrimaryEmail) {
       $table->putInSet(new LiskDAOSet());
@@ -142,162 +148,311 @@ final class PhabricatorPeopleQuery
     }
 
     if ($this->needProfileImage) {
-      $user_profile_file_phids = mpull($users, 'getProfileImagePHID');
-      $user_profile_file_phids = array_filter($user_profile_file_phids);
-      if ($user_profile_file_phids) {
-        $files = id(new PhabricatorFileQuery())
-          ->setParentQuery($this)
-          ->setViewer($this->getViewer())
-          ->withPHIDs($user_profile_file_phids)
-          ->execute();
-        $files = mpull($files, null, 'getPHID');
-      } else {
-        $files = array();
-      }
+      $rebuild = array();
       foreach ($users as $user) {
-        $image_phid = $user->getProfileImagePHID();
-        if (isset($files[$image_phid])) {
-          $profile_image_uri = $files[$image_phid]->getBestURI();
-        } else {
-          $profile_image_uri = PhabricatorUser::getDefaultProfileImageURI();
+        $image_uri = $user->getProfileImageCache();
+        if ($image_uri) {
+          // This user has a valid cache, so we don't need to fetch any
+          // data or rebuild anything.
+
+          $user->attachProfileImageURI($image_uri);
+          continue;
         }
-        $user->attachProfileImageURI($profile_image_uri);
+
+        // This user's cache is invalid or missing, so we're going to rebuild
+        // it.
+        $rebuild[] = $user;
+      }
+
+      if ($rebuild) {
+        $file_phids = mpull($rebuild, 'getProfileImagePHID');
+        $file_phids = array_filter($file_phids);
+
+        if ($file_phids) {
+          // NOTE: We're using the omnipotent user here because older profile
+          // images do not have the 'profile' flag, so they may not be visible
+          // to the executing viewer. At some point, we could migrate to add
+          // this flag and then use the real viewer, or just use the real
+          // viewer after enough time has passed to limit the impact of old
+          // data. The consequence of missing here is that we cache a default
+          // image when a real image exists.
+          $files = id(new PhabricatorFileQuery())
+            ->setParentQuery($this)
+            ->setViewer(PhabricatorUser::getOmnipotentUser())
+            ->withPHIDs($file_phids)
+            ->execute();
+          $files = mpull($files, null, 'getPHID');
+        } else {
+          $files = array();
+        }
+
+        foreach ($rebuild as $user) {
+          $image_phid = $user->getProfileImagePHID();
+          if (isset($files[$image_phid])) {
+            $image_uri = $files[$image_phid]->getBestURI();
+          } else {
+            $image_uri = PhabricatorUser::getDefaultProfileImageURI();
+          }
+
+          $user->writeProfileImageCache($image_uri);
+          $user->attachProfileImageURI($image_uri);
+        }
       }
     }
 
-    if ($this->needStatus) {
-      $user_list = mpull($users, null, 'getPHID');
-      $statuses = id(new PhabricatorCalendarEvent())->loadCurrentStatuses(
-        array_keys($user_list));
-      foreach ($user_list as $phid => $user) {
-        $status = idx($statuses, $phid);
-        if ($status) {
-          $user->attachStatus($status);
+    if ($this->needAvailability) {
+      $rebuild = array();
+      foreach ($users as $user) {
+        $cache = $user->getAvailabilityCache();
+        if ($cache !== null) {
+          $user->attachAvailability($cache);
+        } else {
+          $rebuild[] = $user;
         }
+      }
+
+      if ($rebuild) {
+        $this->rebuildAvailabilityCache($rebuild);
       }
     }
 
     return $users;
   }
 
-  private function buildJoinsClause($conn_r) {
-    $joins = array();
+  protected function shouldGroupQueryResultRows() {
+    if ($this->nameTokens) {
+      return true;
+    }
+
+    return parent::shouldGroupQueryResultRows();
+  }
+
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
 
     if ($this->emails) {
       $email_table = new PhabricatorUserEmail();
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T email ON email.userPHID = user.PHID',
         $email_table->getTableName());
     }
 
-    $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
+    if ($this->nameTokens) {
+      foreach ($this->nameTokens as $key => $token) {
+        $token_table = 'token_'.$key;
+        $joins[] = qsprintf(
+          $conn,
+          'JOIN %T %T ON %T.userID = user.id AND %T.token LIKE %>',
+          PhabricatorUser::NAMETOKEN_TABLE,
+          $token_table,
+          $token_table,
+          $token_table,
+          $token);
+      }
+    }
 
-    $joins = implode(' ', $joins);
     return  $joins;
   }
 
-  private function buildWhereClause($conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->usernames !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.userName IN (%Ls)',
         $this->usernames);
     }
 
     if ($this->emails !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'email.address IN (%Ls)',
         $this->emails);
     }
 
     if ($this->realnames !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.realName IN (%Ls)',
         $this->realnames);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->dateCreatedAfter) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.dateCreated >= %d',
         $this->dateCreatedAfter);
     }
 
     if ($this->dateCreatedBefore) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.dateCreated <= %d',
         $this->dateCreatedBefore);
     }
 
-    if ($this->isAdmin) {
+    if ($this->isAdmin !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'user.isAdmin = 1');
+        $conn,
+        'user.isAdmin = %d',
+        (int)$this->isAdmin);
     }
 
     if ($this->isDisabled !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.isDisabled = %d',
         (int)$this->isDisabled);
     }
 
     if ($this->isApproved !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.isApproved = %d',
         (int)$this->isApproved);
     }
 
-    if ($this->isSystemAgent) {
+    if ($this->isSystemAgent !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'user.isSystemAgent = 1');
+        $conn,
+        'user.isSystemAgent = %d',
+        (int)$this->isSystemAgent);
+    }
+
+    if ($this->isMailingList !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'user.isMailingList = %d',
+        (int)$this->isMailingList);
     }
 
     if (strlen($this->nameLike)) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'user.username LIKE %~ OR user.realname LIKE %~',
         $this->nameLike,
         $this->nameLike);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
-  protected function getPagingColumn() {
-    return 'user.id';
-  }
-
-  protected function getApplicationSearchObjectPHIDColumn() {
-    return 'user.phid';
+  protected function getPrimaryTableAlias() {
+    return 'user';
   }
 
   public function getQueryApplicationClass() {
     return 'PhabricatorPeopleApplication';
+  }
+
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'username' => array(
+        'table' => 'user',
+        'column' => 'username',
+        'type' => 'string',
+        'reverse' => true,
+        'unique' => true,
+      ),
+    );
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $user = $this->loadCursorObject($cursor);
+    return array(
+      'id' => $user->getID(),
+      'username' => $user->getUsername(),
+    );
+  }
+
+  private function rebuildAvailabilityCache(array $rebuild) {
+    $rebuild = mpull($rebuild, null, 'getPHID');
+
+    // Limit the window we look at because far-future events are largely
+    // irrelevant and this makes the cache cheaper to build and allows it to
+    // self-heal over time.
+    $min_range = PhabricatorTime::getNow();
+    $max_range = $min_range + phutil_units('72 hours in seconds');
+
+    $events = id(new PhabricatorCalendarEventQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withInvitedPHIDs(array_keys($rebuild))
+      ->withIsCancelled(false)
+      ->withDateRange($min_range, $max_range)
+      ->execute();
+
+    // Group all the events by invited user. Only examine events that users
+    // are actually attending.
+    $map = array();
+    foreach ($events as $event) {
+      foreach ($event->getInvitees() as $invitee) {
+        if (!$invitee->isAttending()) {
+          continue;
+        }
+
+        $invitee_phid = $invitee->getInviteePHID();
+        if (!isset($rebuild[$invitee_phid])) {
+          continue;
+        }
+
+        $map[$invitee_phid][] = $event;
+      }
+    }
+
+    foreach ($rebuild as $phid => $user) {
+      $events = idx($map, $phid, array());
+
+      $cursor = $min_range;
+      if ($events) {
+        // Find the next time when the user has no meetings. If we move forward
+        // because of an event, we check again for events after that one ends.
+        while (true) {
+          foreach ($events as $event) {
+            $from = $event->getDateFromForCache();
+            $to = $event->getDateTo();
+            if (($from <= $cursor) && ($to > $cursor)) {
+              $cursor = $to;
+              continue 2;
+            }
+          }
+          break;
+        }
+      }
+
+      if ($cursor > $min_range) {
+        $availability = array(
+          'until' => $cursor,
+        );
+        $availability_ttl = $cursor;
+      } else {
+        $availability = array(
+          'until' => null,
+        );
+        $availability_ttl = $max_range;
+      }
+
+      // Never TTL the cache to longer than the maximum range we examined.
+      $availability_ttl = min($availability_ttl, $max_range);
+
+      $user->writeAvailabilityCache($availability, $availability_ttl);
+      $user->attachAvailability($availability);
+    }
   }
 
 }

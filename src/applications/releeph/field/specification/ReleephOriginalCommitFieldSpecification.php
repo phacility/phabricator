@@ -8,7 +8,7 @@ final class ReleephOriginalCommitFieldSpecification
   }
 
   public function getName() {
-    return 'Commit';
+    return pht('Commit');
   }
 
   public function getRequiredHandlePHIDsForPropertyView() {

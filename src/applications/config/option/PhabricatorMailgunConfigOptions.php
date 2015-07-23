@@ -11,16 +11,25 @@ final class PhabricatorMailgunConfigOptions
     return pht('Configure Mailgun integration.');
   }
 
+  public function getFontIcon() {
+    return 'fa-send-o';
+  }
+
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('mailgun.domain', 'string', null)
         ->setLocked(true)
         ->setDescription(
           pht(
-            'Mailgun domain name. See https://mailgun.com/cp/domains'))
-        ->addExample('mycompany.com', 'Use specific domain'),
+            'Mailgun domain name. See %s.',
+            'https://mailgun.com/cp/domains'))
+        ->addExample('mycompany.com', pht('Use specific domain')),
       $this->newOption('mailgun.api-key', 'string', null)
-        ->setMasked(true)
+        ->setHidden(true)
         ->setDescription(pht('Mailgun API key.')),
     );
 

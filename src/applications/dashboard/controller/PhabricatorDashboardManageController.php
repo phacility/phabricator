@@ -55,9 +55,9 @@ final class PhabricatorDashboardManageController
         'You do not have permission to edit this dashboard. If you want to '.
         'make changes, make a copy first.');
 
-      $box->setErrorView(
-        id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+      $box->setInfoView(
+        id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
           ->setErrors(array($no_edit)));
     }
 
@@ -165,12 +165,9 @@ final class PhabricatorDashboardManageController
       pht('Editable By'),
       $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
 
-    $panel_phids = $dashboard->getPanelPHIDs();
-    $this->loadHandles($panel_phids);
-
     $properties->addProperty(
       pht('Panels'),
-      $this->renderHandlesForPHIDs($panel_phids));
+      $viewer->renderHandleList($dashboard->getPanelPHIDs()));
 
     return $properties;
   }

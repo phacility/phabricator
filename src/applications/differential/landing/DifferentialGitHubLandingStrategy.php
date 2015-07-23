@@ -20,7 +20,7 @@ final class DifferentialGitHubLandingStrategy
       id(new DifferentialHostedGitLandingStrategy())
         ->commitRevisionToWorkspace($revision, $workspace, $viewer);
     } catch (Exception $e) {
-      throw new PhutilProxyException('Failed to commit patch', $e);
+      throw new PhutilProxyException(pht('Failed to commit patch.'), $e);
     }
 
     try {
@@ -33,7 +33,9 @@ final class DifferentialGitHubLandingStrategy
       }
 
       // Else, throw what git said.
-      throw new PhutilProxyException('Failed to push changes upstream', $e);
+      throw new PhutilProxyException(
+        pht('Failed to push changes upstream.'),
+        $e);
     }
   }
 
@@ -44,6 +46,11 @@ final class DifferentialGitHubLandingStrategy
     PhabricatorUser $viewer,
     DifferentialRevision $revision,
     PhabricatorRepository $repository) {
+
+    // TODO: This temporarily disables this action, because it doesn't work
+    // and is confusing to users. If you want to use it, comment out this line
+    // for now and we'll provide real support eventually.
+    return;
 
     $vcs = $repository->getVersionControlSystem();
     if ($vcs !== PhabricatorRepositoryType::REPOSITORY_TYPE_GIT) {
@@ -103,13 +110,14 @@ final class DifferentialGitHubLandingStrategy
 
     if (!$this->account) {
       throw new Exception(
-        "No matching GitHub account found for {$repo_domain}.");
+        pht('No matching GitHub account found for %s.', $repo_domain));
     }
 
     $this->provider = PhabricatorAuthProvider::getEnabledProviderByKey(
       $this->account->getProviderKey());
     if (!$this->provider) {
-      throw new Exception("GitHub provider for {$repo_domain} is not enabled.");
+      throw new Exception(
+        pht('GitHub provider for %s is not enabled.', $repo_domain));
     }
   }
 
@@ -152,8 +160,9 @@ final class DifferentialGitHubLandingStrategy
 
     if ($no_permission) {
       throw new Exception(
-        "You don't have permission to push to this repository. \n".
-        "Push permissions for this repository are managed on GitHub.");
+        pht(
+          "You don't have permission to push to this repository. ".
+          "Push permissions for this repository are managed on GitHub."));
     }
 
     $scopes = BaseHTTPFuture::getHeader($headers, 'X-OAuth-Scopes');
@@ -166,8 +175,8 @@ final class DifferentialGitHubLandingStrategy
         ->setUser($viewer)
         ->setTitle(pht('Stronger token needed'))
         ->appendChild(pht(
-            'In order to complete this action, you need a '.
-            'stronger GitHub token.'))
+          'In order to complete this action, you need a '.
+          'stronger GitHub token.'))
         ->setSubmitURI($refresh_token_uri)
         ->addCancelButton('/D'.$revision->getId())
         ->setDisableWorkflowOnSubmit(true)

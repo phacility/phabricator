@@ -8,7 +8,11 @@ final class PhabricatorProjectsPolicyRule extends PhabricatorPolicyRule {
     return pht('members of projects');
   }
 
-  public function willApplyRules(PhabricatorUser $viewer, array $values) {
+  public function willApplyRules(
+    PhabricatorUser $viewer,
+    array $values,
+    array $objects) {
+
     $values = array_unique(array_filter(array_mergev($values)));
     if (!$values) {
       return;
@@ -24,12 +28,17 @@ final class PhabricatorProjectsPolicyRule extends PhabricatorPolicyRule {
     }
   }
 
-  public function applyRule(PhabricatorUser $viewer, $value) {
+  public function applyRule(
+    PhabricatorUser $viewer,
+    $value,
+    PhabricatorPolicyInterface $object) {
+
     foreach ($value as $project_phid) {
       if (isset($this->memberships[$viewer->getPHID()][$project_phid])) {
         return true;
       }
     }
+
     return false;
   }
 
@@ -38,13 +47,7 @@ final class PhabricatorProjectsPolicyRule extends PhabricatorPolicyRule {
   }
 
   public function getValueControlTemplate() {
-    $projects_source = new PhabricatorProjectDatasource();
-
-    return array(
-      'markup' => new AphrontTokenizerTemplateView(),
-      'uri' => $projects_source->getDatasourceURI(),
-      'placeholder' => $projects_source->getPlaceholderText(),
-    );
+    return $this->getDatasourceTemplate(new PhabricatorProjectDatasource());
   }
 
   public function getRuleOrder() {

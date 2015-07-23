@@ -7,7 +7,7 @@ final class PhabricatorRepositoryPushLogSearchEngine
     return pht('Push Logs');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorDiffusionApplication';
   }
 
@@ -55,35 +55,19 @@ final class PhabricatorRepositoryPushLogSearchEngine
     $repository_phids = $saved_query->getParameter('repositoryPHIDs', array());
     $pusher_phids = $saved_query->getParameter('pusherPHIDs', array());
 
-    $all_phids = array_merge(
-      $repository_phids,
-      $pusher_phids);
-
-    if ($all_phids) {
-      $handles = id(new PhabricatorHandleQuery())
-        ->setViewer($this->requireViewer())
-        ->withPHIDs($all_phids)
-        ->execute();
-    } else {
-      $handles = array();
-    }
-
-    $repository_handles = array_select_keys($handles, $repository_phids);
-    $pusher_handles = array_select_keys($handles, $pusher_phids);
-
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new DiffusionRepositoryDatasource())
           ->setName('repositories')
           ->setLabel(pht('Repositories'))
-          ->setValue($repository_handles))
-      ->appendChild(
+          ->setValue($repository_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('pushers')
           ->setLabel(pht('Pushers'))
-          ->setValue($pusher_handles));
+          ->setValue($pusher_phids));
   }
 
   protected function getURI($path) {
@@ -124,11 +108,8 @@ final class PhabricatorRepositoryPushLogSearchEngine
       ->setHandles($handles)
       ->setLogs($logs);
 
-    $box = id(new PHUIBoxView())
-      ->addMargin(PHUI::MARGIN_LARGE)
-      ->appendChild($table);
-
-    return $box;
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setTable($table);
   }
 
 }

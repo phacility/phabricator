@@ -7,7 +7,7 @@ final class AlmanacNetworkSearchEngine
     return pht('Almanac Networks');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorAlmanacApplication';
   }
 
@@ -80,6 +80,10 @@ final class AlmanacNetworkSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No Almanac Networks found.'));
+
+    return $result;
   }
 }

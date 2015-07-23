@@ -33,9 +33,9 @@ final class DarkConsoleDataController extends PhabricatorController {
       return new Aphront400Response();
     }
 
-    $result = json_decode($result, true);
-
-    if (!is_array($result)) {
+    try {
+      $result = phutil_json_decode($result);
+    } catch (PhutilJSONParserException $ex) {
       return new Aphront400Response();
     }
 

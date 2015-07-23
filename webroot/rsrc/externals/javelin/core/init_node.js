@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Alternative Javelin init file for Node.js.
  *
@@ -23,9 +25,8 @@ JX.onload = function(func) {
   func();
 };
 
-JX.require = function(thing, relative) {
-  relative = relative || __dirname + '/..';
-  var path = relative + '/' + thing + '.js';
+JX.require = function(thing) {
+  var path = __dirname + '/../' + thing + '.js';
   var content = fs.readFileSync(path);
   var dir = pathModule.dirname(path);
 
@@ -37,17 +38,10 @@ JX.require = function(thing, relative) {
   }
 
   var extra = {
-    JX : this,
-    __DEV__ : 0,
-    window : {},
-    __dirname : dir,
-    require : function(thing) {
-      if (thing == 'javelin') {
-        return require(dir + '/' + thing);
-      } else {
-        return require(thing);
-      }
-    }
+    JX: this,
+    __DEV__: 0,
+    window: {},
+    __dirname: dir
   };
 
   for (k in extra) {

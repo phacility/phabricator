@@ -10,22 +10,18 @@ final class TokenGiveConduitAPIMethod extends TokenConduitAPIMethod {
     return pht('Give or change a token.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'tokenPHID'   => 'phid|null',
       'objectPHID'  => 'phid',
     );
   }
 
-  public function defineErrorTypes() {
-    return array();
-  }
-
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'void';
   }
 
-  public function execute(ConduitAPIRequest $request) {
+  protected function execute(ConduitAPIRequest $request) {
     $content_source = PhabricatorContentSource::newFromConduitRequest($request);
 
     $editor = id(new PhabricatorTokenGivenEditor())

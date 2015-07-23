@@ -8,26 +8,22 @@ final class DiffusionFindSymbolsConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Retrieve Diffusion symbol information.';
+    return pht('Retrieve Diffusion symbol information.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
-      'name'        => 'optional string',
-      'namePrefix'  => 'optional string',
-      'context'     => 'optional string',
-      'language'    => 'optional string',
-      'type'        => 'optional string',
+      'name'           => 'optional string',
+      'namePrefix'     => 'optional string',
+      'context'        => 'optional string',
+      'language'       => 'optional string',
+      'type'           => 'optional string',
+      'repositoryPHID' => 'optional string',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty list<dict>';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {
@@ -36,8 +32,10 @@ final class DiffusionFindSymbolsConduitAPIMethod
     $context = $request->getValue('context');
     $language = $request->getValue('language');
     $type = $request->getValue('type');
+    $repository = $request->getValue('repositoryPHID');
 
-    $query = new DiffusionSymbolQuery();
+    $query = id(new DiffusionSymbolQuery())
+      ->setViewer($request->getUser());
     if ($name !== null) {
       $query->setName($name);
     }
@@ -53,9 +51,11 @@ final class DiffusionFindSymbolsConduitAPIMethod
     if ($type !== null) {
       $query->setType($type);
     }
+    if ($repository !== null) {
+      $query->withRepositoryPHIDs(array($repository));
+    }
 
     $query->needPaths(true);
-    $query->needArcanistProjects(true);
     $query->needRepositories(true);
 
     $results = $query->execute();
@@ -69,13 +69,14 @@ final class DiffusionFindSymbolsConduitAPIMethod
       }
 
       $response[] = array(
-        'name'        => $result->getSymbolName(),
-        'context'     => $result->getSymbolContext(),
-        'type'        => $result->getSymbolType(),
-        'language'    => $result->getSymbolLanguage(),
-        'path'        => $result->getPath(),
-        'line'        => $result->getLineNumber(),
-        'uri'         => $uri,
+        'name'           => $result->getSymbolName(),
+        'context'        => $result->getSymbolContext(),
+        'type'           => $result->getSymbolType(),
+        'language'       => $result->getSymbolLanguage(),
+        'path'           => $result->getPath(),
+        'line'           => $result->getLineNumber(),
+        'uri'            => $uri,
+        'repositoryPHID' => $result->getRepository()->getPHID(),
       );
     }
 

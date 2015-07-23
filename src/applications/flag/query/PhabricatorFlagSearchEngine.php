@@ -7,7 +7,7 @@ final class PhabricatorFlagSearchEngine
     return pht('Flags');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorFlagsApplication';
   }
 
@@ -152,6 +152,11 @@ final class PhabricatorFlagSearchEngine
         ->setHeader($flag->getHandle()->getFullName())
         ->setHref($flag->getHandle()->getURI());
 
+      $status_open = PhabricatorObjectHandle::STATUS_OPEN;
+      if ($flag->getHandle()->getStatus() != $status_open) {
+        $item->setDisabled(true);
+      }
+
       $item->addAction(
         id(new PHUIListItemView())
           ->setIcon('fa-pencil')
@@ -175,7 +180,12 @@ final class PhabricatorFlagSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No flags found.'));
+
+    return $result;
+
   }
 
 

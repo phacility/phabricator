@@ -40,6 +40,17 @@ JX.install('PhabricatorDragAndDropFileUpload', {
   members : {
     _node : null,
     _depth : 0,
+    _isEnabled: false,
+
+    setIsEnabled: function(bool) {
+      this._isEnabled = bool;
+      return this;
+    },
+
+    getIsEnabled: function() {
+      return this._isEnabled;
+    },
+
     _updateDepth : function(delta) {
       if (this._depth === 0 && delta > 0) {
         this.invoke('didBeginDrag');
@@ -53,6 +64,7 @@ JX.install('PhabricatorDragAndDropFileUpload', {
     },
 
     start : function() {
+
 
       // TODO: move this to JX.DOM.contains()?
       function contains(container, child) {
@@ -73,6 +85,9 @@ JX.install('PhabricatorDragAndDropFileUpload', {
         'click',
         null,
         JX.bind(this, function (e) {
+          if (!this.getIsEnabled()) {
+            return;
+          }
           if (this._depth) {
             e.kill();
             // Force depth to 0.
@@ -87,6 +102,10 @@ JX.install('PhabricatorDragAndDropFileUpload', {
         'dragenter',
         null,
         JX.bind(this, function(e) {
+          if (!this.getIsEnabled()) {
+            return;
+          }
+
           if (contains(this._node, e.getTarget())) {
             this._updateDepth(1);
           }
@@ -97,6 +116,10 @@ JX.install('PhabricatorDragAndDropFileUpload', {
         'dragleave',
         null,
         JX.bind(this, function(e) {
+          if (!this.getIsEnabled()) {
+            return;
+          }
+
           if (contains(this._node, e.getTarget())) {
             this._updateDepth(-1);
           }
@@ -106,18 +129,26 @@ JX.install('PhabricatorDragAndDropFileUpload', {
         this._node,
         'dragover',
         null,
-        function(e) {
+        JX.bind(this, function(e) {
+          if (!this.getIsEnabled()) {
+            return;
+          }
+
           // NOTE: We must set this, or Chrome refuses to drop files from the
           // download shelf.
           e.getRawEvent().dataTransfer.dropEffect = 'copy';
           e.kill();
-        });
+        }));
 
       JX.DOM.listen(
         this._node,
         'drop',
         null,
         JX.bind(this, function(e) {
+          if (!this.getIsEnabled()) {
+            return;
+          }
+
           e.kill();
 
           var files = e.getRawEvent().dataTransfer.files;
@@ -135,6 +166,10 @@ JX.install('PhabricatorDragAndDropFileUpload', {
           'paste',
           null,
           JX.bind(this, function(e) {
+            if (!this.getIsEnabled()) {
+              return;
+            }
+
             var clipboard = e.getRawEvent().clipboardData;
             if (!clipboard) {
               return;
@@ -168,64 +203,175 @@ JX.install('PhabricatorDragAndDropFileUpload', {
             }
           }));
       }
+
+      this.setIsEnabled(true);
     },
+
     _sendRequest : function(spec) {
       var file = new JX.PhabricatorFileUpload()
+        .setRawFileObject(spec)
         .setName(spec.name)
-        .setTotalBytes(spec.size)
+        .setTotalBytes(spec.size);
+
+      var threshold = this.getChunkThreshold();
+      if (threshold && (file.getTotalBytes() > threshold)) {
+        // This is a large file, so we'll go through allocation so we can
+        // pick up support for resume and chunking.
+        this._allocateFile(file);
+      } else {
+        // If this file is smaller than the chunk threshold, skip the round
+        // trip for allocation and just upload it directly.
+        this._sendDataRequest(file);
+      }
+    },
+
+    _allocateFile: function(file) {
+      file
+        .setStatus('allocate')
+        .update();
+
+      var alloc_uri = this._getUploadURI(file)
+        .setQueryParam('allocate', 1);
+
+      new JX.Workflow(alloc_uri)
+        .setHandler(JX.bind(this, this._didAllocateFile, file))
+        .start();
+    },
+
+    _getUploadURI: function(file) {
+      var uri = JX.$U(this.getURI())
+        .setQueryParam('name', file.getName())
+        .setQueryParam('length', file.getTotalBytes());
+
+      if (this.getViewPolicy()) {
+        uri.setQueryParam('viewPolicy', this.getViewPolicy());
+      }
+
+      if (file.getAllocatedPHID()) {
+        uri.setQueryParam('phid', file.getAllocatedPHID());
+      }
+
+      return uri;
+    },
+
+    _didAllocateFile: function(file, r) {
+      var phid = r.phid;
+      var upload = r.upload;
+
+      if (!upload) {
+        if (phid) {
+          this._completeUpload(file, r);
+        } else {
+          this._failUpload(file, r);
+        }
+        return;
+      } else {
+        if (phid) {
+          // Start or resume a chunked upload.
+          file.setAllocatedPHID(phid);
+          this._loadChunks(file);
+        } else {
+          // Proceed with non-chunked upload.
+          this._sendDataRequest(file);
+        }
+      }
+    },
+
+    _loadChunks: function(file) {
+      file
+        .setStatus('chunks')
+        .update();
+
+      var chunks_uri = this._getUploadURI(file)
+        .setQueryParam('querychunks', 1);
+
+      new JX.Workflow(chunks_uri)
+        .setHandler(JX.bind(this, this._didLoadChunks, file))
+        .start();
+    },
+
+    _didLoadChunks: function(file, r) {
+      file.setChunks(r);
+      this._uploadNextChunk(file);
+    },
+
+    _uploadNextChunk: function(file) {
+      var chunks = file.getChunks();
+      var chunk;
+      for (var ii = 0; ii < chunks.length; ii++) {
+        chunk = chunks[ii];
+        if (!chunk.complete) {
+          this._uploadChunk(file, chunk);
+          break;
+        }
+      }
+    },
+
+    _uploadChunk: function(file, chunk, callback) {
+      file
+        .setStatus('upload')
+        .update();
+
+      var chunkup_uri = this._getUploadURI(file)
+        .setQueryParam('uploadchunk', 1)
+        .setQueryParam('__upload__', 1)
+        .setQueryParam('byteStart', chunk.byteStart)
+        .toString();
+
+      var callback = JX.bind(this, this._didUploadChunk, file, chunk);
+
+      var req = new JX.Request(chunkup_uri, callback);
+
+      var seen_bytes = 0;
+      var onprogress = JX.bind(this, function(progress) {
+        file
+          .addUploadedBytes(progress.loaded - seen_bytes)
+          .update();
+
+        seen_bytes = progress.loaded;
+        this.invoke('progress', file);
+      });
+
+      req.listen('error', JX.bind(this, this._onUploadError, req, file));
+      req.listen('uploadprogress', onprogress);
+
+      var blob = file.getRawFileObject().slice(chunk.byteStart, chunk.byteEnd);
+
+      req
+        .setRawData(blob)
+        .send();
+    },
+
+    _didUploadChunk: function(file, chunk, r) {
+      file.didCompleteChunk(chunk);
+
+      if (r.complete) {
+        this._completeUpload(file, r);
+      } else {
+        this._uploadNextChunk(file);
+      }
+    },
+
+    _sendDataRequest: function(file) {
+      file
         .setStatus('uploading')
         .update();
 
       this.invoke('willUpload', file);
 
-      var up_uri = JX.$U(this.getURI())
-        .setQueryParam('name', file.getName())
-        .setQueryParam('__upload__', 1);
-
-      if (this.getViewPolicy()) {
-        up_uri.setQueryParam('viewPolicy', this.getViewPolicy());
-      }
-
-      up_uri = up_uri.toString();
+      var up_uri = this._getUploadURI(file)
+        .setQueryParam('__upload__', 1)
+        .toString();
 
       var onupload = JX.bind(this, function(r) {
         if (r.error) {
-          file
-            .setStatus('error')
-            .setError(r.error)
-            .update();
-
-          this.invoke('didError', file);
+          this._failUpload(file, r);
         } else {
-          file
-            .setID(r.id)
-            .setPHID(r.phid)
-            .setURI(r.uri)
-            .setMarkup(r.html)
-            .setStatus('done')
-            .update();
-
-          this.invoke('didUpload', file);
+          this._completeUpload(file, r);
         }
       });
 
       var req = new JX.Request(up_uri, onupload);
-
-      var onerror = JX.bind(this, function(error) {
-        file.setStatus('error');
-
-        if (error) {
-          file.setError(error.code + ': ' + error.info);
-        } else {
-          var xhr = req.getTransport();
-          if (xhr.responseText) {
-            file.setError('Server responded: ' + xhr.responseText);
-          }
-        }
-
-        file.update();
-        this.invoke('didError', file);
-      });
 
       var onprogress = JX.bind(this, function(progress) {
         file
@@ -236,17 +382,56 @@ JX.install('PhabricatorDragAndDropFileUpload', {
         this.invoke('progress', file);
       });
 
-      req.listen('error', onerror);
+      req.listen('error', JX.bind(this, this._onUploadError, req, file));
       req.listen('uploadprogress', onprogress);
 
       req
-        .setRawData(spec)
+        .setRawData(file.getRawFileObject())
         .send();
+    },
+
+    _completeUpload: function(file, r) {
+      file
+        .setID(r.id)
+        .setPHID(r.phid)
+        .setURI(r.uri)
+        .setMarkup(r.html)
+        .setStatus('done')
+        .update();
+
+      this.invoke('didUpload', file);
+    },
+
+    _failUpload: function(file, r) {
+      file
+        .setStatus('error')
+        .setError(r.error)
+        .update();
+
+      this.invoke('didError', file);
+    },
+
+    _onUploadError: function(req, file, error) {
+      file.setStatus('error');
+
+      if (error) {
+        file.setError(error.code + ': ' + error.info);
+      } else {
+        var xhr = req.getTransport();
+        if (xhr.responseText) {
+          file.setError('Server responded: ' + xhr.responseText);
+        }
+      }
+
+      file.update();
+      this.invoke('didError', file);
     }
+
   },
   properties: {
-    URI : null,
-    activatedClass : null,
-    viewPolicy : null
+    URI: null,
+    activatedClass: null,
+    viewPolicy: null,
+    chunkThreshold: null
   }
 });

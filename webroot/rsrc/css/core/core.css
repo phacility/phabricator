@@ -2,24 +2,6 @@
  * @provides phabricator-core-css
  */
 
-body {
-  /* Always show the vertical scrollbar so that going from a page without a
-     scrollbar to a page with a scrollbar doesn't make content jump a few
-     pixels left when the viewport narrows. */
-  overflow-y: scroll;
-  /* reset behavior in ie7, as it will add an extra scrollbar regardless
-     selector * targets ie6 and ie7 only */
-  *overflow-y: auto;
-}
-
-.device-phone {
-  /* By default, the iPhone zooms all text on the page by some percentage when
-     you rotate from portrait mode to landscape mode. Disable this, since it
-     breaks lots of things and prevents you from using landscape to see more
-     columns in source code views. */
-  -webkit-text-size-adjust: none;
-}
-
 body, div, dl, dt, dd, ul, ol, li,
 h1, h2, h3, h4, h5, h6,
 pre, form, fieldset,
@@ -61,11 +43,21 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 body {
-  font: 13px/1.231 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font: {$basefont};
   direction: ltr;
   text-align: left;
   unicode-bidi: embed;
-  background: #ebecee;
+  background: {$page.background.light};
+
+  /* By default, the iPhone zooms all text on the page by some percentage when
+     you rotate from portrait mode to landscape mode. Disable this, since it
+     breaks lots of things and prevents you from using landscape to see more
+     columns in source code views. */
+  -webkit-text-size-adjust: none;
+
+  /* Prevent content from resizing abruptly when shifting between scrollable
+     and unscrollable pages. */
+  overflow-y: scroll;
 }
 
 textarea {
@@ -88,7 +80,7 @@ h2 {
 a {
   -moz-outline-style: none;
   text-decoration: none;
-  color: #18559D;
+  color: {$anchor};
   cursor: pointer;
 }
 
@@ -102,13 +94,18 @@ img {
 
 .busy {
   position: fixed;
-  bottom: 16px;
-  right: 16px;
-  width: 44px;
-  height: 44px;
-  border-radius: 5px;
-  opacity: 0.4;
-  background: #000 url(/rsrc/image/loading/compass_24.gif) center no-repeat;
+  bottom: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+}
+
+.with-durable-column .busy {
+  right: 308px;
+}
+
+.busy .phui-icon-view {
+  font-size: 32px;
 }
 
 .grouped:after {

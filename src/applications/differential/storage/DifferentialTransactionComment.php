@@ -12,8 +12,21 @@ final class DifferentialTransactionComment
   protected $hasReplies = 0;
   protected $replyToCommentPHID;
 
+  private $replyToComment = self::ATTACHABLE;
+  private $isHidden = self::ATTACHABLE;
+
   public function getApplicationTransactionObject() {
     return new DifferentialTransaction();
+  }
+
+  public function attachReplyToComment(
+    DifferentialTransactionComment $comment = null) {
+    $this->replyToComment = $comment;
+    return $this;
+  }
+
+  public function getReplyToComment() {
+    return $this->assertAttached($this->replyToComment);
   }
 
   protected function getConfiguration() {
@@ -85,6 +98,15 @@ final class DifferentialTransactionComment
     }
 
     return $inline_groups;
+  }
+
+  public function getIsHidden() {
+    return $this->assertAttached($this->isHidden);
+  }
+
+  public function attachIsHidden($hidden) {
+    $this->isHidden = $hidden;
+    return $this;
   }
 
 }

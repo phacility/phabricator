@@ -14,12 +14,12 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
     return pht('Accounts and Billing');
   }
 
-  public function getIconName() {
-    return 'phortune';
+  public function getFontIcon() {
+    return 'fa-diamond';
   }
 
   public function getTitleGlyph() {
-    return "\xE2\x9C\x98";
+    return "\xE2\x97\x87";
   }
 
   public function getApplicationGroup() {
@@ -41,6 +41,16 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
           ),
           'order/(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhortuneCartListController',
+          'subscription/' => array(
+            '(?:query/(?P<queryKey>[^/]+)/)?'
+              => 'PhortuneSubscriptionListController',
+            'view/(?P<id>\d+)/'
+              => 'PhortuneSubscriptionViewController',
+            'edit/(?P<id>\d+)/'
+              => 'PhortuneSubscriptionEditController',
+            'order/(?P<subscriptionID>\d+)/'
+              => 'PhortuneCartListController',
+          ),
           'charge/(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhortuneChargeListController',
         ),
@@ -53,7 +63,6 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
           'checkout/' => 'PhortuneCartCheckoutController',
           '(?P<action>cancel|refund)/' => 'PhortuneCartCancelController',
           'update/' => 'PhortuneCartUpdateController',
-          'accept/' => 'PhortuneCartAcceptController',
         ),
         'account/' => array(
           '' => 'PhortuneAccountListController',
@@ -73,8 +82,27 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
         'merchant/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhortuneMerchantListController',
           'edit/(?:(?P<id>\d+)/)?' => 'PhortuneMerchantEditController',
-          'orders/(?P<merchantID>\d+)/(?:query/(?P<querKey>[^/]+)/)?'
+          'orders/(?P<merchantID>\d+)/(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhortuneCartListController',
+          '(?P<merchantID>\d+)/' => array(
+            'cart/(?P<id>\d+)/' => array(
+              '' => 'PhortuneCartViewController',
+              '(?P<action>cancel|refund)/' => 'PhortuneCartCancelController',
+              'update/' => 'PhortuneCartUpdateController',
+              'accept/' => 'PhortuneCartAcceptController',
+            ),
+            'subscription/' => array(
+              '(?:query/(?P<queryKey>[^/]+)/)?'
+                => 'PhortuneSubscriptionListController',
+              'view/(?P<id>\d+)/'
+                => 'PhortuneSubscriptionViewController',
+              'order/(?P<subscriptionID>\d+)/'
+                => 'PhortuneCartListController',
+            ),
+            'invoice/' => array(
+              'new/' => 'PhortuneMerchantInvoiceCreateController',
+            ),
+          ),
           '(?P<id>\d+)/' => 'PhortuneMerchantViewController',
         ),
       ),

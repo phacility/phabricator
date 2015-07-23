@@ -19,6 +19,14 @@ final class PhabricatorConduitCertificateSettingsPanel
     return pht('Authentication');
   }
 
+  public function isEnabled() {
+    if ($this->getUser()->getIsMailingList()) {
+      return false;
+    }
+
+    return true;
+  }
+
   public function processRequest(AphrontRequest $request) {
     $user = $this->getUser();
     $viewer = $request->getUser();
@@ -61,13 +69,14 @@ final class PhabricatorConduitCertificateSettingsPanel
     }
 
     if ($request->getStr('regenerated')) {
-      $notice = new AphrontErrorView();
-      $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+      $notice = new PHUIInfoView();
+      $notice->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
       $notice->setTitle(pht('Certificate Regenerated'));
       $notice->appendChild(phutil_tag(
         'p',
         array(),
-        pht('Your old certificate has been destroyed and you have been issued '.
+        pht(
+          'Your old certificate has been destroyed and you have been issued '.
         'a new certificate. Sessions established under the old certificate '.
         'are no longer valid.')));
       $notice = $notice->render();
@@ -83,7 +92,8 @@ final class PhabricatorConduitCertificateSettingsPanel
       ->appendChild(phutil_tag(
         'p',
         array('class' => 'aphront-form-instructions'),
-        pht('This certificate allows you to authenticate over Conduit, '.
+        pht(
+          'This certificate allows you to authenticate over Conduit, '.
           'the Phabricator API. Normally, you just run %s to install it.',
           phutil_tag('tt', array(), 'arc install-certificate'))))
       ->appendChild(
@@ -98,7 +108,8 @@ final class PhabricatorConduitCertificateSettingsPanel
       ->setHeaderText(pht('Arcanist Certificate'))
       ->setForm($cert_form);
 
-    $regen_instruction = pht('You can regenerate this certificate, which '.
+    $regen_instruction = pht(
+      'You can regenerate this certificate, which '.
       'will invalidate the old certificate and create a new one.');
 
     $regen_form = new AphrontFormView();

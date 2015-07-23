@@ -79,8 +79,8 @@ final class PhabricatorDaemonLogViewController
       ->setUser($user)
       ->setEvents($events);
 
-    $event_panel = new AphrontPanelView();
-    $event_panel->setNoBackground();
+    $event_panel = new PHUIObjectBoxView();
+    $event_panel->setHeaderText(pht('Events'));
     $event_panel->appendChild($event_view);
 
     $object_box = id(new PHUIObjectBoxView())
@@ -95,7 +95,6 @@ final class PhabricatorDaemonLogViewController
       ),
       array(
         'title' => pht('Daemon Log'),
-        'device' => false,
       ));
   }
 
@@ -112,7 +111,7 @@ final class PhabricatorDaemonLogViewController
 
     $unknown_time = PhabricatorDaemonLogQuery::getTimeUntilUnknown();
     $dead_time = PhabricatorDaemonLogQuery::getTimeUntilDead();
-    $wait_time = PhutilDaemonOverseer::RESTART_WAIT;
+    $wait_time = PhutilDaemonHandle::getWaitBeforeRestart();
 
     $details = null;
     $status = $daemon->getStatus();
@@ -149,12 +148,10 @@ final class PhabricatorDaemonLogViewController
           phutil_format_relative_time($wait_time));
         break;
       case PhabricatorDaemonLog::STATUS_EXITING:
-        $details = pht(
-          'This daemon is shutting down gracefully.');
+        $details = pht('This daemon is shutting down gracefully.');
         break;
       case PhabricatorDaemonLog::STATUS_EXITED:
-        $details = pht(
-          'This daemon exited normally and is no longer running.');
+        $details = pht('This daemon exited normally and is no longer running.');
         break;
     }
 

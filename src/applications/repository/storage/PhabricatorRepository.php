@@ -11,7 +11,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     PhabricatorFlaggableInterface,
     PhabricatorMarkupInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorProjectInterface {
+    PhabricatorProjectInterface,
+    PhabricatorSpacesInterface {
 
   /**
    * Shortest hash we'll recognize in raw "a829f32" form.
@@ -54,6 +55,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   protected $details = array();
   protected $credentialPHID;
   protected $almanacServicePHID;
+  protected $spacePHID;
 
   private $commitCount = self::ATTACHABLE;
   private $mostRecentCommit = self::ATTACHABLE;
@@ -69,10 +71,17 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $edit_policy = $app->getPolicy(DiffusionDefaultEditCapability::CAPABILITY);
     $push_policy = $app->getPolicy(DiffusionDefaultPushCapability::CAPABILITY);
 
-    return id(new PhabricatorRepository())
+    $repository = id(new PhabricatorRepository())
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
-      ->setPushPolicy($push_policy);
+      ->setPushPolicy($push_policy)
+      ->setSpacePHID($actor->getDefaultSpacePHID());
+
+    // Put the repository in "Importing" mode until we finish
+    // parsing it.
+    $repository->setDetail('importing', true);
+
+    return $repository;
   }
 
   protected function getConfiguration() {
@@ -129,6 +138,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       'isActive'    => $this->isTracked(),
       'isHosted'    => $this->isHosted(),
       'isImporting' => $this->isImporting(),
+      'encoding'    => $this->getDetail('encoding'),
+      'staging' => array(
+        'supported' => $this->supportsStaging(),
+        'prefix' => 'phabricator',
+        'uri' => $this->getStagingURI(),
+      ),
     );
   }
 
@@ -214,7 +229,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   public function getSubversionPathURI($path = null, $commit = null) {
     $vcs = $this->getVersionControlSystem();
     if ($vcs != PhabricatorRepositoryType::REPOSITORY_TYPE_SVN) {
-      throw new Exception('Not a subversion repository!');
+      throw new Exception(pht('Not a subversion repository!'));
     }
 
     if ($this->isHosted()) {
@@ -410,7 +425,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $env['HGPLAIN'] = 1;
         break;
       default:
-        throw new Exception('Unrecognized version control system.');
+        throw new Exception(pht('Unrecognized version control system.'));
     }
 
     return $env;
@@ -441,7 +456,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           // command-line flag instead of an environmental variable.
           break;
         default:
-          throw new Exception('Unrecognized version control system.');
+          throw new Exception(pht('Unrecognized version control system.'));
       }
     }
 
@@ -495,7 +510,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         }
         break;
       default:
-        throw new Exception('Unrecognized version control system.');
+        throw new Exception(pht('Unrecognized version control system.'));
     }
 
     array_unshift($args, $pattern);
@@ -518,7 +533,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $pattern = "hg {$pattern}";
         break;
       default:
-        throw new Exception('Unrecognized version control system.');
+        throw new Exception(pht('Unrecognized version control system.'));
     }
 
     array_unshift($args, $pattern);
@@ -538,9 +553,22 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     // trusted, Mercurial prints out a warning to stdout, twice, after Feb 2011.
     //
     // http://selenic.com/pipermail/mercurial-devel/2011-February/028541.html
+    //
+    // After Jan 2015, it may also fail to write to a revision branch cache.
+
+    $ignore = array(
+      'ignoring untrusted configuration option',
+      "couldn't write revision branch cache:",
+    );
+
+    foreach ($ignore as $key => $pattern) {
+      $ignore[$key] = preg_quote($pattern, '/');
+    }
+
+    $ignore = '('.implode('|', $ignore).')';
 
     $lines = preg_split('/(?<=\n)/', $stdout);
-    $regex = '/ignoring untrusted configuration option .*\n$/';
+    $regex = '/'.$ignore.'.*\n$/';
 
     foreach ($lines as $key => $line) {
       $lines[$key] = preg_replace($regex, '', $line);
@@ -573,7 +601,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           $uri);
         break;
       default:
-        throw new Exception('Unrecognized version control system.');
+        throw new Exception(pht('Unrecognized version control system.'));
     }
 
     return $normalized_uri->getNormalizedPath();
@@ -676,6 +704,25 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
 
+  /**
+   * Should this repository publish feed, notifications, audits, and email?
+   *
+   * We do not publish information about repositories during initial import,
+   * or if the repository has been set not to publish.
+   */
+  public function shouldPublish() {
+    if ($this->isImporting()) {
+      return false;
+    }
+
+    if ($this->getDetail('disable-herald')) {
+      return false;
+    }
+
+    return true;
+  }
+
+
 /* -(  Autoclose  )---------------------------------------------------------- */
 
 
@@ -761,7 +808,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         break;
       default:
-        throw new Exception('Unrecognized version control system.');
+        throw new Exception(pht('Unrecognized version control system.'));
     }
 
     $closeable_flag = PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE;
@@ -917,7 +964,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return $uri;
     }
 
-    throw new Exception("Remote URI '{$raw_uri}' could not be parsed!");
+    throw new Exception(pht("Remote URI '%s' could not be parsed!", $raw_uri));
   }
 
 
@@ -1004,6 +1051,11 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $ssh_user = PhabricatorEnv::getEnvConfig('diffusion.ssh-user');
     if ($ssh_user) {
       $uri->setUser($ssh_user);
+    }
+
+    $ssh_host = PhabricatorEnv::getEnvConfig('diffusion.ssh-host');
+    if (strlen($ssh_host)) {
+      $uri->setDomain($ssh_host);
     }
 
     $uri->setPort(PhabricatorEnv::getEnvConfig('diffusion.ssh-port'));
@@ -1117,12 +1169,11 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $path->delete();
       }
 
-      $projects = id(new PhabricatorRepositoryArcanistProject())
-        ->loadAllWhere('repositoryID = %d', $this->getID());
-      foreach ($projects as $project) {
-        // note each project deletes its PhabricatorRepositorySymbols
-        $project->delete();
-      }
+      queryfx(
+        $this->establishConnection('w'),
+        'DELETE FROM %T WHERE repositoryPHID = %s',
+        id(new PhabricatorRepositorySymbol())->getTableName(),
+        $this->getPHID());
 
       $commits = id(new PhabricatorRepositoryCommit())
         ->loadAllWhere('repositoryID = %d', $this->getID());
@@ -1409,8 +1460,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   public static function assertValidRemoteURI($uri) {
     if (trim($uri) != $uri) {
       throw new Exception(
-        pht(
-          'The remote URI has leading or trailing whitespace.'));
+        pht('The remote URI has leading or trailing whitespace.'));
     }
 
     $protocol = self::getRemoteURIProtocol($uri);
@@ -1424,8 +1474,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           pht(
             "The remote URI is not formatted correctly. Remote URIs ".
             "with an explicit protocol should be in the form ".
-            "'proto://domain/path', not 'proto://domain:/path'. ".
-            "The ':/path' syntax is only valid in SCP-style URIs."));
+            "'%s', not '%s'. The '%s' syntax is only valid in SCP-style URIs.",
+            'proto://domain/path',
+            'proto://domain:/path',
+            ':/path'));
       }
     }
 
@@ -1445,8 +1497,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         throw new Exception(
           pht(
             "The URI protocol is unrecognized. It should begin ".
-            "'ssh://', 'http://', 'https://', 'git://', 'svn://', ".
-            "'svn+ssh://', or be in the form 'git@domain.com:path'."));
+            "'%s', '%s', '%s', '%s', '%s', '%s', or be in the form '%s'.",
+            'ssh://',
+            'http://',
+            'https://',
+            'git://',
+            'svn://',
+            'svn+ssh://',
+            'git@domain.com:path'));
     }
 
     return true;
@@ -1513,6 +1571,247 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     return $smart_wait;
+  }
+
+
+  /**
+   * Retrieve the sevice URI for the device hosting this repository.
+   *
+   * See @{method:newConduitClient} for a general discussion of interacting
+   * with repository services. This method provides lower-level resolution of
+   * services, returning raw URIs.
+   *
+   * @param PhabricatorUser Viewing user.
+   * @param bool `true` to throw if a remote URI would be returned.
+   * @param list<string> List of allowable protocols.
+   * @return string|null URI, or `null` for local repositories.
+   */
+  public function getAlmanacServiceURI(
+    PhabricatorUser $viewer,
+    $never_proxy,
+    array $protocols) {
+
+    $service_phid = $this->getAlmanacServicePHID();
+    if (!$service_phid) {
+      // No service, so this is a local repository.
+      return null;
+    }
+
+    $service = id(new AlmanacServiceQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($service_phid))
+      ->needBindings(true)
+      ->executeOne();
+    if (!$service) {
+      throw new Exception(
+        pht(
+          'The Almanac service for this repository is invalid or could not '.
+          'be loaded.'));
+    }
+
+    $service_type = $service->getServiceType();
+    if (!($service_type instanceof AlmanacClusterRepositoryServiceType)) {
+      throw new Exception(
+        pht(
+          'The Almanac service for this repository does not have the correct '.
+          'service type.'));
+    }
+
+    $bindings = $service->getBindings();
+    if (!$bindings) {
+      throw new Exception(
+        pht(
+          'The Almanac service for this repository is not bound to any '.
+          'interfaces.'));
+    }
+
+    $local_device = AlmanacKeys::getDeviceID();
+
+    if ($never_proxy && !$local_device) {
+      throw new Exception(
+        pht(
+          'Unable to handle proxied service request. This device is not '.
+          'registered, so it can not identify local services. Register '.
+          'this device before sending requests here.'));
+    }
+
+    $protocol_map = array_fuse($protocols);
+
+    $uris = array();
+    foreach ($bindings as $binding) {
+      $iface = $binding->getInterface();
+
+      // If we're never proxying this and it's locally satisfiable, return
+      // `null` to tell the caller to handle it locally. If we're allowed to
+      // proxy, we skip this check and may proxy the request to ourselves.
+      // (That proxied request will end up here with proxying forbidden,
+      // return `null`, and then the request will actually run.)
+
+      if ($local_device && $never_proxy) {
+        if ($iface->getDevice()->getName() == $local_device) {
+          return null;
+        }
+      }
+
+      $protocol = $binding->getAlmanacPropertyValue('protocol');
+      if ($protocol === null) {
+        $protocol = 'https';
+      }
+
+      if (empty($protocol_map[$protocol])) {
+        continue;
+      }
+
+      $uris[] = $protocol.'://'.$iface->renderDisplayAddress().'/';
+    }
+
+    if (!$uris) {
+      throw new Exception(
+        pht(
+          'The Almanac service for this repository is not bound to any '.
+          'interfaces which support the required protocols (%s).',
+          implode(', ', $protocols)));
+    }
+
+    if ($never_proxy) {
+      throw new Exception(
+        pht(
+          'Refusing to proxy a repository request from a cluster host. '.
+          'Cluster hosts must correctly route their intracluster requests.'));
+    }
+
+    shuffle($uris);
+    return head($uris);
+  }
+
+
+  /**
+   * Build a new Conduit client in order to make a service call to this
+   * repository.
+   *
+   * If the repository is hosted locally, this method may return `null`. The
+   * caller should use `ConduitCall` or other local logic to complete the
+   * request.
+   *
+   * By default, we will return a @{class:ConduitClient} for any repository with
+   * a service, even if that service is on the current device.
+   *
+   * We do this because this configuration does not make very much sense in a
+   * production context, but is very common in a test/development context
+   * (where the developer's machine is both the web host and the repository
+   * service). By proxying in development, we get more consistent behavior
+   * between development and production, and don't have a major untested
+   * codepath.
+   *
+   * The `$never_proxy` parameter can be used to prevent this local proxying.
+   * If the flag is passed:
+   *
+   *   - The method will return `null` (implying a local service call)
+   *     if the repository service is hosted on the current device.
+   *   - The method will throw if it would need to return a client.
+   *
+   * This is used to prevent loops in Conduit: the first request will proxy,
+   * even in development, but the second request will be identified as a
+   * cluster request and forced not to proxy.
+   *
+   * For lower-level service resolution, see @{method:getAlmanacServiceURI}.
+   *
+   * @param PhabricatorUser Viewing user.
+   * @param bool `true` to throw if a client would be returned.
+   * @return ConduitClient|null Client, or `null` for local repositories.
+   */
+  public function newConduitClient(
+    PhabricatorUser $viewer,
+    $never_proxy = false) {
+
+    $uri = $this->getAlmanacServiceURI(
+      $viewer,
+      $never_proxy,
+      array(
+        'http',
+        'https',
+      ));
+    if ($uri === null) {
+      return null;
+    }
+
+    $domain = id(new PhutilURI(PhabricatorEnv::getURI('/')))->getDomain();
+
+    $client = id(new ConduitClient($uri))
+      ->setHost($domain);
+
+    if ($viewer->isOmnipotent()) {
+      // If the caller is the omnipotent user (normally, a daemon), we will
+      // sign the request with this host's asymmetric keypair.
+
+      $public_path = AlmanacKeys::getKeyPath('device.pub');
+      try {
+        $public_key = Filesystem::readFile($public_path);
+      } catch (Exception $ex) {
+        throw new PhutilAggregateException(
+          pht(
+            'Unable to read device public key while attempting to make '.
+            'authenticated method call within the Phabricator cluster. '.
+            'Use `%s` to register keys for this device. Exception: %s',
+            'bin/almanac register',
+            $ex->getMessage()),
+          array($ex));
+      }
+
+      $private_path = AlmanacKeys::getKeyPath('device.key');
+      try {
+        $private_key = Filesystem::readFile($private_path);
+        $private_key = new PhutilOpaqueEnvelope($private_key);
+      } catch (Exception $ex) {
+        throw new PhutilAggregateException(
+          pht(
+            'Unable to read device private key while attempting to make '.
+            'authenticated method call within the Phabricator cluster. '.
+            'Use `%s` to register keys for this device. Exception: %s',
+            'bin/almanac register',
+            $ex->getMessage()),
+          array($ex));
+      }
+
+      $client->setSigningKeys($public_key, $private_key);
+    } else {
+      // If the caller is a normal user, we generate or retrieve a cluster
+      // API token.
+
+      $token = PhabricatorConduitToken::loadClusterTokenForUser($viewer);
+      if ($token) {
+        $client->setConduitToken($token->getToken());
+      }
+    }
+
+    return $client;
+  }
+
+
+/* -(  Symbols  )-------------------------------------------------------------*/
+
+  public function getSymbolSources() {
+    return $this->getDetail('symbol-sources', array());
+  }
+
+  public function getSymbolLanguages() {
+    return $this->getDetail('symbol-languages', array());
+  }
+
+
+/* -(  Staging  )-------------------------------------------------------------*/
+
+
+  public function supportsStaging() {
+    return $this->isGit();
+  }
+
+
+  public function getStagingURI() {
+    if (!$this->supportsStaging()) {
+      return null;
+    }
+    return $this->getDetail('staging-uri', null);
   }
 
 
@@ -1607,12 +1906,39 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
+
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
 
     $this->openTransaction();
-    $this->delete();
+
+      $this->delete();
+
+      $books = id(new DivinerBookQuery())
+        ->setViewer($engine->getViewer())
+        ->withRepositoryPHIDs(array($this->getPHID()))
+        ->execute();
+      foreach ($books as $book) {
+        $engine->destroyObject($book);
+      }
+
+      $atoms = id(new DivinerAtomQuery())
+        ->setViewer($engine->getViewer())
+        ->withRepositoryPHIDs(array($this->getPHID()))
+        ->execute();
+      foreach ($atoms as $atom) {
+        $engine->destroyObject($atom);
+      }
+
     $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorSpacesInterface  )----------------------------------------- */
+
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
   }
 
 }

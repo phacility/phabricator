@@ -28,6 +28,7 @@ final class PhabricatorDashboardViewController
 
     $title = $dashboard->getName();
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb(pht('Dashboard %d', $dashboard->getID()));
 
     if ($dashboard->getPanelPHIDs()) {
@@ -66,8 +67,8 @@ final class PhabricatorDashboardViewController
     $id = $this->id;
     $manage_uri = $this->getApplicationURI("manage/{$id}/");
 
-    return id(new AphrontErrorView())
-      ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
+    return id(new PHUIInfoView())
+      ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
       ->appendChild(
         pht('This dashboard has no panels '.
           'yet. Use %s to add panels.',

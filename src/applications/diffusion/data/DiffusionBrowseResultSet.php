@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionBrowseResultSet {
+final class DiffusionBrowseResultSet extends Phobject {
 
   const REASON_IS_FILE              = 'is-file';
   const REASON_IS_DELETED           = 'is-deleted';

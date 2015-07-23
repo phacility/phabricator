@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @task action Handling Action Requests
+ */
 abstract class NuanceSourceDefinition extends Phobject {
 
   private $actor;
@@ -9,13 +12,15 @@ abstract class NuanceSourceDefinition extends Phobject {
     $this->actor = $actor;
     return $this;
   }
+
   public function getActor() {
     return $this->actor;
   }
+
   public function requireActor() {
     $actor = $this->getActor();
     if (!$actor) {
-      throw new Exception('You must "setActor()" first!');
+      throw new PhutilInvalidStateException('setActor');
     }
     return $actor;
   }
@@ -25,28 +30,17 @@ abstract class NuanceSourceDefinition extends Phobject {
     $this->sourceObject = $source;
     return $this;
   }
+
   public function getSourceObject() {
     return $this->sourceObject;
   }
+
   public function requireSourceObject() {
     $source = $this->getSourceObject();
     if (!$source) {
-      throw new Exception('You must "setSourceObject()" first!');
+      throw new PhutilInvalidStateException('setSourceObject');
     }
     return $source;
-  }
-
-  public static function getSelectOptions() {
-    $definitions = self::getAllDefinitions();
-
-    $options = array();
-    foreach ($definitions as $definition) {
-      $key = $definition->getSourceTypeConstant();
-      $name = $definition->getName();
-      $options[$key] = $name;
-    }
-
-    return $options;
   }
 
   /**
@@ -64,33 +58,22 @@ abstract class NuanceSourceDefinition extends Phobject {
   }
 
   public static function getAllDefinitions() {
-    static $definitions;
-
-    if ($definitions === null) {
-      $objects = id(new PhutilSymbolLoader())
-        ->setAncestorClass(__CLASS__)
-        ->loadObjects();
-      foreach ($objects as $definition) {
-        $key = $definition->getSourceTypeConstant();
-        $name = $definition->getName();
-        if (isset($definitions[$key])) {
-          $conflict = $definitions[$key];
-          throw new Exception(sprintf(
-            'Defintion %s conflicts with definition %s. This is a programming '.
-            'error.',
-            $conflict,
-            $name));
-        }
-      }
-      $definitions = $objects;
-    }
-    return $definitions;
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->setUniqueMethod('getSourceTypeConstant')
+      ->execute();
   }
 
   /**
    * A human readable string like "Twitter" or "Phabricator Form".
    */
   abstract public function getName();
+
+
+  /**
+   * Human readable description of this source, a sentence or two long.
+   */
+  abstract public function getSourceDescription();
 
   /**
    * This should be a any VARCHAR(32).
@@ -192,13 +175,7 @@ abstract class NuanceSourceDefinition extends Phobject {
         ->setLabel(pht('Name'))
         ->setName('name')
         ->setError($e_name)
-        ->setValue($source->getName()))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-        ->setLabel(pht('Type'))
-        ->setName('type')
-        ->setOptions(self::getSelectOptions())
-        ->setValue($source->getType()));
+        ->setValue($source->getName()));
 
     $form = $this->augmentEditForm($form, $ex);
 
@@ -259,4 +236,54 @@ abstract class NuanceSourceDefinition extends Phobject {
   abstract public function renderView();
 
   abstract public function renderListView();
+
+
+  protected function newItemFromProperties(
+    NuanceRequestor $requestor,
+    array $properties,
+    PhabricatorContentSource $content_source) {
+
+    // TODO: Should we have a tighter actor/viewer model? Requestors will
+    // often have no real user associated with them...
+    $actor = PhabricatorUser::getOmnipotentUser();
+
+    $source = $this->requireSourceObject();
+
+    $item = NuanceItem::initializeNewItem();
+
+    $xactions = array();
+
+    $xactions[] = id(new NuanceItemTransaction())
+      ->setTransactionType(NuanceItemTransaction::TYPE_SOURCE)
+      ->setNewValue($source->getPHID());
+
+    $xactions[] = id(new NuanceItemTransaction())
+      ->setTransactionType(NuanceItemTransaction::TYPE_REQUESTOR)
+      ->setNewValue($requestor->getPHID());
+
+    foreach ($properties as $key => $property) {
+      $xactions[] = id(new NuanceItemTransaction())
+        ->setTransactionType(NuanceItemTransaction::TYPE_PROPERTY)
+        ->setMetadataValue(NuanceItemTransaction::PROPERTY_KEY, $key)
+        ->setNewValue($property);
+    }
+
+    $editor = id(new NuanceItemEditor())
+      ->setActor($actor)
+      ->setActingAsPHID($requestor->getActingAsPHID())
+      ->setContentSource($content_source);
+
+    $editor->applyTransactions($item, $xactions);
+
+    return $item;
+  }
+
+
+/* -(  Handling Action Requests  )------------------------------------------- */
+
+
+  public function handleActionRequest(AphrontRequest $request) {
+    return new Aphront404Response();
+  }
+
 }

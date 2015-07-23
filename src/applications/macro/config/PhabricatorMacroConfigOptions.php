@@ -11,11 +11,16 @@ final class PhabricatorMacroConfigOptions
     return pht('Configure Macro.');
   }
 
+  public function getFontIcon() {
+    return 'fa-file-image-o';
+  }
+
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array(
-      $this->newOption('metamta.macro.reply-handler-domain', 'string', null)
-        ->setDescription(pht(
-          'As {{metamta.maniphest.reply-handler-domain}}, but affects Macro.')),
       $this->newOption('metamta.macro.subject-prefix', 'string', '[Macro]')
         ->setDescription(pht('Subject prefix for Macro email.')),
     );

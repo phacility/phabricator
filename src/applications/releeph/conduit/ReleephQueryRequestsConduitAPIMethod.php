@@ -8,23 +8,19 @@ final class ReleephQueryRequestsConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return
-      'Return information about all Releeph requests linked to the given ids.';
+    return pht(
+      'Return information about all Releeph requests linked to the given ids.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'revisionPHIDs'         => 'optional list<phid>',
       'requestedCommitPHIDs'  => 'optional list<phid>',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict<string, wild>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $conduit_request) {

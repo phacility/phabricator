@@ -30,14 +30,14 @@ final class PholioTransactionView
 
     switch ($u->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
-      case PholioTransactionType::TYPE_INLINE:
+      case PholioTransaction::TYPE_INLINE:
         break;
       default:
         return false;
     }
 
     switch ($v->getTransactionType()) {
-      case PholioTransactionType::TYPE_INLINE:
+      case PholioTransaction::TYPE_INLINE:
         return true;
     }
 
@@ -50,7 +50,7 @@ final class PholioTransactionView
     $out = array();
 
     $group = $xaction->getTransactionGroup();
-    if ($xaction->getTransactionType() == PholioTransactionType::TYPE_INLINE) {
+    if ($xaction->getTransactionType() == PholioTransaction::TYPE_INLINE) {
       array_unshift($group, $xaction);
     } else {
       $out[] = parent::renderTransactionContent($xaction);
@@ -63,11 +63,11 @@ final class PholioTransactionView
     $inlines = array();
     foreach ($group as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case PholioTransactionType::TYPE_INLINE:
+        case PholioTransaction::TYPE_INLINE:
           $inlines[] = $xaction;
           break;
         default:
-          throw new Exception('Unknown grouped transaction type!');
+          throw new Exception(pht('Unknown grouped transaction type!'));
       }
     }
 
@@ -101,12 +101,12 @@ final class PholioTransactionView
 
     $image = idx($images, $comment->getImageID());
     if (!$image) {
-      throw new Exception('No image attached!');
+      throw new Exception(pht('No image attached!'));
     }
 
     $file = $image->getFile();
     if (!$file->isViewableImage()) {
-      throw new Exception('File is not viewable.');
+      throw new Exception(pht('File is not viewable.'));
     }
 
     $image_uri = $file->getBestURI();

@@ -10,7 +10,7 @@ final class PhabricatorRepositoryQuery
   private $uuids;
   private $nameContains;
   private $remoteURIs;
-  private $anyProjectPHIDs;
+  private $datasourceQuery;
 
   private $numericIdentifiers;
   private $callsignIdentifiers;
@@ -22,12 +22,6 @@ final class PhabricatorRepositoryQuery
   const STATUS_CLOSED = 'status-closed';
   const STATUS_ALL = 'status-all';
   private $status = self::STATUS_ALL;
-
-  const ORDER_CREATED = 'order-created';
-  const ORDER_COMMITTED = 'order-committed';
-  const ORDER_CALLSIGN = 'order-callsign';
-  const ORDER_NAME = 'order-name';
-  private $order = self::ORDER_CREATED;
 
   const HOSTED_PHABRICATOR = 'hosted-phab';
   const HOSTED_REMOTE = 'hosted-remote';
@@ -104,8 +98,8 @@ final class PhabricatorRepositoryQuery
     return $this;
   }
 
-  public function withAnyProjects(array $projects) {
-    $this->anyProjectPHIDs = $projects;
+  public function withDatasourceQuery($query) {
+    $this->datasourceQuery = $query;
     return $this;
   }
 
@@ -124,36 +118,45 @@ final class PhabricatorRepositoryQuery
     return $this;
   }
 
-  public function setOrder($order) {
-    $this->order = $order;
-    return $this;
+  public function getBuiltinOrders() {
+    return array(
+      'committed' => array(
+        'vector' => array('committed', 'id'),
+        'name' => pht('Most Recent Commit'),
+      ),
+      'name' => array(
+        'vector' => array('name', 'id'),
+        'name' => pht('Name'),
+      ),
+      'callsign' => array(
+        'vector' => array('callsign'),
+        'name' => pht('Callsign'),
+      ),
+      'size' => array(
+        'vector' => array('size', 'id'),
+        'name' => pht('Size'),
+      ),
+    ) + parent::getBuiltinOrders();
   }
 
   public function getIdentifierMap() {
     if ($this->identifierMap === null) {
-      throw new Exception(
-        'You must execute() the query before accessing the identifier map.');
+      throw new PhutilInvalidStateException('execute');
     }
     return $this->identifierMap;
   }
 
+  protected function willExecute() {
+    $this->identifierMap = array();
+  }
+
+  public function newResultObject() {
+    return new PhabricatorRepository();
+  }
+
   protected function loadPage() {
-    $table = new PhabricatorRepository();
-    $conn_r = $table->establishConnection('r');
-
-    if ($this->identifierMap === null) {
-      $this->identifierMap = array();
-    }
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T r %Q %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildJoinsClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
+    $table = $this->newResultObject();
+    $data = $this->loadStandardPageRows($table);
     $repositories = $table->loadAllFromArray($data);
 
     if ($this->needCommitCounts) {
@@ -226,7 +229,7 @@ final class PhabricatorRepositoryQuery
         case self::HOSTED_ALL:
           break;
         default:
-          throw new Exception("Uknown hosted failed '${hosted}'!");
+          throw new Exception(pht("Unknown hosted failed '%s'!", $hosted));
       }
     }
 
@@ -294,163 +297,150 @@ final class PhabricatorRepositoryQuery
     return $repositories;
   }
 
-  protected function getReversePaging() {
-    switch ($this->order) {
-      case self::ORDER_CALLSIGN:
-      case self::ORDER_NAME:
-        return true;
-    }
-    return false;
+  protected function getPrimaryTableAlias() {
+    return 'r';
   }
 
-  protected function getPagingColumn() {
-    $order = $this->order;
-    switch ($order) {
-      case self::ORDER_CREATED:
-        return 'r.id';
-      case self::ORDER_COMMITTED:
-        return 's.epoch';
-      case self::ORDER_CALLSIGN:
-        return 'r.callsign';
-      case self::ORDER_NAME:
-        return 'r.name';
-      default:
-        throw new Exception("Unknown order '{$order}!'");
-    }
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'committed' => array(
+        'table' => 's',
+        'column' => 'epoch',
+        'type' => 'int',
+        'null' => 'tail',
+      ),
+      'callsign' => array(
+        'table' => 'r',
+        'column' => 'callsign',
+        'type' => 'string',
+        'unique' => true,
+        'reverse' => true,
+      ),
+      'name' => array(
+        'table' => 'r',
+        'column' => 'name',
+        'type' => 'string',
+        'reverse' => true,
+      ),
+      'size' => array(
+        'table' => 's',
+        'column' => 'size',
+        'type' => 'int',
+        'null' => 'tail',
+      ),
+    );
   }
 
-  private function loadCursorObject($id) {
-    $query = id(new PhabricatorRepositoryQuery())
-      ->setViewer($this->getPagingViewer())
-      ->withIDs(array((int)$id));
+  protected function willExecuteCursorQuery(
+    PhabricatorCursorPagedPolicyAwareQuery $query) {
+    $vector = $this->getOrderVector();
 
-    if ($this->order == self::ORDER_COMMITTED) {
+    if ($vector->containsKey('committed')) {
       $query->needMostRecentCommits(true);
     }
 
-    $results = $query->execute();
-    return head($results);
+    if ($vector->containsKey('size')) {
+      $query->needCommitCounts(true);
+    }
   }
 
-  protected function buildPagingClause(AphrontDatabaseConnection $conn_r) {
-    $default = parent::buildPagingClause($conn_r);
+  protected function getPagingValueMap($cursor, array $keys) {
+    $repository = $this->loadCursorObject($cursor);
 
-    $before_id = $this->getBeforeID();
-    $after_id = $this->getAfterID();
-
-    if (!$before_id && !$after_id) {
-      return $default;
-    }
-
-    $order = $this->order;
-    if ($order == self::ORDER_CREATED) {
-      return $default;
-    }
-
-    if ($before_id) {
-      $cursor = $this->loadCursorObject($before_id);
-    } else {
-      $cursor = $this->loadCursorObject($after_id);
-    }
-
-    if (!$cursor) {
-      return null;
-    }
-
-    $id_column = array(
-      'name' => 'r.id',
-      'type' => 'int',
-      'value' => $cursor->getID(),
+    $map = array(
+      'id' => $repository->getID(),
+      'callsign' => $repository->getCallsign(),
+      'name' => $repository->getName(),
     );
 
-    $columns = array();
-    switch ($order) {
-      case self::ORDER_COMMITTED:
-        $commit = $cursor->getMostRecentCommit();
-        if (!$commit) {
-          return null;
-        }
-        $columns[] = array(
-          'name' => 's.epoch',
-          'type' => 'int',
-          'value' => $commit->getEpoch(),
-        );
-        $columns[] = $id_column;
-        break;
-      case self::ORDER_CALLSIGN:
-        $columns[] = array(
-          'name' => 'r.callsign',
-          'type' => 'string',
-          'value' => $cursor->getCallsign(),
-          'reverse' => true,
-        );
-        break;
-      case self::ORDER_NAME:
-        $columns[] = array(
-          'name' => 'r.name',
-          'type' => 'string',
-          'value' => $cursor->getName(),
-          'reverse' => true,
-        );
-        $columns[] = $id_column;
-        break;
-      default:
-        throw new Exception("Unknown order '{$order}'!");
+    foreach ($keys as $key) {
+      switch ($key) {
+        case 'committed':
+          $commit = $repository->getMostRecentCommit();
+          if ($commit) {
+            $map[$key] = $commit->getEpoch();
+          } else {
+            $map[$key] = null;
+          }
+          break;
+        case 'size':
+          $count = $repository->getCommitCount();
+          if ($count) {
+            $map[$key] = $count;
+          } else {
+            $map[$key] = null;
+          }
+          break;
+      }
     }
 
-    return $this->buildPagingClauseFromMultipleColumns(
-      $conn_r,
-      $columns,
-      array(
-        // TODO: Clean up the column ordering stuff and then make this
-        // depend on getReversePaging().
-        'reversed' => (bool)($before_id),
-      ));
+    return $map;
   }
 
-  private function buildJoinsClause(AphrontDatabaseConnection $conn_r) {
-    $joins = array();
+  protected function buildSelectClauseParts(AphrontDatabaseConnection $conn) {
+    $parts = parent::buildSelectClauseParts($conn);
 
-    $join_summary_table = $this->needCommitCounts ||
-                          $this->needMostRecentCommits ||
-                          ($this->order == self::ORDER_COMMITTED);
+    if ($this->shouldJoinSummaryTable()) {
+      $parts[] = 's.*';
+    }
 
-    if ($join_summary_table) {
+    return $parts;
+  }
+
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
+
+    if ($this->shouldJoinSummaryTable()) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'LEFT JOIN %T s ON r.id = s.repositoryID',
         PhabricatorRepository::TABLE_SUMMARY);
     }
 
-    if ($this->anyProjectPHIDs) {
-      $joins[] = qsprintf(
-        $conn_r,
-        'JOIN edge e ON e.src = r.phid');
-    }
-
-    return implode(' ', $joins);
+    return $joins;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  private function shouldJoinSummaryTable() {
+    if ($this->needCommitCounts) {
+      return true;
+    }
 
-    if ($this->ids) {
+    if ($this->needMostRecentCommits) {
+      return true;
+    }
+
+    $vector = $this->getOrderVector();
+    if ($vector->containsKey('committed')) {
+      return true;
+    }
+
+    if ($vector->containsKey('size')) {
+      return true;
+    }
+
+    return false;
+  }
+
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->callsigns) {
+    if ($this->callsigns !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.callsign IN (%Ls)',
         $this->callsigns);
     }
@@ -462,21 +452,21 @@ final class PhabricatorRepositoryQuery
 
       if ($this->numericIdentifiers) {
         $identifier_clause[] = qsprintf(
-          $conn_r,
+          $conn,
           'r.id IN (%Ld)',
           $this->numericIdentifiers);
       }
 
       if ($this->callsignIdentifiers) {
         $identifier_clause[] = qsprintf(
-          $conn_r,
+          $conn,
           'r.callsign IN (%Ls)',
           $this->callsignIdentifiers);
       }
 
       if ($this->phidIdentifiers) {
         $identifier_clause[] = qsprintf(
-          $conn_r,
+          $conn,
           'r.phid IN (%Ls)',
           $this->phidIdentifiers);
       }
@@ -486,35 +476,41 @@ final class PhabricatorRepositoryQuery
 
     if ($this->types) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.versionControlSystem IN (%Ls)',
         $this->types);
     }
 
     if ($this->uuids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.uuid IN (%Ls)',
         $this->uuids);
     }
 
     if (strlen($this->nameContains)) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'name LIKE %~',
         $this->nameContains);
     }
 
-    if ($this->anyProjectPHIDs) {
+    if (strlen($this->datasourceQuery)) {
+      // This handles having "rP" match callsigns starting with "P...".
+      $query = trim($this->datasourceQuery);
+      if (preg_match('/^r/', $query)) {
+        $callsign = substr($query, 1);
+      } else {
+        $callsign = $query;
+      }
       $where[] = qsprintf(
-        $conn_r,
-        'e.dst IN (%Ls)',
-        $this->anyProjectPHIDs);
+        $conn,
+        'r.name LIKE %> OR r.callsign LIKE %>',
+        $query,
+        $callsign);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {

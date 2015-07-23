@@ -10,7 +10,7 @@ final class PhabricatorS3FileStorageEngine
   extends PhabricatorFileStorageEngine {
 
 
-/* -(  Implementation  )----------------------------------------------------- */
+/* -(  Engine Metadata  )---------------------------------------------------- */
 
 
   /**
@@ -19,6 +19,21 @@ final class PhabricatorS3FileStorageEngine
   public function getEngineIdentifier() {
     return 'amazon-s3';
   }
+
+  public function getEnginePriority() {
+    return 100;
+  }
+
+  public function canWriteFiles() {
+    $bucket = PhabricatorEnv::getEnvConfig('storage.s3.bucket');
+    $access_key = PhabricatorEnv::getEnvConfig('amazon-s3.access-key');
+    $secret_key = PhabricatorEnv::getEnvConfig('amazon-s3.secret-key');
+
+    return (strlen($bucket) && strlen($access_key) && strlen($secret_key));
+  }
+
+
+/* -(  Managing File Data  )------------------------------------------------- */
 
 
   /**
@@ -32,12 +47,19 @@ final class PhabricatorS3FileStorageEngine
     // files more browsable with web/debugging tools like the S3 administration
     // tool.
     $seed = Filesystem::readRandomCharacters(20);
-    $parts = array(
-      substr($seed, 0, 2),
-      substr($seed, 2, 2),
-      substr($seed, 4),
-    );
-    $name = 'phabricator/'.implode('/', $parts);
+    $parts = array();
+    $parts[] = 'phabricator';
+
+    $instance_name = PhabricatorEnv::getEnvConfig('cluster.instance');
+    if (strlen($instance_name)) {
+      $parts[] = $instance_name;
+    }
+
+    $parts[] = substr($seed, 0, 2);
+    $parts[] = substr($seed, 2, 2);
+    $parts[] = substr($seed, 4);
+
+    $name = implode('/', $parts);
 
     AphrontWriteGuard::willWrite();
     $profiler = PhutilServiceProfiler::getInstance();
@@ -114,7 +136,9 @@ final class PhabricatorS3FileStorageEngine
     $bucket = PhabricatorEnv::getEnvConfig('storage.s3.bucket');
     if (!$bucket) {
       throw new PhabricatorFileStorageConfigurationException(
-        "No 'storage.s3.bucket' specified!");
+        pht(
+          "No '%s' specified!",
+          'storage.s3.bucket'));
     }
     return $bucket;
   }
@@ -135,7 +159,10 @@ final class PhabricatorS3FileStorageEngine
 
     if (!$access_key || !$secret_key) {
       throw new PhabricatorFileStorageConfigurationException(
-        "Specify 'amazon-s3.access-key' and 'amazon-s3.secret-key'!");
+        pht(
+          "Specify '%s' and '%s'!",
+          'amazon-s3.access-key',
+          'amazon-s3.secret-key'));
     }
 
     if ($endpoint !== null) {

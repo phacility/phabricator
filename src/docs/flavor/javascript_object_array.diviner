@@ -8,7 +8,7 @@ behavior.
 = Primitives =
 
 Javascript has two native datatype primitives, Object and Array. Both are
-classes, so you can use ##new## to instantiate new objects and arrays:
+classes, so you can use `new` to instantiate new objects and arrays:
 
   COUNTEREXAMPLE
   var a = new Array();    //  Not preferred.
@@ -42,7 +42,7 @@ and Array are both classes, but "object" is also a primitive type. Object is
 
 = Objects are Maps, Arrays are Lists =
 
-PHP has a single ##array## datatype which behaves like as both map and a list,
+PHP has a single `array` datatype which behaves like as both map and a list,
 and a common mistake is to treat Javascript arrays (or objects) in the same way.
 **Don't do this.** It sort of works until it doesn't. Instead, learn how
 Javascript's native datatypes work and use them properly.
@@ -94,9 +94,9 @@ Iterate over a list like this:
 
 NOTE: There's some sparse array nonsense being omitted here, see below.
 
-If you try to use ##for (var k in ...)## syntax to iterate over an Array, you'll
+If you try to use `for (var k in ...)` syntax to iterate over an Array, you'll
 pick up a  whole pile of keys you didn't intend to and it won't work. If you try
-to use ##for (var ii = 0; ...)## syntax to iterate over an Object, it won't work
+to use `for (var ii = 0; ...)` syntax to iterate over an Object, it won't work
 at all.
 
 If you consistently treat Arrays as lists and Objects as maps and use the
@@ -106,7 +106,7 @@ way.
 = hasOwnProperty() =
 
 An issue with this model is that if you write stuff to Object.prototype, it will
-show up every time you use enumeration ##for##:
+show up every time you use enumeration `for`:
 
   COUNTEREXAMPLE
   var o = {};
@@ -117,7 +117,7 @@ show up every time you use enumeration ##for##:
 
 There are two ways to avoid this:
 
-  - test that ##k## exists on ##o## by calling ##o.hasOwnProperty(k)## in every
+  - test that `k` exists on `o` by calling `o.hasOwnProperty(k)` in every
     single loop everywhere in your program and only use libraries which also do
     this and never forget to do it ever; or
   - don't write to Object.prototype.

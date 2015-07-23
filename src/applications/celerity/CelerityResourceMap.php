@@ -6,7 +6,7 @@
  * not need to invoke it directly; instead, you call higher-level Celerity APIs
  * and it uses the resource map to satisfy your requests.
  */
-final class CelerityResourceMap {
+final class CelerityResourceMap extends Phobject {
 
   private static $instances = array();
 
@@ -16,6 +16,7 @@ final class CelerityResourceMap {
   private $packageMap;
   private $nameMap;
   private $hashMap;
+  private $componentMap;
 
   public function __construct(CelerityResources $resources) {
     $this->resources = $resources;
@@ -43,7 +44,8 @@ final class CelerityResourceMap {
       if (empty($resources_list[$name])) {
         throw new Exception(
           pht(
-            'No resource source exists with name "%s"!', $name));
+            'No resource source exists with name "%s"!',
+            $name));
       }
 
       $instance = new CelerityResourceMap($resources_list[$name]);

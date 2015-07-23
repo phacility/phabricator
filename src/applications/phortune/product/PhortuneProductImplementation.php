@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhortuneProductImplementation {
+abstract class PhortuneProductImplementation extends Phobject {
 
   abstract public function loadImplementationsForRefs(
     PhabricatorUser $viewer,
@@ -33,6 +33,12 @@ abstract class PhortuneProductImplementation {
     PhortunePurchase $purchase,
     PhortuneCurrency $amount) {
     return;
+  }
+
+  public function getPurchaseURI(
+    PhortuneProduct $product,
+    PhortunePurchase $purchase) {
+    return null;
   }
 
 }

@@ -23,6 +23,7 @@ JX.install('ChangesetViewManager', {
     this._renderer = data.renderer;
     this._highlight = data.highlight;
     this._encoding = data.encoding;
+    this._loaded = data.loaded;
   },
 
   members: {
@@ -37,6 +38,7 @@ JX.install('ChangesetViewManager', {
     _renderer: null,
     _highlight: null,
     _encoding: null,
+    _undoTemplates: null,
 
 
     /**
@@ -118,25 +120,12 @@ JX.install('ChangesetViewManager', {
       this._loaded = true;
       this._sequence++;
 
-      var params = {
-        ref: this._ref,
-        whitespace: this._whitespace || '',
-        renderer: this.getRenderer() || '',
-        highlight: this._highlight || '',
-        encoding: this._encoding || ''
-      };
+      var params = this._getViewParameters();
 
       var workflow = new JX.Workflow(this._renderURI, params)
         .setHandler(JX.bind(this, this._onresponse, this._sequence));
 
-      var routable = workflow.getRoutable();
-
-      routable
-        .setPriority(500)
-        .setType('content')
-        .setKey(this._getRoutableKey());
-
-      JX.Router.getInstance().queue(routable);
+      this._startContentWorkflow(workflow);
 
       JX.DOM.setContent(
         this._getContentFrame(),
@@ -148,6 +137,109 @@ JX.install('ChangesetViewManager', {
       return this;
     },
 
+    /**
+     * Load missing context in a changeset.
+     *
+     * We do this when the user clicks "Show X Lines". We also expand all of
+     * the missing context when they "Show Entire File".
+     *
+     * @param string Line range specification, like "0-40/0-20".
+     * @param node Row where the context should be rendered after loading.
+     * @param bool True if this is a bulk load of multiple context blocks.
+     * @return this
+     */
+    loadContext: function(range, target, bulk) {
+      var params = this._getViewParameters();
+      params.range = range;
+
+      var container = JX.DOM.scry(target, 'td')[0];
+      // TODO: pht()
+      JX.DOM.setContent(container, 'Loading...');
+      JX.DOM.alterClass(target, 'differential-show-more-loading', true);
+
+      var workflow = new JX.Workflow(this._renderURI, params)
+        .setHandler(JX.bind(this, this._oncontext, target));
+
+      if (bulk) {
+        // If we're loading a bunch of these because the viewer clicked
+        // "Show Entire File Content" or similar, use lower-priority requests
+        // and draw a progress bar.
+        this._startContentWorkflow(workflow);
+      } else {
+        // If this is a single click on a context link, use a higher priority
+        // load without a chrome change.
+        workflow.start();
+      }
+
+      return this;
+    },
+
+    _startContentWorkflow: function(workflow) {
+      var routable = workflow.getRoutable();
+
+      routable
+        .setPriority(500)
+        .setType('content')
+        .setKey(this._getRoutableKey());
+
+      JX.Router.getInstance().queue(routable);
+    },
+
+
+    /**
+     * Receive a response to a context request.
+     */
+    _oncontext: function(target, response) {
+      // TODO: This should be better structured.
+      // If the response comes back with several top-level nodes, the last one
+      // is the actual context; the others are headers. Add any headers first,
+      // then copy the new rows into the document.
+      var markup = JX.$H(response.changeset).getFragment();
+      var len = markup.childNodes.length;
+      var diff = JX.DOM.findAbove(target, 'table', 'differential-diff');
+
+      for (var ii = 0; ii < len - 1; ii++) {
+        diff.parentNode.insertBefore(markup.firstChild, diff);
+      }
+
+      var table = markup.firstChild;
+      var root = target.parentNode;
+      this._moveRows(table, root, target);
+      root.removeChild(target);
+
+      this._onchangesetresponse(response);
+    },
+
+    _moveRows: function(src, dst, before) {
+      var rows = JX.DOM.scry(src, 'tr');
+      for (var ii = 0; ii < rows.length; ii++) {
+
+        // Find the table this <tr /> belongs to. If it's a sub-table, like a
+        // table in an inline comment, don't copy it.
+        if (JX.DOM.findAbove(rows[ii], 'table') !== src) {
+          continue;
+        }
+
+        if (before) {
+          dst.insertBefore(rows[ii], before);
+        } else {
+          dst.appendChild(rows[ii]);
+        }
+      }
+    },
+
+    /**
+     * Get parameters which define the current rendering options.
+     */
+    _getViewParameters: function() {
+      return {
+        ref: this._ref,
+        whitespace: this._whitespace || '',
+        renderer: this.getRenderer() || '',
+        highlight: this._highlight || '',
+        encoding: this._encoding || ''
+      };
+    },
 
     /**
      * Get the active @{class:JX.Routable} for this changeset.
@@ -172,18 +264,15 @@ JX.install('ChangesetViewManager', {
         return this._renderer;
       }
 
-      // TODO: This is a big pile of TODOs.
-
       // NOTE: If you load the page at one device resolution and then resize to
       // a different one we don't re-render the diffs, because it's a
       // complicated mess and you could lose inline comments, cursor positions,
       // etc.
-      var renderer = (JX.Device.getDevice() == 'desktop') ? '2up' : '1up';
+      return (JX.Device.getDevice() == 'desktop') ? '2up' : '1up';
+    },
 
-      // TODO: Once 1up works better, figure out when to show it.
-      renderer = '2up';
-
-      return renderer;
+    getUndoTemplates: function() {
+      return this._undoTemplates;
     },
 
     setEncoding: function(encoding) {
@@ -257,11 +346,17 @@ JX.install('ChangesetViewManager', {
           if (near_bot || above_mid) {
             // Figure out how much taller the document got.
             var delta = (JX.Vector.getDocument().y - old_dim.y);
-            window.scrollTo(old_pos.x, old_pos.y + delta);
+            JX.DOM.scrollToPosition(old_pos.x, old_pos.y + delta);
           }
         }
         this._stabilize = false;
       }
+
+      this._onchangesetresponse(response);
+    },
+
+    _onchangesetresponse: function(response) {
+      // Code shared by autoload and context responses.
 
       if (response.coverage) {
         for (var k in response.coverage) {
@@ -272,6 +367,12 @@ JX.install('ChangesetViewManager', {
           }
         }
       }
+
+      if (response.undoTemplates) {
+        this._undoTemplates = response.undoTemplates;
+      }
+
+      JX.Stratcom.invoke('differential-inline-comment-refresh');
     },
 
     _getContentFrame: function() {

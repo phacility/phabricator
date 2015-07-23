@@ -96,6 +96,7 @@ When defining custom fields using a configuration option like
     - **users**: A typeahead which allows multiple users to be input.
     - **date**: A date/time picker.
     - **header**: Renders a visual divider which you can use to group fields.
+    - **link**: A text field which allows the user to enter a link.
   - **edit**: Show this field on the application's edit interface (this
     defaults to `true`).
   - **view**: Show this field on the application's view interface (this
@@ -206,5 +207,5 @@ integrations, see the base class for your application and
 Continue by:
 
   - learning more about extending Phabricator with custom code in
-    @{article:libphutil Libraries User Guide};
+    @{article@contributor:Adding New Classes};
   - or returning to the @{article: Configuration Guide}.

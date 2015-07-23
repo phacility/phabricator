@@ -13,7 +13,7 @@ final class PhabricatorImageMacroRemarkupRule extends PhutilRemarkupRule {
       $text);
   }
 
-  public function markupImageMacro($matches) {
+  public function markupImageMacro(array $matches) {
     if ($this->macros === null) {
       $this->macros = array();
 
@@ -113,17 +113,6 @@ final class PhabricatorImageMacroRemarkupRule extends PhutilRemarkupRule {
         $src_uri = PhabricatorEnv::getProductionURI($src_uri);
       }
 
-      $file_data = $file->getMetadata();
-      $style = null;
-      $height = idx($file_data, PhabricatorFile::METADATA_IMAGE_HEIGHT);
-      $width = idx($file_data, PhabricatorFile::METADATA_IMAGE_WIDTH);
-      if ($height && $width) {
-        $style = sprintf(
-          'height: %dpx; width: %dpx;',
-          $height,
-          $width);
-      }
-
       $id = null;
       $audio = idx($files, $macro->getAudioPHID());
       $should_play = ($audio && $macro->getAudioBehavior() !=
@@ -154,7 +143,9 @@ final class PhabricatorImageMacroRemarkupRule extends PhutilRemarkupRule {
           'src'   => $src_uri,
           'alt'   => $spec['original'],
           'title' => $spec['original'],
-          'style' => $style,
+          'height' => $file->getImageHeight(),
+          'width' => $file->getImageWidth(),
+          'class' => 'phabricator-remarkup-macro',
         ));
 
       $engine->overwriteStoredText($spec['token'], $result);

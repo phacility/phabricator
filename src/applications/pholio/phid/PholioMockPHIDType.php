@@ -5,7 +5,7 @@ final class PholioMockPHIDType extends PhabricatorPHIDType {
   const TYPECONST = 'MOCK';
 
   public function getTypeName() {
-    return pht('Mock');
+    return pht('Pholio Mock');
   }
 
   public function getPHIDTypeApplicationClass() {
@@ -40,7 +40,7 @@ final class PholioMockPHIDType extends PhabricatorPHIDType {
       $handle->setFullName("M{$id}: {$name}");
 
       if ($mock->isClosed()) {
-        $handle->setStatus(PhabricatorObjectHandleStatus::STATUS_CLOSED);
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
       }
     }
   }

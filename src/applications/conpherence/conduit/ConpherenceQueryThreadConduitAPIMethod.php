@@ -9,13 +9,13 @@ final class ConpherenceQueryThreadConduitAPIMethod
 
   public function getMethodDescription() {
     return pht(
-      'Query for conpherence threads for the logged in user. '.
-      'You can query by ids or phids for specific conpherence threads. '.
-      'Otherwise, specify limit and offset to query the most recently '.
-      'updated conpherences for the logged in user.');
+      'Query for Conpherence threads for the logged in user. You can query '.
+      'by IDs or PHIDs for specific Conpherence threads. Otherwise, specify '.
+      'limit and offset to query the most recently updated Conpherences for '.
+      'the logged in user.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'ids' => 'optional array<int>',
       'phids' => 'optional array<phids>',
@@ -24,12 +24,8 @@ final class ConpherenceQueryThreadConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

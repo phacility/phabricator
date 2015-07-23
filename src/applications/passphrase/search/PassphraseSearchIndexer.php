@@ -17,7 +17,7 @@ final class PassphraseSearchIndexer extends PhabricatorSearchDocumentIndexer {
     $doc->setDocumentModified($credential->getDateModified());
 
     $doc->addField(
-      PhabricatorSearchField::FIELD_BODY,
+      PhabricatorSearchDocumentFieldType::FIELD_BODY,
       $credential->getDescription());
 
     $doc->addRelationship(

@@ -7,7 +7,7 @@ final class DrydockResourceSearchEngine
     return pht('Drydock Resources');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorDrydockApplication';
   }
 
@@ -87,10 +87,14 @@ final class DrydockResourceSearchEngine
     PhabricatorSavedQuery $query,
     array $handles) {
 
-    return id(new DrydockResourceListView())
+    $list = id(new DrydockResourceListView())
       ->setUser($this->requireViewer())
-      ->setResources($resources)
-      ->render();
+      ->setResources($resources);
+
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setTable($list);
+
+    return $result;
   }
 
 }

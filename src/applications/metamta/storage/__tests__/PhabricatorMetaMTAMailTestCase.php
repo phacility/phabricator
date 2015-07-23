@@ -69,7 +69,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
 
     $this->assertTrue(
       in_array($phid, $mail->buildRecipientList()),
-      '"To" is a recipient.');
+      pht('"To" is a recipient.'));
 
 
     // Test that the "No Self Mail" and "No Mail" preferences work correctly.
@@ -77,7 +77,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
 
     $this->assertTrue(
       in_array($phid, $mail->buildRecipientList()),
-      '"From" does not exclude recipients by default.');
+      pht('"From" does not exclude recipients by default.'));
 
     $prefs->setPreference(
       PhabricatorUserPreferences::PREFERENCE_NO_SELF_MAIL,
@@ -86,7 +86,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
 
     $this->assertFalse(
       in_array($phid, $mail->buildRecipientList()),
-      '"From" excludes recipients with no-self-mail set.');
+      pht('"From" excludes recipients with no-self-mail set.'));
 
     $prefs->unsetPreference(
       PhabricatorUserPreferences::PREFERENCE_NO_SELF_MAIL);
@@ -94,7 +94,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
 
     $this->assertTrue(
       in_array($phid, $mail->buildRecipientList()),
-      '"From" does not exclude recipients by default.');
+      pht('"From" does not exclude recipients by default.'));
 
     $prefs->setPreference(
       PhabricatorUserPreferences::PREFERENCE_NO_MAIL,
@@ -103,13 +103,13 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
 
     $this->assertFalse(
       in_array($phid, $mail->buildRecipientList()),
-      '"From" excludes recipients with no-mail set.');
+      pht('"From" excludes recipients with no-mail set.'));
 
     $mail->setForceDelivery(true);
 
     $this->assertTrue(
       in_array($phid, $mail->buildRecipientList()),
-      '"From" includes no-mail recipients when forced.');
+      pht('"From" includes no-mail recipients when forced.'));
 
     $mail->setForceDelivery(false);
 
@@ -119,7 +119,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
 
     $this->assertTrue(
       in_array($phid, $mail->buildRecipientList()),
-      '"From" does not exclude recipients by default.');
+      pht('"From" does not exclude recipients by default.'));
 
 
     // Test that explicit exclusion works correctly.
@@ -127,7 +127,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
 
     $this->assertFalse(
       in_array($phid, $mail->buildRecipientList()),
-      'Explicit exclude excludes recipients.');
+      pht('Explicit exclude excludes recipients.'));
 
     $mail->setExcludeMailRecipientPHIDs(array());
 
@@ -144,7 +144,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
 
     $this->assertFalse(
       in_array($phid, $mail->buildRecipientList()),
-      'Tag preference excludes recipients.');
+      pht('Tag preference excludes recipients.'));
 
     $prefs->unsetPreference(PhabricatorUserPreferences::PREFERENCE_MAILTAGS);
     $prefs->save();
@@ -194,19 +194,25 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
 
     $this->assertTrue(
       isset($dict['Thread-Index']),
-      "Expect Thread-Index header for case {$case}.");
+      pht('Expect Thread-Index header for case %s.', $case));
     $this->assertEqual(
       $expect_message_id,
       isset($dict['Message-ID']),
-      "Expectation about existence of Message-ID header for case {$case}.");
+      pht(
+        'Expectation about existence of Message-ID header for case %s.',
+        $case));
     $this->assertEqual(
       $expect_in_reply_to,
       isset($dict['In-Reply-To']),
-      "Expectation about existence of In-Reply-To header for case {$case}.");
+      pht(
+        'Expectation about existence of In-Reply-To header for case %s.',
+        $case));
     $this->assertEqual(
       $expect_references,
       isset($dict['References']),
-      "Expectation about existence of References header for case {$case}.");
+      pht(
+        'Expectation about existence of References header for case %s.',
+        $case));
   }
 
 }

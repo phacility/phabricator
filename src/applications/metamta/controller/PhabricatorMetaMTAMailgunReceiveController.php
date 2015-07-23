@@ -23,7 +23,7 @@ final class PhabricatorMetaMTAMailgunReceiveController
 
     if (!$this->verifyMessage()) {
       throw new Exception(
-        'Mail signature is not valid. Check your Mailgun API key.');
+        pht('Mail signature is not valid. Check your Mailgun API key.'));
     }
 
     $request = $this->getRequest();
@@ -56,7 +56,7 @@ final class PhabricatorMetaMTAMailgunReceiveController
         $file = PhabricatorFile::newFromPHPUpload(
           $file_raw,
           array(
-            'authorPHID' => $user->getPHID(),
+            'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
           ));
         $file_phids[] = $file->getPHID();
       } catch (Exception $ex) {

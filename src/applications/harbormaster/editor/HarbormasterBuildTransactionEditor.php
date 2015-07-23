@@ -78,7 +78,7 @@ final class HarbormasterBuildTransactionEditor
         $issuable = $build->canResumeBuild();
         break;
       default:
-        throw new Exception("Unknown command $command");
+        throw new Exception(pht('Unknown command %s', $command));
     }
 
     if (!$issuable) {

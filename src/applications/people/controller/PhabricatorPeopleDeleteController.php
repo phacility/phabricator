@@ -44,8 +44,7 @@ final class PhabricatorPeopleDeleteController
       'so on), but less safe to delete established users. If possible, '.
       'disable them instead.');
 
-    $str4 = pht(
-      'To permanently destroy this user, run this command:');
+    $str4 = pht('To permanently destroy this user, run this command:');
 
     $form = id(new AphrontFormView())
       ->setUser($admin)
@@ -73,9 +72,7 @@ final class PhabricatorPeopleDeleteController
         pht(
           'As you stare into the gaping maw of the abyss, something '.
           'holds you back.'))
-      ->appendParagraph(
-        pht(
-          'You can not delete your own account.'))
+      ->appendParagraph(pht('You can not delete your own account.'))
       ->addCancelButton($profile_uri, pht('Turn Back'));
   }
 

@@ -12,12 +12,12 @@ final class ReleephWorkGetCommitMessageConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return
-      'Get commit message components for building '.
-      'a ReleephRequest commit message.';
+    return pht(
+      'Get commit message components for building a %s commit message.',
+      'ReleephRequest');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     $action_const = $this->formatStringConstants(array('pick', 'revert'));
 
     return array(
@@ -26,12 +26,8 @@ final class ReleephWorkGetCommitMessageConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict<string, string>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

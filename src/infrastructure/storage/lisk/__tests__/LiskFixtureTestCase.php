@@ -67,7 +67,7 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
 
       $this->assertTrue(
         ($loaded !== null),
-        'Reads inside transactions should have transaction visibility.');
+        pht('Reads inside transactions should have transaction visibility.'));
 
       LiskDAO::beginIsolateAllLiskEffectsToTransactions();
     } catch (Exception $ex) {
@@ -136,5 +136,31 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
       throw $ex;
     }
   }
+
+  public function testNonmutableColumns() {
+    $object = id(new HarbormasterScratchTable())
+      ->setData('val1')
+      ->setNonmutableData('val1')
+      ->save();
+
+    $object->reload();
+
+    $this->assertEqual('val1', $object->getData());
+    $this->assertEqual('val1', $object->getNonmutableData());
+
+    $object
+      ->setData('val2')
+      ->setNonmutableData('val2')
+      ->save();
+
+    $object->reload();
+
+    $this->assertEqual('val2', $object->getData());
+
+    // NOTE: This is the important test: the nonmutable column should not have
+    // been affected by the update.
+    $this->assertEqual('val1', $object->getNonmutableData());
+  }
+
 
 }

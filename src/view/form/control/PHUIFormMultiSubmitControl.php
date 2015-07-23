@@ -6,7 +6,7 @@ final class PHUIFormMultiSubmitControl extends AphrontFormControl {
 
   public function addBackButton($label = null) {
     if ($label === null) {
-      $label = pht("\xC2\xAB Back");
+      $label = "\xC2\xAB ".pht('Back');
     }
     return $this->addButton('__back__', $label, 'grey');
   }

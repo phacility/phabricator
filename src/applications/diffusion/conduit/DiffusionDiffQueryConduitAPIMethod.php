@@ -10,12 +10,12 @@ final class DiffusionDiffQueryConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return
+    return pht(
       'Get diff information from a repository for a specific path at an '.
-      '(optional) commit.';
+      '(optional) commit.');
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'array';
   }
 

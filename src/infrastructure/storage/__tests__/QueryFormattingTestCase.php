@@ -25,7 +25,7 @@ final class QueryFormattingTestCase extends PhabricatorTestCase {
     }
     $this->assertTrue(
       (bool)$raised,
-      'qsprintf should raise exception for invalid %d conversion.');
+      pht('%s should raise exception for invalid %%d conversion.', 'qsprintf'));
 
     $this->assertEqual(
       "'<S>'",

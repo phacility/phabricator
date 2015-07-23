@@ -12,8 +12,9 @@ final class PhabricatorConfigManagementSetWorkflow
         array(
           array(
             'name'  => 'database',
-            'help'  => pht('Update configuration in the database instead of '.
-            'in local configuration.'),
+            'help'  => pht(
+              'Update configuration in the database instead of '.
+              'in local configuration.'),
           ),
           array(
             'name'      => 'args',
@@ -26,31 +27,34 @@ final class PhabricatorConfigManagementSetWorkflow
     $console = PhutilConsole::getConsole();
     $argv = $args->getArg('args');
     if (count($argv) == 0) {
-      throw new PhutilArgumentUsageException(pht(
-        'Specify a configuration key and a value to set it to.'));
+      throw new PhutilArgumentUsageException(
+        pht('Specify a configuration key and a value to set it to.'));
     }
 
     $key = $argv[0];
 
     if (count($argv) == 1) {
-      throw new PhutilArgumentUsageException(pht(
-        "Specify a value to set the key '%s' to.",
-        $key));
+      throw new PhutilArgumentUsageException(
+        pht(
+          "Specify a value to set the key '%s' to.",
+          $key));
     }
 
     $value = $argv[1];
 
     if (count($argv) > 2) {
-      throw new PhutilArgumentUsageException(pht(
-        'Too many arguments: expected one key and one value.'));
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Too many arguments: expected one key and one value.'));
     }
 
     $options = PhabricatorApplicationConfigOptions::loadAllOptions();
     if (empty($options[$key])) {
-      throw new PhutilArgumentUsageException(pht(
-        "No such configuration key '%s'! Use `config list` to list all ".
-        "keys.",
-        $key));
+      throw new PhutilArgumentUsageException(
+        pht(
+          "No such configuration key '%s'! Use `%s` to list all keys.",
+          $key,
+          'config list'));
     }
 
     $option = $options[$key];
@@ -64,10 +68,11 @@ final class PhabricatorConfigManagementSetWorkflow
         break;
       case 'int':
         if (!ctype_digit($value)) {
-          throw new PhutilArgumentUsageException(pht(
-            "Config key '%s' is of type '%s'. Specify an integer.",
-            $key,
-            $type));
+          throw new PhutilArgumentUsageException(
+            pht(
+              "Config key '%s' is of type '%s'. Specify an integer.",
+              $key,
+              $type));
         }
         $value = (int)$value;
         break;
@@ -77,29 +82,58 @@ final class PhabricatorConfigManagementSetWorkflow
         } else if ($value == 'false') {
           $value = false;
         } else {
-          throw new PhutilArgumentUsageException(pht(
-            "Config key '%s' is of type '%s'. ".
-            "Specify 'true' or 'false'.",
-            $key,
-            $type));
+          throw new PhutilArgumentUsageException(
+            pht(
+              "Config key '%s' is of type '%s'. Specify '%s' or '%s'.",
+              $key,
+              $type,
+              'true',
+              'false'));
         }
         break;
       default:
         $value = json_decode($value, true);
         if (!is_array($value)) {
-          throw new PhutilArgumentUsageException(pht(
-            "Config key '%s' is of type '%s'. Specify it in JSON.",
-            $key,
-            $type));
+          switch ($type) {
+            case 'set':
+              $message = sprintf(
+                  "%s%s\n\n    %s\n",
+                  pht(
+                    "Config key '%s' is of type '%s'. Specify it in JSON.",
+                    $key,
+                    $type),
+                  pht('For example:'),
+                  './bin/config set \'{"value1": true, "value2": true}\'');
+              break;
+            default:
+              if (preg_match('/^list</', $type)) {
+                $message = sprintf(
+                  "%s%s\n\n    %s\n",
+                  pht(
+                    "Config key '%s' is of type '%s'. Specify it in JSON.",
+                    $key,
+                    $type),
+                  pht('For example:'),
+                  './bin/config set \'["a", "b", "c"]\'');
+              } else {
+                $message = pht(
+                  'Config key "%s" is of type "%s". Specify it in JSON.',
+                  $key,
+                  $type);
+              }
+              break;
+          }
+          throw new PhutilArgumentUsageException($message);
         }
         break;
     }
     $use_database = $args->getArg('database');
     if ($option->getLocked() && $use_database) {
-      throw new PhutilArgumentUsageException(pht(
-        "Config key '%s' is locked and can only be set in local ".
-        'configuration.',
-        $key));
+      throw new PhutilArgumentUsageException(
+        pht(
+          "Config key '%s' is locked and can only be set in local ".
+          "configuration.",
+          $key));
     }
 
     try {
@@ -121,7 +155,8 @@ final class PhabricatorConfigManagementSetWorkflow
     }
 
     $console->writeOut(
-      pht("Set '%s' in %s configuration.", $key, $config_type)."\n");
+      "%s\n",
+      pht("Set '%s' in %s configuration.", $key, $config_type));
   }
 
 }

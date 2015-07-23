@@ -11,8 +11,39 @@ final class PhabricatorSecurityConfigOptions
     return pht('Security options.');
   }
 
+  public function getFontIcon() {
+    return 'fa-lock';
+  }
+
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     $support_href = PhabricatorEnv::getDoclink('Give Feedback! Get Support!');
+
+    $doc_href = PhabricatorEnv::getDoclink('Configuring a File Domain');
+    $doc_name = pht('Configuration Guide: Configuring a File Domain');
+
+    // This is all of the IANA special/reserved blocks in IPv4 space.
+    $default_address_blacklist = array(
+      '0.0.0.0/8',
+      '10.0.0.0/8',
+      '100.64.0.0/10',
+      '127.0.0.0/8',
+      '169.254.0.0/16',
+      '172.16.0.0/12',
+      '192.0.0.0/24',
+      '192.0.2.0/24',
+      '192.88.99.0/24',
+      '192.168.0.0/16',
+      '198.18.0.0/15',
+      '198.51.100.0/24',
+      '203.0.113.0/24',
+      '224.0.0.0/4',
+      '240.0.0.0/4',
+      '255.255.255.255/32',
+    );
 
     return array(
       $this->newOption('security.alternate-file-domain', 'string', null)
@@ -20,31 +51,21 @@ final class PhabricatorSecurityConfigOptions
         ->setSummary(pht('Alternate domain to serve files from.'))
         ->setDescription(
           pht(
-            "IMPORTANT: By default, Phabricator serves files from the same ".
-            "domain the application lives on. This is convenient but not ".
-            "secure: it creates a large class of vulnerabilities which can ".
-            "not be generally mitigated.\n\n".
-
-            "To avoid this, you should configure a second domain in the same ".
-            "way you have the primary domain configured (i.e., point it at ".
-            "the same machine and set up the same vhost rules) and provide ".
-            "it here. For instance, if your primary install is on ".
-            "'http://www.phabricator-example.com/', you could configure ".
-            "'http://www.phabricator-files.com/' and specify the entire ".
-            "domain (with protocol) here. This will enforce that files are ".
-            "served only from the alternate domain. Ideally, you should use ".
-            "a completely separate domain name rather than just a different ".
-            "subdomain.\n\n".
-
-            "It is **STRONGLY RECOMMENDED** that you configure this. Your ".
-            "install is **NOT SECURE** unless you do so."))
-        ->addExample('http://www.phabricator-files.com/', pht('Valid Setting')),
+            'By default, Phabricator serves files from the same domain '.
+            'the application is served from. This is convenient, but '.
+            'presents a security risk.'.
+            "\n\n".
+            'You should configure a CDN or alternate file domain to mitigate '.
+            'this risk. Configuring a CDN will also improve performance. See '.
+            '[[ %s | %s ]] for instructions.',
+            $doc_href,
+            $doc_name))
+        ->addExample('https://files.phabcdn.net/', pht('Valid Setting')),
       $this->newOption(
         'security.hmac-key',
         'string',
         '[D\t~Y7eNmnQGJ;rnH6aF;m2!vJ8@v8C=Cs:aQS\.Qw')
-        ->setMasked(true)
-        ->setLocked(true)
+        ->setHidden(true)
         ->setSummary(
           pht('Key for HMAC digests.'))
         ->setDescription(
@@ -71,12 +92,13 @@ final class PhabricatorSecurityConfigOptions
             "reasonably configure more granular behavior there.\n\n".
 
             "IMPORTANT: Phabricator determines if a request is HTTPS or not ".
-            "by examining the PHP \$_SERVER['HTTPS'] variable. If you run ".
+            "by examining the PHP `%s` variable. If you run ".
             "Apache/mod_php this will probably be set correctly for you ".
             "automatically, but if you run Phabricator as CGI/FCGI (e.g., ".
             "through nginx or lighttpd), you need to configure your web ".
             "server so that it passes the value correctly based on the ".
-            "connection type."))
+            "connection type.",
+            "\$_SERVER['HTTPS']"))
         ->setBoolOptions(
           array(
             pht('Force HTTPS'),
@@ -102,8 +124,7 @@ final class PhabricatorSecurityConfigOptions
         'phabricator.csrf-key',
         'string',
         '0b7ec0592e0a2829d8b71df2fa269b2c6172eca3')
-        ->setMasked(true)
-        ->setLocked(true)
+        ->setHidden(true)
         ->setSummary(
           pht('Hashed with other inputs to generate CSRF tokens.'))
         ->setDescription(
@@ -118,8 +139,7 @@ final class PhabricatorSecurityConfigOptions
          'phabricator.mail-key',
          'string',
          '5ce3e7e8787f6e40dfae861da315a5cdf1018f12')
-        ->setMasked(true)
-        ->setLocked(true)
+        ->setHidden(true)
         ->setSummary(
           pht('Hashed with other inputs to generate mail tokens.'))
         ->setDescription(
@@ -144,7 +164,8 @@ final class PhabricatorSecurityConfigOptions
             "When users write comments which have URIs, they'll be ".
             "automatically linked if the protocol appears in this set. This ".
             "whitelist is primarily to prevent security issues like ".
-            "javascript:// URIs."))
+            "%s URIs.",
+            'javascript://'))
         ->addExample("http\nhttps", pht('Valid Setting'))
         ->setLocked(true),
       $this->newOption(
@@ -207,39 +228,56 @@ final class PhabricatorSecurityConfigOptions
           pht('Determines whether or not YouTube videos get embedded.'))
         ->setDescription(
           pht(
-            "If you enable this, linked YouTube videos will be embeded ".
+            "If you enable this, linked YouTube videos will be embedded ".
             "inline. This has mild security implications (you'll leak ".
             "referrers to YouTube) and is pretty silly (but sort of ".
             "awesome).")),
-        $this->newOption('security.allow-outbound-http', 'bool', true)
-          ->setBoolOptions(
-            array(
-              pht('Allow'),
-              pht('Disallow'),
-            ))
+        $this->newOption(
+          'security.outbound-blacklist',
+          'list<string>',
+          $default_address_blacklist)
           ->setLocked(true)
           ->setSummary(
-            pht('Allow outbound HTTP requests.'))
+            pht(
+              'Blacklist subnets to prevent user-initiated outbound '.
+              'requests.'))
           ->setDescription(
             pht(
-              'If you enable this, you are allowing Phabricator to '.
-              'potentially make requests to external servers.')),
-        $this->newOption('security.allow-conduit-act-as-user', 'bool', false)
+              'Phabricator users can make requests to other services from '.
+              'the Phabricator host in some circumstances (for example, by '.
+              'creating a repository with a remote URL or having Phabricator '.
+              'fetch an image from a remote server).'.
+              "\n\n".
+              'This may represent a security vulnerability if services on '.
+              'the same subnet will accept commands or reveal private '.
+              'information over unauthenticated HTTP GET, based on the source '.
+              'IP address. In particular, all hosts in EC2 have access to '.
+              'such a service.'.
+              "\n\n".
+              'This option defines a list of netblocks which Phabricator '.
+              'will decline to connect to. Generally, you should list all '.
+              'private IP space here.'))
+          ->addExample(array('0.0.0.0/0'), pht('No Outbound Requests')),
+        $this->newOption('security.strict-transport-security', 'bool', false)
+          ->setLocked(true)
           ->setBoolOptions(
             array(
-              pht('Allow'),
-              pht('Disallow'),
+              pht('Use HSTS'),
+              pht('Do Not Use HSTS'),
             ))
-          ->setLocked(true)
-          ->setSummary(
-            pht('Allow administrators to use the Conduit API as other users.'))
+          ->setSummary(pht('Enable HTTP Strict Transport Security (HSTS).'))
           ->setDescription(
             pht(
-              'DEPRECATED - if you enable this, you are allowing '.
-              'administrators to act as any user via the Conduit API. '.
-              'Enabling this is not advised as it introduces a huge policy '.
-              'violation and has been obsoleted in functionality.')),
-
+              'HTTP Strict Transport Security (HSTS) sends a header which '.
+              'instructs browsers that the site should only be accessed '.
+              'over HTTPS, never HTTP. This defuses an attack where an '.
+              'adversary gains access to your network, then proxies requests '.
+              'through an unsecured link.'.
+              "\n\n".
+              'Do not enable this option if you serve (or plan to ever serve) '.
+              'unsecured content over plain HTTP. It is very difficult to '.
+              'undo this change once users\' browsers have accepted the '.
+              'setting.')),
     );
   }
 
@@ -256,8 +294,10 @@ final class PhabricatorSecurityConfigOptions
         throw new PhabricatorConfigValidationException(
           pht(
             "Config option '%s' is invalid. The URI must start with ".
-            "'http://' or 'https://'.",
-            $key));
+            "'%s' or '%s'.",
+            $key,
+            'http://',
+            'https://'));
       }
 
       $domain = $uri->getDomain();
@@ -265,10 +305,11 @@ final class PhabricatorSecurityConfigOptions
         throw new PhabricatorConfigValidationException(
           pht(
             "Config option '%s' is invalid. The URI must contain a dot ('.'), ".
-            "like 'http://example.com/', not just a bare name like ".
-            "'http://example/'. Some web browsers will not set cookies on ".
-            "domains with no TLD.",
-            $key));
+            "like '%s', not just a bare name like '%s'. ".
+            "Some web browsers will not set cookies on domains with no TLD.",
+            $key,
+            'http://example.com/',
+            'http://example/'));
       }
 
       $path = $uri->getPath();
@@ -276,11 +317,11 @@ final class PhabricatorSecurityConfigOptions
         throw new PhabricatorConfigValidationException(
           pht(
             "Config option '%s' is invalid. The URI must NOT have a path, ".
-            "e.g. 'http://phabricator.example.com/' is OK, but ".
-            "'http://example.com/phabricator/' is not. Phabricator must be ".
-            "installed on an entire domain; it can not be installed on a ".
-            "path.",
-            $key));
+            "e.g. '%s' is OK, but '%s' is not. Phabricator must be installed ".
+            "on an entire domain; it can not be installed on a path.",
+            $key,
+            'http://phabricator.example.com/',
+            'http://example.com/phabricator/'));
       }
     }
   }

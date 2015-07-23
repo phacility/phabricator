@@ -27,6 +27,7 @@
 final class PhabricatorRepositoryPullLocalDaemon
   extends PhabricatorDaemon {
 
+  private $statusMessageCursor = 0;
 
 /* -(  Pulling Repositories  )----------------------------------------------- */
 
@@ -34,7 +35,7 @@ final class PhabricatorRepositoryPullLocalDaemon
   /**
    * @task pull
    */
-  public function run() {
+  protected function run() {
     $argv = $this->getArgv();
     array_unshift($argv, __CLASS__);
     $args = new PhutilArgumentParser($argv);
@@ -42,18 +43,18 @@ final class PhabricatorRepositoryPullLocalDaemon
       array(
         array(
           'name'      => 'no-discovery',
-          'help'      => 'Pull only, without discovering commits.',
+          'help'      => pht('Pull only, without discovering commits.'),
         ),
         array(
           'name'      => 'not',
           'param'     => 'repository',
           'repeat'    => true,
-          'help'      => 'Do not pull __repository__.',
+          'help'      => pht('Do not pull __repository__.'),
         ),
         array(
           'name'      => 'repositories',
           'wildcard'  => true,
-          'help'      => 'Pull specific __repositories__ instead of all.',
+          'help'      => pht('Pull specific __repositories__ instead of all.'),
         ),
       ));
 
@@ -72,11 +73,12 @@ final class PhabricatorRepositoryPullLocalDaemon
     $queue = array();
 
     while (!$this->shouldExit()) {
+      PhabricatorCaches::destroyRequestCache();
       $pullable = $this->loadPullableRepositories($include, $exclude);
 
       // If any repositories have the NEEDS_UPDATE flag set, pull them
       // as soon as possible.
-      $need_update_messages = $this->loadRepositoryUpdateMessages();
+      $need_update_messages = $this->loadRepositoryUpdateMessages(true);
       foreach ($need_update_messages as $message) {
         $repo = idx($pullable, $message->getRepositoryID());
         if (!$repo) {
@@ -149,7 +151,8 @@ final class PhabricatorRepositoryPullLocalDaemon
           if (!$repository) {
             $this->log(
               pht('Repository %s is no longer pullable; skipping.', $id));
-            break;
+            unset($queue[$id]);
+            continue;
           }
 
           $monogram = $repository->getMonogram();
@@ -255,12 +258,40 @@ final class PhabricatorRepositoryPullLocalDaemon
 
 
   /**
+   * Check for repositories that should be updated immediately.
+   *
+   * With the `$consume` flag, an internal cursor will also be incremented so
+   * that these messages are not returned by subsequent calls.
+   *
+   * @param bool Pass `true` to consume these messages, so the process will
+   *   not see them again.
+   * @return list<wild> Pending update messages.
+   *
    * @task pull
    */
-  private function loadRepositoryUpdateMessages() {
+  private function loadRepositoryUpdateMessages($consume = false) {
     $type_need_update = PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE;
-    return id(new PhabricatorRepositoryStatusMessage())
-      ->loadAllWhere('statusType = %s', $type_need_update);
+    $messages = id(new PhabricatorRepositoryStatusMessage())->loadAllWhere(
+      'statusType = %s AND id > %d',
+      $type_need_update,
+      $this->statusMessageCursor);
+
+    // Keep track of messages we've seen so that we don't load them again.
+    // If we reload messages, we can get stuck a loop if we have a failing
+    // repository: we update immediately in response to the message, but do
+    // not clear the message because the update does not succeed. We then
+    // immediately retry. Instead, messages are only permitted to trigger
+    // an immediate update once.
+
+    if ($consume) {
+      foreach ($messages as $message) {
+        $this->statusMessageCursor = max(
+          $this->statusMessageCursor,
+          $message->getID());
+      }
+    }
+
+    return $messages;
   }
 
 
@@ -282,7 +313,9 @@ final class PhabricatorRepositoryPullLocalDaemon
       foreach ($include as $name) {
         if (empty($by_callsign[$name])) {
           throw new Exception(
-            "No repository exists with callsign '{$name}'!");
+            pht(
+              "No repository exists with callsign '%s'!",
+              $name));
         }
       }
     }
@@ -344,13 +377,6 @@ final class PhabricatorRepositoryPullLocalDaemon
         $stderr);
       phlog($stderr_msg);
     }
-
-    // For now, continue respecting this deprecated setting for raising the
-    // minimum pull frequency.
-    // TODO: Remove this some day once this code has been completely stable
-    // for a while.
-    $sleep_for = (int)$repository->getDetail('pull-frequency');
-    $min_sleep = max($sleep_for, $min_sleep);
 
     $smart_wait = $repository->loadUpdateInterval($min_sleep);
 

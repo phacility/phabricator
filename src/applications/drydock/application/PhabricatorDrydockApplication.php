@@ -14,8 +14,8 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
     return pht('Allocate Software Resources');
   }
 
-  public function getIconName() {
-    return 'drydock';
+  public function getFontIcon() {
+    return 'fa-truck';
   }
 
   public function getTitleGlyph() {
@@ -34,8 +34,13 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
     return true;
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Drydock User Guide');
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Drydock User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Drydock User Guide'),
+      ),
+    );
   }
 
   public function getRoutes() {
@@ -67,9 +72,14 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
 
   protected function getCustomCapabilities() {
     return array(
-      DrydockDefaultViewCapability::CAPABILITY => array(),
+      DrydockDefaultViewCapability::CAPABILITY => array(
+        'template' => DrydockBlueprintPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_VIEW,
+      ),
       DrydockDefaultEditCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
+        'template' => DrydockBlueprintPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_EDIT,
       ),
       DrydockCreateBlueprintsCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,

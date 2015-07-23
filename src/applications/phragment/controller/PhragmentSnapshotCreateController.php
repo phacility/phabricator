@@ -89,8 +89,8 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
       'tr',
       array(),
       array(
-        phutil_tag('th', array(), 'Fragment'),
-        phutil_tag('th', array(), 'Version'),
+        phutil_tag('th', array(), pht('Fragment')),
+        phutil_tag('th', array(), pht('Version')),
       ));
     $rows[] = phutil_tag(
       'tr',

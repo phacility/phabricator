@@ -86,8 +86,7 @@ final class HarbormasterBuildActionController
               'This build is already restarting. You can not reissue a '.
               'restart command to a restarting build.');
           } else {
-            $body = pht(
-              'You can not restart this build.');
+            $body = pht('You can not restart this build.');
           }
         }
         break;

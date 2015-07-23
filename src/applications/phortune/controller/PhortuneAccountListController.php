@@ -56,7 +56,7 @@ final class PhortuneAccountListController extends PhortuneController {
 
     $payment_box = id(new PHUIObjectBoxView())
       ->setHeader($payment_header)
-      ->appendChild($payment_list);
+      ->setObjectList($payment_list);
 
     $merchant_list = id(new PHUIObjectItemListView())
       ->setUser($viewer)
@@ -88,7 +88,7 @@ final class PhortuneAccountListController extends PhortuneController {
 
     $merchant_box = id(new PHUIObjectBoxView())
       ->setHeader($merchant_header)
-      ->appendChild($merchant_list);
+      ->setObjectList($merchant_list);
 
     return $this->buildApplicationPage(
       array(

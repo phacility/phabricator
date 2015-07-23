@@ -7,7 +7,7 @@ final class HeraldTranscriptSearchEngine
     return pht('Herald Transcripts');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorHeraldApplication';
   }
 
@@ -125,7 +125,7 @@ final class HeraldTranscriptSearchEngine
       }
       $item->addAttribute($handles[$xscript->getObjectPHID()]->renderLink());
       $item->addAttribute(
-        number_format((int)(1000 * $xscript->getDuration())).' ms');
+        pht('%s ms', new PhutilNumber((int)(1000 * $xscript->getDuration()))));
       $item->addIcon(
         'none',
         phabricator_datetime($xscript->getTime(), $viewer));
@@ -133,7 +133,11 @@ final class HeraldTranscriptSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No transcripts found.'));
+
+    return $result;
   }
 
 }

@@ -16,7 +16,7 @@ abstract class HeraldController extends PhabricatorController {
     return $response->setContent($page->render());
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return $this->buildSideNavView(true)->getMenu();
   }
 
@@ -48,9 +48,8 @@ abstract class HeraldController extends PhabricatorController {
 
     $nav
       ->addLabel(pht('Utilities'))
-      ->addFilter('test',       pht('Test Console'))
-      ->addFilter('transcript', pht('Transcripts'))
-      ->addFilter('history',    pht('Edit Log'));
+      ->addFilter('test', pht('Test Console'))
+      ->addFilter('transcript', pht('Transcripts'));
 
     $nav->selectFilter(null);
 

@@ -11,6 +11,14 @@ final class PhabricatorPhameConfigOptions
     return pht('Configure Phame blogs.');
   }
 
+  public function getFontIcon() {
+    return 'fa-star';
+  }
+
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption(

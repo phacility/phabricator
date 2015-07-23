@@ -11,7 +11,7 @@ final class DifferentialCreateCommentConduitAPIMethod
     return pht('Add a comment to a Differential revision.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'revision_id'    => 'required revisionid',
       'message'        => 'optional string',
@@ -21,13 +21,13 @@ final class DifferentialCreateCommentConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR_BAD_REVISION' => 'Bad revision ID.',
+      'ERR_BAD_REVISION' => pht('Bad revision ID.'),
     );
   }
 

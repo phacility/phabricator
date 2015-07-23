@@ -25,11 +25,12 @@ final class ReleephWorkRecordConduitAPIMethod
    * reverted.
    */
   public function getMethodDescription() {
-    return 'Record whether we committed a pick or revert '.
-      'to the upstream repository.';
+    return pht(
+      'Record whether we committed a pick or revert '.
+      'to the upstream repository.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     $action_const = $this->formatStringConstants(
       array(
         'pick',
@@ -43,12 +44,8 @@ final class ReleephWorkRecordConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'void';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

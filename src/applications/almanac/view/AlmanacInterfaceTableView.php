@@ -3,17 +3,7 @@
 final class AlmanacInterfaceTableView extends AphrontView {
 
   private $interfaces;
-  private $handles;
   private $canEdit;
-
-  public function setHandles(array $handles) {
-    $this->handles = $handles;
-    return $this;
-  }
-
-  public function getHandles() {
-    return $this->handles;
-  }
 
   public function setInterfaces(array $interfaces) {
     $this->interfaces = $interfaces;
@@ -35,7 +25,6 @@ final class AlmanacInterfaceTableView extends AphrontView {
 
   public function render() {
     $interfaces = $this->getInterfaces();
-    $handles = $this->getHandles();
     $viewer = $this->getUser();
 
     if ($this->getCanEdit()) {
@@ -44,11 +33,13 @@ final class AlmanacInterfaceTableView extends AphrontView {
       $button_class = 'small grey button disabled';
     }
 
+    $handles = $viewer->loadHandles(mpull($interfaces, 'getNetworkPHID'));
+
     $rows = array();
     foreach ($interfaces as $interface) {
       $rows[] = array(
         $interface->getID(),
-        $handles[$interface->getNetworkPHID()]->renderLink(),
+        $handles->renderHandle($interface->getNetworkPHID()),
         $interface->getAddress(),
         $interface->getPort(),
         phutil_tag(

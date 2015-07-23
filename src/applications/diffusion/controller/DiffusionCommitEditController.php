@@ -15,13 +15,11 @@ final class DiffusionCommitEditController extends DiffusionController {
       return new Aphront404Response();
     }
 
-    $commit_phid        = $commit->getPHID();
-    $edge_type          = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+    $commit_phid = $commit->getPHID();
+    $edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
     $current_proj_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $commit_phid,
       $edge_type);
-    $handles = $this->loadViewerHandles($current_proj_phids);
-    $proj_t_values = $handles;
 
     if ($request->isFormPost()) {
       $xactions = array();
@@ -36,18 +34,18 @@ final class DiffusionCommitEditController extends DiffusionController {
         ->setContentSourceFromRequest($request);
       $xactions = $editor->applyTransactions($commit, $xactions);
       return id(new AphrontRedirectResponse())
-      ->setURI('/r'.$callsign.$commit->getCommitIdentifier());
+        ->setURI('/r'.$callsign.$commit->getCommitIdentifier());
     }
 
     $tokenizer_id = celerity_generate_unique_node_id();
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setAction($request->getRequestURI()->getPath())
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
         ->setLabel(pht('Projects'))
         ->setName('projects')
-        ->setValue($proj_t_values)
+        ->setValue($current_proj_phids)
         ->setID($tokenizer_id)
         ->setCaption(
           javelin_tag(

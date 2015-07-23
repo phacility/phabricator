@@ -5,11 +5,15 @@ final class FundInitiativePHIDType extends PhabricatorPHIDType {
   const TYPECONST = 'FITV';
 
   public function getTypeName() {
-    return pht('Initiative');
+    return pht('Fund Initiative');
   }
 
   public function newObject() {
     return new FundInitiative();
+  }
+
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorFundApplication';
   }
 
   protected function buildQueryForObjects(
@@ -33,7 +37,7 @@ final class FundInitiativePHIDType extends PhabricatorPHIDType {
       $name = $initiative->getName();
 
       if ($initiative->isClosed()) {
-        $handle->setStatus(PhabricatorObjectHandleStatus::STATUS_CLOSED);
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
       }
 
       $handle->setName($name);

@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionRenameHistoryQuery {
+final class DiffusionRenameHistoryQuery extends Phobject {
 
   private $oldCommit;
   private $wasCreated;
@@ -30,7 +30,7 @@ final class DiffusionRenameHistoryQuery {
     return $this->oldCommit;
   }
 
-  final public function loadOldFilename() {
+  public function loadOldFilename() {
     $drequest = $this->request;
     $repository_id = $drequest->getRepository()->getID();
     $conn_r = id(new PhabricatorRepository())->establishConnection('r');

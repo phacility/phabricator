@@ -6,16 +6,21 @@ final class PhabricatorConduitApplication extends PhabricatorApplication {
     return '/conduit/';
   }
 
-  public function getIconName() {
-    return 'conduit';
+  public function getFontIcon() {
+    return 'fa-tty';
   }
 
   public function canUninstall() {
     return false;
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Conduit Technical Documentation');
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Conduit Technical Documentation'),
+        'href' => PhabricatorEnv::getDoclink('Conduit Technical Documentation'),
+      ),
+    );
   }
 
   public function getName() {

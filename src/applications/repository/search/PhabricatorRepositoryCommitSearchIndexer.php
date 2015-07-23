@@ -22,7 +22,7 @@ final class PhabricatorRepositoryCommitSearchIndexer
       ->withIDs(array($commit->getRepositoryID()))
       ->executeOne();
     if (!$repository) {
-      throw new Exception('No such repository!');
+      throw new Exception(pht('No such repository!'));
     }
 
     $title = 'r'.$repository->getCallsign().$commit->getCommitIdentifier().
@@ -36,7 +36,7 @@ final class PhabricatorRepositoryCommitSearchIndexer
     $doc->setDocumentTitle($title);
 
     $doc->addField(
-      PhabricatorSearchField::FIELD_BODY,
+      PhabricatorSearchDocumentFieldType::FIELD_BODY,
       $commit_message);
 
     if ($author_phid) {

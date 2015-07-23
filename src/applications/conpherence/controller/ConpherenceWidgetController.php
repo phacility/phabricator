@@ -2,8 +2,6 @@
 
 final class ConpherenceWidgetController extends ConpherenceController {
 
-  private $conpherenceID;
-  private $conpherence;
   private $userPreferences;
 
   public function setUserPreferences(PhabricatorUserPreferences $pref) {
@@ -15,33 +13,15 @@ final class ConpherenceWidgetController extends ConpherenceController {
     return $this->userPreferences;
   }
 
-  public function setConpherence(ConpherenceThread $conpherence) {
-    $this->conpherence = $conpherence;
-    return $this;
+  public function shouldAllowPublic() {
+    return true;
   }
 
-  public function getConpherence() {
-    return $this->conpherence;
-  }
-
-  public function setConpherenceID($conpherence_id) {
-    $this->conpherenceID = $conpherence_id;
-    return $this;
-  }
-
-  public function getConpherenceID() {
-    return $this->conpherenceID;
-  }
-
-  public function willProcessRequest(array $data) {
-    $this->setConpherenceID(idx($data, 'id'));
-  }
-
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $conpherence_id = $this->getConpherenceID();
+    $conpherence_id = $request->getURIData('id');
     if (!$conpherence_id) {
       return new Aphront404Response();
     }
@@ -50,12 +30,32 @@ final class ConpherenceWidgetController extends ConpherenceController {
       ->withIDs(array($conpherence_id))
       ->needWidgetData(true)
       ->executeOne();
+    if (!$conpherence) {
+      return new Aphront404Response();
+    }
     $this->setConpherence($conpherence);
 
     $this->setUserPreferences($user->loadPreferences());
 
-    $widgets = $this->renderWidgetPaneContent();
-    $content = $widgets;
+    switch ($request->getStr('widget')) {
+      case 'widgets-people':
+        $content = $this->renderPeopleWidgetPaneContent();
+        break;
+      case 'widgets-files':
+        $content = $this->renderFileWidgetPaneContent();
+        break;
+      case 'widgets-calendar':
+        $widget = $this->renderCalendarWidgetPaneContent();
+        $content = phutil_implode_html('', $widget);
+        break;
+      case 'widgets-settings':
+        $content = $this->renderSettingsWidgetPaneContent();
+        break;
+      default:
+        $widgets = $this->renderWidgetPaneContent();
+        $content = $widgets;
+        break;
+    }
     return id(new AphrontAjaxResponse())->setContent($content);
   }
 
@@ -68,18 +68,22 @@ final class ConpherenceWidgetController extends ConpherenceController {
       ->setHref($this->getWidgetURI())
       ->setMetadata(array('widget' => null))
       ->addSigil('conpherence-widget-adder');
+    $header = javelin_tag(
+      'a',
+      array(
+        'href' => '#',
+        'sigil' => 'widgets-selector',
+      ),
+      pht('Participants'));
+
     $widgets[] = phutil_tag(
       'div',
       array(
         'class' => 'widgets-header',
       ),
-      id(new PHUIActionHeaderView())
-      ->setHeaderColor(PHUIActionHeaderView::HEADER_GREY)
-      ->setHeaderTitle(pht('Participants'))
-      ->setHeaderHref('#')
-      ->setDropdown(true)
-      ->addAction($new_icon)
-      ->addHeaderSigil('widgets-selector'));
+      id(new PHUIHeaderView())
+      ->setHeader($header)
+      ->addActionIcon($new_icon));
     $user = $this->getRequest()->getUser();
     // now the widget bodies
     $widgets[] = javelin_tag(
@@ -89,11 +93,8 @@ final class ConpherenceWidgetController extends ConpherenceController {
         'id' => 'widgets-people',
         'sigil' => 'widgets-people',
       ),
-      id(new ConpherencePeopleWidgetView())
-      ->setUser($user)
-      ->setConpherence($conpherence)
-      ->setUpdateURI($this->getWidgetURI()));
-    $widgets[] = javelin_tag(
+      $this->renderPeopleWidgetPaneContent());
+   $widgets[] = javelin_tag(
       'div',
       array(
         'class' => 'widgets-body',
@@ -101,11 +102,8 @@ final class ConpherenceWidgetController extends ConpherenceController {
         'sigil' => 'widgets-files',
         'style' => 'display: none;',
       ),
-      id(new ConpherenceFileWidgetView())
-      ->setUser($user)
-      ->setConpherence($conpherence)
-      ->setUpdateURI($this->getWidgetURI()));
-    $widgets[] = phutil_tag(
+      $this->renderFileWidgetPaneContent());
+   $widgets[] = phutil_tag(
       'div',
       array(
         'class' => 'widgets-body',
@@ -121,17 +119,60 @@ final class ConpherenceWidgetController extends ConpherenceController {
         'style' => 'display: none',
       ),
       $this->renderSettingsWidgetPaneContent());
+    $widgets[] = phutil_tag(
+      'div',
+      array(
+        'class' => 'widgets-body',
+        'id' => 'widgets-edit',
+        'style' => 'display: none',
+      ));
 
     // without this implosion we get "," between each element in our widgets
     // array
     return array('widgets' => phutil_implode_html('', $widgets));
   }
 
+  private function renderPeopleWidgetPaneContent() {
+    return id(new ConpherencePeopleWidgetView())
+      ->setUser($this->getViewer())
+      ->setConpherence($this->getConpherence())
+      ->setUpdateURI($this->getWidgetURI());
+  }
+
+  private function renderFileWidgetPaneContent() {
+    return  id(new ConpherenceFileWidgetView())
+      ->setUser($this->getViewer())
+      ->setConpherence($this->getConpherence())
+      ->setUpdateURI($this->getWidgetURI());
+  }
+
   private function renderSettingsWidgetPaneContent() {
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
     $conpherence = $this->getConpherence();
-    $participants = $conpherence->getParticipants();
-    $participant = $participants[$user->getPHID()];
+    $participant = $conpherence->getParticipantIfExists($viewer->getPHID());
+    if (!$participant) {
+      $can_join = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $conpherence,
+        PhabricatorPolicyCapability::CAN_JOIN);
+      if ($can_join) {
+        $text = pht(
+          'Notification settings are available after joining the room.');
+      } else if ($viewer->isLoggedIn()) {
+        $text = pht(
+          'Notification settings not applicable to rooms you can not join.');
+      } else {
+        $text = pht(
+          'Notification settings are available after logging in and joining '.
+          'the room.');
+      }
+      return phutil_tag(
+        'div',
+        array(
+          'class' => 'no-settings',
+        ),
+        $text);
+    }
     $default = ConpherenceSettings::EMAIL_ALWAYS;
     $preference = $this->getUserPreferences();
     if ($preference) {
@@ -177,7 +218,7 @@ final class ConpherenceWidgetController extends ConpherenceController {
     );
 
     return phabricator_form(
-      $user,
+      $viewer,
       array(
         'method' => 'POST',
         'action' => $this->getWidgetURI(),
@@ -192,7 +233,11 @@ final class ConpherenceWidgetController extends ConpherenceController {
     $conpherence = $this->getConpherence();
     $participants = $conpherence->getParticipants();
     $widget_data = $conpherence->getWidgetData();
-    $statuses = $widget_data['statuses'];
+
+    // TODO: This panel is built around an outdated notion of events and isn't
+    // invitee-aware.
+
+    $statuses = $widget_data['events'];
     $handles = $conpherence->getHandles();
     $content = array();
     $layout = id(new AphrontMultiColumnView())
@@ -280,13 +325,19 @@ final class ConpherenceWidgetController extends ConpherenceController {
                 $user,
                 $time_str);
 
-            $secondary_info = pht('%s, %s',
-              $handles[$status->getUserPHID()]->getName(), $epoch_range);
+            if (isset($handles[$status->getUserPHID()])) {
+              $secondary_info = pht(
+                '%s, %s',
+                $handles[$status->getUserPHID()]->getName(),
+                $epoch_range);
+            } else {
+              $secondary_info = $epoch_range;
+            }
 
             $content[] = phutil_tag(
               'div',
               array(
-                'class' => 'user-status '.$status->getTextStatus().$top_border,
+                'class' => 'user-status '.$top_border,
               ),
               array(
                 phutil_tag(
@@ -301,7 +352,7 @@ final class ConpherenceWidgetController extends ConpherenceController {
                     'class' => 'description',
                   ),
                   array(
-                    $status->getTerseSummary($user),
+                    $status->getName(),
                     phutil_tag(
                       'div',
                       array(
@@ -333,9 +384,7 @@ final class ConpherenceWidgetController extends ConpherenceController {
           if ($status) {
             $inner_layout[] = phutil_tag(
               'div',
-              array(
-                'class' => $status->getTextStatus(),
-              ),
+              array(),
               '');
           } else {
             $inner_layout[] = phutil_tag(

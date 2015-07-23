@@ -7,10 +7,10 @@ final class MacroQueryConduitAPIMethod extends MacroConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Retrieve image macro information.';
+    return pht('Retrieve image macro information.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'authorPHIDs' => 'optional list<phid>',
       'phids'       => 'optional list<phid>',
@@ -20,13 +20,8 @@ final class MacroQueryConduitAPIMethod extends MacroConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

@@ -57,13 +57,9 @@ final class NuanceSource extends NuanceDAO
     $edit_policy = $app->getPolicy(
       NuanceSourceDefaultEditCapability::CAPABILITY);
 
-    $definitions = NuanceSourceDefinition::getAllDefinitions();
-    $lucky_definition = head($definitions);
-
     return id(new NuanceSource())
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($edit_policy)
-      ->setType($lucky_definition->getSourceTypeConstant());
+      ->setEditPolicy($edit_policy);
   }
 
 
@@ -88,6 +84,9 @@ final class NuanceSource extends NuanceDAO
 
     return $timeline;
   }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
   public function getCapabilities() {

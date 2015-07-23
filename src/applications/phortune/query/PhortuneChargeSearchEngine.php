@@ -5,6 +5,11 @@ final class PhortuneChargeSearchEngine
 
   private $account;
 
+  public function canUseInPanelContext() {
+    // These only make sense in an account context.
+    return false;
+  }
+
   public function setAccount(PhortuneAccount $account) {
     $this->account = $account;
     return $this;
@@ -16,6 +21,10 @@ final class PhortuneChargeSearchEngine
 
   public function getResultTypeDescription() {
     return pht('Phortune Charges');
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorPhortuneApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -118,8 +127,9 @@ final class PhortuneChargeSearchEngine
       ->setCharges($charges)
       ->setHandles($handles);
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Charges'))
-      ->appendChild($table);
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setTable($table);
+
+    return $table;
   }
 }

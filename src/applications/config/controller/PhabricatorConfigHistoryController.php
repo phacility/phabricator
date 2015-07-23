@@ -3,7 +3,6 @@
 final class PhabricatorConfigHistoryController
   extends PhabricatorConfigController {
 
-
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
@@ -11,7 +10,6 @@ final class PhabricatorConfigHistoryController
     $xactions = id(new PhabricatorConfigTransactionQuery())
       ->setViewer($user)
       ->needComments(true)
-      ->setReversePaging(false)
       ->execute();
 
     $object = new PhabricatorConfigEntry();
@@ -33,14 +31,18 @@ final class PhabricatorConfigHistoryController
     $title = pht('Settings History');
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb('Config', $this->getApplicationURI());
-
     $crumbs->addTextCrumb($title, '/config/history/');
+
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('history/');
+    $nav->setCrumbs($crumbs);
+    $nav->appendChild($timeline);
 
     return $this->buildApplicationPage(
       array(
-        $crumbs,
-        $timeline,
+        $nav,
       ),
       array(
         'title' => $title,

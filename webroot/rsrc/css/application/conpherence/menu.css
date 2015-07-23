@@ -11,6 +11,10 @@
   background: #fff;
 }
 
+.page-has-warning .conpherence-layout {
+  top: 76px;
+}
+
 .conpherence-layout .conpherence-no-threads {
   text-align: center;
   position: fixed;
@@ -39,11 +43,37 @@
   overflow-y: auto;
   top: 0;
   bottom: 0;
+  background: #f7f7f7;
+  border-right: 1px solid {$lightblueborder}
 }
 
-.device-desktop .conpherence-layout .conpherence-menu-pane,
-.device-desktop .conpherence-layout .phabricator-nav-column-background {
-  width: 239px;
+.conpherence-menu-pane .phui-list-item-view.hidden {
+  display: none;
+}
+
+.conpherence-menu-pane.phabricator-side-menu .phui-list-item-type-label {
+  padding: 10px 0 9px 8px;
+}
+
+.conpherence-menu-pane .conpherence-room-list-header
+.phui-icon-view {
+  font-weight: bold;
+  float: right;
+  text-transform: none;
+  margin: 0px 8px 0px 0px;
+}
+
+.conpherence-menu-pane .conpherence-room-list-header
+.phui-icon-view:hover {
+  color: {$sky};
+}
+
+.conpherence-menu-pane .conpherence-message-list-header {
+  margin-top: 12px;
+}
+
+.device-desktop .conpherence-layout .conpherence-menu-pane {
+  width: 240px;
 }
 
 .device .conpherence-menu-pane {
@@ -58,22 +88,12 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.conpherence-layout .phabricator-nav-column-background {
-  display: block;
-  width: 100%;
-}
-
-.device .phabricator-nav-column-background {
-  top: 44px;
-}
-
-.device .conpherence-role-thread .conpherence-menu-pane,
-.device .conpherence-role-thread .phabricator-nav-column-background {
+.device .conpherence-role-thread .conpherence-menu-pane {
   display: none;
 }
 
 .device-desktop .conpherence-content-pane {
-  margin-left: 240px;
+  margin-left: 241px;
 }
 
 .conpherence-content-pane {
@@ -89,22 +109,25 @@
 
 .conpherence-menu .conpherence-menu-item-view {
   display: block;
-  height: 46px;
-  width: 100%;
   overflow: hidden;
   position: relative;
   text-decoration: none;
   border-left: 4px solid transparent;
+  padding: 4px;
 }
 
 .conpherence-menu .conpherence-selected {
-  background: {$hovergrey};
+  background: rgba(0,0,0,0.05);
   border-left: 4px solid {$sky};
+}
+
+.conpherence-menu .phui-list-item-type-link .phui-list-item-href {
+  padding: 8px 0 8px 8px;
 }
 
 .device-desktop .conpherence-menu
  .conpherence-selected.conpherence-menu-item-view:hover {
-  background-color: {$hoverselectedgrey};
+  background-color: rgba(0,0,0,0.07);
 }
 
 .conpherence-menu .loading {
@@ -112,54 +135,48 @@
 }
 
 .device-desktop .conpherence-menu .conpherence-menu-item-view:hover {
-  background-color: {$hovergrey};
+  background-color: rgba(0,0,0,0.05);
 }
 
 .conpherence-menu .conpherence-menu-item-view .conpherence-menu-item-image {
-  top: 6px;
-  left: 8px;
-  display: block;
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  background-size: 30px;
-  border: 2px solid #fff;
-  border-radius: 2px;
+  width: 26px;
+  height: 26px;
+  background-size: 26px;
+  box-shadow: {$borderinset};
+  border-radius: 3px;
+  float: left;
+  margin-left: 4px;
 }
 
 .conpherence-menu .conpherence-menu-item-view .conpherence-menu-item-title {
   display: block;
-  margin-top: 8px;
-  margin-left: 50px;
+  padding: 4px 0 4px 8px;
+  float: left;
   text-align: left;
   font-weight: bold;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   color: {$darkbluetext};
   text-shadow: 0px 1px 1px #fff;
   overflow: hidden;
-  width: 160px;
+  width: 175px;
   text-overflow: ellipsis;
 }
 
 .conpherence-menu .conpherence-menu-item-view .conpherence-menu-item-subtitle {
-  display: block;
-  color: {$bluetext};
-  font-size: 11px;
-  margin-top: 2px;
-  margin-left: 50px;
+  display: none;
 }
 
 .conpherence-menu .conpherence-menu-item-view
 .conpherence-menu-item-unread-count {
   position: absolute;
-  right: 8px;
-  top: 15px;
+  right: 4px;
+  top: 10px;
   background: {$blue};
   border-radius: 2px;
   color: #fff;
   font-weight: bold;
   padding: 0 5px 1px;
-  font-size: 11px;
+  font-size: {$smallestfontsize};
 }
 
 .conpherence-menu .hide-unread-count .conpherence-menu-item-unread-count,
@@ -172,14 +189,16 @@
   top: 15px;
   right: 16px;
   color: {$bluetext};
-  font-size: 11px;
+  font-size: {$smallestfontsize};
+}
+
+.conpherence-menu-item-header {
+  font-weight: bold;
+  text-transform: uppercase;
+  color: {$bluetext};
 }
 
 .no-conpherences-menu-item {
-  color: #a1a5a9;
-  border-top: solid 1px #3B3D3E;
-  padding: 20px 0;
-  margin: 0px auto;
-  width: 280px;
-  text-align: center;
+  color: {$bluetext};
+  padding: 4px 12px;
 }

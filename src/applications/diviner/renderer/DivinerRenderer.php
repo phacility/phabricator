@@ -1,6 +1,6 @@
 <?php
 
-abstract class DivinerRenderer {
+abstract class DivinerRenderer extends Phobject {
 
   private $publisher;
   private $atomStack = array();

@@ -20,6 +20,7 @@ final class PhortunePaymentMethodCreateController
     if (!$account) {
       return new Aphront404Response();
     }
+    $account_id = $account->getID();
 
     $merchant = id(new PhortuneMerchantQuery())
       ->setViewer($viewer)
@@ -30,8 +31,12 @@ final class PhortunePaymentMethodCreateController
     }
 
     $cart_id = $request->getInt('cartID');
+    $subscription_id = $request->getInt('subscriptionID');
     if ($cart_id) {
       $cancel_uri = $this->getApplicationURI("cart/{$cart_id}/checkout/");
+    } else if ($subscription_id) {
+      $cancel_uri = $this->getApplicationURI(
+        "{$account_id}/subscription/edit/{$subscription_id}/");
     } else {
       $cancel_uri = $this->getApplicationURI($account->getID().'/');
     }
@@ -39,30 +44,36 @@ final class PhortunePaymentMethodCreateController
     $providers = $this->loadCreatePaymentMethodProvidersForMerchant($merchant);
     if (!$providers) {
       throw new Exception(
-        'There are no payment providers enabled that can add payment '.
-        'methods.');
+        pht(
+          'There are no payment providers enabled that can add payment '.
+          'methods.'));
     }
 
-    $provider_id = $request->getInt('providerID');
-    if (empty($providers[$provider_id])) {
-      $choices = array();
-      foreach ($providers as $provider) {
-        $choices[] = $this->renderSelectProvider($provider);
+    if (count($providers) == 1) {
+      // If there's only one provider, always choose it.
+      $provider_id = head_key($providers);
+    } else {
+      $provider_id = $request->getInt('providerID');
+      if (empty($providers[$provider_id])) {
+        $choices = array();
+        foreach ($providers as $provider) {
+          $choices[] = $this->renderSelectProvider($provider);
+        }
+
+        $content = phutil_tag(
+          'div',
+          array(
+            'class' => 'phortune-payment-method-list',
+          ),
+          $choices);
+
+        return $this->newDialog()
+          ->setRenderDialogAsDiv(true)
+          ->setTitle(pht('Add Payment Method'))
+          ->appendParagraph(pht('Choose a payment method to add:'))
+          ->appendChild($content)
+          ->addCancelButton($cancel_uri);
       }
-
-      $content = phutil_tag(
-        'div',
-        array(
-          'class' => 'phortune-payment-method-list',
-        ),
-        $choices);
-
-      return $this->newDialog()
-        ->setRenderDialogAsDiv(true)
-        ->setTitle(pht('Add Payment Method'))
-        ->appendParagraph(pht('Choose a payment method to add:'))
-        ->appendChild($content)
-        ->addCancelButton($cancel_uri);
     }
 
     $provider = $providers[$provider_id];
@@ -84,20 +95,23 @@ final class PhortunePaymentMethodCreateController
 
       if (!$errors) {
         $client_token_raw = $request->getStr('token');
-        $client_token = json_decode($client_token_raw, true);
-        if (!is_array($client_token)) {
+        $client_token = null;
+        try {
+          $client_token = phutil_json_decode($client_token_raw);
+        } catch (PhutilJSONParserException $ex) {
           $errors[] = pht(
             'There was an error decoding token information submitted by the '.
             'client. Expected a JSON-encoded token dictionary, received: %s.',
             nonempty($client_token_raw, pht('nothing')));
-        } else {
-          if (!$provider->validateCreatePaymentMethodToken($client_token)) {
-            $errors[] = pht(
-              'There was an error with the payment token submitted by the '.
-              'client. Expected a valid dictionary, received: %s.',
-              $client_token_raw);
-          }
         }
+
+        if (!$provider->validateCreatePaymentMethodToken($client_token)) {
+          $errors[] = pht(
+            'There was an error with the payment token submitted by the '.
+            'client. Expected a valid dictionary, received: %s.',
+            $client_token_raw);
+        }
+
         if (!$errors) {
           $errors = $provider->createPaymentMethodFromRequest(
             $request,
@@ -114,6 +128,8 @@ final class PhortunePaymentMethodCreateController
         if ($cart_id) {
           $next_uri = $this->getApplicationURI(
             "cart/{$cart_id}/checkout/?paymentMethodID=".$method->getID());
+        } else if ($subscription_id) {
+          $next_uri = $cancel_uri;
         } else {
           $account_uri = $this->getApplicationURI($account->getID().'/');
           $next_uri = new PhutilURI($account_uri);
@@ -125,7 +141,7 @@ final class PhortunePaymentMethodCreateController
         $dialog = id(new AphrontDialogView())
           ->setUser($viewer)
           ->setTitle(pht('Error Adding Payment Method'))
-          ->appendChild(id(new AphrontErrorView())->setErrors($errors))
+          ->appendChild(id(new PHUIInfoView())->setErrors($errors))
           ->addCancelButton($request->getRequestURI());
 
         return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -140,6 +156,7 @@ final class PhortunePaymentMethodCreateController
       ->setWorkflow(true)
       ->addHiddenInput('providerID', $provider_id)
       ->addHiddenInput('cartID', $request->getInt('cartID'))
+      ->addHiddenInput('subscriptionID', $request->getInt('subscriptionID'))
       ->addHiddenInput('isProviderForm', true)
       ->appendChild(
         id(new AphrontFormSubmitControl())
@@ -202,8 +219,10 @@ final class PhortunePaymentMethodCreateController
 
     $errors = array();
 
-    $client_errors = json_decode($client_errors_raw, true);
-    if (!is_array($client_errors)) {
+    $client_errors = null;
+    try {
+      $client_errors = phutil_json_decode($client_errors_raw);
+    } catch (PhutilJSONParserException $ex) {
       $errors[] = pht(
         'There was an error decoding error information submitted by the '.
         'client. Expected a JSON-encoded list of error codes, received: %s.',

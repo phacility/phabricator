@@ -125,7 +125,7 @@ final class PhabricatorSlowvoteQuery
     return $polls;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->ids) {
@@ -174,8 +174,8 @@ final class PhabricatorSlowvoteQuery
     return implode(' ', $joins);
   }
 
-  protected function getPagingColumn() {
-    return 'p.id';
+  protected function getPrimaryTableAlias() {
+    return 'p';
   }
 
   public function getQueryApplicationClass() {

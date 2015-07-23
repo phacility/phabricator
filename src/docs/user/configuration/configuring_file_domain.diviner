@@ -1,0 +1,112 @@
+@title Configuring a File Domain
+@group config
+
+Setup guide for an alternate file domain or CDN.
+
+Overview
+========
+
+Serving files that users upload from the same domain that Phabricator runs on
+is a security risk.
+
+In general, doing this creates a risk that users who have permission to upload
+files may be able to upload specially crafted files (like Flash or Java
+applets) which can execute with domain permissions in some contexts (usually
+because of security issues with Flash and Java, but both products have a rich
+history of security issues). The attacker can then trick another user into
+executing the file and gain access to their session.
+
+The best way to mitigate this threat is to serve files from a separate domain.
+For example, if Phabricator is hosted at `https://phabricator.example.com/`,
+you can serve files from `https://files.exampleusercontent.com/`.
+
+The alternate file domain should be a completely different domain from your
+primary domain, not just a different subdomain. For example, Google uses
+`googleusercontent.com`, //not// `usercontent.google.com`.
+
+You can also configure the alternate file domain to serve through a CDN, which
+will improve performance.
+
+Approaches
+=========
+
+Broadly, you can either choose a CDN service and configure that (which will
+also defuse the security risks) or you can configure a second domain with the
+same settings as your first domain. A CDN service may be easier to set up and
+can improve performance.
+
+| Method | Setup Difficulty | Cost | Notes |
+|---|---|---|---|
+| AWS CloudFront | Very Easy | Cheap | Recommended |
+| CloudFlare | Easy | Free/Cheap | Recommended |
+| Self Hosted | Moderate | Free | No CDN unless you're an ops wizard. |
+
+Approach: AWS CloudFront
+========
+
+CloudFront is a CDN service that's part of Amazon Web Services. It makes
+particular sense to use if you're hosting your install in AWS.
+
+To configure it, set up a new CloudFront distribution which is pointed at
+your Phabricator install as an origin (make sure you point it at the primary
+domain name of your install, not just a load balancer or instance). You do not
+need to set up a new domain name, which makes setup a bit more straightforward.
+
+Most settings can be left at their default values, but you should change
+the **Allowed HTTP Methods** setting from `GET, HEAD` to
+`GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE`.
+
+Once configured, accessing the distribution's domain name should return a
+Phabricator error page indicating that Phabricator does not recognize the
+domain. If you see this page, it means you've configured things correctly.
+
+Continue to "Configuring Phabricator", below.
+
+Approach: CloudFlare
+========
+
+[[ https://cloudflare.net | CloudFlare ]] is a general-purpose CDN service.
+
+To set up CloudFlare, you'll need to register a second domain and go through
+their enrollment process to host the alternate domain on their servers. Use a
+CNAME record to forward a subdomain to your Phabricator install.
+
+CloudFlare will automatically generate SSL certificates for hosted domains,
+which can significantly reduce the cost and complexity of setup.
+
+Once configured, accessing the CNAME-forwarded subdomain should return a
+Phabricator error page indicating that Phabricator does not recognize the
+domain. If you see this page, it means you've configured things correctly.
+
+Continue to "Configuring Phabricator", below.
+
+Approach: Self Hosted
+========
+
+To do this, just set up a second domain exactly like your primary domain is
+set up. When setup is complete, visiting the domain should return a Phabricator
+error page indicating that Phabricator does not recognize the domain. This
+means that you've configured things correctly.
+
+Note that if you use SSL (which you should), you'll also need to get a
+certificate for this alternate domain and configure that, too.
+
+You can also configure a self-hosted domain to route through a caching server
+to provide some of the performance benefits of a CDN, but this is advanced and
+outside the scope of this documentation.
+
+Continue to "Configuring Phabricator", below.
+
+Configuring Phabricator
+========
+
+After you've set up a CDN or an alternate domain, configure Phabricator to
+recognize the domain. Run this command, providing the domain you have
+configured in place of the `<domain>` token. You should include the protocol,
+so an example domain might be `https://cdn.phabcdn.net/`.
+
+  phabricator/ $ ./bin/config set security.alternate-file-domain <domain>
+
+Phabricator should now serve CSS, JS, images, profile pictures, and user
+content through the file domain. You can verify this with "View Source" or
+by downloading a file and checking the URL.

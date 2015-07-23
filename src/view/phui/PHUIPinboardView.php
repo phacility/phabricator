@@ -20,14 +20,14 @@ final class PHUIPinboardView extends AphrontView {
 
     if (!$this->items) {
       $string = nonempty($this->noDataString, pht('No data.'));
-      return id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
+      return id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
         ->appendChild($string)
         ->render();
     }
 
     return phutil_tag(
-      'div',
+      'ul',
       array(
         'class' => 'phui-pinboard-view',
       ),

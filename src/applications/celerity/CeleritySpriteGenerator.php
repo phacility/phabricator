@@ -1,27 +1,28 @@
 <?php
 
-final class CeleritySpriteGenerator {
+final class CeleritySpriteGenerator extends Phobject {
 
   public function buildMenuSheet() {
     $sprites = array();
 
-    $sources = array(
-      'arrow-right' => array(
-        'x' => 9,
-        'y' => 31,
-        'css' => '.phabricator-crumb-divider',
-      ),
-      'logo' => array(
+    $colors = array(
+      'dark',
+      'light',
+    );
+
+    $sources = array();
+    foreach ($colors as $color) {
+      $sources[$color.'-logo'] = array(
         'x' => 96,
-        'y' => 26,
-        'css' => '.phabricator-main-menu-logo',
-      ),
-      'eye' => array(
+        'y' => 40,
+        'css' => '.'.$color.'-logo',
+      );
+      $sources[$color.'-eye'] = array(
         'x' => 40,
         'y' => 40,
-        'css' => '.phabricator-main-menu-eye',
-      ),
-    );
+        'css' => '.'.$color.'-eye',
+      );
+    }
 
     $scales = array(
       '1x' => 1,
@@ -149,45 +150,6 @@ final class CeleritySpriteGenerator {
     return $sheet;
   }
 
-  public function buildGradientSheet() {
-    $gradients = $this->getDirectoryList('gradients');
-
-    $template = new PhutilSprite();
-
-    $unusual_heights = array(
-      'breadcrumbs'     => 31,
-      'grey-header'     => 70,
-      'dark-grey-header' => 70,
-      'lightblue-header' => 240,
-      'lightgreen-header' => 240,
-      'lightviolet-header' => 240,
-      'lightred-header' => 240,
-    );
-
-    $sprites = array();
-    foreach ($gradients as $gradient) {
-      $path = $this->getPath('gradients/'.$gradient.'.png');
-      $sprite = id(clone $template)
-        ->setName('gradient-'.$gradient)
-        ->setSourceFile($path)
-        ->setTargetCSS('.gradient-'.$gradient);
-
-      $sprite->setSourceSize(4, idx($unusual_heights, $gradient, 26));
-
-      $sprites[] = $sprite;
-    }
-
-    $sheet = $this->buildSheet(
-      'gradient',
-      false,
-      PhutilSpriteSheet::TYPE_REPEAT_X);
-    foreach ($sprites as $sprite) {
-      $sheet->addSprite($sprite);
-    }
-
-    return $sheet;
-  }
-
   public function buildMainHeaderSheet() {
     $gradients = $this->getDirectoryList('main_header');
     $template = new PhutilSprite();
@@ -198,7 +160,8 @@ final class CeleritySpriteGenerator {
       $sprite = id(clone $template)
         ->setName('main-header-'.$gradient)
         ->setSourceFile($path)
-        ->setTargetCSS('.main-header-'.$gradient);
+        ->setTargetCSS('.phui-theme-'.$gradient.
+          ' .phabricator-main-menu-background');
       $sprite->setSourceSize(6, 44);
       $sprites[] = $sprite;
     }
@@ -214,96 +177,6 @@ final class CeleritySpriteGenerator {
     return $sheet;
   }
 
-
-  public function buildAppsSheet() {
-    return $this->buildAppsSheetVariant(1);
-  }
-
-  public function buildAppsLargeSheet() {
-    return $this->buildAppsSheetVariant(2);
-  }
-
-  public function buildAppsXLargeSheet() {
-    return $this->buildAppsSheetVariant(3);
-  }
-
-  private function buildAppsSheetVariant($variant) {
-
-    if ($variant == 1) {
-      $scales = array(
-        '1x' => 1,
-        '2x' => 2,
-        '4x' => 4,
-      );
-      $variant_name = 'apps';
-      $variant_short = '';
-      $size_x = 14;
-      $size_y = 14;
-
-      $colors = array(
-        'dark'  => 'dark',
-      );
-    } else if ($variant == 2) {
-      $scales = array(
-        '2x' => 1,
-        '4x' => 2,
-      );
-      $variant_name = 'apps-large';
-      $variant_short = '-large';
-      $size_x = 28;
-      $size_y = 28;
-
-      $colors = array(
-        'dark'  => 'dark',
-      );
-    } else {
-      $scales = array(
-        '4x' => 1,
-      );
-      $variant_name = 'apps-xlarge';
-      $variant_short = '-xlarge';
-      $size_x = 56;
-      $size_y = 56;
-
-      $colors = array(
-        'dark'  => 'dark',
-      );
-    }
-
-    $apps = $this->getDirectoryList('apps_dark_1x');
-
-    $template = id(new PhutilSprite())
-      ->setSourceSize($size_x, $size_y);
-
-    $sprites = array();
-    foreach ($apps as $app) {
-      foreach ($colors as $color => $color_path) {
-
-        $css = '.apps-'.$app.'-'.$color.$variant_short;
-        $sprite = id(clone $template)
-          ->setName('apps-'.$app.'-'.$color.$variant_short)
-          ->setTargetCSS($css);
-
-        foreach ($scales as $scale_name => $scale) {
-          $path = $this->getPath(
-            'apps_'.$color_path.'_'.$scale_name.'/'.$app.'.png');
-          $sprite->setSourceFile($path, $scale);
-        }
-
-        $sprites[] = $sprite;
-      }
-    }
-
-    $sheet = $this->buildSheet($variant_name, count($scales) > 1);
-    $sheet->setScales($scales);
-    foreach ($sprites as $sprite) {
-      $sheet->addSprite($sprite);
-    }
-
-    return $sheet;
-  }
-
-
   private function getPath($to_path = null) {
     $root = dirname(phutil_get_library_root('phabricator'));
     return $root.'/resources/sprite/'.$to_path;
@@ -318,8 +191,11 @@ final class CeleritySpriteGenerator {
     foreach ($images as $image) {
       if (!preg_match('/\.png$/', $image)) {
         throw new Exception(
-          "Expected file '{$image}' in '{$path}' to be a sprite source ".
-          "ending in '.png'.");
+          pht(
+            "Expected file '%s' in '%s' to be a sprite source ending in '%s'.",
+            $image,
+            $path,
+            '.png'));
       }
       $result[] = substr($image, 0, -4);
     }
@@ -356,7 +232,8 @@ final class CeleritySpriteGenerator {
       $retina_rules = <<<EOCSS
 @media
 only screen and (min-device-pixel-ratio: 1.5),
-only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+only screen and (-webkit-min-device-pixel-ratio: 1.5),
+only screen and (min-resolution: 1.5dppx) {
   .sprite-{$name}{$extra_css} {
     background-image: url(/rsrc/image/sprite-{$name}-X2.png);
     background-size: {X}px {Y}px;

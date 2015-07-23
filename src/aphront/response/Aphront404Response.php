@@ -14,12 +14,13 @@ final class Aphront404Response extends AphrontHTMLResponse {
       ->setUser($user)
       ->setTitle(pht('404 Not Found'))
       ->addCancelButton('/', pht('Focus'))
-      ->appendParagraph(pht(
-      'Do not dwell in the past, do not dream of the future, '.
-      'concentrate the mind on the present moment.'));
+      ->appendParagraph(
+        pht(
+          'Do not dwell in the past, do not dream of the future, '.
+          'concentrate the mind on the present moment.'));
 
     $view = id(new PhabricatorStandardPageView())
-      ->setTitle('404 Not Found')
+      ->setTitle(pht('404 Not Found'))
       ->setRequest($request)
       ->setDeviceReady(true)
       ->appendChild($dialog);

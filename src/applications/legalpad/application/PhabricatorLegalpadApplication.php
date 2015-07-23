@@ -14,8 +14,8 @@ final class PhabricatorLegalpadApplication extends PhabricatorApplication {
     return pht('Agreements and Signatures');
   }
 
-  public function getIconName() {
-    return 'legalpad';
+  public function getFontIcon() {
+    return 'fa-gavel';
   }
 
   public function getTitleGlyph() {
@@ -32,8 +32,13 @@ final class PhabricatorLegalpadApplication extends PhabricatorApplication {
     );
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Legalpad User Guide');
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Legalpad User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Legalpad User Guide'),
+      ),
+    );
   }
 
   public function getOverview() {
@@ -70,8 +75,27 @@ final class PhabricatorLegalpadApplication extends PhabricatorApplication {
   protected function getCustomCapabilities() {
     return array(
       LegalpadCreateDocumentsCapability::CAPABILITY => array(),
-      LegalpadDefaultViewCapability::CAPABILITY => array(),
-      LegalpadDefaultEditCapability::CAPABILITY => array(),
+      LegalpadDefaultViewCapability::CAPABILITY => array(
+        'template' => PhabricatorLegalpadDocumentPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_VIEW,
+      ),
+      LegalpadDefaultEditCapability::CAPABILITY => array(
+        'template' => PhabricatorLegalpadDocumentPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_EDIT,
+      ),
+    );
+  }
+
+  public function getMailCommandObjects() {
+    return array(
+      'document' => array(
+        'name' => pht('Email Commands: Legalpad Documents'),
+        'header' => pht('Interacting with Legalpad Documents'),
+        'object' => new LegalpadDocument(),
+        'summary' => pht(
+          'This page documents the commands you can use to interact with '.
+          'documents in Legalpad.'),
+      ),
     );
   }
 

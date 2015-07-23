@@ -53,6 +53,7 @@ final class HeraldRuleViewController extends HeraldController {
     $timeline = $this->buildTransactionTimeline(
       $rule,
       new HeraldTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     return $this->buildApplicationPage(
       array(
@@ -115,8 +116,6 @@ final class HeraldRuleViewController extends HeraldController {
 
     $viewer = $this->getRequest()->getUser();
 
-    $this->loadHandles(HeraldAdapter::getHandlePHIDs($rule));
-
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($rule)
@@ -129,9 +128,8 @@ final class HeraldRuleViewController extends HeraldController {
     if ($rule->isPersonalRule()) {
       $view->addProperty(
         pht('Author'),
-        $this->getHandle($rule->getAuthorPHID())->renderLink());
+        $viewer->renderHandle($rule->getAuthorPHID()));
     }
-
 
     $adapter = HeraldAdapter::getAdapterForContentType($rule->getContentType());
     if ($adapter) {
@@ -144,7 +142,7 @@ final class HeraldRuleViewController extends HeraldController {
       if ($rule->isObjectRule()) {
         $view->addProperty(
           pht('Trigger Object'),
-          $this->getHandle($rule->getTriggerObjectPHID())->renderLink());
+          $viewer->renderHandle($rule->getTriggerObjectPHID()));
       }
 
       $view->invokeWillRenderEvent();
@@ -152,8 +150,10 @@ final class HeraldRuleViewController extends HeraldController {
       $view->addSectionHeader(
         pht('Rule Description'),
         PHUIPropertyListView::ICON_SUMMARY);
-      $view->addTextContent(
-        $adapter->renderRuleAsText($rule, $this->getLoadedHandles()));
+
+      $handles = $viewer->loadHandles(HeraldAdapter::getHandlePHIDs($rule));
+      $rule_text = $adapter->renderRuleAsText($rule, $handles, $viewer);
+      $view->addTextContent($rule_text);
     }
 
     return $view;

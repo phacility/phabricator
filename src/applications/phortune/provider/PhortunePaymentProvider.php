@@ -3,7 +3,7 @@
 /**
  * @task addmethod  Adding Payment Methods
  */
-abstract class PhortunePaymentProvider {
+abstract class PhortunePaymentProvider extends Phobject {
 
   private $providerConfig;
 
@@ -117,9 +117,9 @@ abstract class PhortunePaymentProvider {
 
 
   public static function getAllProviders() {
-    return id(new PhutilSymbolLoader())
-      ->setAncestorClass('PhortunePaymentProvider')
-      ->loadObjects();
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->execute();
   }
 
   public function isEnabled() {

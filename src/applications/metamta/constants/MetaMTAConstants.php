@@ -1,3 +1,3 @@
 <?php
 
-abstract class MetaMTAConstants {}
+abstract class MetaMTAConstants extends Phobject {}

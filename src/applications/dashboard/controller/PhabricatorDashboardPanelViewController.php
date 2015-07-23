@@ -163,7 +163,6 @@ final class PhabricatorDashboardPanelViewController
     $dashboard_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $panel->getPHID(),
       PhabricatorDashboardPanelHasDashboardEdgeType::EDGECONST);
-    $this->loadHandles($dashboard_phids);
 
     $does_not_appear = pht(
       'This panel does not appear on any dashboards.');
@@ -171,7 +170,7 @@ final class PhabricatorDashboardPanelViewController
     $properties->addProperty(
       pht('Appears On'),
       $dashboard_phids
-        ? $this->renderHandlesForPHIDs($dashboard_phids)
+        ? $viewer->renderHandleList($dashboard_phids)
         : phutil_tag('em', array(), $does_not_appear));
 
     return $properties;

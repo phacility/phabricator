@@ -7,6 +7,10 @@ final class PhabricatorPasteTransaction
   const TYPE_TITLE = 'paste.title';
   const TYPE_LANGUAGE = 'paste.language';
 
+  const MAILTAG_CONTENT = 'paste-content';
+  const MAILTAG_OTHER = 'paste-other';
+  const MAILTAG_COMMENT = 'paste-comment';
+
   public function getApplicationName() {
     return 'pastebin';
   }
@@ -63,7 +67,7 @@ final class PhabricatorPasteTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
-      case PhabricatorPasteTransaction::TYPE_CONTENT:
+      case self::TYPE_CONTENT:
         if ($old === null) {
           return pht(
             '%s created this paste.',
@@ -74,13 +78,13 @@ final class PhabricatorPasteTransaction
             $this->renderHandleLink($author_phid));
         }
         break;
-      case PhabricatorPasteTransaction::TYPE_TITLE:
+      case self::TYPE_TITLE:
         return pht(
           '%s updated the paste\'s title to "%s".',
           $this->renderHandleLink($author_phid),
           $new);
         break;
-      case PhabricatorPasteTransaction::TYPE_LANGUAGE:
+      case self::TYPE_LANGUAGE:
         return pht(
           "%s updated the paste's language.",
           $this->renderHandleLink($author_phid));
@@ -99,7 +103,7 @@ final class PhabricatorPasteTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
-      case PhabricatorPasteTransaction::TYPE_CONTENT:
+      case self::TYPE_CONTENT:
         if ($old === null) {
           return pht(
             '%s created %s.',
@@ -112,15 +116,15 @@ final class PhabricatorPasteTransaction
             $this->renderHandleLink($object_phid));
         }
         break;
-      case PhabricatorPasteTransaction::TYPE_TITLE:
+      case self::TYPE_TITLE:
         return pht(
           '%s updated the title for %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
-      case PhabricatorPasteTransaction::TYPE_LANGUAGE:
+      case self::TYPE_LANGUAGE:
         return pht(
-          '%s update the language for %s.',
+          '%s updated the language for %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
@@ -180,6 +184,24 @@ final class PhabricatorPasteTransaction
     }
 
     return parent::renderChangeDetails($viewer);
+  }
+
+  public function getMailTags() {
+    $tags = array();
+    switch ($this->getTransactionType()) {
+      case self::TYPE_TITLE:
+      case self::TYPE_CONTENT:
+      case self::TYPE_LANGUAGE:
+        $tags[] = self::MAILTAG_CONTENT;
+        break;
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $tags[] = self::MAILTAG_COMMENT;
+        break;
+      default:
+        $tags[] = self::MAILTAG_OTHER;
+        break;
+    }
+    return $tags;
   }
 
 }

@@ -44,12 +44,10 @@ final class PhortuneProviderActionController
       return $response;
     }
 
-    $title = 'Phortune';
-
     return $this->buildApplicationPage(
       $response,
       array(
-        'title' => $title,
+        'title' => pht('Phortune'),
       ));
   }
 

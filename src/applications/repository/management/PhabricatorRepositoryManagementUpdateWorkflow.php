@@ -14,7 +14,7 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
     return $this->verbose;
   }
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('update')
       ->setExamples('**update** [options] __repository__')
@@ -27,11 +27,11 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
         array(
           array(
             'name'        => 'verbose',
-            'help'        => 'Show additional debugging information.',
+            'help'        => pht('Show additional debugging information.'),
           ),
           array(
             'name'        => 'no-discovery',
-            'help'        => 'Do not perform discovery.',
+            'help'        => pht('Do not perform discovery.'),
           ),
           array(
             'name'        => 'repos',
@@ -51,44 +51,62 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
     }
 
     $repository = head($repos);
-    $callsign = $repository->getCallsign();
-
-    $no_discovery = $args->getArg('no-discovery');
-
-    id(new PhabricatorRepositoryPullEngine())
-      ->setRepository($repository)
-      ->setVerbose($this->getVerbose())
-      ->pullRepository();
-
-    if ($no_discovery) {
-      return;
-    }
-
-    // TODO: It would be nice to discover only if we pulled something, but this
-    // isn't totally trivial. It's slightly more complicated with hosted
-    // repositories, too.
-
-    $lock_name = get_class($this).':'.$callsign;
-    $lock = PhabricatorGlobalLock::newLock($lock_name);
-
-    $lock->lock();
 
     try {
-      $repository->writeStatusMessage(
-        PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
-        null);
+      $lock_name = 'repository.update:'.$repository->getID();
+      $lock = PhabricatorGlobalLock::newLock($lock_name);
 
-      $this->discoverRepository($repository);
+      try {
+        $lock->lock();
+      } catch (PhutilLockException $ex) {
+        throw new PhutilProxyException(
+          pht(
+            'Another process is currently holding the update lock for '.
+            'repository "%s". Repositories may only be updated by one '.
+            'process at a time. This can happen if you are running multiple '.
+            'copies of the daemons. This can also happen if you manually '.
+            'update a repository while the daemons are also updating it '.
+            '(in this case, just try again in a few moments).',
+            $repository->getMonogram()),
+          $ex);
+      }
 
-      $this->checkIfRepositoryIsFullyImported($repository);
+      try {
+        $no_discovery = $args->getArg('no-discovery');
 
-      $this->updateRepositoryRefs($repository);
+        id(new PhabricatorRepositoryPullEngine())
+          ->setRepository($repository)
+          ->setVerbose($this->getVerbose())
+          ->pullRepository();
 
-      $this->mirrorRepository($repository);
+        if ($no_discovery) {
+          $lock->unlock();
+          return;
+        }
 
-      $repository->writeStatusMessage(
-        PhabricatorRepositoryStatusMessage::TYPE_FETCH,
-        PhabricatorRepositoryStatusMessage::CODE_OKAY);
+        // TODO: It would be nice to discover only if we pulled something, but
+        // this isn't totally trivial. It's slightly more complicated with
+        // hosted repositories, too.
+
+        $repository->writeStatusMessage(
+          PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
+          null);
+
+        $this->discoverRepository($repository);
+
+        $this->checkIfRepositoryIsFullyImported($repository);
+
+        $this->updateRepositoryRefs($repository);
+
+        $this->mirrorRepository($repository);
+
+        $repository->writeStatusMessage(
+          PhabricatorRepositoryStatusMessage::TYPE_FETCH,
+          PhabricatorRepositoryStatusMessage::CODE_OKAY);
+      } catch (Exception $ex) {
+        $lock->unlock();
+        throw $ex;
+      }
     } catch (Exception $ex) {
       $repository->writeStatusMessage(
         PhabricatorRepositoryStatusMessage::TYPE_FETCH,
@@ -97,8 +115,6 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
           'message' => pht(
             'Error updating working copy: %s', $ex->getMessage()),
         ));
-
-      $lock->unlock();
       throw $ex;
     }
 
@@ -132,7 +148,7 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
       $proxy = new PhutilProxyException(
         pht(
           'Error while pushing "%s" repository to mirrors.',
-          $repository->getCallsign()),
+          $repository->getMonogram()),
         $ex);
       phlog($proxy);
     }

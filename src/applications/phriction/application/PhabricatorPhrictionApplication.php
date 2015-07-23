@@ -14,16 +14,21 @@ final class PhabricatorPhrictionApplication extends PhabricatorApplication {
     return '/w/';
   }
 
-  public function getIconName() {
-    return 'phriction';
+  public function getFontIcon() {
+    return 'fa-book';
   }
 
   public function isPinnedByDefault(PhabricatorUser $viewer) {
     return true;
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Phriction User Guide');
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Phriction User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Phriction User Guide'),
+      ),
+    );
   }
 
   public function getTitleGlyph() {
@@ -62,6 +67,12 @@ final class PhabricatorPhrictionApplication extends PhabricatorApplication {
 
   public function getApplicationOrder() {
     return 0.140;
+  }
+
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      PhrictionDocumentPHIDType::TYPECONST,
+    );
   }
 
 }

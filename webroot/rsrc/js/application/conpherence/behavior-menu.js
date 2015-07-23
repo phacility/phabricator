@@ -8,11 +8,13 @@
  *           javelin-behavior-device
  *           javelin-history
  *           javelin-vector
+ *           javelin-scrollbar
+ *           phabricator-title
  *           phabricator-shaped-request
+ *           conpherence-thread-manager
  */
 
 JX.behavior('conpherence-menu', function(config) {
-
   /**
    * State for displayed thread.
    */
@@ -21,6 +23,69 @@ JX.behavior('conpherence-menu', function(config) {
     visible: null,
     node: null
   };
+
+  var scrollbar = null;
+
+  // TODO - move more logic into the ThreadManager
+  var threadManager = new JX.ConpherenceThreadManager();
+  threadManager.setMessagesRootCallback(function() {
+    return scrollbar.getContentNode();
+  });
+  threadManager.setWillLoadThreadCallback(function() {
+    markThreadLoading(true);
+  });
+  threadManager.setDidLoadThreadCallback(function(r) {
+    var header = JX.$H(r.header);
+    var messages = JX.$H(r.transactions);
+    var form = JX.$H(r.form);
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var header_root = JX.DOM.find(root, 'div', 'conpherence-header-pane');
+    var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
+    JX.DOM.setContent(header_root, header);
+    JX.DOM.setContent(scrollbar.getContentNode(), messages);
+    JX.DOM.setContent(form_root, form);
+
+    markThreadLoading(false);
+
+    didRedrawThread(true);
+  });
+
+  threadManager.setDidUpdateThreadCallback(function(r) {
+    _scrollMessageWindow();
+  });
+
+  threadManager.setWillSendMessageCallback(function () {
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
+    markThreadLoading(true);
+    JX.DOM.alterClass(form_root, 'loading', true);
+  });
+
+  threadManager.setDidSendMessageCallback(function (r, non_update) {
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
+    var textarea = JX.DOM.find(form_root, 'textarea');
+    if (!non_update) {
+      var fileWidget = null;
+      try {
+        fileWidget = JX.DOM.find(root, 'div', 'widgets-files');
+      } catch (ex) {
+        // Ignore; maybe no files widget
+      }
+      if (fileWidget) {
+        JX.DOM.setContent(
+          fileWidget,
+          JX.$H(r.file_widget));
+      }
+
+      _scrollMessageWindow();
+      textarea.value = '';
+    }
+    markThreadLoading(false);
+
+    setTimeout(function() { JX.DOM.focus(textarea); }, 100);
+  });
+  threadManager.start();
 
   /**
    * Current role of this behavior. The two possible roles are to show a 'list'
@@ -51,20 +116,17 @@ JX.behavior('conpherence-menu', function(config) {
     }
     markWidgetLoading(true);
     onDeviceChange();
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var messages_root = JX.DOM.find(root, 'div', 'conpherence-message-pane');
+    var messages = JX.DOM.find(messages_root, 'div', 'conpherence-messages');
+    scrollbar = new JX.Scrollbar(messages);
+    scrollbar.setAsScrollFrame();
   }
   init();
 
   /**
    * Selecting threads
    */
-  JX.Stratcom.listen(
-    'conpherence-selectthread',
-    null,
-    function (e) {
-      selectThreadByID(e.getData().id);
-    }
-  );
-
   function selectThreadByID(id, update_page_data) {
     var thread = JX.$(id);
     selectThread(thread, update_page_data);
@@ -73,9 +135,6 @@ JX.behavior('conpherence-menu', function(config) {
   function selectThread(node, update_page_data) {
     if (_thread.node) {
       JX.DOM.alterClass(_thread.node, 'conpherence-selected', false);
-      // keep the unread-count hidden still. big TODO once we ajax in updates
-      // to threads to make this work right and move threads between read /
-      // unread
     }
 
     JX.DOM.alterClass(node, 'conpherence-selected', true);
@@ -94,16 +153,13 @@ JX.behavior('conpherence-menu', function(config) {
   }
 
   function updatePageData(data) {
-    var uri_suffix = _thread.selected + '/';
-    if (data.use_base_uri) {
-      uri_suffix = '';
-    }
-    JX.History.replace(config.baseURI + uri_suffix);
+    var uri = '/Z' + _thread.selected;
+    JX.History.replace(uri);
     if (data.title) {
-      document.title = data.title;
+      JX.Title.setTitle(data.title);
     } else if (_thread.node) {
       var threadData = JX.Stratcom.getData(_thread.node);
-      document.title = threadData.title;
+      JX.Title.setTitle(threadData.title);
     }
   }
 
@@ -127,13 +183,17 @@ JX.behavior('conpherence-menu', function(config) {
     var data = JX.Stratcom.getData(_thread.node);
 
     if (_thread.visible !== null || !config.hasThread) {
-      markThreadLoading(true);
-      var uri = config.baseURI + data.threadID + '/';
-      new JX.Workflow(uri, {})
-        .setHandler(JX.bind(null, onLoadThreadResponse, data.threadID))
-        .start();
+      threadManager.setLoadThreadURI('/conpherence/' + data.threadID + '/');
+      threadManager.loadThreadByID(data.threadID);
     } else if (config.hasThread) {
+      // we loaded the thread via the server so let the thread manager know
+      threadManager.setLoadedThreadID(config.selectedThreadID);
+      threadManager.setLoadedThreadPHID(config.selectedThreadPHID);
+      threadManager.setLatestTransactionID(config.latestTransactionID);
+      threadManager.setCanEditLoadedThread(config.canEditSelectedThread);
+      threadManager.cacheCurrentTransactions();
       _scrollMessageWindow();
+      _focusTextarea();
     } else {
       didRedrawThread();
     }
@@ -237,29 +297,13 @@ JX.behavior('conpherence-menu', function(config) {
     var widget = 'conpherence-message-pane';
     if (device == 'desktop') {
       widget = 'widgets-people';
+      var uri = JX.$U(location.href);
+      var params = uri.getQueryParams();
+      if ('settings' in params) {
+        widget = 'widgets-settings';
+      }
     }
     return widget;
-  }
-
-  function onLoadThreadResponse(thread_id, response) {
-    // we got impatient and this is no longer the right answer :/
-    if (_thread.selected != thread_id) {
-      return;
-    }
-    var header = JX.$H(response.header);
-    var messages = JX.$H(response.messages);
-    var form = JX.$H(response.form);
-    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var header_root = JX.DOM.find(root, 'div', 'conpherence-header-pane');
-    var messages_root = JX.DOM.find(root, 'div', 'conpherence-messages');
-    var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
-    JX.DOM.setContent(header_root, header);
-    JX.DOM.setContent(messages_root, messages);
-    JX.DOM.setContent(form_root, form);
-
-    markThreadLoading(false);
-
-    didRedrawThread(true);
   }
 
   /**
@@ -269,21 +313,57 @@ JX.behavior('conpherence-menu', function(config) {
    * - notably when the widget selector is used to invoke the message pane.
    * The following three functions get 'er done.
    */
-   function didRedrawThread(build_device_widget_selector) {
-     _scrollMessageWindow();
-     JX.Stratcom.invoke(
-       'conpherence-did-redraw-thread',
-       null,
-       {
-         widget : getDefaultWidget(),
-         threadID : _thread.selected,
-         buildDeviceWidgetSelector : build_device_widget_selector
-       });
+  function didRedrawThread(build_device_widget_selector) {
+    _scrollMessageWindow();
+    _focusTextarea();
+    JX.Stratcom.invoke(
+      'conpherence-did-redraw-thread',
+      null,
+      {
+        widget : getDefaultWidget(),
+        threadID : _thread.selected,
+        buildDeviceWidgetSelector : build_device_widget_selector
+      });
   }
+
+  var _firstScroll = true;
   function _scrollMessageWindow() {
+    if (_firstScroll) {
+      _firstScroll = false;
+
+      // We want to let the standard #anchor tech take over after we make sure
+      // we don't have to present the user with a "load older message?" dialog
+      if (window.location.hash) {
+        var hash = window.location.hash.replace(/^#/, '');
+        try {
+          JX.$('anchor-' + hash);
+        } catch (ex) {
+          var uri = '/conpherence/' +
+            _thread.selected + '/' + hash + '/';
+          threadManager.setLoadThreadURI(uri);
+          threadManager.loadThreadByID(_thread.selected, true);
+          _firstScroll = true;
+          return;
+        }
+        return;
+      }
+    }
+    scrollbar.scrollTo(scrollbar.getViewportNode().scrollHeight);
+  }
+  function _focusTextarea() {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var messages_root = JX.DOM.find(root, 'div', 'conpherence-messages');
-    messages_root.scrollTop = messages_root.scrollHeight;
+    var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
+    try {
+      var textarea = JX.DOM.find(form_root, 'textarea');
+      // We may have a draft so do this JS trick so we end up focused at the
+      // end of the draft.
+      var textarea_value = textarea.value;
+      textarea.value = '';
+      JX.DOM.focus(textarea);
+      textarea.value = textarea_value;
+    } catch (ex) {
+      // no textarea? no problem
+    }
   }
   JX.Stratcom.listen(
     'conpherence-redraw-thread',
@@ -316,12 +396,12 @@ JX.behavior('conpherence-menu', function(config) {
     var form = JX.DOM.find(root, 'form', 'conpherence-pontificate');
     var data = e.getNodeData('conpherence-edit-metadata');
     var header = JX.DOM.find(root, 'div', 'conpherence-header-pane');
-    var messages = JX.DOM.find(root, 'div', 'conpherence-messages');
+    var messages = scrollbar.getContentNode();
 
     new JX.Workflow.newFromForm(form, data)
       .setHandler(JX.bind(this, function(r) {
         JX.DOM.appendContent(messages, JX.$H(r.transactions));
-        messages.scrollTop = messages.scrollHeight;
+        _scrollMessageWindow();
 
         JX.DOM.setContent(
           header,
@@ -334,41 +414,12 @@ JX.behavior('conpherence-menu', function(config) {
             JX.$(r.conpherence_phid + '-nav-item'),
             JX.$H(r.nav_item)
           );
-          JX.Stratcom.invoke(
-            'conpherence-selectthread',
-            null,
-            { id : r.conpherence_phid + '-nav-item' }
-          );
+          selectThreadByID(r.conpherence_phid + '-nav-item');
         } catch (ex) {
           // Ignore; this view may not have a menu.
         }
       }))
       .start();
-  });
-
-  var _loadingTransactionID = null;
-  JX.Stratcom.listen('click', 'show-older-messages', function(e) {
-    e.kill();
-    var data = e.getNodeData('show-older-messages');
-    if (data.oldest_transaction_id == _loadingTransactionID) {
-      return;
-    }
-    _loadingTransactionID = data.oldest_transaction_id;
-    var node = e.getNode('show-older-messages');
-    JX.DOM.setContent(node, 'Loading...');
-    JX.DOM.alterClass(node, 'conpherence-show-older-messages-loading', true);
-
-    var conf_id = _thread.selected;
-    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var messages_root = JX.DOM.find(root, 'div', 'conpherence-messages');
-    new JX.Workflow(config.baseURI + conf_id + '/', data)
-    .setHandler(function(r) {
-      JX.DOM.remove(node);
-      var messages = JX.$H(r.messages);
-      JX.DOM.prependContent(
-        messages_root,
-        JX.$H(messages));
-    }).start();
   });
 
   /**
@@ -433,8 +484,6 @@ JX.behavior('conpherence-menu', function(config) {
 
     config.selectedID && selectThreadByID(config.selectedID);
 
-    _thread.node.scrollIntoView();
-
     markThreadsLoading(false);
   }
 
@@ -459,97 +508,25 @@ JX.behavior('conpherence-menu', function(config) {
     }
   }
 
-  var handleThreadScrollers = function (e) {
-    e.kill();
-
-    var data = e.getNodeData('conpherence-menu-scroller');
-    var scroller = e.getNode('conpherence-menu-scroller');
-    JX.DOM.alterClass(scroller, 'loading', true);
-    JX.DOM.setContent(scroller.firstChild, 'Loading...');
-    new JX.Workflow(scroller.href, data)
-      .setHandler(
-        JX.bind(null, threadScrollerResponse, scroller, data.direction))
-      .start();
-  };
-
-  var threadScrollerResponse = function (scroller, direction, r) {
-    var html = JX.$H(r.html);
-
-    var thread_phids = r.phids;
-    var reselect_id = null;
-    // remove any threads that are in the list that we just got back
-    // in the result set; things have changed and they'll be in the
-    // right place soon
-    for (var ii = 0; ii < thread_phids.length; ii++) {
-      try {
-        var node_id = thread_phids[ii] + '-nav-item';
-        var node = JX.$(node_id);
-        var node_data = JX.Stratcom.getData(node);
-        if (node_data.id == _thread.selected) {
-          reselect_id = node_id;
-        }
-        JX.DOM.remove(node);
-      } catch (ex) {
-        // ignore , just haven't seen this thread yet
-      }
-    }
-
-    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var menu_root = JX.DOM.find(root, 'div', 'conpherence-menu-pane');
-    var scroll_y = 0;
-    // we have to do some hyjinx in the up case to make the menu scroll to
-    // where it should
-    if (direction == 'up') {
-      var style = {
-        position: 'absolute',
-        left:     '-10000px'
-      };
-      var test_size = JX.$N('div', {style: style}, html);
-      document.body.appendChild(test_size);
-      var html_size = JX.Vector.getDim(test_size);
-      JX.DOM.remove(test_size);
-      scroll_y = html_size.y;
-    }
-    JX.DOM.replace(scroller, html);
-    menu_root.scrollTop += scroll_y;
-
-    if (reselect_id) {
-      JX.Stratcom.invoke(
-        'conpherence-selectthread',
-        null,
-        { id : reselect_id }
-      );
-    }
-  };
-
   JX.Stratcom.listen(
     ['click'],
-    'conpherence-menu-scroller',
-    handleThreadScrollers
-  );
-
-  var onkeydownDraft = function (e) {
-    var form = e.getNode('tag:form');
-    var data = e.getNodeData('tag:form');
-
-    if (!data.preview) {
-      var uri = config.baseURI + 'update/' + _thread.selected + '/';
-      data.preview = new JX.PhabricatorShapedRequest(
-        uri,
-        JX.bag,
-        function () {
-          var data = JX.DOM.convertFormToDictionary(form);
-          data.action = 'draft';
-          return data;
-        });
-    }
-
-    data.preview.trigger();
-  };
+    'conpherence-menu-see-more',
+    function (e) {
+      e.kill();
+      var sigil = e.getNodeData('conpherence-menu-see-more').moreSigil;
+      var root = JX.$('conpherence-menu-pane');
+      var more = JX.DOM.scry(root, 'li', sigil);
+      for (var i = 0; i < more.length; i++) {
+        JX.DOM.alterClass(more[i], 'hidden', false);
+      }
+      JX.DOM.hide(e.getNode('conpherence-menu-see-more'));
+    });
 
   JX.Stratcom.listen(
     ['keydown'],
     'conpherence-pontificate',
-    onkeydownDraft);
+    function (e) {
+      threadManager.handleDraftKeydown(e);
+    });
 
 });

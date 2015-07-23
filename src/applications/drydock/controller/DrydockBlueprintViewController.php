@@ -44,7 +44,7 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       ->render();
     $resource_list->setNoDataString(pht('This blueprint has no resources.'));
 
-    $pager = new AphrontPagerView();
+    $pager = new PHUIPagerView();
     $pager->setURI(new PhutilURI($blueprint_uri), 'offset');
     $pager->setOffset($request->getInt('offset'));
 

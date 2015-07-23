@@ -7,138 +7,68 @@ final class PhabricatorProjectSearchEngine
     return pht('Projects');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorProjectApplication';
   }
 
-  public function getCustomFieldObject() {
-    return new PhabricatorProject();
-  }
-
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    $saved->setParameter(
-      'memberPHIDs',
-      $this->readUsersFromRequest($request, 'members'));
-
-    $saved->setParameter('status', $request->getStr('status'));
-    $saved->setParameter('name', $request->getStr('name'));
-
-    $saved->setParameter(
-      'icons',
-      $this->readListFromRequest($request, 'icons'));
-
-    $saved->setParameter(
-      'colors',
-      $this->readListFromRequest($request, 'colors'));
-
-    $this->readCustomFieldsFromRequest($request, $saved);
-
-    return $saved;
-  }
-
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorProjectQuery())
+  public function newQuery() {
+    return id(new PhabricatorProjectQuery())
       ->needImages(true);
+  }
 
-    $member_phids = $saved->getParameter('memberPHIDs', array());
-    if ($member_phids && is_array($member_phids)) {
-      $query->withMemberPHIDs($member_phids);
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name'))
+        ->setKey('name'),
+      id(new PhabricatorUsersSearchField())
+        ->setLabel(pht('Members'))
+        ->setKey('memberPHIDs')
+        ->setAliases(array('member', 'members')),
+      id(new PhabricatorSearchSelectField())
+        ->setLabel(pht('Status'))
+        ->setKey('status')
+        ->setOptions($this->getStatusOptions()),
+      id(new PhabricatorSearchCheckboxesField())
+        ->setLabel(pht('Icons'))
+        ->setKey('icons')
+        ->setOptions($this->getIconOptions()),
+      id(new PhabricatorSearchCheckboxesField())
+        ->setLabel(pht('Colors'))
+        ->setKey('colors')
+        ->setOptions($this->getColorOptions()),
+    );
+  }
+
+
+protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
+
+    if (strlen($map['name'])) {
+      $tokens = PhabricatorTypeaheadDatasource::tokenizeString($map['name']);
+      $query->withNameTokens($tokens);
     }
 
-    $status = $saved->getParameter('status');
-    $status = idx($this->getStatusValues(), $status);
-    if ($status) {
-      $query->withStatus($status);
+    if ($map['memberPHIDs']) {
+      $query->withMemberPHIDs($map['memberPHIDs']);
     }
 
-    $name = $saved->getParameter('name');
-    if (strlen($name)) {
-      $query->withDatasourceQuery($name);
+    if ($map['status']) {
+      $status = idx($this->getStatusValues(), $map['status']);
+      if ($status) {
+        $query->withStatus($status);
+      }
     }
 
-    $icons = $saved->getParameter('icons');
-    if ($icons) {
-      $query->withIcons($icons);
+    if ($map['icons']) {
+      $query->withIcons($map['icons']);
     }
 
-    $colors = $saved->getParameter('colors');
-    if ($colors) {
-      $query->withColors($colors);
+    if ($map['colors']) {
+      $query->withColors($map['colors']);
     }
-
-    $this->applyCustomFieldsToQuery($query, $saved);
 
     return $query;
-  }
-
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved) {
-
-    $phids = $saved->getParameter('memberPHIDs', array());
-    $member_handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
-
-    $status = $saved->getParameter('status');
-    $name_match = $saved->getParameter('name');
-
-    $icons = array_fuse($saved->getParameter('icons', array()));
-    $colors = array_fuse($saved->getParameter('colors', array()));
-
-    $icon_control = id(new AphrontFormCheckboxControl())
-      ->setLabel(pht('Icons'));
-    foreach (PhabricatorProjectIcon::getIconMap() as $icon => $name) {
-      $image = id(new PHUIIconView())
-        ->setIconFont($icon);
-
-      $icon_control->addCheckbox(
-        'icons[]',
-        $icon,
-        array($image, ' ', $name),
-        isset($icons[$icon]));
-    }
-
-    $color_control = id(new AphrontFormCheckboxControl())
-      ->setLabel(pht('Colors'));
-    foreach (PhabricatorProjectIcon::getColorMap() as $color => $name) {
-      $tag = id(new PHUITagView())
-        ->setType(PHUITagView::TYPE_SHADE)
-        ->setShade($color)
-        ->setName($name);
-
-      $color_control->addCheckbox(
-        'colors[]',
-        $color,
-        $tag,
-        isset($colors[$color]));
-    }
-
-    $form
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setName('name')
-          ->setLabel(pht('Name'))
-          ->setValue($name_match))
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('members')
-          ->setLabel(pht('Members'))
-          ->setValue($member_handles))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Status'))
-          ->setName('status')
-          ->setOptions($this->getStatusOptions())
-          ->setValue($status))
-      ->appendChild($icon_control)
-      ->appendChild($color_control);
-
-    $this->appendCustomFieldsToForm($form, $saved);
   }
 
   protected function getURI($path) {
@@ -181,26 +111,50 @@ final class PhabricatorProjectSearchEngine
 
   private function getStatusOptions() {
     return array(
-      'active' => pht('Show Only Active Projects'),
-      'all'    => pht('Show All Projects'),
+      'active'   => pht('Show Only Active Projects'),
+      'archived' => pht('Show Only Archived Projects'),
+      'all'      => pht('Show All Projects'),
     );
   }
 
   private function getStatusValues() {
     return array(
-      'active' => PhabricatorProjectQuery::STATUS_ACTIVE,
-      'all' => PhabricatorProjectQuery::STATUS_ANY,
+      'active'   => PhabricatorProjectQuery::STATUS_ACTIVE,
+      'archived' => PhabricatorProjectQuery::STATUS_ARCHIVED,
+      'all'      => PhabricatorProjectQuery::STATUS_ANY,
     );
   }
 
-  private function getColorValues() {}
+  private function getIconOptions() {
+    $options = array();
 
-  private function getIconValues() {}
+    foreach (PhabricatorProjectIcon::getIconMap() as $icon => $name) {
+      $options[$icon] = array(
+        id(new PHUIIconView())
+          ->setIconFont($icon),
+        ' ',
+        $name,
+      );
+    }
 
-  protected function getRequiredHandlePHIDsForResultList(
-    array $projects,
-    PhabricatorSavedQuery $query) {
-    return mpull($projects, 'getPHID');
+    return $options;
+  }
+
+  private function getColorOptions() {
+    $options = array();
+
+    foreach (PhabricatorProjectIcon::getColorMap() as $color => $name) {
+      $options[$color] = array(
+        id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_SHADE)
+          ->setShade($color)
+          ->setName($name),
+        ' ',
+        $name,
+      );
+    }
+
+    return $options;
   }
 
   protected function renderResultList(
@@ -209,6 +163,7 @@ final class PhabricatorProjectSearchEngine
     array $handles) {
     assert_instances_of($projects, 'PhabricatorProject');
     $viewer = $this->requireViewer();
+    $handles = $viewer->loadHandles(mpull($projects, 'getPHID'));
 
     $list = new PHUIObjectItemListView();
     $list->setUser($viewer);
@@ -219,36 +174,6 @@ final class PhabricatorProjectSearchEngine
 
     foreach ($projects as $key => $project) {
       $id = $project->getID();
-      $profile_uri = $this->getApplicationURI("profile/{$id}/");
-      $workboards_uri = $this->getApplicationURI("board/{$id}/");
-      $members_uri = $this->getApplicationURI("members/{$id}/");
-      $profile_url = phutil_tag(
-        'a',
-        array(
-          'href' => $profile_uri,
-        ),
-        pht('Profile'));
-      $workboards_url = phutil_tag(
-        'a',
-        array(
-          'href' => $workboards_uri,
-        ),
-        pht('Workboard'));
-
-      $members_class = null;
-      $members_sigil = null;
-      if (!isset($can_edit_projects[$key])) {
-        $members_class = 'disabled';
-        $members_sigil = 'workflow';
-      }
-      $members_url = javelin_tag(
-        'a',
-        array(
-          'href' => $members_uri,
-          'class' => $members_class,
-          'sigil' => $members_sigil,
-        ),
-        pht('Members'));
 
       $tag_list = id(new PHUIHandleTagListView())
         ->setSlim(true)
@@ -258,10 +183,7 @@ final class PhabricatorProjectSearchEngine
         ->setHeader($project->getName())
         ->setHref($this->getApplicationURI("view/{$id}/"))
         ->setImageURI($project->getProfileImageURI())
-        ->addAttribute($tag_list)
-        ->addAttribute($profile_url)
-        ->addAttribute($workboards_url)
-        ->addAttribute($members_url);
+        ->addAttribute($tag_list);
 
       if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ARCHIVED) {
         $item->addIcon('delete-grey', pht('Archived'));
@@ -271,7 +193,12 @@ final class PhabricatorProjectSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No projects found.'));
+
+    return $result;
+
   }
 
 }

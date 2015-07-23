@@ -1,0 +1,179 @@
+@title Troubleshooting Performance Problems
+@group fieldmanual
+
+Guide to the troubleshooting slow pages and hangs.
+
+Overview
+========
+
+This document describes how to isolate, examine, understand and resolve or
+report performance issues like slow pages and hangs.
+
+This document covers the general process for handling performance problems,
+and outlines the major tools available for understanding them:
+
+  - **Multimeter** helps you understand sources of load and broad resource
+    utilization. This is a coarse, high-level tool.
+  - **DarkConsole** helps you dig into a specific slow page and understand
+    service calls. This is a general, mid-level tool.
+  - **XHProf** gives you detailed application performance profiles. This
+    is a fine-grained, low-level tool.
+
+Performance and the Upstream
+============================
+
+Performance issues and hangs will often require upstream involvement to fully
+resolve. The intent is for Phabricator to perform well in all reasonable cases,
+not require tuning for different workloads (as long as those workloads are
+generally reasonable). Poor performance with a reasonable workload is likely a
+bug, not a configuration problem.
+
+However, some pages are slow because Phabricator legitimately needs to do a lot
+of work to generate them. For example, if you write a 100MB wiki document,
+Phabricator will need substantial time to process it, it will take a long time
+to download over the network, and your browser will proably not be able to
+render it especially quickly.
+
+We may be able to improve perfomance in some cases, but Phabricator is not
+magic and can not wish away real complexity. The best solution to these problems
+is usually to find another way to solve your problem: for example, maybe the
+100MB document can be split into several smaller documents.
+
+Here are some examples of performance problems under reasonable workloads that
+the upstream can help resolve:
+
+  - {icon check, color=green} Commenting on a file and mentioning that same
+    file results in a hang.
+  - {icon check, color=green} Creating a new user takes many seconds.
+  - {icon check, color=green} Loading Feed hangs on 32-bit systems.
+
+The upstream will be less able to help resolve unusual workloads with high
+inherent complexity, like these:
+
+  - {icon times, color=red} A 100MB wiki page takes a long time to render.
+  - {icon times, color=red} A turing-complete simulation of Conway's Game of
+    Life implented in 958,000 Herald rules executes slowly.
+  - {icon times, color=red} Uploading an 8GB file takes several minutes.
+
+Generally, the path forward will be:
+
+  - Follow the instructions in this document to gain the best understanding of
+    the issue (and of how to reproduce it) that you can.
+  - In particular, is it being caused by an unusual workload (like a 100MB
+    wiki page)? If so, consider other ways to solve the problem.
+  - File a report with the upstream by following the instructions in
+    @{article:Contributing Bug Reports}.
+
+The remaining sections in this document walk through these steps.
+
+
+Understanding Performance Problems
+==================================
+
+To isolate, examine, and understand performance problems, follow these steps:
+
+**General Slowness**: If you are experiencing generally poor performance, use
+Multimeter to understand resource usage and look for load-based causes. See
+@{article:Multimeter User Guide}. If that isn't fruitful, treat this like a
+reproducible performance problem on an arbitrary page.
+
+**Hangs**: If you are experiencing hangs (pages which never return, or which
+time out with a fatal after some number of seconds), they are almost always
+the result of bugs in the upstream. Report them by following these
+instructions:
+
+  - Set `debug.time-limit` to a value like `5`.
+  - Reproduce the hang. The page should exit after 5 seconds with a more useful
+    stack trace.
+  - File a report with the reproduction instructions and the stack trace in
+    the upstream. See @{article:Contributing Bug Reports} for detailed
+    instructions.
+  - Clear `debug.time-limit` again to take your install out of debug mode.
+
+If part of the reproduction instructions include "Create a 100MB wiki page",
+the upstream may be less sympathetic to your cause than if reproducing the
+issue does not require an unusual, complex workload.
+
+In some cases, the hang may really just a very large amount of processing time.
+If you're very excited about 100MB wiki pages and don't mind waiting many
+minutes for them to render, you may be able to adjust `max_execution_time` in
+your PHP configuration to allow the process enough time to complete, or adjust
+settings in your webserver config to let it wait longer for results.
+
+**DarkConsole**: If you have a reproducible performance problem (for example,
+loading a specific page is very slow), you can enable DarkConsole (a builtin
+debugging console) to examine page performance in detail.
+
+The two most useful tabs in DarkConsole are the "Services" tab and the
+"XHProf" tab.
+
+The "Services" module allows you to examine service calls (network calls,
+subprocesses, events, etc) and find slow queries, slow services, inefficient
+query plans, and unnecessary calls. Broadly, you're looking for slow or
+repeated service calls, or calls which don't make sense given what the page
+should be doing.
+
+After installing XHProf (see @{article:Using XHProf}) you'll gain access to the
+"XHProf" tab, which is a full tracing profiler. You can use the "Profile Page"
+button to generate a complete trace of where a page is spending time. When
+reading a profile, you're looking for the overall use of time, and for anything
+which sticks out as taking unreasonably long or not making sense.
+
+See @{article:Using DarkConsole} for complete instructions on configuring
+and using DarkConsole.
+
+**AJAX Requests**: To debug Ajax requests, activate DarkConsole and then turn
+on the profiler or query analyzer on the main request by clicking the
+appropriate button. The setting will cascade to Ajax requests made by the page
+and they'll show up in the console with full query analysis or profiling
+information.
+
+**Command-Line Hangs**: If you have a script or daemon hanging, you can send
+it `SIGHUP` to have it dump a stack trace to `sys_get_temp_dir()` (usually
+`/tmp`).
+
+Do this with:
+
+```
+$ kill -HUP <pid>
+```
+
+You can use this command to figure out where the system's temporary directory
+is:
+
+```
+$ php -r 'echo sys_get_temp_dir()."\n";'
+```
+
+On most systems, this is `/tmp`. The trace should appear in that directory with
+a name like `phabricator_backtrace_<pid>`. Examining this trace may provide
+a key to understanding the problem.
+
+**Command-Line Performance**: If you have general performance issues with
+command-line scripts, you can add `--trace` to see a service call log. This is
+similar to the "Services" tab in DarkConsole. This may help identify issues.
+
+After installing XHProf, you can also add `--xprofile <filename>` to emit a
+detailed performance profile. You can `arc upload` these files and then view
+them in XHProf from the web UI.
+
+Next Steps
+==========
+
+If you've done all you can to isolate and understand the problem you're
+experiencing, report it to the upstream. Including as much relevant data as
+you can, including:
+
+  - reproduction instructions;
+  - traces from `debug.time-limit` for hangs;
+  - screenshots of service call logs from DarkConsole (review these carefully,
+    as they can sometimes contain sensitive information);
+  - traces from CLI scripts with `--trace`;
+  - traces from sending HUP to processes; and
+  - XHProf profile files from `--xprofile` or "Download .xhprof Profile" in
+    the web UI.
+
+After collecting this information:
+
+  - follow the instructions in @{article:Contributing Bug Reports} to file
+    a report in the upstream.

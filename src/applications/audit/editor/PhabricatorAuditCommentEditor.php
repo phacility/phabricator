@@ -38,20 +38,15 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     return array_keys($phids);
   }
 
-  public static function newReplyHandlerForCommit($commit) {
-    $reply_handler = PhabricatorEnv::newObjectFromConfig(
-      'metamta.diffusion.reply-handler');
-    $reply_handler->setMailReceiver($commit);
-    return $reply_handler;
-  }
-
   public static function getMailThreading(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
     return array(
       'diffusion-audit-'.$commit->getPHID(),
-      'Commit r'.$repository->getCallsign().$commit->getCommitIdentifier(),
+      pht(
+        'Commit %s',
+        'r'.$repository->getCallsign().$commit->getCommitIdentifier()),
     );
   }
 

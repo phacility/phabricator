@@ -15,13 +15,13 @@ Arcanist, and which Phabricator loads at runtime and runs in-process. They
 require somewhat more effort upfront than simple configuration switches, but are
 the most direct and powerful way to respond to events.
 
-= Installing Event Listeners (Phabicator) =
+= Installing Event Listeners (Phabricator) =
 
 To install event listeners in Phabricator, follow these steps:
 
   - Write a listener class which extends @{class@libphutil:PhutilEventListener}.
   - Add it to a libphutil library, or create a new library (for instructions,
-    see @{article:libphutil Libraries User Guide}.
+    see @{article@contributor:Adding New Classes}.
   - Configure Phabricator to load the library by adding it to `load-libraries`
     in the Phabricator config.
   - Configure Phabricator to install the event listener by adding the class
@@ -38,7 +38,7 @@ To install event listeners in Arcanist, follow these steps:
 
   - Write a listener class which extends @{class@libphutil:PhutilEventListener}.
   - Add it to a libphutil library, or create a new library (for instructions,
-    see @{article:libphutil Libraries User Guide}.
+    see @{article@contributor:Adding New Classes}.
   - Configure Phabricator to load the library by adding it to `load`
     in the Arcanist config (e.g., `.arcconfig`, or user/global config).
   - Configure Arcanist to install the event listener by adding the class
@@ -130,22 +130,6 @@ fields to, e.g., edit revision titles. Data available on this event:
   - `specification` Parameters that will be used to invoke the
     `differential.createrevision` Conduit call.
 
-== Controller: Check Request ==
-
-The constant for this event is
-`PhabricatorEventType::TYPE_CONTROLLER_CHECKREQUEST`.
-
-This event is dispatched when controller is about to begin execution. It is
-meant for checking if the user is allowed to use the application at the moment.
-It can check if the user has performed too many operations recently, if his IP
-address is allowed or if the servers are overloaded to process the request.
-Data available on this event:
-
-- `request` Object of class @{class:AphrontRequest}.
-- `controller` Class name of the current controller.
-
-You can delegate the execution to another controller by modifying `controller`.
-
 == Maniphest: Will Edit Task ==
 
 The constant for this event is
@@ -154,11 +138,11 @@ The constant for this event is
 This event is dispatched before a task is edited, and allows you to respond to
 or alter the edit. Data available on this event:
 
-  - ##task## The @{class:ManiphestTask} being edited.
-  - ##transactions## The list of edits (objects of class
+  - `task` The @{class:ManiphestTask} being edited.
+  - `transactions` The list of edits (objects of class
     @{class:ManiphestTransaction}) being applied.
-  - ##new## A boolean indicating if this task is being created.
-  - ##mail## If this edit originates from email, the
+  - `new` A boolean indicating if this task is being created.
+  - `mail` If this edit originates from email, the
     @{class:PhabricatorMetaMTAReceivedMail} object.
 
 This is similar to the next event (did edit task) but occurs before the edit
@@ -172,11 +156,11 @@ The constant for this event is
 This event is dispatched after a task is edited, and allows you to react to the
 edit. Data available on this event:
 
-  - ##task## The @{class:ManiphestTask} that was edited.
-  - ##transactions## The list of edits (objects of class
+  - `task` The @{class:ManiphestTask} that was edited.
+  - `transactions` The list of edits (objects of class
     @{class:ManiphestTransaction}) that were applied.
-  - ##new## A boolean indicating if this task was newly created.
-  - ##mail## If this edit originates from email, the
+  - `new` A boolean indicating if this task was newly created.
+  - `mail` If this edit originates from email, the
     @{class:PhabricatorMetaMTAReceivedMail} object.
 
 This is similar to the previous event (will edit task) but occurs after the
@@ -190,8 +174,8 @@ The constant for this event is
 This event is dispatched before Differential decides if a file is generated (and
 doesn't need to be reviewed) or not. Data available on this event:
 
-  - ##corpus## Body of the file.
-  - ##is_generated## Boolean indicating if this file should be treated as
+  - `corpus` Body of the file.
+  - `is_generated` Boolean indicating if this file should be treated as
     generated.
 
 == Diffusion: Did Discover Commit ==

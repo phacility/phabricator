@@ -29,7 +29,7 @@ describe('JX.View', function() {
     var t = new JX.TestView(
       '',
       {},
-      [new JX.TestView('Hey', {id: "child"}, [])]
+      [new JX.TestView('Hey', {id: 'child'}, [])]
     );
     var result = JX.ViewRenderer.render(t);
     expect(JX.DOM.scry(result, 'span').length).toBe(1);

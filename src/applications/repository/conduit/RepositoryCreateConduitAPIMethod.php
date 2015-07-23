@@ -12,14 +12,14 @@ final class RepositoryCreateConduitAPIMethod
   }
 
   public function getMethodStatusDescription() {
-    return 'Repository methods are new and subject to change.';
+    return pht('Repository methods are new and subject to change.');
   }
 
   public function getMethodDescription() {
-    return 'Create a new repository (Admin Only).';
+    return pht('Create a new repository.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     $vcs_const = $this->formatStringConstants(array('git', 'hg', 'svn'));
 
     return array(
@@ -42,20 +42,16 @@ final class RepositoryCreateConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR-PERMISSIONS' =>
-        'You do not have the authority to call this method.',
-      'ERR-DUPLICATE'   =>
-        'Duplicate repository callsign.',
-      'ERR-BAD-CALLSIGN' =>
-        'Callsign is required and must be ALL UPPERCASE LETTERS.',
-      'ERR-UNKNOWN-REPOSITORY-VCS' =>
-        'Unknown repository VCS type.',
+      'ERR-DUPLICATE' => pht('Duplicate repository callsign.'),
+      'ERR-BAD-CALLSIGN' => pht(
+        'Callsign is required and must be ALL UPPERCASE LETTERS.'),
+      'ERR-UNKNOWN-REPOSITORY-VCS' => pht('Unknown repository VCS type.'),
     );
   }
 

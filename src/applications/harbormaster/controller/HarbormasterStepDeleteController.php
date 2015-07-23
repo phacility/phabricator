@@ -2,27 +2,25 @@
 
 final class HarbormasterStepDeleteController extends HarbormasterController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $this->requireApplicationCapability(
       HarbormasterManagePlansCapability::CAPABILITY);
 
-    $id = $this->id;
+    $id = $request->getURIData('id');
 
     $step = id(new HarbormasterBuildStepQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->executeOne();
-    if ($step === null) {
-      throw new Exception('Build step not found!');
+    if (!$step) {
+      return new Aphront404Response();
     }
 
     $plan_id = $step->getBuildPlan()->getID();
@@ -33,19 +31,14 @@ final class HarbormasterStepDeleteController extends HarbormasterController {
       return id(new AphrontRedirectResponse())->setURI($done_uri);
     }
 
-    $dialog = new AphrontDialogView();
-    $dialog->setTitle(pht('Really Delete Step?'))
-            ->setUser($viewer)
-            ->addSubmitButton(pht('Delete Build Step'))
-            ->addCancelButton($done_uri);
-    $dialog->appendChild(
-      phutil_tag(
-        'p',
-        array(),
+    return $this->newDialog()
+      ->setTitle(pht('Really Delete Step?'))
+      ->appendParagraph(
         pht(
-          'Are you sure you want to delete this '.
-          'step? This can\'t be undone!')));
-    return id(new AphrontDialogResponse())->setDialog($dialog);
+          "Are you sure you want to delete this step? ".
+          "This can't be undone!"))
+      ->addCancelButton($done_uri)
+      ->addSubmitButton(pht('Delete Build Step'));
   }
 
 }

@@ -220,8 +220,9 @@ JX.install('HeraldRuleEditor', {
         case 'buildplan':
         case 'taskpriority':
         case 'taskstatus':
-        case 'arcanistprojects':
         case 'legaldocuments':
+        case 'applicationemail':
+        case 'space':
           var tokenizer = this._newTokenizer(type);
           input = tokenizer[0];
           get_fn = tokenizer[1];
@@ -276,25 +277,21 @@ JX.install('HeraldRuleEditor', {
     },
 
     _newTokenizer : function(type) {
-      var template = JX.$N(
-        'div',
-        JX.$H(this._config.template.markup));
-      template = template.firstChild;
-      template.id = '';
-
       var tokenizerConfig = {
-        root : template,
         src : this._config.template.source[type].uri,
         placeholder: this._config.template.source[type].placeholder,
+        browseURI: this._config.template.source[type].browseURI,
         icons : this._config.template.icons,
         username : this._config.username
       };
 
-      var build = JX.Prefab.buildTokenizer(tokenizerConfig);
+      var build = JX.Prefab.newTokenizerFromTemplate(
+        this._config.template.markup,
+        tokenizerConfig);
       build.tokenizer.start();
 
       return [
-        template,
+        build.node,
         function() {
           return build.tokenizer.getTokens();
         },

@@ -3,6 +3,10 @@
 final class HarbormasterBuildPlanDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Build Plans');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a build plan name...');
   }
@@ -17,12 +21,20 @@ final class HarbormasterBuildPlanDatasource
 
     $results = array();
 
-    $plans = id(new HarbormasterBuildPlanQuery())
-      ->setViewer($viewer)
-      ->execute();
+    $query = id(new HarbormasterBuildPlanQuery())
+      ->setOrder('name')
+      ->withDatasourceQuery($raw_query);
+
+    $plans = $this->executeQuery($query);
     foreach ($plans as $plan) {
+      $closed = null;
+      if ($plan->isDisabled()) {
+        $closed = pht('Disabled');
+      }
+
       $results[] = id(new PhabricatorTypeaheadResult())
         ->setName($plan->getName())
+        ->setClosed($closed)
         ->setPHID($plan->getPHID());
     }
 

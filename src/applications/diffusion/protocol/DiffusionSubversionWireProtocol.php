@@ -93,7 +93,7 @@ final class DiffusionSubversionWireProtocol extends Phobject {
           $this->state = 'item';
         }
       } else {
-        throw new Exception("Invalid state '{$this->state}'!");
+        throw new Exception(pht("Invalid state '%s'!", $this->state));
       }
     }
 
@@ -124,7 +124,10 @@ final class DiffusionSubversionWireProtocol extends Phobject {
           $out[] = self::serializeStruct($value);
           break;
         default:
-          throw new Exception("Unknown SVN wire protocol structure '{$type}'!");
+          throw new Exception(
+            pht(
+              "Unknown SVN wire protocol structure '%s'!",
+              $type));
       }
       if ($type != 'list') {
         $out[] = ' ';
@@ -139,7 +142,9 @@ final class DiffusionSubversionWireProtocol extends Phobject {
     if (empty($struct[0]['type']) || ($struct[0]['type'] != 'word')) {
       // This isn't what we expect; fail defensively.
       throw new Exception(
-        pht("Unexpected command structure, expected '( word ... )'."));
+        pht(
+          "Unexpected command structure, expected '%s'.",
+          '( word ... )'));
     }
 
     switch ($struct[0]['value']) {

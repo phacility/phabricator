@@ -46,7 +46,7 @@ final class AphrontJavelinView extends AphrontView {
     return $this->name;
   }
 
-  final public function setName($template_name) {
+  public function setName($template_name) {
     $this->name = $template_name;
     return $this;
   }
@@ -55,7 +55,7 @@ final class AphrontJavelinView extends AphrontView {
     return $this->parameters;
   }
 
-  final public function setParameters($template_parameters) {
+  public function setParameters($template_parameters) {
     $this->parameters = $template_parameters;
     return $this;
   }
@@ -64,7 +64,7 @@ final class AphrontJavelinView extends AphrontView {
     return $this->celerityResource;
   }
 
-  final public function setCelerityResource($celerity_resource) {
+  public function setCelerityResource($celerity_resource) {
     $this->celerityResource = $celerity_resource;
     return $this;
   }

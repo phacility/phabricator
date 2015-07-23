@@ -11,14 +11,14 @@ final class FeedQueryConduitAPIMethod extends FeedConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Query the feed for stories';
+    return pht('Query the feed for stories');
   }
 
   private function getDefaultLimit() {
     return 100;
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'filterPHIDs' => 'optional list <phid>',
       'limit' => 'optional int (default '.$this->getDefaultLimit().')',
@@ -30,25 +30,27 @@ final class FeedQueryConduitAPIMethod extends FeedConduitAPIMethod {
 
   private function getSupportedViewTypes() {
     return array(
-      'html' => 'Full HTML presentation of story',
-      'data' => 'Dictionary with various data of the story',
-      'html-summary' => 'Story contains only the title of the story',
-      'text' => 'Simple one-line plain text representation of story',
+      'html' => pht('Full HTML presentation of story'),
+      'data' => pht('Dictionary with various data of the story'),
+      'html-summary' => pht('Story contains only the title of the story'),
+      'text' => pht('Simple one-line plain text representation of story'),
     );
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
 
     $view_types = array_keys($this->getSupportedViewTypes());
     $view_types = implode(', ', $view_types);
 
     return array(
       'ERR-UNKNOWN-TYPE' =>
-        'Unsupported view type, possibles are: '.$view_types,
+        pht(
+          'Unsupported view type, possibles are: %s',
+          $view_types),
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 

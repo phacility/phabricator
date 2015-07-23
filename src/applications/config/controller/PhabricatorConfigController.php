@@ -20,13 +20,17 @@ abstract class PhabricatorConfigController extends PhabricatorController {
     $nav->addLabel(pht('Database'));
     $nav->addFilter('database/', pht('Database Status'));
     $nav->addFilter('dbissue/', pht('Database Issues'));
+    $nav->addLabel(pht('Cache'));
+    $nav->addFilter('cache/', pht('Cache Status'));
     $nav->addLabel(pht('Welcome'));
     $nav->addFilter('welcome/', pht('Welcome Screen'));
+    $nav->addLabel(pht('Modules'));
+    $nav->addFilter('module/sites/', pht('Sites'));
 
     return $nav;
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return $this->buildSideNavView(null, true)->getMenu();
   }
 

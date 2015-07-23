@@ -16,21 +16,17 @@ final class DiffusionGetCommitsConduitAPIMethod
   }
 
   public function getMethodStatusDescription() {
-    return pht('Obsoleted by diffusion.querycommits.');
+    return pht('Obsoleted by %s.', 'diffusion.querycommits');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'commits' => 'required list<string>',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty list<dict<string, wild>>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {
@@ -135,7 +131,7 @@ final class DiffusionGetCommitsConduitAPIMethod
     }
 
     $commits = $this->addRepositoryCommitDataInformation($commits);
-    $commits = $this->addDifferentialInformation($commits);
+    $commits = $this->addDifferentialInformation($commits, $request);
     $commits = $this->addManiphestInformation($commits);
 
     foreach ($commits as $name => $commit) {
@@ -238,31 +234,29 @@ final class DiffusionGetCommitsConduitAPIMethod
   /**
    * Enhance the commit list with Differential information.
    */
-  private function addDifferentialInformation(array $commits) {
+  private function addDifferentialInformation(
+    array $commits,
+    ConduitAPIRequest $request) {
+
     $commit_phids = ipull($commits, 'commitPHID');
 
-    // TODO: (T603) This should be policy checked, either by moving to
-    // DifferentialRevisionQuery or by doing a followup query to make sure
-    // the matched objects are visible.
-
-    $rev_conn_r = id(new DifferentialRevision())->establishConnection('r');
-    $revs = queryfx_all(
-      $rev_conn_r,
-      'SELECT r.id id, r.phid phid, c.commitPHID commitPHID FROM %T r JOIN %T c
-        ON r.id = c.revisionID
-        WHERE c.commitPHID in (%Ls)',
-      id(new DifferentialRevision())->getTableName(),
-      DifferentialRevision::TABLE_COMMIT,
-      $commit_phids);
-
-    $revs = ipull($revs, null, 'commitPHID');
-    foreach ($commits as $name => $commit) {
-      if (isset($revs[$commit['commitPHID']])) {
-        $rev = $revs[$commit['commitPHID']];
-        $commits[$name] += array(
-          'differentialRevisionID'    => 'D'.$rev['id'],
-          'differentialRevisionPHID'  => $rev['phid'],
-        );
+    $revisions = id(new DifferentialRevisionQuery())
+      ->setViewer($request->getUser())
+      ->withCommitPHIDs($commit_phids)
+      ->needCommitPHIDs(true)
+      ->execute();
+    $rev_phid_commit_phids_map = mpull($revisions, 'getCommitPHIDs', 'getPHID');
+    $revisions = mpull($revisions, null, 'getPHID');
+    foreach ($rev_phid_commit_phids_map as $rev_phid => $commit_phids) {
+      foreach ($commits as $name => $commit) {
+        $commit_phid = $commit['commitPHID'];
+        if (in_array($commit_phid, $commit_phids)) {
+          $revision = $revisions[$rev_phid];
+          $commits[$name] += array(
+            'differentialRevisionID'    => 'D'.$revision->getID(),
+            'differentialRevisionPHID'  => $revision->getPHID(),
+          );
+        }
       }
     }
 

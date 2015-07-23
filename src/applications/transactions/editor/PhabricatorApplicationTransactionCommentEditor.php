@@ -121,20 +121,21 @@ final class PhabricatorApplicationTransactionCommentEditor
 
     if (!$xaction->getPHID()) {
       throw new Exception(
-        'Transaction must have a PHID before calling applyEdit()!');
+        pht(
+          'Transaction must have a PHID before calling %s!',
+          'applyEdit()'));
     }
 
     $type_comment = PhabricatorTransactions::TYPE_COMMENT;
     if ($xaction->getTransactionType() == $type_comment) {
       if ($comment->getPHID()) {
         throw new Exception(
-          'Transaction comment must not yet have a PHID!');
+          pht('Transaction comment must not yet have a PHID!'));
       }
     }
 
     if (!$this->getContentSource()) {
-      throw new Exception(
-        'Call setContentSource() before applyEdit()!');
+      throw new PhutilInvalidStateException('applyEdit');
     }
 
     $actor = $this->requireActor();

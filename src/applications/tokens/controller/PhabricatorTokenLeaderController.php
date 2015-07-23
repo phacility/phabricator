@@ -11,7 +11,7 @@ final class PhabricatorTokenLeaderController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $pager = new AphrontPagerView();
+    $pager = new PHUIPagerView();
     $pager->setURI($request->getRequestURI(), 'page');
     $pager->setOffset($request->getInt('page'));
 
@@ -43,13 +43,17 @@ final class PhabricatorTokenLeaderController
 
     $title = pht('Token Leader Board');
 
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setObjectList($list);
+
     $nav = $this->buildSideNav();
     $nav->setCrumbs(
       $this->buildApplicationCrumbs()
         ->addTextCrumb($title));
     $nav->selectFilter('leaders/');
 
-    $nav->appendChild($list);
+    $nav->appendChild($box);
     $nav->appendChild($pager);
 
     return $this->buildApplicationPage(

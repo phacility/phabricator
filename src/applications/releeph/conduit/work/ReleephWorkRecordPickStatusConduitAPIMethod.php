@@ -12,10 +12,10 @@ final class ReleephWorkRecordPickStatusConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Record whether a pick or revert was successful or not.';
+    return pht('Record whether a pick or revert was successful or not.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     $action_const = $this->formatStringConstants(
       array(
         'pick',
@@ -31,12 +31,8 @@ final class ReleephWorkRecordPickStatusConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return '';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {
@@ -59,7 +55,7 @@ final class ReleephWorkRecordPickStatusConduitAPIMethod
         break;
 
       default:
-        throw new Exception("Unknown action {$action}!");
+        throw new Exception(pht('Unknown action %s!', $action));
     }
 
     $releeph_request = id(new ReleephRequest())

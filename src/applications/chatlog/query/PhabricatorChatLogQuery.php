@@ -55,7 +55,7 @@ final class PhabricatorChatLogQuery
     return $events;
   }
 
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     $where[] = $this->buildPagingClause($conn_r);

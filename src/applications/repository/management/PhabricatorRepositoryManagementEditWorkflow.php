@@ -3,11 +3,11 @@
 final class PhabricatorRepositoryManagementEditWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('edit')
       ->setExamples('**edit** --as __username__ __repository__ ...')
-      ->setSynopsis('Edit __repository__, named by callsign.')
+      ->setSynopsis(pht('Edit __repository__, named by callsign.'))
       ->setArguments(
         array(
           array(
@@ -17,12 +17,12 @@ final class PhabricatorRepositoryManagementEditWorkflow
           array(
             'name' => 'as',
             'param' => 'user',
-            'help' => 'Edit as user.',
+            'help' => pht('Edit as user.'),
           ),
           array(
             'name' => 'local-path',
             'param' => 'path',
-            'help' => 'Edit the local path.',
+            'help' => pht('Edit the local path.'),
           ),
         ));
   }
@@ -32,7 +32,7 @@ final class PhabricatorRepositoryManagementEditWorkflow
 
     if (!$repos) {
       throw new PhutilArgumentUsageException(
-        'Specify one or more repositories to edit, by callsign.');
+        pht('Specify one or more repositories to edit, by callsign.'));
     }
 
     $console = PhutilConsole::getConsole();
@@ -47,7 +47,9 @@ final class PhabricatorRepositoryManagementEditWorkflow
     $username = $args->getArg('as');
     if (!$username) {
       throw new PhutilArgumentUsageException(
-        pht('Specify a user to edit as with --as <username>.'));
+        pht(
+          'Specify a user to edit as with %s.',
+          '--as <username>'));
     }
 
     $actor = id(new PhabricatorPeopleQuery())
@@ -61,7 +63,7 @@ final class PhabricatorRepositoryManagementEditWorkflow
     }
 
     foreach ($repos as $repo) {
-      $console->writeOut("Editing '%s'...\n", $repo->getCallsign());
+      $console->writeOut("%s\n", pht("Editing '%s'...", $repo->getCallsign()));
 
       $xactions = array();
 
@@ -88,7 +90,7 @@ final class PhabricatorRepositoryManagementEditWorkflow
         ->applyTransactions($repo, $xactions);
     }
 
-    $console->writeOut("Done.\n");
+    $console->writeOut("%s\n", pht('Done.'));
 
     return 0;
   }

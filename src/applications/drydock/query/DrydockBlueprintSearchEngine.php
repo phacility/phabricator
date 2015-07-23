@@ -7,7 +7,7 @@ final class DrydockBlueprintSearchEngine
     return pht('Drydock Blueprints');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorDrydockApplication';
   }
 
@@ -69,7 +69,11 @@ final class DrydockBlueprintSearchEngine
       $view->addItem($item);
     }
 
-    return $view;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($view);
+    $result->setNoDataString(pht('No blueprints found.'));
+
+    return $result;
   }
 
 }

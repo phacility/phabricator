@@ -155,12 +155,15 @@ final class ManiphestTaskEditController extends ManiphestController {
 
     $aux_fields = $field_list->getFields();
 
+    $v_space = $task->getSpacePHID();
+
     if ($request->isFormPost()) {
       $changes = array();
 
       $new_title = $request->getStr('title');
       $new_desc = $request->getStr('description');
       $new_status = $request->getStr('status');
+      $v_space = $request->getStr('spacePHID');
 
       if (!$task->getID()) {
         $workflow = 'create';
@@ -268,6 +271,7 @@ final class ManiphestTaskEditController extends ManiphestController {
         }
 
         if ($can_edit_policies) {
+          $changes[PhabricatorTransactions::TYPE_SPACE] = $v_space;
           $changes[PhabricatorTransactions::TYPE_VIEW_POLICY] =
             $request->getStr('viewPolicy');
           $changes[PhabricatorTransactions::TYPE_EDIT_POLICY] =
@@ -477,6 +481,8 @@ final class ManiphestTaskEditController extends ManiphestController {
             $task->setViewPolicy($template_task->getViewPolicy());
             $task->setEditPolicy($template_task->getEditPolicy());
 
+            $v_space = $template_task->getSpacePHID();
+
             $template_fields = PhabricatorCustomField::getObjectFields(
               $template_task,
               PhabricatorCustomField::ROLE_EDIT);
@@ -506,42 +512,28 @@ final class ManiphestTaskEditController extends ManiphestController {
       }
     }
 
-    $phids = array_merge(
-      array($task->getOwnerPHID()),
-      $task->getSubscriberPHIDs(),
-      $task->getProjectPHIDs());
-
-    if ($parent_task) {
-      $phids[] = $parent_task->getPHID();
-    }
-
-    $phids = array_filter($phids);
-    $phids = array_unique($phids);
-
-    $handles = $this->loadViewerHandles($phids);
-
     $error_view = null;
     if ($errors) {
-      $error_view = new AphrontErrorView();
+      $error_view = new PHUIInfoView();
       $error_view->setErrors($errors);
     }
 
     $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
 
     if ($task->getOwnerPHID()) {
-      $assigned_value = array($handles[$task->getOwnerPHID()]);
+      $assigned_value = array($task->getOwnerPHID());
     } else {
       $assigned_value = array();
     }
 
     if ($task->getSubscriberPHIDs()) {
-      $cc_value = array_select_keys($handles, $task->getSubscriberPHIDs());
+      $cc_value = $task->getSubscriberPHIDs();
     } else {
       $cc_value = array();
     }
 
     if ($task->getProjectPHIDs()) {
-      $projects_value = array_select_keys($handles, $task->getProjectPHIDs());
+      $projects_value = $task->getProjectPHIDs();
     } else {
       $projects_value = array();
     }
@@ -583,7 +575,7 @@ final class ManiphestTaskEditController extends ManiphestController {
         ->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel(pht('Parent Task'))
-            ->setValue($handles[$parent_task->getPHID()]->getFullName()))
+            ->setValue($user->renderHandle($parent_task->getPHID())))
         ->addHiddenInput('parent', $parent_task->getID());
     }
 
@@ -620,7 +612,7 @@ final class ManiphestTaskEditController extends ManiphestController {
       ->execute();
 
     if ($can_edit_assign) {
-      $form->appendChild(
+      $form->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Assigned To'))
           ->setName('assigned_to')
@@ -631,7 +623,7 @@ final class ManiphestTaskEditController extends ManiphestController {
     }
 
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('CC'))
           ->setName('cc')
@@ -657,6 +649,7 @@ final class ManiphestTaskEditController extends ManiphestController {
             ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
             ->setPolicyObject($task)
             ->setPolicies($policies)
+            ->setSpacePHID($v_space)
             ->setName('viewPolicy'))
         ->appendChild(
           id(new AphrontFormPolicyControl())
@@ -680,7 +673,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           pht('Create New Project'));
       }
       $form
-        ->appendChild(
+        ->appendControl(
           id(new AphrontFormTokenizerControl())
             ->setLabel(pht('Projects'))
             ->setName('projects')
@@ -692,25 +685,13 @@ final class ManiphestTaskEditController extends ManiphestController {
 
     $field_list->appendFieldsToForm($form);
 
-    require_celerity_resource('aphront-error-view-css');
+    require_celerity_resource('phui-info-view-css');
 
     Javelin::initBehavior('project-create', array(
       'tokenizerID' => $project_tokenizer_id,
     ));
 
-    $description_control = new PhabricatorRemarkupControl();
-    // "Upsell" creating tasks via email in create flows if the instance is
-    // configured for this awesomeness.
-    $email_create = PhabricatorEnv::getEnvConfig(
-      'metamta.maniphest.public-create-email');
-    if (!$task->getID() && $email_create) {
-      $email_hint = pht(
-        'You can also create tasks by sending an email to: %s',
-        phutil_tag('tt', array(), $email_create));
-      $description_control->setCaption($email_hint);
-    }
-
-    $description_control
+    $description_control = id(new PhabricatorRemarkupControl())
       ->setLabel(pht('Description'))
       ->setName('description')
       ->setID('description-textarea')
@@ -719,7 +700,6 @@ final class ManiphestTaskEditController extends ManiphestController {
 
     $form
       ->appendChild($description_control);
-
 
     if ($request->isAjax()) {
       $dialog = id(new AphrontDialogView())

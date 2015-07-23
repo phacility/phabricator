@@ -26,7 +26,7 @@
  *             and generating @{class:PhabricatorOAuthServerAccessToken}s
  * @task internal Internals
  */
-final class PhabricatorOAuthServer {
+final class PhabricatorOAuthServer extends Phobject {
 
   const AUTHORIZATION_CODE_TIMEOUT = 300;
   const ACCESS_TOKEN_TIMEOUT       = 3600;
@@ -36,7 +36,7 @@ final class PhabricatorOAuthServer {
 
   private function getUser() {
     if (!$this->user) {
-      throw new Exception('You must setUser before you can getUser!');
+      throw new PhutilInvalidStateException('setUser');
     }
     return $this->user;
   }
@@ -48,7 +48,7 @@ final class PhabricatorOAuthServer {
 
   private function getClient() {
     if (!$this->client) {
-      throw new Exception('You must setClient before you can getClient!');
+      throw new PhutilInvalidStateException('setClient');
     }
     return $this->client;
   }
@@ -65,16 +65,16 @@ final class PhabricatorOAuthServer {
   public function userHasAuthorizedClient(array $scope) {
 
     $authorization = id(new PhabricatorOAuthClientAuthorization())->
-      loadOneWhere('userPHID = %s AND clientPHID = %s',
-                   $this->getUser()->getPHID(),
-                   $this->getClient()->getPHID());
+      loadOneWhere(
+        'userPHID = %s AND clientPHID = %s',
+        $this->getUser()->getPHID(),
+        $this->getClient()->getPHID());
     if (empty($authorization)) {
       return array(false, null);
     }
 
     if ($scope) {
-      $missing_scope = array_diff_key($scope,
-                                      $authorization->getScope());
+      $missing_scope = array_diff_key($scope, $authorization->getScope());
     } else {
       $missing_scope = false;
     }
@@ -112,7 +112,7 @@ final class PhabricatorOAuthServer {
     $authorization_code->setClientPHID($client->getPHID());
     $authorization_code->setClientSecret($client->getSecret());
     $authorization_code->setUserPHID($this->getUser()->getPHID());
-    $authorization_code->setRedirectURI((string) $redirect_uri);
+    $authorization_code->setRedirectURI((string)$redirect_uri);
     $authorization_code->save();
 
     return $authorization_code;
@@ -166,10 +166,10 @@ final class PhabricatorOAuthServer {
     $must_be_used_by = $created_time + self::ACCESS_TOKEN_TIMEOUT;
     $expired         = time() > $must_be_used_by;
     $authorization   = id(new PhabricatorOAuthClientAuthorization())
-                         ->loadOneWhere(
-                           'userPHID = %s AND clientPHID = %s',
-                           $token->getUserPHID(),
-                           $token->getClientPHID());
+      ->loadOneWhere(
+        'userPHID = %s AND clientPHID = %s',
+        $token->getUserPHID(),
+        $token->getClientPHID());
 
     if (!$authorization) {
       return false;
@@ -198,7 +198,7 @@ final class PhabricatorOAuthServer {
    * for details on what makes a given redirect URI "valid".
    */
   public function validateRedirectURI(PhutilURI $uri) {
-    if (!PhabricatorEnv::isValidRemoteWebResource($uri)) {
+    if (!PhabricatorEnv::isValidRemoteURIForLink($uri)) {
       return false;
     }
 

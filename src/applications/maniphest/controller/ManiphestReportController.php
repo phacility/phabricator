@@ -171,7 +171,7 @@ final class ManiphestReportController extends ManiphestController {
       if ($week_bucket != $last_week) {
         if ($week) {
           $rows[] = $this->formatBurnRow(
-            'Week of '.phabricator_date($last_week_epoch, $user),
+            pht('Week of %s', phabricator_date($last_week_epoch, $user)),
             $week);
           $rowc[] = 'week';
         }
@@ -261,17 +261,17 @@ final class ManiphestReportController extends ManiphestController {
     }
 
     if ($caption) {
-      $caption = id(new AphrontErrorView())
+      $caption = id(new PHUIInfoView())
         ->appendChild($caption)
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
     }
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText($header);
     if ($caption) {
-      $panel->setErrorView($caption);
+      $panel->setInfoView($caption);
     }
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     $tokens = array();
     if ($handle) {
@@ -319,13 +319,14 @@ final class ManiphestReportController extends ManiphestController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorProjectDatasource())
           ->setLabel(pht('Project'))
           ->setLimit(1)
           ->setName('set_project')
-          ->setValue($tokens));
+          // TODO: This is silly, but this is Maniphest reports.
+          ->setValue(mpull($tokens, 'getPHID')));
 
     if ($has_window) {
       list($window_str, $ignored, $window_error) = $this->getWindow();
@@ -409,7 +410,10 @@ final class ManiphestReportController extends ManiphestController {
       $handles = $this->loadViewerHandles($phids);
       $project_handle = $handles[$project_phid];
 
-      $query->withAnyProjects($phids);
+      $query->withEdgeLogicPHIDs(
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        PhabricatorQueryConstraint::OPERATOR_OR,
+        $phids);
     }
 
     $tasks = $query->execute();
@@ -460,7 +464,7 @@ final class ManiphestReportController extends ManiphestController {
           }
         }
 
-        $base_link = '/maniphest/?allProjects=';
+        $base_link = '/maniphest/?projects=';
         $leftover_name = phutil_tag('em', array(), pht('(No Project)'));
         $col_header = pht('Project');
         $header = pht('Open Tasks by Project and Priority (%s)', $date);
@@ -584,7 +588,7 @@ final class ManiphestReportController extends ManiphestController {
       $cname[] = $label;
       $cclass[] = 'n';
     }
-    $cname[] = 'Total';
+    $cname[] = pht('Total');
     $cclass[] = 'n';
     $cname[] = javelin_tag(
       'span',
@@ -602,8 +606,8 @@ final class ManiphestReportController extends ManiphestController {
       array(
         'sigil' => 'has-tooltip',
         'meta'  => array(
-          'tip' => pht('Oldest open task, excluding those with Low or '.
-                   'Wishlist priority.'),
+          'tip' => pht(
+            'Oldest open task, excluding those with Low or Wishlist priority.'),
           'size' => 200,
         ),
       ),
@@ -648,7 +652,7 @@ final class ManiphestReportController extends ManiphestController {
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText($header);
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     $tokens = array();
     if ($project_handle) {

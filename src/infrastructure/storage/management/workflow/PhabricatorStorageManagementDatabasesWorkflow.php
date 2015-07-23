@@ -3,11 +3,11 @@
 final class PhabricatorStorageManagementDatabasesWorkflow
   extends PhabricatorStorageManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('databases')
       ->setExamples('**databases** [__options__]')
-      ->setSynopsis('List Phabricator databases.');
+      ->setSynopsis(pht('List Phabricator databases.'));
   }
 
   public function execute(PhutilArgumentParser $args) {

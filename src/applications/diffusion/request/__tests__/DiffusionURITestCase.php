@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionURITestCase extends ArcanistPhutilTestCase {
+final class DiffusionURITestCase extends PhutilTestCase {
 
   public function testBlobDecode() {
     $map = array(
@@ -67,7 +67,7 @@ final class DiffusionURITestCase extends ArcanistPhutilTestCase {
       $this->assertEqual(
         $expect,
         $actual,
-        "Parsing '{$input}'");
+        pht("Parsing '%s'", $input));
     }
   }
 

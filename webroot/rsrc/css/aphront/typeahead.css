@@ -27,7 +27,7 @@ div.jx-typeahead-results {
 div.jx-typeahead-results a.jx-result {
   color: {$darkgreytext};
   display: block;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   border-top: 1px solid {$hoverborder};
 }
 
@@ -47,7 +47,7 @@ table.jx-typeahead button {
 }
 
 table.jx-typeahead input {
-  font-size: 13px;
+  font-size: {$normalfontsize};
   padding: 2px;
 }
 

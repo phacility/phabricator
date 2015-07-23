@@ -1,0 +1,247 @@
+@title Troubleshooting Repository Imports
+@group fieldmanual
+
+Guide to the troubleshooting repositories which import incompletely.
+
+Overview
+========
+
+When you first import an external source code repository (or push new commits to
+a hosted repository), Phabricator imports those commits in the background.
+
+While a repository is initially importing, some features won't work. While
+individual commits are importing, some of their metadata won't be available in
+the web UI.
+
+Sometimes, the import process may hang or fail to complete. This document can
+help you understand the import process and troubleshoot problems with it.
+
+
+Understanding the Import Pipeline
+=================================
+
+Phabricator first performs commit discovery on repositories. This examines
+a repository and identifies all the commits in it at a very shallow level,
+then creates stub objects for them. These stub objects primarily serve to
+assign various internal IDs to each commit.
+
+Commit discovery occurs in the update phase, and you can learn more about
+updates in @{article:Diffusion User Guide: Repository Updates}.
+
+After commits are discovered, background tasks are queued to actually import
+commits. These tasks do things like look at commit messages, trigger mentions
+and autoclose rules, cache changes, trigger Herald, publish feed stories and
+email, and apply Owners rules. You can learn more about some of these steps in
+@{article:Diffusion User Guide: Autoclose}.
+
+Specifically, the import pipeline has four steps:
+
+  - **Message**: Parses the commit message and author metadata.
+  - **Change**: Caches the paths the commit affected.
+  - **Owners**: Runs Owners rules.
+  - **Herald**: Runs Herald rules and publishes notifications.
+
+These steps run in sequence for each commit, but all discovered commits import
+in parallel.
+
+
+Identifying Missing Steps
+=========================
+
+There are a few major pieces of information you can look at to understand where
+the import process is stuck.
+
+First, to identify which commits have missing import steps, run this command:
+
+```
+phabricator/ $ ./bin/repository importing rXYZ
+```
+
+That will show what work remains to be done. Each line shows a commit which
+is discovered but not imported, and the import steps that are remaining for
+that commit. Generally, the commit is stuck on the first step in the list.
+
+Second, load the Daemon Console (at `/daemon/` in the web UI). This will show
+what work is currently being done and waiting to complete. The most important
+sections are "Queued Tasks" (work waiting in queue) and "Leased Tasks"
+(work currently being done).
+
+Third, run this command to look at the daemon logs:
+
+```
+phabricator/ $ ./bin/phd log
+```
+
+This can show you any errors the daemons have encountered recently.
+
+The next sections will walk through how to use this information to understand
+and resolve the issue.
+
+
+Handling Permanent Failures
+===========================
+
+Some commits can not be imported, which will permanently stop a repository from
+fully importing. These are rare, but can be caused by unusual data in a
+repository, version peculiarities, or bugs in the importer.
+
+Permanent failures usually look like a small number of commits stuck on the
+"Message" or "Change" steps in the output of `repository importing`. If you
+have a larger number of commits, it is less likely that there are any permanent
+problems.
+
+In the Daemon console, permanent failures usually look like a small number of
+tasks in "Leased Tasks" with a large failure count. These tasks are retrying
+until they succeed, but a bug is permanently preventing them from succeeding,
+so they'll rack up a large number of retries over time.
+
+In the daemon log, these commits usually emit specific errors showing why
+they're failing to import.
+
+These failures are the easiest to identify and understand, and can often be
+resolved quickly. Choose some failing commit from the output of `bin/repository
+importing` and use this command to re-run any missing steps manually in the
+foreground:
+
+```
+phabricator/ $ ./bin/repository reparse --importing --trace rXYZabcdef012...
+```
+
+This command is always safe to run, no matter what the actual root cause of
+the problem is.
+
+If this fails with an error, you've likely identified a problem with
+Phabricator. Collect as much information as you can about what makes the commit
+special and file a bug in the upstream by following the instructions in
+@{article:Contributing Bug Reports}.
+
+If the commit imports cleanly, this is more likely to be caused by some other
+issue.
+
+
+Handling Temporary Failures
+===========================
+
+Some commits may temporarily fail to import: perhaps the network or services
+may have briefly been down, or some configuration wasn't quite right, or the
+daemons were killed halfway through the work.
+
+These commits will retry eventually and usually succeed, but some of the retry
+time limits are very conserative (up to 24 hours) and you might not want to
+wait that long.
+
+In the Daemon console, temporarily failures usually look like tasks in the
+"Leased Tasks" column with a large "Expires" value but a low "Failures" count
+(usually 0 or 1). The "Expires" column is showing how long Phabricator is
+waiting to retry these tasks.
+
+In the daemon log, these temporary failures might have created log entries, but
+might also not have. For example, if the failure was rooted in a network issue
+that probably will create a log entry, but if the faiulre was rooted in the
+daemons being abruptly killed that may not create a log entry.
+
+You can follow the instructions from "Handling Permanent Failures" above to
+reparse steps individually to look for an error that represents a root cause,
+but sometimes this can happen because of some transient issue which won't be
+identifiable.
+
+The easiest way to fix this is to restart the daemons. When you restart
+daemons, all task leases are immediately expired, so any tasks waiting for a
+long time will run right away:
+
+```
+phabricator/ $ ./bin/phd restart
+```
+
+This command is always safe to run, no matter what the actual root cause of
+the problem is.
+
+After restarting the daemons, any pending tasks should be able to retry
+immediately.
+
+For more information on managing the daemons, see
+@{article:Managing Daemons with phd}.
+
+
+Forced Parsing
+==============
+
+In rare cases, the actual tasks may be lost from the task queue. Usually, they
+have been stolen by gremlins or spritied away by ghosts, or someone may have
+been too ambitious with running manual SQL commands and deleted a bunch of
+extra things they shouldn't have.
+
+There is no normal set of conditions under which this should occur, but you can
+force Phabricator to re-queue the tasks to recover from it if it does occur.
+
+This will look like missing steps in `repository importing`, but nothing in the
+"Queued Tasks" or "Leased Tasks" sections of the daemon console. The daemon
+logs will also be empty, since the tasks have vanished.
+
+To re-queue parse tasks for a repository, run this command, which will queue
+up all of the missing work in `repository importing`:
+
+```
+phabricator/ $ ./bin/repository reparse --importing --all rXYZ
+```
+
+This command may cause duplicate work to occur if you have misdiagnosed the
+problem and the tasks aren't actually lost. For example, it could queue a
+second task to perform publishing, which could cause Phabricator to send a
+second copy of email about the commit. Other than that, it is safe to run even
+if this isn't the problem.
+
+After running this command, you should see tasks in "Queued Tasks" and "Leased
+Tasks" in the console which correspond to the commits in `repository
+importing`, and progress should resume.
+
+
+Forced Imports
+==============
+
+In some cases, you might want to force a repository to be flagged as imported
+even though the import isn't complete. The most common and reasonable case
+where you might want to do this is if you've identified a permanent failure
+with a small number of commits (maybe just one) and reported it upstream, and
+are waiting for a fix. You might want to start using the repository immediately,
+even if a few things can't import yet.
+
+You should be cautious about doing this. The "importing" flag controls
+publishing of notifications and email, so if you flag a repository as imported
+but it still has a lot of work queued, it may send an enormous amount of email
+as that work completes.
+
+To mark a repository as imported even though it really isn't, run this
+command:
+
+```
+phabricator/ $ ./bin/repository mark-imported rXYZ
+```
+
+If you do this by mistake, you can reverse it later by using the
+`--mark-not-imported` flag.
+
+
+General Tips
+============
+
+Broadly, `bin/repository` contains several useful debugging commands which
+let you figure out where failures are occuring. You can add the `--trace` flag
+to any command to get more details about what it is doing. For any command,
+you can use `help` to learn more about what it does and which flag it takes:
+
+```
+phabricator/ $ bin/repository help <command>
+```
+
+In particular, you can use flags with the `repository reparse` command to
+manually run parse steps in the foreground, including re-running steps and
+running steps out of order.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to the @{article:Diffusion User Guide}.

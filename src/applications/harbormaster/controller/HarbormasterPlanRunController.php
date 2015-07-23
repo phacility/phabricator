@@ -2,20 +2,18 @@
 
 final class HarbormasterPlanRunController extends HarbormasterController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $this->requireApplicationCapability(
       HarbormasterManagePlansCapability::CAPABILITY);
 
-    $plan_id = $this->id;
+    $plan_id = $request->getURIData('id');
+
+    // NOTE: At least for now, this only requires the "Can Manage Plans"
+    // capability, not the "Can Edit" capability. Possibly it should have
+    // a more stringent requirement, though.
+
     $plan = id(new HarbormasterBuildPlanQuery())
       ->setViewer($viewer)
       ->withIDs(array($plan_id))
@@ -63,7 +61,7 @@ final class HarbormasterPlanRunController extends HarbormasterController {
     }
 
     if ($errors) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
+      $errors = id(new PHUIInfoView())->setErrors($errors);
     }
 
     $title = pht('Run Build Plan Manually');
@@ -82,20 +80,17 @@ final class HarbormasterPlanRunController extends HarbormasterController {
           $plan->getID()))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Buildable Name')
+          ->setLabel(pht('Buildable Name'))
           ->setName('buildablePHID')
           ->setError($e_name)
           ->setValue($v_name));
 
-    $dialog = id(new AphrontDialogView())
+    return $this->newDialog()
       ->setWidth(AphrontDialogView::WIDTH_FULL)
-      ->setUser($viewer)
       ->setTitle($title)
       ->appendChild($form)
       ->addCancelButton($cancel_uri)
       ->addSubmitButton($save_button);
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
 }

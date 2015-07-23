@@ -3,6 +3,10 @@
 final class PhabricatorOwnersPackageDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Packages');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a package name...');
   }
@@ -17,10 +21,11 @@ final class PhabricatorOwnersPackageDatasource
 
     $results = array();
 
-    $packages = id(new PhabricatorOwnersPackageQuery())
-      ->setViewer($viewer)
-      ->execute();
+    $query = id(new PhabricatorOwnersPackageQuery())
+      ->withNamePrefix($raw_query)
+      ->setOrder('name');
 
+    $packages = $this->executeQuery($query);
     foreach ($packages as $package) {
       $results[] = id(new PhabricatorTypeaheadResult())
         ->setName($package->getName())
@@ -28,7 +33,7 @@ final class PhabricatorOwnersPackageDatasource
         ->setPHID($package->getPHID());
     }
 
-    return $results;
+    return $this->filterResultsAgainstTokens($results);
   }
 
 }

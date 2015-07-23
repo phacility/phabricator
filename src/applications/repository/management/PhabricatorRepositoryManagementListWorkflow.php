@@ -3,10 +3,10 @@
 final class PhabricatorRepositoryManagementListWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('list')
-      ->setSynopsis('Show a list of repositories.')
+      ->setSynopsis(pht('Show a list of repositories.'))
       ->setArguments(array());
   }
 
@@ -21,7 +21,7 @@ final class PhabricatorRepositoryManagementListWorkflow
         $console->writeOut("%s\n", $repo->getCallsign());
       }
     } else {
-      $console->writeErr("%s\n", 'There are no repositories.');
+      $console->writeErr("%s\n", pht('There are no repositories.'));
     }
 
     return 0;

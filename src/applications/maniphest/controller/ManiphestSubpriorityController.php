@@ -32,21 +32,25 @@ final class ManiphestSubpriorityController extends ManiphestController {
       if (!$after_task) {
         return new Aphront404Response();
       }
-      $after_pri = $after_task->getPriority();
-      $after_sub = $after_task->getSubpriority();
+      list($pri, $sub) = ManiphestTransactionEditor::getAdjacentSubpriority(
+        $after_task,
+        $is_after = true);
     } else {
-      $after_pri = $request->getInt('priority');
-      $after_sub = null;
+      list($pri, $sub) = ManiphestTransactionEditor::getEdgeSubpriority(
+        $request->getInt('priority'),
+        $is_end = false);
     }
 
-    $xactions = array(id(new ManiphestTransaction())
+    $xactions = array();
+
+    $xactions[] = id(new ManiphestTransaction())
+      ->setTransactionType(ManiphestTransaction::TYPE_PRIORITY)
+      ->setNewValue($pri);
+
+    $xactions[] = id(new ManiphestTransaction())
       ->setTransactionType(ManiphestTransaction::TYPE_SUBPRIORITY)
-      ->setNewValue(array(
-        'newPriority' => $after_pri,
-        'newSubpriorityBase' => $after_sub,
-        'direction' => '>',
-      )),
-    );
+      ->setNewValue($sub);
+
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($user)
       ->setContinueOnMissingFields(true)

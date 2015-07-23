@@ -2,7 +2,9 @@
 
 final class NuanceItem
   extends NuanceDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorApplicationTransactionInterface {
 
   const STATUS_OPEN     = 0;
   const STATUS_ASSIGNED = 10;
@@ -13,14 +15,14 @@ final class NuanceItem
   protected $requestorPHID;
   protected $sourcePHID;
   protected $sourceLabel;
-  protected $data;
+  protected $data = array();
   protected $mailKey;
   protected $dateNuanced;
 
-  public static function initializeNewItem(PhabricatorUser $user) {
+  public static function initializeNewItem() {
     return id(new NuanceItem())
       ->setDateNuanced(time())
-      ->setStatus(NuanceItem::STATUS_OPEN);
+      ->setStatus(self::STATUS_OPEN);
   }
 
   protected function getConfiguration() {
@@ -94,6 +96,15 @@ final class NuanceItem
     $this->source = $source;
   }
 
+  public function getNuanceProperty($key, $default = null) {
+    return idx($this->data, $key, $default);
+  }
+
+  public function setNuanceProperty($key, $value) {
+    $this->data[$key] = $value;
+    return $this;
+  }
+
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
@@ -134,4 +145,27 @@ final class NuanceItem
       'dateNuanced' => $this->getDateNuanced(),
     );
   }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new NuanceItemEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new NuanceItemTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
+  }
+
 }

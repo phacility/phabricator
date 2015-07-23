@@ -32,5 +32,4 @@ final class PhabricatorHomeQuickCreateController
       ));
   }
 
-
 }

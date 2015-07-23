@@ -5,7 +5,9 @@ $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
 if ($argc !== 5) {
-  echo "usage: add_user.php <username> <email> <realname> <admin_user>\n";
+  echo pht(
+    "Usage: %s\n",
+    'add_user.php <username> <email> <realname> <admin_user>');
   exit(1);
 }
 
@@ -19,8 +21,9 @@ $admin = id(new PhabricatorUser())->loadOneWhere(
   $argv[4]);
 if (!$admin) {
   throw new Exception(
-    'Admin user must be the username of a valid Phabricator account, used '.
-    'to send the new user a welcome email.');
+    pht(
+      'Admin user must be the username of a valid Phabricator account, used '.
+      'to send the new user a welcome email.'));
 }
 
 $existing_user = id(new PhabricatorUser())->loadOneWhere(
@@ -28,7 +31,9 @@ $existing_user = id(new PhabricatorUser())->loadOneWhere(
   $username);
 if ($existing_user) {
   throw new Exception(
-    "There is already a user with the username '{$username}'!");
+    pht(
+      "There is already a user with the username '%s'!",
+      $username));
 }
 
 $existing_email = id(new PhabricatorUserEmail())->loadOneWhere(
@@ -36,7 +41,9 @@ $existing_email = id(new PhabricatorUserEmail())->loadOneWhere(
   $email);
 if ($existing_email) {
   throw new Exception(
-    "There is already a user with the email '{$email}'!");
+    pht(
+      "There is already a user with the email '%s'!",
+      $email));
 }
 
 $user = new PhabricatorUser();
@@ -54,4 +61,8 @@ id(new PhabricatorUserEditor())
 
 $user->sendWelcomeEmail($admin);
 
-echo "Created user '{$username}' (realname='{$realname}', email='{$email}').\n";
+echo pht(
+  "Created user '%s' (realname='%s', email='%s').\n",
+  $username,
+  $realname,
+  $email);

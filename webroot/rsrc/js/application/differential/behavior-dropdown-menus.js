@@ -16,18 +16,17 @@ JX.behavior('differential-dropdown-menus', function(config) {
   var pht = JX.phtize(config.pht);
 
   function show_more(container) {
+    var view = JX.ChangesetViewManager.getForNode(container);
+
     var nodes = JX.DOM.scry(container, 'tr', 'context-target');
     for (var ii = 0; ii < nodes.length; ii++) {
       var show = JX.DOM.scry(nodes[ii], 'a', 'show-more');
       for (var jj = 0; jj < show.length; jj++) {
-        if (JX.Stratcom.getData(show[jj]).type != 'all') {
+        var data = JX.Stratcom.getData(show[jj]);
+        if (data.type != 'all') {
           continue;
         }
-        var event_data = {
-          context : nodes[ii],
-          show : show[jj]
-        };
-        JX.Stratcom.invoke('differential-reveal-context', null, event_data);
+        view.loadContext(data.range, nodes[ii], true);
       }
     }
   }
@@ -218,7 +217,7 @@ JX.behavior('differential-dropdown-menus', function(config) {
       visible_item
         .setDisabled(true)
         .setIcon('fa-expand')
-        .setName(pht("Can't Toggle Unloaded File"));
+        .setName(pht('Can\'t Toggle Unloaded File'));
       var diffs = JX.DOM.scry(
         JX.$(data.containerID),
         'table',

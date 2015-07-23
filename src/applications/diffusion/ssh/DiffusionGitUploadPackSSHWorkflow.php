@@ -2,7 +2,7 @@
 
 final class DiffusionGitUploadPackSSHWorkflow extends DiffusionGitSSHWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this->setName('git-upload-pack');
     $this->setArguments(
       array(
@@ -14,11 +14,13 @@ final class DiffusionGitUploadPackSSHWorkflow extends DiffusionGitSSHWorkflow {
   }
 
   protected function executeRepositoryOperations() {
-    $args = $this->getArgs();
-    $path = head($args->getArg('dir'));
-    $repository = $this->loadRepository($path);
+    $repository = $this->getRepository();
 
-    $command = csprintf('git-upload-pack -- %s', $repository->getLocalPath());
+    if ($this->shouldProxy()) {
+      $command = $this->getProxyCommand();
+    } else {
+      $command = csprintf('git-upload-pack -- %s', $repository->getLocalPath());
+    }
     $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
 
     $future = id(new ExecFuture('%C', $command))

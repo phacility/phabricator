@@ -9,9 +9,14 @@ final class PholioMock extends PholioDAO
     PhabricatorFlaggableInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorSpacesInterface,
+    PhabricatorMentionableInterface {
 
   const MARKUP_FIELD_DESCRIPTION  = 'markup:description';
+
+  const STATUS_OPEN = 'open';
+  const STATUS_CLOSED = 'closed';
 
   protected $authorPHID;
   protected $viewPolicy;
@@ -23,6 +28,7 @@ final class PholioMock extends PholioDAO
   protected $coverPHID;
   protected $mailKey;
   protected $status;
+  protected $spacePHID;
 
   private $images = self::ATTACHABLE;
   private $allImages = self::ATTACHABLE;
@@ -41,8 +47,10 @@ final class PholioMock extends PholioDAO
     return id(new PholioMock())
       ->setAuthorPHID($actor->getPHID())
       ->attachImages(array())
+      ->setStatus(self::STATUS_OPEN)
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($edit_policy);
+      ->setEditPolicy($edit_policy)
+      ->setSpacePHID($actor->getDefaultSpacePHID());
   }
 
   public function getMonogram() {
@@ -158,8 +166,8 @@ final class PholioMock extends PholioDAO
 
   public function getStatuses() {
     $options = array();
-    $options['open'] = pht('Open');
-    $options['closed'] = pht('Closed');
+    $options[self::STATUS_OPEN] = pht('Open');
+    $options[self::STATUS_CLOSED] = pht('Closed');
     return $options;
   }
 
@@ -303,5 +311,14 @@ final class PholioMock extends PholioDAO
       $this->delete();
     $this->saveTransaction();
   }
+
+
+/* -(  PhabricatorSpacesInterface  )----------------------------------------- */
+
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
+  }
+
 
 }

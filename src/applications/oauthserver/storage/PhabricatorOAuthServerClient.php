@@ -10,6 +10,7 @@ final class PhabricatorOAuthServerClient
   protected $name;
   protected $redirectURI;
   protected $creatorPHID;
+  protected $isTrusted = 0;
   protected $viewPolicy;
   protected $editPolicy;
 
@@ -40,6 +41,7 @@ final class PhabricatorOAuthServerClient
         'name' => 'text255',
         'secret' => 'text32',
         'redirectURI' => 'text255',
+        'isTrusted' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,

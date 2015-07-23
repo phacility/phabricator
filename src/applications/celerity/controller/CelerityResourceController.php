@@ -18,6 +18,10 @@ abstract class CelerityResourceController extends PhabricatorController {
     return true;
   }
 
+  public function shouldAllowLegallyNonCompliantUsers() {
+    return true;
+  }
+
   abstract public function getCelerityResourceMap();
 
   protected function serveResource($path, $package_hash = null) {
@@ -31,7 +35,7 @@ abstract class CelerityResourceController extends PhabricatorController {
     $type_map = self::getSupportedResourceTypes();
 
     if (empty($type_map[$type])) {
-      throw new Exception('Only static resources may be served.');
+      throw new Exception(pht('Only static resources may be served.'));
     }
 
     $dev_mode = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
@@ -97,8 +101,15 @@ abstract class CelerityResourceController extends PhabricatorController {
     $response->setMimeType($type_map[$type]);
 
     // NOTE: This is a piece of magic required to make WOFF fonts work in
-    // Firefox. Possibly we should generalize this.
-    if ($type == 'woff') {
+    // Firefox and IE. Possibly we should generalize this more.
+
+    $cross_origin_types = array(
+      'woff' => true,
+      'woff2' => true,
+      'eot' => true,
+    );
+
+    if (isset($cross_origin_types[$type])) {
       // We could be more tailored here, but it's not currently trivial to
       // generate a comprehensive list of valid origins (an install may have
       // arbitrarily many Phame blogs, for example), and we lose nothing by
@@ -118,8 +129,10 @@ abstract class CelerityResourceController extends PhabricatorController {
       'jpg' => 'image/jpeg',
       'swf' => 'application/x-shockwave-flash',
       'woff' => 'font/woff',
+      'woff2' => 'font/woff2',
       'eot' => 'font/eot',
       'ttf' => 'font/ttf',
+      'mp3' => 'audio/mpeg',
     );
   }
 
@@ -151,8 +164,8 @@ abstract class CelerityResourceController extends PhabricatorController {
     return isset($types[$type]);
   }
 
-  private function getCacheKey($path) {
-    return 'celerity:'.$path;
+  protected function getCacheKey($path) {
+    return 'celerity:'.PhabricatorHash::digestToLength($path, 64);
   }
 
 }

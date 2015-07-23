@@ -9,7 +9,7 @@ $conn_w = $table->establishConnection('w');
 
 $xaccount = new PhabricatorExternalAccount();
 
-echo "Migrating OAuth to ExternalAccount...\n";
+echo pht('Migrating OAuth to %s...', 'ExternalAccount')."\n";
 
 $domain_map = array(
   'disqus'      => 'disqus.com',
@@ -31,18 +31,18 @@ $rows = queryfx_all(
   $conn_w,
   'SELECT * FROM user_oauthinfo');
 foreach ($rows as $row) {
-  echo "Migrating row ID #".$row['id'].".\n";
+  echo pht('Migrating row ID #%d.', $row['id'])."\n";
   $user = id(new PhabricatorUser())->loadOneWhere(
     'id = %d',
     $row['userID']);
   if (!$user) {
-    echo "Bad user ID!\n";
+    echo pht('Bad user ID!')."\n";
     continue;
   }
 
   $domain = idx($domain_map, $row['oauthProvider']);
   if (empty($domain)) {
-    echo "Unknown OAuth provider!\n";
+    echo pht('Unknown OAuth provider!')."\n";
     continue;
   }
 
@@ -63,4 +63,4 @@ foreach ($rows as $row) {
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

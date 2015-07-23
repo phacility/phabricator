@@ -8,22 +8,22 @@ final class DiffusionCommitBranchesController extends DiffusionController {
 
   protected function processDiffusionRequest(AphrontRequest $request) {
     $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
 
-    $branches = array();
-    try {
-      $branches = $this->callConduitWithDiffusionRequest(
-        'diffusion.branchquery',
-        array(
-          'contains' => $drequest->getCommit(),
-        ));
-    } catch (ConduitException $ex) {
-      if ($ex->getMessage() != 'ERR-UNSUPPORTED-VCS') {
-        throw $ex;
-      }
+    switch ($repository->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $branches = array();
+        break;
+      default:
+        $branches = $this->callConduitWithDiffusionRequest(
+          'diffusion.branchquery',
+          array(
+            'contains' => $drequest->getCommit(),
+          ));
+        break;
     }
 
     $branches = DiffusionRepositoryRef::loadAllFromDictionaries($branches);
-
     $branch_links = array();
     foreach ($branches as $branch) {
       $branch_links[] = phutil_tag(
@@ -39,6 +39,6 @@ final class DiffusionCommitBranchesController extends DiffusionController {
     }
 
     return id(new AphrontAjaxResponse())
-      ->setContent($branch_links ? implode(', ', $branch_links) : 'None');
+      ->setContent($branch_links ? implode(', ', $branch_links) : pht('None'));
   }
 }

@@ -1,6 +1,6 @@
 <?php
 
-echo "Populating Phabricator files with mail keys xactions...\n";
+echo pht('Populating Phabricator files with mail keys xactions...')."\n";
 
 $table = new PhabricatorFile();
 $table_name = $table->getTableName();
@@ -35,4 +35,4 @@ if ($sql) {
 }
 
 $table->saveTransaction();
-echo "Done.\n";
+echo pht('Done.')."\n";

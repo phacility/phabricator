@@ -7,6 +7,11 @@ interface PhabricatorInlineCommentInterface extends PhabricatorMarkupInterface {
 
   const MARKUP_FIELD_BODY = 'markup:body';
 
+  const STATE_UNDONE = 'undone';
+  const STATE_DRAFT = 'draft';
+  const STATE_UNDRAFT = 'undraft';
+  const STATE_DONE = 'done';
+
   public function setChangesetID($id);
   public function getChangesetID();
 
@@ -18,6 +23,18 @@ interface PhabricatorInlineCommentInterface extends PhabricatorMarkupInterface {
 
   public function setLineLength($length);
   public function getLineLength();
+
+  public function setReplyToCommentPHID($phid);
+  public function getReplyToCommentPHID();
+
+  public function setHasReplies($has_replies);
+  public function getHasReplies();
+
+  public function setIsDeleted($deleted);
+  public function getIsDeleted();
+
+  public function setFixedState($state);
+  public function getFixedState();
 
   public function setContent($content);
   public function getContent();
@@ -36,5 +53,11 @@ interface PhabricatorInlineCommentInterface extends PhabricatorMarkupInterface {
 
   public function save();
   public function delete();
+
+  public function setIsGhost($is_ghost);
+  public function getIsGhost();
+
+  public function supportsHiding();
+  public function isHidden();
 
 }

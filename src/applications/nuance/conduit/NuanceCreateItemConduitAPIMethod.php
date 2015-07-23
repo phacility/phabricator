@@ -10,7 +10,7 @@ final class NuanceCreateItemConduitAPIMethod extends NuanceConduitAPIMethod {
     return pht('Create a new item.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'requestorPHID' => 'required string',
       'sourcePHID'    => 'required string',
@@ -18,11 +18,11 @@ final class NuanceCreateItemConduitAPIMethod extends NuanceConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-NO-REQUESTOR-PHID' => pht('Items must have a requestor.'),
       'ERR-NO-SOURCE-PHID' => pht('Items must have a source.'),
@@ -36,7 +36,7 @@ final class NuanceCreateItemConduitAPIMethod extends NuanceConduitAPIMethod {
 
     $user = $request->getUser();
 
-    $item = NuanceItem::initializeNewItem($user);
+    $item = NuanceItem::initializeNewItem();
     $xactions = array();
 
     if ($source_phid) {

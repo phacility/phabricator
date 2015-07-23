@@ -30,17 +30,10 @@
 input.diffusion-clone-uri {
   display: block;
   width: 100%;
-  border: 1px solid #efefef;
-  box-shadow: none;
-  height: 24px;
 }
 
 .diffusion-clone-extras {
   font-size: 11px;
   text-align: right;
   color: {$lightgreytext};
-}
-
-.diffusion-locate-file-view {
-  border-bottom: 1px solid {$thinblueborder};
 }

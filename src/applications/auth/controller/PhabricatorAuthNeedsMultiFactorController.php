@@ -29,9 +29,9 @@ final class PhabricatorAuthNeedsMultiFactorController
     $viewer->updateMultiFactorEnrollment();
 
     if (!$viewer->getIsEnrolledInMultiFactor()) {
-      $help = id(new AphrontErrorView())
+      $help = id(new PHUIInfoView())
         ->setTitle(pht('Add Multi-Factor Authentication To Your Account'))
-        ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
         ->setErrors(
           array(
             pht(
@@ -40,7 +40,7 @@ final class PhabricatorAuthNeedsMultiFactorController
             pht(
               'Multi-factor authentication helps secure your account by '.
               'making it more difficult for attackers to gain access or '.
-              'take senstive actions.'),
+              'take sensitive actions.'),
             pht(
               'To learn more about multi-factor authentication, click the '.
               '%s button below.',
@@ -53,9 +53,9 @@ final class PhabricatorAuthNeedsMultiFactorController
               'account.'),
           ));
     } else {
-      $help = id(new AphrontErrorView())
+      $help = id(new PHUIInfoView())
         ->setTitle(pht('Multi-Factor Authentication Configured'))
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->setErrors(
           array(
             pht(

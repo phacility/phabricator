@@ -74,7 +74,7 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
         break;
       case PhabricatorTransactions::TYPE_EDGE:
         if ($value) {
-          $value = json_decode($value);
+          $value = phutil_json_decode($value);
         }
         if (!$value) {
           $value = array();

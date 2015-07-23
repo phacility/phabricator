@@ -7,6 +7,12 @@ abstract class DiffusionGitSSHWorkflow extends DiffusionSSHWorkflow {
     return parent::writeError($message."\n");
   }
 
+  protected function identifyRepository() {
+    $args = $this->getArgs();
+    $path = head($args->getArg('dir'));
+    return $this->loadRepositoryWithPath($path);
+  }
+
   protected function waitForGitClient() {
     $io_channel = $this->getIOChannel();
 

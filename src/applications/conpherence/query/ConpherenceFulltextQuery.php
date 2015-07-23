@@ -4,10 +4,16 @@ final class ConpherenceFulltextQuery
   extends PhabricatorOffsetPagedQuery {
 
   private $threadPHIDs;
+  private $previousTransactionPHIDs;
   private $fulltext;
 
   public function withThreadPHIDs(array $phids) {
     $this->threadPHIDs = $phids;
+    return $this;
+  }
+
+  public function withPreviousTransactionPHIDs(array $phids) {
+    $this->previousTransactionPHIDs = $phids;
     return $this;
   }
 
@@ -32,7 +38,7 @@ final class ConpherenceFulltextQuery
     return $rows;
   }
 
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->threadPHIDs !== null) {
@@ -40,6 +46,13 @@ final class ConpherenceFulltextQuery
         $conn_r,
         'i.threadPHID IN (%Ls)',
         $this->threadPHIDs);
+    }
+
+    if ($this->previousTransactionPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'i.previousTransactionPHID IN (%Ls)',
+        $this->previousTransactionPHIDs);
     }
 
     if (strlen($this->fulltext)) {

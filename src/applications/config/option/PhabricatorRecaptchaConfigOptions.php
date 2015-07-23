@@ -11,6 +11,14 @@ final class PhabricatorRecaptchaConfigOptions
     return pht('Configure Recaptcha captchas.');
   }
 
+  public function getFontIcon() {
+    return 'fa-recycle';
+  }
+
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
 
     return array(
@@ -30,7 +38,7 @@ final class PhabricatorRecaptchaConfigOptions
         ->setDescription(
           pht('Recaptcha public key, obtained by signing up for Recaptcha.')),
       $this->newOption('recaptcha.private-key', 'string', null)
-        ->setMasked(true)
+        ->setHidden(true)
         ->setDescription(
           pht('Recaptcha private key, obtained by signing up for Recaptcha.')),
     );

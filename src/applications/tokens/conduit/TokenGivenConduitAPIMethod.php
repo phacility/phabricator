@@ -10,7 +10,7 @@ final class TokenGivenConduitAPIMethod extends TokenConduitAPIMethod {
     return pht('Query tokens given to objects.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'authorPHIDs' => 'list<phid>',
       'objectPHIDs' => 'list<phid>',
@@ -18,15 +18,11 @@ final class TokenGivenConduitAPIMethod extends TokenConduitAPIMethod {
     );
   }
 
-  public function defineErrorTypes() {
-    return array();
-  }
-
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
   }
 
-  public function execute(ConduitAPIRequest $request) {
+  protected function execute(ConduitAPIRequest $request) {
     $query = id(new PhabricatorTokenGivenQuery())
       ->setViewer($request->getUser());
 

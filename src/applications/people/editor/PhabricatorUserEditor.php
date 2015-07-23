@@ -23,19 +23,29 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
    */
   public function createNewUser(
     PhabricatorUser $user,
-    PhabricatorUserEmail $email) {
+    PhabricatorUserEmail $email,
+    $allow_reassign = false) {
 
     if ($user->getID()) {
-      throw new Exception('User has already been created!');
+      throw new Exception(pht('User has already been created!'));
     }
 
+    $is_reassign = false;
     if ($email->getID()) {
-      throw new Exception('Email has already been created!');
+      if ($allow_reassign) {
+        if ($email->getIsPrimary()) {
+          throw new Exception(
+            pht('Primary email addresses can not be reassigned.'));
+        }
+        $is_reassign = true;
+      } else {
+        throw new Exception(pht('Email has already been created!'));
+      }
     }
 
     if (!PhabricatorUser::validateUsername($user->getUsername())) {
       $valid = PhabricatorUser::describeValidUsername();
-      throw new Exception("Username is invalid! {$valid}");
+      throw new Exception(pht('Username is invalid! %s', $valid));
     }
 
     // Always set a new user's email address to primary.
@@ -71,7 +81,20 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
       $log->setNewValue($email->getAddress());
       $log->save();
 
+      if ($is_reassign) {
+        $log = PhabricatorUserLog::initializeNewLog(
+          $this->requireActor(),
+          $user->getPHID(),
+          PhabricatorUserLog::ACTION_EMAIL_REASSIGN);
+        $log->setNewValue($email->getAddress());
+        $log->save();
+      }
+
     $user->saveTransaction();
+
+    if ($email->getIsVerified()) {
+      $this->didVerifyEmail($user, $email);
+    }
 
     return $this;
   }
@@ -83,8 +106,9 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
   public function updateUser(
     PhabricatorUser $user,
     PhabricatorUserEmail $email = null) {
+
     if (!$user->getID()) {
-      throw new Exception('User has not been created yet!');
+      throw new Exception(pht('User has not been created yet!'));
     }
 
     $user->openTransaction();
@@ -113,7 +137,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     PhutilOpaqueEnvelope $envelope) {
 
     if (!$user->getID()) {
-      throw new Exception('User has not been created yet!');
+      throw new Exception(pht('User has not been created yet!'));
     }
 
     $user->openTransaction();
@@ -139,12 +163,12 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $actor = $this->requireActor();
 
     if (!$user->getID()) {
-      throw new Exception('User has not been created yet!');
+      throw new Exception(pht('User has not been created yet!'));
     }
 
     if (!PhabricatorUser::validateUsername($username)) {
       $valid = PhabricatorUser::describeValidUsername();
-      throw new Exception("Username is invalid! {$valid}");
+      throw new Exception(pht('Username is invalid! %s', $valid));
     }
 
     $old_username = $user->getUsername();
@@ -185,7 +209,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $actor = $this->requireActor();
 
     if (!$user->getID()) {
-      throw new Exception('User has not been created yet!');
+      throw new Exception(pht('User has not been created yet!'));
     }
 
     $user->openTransaction();
@@ -223,7 +247,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $actor = $this->requireActor();
 
     if (!$user->getID()) {
-      throw new Exception('User has not been created yet!');
+      throw new Exception(pht('User has not been created yet!'));
     }
 
     $user->openTransaction();
@@ -254,6 +278,43 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     return $this;
   }
 
+  /**
+   * @task role
+   */
+  public function makeMailingListUser(PhabricatorUser $user, $mailing_list) {
+    $actor = $this->requireActor();
+
+    if (!$user->getID()) {
+      throw new Exception(pht('User has not been created yet!'));
+    }
+
+    $user->openTransaction();
+      $user->beginWriteLocking();
+
+        $user->reload();
+        if ($user->getIsMailingList() == $mailing_list) {
+          $user->endWriteLocking();
+          $user->killTransaction();
+          return $this;
+        }
+
+        $log = PhabricatorUserLog::initializeNewLog(
+          $actor,
+          $user->getPHID(),
+          PhabricatorUserLog::ACTION_MAILING_LIST);
+        $log->setOldValue($user->getIsMailingList());
+        $log->setNewValue($mailing_list);
+
+        $user->setIsMailingList((int)$mailing_list);
+        $user->save();
+
+        $log->save();
+
+      $user->endWriteLocking();
+    $user->saveTransaction();
+
+    return $this;
+  }
 
   /**
    * @task role
@@ -262,7 +323,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $actor = $this->requireActor();
 
     if (!$user->getID()) {
-      throw new Exception('User has not been created yet!');
+      throw new Exception(pht('User has not been created yet!'));
     }
 
     $user->openTransaction();
@@ -301,7 +362,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $actor = $this->requireActor();
 
     if (!$user->getID()) {
-      throw new Exception('User has not been created yet!');
+      throw new Exception(pht('User has not been created yet!'));
     }
 
     $user->openTransaction();
@@ -346,10 +407,10 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $actor = $this->requireActor();
 
     if (!$user->getID()) {
-      throw new Exception('User has not been created yet!');
+      throw new Exception(pht('User has not been created yet!'));
     }
     if ($email->getID()) {
-      throw new Exception('Email has already been created!');
+      throw new Exception(pht('Email has already been created!'));
     }
 
     // Use changePrimaryEmail() to change primary email.
@@ -396,10 +457,10 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $actor = $this->requireActor();
 
     if (!$user->getID()) {
-      throw new Exception('User has not been created yet!');
+      throw new Exception(pht('User has not been created yet!'));
     }
     if (!$email->getID()) {
-      throw new Exception('Email has not been created yet!');
+      throw new Exception(pht('Email has not been created yet!'));
     }
 
     $user->openTransaction();
@@ -409,10 +470,10 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
         $email->reload();
 
         if ($email->getIsPrimary()) {
-          throw new Exception("Can't remove primary email!");
+          throw new Exception(pht("Can't remove primary email!"));
         }
         if ($email->getUserPHID() != $user->getPHID()) {
-          throw new Exception('Email not owned by user!');
+          throw new Exception(pht('Email not owned by user!'));
         }
 
         $email->delete();
@@ -442,10 +503,10 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $actor = $this->requireActor();
 
     if (!$user->getID()) {
-      throw new Exception('User has not been created yet!');
+      throw new Exception(pht('User has not been created yet!'));
     }
     if (!$email->getID()) {
-      throw new Exception('Email has not been created yet!');
+      throw new Exception(pht('Email has not been created yet!'));
     }
 
     $user->openTransaction();
@@ -455,15 +516,15 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
         $email->reload();
 
         if ($email->getUserPHID() != $user->getPHID()) {
-          throw new Exception('User does not own email!');
+          throw new Exception(pht('User does not own email!'));
         }
 
         if ($email->getIsPrimary()) {
-          throw new Exception('Email is already primary!');
+          throw new Exception(pht('Email is already primary!'));
         }
 
         if (!$email->getIsVerified()) {
-          throw new Exception('Email is not verified!');
+          throw new Exception(pht('Email is not verified!'));
         }
 
         $old_primary = $user->loadPrimaryEmail();
@@ -514,10 +575,10 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     $actor = $this->requireActor();
 
     if (!$user->getID()) {
-      throw new Exception('User has not been created yet!');
+      throw new Exception(pht('User has not been created yet!'));
     }
     if (!$email->getID()) {
-      throw new Exception('Email has not been created yet!');
+      throw new Exception(pht('Email has not been created yet!'));
     }
 
     $user->openTransaction();
@@ -555,6 +616,57 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
       $user->endWriteLocking();
     $user->saveTransaction();
 
+    $this->didVerifyEmail($user, $email);
+  }
+
+
+  /**
+   * Reassign an unverified email address.
+   */
+  public function reassignEmail(
+    PhabricatorUser $user,
+    PhabricatorUserEmail $email) {
+    $actor = $this->requireActor();
+
+    if (!$user->getID()) {
+      throw new Exception(pht('User has not been created yet!'));
+    }
+
+    if (!$email->getID()) {
+      throw new Exception(pht('Email has not been created yet!'));
+    }
+
+    $user->openTransaction();
+      $user->beginWriteLocking();
+
+        $user->reload();
+        $email->reload();
+
+        $old_user = $email->getUserPHID();
+
+        if ($old_user != $user->getPHID()) {
+          if ($email->getIsVerified()) {
+            throw new Exception(
+              pht('Verified email addresses can not be reassigned.'));
+          }
+          if ($email->getIsPrimary()) {
+            throw new Exception(
+              pht('Primary email addresses can not be reassigned.'));
+          }
+
+          $email->setUserPHID($user->getPHID());
+          $email->save();
+
+          $log = PhabricatorUserLog::initializeNewLog(
+            $actor,
+            $user->getPHID(),
+            PhabricatorUserLog::ACTION_EMAIL_REASSIGN);
+          $log->setNewValue($email->getAddress());
+          $log->save();
+        }
+
+      $user->endWriteLocking();
+    $user->saveTransaction();
   }
 
 
@@ -578,6 +690,14 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     if (!PhabricatorUserEmail::isAllowedAddress($email->getAddress())) {
       throw new Exception(PhabricatorUserEmail::describeAllowedAddresses());
     }
+
+    $application_email = id(new PhabricatorMetaMTAApplicationEmailQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withAddresses(array($email->getAddress()))
+      ->executeOne();
+    if ($application_email) {
+      throw new Exception($application_email->getInUseMessage());
+    }
   }
 
   private function revokePasswordResetLinks(PhabricatorUser $user) {
@@ -594,5 +714,21 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
         PhabricatorAuthSessionEngine::PASSWORD_TEMPORARY_TOKEN_TYPE,
       ));
   }
+
+  private function didVerifyEmail(
+    PhabricatorUser $user,
+    PhabricatorUserEmail $email) {
+
+    $event_type = PhabricatorEventType::TYPE_AUTH_DIDVERIFYEMAIL;
+    $event_data = array(
+      'user' => $user,
+      'email' => $email,
+    );
+
+    $event = id(new PhabricatorEvent($event_type, $event_data))
+      ->setUser($user);
+    PhutilEventEngine::dispatchEvent($event);
+  }
+
 
 }

@@ -2,6 +2,10 @@
 
 final class PhabricatorPathSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
+
   protected function executeChecks() {
     // NOTE: We've already appended `environment.append-paths`, so we don't
     // need to explicitly check for it.
@@ -9,19 +13,25 @@ final class PhabricatorPathSetupCheck extends PhabricatorSetupCheck {
 
     if (!$path) {
       $summary = pht(
-        'The environmental variable $PATH is empty. Phabricator will not '.
-        'be able to execute some commands.');
+        'The environmental variable %s is empty. Phabricator will not '.
+        'be able to execute some commands.',
+        '$PATH');
 
       $message = pht(
-        'The environmental variable $PATH is empty. Phabricator needs to '.
-        'execute some system commands, like `svn`, `git`, `hg`, and `diff`. '.
-        'To execute these commands, the binaries must be available in the '.
-        'webserver\'s $PATH. You can set additional paths in Phabricator '.
-        'configuration.');
+        "The environmental variable %s is empty. Phabricator needs to execute ".
+        "some system commands, like `%s`, `%s`, `%s`, and `%s`. To execute ".
+        "these commands, the binaries must be available in the webserver's ".
+        "%s. You can set additional paths in Phabricator configuration.",
+        '$PATH',
+        'svn',
+        'git',
+        'hg',
+        'diff',
+        '$PATH');
 
       $this
         ->newIssue('config.environment.append-paths')
-        ->setName(pht('$PATH Not Set'))
+        ->setName(pht('%s Not Set', '$PATH'))
         ->setSummary($summary)
         ->setMessage($message)
         ->addPhabricatorConfig('environment.append-paths');
@@ -82,10 +92,11 @@ final class PhabricatorPathSetupCheck extends PhabricatorSetupCheck {
         if (!phutil_is_windows() && !@file_exists($path_part.'/.')) {
           $message = pht(
             "The PATH component '%s' (which resolves as the absolute path ".
-            "'%s') is not usable because it is not traversable (its '+x' ".
+            "'%s') is not usable because it is not traversable (its '%s' ".
             "permission bit is not set).",
             $path_part,
-            Filesystem::resolvePath($path_part));
+            Filesystem::resolvePath($path_part),
+            '+x');
         }
       }
 

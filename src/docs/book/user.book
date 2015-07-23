@@ -1,51 +1,36 @@
 {
-  "name" : "phabricator",
-  "title" : "Phabricator User Documentation",
-  "short" : "Phabricator User Docs",
-  "preface" : "Instructions for installing, configuring, and using Phabricator.",
-  "root" : "../../../",
-  "uri.source" :
+  "name": "phabricator",
+  "title": "Phabricator User Documentation",
+  "short": "Phabricator User Docs",
+  "preface": "Instructions for installing, configuring, and using Phabricator.",
+  "root": "../../../",
+  "uri.source":
     "https://secure.phabricator.com/diffusion/P/browse/master/%f$%l",
-  "rules" : {
-    "(\\.diviner$)" : "DivinerArticleAtomizer"
+  "rules": {
+    "(\\.diviner$)": "DivinerArticleAtomizer"
   },
-  "exclude" : [
+  "exclude": [
     "(^externals/)",
-    "(^webroot/rsrc/externals/)",
-    "(^scripts/)",
-    "(^support/)",
     "(^resources/)",
-    "(^src/docs/tech/)",
+    "(^scripts/)",
+    "(^src/docs/contributor/)",
     "(^src/docs/flavor/)",
-    "(^src/docs/contributor/)"
+    "(^src/docs/tech/)",
+    "(^support/)",
+    "(^webroot/rsrc/externals/)"
   ],
-  "groups" : {
-    "intro" : {
-      "name" : "Introduction"
+  "groups": {
+    "intro": {
+      "name": "Introduction"
     },
-    "config" : {
-      "name" : "Configuration"
+    "config": {
+      "name": "Configuration"
     },
-    "userguide" : {
-      "name" : "Application User Guides"
+    "userguide": {
+      "name": "Application User Guides"
     },
-    "differential" : {
-      "name" : "Differential (Code Review)"
-    },
-    "diffusion" : {
-      "name" : "Diffusion (Repository Browser)"
-    },
-    "maniphest" : {
-      "name" : "Maniphest (Task Tracking)"
-    },
-    "slowvote" : {
-      "name" : "Slowvote (Polls)"
-    },
-    "herald" : {
-      "name" : "Herald (Notifications)"
-    },
-    "phriction" : {
-      "name" : "Phriction (Wiki)"
+    "fieldmanual": {
+      "name": "Field Manuals"
     }
   }
 }

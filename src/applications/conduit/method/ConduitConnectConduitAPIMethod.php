@@ -15,10 +15,10 @@ final class ConduitConnectConduitAPIMethod extends ConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Connect a session-based client.';
+    return pht('Connect a session-based client.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'client'              => 'required string',
       'clientVersion'       => 'required int',
@@ -30,28 +30,27 @@ final class ConduitConnectConduitAPIMethod extends ConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict<string, any>';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR-BAD-VERSION' =>
+      'ERR-BAD-VERSION' => pht(
         'Client/server version mismatch. Upgrade your server or downgrade '.
-        'your client.',
-      'NEW-ARC-VERSION' =>
-        'Client/server version mismatch. Upgrade your client.',
-      'ERR-UNKNOWN-CLIENT' =>
-        'Client is unknown.',
-      'ERR-INVALID-USER' =>
-        'The username you are attempting to authenticate with is not valid.',
-      'ERR-INVALID-CERTIFICATE' =>
-        'Your authentication certificate for this server is invalid.',
-      'ERR-INVALID-TOKEN' =>
+        'your client.'),
+      'NEW-ARC-VERSION' => pht(
+        'Client/server version mismatch. Upgrade your client.'),
+      'ERR-UNKNOWN-CLIENT' => pht('Client is unknown.'),
+      'ERR-INVALID-USER' => pht(
+        'The username you are attempting to authenticate with is not valid.'),
+      'ERR-INVALID-CERTIFICATE' => pht(
+        'Your authentication certificate for this server is invalid.'),
+      'ERR-INVALID-TOKEN' => pht(
         "The challenge token you are authenticating with is outside of the ".
         "allowed time range. Either your system clock is out of whack or ".
-        "you're executing a replay attack.",
-      'ERR-NO-CERTIFICATE' => 'This server requires authentication.',
+        "you're executing a replay attack."),
+      'ERR-NO-CERTIFICATE' => pht('This server requires authentication.'),
     );
   }
 
@@ -87,16 +86,21 @@ final class ConduitConnectConduitAPIMethod extends ConduitAPIMethod {
           if ($server_version < $client_version) {
             $ex = new ConduitException('ERR-BAD-VERSION');
             $ex->setErrorDescription(
-              "Your 'arc' client version is '{$client_version}', which ".
-              "is newer than the server version, '{$server_version}'. ".
-              "Upgrade your Phabricator install.");
+              pht(
+                "Your '%s' client version is '%d', which is newer than the ".
+                "server version, '%d'. Upgrade your Phabricator install.",
+                'arc',
+                $client_version,
+                $server_version));
           } else {
             $ex = new ConduitException('NEW-ARC-VERSION');
             $ex->setErrorDescription(
-              "A new version of arc is available! You need to upgrade ".
-              "to connect to this server (you are running version ".
-              "{$client_version}, the server is running version ".
-              "{$server_version}).");
+              pht(
+                'A new version of arc is available! You need to upgrade '.
+                'to connect to this server (you are running version '.
+                '%d, the server is running version %d).',
+                $client_version,
+                $server_version));
           }
           throw $ex;
         }

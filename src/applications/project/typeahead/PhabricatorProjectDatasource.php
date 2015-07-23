@@ -3,6 +3,10 @@
 final class PhabricatorProjectDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Projects');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a project name...');
   }
@@ -18,17 +22,18 @@ final class PhabricatorProjectDatasource
 
     // Allow users to type "#qa" or "qa" to find "Quality Assurance".
     $raw_query = ltrim($raw_query, '#');
+    $tokens = self::tokenizeString($raw_query);
 
-    if (!strlen($raw_query)) {
-      return array();
+    $query = id(new PhabricatorProjectQuery())
+      ->needImages(true)
+      ->needSlugs(true);
+
+    if ($tokens) {
+      $query->withNameTokens($tokens);
     }
 
-    $projs = id(new PhabricatorProjectQuery())
-      ->setViewer($viewer)
-      ->needImages(true)
-      ->needSlugs(true)
-      ->withDatasourceQuery($raw_query)
-      ->execute();
+    $projs = $this->executeQuery($query);
+
     $projs = mpull($projs, null, 'getPHID');
 
     $must_have_cols = $this->getParameter('mustHaveColumns', false);
@@ -59,10 +64,11 @@ final class PhabricatorProjectDatasource
       $proj_result = id(new PhabricatorTypeaheadResult())
         ->setName($all_strings)
         ->setDisplayName($proj->getName())
-        ->setDisplayType('Project')
+        ->setDisplayType(pht('Project'))
         ->setURI('/tag/'.$proj->getPrimarySlug().'/')
         ->setPHID($proj->getPHID())
-        ->setIcon($proj->getIcon().' bluegrey')
+        ->setIcon($proj->getIcon())
+        ->setColor($proj->getColor())
         ->setPriorityType('proj')
         ->setClosed($closed);
 

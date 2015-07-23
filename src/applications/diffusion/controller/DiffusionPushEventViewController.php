@@ -43,7 +43,7 @@ final class DiffusionPushEventViewController
 
     $commits_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Pushed Commits'))
-      ->appendChild($commits_table);
+      ->setTable($commits_table);
 
     $logs = $event->getLogs();
 
@@ -54,7 +54,7 @@ final class DiffusionPushEventViewController
 
     $update_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('All Pushed Updates'))
-      ->appendChild($updates_table);
+      ->setTable($updates_table);
 
     return $this->buildApplicationPage(
       array(
@@ -70,9 +70,6 @@ final class DiffusionPushEventViewController
 
   private function buildPropertyList(PhabricatorRepositoryPushEvent $event) {
     $viewer = $this->getRequest()->getUser();
-
-    $this->loadHandles(array($event->getPusherPHID()));
-
     $view = new PHUIPropertyListView();
 
     $view->addProperty(
@@ -81,7 +78,7 @@ final class DiffusionPushEventViewController
 
     $view->addProperty(
       pht('Pushed By'),
-      $this->getHandle($event->getPusherPHID())->renderLink());
+      $viewer->renderHandle($event->getPusherPHID()));
 
     $view->addProperty(
       pht('Pushed Via'),

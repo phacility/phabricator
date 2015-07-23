@@ -7,10 +7,10 @@ final class FlagQueryConduitAPIMethod extends FlagConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Query flag markers.';
+    return pht('Query flag markers.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'ownerPHIDs'    => 'optional list<phid>',
       'types'         => 'optional list<type>',
@@ -21,13 +21,8 @@ final class FlagQueryConduitAPIMethod extends FlagConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

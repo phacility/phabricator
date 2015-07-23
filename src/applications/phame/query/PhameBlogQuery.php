@@ -43,7 +43,7 @@ final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $blogs;
   }
 
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->ids) {

@@ -24,8 +24,7 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getConfigureProvidesDescription() {
-    return pht(
-      'This merchant accepts credit and debit cards via Stripe.');
+    return pht('This merchant accepts credit and debit cards via Stripe.');
   }
 
   public function getPaymentMethodDescription() {
@@ -147,7 +146,7 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
 
     $id = $stripe_charge->id;
     if (!$id) {
-      throw new Exception('Stripe charge call did not return an ID!');
+      throw new Exception(pht('Stripe charge call did not return an ID!'));
     }
 
     $charge->setMetadataValue('stripe.chargeID', $id);
@@ -277,6 +276,8 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     array $errors) {
 
     $ccform = id(new PhortuneCreditCardForm())
+      ->setSecurityAssurance(
+        pht('Payments are processed securely by Stripe.'))
       ->setUser($request->getUser())
       ->setErrors($errors)
       ->addScript('https://js.stripe.com/v2/');

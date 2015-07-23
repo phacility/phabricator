@@ -25,7 +25,7 @@ final class PhabricatorRepositoryCommitOwnersWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    if ($repository->getDetail('herald-disabled')) {
+    if (!$repository->shouldPublish()) {
       return;
     }
 
@@ -92,12 +92,12 @@ final class PhabricatorRepositoryCommitOwnersWorker
     $reasons = array();
 
     if ($data->getCommitDetail('vsDiff')) {
-      $reasons[] = 'Changed After Revision Was Accepted';
+      $reasons[] = pht('Changed After Revision Was Accepted');
     }
 
     $commit_author_phid = $data->getCommitDetail('authorPHID');
     if (!$commit_author_phid) {
-      $reasons[] = 'Commit Author Not Recognized';
+      $reasons[] = pht('Commit Author Not Recognized');
     }
 
     $revision_id = $data->getCommitDetail('differential.revisionID');
@@ -106,21 +106,22 @@ final class PhabricatorRepositoryCommitOwnersWorker
     $commit_reviewedby_phid = null;
 
     if ($revision_id) {
-      // TODO: (T603) This is probably safe to use an omnipotent user on,
-      // but check things more closely.
-      $revision = id(new DifferentialRevision())->load($revision_id);
+      $revision = id(new DifferentialRevisionQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withIDs(array($revision_id))
+        ->executeOne();
       if ($revision) {
         $revision_author_phid = $revision->getAuthorPHID();
         $commit_reviewedby_phid = $data->getCommitDetail('reviewerPHID');
         if ($revision_author_phid !== $commit_author_phid) {
-          $reasons[] = 'Author Not Matching with Revision';
+          $reasons[] = pht('Author Not Matching with Revision');
         }
       } else {
-        $reasons[] = 'Revision Not Found';
+        $reasons[] = pht('Revision Not Found');
       }
 
     } else {
-      $reasons[] = 'No Revision Specified';
+      $reasons[] = pht('No Revision Specified');
     }
 
     $owners_phids = PhabricatorOwnersOwner::loadAffiliatedUserPHIDs(
@@ -129,7 +130,7 @@ final class PhabricatorRepositoryCommitOwnersWorker
     if (!($commit_author_phid && in_array($commit_author_phid, $owners_phids) ||
         $commit_reviewedby_phid && in_array($commit_reviewedby_phid,
           $owners_phids))) {
-      $reasons[] = 'Owners Not Involved';
+      $reasons[] = pht('Owners Not Involved');
     }
 
     return $reasons;

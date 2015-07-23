@@ -160,7 +160,9 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
   public function execute() {
     if (!$this->sourcePHIDs) {
       throw new Exception(
-      'You must use withSourcePHIDs() to query edges.');
+        pht(
+          'You must use %s to query edges.',
+          'withSourcePHIDs()'));
     }
 
     $sources = phid_group_by_type($this->sourcePHIDs);
@@ -201,7 +203,7 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
             $data_ids);
           foreach ($data_rows as $row) {
             $data_map[$row['id']] = idx(
-              json_decode($row['data'], true),
+              phutil_json_decode($row['data']),
               'data');
           }
         }
@@ -256,8 +258,7 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
     array $src_phids = array(),
     array $types = array()) {
     if ($this->resultSet === null) {
-      throw new Exception(
-        'You must execute() a query before you you can getDestinationPHIDs().');
+      throw new PhutilInvalidStateException('execute');
     }
 
     $result_phids = array();
@@ -289,7 +290,7 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
   /**
    * @task internal
    */
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->sourcePHIDs) {

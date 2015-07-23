@@ -16,7 +16,7 @@ abstract class PhabricatorAuthProviderConfigController
     return $nav;
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return $this->buildSideNavView($for_app = true)->getMenu();
   }
 
@@ -25,12 +25,6 @@ abstract class PhabricatorAuthProviderConfigController
 
     $can_create = $this->hasApplicationCapability(
       AuthManageProvidersCapability::CAPABILITY);
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('Add Authentication Provider'))
-        ->setHref($this->getApplicationURI('/config/new/'))
-        ->setDisabled(!$can_create)
-        ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }

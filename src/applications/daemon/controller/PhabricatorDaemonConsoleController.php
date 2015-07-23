@@ -3,9 +3,8 @@
 final class PhabricatorDaemonConsoleController
   extends PhabricatorDaemonController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $window_start = (time() - (60 * 15));
 
@@ -51,14 +50,15 @@ final class PhabricatorDaemonConsoleController
       $rows[] = array(
         $class,
         number_format($info['n']),
-        number_format((int)($info['duration'] / $info['n'])).' us',
+        pht('%s us', new PhutilNumber((int)($info['duration'] / $info['n']))),
       );
     }
 
     if ($failed) {
       // Add the time it takes to restart the daemons. This includes a guess
       // about other overhead of 2X.
-      $usage_total += PhutilDaemonOverseer::RESTART_WAIT * count($failed) * 2;
+      $restart_delay = PhutilDaemonHandle::getWaitBeforeRestart();
+      $usage_total += $restart_delay * count($failed) * 2;
       foreach ($failed as $failed_task) {
         $usage_start = min($usage_start, $failed_task->getFailureTime());
       }
@@ -71,7 +71,7 @@ final class PhabricatorDaemonConsoleController
     }
 
     $logs = id(new PhabricatorDaemonLogQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
       ->setAllowStatusWrites(true)
       ->execute();
@@ -120,15 +120,15 @@ final class PhabricatorDaemonConsoleController
     $completed_panel = new PHUIObjectBoxView();
     $completed_panel->setHeaderText(
       pht('Recently Completed Tasks (Last 15m)'));
-    $completed_panel->appendChild($completed_table);
+    $completed_panel->setTable($completed_table);
 
     $daemon_table = new PhabricatorDaemonLogListView();
-    $daemon_table->setUser($user);
+    $daemon_table->setUser($viewer);
     $daemon_table->setDaemonLogs($logs);
 
     $daemon_panel = new PHUIObjectBoxView();
     $daemon_panel->setHeaderText(pht('Active Daemons'));
-    $daemon_panel->appendChild($daemon_table);
+    $daemon_panel->setObjectList($daemon_table);
 
 
     $tasks = id(new PhabricatorWorkerLeaseQuery())
@@ -143,7 +143,7 @@ final class PhabricatorDaemonConsoleController
 
     $leased_panel = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Leased Tasks'))
-      ->appendChild($tasks_table);
+      ->setTable($tasks_table);
 
     $task_table = new PhabricatorWorkerActiveTask();
     $queued = queryfx_all(
@@ -175,7 +175,7 @@ final class PhabricatorDaemonConsoleController
 
     $queued_panel = new PHUIObjectBoxView();
     $queued_panel->setHeaderText(pht('Queued Tasks'));
-    $queued_panel->appendChild($queued_table);
+    $queued_panel->setTable($queued_table);
 
     $upcoming = id(new PhabricatorWorkerLeaseQuery())
       ->setLimit(10)
@@ -184,10 +184,23 @@ final class PhabricatorDaemonConsoleController
 
     $upcoming_panel = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Next In Queue'))
-      ->appendChild(
+      ->setTable(
         id(new PhabricatorDaemonTasksTableView())
           ->setTasks($upcoming)
           ->setNoDataString(pht('Task queue is empty.')));
+
+    $triggers = id(new PhabricatorWorkerTriggerQuery())
+      ->setViewer($viewer)
+      ->setOrder(PhabricatorWorkerTriggerQuery::ORDER_EXECUTION)
+      ->needEvents(true)
+      ->setLimit(10)
+      ->execute();
+
+    $triggers_table = $this->buildTriggersTable($triggers);
+
+    $triggers_panel = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Upcoming Triggers'))
+      ->setTable($triggers_table);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Console'));
@@ -202,6 +215,7 @@ final class PhabricatorDaemonConsoleController
         $queued_panel,
         $leased_panel,
         $upcoming_panel,
+        $triggers_panel,
       ));
 
     return $this->buildApplicationPage(
@@ -210,6 +224,49 @@ final class PhabricatorDaemonConsoleController
         'title' => pht('Console'),
         'device' => false,
       ));
+  }
+
+  private function buildTriggersTable(array $triggers) {
+    $viewer = $this->getViewer();
+
+    $rows = array();
+    foreach ($triggers as $trigger) {
+      $event = $trigger->getEvent();
+      if ($event) {
+        $last_epoch = $event->getLastEventEpoch();
+        $next_epoch = $event->getNextEventEpoch();
+      } else {
+        $last_epoch = null;
+        $next_epoch = null;
+      }
+
+      $rows[] = array(
+        $trigger->getID(),
+        $trigger->getClockClass(),
+        $trigger->getActionClass(),
+        $last_epoch ? phabricator_datetime($last_epoch, $viewer) : null,
+        $next_epoch ? phabricator_datetime($next_epoch, $viewer) : null,
+      );
+    }
+
+    return id(new AphrontTableView($rows))
+      ->setNoDataString(pht('There are no upcoming event triggers.'))
+      ->setHeaders(
+        array(
+          pht('ID'),
+          pht('Clock'),
+          pht('Action'),
+          pht('Last'),
+          pht('Next'),
+        ))
+      ->setColumnClasses(
+        array(
+          '',
+          '',
+          'wide',
+          'date',
+          'date',
+        ));
   }
 
 }

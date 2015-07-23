@@ -1,86 +1,180 @@
 @title Configuring File Storage
 @group config
 
-Setup how Phabricator will store files.
+Setup file storage and support for large files.
 
-= Overview =
+Overview
+========
 
-Phabricator allows users to upload files, and several applications use file
-storage (for instance, Maniphest allows you to attach files to tasks). You can
-configure several different storage systems:
+This document describes how to configure Phabricator to support large file
+uploads, and how to choose where Phabricator stores files.
 
-  - you can store data in MySQL: this is the easiest to set up, but doesn't
-    scale well;
-  - you can store data on local disk: this is also easy to set up but won't
-    scale to multiple web frontends without NFS;
-  - or you can build a custom storage engine.
+There are two major things to configure:
+
+  - set up PHP and your HTTP server to accept large requests;
+  - choose and configure a storage engine.
+
+The following sections will guide you through this configuration.
+
+
+How Phabricator Stores Files
+============================
+
+Phabricator stores files in "storage engines", which are modular backends
+that implement access to some storage system (like MySQL, the filesystem, or
+a cloud storage service like Amazon S3).
+
+Phabricator stores large files by breaking them up into many chunks (a few
+megabytes in size) and storing the chunks in an underlying storage engine.
+This makes it easier to implement new storage engines and gives Phabricator
+more flexibility in managing file data.
+
+The first section of this document discusses configuring your install so that
+PHP and your HTTP server will accept requests which are larger than the size of
+one file chunk. Without this configuration, file chunk data will be rejected.
+
+The second section discusses choosing and configuring storage engines, so data
+is stored where you want it to be.
+
+
+Configuring Upload Limits
+=========================
+
+File uploads are limited by several pieces of configuration at different layers
+of the stack. Generally, the minimum value of all the limits is the effective
+one.
+
+To upload large files, you need to increase all the limits to at least
+**32MB**. This will allow you to upload file chunks, which will let Phabricator
+store arbitrarily large files.
+
+The settings which limit file uploads are:
+
+**HTTP Server**: The HTTP server may set a limit on the maximum request size.
+If you exceed this limit, you'll see a default server page with an HTTP error.
+These directives limit the total size of the request body, so they must be
+somewhat larger than the desired maximum filesize.
+
+  - **Apache**: Apache limits requests with the Apache `LimitRequestBody`
+    directive.
+  - **nginx**: nginx limits requests with the nginx `client_max_body_size`
+    directive. This often defaults to `1M`.
+  - **lighttpd**: lighttpd limits requests with the lighttpd
+    `server.max-request-size` directive.
+
+Set the applicable limit to at least **32MB**. Phabricator can not read these
+settings, so it can not raise setup warnings if they are misconfigured.
+
+**PHP**: PHP has several directives which limit uploads. These directives are
+found in `php.ini`.
+
+  - **post_max_size**: Maximum POST request size PHP will accept. If you
+    exceed this, Phabricator will give you a useful error. This often defaults
+    to `8M`. Set this to at least `32MB`. Phabricator will give you a setup
+    warning about this if it is set too low.
+  - **memory_limit**: For some uploads, file data will be read into memory
+    before Phabricator can adjust the memory limit. If you exceed this, PHP
+    may give you a useful error, depending on your configuration. It is
+    recommended that you set this to `-1` to disable it. Phabricator will
+    give you a setup warning about this if it is set too low.
+
+You may also want to configure these PHP options:
+
+  - **max_input_vars**: When files are uploaded via HTML5 drag and drop file
+    upload APIs, PHP parses the file body as though it contained normal POST
+    parameters, and may trigger `max_input_vars` if a file has a lot of
+    brackets in it. You may need to set it to some astronomically high value.
+  - **upload_max_filesize**: Maximum file size PHP will accept in a raw file
+    upload. This is not normally used when uploading files via drag-and-drop,
+    but affects some other kinds of file uploads. If you exceed this,
+    Phabricator will give you a useful error. This often defaults to `2M`. Set
+    this to at least `32MB`.
+
+Once you've adjusted all this configuration, your server will be able to
+receive chunk uploads. As long as you have somewhere to store them, this will
+enable you to store arbitrarily large files.
+
+
+Storage Engines
+===============
+
+Phabricator supports several different file storage engines:
+
+| Engine | Setup | Cost | Notes |
+|--------|-------|------|-------|
+| MySQL  | Automatic | Free | May not scale well. |
+| Local Disk | Easy | Free | Does not scale well. |
+| Amazon S3 | Easy | Cheap | Scales well. |
+| Custom | Hard | Varies | Implement a custom storage engine. |
+
+You can review available storage engines and their configuration by navigating
+to {nav Applications > Files > Help/Options > Storage Engines} in the web UI.
 
 By default, Phabricator is configured to store files up to 1MB in MySQL, and
-reject files larger than 1MB. It is recommended you set up local disk storage
-for files larger than 1MB. This should be sufficient for most installs. If you
-have a larger install or more unique requirements, you may want to customize
-this further.
+reject files larger than 1MB. To store larger files, you can either:
 
-For technical documentation (including instructions on building custom storage
-engines) see @{article:File Storage Technical Documentation}.
+  - increase the MySQL limit to at least 8MB; or
+  - configure another storage engine.
 
-You don't have to fully configure this immediately, the defaults are okay until
-you need to upload larger files and it's relatively easy to port files between
-storage engines later.
+Doing either of these will enable the chunk storage engine and support for
+arbitrarily large files.
 
-= Storage Engines =
+The remaining sections of this document discuss the available storage engines
+and how to configure them.
 
-Builtin storage engines and information on how to configure them.
 
-== MySQL ==
+Engine: MySQL
+=============
 
-  - **Pros**: Fast, no setup required.
-  - **Cons**: Storing files in a database is a classic bad idea. Does not scale
-    well. Maximum file size is limited.
+  - **Pros**: Low latency, no setup required.
+  - **Cons**: Storing files in a database is a classic bad idea. May become
+    difficult to administrate if you have a large amount of data.
 
 MySQL storage is configured by default, for files up to (just under) 1MB. You
 can configure it with these keys:
 
-  - ##storage.mysql-engine.max-size##: Change the filesize limit. Set to 0
+  - `storage.mysql-engine.max-size`: Change the filesize limit. Set to 0
     to disable.
 
-For most installs, it is recommended you configure local disk storage below,
-and then either leave this as is or disable it, depending on how upset you feel
-about putting files in a database.
+For most installs, it is reasonable to leave this engine as-is and let small
+files (like thumbnails and profile images) be stored in MySQL, which is usually
+the lowest-latency filestore, even if you configure another storage engine.
 
-== Local Disk ==
+To support large files, increase this limit to at least **8MB**. This will
+activate chunk storage in MySQL.
 
-  - **Pros**: Very simple. Almost no setup required.
+Engine: Local Disk
+==================
+
+  - **Pros**: Simple to setup.
   - **Cons**: Doesn't scale to multiple web frontends without NFS.
 
-For most installs, it is **strongly recommended** that you configure local disk
-storage. To do this, set the configuration key:
+To configure file storage on the local disk, set:
 
-  - ##storage.local-disk.path##: Set to some writable directory on local disk.
-    Make that directory. You're done.
+  - `storage.local-disk.path`: Set to some writable directory on local disk.
+    Make that directory.
 
-== Amazon S3 ==
+Engine: Amazon S3
+=================
 
   - **Pros**: Scales well.
-  - **Cons**: More complicated and expensive than other approaches.
+  - **Cons**: Slightly more complicated than other engines, not free.
 
-To enable file storage in S3, set these key:
+To enable file storage in S3, set these keys:
 
-  - ##amazon-s3.access-key## Your AWS access key.
-  - ##amazon-s3.secret-key## Your AWS secret key.
-  - ##storage.s3.bucket## S3 bucket name where files should be stored.
+  - `amazon-s3.access-key`: Your AWS access key.
+  - `amazon-s3.secret-key`: Your AWS secret key.
+  - `storage.s3.bucket`: S3 bucket name where files should be stored.
 
-== Custom Engine ==
+Testing Storage Engines
+=======================
 
-For details about writing a custom storage engine, see @{article:File Storage
-Technical Documentation}.
+You can test that things are correctly configured by dragging and dropping
+a file onto the Phabricator home page. If engines have been configured
+properly, the file should upload.
 
-= Testing Storage Engines =
-
-You can test that things are correctly configured by going to the Files
-application (##/file/##) and uploading files.
-
-= Migrating Files Between Engines =
+Migrating Files Between Engines
+===============================
 
 If you want to move files between storage engines, you can use the `bin/files`
 script to perform migrations. For example, suppose you previously used MySQL but
@@ -96,10 +190,9 @@ If that works properly, you can then migrate everything:
 You can use `--dry-run` to show which migrations would be performed without
 taking any action. Run `bin/files help` for more options and information.
 
-= Next Steps =
+Next Steps
+==========
 
 Continue by:
 
-  - configuring file size upload limits with
-    @{article:Configuring File Upload Limits}; or
   - returning to the @{article:Configuration Guide}.

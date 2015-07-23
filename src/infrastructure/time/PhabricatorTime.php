@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorTime {
+final class PhabricatorTime extends Phobject {
 
   private static $stack = array();
   private static $originalZone;
@@ -12,7 +12,7 @@ final class PhabricatorTime {
 
     $ok = date_default_timezone_set($timezone);
     if (!$ok) {
-      throw new Exception("Invalid timezone '{$timezone}'!");
+      throw new Exception(pht("Invalid timezone '%s'!", $timezone));
     }
 
     self::$stack[] = array(
@@ -25,7 +25,10 @@ final class PhabricatorTime {
 
   public static function popTime($key) {
     if ($key !== last_key(self::$stack)) {
-      throw new Exception('PhabricatorTime::popTime with bad key.');
+      throw new Exception(
+        pht(
+          '%s with bad key.',
+          __METHOD__));
     }
     array_pop(self::$stack);
 
@@ -49,13 +52,30 @@ final class PhabricatorTime {
     $old_zone = date_default_timezone_get();
 
     date_default_timezone_set($user->getTimezoneIdentifier());
-      $timestamp = (int)strtotime($time, PhabricatorTime::getNow());
+      $timestamp = (int)strtotime($time, self::getNow());
       if ($timestamp <= 0) {
         $timestamp = null;
       }
     date_default_timezone_set($old_zone);
 
     return $timestamp;
+  }
+
+  public static function getTodayMidnightDateTime($viewer) {
+    $timezone = new DateTimeZone($viewer->getTimezoneIdentifier());
+    $today = new DateTime('@'.time());
+    $today->setTimeZone($timezone);
+    $year = $today->format('Y');
+    $month = $today->format('m');
+    $day = $today->format('d');
+    $today = new DateTime("{$year}-{$month}-{$day}", $timezone);
+    return $today;
+  }
+
+  public static function getDateTimeFromEpoch($epoch, PhabricatorUser $viewer) {
+    $datetime = new DateTime('@'.$epoch);
+    $datetime->setTimeZone($viewer->getTimeZone());
+    return $datetime;
   }
 
 }

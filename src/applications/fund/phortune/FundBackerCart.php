@@ -33,8 +33,7 @@ final class FundBackerCart extends PhortuneCartImplementation {
 
     $initiative = $this->getInitiative();
     if (!$initiative) {
-      throw new Exception(
-        pht('Call setInitiative() before building a cart!'));
+      throw new PhutilInvalidStateException('setInitiative');
     }
 
     $cart->setMetadataValue('initiativePHID', $initiative->getPHID());

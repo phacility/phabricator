@@ -3,7 +3,8 @@
 
 Using Legalpad to track agreements and signatures on legal documents.
 
-= Overview =
+Overview
+========
 
 Legalpad is a simple application for tracking signatures on legal agreements.
 You can add legal documents, users can sign them, and you can keep track of who
@@ -19,7 +20,27 @@ NOTE: Legalpad is a basic application, and missing many of the features of more
 general document signing software. It may be useful to help you do things
 beyond track CLAs, but you should evaluate its capabilities carefully.
 
-Requiring a CLA
+Documents
+=========
+
+The primary object in legalpad is the //Legalpad Document//, which represents
+a written agreement, contract, policy, or other similar document.
+
+Most fields of a document are relatively straightforward, but some are unique
+to the application:
+
+**Who Should Sign?** This field controls what kind of signatures the document
+accepts. You can choose either **Individuals** (users will be prompted to sign
+with their name), **Corporations** (users will be prompted to enter information
+identifying the corporation they are signing on behalf of) or **No One** (for
+policy documents or other documents which do not require a signature).
+
+**Require Signature** This field allows you to create a document which all of
+your users must sign before they can use Phabricator, like a terms of service
+document. See "Use Case: Terms of Service" below for details. These documents
+must be signable by individuals.
+
+Use Case: Requiring a CLA
 ===============
 
 Open source projects often require contributors to sign a license agreement
@@ -35,6 +56,10 @@ After you've done this, all new reviews created in Differential by authors who
 have not signed the document will trigger a signature requirement. These reviews
 can not be accepted until the document has been signed.
 
+The content of these revisions will also be hidden until the document has been
+signed. This prevents reviewers from being tainted by examining the changes if
+the author ultimately declines to sign the CLA.
+
 If the author has already signed all of the required documents, Herald will not
 take any actions. This reduces the amount of noise the CLA process generates for
 regular contributors.
@@ -47,7 +72,25 @@ projects, you can also choose a more narrow Herald condition than "Always" (for
 example, require a signature only if the revision is against certain
 repositories).
 
-Document-Based Policies
+Use Case: Terms of Service
+=================================
+
+If you have a "Terms of Service" document that you'd like users to agree to
+before they're allowed to use your install, you can add it to Legalpad and then
+check the **Require Signature** box for the document.
+
+After logging in, users will need to agree to the document before they can
+do other things with their account (you'll need to agree to it, too, as soon
+as you save your changes, so that will give you a sense of the workflow).
+
+Note that although users who have not signed all of the required documents can
+not use most Phabricator functions, they can browse other Legalpad documents
+that they have permission to see. This allows a terms document to be
+supplemented with additional policy or guideline documents that users are free
+to review before agreeing to the terms.
+
+
+Use Case: Document-Based Policies
 =======================
 
 If you have a document like an NDA, you can write a policy rule which prevents

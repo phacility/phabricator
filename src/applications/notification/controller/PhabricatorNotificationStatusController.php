@@ -8,14 +8,14 @@ final class PhabricatorNotificationStatusController
       $status = PhabricatorNotificationClient::getServerStatus();
       $status = $this->renderServerStatus($status);
     } catch (Exception $ex) {
-      $status = new AphrontErrorView();
-      $status->setTitle('Notification Server Issue');
+      $status = new PHUIInfoView();
+      $status->setTitle(pht('Notification Server Issue'));
       $status->appendChild(hsprintf(
-        'Unable to determine server status. This probably means the server '.
-        'is not in great shape. The specific issue encountered was:'.
-        '<br />'.
-        '<br />'.
+        '%s<br /><br />'.
         '<strong>%s</strong> %s',
+        pht(
+          'Unable to determine server status. This probably means the server '.
+          'is not in great shape. The specific issue encountered was:'),
         get_class($ex),
         phutil_escape_html_newlines($ex->getMessage())));
     }
@@ -44,6 +44,7 @@ final class PhabricatorNotificationStatusController
           $value = phutil_format_relative_time_detailed($value);
           break;
         case 'log':
+        case 'instance':
           break;
         default:
           $value = number_format($value);

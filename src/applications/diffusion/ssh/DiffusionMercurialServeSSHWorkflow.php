@@ -5,7 +5,7 @@ final class DiffusionMercurialServeSSHWorkflow
 
   protected $didSeeWrite;
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this->setName('hg');
     $this->setArguments(
       array(
@@ -24,22 +24,31 @@ final class DiffusionMercurialServeSSHWorkflow
       ));
   }
 
-  protected function executeRepositoryOperations() {
+  protected function identifyRepository() {
     $args = $this->getArgs();
     $path = $args->getArg('repository');
-    $repository = $this->loadRepository($path);
+    return $this->loadRepositoryWithPath($path);
+  }
 
+  protected function executeRepositoryOperations() {
+    $repository = $this->getRepository();
     $args = $this->getArgs();
 
     if (!$args->getArg('stdio')) {
-      throw new Exception('Expected `hg ... --stdio`!');
+      throw new Exception(pht('Expected `%s`!', 'hg ... --stdio'));
     }
 
     if ($args->getArg('command') !== array('serve')) {
-      throw new Exception('Expected `hg ... serve`!');
+      throw new Exception(pht('Expected `%s`!', 'hg ... serve'));
     }
 
-    $command = csprintf('hg -R %s serve --stdio', $repository->getLocalPath());
+    if ($this->shouldProxy()) {
+      $command = $this->getProxyCommand();
+    } else {
+      $command = csprintf(
+        'hg -R %s serve --stdio',
+        $repository->getLocalPath());
+    }
     $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
 
     $future = id(new ExecFuture('%C', $command))

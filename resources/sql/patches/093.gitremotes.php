@@ -1,6 +1,6 @@
 <?php
 
-echo "Stripping remotes from repository default branches...\n";
+echo pht('Stripping remotes from repository default branches...')."\n";
 
 $table = new PhabricatorRepository();
 $table->openTransaction();
@@ -30,8 +30,13 @@ foreach ($repos as $repo) {
   $id = $repo['id'];
   $name = $repo['name'];
 
-  echo "Updating default branch for repository #{$id} '{$name}' from ".
-       "'{$old}' to '{$new}' to remove the explicit remote.\n";
+  echo pht(
+    "Updating default branch for repository #%d '%s' from ".
+    "'%s' to '%s' to remove the explicit remote.\n",
+    $id,
+    $name,
+    $old,
+    $new);
   queryfx(
     $conn_w,
     'UPDATE %T SET details = %s WHERE id = %d',
@@ -41,4 +46,4 @@ foreach ($repos as $repo) {
 }
 
 $table->saveTransaction();
-echo "Done.\n";
+echo pht('Done.')."\n";

@@ -284,9 +284,8 @@ describe('Javelin URI', function() {
   });
 
   it('no global state interference', function() {
-    var uri1 = JX.$U('/?key=value');
-    var uri2 = JX.$U();
-    expect(uri2.getQueryParams()).not.toEqual({'key' : 'value'});
+    var uri = JX.$U();
+    expect(uri.getQueryParams()).not.toEqual({'key' : 'value'});
   });
 
   it('should not loop indefinitely when parsing empty params', function() {

@@ -25,7 +25,7 @@ final class PonderVoteEditor extends PhabricatorEditor {
   public function saveVote() {
     $actor = $this->requireActor();
     if (!$this->votable) {
-      throw new Exception('Must set votable before saving vote');
+      throw new PhutilInvalidStateException('setVotable');
     }
 
     $votable = $this->votable;
@@ -58,13 +58,13 @@ final class PonderVoteEditor extends PhabricatorEditor {
         $curvote = PonderVote::VOTE_NONE;
       }
 
-      // adjust votable's score by this much
+      // Adjust votable's score by this much.
       $delta = $newvote - $curvote;
 
       queryfx($conn,
         'UPDATE %T as t
-        SET t.`voteCount` = t.`voteCount` + %d
-        WHERE t.`PHID` = %s',
+        SET t.voteCount = t.voteCount + %d
+        WHERE t.PHID = %s',
         $votable->getTableName(),
         $delta,
         $votable->getVotablePHID());

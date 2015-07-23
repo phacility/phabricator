@@ -3,27 +3,23 @@
 final class FileUploadHashConduitAPIMethod extends FileConduitAPIMethod {
 
   public function getAPIMethodName() {
+    // TODO: Deprecate this in favor of `file.allocate`.
     return 'file.uploadhash';
   }
 
   public function getMethodDescription() {
-    return 'Upload a file to the server using content hash.';
+    return pht('Upload a file to the server using content hash.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'hash' => 'required nonempty string',
       'name' => 'required nonempty string',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'phid or null';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

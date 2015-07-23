@@ -2,19 +2,13 @@
 
 final class PhameBlogDeleteController extends PhameController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
+    $id = $request->getURIData('id');
 
     $blog = id(new PhameBlogQuery())
       ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_EDIT,

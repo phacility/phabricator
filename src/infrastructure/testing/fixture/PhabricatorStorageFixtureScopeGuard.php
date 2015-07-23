@@ -3,7 +3,7 @@
 /**
  * Used by unit tests to build storage fixtures.
  */
-final class PhabricatorStorageFixtureScopeGuard {
+final class PhabricatorStorageFixtureScopeGuard extends Phobject {
 
   private $name;
 
@@ -11,7 +11,7 @@ final class PhabricatorStorageFixtureScopeGuard {
     $this->name = $name;
 
     execx(
-      'php %s upgrade --force --namespace %s',
+      'php %s upgrade --force --no-adjust --namespace %s',
       $this->getStorageBinPath(),
       $this->name);
 

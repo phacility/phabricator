@@ -3,10 +3,11 @@
 $table = new ManiphestTransaction();
 $conn_w = $table->establishConnection('w');
 
-echo "Converting Maniphest project transactions to modern EDGE ".
-  "transactions...\n";
+echo pht(
+  "Converting Maniphest project transactions to modern edge transactions...\n");
 $metadata = array(
-  'edge:type' => PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,);
+  'edge:type' => PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+);
 foreach (new LiskMigrationIterator($table) as $txn) {
   // ManiphestTransaction::TYPE_PROJECTS
   if ($txn->getTransactionType() == 'projects') {
@@ -30,7 +31,7 @@ foreach (new LiskMigrationIterator($table) as $txn) {
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";
 
 function mig20141222_build_edge_data(array $project_phids, $task_phid) {
   $edge_data = array();

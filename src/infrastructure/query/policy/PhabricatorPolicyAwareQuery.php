@@ -33,8 +33,8 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
   private $rawResultLimit;
   private $capabilities;
   private $workspace = array();
+  private $inFlightPHIDs = array();
   private $policyFilteredPHIDs = array();
-  private $canUseApplication;
 
   /**
    * Should we continue or throw an exception when a query result is filtered
@@ -171,7 +171,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
     }
 
     if (count($results) > 1) {
-      throw new Exception('Expected a single result!');
+      throw new Exception(pht('Expected a single result!'));
     }
 
     if (!$results) {
@@ -190,7 +190,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    */
   final public function execute() {
     if (!$this->viewer) {
-      throw new Exception('Call setViewer() before execute()!');
+      throw new PhutilInvalidStateException('setViewer');
     }
 
     $parent_query = $this->getParentQuery();
@@ -256,7 +256,6 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
       }
 
       if ($visible) {
-        $this->putObjectsInWorkspace($this->getWorkspaceMapForPage($visible));
         $visible = $this->didFilterPage($visible);
       }
 
@@ -337,9 +336,25 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
   }
 
   protected function didRejectResult(PhabricatorPolicyInterface $object) {
+    // Some objects (like commits) may be rejected because related objects
+    // (like repositories) can not be loaded. In some cases, we may need these
+    // related objects to determine the object policy, so it's expected that
+    // we may occasionally be unable to determine the policy.
+
+    try {
+      $policy = $object->getPolicy(PhabricatorPolicyCapability::CAN_VIEW);
+    } catch (Exception $ex) {
+      $policy = null;
+    }
+
+    // Mark this object as filtered so handles can render "Restricted" instead
+    // of "Unknown".
+    $phid = $object->getPHID();
+    $this->addPolicyFilteredPHIDs(array($phid => $phid));
+
     $this->getPolicyFilter()->rejectObject(
       $object,
-      $object->getPolicy(PhabricatorPolicyCapability::CAN_VIEW),
+      $policy,
       PhabricatorPolicyCapability::CAN_VIEW);
   }
 
@@ -390,8 +405,8 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    *
    * **Fully enrich objects pulled from the workspace.** After pulling objects
    * from the workspace, you still need to load and attach any additional
-   * content the query requests. Otherwise, a query might return objects without
-   * requested content.
+   * content the query requests. Otherwise, a query might return objects
+   * without requested content.
    *
    * Generally, you do not need to update the workspace yourself: it is
    * automatically populated as a side effect of objects surviving policy
@@ -403,16 +418,22 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    * @task workspace
    */
   public function putObjectsInWorkspace(array $objects) {
-    assert_instances_of($objects, 'PhabricatorPolicyInterface');
-
-    $viewer_phid = $this->getViewer()->getPHID();
-
-    // The workspace is scoped per viewer to prevent accidental contamination.
-    if (empty($this->workspace[$viewer_phid])) {
-      $this->workspace[$viewer_phid] = array();
+    $parent = $this->getParentQuery();
+    if ($parent) {
+      $parent->putObjectsInWorkspace($objects);
+      return $this;
     }
 
-    $this->workspace[$viewer_phid] += $objects;
+    assert_instances_of($objects, 'PhabricatorPolicyInterface');
+
+    $viewer_fragment = $this->getViewer()->getCacheFragment();
+
+    // The workspace is scoped per viewer to prevent accidental contamination.
+    if (empty($this->workspace[$viewer_fragment])) {
+      $this->workspace[$viewer_fragment] = array();
+    }
+
+    $this->workspace[$viewer_fragment] += $objects;
 
     return $this;
   }
@@ -429,18 +450,19 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    * @task workspace
    */
   public function getObjectsFromWorkspace(array $phids) {
-    $viewer_phid = $this->getViewer()->getPHID();
+    $parent = $this->getParentQuery();
+    if ($parent) {
+      return $parent->getObjectsFromWorkspace($phids);
+    }
+
+    $viewer_fragment = $this->getViewer()->getCacheFragment();
 
     $results = array();
     foreach ($phids as $key => $phid) {
-      if (isset($this->workspace[$viewer_phid][$phid])) {
-        $results[$phid] = $this->workspace[$viewer_phid][$phid];
+      if (isset($this->workspace[$viewer_fragment][$phid])) {
+        $results[$phid] = $this->workspace[$viewer_fragment][$phid];
         unset($phids[$key]);
       }
-    }
-
-    if ($phids && $this->getParentQuery()) {
-      $results += $this->getParentQuery()->getObjectsFromWorkspace($phids);
     }
 
     return $results;
@@ -448,23 +470,35 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
 
 
   /**
-   * Convert a result page to a `<phid, PhabricatorPolicyInterface>` map.
+   * Mark PHIDs as in flight.
    *
-   * @param list<PhabricatorPolicyInterface> Objects.
-   * @return map<phid, PhabricatorPolicyInterface> Map of objects which can
-   *   be put into the workspace.
-   * @task workspace
+   * PHIDs which are "in flight" are actively being queried for. Using this
+   * list can prevent infinite query loops by aborting queries which cycle.
+   *
+   * @param list<phid> List of PHIDs which are now in flight.
+   * @return this
    */
-  protected function getWorkspaceMapForPage(array $results) {
-    $map = array();
-    foreach ($results as $result) {
-      $phid = $result->getPHID();
-      if ($phid !== null) {
-        $map[$phid] = $result;
-      }
+  public function putPHIDsInFlight(array $phids) {
+    foreach ($phids as $phid) {
+      $this->inFlightPHIDs[$phid] = $phid;
     }
+    return $this;
+  }
 
-    return $map;
+
+  /**
+   * Get PHIDs which are currently in flight.
+   *
+   * PHIDs which are "in flight" are actively being queried for.
+   *
+   * @return map<phid, phid> PHIDs currently in flight.
+   */
+  public function getPHIDsInFlight() {
+    $results = $this->inFlightPHIDs;
+    if ($this->getParentQuery()) {
+      $results += $this->getParentQuery()->getPHIDsInFlight();
+    }
+    return $results;
   }
 
 
@@ -629,21 +663,13 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    *   execute the query.
    */
   public function canViewerUseQueryApplication() {
-    if ($this->canUseApplication === null) {
-      $class = $this->getQueryApplicationClass();
-      if (!$class) {
-        $this->canUseApplication = true;
-      } else {
-        $result = id(new PhabricatorApplicationQuery())
-          ->setViewer($this->getViewer())
-          ->withClasses(array($class))
-          ->execute();
-
-        $this->canUseApplication = (bool)$result;
-      }
+    $class = $this->getQueryApplicationClass();
+    if (!$class) {
+      return true;
     }
 
-    return $this->canUseApplication;
+    $viewer = $this->getViewer();
+    return PhabricatorApplication::isClassInstalledForViewer($class, $viewer);
   }
 
 }

@@ -57,20 +57,14 @@ abstract class PhragmentController extends PhabricatorController {
 
     $viewer = $this->getRequest()->getUser();
 
-    $phids = array();
-    $phids[] = $fragment->getLatestVersionPHID();
-
     $snapshot_phids = array();
     $snapshots = id(new PhragmentSnapshotQuery())
       ->setViewer($viewer)
       ->withPrimaryFragmentPHIDs(array($fragment->getPHID()))
       ->execute();
     foreach ($snapshots as $snapshot) {
-      $phids[] = $snapshot->getPHID();
       $snapshot_phids[] = $snapshot->getPHID();
     }
-
-    $this->loadHandles($phids);
 
     $file = null;
     $file_uri = null;
@@ -183,7 +177,7 @@ abstract class PhragmentController extends PhabricatorController {
       }
       $properties->addProperty(
         pht('Latest Version'),
-        $this->renderHandlesForPHIDs(array($fragment->getLatestVersionPHID())));
+        $viewer->renderHandle($fragment->getLatestVersionPHID()));
     } else {
       $properties->addProperty(
         pht('Type'),
@@ -193,7 +187,7 @@ abstract class PhragmentController extends PhabricatorController {
     if (count($snapshot_phids) > 0) {
       $properties->addProperty(
         pht('Snapshots'),
-        $this->renderHandlesForPHIDs($snapshot_phids));
+        $viewer->renderHandleList($snapshot_phids));
     }
 
     return id(new PHUIObjectBoxView())
@@ -204,15 +198,19 @@ abstract class PhragmentController extends PhabricatorController {
   public function renderConfigurationWarningIfRequired() {
     $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
     if ($alt === null) {
-      return id(new AphrontErrorView())
+      return id(new PHUIInfoView())
         ->setTitle(pht('security.alternate-file-domain must be configured!'))
-        ->setSeverity(AphrontErrorView::SEVERITY_ERROR)
-        ->appendChild(phutil_tag('p', array(), pht(
-          'Because Phragment generates files (such as ZIP archives and '.
-          'patches) as they are requested, it requires that you configure '.
-          'the `security.alternate-file-domain` option. This option on it\'s '.
-          'own will also provide additional security when serving files '.
-          'across Phabricator.')));
+        ->setSeverity(PHUIInfoView::SEVERITY_ERROR)
+        ->appendChild(
+          phutil_tag(
+            'p',
+            array(),
+            pht(
+              "Because Phragment generates files (such as ZIP archives and ".
+              "patches) as they are requested, it requires that you configure ".
+              "the `%s` option. This option on it's own will also provide ".
+              "additional security when serving files across Phabricator.",
+              'security.alternate-file-domain')));
     }
     return null;
   }

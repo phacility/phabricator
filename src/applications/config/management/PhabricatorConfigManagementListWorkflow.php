@@ -7,7 +7,7 @@ final class PhabricatorConfigManagementListWorkflow
     $this
       ->setName('list')
       ->setExamples('**list**')
-      ->setSynopsis('List all configuration keys.');
+      ->setSynopsis(pht('List all configuration keys.'));
   }
 
   public function execute(PhutilArgumentParser $args) {

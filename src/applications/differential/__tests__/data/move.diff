@@ -1,0 +1,12 @@
+diff --git a/SRC b/DST
+similarity index 57%
+rename from SRC
+rename to DST
+index 5d5c76f..f7bd789 100644
+--- a/SRC
++++ b/DST
+@@ -1,3 +1,3 @@
+ Apples
+-Bananas
++Blueberries
+ Cherries

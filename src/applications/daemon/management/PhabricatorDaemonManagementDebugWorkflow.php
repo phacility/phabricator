@@ -7,7 +7,7 @@ final class PhabricatorDaemonManagementDebugWorkflow
     return true;
   }
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('debug')
       ->setExamples('**debug** __daemon__')
@@ -23,8 +23,14 @@ final class PhabricatorDaemonManagementDebugWorkflow
           ),
           array(
             'name' => 'as-current-user',
-            'help' => 'Run the daemon as the current user '.
-              'instead of the configured phd.user',
+            'help' => pht(
+              'Run the daemon as the current user '.
+              'instead of the configured %s',
+              'phd.user'),
+          ),
+          array(
+            'name' => 'autoscale',
+            'help' => pht('Put the daemon in an autoscale group.'),
           ),
         ));
   }
@@ -38,10 +44,21 @@ final class PhabricatorDaemonManagementDebugWorkflow
         pht('You must specify which daemon to debug.'));
     }
 
-    $daemon_class = array_shift($argv);
-    return $this->launchDaemon(
-      $daemon_class,
-      $argv,
+    $config = array();
+
+    $config['class'] = array_shift($argv);
+    $config['argv'] = $argv;
+
+    if ($args->getArg('autoscale')) {
+      $config['autoscale'] = array(
+        'group' => 'debug',
+      );
+    }
+
+    return $this->launchDaemons(
+      array(
+        $config,
+      ),
       $is_debug = true,
       $run_as_current_user);
   }

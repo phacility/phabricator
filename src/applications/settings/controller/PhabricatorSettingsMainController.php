@@ -97,6 +97,8 @@ final class PhabricatorSettingsMainController
 
     $result = array();
     foreach ($panels as $key => $panel) {
+      $panel->setUser($this->user);
+
       if (!$panel->isEnabled()) {
         continue;
       }
@@ -151,7 +153,7 @@ final class PhabricatorSettingsMainController
     return $nav;
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     $panels = $this->buildPanels();
     return $this->renderSideNav($panels)->getMenu();
   }

@@ -9,18 +9,14 @@ final class PhabricatorStandardCustomFieldUsers
 
   public function renderEditControl(array $handles) {
     $value = $this->getFieldValue();
-    if ($value) {
-      $control_value = array_select_keys($handles, $value);
-    } else {
-      $control_value = array();
-    }
 
     $control = id(new AphrontFormTokenizerControl())
+      ->setUser($this->getViewer())
       ->setLabel($this->getFieldName())
       ->setName($this->getFieldKey())
       ->setDatasource(new PhabricatorPeopleDatasource())
       ->setCaption($this->getCaption())
-      ->setValue($control_value);
+      ->setValue(nonempty($value, array()));
 
     $limit = $this->getFieldConfigValue('limit');
     if ($limit) {
@@ -33,16 +29,15 @@ final class PhabricatorStandardCustomFieldUsers
   public function appendToApplicationSearchForm(
     PhabricatorApplicationSearchEngine $engine,
     AphrontFormView $form,
-    $value,
-    array $handles) {
+    $value) {
 
     $control = id(new AphrontFormTokenizerControl())
       ->setLabel($this->getFieldName())
       ->setName($this->getFieldKey())
       ->setDatasource(new PhabricatorPeopleDatasource())
-      ->setValue($handles);
+      ->setValue(nonempty($value, array()));
 
-    $form->appendChild($control);
+    $form->appendControl($control);
   }
 
   public function getHeraldFieldValueType($condition) {

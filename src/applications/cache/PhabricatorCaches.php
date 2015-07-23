@@ -1,11 +1,15 @@
 <?php
 
 /**
+ *
+ * @task request    Request Cache
  * @task immutable  Immutable Cache
  * @task setup      Setup Cache
  * @task compress   Compression
  */
-final class PhabricatorCaches {
+final class PhabricatorCaches extends Phobject {
+
+  private static $requestCache;
 
   public static function getNamespace() {
     return PhabricatorEnv::getEnvConfig('phabricator.cache-namespace');
@@ -18,8 +22,39 @@ final class PhabricatorCaches {
       ->setCaches($caches);
   }
 
+/* -(  Request Cache  )------------------------------------------------------ */
 
-/* -(  Local Cache  )-------------------------------------------------------- */
+
+  /**
+   * Get a request cache stack.
+   *
+   * This cache stack is destroyed after each logical request. In particular,
+   * it is destroyed periodically by the daemons, while `static` caches are
+   * not.
+   *
+   * @return PhutilKeyValueCacheStack Request cache stack.
+   */
+  public static function getRequestCache() {
+    if (!self::$requestCache) {
+      self::$requestCache = new PhutilInRequestKeyValueCache();
+    }
+    return self::$requestCache;
+  }
+
+
+  /**
+   * Destroy the request cache.
+   *
+   * This is called at the beginning of each logical request.
+   *
+   * @return void
+   */
+  public static function destroyRequestCache() {
+    self::$requestCache = null;
+  }
+
+
+/* -(  Immutable Cache  )---------------------------------------------------- */
 
 
   /**
@@ -270,7 +305,7 @@ final class PhabricatorCaches {
   }
 
   private static function addNamespaceToCaches(array $caches) {
-    $namespace = PhabricatorCaches::getNamespace();
+    $namespace = self::getNamespace();
     if (!$namespace) {
       return $caches;
     }
@@ -332,7 +367,9 @@ final class PhabricatorCaches {
   public static function inflateData($value) {
     if (!function_exists('gzinflate')) {
       throw new Exception(
-        pht('gzinflate() is not available; unable to read deflated data!'));
+        pht(
+          '%s is not available; unable to read deflated data!',
+          'gzinflate()'));
     }
 
     $value = gzinflate($value);

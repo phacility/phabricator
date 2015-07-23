@@ -7,6 +7,14 @@ final class DifferentialChangesetTwoUpRenderer
     return false;
   }
 
+  protected function getRendererTableClass() {
+    return 'diff-2up';
+  }
+
+  public function getRendererKey() {
+    return '2up';
+  }
+
   protected function renderColgroup() {
     return phutil_tag('colgroup', array(), array(
       phutil_tag('col', array('class' => 'num')),
@@ -47,19 +55,8 @@ final class DifferentialChangesetTwoUpRenderer
     $new_lines = $this->getNewLines();
     $gaps = $this->getGaps();
     $reference = $this->getRenderingReference();
-    $left_id = $this->getOldChangesetID();
-    $right_id = $this->getNewChangesetID();
 
-    // "N" stands for 'new' and means the comment should attach to the new file
-    // when stored, i.e. DifferentialInlineComment->setIsNewFile().
-    // "O" stands for 'old' and means the comment should attach to the old file.
-
-    $left_char = $this->getOldAttachesToNewFile()
-      ? 'N'
-      : 'O';
-    $right_char = $this->getNewAttachesToNewFile()
-      ? 'N'
-      : 'O';
+    list($left_prefix, $right_prefix) = $this->getLineIDPrefixes();
 
     $changeset = $this->getChangeset();
     $copy_lines = idx($changeset->getMetadata(), 'copy:lines', array());
@@ -72,6 +69,8 @@ final class DifferentialChangesetTwoUpRenderer
     $depths = $this->getDepths();
     $mask = $this->getMask();
 
+    $hidden = new PHUIDiffRevealIconView();
+
     for ($ii = $range_start; $ii < $range_start + $range_len; $ii++) {
       if (empty($mask[$ii])) {
         // If we aren't going to show this line, we've just entered a gap.
@@ -83,66 +82,11 @@ final class DifferentialChangesetTwoUpRenderer
         $top = $gap[0];
         $len = $gap[1];
 
-        $end   = $top + $len - 20;
-
-        $contents = array();
-
-        if ($len > 40) {
-          $is_first_block = false;
-          if ($ii == 0) {
-            $is_first_block = true;
-          }
-
-          $contents[] = javelin_tag(
-            'a',
-            array(
-              'href' => '#',
-              'mustcapture' => true,
-              'sigil'       => 'show-more',
-              'meta'        => array(
-                'ref'    => $reference,
-                'range' => "{$top}-{$len}/{$top}-20",
-              ),
-            ),
-            $is_first_block
-              ? pht('Show First 20 Lines')
-              : pht("\xE2\x96\xB2 Show 20 Lines"));
-        }
-
-        $contents[] = javelin_tag(
-          'a',
-          array(
-            'href' => '#',
-            'mustcapture' => true,
-            'sigil'       => 'show-more',
-            'meta'        => array(
-              'type'   => 'all',
-              'ref'    => $reference,
-              'range'  => "{$top}-{$len}/{$top}-{$len}",
-            ),
-          ),
-          pht('Show All %d Lines', $len));
+        $contents = $this->renderShowContextLinks($top, $len, $rows);
 
         $is_last_block = false;
         if ($ii + $len >= $rows) {
           $is_last_block = true;
-        }
-
-        if ($len > 40) {
-          $contents[] = javelin_tag(
-            'a',
-            array(
-              'href' => '#',
-              'mustcapture' => true,
-              'sigil'       => 'show-more',
-              'meta'        => array(
-                'ref'    => $reference,
-                'range' => "{$top}-{$len}/{$end}-20",
-              ),
-            ),
-            $is_last_block
-              ? pht('Show Last 20 Lines')
-              : pht("\xE2\x96\xBC Show 20 Lines"));
         }
 
         $context = null;
@@ -170,9 +114,7 @@ final class DifferentialChangesetTwoUpRenderer
                 'colspan' => 2,
                 'class' => 'show-more',
               ),
-              phutil_implode_html(
-                " \xE2\x80\xA2 ", // Bullet
-                $contents)),
+              $contents),
             phutil_tag(
               'th',
               array(
@@ -283,25 +225,85 @@ final class DifferentialChangesetTwoUpRenderer
         $html[] = $context_not_available;
       }
 
-      if ($o_num && $left_id) {
-        $o_id = 'C'.$left_id.$left_char.'L'.$o_num;
+      if ($o_num && $left_prefix) {
+        $o_id = $left_prefix.$o_num;
       } else {
         $o_id = null;
       }
 
-      if ($n_num && $right_id) {
-        $n_id = 'C'.$right_id.$right_char.'L'.$n_num;
+      if ($n_num && $right_prefix) {
+        $n_id = $right_prefix.$n_num;
       } else {
         $n_id = null;
+      }
+
+      $old_comments = $this->getOldComments();
+      $new_comments = $this->getNewComments();
+      $scaffolds = array();
+
+      $o_hidden = array();
+      $n_hidden = array();
+
+      if ($o_num && isset($old_comments[$o_num])) {
+        foreach ($old_comments[$o_num] as $comment) {
+          $inline = $this->buildInlineComment(
+            $comment,
+            $on_right = false);
+          $scaffold = $this->getRowScaffoldForInline($inline);
+
+          if ($comment->isHidden()) {
+            $o_hidden[] = $comment;
+          }
+
+          if ($n_num && isset($new_comments[$n_num])) {
+            foreach ($new_comments[$n_num] as $key => $new_comment) {
+              if ($comment->isCompatible($new_comment)) {
+                $companion = $this->buildInlineComment(
+                  $new_comment,
+                  $on_right = true);
+
+                if ($new_comment->isHidden()) {
+                  $n_hidden = $new_comment;
+                }
+
+                $scaffold->addInlineView($companion);
+                unset($new_comments[$n_num][$key]);
+                break;
+              }
+            }
+          }
+
+
+          $scaffolds[] = $scaffold;
+        }
+      }
+
+      if ($n_num && isset($new_comments[$n_num])) {
+        foreach ($new_comments[$n_num] as $comment) {
+          $inline = $this->buildInlineComment(
+            $comment,
+            $on_right = true);
+
+          if ($comment->isHidden()) {
+            $n_hidden[] = $comment;
+          }
+
+          $scaffolds[] = $this->getRowScaffoldForInline($inline);
+        }
+      }
+
+      if ($o_hidden) {
+        $o_num = array($hidden, $o_num);
+      }
+
+      if ($n_hidden) {
+        $n_num = array($hidden, $n_num);
       }
 
       // NOTE: This is a unicode zero-width space, which we use as a hint when
       // intercepting 'copy' events to make sure sensible text ends up on the
       // clipboard. See the 'phabricator-oncopy' behavior.
       $zero_space = "\xE2\x80\x8B";
-
-      // NOTE: The Javascript is sensitive to whitespace changes in this
-      // block!
 
       $html[] = phutil_tag('tr', array(), array(
         phutil_tag('th', array('id' => $o_id), $o_num),
@@ -322,108 +324,46 @@ final class DifferentialChangesetTwoUpRenderer
         $html[] = $context_not_available;
       }
 
-      $old_comments = $this->getOldComments();
-      $new_comments = $this->getNewComments();
-
-      if ($o_num && isset($old_comments[$o_num])) {
-        foreach ($old_comments[$o_num] as $comment) {
-          $comment_html = $this->renderInlineComment($comment,
-                                                     $on_right = false);
-          $new = '';
-          if ($n_num && isset($new_comments[$n_num])) {
-            foreach ($new_comments[$n_num] as $key => $new_comment) {
-              if ($comment->isCompatible($new_comment)) {
-                $new = $this->renderInlineComment($new_comment,
-                                                  $on_right = true);
-                unset($new_comments[$n_num][$key]);
-              }
-            }
-          }
-          $html[] = phutil_tag('tr', array('class' => 'inline'), array(
-            phutil_tag('th', array()),
-            phutil_tag('td', array(), $comment_html),
-            phutil_tag('th', array()),
-            phutil_tag('td', array('colspan' => 3), $new),
-          ));
-        }
-      }
-      if ($n_num && isset($new_comments[$n_num])) {
-        foreach ($new_comments[$n_num] as $comment) {
-          $comment_html = $this->renderInlineComment($comment,
-                                                     $on_right = true);
-          $html[] = phutil_tag('tr', array('class' => 'inline'), array(
-            phutil_tag('th', array()),
-            phutil_tag('td', array()),
-            phutil_tag('th', array()),
-            phutil_tag(
-              'td',
-              array('colspan' => 3),
-              $comment_html),
-          ));
-        }
+      foreach ($scaffolds as $scaffold) {
+        $html[] = $scaffold;
       }
     }
 
     return $this->wrapChangeInTable(phutil_implode_html('', $html));
   }
 
-  public function renderFileChange($old_file = null,
-                                   $new_file = null,
-                                   $id = 0,
-                                   $vs = 0) {
+  public function renderFileChange(
+    $old_file = null,
+    $new_file = null,
+    $id = 0,
+    $vs = 0) {
+
     $old = null;
     if ($old_file) {
-      $old = phutil_tag(
-        'div',
-        array(
-          'class' => 'differential-image-stage',
-        ),
-        phutil_tag(
-          'img',
-          array(
-            'src' => $old_file->getBestURI(),
-          )));
+      $old = $this->renderImageStage($old_file);
     }
 
     $new = null;
     if ($new_file) {
-      $new = phutil_tag(
-        'div',
-        array(
-          'class' => 'differential-image-stage',
-        ),
-        phutil_tag(
-          'img',
-          array(
-            'src' => $new_file->getBestURI(),
-          )));
+      $new = $this->renderImageStage($new_file);
     }
 
     $html_old = array();
     $html_new = array();
     foreach ($this->getOldComments() as $on_line => $comment_group) {
       foreach ($comment_group as $comment) {
-        $comment_html = $this->renderInlineComment($comment, $on_right = false);
-        $html_old[] = phutil_tag('tr', array('class' => 'inline'), array(
-          phutil_tag('th', array()),
-          phutil_tag('td', array(), $comment_html),
-          phutil_tag('th', array()),
-          phutil_tag('td', array('colspan' => 3)),
-        ));
+        $inline = $this->buildInlineComment(
+          $comment,
+          $on_right = false);
+        $html_old[] = $this->getRowScaffoldForInline($inline);
       }
     }
     foreach ($this->getNewComments() as $lin_line => $comment_group) {
       foreach ($comment_group as $comment) {
-        $comment_html = $this->renderInlineComment($comment, $on_right = true);
-        $html_new[] = phutil_tag('tr', array('class' => 'inline'), array(
-          phutil_tag('th', array()),
-          phutil_tag('td', array()),
-          phutil_tag('th', array()),
-          phutil_tag(
-            'td',
-            array('colspan' => 3),
-            $comment_html),
-        ));
+        $inline = $this->buildInlineComment(
+          $comment,
+          $on_right = true);
+        $html_new[] = $this->getRowScaffoldForInline($inline);
       }
     }
 
@@ -458,6 +398,11 @@ final class DifferentialChangesetTwoUpRenderer
     $output = $this->wrapChangeInTable($output);
 
     return $this->renderChangesetTable($output);
+  }
+
+  public function getRowScaffoldForInline(PHUIDiffInlineCommentView $view) {
+    return id(new PHUIDiffTwoUpInlineCommentRowScaffold())
+      ->addInlineView($view);
   }
 
 }

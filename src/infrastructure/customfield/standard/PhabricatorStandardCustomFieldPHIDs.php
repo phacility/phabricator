@@ -42,6 +42,7 @@ abstract class PhabricatorStandardCustomFieldPHIDs
       }
     }
     $this->setFieldValue($value);
+    return $this;
   }
 
   public function readApplicationSearchValueFromRequest(
@@ -59,13 +60,6 @@ abstract class PhabricatorStandardCustomFieldPHIDs
         $this->newStringIndex(null),
         $value);
     }
-  }
-
-  public function getRequiredHandlePHIDsForApplicationSearch($value) {
-    if ($value) {
-      return $value;
-    }
-    return array();
   }
 
   public function getRequiredHandlePHIDsForPropertyView() {
@@ -124,7 +118,7 @@ abstract class PhabricatorStandardCustomFieldPHIDs
       $old = array();
     }
 
-    $new = json_decode($xaction->getNewValue());
+    $new = phutil_json_decode($xaction->getNewValue());
     if (!is_array($new)) {
       $new = array();
     }

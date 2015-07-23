@@ -2,51 +2,38 @@
 
 final class DivinerAtomController extends DivinerController {
 
-  private $bookName;
-  private $atomType;
-  private $atomName;
-  private $atomContext;
-  private $atomIndex;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->bookName = $data['book'];
-    $this->atomType = $data['type'];
-    $this->atomName = $data['name'];
-    $this->atomContext = nonempty(idx($data, 'context'), null);
-    $this->atomIndex = nonempty(idx($data, 'index'), null);
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
+
+    $book_name    = $request->getURIData('book');
+    $atom_type    = $request->getURIData('type');
+    $atom_name    = $request->getURIData('name');
+    $atom_context = nonempty($request->getURIData('context'), null);
+    $atom_index   = nonempty($request->getURIData('index'), null);
 
     require_celerity_resource('diviner-shared-css');
 
     $book = id(new DivinerBookQuery())
       ->setViewer($viewer)
-      ->withNames(array($this->bookName))
+      ->withNames(array($book_name))
       ->executeOne();
 
     if (!$book) {
       return new Aphront404Response();
     }
 
-    // TODO: This query won't load ghosts, because they'll fail `needAtoms()`.
-    // Instead, we might want to load ghosts and render a message like
-    // "this thing existed in an older version, but no longer does", especially
-    // if we add content like comments.
-
     $symbol = id(new DivinerAtomQuery())
       ->setViewer($viewer)
       ->withBookPHIDs(array($book->getPHID()))
-      ->withTypes(array($this->atomType))
-      ->withNames(array($this->atomName))
-      ->withContexts(array($this->atomContext))
-      ->withIndexes(array($this->atomIndex))
+      ->withTypes(array($atom_type))
+      ->withNames(array($atom_name))
+      ->withContexts(array($atom_context))
+      ->withIndexes(array($atom_index))
+      ->withIsDocumentable(true)
       ->needAtoms(true)
       ->needExtends(true)
       ->needChildren(true)
@@ -58,14 +45,15 @@ final class DivinerAtomController extends DivinerController {
 
     $atom = $symbol->getAtom();
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
 
     $crumbs->addTextCrumb(
       $book->getShortTitle(),
       '/book/'.$book->getName().'/');
 
-    $atom_short_title = $atom->getDocblockMetaValue(
-      'short',
-      $symbol->getTitle());
+    $atom_short_title = $atom
+      ? $atom->getDocblockMetaValue('short', $symbol->getTitle())
+      : $symbol->getTitle();
 
     $crumbs->addTextCrumb($atom_short_title);
 
@@ -75,26 +63,41 @@ final class DivinerAtomController extends DivinerController {
         id(new PHUITagView())
           ->setType(PHUITagView::TYPE_STATE)
           ->setBackgroundColor(PHUITagView::COLOR_BLUE)
-          ->setName(DivinerAtom::getAtomTypeNameString($atom->getType())));
+          ->setName(DivinerAtom::getAtomTypeNameString(
+            $atom ? $atom->getType() : $symbol->getType())));
 
-    $properties = id(new PHUIPropertyListView());
+    $properties = new PHUIPropertyListView();
 
-    $group = $atom->getProperty('group');
+    $group = $atom ? $atom->getProperty('group') : $symbol->getGroupName();
     if ($group) {
       $group_name = $book->getGroupName($group);
     } else {
       $group_name = null;
     }
 
-    $this->buildDefined($properties, $symbol);
-    $this->buildExtendsAndImplements($properties, $symbol);
+    $prop_list = new PHUIPropertyGroupView();
+    $prop_list->addPropertyList($properties);
 
-    $warnings = $atom->getWarnings();
-    if ($warnings) {
-      $warnings = id(new AphrontErrorView())
-        ->setErrors($warnings)
-        ->setTitle(pht('Documentation Warnings'))
-        ->setSeverity(AphrontErrorView::SEVERITY_WARNING);
+    $document = id(new PHUIDocumentView())
+      ->setBook($book->getTitle(), $group_name)
+      ->setHeader($header)
+      ->addClass('diviner-view')
+      ->appendChild($prop_list);
+
+    if ($atom) {
+      $this->buildDefined($properties, $symbol);
+      $this->buildExtendsAndImplements($properties, $symbol);
+      $this->buildRepository($properties, $symbol);
+
+      $warnings = $atom->getWarnings();
+      if ($warnings) {
+        $warnings = id(new PHUIInfoView())
+          ->setErrors($warnings)
+          ->setTitle(pht('Documentation Warnings'))
+          ->setSeverity(PHUIInfoView::SEVERITY_WARNING);
+      }
+
+      $document->appendChild($warnings);
     }
 
     $methods = $this->composeMethods($symbol);
@@ -110,7 +113,10 @@ final class DivinerAtomController extends DivinerController {
     }
     $engine->process();
 
-    $content = $this->renderDocumentationText($symbol, $engine);
+    if ($atom) {
+      $content = $this->renderDocumentationText($symbol, $engine);
+      $document->appendChild($content);
+    }
 
     $toc = $engine->getEngineMetadata(
       $symbol,
@@ -118,16 +124,16 @@ final class DivinerAtomController extends DivinerController {
       PhutilRemarkupHeaderBlockRule::KEY_HEADER_TOC,
       array());
 
-    $document = id(new PHUIDocumentView())
-      ->setBook($book->getTitle(), $group_name)
-      ->setHeader($header)
-      ->addClass('diviner-view')
-      ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
-      ->appendChild($properties)
-      ->appendChild($warnings)
-      ->appendChild($content);
+    if (!$atom) {
+      $document->appendChild(
+        id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+          ->appendChild(pht('This atom no longer exists.')));
+    }
 
-    $document->appendChild($this->buildParametersAndReturn(array($symbol)));
+    if ($atom) {
+      $document->appendChild($this->buildParametersAndReturn(array($symbol)));
+    }
 
     if ($methods) {
       $tasks = $this->composeTasks($symbol);
@@ -199,7 +205,7 @@ final class DivinerAtomController extends DivinerController {
       }
 
       $section = id(new DivinerSectionView())
-          ->setHeader(pht('Methods'));
+        ->setHeader(pht('Methods'));
 
       foreach ($methods as $spec) {
         $matom = last($spec['atoms']);
@@ -290,7 +296,19 @@ final class DivinerAtomController extends DivinerController {
         pht('Implements'),
         phutil_implode_html(phutil_tag('br'), $items));
     }
+  }
 
+  private function buildRepository(
+    PHUIPropertyListView $view,
+    DivinerLiveSymbol $symbol) {
+
+    if (!$symbol->getRepositoryPHID()) {
+      return;
+    }
+
+    $view->addProperty(
+      pht('Repository'),
+      $this->getViewer()->renderHandle($symbol->getRepositoryPHID()));
   }
 
   private function renderAtomTag(DivinerLiveSymbol $symbol) {
@@ -457,6 +475,7 @@ final class DivinerAtomController extends DivinerController {
   private function renderFullSignature(
     DivinerLiveSymbol $symbol,
     $is_link = false) {
+
     switch ($symbol->getType()) {
       case DivinerAtom::TYPE_CLASS:
       case DivinerAtom::TYPE_INTERFACE:
@@ -470,20 +489,23 @@ final class DivinerAtomController extends DivinerController {
     $atom = $symbol->getAtom();
 
     $out = array();
-    if ($atom->getProperty('final')) {
-      $out[] = 'final';
-    }
 
-    if ($atom->getProperty('abstract')) {
-      $out[] = 'abstract';
-    }
+    if ($atom) {
+      if ($atom->getProperty('final')) {
+        $out[] = 'final';
+      }
 
-    if ($atom->getProperty('access')) {
-      $out[] = $atom->getProperty('access');
-    }
+      if ($atom->getProperty('abstract')) {
+        $out[] = 'abstract';
+      }
 
-    if ($atom->getProperty('static')) {
-      $out[] = 'static';
+      if ($atom->getProperty('access')) {
+        $out[] = $atom->getProperty('access');
+      }
+
+      if ($atom->getProperty('static')) {
+        $out[] = 'static';
+      }
     }
 
     switch ($symbol->getType()) {
@@ -527,13 +549,15 @@ final class DivinerAtomController extends DivinerController {
 
     $out = phutil_implode_html(' ', $out);
 
-    $parameters = $atom->getProperty('parameters');
-    if ($parameters !== null) {
-      $pout = array();
-      foreach ($parameters as $parameter) {
-        $pout[] = idx($parameter, 'name', '...');
+    if ($atom) {
+      $parameters = $atom->getProperty('parameters');
+      if ($parameters !== null) {
+        $pout = array();
+        foreach ($parameters as $parameter) {
+          $pout[] = idx($parameter, 'name', '...');
+        }
+        $out = array($out, '('.implode(', ', $pout).')');
       }
-      $out = array($out, '('.implode(', ', $pout).')');
     }
 
     return phutil_tag(

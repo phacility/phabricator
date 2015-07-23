@@ -13,21 +13,19 @@ final class HarbormasterSendMessageConduitAPIMethod
       'external system.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     $type_const = $this->formatStringConstants(array('pass', 'fail'));
 
     return array(
       'buildTargetPHID' => 'required phid',
-      'type'            => 'required '.$type_const,
+      'lint' => 'optional list<wild>',
+      'unit' => 'optional list<wild>',
+      'type' => 'required '.$type_const,
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'void';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {
@@ -44,10 +42,31 @@ final class HarbormasterSendMessageConduitAPIMethod
       throw new Exception(pht('No such build target!'));
     }
 
-    $message = HarbormasterBuildMessage::initializeNewMessage($viewer)
+    $save = array();
+
+    $lint_messages = $request->getValue('lint', array());
+    foreach ($lint_messages as $lint) {
+      $save[] = HarbormasterBuildLintMessage::newFromDictionary(
+        $build_target,
+        $lint);
+    }
+
+    $unit_messages = $request->getValue('unit', array());
+    foreach ($unit_messages as $unit) {
+      $save[] = HarbormasterBuildUnitMessage::newFromDictionary(
+        $build_target,
+        $unit);
+    }
+
+    $save[] = HarbormasterBuildMessage::initializeNewMessage($viewer)
       ->setBuildTargetPHID($build_target->getPHID())
-      ->setType($message_type)
-      ->save();
+      ->setType($message_type);
+
+    $build_target->openTransaction();
+    foreach ($save as $object) {
+      $object->save();
+    }
+    $build_target->saveTransaction();
 
     // If the build has completely paused because all steps are blocked on
     // waiting targets, this will resume it.

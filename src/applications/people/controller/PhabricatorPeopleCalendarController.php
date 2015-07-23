@@ -25,7 +25,7 @@ final class PhabricatorPeopleCalendarController
       return new Aphront404Response();
     }
 
-    $picture = $user->loadProfileImageURI();
+    $picture = $user->getProfileImageURI();
 
     $now     = time();
     $request = $this->getRequest();
@@ -35,29 +35,41 @@ final class PhabricatorPeopleCalendarController
     $month   = $request->getInt('month', $month_d);
     $day   = phabricator_format_local_time($now, $user, 'j');
 
-
-    $holidays = id(new PhabricatorCalendarHoliday())->loadAllWhere(
-      'day BETWEEN %s AND %s',
-      "{$year}-{$month}-01",
-      "{$year}-{$month}-31");
+    $start_epoch = strtotime("{$year}-{$month}-01");
+    $end_epoch = strtotime("{$year}-{$month}-01 next month");
 
     $statuses = id(new PhabricatorCalendarEventQuery())
       ->setViewer($user)
       ->withInvitedPHIDs(array($user->getPHID()))
       ->withDateRange(
-        strtotime("{$year}-{$month}-01"),
-        strtotime("{$year}-{$month}-01 next month"))
+        $start_epoch,
+        $end_epoch)
       ->execute();
 
+    $start_range_value = AphrontFormDateControlValue::newFromEpoch(
+      $user,
+      $start_epoch);
+    $end_range_value = AphrontFormDateControlValue::newFromEpoch(
+      $user,
+      $end_epoch);
+
     if ($month == $month_d && $year == $year_d) {
-      $month_view = new PHUICalendarMonthView($month, $year, $day);
+      $month_view = new PHUICalendarMonthView(
+        $start_range_value,
+        $end_range_value,
+        $month,
+        $year,
+        $day);
     } else {
-      $month_view = new PHUICalendarMonthView($month, $year);
+      $month_view = new PHUICalendarMonthView(
+        $start_range_value,
+        $end_range_value,
+        $month,
+        $year);
     }
 
     $month_view->setBrowseURI($request->getRequestURI());
     $month_view->setUser($user);
-    $month_view->setHolidays($holidays);
     $month_view->setImage($picture);
 
     $phids = mpull($statuses, 'getUserPHID');
@@ -67,26 +79,22 @@ final class PhabricatorPeopleCalendarController
       $event = new AphrontCalendarEventView();
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
       $event->setUserPHID($status->getUserPHID());
-      $event->setName($status->getHumanStatus());
+      $event->setName($status->getName());
       $event->setDescription($status->getDescription());
       $event->setEventID($status->getID());
       $month_view->addEvent($event);
     }
 
-    $date = new DateTime("{$year}-{$month}-01");
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(
-      $user->getUsername(),
-      '/p/'.$user->getUsername().'/');
-    $crumbs->addTextCrumb($date->format('F Y'));
+    $name = $user->getUsername();
+
+    $nav = $this->buildIconNavView($user);
+    $nav->selectFilter("{$name}/calendar/");
+    $nav->appendChild($month_view);
 
     return $this->buildApplicationPage(
+      $nav,
       array(
-        $crumbs,
-        $month_view,
-     ),
-     array(
-       'title' => pht('Calendar'),
-     ));
+        'title' => pht('Calendar'),
+      ));
   }
 }

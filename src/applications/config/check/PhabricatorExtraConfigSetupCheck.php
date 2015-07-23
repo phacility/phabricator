@@ -2,6 +2,10 @@
 
 final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
+
   protected function executeChecks() {
     $ancient_config = self::getAncientConfig();
 
@@ -143,8 +147,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
 
     $markup_reason = pht(
       'Custom remarkup rules are now added by subclassing '.
-      'PhabricatorRemarkupCustomInlineRule or '.
-      'PhabricatorRemarkupCustomBlockRule.');
+      '%s or %s.',
+      'PhabricatorRemarkupCustomInlineRule',
+      'PhabricatorRemarkupCustomBlockRule');
 
     $session_reason = pht(
       'Sessions now expire and are garbage collected rather than having an '.
@@ -155,27 +160,45 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'option "%s". Use that option to configure which fields are shown.',
       'differential.fields');
 
+    $reply_domain_reason = pht(
+      'Individual application reply handler domains have been removed. '.
+      'Configure a reply domain with "%s".',
+      'metamta.reply-handler-domain');
+
+    $reply_handler_reason = pht(
+      'Reply handlers can no longer be overridden with configuration.');
+
+    $monospace_reason = pht(
+      'Phabricator no longer supports global customization of monospaced '.
+      'fonts.');
+
+    $public_mail_reason = pht(
+      'Inbound mail addresses are now configured for each application '.
+      'in the Applications tool.');
+
     $ancient_config += array(
       'phid.external-loaders' =>
         pht(
-          'External loaders have been replaced. Extend `PhabricatorPHIDType` '.
-          'to implement new PHID and handle types.'),
+          'External loaders have been replaced. Extend `%s` '.
+          'to implement new PHID and handle types.',
+          'PhabricatorPHIDType'),
       'maniphest.custom-task-extensions-class' =>
         pht(
-          'Maniphest fields are now loaded automatically. You can configure '.
-          'them with `maniphest.fields`.'),
+          'Maniphest fields are now loaded automatically. '.
+          'You can configure them with `%s`.',
+          'maniphest.fields'),
       'maniphest.custom-fields' =>
         pht(
-          'Maniphest fields are now defined in '.
-          '`maniphest.custom-field-definitions`. Existing definitions have '.
-          'been migrated.'),
+          'Maniphest fields are now defined in `%s`. '.
+          'Existing definitions have been migrated.',
+          'maniphest.custom-field-definitions'),
       'differential.custom-remarkup-rules' => $markup_reason,
       'differential.custom-remarkup-block-rules' => $markup_reason,
       'auth.sshkeys.enabled' => pht(
         'SSH keys are now actually useful, so they are always enabled.'),
       'differential.anonymous-access' => pht(
-        'Phabricator now has meaningful global access controls. See '.
-        '`policy.allow-public`.'),
+        'Phabricator now has meaningful global access controls. See `%s`.',
+        'policy.allow-public'),
       'celerity.resource-path' => pht(
         'An alternate resource map is no longer supported. Instead, use '.
         'multiple maps. See T4222.'),
@@ -191,14 +214,68 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'differential.show-test-plan-field' => $differential_field_reason,
       'differential.field-selector' => $differential_field_reason,
       'phabricator.show-beta-applications' => pht(
-        'This option has been renamed to `phabricator.show-prototypes` '.
-        'to emphasize the unfinished nature of many prototype applications. '.
-        'Your existing setting has been migrated.'),
+        'This option has been renamed to `%s` to emphasize the '.
+        'unfinished nature of many prototype applications. '.
+        'Your existing setting has been migrated.',
+        'phabricator.show-prototypes'),
       'notification.user' => pht(
         'The notification server no longer requires root permissions. Start '.
         'the server as the user you want it to run under.'),
       'notification.debug' => pht(
         'Notifications no longer have a dedicated debugging mode.'),
+      'translation.provider' => pht(
+        'The translation implementation has changed and providers are no '.
+        'longer used or supported.'),
+      'config.mask' => pht(
+        'Use `%s` instead of this option.',
+        'config.hide'),
+      'phd.start-taskmasters' => pht(
+        'Taskmasters now use an autoscaling pool. You can configure the '.
+        'pool size with `%s`.',
+        'phd.taskmasters'),
+      'storage.engine-selector' => pht(
+        'Phabricator now automatically discovers available storage engines '.
+        'at runtime.'),
+      'storage.upload-size-limit' => pht(
+        'Phabricator now supports arbitrarily large files. Consult the '.
+        'documentation for configuration details.'),
+      'security.allow-outbound-http' => pht(
+        'This option has been replaced with the more granular option `%s`.',
+        'security.outbound-blacklist'),
+      'metamta.reply.show-hints' => pht(
+        'Phabricator no longer shows reply hints in mail.'),
+
+      'metamta.differential.reply-handler-domain' => $reply_domain_reason,
+      'metamta.diffusion.reply-handler-domain' => $reply_domain_reason,
+      'metamta.macro.reply-handler-domain' => $reply_domain_reason,
+      'metamta.maniphest.reply-handler-domain' => $reply_domain_reason,
+      'metamta.pholio.reply-handler-domain' => $reply_domain_reason,
+
+      'metamta.diffusion.reply-handler' => $reply_handler_reason,
+      'metamta.differential.reply-handler' => $reply_handler_reason,
+      'metamta.maniphest.reply-handler' => $reply_handler_reason,
+      'metamta.package.reply-handler' => $reply_handler_reason,
+
+      'metamta.precedence-bulk' => pht(
+        'Phabricator now always sends transaction mail with '.
+        '"Precedence: bulk" to improve deliverability.'),
+
+      'style.monospace' => $monospace_reason,
+      'style.monospace.windows' => $monospace_reason,
+
+      'search.engine-selector' => pht(
+        'Phabricator now automatically discovers available search engines '.
+        'at runtime.'),
+
+      'metamta.files.public-create-email' => $public_mail_reason,
+      'metamta.maniphest.public-create-email' => $public_mail_reason,
+      'metamta.maniphest.default-public-author' => $public_mail_reason,
+      'metamta.paste.public-create-email' => $public_mail_reason,
+
+      'security.allow-conduit-act-as-user' => pht(
+        'Impersonating users over the API is no longer supported.'),
+
+      'feed.public' => pht('The framable public feed is no longer supported.'),
     );
 
     return $ancient_config;

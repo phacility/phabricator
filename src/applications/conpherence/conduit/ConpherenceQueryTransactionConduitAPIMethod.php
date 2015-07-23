@@ -10,48 +10,48 @@ final class ConpherenceQueryTransactionConduitAPIMethod
   public function getMethodDescription() {
     return pht(
       'Query for transactions for the logged in user within a specific '.
-      'conpherence thread. You can specify the thread by id or phid. '.
+      'Conpherence room. You can specify the room by ID or PHID. '.
       'Otherwise, specify limit and offset to query the most recent '.
-      'transactions within the conpherence for the logged in user.');
+      'transactions within the Conpherence room for the logged in user.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
-      'threadID' => 'optional int',
-      'threadPHID' => 'optional phid',
+      'roomID' => 'optional int',
+      'roomPHID' => 'optional phid',
       'limit' => 'optional int',
       'offset' => 'optional int',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR_USAGE_NO_THREAD_ID' => pht(
-        'You must specify a thread id or thread phid to query transactions '.
+      'ERR_USAGE_NO_ROOM_ID' => pht(
+        'You must specify a room id or room PHID to query transactions '.
         'from.'),
     );
   }
 
   protected function execute(ConduitAPIRequest $request) {
     $user = $request->getUser();
-    $thread_id = $request->getValue('threadID');
-    $thread_phid = $request->getValue('threadPHID');
+    $room_id = $request->getValue('roomID');
+    $room_phid = $request->getValue('roomPHID');
     $limit = $request->getValue('limit');
     $offset = $request->getValue('offset');
 
     $query = id(new ConpherenceThreadQuery())
       ->setViewer($user);
 
-    if ($thread_id) {
-      $query->withIDs(array($thread_id));
-    } else if ($thread_phid) {
-      $query->withPHIDs(array($thread_phid));
+    if ($room_id) {
+      $query->withIDs(array($room_id));
+    } else if ($room_phid) {
+      $query->withPHIDs(array($room_phid));
     } else {
-      throw new ConduitException('ERR_USAGE_NO_THREAD_ID');
+      throw new ConduitException('ERR_USAGE_NO_ROOM_ID');
     }
 
     $conpherence = $query->executeOne();
@@ -87,8 +87,8 @@ final class ConpherenceQueryTransactionConduitAPIMethod
         'transactionMetadata' => $transaction->getMetadata(),
         'authorPHID' => $transaction->getAuthorPHID(),
         'dateCreated' => $transaction->getDateCreated(),
-        'conpherenceID' => $conpherence->getID(),
-        'conpherencePHID' => $conpherence->getPHID(),
+        'roomID' => $conpherence->getID(),
+        'roomPHID' => $conpherence->getPHID(),
       );
     }
     return $data;

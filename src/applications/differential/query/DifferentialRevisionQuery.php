@@ -32,23 +32,16 @@ final class DifferentialRevisionQuery
   private $reviewers = array();
   private $revIDs = array();
   private $commitHashes = array();
+  private $commitPHIDs = array();
   private $phids = array();
   private $responsibles = array();
   private $branches = array();
-  private $arcanistProjectPHIDs = array();
   private $repositoryPHIDs;
+  private $updatedEpochMin;
+  private $updatedEpochMax;
 
-  private $order            = 'order-modified';
   const ORDER_MODIFIED      = 'order-modified';
   const ORDER_CREATED       = 'order-created';
-  /**
-   * This is essentially a denormalized copy of the revision modified time that
-   * should perform better for path queries with a LIMIT. Critically, when you
-   * browse "/", every revision in that repository for all time will match so
-   * the query benefits from being able to stop before fully materializing the
-   * result set.
-   */
-  const ORDER_PATH_MODIFIED = 'order-path-modified';
 
   private $needRelationships  = false;
   private $needActiveDiffs    = false;
@@ -154,6 +147,20 @@ final class DifferentialRevisionQuery
   }
 
   /**
+   * Filter results to revisions that have one of the provided PHIDs as
+   * commits. Calling this function will clear anything set by previous calls
+   * to @{method:withCommitPHIDs}.
+   *
+   * @param array List of PHIDs of commits
+   * @return this
+   * @task config
+   */
+  public function withCommitPHIDs(array $commit_phids) {
+    $this->commitPHIDs = $commit_phids;
+    return $this;
+  }
+
+  /**
    * Filter results to revisions with a given status. Provide a class constant,
    * such as `DifferentialRevisionQuery::STATUS_OPEN`.
    *
@@ -220,21 +227,14 @@ final class DifferentialRevisionQuery
   }
 
 
-  /**
-   * Filter results to only return revisions with a given set of arcanist
-   * projects.
-   *
-   * @param array List of project PHIDs.
-   * @return this
-   * @task config
-   */
-  public function withArcanistProjectPHIDs(array $arc_project_phids) {
-    $this->arcanistProjectPHIDs = $arc_project_phids;
+  public function withRepositoryPHIDs(array $repository_phids) {
+    $this->repositoryPHIDs = $repository_phids;
     return $this;
   }
 
-  public function withRepositoryPHIDs(array $repository_phids) {
-    $this->repositoryPHIDs = $repository_phids;
+  public function withUpdatedEpochBetween($min, $max) {
+    $this->updatedEpochMin = $min;
+    $this->updatedEpochMax = $max;
     return $this;
   }
 
@@ -246,7 +246,17 @@ final class DifferentialRevisionQuery
    * @task config
    */
   public function setOrder($order_constant) {
-    $this->order = $order_constant;
+    switch ($order_constant) {
+      case self::ORDER_CREATED:
+        $this->setOrderVector(array('id'));
+        break;
+      case self::ORDER_MODIFIED:
+        $this->setOrderVector(array('updated', 'id'));
+        break;
+      default:
+        throw new Exception(pht('Unknown order "%s".', $order_constant));
+    }
+
     return $this;
   }
 
@@ -572,14 +582,17 @@ final class DifferentialRevisionQuery
   private function buildSelectStatement(AphrontDatabaseConnection $conn_r) {
     $table = new DifferentialRevision();
 
-    $select = qsprintf(
+    $select = $this->buildSelectClause($conn_r);
+
+    $from = qsprintf(
       $conn_r,
-      'SELECT r.* FROM %T r',
+      'FROM %T r',
       $table->getTableName());
 
     $joins = $this->buildJoinsClause($conn_r);
     $where = $this->buildWhereClause($conn_r);
     $group_by = $this->buildGroupByClause($conn_r);
+    $having = $this->buildHavingClause($conn_r);
 
     $this->buildingGlobalOrder = false;
     $order_by = $this->buildOrderClause($conn_r);
@@ -588,11 +601,13 @@ final class DifferentialRevisionQuery
 
     return qsprintf(
       $conn_r,
-      '(%Q %Q %Q %Q %Q %Q)',
+      '(%Q %Q %Q %Q %Q %Q %Q %Q)',
       $select,
+      $from,
       $joins,
       $where,
       $group_by,
+      $having,
       $order_by,
       $limit);
   }
@@ -653,16 +668,23 @@ final class DifferentialRevisionQuery
         $this->draftAuthors);
     }
 
-    $joins = implode(' ', $joins);
+    if ($this->commitPHIDs) {
+      $joins[] = qsprintf(
+        $conn_r,
+        'JOIN %T commits ON commits.revisionID = r.id',
+        DifferentialRevision::TABLE_COMMIT);
+    }
 
-    return $joins;
+    $joins[] = $this->buildJoinClauseParts($conn_r);
+
+    return $this->formatJoinClause($joins);
   }
 
 
   /**
    * @task internal
    */
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->pathIDs) {
@@ -714,6 +736,13 @@ final class DifferentialRevisionQuery
       $where[] = $hash_clauses;
     }
 
+    if ($this->commitPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'commits.commitPHID IN (%Ls)',
+        $this->commitPHIDs);
+    }
+
     if ($this->phids) {
       $where[] = qsprintf(
         $conn_r,
@@ -728,12 +757,23 @@ final class DifferentialRevisionQuery
         $this->branches);
     }
 
-    if ($this->arcanistProjectPHIDs) {
+    if ($this->updatedEpochMin !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'r.arcanistProjectPHID in (%Ls)',
-        $this->arcanistProjectPHIDs);
+        'r.dateModified >= %d',
+        $this->updatedEpochMin);
     }
+
+    if ($this->updatedEpochMax !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'r.dateModified <= %d',
+        $this->updatedEpochMax);
+    }
+
+    // NOTE: Although the status constants are integers in PHP, the column is a
+    // string column in MySQL, and MySQL won't use keys on string columns if
+    // you put integers in the query.
 
     switch ($this->status) {
       case self::STATUS_ANY:
@@ -741,13 +781,13 @@ final class DifferentialRevisionQuery
       case self::STATUS_OPEN:
         $where[] = qsprintf(
           $conn_r,
-          'r.status IN (%Ld)',
+          'r.status IN (%Ls)',
           DifferentialRevisionStatus::getOpenStatuses());
         break;
       case self::STATUS_NEEDS_REVIEW:
         $where[] = qsprintf(
           $conn_r,
-          'r.status IN (%Ld)',
+          'r.status IN (%Ls)',
           array(
             ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
           ));
@@ -755,7 +795,7 @@ final class DifferentialRevisionQuery
       case self::STATUS_NEEDS_REVISION:
         $where[] = qsprintf(
           $conn_r,
-          'r.status IN (%Ld)',
+          'r.status IN (%Ls)',
           array(
             ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
           ));
@@ -763,7 +803,7 @@ final class DifferentialRevisionQuery
       case self::STATUS_ACCEPTED:
         $where[] = qsprintf(
           $conn_r,
-          'r.status IN (%Ld)',
+          'r.status IN (%Ls)',
           array(
             ArcanistDifferentialRevisionStatus::ACCEPTED,
           ));
@@ -771,23 +811,23 @@ final class DifferentialRevisionQuery
       case self::STATUS_CLOSED:
         $where[] = qsprintf(
           $conn_r,
-          'r.status IN (%Ld)',
+          'r.status IN (%Ls)',
           DifferentialRevisionStatus::getClosedStatuses());
         break;
       case self::STATUS_ABANDONED:
         $where[] = qsprintf(
           $conn_r,
-          'r.status IN (%Ld)',
+          'r.status IN (%Ls)',
           array(
             ArcanistDifferentialRevisionStatus::ABANDONED,
           ));
         break;
       default:
         throw new Exception(
-          "Unknown revision status filter constant '{$this->status}'!");
+          pht("Unknown revision status filter constant '%s'!", $this->status));
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildWhereClauseParts($conn_r);
     return $this->formatWhereClause($where);
   }
 
@@ -810,91 +850,34 @@ final class DifferentialRevisionQuery
     }
   }
 
-  private function loadCursorObject($id) {
-    $results = id(new DifferentialRevisionQuery())
-      ->setViewer($this->getPagingViewer())
-      ->withIDs(array((int)$id))
-      ->execute();
-    return head($results);
+  protected function getDefaultOrderVector() {
+    return array('updated', 'id');
   }
 
-  protected function buildPagingClause(AphrontDatabaseConnection $conn_r) {
-    $default = parent::buildPagingClause($conn_r);
+  public function getOrderableColumns() {
+    $primary = ($this->buildingGlobalOrder ? null : 'r');
 
-    $before_id = $this->getBeforeID();
-    $after_id = $this->getAfterID();
-
-    if (!$before_id && !$after_id) {
-      return $default;
-    }
-
-    if ($before_id) {
-      $cursor = $this->loadCursorObject($before_id);
-    } else {
-      $cursor = $this->loadCursorObject($after_id);
-    }
-
-    if (!$cursor) {
-      return null;
-    }
-
-    $columns = array();
-
-    switch ($this->order) {
-      case self::ORDER_CREATED:
-        return $default;
-      case self::ORDER_MODIFIED:
-        $columns[] = array(
-          'name' => 'r.dateModified',
-          'value' => $cursor->getDateModified(),
-          'type' => 'int',
-        );
-        break;
-      case self::ORDER_PATH_MODIFIED:
-        $columns[] = array(
-          'name' => 'p.epoch',
-          'value' => $cursor->getDateCreated(),
-          'type' => 'int',
-        );
-        break;
-    }
-
-    $columns[] = array(
-      'name' => 'r.id',
-      'value' => $cursor->getID(),
-      'type' => 'int',
+    return array(
+      'id' => array(
+        'table' => $primary,
+        'column' => 'id',
+        'type' => 'int',
+        'unique' => true,
+      ),
+      'updated' => array(
+        'table' => $primary,
+        'column' => 'dateModified',
+        'type' => 'int',
+      ),
     );
-
-    return $this->buildPagingClauseFromMultipleColumns(
-      $conn_r,
-      $columns,
-      array(
-        'reversed' => (bool)($before_id xor $this->getReversePaging()),
-      ));
   }
 
-  protected function getPagingColumn() {
-    $is_global = $this->buildingGlobalOrder;
-    switch ($this->order) {
-      case self::ORDER_MODIFIED:
-        if ($is_global) {
-          return 'dateModified';
-        }
-        return 'r.dateModified';
-      case self::ORDER_CREATED:
-        if ($is_global) {
-          return 'id';
-        }
-        return 'r.id';
-      case self::ORDER_PATH_MODIFIED:
-        if (!$this->pathIDs) {
-          throw new Exception(
-            'To use ORDER_PATH_MODIFIED, you must specify withPath().');
-        }
-        return 'p.epoch';
-      default:
-        throw new Exception("Unknown query order constant '{$this->order}'.");
-    }
+  protected function getPagingValueMap($cursor, array $keys) {
+    $revision = $this->loadCursorObject($cursor);
+    return array(
+      'id' => $revision->getID(),
+      'updated' => $revision->getDateModified(),
+    );
   }
 
   private function loadRelationships($conn_r, array $revisions) {
@@ -1056,7 +1039,7 @@ final class DifferentialRevisionQuery
             // The author can never have authority unless we allow self-accept.
             $has_authority = false;
           } else {
-            // Otherwise, look up whether th viewer has authority.
+            // Otherwise, look up whether the viewer has authority.
             $has_authority = isset($authority[$reviewer_phid]);
           }
 
@@ -1164,6 +1147,10 @@ final class DifferentialRevisionQuery
 
   public function getQueryApplicationClass() {
     return 'PhabricatorDifferentialApplication';
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'r';
   }
 
 }

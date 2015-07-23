@@ -6,7 +6,12 @@ final class ProjectRemarkupRule extends PhabricatorObjectRemarkupRule {
     return '#';
   }
 
-  protected function renderObjectRef($object, $handle, $anchor, $id) {
+  protected function renderObjectRef(
+    $object,
+    PhabricatorObjectHandle $handle,
+    $anchor,
+    $id) {
+
     if ($this->getEngine()->isTextMode()) {
       return '#'.$id;
     }
@@ -30,7 +35,21 @@ final class ProjectRemarkupRule extends PhabricatorObjectRemarkupRule {
     // In other contexts, the PhabricatorProjectProjectPHIDType pattern is
     // controlling and these names should parse correctly.
 
-    return '[^\s.\d!,:;{}#]+(?:[^\s!,:;{}#][^\s.!,:;{}#]+)*';
+    // These characters may never appear anywhere in a hashtag.
+    $never = '\s?!,:;{}#\\(\\)"\'';
+
+    // These characters may not appear at the beginning.
+    $never_first = '.\d';
+
+    // These characters may not appear at the end.
+    $never_last = '.';
+
+    return
+      '[^'.$never_first.$never.']+'.
+      '(?:'.
+        '[^'.$never.']*'.
+        '[^'.$never_last.$never.']+'.
+      ')*';
   }
 
   protected function loadObjects(array $ids) {

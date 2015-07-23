@@ -8,12 +8,12 @@ final class DiffusionBrowseQueryConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return
+    return pht(
       'File(s) information for a repository at an (optional) path and '.
-      '(optional) commit.';
+      '(optional) commit.');
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'array';
   }
 

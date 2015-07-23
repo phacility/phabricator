@@ -143,8 +143,9 @@ abstract class PhabricatorApplicationTransactionComment
   }
 
   public function describeAutomaticCapability($capability) {
-    // TODO: (T603) Policies are murky.
-    return null;
+    return pht(
+      'Comments are visible to users who can see the object which was '.
+      'commented on. Comments can be edited by their authors.');
   }
 
 

@@ -72,11 +72,17 @@ final class PhabricatorMainMenuView extends AphrontView {
         phutil_implode_html(' ', $aural));
     }
 
+    $applications = PhabricatorApplication::getAllInstalledApplications();
+    foreach ($applications as $application) {
+      $menus[] = $application->buildMainMenuExtraNodes(
+        $user,
+        $this->getController());
+    }
+
     $application_menu = $this->renderApplicationMenu();
     $classes = array();
-    $classes[] = 'phabricator-main-menu';
-    $classes[] = 'sprite-main-header';
-    $classes[] = 'main-header-'.PhabricatorEnv::getEnvConfig('ui.header-color');
+    $classes[] = 'phabricator-main-menu sprite-main-header';
+    $classes[] = 'phabricator-main-menu-background';
 
     return phutil_tag(
       'div',
@@ -114,6 +120,16 @@ final class PhabricatorMainMenuView extends AphrontView {
     if ($show_search) {
       $search = new PhabricatorMainMenuSearchView();
       $search->setUser($user);
+
+      $application = null;
+      $controller = $this->getController();
+      if ($controller) {
+        $application = $controller->getCurrentApplication();
+      }
+      if ($application) {
+        $search->setApplication($application);
+      }
+
       $result = $search;
 
       $pref_shortcut = PhabricatorUserPreferences::PREFERENCE_SEARCH_SHORTCUT;
@@ -144,7 +160,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'meta'  => array(
           'map' => array(
             $header_id => 'phabricator-application-menu-expanded',
-            $button_id => 'sky',
+            $button_id => 'menu-icon-selected',
           ),
         ),
       ),
@@ -152,7 +168,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'span',
         array(
           'class' => 'phabricator-menu-button-icon phui-icon-view '.
-                     'phui-font-fa fa-bars white',
+                     'phui-font-fa fa-bars',
           'id' => $button_id,
         ),
         ''));
@@ -207,7 +223,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'meta'  => array(
           'map' => array(
             $header_id => 'phabricator-search-menu-expanded',
-            $button_id => 'sky',
+            $button_id => 'menu-icon-selected',
           ),
         ),
       ),
@@ -215,7 +231,7 @@ final class PhabricatorMainMenuView extends AphrontView {
       'span',
       array(
         'class' => 'phabricator-menu-button-icon phui-icon-view '.
-                   'phui-font-fa fa-search white',
+                   'phui-font-fa fa-search',
         'id' => $button_id,
       ),
       ''));
@@ -236,6 +252,36 @@ final class PhabricatorMainMenuView extends AphrontView {
   }
 
   private function renderPhabricatorLogo() {
+    $style_logo = null;
+    $custom_header = PhabricatorEnv::getEnvConfig('ui.custom-header');
+    if ($custom_header) {
+      $cache = PhabricatorCaches::getImmutableCache();
+      $cache_key_logo = 'ui.custom-header.logo-phid.v1.'.$custom_header;
+      $logo_uri = $cache->getKey($cache_key_logo);
+      if (!$logo_uri) {
+        $file = id(new PhabricatorFileQuery())
+          ->setViewer($this->getUser())
+          ->withPHIDs(array($custom_header))
+          ->executeOne();
+        if ($file) {
+          $logo_uri = $file->getViewURI();
+          $cache->setKey($cache_key_logo, $logo_uri);
+        }
+      }
+      if ($logo_uri) {
+        $style_logo =
+          'background-size: 96px 40px; '.
+          'background-position: 0px 0px; '.
+          'background-image: url('.$logo_uri.');';
+      }
+    }
+
+    $color = PhabricatorEnv::getEnvConfig('ui.header-color');
+    if ($color == 'light') {
+      $color = 'dark';
+    } else {
+      $color = 'light';
+    }
 
     return phutil_tag(
       'a',
@@ -253,13 +299,14 @@ final class PhabricatorMainMenuView extends AphrontView {
         phutil_tag(
           'span',
           array(
-            'class' => 'sprite-menu phabricator-main-menu-eye',
+            'class' => 'sprite-menu phabricator-main-menu-eye '.$color.'-eye',
           ),
           ''),
           phutil_tag(
           'span',
           array(
-            'class' => 'sprite-menu phabricator-main-menu-logo',
+            'class' => 'sprite-menu phabricator-main-menu-logo '.$color.'-logo',
+            'style' => $style_logo,
           ),
           ''),
       ));
@@ -274,22 +321,20 @@ final class PhabricatorMainMenuView extends AphrontView {
     $container_classes = array('alert-notifications');
     $aural = array();
 
+    $dropdown_query = id(new AphlictDropdownDataQuery())
+      ->setViewer($user);
+    $dropdown_data = $dropdown_query->execute();
+
     $message_tag = '';
     $message_notification_dropdown = '';
-    $conpherence = 'PhabricatorConpherenceApplication';
-    if (PhabricatorApplication::isClassInstalledForViewer(
-      $conpherence,
-      $user)) {
+    $conpherence_app = 'PhabricatorConpherenceApplication';
+    $conpherence_data = $dropdown_data[$conpherence_app];
+    if ($conpherence_data['isInstalled']) {
       $message_id = celerity_generate_unique_node_id();
       $message_count_id = celerity_generate_unique_node_id();
       $message_dropdown_id = celerity_generate_unique_node_id();
 
-      $unread_status = ConpherenceParticipationStatus::BEHIND;
-      $unread = id(new ConpherenceParticipantCountQuery())
-        ->withParticipantPHIDs(array($user->getPHID()))
-        ->withParticipationStatus($unread_status)
-        ->execute();
-      $message_count_number = idx($unread, $user->getPHID(), 0);
+      $message_count_number = $conpherence_data['rawCount'];
 
       if ($message_count_number) {
         $aural[] = phutil_tag(
@@ -304,17 +349,13 @@ final class PhabricatorMainMenuView extends AphrontView {
         $aural[] = pht('No messages.');
       }
 
-      if ($message_count_number > 999) {
-        $message_count_number = "\xE2\x88\x9E";
-      }
-
       $message_count_tag = phutil_tag(
         'span',
         array(
           'id'    => $message_count_id,
           'class' => 'phabricator-main-menu-message-count',
         ),
-        $message_count_number);
+        $conpherence_data['count']);
 
       $message_icon_tag = javelin_tag(
         'span',
@@ -349,8 +390,9 @@ final class PhabricatorMainMenuView extends AphrontView {
           'dropdownID'  => $message_dropdown_id,
           'loadingText' => pht('Loading...'),
           'uri'         => '/conpherence/panel/',
-          'countType'   => 'messages',
+          'countType'   => $conpherence_data['countType'],
           'countNumber' => $message_count_number,
+          'unreadClass' => 'message-unread',
         ));
 
       $message_notification_dropdown = javelin_tag(
@@ -367,15 +409,13 @@ final class PhabricatorMainMenuView extends AphrontView {
     $bubble_tag = '';
     $notification_dropdown = '';
     $notification_app = 'PhabricatorNotificationsApplication';
-    if (PhabricatorApplication::isClassInstalledForViewer(
-      $notification_app,
-      $user)) {
+    $notification_data = $dropdown_data[$notification_app];
+    if ($notification_data['isInstalled']) {
       $count_id = celerity_generate_unique_node_id();
       $dropdown_id = celerity_generate_unique_node_id();
       $bubble_id = celerity_generate_unique_node_id();
 
-      $count_number = id(new PhabricatorFeedStoryNotification())
-        ->countUnread($user);
+      $count_number = $notification_data['rawCount'];
 
       if ($count_number) {
         $aural[] = phutil_tag(
@@ -390,17 +430,13 @@ final class PhabricatorMainMenuView extends AphrontView {
         $aural[] = pht('No notifications.');
       }
 
-      if ($count_number > 999) {
-        $count_number = "\xE2\x88\x9E";
-      }
-
       $count_tag = phutil_tag(
         'span',
         array(
           'id'    => $count_id,
           'class' => 'phabricator-main-menu-alert-count',
         ),
-        $count_number);
+        $notification_data['count']);
 
       $icon_tag = javelin_tag(
         'span',
@@ -432,8 +468,9 @@ final class PhabricatorMainMenuView extends AphrontView {
           'dropdownID'  => $dropdown_id,
           'loadingText' => pht('Loading...'),
           'uri'         => '/notification/panel/',
-          'countType'   => 'notifications',
+          'countType'   => $notification_data['countType'],
           'countNumber' => $count_number,
+          'unreadClass' => 'alert-unread',
         ));
 
       $notification_dropdown = javelin_tag(
@@ -451,13 +488,6 @@ final class PhabricatorMainMenuView extends AphrontView {
       $notification_dropdown,
       $message_notification_dropdown,
     );
-
-    $applications = PhabricatorApplication::getAllInstalledApplications();
-    foreach ($applications as $application) {
-      $dropdowns[] = $application->buildMainMenuExtraNodes(
-        $this->getUser(),
-        $this->getController());
-    }
 
     return array(
       array(

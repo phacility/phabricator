@@ -3,24 +3,24 @@
 final class PhabricatorFilesManagementMigrateWorkflow
   extends PhabricatorFilesManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('migrate')
-      ->setSynopsis('Migrate files between storage engines.')
+      ->setSynopsis(pht('Migrate files between storage engines.'))
       ->setArguments(
         array(
           array(
             'name'      => 'engine',
             'param'     => 'storage_engine',
-            'help'      => 'Migrate to the named storage engine.',
+            'help'      => pht('Migrate to the named storage engine.'),
           ),
           array(
             'name'      => 'dry-run',
-            'help'      => 'Show what would be migrated.',
+            'help'      => pht('Show what would be migrated.'),
           ),
           array(
             'name'      => 'all',
-            'help'      => 'Migrate all files.',
+            'help'      => pht('Migrate all files.'),
           ),
           array(
             'name'      => 'names',
@@ -35,8 +35,11 @@ final class PhabricatorFilesManagementMigrateWorkflow
     $engine_id = $args->getArg('engine');
     if (!$engine_id) {
       throw new PhutilArgumentUsageException(
-        'Specify an engine to migrate to with `--engine`. '.
-        'Use `files engines` to get a list of engines.');
+        pht(
+          'Specify an engine to migrate to with `%s`. '.
+          'Use `%s` to get a list of engines.',
+          '--engine',
+          'files engines'));
     }
 
     $engine = PhabricatorFile::buildEngine($engine_id);
@@ -44,8 +47,10 @@ final class PhabricatorFilesManagementMigrateWorkflow
     $iterator = $this->buildIterator($args);
     if (!$iterator) {
       throw new PhutilArgumentUsageException(
-        'Either specify a list of files to migrate, or use `--all` '.
-        'to migrate all files.');
+        pht(
+          'Either specify a list of files to migrate, or use `%s` '.
+          'to migrate all files.',
+          '--all'));
     }
 
     $is_dry_run = $args->getArg('dry-run');
@@ -57,39 +62,45 @@ final class PhabricatorFilesManagementMigrateWorkflow
 
       if ($file->getStorageEngine() == $engine_id) {
         $console->writeOut(
-          "%s: Already stored on '%s'\n",
-          $fid,
-          $engine_id);
+          "%s\n",
+          pht(
+            "%s: Already stored on '%s'",
+            $fid,
+            $engine_id));
         continue;
       }
 
       if ($is_dry_run) {
         $console->writeOut(
-          "%s: Would migrate from '%s' to '%s' (dry run)\n",
-          $fid,
-          $file->getStorageEngine(),
-          $engine_id);
+          "%s\n",
+          pht(
+            "%s: Would migrate from '%s' to '%s' (dry run)",
+            $fid,
+            $file->getStorageEngine(),
+            $engine_id));
         continue;
       }
 
       $console->writeOut(
-        "%s: Migrating from '%s' to '%s'...",
-        $fid,
-        $file->getStorageEngine(),
-        $engine_id);
+        "%s\n",
+        pht(
+          "%s: Migrating from '%s' to '%s'...",
+          $fid,
+          $file->getStorageEngine(),
+          $engine_id));
 
       try {
         $file->migrateToEngine($engine);
-        $console->writeOut("done.\n");
+        $console->writeOut("%s\n", pht('Done.'));
       } catch (Exception $ex) {
-        $console->writeOut("failed!\n");
+        $console->writeOut("%s\n", pht('Failed!'));
         $console->writeErr("%s\n", (string)$ex);
         $failed[] = $file;
       }
     }
 
     if ($failed) {
-      $console->writeOut("**Failures!**\n");
+      $console->writeOut("**%s**\n", pht('Failures!'));
       $ids = array();
       foreach ($failed as $file) {
         $ids[] = 'F'.$file->getID();
@@ -98,7 +109,7 @@ final class PhabricatorFilesManagementMigrateWorkflow
 
       return 1;
     } else {
-      $console->writeOut("**Success!**\n");
+      $console->writeOut("**%s**\n", pht('Success!'));
       return 0;
     }
   }

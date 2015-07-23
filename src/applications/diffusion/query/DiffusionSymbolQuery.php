@@ -11,21 +11,35 @@
  */
 final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
 
+  private $viewer;
   private $context;
   private $namePrefix;
   private $name;
 
-  private $projectIDs;
+  private $repositoryPHIDs;
   private $language;
   private $type;
 
   private $needPaths;
-  private $needArcanistProject;
   private $needRepositories;
 
 
 /* -(  Configuring the Query  )---------------------------------------------- */
 
+  /**
+   * @task config
+   */
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  /**
+   * @task config
+   */
+  public function getViewer() {
+    return $this->viewer;
+  }
 
   /**
    * @task config
@@ -57,8 +71,8 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
   /**
    * @task config
    */
-  public function setProjectIDs(array $project_ids) {
-    $this->projectIDs = $project_ids;
+  public function withRepositoryPHIDs(array $repository_phids) {
+    $this->repositoryPHIDs = $repository_phids;
     return $this;
   }
 
@@ -93,20 +107,31 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
   /**
    * @task config
    */
-  public function needArcanistProjects($need_arcanist_projects) {
-    $this->needArcanistProjects = $need_arcanist_projects;
-    return $this;
-  }
-
-
-  /**
-   * @task config
-   */
   public function needRepositories($need_repositories) {
     $this->needRepositories = $need_repositories;
     return $this;
   }
 
+
+/* -(  Specialized Query  )-------------------------------------------------- */
+
+  public function existsSymbolsInRepository($repository_phid) {
+    $this
+      ->withRepositoryPHIDs(array($repository_phid))
+      ->setLimit(1);
+
+    $symbol = new PhabricatorRepositorySymbol();
+    $conn_r = $symbol->establishConnection('r');
+
+    $data = queryfx_all(
+      $conn_r,
+      'SELECT * FROM %T %Q %Q',
+      $symbol->getTableName(),
+      $this->buildWhereClause($conn_r),
+      $this->buildLimitClause($conn_r));
+
+    return (!empty($data));
+  }
 
 /* -(  Executing the Query  )------------------------------------------------ */
 
@@ -117,10 +142,10 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
   public function execute() {
     if ($this->name && $this->namePrefix) {
       throw new Exception(
-        'You can not set both a name and a name prefix!');
+        pht('You can not set both a name and a name prefix!'));
     } else if (!$this->name && !$this->namePrefix) {
       throw new Exception(
-        'You must set a name or a name prefix!');
+        pht('You must set a name or a name prefix!'));
     }
 
     $symbol = new PhabricatorRepositorySymbol();
@@ -140,14 +165,12 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
       if ($this->needPaths) {
         $this->loadPaths($symbols);
       }
-      if ($this->needArcanistProjects || $this->needRepositories) {
-        $this->loadArcanistProjects($symbols);
-      }
       if ($this->needRepositories) {
-        $this->loadRepositories($symbols);
+        $symbols = $this->loadRepositories($symbols);
       }
 
     }
+
 
     return $symbols;
   }
@@ -169,7 +192,7 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
   /**
    * @task internal
    */
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if (isset($this->context)) {
@@ -193,11 +216,11 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
         $this->namePrefix);
     }
 
-    if ($this->projectIDs) {
+    if ($this->repositoryPHIDs) {
       $where[] = qsprintf(
         $conn_r,
-        'arcanistProjectID IN (%Ld)',
-        $this->projectIDs);
+        'repositoryPHID IN (%Ls)',
+        $this->repositoryPHIDs);
     }
 
     if ($this->language) {
@@ -238,47 +261,25 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
   /**
    * @task internal
    */
-  private function loadArcanistProjects(array $symbols) {
-    assert_instances_of($symbols, 'PhabricatorRepositorySymbol');
-    $projects = id(new PhabricatorRepositoryArcanistProject())->loadAllWhere(
-      'id IN (%Ld)',
-      mpull($symbols, 'getArcanistProjectID'));
-    foreach ($symbols as $symbol) {
-      $project = idx($projects, $symbol->getArcanistProjectID());
-      $symbol->attachArcanistProject($project);
-    }
-  }
-
-
-  /**
-   * @task internal
-   */
   private function loadRepositories(array $symbols) {
     assert_instances_of($symbols, 'PhabricatorRepositorySymbol');
 
-    $projects = mpull($symbols, 'getArcanistProject');
-    $projects = array_filter($projects);
+    $repos = id(new PhabricatorRepositoryQuery())
+      ->setViewer($this->viewer)
+      ->withPHIDs(mpull($symbols, 'getRepositoryPHID'))
+      ->execute();
+    $repos = mpull($repos, null, 'getPHID');
 
-    $repo_ids = mpull($projects, 'getRepositoryID');
-    $repo_ids = array_filter($repo_ids);
-
-    if ($repo_ids) {
-      // TODO: (T603) Provide a viewer here.
-      $repos = id(new PhabricatorRepository())->loadAllWhere(
-        'id IN (%Ld)',
-        $repo_ids);
-    } else {
-      $repos = array();
-    }
-
+    $visible = array();
     foreach ($symbols as $symbol) {
-      $proj = $symbol->getArcanistProject();
-      if ($proj) {
-        $symbol->attachRepository(idx($repos, $proj->getRepositoryID()));
-      } else {
-        $symbol->attachRepository(null);
+      $repository = idx($repos, $symbol->getRepositoryPHID());
+      // repository is null mean "user can't view repo", so hide the symbol
+      if ($repository) {
+        $symbol->attachRepository($repository);
+        $visible[] = $symbol;
       }
     }
+    return $visible;
   }
 
 }

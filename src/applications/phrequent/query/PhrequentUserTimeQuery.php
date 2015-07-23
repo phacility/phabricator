@@ -9,26 +9,29 @@ final class PhrequentUserTimeQuery
   const ORDER_STARTED_DESC  = 3;
   const ORDER_ENDED_ASC     = 4;
   const ORDER_ENDED_DESC    = 5;
-  const ORDER_DURATION_ASC  = 6;
-  const ORDER_DURATION_DESC = 7;
 
   const ENDED_YES = 0;
   const ENDED_NO  = 1;
   const ENDED_ALL = 2;
 
+  private $ids;
   private $userPHIDs;
   private $objectPHIDs;
-  private $order = self::ORDER_ID_ASC;
   private $ended = self::ENDED_ALL;
 
   private $needPreemptingEvents;
 
-  public function withUserPHIDs($user_phids) {
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
+
+  public function withUserPHIDs(array $user_phids) {
     $this->userPHIDs = $user_phids;
     return $this;
   }
 
-  public function withObjectPHIDs($object_phids) {
+  public function withObjectPHIDs(array $object_phids) {
     $this->objectPHIDs = $object_phids;
     return $this;
   }
@@ -39,7 +42,29 @@ final class PhrequentUserTimeQuery
   }
 
   public function setOrder($order) {
-    $this->order = $order;
+    switch ($order) {
+      case self::ORDER_ID_ASC:
+        $this->setOrderVector(array('-id'));
+        break;
+      case self::ORDER_ID_DESC:
+        $this->setOrderVector(array('id'));
+        break;
+      case self::ORDER_STARTED_ASC:
+        $this->setOrderVector(array('-start', '-id'));
+        break;
+      case self::ORDER_STARTED_DESC:
+        $this->setOrderVector(array('start', 'id'));
+        break;
+      case self::ORDER_ENDED_ASC:
+        $this->setOrderVector(array('-end', '-id'));
+        break;
+      case self::ORDER_ENDED_DESC:
+        $this->setOrderVector(array('end', 'id'));
+        break;
+      default:
+        throw new Exception(pht('Unknown order "%s".', $order));
+    }
+
     return $this;
   }
 
@@ -48,17 +73,24 @@ final class PhrequentUserTimeQuery
     return $this;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
-    if ($this->userPHIDs) {
+    if ($this->ids !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'id IN (%Ld)',
+        $this->ids);
+    }
+
+    if ($this->userPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
         'userPHID IN (%Ls)',
         $this->userPHIDs);
     }
 
-    if ($this->objectPHIDs) {
+    if ($this->objectPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
         'objectPHID IN (%Ls)',
@@ -79,7 +111,7 @@ final class PhrequentUserTimeQuery
           'dateEnded IS NULL');
         break;
       default:
-        throw new Exception("Unknown ended '{$this->ended}'!");
+        throw new Exception(pht("Unknown ended '%s'!", $this->ended));
     }
 
     $where[] = $this->buildPagingClause($conn);
@@ -87,59 +119,27 @@ final class PhrequentUserTimeQuery
     return $this->formatWhereClause($where);
   }
 
-  protected function getPagingColumn() {
-    switch ($this->order) {
-      case self::ORDER_ID_ASC:
-      case self::ORDER_ID_DESC:
-        return 'id';
-      case self::ORDER_STARTED_ASC:
-      case self::ORDER_STARTED_DESC:
-        return 'dateStarted';
-      case self::ORDER_ENDED_ASC:
-      case self::ORDER_ENDED_DESC:
-        return 'dateEnded';
-      case self::ORDER_DURATION_ASC:
-      case self::ORDER_DURATION_DESC:
-        return 'COALESCE(dateEnded, UNIX_TIMESTAMP()) - dateStarted';
-      default:
-        throw new Exception("Unknown order '{$this->order}'!");
-    }
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'start' => array(
+        'column' => 'dateStarted',
+        'type' => 'int',
+      ),
+      'end' => array(
+        'column' => 'dateEnded',
+        'type' => 'int',
+        'null' => 'head',
+      ),
+    );
   }
 
-  protected function getPagingValue($result) {
-    switch ($this->order) {
-      case self::ORDER_ID_ASC:
-      case self::ORDER_ID_DESC:
-        return $result->getID();
-      case self::ORDER_STARTED_ASC:
-      case self::ORDER_STARTED_DESC:
-        return $result->getDateStarted();
-      case self::ORDER_ENDED_ASC:
-      case self::ORDER_ENDED_DESC:
-        return $result->getDateEnded();
-      case self::ORDER_DURATION_ASC:
-      case self::ORDER_DURATION_DESC:
-        return ($result->getDateEnded() || time()) - $result->getDateStarted();
-      default:
-        throw new Exception("Unknown order '{$this->order}'!");
-    }
-  }
-
-  protected function getReversePaging() {
-    switch ($this->order) {
-      case self::ORDER_ID_ASC:
-      case self::ORDER_STARTED_ASC:
-      case self::ORDER_ENDED_ASC:
-      case self::ORDER_DURATION_ASC:
-        return true;
-      case self::ORDER_ID_DESC:
-      case self::ORDER_STARTED_DESC:
-      case self::ORDER_ENDED_DESC:
-      case self::ORDER_DURATION_DESC:
-        return false;
-      default:
-        throw new Exception("Unknown order '{$this->order}'!");
-    }
+  protected function getPagingValueMap($cursor, array $keys) {
+    $usertime = $this->loadCursorObject($cursor);
+    return array(
+      'id' => $usertime->getID(),
+      'start' => $usertime->getDateStarted(),
+      'end' => $usertime->getDateEnded(),
+    );
   }
 
   protected function loadPage() {
@@ -249,8 +249,6 @@ final class PhrequentUserTimeQuery
       self::ORDER_STARTED_DESC  => pht('by nearest start date'),
       self::ORDER_ENDED_ASC     => pht('by furthest end date'),
       self::ORDER_ENDED_DESC    => pht('by nearest end date'),
-      self::ORDER_DURATION_ASC  => pht('by smallest duration'),
-      self::ORDER_DURATION_DESC => pht('by largest duration'),
     );
   }
 

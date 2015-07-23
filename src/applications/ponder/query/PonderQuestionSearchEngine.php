@@ -7,7 +7,7 @@ final class PonderQuestionSearchEngine
     return pht('Ponder Questions');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorPonderApplication';
   }
 
@@ -64,25 +64,19 @@ final class PonderQuestionSearchEngine
     $status = $saved_query->getParameter(
       'status', PonderQuestionStatus::STATUS_OPEN);
 
-    $phids = array_merge($author_phids, $answerer_phids);
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
-
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('authors')
           ->setLabel(pht('Authors'))
-          ->setValue(array_select_keys($handles, $author_phids)))
-      ->appendChild(
+          ->setValue($author_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('answerers')
           ->setLabel(pht('Answered By'))
-          ->setValue(array_select_keys($handles, $answerer_phids)))
+          ->setValue($answerer_phids))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Status'))
@@ -150,14 +144,18 @@ final class PonderQuestionSearchEngine
       ->setUser($viewer);
 
     foreach ($questions as $question) {
+      $color = PonderQuestionStatus::getQuestionStatusTagColor(
+          $question->getStatus());
+      $icon = PonderQuestionStatus::getQuestionStatusIcon(
+          $question->getStatus());
+      $full_status = PonderQuestionStatus::getQuestionStatusFullName(
+          $question->getStatus());
       $item = new PHUIObjectItemView();
       $item->setObjectName('Q'.$question->getID());
       $item->setHeader($question->getTitle());
       $item->setHref('/Q'.$question->getID());
       $item->setObject($question);
-      $item->setBarColor(
-        PonderQuestionStatus::getQuestionStatusTagColor(
-          $question->getStatus()));
+      $item->setStatusIcon($icon.' '.$color, $full_status);
 
       $created_date = phabricator_date($question->getDateCreated(), $viewer);
       $item->addIcon('none', $created_date);
@@ -172,7 +170,11 @@ final class PonderQuestionSearchEngine
       $view->addItem($item);
     }
 
-    return $view;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($view);
+    $result->setNoDataString(pht('No questions found.'));
+
+    return $result;
   }
 
 }

@@ -8,10 +8,10 @@ final class DiffusionSearchQueryConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Search (grep) a repository at a specific path and commit.';
+    return pht('Search (grep) a repository at a specific path and commit.');
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'array';
   }
 
@@ -27,7 +27,7 @@ final class DiffusionSearchQueryConduitAPIMethod
 
   protected function defineCustomErrorTypes() {
     return array(
-      'ERR-GREP-COMMAND' => 'Grep command failed.',
+      'ERR-GREP-COMMAND' => pht('Grep command failed.'),
     );
   }
 

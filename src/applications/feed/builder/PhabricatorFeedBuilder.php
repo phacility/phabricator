@@ -1,19 +1,15 @@
 <?php
 
-final class PhabricatorFeedBuilder {
+final class PhabricatorFeedBuilder extends Phobject {
 
+  private $user;
   private $stories;
-  private $framed;
   private $hovercards = false;
+  private $noDataString;
 
   public function __construct(array $stories) {
     assert_instances_of($stories, 'PhabricatorFeedStory');
     $this->stories = $stories;
-  }
-
-  public function setFramed($framed) {
-    $this->framed = $framed;
-    return $this;
   }
 
   public function setUser(PhabricatorUser $user) {
@@ -26,9 +22,14 @@ final class PhabricatorFeedBuilder {
     return $this;
   }
 
+  public function setNoDataString($string) {
+    $this->noDataString = $string;
+    return $this;
+  }
+
   public function buildView() {
     if (!$this->user) {
-      throw new Exception('Call setUser() before buildView()!');
+      throw new PhutilInvalidStateException('setUser');
     }
 
     $user = $this->user;
@@ -40,7 +41,6 @@ final class PhabricatorFeedBuilder {
 
     $last_date = null;
     foreach ($stories as $story) {
-      $story->setFramed($this->framed);
       $story->setHovercard($this->hovercards);
 
       $date = ucfirst(phabricator_relative_date($story->getEpoch(), $user));
@@ -51,8 +51,9 @@ final class PhabricatorFeedBuilder {
             phutil_tag_div('phabricator-feed-story-date-separator'));
         }
         $last_date = $date;
-        $header = new PHUIActionHeaderView();
-        $header->setHeaderTitle($date);
+        $header = new PHUIHeaderView();
+        $header->setHeader($date);
+        $header->setHeaderIcon('fa-calendar msr');
 
         $null_view->appendChild($header);
       }
@@ -76,8 +77,23 @@ final class PhabricatorFeedBuilder {
       $null_view->appendChild($view);
     }
 
-    return id(new AphrontNullView())
-      ->appendChild($null_view->render());
+    $box = id(new PHUIObjectBoxView())
+      ->appendChild($null_view);
+
+    if (empty($stories)) {
+      $nodatastring = pht('No Stories.');
+      if ($this->noDataString) {
+        $nodatastring = $this->noDataString;
+      }
+
+      $view = id(new PHUIBoxView())
+        ->addClass('mlt mlb msr msl')
+        ->appendChild($nodatastring);
+      $box->appendChild($view);
+    }
+
+    return $box;
+
   }
 
 }

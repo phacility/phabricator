@@ -3,26 +3,26 @@
 final class DrydockManagementCreateResourceWorkflow
   extends DrydockManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('create-resource')
-      ->setSynopsis('Create a resource manually.')
+      ->setSynopsis(pht('Create a resource manually.'))
       ->setArguments(
         array(
           array(
             'name'      => 'name',
             'param'     => 'resource_name',
-            'help'      => 'Resource name.',
+            'help'      => pht('Resource name.'),
           ),
           array(
             'name'      => 'blueprint',
             'param'     => 'blueprint_id',
-            'help'      => 'Blueprint ID.',
+            'help'      => pht('Blueprint ID.'),
           ),
           array(
             'name'      => 'attributes',
             'param'     => 'name=value,...',
-            'help'      => 'Resource attributes.',
+            'help'      => pht('Resource attributes.'),
           ),
         ));
   }
@@ -33,13 +33,17 @@ final class DrydockManagementCreateResourceWorkflow
     $resource_name = $args->getArg('name');
     if (!$resource_name) {
       throw new PhutilArgumentUsageException(
-        'Specify a resource name with `--name`.');
+        pht(
+          'Specify a resource name with `%s`.',
+          '--name'));
     }
 
     $blueprint_id = $args->getArg('blueprint');
     if (!$blueprint_id) {
       throw new PhutilArgumentUsageException(
-        'Specify a blueprint ID with `--blueprint`.');
+        pht(
+          'Specify a blueprint ID with `%s`.',
+          '--blueprint'));
     }
 
     $attributes = $args->getArg('attributes');
@@ -57,7 +61,7 @@ final class DrydockManagementCreateResourceWorkflow
       ->executeOne();
     if (!$blueprint) {
       throw new PhutilArgumentUsageException(
-        'Specified blueprint does not exist.');
+        pht('Specified blueprint does not exist.'));
     }
 
     $resource = id(new DrydockResource())
@@ -70,7 +74,7 @@ final class DrydockManagementCreateResourceWorkflow
     }
     $resource->save();
 
-    $console->writeOut("Created Resource %s\n", $resource->getID());
+    $console->writeOut("%s\n", pht('Created Resource %s', $resource->getID()));
     return 0;
   }
 

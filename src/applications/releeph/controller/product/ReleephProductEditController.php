@@ -15,7 +15,6 @@ final class ReleephProductEditController extends ReleephProductController {
     $product = id(new ReleephProductQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->productID))
-      ->needArcanistProjects(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -48,7 +47,7 @@ final class ReleephProductEditController extends ReleephProductController {
       $test_paths = $product->getDetail('testPaths', array());
     }
 
-    $arc_project_id = $product->getArcanistProjectID();
+    $repository_phid = $product->getRepositoryPHID();
 
     if ($request->isFormPost()) {
       $pusher_phids = $request->getArr('pushers');
@@ -92,8 +91,9 @@ final class ReleephProductEditController extends ReleephProductController {
         ->setDetail('branchTemplate', $branch_template)
         ->setDetail('testPaths', $test_paths);
 
-      $fake_commit_handle =
-        ReleephBranchTemplate::getFakeCommitHandleFor($arc_project_id);
+      $fake_commit_handle = ReleephBranchTemplate::getFakeCommitHandleFor(
+        $repository_phid,
+        $viewer);
 
       if ($branch_template) {
         list($branch_name, $template_errors) = id(new ReleephBranchTemplate())
@@ -104,7 +104,7 @@ final class ReleephProductEditController extends ReleephProductController {
         if ($template_errors) {
           $e_branch_template = pht('Whoopsies!');
           foreach ($template_errors as $template_error) {
-            $errors[] = "Template error: {$template_error}";
+            $errors[] = pht('Template error: %s', $template_error);
           }
         }
       }
@@ -119,13 +119,6 @@ final class ReleephProductEditController extends ReleephProductController {
     $pusher_phids = $request->getArr(
       'pushers',
       $product->getDetail('pushers', array()));
-
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($request->getUser())
-      ->withPHIDs($pusher_phids)
-      ->execute();
-
-    $pusher_handles = array_select_keys($handles, $pusher_phids);
 
     $form = id(new AphrontFormView())
       ->setUser($request->getUser())
@@ -143,9 +136,9 @@ final class ReleephProductEditController extends ReleephProductController {
             $product->getRepository()->getName()))
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel(pht('Arc Project'))
+          ->setLabel(pht('Repository'))
           ->setValue(
-            $product->getArcanistProject()->getName()))
+            $product->getRepository()->getName()))
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel(pht('Releeph Project PHID'))
@@ -178,7 +171,7 @@ final class ReleephProductEditController extends ReleephProductController {
     $branch_template_input = id(new AphrontFormTextControl())
       ->setName('branchTemplate')
       ->setValue($branch_template)
-      ->setLabel('Branch Template')
+      ->setLabel(pht('Branch Template'))
       ->setError($e_branch_template)
       ->setCaption(
         pht("Leave this blank to use your installation's default."));
@@ -186,17 +179,17 @@ final class ReleephProductEditController extends ReleephProductController {
     $branch_template_preview = id(new ReleephBranchPreviewView())
       ->setLabel(pht('Preview'))
       ->addControl('template', $branch_template_input)
-      ->addStatic('arcProjectID', $arc_project_id)
+      ->addStatic('repositoryPHID', $repository_phid)
       ->addStatic('isSymbolic', false)
       ->addStatic('projectName', $product->getName());
 
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Pushers'))
           ->setName('pushers')
           ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setValue($pusher_handles))
+          ->setValue($pusher_phids))
       ->appendChild($branch_template_input)
       ->appendChild($branch_template_preview)
       ->appendRemarkupInstructions($this->getBranchHelpText());

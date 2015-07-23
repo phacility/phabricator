@@ -1,7 +1,10 @@
 <?php
 
 final class PhameBlog extends PhameDAO
-  implements PhabricatorPolicyInterface, PhabricatorMarkupInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorMarkupInterface,
+    PhabricatorApplicationTransactionInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:description';
 
@@ -16,10 +19,7 @@ final class PhameBlog extends PhameDAO
   protected $editPolicy;
   protected $joinPolicy;
 
-  private $bloggerPHIDs = self::ATTACHABLE;
-  private $bloggers = self::ATTACHABLE;
-
-  static private $requestBlog;
+  private static $requestBlog;
 
   protected function getConfiguration() {
     return array(
@@ -57,6 +57,15 @@ final class PhameBlog extends PhameDAO
       PhabricatorPhameBlogPHIDType::TYPECONST);
   }
 
+  public static function initializeNewBlog(PhabricatorUser $actor) {
+    $blog = id(new PhameBlog())
+      ->setCreatorPHID($actor->getPHID())
+      ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
+      ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setJoinPolicy(PhabricatorPolicies::POLICY_USER);
+    return $blog;
+  }
+
   public function getSkinRenderer(AphrontRequest $request) {
     $spec = PhameSkinSpecification::loadOneSkinSpecification(
       $this->getSkin());
@@ -68,8 +77,9 @@ final class PhameBlog extends PhameDAO
 
     if (!$spec) {
       throw new Exception(
-        'This blog has an invalid skin, and the default skin failed to '.
-        'load.');
+        pht(
+          'This blog has an invalid skin, and the default skin failed to '.
+          'load.'));
     }
 
     $skin = newv($spec->getSkinClass(), array());
@@ -157,22 +167,6 @@ final class PhameBlog extends PhameDAO
     return null;
   }
 
-  public function getBloggerPHIDs() {
-    return $this->assertAttached($this->bloggerPHIDs);
-  }
-
-  public function attachBloggers(array $bloggers) {
-    assert_instances_of($bloggers, 'PhabricatorObjectHandle');
-
-    $this->bloggers = $bloggers;
-
-    return $this;
-  }
-
-  public function getBloggers() {
-    return $this->assertAttached($this->bloggers);
-  }
-
   public function getSkin() {
     $config = coalesce($this->getConfigData(), array());
     return idx($config, 'skin', self::SKIN_DEFAULT);
@@ -184,7 +178,7 @@ final class PhameBlog extends PhameDAO
     return $this->setConfigData($config);
   }
 
-  static public function getSkinOptionsForSelect() {
+  public static function getSkinOptionsForSelect() {
     $classes = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhameBlogSkin')
       ->setType('class')
@@ -309,6 +303,28 @@ final class PhameBlog extends PhameDAO
 
   public function shouldUseMarkupCache($field) {
     return (bool)$this->getPHID();
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhameBlogEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhameBlogTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
   }
 
 }

@@ -157,17 +157,24 @@ abstract class DoorkeeperFeedWorker extends FeedPushWorker {
    * @{method:publishFeedStory}.
    */
   final protected function doWork() {
+    if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
+      $this->log("%s\n", pht('Phabricator is running in silent mode.'));
+      return;
+    }
+
     if (!$this->isEnabled()) {
-      $this->log("Doorkeeper worker '%s' is not enabled.\n", get_class($this));
+      $this->log(
+        "%s\n",
+        pht("Doorkeeper worker '%s' is not enabled.", get_class($this)));
       return;
     }
 
     $publisher = $this->loadPublisher();
     if (!$publisher) {
-      $this->log("Story is about an unsupported object type.\n");
+      $this->log("%s\n", pht('Story is about an unsupported object type.'));
       return;
     } else {
-      $this->log("Using publisher '%s'.\n", get_class($publisher));
+      $this->log("%s\n", pht("Using publisher '%s'.", get_class($publisher)));
     }
 
     $this->publishFeedStory();

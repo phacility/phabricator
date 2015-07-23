@@ -7,7 +7,7 @@ final class PhabricatorSearchApplicationSearchEngine
     return pht('Fulltext Results');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorSearchApplication';
   }
 
@@ -31,12 +31,8 @@ final class PhabricatorSearchApplicationSearchEngine
       $this->readUsersFromRequest($request, 'ownerPHIDs'));
 
     $saved->setParameter(
-      'withUnowned',
-      $this->readBoolFromRequest($request, 'withUnowned'));
-
-    $saved->setParameter(
       'subscriberPHIDs',
-      $this->readPHIDsFromRequest($request, 'subscriberPHIDs'));
+      $this->readSubscribersFromRequest($request, 'subscriberPHIDs'));
 
     $saved->setParameter(
       'projectPHIDs',
@@ -46,8 +42,46 @@ final class PhabricatorSearchApplicationSearchEngine
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorSearchDocumentQuery())
-      ->withSavedQuery($saved);
+    $query = new PhabricatorSearchDocumentQuery();
+
+    // Convert the saved query into a resolved form (without typeahead
+    // functions) which the fulltext search engines can execute.
+    $config = clone $saved;
+    $viewer = $this->requireViewer();
+
+    $datasource = id(new PhabricatorPeopleOwnerDatasource())
+      ->setViewer($viewer);
+    $owner_phids = $this->readOwnerPHIDs($config);
+    $owner_phids = $datasource->evaluateTokens($owner_phids);
+    foreach ($owner_phids as $key => $phid) {
+      if ($phid == PhabricatorPeopleNoOwnerDatasource::FUNCTION_TOKEN) {
+        $config->setParameter('withUnowned', true);
+        unset($owner_phids[$key]);
+      }
+      if ($phid == PhabricatorPeopleAnyOwnerDatasource::FUNCTION_TOKEN) {
+        $config->setParameter('withAnyOwner', true);
+        unset($owner_phids[$key]);
+      }
+    }
+    $config->setParameter('ownerPHIDs', $owner_phids);
+
+
+    $datasource = id(new PhabricatorPeopleUserFunctionDatasource())
+      ->setViewer($viewer);
+    $author_phids = $config->getParameter('authorPHIDs', array());
+    $author_phids = $datasource->evaluateTokens($author_phids);
+    $config->setParameter('authorPHIDs', $author_phids);
+
+
+    $datasource = id(new PhabricatorMetaMTAMailableFunctionDatasource())
+      ->setViewer($viewer);
+    $subscriber_phids = $config->getParameter('subscriberPHIDs', array());
+    $subscriber_phids = $datasource->evaluateTokens($subscriber_phids);
+    $config->setParameter('subscriberPHIDs', $subscriber_phids);
+
+
+    $query->withSavedQuery($config);
+
     return $query;
   }
 
@@ -62,27 +96,9 @@ final class PhabricatorSearchApplicationSearchEngine
     $project_value = null;
 
     $author_phids = $saved->getParameter('authorPHIDs', array());
-    $owner_phids = $saved->getParameter('ownerPHIDs', array());
+    $owner_phids = $this->readOwnerPHIDs($saved);
     $subscriber_phids = $saved->getParameter('subscriberPHIDs', array());
     $project_phids = $saved->getParameter('projectPHIDs', array());
-
-    $all_phids = array_merge(
-      $author_phids,
-      $owner_phids,
-      $subscriber_phids,
-      $project_phids);
-
-    $all_handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($all_phids)
-      ->execute();
-
-    $author_handles = array_select_keys($all_handles, $author_phids);
-    $owner_handles = array_select_keys($all_handles, $owner_phids);
-    $subscriber_handles = array_select_keys($all_handles, $subscriber_phids);
-    $project_handles = array_select_keys($all_handles, $project_phids);
-
-    $with_unowned = $saved->getParameter('withUnowned', array());
 
     $status_values = $saved->getParameter('statuses', array());
     $status_values = array_fuse($status_values);
@@ -104,17 +120,11 @@ final class PhabricatorSearchApplicationSearchEngine
     $type_values = $saved->getParameter('types', array());
     $type_values = array_fuse($type_values);
 
-    $types = self::getIndexableDocumentTypes($this->requireViewer());
-
-    $types_control = id(new AphrontFormCheckboxControl())
-      ->setLabel(pht('Document Types'));
-    foreach ($types as $type => $name) {
-      $types_control->addCheckbox(
-        'types[]',
-        $type,
-        $name,
-        isset($type_values[$type]));
-    }
+    $types_control = id(new AphrontFormTokenizerControl())
+      ->setLabel(pht('Document Types'))
+      ->setName('types')
+      ->setDatasource(new PhabricatorSearchDocumentTypeDatasource())
+      ->setValue($type_values);
 
     $form
       ->appendChild(
@@ -127,42 +137,35 @@ final class PhabricatorSearchApplicationSearchEngine
           )))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Query')
+          ->setLabel(pht('Query'))
           ->setName('query')
           ->setValue($saved->getParameter('query')))
       ->appendChild($status_control)
-      ->appendChild($types_control)
-      ->appendChild(
+      ->appendControl($types_control)
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setName('authorPHIDs')
-          ->setLabel('Authors')
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setValue($author_handles))
-      ->appendChild(
+          ->setLabel(pht('Authors'))
+          ->setDatasource(new PhabricatorPeopleUserFunctionDatasource())
+          ->setValue($author_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setName('ownerPHIDs')
-          ->setLabel('Owners')
-          ->setDatasource(new PhabricatorTypeaheadOwnerDatasource())
-          ->setValue($owner_handles))
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->addCheckbox(
-            'withUnowned',
-            1,
-            pht('Show only unowned documents.'),
-            $with_unowned))
-      ->appendChild(
+          ->setLabel(pht('Owners'))
+          ->setDatasource(new PhabricatorPeopleOwnerDatasource())
+          ->setValue($owner_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setName('subscriberPHIDs')
-          ->setLabel('Subscribers')
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setValue($subscriber_handles))
-      ->appendChild(
+          ->setLabel(pht('Subscribers'))
+          ->setDatasource(new PhabricatorMetaMTAMailableFunctionDatasource())
+          ->setValue($subscriber_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setName('projectPHIDs')
-          ->setLabel('In Any Project')
+          ->setLabel(pht('In Any Project'))
           ->setDatasource(new PhabricatorProjectDatasource())
-          ->setValue($project_handles));
+          ->setValue($project_phids));
   }
 
   protected function getURI($path) {
@@ -224,13 +227,6 @@ final class PhabricatorSearchApplicationSearchEngine
 
     asort($results);
 
-    // Put tasks first, see T4606.
-    $results = array_select_keys(
-      $results,
-      array(
-        ManiphestTaskPHIDType::TYPECONST,
-      )) + $results;
-
     return $results;
   }
 
@@ -244,6 +240,8 @@ final class PhabricatorSearchApplicationSearchEngine
     array $handles) {
 
     $viewer = $this->requireViewer();
+    $list = new PHUIObjectItemListView();
+    $list->setNoDataString(pht('No results found.'));
 
     if ($results) {
       $objects = id(new PhabricatorObjectQuery())
@@ -251,33 +249,31 @@ final class PhabricatorSearchApplicationSearchEngine
         ->withPHIDs(mpull($results, 'getPHID'))
         ->execute();
 
-      $output = array();
       foreach ($results as $phid => $handle) {
         $view = id(new PhabricatorSearchResultView())
           ->setHandle($handle)
           ->setQuery($query)
-          ->setObject(idx($objects, $phid));
-        $output[] = $view->render();
+          ->setObject(idx($objects, $phid))
+          ->render();
+        $list->addItem($view);
       }
-
-      $results = phutil_tag_div(
-        'phabricator-search-result-list',
-        $output);
-    } else {
-      $results = phutil_tag_div(
-        'phabricator-search-result-list',
-        phutil_tag(
-          'p',
-          array('class' => 'phabricator-search-no-results'),
-          pht('No search results.')));
     }
 
-    return id(new PHUIBoxView())
-      ->addMargin(PHUI::MARGIN_LARGE)
-      ->addPadding(PHUI::PADDING_LARGE)
-      ->setBorder(true)
-      ->appendChild($results)
-      ->addClass('phabricator-search-result-box');
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+
+    return $result;
+  }
+
+  private function readOwnerPHIDs(PhabricatorSavedQuery $saved) {
+    $owner_phids = $saved->getParameter('ownerPHIDs', array());
+
+    // This was an old checkbox from before typeahead functions.
+    if ($saved->getParameter('withUnowned')) {
+      $owner_phids[] = PhabricatorPeopleNoOwnerDatasource::FUNCTION_TOKEN;
+    }
+
+    return $owner_phids;
   }
 
 }

@@ -1,12 +1,12 @@
 <?php
 
-echo "Backfilling commit summaries...\n";
+echo pht('Backfilling commit summaries...')."\n";
 
 $table = new PhabricatorRepositoryCommit();
 $conn_w = $table->establishConnection('w');
 $commits = new LiskMigrationIterator($table);
 foreach ($commits as $commit) {
-  echo 'Filling Commit #'.$commit->getID()."\n";
+  echo pht('Filling Commit #%d', $commit->getID())."\n";
 
   if (strlen($commit->getSummary())) {
     continue;
@@ -28,4 +28,4 @@ foreach ($commits as $commit) {
     $commit->getID());
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

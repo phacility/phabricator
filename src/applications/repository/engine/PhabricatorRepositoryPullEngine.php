@@ -161,7 +161,7 @@ final class PhabricatorRepositoryPullEngine
     $this->log('%s', pht('Installing commit hook to "%s"...', $path));
 
     $repository = $this->getRepository();
-    $callsign = $repository->getCallsign();
+    $identifier = $this->getHookContextIdentifier($repository);
 
     $root = dirname(phutil_get_library_root('phabricator'));
     $bin = $root.'/bin/commit-hook';
@@ -171,7 +171,7 @@ final class PhabricatorRepositoryPullEngine
       'exec %s -f %s -- %s "$@"',
       $full_php_path,
       $bin,
-      $callsign);
+      $identifier);
 
     $hook = "#!/bin/sh\nexport TERM=dumb\n{$cmd}\n";
 
@@ -188,6 +188,17 @@ final class PhabricatorRepositoryPullEngine
 
     Filesystem::createDirectory($path, 0755);
     Filesystem::writeFile($path.'/README', $readme);
+  }
+
+  private function getHookContextIdentifier(PhabricatorRepository $repository) {
+    $identifier = $repository->getCallsign();
+
+    $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
+    if (strlen($instance)) {
+      $identifier = "{$identifier}:{$instance}";
+    }
+
+    return $identifier;
   }
 
 
@@ -234,26 +245,31 @@ final class PhabricatorRepositoryPullEngine
       if (is_dir($path)) {
         $files = Filesystem::listDirectory($path, $include_hidden = true);
         if (!$files) {
-          $message =
-            "Expected to find a git repository at '{$path}', but there ".
+          $message = pht(
+            "Expected to find a git repository at '%s', but there ".
             "is an empty directory there. Remove the directory: the daemon ".
-            "will run 'git clone' for you.";
+            "will run '%s' for you.",
+            $path,
+            'git clone');
         } else {
-          $message =
-            "Expected to find a git repository at '{$path}', but there is ".
+          $message = pht(
+            "Expected to find a git repository at '%s', but there is ".
             "a non-repository directory (with other stuff in it) there. Move ".
             "or remove this directory (or reconfigure the repository to use a ".
             "different directory), and then either clone a repository ".
-            "yourself or let the daemon do it.";
+            "yourself or let the daemon do it.",
+            $path);
         }
       } else if (is_file($path)) {
-        $message =
-          "Expected to find a git repository at '{$path}', but there is a ".
+        $message = pht(
+          "Expected to find a git repository at '%s', but there is a ".
           "file there instead. Remove it and let the daemon clone a ".
-          "repository for you.";
+          "repository for you.",
+          $path);
       } else {
-        $message =
-          "Expected to find a git repository at '{$path}', but did not.";
+        $message = pht(
+          "Expected to find a git repository at '%s', but did not.",
+          $path);
       }
     } else {
       $repo_path = rtrim($stdout, "\n");
@@ -266,18 +282,24 @@ final class PhabricatorRepositoryPullEngine
         // we're OK.
       } else if (!Filesystem::pathsAreEquivalent($repo_path, $path)) {
         $err = true;
-        $message =
-          "Expected to find repo at '{$path}', but the actual ".
-          "git repository root for this directory is '{$repo_path}'. ".
-          "Something is misconfigured. The repository's 'Local Path' should ".
-          "be set to some place where the daemon can check out a working ".
-          "copy, and should not be inside another git repository.";
+        $message = pht(
+          "Expected to find repo at '%s', but the actual git repository root ".
+          "for this directory is '%s'. Something is misconfigured. ".
+          "The repository's 'Local Path' should be set to some place where ".
+          "the daemon can check out a working copy, ".
+          "and should not be inside another git repository.",
+          $path,
+          $repo_path);
       }
     }
 
     if ($err && $repository->canDestroyWorkingCopy()) {
-      phlog("Repository working copy at '{$path}' failed sanity check; ".
-            "destroying and re-cloning. {$message}");
+      phlog(
+        pht(
+          "Repository working copy at '%s' failed sanity check; ".
+          "destroying and re-cloning. %s",
+          $path,
+          $message));
       Filesystem::remove($path);
       $this->executeGitCreate();
     } else if ($err) {
@@ -313,9 +335,11 @@ final class PhabricatorRepositoryPullEngine
         }
       } else if ($err) {
         throw new Exception(
-          "git fetch failed with error #{$err}:\n".
-          "stdout:{$stdout}\n\n".
-          "stderr:{$stderr}\n");
+          pht(
+            "git fetch failed with error #%d:\nstdout:%s\n\nstderr:%s\n",
+            $err,
+            $stdout,
+            $stderr));
       } else {
         $retry = false;
       }
@@ -356,10 +380,44 @@ final class PhabricatorRepositoryPullEngine
         'init -- %s',
         $path);
     } else {
-      $repository->execxRemoteCommand(
-        'clone --noupdate -- %P %s',
-        $repository->getRemoteURIEnvelope(),
-        $path);
+      $remote = $repository->getRemoteURIEnvelope();
+
+      // NOTE: Mercurial prior to 3.2.4 has an severe command injection
+      // vulnerability. See: <http://bit.ly/19B58E9>
+
+      // On vulnerable versions of Mercurial, we refuse to clone remotes which
+      // contain characters which may be interpreted by the shell.
+      $hg_version = PhabricatorRepositoryVersion::getMercurialVersion();
+      $is_vulnerable = version_compare($hg_version, '3.2.4', '<');
+      if ($is_vulnerable) {
+        $cleartext = $remote->openEnvelope();
+        // The use of "%R" here is an attempt to limit collateral damage
+        // for normal URIs because it isn't clear how long this vulnerability
+        // has been around for.
+
+        $escaped = csprintf('%R', $cleartext);
+        if ((string)$escaped !== (string)$cleartext) {
+          throw new Exception(
+            pht(
+              'You have an old version of Mercurial (%s) which has a severe '.
+              'command injection security vulnerability. The remote URI for '.
+              'this repository (%s) is potentially unsafe. Upgrade Mercurial '.
+              'to at least 3.2.4 to clone it.',
+              $hg_version,
+              $repository->getMonogram()));
+        }
+      }
+
+      try {
+        $repository->execxRemoteCommand(
+          'clone --noupdate -- %P %s',
+          $remote,
+          $path);
+      } catch (Exception $ex) {
+        $message = $ex->getMessage();
+        $message = $this->censorMercurialErrorMessage($message);
+        throw new Exception($message);
+      }
     }
   }
 
@@ -399,9 +457,35 @@ final class PhabricatorRepositoryPullEngine
       if ($err == 1 && preg_match('/no changes found/', $stdout)) {
         return;
       } else {
-        throw $ex;
+        $message = $ex->getMessage();
+        $message = $this->censorMercurialErrorMessage($message);
+        throw new Exception($message);
       }
     }
+  }
+
+
+  /**
+   * Censor response bodies from Mercurial error messages.
+   *
+   * When Mercurial attempts to clone an HTTP repository but does not
+   * receive a response it expects, it emits the response body in the
+   * command output.
+   *
+   * This represents a potential SSRF issue, because an attacker with
+   * permission to create repositories can create one which points at the
+   * remote URI for some local service, then read the response from the
+   * error message. To prevent this, censor response bodies out of error
+   * messages.
+   *
+   * @param string Uncensored Mercurial command output.
+   * @return string Censored Mercurial command output.
+   */
+  private function censorMercurialErrorMessage($message) {
+    return preg_replace(
+      '/^---%<---.*/sm',
+      pht('<Response body omitted from Mercurial error message.>')."\n",
+      $message);
   }
 
 
@@ -412,6 +496,8 @@ final class PhabricatorRepositoryPullEngine
     $repository = $this->getRepository();
     $path = $repository->getLocalPath().'/.hg/hgrc';
 
+    $identifier = $this->getHookContextIdentifier($repository);
+
     $root = dirname(phutil_get_library_root('phabricator'));
     $bin = $root.'/bin/commit-hook';
 
@@ -420,16 +506,16 @@ final class PhabricatorRepositoryPullEngine
 
     // This hook handles normal pushes.
     $data[] = csprintf(
-      'pretxnchangegroup.phabricator = %s %s %s',
+      'pretxnchangegroup.phabricator = TERM=dumb %s %s %s',
       $bin,
-      $repository->getCallsign(),
+      $identifier,
       'pretxnchangegroup');
 
     // This one handles creating bookmarks.
     $data[] = csprintf(
-      'prepushkey.phabricator = %s %s %s',
+      'prepushkey.phabricator = TERM=dumb %s %s %s',
       $bin,
-      $repository->getCallsign(),
+      $identifier,
       'prepushkey');
 
     $data[] = null;

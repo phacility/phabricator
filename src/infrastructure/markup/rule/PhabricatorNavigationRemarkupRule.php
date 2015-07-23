@@ -13,7 +13,7 @@ final class PhabricatorNavigationRemarkupRule extends PhutilRemarkupRule {
       $text);
   }
 
-  public function markupNavigation($matches) {
+  public function markupNavigation(array $matches) {
     if (!$this->isFlatText($matches[0])) {
       return $matches[0];
     }
@@ -71,7 +71,7 @@ final class PhabricatorNavigationRemarkupRule extends PhutilRemarkupRule {
       }
 
       if ($item['href'] !== null) {
-        if (PhabricatorEnv::isValidWebResource($item['href'])) {
+        if (PhabricatorEnv::isValidRemoteURIForLink($item['href'])) {
           $tag->setHref($item['href']);
           $tag->setExternal(true);
         }

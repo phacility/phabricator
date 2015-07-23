@@ -1,12 +1,12 @@
 <?php
 
-echo "Migrating task revisions to edges...\n";
+echo pht('Migrating task revisions to edges...')."\n";
 $table = new ManiphestTask();
 $table->establishConnection('w');
 
 foreach (new LiskMigrationIterator($table) as $task) {
   $id = $task->getID();
-  echo "Task {$id}: ";
+  echo pht('Task %d: ', $id);
 
   $revs = $task->getAttachedPHIDs(DifferentialRevisionPHIDType::TYPECONST);
   if (!$revs) {
@@ -22,7 +22,7 @@ foreach (new LiskMigrationIterator($table) as $task) {
       $rev);
   }
   $editor->save();
-  echo "OKAY\n";
+  echo pht('OKAY')."\n";
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

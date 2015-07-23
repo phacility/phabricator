@@ -28,7 +28,6 @@
  */
 final class PhabricatorGlobalLock extends PhutilLock {
 
-  private $lockname;
   private $conn;
 
   private static $pool = array();
@@ -39,12 +38,24 @@ final class PhabricatorGlobalLock extends PhutilLock {
 
   public static function newLock($name) {
     $namespace = PhabricatorLiskDAO::getStorageNamespace();
-    $full_name = 'global:'.$namespace.':'.$name;
+    $namespace = PhabricatorHash::digestToLength($namespace, 20);
+
+    $full_name = 'ph:'.$namespace.':'.$name;
+
+    $length_limit = 64;
+    if (strlen($full_name) > $length_limit) {
+      throw new Exception(
+        pht(
+          'Lock name "%s" is too long (full lock name is "%s"). The '.
+          'full lock name must not be longer than %s bytes.',
+          $name,
+          $full_name,
+          new PhutilNumber($length_limit)));
+    }
 
     $lock = self::getLock($full_name);
     if (!$lock) {
       $lock = new PhabricatorGlobalLock($full_name);
-      $lock->lockname = $name;
       self::registerLock($lock);
     }
 
@@ -86,7 +97,7 @@ final class PhabricatorGlobalLock extends PhutilLock {
     $result = queryfx_one(
       $conn,
       'SELECT GET_LOCK(%s, %f)',
-      'phabricator:'.$this->lockname,
+      $this->getName(),
       $wait);
 
     $ok = head($result);
@@ -101,7 +112,7 @@ final class PhabricatorGlobalLock extends PhutilLock {
     queryfx(
       $this->conn,
       'SELECT RELEASE_LOCK(%s)',
-      'phabricator:'.$this->lockname);
+      $this->getName());
 
     $this->conn->close();
     self::$pool[] = $this->conn;

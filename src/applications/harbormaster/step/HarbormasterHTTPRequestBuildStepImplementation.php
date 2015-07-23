@@ -95,9 +95,9 @@ final class HarbormasterHTTPRequestBuildStepImplementation
         'name' => pht('Credentials'),
         'type' => 'credential',
         'credential.type'
-          => PassphraseCredentialTypePassword::CREDENTIAL_TYPE,
+          => PassphrasePasswordCredentialType::CREDENTIAL_TYPE,
         'credential.provides'
-          => PassphraseCredentialTypePassword::PROVIDES_TYPE,
+          => PassphrasePasswordCredentialType::PROVIDES_TYPE,
       ),
     );
   }

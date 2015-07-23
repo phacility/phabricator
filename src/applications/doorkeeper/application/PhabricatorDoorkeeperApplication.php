@@ -14,14 +14,18 @@ final class PhabricatorDoorkeeperApplication extends PhabricatorApplication {
     return pht('Doorkeeper');
   }
 
+  public function getFontIcon() {
+    return 'fa-recycle';
+  }
+
   public function getShortDescription() {
     return pht('Connect to Other Software');
   }
 
   public function getRemarkupRules() {
     return array(
-      new DoorkeeperRemarkupRuleAsana(),
-      new DoorkeeperRemarkupRuleJIRA(),
+      new DoorkeeperAsanaRemarkupRule(),
+      new DoorkeeperJIRARemarkupRule(),
     );
   }
 

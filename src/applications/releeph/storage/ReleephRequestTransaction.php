@@ -38,12 +38,12 @@ final class ReleephRequestTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case ReleephRequestTransaction::TYPE_REQUEST:
-      case ReleephRequestTransaction::TYPE_DISCOVERY:
+      case self::TYPE_REQUEST:
+      case self::TYPE_DISCOVERY:
         $phids[] = $new;
         break;
 
-      case ReleephRequestTransaction::TYPE_EDIT_FIELD:
+      case self::TYPE_EDIT_FIELD:
         self::searchForPHIDs($this->getOldValue(), $phids);
         self::searchForPHIDs($this->getNewValue(), $phids);
         break;
@@ -60,18 +60,18 @@ final class ReleephRequestTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case ReleephRequestTransaction::TYPE_REQUEST:
+      case self::TYPE_REQUEST:
         return pht(
           '%s requested %s',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($new));
         break;
 
-      case ReleephRequestTransaction::TYPE_USER_INTENT:
+      case self::TYPE_USER_INTENT:
         return $this->getIntentTitle();
         break;
 
-      case ReleephRequestTransaction::TYPE_EDIT_FIELD:
+      case self::TYPE_EDIT_FIELD:
         $field = newv($this->getMetadataValue('fieldClass'), array());
         $name = $field->getName();
 
@@ -89,7 +89,7 @@ final class ReleephRequestTransaction
           $field->normalizeForTransactionView($this, $new));
         break;
 
-      case ReleephRequestTransaction::TYPE_PICK_STATUS:
+      case self::TYPE_PICK_STATUS:
         switch ($new) {
           case ReleephRequest::PICK_OK:
             return pht('%s found this request picks without error',
@@ -109,7 +109,7 @@ final class ReleephRequestTransaction
         }
         break;
 
-      case ReleephRequestTransaction::TYPE_COMMIT:
+      case self::TYPE_COMMIT:
         $action_type = $this->getMetadataValue('action');
         switch ($action_type) {
           case 'pick':
@@ -126,7 +126,7 @@ final class ReleephRequestTransaction
         }
         break;
 
-      case ReleephRequestTransaction::TYPE_MANUAL_IN_BRANCH:
+      case self::TYPE_MANUAL_IN_BRANCH:
         $action = $new ? pht('picked') : pht('reverted');
         return pht(
           '%s marked this request as manually %s',
@@ -134,7 +134,7 @@ final class ReleephRequestTransaction
           $action);
         break;
 
-      case ReleephRequestTransaction::TYPE_DISCOVERY:
+      case self::TYPE_DISCOVERY:
         return pht('%s discovered this commit as %s',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($new));
@@ -144,10 +144,6 @@ final class ReleephRequestTransaction
         return parent::getTitle();
         break;
     }
-  }
-
-  public function getActionStrength() {
-    return parent::getActionStrength();
   }
 
   public function getActionName() {
@@ -173,7 +169,7 @@ final class ReleephRequestTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case ReleephRequestTransaction::TYPE_USER_INTENT:
+      case self::TYPE_USER_INTENT:
         switch ($new) {
           case ReleephRequest::INTENT_WANT:
             return PhabricatorTransactions::COLOR_GREEN;
@@ -243,7 +239,7 @@ final class ReleephRequestTransaction
   public function shouldHide() {
     $type = $this->getTransactionType();
 
-    if ($type === ReleephRequestTransaction::TYPE_USER_INTENT &&
+    if ($type === self::TYPE_USER_INTENT &&
         $this->getMetadataValue('isRQCreate')) {
 
       return true;
@@ -255,7 +251,7 @@ final class ReleephRequestTransaction
 
     // ReleephSummaryFieldSpecification is usually blank when an RQ is created,
     // creating a transaction change from null to "". Hide these!
-    if ($type === ReleephRequestTransaction::TYPE_EDIT_FIELD) {
+    if ($type === self::TYPE_EDIT_FIELD) {
       if ($this->getOldValue() === null && $this->getNewValue() === '') {
         return true;
       }
@@ -265,7 +261,7 @@ final class ReleephRequestTransaction
 
   public function isBoringPickStatus() {
     $type = $this->getTransactionType();
-    if ($type === ReleephRequestTransaction::TYPE_PICK_STATUS) {
+    if ($type === self::TYPE_PICK_STATUS) {
       $new = $this->getNewValue();
       if ($new === ReleephRequest::PICK_OK ||
           $new === ReleephRequest::REVERT_OK) {

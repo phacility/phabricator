@@ -18,7 +18,7 @@ $map = array(
   'PhabricatorAuthProviderOAuthWordPress' => 'PhabricatorWordPressAuthProvider',
 );
 
-echo "Migrating auth providers...\n";
+echo pht('Migrating auth providers...')."\n";
 $table = new PhabricatorAuthProviderConfig();
 $conn_w = $table->establishConnection('w');
 

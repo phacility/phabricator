@@ -29,6 +29,18 @@ final class PHUIListItemView extends AphrontTagView {
   private $aural;
   private $profileImage;
 
+  public function setDropdownMenu(PhabricatorActionListView $actions) {
+    Javelin::initBehavior('phui-dropdown-menu');
+
+    $this->addSigil('phui-dropdown-menu');
+    $this->setMetadata(
+      array(
+        'items' => $actions,
+      ));
+
+    return $this;
+  }
+
   public function setAural($aural) {
     $this->aural = $aural;
     return $this;
@@ -67,11 +79,6 @@ final class PHUIListItemView extends AphrontTagView {
 
   public function setIcon($icon) {
     $this->icon = $icon;
-    return $this;
-  }
-
-  public function setAppIcon($icon) {
-    $this->appIcon = $icon;
     return $this;
   }
 
@@ -149,6 +156,10 @@ final class PHUIListItemView extends AphrontTagView {
 
     if ($this->selected) {
       $classes[] = 'phui-list-item-selected';
+    }
+
+    if ($this->disabled) {
+      $classes[] = 'phui-list-item-disabled';
     }
 
     if ($this->statusColor) {
@@ -242,8 +253,7 @@ final class PHUIListItemView extends AphrontTagView {
     if ($this->appIcon) {
       $icon = id(new PHUIIconView())
         ->addClass('phui-list-item-icon')
-        ->setSpriteSheet(PHUIIconView::SPRITE_APPS)
-        ->setSpriteIcon($this->appIcon);
+        ->setIconFont($this->appIcon);
     }
 
     return javelin_tag(

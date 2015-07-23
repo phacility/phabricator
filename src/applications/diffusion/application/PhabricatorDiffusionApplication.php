@@ -14,16 +14,21 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
     return '/diffusion/';
   }
 
-  public function getIconName() {
-    return 'diffusion';
+  public function getFontIcon() {
+    return 'fa-code';
   }
 
   public function isPinnedByDefault(PhabricatorUser $viewer) {
     return true;
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Diffusion User Guide');
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Diffusion User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Diffusion User Guide'),
+      ),
+    );
   }
 
   public function getFactObjectsForAnalysis() {
@@ -71,6 +76,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
           'diff/'                       => 'DiffusionDiffController',
           'tags/(?P<dblob>.*)'          => 'DiffusionTagListController',
           'branches/(?P<dblob>.*)'      => 'DiffusionBranchTableController',
+          'refs/(?P<dblob>.*)'          => 'DiffusionRefTableController',
           'lint/(?P<dblob>.*)'          => 'DiffusionLintController',
           'commit/(?P<commit>[a-z0-9]+)/branches/'
             => 'DiffusionCommitBranchesController',
@@ -94,6 +100,8 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
             'hosting/' => 'DiffusionRepositoryEditHostingController',
             '(?P<serve>serve)/' => 'DiffusionRepositoryEditHostingController',
             'update/' => 'DiffusionRepositoryEditUpdateController',
+            'symbol/' => 'DiffusionRepositorySymbolsController',
+            'staging/' => 'DiffusionRepositoryEditStagingController',
           ),
           'pathtree/(?P<dblob>.*)' => 'DiffusionPathTreeController',
           'mirror/' => array(
@@ -132,14 +140,40 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
 
   protected function getCustomCapabilities() {
     return array(
-      DiffusionDefaultViewCapability::CAPABILITY => array(),
+      DiffusionDefaultViewCapability::CAPABILITY => array(
+        'template' => PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_VIEW,
+      ),
       DiffusionDefaultEditCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
+        'template' => PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_EDIT,
       ),
-      DiffusionDefaultPushCapability::CAPABILITY => array(),
+      DiffusionDefaultPushCapability::CAPABILITY => array(
+        'template' => PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
+      ),
       DiffusionCreateRepositoriesCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
+    );
+  }
+
+  public function getMailCommandObjects() {
+    return array(
+      'commit' => array(
+        'name' => pht('Email Commands: Commits'),
+        'header' => pht('Interacting with Commits'),
+        'object' => new PhabricatorRepositoryCommit(),
+        'summary' => pht(
+          'This page documents the commands you can use to interact with '.
+          'commits and audits in Diffusion.'),
+      ),
+    );
+  }
+
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      PhabricatorRepositoryCommitPHIDType::TYPECONST,
     );
   }
 

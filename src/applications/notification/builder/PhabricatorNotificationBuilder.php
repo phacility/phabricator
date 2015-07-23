@@ -1,11 +1,13 @@
 <?php
 
-final class PhabricatorNotificationBuilder {
+final class PhabricatorNotificationBuilder extends Phobject {
 
   private $stories;
+  private $parsedStories;
   private $user = null;
 
   public function __construct(array $stories) {
+    assert_instances_of($stories, 'PhabricatorFeedStory');
     $this->stories = $stories;
   }
 
@@ -14,7 +16,11 @@ final class PhabricatorNotificationBuilder {
     return $this;
   }
 
-  public function buildView() {
+  private function parseStories() {
+
+    if ($this->parsedStories) {
+      return $this->parsedStories;
+    }
 
     $stories = $this->stories;
     $stories = mpull($stories, null, 'getChronologicalKey');
@@ -25,32 +31,6 @@ final class PhabricatorNotificationBuilder {
     // "a updated T234" into "a updated T123 and T234" because there would be
     // nowhere sensible for the notification to link to, and no reasonable way
     // to unambiguously clear it.
-
-    // Each notification emits keys it can aggregate on. For instance, if this
-    // story is "a updated T123", it might emit a key like this:
-    //
-    //   task:phid123:unread => PhabricatorFeedStoryManiphestAggregate
-    //
-    // All the unread notifications about the task with PHID "phid123" will
-    // emit the same key, telling us we can aggregate them into a single
-    // story of type "PhabricatorFeedStoryManiphestAggregate", which could
-    // read like "a and b updated T123".
-    //
-    // A story might be able to aggregate in multiple ways. Although this is
-    // unlikely for stories in a notification context, stories in a feed context
-    // can also aggregate by actor:
-    //
-    //   task:phid123   => PhabricatorFeedStoryManiphestAggregate
-    //   actor:user123  => PhabricatorFeedStoryActorAggregate
-    //
-    // This means the story can either become "a and b updated T123" or
-    // "a updated T123 and T456". When faced with multiple possibilities, it's
-    // our job to choose the best aggregation.
-    //
-    // For now, we use a simple greedy algorithm and repeatedly select the
-    // aggregate story which consumes the largest number of individual stories
-    // until no aggregate story exists that consumes more than one story.
-
 
     // Build up a map of all the possible aggregations.
 
@@ -126,6 +106,12 @@ final class PhabricatorNotificationBuilder {
     $stories = mpull($stories, null, 'getChronologicalKey');
     krsort($stories);
 
+    $this->parsedStories = $stories;
+    return $stories;
+  }
+
+  public function buildView() {
+    $stories = $this->parseStories();
     $null_view = new AphrontNullView();
 
     foreach ($stories as $story) {
@@ -139,5 +125,40 @@ final class PhabricatorNotificationBuilder {
     }
 
     return $null_view;
+  }
+
+  public function buildDict() {
+    $stories = $this->parseStories();
+    $dict = array();
+
+    foreach ($stories as $story) {
+      if ($story instanceof PhabricatorApplicationTransactionFeedStory) {
+        $dict[] = array(
+          'desktopReady' => true,
+          'title'        => $story->renderText(),
+          'body'         => $story->renderTextBody(),
+          'href'         => $story->getURI(),
+          'icon'         => $story->getImageURI(),
+        );
+      } else if ($story instanceof PhabricatorNotificationTestFeedStory) {
+        $dict[] = array(
+          'desktopReady' => true,
+          'title'        => pht('Test Notification'),
+          'body'         => $story->renderText(),
+          'href'         => null,
+          'icon'         => PhabricatorUser::getDefaultProfileImageURI(),
+        );
+      } else {
+        $dict[] = array(
+          'desktopReady' => false,
+          'title'        => null,
+          'body'         => null,
+          'href'         => null,
+          'icon'         => null,
+        );
+      }
+    }
+
+    return $dict;
   }
 }

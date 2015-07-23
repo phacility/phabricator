@@ -7,121 +7,85 @@ final class PhabricatorMacroSearchEngine
     return pht('Macros');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorMacroApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-    $saved->setParameter(
-      'authorPHIDs',
-      $this->readUsersFromRequest($request, 'authors'));
-
-    $saved->setParameter('status', $request->getStr('status'));
-    $saved->setParameter('names', $request->getStrList('names'));
-    $saved->setParameter('nameLike', $request->getStr('nameLike'));
-    $saved->setParameter('createdStart', $request->getStr('createdStart'));
-    $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
-    $saved->setParameter('flagColor', $request->getStr('flagColor', '-1'));
-
-    return $saved;
+  public function newQuery() {
+    return id(new PhabricatorMacroQuery())
+      ->needFiles(true);
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorMacroQuery())
-      ->needFiles(true)
-      ->withIDs($saved->getParameter('ids', array()))
-      ->withPHIDs($saved->getParameter('phids', array()))
-      ->withAuthorPHIDs($saved->getParameter('authorPHIDs', array()));
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchSelectField())
+        ->setLabel(pht('Status'))
+        ->setKey('status')
+        ->setOptions(PhabricatorMacroQuery::getStatusOptions()),
+      id(new PhabricatorUsersSearchField())
+        ->setLabel(pht('Authors'))
+        ->setKey('authorPHIDs')
+        ->setAliases(array('author', 'authors')),
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('nameLike'),
+      id(new PhabricatorSearchStringListField())
+        ->setLabel(pht('Exact Names'))
+        ->setKey('names'),
+      id(new PhabricatorSearchSelectField())
+        ->setLabel(pht('Marked with Flag'))
+        ->setKey('flagColor')
+        ->setDefault('-1')
+        ->setOptions(PhabricatorMacroQuery::getFlagColorsOptions()),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Created After'))
+        ->setKey('createdStart'),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Created Before'))
+        ->setKey('createdEnd'),
+    );
+  }
 
-    $status = $saved->getParameter('status');
-    $options = PhabricatorMacroQuery::getStatusOptions();
-    if (empty($options[$status])) {
-      $status = head_key($options);
+  protected function getDefaultFieldOrder() {
+    return array(
+      '...',
+      'createdStart',
+      'createdEnd',
+    );
+  }
+
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
+
+    if ($map['authorPHIDs']) {
+      $query->withAuthorPHIDs($map['authorPHIDs']);
     }
-    $query->withStatus($status);
 
-    $names = $saved->getParameter('names', array());
-    if ($names) {
-      $query->withNames($names);
+    if ($map['status']) {
+      $query->withStatus($map['status']);
     }
 
-    $like = $saved->getParameter('nameLike');
-    if (strlen($like)) {
-      $query->withNameLike($like);
+    if ($map['names']) {
+      $query->withNames($map['names']);
     }
 
-    $start = $this->parseDateTime($saved->getParameter('createdStart'));
-    $end = $this->parseDateTime($saved->getParameter('createdEnd'));
-
-    if ($start) {
-      $query->withDateCreatedAfter($start);
+    if (strlen($map['nameLike'])) {
+      $query->withNameLike($map['nameLike']);
     }
 
-    if ($end) {
-      $query->withDateCreatedBefore($end);
+    if ($map['createdStart']) {
+      $query->withDateCreatedAfter($map['createdStart']);
     }
 
-    $color = $saved->getParameter('flagColor');
-    if (strlen($color)) {
-      $query->withFlagColor($color);
+    if ($map['createdEnd']) {
+      $query->withDateCreatedBefore($map['createdEnd']);
+    }
+
+    if ($map['flagColor'] !== null) {
+      $query->withFlagColor($map['flagColor']);
     }
 
     return $query;
-  }
-
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
-
-    $phids = $saved_query->getParameter('authorPHIDs', array());
-    $author_handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
-
-    $status = $saved_query->getParameter('status');
-    $names = implode(', ', $saved_query->getParameter('names', array()));
-    $like = $saved_query->getParameter('nameLike');
-    $color = $saved_query->getParameter('flagColor', '-1');
-
-    $form
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setName('status')
-          ->setLabel(pht('Status'))
-          ->setOptions(PhabricatorMacroQuery::getStatusOptions())
-          ->setValue($status))
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('authors')
-          ->setLabel(pht('Authors'))
-          ->setValue($author_handles))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setName('nameLike')
-          ->setLabel(pht('Name Contains'))
-          ->setValue($like))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setName('names')
-          ->setLabel(pht('Exact Names'))
-          ->setValue($names))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setName('flagColor')
-          ->setLabel(pht('Marked with Flag'))
-          ->setOptions(PhabricatorMacroQuery::getFlagColorsOptions())
-          ->setValue($color));
-
-    $this->buildDateRange(
-      $form,
-      $saved_query,
-      'createdStart',
-      pht('Created After'),
-      'createdEnd',
-      pht('Created Before'));
   }
 
   protected function getURI($path) {
@@ -161,12 +125,6 @@ final class PhabricatorMacroSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  protected function getRequiredHandlePHIDsForResultList(
-    array $macros,
-    PhabricatorSavedQuery $query) {
-    return mpull($macros, 'getAuthorPHID');
-  }
-
   protected function renderResultList(
     array $macros,
     PhabricatorSavedQuery $query,
@@ -174,15 +132,23 @@ final class PhabricatorMacroSearchEngine
 
     assert_instances_of($macros, 'PhabricatorFileImageMacro');
     $viewer = $this->requireViewer();
+    $handles = $viewer->loadHandles(mpull($macros, 'getAuthorPHID'));
+
+    $xform = PhabricatorFileTransform::getTransformByKey(
+      PhabricatorFileThumbnailTransform::TRANSFORM_PINBOARD);
 
     $pinboard = new PHUIPinboardView();
     foreach ($macros as $macro) {
       $file = $macro->getFile();
 
-      $item = new PHUIPinboardItemView();
+      $item = id(new PHUIPinboardItemView())
+        ->setUser($viewer)
+        ->setObject($macro);
+
       if ($file) {
-        $item->setImageURI($file->getThumb280x210URI());
-        $item->setImageSize(280, 210);
+        $item->setImageURI($file->getURIForTransform($xform));
+        list($x, $y) = $xform->getTransformedDimensions($file);
+        $item->setImageSize($x, $y);
       }
 
       if ($macro->getDateCreated()) {
@@ -215,7 +181,10 @@ final class PhabricatorMacroSearchEngine
       $pinboard->addItem($item);
     }
 
-    return $pinboard;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setContent($pinboard);
+
+    return $result;
   }
 
 }

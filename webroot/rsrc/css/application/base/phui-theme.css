@@ -1,0 +1,99 @@
+/**
+ * @provides phui-theme-css
+ */
+
+ .phui-theme-light button.phabricator-main-menu-search-dropdown .caret:before {
+  color: {$lightbluetext};
+}
+
+ .phui-theme-light .phabricator-main-menu-search
+  button.phabricator-main-menu-search-dropdown .phui-icon-view {
+  color: {$lightbluetext};
+  text-shadow: {$whitetextshadow};
+}
+
+.phui-theme-light .alert-notifications .phui-icon-view {
+  color: {$lightbluetext};
+  text-shadow: {$whitetextshadow};
+}
+
+.phui-theme-light .phabricator-application-menu
+  .phui-list-item-icon.phui-font-fa {
+  color: {$lightbluetext};
+  text-shadow: {$whitetextshadow};
+}
+
+.device-desktop.phui-theme-light .phabricator-main-menu-search
+  button.phabricator-main-menu-search-dropdown:hover .phui-icon-view {
+    color: {$sky};
+}
+
+.device-desktop.phui-theme-light .phabricator-application-menu
+  .core-menu-item.phui-list-item-view:hover
+  .phui-list-item-icon.phui-font-fa {
+    color: {$sky};
+}
+
+.phui-theme-light .phabricator-menu-button-icon.phui-icon-view {
+  color: {$bluetext};
+  text-shadow: {$whitetextshadow};
+}
+
+.phui-theme-light .sprite-main-header {
+  background-image: none;
+}
+
+.device-desktop.phui-theme-light .phabricator-main-menu-brand:hover {
+  background-color: rgba(55,55,55,.08);
+  cursor: hand;
+}
+
+/*--- Messages / Notifications -----------------------------------------------*/
+
+.device-desktop.phui-theme-light .alert-notifications:hover .phui-icon-view {
+  color: {$sky};
+}
+
+.phui-theme-light .alert-unread .phabricator-main-menu-alert-icon,
+.phui-theme-light .message-unread .phabricator-main-menu-message-icon  {
+  color: {$sky};
+}
+
+.phui-theme-light .phabricator-main-menu-alert-count,
+.phui-theme-light .phabricator-main-menu-message-count,
+.phui-theme-light .phui-icon-view.menu-icon-selected {
+  color: {$sky};
+}
+
+/*--- Durable Column ---------------------------------------------------------*/
+
+.phui-theme-light .conpherence-durable-column-header-text,
+.phui-theme-light .conpherence-durable-column-header-text .phui-icon-view {
+  color: {$bluetext};
+}
+
+.phui-theme-light .conpherence-durable-column-header {
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+}
+
+/*--- Dark "Classic" ---------------------------------------------------------*/
+
+.phui-theme-dark {
+  background-color: {$page.background.dark};
+}
+
+.phui-theme-dark .phui-box-border {
+  border-color: {$lightblueborder};
+  border-bottom-color: {$blueborder};
+}
+
+/*--- Blindigo "Phacility" ---------------------------------------------------*/
+
+.phui-theme-blindigo {
+  background-color: #F1F1F4;
+}
+
+.phui-theme-blindigo .phui-workpanel-view .phui-header-shell {
+  background-color: #F1F1F4;
+}

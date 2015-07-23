@@ -4,7 +4,6 @@
  * This protocol has a good spec here:
  *
  *   http://svn.apache.org/repos/asf/subversion/trunk/subversion/libsvn_ra_svn/protocol
- *
  */
 final class DiffusionSubversionServeSSHWorkflow
   extends DiffusionSubversionSSHWorkflow {
@@ -20,8 +19,14 @@ final class DiffusionSubversionServeSSHWorkflow
 
   private $internalBaseURI;
   private $externalBaseURI;
+  private $peekBuffer;
+  private $command;
 
-  public function didConstruct() {
+  private function getCommand() {
+    return $this->command;
+  }
+
+  protected function didConstruct() {
     $this->setName('svnserve');
     $this->setArguments(
       array(
@@ -32,28 +37,136 @@ final class DiffusionSubversionServeSSHWorkflow
       ));
   }
 
-  protected function executeRepositoryOperations() {
-    $args = $this->getArgs();
-    if (!$args->getArg('tunnel')) {
-      throw new Exception('Expected `svnserve -t`!');
+  protected function identifyRepository() {
+    // NOTE: In SVN, we need to read the first few protocol frames before we
+    // can determine which repository the user is trying to access. We're
+    // going to peek at the data on the wire to identify the repository.
+
+    $io_channel = $this->getIOChannel();
+
+    // Before the client will send us the first protocol frame, we need to send
+    // it a connection frame with server capabilities. To figure out the
+    // correct frame we're going to start `svnserve`, read the frame from it,
+    // send it to the client, then kill the subprocess.
+
+    // TODO: This is pretty inelegant and the protocol frame will change very
+    // rarely. We could cache it if we can find a reasonable way to dirty the
+    // cache.
+
+    $command = csprintf('svnserve -t');
+    $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
+    $future = new ExecFuture('%C', $command);
+    $exec_channel = new PhutilExecChannel($future);
+    $exec_protocol = new DiffusionSubversionWireProtocol();
+
+    while (true) {
+      PhutilChannel::waitForAny(array($exec_channel));
+      $exec_channel->update();
+
+      $exec_message = $exec_channel->read();
+      if ($exec_message !== null) {
+        $messages = $exec_protocol->writeData($exec_message);
+        if ($messages) {
+          $message = head($messages);
+          $raw = $message['raw'];
+
+          // Write the greeting frame to the client.
+          $io_channel->write($raw);
+
+          // Kill the subprocess.
+          $future->resolveKill();
+          break;
+        }
+      }
+
+      if (!$exec_channel->isOpenForReading()) {
+        throw new Exception(
+          pht(
+            '%s subprocess exited before emitting a protocol frame.',
+            'svnserve'));
+      }
     }
 
-    $command = csprintf(
-      'svnserve -t --tunnel-user=%s',
-      $this->getUser()->getUsername());
-    $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
+    $io_protocol = new DiffusionSubversionWireProtocol();
+    while (true) {
+      PhutilChannel::waitForAny(array($io_channel));
+      $io_channel->update();
 
+      $in_message = $io_channel->read();
+      if ($in_message !== null) {
+        $this->peekBuffer .= $in_message;
+        if (strlen($this->peekBuffer) > (1024 * 1024)) {
+          throw new Exception(
+            pht(
+              'Client transmitted more than 1MB of data without transmitting '.
+              'a recognizable protocol frame.'));
+        }
+
+        $messages = $io_protocol->writeData($in_message);
+        if ($messages) {
+          $message = head($messages);
+          $struct = $message['structure'];
+
+          // This is the:
+          //
+          //   ( version ( cap1 ... ) url ... )
+          //
+          // The `url` allows us to identify the repository.
+
+          $uri = $struct[2]['value'];
+          $path = $this->getPathFromSubversionURI($uri);
+
+          return $this->loadRepositoryWithPath($path);
+        }
+      }
+
+      if (!$io_channel->isOpenForReading()) {
+        throw new Exception(
+          pht(
+            'Client closed connection before sending a complete protocol '.
+            'frame.'));
+      }
+
+      // If the client has disconnected, kill the subprocess and bail.
+      if (!$io_channel->isOpenForWriting()) {
+        throw new Exception(
+          pht(
+            'Client closed connection before receiving response.'));
+      }
+    }
+  }
+
+  protected function executeRepositoryOperations() {
+    $repository = $this->getRepository();
+
+    $args = $this->getArgs();
+    if (!$args->getArg('tunnel')) {
+      throw new Exception(pht('Expected `%s`!', 'svnserve -t'));
+    }
+
+    if ($this->shouldProxy()) {
+      $command = $this->getProxyCommand();
+    } else {
+      $command = csprintf(
+        'svnserve -t --tunnel-user=%s',
+        $this->getUser()->getUsername());
+    }
+
+    $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
     $future = new ExecFuture('%C', $command);
 
     $this->inProtocol = new DiffusionSubversionWireProtocol();
     $this->outProtocol = new DiffusionSubversionWireProtocol();
 
-    $err = id($this->newPassthruCommand())
+    $this->command = id($this->newPassthruCommand())
       ->setIOChannel($this->getIOChannel())
       ->setCommandChannelFromExecFuture($future)
       ->setWillWriteCallback(array($this, 'willWriteMessageCallback'))
-      ->setWillReadCallback(array($this, 'willReadMessageCallback'))
-      ->execute();
+      ->setWillReadCallback(array($this, 'willReadMessageCallback'));
+
+    $this->command->setPauseIOReads(true);
+
+    $err = $this->command->execute();
 
     if (!$err && $this->didSeeWrite) {
       $this->getRepository()->writeStatusMessage(
@@ -122,7 +235,9 @@ final class DiffusionSubversionServeSSHWorkflow
             $message_raw = $proto->serializeStruct($struct);
             break;
           case 'add-file':
+          case 'add-dir':
             // ( add-file ( path dir-token file-token [ copy-path copy-rev ] ) )
+            // ( add-dir ( path parent child [ copy-path copy-rev ] ) )
             if (isset($struct[1]['value'][3]['value'][0]['value'])) {
               $copy_from = $struct[1]['value'][3]['value'][0]['value'];
               $copy_from = $this->makeInternalURI($copy_from);
@@ -161,6 +276,19 @@ final class DiffusionSubversionServeSSHWorkflow
           switch ($this->outPhaseCount) {
             case 0:
               // This is the "greeting", which announces capabilities.
+
+              // We already sent this when we were figuring out which
+              // repository this request is for, so we aren't going to send
+              // it again.
+
+              // Instead, we're going to replay the client's response (which
+              // we also already read).
+
+              $command = $this->getCommand();
+              $command->writeIORead($this->peekBuffer);
+              $command->setPauseIOReads(false);
+
+              $message_raw = null;
               break;
             case 1:
               // This responds to the client greeting, and announces auth.
@@ -203,7 +331,9 @@ final class DiffusionSubversionServeSSHWorkflow
 
       }
 
-      $result[] = $message_raw;
+      if ($message_raw !== null) {
+        $result[] = $message_raw;
+      }
     }
 
     if (!$result) {
@@ -213,30 +343,40 @@ final class DiffusionSubversionServeSSHWorkflow
     return implode('', $result);
   }
 
-  private function makeInternalURI($uri_string) {
+  private function getPathFromSubversionURI($uri_string) {
     $uri = new PhutilURI($uri_string);
 
     $proto = $uri->getProtocol();
     if ($proto !== 'svn+ssh') {
       throw new Exception(
         pht(
-          'Protocol for URI "%s" MUST be "svn+ssh".',
-          $uri_string));
+          'Protocol for URI "%s" MUST be "%s".',
+          $uri_string,
+          'svn+ssh'));
     }
-
     $path = $uri->getPath();
 
     // Subversion presumably deals with this, but make sure there's nothing
-    // skethcy going on with the URI.
+    // sketchy going on with the URI.
     if (preg_match('(/\\.\\./)', $path)) {
       throw new Exception(
         pht(
-          'String "/../" is invalid in path specification "%s".',
+          'String "%s" is invalid in path specification "%s".',
+          '/../',
           $uri_string));
     }
 
-    $repository = $this->loadRepository($path);
+    $path = $this->normalizeSVNPath($path);
 
+    return $path;
+  }
+
+  private function makeInternalURI($uri_string) {
+    $uri = new PhutilURI($uri_string);
+
+    $repository = $this->getRepository();
+
+    $path = $this->getPathFromSubversionURI($uri_string);
     $path = preg_replace(
       '(^/diffusion/[A-Z]+)',
       rtrim($repository->getLocalPath(), '/'),
@@ -246,14 +386,25 @@ final class DiffusionSubversionServeSSHWorkflow
       $path = rtrim($path, '/');
     }
 
+    // NOTE: We are intentionally NOT removing username information from the
+    // URI. Subversion retains it over the course of the request and considers
+    // two repositories with different username identifiers to be distinct and
+    // incompatible.
+
     $uri->setPath($path);
 
     // If this is happening during the handshake, these are the base URIs for
     // the request.
     if ($this->externalBaseURI === null) {
       $pre = (string)id(clone $uri)->setPath('');
-      $this->externalBaseURI = $pre.'/diffusion/'.$repository->getCallsign();
-      $this->internalBaseURI = $pre.rtrim($repository->getLocalPath(), '/');
+
+      $external_path = '/diffusion/'.$repository->getCallsign();
+      $external_path = $this->normalizeSVNPath($external_path);
+      $this->externalBaseURI = $pre.$external_path;
+
+      $internal_path = rtrim($repository->getLocalPath(), '/');
+      $internal_path = $this->normalizeSVNPath($internal_path);
+      $this->internalBaseURI = $pre.$internal_path;
     }
 
     return (string)$uri;
@@ -268,6 +419,14 @@ final class DiffusionSubversionServeSSHWorkflow
     }
 
     return $uri;
+  }
+
+  private function normalizeSVNPath($path) {
+    // Subversion normalizes redundant slashes internally, so normalize them
+    // here as well to make sure things match up.
+    $path = preg_replace('(/+)', '/', $path);
+
+    return $path;
   }
 
 }

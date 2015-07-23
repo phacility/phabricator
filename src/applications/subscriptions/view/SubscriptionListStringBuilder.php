@@ -1,6 +1,6 @@
 <?php
 
-final class SubscriptionListStringBuilder {
+final class SubscriptionListStringBuilder extends Phobject {
 
   private $handles;
   private $objectPHID;

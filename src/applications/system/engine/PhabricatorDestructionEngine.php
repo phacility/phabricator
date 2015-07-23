@@ -4,6 +4,10 @@ final class PhabricatorDestructionEngine extends Phobject {
 
   private $rootLogID;
 
+  public function getViewer() {
+    return PhabricatorUser::getOmnipotentUser();
+  }
+
   public function destroyObject(PhabricatorDestructibleInterface $object) {
     $log = id(new PhabricatorSystemDestructionLog())
       ->setEpoch(time())
@@ -46,6 +50,9 @@ final class PhabricatorDestructionEngine extends Phobject {
         $template = $object->getApplicationTransactionTemplate();
         $this->destroyTransactions($template, $object_phid);
       }
+
+      $this->destroyWorkerTasks($object_phid);
+      $this->destroyNotifications($object_phid);
     }
 
     // Nuke any Herald transcripts of the object, because they may contain
@@ -61,8 +68,30 @@ final class PhabricatorDestructionEngine extends Phobject {
     }
 
     // TODO: Remove stuff from search indexes?
-    // TODO: PhabricatorFlaggableInterface
-    // TODO: PhabricatorTokenReceiverInterface
+
+    if ($object instanceof PhabricatorFlaggableInterface) {
+      $flags = id(new PhabricatorFlag())->loadAllWhere(
+        'objectPHID = %s', $object_phid);
+
+      foreach ($flags as $flag) {
+        $flag->delete();
+      }
+    }
+
+    $flags = id(new PhabricatorFlag())->loadAllWhere(
+      'ownerPHID = %s', $object_phid);
+    foreach ($flags as $flag) {
+        $flag->delete();
+      }
+
+    if ($object instanceof PhabricatorTokenReceiverInterface) {
+      $tokens = id(new PhabricatorTokenGiven())->loadAllWhere(
+        'objectPHID = %s', $object_phid);
+
+      foreach ($tokens as $token) {
+        $token->delete();
+      }
+    }
   }
 
   private function destroyEdges($src_phid) {
@@ -94,7 +123,29 @@ final class PhabricatorDestructionEngine extends Phobject {
     foreach ($xactions as $xaction) {
       $this->destroyObject($xaction);
     }
+  }
 
+  private function destroyWorkerTasks($object_phid) {
+    $tasks = id(new PhabricatorWorkerActiveTask())->loadAllWhere(
+      'objectPHID = %s',
+      $object_phid);
+
+    foreach ($tasks as $task) {
+      $task->archiveTask(
+        PhabricatorWorkerArchiveTask::RESULT_CANCELLED,
+        0);
+    }
+  }
+
+  private function destroyNotifications($object_phid) {
+    $table = new PhabricatorFeedStoryNotification();
+    $conn_w = $table->establishConnection('w');
+
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE primaryObjectPHID = %s',
+      $table->getTableName(),
+      $object_phid);
   }
 
 }

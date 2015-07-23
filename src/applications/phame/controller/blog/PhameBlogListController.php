@@ -2,18 +2,12 @@
 
 final class PhameBlogListController extends PhameController {
 
-  private $filter;
-
-  public function willProcessRequest(array $data) {
-    $this->filter = idx($data, 'filter');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
     $nav = $this->renderSideNavFilterView(null);
-    $filter = $nav->selectFilter('blog/'.$this->filter, 'blog/user');
+    $filter = $request->getURIData('filter');
+    $filter = $nav->selectFilter('blog/'.$filter, 'blog/user');
 
     $query = id(new PhameBlogQuery())
       ->setViewer($user);
@@ -32,10 +26,10 @@ final class PhameBlogListController extends PhameController {
           ));
         break;
       default:
-        throw new Exception("Unknown filter '{$filter}'!");
+        throw new Exception(pht("Unknown filter '%s'!", $filter));
     }
 
-    $pager = id(new AphrontPagerView())
+    $pager = id(new PHUIPagerView())
       ->setURI($request->getRequestURI(), 'offset')
       ->setOffset($request->getInt('offset'));
 
@@ -44,13 +38,17 @@ final class PhameBlogListController extends PhameController {
     $blog_list = $this->renderBlogList($blogs, $user, $nodata);
     $blog_list->setPager($pager);
 
+    $box = id (new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setObjectList($blog_list);
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title, $this->getApplicationURI());
 
     $nav->appendChild(
       array(
         $crumbs,
-        $blog_list,
+        $box,
       ));
 
     return $this->buildApplicationPage(

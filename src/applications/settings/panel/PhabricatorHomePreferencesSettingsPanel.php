@@ -126,8 +126,7 @@ final class PhabricatorHomePreferencesSettingsPanel
 
     $list = id(new PHUIObjectItemListView())
       ->setUser($user)
-      ->setID($list_id)
-      ->setStackable(true);
+      ->setID($list_id);
 
     Javelin::initBehavior(
       'reorder-applications',
@@ -141,7 +140,7 @@ final class PhabricatorHomePreferencesSettingsPanel
         continue;
       }
 
-      $icon = $application->getIconName();
+      $icon = $application->getFontIcon();
       if (!$icon) {
         $icon = 'application';
       }
@@ -149,8 +148,7 @@ final class PhabricatorHomePreferencesSettingsPanel
       $icon_view = javelin_tag(
         'span',
         array(
-          'class' => 'phui-icon-view '.
-                     'sprite-apps-large apps-'.$icon.'-dark-large',
+          'class' => 'phui-icon-view phui-font-fa '.$icon,
           'aural' => false,
         ),
         '');
@@ -190,7 +188,7 @@ final class PhabricatorHomePreferencesSettingsPanel
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($list);
+      ->setObjectList($list);
 
     return $box;
   }

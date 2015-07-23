@@ -32,7 +32,7 @@ final class DiffusionHistoryController extends DiffusionController {
     $history = DiffusionPathChange::newFromConduit(
       $history_results['pathChanges']);
 
-    $pager = new AphrontPagerView();
+    $pager = new PHUIPagerView();
     $pager->setPageSize($page_size);
     $pager->setOffset($offset);
     $history = $pager->sliceResults($history);
@@ -57,10 +57,9 @@ final class DiffusionHistoryController extends DiffusionController {
       $history_table->setIsHead($offset == 0);
     }
 
-    $history_panel = new AphrontPanelView();
-    $history_panel->appendChild($history_table);
-    $history_panel->appendChild($pager);
-    $history_panel->setNoBackground();
+    $history_panel = new PHUIObjectBoxView();
+    $history_panel->setHeaderText(pht('History'));
+    $history_panel->setTable($history_table);
 
     $content[] = $history_panel;
 
@@ -88,6 +87,7 @@ final class DiffusionHistoryController extends DiffusionController {
         $crumbs,
         $object_box,
         $content,
+        $pager,
       ),
       array(
         'title' => array(
@@ -167,7 +167,5 @@ final class DiffusionHistoryController extends DiffusionController {
 
     return $view;
   }
-
-
 
 }

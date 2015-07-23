@@ -31,14 +31,15 @@ final class PhabricatorPeopleApproveController
 
       $title = pht(
         'Phabricator Account "%s" Approved',
-        $user->getUsername(),
-        $admin->getUsername());
+        $user->getUsername());
 
-      $body = pht(
-        "Your Phabricator account (%s) has been approved by %s. You can ".
-        "login here:\n\n  %s\n\n",
-        $user->getUsername(),
-        $admin->getUsername(),
+      $body = sprintf(
+        "%s\n\n  %s\n\n",
+        pht(
+          'Your Phabricator account (%s) has been approved by %s. You can '.
+          'login here:',
+          $user->getUsername(),
+          $admin->getUsername()),
         PhabricatorEnv::getProductionURI('/'));
 
       $mail = id(new PhabricatorMetaMTAMail())

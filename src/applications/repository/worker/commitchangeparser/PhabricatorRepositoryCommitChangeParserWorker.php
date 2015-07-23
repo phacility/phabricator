@@ -21,9 +21,9 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     $callsign = $repository->getCallsign();
     $full_name = 'r'.$callsign.$identifier;
 
-    $this->log("Parsing %s...\n", $full_name);
+    $this->log("%s\n", pht('Parsing %s...', $full_name));
     if ($this->isBadCommit($full_name)) {
-      $this->log('This commit is marked bad!');
+      $this->log(pht('This commit is marked bad!'));
       return;
     }
 
@@ -96,7 +96,6 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     id(new PhabricatorSearchIndexer())
       ->queueDocumentForIndexing($commit->getPHID());
 
-    PhabricatorOwnersPackagePathValidator::updateOwnersPackagePaths($commit);
     if ($this->shouldQueueFollowupTasks()) {
       $this->queueTask(
         'PhabricatorRepositoryCommitOwnersWorker',

@@ -6,9 +6,8 @@
   width: 540px;
   margin: 32px auto 16px;
   border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25),
-              inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  border-radius: 3px;
+  background-color: #fff;
 }
 
 .device-phone .aphront-dialog-view {
@@ -20,17 +19,8 @@
   margin: auto;
 }
 
-.aphront-dialog-head .phui-action-header {
-  border-bottom: 1px solid {$lightblueborder};
-  padding: 4px 16px;
-  white-space: nowrap;
-}
-
-.aphront-dialog-head .phui-action-header
-  .phui-action-header-title {
-  font-size: 15px;
-  color: {$bluetext};
-  text-shadow: 0 1px 2px #fff;
+.aphront-dialog-head {
+  padding: 12px 12px 0 12px;
 }
 
 .aphront-dialog-flush .aphront-dialog-body {
@@ -46,7 +36,7 @@
 }
 
 .aphront-dialog-body {
-  background: #ffffff;
+  background: #fff;
   padding: 16px;
   border: none;
 }
@@ -55,7 +45,9 @@
   border: none;
   background: {$lightgreybackground};
   padding: 8px 16px;
-  border-top: 1px solid #d4dadf;
+  border-top: 1px solid {$thinblueborder};
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 .aphront-dialog-foot {
@@ -70,13 +62,13 @@
 }
 
 .jx-client-dialog {
-  position:   absolute;
-  width:      100%;
+  position: absolute;
+  width: 100%;
 }
 
 .jx-mask {
-  opacity: .75;
-  background: #fff;
+  opacity: .7;
+  background: #292f33;
   position: fixed;
   top: 0;
   left: 0;
@@ -85,8 +77,8 @@
 }
 
 .jx-dark-mask {
-  background: #000000;
-  opacity:    0.9;
+  background: #292f33;
+  opacity: 0.95;
 }
 
 .aphront-exception-dialog {
@@ -95,30 +87,18 @@
 
 .aphront-exception-dialog .exception-message {
   font-size: 14px;
-  background: #efefef;
-  padding: 1em;
+  background: {$sh-yellowbackground};
+  border: 1px solid {$sh-yellowborder};
+  padding: 12px;
   white-space: pre-wrap;
 }
 
 .aphront-exception-dialog .exception-trace {
-  margin-top: 15px;
-}
-
-.aphront-exception-dialog .exception-trace-header {
-  font-size: 11px;
-  color: {$greytext};
-  border-bottom: 1px solid #aaaaaa;
-  padding-bottom: .5em;
-  margin-bottom: .5em;
+  margin-top: 16px;
 }
 
 .aphront-access-dialog {
   width: 50%;
-}
-
-.aphront-dialog-view ul {
-  margin: 12px 24px;
-  list-style: circle;
 }
 
 .aphront-policy-rejection {

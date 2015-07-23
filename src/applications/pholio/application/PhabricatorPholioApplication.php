@@ -14,8 +14,8 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
     return pht('Review Mocks and Design');
   }
 
-  public function getIconName() {
-    return 'pholio';
+  public function getFontIcon() {
+    return 'fa-camera-retro';
   }
 
   public function getTitleGlyph() {
@@ -49,7 +49,6 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
         'inline/' => array(
           '(?:(?P<id>\d+)/)?' => 'PholioInlineController',
           'list/(?P<id>\d+)/' => 'PholioInlineListController',
-          'thumb/(?P<imageid>\d+)/' => 'PholioInlineThumbController',
         ),
         'image/' => array(
           'upload/' => 'PholioImageUploadController',
@@ -72,8 +71,33 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
 
   protected function getCustomCapabilities() {
     return array(
-      PholioDefaultViewCapability::CAPABILITY => array(),
-      PholioDefaultEditCapability::CAPABILITY => array(),
+      PholioDefaultViewCapability::CAPABILITY => array(
+        'template' => PholioMockPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_VIEW,
+      ),
+      PholioDefaultEditCapability::CAPABILITY => array(
+        'template' => PholioMockPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_EDIT,
+      ),
+    );
+  }
+
+  public function getMailCommandObjects() {
+    return array(
+      'mock' => array(
+        'name' => pht('Email Commands: Mocks'),
+        'header' => pht('Interacting with Pholio Mocks'),
+        'object' => new PholioMock(),
+        'summary' => pht(
+          'This page documents the commands you can use to interact with '.
+          'mocks in Pholio.'),
+      ),
+    );
+  }
+
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      PholioMockPHIDType::TYPECONST,
     );
   }
 

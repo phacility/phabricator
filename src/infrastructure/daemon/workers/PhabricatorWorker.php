@@ -3,7 +3,7 @@
 /**
  * @task config   Configuring Retries and Failures
  */
-abstract class PhabricatorWorker {
+abstract class PhabricatorWorker extends Phobject {
 
   private $data;
   private static $runAllTasksInProcess = false;
@@ -199,7 +199,8 @@ abstract class PhabricatorWorker {
     }
 
     $tasks = id(new PhabricatorWorkerArchiveTaskQuery())
-      ->withIDs($task_ids);
+      ->withIDs($task_ids)
+      ->execute();
 
     foreach ($tasks as $task) {
       if ($task->getResult() != PhabricatorWorkerArchiveTask::RESULT_SUCCESS) {

@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionGitBranch {
+final class DiffusionGitBranch extends Phobject {
 
   const DEFAULT_GIT_REMOTE = 'origin';
 
@@ -42,7 +42,10 @@ final class DiffusionGitBranch {
           continue;
       }
       if (!preg_match('/^ *(\S+)\s+([a-z0-9]{40})/', $line, $matches)) {
-        throw new Exception("Failed to parse {$line}!");
+        throw new Exception(
+          pht(
+            'Failed to parse %s!',
+            $line));
       }
 
       $remote_branch = $matches[1];
@@ -57,7 +60,9 @@ final class DiffusionGitBranch {
         $matches = null;
         if (!preg_match('#^([^/]+)/(.*)$#', $remote_branch, $matches)) {
           throw new Exception(
-            "Failed to parse remote branch '{$remote_branch}'!");
+            pht(
+              "Failed to parse remote branch '%s'!",
+              $remote_branch));
         }
         $remote_name = $matches[1];
         $branch_name = $matches[2];
@@ -84,7 +89,10 @@ final class DiffusionGitBranch {
     foreach ($lines as $line) {
       $matches = null;
       if (!preg_match($regex, $line, $matches)) {
-        throw new Exception("Failed to parse {$line}!");
+        throw new Exception(
+          pht(
+            'Failed to parse %s!',
+            $line));
       }
 
       $branch = $matches[1];

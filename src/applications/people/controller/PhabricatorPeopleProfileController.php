@@ -20,17 +20,16 @@ final class PhabricatorPeopleProfileController
       ->setViewer($viewer)
       ->withUsernames(array($this->username))
       ->needProfileImage(true)
+      ->needAvailability(true)
       ->executeOne();
     if (!$user) {
       return new Aphront404Response();
     }
 
-    require_celerity_resource('phabricator-profile-css');
-
     $profile = $user->loadUserProfile();
     $username = phutil_escape_uri($user->getUserName());
 
-    $picture = $user->loadProfileImageURI();
+    $picture = $user->getProfileImageURI();
 
     $header = id(new PHUIHeaderView())
       ->setHeader($user->getFullName())
@@ -62,6 +61,19 @@ final class PhabricatorPeopleProfileController
         ->setHref($this->getApplicationURI('picture/'.$user->getID().'/'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
+
+    $class = 'PhabricatorConpherenceApplication';
+    if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
+      $href = id(new PhutilURI('/conpherence/new/'))
+        ->setQueryParam('participant', $user->getPHID());
+
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('fa-comments')
+          ->setName(pht('Send Message'))
+          ->setWorkflow(true)
+          ->setHref($href));
+    }
 
     if ($viewer->getIsAdmin()) {
       $actions->addAction(
@@ -128,41 +140,26 @@ final class PhabricatorPeopleProfileController
     }
 
     $properties = $this->buildPropertyView($user, $actions);
+    $name = $user->getUsername();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($user->getUsername());
-
-    $feed = $this->renderUserFeed($user);
-    $cal_class = 'PhabricatorCalendarApplication';
-    $classes = array();
-    $classes[] = 'profile-activity-view';
-    if (PhabricatorApplication::isClassInstalledForViewer($cal_class, $user)) {
-      $calendar = $this->renderUserCalendar($user);
-      $classes[] = 'profile-has-calendar';
-      $classes[] = 'grouped';
-    } else {
-      $calendar = null;
-    }
-    $activity = phutil_tag(
-      'div',
-      array(
-        'class' => implode($classes, ' '),
-      ),
-      array(
-        $calendar,
-        $feed,
-      ));
+    $crumbs->addTextCrumb($name);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    $feed = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Recent Activity'))
+      ->appendChild($this->buildPeopleFeed($user, $viewer));
+
+    $nav = $this->buildIconNavView($user);
+    $nav->selectFilter("{$name}/");
+    $nav->appendChild($object_box);
+    $nav->appendChild($feed);
+
     return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-        $activity,
-      ),
+      $nav,
       array(
         'title' => $user->getUsername(),
       ));
@@ -186,8 +183,9 @@ final class PhabricatorPeopleProfileController
     return $view;
   }
 
-  private function renderUserFeed(PhabricatorUser $user) {
-    $viewer = $this->getRequest()->getUser();
+  private function buildPeopleFeed(
+    PhabricatorUser $user,
+    $viewer) {
 
     $query = new PhabricatorFeedQuery();
     $query->setFilterPHIDs(
@@ -201,88 +199,12 @@ final class PhabricatorPeopleProfileController
     $builder = new PhabricatorFeedBuilder($stories);
     $builder->setUser($viewer);
     $builder->setShowHovercards(true);
+    $builder->setNoDataString(pht('To begin on such a grand journey, '.
+      'requires but just a single step.'));
     $view = $builder->buildView();
 
-    return phutil_tag_div(
-      'profile-feed',
-      $view->render());
+    return phutil_tag_div('phabricator-project-feed', $view->render());
+
   }
 
-  private function renderUserCalendar(PhabricatorUser $user) {
-    $viewer = $this->getRequest()->getUser();
-    $epochs = CalendarTimeUtil::getCalendarEventEpochs(
-      $viewer,
-      'today',
-       7);
-    $start_epoch = $epochs['start_epoch'];
-    $end_epoch = $epochs['end_epoch'];
-    $statuses = id(new PhabricatorCalendarEventQuery())
-      ->setViewer($viewer)
-      ->withInvitedPHIDs(array($user->getPHID()))
-      ->withDateRange($start_epoch, $end_epoch)
-      ->execute();
-
-    $timestamps = CalendarTimeUtil::getCalendarWeekTimestamps(
-      $viewer);
-    $today = $timestamps['today'];
-    $epoch_stamps = $timestamps['epoch_stamps'];
-    $events = array();
-
-    foreach ($epoch_stamps as $day) {
-      $epoch_start = $day->format('U');
-      $next_day = clone $day;
-      $next_day->modify('+1 day');
-      $epoch_end = $next_day->format('U');
-
-      foreach ($statuses as $status) {
-        if ($status->getDateTo() < $epoch_start) {
-          continue;
-        }
-        if ($status->getDateFrom() >= $epoch_end) {
-          continue;
-        }
-
-        $event = new AphrontCalendarEventView();
-        $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
-
-        $status_text = $status->getHumanStatus();
-        $event->setUserPHID($status->getUserPHID());
-        $event->setName($status_text);
-        $event->setDescription($status->getDescription());
-        $event->setEventID($status->getID());
-        $events[$epoch_start][] = $event;
-      }
-    }
-
-    $week = array();
-    foreach ($epoch_stamps as $day) {
-      $epoch = $day->format('U');
-      $headertext = phabricator_format_local_time($epoch, $user, 'l, M d');
-
-      $list = new PHUICalendarListView();
-      $list->setUser($viewer);
-      $list->showBlankState(true);
-      if (isset($events[$epoch])) {
-        foreach ($events[$epoch] as $event) {
-          $list->addEvent($event);
-        }
-      }
-
-      $header = phutil_tag(
-        'a',
-        array(
-          'href' => $this->getRequest()->getRequestURI().'calendar/',
-        ),
-        $headertext);
-
-      $calendar = new PHUICalendarWidgetView();
-      $calendar->setHeader($header);
-      $calendar->setCalendarList($list);
-      $week[] = $calendar;
-    }
-
-    return phutil_tag_div(
-      'profile-calendar',
-      $week);
-  }
 }

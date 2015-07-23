@@ -27,8 +27,7 @@ final class PonderAnswerSaveController extends PonderController {
         ->setUser($viewer)
         ->setTitle(pht('Empty Answer'))
         ->appendChild(
-          phutil_tag('p', array(), pht(
-          'Your answer must not be empty.')))
+          phutil_tag('p', array(), pht('Your answer must not be empty.')))
         ->addCancelButton('/Q'.$question_id);
 
       return id(new AphrontDialogResponse())->setDialog($dialog);

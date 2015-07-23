@@ -43,6 +43,7 @@ final class PhabricatorApplicationTransactionTextDiffDetailView
       $markup_engine->setViewer($this->getUser());
 
       $parser = new DifferentialChangesetParser();
+      $parser->setUser($this->getUser());
       $parser->setChangeset($changeset);
       $parser->setMarkupEngine($markup_engine);
       $parser->setWhitespaceMode($whitespace_mode);

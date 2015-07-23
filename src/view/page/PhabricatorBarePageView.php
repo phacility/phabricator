@@ -117,6 +117,17 @@ class PhabricatorBarePageView extends AphrontPageView {
 
     $response = CelerityAPI::getStaticResourceResponse();
 
+    if ($this->getRequest()) {
+      $viewer = $this->getRequest()->getViewer();
+      if ($viewer) {
+        $postprocessor_key = $viewer->getPreference(
+          PhabricatorUserPreferences::PREFERENCE_RESOURCE_POSTPROCESSOR);
+        if (strlen($postprocessor_key)) {
+          $response->setPostProcessorKey($postprocessor_key);
+        }
+      }
+    }
+
     $developer = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
     return hsprintf(
       '%s%s%s%s%s%s%s%s',

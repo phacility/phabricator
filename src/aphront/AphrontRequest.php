@@ -1,11 +1,11 @@
 <?php
 
 /**
- * @task data   Accessing Request Data
- * @task cookie Managing Cookies
- *
+ * @task data     Accessing Request Data
+ * @task cookie   Managing Cookies
+ * @task cluster  Working With a Phabricator Cluster
  */
-final class AphrontRequest {
+final class AphrontRequest extends Phobject {
 
   // NOTE: These magic request-type parameters are automatically included in
   // certain requests (e.g., by phabricator_form(), JX.Request,
@@ -19,6 +19,7 @@ final class AphrontRequest {
   const TYPE_CONTINUE = '__continue__';
   const TYPE_PREVIEW = '__preview__';
   const TYPE_HISEC = '__hisec__';
+  const TYPE_QUICKSAND = '__quicksand__';
 
   private $host;
   private $path;
@@ -26,45 +27,46 @@ final class AphrontRequest {
   private $user;
   private $applicationConfiguration;
   private $uriData;
+  private $cookiePrefix;
 
-  final public function __construct($host, $path) {
+  public function __construct($host, $path) {
     $this->host = $host;
     $this->path = $path;
   }
 
-  final public function setURIMap(array $uri_data) {
+  public function setURIMap(array $uri_data) {
     $this->uriData = $uri_data;
     return $this;
   }
 
-  final public function getURIMap() {
+  public function getURIMap() {
     return $this->uriData;
   }
 
-  final public function getURIData($key, $default = null) {
+  public function getURIData($key, $default = null) {
     return idx($this->uriData, $key, $default);
   }
 
-  final public function setApplicationConfiguration(
+  public function setApplicationConfiguration(
     $application_configuration) {
     $this->applicationConfiguration = $application_configuration;
     return $this;
   }
 
-  final public function getApplicationConfiguration() {
+  public function getApplicationConfiguration() {
     return $this->applicationConfiguration;
   }
 
-  final public function setPath($path) {
+  public function setPath($path) {
     $this->path = $path;
     return $this;
   }
 
-  final public function getPath() {
+  public function getPath() {
     return $this->path;
   }
 
-  final public function getHost() {
+  public function getHost() {
     // The "Host" header may include a port number, or may be a malicious
     // header in the form "realdomain.com:ignored@evil.com". Invoke the full
     // parser to extract the real domain correctly. See here for coverage of
@@ -82,7 +84,7 @@ final class AphrontRequest {
   /**
    * @task data
    */
-  final public function setRequestData(array $request_data) {
+  public function setRequestData(array $request_data) {
     $this->requestData = $request_data;
     return $this;
   }
@@ -91,7 +93,7 @@ final class AphrontRequest {
   /**
    * @task data
    */
-  final public function getRequestData() {
+  public function getRequestData() {
     return $this->requestData;
   }
 
@@ -99,7 +101,7 @@ final class AphrontRequest {
   /**
    * @task data
    */
-  final public function getInt($name, $default = null) {
+  public function getInt($name, $default = null) {
     if (isset($this->requestData[$name])) {
       return (int)$this->requestData[$name];
     } else {
@@ -111,7 +113,7 @@ final class AphrontRequest {
   /**
    * @task data
    */
-  final public function getBool($name, $default = null) {
+  public function getBool($name, $default = null) {
     if (isset($this->requestData[$name])) {
       if ($this->requestData[$name] === 'true') {
         return true;
@@ -129,7 +131,7 @@ final class AphrontRequest {
   /**
    * @task data
    */
-  final public function getStr($name, $default = null) {
+  public function getStr($name, $default = null) {
     if (isset($this->requestData[$name])) {
       $str = (string)$this->requestData[$name];
       // Normalize newline craziness.
@@ -147,7 +149,7 @@ final class AphrontRequest {
   /**
    * @task data
    */
-  final public function getArr($name, $default = array()) {
+  public function getArr($name, $default = array()) {
     if (isset($this->requestData[$name]) &&
         is_array($this->requestData[$name])) {
       return $this->requestData[$name];
@@ -160,7 +162,7 @@ final class AphrontRequest {
   /**
    * @task data
    */
-  final public function getStrList($name, $default = array()) {
+  public function getStrList($name, $default = array()) {
     if (!isset($this->requestData[$name])) {
       return $default;
     }
@@ -173,32 +175,36 @@ final class AphrontRequest {
   /**
    * @task data
    */
-  final public function getExists($name) {
+  public function getExists($name) {
     return array_key_exists($name, $this->requestData);
   }
 
-  final public function getFileExists($name) {
+  public function getFileExists($name) {
     return isset($_FILES[$name]) &&
            (idx($_FILES[$name], 'error') !== UPLOAD_ERR_NO_FILE);
   }
 
-  final public function isHTTPGet() {
+  public function isHTTPGet() {
     return ($_SERVER['REQUEST_METHOD'] == 'GET');
   }
 
-  final public function isHTTPPost() {
+  public function isHTTPPost() {
     return ($_SERVER['REQUEST_METHOD'] == 'POST');
   }
 
-  final public function isAjax() {
-    return $this->getExists(self::TYPE_AJAX);
+  public function isAjax() {
+    return $this->getExists(self::TYPE_AJAX) && !$this->isQuicksand();
   }
 
-  final public function isJavelinWorkflow() {
-    return $this->getExists(self::TYPE_WORKFLOW);
+  public function isWorkflow() {
+    return $this->getExists(self::TYPE_WORKFLOW) && !$this->isQuicksand();
   }
 
-  final public function isConduit() {
+  public function isQuicksand() {
+    return $this->getExists(self::TYPE_QUICKSAND);
+  }
+
+  public function isConduit() {
     return $this->getExists(self::TYPE_CONDUIT);
   }
 
@@ -210,7 +216,7 @@ final class AphrontRequest {
     return 'X-Phabricator-Csrf';
   }
 
-  final public function validateCSRF() {
+  public function validateCSRF() {
     $token_name = self::getCSRFTokenName();
     $token = $this->getStr($token_name);
 
@@ -244,21 +250,24 @@ final class AphrontRequest {
       // in developer mode.
       if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
         // TODO: Clean this up, see T1921.
-        $more_info[] =
-          "To avoid this error, use phabricator_form() to construct forms. ".
-          "If you are already using phabricator_form(), make sure the form ".
-          "'action' uses a relative URI (i.e., begins with a '/'). Forms ".
-          "using absolute URIs do not include CSRF tokens, to prevent ".
-          "leaking tokens to external sites.\n\n".
-          "If this page performs writes which do not require CSRF ".
-          "protection (usually, filling caches or logging), you can use ".
-          "AphrontWriteGuard::beginScopedUnguardedWrites() to temporarily ".
-          "bypass CSRF protection while writing. You should use this only ".
-          "for writes which can not be protected with normal CSRF ".
+        $more_info[] = pht(
+          "To avoid this error, use %s to construct forms. If you are already ".
+          "using %s, make sure the form 'action' uses a relative URI (i.e., ".
+          "begins with a '%s'). Forms using absolute URIs do not include CSRF ".
+          "tokens, to prevent leaking tokens to external sites.\n\n".
+          "If this page performs writes which do not require CSRF protection ".
+          "(usually, filling caches or logging), you can use %s to ".
+          "temporarily bypass CSRF protection while writing. You should use ".
+          "this only for writes which can not be protected with normal CSRF ".
           "mechanisms.\n\n".
-          "Some UI elements (like PhabricatorActionListView) also have ".
-          "methods which will allow you to render links as forms (like ".
-          "setRenderAsForm(true)).";
+          "Some UI elements (like %s) also have methods which will allow you ".
+          "to render links as forms (like %s).",
+          'phabricator_form()',
+          'phabricator_form()',
+          '/',
+          'AphrontWriteGuard::beginScopedUnguardedWrites()',
+          'PhabricatorActionListView',
+          'setRenderAsForm(true)');
       }
 
       // This should only be able to happen if you load a form, pull your
@@ -267,16 +276,16 @@ final class AphrontRequest {
       // is incredibly confusing otherwise.
       throw new AphrontCSRFException(
         pht(
-          "You are trying to save some data to Phabricator, but the request ".
-          "your browser made included an incorrect token. Reload the page ".
-          "and try again. You may need to clear your cookies.\n\n%s",
-          implode("\n", $more_info)));
+          'You are trying to save some data to Phabricator, but the request '.
+          'your browser made included an incorrect token. Reload the page '.
+          'and try again. You may need to clear your cookies.')."\n\n".
+          implode("\n", $more_info));
     }
 
     return true;
   }
 
-  final public function isFormPost() {
+  public function isFormPost() {
     $post = $this->getExists(self::TYPE_FORM) &&
             !$this->getExists(self::TYPE_HISEC) &&
             $this->isHTTPPost();
@@ -288,7 +297,7 @@ final class AphrontRequest {
     return $this->validateCSRF();
   }
 
-  final public function isFormOrHisecPost() {
+  public function isFormOrHisecPost() {
     $post = $this->getExists(self::TYPE_FORM) &&
             $this->isHTTPPost();
 
@@ -300,12 +309,12 @@ final class AphrontRequest {
   }
 
 
-  final public function setCookiePrefix($prefix) {
+  public function setCookiePrefix($prefix) {
     $this->cookiePrefix = $prefix;
     return $this;
   }
 
-  final private function getPrefixedCookieName($name) {
+  private function getPrefixedCookieName($name) {
     if (strlen($this->cookiePrefix)) {
       return $this->cookiePrefix.'_'.$name;
     } else {
@@ -313,7 +322,7 @@ final class AphrontRequest {
     }
   }
 
-  final public function getCookie($name, $default = null) {
+  public function getCookie($name, $default = null) {
     $name = $this->getPrefixedCookieName($name);
     $value = idx($_COOKIE, $name, $default);
 
@@ -332,7 +341,7 @@ final class AphrontRequest {
     return $value;
   }
 
-  final public function clearCookie($name) {
+  public function clearCookie($name) {
     $this->setCookieWithExpiration($name, '', time() - (60 * 60 * 24 * 30));
     unset($_COOKIE[$name]);
   }
@@ -385,7 +394,7 @@ final class AphrontRequest {
    *
    * @task cookie
    */
-  final public function canSetCookies() {
+  public function canSetCookies() {
     return (bool)$this->getCookieDomainURI();
   }
 
@@ -400,7 +409,7 @@ final class AphrontRequest {
    * @return this
    * @task cookie
    */
-  final public function setCookie($name, $value) {
+  public function setCookie($name, $value) {
     $far_future = time() + (60 * 60 * 24 * 365 * 5);
     return $this->setCookieWithExpiration($name, $value, $far_future);
   }
@@ -416,7 +425,7 @@ final class AphrontRequest {
    * @return this
    * @task cookie
    */
-  final public function setTemporaryCookie($name, $value) {
+  public function setTemporaryCookie($name, $value) {
     return $this->setCookieWithExpiration($name, $value, 0);
   }
 
@@ -430,7 +439,7 @@ final class AphrontRequest {
    * @return this
    * @task cookie
    */
-  final private function setCookieWithExpiration(
+  private function setCookieWithExpiration(
     $name,
     $value,
     $expire) {
@@ -480,31 +489,31 @@ final class AphrontRequest {
     return $this;
   }
 
-  final public function setUser($user) {
+  public function setUser($user) {
     $this->user = $user;
     return $this;
   }
 
-  final public function getUser() {
+  public function getUser() {
     return $this->user;
   }
 
-  final public function getViewer() {
+  public function getViewer() {
     return $this->user;
   }
 
-  final public function getRequestURI() {
+  public function getRequestURI() {
     $get = $_GET;
     unset($get['__path__']);
     $path = phutil_escape_uri($this->getPath());
     return id(new PhutilURI($path))->setQueryParams($get);
   }
 
-  final public function isDialogFormPost() {
+  public function isDialogFormPost() {
     return $this->isFormPost() && $this->getStr('__dialog__');
   }
 
-  final public function getRemoteAddr() {
+  public function getRemoteAddr() {
     return $_SERVER['REMOTE_ADDR'];
   }
 
@@ -534,8 +543,9 @@ final class AphrontRequest {
    *
    * @return  dict<string, string>  Original request parameters.
    */
-  public function getPassthroughRequestParameters() {
-    return self::flattenData($this->getPassthroughRequestData());
+  public function getPassthroughRequestParameters($include_quicksand = false) {
+    return self::flattenData(
+      $this->getPassthroughRequestData($include_quicksand));
   }
 
   /**
@@ -543,11 +553,14 @@ final class AphrontRequest {
    *
    * @return dict<string, wild> Request data, with magic filtered out.
    */
-  public function getPassthroughRequestData() {
+  public function getPassthroughRequestData($include_quicksand = false) {
     $data = $this->getRequestData();
 
     // Remove magic parameters like __dialog__ and __ajax__.
     foreach ($data as $key => $value) {
+      if ($include_quicksand && $key == self::TYPE_QUICKSAND) {
+        continue;
+      }
       if (!strncmp($key, '__', 2)) {
         unset($data[$key]);
       }
@@ -624,5 +637,131 @@ final class AphrontRequest {
 
     return $default;
   }
+
+
+/* -(  Working With a Phabricator Cluster  )--------------------------------- */
+
+
+  /**
+   * Is this a proxied request originating from within the Phabricator cluster?
+   *
+   * IMPORTANT: This means the request is dangerous!
+   *
+   * These requests are **more dangerous** than normal requests (they can not
+   * be safely proxied, because proxying them may cause a loop). Cluster
+   * requests are not guaranteed to come from a trusted source, and should
+   * never be treated as safer than normal requests. They are strictly less
+   * safe.
+   */
+  public function isProxiedClusterRequest() {
+    return (bool)self::getHTTPHeader('X-Phabricator-Cluster');
+  }
+
+
+  /**
+   * Build a new @{class:HTTPSFuture} which proxies this request to another
+   * node in the cluster.
+   *
+   * IMPORTANT: This is very dangerous!
+   *
+   * The future forwards authentication information present in the request.
+   * Proxied requests must only be sent to trusted hosts. (We attempt to
+   * enforce this.)
+   *
+   * This is not a general-purpose proxying method; it is a specialized
+   * method with niche applications and severe security implications.
+   *
+   * @param string URI identifying the host we are proxying the request to.
+   * @return HTTPSFuture New proxy future.
+   *
+   * @phutil-external-symbol class PhabricatorStartup
+   */
+  public function newClusterProxyFuture($uri) {
+    $uri = new PhutilURI($uri);
+
+    $domain = $uri->getDomain();
+    $ip = gethostbyname($domain);
+    if (!$ip) {
+      throw new Exception(
+        pht(
+          'Unable to resolve domain "%s"!',
+          $domain));
+    }
+
+    if (!PhabricatorEnv::isClusterAddress($ip)) {
+      throw new Exception(
+        pht(
+          'Refusing to proxy a request to IP address ("%s") which is not '.
+          'in the cluster address block (this address was derived by '.
+          'resolving the domain "%s").',
+          $ip,
+          $domain));
+    }
+
+    $uri->setPath($this->getPath());
+    $uri->setQueryParams(self::flattenData($_GET));
+
+    $input = PhabricatorStartup::getRawInput();
+
+    $future = id(new HTTPSFuture($uri))
+      ->addHeader('Host', self::getHost())
+      ->addHeader('X-Phabricator-Cluster', true)
+      ->setMethod($_SERVER['REQUEST_METHOD'])
+      ->write($input);
+
+    if (isset($_SERVER['PHP_AUTH_USER'])) {
+      $future->setHTTPBasicAuthCredentials(
+        $_SERVER['PHP_AUTH_USER'],
+        new PhutilOpaqueEnvelope(idx($_SERVER, 'PHP_AUTH_PW', '')));
+    }
+
+    $headers = array();
+    $seen = array();
+
+    // NOTE: apache_request_headers() might provide a nicer way to do this,
+    // but isn't available under FCGI until PHP 5.4.0.
+    foreach ($_SERVER as $key => $value) {
+      if (preg_match('/^HTTP_/', $key)) {
+        // Unmangle the header as best we can.
+        $key = str_replace('_', ' ', $key);
+        $key = strtolower($key);
+        $key = ucwords($key);
+        $key = str_replace(' ', '-', $key);
+
+        $headers[] = array($key, $value);
+        $seen[$key] = true;
+      }
+    }
+
+    // In some situations, this may not be mapped into the HTTP_X constants.
+    // CONTENT_LENGTH is similarly affected, but we trust cURL to take care
+    // of that if it matters, since we're handing off a request body.
+    if (empty($seen['Content-Type'])) {
+      if (isset($_SERVER['CONTENT_TYPE'])) {
+        $headers[] = array('Content-Type', $_SERVER['CONTENT_TYPE']);
+      }
+    }
+
+    foreach ($headers as $header) {
+      list($key, $value) = $header;
+      switch ($key) {
+        case 'Host':
+        case 'Authorization':
+          // Don't forward these headers, we've already handled them elsewhere.
+          unset($headers[$key]);
+          break;
+        default:
+          break;
+      }
+    }
+
+    foreach ($headers as $header) {
+      list($key, $value) = $header;
+      $future->addHeader($key, $value);
+    }
+
+    return $future;
+  }
+
 
 }

@@ -14,8 +14,8 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
     return pht('Store and Share Files');
   }
 
-  public function getIconName() {
-    return 'files';
+  public function getFontIcon() {
+    return 'fa-file';
   }
 
   public function getTitleGlyph() {
@@ -40,11 +40,28 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
     );
   }
 
+  public function supportsEmailIntegration() {
+    return true;
+  }
+
+  public function getAppEmailBlurb() {
+    return pht(
+      'Send emails with file attachments to these addresses to upload '.
+      'files. %s',
+      phutil_tag(
+        'a',
+        array(
+          'href' => $this->getInboundEmailSupportLink(),
+        ),
+        pht('Learn More')));
+  }
+
   protected function getCustomCapabilities() {
     return array(
       FilesDefaultViewCapability::CAPABILITY => array(
-        'caption' => pht(
-          'Default view policy for newly created files.'),
+        'caption' => pht('Default view policy for newly created files.'),
+        'template' => PhabricatorFileFilePHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_VIEW,
       ),
     );
   }
@@ -61,15 +78,37 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
         'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorFileDeleteController',
         'edit/(?P<id>[1-9]\d*)/' => 'PhabricatorFileEditController',
         'info/(?P<phid>[^/]+)/' => 'PhabricatorFileInfoController',
-        'data/(?P<key>[^/]+)/(?P<phid>[^/]+)/(?P<token>[^/]+)/.*'
-          => 'PhabricatorFileDataController',
-        'data/(?P<key>[^/]+)/(?P<phid>[^/]+)/.*'
+        'data/'.
+          '(?:@(?P<instance>[^/]+)/)?'.
+          '(?P<key>[^/]+)/'.
+          '(?P<phid>[^/]+)/'.
+          '(?:(?P<token>[^/]+)/)?'.
+          '.*'
           => 'PhabricatorFileDataController',
         'proxy/' => 'PhabricatorFileProxyController',
-        'xform/(?P<transform>[^/]+)/(?P<phid>[^/]+)/(?P<key>[^/]+)/'
+        'xform/'.
+          '(?:@(?P<instance>[^/]+)/)?'.
+          '(?P<transform>[^/]+)/'.
+          '(?P<phid>[^/]+)/'.
+          '(?P<key>[^/]+)/'
           => 'PhabricatorFileTransformController',
+        'transforms/(?P<id>[1-9]\d*)/' =>
+          'PhabricatorFileTransformListController',
         'uploaddialog/' => 'PhabricatorFileUploadDialogController',
         'download/(?P<phid>[^/]+)/' => 'PhabricatorFileDialogController',
+      ),
+    );
+  }
+
+  public function getMailCommandObjects() {
+    return array(
+      'file' => array(
+        'name' => pht('Email Commands: Files'),
+        'header' => pht('Interacting with Files'),
+        'object' => new PhabricatorFile(),
+        'summary' => pht(
+          'This page documents the commands you can use to interact with '.
+          'files.'),
       ),
     );
   }

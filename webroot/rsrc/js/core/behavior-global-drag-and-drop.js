@@ -7,62 +7,101 @@
  *           phabricator-drag-and-drop-file-upload
  */
 
-JX.behavior('global-drag-and-drop', function(config) {
+JX.behavior('global-drag-and-drop', function(config, statics) {
   if (!JX.PhabricatorDragAndDropFileUpload.isSupported()) {
     return;
   }
 
-  var pending = 0;
-  var files = [];
-  var errors = false;
+  function init() {
+    statics.pending = 0;
+    statics.files = [];
+    statics.errors = false;
+    statics.enabled = true;
 
-  if (config.ifSupported) {
-    JX.$(config.ifSupported).style.display = '';
+    if (config.ifSupported) {
+      JX.$(config.ifSupported).style.display = '';
+    }
+
+    var page = JX.$('phabricator-standard-page');
+    statics.drop = new JX.PhabricatorDragAndDropFileUpload(page)
+      .setURI(config.uploadURI)
+      .setViewPolicy(config.viewPolicy)
+      .setChunkThreshold(config.chunkThreshold);
+
+    install_extra_listeners();
+
+    statics.drop.start();
+
+    return true;
   }
 
-  var drop = new JX.PhabricatorDragAndDropFileUpload(document.documentElement)
-    .setURI(config.uploadURI)
-    .setViewPolicy(config.viewPolicy);
-
-  drop.listen('didBeginDrag', function() {
-    JX.Mask.show();
-    JX.DOM.show(JX.$(config.instructions));
-  });
-
-  drop.listen('didEndDrag', function() {
-    JX.Mask.hide();
-    JX.DOM.hide(JX.$(config.instructions));
-  });
-
-  drop.listen('willUpload', function() {
-    pending++;
-  });
-
-  drop.listen('didUpload', function(f) {
-    files.push(f);
-
-    pending--;
-    if (pending === 0 && !errors) {
-      // If whatever the user dropped in has finished uploading, send them to
-      // their uploads.
-      var uri;
-      uri = JX.$U(config.browseURI);
-      var ids = [];
-      for (var ii = 0; ii < files.length; ii++) {
-        ids.push(files[ii].getID());
+  function install_extra_listeners() {
+    statics.drop.listen('didBeginDrag', function() {
+      if (!statics.enabled) {
+        return;
       }
-      uri.setQueryParam('h', ids.join(','));
+      JX.Mask.show('global-upload-mask');
+      JX.DOM.show(JX.$(config.instructions));
+    });
 
-      files = [];
+    statics.drop.listen('didEndDrag', function() {
+      if (!statics.enabled) {
+        return;
+      }
+      JX.Mask.hide('global-upload-mask');
+      JX.DOM.hide(JX.$(config.instructions));
+    });
 
-      uri.go();
-    }
-  });
+    statics.drop.listen('willUpload', function() {
+      if (!statics.enabled) {
+        return;
+      }
+      statics.pending++;
+    });
 
-  drop.listen('didError', function() {
-    pending--;
-    errors = true;
-  });
+    statics.drop.listen('didUpload', function(f) {
+      if (!statics.enabled) {
+        return;
+      }
+      statics.files.push(f);
 
-  drop.start();
+      statics.pending--;
+      if (statics.pending === 0 && !statics.errors) {
+        // If whatever the user dropped in has finished uploading, send them to
+        // their uploads.
+        var uri;
+        uri = JX.$U(config.browseURI);
+        var ids = [];
+        for (var ii = 0; ii < statics.files.length; ii++) {
+          ids.push(statics.files[ii].getID());
+        }
+        uri.setQueryParam('h', ids.join(','));
+
+        statics.files = [];
+
+        uri.go();
+      }
+    });
+
+    statics.drop.listen('didError', function() {
+      if (!statics.enabled) {
+        return;
+      }
+      statics.pending--;
+      statics.errors = true;
+    });
+
+    JX.Stratcom.listen(
+      'quicksand-redraw',
+      null,
+      function (e) {
+        var data = e.getData();
+        var toggle = data.newResponse.globalDragAndDrop;
+        statics.enabled = toggle;
+        statics.drop.setIsEnabled(toggle);
+      });
+  }
+
+  statics.init = statics.init || init();
+
 });

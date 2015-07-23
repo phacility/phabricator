@@ -7,7 +7,7 @@ final class DrydockLeaseSearchEngine
     return pht('Drydock Leases');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorDrydockApplication';
   }
 
@@ -89,10 +89,12 @@ final class DrydockLeaseSearchEngine
     PhabricatorSavedQuery $saved,
     array $handles) {
 
-    return id(new DrydockLeaseListView())
+    $list = id(new DrydockLeaseListView())
       ->setUser($this->requireViewer())
-      ->setLeases($leases)
-      ->render();
+      ->setLeases($leases);
+
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setContent($list);
   }
 
 }

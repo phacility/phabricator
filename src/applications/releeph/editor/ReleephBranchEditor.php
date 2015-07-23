@@ -15,9 +15,10 @@ final class ReleephBranchEditor extends PhabricatorEditor {
     return $this;
   }
 
-  public function newBranchFromCommit(PhabricatorRepositoryCommit $cut_point,
-                                      $branch_date,
-                                      $symbolic_name = null) {
+  public function newBranchFromCommit(
+    PhabricatorRepositoryCommit $cut_point,
+    $branch_date,
+    $symbolic_name = null) {
 
     $template = $this->releephProject->getDetail('branchTemplate');
     if (!$template) {

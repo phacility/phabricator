@@ -71,7 +71,7 @@ final class PhabricatorAuthAccountView extends AphrontView {
       // Make sure we don't link a "javascript:" URI if a user somehow
       // managed to get one here.
 
-      if (PhabricatorEnv::isValidRemoteWebResource($account_uri)) {
+      if (PhabricatorEnv::isValidRemoteURIForLink($account_uri)) {
         $account_uri = phutil_tag(
           'a',
           array(
@@ -89,15 +89,28 @@ final class PhabricatorAuthAccountView extends AphrontView {
         $account_uri);
     }
 
-    $image_uri = $account->getProfileImageFile()->getProfileThumbURI();
+    $image_file = $account->getProfileImageFile();
+    $xform = PhabricatorFileTransform::getTransformByKey(
+      PhabricatorFileThumbnailTransform::TRANSFORM_PROFILE);
+    $image_uri = $image_file->getURIForTransform($xform);
+    list($x, $y) = $xform->getTransformedDimensions($image_file);
+
+    $profile_image = phutil_tag(
+      'div',
+      array(
+        'class' => 'auth-account-view-profile-image',
+        'style' => 'background-image: url('.$image_uri.');',
+      ));
 
     return phutil_tag(
       'div',
       array(
         'class' => 'auth-account-view',
-        'style' => 'background-image: url('.$image_uri.')',
       ),
-      $content);
+      array(
+        $profile_image,
+        $content,
+      ));
   }
 
 }

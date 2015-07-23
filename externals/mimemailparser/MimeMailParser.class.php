@@ -111,6 +111,14 @@ class MimeMailParser {
 	 * @param $data String
 	 */
 	public function setText($data) {
+    // NOTE: This has been modified for Phabricator. If the input data does not
+    // end in a newline, Mailparse fails to include the last line in the mail
+    // body. This happens somewhere deep, deep inside the mailparse extension,
+    // so adding a newline here seems like the most straightforward fix.
+    if (!preg_match('/\n\z/', $data)) {
+      $data = $data."\n";
+    }
+
 		$this->resource = mailparse_msg_create();
 		// does not parse incrementally, fast memory hog might explode
 		mailparse_msg_parse($this->resource, $data);

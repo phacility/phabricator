@@ -37,23 +37,28 @@ final class DrydockWorkingCopyBlueprintImplementation
     $repository_id = $lease->getAttribute('repositoryID');
     if (!$repository_id) {
       throw new Exception(
-        "Lease is missing required 'repositoryID' attribute.");
+        pht(
+          "Lease is missing required '%s' attribute.",
+          'repositoryID'));
     }
 
-    // TODO: (T603) Figure out the interaction between policies and
-    // Drydock.
-    $repository = id(new PhabricatorRepository())->load($repository_id);
+    $repository = id(new PhabricatorRepositoryQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withIDs(array($repository_id))
+      ->executeOne();
 
     if (!$repository) {
       throw new Exception(
-        "Repository '{$repository_id}' does not exist!");
+        pht(
+          "Repository '%s' does not exist!",
+          $repository_id));
     }
 
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         break;
       default:
-        throw new Exception('Unsupported VCS!');
+        throw new Exception(pht('Unsupported VCS!'));
     }
 
     // TODO: Policy stuff here too.
@@ -75,7 +80,9 @@ final class DrydockWorkingCopyBlueprintImplementation
     $this->log(pht('Complete.'));
 
     $resource = $this->newResourceTemplate(
-      'Working Copy ('.$repository->getCallsign().')');
+      pht(
+        'Working Copy (%s)',
+        $repository->getCallsign()));
     $resource->setStatus(DrydockResourceStatus::STATUS_OPEN);
     $resource->setAttribute('lease.host', $host_lease->getID());
     $resource->setAttribute('path', $path);
@@ -107,7 +114,7 @@ final class DrydockWorkingCopyBlueprintImplementation
           ->getInterface($type);
     }
 
-    throw new Exception("No interface of type '{$type}'.");
+    throw new Exception(pht("No interface of type '%s'.", $type));
   }
 
 }

@@ -18,16 +18,56 @@ final class PhabricatorMetaMTAEmailBodyParserTestCase
       $parser = new PhabricatorMetaMTAEmailBodyParser();
       $body_data = $parser->parseBody($body);
       $this->assertEqual('OKAY', $body_data['body']);
-      $this->assertEqual('whatevs', $body_data['command']);
-      $this->assertEqual('dude', $body_data['command_value']);
+      $this->assertEqual(
+        array(
+          array('whatevs', 'dude'),
+        ),
+        $body_data['commands']);
     }
+
     $bodies = $this->getEmailBodiesWithPartialCommands();
     foreach ($bodies as $body) {
       $parser = new PhabricatorMetaMTAEmailBodyParser();
       $body_data = $parser->parseBody($body);
       $this->assertEqual('OKAY', $body_data['body']);
-      $this->assertEqual('whatevs', $body_data['command']);
-      $this->assertEqual(null, $body_data['command_value']);
+      $this->assertEqual(
+        array(
+          array('whatevs'),
+        ),
+        $body_data['commands']);
+    }
+
+    $bodies = $this->getEmailBodiesWithMultipleCommands();
+    foreach ($bodies as $body) {
+      $parser = new PhabricatorMetaMTAEmailBodyParser();
+      $body_data = $parser->parseBody($body);
+      $this->assertEqual("preface\n\nOKAY", $body_data['body']);
+      $this->assertEqual(
+        array(
+          array('top1'),
+          array('top2'),
+        ),
+        $body_data['commands']);
+    }
+
+    $bodies = $this->getEmailBodiesWithSplitCommands();
+    foreach ($bodies as $body) {
+      $parser = new PhabricatorMetaMTAEmailBodyParser();
+      $body_data = $parser->parseBody($body);
+      $this->assertEqual('OKAY', $body_data['body']);
+      $this->assertEqual(
+        array(
+          array('cmd1'),
+          array('cmd2'),
+        ),
+        $body_data['commands']);
+    }
+
+    $bodies = $this->getEmailBodiesWithMiddleCommands();
+    foreach ($bodies as $body) {
+      $parser = new PhabricatorMetaMTAEmailBodyParser();
+      $body_data = $parser->parseBody($body);
+      $this->assertEqual("HEAD\n!cmd2\nTAIL", $body_data['body']);
     }
   }
 
@@ -63,6 +103,30 @@ EOEMAIL;
     return $with_commands;
   }
 
+  private function getEmailBodiesWithMultipleCommands() {
+    $bodies = $this->getEmailBodies();
+    $with_commands = array();
+    foreach ($bodies as $body) {
+      $with_commands[] = "!top1\n\n!top2\n\npreface\n\n".$body;
+    }
+    return $with_commands;
+  }
+
+  private function getEmailBodiesWithSplitCommands() {
+    $with_split = array();
+    $with_split[] = "!cmd1\n!cmd2\nOKAY";
+    $with_split[] = "!cmd1\nOKAY\n!cmd2";
+    $with_split[] = "OKAY\n!cmd1\n!cmd2";
+    return $with_split;
+  }
+
+  private function getEmailBodiesWithMiddleCommands() {
+    $with_middle = array();
+    $with_middle[] = "!cmd1\nHEAD\n!cmd2\nTAIL\n!cmd3";
+    $with_middle[] = "!cmd1\nHEAD\n!cmd2\nTAIL";
+    $with_middle[] = "HEAD\n!cmd2\nTAIL\n!cmd3";
+    return $with_middle;
+  }
 
   private function getEmailBodies() {
     $trailing_space = ' ';
@@ -182,6 +246,20 @@ EOMAIL
 <<<EOMAIL
 OKAY {$emdash}{$trailing_space}
 Sent from Mailbox
+EOMAIL
+,
+<<<EOMAIL
+OKAY
+
+{$emdash}
+Sent from Mailbox
+EOMAIL
+,
+<<<EOMAIL
+OKAY
+
+2015-05-06 11:21 GMT-07:00 Someone <someone@somewhere.com>:
+> ...
 EOMAIL
     );
   }

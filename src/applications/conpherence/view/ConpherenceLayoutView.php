@@ -9,6 +9,7 @@ final class ConpherenceLayoutView extends AphrontView {
   private $header;
   private $messages;
   private $replyForm;
+  private $latestTransactionID;
 
   public function setMessages($messages) {
     $this->messages = $messages;
@@ -49,6 +50,11 @@ final class ConpherenceLayoutView extends AphrontView {
     return $this;
   }
 
+  public function setLatestTransactionID($id) {
+    $this->latestTransactionID = $id;
+    return $this;
+  }
+
   public function render() {
     require_celerity_resource('conpherence-menu-css');
     require_celerity_resource('conpherence-message-pane-css');
@@ -58,9 +64,16 @@ final class ConpherenceLayoutView extends AphrontView {
 
     $selected_id = null;
     $selected_thread_id = null;
+    $selected_thread_phid = null;
+    $can_edit_selected = null;
     if ($this->thread) {
       $selected_id = $this->thread->getPHID().'-nav-item';
       $selected_thread_id = $this->thread->getID();
+      $selected_thread_phid = $this->thread->getPHID();
+      $can_edit_selected = PhabricatorPolicyFilter::hasCapability(
+        $this->getUser(),
+        $this->thread,
+        PhabricatorPolicyCapability::CAN_EDIT);
     }
     $this->initBehavior('conpherence-menu',
       array(
@@ -68,6 +81,9 @@ final class ConpherenceLayoutView extends AphrontView {
         'layoutID' => $layout_id,
         'selectedID' => $selected_id,
         'selectedThreadID' => $selected_thread_id,
+        'selectedThreadPHID' => $selected_thread_phid,
+        'canEditSelectedThread' => $can_edit_selected,
+        'latestTransactionID' => $this->latestTransactionID,
         'role' => $this->role,
         'hasThreadList' => (bool)$this->threadView,
         'hasThread' => (bool)$this->messages,
@@ -76,52 +92,7 @@ final class ConpherenceLayoutView extends AphrontView {
 
     $this->initBehavior(
       'conpherence-widget-pane',
-      array(
-        'widgetBaseUpdateURI' => $this->baseURI.'update/',
-        'widgetRegistry' => array(
-          'conpherence-message-pane' => array(
-            'name' => pht('Thread'),
-            'icon' => 'fa-comment',
-            'deviceOnly' => true,
-            'hasCreate' => false,
-          ),
-          'widgets-people' => array(
-            'name' => pht('Participants'),
-            'icon' => 'fa-users',
-            'deviceOnly' => false,
-            'hasCreate' => true,
-            'createData' => array(
-              'refreshFromResponse' => true,
-              'action' => ConpherenceUpdateActions::ADD_PERSON,
-              'customHref' => null,
-            ),
-          ),
-          'widgets-files' => array(
-            'name' => pht('Files'),
-            'icon' => 'fa-files-o',
-            'deviceOnly' => false,
-            'hasCreate' => false,
-          ),
-          'widgets-calendar' => array(
-            'name' => pht('Calendar'),
-            'icon' => 'fa-calendar',
-            'deviceOnly' => false,
-            'hasCreate' => true,
-            'createData' => array(
-              'refreshFromResponse' => false,
-              'action' => ConpherenceUpdateActions::ADD_STATUS,
-              'customHref' => '/calendar/event/create/',
-            ),
-          ),
-          'widgets-settings' => array(
-            'name' => pht('Settings'),
-            'icon' => 'fa-wrench',
-            'deviceOnly' => false,
-            'hasCreate' => false,
-          ),
-        ),
-      ));
-
+      ConpherenceWidgetConfigConstants::getWidgetPaneBehaviorConfig());
 
     return javelin_tag(
       'div',
@@ -131,13 +102,6 @@ final class ConpherenceLayoutView extends AphrontView {
         'class' => 'conpherence-layout conpherence-role-'.$this->role,
       ),
       array(
-        javelin_tag(
-          'div',
-          array(
-            'class' => 'phabricator-nav-column-background',
-            'sigil' => 'phabricator-nav-column-background',
-          ),
-          ''),
         javelin_tag(
           'div',
           array(
@@ -173,7 +137,7 @@ final class ConpherenceLayoutView extends AphrontView {
                   array(
                     'class' => 'text',
                   ),
-                  pht('You do not have any messages yet.')),
+                  pht('You are not in any rooms yet.')),
                 javelin_tag(
                   'a',
                   array(
@@ -181,7 +145,7 @@ final class ConpherenceLayoutView extends AphrontView {
                     'class' => 'button grey',
                     'sigil' => 'workflow',
                   ),
-                  pht('Send a Message')),
+                  pht('Create a Room')),
             )),
             javelin_tag(
               'div',

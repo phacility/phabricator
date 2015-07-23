@@ -6,8 +6,6 @@
  */
 final class PhabricatorEventType extends PhutilEventType {
 
-  const TYPE_CONTROLLER_CHECKREQUEST        = 'controller.checkRequest';
-
   const TYPE_MANIPHEST_WILLEDITTASK         = 'maniphest.willEditTask';
   const TYPE_MANIPHEST_DIDEDITTASK          = 'maniphest.didEditTask';
 
@@ -30,6 +28,7 @@ final class PhabricatorEventType extends PhutilEventType {
   const TYPE_PEOPLE_DIDRENDERMENU           = 'people.didRenderMenu';
   const TYPE_AUTH_WILLREGISTERUSER          = 'auth.willRegisterUser';
   const TYPE_AUTH_WILLLOGINUSER             = 'auth.willLoginUser';
+  const TYPE_AUTH_DIDVERIFYEMAIL            = 'auth.didVerifyEmail';
 
   const TYPE_SEARCH_DIDUPDATEINDEX          = 'search.didUpdateIndex';
 

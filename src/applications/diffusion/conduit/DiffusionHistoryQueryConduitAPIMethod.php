@@ -10,11 +10,12 @@ final class DiffusionHistoryQueryConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Returns history information for a repository at a specific '.
-      'commit and path.';
+    return pht(
+      'Returns history information for a repository at a specific '.
+      'commit and path.');
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'array';
   }
 

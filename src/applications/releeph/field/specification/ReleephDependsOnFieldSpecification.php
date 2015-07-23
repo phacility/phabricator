@@ -2,6 +2,7 @@
 
 final class ReleephDependsOnFieldSpecification
   extends ReleephFieldSpecification {
+
   public function getFieldKey() {
     return 'dependsOn';
   }

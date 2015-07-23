@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorIRCProtocolAdapter
-  extends PhabricatorBaseProtocolAdapter {
+final class PhabricatorIRCProtocolAdapter extends PhabricatorProtocolAdapter {
 
   private $socket;
 
@@ -33,7 +32,9 @@ final class PhabricatorIRCProtocolAdapter
 
     if (!preg_match('/^[A-Za-z0-9_`[{}^|\]\\-]+$/', $nick)) {
       throw new Exception(
-        "Nickname '{$nick}' is invalid!");
+        pht(
+          "Nickname '%s' is invalid!",
+          $nick));
     }
 
     $errno = null;
@@ -44,11 +45,11 @@ final class PhabricatorIRCProtocolAdapter
       $socket = fsockopen('ssl://'.$server, $port, $errno, $error);
     }
     if (!$socket) {
-      throw new Exception("Failed to connect, #{$errno}: {$error}");
+      throw new Exception(pht('Failed to connect, #%d: %s', $errno, $error));
     }
     $ok = stream_set_blocking($socket, false);
     if (!$ok) {
-      throw new Exception('Failed to set stream nonblocking.');
+      throw new Exception(pht('Failed to set stream nonblocking.'));
     }
 
     $this->socket = $socket;
@@ -77,7 +78,7 @@ final class PhabricatorIRCProtocolAdapter
       // was most likely because we were signaled.
       $ok = @stream_select($read, $write, $except, $timeout_sec = 0);
       if ($ok === false) {
-        throw new Exception('stream_select() failed!');
+        throw new Exception(pht('%s failed!', 'stream_select()'));
       }
     }
 
@@ -88,12 +89,12 @@ final class PhabricatorIRCProtocolAdapter
         // This indicates the connection was terminated on the other side,
         // just exit via exception and let the overseer restart us after a
         // delay so we can reconnect.
-        throw new Exception('Remote host closed connection.');
+        throw new Exception(pht('Remote host closed connection.'));
       }
       do {
         $data = fread($this->socket, 4096);
         if ($data === false) {
-          throw new Exception('fread() failed!');
+          throw new Exception(pht('%s failed!', 'fread()'));
         } else {
           $messages[] = id(new PhabricatorBotMessage())
             ->setCommand('LOG')
@@ -107,7 +108,7 @@ final class PhabricatorIRCProtocolAdapter
       do {
         $len = fwrite($this->socket, $this->writeBuffer);
         if ($len === false) {
-          throw new Exception('fwrite() failed!');
+          throw new Exception(pht('%s failed!', 'fwrite()'));
         } else if ($len === 0) {
           break;
         } else {
@@ -207,7 +208,7 @@ final class PhabricatorIRCProtocolAdapter
         }
         $join = $this->getConfig('join');
         if (!$join) {
-          throw new Exception('Not configured to join any channels!');
+          throw new Exception(pht('Not configured to join any channels!'));
         }
         foreach ($join as $channel) {
           $this->write("JOIN {$channel}");

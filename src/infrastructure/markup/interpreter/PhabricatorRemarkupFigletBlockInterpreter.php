@@ -10,7 +10,9 @@ final class PhabricatorRemarkupFigletBlockInterpreter
   public function markupContent($content, array $argv) {
     if (!Filesystem::binaryExists('figlet')) {
       return $this->markupError(
-        pht('Unable to locate the `figlet` binary. Install figlet.'));
+        pht(
+          'Unable to locate the `%s` binary. Install figlet.',
+          'figlet'));
     }
 
     $font = idx($argv, 'font', 'standard');
@@ -24,7 +26,9 @@ final class PhabricatorRemarkupFigletBlockInterpreter
     if ($err) {
       return $this->markupError(
         pht(
-          'Execution of `figlet` failed:', $stderr));
+          'Execution of `%s` failed: %s',
+          'figlet',
+          $stderr));
     }
 
 

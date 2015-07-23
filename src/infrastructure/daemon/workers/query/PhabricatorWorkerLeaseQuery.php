@@ -75,15 +75,17 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
   public function execute() {
     if (!$this->limit) {
       throw new Exception(
-        pht('You must setLimit() when leasing tasks.'));
+        pht('You must %s when leasing tasks.', 'setLimit()'));
     }
 
     if ($this->leased !== false) {
       if (!$this->skipLease) {
         throw new Exception(
           pht(
-            'If you potentially select leased tasks using withLeasedTasks(), '.
-            'you MUST disable lease acquisition by calling setSkipLease().'));
+            'If you potentially select leased tasks using %s, '.
+            'you MUST disable lease acquisition by calling %s.',
+            'withLeasedTasks()',
+            'setSkipLease()'));
       }
     }
 
@@ -122,7 +124,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
         $conn_w,
         'SELECT id, leaseOwner FROM %T %Q %Q %Q',
         $task_table->getTableName(),
-        $this->buildWhereClause($conn_w, $phase),
+        $this->buildCustomWhereClause($conn_w, $phase),
         $this->buildOrderClause($conn_w, $phase),
         $this->buildLimitClause($conn_w, $limit - $leased));
 
@@ -206,7 +208,10 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
     return $tasks;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_w, $phase) {
+  protected function buildCustomWhereClause(
+    AphrontDatabaseConnection $conn_w,
+    $phase) {
+
     $where = array();
 
     switch ($phase) {
@@ -221,7 +226,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
         $where[] = 'leaseExpires < UNIX_TIMESTAMP()';
         break;
       default:
-        throw new Exception("Unknown phase '{$phase}'!");
+        throw new Exception(pht("Unknown phase '%s'!", $phase));
     }
 
     if ($this->ids !== null) {
@@ -250,7 +255,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
         throw new Exception(
           pht(
             'Trying to lease tasks selected in the leased phase! This is '.
-            'intended to be imposssible.'));
+            'intended to be impossible.'));
       case self::PHASE_UNLEASED:
         $where[] = qsprintf($conn_w, 'leaseOwner IS NULL');
         $where[] = qsprintf($conn_w, 'id IN (%Ld)', ipull($rows, 'id'));
@@ -267,7 +272,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
         $where[] = qsprintf($conn_w, '(%Q)', implode(' OR ', $in));
         break;
       default:
-        throw new Exception("Unknown phase '{$phase}'!");
+        throw new Exception(pht('Unknown phase "%s"!', $phase));
     }
 
     return $this->formatWhereClause($where);

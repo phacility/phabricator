@@ -19,7 +19,7 @@ final class AphrontJSONResponse extends AphrontResponse {
     if ($this->addJSONShield === null) {
       return true;
     }
-    return (bool) $this->addJSONShield;
+    return (bool)$this->addJSONShield;
   }
 
   public function buildResponseString() {

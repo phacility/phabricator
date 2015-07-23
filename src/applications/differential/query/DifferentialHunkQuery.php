@@ -34,7 +34,7 @@ final class DifferentialHunkQuery
     $all_results = array();
 
     // Load modern hunks.
-    $table = new DifferentialHunkModern();
+    $table = new DifferentialModernHunk();
     $conn_r = $table->establishConnection('r');
 
     $modern_data = queryfx_all(
@@ -48,7 +48,7 @@ final class DifferentialHunkQuery
 
 
     // Now, load legacy hunks.
-    $table = new DifferentialHunkLegacy();
+    $table = new DifferentialLegacyHunk();
     $conn_r = $table->establishConnection('r');
 
     $legacy_data = queryfx_all(
@@ -90,12 +90,14 @@ final class DifferentialHunkQuery
     return $hunks;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if (!$this->changesets) {
       throw new Exception(
-        pht('You must load hunks via changesets, with withChangesets()!'));
+        pht(
+          'You must load hunks via changesets, with %s!',
+          'withChangesets()'));
     }
 
     $where[] = qsprintf(
@@ -112,8 +114,9 @@ final class DifferentialHunkQuery
     return 'PhabricatorDifferentialApplication';
   }
 
-  protected function getReversePaging() {
-    return true;
+  protected function getDefaultOrderVector() {
+    // TODO: Do we need this?
+    return array('-id');
   }
 
 }

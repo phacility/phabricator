@@ -366,6 +366,6 @@
     1,
     2
   ],
-  "header": "\/**\n * @provides sprite-projects-css\n * @generated\n *\/\n\n.sprite-projects {\n  background-image: url(\/rsrc\/image\/sprite-projects.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-projects {\n    background-image: url(\/rsrc\/image\/sprite-projects-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}\n",
+  "header": "\/**\n * @provides sprite-projects-css\n * @generated\n *\/\n\n.sprite-projects {\n  background-image: url(\/rsrc\/image\/sprite-projects.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5),\nonly screen and (min-resolution: 1.5dppx) {\n  .sprite-projects {\n    background-image: url(\/rsrc\/image\/sprite-projects-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}\n",
   "type": "standard"
 }

@@ -26,7 +26,7 @@ final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
 
         $pattern =
           '@'.
-          '(?<!/)(?:^|\b)'.
+          '(?<![/:#-])(?:^|\b)'.
           '(R2D2)'.
           '(?:\b|$)'.
           '@';
@@ -41,9 +41,11 @@ final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
           }
         }
 
+        // Use a negative lookbehind to prevent matching "/D123", "#D123",
+        // ":D123", etc.
         $pattern =
           '@'.
-          '(?<!/)(?:^|\b)'. // Negative lookbehind prevent matching "/D123".
+          '(?<![/:#-])(?:^|\b)'.
           '([A-Z])(\d+)'.
           '(?:\b|$)'.
           '@';
@@ -112,7 +114,7 @@ final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
                 'poll_id' => $vote_id,
               ));
             $output[$vote['phid']] = 'V'.$vote['id'].': '.$vote['question'].
-              ' Come Vote '.$vote['uri'];
+              ' '.pht('Come Vote').' '.$vote['uri'];
           }
         }
 
@@ -131,35 +133,39 @@ final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
         if ($paste_ids) {
           foreach ($paste_ids as $paste_id) {
             $paste = $this->getConduit()->callMethodSynchronous(
-              'paste.info',
+              'paste.query',
               array(
-                'paste_id' => $paste_id,
+                'ids' => array($paste_id),
               ));
-            // Eventually I'd like to show the username of the paster as well,
-            // however that will need something like a user.username_from_phid
-            // since we (ideally) want to keep the bot to Conduit calls...and
-            // not call to Phabricator-specific stuff (like actually loading
-            // the User object and fetching his/her username.)
+            $paste = head($paste);
+
             $output[$paste['phid']] = 'P'.$paste['id'].': '.$paste['uri'].' - '.
               $paste['title'];
 
             if ($paste['language']) {
               $output[$paste['phid']] .= ' ('.$paste['language'].')';
             }
+
+            $user = $this->getConduit()->callMethodSynchronous(
+              'user.query',
+              array(
+                'phids' => array($paste['authorPHID']),
+              ));
+            $user = head($user);
+            if ($user) {
+              $output[$paste['phid']] .= ' by '.$user['userName'];
+            }
           }
         }
 
         if ($commit_names) {
           $commits = $this->getConduit()->callMethodSynchronous(
-            'diffusion.getcommits',
+            'diffusion.querycommits',
             array(
-              'commits' => $commit_names,
+              'names' => $commit_names,
             ));
-          foreach ($commits as $commit) {
-            if (isset($commit['error'])) {
-              continue;
-            }
-            $output[$commit['commitPHID']] = $commit['uri'];
+          foreach ($commits['data'] as $commit) {
+            $output[$commit['phid']] = $commit['uri'];
           }
         }
 

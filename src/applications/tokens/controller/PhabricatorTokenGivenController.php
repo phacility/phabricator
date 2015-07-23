@@ -57,9 +57,11 @@ final class PhabricatorTokenGivenController extends PhabricatorTokenController {
 
       $list->addItem($item);
     }
-    $list->setPager($pager);
-
     $title = pht('Tokens Given');
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setObjectList($list);
 
     $nav = $this->buildSideNav();
     $nav->setCrumbs(
@@ -67,7 +69,8 @@ final class PhabricatorTokenGivenController extends PhabricatorTokenController {
         ->addTextCrumb($title));
     $nav->selectFilter('given/');
 
-    $nav->appendChild($list);
+    $nav->appendChild($box);
+    $nav->appendChild($pager);
 
     return $this->buildApplicationPage(
       $nav,

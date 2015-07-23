@@ -53,7 +53,7 @@
  * @task query Querying the Graph Cache
  * @task cache Cache Internals
  */
-final class PhabricatorRepositoryGraphCache {
+final class PhabricatorRepositoryGraphCache extends Phobject {
 
   private $rebuiltKeys = array();
 
@@ -106,7 +106,7 @@ final class PhabricatorRepositoryGraphCache {
 
       // Sanity check so we can survive and recover from bad data.
       if (isset($seen[$commit_id])) {
-        phlog(pht('Unexpected infinite loop in RepositoryGraphCache!'));
+        phlog(pht('Unexpected infinite loop in %s!', __CLASS__));
         return false;
       } else {
         $seen[$commit_id] = true;
@@ -313,7 +313,7 @@ final class PhabricatorRepositoryGraphCache {
     // Find all the Git and Mercurial commits in the block which have completed
     // change import. We can't fill the cache accurately for commits which have
     // not completed change import, so just pretend we don't know about them.
-    // In these cases, we will will ultimately fall back to VCS queries.
+    // In these cases, we will ultimately fall back to VCS queries.
 
     $commit_rows = queryfx_all(
       $conn_r,

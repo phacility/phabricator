@@ -2,7 +2,6 @@
  * @provides phortune-credit-card-form-css
  */
 
-.credit-card-logos {
-  background: url(/rsrc/image/credit_cards.png) no-repeat 0px 2px;
-  height: 32px;
+.phortune-security-assurance {
+  color: {$lightgreytext};
 }

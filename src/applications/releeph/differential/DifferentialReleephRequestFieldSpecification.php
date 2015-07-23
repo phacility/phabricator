@@ -16,7 +16,7 @@
  * button.)
  *
  */
-final class DifferentialReleephRequestFieldSpecification {
+final class DifferentialReleephRequestFieldSpecification extends Phobject {
 
   // TODO: This class is essentially dead right now, see T2222.
 
@@ -39,7 +39,7 @@ final class DifferentialReleephRequestFieldSpecification {
 
   public function setValueFromStorage($json) {
     if ($json) {
-      $dict = json_decode($json, true);
+      $dict = phutil_json_decode($json);
       $this->releephAction = idx($dict, 'releephAction');
       $this->releephPHIDs = idx($dict, 'releephPHIDs');
     }
@@ -51,7 +51,7 @@ final class DifferentialReleephRequestFieldSpecification {
   }
 
   public function renderLabelForRevisionView() {
-    return 'Releeph';
+    return pht('Releeph');
   }
 
   public function getRequiredHandlePHIDs() {
@@ -59,16 +59,20 @@ final class DifferentialReleephRequestFieldSpecification {
   }
 
   public function renderValueForRevisionView() {
-    static $tense = array(
-      self::ACTION_PICKS => array(
-        'future'  => 'Will pick',
-        'past'    => 'Picked',
-      ),
-      self::ACTION_REVERTS => array(
-        'future'  => 'Will revert',
-        'past'    => 'Reverted',
-      ),
-    );
+    static $tense;
+
+    if ($tense === null) {
+      $tense = array(
+        self::ACTION_PICKS => array(
+          'future'  => pht('Will pick'),
+          'past'    => pht('Picked'),
+        ),
+        self::ACTION_REVERTS => array(
+          'future'  => pht('Will revert'),
+          'past'    => pht('Reverted'),
+        ),
+      );
+    }
 
     $releeph_requests = $this->loadReleephRequests();
     if (!$releeph_requests) {
@@ -166,7 +170,9 @@ final class DifferentialReleephRequestFieldSpecification {
 
       default:
         throw new DifferentialFieldParseException(
-          "Commit message contains unknown Releeph action '{$raw_action}'!");
+          pht(
+            "Commit message contains unknown Releeph action '%s'!",
+            $raw_action));
         break;
     }
 
@@ -176,16 +182,20 @@ final class DifferentialReleephRequestFieldSpecification {
       if (!preg_match('/^(?:RQ)?(\d+)$/i', $token, $match)) {
         $label = $this->renderLabelForCommitMessage();
         throw new DifferentialFieldParseException(
-          "Commit message contains unparseable ".
-          "Releeph request token '{$token}'!");
+          pht(
+            "Commit message contains unparseable ".
+            "Releeph request token '%s'!",
+            $token));
       }
 
-      $id = (int) $match[1];
+      $id = (int)$match[1];
       $releeph_request = id(new ReleephRequest())->load($id);
 
       if (!$releeph_request) {
         throw new DifferentialFieldParseException(
-          "Commit message references non existent releeph request: {$value}!");
+          pht(
+            'Commit message references non existent Releeph request: %s!',
+            $value));
       }
 
       $releeph_requests[] = $releeph_request;
@@ -201,7 +211,9 @@ final class DifferentialReleephRequestFieldSpecification {
 
         if (idx($rqs_seen, $rq_id)) {
           throw new DifferentialFieldParseException(
-            "Commit message refers to {$rq_id} multiple times!");
+            pht(
+              'Commit message refers to %s multiple times!',
+              $rq_id));
         }
         $rqs_seen[$rq_id] = true;
 
@@ -217,9 +229,10 @@ final class DifferentialReleephRequestFieldSpecification {
           $lists[] = implode(', ', $rq_ids).' in '.$branch_name;
         }
         throw new DifferentialFieldParseException(
-          'Commit message references multiple Releeph requests, '.
-          'but the requests are in different branches: '.
-          implode('; ', $lists));
+          pht(
+            'Commit message references multiple Releeph requests, '.
+            'but the requests are in different branches: %s',
+            implode('; ', $lists)));
       }
     }
 
@@ -233,16 +246,17 @@ final class DifferentialReleephRequestFieldSpecification {
   }
 
   public function renderLabelForCommitMessage() {
-    return 'Releeph';
+    return pht('Releeph');
   }
 
   public function shouldAppearOnCommitMessageTemplate() {
     return false;
   }
 
-  public function didParseCommit(PhabricatorRepository $repo,
-                                 PhabricatorRepositoryCommit $commit,
-                                 PhabricatorRepositoryCommitData $data) {
+  public function didParseCommit(
+    PhabricatorRepository $repo,
+    PhabricatorRepositoryCommit $commit,
+    PhabricatorRepositoryCommitData $data) {
 
     // NOTE: This is currently dead code. See T2222.
 
@@ -305,9 +319,10 @@ final class DifferentialReleephRequestFieldSpecification {
       ->execute();
   }
 
-  private function isCommitOnBranch(PhabricatorRepository $repo,
-                                    PhabricatorRepositoryCommit $commit,
-                                    ReleephBranch $releeph_branch) {
+  private function isCommitOnBranch(
+    PhabricatorRepository $repo,
+    PhabricatorRepositoryCommit $commit,
+    ReleephBranch $releeph_branch) {
 
     switch ($repo->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
@@ -352,7 +367,7 @@ final class DifferentialReleephRequestFieldSpecification {
         }
 
         if ($in_branch && $ex_branch) {
-          $error = sprintf(
+          $error = pht(
             'CONFUSION: commit %s in %s contains %d path change(s) that were '.
             'part of a Releeph branch, but also has %d path change(s) not '.
             'part of a Releeph branch!',

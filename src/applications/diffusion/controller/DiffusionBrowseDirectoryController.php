@@ -57,9 +57,9 @@ final class DiffusionBrowseDirectoryController
       $browse_table->setPaths($results->getPaths());
       $browse_table->setUser($request->getUser());
 
-      $browse_panel = new AphrontPanelView();
-      $browse_panel->appendChild($browse_table);
-      $browse_panel->setNoBackground();
+      $browse_panel = new PHUIObjectBoxView();
+      $browse_panel->setHeaderText($drequest->getPath(), '/');
+      $browse_panel->setTable($browse_table);
 
       $content[] = $browse_panel;
     }
@@ -98,7 +98,9 @@ final class DiffusionBrowseDirectoryController
       array(
         'title' => array(
           nonempty(basename($drequest->getPath()), '/'),
-          $drequest->getRepository()->getCallsign().' Repository',
+          pht(
+            '%s Repository',
+            $drequest->getRepository()->getCallsign()),
         ),
       ));
   }

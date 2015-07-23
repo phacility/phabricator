@@ -1,18 +1,18 @@
 <?php
 
-abstract class HeraldCustomAction {
+abstract class HeraldCustomAction extends Phobject {
 
-  public abstract function appliesToAdapter(HeraldAdapter $adapter);
+  abstract public function appliesToAdapter(HeraldAdapter $adapter);
 
-  public abstract function appliesToRuleType($rule_type);
+  abstract public function appliesToRuleType($rule_type);
 
-  public abstract function getActionKey();
+  abstract public function getActionKey();
 
-  public abstract function getActionName();
+  abstract public function getActionName();
 
-  public abstract function getActionType();
+  abstract public function getActionType();
 
-  public abstract function applyEffect(
+  abstract public function applyEffect(
     HeraldAdapter $adapter,
     $object,
     HeraldEffect $effect);

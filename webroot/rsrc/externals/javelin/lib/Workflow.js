@@ -29,22 +29,27 @@ JX.install('Workflow', {
 
   statics : {
     _stack   : [],
-    newFromForm : function(form, data) {
+    newFromForm : function(form, data, keep_enabled) {
       var pairs = JX.DOM.convertFormToListOfPairs(form);
       for (var k in data) {
         pairs.push([k, data[k]]);
       }
 
-      // Disable form elements during the request
-      var inputs = [].concat(
-        JX.DOM.scry(form, 'input'),
-        JX.DOM.scry(form, 'button'),
-        JX.DOM.scry(form, 'textarea'));
-      for (var ii = 0; ii < inputs.length; ii++) {
-        if (inputs[ii].disabled) {
-          delete inputs[ii];
-        } else {
-          inputs[ii].disabled = true;
+      var inputs;
+      if (keep_enabled) {
+        inputs = [];
+      } else {
+        // Disable form elements during the request
+        inputs = [].concat(
+          JX.DOM.scry(form, 'input'),
+          JX.DOM.scry(form, 'button'),
+          JX.DOM.scry(form, 'textarea'));
+        for (var ii = 0; ii < inputs.length; ii++) {
+          if (inputs[ii].disabled) {
+            delete inputs[ii];
+          } else {
+            inputs[ii].disabled = true;
+          }
         }
       }
 
@@ -57,6 +62,7 @@ JX.install('Workflow', {
           inputs[ii] && (inputs[ii].disabled = false);
         }
       });
+
       return workflow;
     },
     newFromLink : function(link) {
@@ -171,7 +177,13 @@ JX.install('Workflow', {
           'didSyntheticSubmit',
           [],
           JX.Workflow._onsyntheticsubmit);
+
+        // Note that even in the presence of a content frame, we're doing
+        // everything here at top level: dialogs are fully modal and cover
+        // the entire window.
+
         document.body.appendChild(this._root);
+
         var d = JX.Vector.getDim(this._root);
         var v = JX.Vector.getViewport();
         var s = JX.Vector.getScroll();
@@ -204,6 +216,8 @@ JX.install('Workflow', {
         // The `focus()` call may have scrolled the window. Scroll it back to
         // where it was before -- we want to focus the control, but not adjust
         // the scroll position.
+
+        // Dialogs are window-level, so scroll the window explicitly.
         window.scrollTo(s.x, s.y);
 
       } else if (this.getHandler()) {

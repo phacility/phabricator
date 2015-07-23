@@ -2,8 +2,7 @@
 @group config
 
 This document contains instructions for configuring inbound email, so users
-may update Differential and Maniphest by replying to messages and create
-Maniphest tasks via email.
+may interact with some Phabricator applications via email.
 
 = Preamble =
 
@@ -33,20 +32,13 @@ in Phabricator and users will not be able to take actions like claiming tasks or
 requesting changes to revisions.
 
 To change this behavior so that users can interact with objects in Phabricator
-over email, set these configuration keys:
-
-  - ##metamta.differential.reply-handler-domain##: enables email replies for
-    Differential.
-  - ##metamta.maniphest.reply-handler-domain##: enables email replies for
-    Maniphest.
-
-Set these keys to some domain which you configure according to the instructions
-below, e.g. `phabricator.example.com`. You can set these both to the same
-domain, and will generally want to. Once you set these keys, emails will use a
-'Reply-To' like `T123+273+af310f9220ad@example.com`, which -- when
+over email, change the configuration key `metamta.reply-handler-domain` to some
+domain you configure according to the instructions below, e.g.
+`phabricator.example.com`. Once you set this key, emails will use a
+'Reply-To' like `T123+273+af310f9220ad@phabricator.example.com`, which -- when
 configured correctly, according to the instructions below -- will parse incoming
-email and allow users to interact with Maniphest tasks and Differential
-revisions over email.
+email and allow users to interact with Differential revisions, Maniphest tasks,
+etc. over email.
 
 If you don't want Phabricator to take up an entire domain (or subdomain) you
 can configure a general prefix so you can use a single mailbox to receive mail
@@ -56,10 +48,15 @@ mail address. This works because everything up to the first (optional) '+'
 character in an email-address is considered the receiver, and everything
 after is essentially ignored.
 
-You can also set up a task creation email address, like `bugs@example.com`,
-which will create a Maniphest task out of any email which is set to it. To do
-this, set `metamta.maniphest.public-create-email` in your configuration. This
-has some mild security implications, see below.
+You can also set up application email addresses to allow users to create
+application objects via email. For example, you could configure
+`bugs@phabricator.example.com` to create a Maniphest task out of any email
+which is sent to it. To do this, see application settings for a given
+application at
+
+{nav icon=home, name=Home >
+name=Applications >
+icon=cog, name=Settings}
 
 = Security =
 
@@ -93,8 +90,8 @@ practically, is a reasonable setting for many installs. The reply-to address
 will still contain a hash unique to the object it represents, so users who have
 not received an email about an object can not blindly interact with it.
 
-If you enable `metamta.maniphest.public-create-email`, that address also uses
-the weaker "From" authentication mechanism.
+If you enable application email addresses, those addresses also use the weaker
+"From" authentication mechanism.
 
 NOTE: Phabricator does not currently attempt to verify "From" addresses because
 this is technically complex, seems unreasonably difficult in the general case,
@@ -110,7 +107,7 @@ You can use the `bin/mail` utility to test and review inbound mail. This can
 help you determine if mail is being delivered to Phabricator or not:
 
   phabricator/ $ ./bin/mail list-inbound   # List inbound messages.
-  phabricator/ $ ./bin-mail show-inbound   # Show details about a message.
+  phabricator/ $ ./bin/mail show-inbound   # Show details about a message.
 
 You can also test receiving mail, but note that this just simulates receiving
 the mail and doesn't send any information over the network. It is
@@ -138,24 +135,21 @@ To use SendGrid, you need a SendGrid account with access to the "Parse API" for
 inbound email. Provided you have such an account, configure it like this:
 
   - Configure an MX record according to SendGrid's instructions, i.e. add
-    ##phabricator.example.com MX 10 mx.sendgrid.net.## or similar.
+    `phabricator.example.com MX 10 mx.sendgrid.net.` or similar.
   - Go to the "Parse Incoming Emails" page on SendGrid
     (<http://sendgrid.com/developer/reply>) and add the domain as the
     "Hostname".
-  - Add the URL ##https://phabricator.example.com/mail/sendgrid/## as the "Url",
+  - Add the URL `https://phabricator.example.com/mail/sendgrid/` as the "Url",
     using your domain (and HTTP instead of HTTPS if you are not configured with
     SSL).
   - If you get an error that the hostname "can't be located or verified", it
     means your MX record is either incorrectly configured or hasn't propagated
     yet.
-  - Set ##metamta.maniphest.reply-handler-domain## and/or
-    ##metamta.differential.reply-handler-domain## to
-    "##phabricator.example.com##" (whatever you configured the MX record for),
-    depending on whether you want to support email replies for Maniphest,
-    Differential, or both.
+  - Set `metamta.reply-handler-domain` to `phabricator.example.com`"
+    (whatever you configured the MX record for).
 
 That's it! If everything is working properly you should be able to send email
-to ##anything@phabricator.example.com## and it should appear in
+to `anything@phabricator.example.com` and it should appear in
 `bin/mail list-inbound` within a few seconds.
 
 = Local MTA: Installing Mailparse =
@@ -214,12 +208,12 @@ this script into `/etc/smrsh/`:
 
   sudo ln -s /path/to/phabricator/scripts/mail/mail_handler.php /etc/smrsh/
 
-Finally, edit ##/etc/mail/virtusertable## and add an entry like this:
+Finally, edit `/etc/mail/virtusertable` and add an entry like this:
 
   @yourdomain.com phabricator@localhost
 
 That will forward all mail to @yourdomain.com to the Phabricator processing
-script. Run ##sudo /etc/mail/make## or similar and then restart sendmail with
+script. Run `sudo /etc/mail/make` or similar and then restart sendmail with
 `sudo /etc/init.d/sendmail restart`.
 
 = Local MTA: Configuring Lamson =
@@ -235,7 +229,7 @@ To get started, follow the provided instructions
 (<http://lamsonproject.org/docs/getting_started.html>) to set up an instance.
 One likely deployment issue is that binding to port 25 requires root
 privileges. Lamson is capable of starting as root then dropping privileges, but
-you must supply ##-uid## and ##-gid## arguments to do so, as demonstrated by
+you must supply `-uid` and `-gid` arguments to do so, as demonstrated by
 Step 8 in Lamson's deployment tutorial (located here:
 <http://lamsonproject.org/docs/deploying_oneshotblog.html>).
 

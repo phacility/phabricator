@@ -13,23 +13,23 @@ final class PhabricatorXHProfSampleListController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $pager = new AphrontPagerView();
+    $pager = new PHUIPagerView();
     $pager->setOffset($request->getInt('page'));
 
     switch ($this->view) {
       case 'sampled':
-        $clause = '`sampleRate` > 0';
+        $clause = 'sampleRate > 0';
         $show_type = false;
         break;
       case 'my-runs':
         $clause = qsprintf(
           id(new PhabricatorXHProfSample())->establishConnection('r'),
-          '`sampleRate` = 0 AND `userPHID` = %s',
+          'sampleRate = 0 AND userPHID = %s',
           $request->getUser()->getPHID());
         $show_type = false;
         break;
       case 'manual':
-        $clause = '`sampleRate` = 0';
+        $clause = 'sampleRate = 0';
         $show_type = false;
         break;
       case 'all':
@@ -80,12 +80,15 @@ final class PhabricatorXHProfSampleListController
     }
 
     $list->setPager($pager);
+    $list->setNoDataString(pht('There are no profiling samples.'));
 
-    return $this->buildStandardPageResponse(
-      $list,
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('XHProf Samples'));
+
+    return $this->buildApplicationPage(
+      array($crumbs, $list),
       array(
         'title' => pht('XHProf Samples'),
-        'device' => true,
       ));
 
   }

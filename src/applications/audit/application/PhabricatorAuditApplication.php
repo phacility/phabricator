@@ -6,8 +6,8 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
     return '/audit/';
   }
 
-  public function getIconName() {
-    return 'audit';
+  public function getFontIcon() {
+    return 'fa-check-circle-o';
   }
 
   public function getName() {
@@ -22,13 +22,12 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
     return true;
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Audit User Guide');
-  }
-
-  public function getEventListeners() {
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
     return array(
-      new AuditActionMenuEventListener(),
+      array(
+        'name' => pht('Audit User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Audit User Guide'),
+      ),
     );
   }
 

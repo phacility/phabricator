@@ -3,6 +3,10 @@
 final class PhabricatorMetaMTAMailableDatasource
   extends PhabricatorTypeaheadCompositeDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Subscribers');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a user, project, or mailing list name...');
   }
@@ -15,7 +19,6 @@ final class PhabricatorMetaMTAMailableDatasource
     return array(
       new PhabricatorPeopleDatasource(),
       new PhabricatorProjectDatasource(),
-      new PhabricatorMailingListDatasource(),
     );
   }
 

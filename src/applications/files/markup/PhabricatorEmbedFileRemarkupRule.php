@@ -28,7 +28,11 @@ final class PhabricatorEmbedFileRemarkupRule
     return $objects;
   }
 
-  protected function renderObjectEmbed($object, $handle, $options) {
+  protected function renderObjectEmbed(
+    $object,
+    PhabricatorObjectHandle $handle,
+    $options) {
+
     $options = $this->getFileOptions($options) + array(
       'name' => $object->getName(),
     );
@@ -96,16 +100,24 @@ final class PhabricatorEmbedFileRemarkupRule
         case 'full':
           $attrs += array(
             'src' => $file->getBestURI(),
+            'height' => $file->getImageHeight(),
+            'width' => $file->getImageWidth(),
           );
           $image_class = 'phabricator-remarkup-embed-image-full';
           break;
         case 'thumb':
         default:
-          $attrs['src'] = $file->getPreview220URI();
-          $dimensions =
-            PhabricatorImageTransformer::getPreviewDimensions($file, 220);
-          $attrs['width'] = $dimensions['sdx'];
-          $attrs['height'] = $dimensions['sdy'];
+          $preview_key = PhabricatorFileThumbnailTransform::TRANSFORM_PREVIEW;
+          $xform = PhabricatorFileTransform::getTransformByKey($preview_key);
+          $attrs['src'] = $file->getURIForTransform($xform);
+
+          $dimensions = $xform->getTransformedDimensions($file);
+          if ($dimensions) {
+            list($x, $y) = $dimensions;
+            $attrs['width'] = $x;
+            $attrs['height'] = $y;
+          }
+
           $image_class = 'phabricator-remarkup-embed-image';
           break;
       }
@@ -124,9 +136,9 @@ final class PhabricatorEmbedFileRemarkupRule
         'class'       => $image_class,
         'sigil'       => 'lightboxable',
         'meta'        => array(
-          'phid' => $file->getPHID(),
-          'uri' => $file->getBestURI(),
-          'dUri' => $file->getDownloadURI(),
+          'phid'     => $file->getPHID(),
+          'uri'      => $file->getBestURI(),
+          'dUri'     => $file->getDownloadURI(),
           'viewable' => true,
         ),
       ),
@@ -160,7 +172,7 @@ final class PhabricatorEmbedFileRemarkupRule
     }
 
     return phutil_tag(
-      'div',
+      ($options['layout'] == 'inline' ? 'span' : 'div'),
       array(
         'class' => $layout_class,
       ),

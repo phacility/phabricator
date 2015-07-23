@@ -11,6 +11,10 @@ final class PhabricatorAuthValidateController
     return true;
   }
 
+  public function shouldAllowLegallyNonCompliantUsers() {
+    return true;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $viewer = $request->getUser();

@@ -52,7 +52,7 @@ final class PhortuneCurrency extends Phobject {
       case 'USD':
         break;
       default:
-        throw new Exception("Unsupported currency '{$currency}'!");
+        throw new Exception(pht("Unsupported currency '%s'!", $currency));
     }
 
     return self::newFromValueAndCurrency($value, $currency);
@@ -68,10 +68,10 @@ final class PhortuneCurrency extends Phobject {
   }
 
   public static function newFromList(array $list) {
-    assert_instances_of($list, 'PhortuneCurrency');
+    assert_instances_of($list, __CLASS__);
 
     if (!$list) {
-      return PhortuneCurrency::newEmptyCurrency();
+      return self::newEmptyCurrency();
     }
 
     $total = null;
@@ -121,7 +121,7 @@ final class PhortuneCurrency extends Phobject {
   }
 
   private static function throwFormatException($string) {
-    throw new Exception("Invalid currency format ('{$string}').");
+    throw new Exception(pht("Invalid currency format ('%s').", $string));
   }
 
   private function throwUnlikeCurrenciesException(PhortuneCurrency $other) {
@@ -201,8 +201,8 @@ final class PhortuneCurrency extends Phobject {
    */
   public function assertInRange($minimum, $maximum) {
     if ($minimum !== null && $maximum !== null) {
-      $min = PhortuneCurrency::newFromString($minimum);
-      $max = PhortuneCurrency::newFromString($maximum);
+      $min = self::newFromString($minimum);
+      $max = self::newFromString($maximum);
       if ($min->value > $max->value) {
         throw new Exception(
           pht(
@@ -213,7 +213,7 @@ final class PhortuneCurrency extends Phobject {
     }
 
     if ($minimum !== null) {
-      $min = PhortuneCurrency::newFromString($minimum);
+      $min = self::newFromString($minimum);
       if ($min->value > $this->value) {
         throw new Exception(
           pht(
@@ -223,7 +223,7 @@ final class PhortuneCurrency extends Phobject {
     }
 
     if ($maximum !== null) {
-      $max = PhortuneCurrency::newFromString($maximum);
+      $max = self::newFromString($maximum);
       if ($max->value < $this->value) {
         throw new Exception(
           pht(

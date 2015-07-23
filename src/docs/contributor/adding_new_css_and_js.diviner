@@ -18,8 +18,7 @@ To add a new CSS or JS file, create it in an appropriate location in
 `webroot/rsrc/css/` or `webroot/rsrc/js/` inside your `phabricator/`
 directory.
 
-Each file must ##@provides## itself as a component, declared in a header
-comment:
+Each file must `@provides` itself as a component, declared in a header comment:
 
   LANG=css
   /**

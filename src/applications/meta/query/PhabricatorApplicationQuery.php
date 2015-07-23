@@ -10,6 +10,7 @@ final class PhabricatorApplicationQuery
   private $unlisted;
   private $classes;
   private $launchable;
+  private $applicationEmailSupport;
   private $phids;
 
   const ORDER_APPLICATION = 'order:application';
@@ -44,6 +45,11 @@ final class PhabricatorApplicationQuery
 
   public function withLaunchable($launchable) {
     $this->launchable = $launchable;
+    return $this;
+  }
+
+  public function withApplicationEmailSupport($appemails) {
+    $this->applicationEmailSupport = $appemails;
     return $this;
   }
 
@@ -131,6 +137,14 @@ final class PhabricatorApplicationQuery
       }
     }
 
+    if ($this->applicationEmailSupport !== null) {
+      foreach ($apps as $key => $app) {
+        if ($app->supportsEmailIntegration() !=
+            $this->applicationEmailSupport) {
+          unset($apps[$key]);
+        }
+      }
+    }
 
     switch ($this->order) {
       case self::ORDER_NAME:
@@ -153,6 +167,12 @@ final class PhabricatorApplicationQuery
     // to filter its results just leaves us recursing indefinitely. Users
     // always have access to applications regardless of other policy settings
     // anyway.
+    return null;
+  }
+
+  protected function getResultCursor($object) {
+    // TODO: This won't work, but doesn't matter until we write more than 100
+    // applications. Since we only have about 70, just avoid fataling for now.
     return null;
   }
 

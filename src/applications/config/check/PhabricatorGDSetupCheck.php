@@ -2,15 +2,22 @@
 
 final class PhabricatorGDSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
+
   protected function executeChecks() {
     if (!extension_loaded('gd')) {
       $message = pht(
-        "The 'gd' extension is not installed. Without 'gd', support, ".
+        "The '%s' extension is not installed. Without '%s', support, ".
         "Phabricator will not be able to process or resize images ".
-        "(for example, to generate thumbnails). Install or enable 'gd'.");
+        "(for example, to generate thumbnails). Install or enable '%s'.",
+        'gd',
+        'gd',
+        'gd');
 
       $this->newIssue('extension.gd')
-        ->setName(pht("Missing 'gd' Extension"))
+        ->setName(pht("Missing '%s' Extension", 'gd'))
         ->setMessage($message);
     } else {
       $image_type_map = array(
@@ -32,15 +39,17 @@ final class PhabricatorGDSetupCheck extends PhabricatorSetupCheck {
         $have = implode(', ', $have);
 
         $message = pht(
-          "The 'gd' extension has support for only some image types. ".
+          "The '%s' extension has support for only some image types. ".
           "Phabricator will be unable to process images of the missing ".
-          "types until you build 'gd' with support for them. ".
+          "types until you build '%s' with support for them. ".
           "Supported types: %s. Missing types: %s.",
+          'gd',
+          'gd',
           $have,
           $missing);
 
         $this->newIssue('extension.gd.support')
-          ->setName(pht("Partial 'gd' Support"))
+          ->setName(pht("Partial '%s' Support", 'gd'))
           ->setMessage($message);
       }
     }

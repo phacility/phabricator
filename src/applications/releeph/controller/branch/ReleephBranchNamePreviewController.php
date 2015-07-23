@@ -13,9 +13,11 @@ final class ReleephBranchNamePreviewController
       $template = ReleephBranchTemplate::getDefaultTemplate();
     }
 
-    $arc_project_id = $request->getInt('arcProjectID');
+    $repository_phid = $request->getInt('repositoryPHID');
     $fake_commit_handle =
-      ReleephBranchTemplate::getFakeCommitHandleFor($arc_project_id);
+      ReleephBranchTemplate::getFakeCommitHandleFor(
+        $repository_phid,
+        $request->getUser());
 
     list($name, $errors) = id(new ReleephBranchTemplate())
       ->setCommitHandle($fake_commit_handle)

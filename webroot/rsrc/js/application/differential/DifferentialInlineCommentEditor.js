@@ -19,6 +19,7 @@ JX.install('DifferentialInlineCommentEditor', {
   members : {
     _uri : null,
     _undoText : null,
+    _completed: false,
     _skipOverInlineCommentRows : function(node) {
       // TODO: Move this semantic information out of class names.
       while (node && node.className.indexOf('inline') !== -1) {
@@ -32,16 +33,37 @@ JX.install('DifferentialInlineCommentEditor', {
         on_right : this.getOnRight(),
         id : this.getID(),
         number : this.getLineNumber(),
-        is_new : this.getIsNew(),
+        is_new : (this.getIsNew() ? 1 : 0),
         length : this.getLength(),
-        changeset : this.getChangeset(),
-        text : this.getText() || ''
+        changesetID : this.getChangesetID(),
+        text : this.getText() || '',
+        renderer: this.getRenderer(),
+        replyToCommentPHID: this.getReplyToCommentPHID() || '',
       };
     },
     _draw : function(content, exact_row) {
       var row = this.getRow();
       var table = this.getTable();
       var target = exact_row ? row : this._skipOverInlineCommentRows(row);
+
+      function copyRows(dst, src, before) {
+        var rows = JX.DOM.scry(src, 'tr');
+        for (var ii = 0; ii < rows.length; ii++) {
+
+          // Find the table this <tr /> belongs to. If it's a sub-table, like a
+          // table in an inline comment, don't copy it.
+          if (JX.DOM.findAbove(rows[ii], 'table') !== src) {
+            continue;
+          }
+
+          if (before) {
+            dst.insertBefore(rows[ii], before);
+          } else {
+            dst.appendChild(rows[ii]);
+          }
+        }
+        return rows;
+      }
 
       return copyRows(table, content, target);
     },
@@ -52,11 +74,17 @@ JX.install('DifferentialInlineCommentEditor', {
           JX.DOM.remove(rows[ii]);
         }
       }
+      JX.DifferentialInlineCommentEditor._undoRows = [];
     },
     _undo : function() {
       this._removeUndoLink();
 
-      this.setText(this._undoText);
+      if (this._undoText) {
+        this.setText(this._undoText);
+      } else {
+        this.setOperation('undelete');
+      }
+
       this.start();
     },
     _registerUndoListener : function() {
@@ -125,6 +153,8 @@ JX.install('DifferentialInlineCommentEditor', {
         'inline-edit-form',
         onsubmit);
     },
+
+
     _didCompleteWorkflow : function(response) {
       var op = this.getOperation();
 
@@ -134,32 +164,42 @@ JX.install('DifferentialInlineCommentEditor', {
         this._draw(JX.$H(response.markup).getNode());
       }
 
-      // These operations remove the old row (edit adds a new row first).
-      var remove_old = (op == 'edit' || op == 'delete');
-      if (remove_old) {
-        JX.DOM.remove(this.getRow());
-        var other_rows = this.getOtherRows();
-        for(var i = 0; i < other_rows.length; ++i) {
-          JX.DOM.remove(other_rows[i]);
-        }
+      if (op == 'delete' || op == 'refdelete') {
+        this._undoText = null;
+        this._drawUndo();
+      } else {
+        this._removeUndoLink();
       }
 
-      // Once the user saves something, get rid of the 'undo' option. A
-      // particular case where we need this is saving a delete, when we might
-      // otherwise leave around an 'undo' for an earlier edit to the same
-      // comment.
-      this._removeUndoLink();
+      // These operations remove the old row (edit adds a new row first).
+      var remove_old = (op == 'edit' || op == 'delete' || op == 'refdelete');
+      if (remove_old) {
+        this._setRowState('hidden');
+      }
+
+      if (op == 'undelete') {
+        this._setRowState('visible');
+      }
+
+      this._completed = true;
 
       JX.Stratcom.invoke('differential-inline-comment-update');
       this.invoke('done');
     },
+
+
     _didCancelWorkflow : function() {
       this.invoke('done');
 
-      var op = this.getOperation();
-      if (op == 'delete') {
-        // No undo for delete, we prompt the user explicitly.
-        return;
+      switch (this.getOperation()) {
+        case 'delete':
+        case 'refdelete':
+          if (!this._completed) {
+            this._setRowState('visible');
+          }
+          return;
+        case 'undelete':
+          return;
       }
 
       var textarea;
@@ -188,6 +228,10 @@ JX.install('DifferentialInlineCommentEditor', {
       // Save the text so we can 'undo' back to it.
       this._undoText = text;
 
+      this._drawUndo();
+    },
+
+    _drawUndo: function() {
       var templates = this.getTemplates();
       var template = this.getOnRight() ? templates.r : templates.l;
       template = JX.$H(template).getNode();
@@ -210,21 +254,17 @@ JX.install('DifferentialInlineCommentEditor', {
       this._registerUndoListener();
 
       var data = this._buildRequestData();
-
       var op = this.getOperation();
 
-
-      if (op == 'delete') {
+      if (op == 'delete' || op == 'refdelete' || op == 'undelete') {
         this._setRowState('loading');
+
         var oncomplete = JX.bind(this, this._didCompleteWorkflow);
-        var onclose = JX.bind(this, function() {
-          this._setRowState('visible');
-          this._didCancelWorkflow();
-        });
+        var oncancel = JX.bind(this, this._didCancelWorkflow);
 
         new JX.Workflow(this._uri, data)
           .setHandler(oncomplete)
-          .setCloseHandler(onclose)
+          .setCloseHandler(oncancel)
           .start();
       } else {
         var handler = JX.bind(this, this._didContinueWorkflow);
@@ -239,7 +279,47 @@ JX.install('DifferentialInlineCommentEditor', {
       }
 
       return this;
+    },
+
+    deleteByID: function(id) {
+      var data = {
+        op: 'refdelete',
+        id: id
+      };
+
+      new JX.Workflow(this._uri, data)
+        .setHandler(JX.bind(this, function() {
+          this._didUpdate();
+        }))
+        .start();
+    },
+
+    toggleCheckbox: function(id, checkbox) {
+      var data = {
+        op: 'done',
+        id: id
+      };
+
+      new JX.Workflow(this._uri, data)
+        .setHandler(JX.bind(this, function(r) {
+          checkbox.checked = !checkbox.checked;
+
+          var comment = JX.DOM.findAbove(
+            checkbox,
+            'div',
+            'differential-inline-comment');
+          JX.DOM.alterClass(comment, 'inline-is-done', !!checkbox.checked);
+          JX.DOM.alterClass(comment, 'inline-state-is-draft', r.draftState);
+
+          this._didUpdate();
+        }))
+        .start();
+    },
+
+    _didUpdate: function() {
+      JX.Stratcom.invoke('differential-inline-comment-update');
     }
+
   },
 
   statics : {
@@ -259,17 +339,18 @@ JX.install('DifferentialInlineCommentEditor', {
   properties : {
     operation : null,
     row : null,
-    otherRows: [],
     table : null,
     onRight : null,
     ID : null,
     lineNumber : null,
-    changeset : null,
+    changesetID : null,
     length : null,
     isNew : null,
     text : null,
     templates : null,
-    originalText : null
+    originalText : null,
+    renderer: null,
+    replyToCommentPHID: null
   }
 
 });

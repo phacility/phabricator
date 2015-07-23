@@ -11,6 +11,10 @@ final class PhabricatorAuthFinishController
     return true;
   }
 
+  public function shouldAllowLegallyNonCompliantUsers() {
+    return true;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $viewer = $request->getUser();
@@ -70,7 +74,7 @@ final class PhabricatorAuthFinishController
     $request->clearCookie(PhabricatorCookies::COOKIE_NEXTURI);
     $request->clearCookie(PhabricatorCookies::COOKIE_HISEC);
 
-    if (!PhabricatorEnv::isValidLocalWebResource($next)) {
+    if (!PhabricatorEnv::isValidLocalURIForLink($next)) {
       $next = '/';
     }
 

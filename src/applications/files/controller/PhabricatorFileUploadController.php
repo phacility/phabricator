@@ -2,8 +2,11 @@
 
 final class PhabricatorFileUploadController extends PhabricatorFileController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function isGlobalDragAndDropUploadEnabled() {
+    return true;
+  }
+
+  public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
 
     $file = PhabricatorFile::initializeNewFile();
@@ -57,8 +60,7 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
         id(new AphrontFormFileControl())
           ->setLabel(pht('File'))
           ->setName('file')
-          ->setError($e_file)
-          ->setCaption($this->renderUploadLimit()))
+          ->setError($e_file))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
@@ -100,27 +102,6 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
       array(
         'title' => $title,
       ));
-  }
-
-  private function renderUploadLimit() {
-    $limit = PhabricatorEnv::getEnvConfig('storage.upload-size-limit');
-    $limit = phutil_parse_bytes($limit);
-    if ($limit) {
-      $formatted = phutil_format_bytes($limit);
-      return 'Maximum file size: '.$formatted;
-    }
-
-    $doc_href = PhabricatorEnv::getDocLink(
-      'Configuring File Upload Limits');
-    $doc_link = phutil_tag(
-      'a',
-      array(
-        'href'    => $doc_href,
-        'target'  => '_blank',
-      ),
-      'Configuring File Upload Limits');
-
-    return hsprintf('Upload limit is not configured, see %s.', $doc_link);
   }
 
 }

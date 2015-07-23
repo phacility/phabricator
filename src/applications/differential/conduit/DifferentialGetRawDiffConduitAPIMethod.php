@@ -11,17 +11,17 @@ final class DifferentialGetRawDiffConduitAPIMethod
     return pht('Retrieve a raw diff');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'diffID' => 'required diffID',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty string';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR_NOT_FOUND' => pht('Diff not found.'),
     );

@@ -50,6 +50,7 @@ final class PhabricatorSlowvoteEditController
     $v_description = $poll->getDescription();
     $v_responses = $poll->getResponseVisibility();
     $v_shuffle = $poll->getShuffle();
+    $v_space = $poll->getSpacePHID();
 
     $responses = $request->getArr('response');
     if ($request->isFormPost()) {
@@ -59,6 +60,8 @@ final class PhabricatorSlowvoteEditController
       $v_shuffle = (int)$request->getBool('shuffle');
       $v_view_policy = $request->getStr('viewPolicy');
       $v_projects = $request->getArr('projects');
+
+      $v_space = $request->getStr('spacePHID');
 
       if ($is_new) {
         $poll->setMethod($request->getInt('method'));
@@ -104,6 +107,10 @@ final class PhabricatorSlowvoteEditController
         ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
         ->setNewValue($v_view_policy);
 
+      $xactions[] = id(clone $template)
+        ->setTransactionType(PhabricatorTransactions::TYPE_SPACE)
+        ->setNewValue($v_space);
+
       if (empty($errors)) {
         $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
         $xactions[] = id(new PhabricatorSlowvoteTransaction())
@@ -145,12 +152,6 @@ final class PhabricatorSlowvoteEditController
         pht('Resolve issues and build consensus through '.
           'protracted deliberation.'));
 
-    if ($v_projects) {
-      $project_handles = $this->loadViewerHandles($v_projects);
-    } else {
-      $project_handles = array();
-    }
-
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendChild($instructions)
@@ -167,11 +168,11 @@ final class PhabricatorSlowvoteEditController
           ->setLabel(pht('Description'))
           ->setName('description')
           ->setValue($v_description))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Projects'))
           ->setName('projects')
-          ->setValue($project_handles)
+          ->setValue($v_projects)
           ->setDatasource(new PhabricatorProjectDatasource()));
 
     if ($is_new) {
@@ -256,7 +257,8 @@ final class PhabricatorSlowvoteEditController
           ->setName('viewPolicy')
           ->setPolicyObject($poll)
           ->setPolicies($policies)
-          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+          ->setSpacePHID($v_space))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($button)

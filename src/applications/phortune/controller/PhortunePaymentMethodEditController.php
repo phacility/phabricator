@@ -65,7 +65,7 @@ final class PhortunePaymentMethodEditController
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Edit Payment Method'))
-      ->appendChild($form);
+      ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($account->getName(), $account_uri);

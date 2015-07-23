@@ -15,14 +15,14 @@ final class PhabricatorHunksManagementMigrateWorkflow
     $saw_any_rows = false;
     $console = PhutilConsole::getConsole();
 
-    $table = new DifferentialHunkLegacy();
+    $table = new DifferentialLegacyHunk();
     foreach (new LiskMigrationIterator($table) as $hunk) {
       $saw_any_rows = true;
 
       $id = $hunk->getID();
       $console->writeOut("%s\n", pht('Migrating hunk %d...', $id));
 
-      $new_hunk = id(new DifferentialHunkModern())
+      $new_hunk = id(new DifferentialModernHunk())
         ->setChangesetID($hunk->getChangesetID())
         ->setOldOffset($hunk->getOldOffset())
         ->setOldLen($hunk->getOldLen())
@@ -48,8 +48,6 @@ final class PhabricatorHunksManagementMigrateWorkflow
             new PhutilNumber($diff_len),
             sprintf('%.1f%%', 100 * ($diff_len / $old_len))));
       }
-
-      break;
     }
 
     if ($saw_any_rows) {

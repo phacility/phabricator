@@ -7,10 +7,10 @@ final class FlagEditConduitAPIMethod extends FlagConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Create or modify a flag.';
+    return pht('Create or modify a flag.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'objectPHID' => 'required phid',
       'color'      => 'optional int',
@@ -18,13 +18,8 @@ final class FlagEditConduitAPIMethod extends FlagConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

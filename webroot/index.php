@@ -13,6 +13,8 @@ PhabricatorStartup::didStartup();
 
 try {
   PhabricatorStartup::loadCoreLibraries();
+  PhabricatorCaches::destroyRequestCache();
+
   $sink = new AphrontPHPHTTPSink();
 
   try {
@@ -31,7 +33,6 @@ try {
       throw $ex;
     }
   }
-
 } catch (Exception $ex) {
   PhabricatorStartup::didEncounterFatalException('Core Exception', $ex, false);
 }

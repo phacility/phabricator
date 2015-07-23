@@ -52,9 +52,6 @@ final class AlmanacNetworkEditor
       case AlmanacNetworkTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
         return;
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -66,8 +63,6 @@ final class AlmanacNetworkEditor
 
     switch ($xaction->getTransactionType()) {
       case AlmanacNetworkTransaction::TYPE_NAME:
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;
     }
 
@@ -82,7 +77,7 @@ final class AlmanacNetworkEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
-      case AlmanacServiceTransaction::TYPE_NAME:
+      case AlmanacNetworkTransaction::TYPE_NAME:
         $missing = $this->validateIsEmptyTextField(
           $object->getName(),
           $xactions);

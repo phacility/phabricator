@@ -1,12 +1,12 @@
 <?php
 
-echo "Migrating differential dependencies to edges...\n";
+echo pht('Migrating differential dependencies to edges...')."\n";
 $table = new DifferentialRevision();
 $table->openTransaction();
 
 foreach (new LiskMigrationIterator($table) as $rev) {
   $id = $rev->getID();
-  echo "Revision {$id}: ";
+  echo pht('Revision %d: ', $id);
 
   $deps = $rev->getAttachedPHIDs(DifferentialRevisionPHIDType::TYPECONST);
   if (!$deps) {
@@ -22,8 +22,8 @@ foreach (new LiskMigrationIterator($table) as $rev) {
       $dep);
   }
   $editor->save();
-  echo "OKAY\n";
+  echo pht('OKAY')."\n";
 }
 
 $table->saveTransaction();
-echo "Done.\n";
+echo pht('Done.')."\n";

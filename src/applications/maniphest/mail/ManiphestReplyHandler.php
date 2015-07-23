@@ -1,187 +1,39 @@
 <?php
 
-final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
+final class ManiphestReplyHandler
+  extends PhabricatorApplicationTransactionReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof ManiphestTask)) {
-      throw new Exception('Mail receiver is not a ManiphestTask!');
+      throw new Exception(pht('Mail receiver is not a %s!', 'ManiphestTask'));
     }
   }
 
-  public function getPrivateReplyHandlerEmailAddress(
-    PhabricatorObjectHandle $handle) {
-    return $this->getDefaultPrivateReplyHandlerEmailAddress($handle, 'T');
+  public function getObjectPrefix() {
+    return 'T';
   }
 
-  public function getPublicReplyHandlerEmailAddress() {
-    return $this->getDefaultPublicReplyHandlerEmailAddress('T');
-  }
+  protected function didReceiveMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    $body) {
 
-  public function getReplyHandlerDomain() {
-    return PhabricatorEnv::getEnvConfig(
-      'metamta.maniphest.reply-handler-domain');
-  }
-
-  public function getReplyHandlerInstructions() {
-    if ($this->supportsReplies()) {
-      return pht(
-        'Reply to comment or attach files, or !close, !claim, '.
-        '!unsubscribe or !assign <username>.');
-    } else {
-      return null;
-    }
-  }
-
-  protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
-    // NOTE: We'll drop in here on both the "reply to a task" and "create a
-    // new task" workflows! Make sure you test both if you make changes!
-
-    $task = $this->getMailReceiver();
-
-    $is_new_task = !$task->getID();
-
-    $user = $this->getActor();
-
-    $body_data = $mail->parseBody();
-    $body = $body_data['body'];
-    $body = $this->enhanceBodyWithAttachments($body, $mail->getAttachments());
+    $object = $this->getMailReceiver();
+    $is_new = !$object->getID();
 
     $xactions = array();
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_EMAIL,
-      array(
-        'id' => $mail->getID(),
-      ));
 
-    $template = new ManiphestTransaction();
-
-    $is_unsub = false;
-    if ($is_new_task) {
-      $task = ManiphestTask::initializeNewTask($user);
-
-      $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
-        ->setNewValue(ManiphestTaskStatus::getDefaultStatus());
-
-      $xactions[] = id(new ManiphestTransaction())
+    if ($is_new) {
+      $xactions[] = $object->getApplicationTransactionTemplate()
         ->setTransactionType(ManiphestTransaction::TYPE_TITLE)
         ->setNewValue(nonempty($mail->getSubject(), pht('Untitled Task')));
 
-      $xactions[] = id(new ManiphestTransaction())
+      $xactions[] = $object->getApplicationTransactionTemplate()
         ->setTransactionType(ManiphestTransaction::TYPE_DESCRIPTION)
         ->setNewValue($body);
-
-    } else {
-
-      $command = $body_data['command'];
-      $command_value = $body_data['command_value'];
-
-      $ttype = PhabricatorTransactions::TYPE_COMMENT;
-      $new_value = null;
-      switch ($command) {
-        case 'close':
-          $ttype = ManiphestTransaction::TYPE_STATUS;
-          $new_value = ManiphestTaskStatus::getDefaultClosedStatus();
-          break;
-        case 'claim':
-          $ttype = ManiphestTransaction::TYPE_OWNER;
-          $new_value = $user->getPHID();
-          break;
-        case 'assign':
-          $ttype = ManiphestTransaction::TYPE_OWNER;
-          if ($command_value) {
-            $assign_users = id(new PhabricatorPeopleQuery())
-              ->setViewer($user)
-              ->withUsernames(array($command_value))
-              ->execute();
-            if ($assign_users) {
-              $assign_user = head($assign_users);
-              $new_value = $assign_user->getPHID();
-            }
-          }
-          // assign to the user by default
-          if (!$new_value) {
-            $new_value = $user->getPHID();
-          }
-          break;
-        case 'unsubscribe':
-          $is_unsub = true;
-          $ttype = PhabricatorTransactions::TYPE_SUBSCRIBERS;
-          $ccs = $task->getSubscriberPHIDs();
-          foreach ($ccs as $k => $phid) {
-            if ($phid == $user->getPHID()) {
-              unset($ccs[$k]);
-            }
-          }
-          $new_value = array('=' => array_values($ccs));
-          break;
-      }
-
-      if ($ttype != PhabricatorTransactions::TYPE_COMMENT) {
-        $xaction = clone $template;
-        $xaction->setTransactionType($ttype);
-        $xaction->setNewValue($new_value);
-        $xactions[] = $xaction;
-      }
-
-      if (strlen($body)) {
-        $xaction = clone $template;
-        $xaction->setTransactionType(PhabricatorTransactions::TYPE_COMMENT);
-        $xaction->attachComment(
-          id(new ManiphestTransactionComment())
-            ->setContent($body));
-        $xactions[] = $xaction;
-      }
     }
 
-    $ccs = $mail->loadCCPHIDs();
-    $old_ccs = $task->getSubscriberPHIDs();
-    $new_ccs = array_merge($old_ccs, $ccs);
-    if (!$is_unsub) {
-      $new_ccs[] = $user->getPHID();
-    }
-    $new_ccs = array_unique($new_ccs);
-
-    if (array_diff($new_ccs, $old_ccs)) {
-      $cc_xaction = clone $template;
-      $cc_xaction->setTransactionType(
-        PhabricatorTransactions::TYPE_SUBSCRIBERS);
-      $cc_xaction->setNewValue(array('=' => $new_ccs));
-      $xactions[] = $cc_xaction;
-    }
-
-    $event = new PhabricatorEvent(
-      PhabricatorEventType::TYPE_MANIPHEST_WILLEDITTASK,
-      array(
-        'task'          => $task,
-        'mail'          => $mail,
-        'new'           => $is_new_task,
-        'transactions'  => $xactions,
-      ));
-    $event->setUser($user);
-    PhutilEventEngine::dispatchEvent($event);
-
-    $task = $event->getValue('task');
-    $xactions = $event->getValue('transactions');
-
-    $editor = id(new ManiphestTransactionEditor())
-      ->setActor($user)
-      ->setParentMessageID($mail->getMessageID())
-      ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
-      ->setContinueOnNoEffect(true)
-      ->setContinueOnMissingFields(true)
-      ->setContentSource($content_source)
-      ->applyTransactions($task, $xactions);
-
-    $event = new PhabricatorEvent(
-      PhabricatorEventType::TYPE_MANIPHEST_DIDEDITTASK,
-      array(
-        'task'          => $task,
-        'new'           => $is_new_task,
-        'transactions'  => $xactions,
-      ));
-    $event->setUser($user);
-    PhutilEventEngine::dispatchEvent($event);
+    return $xactions;
   }
+
 
 }

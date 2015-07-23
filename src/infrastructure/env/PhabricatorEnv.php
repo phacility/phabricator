@@ -48,13 +48,14 @@
  * @task test     Unit Test Support
  * @task internal Internals
  */
-final class PhabricatorEnv {
+final class PhabricatorEnv extends Phobject {
 
   private static $sourceStack;
   private static $repairSource;
   private static $overrideSource;
   private static $requestBaseURI;
   private static $cache;
+  private static $localeCode;
 
   /**
    * @phutil-external-symbol class PhabricatorStartup
@@ -87,7 +88,7 @@ final class PhabricatorEnv {
 
     // Force a valid timezone. If both PHP and Phabricator configuration are
     // invalid, use UTC.
-    $tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
+    $tz = self::getEnvConfig('phabricator.timezone');
     if ($tz) {
       @date_default_timezone_set($tz);
     }
@@ -101,7 +102,7 @@ final class PhabricatorEnv {
     $phabricator_path = dirname(phutil_get_library_root('phabricator'));
     $support_path = $phabricator_path.'/support/bin';
     $env_path = $support_path.PATH_SEPARATOR.$env_path;
-    $append_dirs = PhabricatorEnv::getEnvConfig('environment.append-paths');
+    $append_dirs = self::getEnvConfig('environment.append-paths');
     if (!empty($append_dirs)) {
       $append_path = implode(PATH_SEPARATOR, $append_dirs);
       $env_path = $env_path.PATH_SEPARATOR.$append_path;
@@ -112,12 +113,57 @@ final class PhabricatorEnv {
     // subprocess environments.
     $_ENV['PATH'] = $env_path;
 
+
+    // If an instance identifier is defined, write it into the environment so
+    // it's available to subprocesses.
+    $instance = self::getEnvConfig('cluster.instance');
+    if (strlen($instance)) {
+      putenv('PHABRICATOR_INSTANCE='.$instance);
+      $_ENV['PHABRICATOR_INSTANCE'] = $instance;
+    }
+
     PhabricatorEventEngine::initialize();
 
-    $translation = PhabricatorEnv::newObjectFromConfig('translation.provider');
-    PhutilTranslator::getInstance()
-      ->setLanguage($translation->getLanguage())
-      ->addTranslations($translation->getCleanTranslations());
+    // TODO: Add a "locale.default" config option once we have some reasonable
+    // defaults which aren't silly nonsense.
+    self::setLocaleCode('en_US');
+  }
+
+  public static function beginScopedLocale($locale_code) {
+    return new PhabricatorLocaleScopeGuard($locale_code);
+  }
+
+  public static function getLocaleCode() {
+    return self::$localeCode;
+  }
+
+  public static function setLocaleCode($locale_code) {
+    if (!$locale_code) {
+      return;
+    }
+
+    if ($locale_code == self::$localeCode) {
+      return;
+    }
+
+    try {
+      $locale = PhutilLocale::loadLocale($locale_code);
+      $translations = PhutilTranslation::getTranslationMapForLocale(
+        $locale_code);
+
+      $override = self::getEnvConfig('translation.override');
+      if (!is_array($override)) {
+        $override = array();
+      }
+
+      PhutilTranslator::getInstance()
+        ->setLocale($locale)
+        ->setTranslations($override + $translations);
+
+      self::$localeCode = $locale_code;
+    } catch (Exception $ex) {
+      // Just ignore this; the user likely has an out-of-date locale code.
+    }
   }
 
   private static function buildConfigurationSourceStack() {
@@ -144,7 +190,7 @@ final class PhabricatorEnv {
     // If the install overrides the database adapter, we might need to load
     // the database adapter class before we can push on the database config.
     // This config is locked and can't be edited from the web UI anyway.
-    foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
+    foreach (self::getEnvConfig('load-libraries') as $library) {
       phutil_load_library($library);
     }
 
@@ -231,17 +277,103 @@ final class PhabricatorEnv {
   }
 
   public static function calculateEnvironmentHash() {
-    $keys = array_keys(self::getAllConfigKeys());
-    sort($keys);
-
-    $skip_keys = self::getEnvConfig('phd.variant-config');
-    $keys = array_diff($keys, $skip_keys);
+    $keys = self::getKeysForConsistencyCheck();
 
     $values = array();
     foreach ($keys as $key) {
       $values[$key] = self::getEnvConfigIfExists($key);
     }
+
     return PhabricatorHash::digest(json_encode($values));
+  }
+
+  /**
+   * Returns a summary of non-default configuration settings to allow the
+   * "daemons and web have different config" setup check to list divergent
+   * keys.
+   */
+  public static function calculateEnvironmentInfo() {
+    $keys = self::getKeysForConsistencyCheck();
+
+    $info = array();
+
+    $defaults = id(new PhabricatorConfigDefaultSource())->getAllKeys();
+    foreach ($keys as $key) {
+      $current = self::getEnvConfigIfExists($key);
+      $default = idx($defaults, $key, null);
+      if ($current !== $default) {
+        $info[$key] = PhabricatorHash::digestForIndex(json_encode($current));
+      }
+    }
+
+    $keys_hash = array_keys($defaults);
+    sort($keys_hash);
+    $keys_hash = implode("\0", $keys_hash);
+    $keys_hash = PhabricatorHash::digestForIndex($keys_hash);
+
+    return array(
+      'version' => 1,
+      'keys' => $keys_hash,
+      'values' => $info,
+    );
+  }
+
+
+  /**
+   * Compare two environment info summaries to generate a human-readable
+   * list of discrepancies.
+   */
+  public static function compareEnvironmentInfo(array $u, array $v) {
+    $issues = array();
+
+    $uversion = idx($u, 'version');
+    $vversion = idx($v, 'version');
+    if ($uversion != $vversion) {
+      $issues[] = pht(
+        'The two configurations were generated by different versions '.
+        'of Phabricator.');
+
+      // These may not be comparable, so stop here.
+      return $issues;
+    }
+
+    if ($u['keys'] !== $v['keys']) {
+      $issues[] = pht(
+        'The two configurations have different keys. This usually means '.
+        'that they are running different versions of Phabricator.');
+    }
+
+    $uval = idx($u, 'values', array());
+    $vval = idx($v, 'values', array());
+
+    $all_keys = array_keys($uval + $vval);
+
+    foreach ($all_keys as $key) {
+      $uv = idx($uval, $key);
+      $vv = idx($vval, $key);
+      if ($uv !== $vv) {
+        if ($uv && $vv) {
+          $issues[] = pht(
+            'The configuration key "%s" is set in both configurations, but '.
+            'set to different values.',
+            $key);
+        } else {
+          $issues[] = pht(
+            'The configuration key "%s" is set in only one configuration.',
+            $key);
+        }
+      }
+    }
+
+    return $issues;
+  }
+
+  private static function getKeysForConsistencyCheck() {
+    $keys = array_keys(self::getAllConfigKeys());
+    sort($keys);
+
+    $skip_keys = self::getEnvConfig('phd.variant-config');
+    return array_diff($keys, $skip_keys);
   }
 
 
@@ -269,7 +401,10 @@ final class PhabricatorEnv {
       self::$cache[$key] = $result[$key];
       return $result[$key];
     } else {
-      throw new Exception("No config value specified for key '{$key}'.");
+      throw new Exception(
+        pht(
+          "No config value specified for key '%s'.",
+          $key));
     }
   }
 
@@ -387,7 +522,9 @@ final class PhabricatorEnv {
 
     if (!$base_uri) {
       throw new Exception(
-        "Define 'phabricator.base-uri' in your configuration to continue.");
+        pht(
+          "Define '%s' in your configuration to continue.",
+          'phabricator.base-uri'));
     }
 
     return $base_uri;
@@ -433,8 +570,9 @@ final class PhabricatorEnv {
     if ($stack_key !== $key) {
       self::$sourceStack->pushSource($source);
       throw new Exception(
-        'Scoped environments were destroyed in a diffent order than they '.
-        'were initialized.');
+        pht(
+          'Scoped environments were destroyed in a different order than they '.
+          'were initialized.'));
     }
   }
 
@@ -443,11 +581,11 @@ final class PhabricatorEnv {
 
 
   /**
-   * Detect if a URI satisfies either @{method:isValidLocalWebResource} or
-   * @{method:isValidRemoteWebResource}, i.e. is a page on this server or the
+   * Detect if a URI satisfies either @{method:isValidLocalURIForLink} or
+   * @{method:isValidRemoteURIForLink}, i.e. is a page on this server or the
    * URI of some other resource which has a valid protocol. This rejects
    * garbage URIs and URIs with protocols which do not appear in the
-   * ##uri.allowed-protocols## configuration, notably 'javascript:' URIs.
+   * `uri.allowed-protocols` configuration, notably 'javascript:' URIs.
    *
    * NOTE: This method is generally intended to reject URIs which it may be
    * unsafe to put in an "href" link attribute.
@@ -456,9 +594,9 @@ final class PhabricatorEnv {
    * @return bool True if the URI identifies a web resource.
    * @task uri
    */
-  public static function isValidWebResource($uri) {
-    return self::isValidLocalWebResource($uri) ||
-           self::isValidRemoteWebResource($uri);
+  public static function isValidURIForLink($uri) {
+    return self::isValidLocalURIForLink($uri) ||
+           self::isValidRemoteURIForLink($uri);
   }
 
 
@@ -472,7 +610,7 @@ final class PhabricatorEnv {
    * @return bool True if the URI identifies a local page.
    * @task uri
    */
-  public static function isValidLocalWebResource($uri) {
+  public static function isValidLocalURIForLink($uri) {
     $uri = (string)$uri;
 
     if (!strlen($uri)) {
@@ -508,27 +646,172 @@ final class PhabricatorEnv {
 
 
   /**
-   * Detect if a URI identifies some valid remote resource.
+   * Detect if a URI identifies some valid linkable remote resource.
    *
    * @param string URI to test.
    * @return bool True if a URI idenfies a remote resource with an allowed
    *              protocol.
    * @task uri
    */
-  public static function isValidRemoteWebResource($uri) {
-    $uri = (string)$uri;
-
-    $proto = id(new PhutilURI($uri))->getProtocol();
-    if (!$proto) {
+  public static function isValidRemoteURIForLink($uri) {
+    try {
+      self::requireValidRemoteURIForLink($uri);
+      return true;
+    } catch (Exception $ex) {
       return false;
     }
+  }
 
-    $allowed = self::getEnvConfig('uri.allowed-protocols');
-    if (empty($allowed[$proto])) {
-      return false;
+
+  /**
+   * Detect if a URI identifies a valid linkable remote resource, throwing a
+   * detailed message if it does not.
+   *
+   * A valid linkable remote resource can be safely linked or redirected to.
+   * This is primarily a protocol whitelist check.
+   *
+   * @param string URI to test.
+   * @return void
+   * @task uri
+   */
+  public static function requireValidRemoteURIForLink($uri) {
+    $uri = new PhutilURI($uri);
+
+    $proto = $uri->getProtocol();
+    if (!strlen($proto)) {
+      throw new Exception(
+        pht(
+          'URI "%s" is not a valid linkable resource. A valid linkable '.
+          'resource URI must specify a protocol.',
+          $uri));
     }
 
-    return true;
+    $protocols = self::getEnvConfig('uri.allowed-protocols');
+    if (!isset($protocols[$proto])) {
+      throw new Exception(
+        pht(
+          'URI "%s" is not a valid linkable resource. A valid linkable '.
+          'resource URI must use one of these protocols: %s.',
+          $uri,
+          implode(', ', array_keys($protocols))));
+    }
+
+    $domain = $uri->getDomain();
+    if (!strlen($domain)) {
+      throw new Exception(
+        pht(
+          'URI "%s" is not a valid linkable resource. A valid linkable '.
+          'resource URI must specify a domain.',
+          $uri));
+    }
+  }
+
+
+  /**
+   * Detect if a URI identifies a valid fetchable remote resource.
+   *
+   * @param string URI to test.
+   * @param list<string> Allowed protocols.
+   * @return bool True if the URI is a valid fetchable remote resource.
+   * @task uri
+   */
+  public static function isValidRemoteURIForFetch($uri, array $protocols) {
+    try {
+      self::requireValidRemoteURIForFetch($uri, $protocols);
+      return true;
+    } catch (Exception $ex) {
+      return false;
+    }
+  }
+
+
+  /**
+   * Detect if a URI identifies a valid fetchable remote resource, throwing
+   * a detailed message if it does not.
+   *
+   * A valid fetchable remote resource can be safely fetched using a request
+   * originating on this server. This is a primarily an address check against
+   * the outbound address blacklist.
+   *
+   * @param string URI to test.
+   * @param list<string> Allowed protocols.
+   * @return pair<string, string> Pre-resolved URI and domain.
+   * @task uri
+   */
+  public static function requireValidRemoteURIForFetch(
+    $uri,
+    array $protocols) {
+
+    $uri = new PhutilURI($uri);
+
+    $proto = $uri->getProtocol();
+    if (!strlen($proto)) {
+      throw new Exception(
+        pht(
+          'URI "%s" is not a valid fetchable resource. A valid fetchable '.
+          'resource URI must specify a protocol.',
+          $uri));
+    }
+
+    $protocols = array_fuse($protocols);
+    if (!isset($protocols[$proto])) {
+      throw new Exception(
+        pht(
+          'URI "%s" is not a valid fetchable resource. A valid fetchable '.
+          'resource URI must use one of these protocols: %s.',
+          $uri,
+          implode(', ', array_keys($protocols))));
+    }
+
+    $domain = $uri->getDomain();
+    if (!strlen($domain)) {
+      throw new Exception(
+        pht(
+          'URI "%s" is not a valid fetchable resource. A valid fetchable '.
+          'resource URI must specify a domain.',
+          $uri));
+    }
+
+    $addresses = gethostbynamel($domain);
+    if (!$addresses) {
+      throw new Exception(
+        pht(
+          'URI "%s" is not a valid fetchable resource. The domain "%s" could '.
+          'not be resolved.',
+          $uri,
+          $domain));
+    }
+
+    foreach ($addresses as $address) {
+      if (self::isBlacklistedOutboundAddress($address)) {
+        throw new Exception(
+          pht(
+            'URI "%s" is not a valid fetchable resource. The domain "%s" '.
+            'resolves to the address "%s", which is blacklisted for '.
+            'outbound requests.',
+            $uri,
+            $domain,
+            $address));
+      }
+    }
+
+    $resolved_uri = clone $uri;
+    $resolved_uri->setDomain(head($addresses));
+
+    return array($resolved_uri, $domain);
+  }
+
+
+  /**
+   * Determine if an IP address is in the outbound address blacklist.
+   *
+   * @param string IP address.
+   * @return bool True if the address is blacklisted.
+   */
+  public static function isBlacklistedOutboundAddress($address) {
+    $blacklist = self::getEnvConfig('security.outbound-blacklist');
+
+    return PhutilCIDRList::newList($blacklist)->containsAddress($address);
   }
 
   public static function isClusterRemoteAddress() {
@@ -544,7 +827,7 @@ final class PhabricatorEnv {
   }
 
   public static function isClusterAddress($address) {
-    $cluster_addresses = PhabricatorEnv::getEnvConfig('cluster.addresses');
+    $cluster_addresses = self::getEnvConfig('cluster.addresses');
     if (!$cluster_addresses) {
       throw new Exception(
         pht(

@@ -3,23 +3,18 @@
 final class PhabricatorApplicationDetailViewController
   extends PhabricatorApplicationsController {
 
-  private $application;
 
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->application = $data['application'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $application = $request->getURIData('application');
 
     $selected = id(new PhabricatorApplicationQuery())
-      ->setViewer($user)
-      ->withClasses(array($this->application))
+      ->setViewer($viewer)
+      ->withClasses(array($application))
       ->executeOne();
     if (!$selected) {
       return new Aphront404Response();
@@ -32,7 +27,7 @@ final class PhabricatorApplicationDetailViewController
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
-      ->setUser($user)
+      ->setUser($viewer)
       ->setPolicyObject($selected);
 
     if ($selected->isInstalled()) {
@@ -41,17 +36,30 @@ final class PhabricatorApplicationDetailViewController
       $header->setStatus('fa-ban', 'dark', pht('Uninstalled'));
     }
 
-    $actions = $this->buildActionView($user, $selected);
+    $actions = $this->buildActionView($viewer, $selected);
     $properties = $this->buildPropertyView($selected, $actions);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    $configs =
+      PhabricatorApplicationConfigurationPanel::loadAllPanelsForApplication(
+        $selected);
+
+    $panels = array();
+    foreach ($configs as $config) {
+      $config->setViewer($viewer);
+      $config->setApplication($selected);
+
+      $panels[] = $config->buildConfigurationPagePanel();
+    }
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $object_box,
+        $panels,
       ),
       array(
         'title' => $title,
@@ -129,14 +137,6 @@ final class PhabricatorApplicationDetailViewController
     $view = id(new PhabricatorActionListView())
       ->setUser($user)
       ->setObjectURI($this->getRequest()->getRequestURI());
-
-    if ($selected->getHelpURI()) {
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Help / Documentation'))
-          ->setIcon('fa-life-ring')
-          ->setHref($selected->getHelpURI()));
-    }
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $user,

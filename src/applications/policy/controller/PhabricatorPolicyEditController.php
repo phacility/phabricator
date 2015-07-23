@@ -3,15 +3,34 @@
 final class PhabricatorPolicyEditController
   extends PhabricatorPolicyController {
 
-  private $phid;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
-  public function willProcessRequest(array $data) {
-    $this->phid = idx($data, 'phid');
-  }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $object_phid = $request->getURIData('objectPHID');
+    if ($object_phid) {
+      $object = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($object_phid))
+        ->executeOne();
+      if (!$object) {
+        return new Aphront404Response();
+      }
+    } else {
+      $object_type = $request->getURIData('objectType');
+      if (!$object_type) {
+        $object_type = $request->getURIData('templateType');
+      }
+
+      $phid_types = PhabricatorPHIDType::getAllInstalledTypes($viewer);
+      if (empty($phid_types[$object_type])) {
+        return new Aphront404Response();
+      }
+      $object = $phid_types[$object_type]->newObject();
+      if (!$object) {
+        return new Aphront404Response();
+      }
+    }
 
     $action_options = array(
       PhabricatorPolicy::ACTION_ALLOW => pht('Allow'),
@@ -21,6 +40,13 @@ final class PhabricatorPolicyEditController
     $rules = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorPolicyRule')
       ->loadObjects();
+
+    foreach ($rules as $key => $rule) {
+      if (!$rule->canApplyToObject($object)) {
+        unset($rules[$key]);
+      }
+    }
+
     $rules = msort($rules, 'getRuleOrder');
 
     $default_rule = array(
@@ -29,10 +55,11 @@ final class PhabricatorPolicyEditController
       'value' => null,
     );
 
-    if ($this->phid) {
+    $phid = $request->getURIData('phid');
+    if ($phid) {
       $policies = id(new PhabricatorPolicyQuery())
         ->setViewer($viewer)
-        ->withPHIDs(array($this->phid))
+        ->withPHIDs(array($phid))
         ->execute();
       if (!$policies) {
         return new Aphront404Response();
@@ -52,9 +79,12 @@ final class PhabricatorPolicyEditController
     $errors = array();
     if ($request->isFormPost()) {
       $data = $request->getStr('rules');
-      $data = @json_decode($data, true);
-      if (!is_array($data)) {
-        throw new Exception('Failed to JSON decode rule data!');
+      try {
+        $data = phutil_json_decode($data);
+      } catch (PhutilJSONParserException $ex) {
+        throw new PhutilProxyException(
+          pht('Failed to JSON decode rule data!'),
+          $ex);
       }
 
       $rule_data = array();
@@ -65,12 +95,12 @@ final class PhabricatorPolicyEditController
           case 'deny':
             break;
           default:
-            throw new Exception("Invalid action '{$action}'!");
+            throw new Exception(pht("Invalid action '%s'!", $action));
         }
 
         $rule_class = idx($rule, 'rule');
         if (empty($rules[$rule_class])) {
-          throw new Exception("Invalid rule class '{$rule_class}'!");
+          throw new Exception(pht("Invalid rule class '%s'!", $rule_class));
         }
 
         $rule_obj = $rules[$rule_class];
@@ -138,7 +168,7 @@ final class PhabricatorPolicyEditController
       ));
 
     if ($errors) {
-      $errors = id(new AphrontErrorView())
+      $errors = id(new PHUIInfoView())
         ->setErrors($errors);
     }
 
@@ -165,8 +195,7 @@ final class PhabricatorPolicyEditController
                 'mustcapture' => true,
               ),
               pht('New Rule')))
-          ->setDescription(
-            pht('These rules are processed in order.'))
+          ->setDescription(pht('These rules are processed in order.'))
           ->setContent(javelin_tag(
             'table',
             array(
@@ -205,10 +234,18 @@ final class PhabricatorPolicyEditController
         'defaultRule' => $default_rule,
       ));
 
+    $title = pht('Custom Policy');
+
+    $key = $request->getStr('capability');
+    if ($key) {
+      $capability = PhabricatorPolicyCapability::getCapabilityByKey($key);
+      $title = pht('Custom "%s" Policy', $capability->getCapabilityName());
+    }
+
     $dialog = id(new AphrontDialogView())
       ->setWidth(AphrontDialogView::WIDTH_FULL)
       ->setUser($viewer)
-      ->setTitle(pht('Edit Policy'))
+      ->setTitle($title)
       ->appendChild($form)
       ->addSubmitButton(pht('Save Policy'))
       ->addCancelButton('#');

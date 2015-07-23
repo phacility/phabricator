@@ -53,19 +53,12 @@ final class PholioMockQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new PholioMock();
+  }
+
   protected function loadPage() {
-    $table = new PholioMock();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    $mocks = $table->loadAllFromArray($data);
+    $mocks = $this->loadStandardPage(new PholioMock());
 
     if ($mocks && $this->needImages) {
       self::loadImages($this->getViewer(), $mocks, $this->needInlineComments);
@@ -82,40 +75,38 @@ final class PholioMockQuery
     return $mocks;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'id IN (%Ld)',
+        $conn,
+        'mock.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'phid IN (%Ls)',
+        $conn,
+        'mock.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->authorPHIDs) {
+    if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'authorPHID in (%Ls)',
+        $conn,
+        'mock.authorPHID in (%Ls)',
         $this->authorPHIDs);
     }
 
-    if ($this->statuses) {
+    if ($this->statuses !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'status IN (%Ls)',
+        $conn,
+        'mock.status IN (%Ls)',
         $this->statuses);
     }
 
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public static function loadImages(
@@ -176,6 +167,10 @@ final class PholioMockQuery
 
   public function getQueryApplicationClass() {
     return 'PhabricatorPholioApplication';
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'mock';
   }
 
 }

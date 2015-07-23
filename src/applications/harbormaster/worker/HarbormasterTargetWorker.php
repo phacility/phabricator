@@ -30,7 +30,7 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
     return $target;
   }
 
-  public function doWork() {
+  protected function doWork() {
     $target = $this->loadBuildTarget();
     $build = $target->getBuild();
     $viewer = $this->getViewer();
@@ -59,7 +59,7 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
       $target->setTargetStatus($next_status);
 
       if ($target->isComplete()) {
-        $target->setDateCompleted(time());
+        $target->setDateCompleted(PhabricatorTime::getNow());
       }
 
       $target->save();
@@ -70,12 +70,12 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
     } catch (HarbormasterBuildFailureException $ex) {
       // A build step wants to fail explicitly.
       $target->setTargetStatus(HarbormasterBuildTarget::STATUS_FAILED);
-      $target->setDateCompleted(time());
+      $target->setDateCompleted(PhabricatorTime::getNow());
       $target->save();
     } catch (HarbormasterBuildAbortedException $ex) {
       // A build step is aborting because the build has been restarted.
       $target->setTargetStatus(HarbormasterBuildTarget::STATUS_ABORTED);
-      $target->setDateCompleted(time());
+      $target->setDateCompleted(PhabricatorTime::getNow());
       $target->save();
     } catch (Exception $ex) {
       phlog($ex);

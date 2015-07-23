@@ -3,11 +3,11 @@
 $table = new PhabricatorRepositoryAuditRequest();
 $conn_w = $table->establishConnection('w');
 
-echo "Migrating Audit subscribers to subscriptions...\n";
+echo pht('Migrating Audit subscribers to subscriptions...')."\n";
 foreach (new LiskMigrationIterator($table) as $request) {
   $id = $request->getID();
 
-  echo "Migrating auditor {$id}...\n";
+  echo pht("Migrating audit %d...\n", $id);
 
   if ($request->getAuditStatus() != 'cc') {
     // This isn't a "subscriber", so skip it.
@@ -27,4 +27,4 @@ foreach (new LiskMigrationIterator($table) as $request) {
   $request->delete();
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

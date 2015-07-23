@@ -13,19 +13,21 @@ final class PhortuneCartViewController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $cart = id(new PhortuneCartQuery())
+    $authority = $this->loadMerchantAuthority();
+
+    $query = id(new PhortuneCartQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))
-      ->needPurchases(true)
-      ->executeOne();
+      ->needPurchases(true);
+
+    if ($authority) {
+      $query->withMerchantPHIDs(array($authority->getPHID()));
+    }
+
+    $cart = $query->executeOne();
     if (!$cart) {
       return new Aphront404Response();
     }
-
-    $can_admin = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $cart->getMerchant(),
-      PhabricatorPolicyCapability::CAN_EDIT);
 
     $cart_table = $this->buildCartContentTable($cart);
 
@@ -38,6 +40,31 @@ final class PhortuneCartViewController
     $error_view = null;
     $resume_uri = null;
     switch ($cart->getStatus()) {
+      case PhortuneCart::STATUS_READY:
+        if ($authority && $cart->getIsInvoice()) {
+          // We arrived here by following the ad-hoc invoice workflow, and
+          // are acting with merchant authority.
+
+          $checkout_uri = PhabricatorEnv::getURI($cart->getCheckoutURI());
+
+          $invoice_message = array(
+            pht(
+              'Manual invoices do not automatically notify recipients yet. '.
+              'Send the payer this checkout link:'),
+            ' ',
+            phutil_tag(
+              'a',
+              array(
+                'href' => $checkout_uri,
+              ),
+              $checkout_uri),
+          );
+
+          $error_view = id(new PHUIInfoView())
+            ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+            ->setErrors(array($invoice_message));
+        }
+        break;
       case PhortuneCart::STATUS_PURCHASING:
         if ($can_edit) {
           $resume_uri = $cart->getMetadataValue('provider.checkoutURI');
@@ -73,7 +100,7 @@ final class PhortuneCartViewController
         }
         break;
       case PhortuneCart::STATUS_REVIEW:
-        if ($can_admin) {
+        if ($authority) {
           $errors[] = pht(
             'This order has been flagged for manual review. Review the order '.
             'and choose %s to accept it or %s to reject it.',
@@ -86,10 +113,9 @@ final class PhortuneCartViewController
         }
         break;
       case PhortuneCart::STATUS_PURCHASED:
-        $error_view = id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        $error_view = id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
           ->appendChild(pht('This purchase has been completed.'));
-
         break;
     }
 
@@ -97,7 +123,7 @@ final class PhortuneCartViewController
     $actions = $this->buildActionListView(
       $cart,
       $can_edit,
-      $can_admin,
+      $authority,
       $resume_uri);
     $properties->setActionList($actions);
 
@@ -120,14 +146,16 @@ final class PhortuneCartViewController
 
     $cart_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($properties)
-      ->appendChild($cart_table);
+      ->addPropertyList($properties)
+      ->setTable($cart_table);
 
     if ($errors) {
       $cart_box->setFormErrors($errors);
     } else if ($error_view) {
-      $cart_box->setErrorView($error_view);
+      $cart_box->setInfoView($error_view);
     }
+
+    $description = $this->renderCartDescription($cart);
 
     $charges = id(new PhortuneChargeQuery())
       ->setViewer($viewer)
@@ -152,12 +180,16 @@ final class PhortuneCartViewController
 
     $charges = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Charges'))
-      ->appendChild($charges_table);
+      ->setTable($charges_table);
 
     $account = $cart->getAccount();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $this->addAccountCrumb($crumbs, $cart->getAccount());
+    if ($authority) {
+      $this->addMerchantCrumb($crumbs, $authority);
+    } else {
+      $this->addAccountCrumb($crumbs, $cart->getAccount());
+    }
     $crumbs->addTextCrumb(pht('Cart %d', $cart->getID()));
 
     $timeline = $this->buildTransactionTimeline(
@@ -170,6 +202,7 @@ final class PhortuneCartViewController
       array(
         $crumbs,
         $cart_box,
+        $description,
         $charges,
         $timeline,
       ),
@@ -219,7 +252,7 @@ final class PhortuneCartViewController
   private function buildActionListView(
     PhortuneCart $cart,
     $can_edit,
-    $can_admin,
+    $authority,
     $resume_uri) {
 
     $viewer = $this->getRequest()->getUser();
@@ -231,10 +264,16 @@ final class PhortuneCartViewController
 
     $can_cancel = ($can_edit && $cart->canCancelOrder());
 
-    $cancel_uri = $this->getApplicationURI("cart/{$id}/cancel/");
-    $refund_uri = $this->getApplicationURI("cart/{$id}/refund/");
-    $update_uri = $this->getApplicationURI("cart/{$id}/update/");
-    $accept_uri = $this->getApplicationURI("cart/{$id}/accept/");
+    if ($authority) {
+      $prefix = 'merchant/'.$authority->getID().'/';
+    } else {
+      $prefix = '';
+    }
+
+    $cancel_uri = $this->getApplicationURI("{$prefix}cart/{$id}/cancel/");
+    $refund_uri = $this->getApplicationURI("{$prefix}cart/{$id}/refund/");
+    $update_uri = $this->getApplicationURI("{$prefix}cart/{$id}/update/");
+    $accept_uri = $this->getApplicationURI("{$prefix}cart/{$id}/accept/");
 
     $view->addAction(
       id(new PhabricatorActionView())
@@ -244,7 +283,7 @@ final class PhortuneCartViewController
         ->setWorkflow(true)
         ->setHref($cancel_uri));
 
-    if ($can_admin) {
+    if ($authority) {
       if ($cart->getStatus() == PhortuneCart::STATUS_REVIEW) {
         $view->addAction(
           id(new PhabricatorActionView())

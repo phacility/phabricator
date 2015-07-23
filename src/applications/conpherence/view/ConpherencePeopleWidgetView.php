@@ -9,25 +9,32 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
     $conpherence = $this->getConpherence();
     $participants = $conpherence->getParticipants();
     $handles = $conpherence->getHandles();
+    $head_handles = array_select_keys($handles, array($user->getPHID()));
+    $handle_list = mpull($handles, 'getName');
+    natcasesort($handle_list);
+    $handles = mpull($handles, null, 'getName');
+    $handles = array_select_keys($handles, $handle_list);
+    $head_handles = mpull($head_handles, null, 'getName');
+    $handles = $head_handles + $handles;
 
     $body = array();
-    // future proof by using participants to iterate through handles;
-    // we may have non-people handles sooner or later
-    foreach ($participants as $user_phid => $participant) {
-      $handle = $handles[$user_phid];
+    foreach ($handles as $handle) {
+      $user_phid = $handle->getPHID();
       $remove_html = '';
       if ($user_phid == $user->getPHID()) {
+        $icon = id(new PHUIIconView())
+          ->setIconFont('fa-times lightbluetext');
         $remove_html = javelin_tag(
           'a',
           array(
             'class' => 'remove',
             'sigil' => 'remove-person',
             'meta' => array(
-              'remove_person' => $handle->getPHID(),
+              'remove_person' => $user_phid,
               'action' => 'remove_person',
             ),
           ),
-          hsprintf('<span class="close-icon">&times;</span>'));
+          $icon);
       }
       $body[] = phutil_tag(
         'div',
@@ -39,6 +46,7 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
             'a',
             array(
               'class' => 'pic',
+              'href' => $handle->getURI(),
             ),
             phutil_tag(
               'img',

@@ -43,16 +43,15 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($example->getName());
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('%s (%s)', $example->getName(), get_class($example)))
-      ->setSubheader($example->getDescription())
-      ->setNoBackground(true);
+    $note = id(new PHUIInfoView())
+      ->setTitle(pht('%s (%s)', $example->getName(), get_class($example)))
+      ->appendChild($example->getDescription())
+      ->setSeverity(PHUIInfoView::SEVERITY_NODATA);
 
     $nav->appendChild(
       array(
         $crumbs,
-        $header,
-        phutil_tag('br'),
+        $note,
         $result,
       ));
 

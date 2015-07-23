@@ -4,19 +4,13 @@
  *           javelin-stratcom
  *           javelin-dom
  *           javelin-workflow
+ *           javelin-quicksand
  *           phabricator-phtize
  *           phabricator-drag-and-drop-file-upload
  *           phabricator-draggable-list
  */
-JX.behavior('pholio-mock-edit', function(config) {
+JX.behavior('pholio-mock-edit', function(config, statics) {
   var pht = JX.phtize(config.pht);
-
-  var nodes = {
-    list: JX.$(config.listID),
-    drop: JX.$(config.dropID),
-    order: JX.$(config.orderID)
-  };
-
   var uploading = [];
 
 
@@ -26,7 +20,7 @@ JX.behavior('pholio-mock-edit', function(config) {
   // When the user clicks the "X" on an image, we replace it with a "click to
   // undo" element. If they click to undo, we put the original node back in the
   // DOM.
-  JX.Stratcom.listen('click', 'pholio-drop-remove', function(e) {
+  var pholio_drop_remove = function(e) {
     e.kill();
 
     var node = e.getNode('pholio-drop-image');
@@ -40,37 +34,39 @@ JX.behavior('pholio-mock-edit', function(config) {
 
     JX.DOM.replace(node, undo);
     synchronize_order();
-  });
+  };
 
 
 /* -(  Reordering Images  )-------------------------------------------------- */
 
 
-  var draglist = new JX.DraggableList('pholio-drop-image', nodes.list)
-    .setGhostNode(JX.$N('div', {className: 'drag-ghost'}))
-    .setFindItemsHandler(function() {
-      return JX.DOM.scry(nodes.list, 'div', 'pholio-drop-image');
-    });
-
-  // Only let the user drag images by the handle, not the whole entry.
-  draglist.listen('shouldBeginDrag', function(e) {
-    if (!e.getNode('pholio-drag-handle')) {
-      JX.Stratcom.context().prevent();
-    }
-  });
-
   // Reflect the display order in a hidden input.
   var synchronize_order = function() {
-    var items = draglist.findItems();
+    var items = statics.draglist.findItems();
     var order = [];
     for (var ii = 0; ii < items.length; ii++) {
       order.push(JX.Stratcom.getData(items[ii]).filePHID);
     }
-    nodes.order.value = order.join(',');
+    statics.nodes.order.value = order.join(',');
   };
 
-  draglist.listen('didDrop', synchronize_order);
-  synchronize_order();
+
+  var build_draglist = function(node) {
+    var draglist = new JX.DraggableList('pholio-drop-image', node)
+      .setGhostNode(JX.$N('div', {className: 'drag-ghost'}))
+      .setFindItemsHandler(function() {
+        return JX.DOM.scry(node, 'div', 'pholio-drop-image');
+      });
+
+    // Only let the user drag images by the handle, not the whole entry.
+    draglist.listen('shouldBeginDrag', function(e) {
+      if (!e.getNode('pholio-drag-handle')) {
+        JX.Stratcom.context().prevent();
+      }
+    });
+    draglist.listen('didDrop', synchronize_order);
+    return draglist;
+  };
 
 
 /* -(  Build  )-------------------------------------------------------------- */
@@ -97,7 +93,7 @@ JX.behavior('pholio-mock-edit', function(config) {
     drop.listen('willUpload', function(file) {
       var node = render_uploading();
       uploading.push({node: node, file: file});
-      nodes.list.appendChild(node);
+      statics.nodes.list.appendChild(node);
     });
 
     drop.listen('didUpload', function(file) {
@@ -191,7 +187,55 @@ JX.behavior('pholio-mock-edit', function(config) {
 
 /* -(  Init  )--------------------------------------------------------------- */
 
-  build_add_control(nodes.drop);
-  build_list_controls(nodes.list);
 
+  function update_statics(data, page_id, no_build) {
+    statics.nodes = {
+      list: JX.$(data.listID),
+      drop: JX.$(data.dropID),
+      order: JX.$(data.orderID)
+    };
+
+    if (!statics.mockEditCache[page_id]) {
+      statics.mockEditCache[page_id] = {};
+    }
+    statics.mockEditCache[page_id].config = config;
+    statics.mockEditCache[page_id].nodes = statics.nodes;
+
+    if (no_build !== true) {
+      build_add_control(statics.nodes.drop);
+      build_list_controls(statics.nodes.list);
+      statics.draglist = build_draglist(statics.nodes.list);
+      statics.mockEditCache[page_id].draglist = statics.draglist;
+    } else {
+      statics.draglist = statics.mockEditCache[page_id].draglist;
+    }
+    synchronize_order();
+  }
+
+  function install() {
+    statics.mockEditCache = {};
+    JX.Stratcom.listen('click', 'pholio-drop-remove', pholio_drop_remove);
+    JX.Stratcom.listen(
+      'quicksand-redraw',
+      null,
+      function (e) {
+        e.kill();
+
+        var data = e.getData();
+        if (!data.newResponse.mockEditConfig) {
+          return;
+        }
+        if (data.fromServer) {
+          // we ran update_statics(config) below already
+        } else {
+          var page_id = data.newResponseID;
+          var new_config = statics.mockEditCache[page_id].config;
+          update_statics(new_config, page_id, true);
+        }
+      });
+    return true;
+  }
+
+  statics.installed = statics.installed || install();
+  update_statics(config, JX.Quicksand.getCurrentPageID(), false);
 });

@@ -3,6 +3,8 @@
 final class PhabricatorProjectBoardViewController
   extends PhabricatorProjectBoardController {
 
+  const BATCH_EDIT_ALL = 'all';
+
   private $id;
   private $slug;
   private $handles;
@@ -54,7 +56,6 @@ final class PhabricatorProjectBoardViewController
     $column_query = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
       ->withProjectPHIDs(array($project->getPHID()));
-
     if (!$show_hidden) {
       $column_query->withStatuses(
         array(PhabricatorProjectColumn::STATUS_ACTIVE));
@@ -101,6 +102,19 @@ final class PhabricatorProjectBoardViewController
     if ($request->isFormPost()) {
       $saved = $engine->buildSavedQueryFromRequest($request);
       $engine->saveQuery($saved);
+      $filter_form = id(new AphrontFormView())
+        ->setUser($viewer);
+      $engine->buildSearchForm($filter_form, $saved);
+      if ($engine->getErrors()) {
+        return $this->newDialog()
+          ->setWidth(AphrontDialogView::WIDTH_FULL)
+          ->setTitle(pht('Advanced Filter'))
+          ->appendChild($filter_form->buildLayoutView())
+          ->setErrors($engine->getErrors())
+          ->setSubmitURI($board_uri)
+          ->addSubmitButton(pht('Apply Filter'))
+          ->addCancelButton($board_uri);
+      }
       return id(new AphrontRedirectResponse())->setURI(
         $this->getURIWithState(
           $engine->getQueryResultsPageURI($saved->getQueryKey())));
@@ -145,8 +159,11 @@ final class PhabricatorProjectBoardViewController
     $task_query = $engine->buildQueryFromSavedQuery($saved);
 
     $tasks = $task_query
-      ->addWithAllProjects(array($project->getPHID()))
-      ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
+      ->withEdgeLogicPHIDs(
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        PhabricatorQueryConstraint::OPERATOR_AND,
+        array($project->getPHID()))
+      ->setOrder(ManiphestTaskQuery::ORDER_PRIORITY)
       ->setViewer($viewer)
       ->execute();
     $tasks = mpull($tasks, null, 'getPHID');
@@ -198,21 +215,67 @@ final class PhabricatorProjectBoardViewController
       ->requireCapabilities(array(PhabricatorPolicyCapability::CAN_EDIT))
       ->apply($tasks);
 
+    // If this is a batch edit, select the editable tasks in the chosen column
+    // and ship the user into the batch editor.
+    $batch_edit = $request->getStr('batch');
+    if ($batch_edit) {
+      if ($batch_edit !== self::BATCH_EDIT_ALL) {
+        $column_id_map = mpull($columns, null, 'getID');
+        $batch_column = idx($column_id_map, $batch_edit);
+        if (!$batch_column) {
+          return new Aphront404Response();
+        }
+
+        $batch_task_phids = idx($task_map, $batch_column->getPHID(), array());
+        foreach ($batch_task_phids as $key => $batch_task_phid) {
+          if (empty($task_can_edit_map[$batch_task_phid])) {
+            unset($batch_task_phids[$key]);
+          }
+        }
+
+        $batch_tasks = array_select_keys($tasks, $batch_task_phids);
+      } else {
+        $batch_tasks = $task_can_edit_map;
+      }
+
+      if (!$batch_tasks) {
+        $cancel_uri = $this->getURIWithState($board_uri);
+        return $this->newDialog()
+          ->setTitle(pht('No Editable Tasks'))
+          ->appendParagraph(
+            pht(
+              'The selected column contains no visible tasks which you '.
+              'have permission to edit.'))
+          ->addCancelButton($board_uri);
+      }
+
+      $batch_ids = mpull($batch_tasks, 'getID');
+      $batch_ids = implode(',', $batch_ids);
+
+      $batch_uri = new PhutilURI('/maniphest/batch/');
+      $batch_uri->setQueryParam('board', $this->id);
+      $batch_uri->setQueryParam('batch', $batch_ids);
+      return id(new AphrontRedirectResponse())
+        ->setURI($batch_uri);
+    }
+
     $board_id = celerity_generate_unique_node_id();
 
     $board = id(new PHUIWorkboardView())
       ->setUser($viewer)
       ->setID($board_id);
 
+    $behavior_config = array(
+      'boardID' => $board_id,
+      'projectPHID' => $project->getPHID(),
+      'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
+      'createURI' => '/maniphest/task/create/',
+      'order' => $this->sortKey,
+    );
     $this->initBehavior(
       'project-boards',
-      array(
-        'boardID' => $board_id,
-        'projectPHID' => $project->getPHID(),
-        'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
-        'createURI' => '/maniphest/task/create/',
-        'order' => $this->sortKey,
-      ));
+      $behavior_config);
+    $this->addExtraQuickSandConfig(array('boardConfig' => $behavior_config));
 
     $this->handles = ManiphestTaskListView::loadTaskHandles($viewer, $tasks);
 
@@ -279,10 +342,6 @@ final class PhabricatorProjectBoardViewController
       $board->addPanel($panel);
     }
 
-    Javelin::initBehavior(
-      'boards-dropdown',
-      array());
-
     $sort_menu = $this->buildSortMenu(
       $viewer,
       $sort_key);
@@ -303,7 +362,7 @@ final class PhabricatorProjectBoardViewController
       $project->getName());
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('%s Workboard', $header_link))
+      ->setHeader($header_link)
       ->setUser($viewer)
       ->setNoBackground(true)
       ->addActionLink($sort_menu)
@@ -311,21 +370,24 @@ final class PhabricatorProjectBoardViewController
       ->addActionLink($manage_menu)
       ->setPolicyObject($project);
 
+    $header_box = id(new PHUIBoxView())
+      ->appendChild($header)
+      ->addClass('project-board-header');
+
     $board_box = id(new PHUIBoxView())
       ->appendChild($board)
       ->addClass('project-board-wrapper');
 
     $nav = $this->buildIconNavView($project);
-    $nav->appendChild($header);
+    $nav->appendChild($header_box);
     $nav->appendChild($board_box);
 
     return $this->buildApplicationPage(
-      array(
-        $nav,
-      ),
+      $nav,
       array(
         'title' => pht('%s Board', $project->getName()),
         'showFooter' => false,
+        'pageObjects' => array($project->getPHID()),
       ));
   }
 
@@ -507,6 +569,19 @@ final class PhabricatorProjectBoardViewController
       ->setName($hidden_text)
       ->setHref($hidden_uri);
 
+    $batch_edit_uri = $request->getRequestURI();
+    $batch_edit_uri->setQueryParam('batch', self::BATCH_EDIT_ALL);
+    $can_batch_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      PhabricatorApplication::getByClass('PhabricatorManiphestApplication'),
+      ManiphestBulkEditCapability::CAPABILITY);
+
+    $manage_items[] = id(new PhabricatorActionView())
+      ->setIcon('fa-list-ul')
+      ->setName(pht('Batch Edit Visible Tasks...'))
+      ->setHref($batch_edit_uri)
+      ->setDisabled(!$can_batch_edit);
+
     $manage_menu = id(new PhabricatorActionListView())
         ->setUser($viewer);
     foreach ($manage_items as $item) {
@@ -551,6 +626,19 @@ final class PhabricatorProjectBoardViewController
           'columnPHID' => $column->getPHID(),
         ))
       ->setDisabled(!$can_edit);
+
+    $batch_edit_uri = $request->getRequestURI();
+    $batch_edit_uri->setQueryParam('batch', $column->getID());
+    $can_batch_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      PhabricatorApplication::getByClass('PhabricatorManiphestApplication'),
+      ManiphestBulkEditCapability::CAPABILITY);
+
+    $column_items[] = id(new PhabricatorActionView())
+      ->setIcon('fa-list-ul')
+      ->setName(pht('Batch Edit Tasks...'))
+      ->setHref($batch_edit_uri)
+      ->setDisabled(!$can_batch_edit);
 
     $edit_uri = $this->getApplicationURI(
       'board/'.$this->id.'/column/'.$column->getID().'/');

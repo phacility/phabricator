@@ -65,11 +65,10 @@ abstract class AlmanacServiceType extends Phobject {
    * @return map<string, object> Dictionary of available service types.
    */
   public static function getAllServiceTypes() {
-    $types = id(new PhutilSymbolLoader())
+    return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
-      ->loadObjects();
-
-    return msort($types, 'getServiceTypeName');
+      ->setSortMethod('getServiceTypeName')
+      ->execute();
   }
 
 

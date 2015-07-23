@@ -54,6 +54,10 @@ final class PHUIFeedStoryView extends AphrontView {
     return $this;
   }
 
+  public function getImage() {
+    return $this->image;
+  }
+
   public function setImageHref($image_href) {
     $this->imageHref = $image_href;
     return $this;
@@ -157,16 +161,12 @@ final class PHUIFeedStoryView extends AphrontView {
 
     $body = null;
     $foot = null;
-    $image_style = null;
-    $actor = '';
 
-    if ($this->image) {
-      $actor = new PHUIIconView();
-      $actor->setImage($this->image);
-      $actor->addClass('phui-feed-story-actor-image');
-      if ($this->imageHref) {
-        $actor->setHref($this->imageHref);
-      }
+    $actor = new PHUIIconView();
+    $actor->setImage($this->image);
+    $actor->addClass('phui-feed-story-actor-image');
+    if ($this->imageHref) {
+      $actor->setHref($this->imageHref);
     }
 
     if ($this->epoch) {
@@ -192,9 +192,8 @@ final class PHUIFeedStoryView extends AphrontView {
 
     $icon = null;
     if ($this->appIcon) {
-      $icon = new PHUIIconView();
-      $icon->setSpriteIcon($this->appIcon);
-      $icon->setSpriteSheet(PHUIIconView::SPRITE_APPS);
+      $icon = id(new PHUIIconView())
+        ->setIconFont($this->appIcon);
     }
 
     $action_list = array();
@@ -275,23 +274,4 @@ final class PHUIFeedStoryView extends AphrontView {
       ->appendChild(array($head, $body, $foot));
   }
 
-  public function setAppIconFromPHID($phid) {
-    switch (phid_get_type($phid)) {
-      case PholioMockPHIDType::TYPECONST:
-        $this->setAppIcon('pholio-dark');
-        break;
-      case PhabricatorMacroMacroPHIDType::TYPECONST:
-        $this->setAppIcon('macro-dark');
-        break;
-      case ManiphestTaskPHIDType::TYPECONST:
-        $this->setAppIcon('maniphest-dark');
-        break;
-      case DifferentialRevisionPHIDType::TYPECONST:
-        $this->setAppIcon('differential-dark');
-        break;
-      case PhabricatorCalendarEventPHIDType::TYPECONST:
-        $this->setAppIcon('calendar-dark');
-        break;
-    }
-  }
 }

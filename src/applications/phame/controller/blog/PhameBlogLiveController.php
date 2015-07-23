@@ -2,25 +2,17 @@
 
 final class PhameBlogLiveController extends PhameController {
 
-  private $id;
-  private $more;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-    $this->more = idx($data, 'more', '');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
+    $id = $request->getURIData('id');
 
     $blog = id(new PhameBlogQuery())
       ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$blog) {
       return new Aphront404Response();
@@ -55,7 +47,8 @@ final class PhameBlogLiveController extends PhameController {
     }
 
     $phame_request = clone $request;
-    $phame_request->setPath('/'.ltrim($this->more, '/'));
+    $more = $phame_request->getURIData('more', '');
+    $phame_request->setPath('/'.ltrim($more, '/'));
 
     $uri = $blog->getLiveURI();
 

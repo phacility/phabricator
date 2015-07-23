@@ -1,6 +1,33 @@
 #!/usr/bin/env php
 <?php
 
+// NOTE: This script will sometimes emit a warning like this on startup:
+//
+//   No entry for terminal type "unknown";
+//   using dumb terminal settings.
+//
+// This can be fixed by adding "TERM=dumb" to the shebang line, but doing so
+// causes some systems to hang mysteriously. See T7119.
+
+// Commit hooks execute in an unusual context where the environment may be
+// unavailable, particularly in SVN. The first parameter to this script is
+// either a bare repository identifier ("X"), or a repository identifier
+// followed by an instance identifier ("X:instance"). If we have an instance
+// identifier, unpack it into the environment before we start up. This allows
+// subclasses of PhabricatorConfigSiteSource to read it and build an instance
+// environment.
+
+if ($argc > 1) {
+  $context = $argv[1];
+  $context = explode(':', $context, 2);
+  $argv[1] = $context[0];
+
+  if (count($context) > 1) {
+    $_ENV['PHABRICATOR_INSTANCE'] = $context[1];
+    putenv('PHABRICATOR_INSTANCE='.$context[1]);
+  }
+}
+
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
@@ -34,7 +61,9 @@ if ($repository->isGit() || $repository->isHg()) {
   $username = getenv(DiffusionCommitHookEngine::ENV_USER);
   if (!strlen($username)) {
     throw new Exception(
-      pht('usage: %s should be defined!', DiffusionCommitHookEngine::ENV_USER));
+      pht(
+        'Usage: %s should be defined!',
+        DiffusionCommitHookEngine::ENV_USER));
   }
 
   if ($repository->isHg()) {

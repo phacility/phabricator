@@ -16,11 +16,11 @@ final class DivinerArticleAtomizer extends DivinerAtomizer {
     $title = idx($meta, 'title');
     if (!strlen($title)) {
       $title = pht('Untitled Article "%s"', basename($file_name));
-      $atom->addWarning('Article has no @title!');
+      $atom->addWarning(pht('Article has no %s!', '@title'));
       $atom->setDocblockMetaValue('title', $title);
     }
 
-    // If the article has no @name, use the filename after stripping any
+    // If the article has no `@name`, use the filename after stripping any
     // extension.
     $name = idx($meta, 'name');
     if (!$name) {

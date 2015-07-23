@@ -92,6 +92,9 @@ You can optionally omit the trailing `=` signs -- that is, these are the same:
 This produces headers like the ones in this document. Make sure you have an
 empty line before and after the header.
 
+Lists
+=====
+
 Make **lists** by beginning each item with a `-` or a `*`:
 
   lang=text
@@ -116,6 +119,21 @@ You can make numbered lists with a `#` instead of `-` or `*`:
   # Articuno
   # Zapdos
   # Moltres
+
+Numbered lists can also be started with `1.` or `1)`. If you use a number other
+than `1`, the list will start at that number instead. For example, this:
+
+```
+  200) OK
+  201) Created
+  202) Accepted
+```
+
+...produces this:
+
+  200) OK
+  201) Created
+  202) Accepted
 
 You can also nest lists:
 
@@ -258,10 +276,22 @@ You can use `lines=N` to limit the vertical size of a chunk of code, and
   <p>Mangostine</p>
   <p>Melon</p>
 
-You can also use `NOTE:`, `WARNING:`, or `IMPORTANT:` to call out an important
- idea.
+
+You can use the `NOTE:`, `WARNING:` or `IMPORTANT:` elements to call attention
+to an important idea.
+
+For example, write this:
+
+```
+NOTE: Best practices in proton pack operation include not crossing the streams.
+```
+
+...to produce this:
 
 NOTE: Best practices in proton pack operation include not crossing the streams.
+
+Using `WARNING:` or `IMPORTANT:` at the beginning of the line changes the
+color of the callout:
 
 WARNING: Crossing the streams can result in total protonic reversal!
 
@@ -269,7 +299,7 @@ IMPORTANT: Don't cross the streams!
 
 In addition, you can use `(NOTE)`, `(WARNING)`, or `(IMPORTANT)` to get the
 same effect but without `(NOTE)`, `(WARNING)`, or `(IMPORTANT)` appearing in
-the rendered result. For example
+the rendered result. For example, this callout uses `(NOTE)`:
 
 (NOTE) Dr. Egon Spengler is the best resource for additional proton pack
  questions.

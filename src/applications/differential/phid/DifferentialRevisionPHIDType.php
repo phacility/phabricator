@@ -5,7 +5,7 @@ final class DifferentialRevisionPHIDType extends PhabricatorPHIDType {
   const TYPECONST = 'DREV';
 
   public function getTypeName() {
-    return pht('Revision');
+    return pht('Differential Revision');
   }
 
   public function getPHIDTypeApplicationClass() {
@@ -41,13 +41,13 @@ final class DifferentialRevisionPHIDType extends PhabricatorPHIDType {
       $handle->setFullName("D{$id}: {$title}");
 
       if ($revision->isClosed()) {
-        $handle->setStatus(PhabricatorObjectHandleStatus::STATUS_CLOSED);
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
       }
     }
   }
 
   public function canLoadNamedObject($name) {
-    return preg_match('/^D\d*[1-9]\d*$/i', $name);
+    return preg_match('/^D[1-9]\d*$/i', $name);
   }
 
   public function loadNamedObjects(

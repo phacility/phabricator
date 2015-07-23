@@ -20,6 +20,7 @@ final class PhabricatorPeopleProfileEditController
     $user = id(new PhabricatorPeopleQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))
+      ->needProfileImage(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -60,9 +61,6 @@ final class PhabricatorPeopleProfileEditController
     }
 
     $title = pht('Edit Profile');
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($user->getUsername(), $profile_uri);
-    $crumbs->addTextCrumb($title);
 
     $form = id(new AphrontFormView())
       ->setUser($viewer);
@@ -80,11 +78,12 @@ final class PhabricatorPeopleProfileEditController
       ->setValidationException($validation_exception)
       ->setForm($form);
 
+    $nav = $this->buildIconNavView($user);
+    $nav->selectFilter('/');
+    $nav->appendChild($form_box);
+
     return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
+      $nav,
       array(
         'title' => $title,
       ));

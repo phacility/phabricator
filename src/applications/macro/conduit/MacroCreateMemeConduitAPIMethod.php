@@ -14,7 +14,7 @@ final class MacroCreateMemeConduitAPIMethod extends MacroConduitAPIMethod {
     return pht('Generate a meme.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'macroName'    => 'string',
       'upperText'    => 'optional string',
@@ -22,13 +22,13 @@ final class MacroCreateMemeConduitAPIMethod extends MacroConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'string';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR-NOT-FOUND' => 'Macro was not found.',
+      'ERR-NOT-FOUND' => pht('Macro was not found.'),
     );
   }
 

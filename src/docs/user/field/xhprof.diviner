@@ -1,0 +1,122 @@
+@title Using XHProf
+@group fieldmanual
+
+Describes how to install and use XHProf, a PHP profiling tool.
+
+Overview
+========
+
+XHProf is a profiling tool which will let you understand application
+performance in Phabricator.
+
+After you install XHProf, you can use it from the web UI and the CLI to
+generate detailed performance profiles. It is the most powerful tool available
+for understanding application performance and identifying and fixing slow code.
+
+Installing XHProf
+=================
+
+You are likely to have the most luck building XHProf from source:
+
+  $ git clone https://github.com/phacility/xhprof.git
+
+From any source distribution of the extension, build and install it like this:
+
+  $ cd xhprof/
+  $ cd extension/
+  $ phpize
+  $ ./configure
+  $ make
+  $ sudo make install
+
+You may also need to add `extension=xhprof.so` to your php.ini.
+
+You can also try using PECL to install it, but this may not work well with
+recent versions of PHP:
+
+  $ pecl install xhprof
+
+Once you've installed it, `php -i` should report it as installed (you may
+see a different version number, which is fine):
+
+  $ php -i | grep xhprof
+  ...
+  xhprof => 0.9.2
+  ...
+
+
+Using XHProf: Web UI
+====================
+
+To profile a web page, activate DarkConsole and navigate to the XHProf tab.
+Use the **Profile Page** button to generate a profile.
+
+For instructions on activating DarkConsole, see @{article:Using DarkConsole}.
+
+
+Using XHProf: CLI
+=================
+
+From the command line, use the `--xprofile <filename>` flag to generate a
+profile of any script.
+
+You can then upload this file to Phabricator (using `arc upload` may be easiest)
+and view it in the web UI.
+
+
+Analyzing Profiles
+==================
+
+Understanding profiles is as much art as science, so be warned that you may not
+make much headway. Even if you aren't able to conclusively read a profile
+yourself, you can attach profiles when submitting bug reports to the upstream
+and we can look at them. This may yield new insight.
+
+When looking at profiles, the "Wall Time (Inclusive)" column is usually the
+most important. This shows the total amount of time spent in a function or
+method and all of its children. Usually, to improve the performance of a page,
+we're trying to find something that's slow and make it not slow: this column
+can help identify which things are slowest.
+
+The "Wall Time (Exclusive)" column shows time spent in a function or method,
+excluding time spent in its children. This can give you hint about whether the
+call itself is slow or it's just making calls to other things that are slow.
+
+You can also get a sense of this by clicking a call to see its children, and
+seeing if the bulk of runtime is spent in a child call. This tends to indicate
+that you're looking at a problem which is deeper in the stack, and you need
+to go down further to identify and understand it.
+
+Conversely, if the "Wall Time (Exclusive)" column is large, or the children
+of a call are all cheap, there's probably something expesive happening in the
+call itself.
+
+The "Count" column can also sometimes tip you off that something is amiss, if
+a method which shouldn't be called very often is being called a lot.
+
+Some general thing to look for -- these aren't smoking guns, but are unusual
+and can lead to finding a performance issue:
+
+  - Is a low-level utility method like `phutil_utf8ize()` or `array_merge()`
+    taking more than a few percent of the page runtime?
+  - Do any methods (especially high-level methods) have >10,00 calls?
+  - Are we spending more than 100ms doing anything which isn't loading data
+    or rendering data?
+  - Does anything look suspiciously expensive or out of place?
+  - Is the profile for the slow page a lot different than the profile for a
+    fast page?
+
+Some performance problems are obvious and will jump out of a profile; others
+may require a more nuanced understanding of the codebase to sniff out which
+parts are suspicious. If you aren't able to make progress with a profile,
+report the issue upstream and attach the profile to your report.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - enabling DarkConsole with @{article:Using DarkConsole}; or
+  - understanding and reporting performance problems with
+    @{article:Troubleshooting Performance Problems}.

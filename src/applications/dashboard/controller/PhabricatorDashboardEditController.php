@@ -56,7 +56,7 @@ final class PhabricatorDashboardEditController
       $button = pht('Create Dashboard');
       $cancel_uri = $this->getApplicationURI();
 
-      $crumbs->addTextCrumb('Create Dashboard');
+      $crumbs->addTextCrumb(pht('Create Dashboard'));
     } else {
       $id = $dashboard->getID();
       $cancel_uri = $this->getApplicationURI('manage/'.$id.'/');
@@ -226,11 +226,9 @@ final class PhabricatorDashboardEditController
               "This is a simple template dashboard. You can edit this panel ".
               "to change this text and replace it with a welcome message, or ".
               "leave this placeholder text as-is to give your dashboard a ".
-              "rustic, authentic feel.".
-              "\n\n".
+              "rustic, authentic feel.\n\n".
               "You can drag, remove, add, and edit panels to customize the ".
-              "rest of this dashboard to show the information you want.".
-              "\n\n".
+              "rest of this dashboard to show the information you want.\n\n".
               "To install this dashboard on the home page, use the ".
               "**Install Dashboard** action link above."),
           ));

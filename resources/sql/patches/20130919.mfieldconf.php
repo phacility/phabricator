@@ -1,18 +1,18 @@
 <?php
 
-echo "Migrating Maniphest custom field configuration...\n";
+echo pht('Migrating Maniphest custom field configuration...')."\n";
 
 $old_key = 'maniphest.custom-fields';
 $new_key = 'maniphest.custom-field-definitions';
 
 if (PhabricatorEnv::getEnvConfig($new_key)) {
-  echo "Skipping migration, new data is already set.\n";
+  echo pht('Skipping migration, new data is already set.')."\n";
   return;
 }
 
 $old = PhabricatorEnv::getEnvConfigIfExists($old_key);
 if (!$old) {
-  echo "Skipping migration, old data does not exist.\n";
+  echo pht('Skipping migration, old data does not exist.')."\n";
   return;
 }
 
@@ -63,4 +63,4 @@ PhabricatorConfigEntry::loadConfigEntry($new_key)
   ->setValue($new)
   ->save();
 
-echo "Done.\n";
+echo pht('Done.')."\n";

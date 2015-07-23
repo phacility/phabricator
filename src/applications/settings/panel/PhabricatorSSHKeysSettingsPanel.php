@@ -19,6 +19,10 @@ final class PhabricatorSSHKeysSettingsPanel extends PhabricatorSettingsPanel {
   }
 
   public function isEnabled() {
+    if ($this->getUser()->getIsMailingList()) {
+      return false;
+    }
+
     return true;
   }
 
@@ -35,7 +39,7 @@ final class PhabricatorSSHKeysSettingsPanel extends PhabricatorSettingsPanel {
       ->setUser($viewer)
       ->setKeys($keys)
       ->setCanEdit(true)
-      ->setNoDataString("You haven't added any SSH Public Keys.");
+      ->setNoDataString(pht("You haven't added any SSH Public Keys."));
 
     $panel = new PHUIObjectBoxView();
     $header = new PHUIHeaderView();
@@ -71,7 +75,7 @@ final class PhabricatorSSHKeysSettingsPanel extends PhabricatorSettingsPanel {
     $header->addActionLink($upload_button);
 
     $panel->setHeader($header);
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     return $panel;
   }

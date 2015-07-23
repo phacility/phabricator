@@ -125,12 +125,25 @@ final class FundInitiative extends FundDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return ($viewer->getPHID() == $this->getOwnerPHID());
+    if ($viewer->getPHID() == $this->getOwnerPHID()) {
+      return true;
+    }
+
+    if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
+      foreach ($viewer->getAuthorities() as $authority) {
+        if ($authority instanceof PhortuneMerchant) {
+          if ($authority->getPHID() == $this->getMerchantPHID()) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht(
-      'The owner of an initiative can always view and edit it.');
+    return pht('The owner of an initiative can always view and edit it.');
   }
 
 

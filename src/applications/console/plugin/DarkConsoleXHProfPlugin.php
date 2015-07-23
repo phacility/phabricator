@@ -5,7 +5,7 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
   protected $profileFilePHID;
 
   public function getName() {
-    return 'XHProf';
+    return pht('XHProf');
   }
 
   public function getColor() {
@@ -17,7 +17,7 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
   }
 
   public function getDescription() {
-    return 'Provides detailed PHP profiling information through XHProf.';
+    return pht('Provides detailed PHP profiling information through XHProf.');
   }
 
   public function generateData() {
@@ -47,14 +47,14 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
           'href' => $href,
           'class' => 'bright-link',
         ),
-        'Installation Guide');
+        pht('Installation Guide'));
       return hsprintf(
-        '<div class="dark-console-no-content">'.
+        '<div class="dark-console-no-content">%s</div>',
+        pht(
           'The "xhprof" PHP extension is not available. Install xhprof '.
           'to enable the XHProf console plugin. You can find instructions in '.
-          'the %s.'.
-        '</div>',
-        $install_guide);
+          'the %s.',
+          $install_guide));
     }
 
     $result = array();

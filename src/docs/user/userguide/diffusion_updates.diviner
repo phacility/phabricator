@@ -99,7 +99,7 @@ which calls `diffusion.looksoon`. This should make an external repository about
 as responsive as a hosted repository.
 
 If a repository has an update scheduled, the Diffusion > (Choose a
-Repository) > Edit Repository interface will show that the the repository is
+Repository) > Edit Repository interface will show that the repository is
 prioritized and will be updated soon.
 
 
@@ -113,3 +113,11 @@ issues, using the `--trace` flag to get full details:
 
 To catch potential issues with permissions, run this command as the same user
 that the daemons run as.
+
+Next Steps
+==========
+
+Continue by:
+
+  - troubleshooting in greater depth with
+    @{article:Troubleshooting Repository Imports}.

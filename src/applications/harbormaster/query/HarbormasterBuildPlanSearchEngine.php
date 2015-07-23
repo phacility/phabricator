@@ -7,51 +7,36 @@ final class HarbormasterBuildPlanSearchEngine
     return pht('Harbormaster Build Plans');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorHarbormasterApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    $saved->setParameter(
-      'status',
-      $this->readListFromRequest($request, 'status'));
-
-    return $saved;
+  public function newQuery() {
+    return new HarbormasterBuildPlanQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new HarbormasterBuildPlanQuery());
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchCheckboxesField())
+        ->setLabel(pht('Status'))
+        ->setKey('status')
+        ->setAliases(array('statuses'))
+        ->setOptions(
+          array(
+            HarbormasterBuildPlan::STATUS_ACTIVE => pht('Active'),
+            HarbormasterBuildPlan::STATUS_DISABLED => pht('Disabled'),
+          )),
+    );
+  }
 
-    $status = $saved->getParameter('status', array());
-    if ($status) {
-      $query->withStatuses($status);
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
+
+    if ($map['status']) {
+      $query->withStatuses($map['status']);
     }
 
     return $query;
-  }
-
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
-
-    $status = $saved_query->getParameter('status', array());
-
-    $form
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->setLabel('Status')
-          ->addCheckbox(
-            'status[]',
-            HarbormasterBuildPlan::STATUS_ACTIVE,
-            pht('Active'),
-            in_array(HarbormasterBuildPlan::STATUS_ACTIVE, $status))
-          ->addCheckbox(
-            'status[]',
-            HarbormasterBuildPlan::STATUS_DISABLED,
-            pht('Disabled'),
-            in_array(HarbormasterBuildPlan::STATUS_DISABLED, $status)));
   }
 
   protected function getURI($path) {
@@ -103,12 +88,21 @@ final class HarbormasterBuildPlanSearchEngine
         $item->setDisabled(true);
       }
 
+      if ($plan->isAutoplan()) {
+        $item->addIcon('fa-lock grey', pht('Autoplan'));
+      }
+
       $item->setHref($this->getApplicationURI("plan/{$id}/"));
 
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No build plans found.'));
+
+    return $result;
+
   }
 
 }

@@ -6,20 +6,17 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
     return parent::newAtom($type)->setLanguage('php');
   }
 
-
   protected function executeAtomize($file_name, $file_data) {
-    $future = xhpast_get_parser_future($file_data);
+    $future = PhutilXHPASTBinary::getParserFuture($file_data);
     $tree = XHPASTTree::newFromDataAndResolvedExecFuture(
       $file_data,
       $future->resolve());
 
     $atoms = array();
-
     $root = $tree->getRootNode();
 
     $func_decl = $root->selectDescendantsOfType('n_FUNCTION_DECLARATION');
     foreach ($func_decl as $func) {
-
       $name = $func->getChildByIndex(2);
 
       // Don't atomize closures
@@ -33,7 +30,6 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
         ->setFile($file_name);
 
       $this->findAtomDocblock($atom, $func);
-
       $this->parseParams($atom, $func);
       $this->parseReturnType($atom, $func);
 
@@ -46,6 +42,7 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
     );
     foreach ($class_types as $atom_type => $node_type) {
       $class_decls = $root->selectDescendantsOfType($node_type);
+
       foreach ($class_decls as $class) {
         $name = $class->getChildByIndex(1, 'n_CLASS_NAME');
 
@@ -54,13 +51,13 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
           ->setFile($file_name)
           ->setLine($class->getLineNumber());
 
-        // This parses "final" and "abstract".
+        // This parses `final` and `abstract`.
         $attributes = $class->getChildByIndex(0, 'n_CLASS_ATTRIBUTES');
         foreach ($attributes->selectDescendantsOfType('n_STRING') as $attr) {
           $atom->setProperty($attr->getConcreteString(), true);
         }
 
-        // If this exists, it is n_EXTENDS_LIST.
+        // If this exists, it is `n_EXTENDS_LIST`.
         $extends = $class->getChildByIndex(2);
         $extends_class = $extends->selectDescendantsOfType('n_CLASS_NAME');
         foreach ($extends_class as $parent_class) {
@@ -70,7 +67,7 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
               $parent_class->getConcreteString()));
         }
 
-        // If this exists, it is n_IMPLEMENTS_LIST.
+        // If this exists, it is `n_IMPLEMENTS_LIST`.
         $implements = $class->getChildByIndex(3);
         $iface_names = $implements->selectDescendantsOfType('n_CLASS_NAME');
         foreach ($iface_names as $iface_name) {
@@ -154,9 +151,9 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
       if (count($docs) < count($params)) {
         $atom->addWarning(
           pht(
-            'This call takes %d parameters, but only %d are documented.',
-            count($params),
-            count($docs)));
+            'This call takes %s parameter(s), but only %s are documented.',
+            new PhutilNumber(count($params)),
+            new PhutilNumber(count($docs))));
       }
     }
 
@@ -193,7 +190,6 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
     $atom->setProperty('parameters', $param_spec);
   }
 
-
   private function findAtomDocblock(DivinerAtom $atom, XHPASTNode $node) {
     $token = $node->getDocblockToken();
     if ($token) {
@@ -216,13 +212,14 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
           if (preg_match('/@(return|param|task|author)/', $value, $matches)) {
             $atom->addWarning(
               pht(
-                'Atom "%s" is preceded by a comment containing "@%s", but the '.
-                'comment is not a documentation comment. Documentation '.
-                'comments must begin with "/**", followed by a newline. Did '.
+                'Atom "%s" is preceded by a comment containing `%s`, but '.
+                'the comment is not a documentation comment. Documentation '.
+                'comments must begin with `%s`, followed by a newline. Did '.
                 'you mean to use a documentation comment? (As the comment is '.
                 'not a documentation comment, it will be ignored.)',
                 $atom->getName(),
-                $matches[1]));
+                '@'.$matches[1],
+                '/**'));
           }
         }
       }
@@ -234,7 +231,7 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
 
   protected function parseParamDoc(DivinerAtom $atom, $doc, $name) {
     $dict = array();
-    $split = preg_split('/\s+/', trim($doc), $limit = 2);
+    $split = preg_split('/\s+/', trim($doc), 2);
     if (!empty($split[0])) {
       $dict['doctype'] = $split[0];
     }
@@ -242,7 +239,7 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
     if (!empty($split[1])) {
       $docs = $split[1];
 
-      // If the parameter is documented like "@param int $num Blah blah ..",
+      // If the parameter is documented like `@param int $num Blah blah ..`,
       // get rid of the `$num` part (which Diviner considers optional). If it
       // is present and different from the declared name, raise a warning.
       $matches = null;
@@ -251,8 +248,8 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
           if ($matches[1] !== $name) {
             $atom->addWarning(
               pht(
-                'Parameter "%s" is named "%s" in the documentation. The '.
-                'documentation may be out of date.',
+                'Parameter "%s" is named "%s" in the documentation. '.
+                'The documentation may be out of date.',
                 $name,
                 $matches[1]));
           }
@@ -272,11 +269,17 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
     $metadata = $atom->getDocblockMeta();
     $return = idx($metadata, 'return');
 
+    $type = null;
+    $docs = null;
+
     if (!$return) {
       $return = idx($metadata, 'returns');
       if ($return) {
         $atom->addWarning(
-          pht('Documentation uses `@returns`, but should use `@return`.'));
+          pht(
+            'Documentation uses `%s`, but should use `%s`.',
+            '@returns',
+            '@return'));
       }
     }
 
@@ -288,12 +291,16 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
 
       if ($return) {
         $atom->addWarning(
-          'Method __construct() has explicitly documented @return. The '.
-          '__construct() method always returns $this. Diviner documents '.
-          'this implicitly.');
+          pht(
+            'Method `%s` has explicitly documented `%s`. The `%s` method '.
+            'always returns `%s`. Diviner documents this implicitly.',
+            '__construct()',
+            '@return',
+            '__construct()',
+            '$this'));
       }
     } else if ($return) {
-      $split = preg_split('/\s+/', trim($return), $limit = 2);
+      $split = preg_split('/(?<!,)\s+/', trim($return), 2);
       if (!empty($split[0])) {
         $type = $split[0];
       }
@@ -302,7 +309,6 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
         $type = $type.' &';
       }
 
-      $docs = null;
       if (!empty($split[1])) {
         $docs = $split[1];
       }

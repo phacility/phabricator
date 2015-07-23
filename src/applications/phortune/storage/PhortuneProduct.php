@@ -87,6 +87,11 @@ final class PhortuneProduct extends PhortuneDAO
       $amount);
   }
 
+  public function getPurchaseURI(PhortunePurchase $purchase) {
+    return $this->getImplementation()->getPurchaseURI(
+      $this,
+      $purchase);
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

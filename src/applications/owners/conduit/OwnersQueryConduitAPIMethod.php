@@ -7,13 +7,14 @@ final class OwnersQueryConduitAPIMethod extends OwnersConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Query for packages by one of the following: repository/path, '.
+    return pht(
+      'Query for packages by one of the following: repository/path, '.
       'packages with a given user or project owner, or packages affiliated '.
       'with a user (owned by either the user or a project they are a member '.
-      'of.) You should only provide at most one search query.';
+      'of.) You should only provide at most one search query.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'userOwner'                  => 'optional string',
       'projectOwner'               => 'optional string',
@@ -23,17 +24,17 @@ final class OwnersQueryConduitAPIMethod extends OwnersConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict<phid -> dict of package info>';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR-INVALID-USAGE' =>
+      'ERR-INVALID-USAGE' => pht(
         'Provide one of a single owner phid (user/project), a single '.
-        'affiliated user phid (user), or a repository/path.',
-      'ERR-INVALID-PARAMETER' => 'parameter should be a phid',
-      'ERR_REP_NOT_FOUND'  => 'The repository callsign is not recognized',
+        'affiliated user phid (user), or a repository/path.'),
+      'ERR-INVALID-PARAMETER' => pht('Parameter should be a phid.'),
+      'ERR_REP_NOT_FOUND'  => pht('The repository callsign is not recognized.'),
     );
   }
 
@@ -49,7 +50,9 @@ final class OwnersQueryConduitAPIMethod extends OwnersConduitAPIMethod {
     if (!$is_valid_phid) {
       throw id(new ConduitException('ERR-INVALID-PARAMETER'))
         ->setErrorDescription(
-          'Expected user/project PHID for owner, got '.$owner);
+          pht(
+            'Expected user/project PHID for owner, got %s.',
+            $owner));
     }
 
     $owners = id(new PhabricatorOwnersOwner())->loadAllWhere(
@@ -77,7 +80,9 @@ final class OwnersQueryConduitAPIMethod extends OwnersConduitAPIMethod {
     if (!$repository) {
       throw id(new ConduitException('ERR_REP_NOT_FOUND'))
         ->setErrorDescription(
-          'Repository callsign '.$repo_callsign.' not recognized');
+          pht(
+            'Repository callsign %s not recognized',
+            $repo_callsign));
     }
     if ($path == null) {
       return PhabricatorOwnersPackage::loadPackagesForRepository($repository);

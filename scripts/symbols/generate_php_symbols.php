@@ -4,28 +4,36 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
-if ($argc !== 1 || posix_isatty(STDIN)) {
+$args = new PhutilArgumentParser($argv);
+$args->setSynopsis(<<<EOSYNOPSIS
+**generate_php_symbols.php** [__options__]
+
+  Generate repository symbols using XHPAST. Paths are read from stdin.
+EOSYNOPSIS
+  );
+$args->parseStandardArguments();
+
+if (posix_isatty(STDIN)) {
   echo phutil_console_format(
-    "usage: find . -type f -name '*.php' | ./generate_php_symbols.php\n");
+    "%s\n",
+    pht(
+      'Usage: %s',
+      "find . -type f -name '*.php' | ./generate_php_symbols.php"));
   exit(1);
 }
 
 $input = file_get_contents('php://stdin');
-$input = trim($input);
-$input = explode("\n", $input);
-
 $data = array();
 $futures = array();
 
-foreach ($input as $file) {
+foreach (explode("\n", trim($input)) as $file) {
   $file = Filesystem::readablePath($file);
   $data[$file] = Filesystem::readFile($file);
-  $futures[$file] = xhpast_get_parser_future($data[$file]);
+  $futures[$file] = PhutilXHPASTBinary::getParserFuture($data[$file]);
 }
 
-$futures = id(new FutureIterator($futures))
-  ->limit(8);
-foreach ($futures as $file => $future) {
+$futures = new FutureIterator($futures);
+foreach ($futures->limit(8) as $file => $future) {
   $tree = XHPASTTree::newFromDataAndResolvedExecFuture(
     $data[$file],
     $future->resolve());
@@ -36,7 +44,7 @@ foreach ($futures as $file => $future) {
   $functions = $root->selectDescendantsOfType('n_FUNCTION_DECLARATION');
   foreach ($functions as $function) {
     $name = $function->getChildByIndex(2);
-    // Skip anonymous functions
+    // Skip anonymous functions.
     if (!$name->getConcreteString()) {
       continue;
     }
@@ -67,8 +75,8 @@ foreach ($futures as $file => $future) {
   }
 
   foreach ($scopes as $scope) {
-    // this prints duplicate symbols in the case of nested classes
-    // luckily, PHP doesn't allow those
+    // This prints duplicate symbols in the case of nested classes.
+    // Luckily, PHP doesn't allow those.
     list($class, $class_name) = $scope;
 
     $consts = $class->selectDescendantsOfType(
@@ -100,15 +108,15 @@ foreach ($futures as $file => $future) {
   }
 }
 
-function print_symbol($file, $type, $token, $context = null) {
+function print_symbol($file, $type, XHPASTNode $node, $context = null) {
   $parts = array(
     $context ? $context->getConcreteString() : '',
-    // variable tokens are `$name`, not just `name`, so strip the $ off of
+    // Variable tokens are `$name`, not just `name`, so strip the "$"" off of
     // class field names
-    ltrim($token->getConcreteString(), '$'),
+    ltrim($node->getConcreteString(), '$'),
     $type,
     'php',
-    $token->getLineNumber(),
+    $node->getLineNumber(),
     '/'.ltrim($file, './'),
   );
   echo implode(' ', $parts)."\n";

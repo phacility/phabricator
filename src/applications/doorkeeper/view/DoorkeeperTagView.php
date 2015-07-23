@@ -12,7 +12,7 @@ final class DoorkeeperTagView extends AphrontView {
   public function render() {
     $xobj = $this->xobj;
     if (!$xobj) {
-      throw new Exception('Call setExternalObject() before render()!');
+      throw new PhutilInvalidStateException('setExternalObject');
     }
 
     $tag_id = celerity_generate_unique_node_id();

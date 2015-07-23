@@ -82,20 +82,15 @@ final class AlmanacBindingEditController
       }
     }
 
-    $interface_handles = array();
-    if ($v_interface) {
-      $interface_handles = $this->loadViewerHandles($v_interface);
-    }
-
     $form = id(new AphrontFormView())
       ->setUser($viewer)
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setName('interfacePHIDs')
-          ->setLabel('Interface')
+          ->setLabel(pht('Interface'))
           ->setLimit(1)
           ->setDatasource(new AlmanacInterfaceDatasource())
-          ->setValue($interface_handles)
+          ->setValue($v_interface)
           ->setError($e_interface))
       ->appendChild(
         id(new AphrontFormSubmitControl())

@@ -2,19 +2,18 @@
 
 final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
-  private $only;
   private $minipanels = array();
 
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->only = idx($data, 'only');
+  public function isGlobalDragAndDropUploadEnabled() {
+    return true;
   }
 
-  public function processRequest() {
-    $user = $this->getRequest()->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $user = $request->getUser();
 
     $dashboard = PhabricatorDashboardInstall::getDashboard(
       $user,
@@ -42,7 +41,7 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
       $content = $this->buildMainResponse($projects);
     }
 
-    if (!$this->only) {
+    if (!$request->getURIData('only')) {
       $nav = $this->buildNav();
       $nav->appendChild(
         array(
@@ -105,16 +104,22 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
       $revision_panel = null;
     }
 
-    return array(
-      $welcome_panel,
-      $unbreak_panel,
-      $triage_panel,
-      $revision_panel,
-      $tasks_panel,
-      $audit_panel,
-      $commit_panel,
-      $this->minipanels,
-    );
+    $home = phutil_tag(
+      'div',
+      array(
+        'class' => 'homepage-panel',
+      ),
+      array(
+        $welcome_panel,
+        $unbreak_panel,
+        $triage_panel,
+        $revision_panel,
+        $tasks_panel,
+        $audit_panel,
+        $commit_panel,
+        $this->minipanels,
+      ));
+      return $home;
   }
 
   private function buildUnbreakNowPanel() {
@@ -137,19 +142,17 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     if (!$tasks) {
       return $this->renderMiniPanel(
-        'No "Unbreak Now!" Tasks',
-        'Nothing appears to be critically broken right now.');
+        pht('No "Unbreak Now!" Tasks'),
+        pht('Nothing appears to be critically broken right now.'));
     }
 
     $href = urisprintf(
-      '/maniphest/?statuses=%s&priorities=%s#R',
-      implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
+      '/maniphest/?statuses=open()&priorities=%s#R',
       $unbreak_now);
     $title = pht('Unbreak Now!');
-    $panel = new AphrontPanelView();
+    $panel = new PHUIObjectBoxView();
     $panel->setHeader($this->renderSectionHeader($title, $href));
-    $panel->appendChild($this->buildTaskListView($tasks));
-    $panel->setNoBackground();
+    $panel->setObjectList($this->buildTaskListView($tasks));
 
     return $panel;
   }
@@ -173,7 +176,10 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
         ->setViewer($user)
         ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
         ->withPriorities(array($needs_triage))
-        ->withAnyProjects(mpull($projects, 'getPHID'))
+        ->withEdgeLogicPHIDs(
+          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+          PhabricatorQueryConstraint::OPERATOR_OR,
+          mpull($projects, 'getPHID'))
         ->needProjectPHIDs(true)
         ->setLimit(10);
       $tasks = $task_query->execute();
@@ -183,22 +189,18 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     if (!$tasks) {
       return $this->renderMiniPanel(
-        'No "Needs Triage" Tasks',
-        hsprintf(
-          'No tasks in <a href="/project/">projects you are a member of</a> '.
-          'need triage.'));
+        pht('No "Needs Triage" Tasks'),
+        pht('No tasks in projects you are a member of need triage.'));
     }
 
     $title = pht('Needs Triage');
     $href = urisprintf(
-      '/maniphest/?statuses=%s&priorities=%s&userProjects=%s#R',
-      implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
+      '/maniphest/?statuses=open()&priorities=%s&projects=projects(%s)#R',
       $needs_triage,
       $user->getPHID());
-    $panel = new AphrontPanelView();
+    $panel = new PHUIObjectBoxView();
     $panel->setHeader($this->renderSectionHeader($title, $href));
-    $panel->appendChild($this->buildTaskListView($tasks));
-    $panel->setNoBackground();
+    $panel->setObjectList($this->buildTaskListView($tasks));
 
     return $panel;
   }
@@ -223,13 +225,13 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     if (!$blocking && !$active) {
       return $this->renderMiniPanel(
-        'No Waiting Revisions',
-        'No revisions are waiting on you.');
+        pht('No Waiting Revisions'),
+        pht('No revisions are waiting on you.'));
     }
 
     $title = pht('Revisions Waiting on You');
     $href = '/differential';
-    $panel = new AphrontPanelView();
+    $panel = new PHUIObjectBoxView();
     $panel->setHeader($this->renderSectionHeader($title, $href));
 
     $revision_view = id(new DifferentialRevisionListView())
@@ -244,20 +246,18 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
     $revision_view->setHandles($handles);
 
     $list_view = $revision_view->render();
-    $list_view->setFlush(true);
 
-    $panel->appendChild($list_view);
-    $panel->setNoBackground();
+    $panel->setObjectList($list_view);
 
     return $panel;
   }
 
   private function buildWelcomePanel() {
-    $panel = new AphrontPanelView();
+    $panel = new PHUIObjectBoxView();
+    $panel->setHeaderText(pht('Welcome'));
     $panel->appendChild(
       phutil_safe_html(
         PhabricatorEnv::getEnvConfig('welcome.html')));
-    $panel->setNoBackground();
 
     return $panel;
   }
@@ -279,16 +279,15 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     if (!$tasks) {
       return $this->renderMiniPanel(
-        'No Assigned Tasks',
-        'You have no assigned tasks.');
+        pht('No Assigned Tasks'),
+        pht('You have no assigned tasks.'));
     }
 
     $title = pht('Assigned Tasks');
-    $href = '/maniphest';
-    $panel = new AphrontPanelView();
+    $href = '/maniphest/query/assigned/';
+    $panel = new PHUIObjectBoxView();
     $panel->setHeader($this->renderSectionHeader($title, $href));
-    $panel->appendChild($this->buildTaskListView($tasks));
-    $panel->setNoBackground();
+    $panel->setObjectList($this->buildTaskListView($tasks));
 
     return $panel;
   }
@@ -312,17 +311,24 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
   }
 
   private function renderSectionHeader($title, $href) {
-    $header = phutil_tag(
+    $title = phutil_tag(
       'a',
       array(
         'href' => $href,
       ),
       $title);
+    $icon = id(new PHUIIconView())
+      ->setIconFont('fa-search')
+      ->setHref($href);
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->addActionIcon($icon);
     return $header;
   }
 
   private function renderMiniPanel($title, $body) {
-    $panel = new AphrontMiniPanelView();
+    $panel = new PHUIInfoView();
+    $panel->setSeverity(PHUIInfoView::SEVERITY_NODATA);
     $panel->appendChild(
       phutil_tag(
         'p',
@@ -354,8 +360,8 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     if (!$commits) {
       return $this->renderMinipanel(
-        'No Audits',
-        'No commits are waiting for you to audit them.');
+        pht('No Audits'),
+        pht('No commits are waiting for you to audit them.'));
     }
 
     $view = id(new PhabricatorAuditListView())
@@ -368,10 +374,9 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     $title = pht('Audits');
     $href = '/audit/';
-    $panel = new AphrontPanelView();
+    $panel = new PHUIObjectBoxView();
     $panel->setHeader($this->renderSectionHeader($title, $href));
-    $panel->appendChild($view);
-    $panel->setNoBackground();
+    $panel->setObjectList($view);
 
     return $panel;
   }
@@ -394,8 +399,8 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     if (!$commits) {
       return $this->renderMinipanel(
-        'No Problem Commits',
-        'No one has raised concerns with your commits.');
+        pht('No Problem Commits'),
+        pht('No one has raised concerns with your commits.'));
     }
 
     $view = id(new PhabricatorAuditListView())
@@ -408,10 +413,9 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     $title = pht('Problem Commits');
     $href = '/audit/';
-    $panel = new AphrontPanelView();
+    $panel = new PHUIObjectBoxView();
     $panel->setHeader($this->renderSectionHeader($title, $href));
-    $panel->appendChild($view);
-    $panel->setNoBackground();
+    $panel->setObjectList($view);
 
     return $panel;
   }

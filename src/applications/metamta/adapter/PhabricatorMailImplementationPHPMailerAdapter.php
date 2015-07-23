@@ -3,6 +3,8 @@
 final class PhabricatorMailImplementationPHPMailerAdapter
   extends PhabricatorMailImplementationAdapter {
 
+  private $mailer;
+
   /**
    * @phutil-external-symbol class PHPMailer
    */

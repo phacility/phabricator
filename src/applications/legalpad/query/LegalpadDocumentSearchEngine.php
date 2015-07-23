@@ -7,7 +7,7 @@ final class LegalpadDocumentSearchEngine
     return pht('Legalpad Documents');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorLegalpadApplication';
   }
 
@@ -73,11 +73,6 @@ final class LegalpadDocumentSearchEngine
     $creator_phids = $saved_query->getParameter('creatorPHIDs', array());
     $contributor_phids = $saved_query->getParameter(
       'contributorPHIDs', array());
-    $phids = array_merge($creator_phids, $contributor_phids);
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
 
     $viewer_signature = $saved_query->getParameter('withViewerSignature');
     if (!$this->requireViewer()->getPHID()) {
@@ -93,18 +88,18 @@ final class LegalpadDocumentSearchEngine
             pht('Show only documents I have signed.'),
             $viewer_signature)
           ->setDisabled(!$this->requireViewer()->getPHID()))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('creators')
           ->setLabel(pht('Creators'))
-          ->setValue(array_select_keys($handles, $creator_phids)))
-      ->appendChild(
+          ->setValue($creator_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('contributors')
           ->setLabel(pht('Contributors'))
-          ->setValue(array_select_keys($handles, $contributor_phids)));
+          ->setValue($contributor_phids));
 
     $this->buildDateRange(
       $form,
@@ -113,7 +108,6 @@ final class LegalpadDocumentSearchEngine
       pht('Created After'),
       'createdEnd',
       pht('Created Before'));
-
   }
 
   protected function getURI($path) {
@@ -168,47 +162,58 @@ final class LegalpadDocumentSearchEngine
 
       $title = $document->getTitle();
 
-      $type_name = $document->getSignatureTypeName();
-      $type_icon = $document->getSignatureTypeIcon();
-
       $item = id(new PHUIObjectItemView())
         ->setObjectName($document->getMonogram())
         ->setHeader($title)
         ->setHref('/'.$document->getMonogram())
-        ->setObject($document)
-        ->addIcon($type_icon, $type_name)
-        ->addIcon(
-          'fa-pencil grey',
-          pht('Version %d (%s)', $document->getVersions(), $last_updated));
+        ->setObject($document);
 
-      if ($viewer->getPHID()) {
-        $signature = $document->getUserSignature($viewer->getPHID());
+      $no_signatures = LegalpadDocument::SIGNATURE_TYPE_NONE;
+      if ($document->getSignatureType() == $no_signatures) {
+        $item->addIcon('none', pht('Not Signable'));
       } else {
-        $signature = null;
+
+        $type_name = $document->getSignatureTypeName();
+        $type_icon = $document->getSignatureTypeIcon();
+        $item->addIcon($type_icon, $type_name);
+
+        if ($viewer->getPHID()) {
+          $signature = $document->getUserSignature($viewer->getPHID());
+        } else {
+          $signature = null;
+        }
+
+        if ($signature) {
+          $item->addAttribute(
+            array(
+              id(new PHUIIconView())->setIconFont('fa-check-square-o', 'green'),
+              ' ',
+              pht(
+                'Signed on %s',
+                phabricator_date($signature->getDateCreated(), $viewer)),
+            ));
+        } else {
+          $item->addAttribute(
+            array(
+              id(new PHUIIconView())->setIconFont('fa-square-o', 'grey'),
+              ' ',
+              pht('Not Signed'),
+            ));
+        }
       }
 
-      if ($signature) {
-        $item->addAttribute(
-          array(
-            id(new PHUIIconView())->setIconFont('fa-check-square-o', 'green'),
-            ' ',
-            pht(
-              'Signed on %s',
-              phabricator_date($signature->getDateCreated(), $viewer)),
-          ));
-      } else {
-        $item->addAttribute(
-          array(
-            id(new PHUIIconView())->setIconFont('fa-square-o', 'grey'),
-            ' ',
-            pht('Not Signed'),
-          ));
-      }
+      $item->addIcon(
+        'fa-pencil grey',
+        pht('Version %d (%s)', $document->getVersions(), $last_updated));
 
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No documents found.'));
+
+    return $result;
   }
 
 }

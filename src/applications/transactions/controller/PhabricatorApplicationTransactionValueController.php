@@ -63,8 +63,6 @@ final class PhabricatorApplicationTransactionValueController
       $rule_objects[$class] = newv($class, array());
     }
     $policy->attachRuleObjects($rule_objects);
-    $handle_phids = $this->extractPHIDs($policy, $rule_objects);
-    $handles = $this->loadHandles($handle_phids);
 
     $this->requireResource('policy-transaction-detail-css');
     $cancel_uri = $this->guessCancelURI($viewer, $xaction);
@@ -114,13 +112,17 @@ final class PhabricatorApplicationTransactionValueController
         ->setIconFont($icon)
         ->setText(
           ucfirst($rule['action']).' '.$rule_object->getRuleDescription());
-      $handle_phids =
-        $rule_object->getRequiredHandlePHIDsForSummary($rule['value']);
+
+      $handle_phids = $rule_object->getRequiredHandlePHIDsForSummary(
+        $rule['value']);
       if ($handle_phids) {
-        $value = $this->renderHandlesForPHIDs($handle_phids, ',');
+        $value = $this->getViewer()
+          ->renderHandleList($handle_phids)
+          ->setAsInline(true);
       } else {
         $value = $rule['value'];
       }
+
       $details[] = phutil_tag('div',
         array(
           'class' => 'policy-transaction-detail-row',

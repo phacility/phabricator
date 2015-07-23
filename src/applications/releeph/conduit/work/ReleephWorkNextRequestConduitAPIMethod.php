@@ -15,26 +15,26 @@ final class ReleephWorkNextRequestConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return
-      'Return info required to cut a branch, '.
-      'and pick and revert ReleephRequests';
+    return pht(
+      'Return info required to cut a branch, and pick and revert %s.',
+      'ReleephRequests');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'branchPHID'  => 'required phid',
       'seen'        => 'required map<string, bool>',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return '';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR-NOT-PUSHER' =>
-        'You are not listed as a pusher for thie Releeph project!',
+      'ERR-NOT-PUSHER' => pht(
+        'You are not listed as a pusher for the Releeph project!'),
     );
   }
 
@@ -177,7 +177,7 @@ final class ReleephWorkNextRequestConduitAPIMethod
     foreach ($releeph_requests as $rq) {
       // TODO: it's likely that relying on the `id` column to provide
       // trunk-commit-order is thoroughly broken.
-      $ordinal = (int) $rq->loadPhabricatorRepositoryCommit()->getID();
+      $ordinal = (int)$rq->loadPhabricatorRepositoryCommit()->getID();
       $surrogate[$ordinal] = $rq;
     }
     ksort($surrogate);

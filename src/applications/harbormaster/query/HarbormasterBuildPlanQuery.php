@@ -6,6 +6,9 @@ final class HarbormasterBuildPlanQuery
   private $ids;
   private $phids;
   private $statuses;
+  private $datasourceQuery;
+  private $planAutoKeys;
+  private $needBuildSteps;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -22,52 +25,119 @@ final class HarbormasterBuildPlanQuery
     return $this;
   }
 
-  protected function loadPage() {
-    $table = new HarbormasterBuildPlan();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+  public function withDatasourceQuery($query) {
+    $this->datasourceQuery = $query;
+    return $this;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  public function withPlanAutoKeys(array $keys) {
+    $this->planAutoKeys = $keys;
+    return $this;
+  }
 
-    if ($this->ids) {
+  public function needBuildSteps($need) {
+    $this->needBuildSteps = $need;
+    return $this;
+  }
+
+  public function newResultObject() {
+    return new HarbormasterBuildPlan();
+  }
+
+  protected function loadPage() {
+    return $this->loadStandardPage($this->newResultObject());
+  }
+
+  protected function didFilterPage(array $page) {
+    if ($this->needBuildSteps) {
+      $plan_phids = mpull($page, 'getPHID');
+
+      $steps = id(new HarbormasterBuildStepQuery())
+        ->setParentQuery($this)
+        ->setViewer($this->getViewer())
+        ->withBuildPlanPHIDs($plan_phids)
+        ->execute();
+      $steps = mgroup($steps, 'getBuildPlanPHID');
+
+      foreach ($page as $plan) {
+        $plan_steps = idx($steps, $plan->getPHID(), array());
+        $plan->attachBuildSteps($plan_steps);
+      }
+    }
+
+    return $page;
+  }
+
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->statuses) {
+    if ($this->statuses !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'planStatus IN (%Ls)',
         $this->statuses);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    if (strlen($this->datasourceQuery)) {
+      $where[] = qsprintf(
+        $conn,
+        'name LIKE %>',
+        $this->datasourceQuery);
+    }
 
-    return $this->formatWhereClause($where);
+    if ($this->planAutoKeys !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'planAutoKey IN (%Ls)',
+        $this->planAutoKeys);
+    }
+
+    return $where;
   }
 
   public function getQueryApplicationClass() {
     return 'PhabricatorHarbormasterApplication';
+  }
+
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'name' => array(
+        'column' => 'name',
+        'type' => 'string',
+        'reverse' => true,
+      ),
+    );
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $plan = $this->loadCursorObject($cursor);
+    return array(
+      'id' => $plan->getID(),
+      'name' => $plan->getName(),
+    );
+  }
+
+  public function getBuiltinOrders() {
+    return array(
+      'name' => array(
+        'vector' => array('name', 'id'),
+        'name' => pht('Name'),
+      ),
+    ) + parent::getBuiltinOrders();
   }
 
 }

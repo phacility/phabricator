@@ -26,17 +26,27 @@ final class PhabricatorFileEditController extends PhabricatorFileController {
     }
 
     $title = pht('Edit %s', $file->getName());
+    $file_name = $file->getName();
     $view_uri = '/'.$file->getMonogram();
-
+    $error_name = true;
     $validation_exception = null;
+
     if ($request->isFormPost()) {
       $can_view = $request->getStr('canView');
+      $file_name = $request->getStr('name');
+      $errors = array();
+
+      $type_name = PhabricatorFileTransaction::TYPE_NAME;
 
       $xactions = array();
 
       $xactions[] = id(new PhabricatorFileTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
         ->setNewValue($can_view);
+
+      $xactions[] = id(new PhabricatorFileTransaction())
+        ->setTransactionType(PhabricatorFileTransaction::TYPE_NAME)
+        ->setNewValue($file_name);
 
       $editor = id(new PhabricatorFileEditor())
         ->setActor($viewer)
@@ -48,6 +58,7 @@ final class PhabricatorFileEditController extends PhabricatorFileController {
         return id(new AphrontRedirectResponse())->setURI($view_uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
+        $error_name = $ex->getShortMessage($type_name);
 
         $file->setViewPolicy($can_view);
       }
@@ -61,6 +72,12 @@ final class PhabricatorFileEditController extends PhabricatorFileController {
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
+       ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setName('name')
+        ->setValue($file_name)
+        ->setLabel(pht('Name'))
+        ->setError($error_name))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setUser($viewer)

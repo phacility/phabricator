@@ -1,273 +1,347 @@
 {
-  "name" : "phabdev",
-  "title" : "Phabricator Technical Documentation",
-  "short" : "Phabricator Tech Docs",
-  "preface" : "Technical documentation intended for Phabricator developers.",
-  "root" : "../../../",
-  "uri.source" :
+  "name": "phabdev",
+  "title": "Phabricator Technical Documentation",
+  "short": "Phabricator Tech Docs",
+  "preface": "Technical reference material for Phabricator developers.",
+  "root": "../../../",
+  "uri.source":
     "https://secure.phabricator.com/diffusion/P/browse/master/%f$%l",
-  "rules" : {
-    "(\\.php$)" : "DivinerPHPAtomizer",
-    "(\\.diviner$)" : "DivinerArticleAtomizer"
+  "rules": {
+    "(\\.diviner$)": "DivinerArticleAtomizer",
+    "(\\.php$)": "DivinerPHPAtomizer"
   },
-  "exclude" : [
+  "exclude": [
     "(^externals/)",
-    "(^webroot/rsrc/externals/)",
-    "(^scripts/)",
-    "(^support/)",
     "(^resources/)",
-    "(^src/docs/user/)",
+    "(^scripts/)",
+    "(^src/docs/contributor/)",
     "(^src/docs/flavor/)",
-    "(^src/docs/contributor/)"
+    "(^src/docs/user/)",
+    "(^support/)",
+    "(^webroot/rsrc/externals/)"
   ],
-  "groups" : {
-    "arcanist" : {
-      "name" : "Arcanist Integration",
-      "include" : "(^src/applications/arcanist/)"
+  "groups": {
+    "aphront": {
+      "name": "Aphront",
+      "include": "(^src/aphront/)"
     },
-    "audit" : {
-      "name" : "Audit",
-      "include" : "(^src/applications/audit/)"
+    "almanac": {
+      "name": "Almanac",
+      "include": "(^src/applications/almanac/)"
     },
-    "auth" : {
-      "name" : "Auth",
-      "include" : "(^src/applications/auth/)"
+    "aphlict": {
+      "name": "Aphlict",
+      "include": "(^src/applications/aphlict/)"
     },
-    "baseapp" : {
-      "name" : "Application Basics",
-      "include" : "(^src/applications/base/)"
+    "arcanist": {
+      "name": "Arcanist Integration",
+      "include": "(^src/applications/arcanist/)"
     },
-    "cache" : {
-      "name" : "Cache",
-      "include" : "(^src/applications/cache/)"
+    "audit": {
+      "name": "Audit",
+      "include": "(^src/applications/audit/)"
     },
-    "calendar" : {
-      "name" : "Calendar",
-      "include" : "(^src/applications/calendar/)"
+    "auth": {
+      "name": "Auth",
+      "include": "(^src/applications/auth/)"
     },
-    "chatlog" : {
-      "name" : "Chatlog",
-      "include" : "(^src/applications/chatlog/)"
+    "baseapp": {
+      "name": "Application Basics",
+      "include": "(^src/applications/base/)"
     },
-    "conduit" : {
-      "name" : "Conduit",
-      "include" : "(^src/applications/conduit/)"
+    "cache": {
+      "name": "Cache",
+      "include": "(^src/applications/cache/)"
     },
-    "config" : {
-      "name" : "Config",
-      "include" : "(^src/applications/config/)"
+    "calendar": {
+      "name": "Calendar",
+      "include": "(^src/applications/calendar/)"
     },
-    "conpherence" : {
-      "name" : "Conpherence",
-      "include" : "(^src/applications/conpherence/)"
+    "celerity": {
+      "name": "Celerity",
+      "include": "(^src/applications/celerity/)"
     },
-    "countdown" : {
-      "name" : "Countdown",
-      "include" : "(^src/applications/countdown/)"
+    "chatlog": {
+      "name": "Chatlog",
+      "include": "(^src/applications/chatlog/)"
     },
-    "daemon" : {
-      "name" : "Daemons",
-      "include" : "(^src/applications/daemon/)"
+    "conduit": {
+      "name": "Conduit",
+      "include": "(^src/applications/conduit/)"
     },
-    "differential" : {
-      "name" : "Differential",
-      "include" : "(^src/applications/differential/)"
+    "config": {
+      "name": "Config",
+      "include": "(^src/applications/config/)"
     },
-    "diffusion" : {
-      "name" : "Diffusion",
-      "include" : "(^src/applications/diffusion/)"
+    "conpherence": {
+      "name": "Conpherence",
+      "include": "(^src/applications/conpherence/)"
     },
-    "directory" : {
-      "name" : "Directory",
-      "include" : "(^src/applications/directory/)"
+    "console": {
+      "name": "Console",
+      "include": "(^src/applications/console/)"
     },
-    "diviner" : {
-      "name" : "Diviner",
-      "include" : "(^src/applications/diviner/)"
+    "countdown": {
+      "name": "Countdown",
+      "include": "(^src/applications/countdown/)"
     },
-    "doorkeeper" : {
-      "name" : "Doorkeeper",
-      "include" : "(^src/applications/doorkeeper/)"
+    "customfield": {
+      "name": "Custom Fields",
+      "include": "(^src/infrastructure/customfield/)"
     },
-    "draft" : {
-      "name" : "Draft",
-      "include" : "(^src/applications/draft/)"
+    "daemon": {
+      "name": "Daemons",
+      "include": [
+        "(^src/applications/daemon/)",
+        "(^src/infrastructure/daemon/)"
+      ]
     },
-    "drydock" : {
-      "name" : "Drydock",
-      "include" : "(^src/applications/drydock/)"
+    "dashboard": {
+      "name": "Dashboard",
+      "include": "(^src/applications/dashboard/)"
     },
-    "fact" : {
-      "name" : "Fact",
-      "include" : "(^src/applications/fact/)"
+    "differential": {
+      "name": "Differential",
+      "include": "(^src/applications/differential/)"
     },
-    "feed" : {
-      "name" : "Feed",
-      "include" : "(^src/applications/feed/)"
+    "diffusion": {
+      "name": "Diffusion",
+      "include": "(^src/applications/diffusion/)"
     },
-    "files" : {
-      "name" : "Files",
-      "include" : "(^src/applications/files/)"
+    "diviner": {
+      "name": "Diviner",
+      "include": "(^src/applications/diviner/)"
     },
-    "flag" : {
-      "name" : "Flags",
-      "include" : "(^src/applications/flag/)"
+    "doorkeeper": {
+      "name": "Doorkeeper",
+      "include": "(^src/applications/doorkeeper/)"
     },
-    "harbormaster" : {
-      "name" : "Harbormaster",
-      "include" : "(^src/applications/harbormaster/)"
+    "draft": {
+      "name": "Draft",
+      "include": "(^src/applications/draft/)"
     },
-    "help" : {
-      "name" : "Help",
-      "include" : "(^src/applications/help/)"
+    "drydock": {
+      "name": "Drydock",
+      "include": "(^src/applications/drydock/)"
     },
-    "herald" : {
-      "name" : "Herald",
-      "include" : "(^src/applications/herald/)"
+    "edges": {
+      "name": "Edges",
+      "include": "(^src/infrastructure/edges/)"
     },
-    "legalpad" : {
-      "name" : "Legalpad",
-      "include" : "(^src/applications/legalpad/)"
+    "events": {
+      "name": "Events",
+      "include": "(^src/infrastructure/events/)"
     },
-    "lipsum" : {
-      "name" : "Lipsum",
-      "include" : "(^src/applications/lipsum/)"
+    "fact": {
+      "name": "Fact",
+      "include": "(^src/applications/fact/)"
     },
-    "macro" : {
-      "name" : "Macro",
-      "include" : "(^src/applications/macro/)"
+    "feed": {
+      "name": "Feed",
+      "include": "(^src/applications/feed/)"
     },
-    "mailinglists" : {
-      "name" : "Mailing Lists",
-      "include" : "(^src/applications/mailinglists/)"
+    "files": {
+      "name": "Files",
+      "include": "(^src/applications/files/)"
     },
-    "maniphest" : {
-      "name" : "Maniphest",
-      "include" : "(^src/applications/maniphest/)"
+    "flag": {
+      "name": "Flags",
+      "include": "(^src/applications/flag/)"
     },
-    "meta" : {
-      "name" : "Meta",
-      "include" : "(^src/applications/meta/)"
+    "fund": {
+      "name": "Fund",
+      "include": "(^src/applications/fund/)"
     },
-    "metamta" : {
-      "name" : "MetaMTA",
-      "include" : "(^src/applications/metamta/)"
+    "harbormaster": {
+      "name": "Harbormaster",
+      "include": "(^src/applications/harbormaster/)"
     },
-    "notification" : {
-      "name" : "Notifications",
-      "include" : "(^src/applications/notification/)"
+    "help": {
+      "name": "Help",
+      "include": "(^src/applications/help/)"
     },
-    "oauthserver" : {
-      "name" : "OAuth Server",
-      "include" : "(^src/applications/oauthserver/)"
+    "herald": {
+      "name": "Herald",
+      "include": "(^src/applications/herald/)"
     },
-    "owners" : {
-      "name" : "Owners",
-      "include" : "(^src/applications/owners/)"
+    "home": {
+      "name": "Home",
+      "include": "(^src/applications/home/)"
     },
-    "paste" : {
-      "name" : "Paste",
-      "include" : "(^src/applications/paste/)"
+    "legalpad": {
+      "name": "Legalpad",
+      "include": "(^src/applications/legalpad/)"
     },
-    "people" : {
-      "name" : "People",
-      "include" : "(^src/applications/people/)"
+    "lipsum": {
+      "name": "Lipsum",
+      "include": "(^src/applications/lipsum/)"
     },
-    "phame" : {
-      "name" : "Phame",
-      "include" : "(^src/applications/phame/)"
+    "macro": {
+      "name": "Macro",
+      "include": "(^src/applications/macro/)"
     },
-    "phid" : {
-      "name" : "PHIDs",
-      "include" : "(^src/applications/phid/)"
+    "maniphest": {
+      "name": "Maniphest",
+      "include": "(^src/applications/maniphest/)"
     },
-    "phlux" : {
-      "name" : "Phlux",
-      "include" : "(^src/applications/phlux/)"
+    "meta": {
+      "name": "Applications",
+      "include": "(^src/applications/meta/)"
     },
-    "pholio" : {
-      "name" : "Pholio",
-      "include" : "(^src/applications/pholio/)"
+    "metamta": {
+      "name": "MetaMTA",
+      "include": "(^src/applications/metamta/)"
     },
-    "phortune" : {
-      "name" : "Phortune",
-      "include" : "(^src/applications/phortune/)"
+    "multimeter": {
+      "name": "Multimeter",
+      "include": "(^src/applications/multimeter/)"
     },
-    "phpast" : {
-      "name" : "PHPAST",
-      "include" : "(^src/applications/phpast/)"
+    "notification": {
+      "name": "Notifications",
+      "include": "(^src/applications/notification/)"
     },
-    "phrequent" : {
-      "name" : "Phrequent",
-      "include" : "(^src/applications/phrequent/)"
+    "nuance": {
+      "name": "Nuance",
+      "include": "(^src/applications/nuance/)"
     },
-    "phriction" : {
-      "name" : "Phriction",
-      "include" : "(^src/applications/phriction/)"
+    "oauthserver": {
+      "name": "OAuth Server",
+      "include": "(^src/applications/oauthserver/)"
     },
-    "policy" : {
-      "name" : "Policy",
-      "include" : "(^src/applications/policy/)"
+    "owners": {
+      "name": "Owners",
+      "include": "(^src/applications/owners/)"
     },
-    "ponder" : {
-      "name" : "Ponder",
-      "include" : "(^src/applications/ponder/)"
+    "passphrase": {
+      "name": "Passphrase",
+      "include": "(^src/applications/passphrase/)"
     },
-    "project" : {
-      "name" : "Projects",
-      "include" : "(^src/applications/project/)"
+    "paste": {
+      "name": "Paste",
+      "include": "(^src/applications/paste/)"
     },
-    "releeph" : {
-      "name" : "Releeph",
-      "include" : "(^src/applications/releeph/)"
+    "people": {
+      "name": "People",
+      "include": "(^src/applications/people/)"
     },
-    "remarkup" : {
-      "name" : "Remarkup",
-      "include" : "(^src/applications/remarkup/)"
+    "phame": {
+      "name": "Phame",
+      "include": "(^src/applications/phame/)"
     },
-    "repository" : {
-      "name" : "Repositories",
-      "include" : "(^src/applications/repository/)"
+    "phid": {
+      "name": "PHIDs",
+      "include": "(^src/applications/phid/)"
     },
-    "search" : {
-      "name" : "Search",
-      "include" : "(^src/applications/search/)"
+    "phlux": {
+      "name": "Phlux",
+      "include": "(^src/applications/phlux/)"
     },
-    "settings" : {
-      "name" : "Settings",
-      "include" : "(^src/applications/settings/)"
+    "pholio": {
+      "name": "Pholio",
+      "include": "(^src/applications/pholio/)"
     },
-    "slowvote" : {
-      "name" : "Slowvote",
-      "include" : "(^src/applications/slowvote/)"
+    "phortune": {
+      "name": "Phortune",
+      "include": "(^src/applications/phortune/)"
     },
-    "subscriptions" : {
-      "name" : "Subscriptions",
-      "include" : "(^src/applications/subscriptions/)"
+    "phpast": {
+      "name": "PHPAST",
+      "include": "(^src/applications/phpast/)"
     },
-    "system" : {
-      "name" : "System",
-      "include" : "(^src/applications/system/)"
+    "phragment": {
+      "name": "Phragment",
+      "include": "(^src/applications/phragment/)"
     },
-    "tokens" : {
-      "name" : "Tokens",
-      "include" : "(^src/applications/tokens/)"
+    "phrequent": {
+      "name": "Phrequent",
+      "include": "(^src/applications/phrequent/)"
     },
-    "transactions" : {
-      "name" : "Transactions",
-      "include" : "(^src/applications/transactions/)"
+    "phriction": {
+      "name": "Phriction",
+      "include": "(^src/applications/phriction/)"
     },
-    "typeahead" : {
-      "name" : "Typeahead",
-      "include" : "(^src/applications/typeahead/)"
+    "phui": {
+      "name": "PHUI",
+      "include": "(^src/view/phui/)"
     },
-    "uiexample" : {
-      "name" : "UI Examples",
-      "include" : "(^src/applications/uiexample/)"
+    "policy": {
+      "name": "Policy",
+      "include": "(^src/applications/policy/)"
     },
-    "xhprof" : {
-      "name" : "XHProf",
-      "include" : "(^src/applications/xhprof/)"
+    "ponder": {
+      "name": "Ponder",
+      "include": "(^src/applications/ponder/)"
+    },
+    "project": {
+      "name": "Projects",
+      "include": "(^src/applications/project/)"
+    },
+    "releeph": {
+      "name": "Releeph",
+      "include": "(^src/applications/releeph/)"
+    },
+    "remarkup": {
+      "name": "Remarkup",
+      "include": [
+        "(^src/applications/remarkup/)",
+        "(^src/infrastructure/markup/)"
+      ]
+    },
+    "repository": {
+      "name": "Repositories",
+      "include": "(^src/applications/repository/)"
+    },
+    "search": {
+      "name": "Search",
+      "include": "(^src/applications/search/)"
+    },
+    "settings": {
+      "name": "Settings",
+      "include": "(^src/applications/settings/)"
+    },
+    "slowvote": {
+      "name": "Slowvote",
+      "include": "(^src/applications/slowvote/)"
+    },
+    "spaces": {
+      "name": "Spaces",
+      "include": "(^src/applications/spaces/)"
+    },
+    "storage": {
+      "name": "Storage",
+      "include": "(^src/infrastructure/storage/)"
+    },
+    "subscriptions": {
+      "name": "Subscriptions",
+      "include": "(^src/applications/subscriptions/)"
+    },
+    "support": {
+      "name": "Support",
+      "include": "(^src/applications/support/)"
+    },
+    "system": {
+      "name": "System",
+      "include": "(^src/applications/system/)"
+    },
+    "tokens": {
+      "name": "Tokens",
+      "include": "(^src/applications/tokens/)"
+    },
+    "transactions": {
+      "name": "Transactions",
+      "include": "(^src/applications/transactions/)"
+    },
+    "typeahead": {
+      "name": "Typeahead",
+      "include": "(^src/applications/typeahead/)"
+    },
+    "uiexample": {
+      "name": "UI Examples",
+      "include": "(^src/applications/uiexample/)"
+    },
+    "xhprof": {
+      "name": "XHProf",
+      "include": "(^src/applications/xhprof/)"
     }
   }
 }

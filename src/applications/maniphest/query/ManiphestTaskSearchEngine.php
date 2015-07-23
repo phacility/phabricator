@@ -34,141 +34,161 @@ final class ManiphestTaskSearchEngine
     return pht('Tasks');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorManiphestApplication';
   }
 
-  public function getCustomFieldObject() {
-    return new ManiphestTask();
+  public function newQuery() {
+    return id(new ManiphestTaskQuery())
+      ->needProjectPHIDs(true);
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorOwnersSearchField())
+        ->setLabel(pht('Assigned To'))
+        ->setKey('assignedPHIDs')
+        ->setAliases(array('assigned')),
+      id(new PhabricatorUsersSearchField())
+        ->setLabel(pht('Authors'))
+        ->setKey('authorPHIDs')
+        ->setAliases(array('author', 'authors')),
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Statuses'))
+        ->setKey('statuses')
+        ->setAliases(array('status'))
+        ->setDatasource(new ManiphestTaskStatusFunctionDatasource()),
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Priorities'))
+        ->setKey('priorities')
+        ->setAliases(array('priority'))
+        ->setDatasource(new ManiphestTaskPriorityDatasource()),
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Contains Words'))
+        ->setKey('fulltext'),
+      id(new PhabricatorSearchThreeStateField())
+        ->setLabel(pht('Blocking'))
+        ->setKey('blocking')
+        ->setOptions(
+          pht('(Show All)'),
+          pht('Show Only Tasks Blocking Other Tasks'),
+          pht('Hide Tasks Blocking Other Tasks')),
+      id(new PhabricatorSearchThreeStateField())
+        ->setLabel(pht('Blocked'))
+        ->setKey('blocked')
+        ->setOptions(
+          pht('(Show All)'),
+          pht('Show Only Task Blocked By Other Tasks'),
+          pht('Hide Tasks Blocked By Other Tasks')),
+      id(new PhabricatorSearchSelectField())
+        ->setLabel(pht('Group By'))
+        ->setKey('group')
+        ->setOptions($this->getGroupOptions()),
+      id(new PhabricatorSearchStringListField())
+        ->setLabel(pht('Task IDs'))
+        ->setKey('ids'),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Created After'))
+        ->setKey('createdStart'),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Created Before'))
+        ->setKey('createdEnd'),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Updated After'))
+        ->setKey('modifiedStart'),
+      id(new PhabricatorSearchDateField())
+        ->setLabel(pht('Updated Before'))
+        ->setKey('modifiedEnd'),
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Page Size'))
+        ->setKey('limit'),
+    );
+  }
 
-    $saved->setParameter(
+  protected function getDefaultFieldOrder() {
+    return array(
       'assignedPHIDs',
-      $this->readUsersFromRequest($request, 'assigned'));
-
-    $saved->setParameter('withUnassigned', $request->getBool('withUnassigned'));
-
-    $saved->setParameter(
+      'projectPHIDs',
       'authorPHIDs',
-      $this->readUsersFromRequest($request, 'authors'));
-
-    $saved->setParameter(
       'subscriberPHIDs',
-      $this->readPHIDsFromRequest($request, 'subscribers'));
-
-    $saved->setParameter(
       'statuses',
-      $this->readListFromRequest($request, 'statuses'));
-
-    $saved->setParameter(
       'priorities',
-      $this->readListFromRequest($request, 'priorities'));
-
-    $saved->setParameter(
+      'fulltext',
       'blocking',
-      $this->readBoolFromRequest($request, 'blocking'));
-    $saved->setParameter(
       'blocked',
-      $this->readBoolFromRequest($request, 'blocked'));
-
-    $saved->setParameter('group', $request->getStr('group'));
-    $saved->setParameter('order', $request->getStr('order'));
-
-    $ids = $request->getStrList('ids');
-    foreach ($ids as $key => $id) {
-      $id = trim($id, ' Tt');
-      if (!$id || !is_numeric($id)) {
-        unset($ids[$key]);
-      } else {
-        $ids[$key] = $id;
-      }
-    }
-    $saved->setParameter('ids', $ids);
-
-    $saved->setParameter('fulltext', $request->getStr('fulltext'));
-
-    $saved->setParameter(
-      'allProjectPHIDs',
-      $this->readPHIDsFromRequest($request, 'allProjects'));
-
-    $saved->setParameter(
-      'withNoProject',
-      $request->getBool('withNoProject'));
-
-    $saved->setParameter(
-      'anyProjectPHIDs',
-      $this->readPHIDsFromRequest($request, 'anyProjects'));
-
-    $saved->setParameter(
-      'excludeProjectPHIDs',
-      $this->readPHIDsFromRequest($request, 'excludeProjects'));
-
-    $saved->setParameter(
-      'userProjectPHIDs',
-      $this->readUsersFromRequest($request, 'userProjects'));
-
-    $saved->setParameter('createdStart', $request->getStr('createdStart'));
-    $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
-    $saved->setParameter('modifiedStart', $request->getStr('modifiedStart'));
-    $saved->setParameter('modifiedEnd', $request->getStr('modifiedEnd'));
-
-    $limit = $request->getInt('limit');
-    if ($limit > 0) {
-      $saved->setParameter('limit', $limit);
-    }
-
-    $this->readCustomFieldsFromRequest($request, $saved);
-
-    return $saved;
+      'group',
+      'order',
+      'ids',
+      '...',
+      'createdStart',
+      'createdEnd',
+      'modifiedStart',
+      'modifiedEnd',
+      'limit',
+    );
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
+  protected function getHiddenFields() {
+    $keys = array();
+
+    if ($this->getIsBoardView()) {
+      $keys[] = 'group';
+      $keys[] = 'order';
+      $keys[] = 'limit';
+    }
+
+    return $keys;
+  }
+
+  protected function buildQueryFromParameters(array $map) {
     $query = id(new ManiphestTaskQuery())
       ->needProjectPHIDs(true);
 
-    $author_phids = $saved->getParameter('authorPHIDs');
-    if ($author_phids) {
-      $query->withAuthors($author_phids);
+    if ($map['assignedPHIDs']) {
+      $query->withOwners($map['assignedPHIDs']);
     }
 
-    $subscriber_phids = $saved->getParameter('subscriberPHIDs');
-    if ($subscriber_phids) {
-      $query->withSubscribers($subscriber_phids);
+    if ($map['authorPHIDs']) {
+      $query->withAuthors($map['authorPHIDs']);
     }
 
-    $with_unassigned = $saved->getParameter('withUnassigned');
-    if ($with_unassigned) {
-      $query->withOwners(array(null));
-    } else {
-      $assigned_phids = $saved->getParameter('assignedPHIDs', array());
-      if ($assigned_phids) {
-        $query->withOwners($assigned_phids);
-      }
+    if ($map['statuses']) {
+      $query->withStatuses($map['statuses']);
     }
 
-    $statuses = $saved->getParameter('statuses');
-    if ($statuses) {
-      $query->withStatuses($statuses);
+    if ($map['priorities']) {
+      $query->withPriorities($map['priorities']);
     }
 
-    $priorities = $saved->getParameter('priorities');
-    if ($priorities) {
-      $query->withPriorities($priorities);
+    if ($map['createdStart']) {
+      $query->withDateCreatedAfter($map['createdStart']);
     }
 
+    if ($map['createdEnd']) {
+      $query->withDateCreatedBefore($map['createdEnd']);
+    }
 
-    $query->withBlockingTasks($saved->getParameter('blocking'));
-    $query->withBlockedTasks($saved->getParameter('blocked'));
+    if ($map['modifiedStart']) {
+      $query->withDateModifiedAfter($map['modifiedStart']);
+    }
 
-    $this->applyOrderByToQuery(
-      $query,
-      $this->getOrderValues(),
-      $saved->getParameter('order'));
+    if ($map['modifiedEnd']) {
+      $query->withDateModifiedBefore($map['modifiedEnd']);
+    }
 
-    $group = $saved->getParameter('group');
+    if ($map['blocking'] !== null) {
+      $query->withBlockingTasks($map['blocking']);
+    }
+
+    if ($map['blocked'] !== null) {
+      $query->withBlockedTasks($map['blocked']);
+    }
+
+    if (strlen($map['fulltext'])) {
+      $query->withFullTextSearch($map['fulltext']);
+    }
+
+    $group = idx($map, 'group');
     $group = idx($this->getGroupValues(), $group);
     if ($group) {
       $query->setGroupBy($group);
@@ -176,288 +196,23 @@ final class ManiphestTaskSearchEngine
       $query->setGroupBy(head($this->getGroupValues()));
     }
 
-    $ids = $saved->getParameter('ids');
-    if ($ids) {
-      $query->withIDs($ids);
-    }
+    if ($map['ids']) {
+      $ids = $map['ids'];
+      foreach ($ids as $key => $id) {
+        $id = trim($id, ' Tt');
+        if (!$id || !is_numeric($id)) {
+          unset($ids[$key]);
+        } else {
+          $ids[$key] = $id;
+        }
+      }
 
-    $fulltext = $saved->getParameter('fulltext');
-    if (strlen($fulltext)) {
-      $query->withFullTextSearch($fulltext);
-    }
-
-    $with_no_project = $saved->getParameter('withNoProject');
-    if ($with_no_project) {
-      $query->withAllProjects(array(ManiphestTaskOwner::PROJECT_NO_PROJECT));
-    } else {
-      $project_phids = $saved->getParameter('allProjectPHIDs');
-      if ($project_phids) {
-        $query->withAllProjects($project_phids);
+      if ($ids) {
+        $query->withIDs($ids);
       }
     }
 
-    $any_project_phids = $saved->getParameter('anyProjectPHIDs');
-    if ($any_project_phids) {
-      $query->withAnyProjects($any_project_phids);
-    }
-
-    $exclude_project_phids = $saved->getParameter('excludeProjectPHIDs');
-    if ($exclude_project_phids) {
-      $query->withoutProjects($exclude_project_phids);
-    }
-
-    $user_project_phids = $saved->getParameter('userProjectPHIDs');
-    if ($user_project_phids) {
-      $query->withAnyUserProjects($user_project_phids);
-    }
-
-    $start = $this->parseDateTime($saved->getParameter('createdStart'));
-    $end = $this->parseDateTime($saved->getParameter('createdEnd'));
-
-    if ($start) {
-      $query->withDateCreatedAfter($start);
-    }
-
-    if ($end) {
-      $query->withDateCreatedBefore($end);
-    }
-
-    $mod_start = $this->parseDateTime($saved->getParameter('modifiedStart'));
-    $mod_end = $this->parseDateTime($saved->getParameter('modifiedEnd'));
-
-    if ($mod_start) {
-      $query->withDateModifiedAfter($mod_start);
-    }
-
-    if ($mod_end) {
-      $query->withDateModifiedBefore($mod_end);
-    }
-
-    $this->applyCustomFieldsToQuery($query, $saved);
-
     return $query;
-  }
-
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved) {
-
-    $assigned_phids = $saved->getParameter('assignedPHIDs', array());
-    $author_phids = $saved->getParameter('authorPHIDs', array());
-    $all_project_phids = $saved->getParameter(
-      'allProjectPHIDs',
-      array());
-    $any_project_phids = $saved->getParameter(
-      'anyProjectPHIDs',
-      array());
-    $exclude_project_phids = $saved->getParameter(
-      'excludeProjectPHIDs',
-      array());
-    $user_project_phids = $saved->getParameter(
-      'userProjectPHIDs',
-      array());
-    $subscriber_phids = $saved->getParameter('subscriberPHIDs', array());
-
-    $all_phids = array_merge(
-      $assigned_phids,
-      $author_phids,
-      $all_project_phids,
-      $any_project_phids,
-      $exclude_project_phids,
-      $user_project_phids,
-      $subscriber_phids);
-
-    if ($all_phids) {
-      $handles = id(new PhabricatorHandleQuery())
-        ->setViewer($this->requireViewer())
-        ->withPHIDs($all_phids)
-        ->execute();
-    } else {
-      $handles = array();
-    }
-
-    $assigned_handles = array_select_keys($handles, $assigned_phids);
-    $author_handles = array_select_keys($handles, $author_phids);
-    $all_project_handles = array_select_keys($handles, $all_project_phids);
-    $any_project_handles = array_select_keys($handles, $any_project_phids);
-    $exclude_project_handles = array_select_keys(
-      $handles,
-      $exclude_project_phids);
-    $user_project_handles = array_select_keys($handles, $user_project_phids);
-    $subscriber_handles = array_select_keys($handles, $subscriber_phids);
-
-    $with_unassigned = $saved->getParameter('withUnassigned');
-    $with_no_projects = $saved->getParameter('withNoProject');
-
-    $statuses = $saved->getParameter('statuses', array());
-    $statuses = array_fuse($statuses);
-    $status_control = id(new AphrontFormCheckboxControl())
-      ->setLabel(pht('Status'));
-    foreach (ManiphestTaskStatus::getTaskStatusMap() as $status => $name) {
-      $status_control->addCheckbox(
-        'statuses[]',
-        $status,
-        $name,
-        isset($statuses[$status]));
-    }
-
-    $priorities = $saved->getParameter('priorities', array());
-    $priorities = array_fuse($priorities);
-    $priority_control = id(new AphrontFormCheckboxControl())
-      ->setLabel(pht('Priority'));
-    foreach (ManiphestTaskPriority::getTaskPriorityMap() as $pri => $name) {
-      $priority_control->addCheckbox(
-        'priorities[]',
-        $pri,
-        $name,
-        isset($priorities[$pri]));
-    }
-
-    $blocking_control = id(new AphrontFormSelectControl())
-      ->setLabel(pht('Blocking'))
-      ->setName('blocking')
-      ->setValue($this->getBoolFromQuery($saved, 'blocking'))
-      ->setOptions(array(
-        '' => pht('Show All Tasks'),
-        'true' => pht('Show Tasks Blocking Other Tasks'),
-        'false' => pht('Show Tasks Not Blocking Other Tasks'),));
-    $blocked_control = id(new AphrontFormSelectControl())
-      ->setLabel(pht('Blocked'))
-      ->setName('blocked')
-      ->setValue($this->getBoolFromQuery($saved, 'blocked'))
-      ->setOptions(array(
-        '' => pht('Show All Tasks'),
-        'true' => pht('Show Tasks Blocked By Other Tasks'),
-        'false' => pht('Show Tasks Not Blocked By Other Tasks'),));
-
-    $ids = $saved->getParameter('ids', array());
-
-    $builtin_orders = $this->getOrderOptions();
-    $custom_orders = $this->getCustomFieldOrderOptions();
-    $all_orders = $builtin_orders + $custom_orders;
-
-    $form
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('assigned')
-          ->setLabel(pht('Assigned To'))
-          ->setValue($assigned_handles))
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->addCheckbox(
-            'withUnassigned',
-            1,
-            pht('Show only unassigned tasks.'),
-            $with_unassigned))
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorProjectDatasource())
-          ->setName('allProjects')
-          ->setLabel(pht('In All Projects'))
-          ->setValue($all_project_handles));
-
-    if (!$this->getIsBoardView()) {
-      $form
-        ->appendChild(
-          id(new AphrontFormCheckboxControl())
-            ->addCheckbox(
-              'withNoProject',
-              1,
-              pht('Show only tasks with no projects.'),
-              $with_no_projects));
-    }
-
-    $form
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorProjectDatasource())
-          ->setName('anyProjects')
-          ->setLabel(pht('In Any Project'))
-          ->setValue($any_project_handles))
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorProjectDatasource())
-          ->setName('excludeProjects')
-          ->setLabel(pht('Not In Projects'))
-          ->setValue($exclude_project_handles))
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('userProjects')
-          ->setLabel(pht('In Users\' Projects'))
-          ->setValue($user_project_handles))
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('authors')
-          ->setLabel(pht('Authors'))
-          ->setValue($author_handles))
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
-          ->setName('subscribers')
-          ->setLabel(pht('Subscribers'))
-          ->setValue($subscriber_handles))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setName('fulltext')
-          ->setLabel(pht('Contains Words'))
-          ->setValue($saved->getParameter('fulltext')))
-      ->appendChild($status_control)
-      ->appendChild($priority_control)
-      ->appendChild($blocking_control)
-      ->appendChild($blocked_control);
-
-    if (!$this->getIsBoardView()) {
-      $form
-        ->appendChild(
-          id(new AphrontFormSelectControl())
-            ->setName('group')
-            ->setLabel(pht('Group By'))
-            ->setValue($saved->getParameter('group'))
-            ->setOptions($this->getGroupOptions()))
-        ->appendChild(
-          id(new AphrontFormSelectControl())
-            ->setName('order')
-            ->setLabel(pht('Order By'))
-            ->setValue($saved->getParameter('order'))
-            ->setOptions($all_orders));
-    }
-
-    $form
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setName('ids')
-          ->setLabel(pht('Task IDs'))
-          ->setValue(implode(', ', $ids)));
-
-    $this->appendCustomFieldsToForm($form, $saved);
-
-    $this->buildDateRange(
-      $form,
-      $saved,
-      'createdStart',
-      pht('Created After'),
-      'createdEnd',
-      pht('Created Before'));
-
-    $this->buildDateRange(
-      $form,
-      $saved,
-      'modifiedStart',
-      pht('Updated After'),
-      'modifiedEnd',
-      pht('Updated Before'));
-
-    if (!$this->getIsBoardView()) {
-      $form
-        ->appendChild(
-          id(new AphrontFormTextControl())
-            ->setName('limit')
-            ->setLabel(pht('Page Size'))
-            ->setValue($saved->getParameter('limit', 100)));
-    }
   }
 
   protected function getURI($path) {
@@ -519,24 +274,6 @@ final class ManiphestTaskSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  private function getOrderOptions() {
-    return array(
-      'priority' => pht('Priority'),
-      'updated' => pht('Date Updated'),
-      'created' => pht('Date Created'),
-      'title' => pht('Title'),
-    );
-  }
-
-  private function getOrderValues() {
-    return array(
-      'priority' => ManiphestTaskQuery::ORDER_PRIORITY,
-      'updated'  => ManiphestTaskQuery::ORDER_MODIFIED,
-      'created'  => ManiphestTaskQuery::ORDER_CREATED,
-      'title'    => ManiphestTaskQuery::ORDER_TITLE,
-    );
-  }
-
   private function getGroupOptions() {
     return array(
       'priority' => pht('Priority'),
@@ -579,13 +316,66 @@ final class ManiphestTaskSearchEngine
         ManiphestBulkEditCapability::CAPABILITY);
     }
 
-    return id(new ManiphestTaskResultListView())
+    $list = id(new ManiphestTaskResultListView())
       ->setUser($viewer)
       ->setTasks($tasks)
       ->setSavedQuery($saved)
       ->setCanEditPriority($can_edit_priority)
       ->setCanBatchEdit($can_bulk_edit)
       ->setShowBatchControls($this->showBatchControls);
+
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setContent($list);
+
+    return $result;
+  }
+
+  protected function willUseSavedQuery(PhabricatorSavedQuery $saved) {
+
+    // The 'withUnassigned' parameter may be present in old saved queries from
+    // before parameterized typeaheads, and is retained for compatibility. We
+    // could remove it by migrating old saved queries.
+    $assigned_phids = $saved->getParameter('assignedPHIDs', array());
+    if ($saved->getParameter('withUnassigned')) {
+      $assigned_phids[] = PhabricatorPeopleNoOwnerDatasource::FUNCTION_TOKEN;
+    }
+    $saved->setParameter('assignedPHIDs', $assigned_phids);
+
+    // The 'projects' and other parameters may be present in old saved queries
+    // from before parameterized typeaheads.
+    $project_phids = $saved->getParameter('projectPHIDs', array());
+
+    $old = $saved->getParameter('projects', array());
+    foreach ($old as $phid) {
+      $project_phids[] = $phid;
+    }
+
+    $all = $saved->getParameter('allProjectPHIDs', array());
+    foreach ($all as $phid) {
+      $project_phids[] = $phid;
+    }
+
+    $any = $saved->getParameter('anyProjectPHIDs', array());
+    foreach ($any as $phid) {
+      $project_phids[] = 'any('.$phid.')';
+    }
+
+    $not = $saved->getParameter('excludeProjectPHIDs', array());
+    foreach ($not as $phid) {
+      $project_phids[] = 'not('.$phid.')';
+    }
+
+    $users = $saved->getParameter('userProjectPHIDs', array());
+    foreach ($users as $phid) {
+      $project_phids[] = 'projects('.$phid.')';
+    }
+
+    $no = $saved->getParameter('withNoProject');
+    if ($no) {
+      $project_phids[] = 'null()';
+    }
+
+    $saved->setParameter('projectPHIDs', $project_phids);
   }
 
 }

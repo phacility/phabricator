@@ -7,8 +7,8 @@ final class PhabricatorPholioMockTestDataGenerator
     $author_phid = $this->loadPhabrictorUserPHID();
     $author = id(new PhabricatorUser())
           ->loadOneWhere('phid = %s', $author_phid);
-    $mock = id(new PholioMock())
-      ->setAuthorPHID($author_phid);
+    $mock = PholioMock::initializeNewMock($author);
+
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorContentSource::SOURCE_UNKNOWN,
       array());
@@ -17,9 +17,9 @@ final class PhabricatorPholioMockTestDataGenerator
 
     // Accumulate Transactions
     $changes = array();
-    $changes[PholioTransactionType::TYPE_NAME] =
+    $changes[PholioTransaction::TYPE_NAME] =
       $this->generateTitle();
-    $changes[PholioTransactionType::TYPE_DESCRIPTION] =
+    $changes[PholioTransaction::TYPE_DESCRIPTION] =
       $this->generateDescription();
     $changes[PhabricatorTransactions::TYPE_VIEW_POLICY] =
       PhabricatorPolicies::POLICY_PUBLIC;
@@ -90,11 +90,18 @@ final class PhabricatorPholioMockTestDataGenerator
     $rand_images = array();
     $quantity = rand(2, 10);
     $quantity = min($quantity, count($images));
-    foreach (array_rand($images, $quantity) as $random) {
-      $rand_images[] = $images[$random]->getPHID();
+
+    if ($quantity) {
+      $random_images = $quantity === 1 ?
+        array(array_rand($images, $quantity)) :
+        array_rand($images, $quantity);
+
+      foreach ($random_images as $random) {
+        $rand_images[] = $images[$random]->getPHID();
+      }
     }
-    // this means you don't have any jpegs yet. we'll
-    // just use a builtin image
+
+    // This means you don't have any JPEGs yet. We'll just use a built-in image.
     if (empty($rand_images)) {
       $default = PhabricatorFile::loadBuiltin(
         PhabricatorUser::getOmnipotentUser(),

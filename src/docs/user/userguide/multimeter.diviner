@@ -1,0 +1,99 @@
+@title Multimeter User Guide
+@group userguide
+
+Using Multimeter, a sampling profiler.
+
+Overview
+========
+
+IMPORTANT: This document describes a prototype application.
+
+Multimeter is a sampling profiler that can give you coarse information about
+Phabricator resource usage. In particular, it can help quickly identify sources
+of load, like bots or scripts which are making a very large number of requests.
+
+Configuring and Using Multimeter
+================================
+
+To access Multimeter, go to {nav Applications > Multimeter}.
+
+By default, Multimeter samples 0.1% of pages. This should be a reasonable rate
+for most installs, but you can increase or decrease the rate by adjusting
+`debug.sample-rate`. Increasing the rate (by setting the value to a lower
+number, like 100, to sample 1% of pages) will increase the granualrity of the
+data, at a small performance cost.
+
+Using Multimeter
+================
+
+Multimeter shows you what Phabricator has spent time doing recently. By
+looking at the samples it collects, you can identify major sources of load
+or resource use, whether they are specific users, pages, subprocesses, or
+other types of activity.
+
+By identifying and understanding unexpected load, you can adjust usage patterns
+or configuration to make better use of resources (for example, rewrite bots
+that are making too many calls), or report specific, actionable issues to the
+upstream for resolution.
+
+The main screen of Multimeter shows you everything Phabricator has spent
+resources on recently, broken down by action type. Categories are folded up
+by default, with "(All)" labels.
+
+To filter by a dimension, click the link for it. For example, from the main
+page, you can click "Web Request" to filter by only web requests. To expand a
+grouped dimension, click the "(All)" link.
+
+For example, suppose we suspect that someone is running a bot that is making
+a lot of requests and consuming a lot of resources. We can get a better idea
+about this by filtering the results like this:
+
+  - Click {nav Web Request}. This will show only web requests.
+  - Click {nav (All)} under "Viewer". This will expand events by viewer.
+
+Recent resource costs for web requests are now shown, grouped and sorted by
+user. The usernames in the "Viewer" column show who is using resources, in
+order from greatest use to least use (only administrators can see usernames).
+
+The "Avg" column shows the average cost per event, while the "Cost" column
+shows the total cost.
+
+If the top few users account for similar costs and are normal, active users,
+there may be nothing amiss and your problem might lie elsewhere. If a user like
+`slowbot` is in the top few users and has way higher usage than anyone else,
+there might be a script running under that account consuming a disproportionate
+amount of resources.
+
+Assuming you find a user with unusual usage, you could dig into their usage
+like this:
+
+  - Click their name (like {nav slowbot}) to filter to just their requests.
+  - Click {nav (All)} under "Label". This expands by request detail.
+
+This will show exactly what they spent those resources doing, and can help
+identify if they're making a lot of API calls or scraping the site or whatever
+else.
+
+This is just an example of a specific kind of problem that Multimeter could
+help resolve. In general, exploring Multimeter data by filtering and expanding
+resource uses can help you understand how resources are used and identify
+unexpected uses of resources. For example:
+
+  - Identify a problem with load balancing by filtering on {nav Web Request}
+    and expanding on {nav Host}. If hosts aren't roughly even, DNS or a load
+    balancer are misconfigured.
+  - Identify which pages cost the most by filtering on {nav Web Request}
+    and expanding on {nav Label}.
+  - Find outlier pages by filtering on {nav Web Request} and expanding on
+    {nav ID}.
+  - Find where subprocess are invoked from by filtering on {nav Subprocesses},
+    then expanding on {nav Context}.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - understanding and reporting performance issues with
+    @{article:Troubleshooting Performance Problems}.

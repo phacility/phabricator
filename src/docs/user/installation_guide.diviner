@@ -106,8 +106,11 @@ scripts available which should handle most of the things discussed in this
 document for you:
 
   - **RedHat Derivatives**:
-    <http://www.phabricator.com/rsrc/install/install_rhel-derivs.sh>
-  - **Ubuntu**: <http://www.phabricator.com/rsrc/install/install_ubuntu.sh>
+    [[ https://secure.phabricator.com/diffusion/P/browse/master/scripts/install/install_rhel-derivs.sh
+     | install_rhel-derivs.sh ]]
+  - **Ubuntu**:
+    [[ https://secure.phabricator.com/diffusion/P/browse/master/scripts/install/install_ubuntu.sh
+     | install_ubuntu.sh ]]
 
 If those work for you, you can skip directly to the
 @{article:Configuration Guide}. These scripts are also available in the
@@ -167,23 +170,10 @@ If it doesn't show up, add:
 
 ..to "/etc/php.d/apc.ini" or the "php.ini" file indicated by "php -i".
 
-= Updating Phabricator =
-
-Since Phabricator is under active development, you should update frequently. To
-update Phabricator:
-
-  - Stop the webserver (including `php-fpm`, if you use it).
-  - Run `git pull` in `libphutil/`, `arcanist/` and `phabricator/`.
-  - Run `phabricator/bin/storage upgrade`.
-  - Restart the webserver (and `php-fpm`, if you stopped it earlier).
-
-For more details, see @{article:Configuration Guide}. You can use a script
-similar to this one to automate the process:
-
-http://www.phabricator.com/rsrc/install/update_phabricator.sh
-
 = Next Steps =
 
 Continue by:
 
-  - configuring Phabricator with the @{article:Configuration Guide}.
+  - configuring Phabricator with the @{article:Configuration Guide}; or
+  - learning how to keep Phabricator up to date with
+    @{article:Upgrading Phabricator}.

@@ -1,0 +1,20 @@
+CREATE TABLE {$NAMESPACE}_phortune.phortune_subscription (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  phid VARBINARY(64) NOT NULL,
+  accountPHID VARBINARY(64) NOT NULL,
+  merchantPHID VARBINARY(64) NOT NULL,
+  triggerPHID VARBINARY(64) NOT NULL,
+  authorPHID VARBINARY(64) NOT NULL,
+  subscriptionClassKey BINARY(12) NOT NULL,
+  subscriptionClass VARCHAR(128) NOT NULL COLLATE {$COLLATE_TEXT},
+  subscriptionRefKey BINARY(12) NOT NULL,
+  subscriptionRef VARCHAR(128) NOT NULL COLLATE {$COLLATE_TEXT},
+  status VARCHAR(32) NOT NULL COLLATE {$COLLATE_TEXT},
+  metadata LONGTEXT NOT NULL COLLATE {$COLLATE_TEXT},
+  dateCreated INT UNSIGNED NOT NULL,
+  dateModified INT UNSIGNED NOT NULL,
+  UNIQUE KEY `key_phid` (phid),
+  UNIQUE KEY `key_subscription` (subscriptionClassKey, subscriptionRefKey),
+  KEY `key_account` (accountPHID),
+  KEY `key_merchant` (merchantPHID)
+) ENGINE=InnoDB, COLLATE {$COLLATE_TEXT};

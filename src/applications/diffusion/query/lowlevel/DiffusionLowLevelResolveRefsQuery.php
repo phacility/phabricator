@@ -4,18 +4,29 @@
  * Resolves references (like short commit names, branch names, tag names, etc.)
  * into canonical, stable commit identifiers. This query works for all
  * repository types.
+ *
+ * This query will always resolve refs which can be resolved, but may need to
+ * perform VCS operations. A faster (but less complete) counterpart query is
+ * available in @{class:DiffusionCachedResolveRefsQuery}; that query can
+ * resolve most refs without VCS operations.
  */
 final class DiffusionLowLevelResolveRefsQuery
   extends DiffusionLowLevelQuery {
 
   private $refs;
+  private $types;
 
   public function withRefs(array $refs) {
     $this->refs = $refs;
     return $this;
   }
 
-  public function executeQuery() {
+  public function withTypes(array $types) {
+    $this->types = $types;
+    return $this;
+  }
+
+  protected function executeQuery() {
     if (!$this->refs) {
       return array();
     }
@@ -31,7 +42,11 @@ final class DiffusionLowLevelResolveRefsQuery
         $result = $this->resolveSubversionRefs();
         break;
       default:
-        throw new Exception('Unsupported repository type!');
+        throw new Exception(pht('Unsupported repository type!'));
+    }
+
+    if ($this->types !== null) {
+      $result = $this->filterRefsByType($result, $this->types);
     }
 
     return $result;
@@ -40,23 +55,81 @@ final class DiffusionLowLevelResolveRefsQuery
   private function resolveGitRefs() {
     $repository = $this->getRepository();
 
+    $unresolved = array_fuse($this->refs);
+    $results = array();
+
+    // First, resolve branches and tags.
+    $ref_map = id(new DiffusionLowLevelGitRefQuery())
+      ->setRepository($repository)
+      ->withIsTag(true)
+      ->withIsOriginBranch(true)
+      ->execute();
+    $ref_map = mgroup($ref_map, 'getShortName');
+
+    $tag_prefix = 'refs/tags/';
+    foreach ($unresolved as $ref) {
+      if (empty($ref_map[$ref])) {
+        continue;
+      }
+
+      foreach ($ref_map[$ref] as $result) {
+        $fields = $result->getRawFields();
+        $objectname = idx($fields, 'refname');
+        if (!strncmp($objectname, $tag_prefix, strlen($tag_prefix))) {
+          $type = 'tag';
+        } else {
+          $type = 'branch';
+        }
+
+        $info = array(
+          'type' => $type,
+          'identifier' => $result->getCommitIdentifier(),
+        );
+
+        if ($type == 'tag') {
+          $alternate = idx($fields, 'objectname');
+          if ($alternate) {
+            $info['alternate'] = $alternate;
+          }
+        }
+
+        $results[$ref][] = $info;
+      }
+
+      unset($unresolved[$ref]);
+    }
+
+    // If we resolved everything, we're done.
+    if (!$unresolved) {
+      return $results;
+    }
+
+    // Try to resolve anything else. This stuff either doesn't exist or is
+    // some ref like "HEAD^^^".
     $future = $repository->getLocalCommandFuture('cat-file --batch-check');
-    $future->write(implode("\n", $this->refs));
+    $future->write(implode("\n", $unresolved));
     list($stdout) = $future->resolvex();
 
     $lines = explode("\n", rtrim($stdout, "\n"));
-    if (count($lines) !== count($this->refs)) {
-      throw new Exception('Unexpected line count from `git cat-file`!');
+    if (count($lines) !== count($unresolved)) {
+      throw new Exception(
+        pht(
+          'Unexpected line count from `%s`!',
+          'git cat-file'));
     }
 
     $hits = array();
     $tags = array();
 
-    $lines = array_combine($this->refs, $lines);
+    $lines = array_combine($unresolved, $lines);
     foreach ($lines as $ref => $line) {
       $parts = explode(' ', $line);
       if (count($parts) < 2) {
-        throw new Exception("Failed to parse `git cat-file` output: {$line}");
+        throw new Exception(
+          pht(
+            'Failed to parse `%s` output: %s',
+            'git cat-file',
+            $line));
       }
       list($identifier, $type) = $parts;
 
@@ -77,7 +150,10 @@ final class DiffusionLowLevelResolveRefsQuery
           break;
         default:
           throw new Exception(
-            "Unexpected object type from `git cat-file`: {$line}");
+            pht(
+              'Unexpected object type from `%s`: %s',
+              'git cat-file',
+              $line));
       }
 
       $hits[] = array(
@@ -111,7 +187,10 @@ final class DiffusionLowLevelResolveRefsQuery
         $alternate = $identifier;
         $identifier = idx($tag_map, $ref);
         if (!$identifier) {
-          throw new Exception("Failed to look up tag '{$ref}'!");
+          throw new Exception(
+            pht(
+              "Failed to look up tag '%s'!",
+              $ref));
         }
       }
 
@@ -133,15 +212,50 @@ final class DiffusionLowLevelResolveRefsQuery
   private function resolveMercurialRefs() {
     $repository = $this->getRepository();
 
+    // First, pull all of the branch heads in the repository. Doing this in
+    // bulk is much faster than querying each individual head if we're
+    // checking even a small number of refs.
+    $branches = id(new DiffusionLowLevelMercurialBranchesQuery())
+      ->setRepository($repository)
+      ->executeQuery();
+
+    $branches = mgroup($branches, 'getShortName');
+
+    $results = array();
+    $unresolved = $this->refs;
+    foreach ($unresolved as $key => $ref) {
+      if (empty($branches[$ref])) {
+        continue;
+      }
+
+      foreach ($branches[$ref] as $branch) {
+        $fields = $branch->getRawFields();
+
+        $results[$ref][] = array(
+          'type' => 'branch',
+          'identifier' => $branch->getCommitIdentifier(),
+          'closed' => idx($fields, 'closed', false),
+        );
+      }
+
+      unset($unresolved[$key]);
+    }
+
+    if (!$unresolved) {
+      return $results;
+    }
+
+    // If we still have unresolved refs (which might be things like "tip"),
+    // try to resolve them individually.
+
     $futures = array();
-    foreach ($this->refs as $ref) {
+    foreach ($unresolved as $ref) {
       $futures[$ref] = $repository->getLocalCommandFuture(
         'log --template=%s --rev %s',
         '{node}',
         hgsprintf('%s', $ref));
     }
 
-    $results = array();
     foreach (new FutureIterator($futures) as $ref => $future) {
       try {
         list($stdout) = $future->resolvex();
@@ -150,6 +264,10 @@ final class DiffusionLowLevelResolveRefsQuery
           // This indicates that the ref ambiguously matched several things.
           // Eventually, it would be nice to return all of them, but it is
           // unclear how to best do that. For now, treat it as a miss instead.
+          continue;
+        }
+        if (preg_match('/unknown revision/', $ex->getStdErr())) {
+          // No matches for this ref.
           continue;
         }
         throw $ex;
@@ -169,51 +287,12 @@ final class DiffusionLowLevelResolveRefsQuery
   }
 
   private function resolveSubversionRefs() {
-    $repository = $this->getRepository();
-
-    $max_commit = id(new PhabricatorRepositoryCommit())
-      ->loadOneWhere(
-        'repositoryID = %d ORDER BY epoch DESC, id DESC LIMIT 1',
-        $repository->getID());
-    if (!$max_commit) {
-      // This repository is empty or hasn't parsed yet, so none of the refs are
-      // going to resolve.
-      return array();
-    }
-
-    $max_commit_id = (int)$max_commit->getCommitIdentifier();
-
-    $results = array();
-    foreach ($this->refs as $ref) {
-      if ($ref == 'HEAD') {
-        // Resolve "HEAD" to mean "the most recent commit".
-        $results[$ref][] = array(
-          'type' => 'commit',
-          'identifier' => $max_commit_id,
-        );
-        continue;
-      }
-
-      if (!preg_match('/^\d+$/', $ref)) {
-        // This ref is non-numeric, so it doesn't resolve to anything.
-        continue;
-      }
-
-      // Resolve other commits if we can deduce their existence.
-
-      // TODO: When we import only part of a repository, we won't necessarily
-      // have all of the smaller commits. Should we fail to resolve them here
-      // for repositories with a subpath? It might let us simplify other things
-      // elsewhere.
-      if ((int)$ref <= $max_commit_id) {
-        $results[$ref][] = array(
-          'type' => 'commit',
-          'identifier' => (int)$ref,
-        );
-      }
-    }
-
-    return $results;
+    // We don't have any VCS logic for Subversion, so just use the cached
+    // query.
+    return id(new DiffusionCachedResolveRefsQuery())
+      ->setRepository($this->getRepository())
+      ->withRefs($this->refs)
+      ->execute();
   }
 
 }

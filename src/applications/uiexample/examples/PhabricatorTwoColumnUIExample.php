@@ -3,11 +3,11 @@
 final class PhabricatorTwoColumnUIExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Two Column Layout';
+    return pht('Two Column Layout');
   }
 
   public function getDescription() {
-    return 'Two Column mobile friendly layout';
+    return pht('Two Column mobile friendly layout');
   }
 
   public function renderExample() {

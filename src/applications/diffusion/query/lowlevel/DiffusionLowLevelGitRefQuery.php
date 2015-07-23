@@ -3,8 +3,6 @@
 /**
  * Execute and parse a low-level Git ref query using `git for-each-ref`. This
  * is useful for returning a list of tags or branches.
- *
- *
  */
 final class DiffusionLowLevelGitRefQuery extends DiffusionLowLevelQuery {
 
@@ -24,66 +22,85 @@ final class DiffusionLowLevelGitRefQuery extends DiffusionLowLevelQuery {
   protected function executeQuery() {
     $repository = $this->getRepository();
 
-    if ($this->isTag && $this->isOriginBranch) {
-      throw new Exception('Specify tags or origin branches, not both!');
-    } else if ($this->isTag) {
-      $prefix = 'refs/tags/';
-    } else if ($this->isOriginBranch) {
+    $prefixes = array();
+
+    $any = ($this->isTag || $this->isOriginBranch);
+    if (!$any) {
+      throw new Exception(pht('Specify types of refs to query.'));
+    }
+
+    if ($this->isOriginBranch) {
       if ($repository->isWorkingCopyBare()) {
         $prefix = 'refs/heads/';
       } else {
         $remote = DiffusionGitBranch::DEFAULT_GIT_REMOTE;
         $prefix = 'refs/remotes/'.$remote.'/';
       }
-    } else {
-      throw new Exception('Specify tags or origin branches!');
+      $prefixes[] = $prefix;
+    }
+
+    if ($this->isTag) {
+      $prefixes[] = 'refs/tags/';
     }
 
     $order = '-creatordate';
 
-    list($stdout) = $repository->execxLocalCommand(
-      'for-each-ref --sort=%s --format=%s %s',
-      $order,
-      $this->getFormatString(),
-      $prefix);
-
-    $stdout = rtrim($stdout);
-    if (!strlen($stdout)) {
-      return array();
+    $futures = array();
+    foreach ($prefixes as $prefix) {
+      $futures[$prefix] = $repository->getLocalCommandFuture(
+        'for-each-ref --sort=%s --format=%s %s',
+        $order,
+        $this->getFormatString(),
+        $prefix);
     }
 
-    // NOTE: Although git supports --count, we can't apply any offset or limit
-    // logic until the very end because we may encounter a HEAD which we want
-    // to discard.
+    // Resolve all the futures first. We want to iterate over them in prefix
+    // order, not resolution order.
+    foreach (new FutureIterator($futures) as $prefix => $future) {
+      $future->resolvex();
+    }
 
-    $lines = explode("\n", $stdout);
     $results = array();
-    foreach ($lines as $line) {
-      $fields = $this->extractFields($line);
+    foreach ($futures as $prefix => $future) {
+      list($stdout) = $future->resolvex();
 
-      $creator = $fields['creator'];
-      $matches = null;
-      if (preg_match('/^(.*) ([0-9]+) ([0-9+-]+)$/', $creator, $matches)) {
-        $fields['author'] = $matches[1];
-        $fields['epoch'] = (int)$matches[2];
-      } else {
-        $fields['author'] = null;
-        $fields['epoch'] = null;
-      }
-
-      $commit = nonempty($fields['*objectname'], $fields['objectname']);
-
-      $short = substr($fields['refname'], strlen($prefix));
-      if ($short == 'HEAD') {
+      $stdout = rtrim($stdout);
+      if (!strlen($stdout)) {
         continue;
       }
 
-      $ref = id(new DiffusionRepositoryRef())
-        ->setShortName($short)
-        ->setCommitIdentifier($commit)
-        ->setRawFields($fields);
+      // NOTE: Although git supports --count, we can't apply any offset or
+      // limit logic until the very end because we may encounter a HEAD which
+      // we want to discard.
 
-      $results[] = $ref;
+      $lines = explode("\n", $stdout);
+      foreach ($lines as $line) {
+        $fields = $this->extractFields($line);
+
+        $creator = $fields['creator'];
+        $matches = null;
+        if (preg_match('/^(.*) ([0-9]+) ([0-9+-]+)$/', $creator, $matches)) {
+          $fields['author'] = $matches[1];
+          $fields['epoch'] = (int)$matches[2];
+        } else {
+          $fields['author'] = null;
+          $fields['epoch'] = null;
+        }
+
+        $commit = nonempty($fields['*objectname'], $fields['objectname']);
+
+        $short = substr($fields['refname'], strlen($prefix));
+        if ($short == 'HEAD') {
+          continue;
+        }
+
+        $ref = id(new DiffusionRepositoryRef())
+          ->setShortName($short)
+          ->setCommitIdentifier($commit)
+          ->setRawFields($fields);
+
+        $results[] = $ref;
+      }
     }
 
     return $results;

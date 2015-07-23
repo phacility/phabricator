@@ -2,19 +2,12 @@
 
 final class PhamePostViewController extends PhameController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
     $post = id(new PhamePostQuery())
       ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->withIDs(array($request->getURIData('id')))
       ->executeOne();
 
     if (!$post) {
@@ -23,11 +16,6 @@ final class PhamePostViewController extends PhameController {
 
     $nav = $this->renderSideNavFilterView();
 
-    $this->loadHandles(
-      array(
-        $post->getBlogPHID(),
-        $post->getBloggerPHID(),
-      ));
     $actions = $this->renderActions($post, $user);
     $properties = $this->renderProperties($post, $user, $actions);
 
@@ -49,28 +37,33 @@ final class PhamePostViewController extends PhameController {
 
     if ($post->isDraft()) {
       $object_box->appendChild(
-        id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
           ->setTitle(pht('Draft Post'))
           ->appendChild(
-            pht('Only you can see this draft until you publish it. '.
-                'Use "Preview / Publish" to publish this post.')));
+            pht(
+              'Only you can see this draft until you publish it. '.
+              'Use "Preview / Publish" to publish this post.')));
     }
 
     if (!$post->getBlog()) {
       $object_box->appendChild(
-        id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+        id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
           ->setTitle(pht('Not On A Blog'))
           ->appendChild(
-            pht('This post is not associated with a blog (the blog may have '.
-                'been deleted). Use "Move Post" to move it to a new blog.')));
+            pht(
+              'This post is not associated with a blog (the blog may have '.
+              'been deleted). Use "Move Post" to move it to a new blog.')));
     }
 
     $nav->appendChild(
       array(
         $object_box,
-      ));
+        $this->buildTransactionTimeline(
+          $post,
+          new PhamePostTransactionQuery()),
+        ));
 
     return $this->buildApplicationPage(
       $nav,
@@ -83,10 +76,10 @@ final class PhamePostViewController extends PhameController {
     PhamePost $post,
     PhabricatorUser $user) {
 
-    $actions = id(new PhabricatorActionListView())
-      ->setObject($post)
-      ->setObjectURI($this->getRequest()->getRequestURI())
-      ->setUser($user);
+      $actions = id(new PhabricatorActionListView())
+        ->setObject($post)
+        ->setObjectURI($this->getRequest()->getRequestURI())
+        ->setUser($user);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $user,
@@ -168,13 +161,11 @@ final class PhamePostViewController extends PhameController {
 
     $properties->addProperty(
       pht('Blog'),
-      $post->getBlogPHID()
-        ? $this->getHandle($post->getBlogPHID())->renderLink()
-        : null);
+      $user->renderHandle($post->getBlogPHID()));
 
     $properties->addProperty(
       pht('Blogger'),
-      $this->getHandle($post->getBloggerPHID())->renderLink());
+      $user->renderHandle($post->getBloggerPHID()));
 
     $properties->addProperty(
       pht('Published'),

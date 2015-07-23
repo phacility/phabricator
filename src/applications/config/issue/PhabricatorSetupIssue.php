@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupIssue {
+final class PhabricatorSetupIssue extends Phobject {
 
   private $issueKey;
   private $name;
@@ -8,6 +8,7 @@ final class PhabricatorSetupIssue {
   private $isFatal;
   private $summary;
   private $shortName;
+  private $group;
 
   private $isIgnored = false;
   private $phpExtensions = array();
@@ -17,6 +18,7 @@ final class PhabricatorSetupIssue {
   private $commands = array();
   private $mysqlConfig = array();
   private $originalPHPConfigValues = array();
+  private $links;
 
   public function addCommand($command) {
     $this->commands[] = $command;
@@ -37,6 +39,19 @@ final class PhabricatorSetupIssue {
       return $this->getName();
     }
     return $this->shortName;
+  }
+
+  public function setGroup($group) {
+    $this->group = $group;
+    return $this;
+  }
+
+  public function getGroup() {
+    if ($this->group) {
+      return $this->group;
+    } else {
+      return PhabricatorSetupCheck::GROUP_OTHER;
+    }
   }
 
   public function setName($name) {
@@ -162,4 +177,17 @@ final class PhabricatorSetupIssue {
   public function getIsIgnored() {
     return $this->isIgnored;
   }
+
+  public function addLink($href, $name) {
+    $this->links[] = array(
+      'href' => $href,
+      'name' => $name,
+    );
+    return $this;
+  }
+
+  public function getLinks() {
+    return $this->links;
+  }
+
 }

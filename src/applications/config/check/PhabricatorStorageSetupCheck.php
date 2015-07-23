@@ -2,77 +2,117 @@
 
 final class PhabricatorStorageSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
+
   /**
    * @phutil-external-symbol class PhabricatorStartup
    */
   protected function executeChecks() {
-    $upload_limit = PhabricatorEnv::getEnvConfig('storage.upload-size-limit');
-    if (!$upload_limit) {
+    $engines = PhabricatorFileStorageEngine::loadWritableChunkEngines();
+    $chunk_engine_active = (bool)$engines;
+
+    if (!$chunk_engine_active) {
+      $doc_href = PhabricatorEnv::getDocLink('Configuring File Storage');
+
       $message = pht(
-        'The Phabricator file upload limit is not configured. You may only '.
-        'be able to upload very small files until you configure it, because '.
-        'some PHP default limits are very low (as low as 2MB).');
+        'Large file storage has not been configured, which will limit '.
+        'the maximum size of file uploads. See %s for '.
+        'instructions on configuring uploads and storage.',
+        phutil_tag(
+          'a',
+          array(
+            'href' => $doc_href,
+            'target' => '_blank',
+          ),
+          pht('Configuring File Storage')));
 
       $this
-        ->newIssue('config.storage.upload-size-limit')
-        ->setShortName(pht('Upload Limit'))
-        ->setName(pht('Upload Limit Not Yet Configured'))
-        ->setMessage($message)
-        ->addPhabricatorConfig('storage.upload-size-limit');
-    } else {
-      $memory_limit = PhabricatorStartup::getOldMemoryLimit();
-      if ($memory_limit && ((int)$memory_limit > 0)) {
-        $memory_limit_bytes = phutil_parse_bytes($memory_limit);
-        $memory_usage_bytes = memory_get_usage();
-        $upload_limit_bytes = phutil_parse_bytes($upload_limit);
+        ->newIssue('large-files')
+        ->setShortName(pht('Large Files'))
+        ->setName(pht('Large File Storage Not Configured'))
+        ->setMessage($message);
+    }
 
-        $available_bytes = ($memory_limit_bytes - $memory_usage_bytes);
+    $post_max_size = ini_get('post_max_size');
+    if ($post_max_size && ((int)$post_max_size > 0)) {
+      $post_max_bytes = phutil_parse_bytes($post_max_size);
+      $post_max_need = (32 * 1024 * 1024);
+      if ($post_max_need > $post_max_bytes) {
+        $summary = pht(
+          'Set %s in your PHP configuration to at least 32MB '.
+          'to support large file uploads.',
+          phutil_tag('tt', array(), 'post_max_size'));
 
-        if ($upload_limit_bytes > $available_bytes) {
-          $summary = pht(
-            'Your PHP memory limit is configured in a way that may prevent '.
-            'you from uploading large files.');
+        $message = pht(
+          'Adjust %s in your PHP configuration to at least 32MB. When '.
+          'set to smaller value, large file uploads may not work properly.',
+          phutil_tag('tt', array(), 'post_max_size'));
 
-          $message = pht(
-            'When you upload a file via drag-and-drop or the API, the entire '.
-            'file is buffered into memory before being written to permanent '.
-            'storage. Phabricator needs memory available to store these '.
-            'files while they are uploaded, but PHP is currently configured '.
-            'to limit the available memory.'.
-            "\n\n".
-            'Your Phabricator %s is currently set to a larger value (%s) than '.
-            'the amount of available memory (%s) that a PHP process has '.
-            'available to use, so uploads via drag-and-drop and the API will '.
-            'hit the memory limit before they hit other limits.'.
-            "\n\n".
-            '(Note that the application itself must also fit in available '.
-            'memory, so not all of the memory under the memory limit is '.
-            'available for buffering file uploads.)'.
-            "\n\n".
-            "The easiest way to resolve this issue is to set %s to %s in your ".
-            "PHP configuration, to disable the memory limit. There is ".
-            "usually little or no value to using this option to limit ".
-            "Phabricator process memory.".
-            "\n\n".
-            "You can also increase the limit, or decrease %s, or ignore this ".
-            "issue and accept that these upload mechanisms will be limited ".
-            "in the size of files they can handle.",
-            phutil_tag('tt', array(), 'storage.upload-size-limit'),
-            phutil_format_bytes($upload_limit_bytes),
-            phutil_format_bytes($available_bytes),
-            phutil_tag('tt', array(), 'memory_limit'),
-            phutil_tag('tt', array(), '-1'),
-            phutil_tag('tt', array(), 'storage.upload-size-limit'));
+        $this
+          ->newIssue('php.post_max_size')
+          ->setName(pht('PHP post_max_size Not Configured'))
+          ->setSummary($summary)
+          ->setMessage($message)
+          ->setGroup(self::GROUP_PHP)
+          ->addPHPConfig('post_max_size');
+      }
+    }
 
-          $this
-            ->newIssue('php.memory_limit.upload')
-            ->setName(pht('Memory Limit Restricts File Uploads'))
-            ->setSummary($summary)
-            ->setMessage($message)
-            ->addPHPConfig('memory_limit')
-            ->addPHPConfigOriginalValue('memory_limit', $memory_limit)
-            ->addPhabricatorConfig('storage.upload-size-limit');
-        }
+    // This is somewhat arbitrary, but make sure we have enough headroom to
+    // upload a default file at the chunk threshold (8MB), which may be
+    // base64 encoded, then JSON encoded in the request, and may need to be
+    // held in memory in the raw and as a query string.
+    $need_bytes = (64 * 1024 * 1024);
+
+    $memory_limit = PhabricatorStartup::getOldMemoryLimit();
+    if ($memory_limit && ((int)$memory_limit > 0)) {
+      $memory_limit_bytes = phutil_parse_bytes($memory_limit);
+      $memory_usage_bytes = memory_get_usage();
+
+      $available_bytes = ($memory_limit_bytes - $memory_usage_bytes);
+
+      if ($need_bytes > $available_bytes) {
+        $summary = pht(
+          'Your PHP memory limit is configured in a way that may prevent '.
+          'you from uploading large files or handling large requests.');
+
+        $message = pht(
+          'When you upload a file via drag-and-drop or the API, chunks must '.
+          'be buffered into memory before being written to permanent '.
+          'storage. Phabricator needs memory available to store these '.
+          'chunks while they are uploaded, but PHP is currently configured '.
+          'to severly limit the available memory.'.
+          "\n\n".
+          'PHP processes currently have very little free memory available '.
+          '(%s). To work well, processes should have at least %s.'.
+          "\n\n".
+          '(Note that the application itself must also fit in available '.
+          'memory, so not all of the memory under the memory limit is '.
+          'available for running workloads.)'.
+          "\n\n".
+          "The easiest way to resolve this issue is to set %s to %s in your ".
+          "PHP configuration, to disable the memory limit. There is ".
+          "usually little or no value to using this option to limit ".
+          "Phabricator process memory.".
+          "\n\n".
+          "You can also increase the limit or ignore this issue and accept ".
+          "that you may encounter problems uploading large files and ".
+          "processing large requests.",
+          phutil_format_bytes($available_bytes),
+          phutil_format_bytes($need_bytes),
+          phutil_tag('tt', array(), 'memory_limit'),
+          phutil_tag('tt', array(), '-1'));
+
+        $this
+          ->newIssue('php.memory_limit.upload')
+          ->setName(pht('Memory Limit Restricts File Uploads'))
+          ->setSummary($summary)
+          ->setMessage($message)
+          ->setGroup(self::GROUP_PHP)
+          ->addPHPConfig('memory_limit')
+          ->addPHPConfigOriginalValue('memory_limit', $memory_limit);
       }
     }
 

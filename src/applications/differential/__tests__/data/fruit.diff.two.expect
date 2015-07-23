@@ -1,21 +1,22 @@
 CTYPE 1 1 (unforced)
 -
+fruit
 -
 O - . ~
-N 1 + apple~
+N 1 + apple\n~
 O - . ~
-N 2 + banana~
+N 2 + banana\n~
 O - . ~
-N 3 + cherry~
+N 3 + cherry\n~
 O - . ~
-N 4 + date~
+N 4 + date\n~
 O - . ~
-N 5 + elderberry~
+N 5 + elderberry\n~
 O - . ~
-N 6 + fig~
+N 6 + fig\n~
 O - . ~
-N 7 + grape~
+N 7 + grape\n~
 O - . ~
-N 8 + honeydew~
+N 8 + honeydew\n~
 O - . ~
-N 9 + ~
+N 9 + \n~

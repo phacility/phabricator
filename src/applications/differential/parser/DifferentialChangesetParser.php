@@ -1,6 +1,8 @@
 <?php
 
-final class DifferentialChangesetParser {
+final class DifferentialChangesetParser extends Phobject {
+
+  const HIGHLIGHT_BYTE_LIMIT = 262144;
 
   protected $visible      = array();
   protected $new          = array();
@@ -36,6 +38,7 @@ final class DifferentialChangesetParser {
   private $isSubparser;
 
   private $isTopLevel;
+
   private $coverage;
   private $markupEngine;
   private $highlightErrors;
@@ -43,6 +46,40 @@ final class DifferentialChangesetParser {
   private $renderer;
   private $characterEncoding;
   private $highlightAs;
+  private $highlightingDisabled;
+  private $showEditAndReplyLinks = true;
+  private $canMarkDone;
+  private $objectOwnerPHID;
+
+  private $rangeStart;
+  private $rangeEnd;
+  private $mask;
+
+  private $highlightEngine;
+
+  public function setRange($start, $end) {
+    $this->rangeStart = $start;
+    $this->rangeEnd = $end;
+    return $this;
+  }
+
+  public function setMask(array $mask) {
+    $this->mask = $mask;
+    return $this;
+  }
+
+  public function renderChangeset() {
+    return $this->render($this->rangeStart, $this->rangeEnd, $this->mask);
+  }
+
+  public function setShowEditAndReplyLinks($bool) {
+    $this->showEditAndReplyLinks = $bool;
+    return $this;
+  }
+
+  public function getShowEditAndReplyLinks() {
+    return $this->showEditAndReplyLinks;
+  }
 
   public function setHighlightAs($highlight_as) {
     $this->highlightAs = $highlight_as;
@@ -62,7 +99,7 @@ final class DifferentialChangesetParser {
     return $this->characterEncoding;
   }
 
-  public function setRenderer($renderer) {
+  public function setRenderer(DifferentialChangesetRenderer $renderer) {
     $this->renderer = $renderer;
     return $this;
   }
@@ -83,6 +120,62 @@ final class DifferentialChangesetParser {
     return $this->disableCache;
   }
 
+  public function setCanMarkDone($can_mark_done) {
+    $this->canMarkDone = $can_mark_done;
+    return $this;
+  }
+
+  public function getCanMarkDone() {
+    return $this->canMarkDone;
+  }
+
+  public function setObjectOwnerPHID($phid) {
+    $this->objectOwnerPHID = $phid;
+    return $this;
+  }
+
+  public function getObjectOwnerPHID() {
+    return $this->objectOwnerPHID;
+  }
+
+  public static function getDefaultRendererForViewer(PhabricatorUser $viewer) {
+    $prefs = $viewer->loadPreferences();
+    $pref_unified = PhabricatorUserPreferences::PREFERENCE_DIFF_UNIFIED;
+    if ($prefs->getPreference($pref_unified) == 'unified') {
+      return '1up';
+    }
+    return null;
+  }
+
+  public function readParametersFromRequest(AphrontRequest $request) {
+    $this->setWhitespaceMode($request->getStr('whitespace'));
+    $this->setCharacterEncoding($request->getStr('encoding'));
+    $this->setHighlightAs($request->getStr('highlight'));
+
+    $renderer = null;
+
+    // If the viewer prefers unified diffs, always set the renderer to unified.
+    // Otherwise, we leave it unspecified and the client will choose a
+    // renderer based on the screen size.
+
+    if ($request->getStr('renderer')) {
+      $renderer = $request->getStr('renderer');
+    } else {
+      $renderer = self::getDefaultRendererForViewer($request->getViewer());
+    }
+
+    switch ($renderer) {
+      case '1up':
+        $this->setRenderer(new DifferentialChangesetOneUpRenderer());
+        break;
+      default:
+        $this->setRenderer(new DifferentialChangesetTwoUpRenderer());
+        break;
+    }
+
+    return $this;
+  }
+
   const CACHE_VERSION = 11;
   const CACHE_MAX_SIZE = 8e6;
 
@@ -96,11 +189,8 @@ final class DifferentialChangesetParser {
 
   const WHITESPACE_SHOW_ALL         = 'show-all';
   const WHITESPACE_IGNORE_TRAILING  = 'ignore-trailing';
-
-  // TODO: This is now "Ignore Most" in the UI.
+  const WHITESPACE_IGNORE_MOST      = 'ignore-most';
   const WHITESPACE_IGNORE_ALL       = 'ignore-all';
-
-  const WHITESPACE_IGNORE_FORCE     = 'ignore-force';
 
   public function setOldLines(array $lines) {
     $this->old = $lines;
@@ -167,6 +257,7 @@ final class DifferentialChangesetParser {
 
     $this->originalLeft = $left;
     $this->originalRight = $right;
+    return $this;
   }
 
   public function diffOriginals() {
@@ -250,6 +341,10 @@ final class DifferentialChangesetParser {
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
     return $this;
+  }
+
+  public function getUser() {
+    return $this->user;
   }
 
   public function setCoverage($coverage) {
@@ -339,6 +434,7 @@ final class DifferentialChangesetParser {
       'hunkStartLines',
       'cacheVersion',
       'cacheHost',
+      'highlightingDisabled',
     );
   }
 
@@ -460,6 +556,12 @@ final class DifferentialChangesetParser {
     if (!$language) {
       $language = $this->highlightEngine->getLanguageFromFilename(
         $this->filename);
+
+      if (($language != 'txt') &&
+          (strlen($corpus) > self::HIGHLIGHT_BYTE_LIMIT)) {
+        $this->highlightingDisabled = true;
+        $language = 'txt';
+      }
     }
 
     return $this->highlightEngine->getHighlightFuture(
@@ -483,14 +585,14 @@ final class DifferentialChangesetParser {
     switch ($whitespace_mode) {
       case self::WHITESPACE_SHOW_ALL:
       case self::WHITESPACE_IGNORE_TRAILING:
-      case self::WHITESPACE_IGNORE_FORCE:
+      case self::WHITESPACE_IGNORE_ALL:
         break;
       default:
-        $whitespace_mode = self::WHITESPACE_IGNORE_ALL;
+        $whitespace_mode = self::WHITESPACE_IGNORE_MOST;
         break;
     }
 
-    $skip_cache = ($whitespace_mode != self::WHITESPACE_IGNORE_ALL);
+    $skip_cache = ($whitespace_mode != self::WHITESPACE_IGNORE_MOST);
     if ($this->disableCache) {
       $skip_cache = true;
     }
@@ -526,10 +628,10 @@ final class DifferentialChangesetParser {
     $whitespace_mode = $this->whitespaceMode;
     $changeset = $this->changeset;
 
-    $ignore_all = (($whitespace_mode == self::WHITESPACE_IGNORE_ALL) ||
-                  ($whitespace_mode == self::WHITESPACE_IGNORE_FORCE));
+    $ignore_all = (($whitespace_mode == self::WHITESPACE_IGNORE_MOST) ||
+                  ($whitespace_mode == self::WHITESPACE_IGNORE_ALL));
 
-    $force_ignore = ($whitespace_mode == self::WHITESPACE_IGNORE_FORCE);
+    $force_ignore = ($whitespace_mode == self::WHITESPACE_IGNORE_ALL);
 
     if (!$force_ignore) {
       if ($ignore_all && $changeset->getWhitespaceMatters()) {
@@ -602,11 +704,6 @@ final class DifferentialChangesetParser {
     $moveaway = false;
     $changetype = $this->changeset->getChangeType();
     if ($changetype == DifferentialChangeType::TYPE_MOVE_AWAY) {
-      // sometimes we show moved files as unchanged, sometimes deleted,
-      // and sometimes inconsistent with what actually happened at the
-      // destination of the move. Rather than make a false claim,
-      // omit the 'not changed' notice if this is the source of a move
-      $unchanged = false;
       $moveaway = true;
     }
 
@@ -739,6 +836,7 @@ final class DifferentialChangesetParser {
       count($this->new));
 
     $renderer = $this->getRenderer()
+      ->setUser($this->getUser())
       ->setChangeset($this->changeset)
       ->setRenderPropertyChangeHeader($render_pch)
       ->setIsTopLevel($this->isTopLevel)
@@ -755,11 +853,11 @@ final class DifferentialChangesetParser {
       ->setHandles($this->handles)
       ->setOldLines($this->old)
       ->setNewLines($this->new)
-      ->setOriginalCharacterEncoding($encoding);
-
-    if ($this->user) {
-      $renderer->setUser($this->user);
-    }
+      ->setOriginalCharacterEncoding($encoding)
+      ->setShowEditAndReplyLinks($this->getShowEditAndReplyLinks())
+      ->setCanMarkDone($this->getCanMarkDone())
+      ->setObjectOwnerPHID($this->getObjectOwnerPHID())
+      ->setHighlightingDisabled($this->highlightingDisabled);
 
     $shield = null;
     if ($this->isTopLevel && !$this->comments) {
@@ -768,6 +866,16 @@ final class DifferentialChangesetParser {
           pht(
             'This file contains generated code, which does not normally '.
             'need to be reviewed.'));
+      } else if ($this->isMoveAway()) {
+        // We put an empty shield on these files. Normally, they do not have
+        // any diff content anyway. However, if they come through `arc`, they
+        // may have content. We don't want to show it (it's not useful) and
+        // we bailed out of fully processing it earlier anyway.
+
+        // We could show a message like "this file was moved", but we show
+        // that as a change header anyway, so it would be redundant. Instead,
+        // just render an empty shield to skip rendering the diff body.
+        $shield = '';
       } else if ($this->isUnchanged()) {
         $type = 'text';
         if (!$rows) {
@@ -780,11 +888,19 @@ final class DifferentialChangesetParser {
           // we'll never have it so we need to be prepared to not render a link.
           $type = 'none';
         }
-        $shield = $renderer->renderShield(
-          pht('The contents of this file were not changed.'),
-          $type);
-      } else if ($this->isMoveAway()) {
-        $shield = null;
+
+        $type_add = DifferentialChangeType::TYPE_ADD;
+        if ($this->changeset->getChangeType() == $type_add) {
+          // Although the generic message is sort of accurate in a technical
+          // sense, this more-tailored message is less confusing.
+          $shield = $renderer->renderShield(
+            pht('This is an empty file.'),
+            $type);
+        } else {
+          $shield = $renderer->renderShield(
+            pht('The contents of this file were not changed.'),
+            $type);
+        }
       } else if ($this->isWhitespaceOnly()) {
         $shield = $renderer->renderShield(
           pht('This file was changed only by adding or removing whitespace.'),
@@ -793,17 +909,24 @@ final class DifferentialChangesetParser {
         $shield = $renderer->renderShield(
           pht('This file was completely deleted.'));
       } else if ($this->changeset->getAffectedLineCount() > 2500) {
-        $lines = number_format($this->changeset->getAffectedLineCount());
         $shield = $renderer->renderShield(
           pht(
             'This file has a very large number of changes (%s lines).',
-            $lines));
+            new PhutilNumber($this->changeset->getAffectedLineCount())));
       }
     }
 
-    if ($shield) {
+    if ($shield !== null) {
       return $renderer->renderChangesetTable($shield);
     }
+
+    // This request should render the "undershield" headers if it's a top-level
+    // request which made it this far (indicating the changeset has no shield)
+    // or it's a request with no mask information (indicating it's the request
+    // that removes the rendering shield). Possibly, this second class of
+    // request might need to be made more explicit.
+    $is_undershield = (empty($mask_force) || $this->isTopLevel);
+    $renderer->setIsUndershield($is_undershield);
 
     $old_comments = array();
     $new_comments = array();
@@ -812,12 +935,50 @@ final class DifferentialChangesetParser {
     $feedback_mask = array();
 
     if ($this->comments) {
+      // If there are any comments which appear in sections of the file which
+      // we don't have, we're going to move them backwards to the closest
+      // earlier line. Two cases where this may happen are:
+      //
+      //   - Porting ghost comments forward into a file which was mostly
+      //     deleted.
+      //   - Porting ghost comments forward from a full-context diff to a
+      //     partial-context diff.
+
+      list($old_backmap, $new_backmap) = $this->buildLineBackmaps();
+
       foreach ($this->comments as $comment) {
+        $new_side = $this->isCommentOnRightSideWhenDisplayed($comment);
+
+        $line = $comment->getLineNumber();
+        if ($new_side) {
+          $back_line = $new_backmap[$line];
+        } else {
+          $back_line = $old_backmap[$line];
+        }
+
+        if ($back_line != $line) {
+          // TODO: This should probably be cleaner, but just be simple and
+          // obvious for now.
+          $ghost = $comment->getIsGhost();
+          if ($ghost) {
+            $moved = pht(
+              'This comment originally appeared on line %s, but that line '.
+              'does not exist in this version of the diff. It has been '.
+              'moved backward to the nearest line.',
+              new PhutilNumber($line));
+            $ghost['reason'] = $ghost['reason']."\n\n".$moved;
+            $comment->setIsGhost($ghost);
+          }
+
+          $comment->setLineNumber($back_line);
+          $comment->setLineLength(0);
+
+        }
+
         $start = max($comment->getLineNumber() - self::LINES_CONTEXT, 0);
         $end = $comment->getLineNumber() +
           $comment->getLineLength() +
           self::LINES_CONTEXT;
-        $new_side = $this->isCommentOnRightSideWhenDisplayed($comment);
         for ($ii = $start; $ii <= $end; $ii++) {
           if ($new_side) {
             $new_mask[$ii] = true;
@@ -838,6 +999,7 @@ final class DifferentialChangesetParser {
           $feedback_mask[$ii] = true;
         }
       }
+
       $this->comments = msort($this->comments, 'getID');
       foreach ($this->comments as $comment) {
         $final = $comment->getLineNumber() +
@@ -905,10 +1067,10 @@ final class DifferentialChangesetParser {
             $file_phids[] = $new_phid;
           }
 
-          // TODO: (T603) Probably fine to use omnipotent viewer here?
-          $files = id(new PhabricatorFile())->loadAllWhere(
-            'phid IN (%Ls)',
-            $file_phids);
+          $files = id(new PhabricatorFileQuery())
+            ->setViewer($this->getUser())
+            ->withPHIDs($file_phids)
+            ->execute();
           foreach ($files as $file) {
             if (empty($file)) {
               continue;
@@ -994,10 +1156,11 @@ final class DifferentialChangesetParser {
    *
    * @return array($gaps, $mask, $depths)
    */
-  private function calculateGapsMaskAndDepths($mask_force,
-                                              $feedback_mask,
-                                              $range_start,
-                                              $range_len) {
+  private function calculateGapsMaskAndDepths(
+    $mask_force,
+    $feedback_mask,
+    $range_start,
+    $range_len) {
 
     // Calculate gaps and mask first
     $gaps = array();
@@ -1103,7 +1266,7 @@ final class DifferentialChangesetParser {
     PhabricatorInlineCommentInterface $comment) {
 
     if (!$this->isCommentVisibleOnRenderedDiff($comment)) {
-      throw new Exception('Comment is not visible on changeset!');
+      throw new Exception(pht('Comment is not visible on changeset!'));
     }
 
     $changeset_id = $comment->getChangesetID();
@@ -1214,17 +1377,20 @@ final class DifferentialChangesetParser {
     foreach ($changesets as $changeset) {
       $file = $changeset->getFilename();
       foreach ($changeset->getHunks() as $hunk) {
-        $line = $hunk->getOldOffset();
-        foreach (explode("\n", $hunk->getChanges()) as $code) {
-          $type = (isset($code[0]) ? $code[0] : '');
-          if ($type == '-' || $type == ' ') {
-            $code = trim(substr($code, 1));
-            $files[$file][$line] = $code;
-            $types[$file][$line] = $type;
-            if (strlen($code) >= $min_width) {
-              $map[$code][] = array($file, $line);
-            }
-            $line++;
+        $lines = $hunk->getStructuredOldFile();
+        foreach ($lines as $line => $info) {
+          $type = $info['type'];
+          if ($type == '\\') {
+            continue;
+          }
+          $types[$file][$line] = $type;
+
+          $text = $info['text'];
+          $text = trim($text);
+          $files[$file][$line] = $text;
+
+          if (strlen($text) >= $min_width) {
+            $map[$text][] = array($file, $line);
           }
         }
       }
@@ -1233,57 +1399,122 @@ final class DifferentialChangesetParser {
     foreach ($changesets as $changeset) {
       $copies = array();
       foreach ($changeset->getHunks() as $hunk) {
-        $added = array_map('trim', $hunk->getAddedLines());
-        for (reset($added); list($line, $code) = each($added); ) {
-          if (isset($map[$code])) { // We found a long matching line.
+        $added = $hunk->getStructuredNewFile();
+        $atype = array();
 
-            if (count($map[$code]) > 16) {
-              // If there are a large number of identical lines in this diff,
-              // don't try to figure out where this block came from: the
-              // analysis is O(N^2), since we need to compare every line
-              // against every other line. Even if we arrive at a result, it
-              // is unlikely to be meaningful. See T5041.
-              continue 2;
-            }
+        foreach ($added as $line => $info) {
+          $atype[$line] = $info['type'];
+          $added[$line] = trim($info['text']);
+        }
 
-            $best_length = 0;
-            foreach ($map[$code] as $val) { // Explore all candidates.
-              list($file, $orig_line) = $val;
-              $length = 1;
-              // Search also backwards for short lines.
-              foreach (array(-1, 1) as $direction) {
-                $offset = $direction;
-                while (!isset($copies[$line + $offset]) &&
-                    isset($added[$line + $offset]) &&
-                    idx($files[$file], $orig_line + $offset) ===
-                      $added[$line + $offset]) {
-                  $length++;
-                  $offset += $direction;
-                }
-              }
-              if ($length > $best_length ||
-                  ($length == $best_length && // Prefer moves.
-                   idx($types[$file], $orig_line) == '-')) {
-                $best_length = $length;
-                // ($offset - 1) contains number of forward matching lines.
-                $best_offset = $offset - 1;
-                $best_file = $file;
-                $best_line = $orig_line;
-              }
-            }
-            $file = ($best_file == $changeset->getFilename() ? '' : $best_file);
-            for ($i = $best_length; $i--; ) {
-              $type = idx($types[$best_file], $best_line + $best_offset - $i);
-              $copies[$line + $best_offset - $i] = ($best_length < $min_lines
-                ? array() // Ignore short blocks.
-                : array($file, $best_line + $best_offset - $i, $type));
-            }
-            for ($i = 0; $i < $best_offset; $i++) {
-              next($added);
-            }
+        $skip_lines = 0;
+        foreach ($added as $line => $code) {
+          if ($skip_lines) {
+            // We're skipping lines that we already processed because we
+            // extended a block above them downward to include them.
+            $skip_lines--;
+            continue;
           }
+
+          if ($atype[$line] !== '+') {
+            // This line hasn't been changed in the new file, so don't try
+            // to figure out where it came from.
+            continue;
+          }
+
+          if (empty($map[$code])) {
+            // This line was too short to trigger copy/move detection.
+            continue;
+          }
+
+          if (count($map[$code]) > 16) {
+            // If there are a large number of identical lines in this diff,
+            // don't try to figure out where this block came from: the analysis
+            // is O(N^2), since we need to compare every line against every
+            // other line. Even if we arrive at a result, it is unlikely to be
+            // meaningful. See T5041.
+            continue;
+          }
+
+          $best_length = 0;
+
+          // Explore all candidates.
+          foreach ($map[$code] as $val) {
+            list($file, $orig_line) = $val;
+            $length = 1;
+
+            // Search backward and forward to find all of the adjacent lines
+            // which match.
+            foreach (array(-1, 1) as $direction) {
+              $offset = $direction;
+              while (true) {
+                if (isset($copies[$line + $offset])) {
+                  // If we run into a block above us which we've already
+                  // attributed to a move or copy from elsewhere, stop
+                  // looking.
+                  break;
+                }
+
+                if (!isset($added[$line + $offset])) {
+                  // If we've run off the beginning or end of the new file,
+                  // stop looking.
+                  break;
+                }
+
+                if (!isset($files[$file][$orig_line + $offset])) {
+                  // If we've run off the beginning or end of the original
+                  // file, we also stop looking.
+                  break;
+                }
+
+                $old = $files[$file][$orig_line + $offset];
+                $new = $added[$line + $offset];
+                if ($old !== $new) {
+                  // If the old line doesn't match the new line, stop
+                  // looking.
+                  break;
+                }
+
+                $length++;
+                $offset += $direction;
+              }
+            }
+
+            if ($length < $best_length) {
+              // If we already know of a better source (more matching lines)
+              // for this move/copy, stick with that one. We prefer long
+              // copies/moves which match a lot of context over short ones.
+              continue;
+            }
+
+            if ($length == $best_length) {
+              if (idx($types[$file], $orig_line) != '-') {
+                // If we already know of an equally good source (same number
+                // of matching lines) and this isn't a move, stick with the
+                // other one. We prefer moves over copies.
+                continue;
+              }
+            }
+
+            $best_length = $length;
+            // ($offset - 1) contains number of forward matching lines.
+            $best_offset = $offset - 1;
+            $best_file = $file;
+            $best_line = $orig_line;
+          }
+
+          $file = ($best_file == $changeset->getFilename() ? '' : $best_file);
+          for ($i = $best_length; $i--; ) {
+            $type = idx($types[$best_file], $best_line + $best_offset - $i);
+            $copies[$line + $best_offset - $i] = ($best_length < $min_lines
+              ? array() // Ignore short blocks.
+              : array($file, $best_line + $best_offset - $i, $type));
+          }
+
+          $skip_lines = $best_offset;
         }
       }
+
       $copies = array_filter($copies);
       if ($copies) {
         $metadata = $changeset->getMetadata();
@@ -1292,6 +1523,50 @@ final class DifferentialChangesetParser {
       }
     }
     return $changesets;
+  }
+
+  /**
+   * Build maps from lines comments appear on to actual lines.
+   */
+  private function buildLineBackmaps() {
+    $old_back = array();
+    $new_back = array();
+    foreach ($this->old as $ii => $old) {
+      $old_back[$old['line']] = $old['line'];
+    }
+    foreach ($this->new as $ii => $new) {
+      $new_back[$new['line']] = $new['line'];
+    }
+
+    $max_old_line = 0;
+    $max_new_line = 0;
+    foreach ($this->comments as $comment) {
+      if ($this->isCommentOnRightSideWhenDisplayed($comment)) {
+        $max_new_line = max($max_new_line, $comment->getLineNumber());
+      } else {
+        $max_old_line = max($max_old_line, $comment->getLineNumber());
+      }
+    }
+
+    $cursor = 1;
+    for ($ii = 1; $ii <= $max_old_line; $ii++) {
+      if (empty($old_back[$ii])) {
+        $old_back[$ii] = $cursor;
+      } else {
+        $cursor = $old_back[$ii];
+      }
+    }
+
+    $cursor = 1;
+    for ($ii = 1; $ii <= $max_new_line; $ii++) {
+      if (empty($new_back[$ii])) {
+        $new_back[$ii] = $cursor;
+      } else {
+        $cursor = $new_back[$ii];
+      }
+    }
+
+    return array($old_back, $new_back);
   }
 
 }

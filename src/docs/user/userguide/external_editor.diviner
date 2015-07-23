@@ -27,7 +27,7 @@ buttons in the interface.
 
 == Configuring: TextMate on OS X ==
 
-TextMate installs a ##txmt://## handler by default, so it's easy to configure
+TextMate installs a `txmt://` handler by default, so it's easy to configure
 this feature if you use TextMate.
 
 First, create a local directory with symlinks for each repository callsign. For

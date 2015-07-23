@@ -3,19 +3,15 @@
 abstract class DivinerController extends PhabricatorController {
 
   protected function buildSideNavView() {
-    $menu = $this->buildMenu();
+    $menu = $this->buildApplicationMenu();
     return AphrontSideNavFilterView::newFromMenu($menu);
   }
 
-  protected function buildApplicationMenu() {
-    return $this->buildMenu();
-  }
-
-  private function buildMenu() {
+  public function buildApplicationMenu() {
     $menu = new PHUIListView();
 
     id(new DivinerAtomSearchEngine())
-      ->setViewer($this->getRequest()->getUser())
+      ->setViewer($this->getRequest()->getViewer())
       ->addNavigationItems($menu);
 
     return $menu;
@@ -24,12 +20,8 @@ abstract class DivinerController extends PhabricatorController {
   protected function renderAtomList(array $symbols) {
     assert_instances_of($symbols, 'DivinerLiveSymbol');
 
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
     $list = array();
     foreach ($symbols as $symbol) {
-
       switch ($symbol->getType()) {
         case DivinerAtom::TYPE_FUNCTION:
           $title = $symbol->getTitle().'()';
@@ -43,8 +35,7 @@ abstract class DivinerController extends PhabricatorController {
         ->setTitle($title)
         ->setHref($symbol->getURI())
         ->setSubtitle($symbol->getSummary())
-        ->setType(DivinerAtom::getAtomTypeNameString(
-            $symbol->getType()));
+        ->setType(DivinerAtom::getAtomTypeNameString($symbol->getType()));
 
       $list[] = $item;
     }

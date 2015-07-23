@@ -10,10 +10,9 @@ final class DiffusionLowLevelParentsQuery
     return $this;
   }
 
-  public function executeQuery() {
+  protected function executeQuery() {
     if (!strlen($this->identifier)) {
-      throw new Exception(
-        pht('You must provide an identifier with withIdentifier()!'));
+      throw new PhutilInvalidStateException('withIdentifier');
     }
 
     $type = $this->getRepository()->getVersionControlSystem();

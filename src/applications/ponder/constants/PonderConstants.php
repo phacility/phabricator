@@ -1,3 +1,3 @@
 <?php
 
-abstract class PonderConstants {}
+abstract class PonderConstants extends Phobject {}

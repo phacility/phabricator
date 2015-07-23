@@ -14,8 +14,8 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
     return pht('Questions and Answers');
   }
 
-  public function getIconName() {
-    return 'ponder';
+  public function getFontIcon() {
+    return 'fa-university';
   }
 
   public function getFactObjectsForAnalysis() {
@@ -29,8 +29,8 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
   }
 
   public function loadStatus(PhabricatorUser $user) {
-    // replace with "x new unanswered questions" or some such
-    // make sure to use self::formatStatusCount and friends...!
+    // Replace with "x new unanswered questions" or some such
+    // make sure to use `self::formatStatusCount` and friends...!
     $status = array();
 
     return $status;
@@ -63,6 +63,25 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
           => 'PonderQuestionStatusController',
         'vote/' => 'PonderVoteSaveController',
       ),
+    );
+  }
+
+  public function getMailCommandObjects() {
+    return array(
+      'question' => array(
+        'name' => pht('Email Commands: Questions'),
+        'header' => pht('Interacting with Ponder Questions'),
+        'object' => new PonderQuestion(),
+        'summary' => pht(
+          'This page documents the commands you can use to interact with '.
+          'questions in Ponder.'),
+      ),
+    );
+  }
+
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      PonderQuestionPHIDType::TYPECONST,
     );
   }
 

@@ -1,36 +1,36 @@
 {
-  "name" : "phabcontrib",
-  "title" : "Phabricator Contributor Documentation",
-  "short" : "Phabricator Contributor Docs",
-  "preface" : "Information for Phabricator contributors.",
-  "root" : "../../../",
-  "uri.source" :
+  "name": "phabcontrib",
+  "title": "Phabricator Contributor Documentation",
+  "short": "Phabricator Contributor Docs",
+  "preface": "Information for Phabricator contributors and developers.",
+  "root": "../../../",
+  "uri.source":
     "https://secure.phabricator.com/diffusion/P/browse/master/%f$%l",
-  "rules" : {
-    "(\\.diviner$)" : "DivinerArticleAtomizer"
+  "rules": {
+    "(\\.diviner$)": "DivinerArticleAtomizer"
   },
-  "exclude" : [
+  "exclude": [
     "(^externals/)",
-    "(^webroot/rsrc/externals/)",
-    "(^scripts/)",
-    "(^support/)",
     "(^resources/)",
-    "(^src/docs/user/)",
+    "(^scripts/)",
+    "(^src/docs/flavor/)",
     "(^src/docs/tech/)",
-    "(^src/docs/flavor/)"
+    "(^src/docs/user/)",
+    "(^support/)",
+    "(^webroot/rsrc/externals/)"
   ],
-  "groups" : {
-    "contrib" : {
-      "name" : "Contributor Overview"
+  "groups": {
+    "contrib": {
+      "name": "Contributor Overview"
     },
     "detail": {
-      "name" : "Contributing in Detail"
+      "name": "Contributing in Detail"
     },
-    "standards" : {
-      "name" : "Coding Standards"
+    "developer": {
+      "name": "Developer Guides"
     },
-    "developer" : {
-      "name" : "Developer Guides"
+    "standards": {
+      "name": "Coding Standards"
     }
   }
 }

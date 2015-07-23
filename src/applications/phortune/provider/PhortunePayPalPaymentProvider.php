@@ -27,8 +27,7 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getConfigureProvidesDescription() {
-    return pht(
-      'This merchant accepts payments via PayPal.');
+    return pht('This merchant accepts payments via PayPal.');
   }
 
   public function getConfigureInstructions() {

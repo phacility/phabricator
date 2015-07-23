@@ -18,6 +18,7 @@ final class PhamePostListController extends PhameController {
       ->setViewer($user);
 
     $nav = $this->renderSideNavFilterView();
+    $nodata = null;
 
     switch ($this->filter) {
       case 'draft':
@@ -46,7 +47,7 @@ final class PhamePostListController extends PhameController {
         } else {
           $nodata = pht('%s has not written any posts.', $blogger);
         }
-        $title = pht('Posts By %s', $blogger);
+        $title = pht('Posts by %s', $blogger);
         break;
       case 'all':
         $nodata = pht('There are no visible posts.');
@@ -54,7 +55,7 @@ final class PhamePostListController extends PhameController {
         $nav->selectFilter('post/all');
         break;
       default:
-        throw new Exception("Unknown filter '{$this->filter}'!");
+        throw new Exception(pht("Unknown filter '%s'!", $this->filter));
     }
 
     $pager = id(new AphrontCursorPagerView())
@@ -62,16 +63,10 @@ final class PhamePostListController extends PhameController {
 
     $posts = $query->executeWithCursorPager($pager);
 
-    $handle_phids = array_merge(
-      mpull($posts, 'getBloggerPHID'),
-      mpull($posts, 'getBlogPHID'));
-    $this->loadHandles($handle_phids);
-
     require_celerity_resource('phame-css');
     $post_list = $this->renderPostList($posts, $user, $nodata);
-    $post_list = id(new PHUIBoxView())
-      ->addPadding(PHUI::PADDING_LARGE)
-      ->addClass('phame-post-list')
+    $post_list = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
       ->appendChild($post_list);
 
     $crumbs = $this->buildApplicationCrumbs();

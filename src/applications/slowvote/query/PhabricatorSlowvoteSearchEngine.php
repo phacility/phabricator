@@ -7,6 +7,10 @@ final class PhabricatorSlowvoteSearchEngine
     return pht('Slowvotes');
   }
 
+  public function getApplicationClassName() {
+    return 'PhabricatorSlowvoteApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter(
@@ -43,22 +47,18 @@ final class PhabricatorSlowvoteSearchEngine
   public function buildSearchForm(
     AphrontFormView $form,
     PhabricatorSavedQuery $saved_query) {
-    $phids = $saved_query->getParameter('authorPHIDs', array());
-    $author_handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
+    $author_phids = $saved_query->getParameter('authorPHIDs', array());
 
     $voted = $saved_query->getParameter('voted', false);
     $statuses = $saved_query->getParameter('statuses', array());
 
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('authors')
           ->setLabel(pht('Authors'))
-          ->setValue($author_handles))
+          ->setValue($author_phids))
       ->appendChild(
         id(new AphrontFormCheckboxControl())
           ->addCheckbox(
@@ -147,6 +147,8 @@ final class PhabricatorSlowvoteSearchEngine
       }
 
       $item = id(new PHUIObjectItemView())
+        ->setUser($viewer)
+        ->setObject($poll)
         ->setObjectName('V'.$poll->getID())
         ->setHeader($poll->getQuestion())
         ->setHref('/V'.$poll->getID())
@@ -167,7 +169,11 @@ final class PhabricatorSlowvoteSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No polls found.'));
+
+    return $result;
   }
 
 }

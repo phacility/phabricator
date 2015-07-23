@@ -13,7 +13,7 @@ abstract class ManiphestController extends PhabricatorController {
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     if ($for_app) {
-      $nav->addFilter('create', pht('Create Task'));
+      $nav->addFilter('task/create/', pht('Create Task'));
     }
 
     id(new ManiphestTaskSearchEngine())

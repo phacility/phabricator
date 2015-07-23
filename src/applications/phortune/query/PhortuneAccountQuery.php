@@ -73,7 +73,7 @@ final class PhortuneAccountQuery
     return $accounts;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     $where[] = $this->buildPagingClause($conn);
@@ -102,7 +102,7 @@ final class PhortuneAccountQuery
     return $this->formatWhereClause($where);
   }
 
-  private function buildJoinClause(AphrontDatabaseConnection $conn) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn) {
     $joins = array();
 
     if ($this->memberPHIDs) {

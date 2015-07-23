@@ -127,7 +127,7 @@ class AphrontRedirectResponse extends AphrontResponse {
       }
 
       // Check that it's a valid remote resource.
-      if (!PhabricatorEnv::isValidRemoteWebResource($uri)) {
+      if (!PhabricatorEnv::isValidURIForLink($uri)) {
         throw new Exception(
           pht(
             'Refusing to redirect to external URI "%s". This URI '.
@@ -148,7 +148,7 @@ class AphrontRedirectResponse extends AphrontResponse {
       }
 
       // If this is a local resource, it must be a valid local resource.
-      if (!PhabricatorEnv::isValidLocalWebResource($uri)) {
+      if (!PhabricatorEnv::isValidLocalURIForLink($uri)) {
         throw new Exception(
           pht(
             'Refusing to redirect to local resource "%s". This URI is not '.

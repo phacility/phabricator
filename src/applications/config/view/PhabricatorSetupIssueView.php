@@ -107,6 +107,11 @@ final class PhabricatorSetupIssueView extends AphrontView {
 
     }
 
+    $related_links = $issue->getLinks();
+    if ($related_links) {
+      $description[] = $this->renderRelatedLinks($related_links);
+    }
+
     $actions = array();
     if (!$issue->getIsFatal()) {
       if ($issue->getIsIgnored()) {
@@ -187,7 +192,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       array(
         'class' => 'setup-issue-tail',
       ),
-      array($actions, $next));
+      array($actions));
 
     $issue = phutil_tag(
       'div',
@@ -214,6 +219,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       ),
       array(
         $issue,
+        $next,
         $debug_info,
       ));
   }
@@ -380,8 +386,8 @@ final class PhabricatorSetupIssueView extends AphrontView {
         'p',
         array(),
         pht(
-          'PHP also loaded these configuration file(s):',
-          count($more_loc)));
+          'PHP also loaded these %s configuration file(s):',
+          new PhutilNumber(count($more_loc))));
       $info[] = phutil_tag(
         'pre',
         array(),
@@ -506,6 +512,39 @@ final class PhabricatorSetupIssueView extends AphrontView {
     } else {
       return PhabricatorConfigJSON::prettyPrintJSON($value);
     }
+  }
+
+  private function renderRelatedLinks(array $links) {
+    $link_info = phutil_tag(
+      'p',
+      array(),
+      pht(
+        '%d related link(s):',
+        count($links)));
+
+    $link_list = array();
+    foreach ($links as $link) {
+      $link_tag = phutil_tag(
+        'a',
+        array(
+          'target' => '_blank',
+          'href' => $link['href'],
+        ),
+        $link['name']);
+      $link_item = phutil_tag('li', array(), $link_tag);
+      $link_list[] = $link_item;
+    }
+    $link_list = phutil_tag('ul', array(), $link_list);
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'setup-issue-config',
+      ),
+      array(
+        $link_info,
+        $link_list,
+      ));
   }
 
 }

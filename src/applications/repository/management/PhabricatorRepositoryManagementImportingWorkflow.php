@@ -3,18 +3,19 @@
 final class PhabricatorRepositoryManagementImportingWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('importing')
       ->setExamples('**importing** __repository__ ...')
       ->setSynopsis(
-        'Show commits in __repository__, named by callsign, which are still '.
-        'importing.')
+        pht(
+          'Show commits in __repository__, named by callsign, which are '.
+          'still importing.'))
       ->setArguments(
         array(
           array(
             'name'        => 'simple',
-            'help'        => 'Show simpler output.',
+            'help'        => pht('Show simpler output.'),
           ),
           array(
             'name'        => 'repos',
@@ -28,8 +29,9 @@ final class PhabricatorRepositoryManagementImportingWorkflow
 
     if (!$repos) {
       throw new PhutilArgumentUsageException(
-        'Specify one or more repositories to find importing commits for, '.
-        'by callsign.');
+        pht(
+          'Specify one or more repositories to find importing commits for, '.
+          'by callsign.'));
     }
 
     $repos = mpull($repos, null, 'getID');
@@ -58,16 +60,16 @@ final class PhabricatorRepositoryManagementImportingWorkflow
           $status = $row['importStatus'];
           $need = array();
           if (!($status & PhabricatorRepositoryCommit::IMPORTED_MESSAGE)) {
-            $need[] = 'Message';
+            $need[] = pht('Message');
           }
           if (!($status & PhabricatorRepositoryCommit::IMPORTED_CHANGE)) {
-            $need[] = 'Change';
+            $need[] = pht('Change');
           }
           if (!($status & PhabricatorRepositoryCommit::IMPORTED_OWNERS)) {
-            $need[] = 'Owners';
+            $need[] = pht('Owners');
           }
           if (!($status & PhabricatorRepositoryCommit::IMPORTED_HERALD)) {
-            $need[] = 'Herald';
+            $need[] = pht('Herald');
           }
 
           $console->writeOut(' %s', implode(', ', $need));

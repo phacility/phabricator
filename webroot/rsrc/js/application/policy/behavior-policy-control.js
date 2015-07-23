@@ -27,7 +27,7 @@ JX.behavior('policy-control', function(config) {
       list.addItem(
         new JX.PHUIXActionView()
           .setName(config.labels[group])
-          .setDisabled(true));
+          .setLabel(true));
 
       for (var jj = 0; jj < config.order[group].length; jj++) {
         var phid = config.order[group][jj];
@@ -35,7 +35,7 @@ JX.behavior('policy-control', function(config) {
         var onselect;
         if (group == 'custom') {
           onselect = JX.bind(null, function(phid) {
-            var uri = get_custom_uri(phid);
+            var uri = get_custom_uri(phid, config.capability);
 
             new JX.Workflow(uri)
               .setHandler(function(response) {
@@ -100,11 +100,12 @@ JX.behavior('policy-control', function(config) {
   /**
    * Get the workflow URI to create or edit a policy with a given PHID.
    */
-  var get_custom_uri = function(phid) {
-    var uri = '/policy/edit/';
+  var get_custom_uri = function(phid, capability) {
+    var uri = config.editURI;
     if (phid != config.customPlaceholder) {
       uri += phid + '/';
     }
+    uri += '?capability=' + capability;
     return uri;
   };
 

@@ -11,7 +11,7 @@ abstract class PhabricatorXHPASTViewPanelController
     $this->storageTree = id(new PhabricatorXHPASTViewParseTree())
       ->load($this->id);
     if (!$this->storageTree) {
-      throw new Exception('No such AST!');
+      throw new Exception(pht('No such AST!'));
     }
   }
 

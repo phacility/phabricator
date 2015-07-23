@@ -115,9 +115,10 @@ JX.install('History', {
      * Pushes a path onto the history stack.
      *
      * @param string Path.
+     * @param wild State object for History API.
      * @return void
      */
-    push : function(path) {
+    push : function(path, state) {
       if (__DEV__) {
         if (!JX.History._installed) {
           JX.$E(
@@ -129,8 +130,8 @@ JX.install('History', {
         if (JX.History._initialPath && JX.History._initialPath !== path) {
           JX.History._initialPath = null;
         }
-        history.pushState(null, null, path);
-        JX.History._fire(path);
+        history.pushState(state || null, null, path);
+        JX.History._fire(path, state);
       } else {
         location.hash = JX.History._composeFragment(path);
       }
@@ -167,13 +168,15 @@ JX.install('History', {
       }
     },
 
-    _handleChange : function() {
+    _handleChange : function(e) {
       var path = JX.History.getPath();
+      var state = (e && e.getRawEvent().state);
+
       if (JX.History.getMechanism() === JX.History.PUSHSTATE) {
         if (path === JX.History._initialPath) {
           JX.History._initialPath = null;
         } else {
-          JX.History._fire(path);
+          JX.History._fire(path, state);
         }
       } else {
         if (path !== JX.History._hash) {
@@ -183,9 +186,10 @@ JX.install('History', {
       }
     },
 
-    _fire : function(path) {
+    _fire : function(path, state) {
       JX.Stratcom.invoke('history:change', null, {
-        path: JX.History._getBasePath(path)
+        path: JX.History._getBasePath(path),
+        state: state
       });
     },
 

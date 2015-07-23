@@ -11,7 +11,7 @@ final class DiffusionQueryPathsConduitAPIMethod
     return pht('Filename search on a repository.');
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<string>';
   }
 

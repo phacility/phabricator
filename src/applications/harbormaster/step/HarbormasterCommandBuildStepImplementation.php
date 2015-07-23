@@ -130,8 +130,8 @@ final class HarbormasterCommandBuildStepImplementation
         'type' => 'text',
         'required' => true,
         'caption' => pht(
-          'Under Windows, this is executed under PowerShell.'.
-          'Under UNIX, this is executed using the user\'s shell.'),
+          "Under Windows, this is executed under PowerShell. ".
+          "Under UNIX, this is executed using the user's shell."),
       ),
       'hostartifact' => array(
         'name' => pht('Host'),

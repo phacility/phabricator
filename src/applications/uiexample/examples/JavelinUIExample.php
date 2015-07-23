@@ -3,11 +3,11 @@
 final class JavelinUIExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Javelin UI';
+    return pht('Javelin UI');
   }
 
   public function getDescription() {
-    return 'Here are some Javelin UI elements that you could use.';
+    return pht('Here are some Javelin UI elements that you could use.');
   }
 
   public function renderExample() {
@@ -34,7 +34,7 @@ final class JavelinUIExample extends PhabricatorUIExample {
           ),
         ),
       ),
-      'Toggle Red Border');
+      pht('Toggle Red Border'));
 
     $button_blue = javelin_tag(
       'a',
@@ -51,7 +51,7 @@ final class JavelinUIExample extends PhabricatorUIExample {
           ),
         ),
       ),
-      'Toggle Blue Background');
+      pht('Toggle Blue Background'));
 
     $div = phutil_tag(
       'div',

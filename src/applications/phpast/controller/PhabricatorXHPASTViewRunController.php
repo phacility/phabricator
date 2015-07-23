@@ -11,7 +11,7 @@ final class PhabricatorXHPASTViewRunController
     if ($request->isFormPost()) {
       $source = $request->getStr('source');
 
-      $future = xhpast_get_parser_future($source);
+      $future = PhutilXHPASTBinary::getParserFuture($source);
       $resolved = $future->resolve();
 
       // This is just to let it throw exceptions if stuff is broken.
@@ -35,13 +35,13 @@ final class PhabricatorXHPASTViewRunController
       ->setUser($user)
       ->appendChild(
         id(new AphrontFormTextAreaControl())
-          ->setLabel('Source')
+          ->setLabel(pht('Source'))
           ->setName('source')
           ->setValue("<?php\n\n")
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Parse'));
+          ->setValue(pht('Parse')));
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Generate XHP AST'))

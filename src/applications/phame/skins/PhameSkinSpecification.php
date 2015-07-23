@@ -1,6 +1,6 @@
 <?php
 
-final class PhameSkinSpecification {
+final class PhameSkinSpecification extends Phobject {
 
   const TYPE_ADVANCED   = 'advanced';
   const TYPE_BASIC      = 'basic';
@@ -42,9 +42,13 @@ final class PhameSkinSpecification {
             $that_dir = $specs[$name]->getRootDirectory();
             $this_dir = $spec->getRootDirectory();
             throw new Exception(
-              "Two skins have the same name ('{$name}'), in '{$this_dir}' and ".
-              "'{$that_dir}'. Rename one or adjust your 'phame.skins' ".
-              "configuration.");
+              pht(
+                "Two skins have the same name ('%s'), in '%s' and '%s'. ".
+                "Rename one or adjust your '%s' configuration.",
+                $name,
+                $this_dir,
+                $that_dir,
+                'phame.skins'));
           }
 
           $specs[$name] = $spec;
@@ -93,15 +97,18 @@ final class PhameSkinSpecification {
   }
 
   private static function loadSkinSpecification($path) {
-
     $config_path = $path.DIRECTORY_SEPARATOR.'skin.json';
     $config = array();
     if (Filesystem::pathExists($config_path)) {
       $config = Filesystem::readFile($config_path);
-      $config = json_decode($config, true);
-      if (!is_array($config)) {
-        throw new Exception(
-          "Skin configuration file '{$config_path}' is not a valid JSON file.");
+      try {
+        $config = phutil_json_decode($config);
+      } catch (PhutilJSONParserException $ex) {
+        throw new PhutilProxyException(
+          pht(
+            "Skin configuration file '%s' is not a valid JSON file.",
+            $config_path),
+          $ex);
       }
       $type = idx($config, 'type', self::TYPE_BASIC);
     } else {
@@ -121,7 +128,7 @@ final class PhameSkinSpecification {
         $spec->addPhutilLibrary($path.DIRECTORY_SEPARATOR.'src');
         break;
       default:
-        throw new Exception('Unknown skin type!');
+        throw new Exception(pht('Unknown skin type!'));
     }
 
     $spec->setType($type);

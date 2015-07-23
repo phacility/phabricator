@@ -7,14 +7,14 @@ $content_source = PhabricatorContentSource::newForSource(
   PhabricatorContentSource::SOURCE_LEGACY,
   array())->serialize();
 
-echo "Migrating Differential comments to modern storage...\n";
+echo pht('Migrating Differential comments to modern storage...')."\n";
 foreach ($rows as $row) {
   $id = $row['id'];
-  echo "Migrating comment {$id}...\n";
+  echo pht('Migrating comment %d...', $id)."\n";
 
   $revision = id(new DifferentialRevision())->load($row['revisionID']);
   if (!$revision) {
-    echo "No revision, continuing.\n";
+    echo pht('No revision, continuing.')."\n";
     continue;
   }
 
@@ -219,4 +219,4 @@ foreach ($rows as $row) {
   }
 
 }
-echo "Done.\n";
+echo pht('Done.')."\n";

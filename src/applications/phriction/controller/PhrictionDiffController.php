@@ -59,6 +59,8 @@ final class PhrictionDiffController extends PhrictionController {
     $engine = new PhabricatorDifferenceEngine();
     $changeset = $engine->generateChangesetFromFileContent($text_l, $text_r);
 
+    $changeset->setFilename($content_r->getTitle());
+
     $changeset->setOldProperties(
       array(
         'Title'   => $content_l->getTitle(),
@@ -70,9 +72,12 @@ final class PhrictionDiffController extends PhrictionController {
 
     $whitespace_mode = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
 
-    $parser = new DifferentialChangesetParser();
-    $parser->setChangeset($changeset);
-    $parser->setRenderingReference("{$l},{$r}");
+    $parser = id(new DifferentialChangesetParser())
+      ->setUser($user)
+      ->setChangeset($changeset)
+      ->setRenderingReference("{$l},{$r}");
+
+    $parser->readParametersFromRequest($request);
     $parser->setWhitespaceMode($whitespace_mode);
 
     $engine = new PhabricatorMarkupEngine();
@@ -83,21 +88,25 @@ final class PhrictionDiffController extends PhrictionController {
     $spec = $request->getStr('range');
     list($range_s, $range_e, $mask) =
       DifferentialChangesetParser::parseRangeSpecification($spec);
-    $output = $parser->render($range_s, $range_e, $mask);
+
+    $parser->setRange($range_s, $range_e);
+    $parser->setMask($mask);
 
     if ($request->isAjax()) {
       return id(new PhabricatorChangesetResponse())
-        ->setRenderedChangeset($output);
+        ->setRenderedChangeset($parser->renderChangeset());
     }
 
-    require_celerity_resource('differential-changeset-view-css');
-    require_celerity_resource('syntax-highlighting-css');
-    require_celerity_resource('phriction-document-css');
+    $changes = id(new DifferentialChangesetListView())
+      ->setUser($this->getViewer())
+      ->setChangesets(array($changeset))
+      ->setVisibleChangesets(array($changeset))
+      ->setRenderingReferences(array("{$l},{$r}"))
+      ->setRenderURI('/phriction/diff/'.$document->getID().'/')
+      ->setTitle(pht('Changes'))
+      ->setParser($parser);
 
-    Javelin::initBehavior('differential-show-more', array(
-      'uri'         => '/phriction/diff/'.$document->getID().'/',
-      'whitespace'  => $whitespace_mode,
-    ));
+    require_celerity_resource('phriction-document-css');
 
     $slug = $document->getSlug();
 
@@ -117,7 +126,8 @@ final class PhrictionDiffController extends PhrictionController {
     $title = pht('Version %s vs %s', $l, $r);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($title);
+      ->setHeader($title)
+      ->setTall(true);
 
     $crumbs->addTextCrumb($title, $request->getRequestURI());
 
@@ -140,7 +150,7 @@ final class PhrictionDiffController extends PhrictionController {
           'a',
           array(
             'href' => $uri->alter('l', $l - 1)->alter('r', $r - 1),
-            'class' => 'button',
+            'class' => 'button simple',
           ),
           pht("\xC2\xAB Previous Change"));
       } else {
@@ -159,7 +169,7 @@ final class PhrictionDiffController extends PhrictionController {
           'a',
           array(
             'href' => $uri->alter('l', $l + 1)->alter('r', $r + 1),
-            'class' => 'button',
+            'class' => 'button simple',
           ),
           pht("Next Change \xC2\xBB"));
       } else {
@@ -188,13 +198,11 @@ final class PhrictionDiffController extends PhrictionController {
         '<table class="phriction-revert-table">'.
           '<tr><td>%s</td><td>%s</td>'.
         '</table>'.
-        '%s'.
       '</div>',
       $comparison_table->render(),
       $navigation_table,
       $revert_l,
-      $revert_r,
-      $output);
+      $revert_r);
 
 
     $object_box = id(new PHUIObjectBoxView())
@@ -205,6 +213,7 @@ final class PhrictionDiffController extends PhrictionController {
       array(
         $crumbs,
         $object_box,
+        $changes,
       ),
       array(
         'title'     => pht('Document History'),
@@ -235,7 +244,7 @@ final class PhrictionDiffController extends PhrictionController {
         'a',
         array(
           'href'  => '/phriction/edit/'.$document_id.'/',
-          'class' => 'button grey',
+          'class' => 'button simple',
         ),
         pht('Edit Current Version'));
     }
@@ -245,7 +254,7 @@ final class PhrictionDiffController extends PhrictionController {
       'a',
       array(
         'href'  => '/phriction/edit/'.$document_id.'/?revert='.$version,
-        'class' => 'button grey',
+        'class' => 'button simple',
       ),
       pht('Revert to Version %s...', $version));
   }
@@ -259,7 +268,6 @@ final class PhrictionDiffController extends PhrictionController {
     $handles = $this->loadViewerHandles($phids);
 
     $list = new PHUIObjectItemListView();
-    $list->setFlush(true);
 
     $first = true;
     foreach ($content as $c) {
@@ -278,10 +286,10 @@ final class PhrictionDiffController extends PhrictionController {
       }
 
       if ($first == true) {
-        $item->setBarColor('green');
+        $item->setStatusIcon('fa-file green');
         $first = false;
       } else {
-        $item->setBarColor('red');
+        $item->setStatusIcon('fa-file red');
       }
 
       $list->addItem($item);

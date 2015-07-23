@@ -1,3 +1,3 @@
 <?php
 
-abstract class PhabricatorEdgeConstants {}
+abstract class PhabricatorEdgeConstants extends Phobject {}

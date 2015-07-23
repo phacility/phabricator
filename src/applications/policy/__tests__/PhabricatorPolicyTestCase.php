@@ -16,7 +16,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         'user'    => true,
         'admin'   => true,
       ),
-      'Public Policy (Enabled in Config)');
+      pht('Public Policy (Enabled in Config)'));
   }
 
 
@@ -35,7 +35,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         'user'    => true,
         'admin'   => true,
       ),
-      'Public Policy (Disabled in Config)');
+      pht('Public Policy (Disabled in Config)'));
   }
 
 
@@ -51,7 +51,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         'user'    => true,
         'admin'   => true,
       ),
-      'User Policy');
+      pht('User Policy'));
   }
 
 
@@ -66,7 +66,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         'user'    => false,
         'admin'   => true,
       ),
-      'Admin Policy');
+      pht('Admin Policy'));
   }
 
 
@@ -81,7 +81,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         'user'    => false,
         'admin'   => false,
       ),
-      'No One Policy');
+      pht('No One Policy'));
   }
 
 
@@ -105,22 +105,22 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
     $this->assertEqual(
       3,
       count($query->setLimit(3)->setOffset(0)->execute()),
-      'Invisible objects are ignored.');
+      pht('Invisible objects are ignored.'));
 
     $this->assertEqual(
       0,
       count($query->setLimit(3)->setOffset(3)->execute()),
-      'Offset pages through visible objects only.');
+      pht('Offset pages through visible objects only.'));
 
     $this->assertEqual(
       2,
       count($query->setLimit(3)->setOffset(1)->execute()),
-      'Offsets work correctly.');
+      pht('Offsets work correctly.'));
 
     $this->assertEqual(
       2,
       count($query->setLimit(0)->setOffset(1)->execute()),
-      'Offset with no limit works.');
+      pht('Offset with no limit works.'));
   }
 
 
@@ -144,12 +144,12 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
     $this->assertEqual(
       3,
       count($query->setLimit(3)->setOffset(0)->execute()),
-      'Limits work.');
+      pht('Limits work.'));
 
     $this->assertEqual(
       2,
       count($query->setLimit(3)->setOffset(4)->execute()),
-      'Limit + offset work.');
+      pht('Limit + offset work.'));
   }
 
 
@@ -185,9 +185,105 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         'user'    => false,
         'admin'   => false,
       ),
-      'Invalid Policy');
+      pht('Invalid Policy'));
   }
 
+
+  /**
+   * Test that extended policies work.
+   */
+  public function testExtendedPolicies() {
+    $object = $this->buildObject(PhabricatorPolicies::POLICY_USER)
+      ->setPHID('PHID-TEST-1');
+
+    $this->expectVisibility(
+      $object,
+      array(
+        'public'  => false,
+        'user'    => true,
+        'admin'   => true,
+      ),
+      pht('No Extended Policy'));
+
+    // Add a restrictive extended policy.
+    $extended = $this->buildObject(PhabricatorPolicies::POLICY_ADMIN)
+      ->setPHID('PHID-TEST-2');
+    $object->setExtendedPolicies(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW => array(
+          array($extended, PhabricatorPolicyCapability::CAN_VIEW),
+        ),
+      ));
+
+    $this->expectVisibility(
+      $object,
+      array(
+        'public'  => false,
+        'user'    => false,
+        'admin'   => true,
+      ),
+      pht('With Extended Policy'));
+
+    // Depend on a different capability.
+    $object->setExtendedPolicies(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW => array(
+          array($extended, PhabricatorPolicyCapability::CAN_EDIT),
+        ),
+      ));
+
+    $extended->setCapabilities(array(PhabricatorPolicyCapability::CAN_EDIT));
+    $extended->setPolicies(
+      array(
+        PhabricatorPolicyCapability::CAN_EDIT =>
+          PhabricatorPolicies::POLICY_NOONE,
+      ));
+
+    $this->expectVisibility(
+      $object,
+      array(
+        'public'  => false,
+        'user'    => false,
+        'admin'   => false,
+      ),
+      pht('With Extended Policy + Edit'));
+  }
+
+
+  /**
+   * Test that cyclic extended policies are arrested properly.
+   */
+  public function testExtendedPolicyCycles() {
+    $object = $this->buildObject(PhabricatorPolicies::POLICY_USER)
+      ->setPHID('PHID-TEST-1');
+
+    $this->expectVisibility(
+      $object,
+      array(
+        'public'  => false,
+        'user'    => true,
+        'admin'   => true,
+      ),
+      pht('No Extended Policy'));
+
+    // Set a self-referential extended policy on the object. This should
+    // make it fail all policy checks.
+    $object->setExtendedPolicies(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW => array(
+          array($object, PhabricatorPolicyCapability::CAN_VIEW),
+        ),
+      ));
+
+    $this->expectVisibility(
+      $object,
+      array(
+        'public'  => false,
+        'user'    => false,
+        'admin'   => false,
+      ),
+      pht('Extended Policy with Cycle'));
+  }
 
   /**
    * An omnipotent user should be able to see even objects with invalid
@@ -222,7 +318,10 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
       }
       $this->assertTrue(
         (bool)PhabricatorApplication::getByClass($class),
-        "Application class '{$class}' for query '{$qclass}'");
+        pht(
+          "Application class '%s' for query '%s'.",
+          $class,
+          $qclass));
     }
   }
 
@@ -254,6 +353,37 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
     $this->assertEqual(array(), $result);
   }
 
+  public function testPolicyStrength() {
+    $public = PhabricatorPolicyQuery::getGlobalPolicy(
+      PhabricatorPolicies::POLICY_PUBLIC);
+    $user = PhabricatorPolicyQuery::getGlobalPolicy(
+      PhabricatorPolicies::POLICY_USER);
+    $admin = PhabricatorPolicyQuery::getGlobalPolicy(
+      PhabricatorPolicies::POLICY_ADMIN);
+    $noone = PhabricatorPolicyQuery::getGlobalPolicy(
+      PhabricatorPolicies::POLICY_NOONE);
+
+    $this->assertFalse($public->isStrongerThan($public));
+    $this->assertFalse($public->isStrongerThan($user));
+    $this->assertFalse($public->isStrongerThan($admin));
+    $this->assertFalse($public->isStrongerThan($noone));
+
+    $this->assertTrue($user->isStrongerThan($public));
+    $this->assertFalse($user->isStrongerThan($user));
+    $this->assertFalse($user->isStrongerThan($admin));
+    $this->assertFalse($user->isStrongerThan($noone));
+
+    $this->assertTrue($admin->isStrongerThan($public));
+    $this->assertTrue($admin->isStrongerThan($user));
+    $this->assertFalse($admin->isStrongerThan($admin));
+    $this->assertFalse($admin->isStrongerThan($noone));
+
+    $this->assertTrue($noone->isStrongerThan($public));
+    $this->assertTrue($noone->isStrongerThan($user));
+    $this->assertTrue($noone->isStrongerThan($admin));
+    $this->assertFalse($admin->isStrongerThan($noone));
+  }
+
 
   /**
    * Test an object for visibility across multiple user specifications.
@@ -271,6 +401,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
       $query->setViewer($viewer);
 
       $caught = null;
+      $result = null;
       try {
         $result = $query->executeOne();
       } catch (PhabricatorPolicyException $ex) {
@@ -281,11 +412,11 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         $this->assertEqual(
           $object,
           $result,
-          "{$description} with user {$spec} should succeed.");
+          pht('%s with user %s should succeed.', $description, $spec));
       } else {
         $this->assertTrue(
           $caught instanceof PhabricatorPolicyException,
-          "{$description} with user {$spec} should fail.");
+          pht('%s with user %s should fail.', $description, $spec));
       }
     }
   }
@@ -326,7 +457,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
         $user->setIsAdmin(true);
         break;
       default:
-        throw new Exception("Unknown user spec '{$spec}'.");
+        throw new Exception(pht("Unknown user spec '%s'.", $spec));
     }
 
     return $user;

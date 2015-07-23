@@ -61,10 +61,6 @@ final class AlmanacServiceEditor
       case AlmanacServiceTransaction::TYPE_LOCK:
         $object->setIsLocked((int)$xaction->getNewValue());
         return;
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-      case PhabricatorTransactions::TYPE_EDGE:
-        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -76,9 +72,6 @@ final class AlmanacServiceEditor
 
     switch ($xaction->getTransactionType()) {
       case AlmanacServiceTransaction::TYPE_NAME:
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-      case PhabricatorTransactions::TYPE_EDGE:
         return;
       case AlmanacServiceTransaction::TYPE_LOCK:
         $service = id(new AlmanacServiceQuery())

@@ -15,6 +15,7 @@ final class LegalpadDocumentEditor
 
   private function setIsContribution($is_contribution) {
     $this->isContribution = $is_contribution;
+    return $this;
   }
 
   private function isContribution() {
@@ -28,10 +29,11 @@ final class LegalpadDocumentEditor
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
-    $types[] = LegalpadTransactionType::TYPE_TITLE;
-    $types[] = LegalpadTransactionType::TYPE_TEXT;
-    $types[] = LegalpadTransactionType::TYPE_SIGNATURE_TYPE;
-    $types[] = LegalpadTransactionType::TYPE_PREAMBLE;
+    $types[] = LegalpadTransaction::TYPE_TITLE;
+    $types[] = LegalpadTransaction::TYPE_TEXT;
+    $types[] = LegalpadTransaction::TYPE_SIGNATURE_TYPE;
+    $types[] = LegalpadTransaction::TYPE_PREAMBLE;
+    $types[] = LegalpadTransaction::TYPE_REQUIRE_SIGNATURE;
 
     return $types;
   }
@@ -41,14 +43,16 @@ final class LegalpadDocumentEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case LegalpadTransactionType::TYPE_TITLE:
+      case LegalpadTransaction::TYPE_TITLE:
         return $object->getDocumentBody()->getTitle();
-      case LegalpadTransactionType::TYPE_TEXT:
+      case LegalpadTransaction::TYPE_TEXT:
         return $object->getDocumentBody()->getText();
-      case LegalpadTransactionType::TYPE_SIGNATURE_TYPE:
+      case LegalpadTransaction::TYPE_SIGNATURE_TYPE:
         return $object->getSignatureType();
-      case LegalpadTransactionType::TYPE_PREAMBLE:
+      case LegalpadTransaction::TYPE_PREAMBLE:
         return $object->getPreamble();
+      case LegalpadTransaction::TYPE_REQUIRE_SIGNATURE:
+        return (bool)$object->getRequireSignature();
     }
   }
 
@@ -57,11 +61,13 @@ final class LegalpadDocumentEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case LegalpadTransactionType::TYPE_TITLE:
-      case LegalpadTransactionType::TYPE_TEXT:
-      case LegalpadTransactionType::TYPE_SIGNATURE_TYPE:
-      case LegalpadTransactionType::TYPE_PREAMBLE:
+      case LegalpadTransaction::TYPE_TITLE:
+      case LegalpadTransaction::TYPE_TEXT:
+      case LegalpadTransaction::TYPE_SIGNATURE_TYPE:
+      case LegalpadTransaction::TYPE_PREAMBLE:
         return $xaction->getNewValue();
+      case LegalpadTransaction::TYPE_REQUIRE_SIGNATURE:
+        return (bool)$xaction->getNewValue();
     }
   }
 
@@ -70,22 +76,25 @@ final class LegalpadDocumentEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case LegalpadTransactionType::TYPE_TITLE:
+      case LegalpadTransaction::TYPE_TITLE:
         $object->setTitle($xaction->getNewValue());
         $body = $object->getDocumentBody();
         $body->setTitle($xaction->getNewValue());
         $this->setIsContribution(true);
         break;
-      case LegalpadTransactionType::TYPE_TEXT:
+      case LegalpadTransaction::TYPE_TEXT:
         $body = $object->getDocumentBody();
         $body->setText($xaction->getNewValue());
         $this->setIsContribution(true);
         break;
-      case LegalpadTransactionType::TYPE_SIGNATURE_TYPE:
+      case LegalpadTransaction::TYPE_SIGNATURE_TYPE:
         $object->setSignatureType($xaction->getNewValue());
         break;
-      case LegalpadTransactionType::TYPE_PREAMBLE:
+      case LegalpadTransaction::TYPE_PREAMBLE:
         $object->setPreamble($xaction->getNewValue());
+        break;
+      case LegalpadTransaction::TYPE_REQUIRE_SIGNATURE:
+        $object->setRequireSignature((int)$xaction->getNewValue());
         break;
     }
   }
@@ -93,6 +102,18 @@ final class LegalpadDocumentEditor
   protected function applyCustomExternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case LegalpadTransaction::TYPE_REQUIRE_SIGNATURE:
+        if ($xaction->getNewValue()) {
+          $session = new PhabricatorAuthSession();
+          queryfx(
+            $session->establishConnection('w'),
+            'UPDATE %T SET signedLegalpadDocuments = 0',
+            $session->getTableName());
+        }
+        break;
+    }
     return;
   }
 
@@ -134,10 +155,11 @@ final class LegalpadDocumentEditor
 
     $type = $u->getTransactionType();
     switch ($type) {
-      case LegalpadTransactionType::TYPE_TITLE:
-      case LegalpadTransactionType::TYPE_TEXT:
-      case LegalpadTransactionType::TYPE_SIGNATURE_TYPE:
-      case LegalpadTransactionType::TYPE_PREAMBLE:
+      case LegalpadTransaction::TYPE_TITLE:
+      case LegalpadTransaction::TYPE_TEXT:
+      case LegalpadTransaction::TYPE_SIGNATURE_TYPE:
+      case LegalpadTransaction::TYPE_PREAMBLE:
+      case LegalpadTransaction::TYPE_REQUIRE_SIGNATURE:
         return $v;
     }
 
@@ -179,9 +201,10 @@ final class LegalpadDocumentEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case LegalpadTransactionType::TYPE_TEXT:
-      case LegalpadTransactionType::TYPE_TITLE:
-      case LegalpadTransactionType::TYPE_PREAMBLE:
+      case LegalpadTransaction::TYPE_TEXT:
+      case LegalpadTransaction::TYPE_TITLE:
+      case LegalpadTransaction::TYPE_PREAMBLE:
+      case LegalpadTransaction::TYPE_REQUIRE_SIGNATURE:
         return true;
     }
 

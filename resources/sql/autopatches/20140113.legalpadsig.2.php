@@ -1,6 +1,6 @@
 <?php
 
-echo "Adding secretkeys to legalpad document signatures.\n";
+echo pht('Adding secretkeys to legalpad document signatures.')."\n";
 
 $table = new LegalpadDocumentSignature();
 $conn_w = $table->establishConnection('w');
@@ -8,7 +8,7 @@ $iterator = new LiskMigrationIterator($table);
 foreach ($iterator as $sig) {
   $id = $sig->getID();
 
-  echo "Populating signature {$id}...\n";
+  echo pht('Populating signature %d...', $id)."\n";
 
   if (!$sig->getSecretKey()) {
     queryfx(
@@ -20,4 +20,4 @@ foreach ($iterator as $sig) {
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

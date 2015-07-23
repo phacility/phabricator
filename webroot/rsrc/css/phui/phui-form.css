@@ -24,7 +24,7 @@ div.jx-tokenizer-container {
   line-height: 18px;
   color: #333;
   vertical-align: middle;
-  font: 13px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font: {$basefont};
   -webkit-font-smoothing: antialiased;
 }
 
@@ -107,8 +107,9 @@ input[type="checkbox"] {
 select {
   height: 24px;
   line-height: 24px;
-  border: 1px solid #a1a5a9;
+  border: 1px solid {$lightgreyborder};
   background-color: #ffffff;
+  min-width: 140px;
 }
 
 select[multiple],
@@ -140,7 +141,15 @@ textarea::-webkit-input-placeholder {
   color: {$lightgreytext};
 }
 
-select[disabled="disabled"],
-input[disabled="disabled"] {
+select[disabled],
+input[disabled] {
   opacity: 0.5;
+}
+
+.aphront-space-select-control-knob {
+  margin: 2px 8px 2px 0;
+}
+
+.device .aphront-space-select-control-knob {
+  margin-bottom: 8px;
 }

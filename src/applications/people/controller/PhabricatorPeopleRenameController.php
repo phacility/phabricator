@@ -101,7 +101,7 @@ final class PhabricatorPeopleRenameController
           ->setError($e_username));
 
     if ($errors) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
+      $errors = id(new PHUIInfoView())->setErrors($errors);
     }
 
     return $this->newDialog()

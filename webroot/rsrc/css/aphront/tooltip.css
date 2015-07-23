@@ -4,6 +4,7 @@
 
 .jx-tooltip-container {
   position: absolute;
+  padding: 5px;
 }
 
 .jx-tooltip-inner {
@@ -14,7 +15,7 @@
 
 .jx-tooltip {
   color: #f9f9f9;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   padding: 6px 8px;
   overflow: hidden;
   white-space: pre-wrap;

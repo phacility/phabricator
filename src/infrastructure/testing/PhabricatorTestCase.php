@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
+abstract class PhabricatorTestCase extends PhutilTestCase {
 
   const NAMESPACE_PREFIX = 'phabricator_unittest_';
 
@@ -119,6 +119,9 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
     $this->env->overrideEnvConfig(
       'phabricator.base-uri',
       'http://phabricator.example.com');
+
+    // Tests do their own stubbing/voiding for events.
+    $this->env->overrideEnvConfig('phabricator.silent', false);
   }
 
   protected function didRunTests() {
@@ -135,8 +138,10 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
       unset($this->env);
     } catch (Exception $ex) {
       throw new Exception(
-        'Some test called PhabricatorEnv::beginScopedEnv(), but is still '.
-        'holding a reference to the scoped environment!');
+        pht(
+          'Some test called %s, but is still holding '.
+          'a reference to the scoped environment!',
+          'PhabricatorEnv::beginScopedEnv()'));
     }
   }
 
@@ -163,14 +168,6 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
     return new PhabricatorStorageFixtureScopeGuard($name);
   }
 
-  protected function getLink($method) {
-    $phabricator_project = 'PHID-APRJ-3f1fc779edeab89b2171';
-    return
-      'https://secure.phabricator.com/diffusion/symbol/'.$method.
-      '/?lang=php&projects='.$phabricator_project.
-      '&jump=true&context='.get_class($this);
-  }
-
   /**
    * Returns an integer seed to use when building unique identifiers (e.g.,
    * non-colliding usernames). The seed is unstable and its value will change
@@ -187,7 +184,7 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
     $seed = $this->getNextObjectSeed();
 
     $user = id(new PhabricatorUser())
-      ->setRealName("Test User {$seed}}")
+      ->setRealName(pht('Test User %s', $seed))
       ->setUserName("test{$seed}")
       ->setIsApproved(1);
 
@@ -213,15 +210,18 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
   public static function assertExecutingUnitTests() {
     if (!self::$testsAreRunning) {
       throw new Exception(
-        'Executing test code outside of test execution! This code path can '.
-        'only be run during unit tests.');
+        pht(
+          'Executing test code outside of test execution! '.
+          'This code path can only be run during unit tests.'));
     }
   }
 
   protected function requireBinaryForTest($binary) {
     if (!Filesystem::binaryExists($binary)) {
       $this->assertSkipped(
-        pht('No binary "%s" found on this system, skipping test.', $binary));
+        pht(
+          'No binary "%s" found on this system, skipping test.',
+          $binary));
     }
   }
 

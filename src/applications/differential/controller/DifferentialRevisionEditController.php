@@ -49,7 +49,8 @@ final class DifferentialRevisionEditController
       }
       if ($diff->getRevisionID()) {
         // TODO: Redirect?
-        throw new Exception('This diff is already attached to a revision!');
+        throw new Exception(
+          pht('This diff is already attached to a revision!'));
       }
     } else {
       $diff = null;

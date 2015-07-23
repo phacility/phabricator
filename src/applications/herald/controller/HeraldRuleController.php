@@ -258,11 +258,19 @@ final class HeraldRuleController extends HeraldController {
       $errors[] = pht('Rule must have a name.');
     }
 
-    $data = json_decode($request->getStr('rule'), true);
+    $data = null;
+    try {
+      $data = phutil_json_decode($request->getStr('rule'));
+    } catch (PhutilJSONParserException $ex) {
+      throw new PhutilProxyException(
+        pht('Failed to decode rule data.'),
+        $ex);
+    }
+
     if (!is_array($data) ||
         !$data['conditions'] ||
         !$data['actions']) {
-      throw new Exception('Failed to decode rule data.');
+      throw new Exception(pht('Failed to decode rule data.'));
     }
 
     $conditions = array();
@@ -312,7 +320,7 @@ final class HeraldRuleController extends HeraldController {
       try {
         $adapter->willSaveAction($rule, $obj);
       } catch (HeraldInvalidActionException $ex) {
-        $errors[] = $ex;
+        $errors[] = $ex->getMessage();
       }
 
       $actions[] = $obj;
@@ -328,7 +336,6 @@ final class HeraldRuleController extends HeraldController {
         $rule->save();
         $rule->saveConditions($conditions);
         $rule->saveActions($actions);
-        $rule->logEdit($request->getUser()->getPHID(), $edit_action);
       $rule->saveTransaction();
     }
 
@@ -347,35 +354,11 @@ final class HeraldRuleController extends HeraldController {
     if ($rule->getConditions()) {
       $serial_conditions = array();
       foreach ($rule->getConditions() as $condition) {
+        $value = $adapter->getEditorValueForCondition(
+          $this->getViewer(),
+          $condition,
+          $handles);
 
-        $value = $condition->getValue();
-        switch ($condition->getFieldName()) {
-          case HeraldAdapter::FIELD_TASK_PRIORITY:
-            $value_map = array();
-            $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
-            foreach ($value as $priority) {
-              $value_map[$priority] = idx($priority_map, $priority);
-            }
-            $value = $value_map;
-            break;
-          case HeraldAdapter::FIELD_TASK_STATUS:
-            $value_map = array();
-            $status_map = ManiphestTaskStatus::getTaskStatusMap();
-            foreach ($value as $status) {
-              $value_map[$status] = idx($status_map, $status);
-            }
-            $value = $value_map;
-            break;
-          default:
-            if (is_array($value)) {
-              $value_map = array();
-              foreach ($value as $k => $fbid) {
-                $value_map[$fbid] = $handles[$fbid]->getName();
-              }
-              $value = $value_map;
-            }
-            break;
-        }
         $serial_conditions[] = array(
           $condition->getFieldName(),
           $condition->getFieldCondition(),
@@ -387,10 +370,10 @@ final class HeraldRuleController extends HeraldController {
     $serial_actions = array(
       array('default', ''),
     );
+
     if ($rule->getActions()) {
       $serial_actions = array();
       foreach ($rule->getActions() as $action) {
-
         switch ($action->getAction()) {
           case HeraldAdapter::ACTION_FLAG:
           case HeraldAdapter::ACTION_BLOCK:
@@ -431,13 +414,27 @@ final class HeraldRuleController extends HeraldController {
     // names of, so that saving a rule without touching anything doesn't change
     // it.
     foreach ($rule->getConditions() as $condition) {
-      if (empty($field_map[$condition->getFieldName()])) {
-        $field_map[$condition->getFieldName()] = pht('<Unknown Field>');
+      $field_name = $condition->getFieldName();
+
+      if (empty($field_map[$field_name])) {
+        $field_map[$field_name] = pht('<Unknown Field "%s">', $field_name);
       }
     }
 
     $actions = $adapter->getActions($rule->getRuleType());
     $action_map = array_select_keys($all_actions, $actions);
+
+    // Populate any actions which exist in the rule but which we don't know the
+    // names of, so that saving a rule without touching anything doesn't change
+    // it.
+    foreach ($rule->getActions() as $action) {
+      $action_name = $action->getAction();
+
+      if (empty($action_map[$action_name])) {
+        $action_map[$action_name] = pht('<Unknown Action "%s">', $action_name);
+      }
+    }
+
 
     $config_info = array();
     $config_info['fields'] = $field_map;
@@ -445,7 +442,11 @@ final class HeraldRuleController extends HeraldController {
     $config_info['actions'] = $action_map;
 
     foreach ($config_info['fields'] as $field => $name) {
-      $field_conditions = $adapter->getConditionsForField($field);
+      try {
+        $field_conditions = $adapter->getConditionsForField($field);
+      } catch (Exception $ex) {
+        $field_conditions = array(HeraldAdapter::CONDITION_UNCONDITIONALLY);
+      }
       $config_info['conditionMap'][$field] = $field_conditions;
     }
 
@@ -461,9 +462,15 @@ final class HeraldRuleController extends HeraldController {
     $config_info['rule_type'] = $rule->getRuleType();
 
     foreach ($config_info['actions'] as $action => $name) {
-      $config_info['targets'][$action] = $adapter->getValueTypeForAction(
-        $action,
-       $rule->getRuleType());
+      try {
+        $action_value = $adapter->getValueTypeForAction(
+          $action,
+         $rule->getRuleType());
+      } catch (Exception $ex) {
+        $action_value = array(HeraldAdapter::VALUE_NONE);
+      }
+
+      $config_info['targets'][$action] = $action_value;
     }
 
     $changeflag_options =
@@ -596,18 +603,22 @@ final class HeraldRuleController extends HeraldController {
       'taskpriority' => new ManiphestTaskPriorityDatasource(),
       'taskstatus' => new ManiphestTaskStatusDatasource(),
       'buildplan' => new HarbormasterBuildPlanDatasource(),
-      'arcanistprojects' => new DiffusionArcanistProjectDatasource(),
       'package' => new PhabricatorOwnersPackageDatasource(),
       'project' => new PhabricatorProjectDatasource(),
       'user' => new PhabricatorPeopleDatasource(),
       'email' => new PhabricatorMetaMTAMailableDatasource(),
       'userorproject' => new PhabricatorProjectOrUserDatasource(),
+      'applicationemail' => new PhabricatorMetaMTAApplicationEmailDatasource(),
+      'space' => new PhabricatorSpacesNamespaceDatasource(),
     );
 
     foreach ($sources as $key => $source) {
+      $source->setViewer($this->getViewer());
+
       $sources[$key] = array(
         'uri' => $source->getDatasourceURI(),
         'placeholder' => $source->getPlaceholderText(),
+        'browseURI' => $source->getBrowseURI(),
       );
     }
 

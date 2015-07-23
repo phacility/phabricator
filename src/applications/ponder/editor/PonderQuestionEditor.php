@@ -145,8 +145,6 @@ final class PonderQuestionEditor
 
         $object->setAnswerCount($count);
         break;
-      case PhabricatorTransactions::TYPE_EDGE:
-        return;
     }
   }
 

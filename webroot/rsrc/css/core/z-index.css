@@ -6,6 +6,12 @@
   z-index: 1;
 }
 
+.device .phabricator-action-list-view.phabricator-action-list-toggle,
+.device-desktop .phui-document-content
+  .phabricator-action-list-view.phabricator-action-list-toggle {
+  z-index: 1;
+}
+
 .device-desktop .phui-timeline-minor-event .phui-timeline-image {
   z-index: 2;
 }
@@ -26,6 +32,10 @@
   z-index: 2;
 }
 
+div.phui-calendar-day-event {
+  z-index: 2;
+}
+
 .slowvote-above-the-bar {
   z-index: 3;
 }
@@ -34,11 +44,7 @@
   z-index: 3;
 }
 
-.phabricator-nav-column-background {
-  z-index: 3;
-}
-
-.phabricator-crumbs-view {
+.phui-crumbs-view {
   z-index: 3;
 }
 
@@ -56,6 +62,10 @@
 
 .phabricator-nav-drag {
   z-index: 4;
+}
+
+.setup-warning-callout {
+  z-index: 5;
 }
 
 .loading .messages-loading-mask,
@@ -79,13 +89,16 @@
   z-index: 6;
 }
 
-.setup-warning-callout,
 .aphront-developer-error-callout {
   z-index: 6;
 }
 
-.jx-notification-container {
+.conpherence-durable-column {
   z-index: 7;
+}
+
+.jx-scrollbar-bar {
+  z-index: 8;
 }
 
 .differential-haunt-mode-1 .differential-add-comment-panel,
@@ -99,6 +112,10 @@
 
 .jx-mask {
   z-index: 10;
+}
+
+.jx-notification-container {
+  z-index: 11;
 }
 
 .phabricator-global-upload-instructions {
@@ -119,10 +136,6 @@ div.jx-typeahead-results {
 
 .fancy-datepicker {
   z-index: 15;
-}
-
-.calendar-button {
-  z-index: 16;
 }
 
 .jx-hovercard-container {

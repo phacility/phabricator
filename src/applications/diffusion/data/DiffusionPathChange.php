@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionPathChange {
+final class DiffusionPathChange extends Phobject {
 
   private $path;
   private $commitIdentifier;
@@ -13,12 +13,12 @@ final class DiffusionPathChange {
   private $targetCommitIdentifier;
   private $awayPaths = array();
 
-  final public function setPath($path) {
+  public function setPath($path) {
     $this->path = $path;
     return $this;
   }
 
-  final public function getPath() {
+  public function getPath() {
     return $this->path;
   }
 
@@ -58,58 +58,58 @@ final class DiffusionPathChange {
     return $this->awayPaths;
   }
 
-  final public function setCommitIdentifier($commit) {
+  public function setCommitIdentifier($commit) {
     $this->commitIdentifier = $commit;
     return $this;
   }
 
-  final public function getCommitIdentifier() {
+  public function getCommitIdentifier() {
     return $this->commitIdentifier;
   }
 
-  final public function setTargetCommitIdentifier($target_commit_identifier) {
+  public function setTargetCommitIdentifier($target_commit_identifier) {
     $this->targetCommitIdentifier = $target_commit_identifier;
     return $this;
   }
 
-  final public function getTargetCommitIdentifier() {
+  public function getTargetCommitIdentifier() {
     return $this->targetCommitIdentifier;
   }
 
-  final public function setCommit($commit) {
+  public function setCommit($commit) {
     $this->commit = $commit;
     return $this;
   }
 
-  final public function getCommit() {
+  public function getCommit() {
     return $this->commit;
   }
 
-  final public function setCommitData($commit_data) {
+  public function setCommitData($commit_data) {
     $this->commitData = $commit_data;
     return $this;
   }
 
-  final public function getCommitData() {
+  public function getCommitData() {
     return $this->commitData;
   }
 
 
-  final public function getEpoch() {
+  public function getEpoch() {
     if ($this->getCommit()) {
       return $this->getCommit()->getEpoch();
     }
     return null;
   }
 
-  final public function getAuthorName() {
+  public function getAuthorName() {
     if ($this->getCommitData()) {
       return $this->getCommitData()->getAuthorName();
     }
     return null;
   }
 
-  final public function getSummary() {
+  public function getSummary() {
     if (!$this->getCommitData()) {
       return null;
     }
@@ -118,8 +118,8 @@ final class DiffusionPathChange {
     return substr($first, 0, 80);
   }
 
-  final public static function convertToArcanistChanges(array $changes) {
-    assert_instances_of($changes, 'DiffusionPathChange');
+  public static function convertToArcanistChanges(array $changes) {
+    assert_instances_of($changes, __CLASS__);
     $direct = array();
     $result = array();
     foreach ($changes as $path) {
@@ -142,10 +142,10 @@ final class DiffusionPathChange {
     return array_select_keys($result, $direct);
   }
 
-  final public static function convertToDifferentialChangesets(
+  public static function convertToDifferentialChangesets(
     PhabricatorUser $user,
     array $changes) {
-    assert_instances_of($changes, 'DiffusionPathChange');
+    assert_instances_of($changes, __CLASS__);
     $arcanist_changes = self::convertToArcanistChanges($changes);
     $diff = DifferentialDiff::newEphemeralFromRawChanges(
       $arcanist_changes);

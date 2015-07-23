@@ -13,70 +13,74 @@ final class AphrontCursorPagerView extends AphrontView {
 
   private $uri;
 
-  final public function setPageSize($page_size) {
+  public function setPageSize($page_size) {
     $this->pageSize = max(1, $page_size);
     return $this;
   }
 
-  final public function getPageSize() {
+  public function getPageSize() {
     return $this->pageSize;
   }
 
-  final public function setURI(PhutilURI $uri) {
+  public function setURI(PhutilURI $uri) {
     $this->uri = $uri;
     return $this;
   }
 
-  final public function readFromRequest(AphrontRequest $request) {
+  public function readFromRequest(AphrontRequest $request) {
     $this->uri = $request->getRequestURI();
     $this->afterID = $request->getStr('after');
     $this->beforeID = $request->getStr('before');
     return $this;
   }
 
-  final public function setAfterID($after_id) {
+  public function setAfterID($after_id) {
     $this->afterID = $after_id;
     return $this;
   }
 
-  final public function getAfterID() {
+  public function getAfterID() {
     return $this->afterID;
   }
 
-  final public function setBeforeID($before_id) {
+  public function setBeforeID($before_id) {
     $this->beforeID = $before_id;
     return $this;
   }
 
-  final public function getBeforeID() {
+  public function getBeforeID() {
     return $this->beforeID;
   }
 
-  final public function setNextPageID($next_page_id) {
+  public function setNextPageID($next_page_id) {
     $this->nextPageID = $next_page_id;
     return $this;
   }
 
-  final public function getNextPageID() {
+  public function getNextPageID() {
     return $this->nextPageID;
   }
 
-  final public function setPrevPageID($prev_page_id) {
+  public function setPrevPageID($prev_page_id) {
     $this->prevPageID = $prev_page_id;
     return $this;
   }
 
-  final public function getPrevPageID() {
+  public function getPrevPageID() {
     return $this->prevPageID;
   }
 
-  final public function sliceResults(array $results) {
+  public function sliceResults(array $results) {
     if (count($results) > $this->getPageSize()) {
       $offset = ($this->beforeID ? count($results) - $this->getPageSize() : 0);
       $results = array_slice($results, $offset, $this->getPageSize(), true);
       $this->moreResults = true;
     }
     return $results;
+  }
+
+  public function getHasMoreResults() {
+    return $this->moreResults;
   }
 
   public function willShowPagingControls() {
@@ -88,8 +92,7 @@ final class AphrontCursorPagerView extends AphrontView {
 
   public function getFirstPageURI() {
     if (!$this->uri) {
-      throw new Exception(
-        pht('You must call setURI() before you can call getFirstPageURI().'));
+      throw new PhutilInvalidStateException('setURI');
     }
 
     if (!$this->afterID && !($this->beforeID && $this->moreResults)) {
@@ -103,8 +106,7 @@ final class AphrontCursorPagerView extends AphrontView {
 
   public function getPrevPageURI() {
     if (!$this->uri) {
-      throw new Exception(
-        pht('You must call setURI() before you can call getPrevPageURI().'));
+      throw new PhutilInvalidStateException('getPrevPageURI');
     }
 
     if (!$this->prevPageID) {
@@ -118,8 +120,7 @@ final class AphrontCursorPagerView extends AphrontView {
 
   public function getNextPageURI() {
     if (!$this->uri) {
-      throw new Exception(
-        pht('You must call setURI() before you can call getNextPageURI().'));
+      throw new PhutilInvalidStateException('setURI');
     }
 
     if (!$this->nextPageID) {
@@ -133,45 +134,55 @@ final class AphrontCursorPagerView extends AphrontView {
 
   public function render() {
     if (!$this->uri) {
-      throw new Exception(
-        pht('You must call setURI() before you can call render().'));
+      throw new PhutilInvalidStateException('setURI');
     }
 
     $links = array();
 
     $first_uri = $this->getFirstPageURI();
     if ($first_uri) {
-      $links[] = phutil_tag(
-        'a',
-        array(
-          'href' => $first_uri,
-        ),
-        "\xC2\xAB ".pht('First'));
+      $icon = id(new PHUIIconView())
+        ->setIconFont('fa-fast-backward');
+      $links[] = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setHref($first_uri)
+        ->setIcon($icon)
+        ->addClass('mml')
+        ->setColor(PHUIButtonView::SIMPLE)
+        ->setText(pht('First'));
     }
 
     $prev_uri = $this->getPrevPageURI();
     if ($prev_uri) {
-      $links[] = phutil_tag(
-        'a',
-        array(
-          'href' => $prev_uri,
-        ),
-        "\xE2\x80\xB9 ".pht('Prev'));
+      $icon = id(new PHUIIconView())
+        ->setIconFont('fa-backward');
+      $links[] = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setHref($prev_uri)
+        ->setIcon($icon)
+        ->addClass('mml')
+        ->setColor(PHUIButtonView::SIMPLE)
+        ->setText(pht('Prev'));
     }
 
     $next_uri = $this->getNextPageURI();
     if ($next_uri) {
-      $links[] = phutil_tag(
-        'a',
-        array(
-          'href' => $next_uri,
-        ),
-        pht('Next')." \xE2\x80\xBA");
+      $icon = id(new PHUIIconView())
+        ->setIconFont('fa-forward');
+      $links[] = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setHref($next_uri)
+        ->setIcon($icon, false)
+        ->addClass('mml')
+        ->setColor(PHUIButtonView::SIMPLE)
+        ->setText(pht('Next'));
     }
 
     return phutil_tag(
       'div',
-      array('class' => 'aphront-pager-view'),
+      array(
+        'class' => 'phui-pager-view',
+      ),
       $links);
   }
 

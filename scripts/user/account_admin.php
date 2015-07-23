@@ -13,31 +13,32 @@ $is_first_user = (!$any_user);
 
 if ($is_first_user) {
   echo pht(
-    "WARNING\n\n".
-    "You're about to create the first account on this install. Normally, you ".
-    "should use the web interface to create the first account, not this ".
-    "script.\n\n".
-    "If you use the web interface, it will drop you into a nice UI workflow ".
-    "which gives you more help setting up your install. If you create an ".
-    "account with this script instead, you will skip the setup help and you ".
-    "will not be able to access it later.");
+      "WARNING\n\n".
+      "You're about to create the first account on this install. Normally, ".
+      "you should use the web interface to create the first account, not ".
+      "this script.\n\n".
+      "If you use the web interface, it will drop you into a nice UI workflow ".
+      "which gives you more help setting up your install. If you create an ".
+      "account with this script instead, you will skip the setup help and you ".
+      "will not be able to access it later.");
   if (!phutil_console_confirm(pht('Skip easy setup and create account?'))) {
     echo pht('Cancelled.')."\n";
     exit(1);
   }
 }
 
-echo 'Enter a username to create a new account or edit an existing account.';
+echo pht(
+  'Enter a username to create a new account or edit an existing account.');
 
-$username = phutil_console_prompt('Enter a username:');
+$username = phutil_console_prompt(pht('Enter a username:'));
 if (!strlen($username)) {
-  echo "Cancelled.\n";
+  echo pht('Cancelled.')."\n";
   exit(1);
 }
 
 if (!PhabricatorUser::validateUsername($username)) {
   $valid = PhabricatorUser::describeValidUsername();
-  echo "The username '{$username}' is invalid. {$valid}\n";
+  echo pht("The username '%s' is invalid. %s", $username, $valid)."\n";
   exit(1);
 }
 
@@ -49,12 +50,12 @@ $user = id(new PhabricatorUser())->loadOneWhere(
 if (!$user) {
   $original = new PhabricatorUser();
 
-  echo "There is no existing user account '{$username}'.\n";
+  echo pht("There is no existing user account '%s'.", $username)."\n";
   $ok = phutil_console_confirm(
-    "Do you want to create a new '{$username}' account?",
+    pht("Do you want to create a new '%s' account?", $username),
     $default_no = false);
   if (!$ok) {
-    echo "Cancelled.\n";
+    echo pht('Cancelled.')."\n";
     exit(1);
   }
   $user = new PhabricatorUser();
@@ -64,12 +65,12 @@ if (!$user) {
 } else {
   $original = clone $user;
 
-  echo "There is an existing user account '{$username}'.\n";
+  echo pht("There is an existing user account '%s'.", $username)."\n";
   $ok = phutil_console_confirm(
-    "Do you want to edit the existing '{$username}' account?",
+    pht("Do you want to edit the existing '%s' account?", $username),
     $default_no = false);
   if (!$ok) {
-    echo "Cancelled.\n";
+    echo pht('Cancelled.')."\n";
     exit(1);
   }
 
@@ -78,12 +79,12 @@ if (!$user) {
 
 $user_realname = $user->getRealName();
 if (strlen($user_realname)) {
-  $realname_prompt = ' ['.$user_realname.']';
+  $realname_prompt = ' ['.$user_realname.']:';
 } else {
-  $realname_prompt = '';
+  $realname_prompt = ':';
 }
 $realname = nonempty(
-  phutil_console_prompt("Enter user real name{$realname_prompt}:"),
+  phutil_console_prompt(pht('Enter user real name').$realname_prompt),
   $user_realname);
 $user->setRealName($realname);
 
@@ -95,13 +96,14 @@ $user->setRealName($realname);
 $create_email = null;
 if ($is_new) {
   do {
-    $email = phutil_console_prompt('Enter user email address:');
+    $email = phutil_console_prompt(pht('Enter user email address:'));
     $duplicate = id(new PhabricatorUserEmail())->loadOneWhere(
       'address = %s',
       $email);
     if ($duplicate) {
-      echo "ERROR: There is already a user with that email address. ".
-           "Each user must have a unique email address.\n";
+      echo pht(
+        "ERROR: There is already a user with that email address. ".
+        "Each user must have a unique email address.\n");
     } else {
       break;
     }
@@ -115,7 +117,7 @@ $changed_pass = false;
 // it.
 phutil_passthru('stty -echo');
 $password = phutil_console_prompt(
-  'Enter a password for this user [blank to leave unchanged]:');
+  pht('Enter a password for this user [blank to leave unchanged]:'));
 phutil_passthru('stty echo');
 if (strlen($password)) {
   $changed_pass = $password;
@@ -123,7 +125,7 @@ if (strlen($password)) {
 
 $is_system_agent = $user->getIsSystemAgent();
 $set_system_agent = phutil_console_confirm(
-  'Is this user a bot/script?',
+  pht('Is this user a bot?'),
   $default_no = !$is_system_agent);
 
 $verify_email = null;
@@ -135,56 +137,56 @@ if (!$is_new) {
   $verify_email = $user->loadPrimaryEmail();
   if (!$verify_email->getIsVerified()) {
     $set_verified = phutil_console_confirm(
-      'Should the primary email address be verified?',
+      pht('Should the primary email address be verified?'),
       $default_no = true);
   } else {
-    // already verified so let's not make a fuss
+    // Already verified so let's not make a fuss.
     $verify_email = null;
   }
 }
 
 $is_admin = $user->getIsAdmin();
 $set_admin = phutil_console_confirm(
-  'Should this user be an administrator?',
+  pht('Should this user be an administrator?'),
   $default_no = !$is_admin);
 
-echo "\n\nACCOUNT SUMMARY\n\n";
+echo "\n\n".pht('ACCOUNT SUMMARY')."\n\n";
 $tpl = "%12s   %-30s   %-30s\n";
-printf($tpl, null, 'OLD VALUE', 'NEW VALUE');
-printf($tpl, 'Username', $original->getUsername(), $user->getUsername());
-printf($tpl, 'Real Name', $original->getRealName(), $user->getRealName());
+printf($tpl, null, pht('OLD VALUE'), pht('NEW VALUE'));
+printf($tpl, pht('Username'), $original->getUsername(), $user->getUsername());
+printf($tpl, pht('Real Name'), $original->getRealName(), $user->getRealName());
 if ($is_new) {
-  printf($tpl, 'Email', '', $create_email);
+  printf($tpl, pht('Email'), '', $create_email);
 }
-printf($tpl, 'Password', null,
+printf($tpl, pht('Password'), null,
   ($changed_pass !== false)
-    ? 'Updated'
-    : 'Unchanged');
+    ? pht('Updated')
+    : pht('Unchanged'));
 
 printf(
   $tpl,
-  'Bot/Script',
+  pht('Bot'),
   $original->getIsSystemAgent() ? 'Y' : 'N',
   $set_system_agent ? 'Y' : 'N');
 
 if ($verify_email) {
   printf(
     $tpl,
-    'Verify Email',
+    pht('Verify Email'),
     $verify_email->getIsVerified() ? 'Y' : 'N',
     $set_verified ? 'Y' : 'N');
 }
 
 printf(
   $tpl,
-  'Admin',
+  pht('Admin'),
   $original->getIsAdmin() ? 'Y' : 'N',
   $set_admin ? 'Y' : 'N');
 
 echo "\n";
 
-if (!phutil_console_confirm('Save these changes?', $default_no = false)) {
-  echo "Cancelled.\n";
+if (!phutil_console_confirm(pht('Save these changes?'), $default_no = false)) {
+  echo pht('Cancelled.')."\n";
   exit(1);
 }
 
@@ -223,4 +225,4 @@ $user->openTransaction();
 
 $user->saveTransaction();
 
-echo "Saved changes.\n";
+echo pht('Saved changes.')."\n";

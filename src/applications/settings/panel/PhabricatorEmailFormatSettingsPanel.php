@@ -15,8 +15,17 @@ final class PhabricatorEmailFormatSettingsPanel
     return pht('Email');
   }
 
+  public function isEditableByAdministrators() {
+    if ($this->getUser()->getIsMailingList()) {
+      return true;
+    }
+
+    return false;
+  }
+
   public function processRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $this->getViewer();
+    $user = $this->getUser();
 
     $preferences = $user->loadPreferences();
 
@@ -67,7 +76,7 @@ final class PhabricatorEmailFormatSettingsPanel
       ? pht('Vary')
       : pht('Do Not Vary');
 
-    $html_emails_default = 'Plain Text';
+    $html_emails_default = pht('Plain Text');
 
     $re_prefix_value = $preferences->getPreference($pref_re_prefix);
     if ($re_prefix_value === null) {
@@ -98,7 +107,7 @@ final class PhabricatorEmailFormatSettingsPanel
 
     $form = new AphrontFormView();
     $form
-      ->setUser($user);
+      ->setUser($viewer);
 
     if (PhabricatorMetaMTAMail::shouldMultiplexAllMail()) {
       $html_email_control = id(new AphrontFormSelectControl())
@@ -132,13 +141,13 @@ final class PhabricatorEmailFormatSettingsPanel
         ->setValue($vary_value);
     } else {
       $html_email_control = id(new AphrontFormStaticControl())
-        ->setValue('Server Default ('.$html_emails_default.')');
+        ->setValue(pht('Server Default (%s)', $html_emails_default));
 
       $re_control = id(new AphrontFormStaticControl())
-        ->setValue('Server Default ('.$re_prefix_default.')');
+        ->setValue(pht('Server Default (%s)', $re_prefix_default));
 
       $vary_control = id(new AphrontFormStaticControl())
-        ->setValue('Server Default ('.$vary_default.')');
+        ->setValue(pht('Server Default (%s)', $vary_default));
     }
 
     $form

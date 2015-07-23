@@ -94,7 +94,7 @@ final class PhortuneChargeQuery
     return $charges;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     $where[] = $this->buildPagingClause($conn);

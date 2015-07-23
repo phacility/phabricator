@@ -3,7 +3,7 @@
 final class PhabricatorAphlictManagementStatusWorkflow
   extends PhabricatorAphlictManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('status')
       ->setSynopsis(pht('Show the status of the notifications server.'))
@@ -15,11 +15,11 @@ final class PhabricatorAphlictManagementStatusWorkflow
     $pid = $this->getPID();
 
     if (!$pid) {
-      $console->writeErr(pht("Aphlict is not running.\n"));
+      $console->writeErr("%s\n", pht('Aphlict is not running.'));
       return 1;
     }
 
-    $console->writeOut(pht("Aphlict (%s) is running.\n", $pid));
+    $console->writeOut("%s\n", pht('Aphlict (%s) is running.', $pid));
     return 0;
   }
 

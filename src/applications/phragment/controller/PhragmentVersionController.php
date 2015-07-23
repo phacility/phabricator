@@ -33,11 +33,6 @@ final class PhragmentVersionController extends PhragmentController {
     $crumbs = $this->buildApplicationCrumbsWithPath($parents);
     $crumbs->addTextCrumb(pht('View Version %d', $version->getSequence()));
 
-    $phids = array();
-    $phids[] = $version->getFilePHID();
-
-    $this->loadHandles($phids);
-
     $file = id(new PhabricatorFileQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($version->getFilePHID()))
@@ -71,7 +66,7 @@ final class PhragmentVersionController extends PhragmentController {
       ->setActionList($actions);
     $properties->addProperty(
       pht('File'),
-      $this->renderHandlesForPHIDs(array($version->getFilePHID())));
+      $viewer->renderHandle($version->getFilePHID()));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -106,7 +101,7 @@ final class PhragmentVersionController extends PhragmentController {
 
     foreach ($previous_versions as $previous_version) {
       $item = id(new PHUIObjectItemView());
-      $item->setHeader('Version '.$previous_version->getSequence());
+      $item->setHeader(pht('Version %s', $previous_version->getSequence()));
       $item->setHref($previous_version->getURI());
       $item->addAttribute(phabricator_datetime(
         $previous_version->getDateCreated(),
@@ -122,8 +117,8 @@ final class PhragmentVersionController extends PhragmentController {
     }
 
     $item = id(new PHUIObjectItemView());
-    $item->setHeader('Prior to Version 0');
-    $item->addAttribute('Prior to any content (empty file)');
+    $item->setHeader(pht('Prior to Version 0'));
+    $item->addAttribute(pht('Prior to any content (empty file)'));
     $item->addAction(id(new PHUIListItemView())
       ->setIcon('fa-file-o')
       ->setName(pht('Get Patch'))

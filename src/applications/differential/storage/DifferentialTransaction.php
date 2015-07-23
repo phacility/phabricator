@@ -4,6 +4,19 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
 
   private $isCommandeerSideEffect;
 
+  const TYPE_INLINE  = 'differential:inline';
+  const TYPE_UPDATE  = 'differential:update';
+  const TYPE_ACTION  = 'differential:action';
+  const TYPE_STATUS  = 'differential:status';
+
+  const MAILTAG_REVIEWERS      = 'differential-reviewers';
+  const MAILTAG_CLOSED         = 'differential-committed';
+  const MAILTAG_CC             = 'differential-cc';
+  const MAILTAG_COMMENT        = 'differential-comment';
+  const MAILTAG_UPDATED        = 'differential-updated';
+  const MAILTAG_REVIEW_REQUEST = 'differential-review-request';
+  const MAILTAG_OTHER          = 'differential-other';
+
 
   public function setIsCommandeerSideEffect($is_side_effect) {
     $this->isCommandeerSideEffect = $is_side_effect;
@@ -13,11 +26,6 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
   public function getIsCommandeerSideEffect() {
     return $this->isCommandeerSideEffect;
   }
-
-  const TYPE_INLINE = 'differential:inline';
-  const TYPE_UPDATE = 'differential:update';
-  const TYPE_ACTION = 'differential:action';
-  const TYPE_STATUS = 'differential:status';
 
   public function getApplicationName() {
     return 'differential';
@@ -70,33 +78,13 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     return parent::shouldHide();
   }
 
-  public function shouldHideForMail(array $xactions) {
+  public function isInlineCommentTransaction() {
     switch ($this->getTransactionType()) {
       case self::TYPE_INLINE:
-        // Hide inlines when rendering mail transactions if any other
-        // transaction type exists.
-        foreach ($xactions as $xaction) {
-          if ($xaction->getTransactionType() != self::TYPE_INLINE) {
-            return true;
-          }
-        }
-
-        // If only inline transactions exist, we just render the first one.
-        return ($this !== head($xactions));
+        return true;
     }
 
-    return parent::shouldHideForMail($xactions);
-  }
-
-  public function getBodyForMail() {
-    switch ($this->getTransactionType()) {
-      case self::TYPE_INLINE:
-        // Don't render inlines into the mail body; they render into a special
-        // section immediately after the body instead.
-        return null;
-    }
-
-    return parent::getBodyForMail();
+    return parent::isInlineCommentTransaction();
   }
 
   public function getRequiredHandlePHIDs() {
@@ -129,14 +117,11 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
   }
 
   public function getActionStrength() {
-
     switch ($this->getTransactionType()) {
       case self::TYPE_ACTION:
         return 3;
       case self::TYPE_UPDATE:
         return 2;
-      case self::TYPE_INLINE:
-        return 0.25;
     }
 
     return parent::getActionStrength();
@@ -182,38 +167,38 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
 
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_SUBSCRIBERS;
-        $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_CC;
+        $tags[] = self::MAILTAG_CC;
         break;
       case self::TYPE_ACTION:
         switch ($this->getNewValue()) {
           case DifferentialAction::ACTION_CLOSE:
-            $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED;
+            $tags[] = self::MAILTAG_CLOSED;
             break;
         }
         break;
       case self::TYPE_UPDATE:
         $old = $this->getOldValue();
         if ($old === null) {
-          $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEW_REQUEST;
+          $tags[] = self::MAILTAG_REVIEW_REQUEST;
         } else {
-          $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_UPDATED;
+          $tags[] = self::MAILTAG_UPDATED;
         }
         break;
       case PhabricatorTransactions::TYPE_EDGE:
         switch ($this->getMetadataValue('edge:type')) {
           case DifferentialRevisionHasReviewerEdgeType::EDGECONST:
-            $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS;
+            $tags[] = self::MAILTAG_REVIEWERS;
             break;
         }
         break;
       case PhabricatorTransactions::TYPE_COMMENT:
       case self::TYPE_INLINE:
-        $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT;
+        $tags[] = self::MAILTAG_COMMENT;
         break;
     }
 
     if (!$tags) {
-      $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_OTHER;
+      $tags[] = self::MAILTAG_OTHER;
     }
 
     return $tags;
@@ -296,16 +281,13 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
       case self::TYPE_STATUS:
         switch ($this->getNewValue()) {
           case ArcanistDifferentialRevisionStatus::ACCEPTED:
-            return pht(
-              'This revision is now accepted and ready to land.');
+            return pht('This revision is now accepted and ready to land.');
           case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
-            return pht(
-              'This revision now requires changes to proceed.');
+            return pht('This revision now requires changes to proceed.');
           case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
-            return pht(
-              'This revision now requires review to proceed.');
+            return pht('This revision now requires review to proceed.');
         }
-    }
+     }
 
     return parent::getTitle();
   }
@@ -380,27 +362,40 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
                 $this->getMetadataValue('commitPHID'));
               $committer_phid = $this->getMetadataValue('committerPHID');
               $author_phid = $this->getMetadataValue('authorPHID');
+
               if ($this->getHandleIfExists($committer_phid)) {
                 $committer_name = $this->renderHandleLink($committer_phid);
               } else {
                 $committer_name = $this->getMetadataValue('committerName');
               }
+
               if ($this->getHandleIfExists($author_phid)) {
                 $author_name = $this->renderHandleLink($author_phid);
               } else {
                 $author_name = $this->getMetadataValue('authorName');
               }
 
-              if ($committer_name && ($committer_name != $author_name)) {
+              // Check if the committer and author are the same. They're the
+              // same if both resolved and are the same user, or if neither
+              // resolved and the text is identical.
+              if ($committer_phid && $author_phid) {
+                $same_author = ($committer_phid == $author_phid);
+              } else if (!$committer_phid && !$author_phid) {
+                $same_author = ($committer_name == $author_name);
+              } else {
+                $same_author = false;
+              }
+
+              if ($committer_name && !$same_author) {
                 return pht(
-                  '%s closed %s by commit %s (authored by %s).',
+                  '%s closed %s by committing %s (authored by %s).',
                   $author_link,
                   $object_link,
                   $commit_name,
                   $author_name);
               } else {
                 return pht(
-                  '%s closed %s by commit %s.',
+                  '%s closed %s by committing %s.',
                   $author_link,
                   $object_link,
                   $commit_name);
@@ -450,7 +445,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
               '%s now requires review to proceed.',
               $object_link);
         }
-    }
+     }
 
     return parent::getTitleForFeed();
   }
@@ -577,7 +572,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
               'this revision.');
         }
         break;
-      case DifferentialTransaction::TYPE_ACTION:
+      case self::TYPE_ACTION:
         switch ($this->getNewValue()) {
           case DifferentialAction::ACTION_CLOSE:
             return pht('This revision is already closed.');
@@ -604,11 +599,9 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
               'You can not commandeer this revision because you already own '.
               'it.');
           case DifferentialAction::ACTION_ACCEPT:
-            return pht(
-              'You have already accepted this revision.');
+            return pht('You have already accepted this revision.');
           case DifferentialAction::ACTION_REJECT:
-            return pht(
-              'You have already requested changes to this revision.');
+            return pht('You have already requested changes to this revision.');
         }
         break;
     }

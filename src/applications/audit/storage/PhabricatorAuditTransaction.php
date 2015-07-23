@@ -387,29 +387,17 @@ final class PhabricatorAuditTransaction
     return parent::getBodyForFeed($story);
   }
 
-
-  // TODO: These two mail methods can likely be abstracted by introducing a
-  // formal concept of "inline comment" transactions.
-
-  public function shouldHideForMail(array $xactions) {
-    $type_inline = PhabricatorAuditActionConstants::INLINE;
+  public function isInlineCommentTransaction() {
     switch ($this->getTransactionType()) {
-      case $type_inline:
-        foreach ($xactions as $xaction) {
-          if ($xaction->getTransactionType() != $type_inline) {
-            return true;
-          }
-        }
-        return ($this !== head($xactions));
+      case PhabricatorAuditActionConstants::INLINE:
+        return true;
     }
 
-    return parent::shouldHideForMail($xactions);
+    return parent::isInlineCommentTransaction();
   }
 
   public function getBodyForMail() {
     switch ($this->getTransactionType()) {
-      case PhabricatorAuditActionConstants::INLINE:
-        return null;
       case self::TYPE_COMMIT:
         $data = $this->getNewValue();
         return $data['description'];

@@ -6,7 +6,7 @@
  * application.
  */
 
-final class DifferentialRevisionStatus {
+final class DifferentialRevisionStatus extends Phobject {
 
   const COLOR_STATUS_DEFAULT = 'status';
   const COLOR_STATUS_DARK = 'status-dark';
@@ -42,11 +42,11 @@ final class DifferentialRevisionStatus {
       ArcanistDifferentialRevisionStatus::NEEDS_REVIEW   =>
         'fa-square-o bluegrey',
       ArcanistDifferentialRevisionStatus::NEEDS_REVISION =>
-        'fa-square-o red',
+        'fa-refresh red',
       ArcanistDifferentialRevisionStatus::CHANGES_PLANNED =>
-        'fa-square-o red',
+        'fa-headphones red',
       ArcanistDifferentialRevisionStatus::ACCEPTED       =>
-        'fa-square-o green',
+        'fa-check green',
       ArcanistDifferentialRevisionStatus::CLOSED         =>
         'fa-check-square-o',
       ArcanistDifferentialRevisionStatus::ABANDONED      =>
@@ -68,7 +68,7 @@ final class DifferentialRevisionStatus {
     $tag = phutil_tag(
       'span',
       array(
-        'class' => 'phui-header-'.$color.' plr',
+        'class' => 'phui-header-status phui-header-'.$color,
       ),
       array(
         $img,

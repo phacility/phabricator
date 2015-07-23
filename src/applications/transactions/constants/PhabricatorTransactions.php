@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorTransactions {
+final class PhabricatorTransactions extends Phobject {
 
   const TYPE_COMMENT      = 'core:comment';
   const TYPE_SUBSCRIBERS  = 'core:subscribers';
@@ -11,6 +11,8 @@ final class PhabricatorTransactions {
   const TYPE_CUSTOMFIELD  = 'core:customfield';
   const TYPE_BUILDABLE    = 'harbormaster:buildable';
   const TYPE_TOKEN        = 'token:give';
+  const TYPE_INLINESTATE  = 'core:inlinestate';
+  const TYPE_SPACE = 'core:space';
 
   const COLOR_RED         = 'red';
   const COLOR_ORANGE      = 'orange';
@@ -22,5 +24,15 @@ final class PhabricatorTransactions {
   const COLOR_VIOLET      = 'violet';
   const COLOR_GREY        = 'grey';
   const COLOR_BLACK       = 'black';
+
+
+  public static function getInlineStateMap() {
+    return array(
+      PhabricatorInlineCommentInterface::STATE_DRAFT =>
+        PhabricatorInlineCommentInterface::STATE_DONE,
+      PhabricatorInlineCommentInterface::STATE_UNDRAFT =>
+        PhabricatorInlineCommentInterface::STATE_UNDONE,
+    );
+  }
 
 }

@@ -3,6 +3,21 @@
 final class PhortuneCartEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  private $invoiceIssues;
+
+  public function setInvoiceIssues(array $invoice_issues) {
+    $this->invoiceIssues = $invoice_issues;
+    return $this;
+  }
+
+  public function getInvoiceIssues() {
+    return $this->invoiceIssues;
+  }
+
+  public function isInvoice() {
+    return (bool)$this->invoiceIssues;
+  }
+
   public function getEditorApplicationClass() {
     return 'PhabricatorPhortuneApplication';
   }
@@ -20,6 +35,7 @@ final class PhortuneCartEditor
     $types[] = PhortuneCartTransaction::TYPE_REVIEW;
     $types[] = PhortuneCartTransaction::TYPE_CANCEL;
     $types[] = PhortuneCartTransaction::TYPE_REFUND;
+    $types[] = PhortuneCartTransaction::TYPE_INVOICED;
 
     return $types;
   }
@@ -35,6 +51,7 @@ final class PhortuneCartEditor
       case PhortuneCartTransaction::TYPE_REVIEW:
       case PhortuneCartTransaction::TYPE_CANCEL:
       case PhortuneCartTransaction::TYPE_REFUND:
+      case PhortuneCartTransaction::TYPE_INVOICED:
         return null;
     }
 
@@ -52,6 +69,7 @@ final class PhortuneCartEditor
       case PhortuneCartTransaction::TYPE_REVIEW:
       case PhortuneCartTransaction::TYPE_CANCEL:
       case PhortuneCartTransaction::TYPE_REFUND:
+      case PhortuneCartTransaction::TYPE_INVOICED:
         return $xaction->getNewValue();
     }
 
@@ -69,6 +87,7 @@ final class PhortuneCartEditor
       case PhortuneCartTransaction::TYPE_REVIEW:
       case PhortuneCartTransaction::TYPE_CANCEL:
       case PhortuneCartTransaction::TYPE_REFUND:
+      case PhortuneCartTransaction::TYPE_INVOICED:
         return;
     }
 
@@ -86,6 +105,7 @@ final class PhortuneCartEditor
       case PhortuneCartTransaction::TYPE_REVIEW:
       case PhortuneCartTransaction::TYPE_CANCEL:
       case PhortuneCartTransaction::TYPE_REFUND:
+      case PhortuneCartTransaction::TYPE_INVOICED:
         return;
     }
 
@@ -113,6 +133,25 @@ final class PhortuneCartEditor
 
     $body = parent::buildMailBody($object, $xactions);
 
+    if ($this->isInvoice()) {
+      $issues = $this->getInvoiceIssues();
+      foreach ($issues as $key => $issue) {
+        $issues[$key] = '  - '.$issue;
+      }
+      $issues = implode("\n", $issues);
+
+      $overview = pht(
+        "Payment for this invoice could not be processed automatically:\n\n".
+        "%s",
+        $issues);
+
+      $body->addRemarkupSection($overview);
+
+      $body->addLinkSection(
+        pht('PAY NOW'),
+        PhabricatorEnv::getProductionURI($object->getCheckoutURI()));
+    }
+
     $items = array();
     foreach ($object->getPurchases() as $purchase) {
       $name = $purchase->getFullDisplayName();
@@ -123,9 +162,26 @@ final class PhortuneCartEditor
 
     $body->addTextSection(pht('ORDER CONTENTS'), implode("\n", $items));
 
+    if ($this->isInvoice()) {
+      $subscription = id(new PhortuneSubscriptionQuery())
+        ->setViewer($this->requireActor())
+        ->withPHIDs(array($object->getSubscriptionPHID()))
+        ->executeOne();
+      if ($subscription) {
+        $body->addLinkSection(
+          pht('SUBSCRIPTION'),
+          PhabricatorEnv::getProductionURI($subscription->getURI()));
+      }
+    } else {
+      $body->addLinkSection(
+        pht('ORDER DETAIL'),
+        PhabricatorEnv::getProductionURI($object->getDetailURI()));
+    }
+
+    $account_uri = '/phortune/'.$object->getAccount()->getID().'/';
     $body->addLinkSection(
-      pht('ORDER DETAIL'),
-      PhabricatorEnv::getProductionURI('/phortune/cart/'.$object->getID().'/'));
+      pht('ACCOUNT OVERVIEW'),
+      PhabricatorEnv::getProductionURI($account_uri));
 
     return $body;
   }
@@ -133,7 +189,7 @@ final class PhortuneCartEditor
   protected function getMailTo(PhabricatorLiskDAO $object) {
     $phids = array();
 
-    // Relaod the cart to pull merchant and account information, in case we
+    // Reload the cart to pull merchant and account information, in case we
     // just created the object.
     $cart = id(new PhortuneCartQuery())
       ->setViewer($this->requireActor())
@@ -156,12 +212,32 @@ final class PhortuneCartEditor
   }
 
   protected function getMailSubjectPrefix() {
-    return 'Order';
+    return '[Phortune]';
   }
 
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {
     return id(new PhortuneCartReplyHandler())
       ->setMailReceiver($object);
+  }
+
+  protected function willPublish(PhabricatorLiskDAO $object, array $xactions) {
+    // We need the purchases in order to build mail.
+    return id(new PhortuneCartQuery())
+      ->setViewer($this->getActor())
+      ->withIDs(array($object->getID()))
+      ->needPurchases(true)
+      ->executeOne();
+  }
+
+  protected function getCustomWorkerState() {
+    return array(
+      'invoiceIssues' => $this->invoiceIssues,
+    );
+  }
+
+  protected function loadCustomWorkerState(array $state) {
+    $this->invoiceIssues = idx($state, 'invoiceIssues');
+    return $this;
   }
 
 }

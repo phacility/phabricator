@@ -7,7 +7,11 @@
  *           javelin-vector
  */
 
-JX.behavior('fancy-datepicker', function() {
+JX.behavior('fancy-datepicker', function(config, statics) {
+  if (statics.initialized) {
+    return;
+  }
+  statics.initialized = true;
 
   var picker;
   var root;
@@ -15,6 +19,42 @@ JX.behavior('fancy-datepicker', function() {
   var value_y;
   var value_m;
   var value_d;
+
+  var get_format_separator = function() {
+    var format = get_format();
+    switch (format.toLowerCase()) {
+      case 'n/j/y':
+        return '/';
+      default:
+        return '-';
+    }
+  };
+
+  var get_key_maps = function() {
+    var format = get_format();
+    var regex = new RegExp('[./ -]');
+    return format.split(regex);
+  };
+
+  var get_format = function() {
+    var format = config.format;
+
+    if (format === null) {
+      format = 'Y-m-d';
+    }
+
+    return format;
+  };
+
+  var get_week_start = function() {
+    var week_start = config.weekStart;
+
+    if (week_start === null) {
+      week_start = 0;
+    }
+
+    return week_start;
+  };
 
   var onopen = function(e) {
     e.kill();
@@ -64,7 +104,9 @@ JX.behavior('fancy-datepicker', function() {
     JX.DOM.remove(picker);
     picker = null;
     JX.DOM.alterClass(root, 'picker-open', false);
-    e.kill();
+    if (e) {
+      e.kill();
+    }
 
     root = null;
   };
@@ -78,25 +120,81 @@ JX.behavior('fancy-datepicker', function() {
 
   var get_inputs = function() {
     return {
-      y: JX.DOM.find(root, 'select', 'year-input'),
-      m: JX.DOM.find(root, 'select', 'month-input'),
-      d: JX.DOM.find(root, 'select', 'day-input'),
+      d: JX.DOM.find(root, 'input', 'date-input'),
       t: JX.DOM.find(root, 'input', 'time-input')
     };
   };
 
-  var read_date = function() {
-    var i = get_inputs();
-    value_y = +i.y.value;
-    value_m = +i.m.value;
-    value_d = +i.d.value;
+  var read_date = function(){
+    var inputs = get_inputs();
+    var date = inputs.d.value;
+    var regex = new RegExp('[./ -]');
+    var date_parts = date.split(regex);
+    var map = get_key_maps();
+
+    for (var i=0; i < date_parts.length; i++) {
+      var key = map[i].toLowerCase();
+
+      switch (key) {
+        case 'y':
+          value_y = date_parts[i];
+          break;
+        case 'm':
+          value_m = date_parts[i];
+          break;
+        case 'd':
+          value_d = date_parts[i];
+          break;
+      }
+    }
   };
 
   var write_date = function() {
-    var i = get_inputs();
-    i.y.value = value_y;
-    i.m.value = value_m;
-    i.d.value = value_d;
+    var inputs = get_inputs();
+    var map = get_key_maps();
+    var arr_values = [];
+
+    for(var i=0; i < map.length; i++) {
+      switch (map[i].toLowerCase()) {
+        case 'y':
+          arr_values[i] = value_y;
+          break;
+        case 'm':
+          arr_values[i] = value_m;
+          break;
+        case 'n':
+          arr_values[i] = value_m;
+          break;
+        case 'd':
+          arr_values[i] = value_d;
+          break;
+        case 'j':
+          arr_values[i] = value_d;
+          break;
+      }
+    }
+
+    var text_value = '';
+    var separator = get_format_separator();
+
+    for(var j=0; j < arr_values.length; j++) {
+      var element = arr_values[j];
+      var format = get_format();
+
+      if ((format.toLowerCase() === 'd-m-y' ||
+        format.toLowerCase() === 'y-m-d') &&
+        element < 10) {
+        element = '0' + element;
+      }
+
+      if (text_value.length === 0) {
+        text_value += element;
+      } else {
+        text_value = text_value + separator + element;
+      }
+    }
+
+    inputs.d.value = text_value;
   };
 
   var render = function() {
@@ -109,15 +207,8 @@ JX.behavior('fancy-datepicker', function() {
   };
 
   var redraw_inputs = function() {
-    var inputs = get_inputs();
     var disabled = JX.Stratcom.getData(root).disabled;
-    for (var k in inputs) {
-      if (disabled) {
-        inputs[k].setAttribute('disabled', 'disabled');
-      } else {
-        inputs[k].removeAttribute('disabled');
-      }
-    }
+    JX.DOM.alterClass(root, 'datepicker-disabled', disabled);
 
     var box = JX.DOM.scry(root, 'input', 'calendar-enable');
     if (box.length) {
@@ -140,9 +231,12 @@ JX.behavior('fancy-datepicker', function() {
     return JX.$N('td', {meta: {value: value}, className: class_name}, label);
   };
 
-
   // Render the top bar which allows you to pick a month and year.
   var render_month = function() {
+    var valid_date = getValidDate();
+    var month = valid_date.getMonth();
+    var year = valid_date.getYear() + 1900;
+
     var months = [
       'January',
       'February',
@@ -159,7 +253,7 @@ JX.behavior('fancy-datepicker', function() {
 
     var buttons = [
       cell('\u25C0', 'm:-1', false, 'lrbutton'),
-      cell(months[value_m - 1] + ' ' + value_y, null),
+      cell(months[month] + ' ' + year, null),
       cell('\u25B6', 'm:1', false, 'lrbutton')];
 
     return JX.$N(
@@ -168,17 +262,37 @@ JX.behavior('fancy-datepicker', function() {
       JX.$N('tr', {}, buttons));
   };
 
+  function getValidDate() {
+    var written_date = new Date(value_y, value_m-1, value_d);
+    if (isNaN(written_date.getTime())) {
+      return new Date();
+    } else {
+      //year 01 should be 2001, not 1901
+      if (written_date.getYear() < 70) {
+        value_y += 2000;
+        written_date = new Date(value_y, value_m-1, value_d);
+      }
+      return written_date;
+    }
+  }
+
 
   // Render the day-of-week and calendar views.
   var render_day = function() {
+    var today = new Date();
+    var valid_date = getValidDate();
+
     var weeks = [];
 
     // First, render the weekday names.
     var weekdays = 'SMTWTFS';
     var weekday_names = [];
-    var ii;
-    for (ii = 0; ii < weekdays.length; ii++) {
-      weekday_names.push(cell(weekdays.charAt(ii), null, false, 'day-name'));
+    var week_start = parseInt(get_week_start(), 10);
+    var week_end = weekdays.length + week_start;
+
+    for (var ii = week_start; ii < week_end; ii++) {
+      var index = ii%7;
+      weekday_names.push(cell(weekdays.charAt(index), null, false, 'day-name'));
     }
     weeks.push(JX.$N('tr', {}, weekday_names));
 
@@ -186,16 +300,21 @@ JX.behavior('fancy-datepicker', function() {
     // Render the calendar itself. NOTE: Javascript uses 0-based month indexes
     // while we use 1-based month indexes, so we have to adjust for that.
     var days = [];
-    var start = new Date(value_y, value_m - 1, 1).getDay();
+    var start = new Date(
+      valid_date.getYear() + 1900,
+      valid_date.getMonth(),
+      1).getDay() - week_start;
+
     while (start--) {
       days.push(cell('', null, false, 'day-placeholder'));
     }
 
-    var today = new Date();
-
     for (ii = 1; ii <= 31; ii++) {
-      var date = new Date(value_y, value_m - 1, ii);
-      if (date.getMonth() != (value_m - 1)) {
+      var date = new Date(
+        valid_date.getYear() + 1900,
+        valid_date.getMonth(),
+        ii);
+      if (date.getMonth() != (valid_date.getMonth())) {
         // We've spilled over into the next month, so stop rendering.
         break;
       }
@@ -213,7 +332,11 @@ JX.behavior('fancy-datepicker', function() {
         classes.push('weekend');
       }
 
-      days.push(cell(ii, 'd:'+ii, value_d == ii, classes.join(' ')));
+      days.push(cell(
+        ii,
+        'd:'+ii,
+        valid_date.getDate() == ii,
+        classes.join(' ')));
     }
 
     // Slice the days into weeks.
@@ -238,6 +361,11 @@ JX.behavior('fancy-datepicker', function() {
       if (!data.value) {
         return;
       }
+
+      var valid_date = getValidDate();
+      value_y = valid_date.getYear() + 1900;
+      value_m = valid_date.getMonth() + 1;
+      value_d = valid_date.getDate();
 
       var p = data.value.split(':');
       switch (p[0]) {
@@ -269,5 +397,12 @@ JX.behavior('fancy-datepicker', function() {
 
       render();
     });
+
+  JX.Stratcom.listen('click', null, function(e){
+    if (e.getNode('phabricator-datepicker')) {
+      return;
+    }
+    onclose();
+  });
 
 });

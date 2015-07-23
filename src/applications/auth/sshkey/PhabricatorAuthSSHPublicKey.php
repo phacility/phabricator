@@ -59,6 +59,7 @@ final class PhabricatorAuthSSHPublicKey extends Phobject {
       'ssh-dsa',
       'ssh-dss',
       'ssh-rsa',
+      'ssh-ed25519',
       'ecdsa-sha2-nistp256',
       'ecdsa-sha2-nistp384',
       'ecdsa-sha2-nistp521',
@@ -128,8 +129,9 @@ final class PhabricatorAuthSSHPublicKey extends Phobject {
       throw new PhutilProxyException(
         pht(
           'Failed to convert public key into PKCS8 format. If you are '.
-          'developing on OSX, you may be able to use `bin/auth cache-pkcs8` '.
+          'developing on OSX, you may be able to use `%s` '.
           'to work around this issue. %s',
+          'bin/auth cache-pkcs8',
           $ex->getMessage()),
         $ex);
     }

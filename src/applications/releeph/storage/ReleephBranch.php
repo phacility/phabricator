@@ -67,7 +67,7 @@ final class ReleephBranch extends ReleephDAO
     return $this;
   }
 
-  public function willWriteData(array &$data) {
+  protected function willWriteData(array &$data) {
     // If symbolicName is omitted, set it to the basename.
     //
     // This means that we can enforce symbolicName as a UNIQUE column in the

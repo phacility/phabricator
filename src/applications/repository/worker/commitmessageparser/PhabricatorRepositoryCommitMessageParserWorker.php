@@ -3,6 +3,43 @@
 abstract class PhabricatorRepositoryCommitMessageParserWorker
   extends PhabricatorRepositoryCommitParserWorker {
 
+  abstract protected function parseCommitWithRef(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit,
+    DiffusionCommitRef $ref);
+
+  final protected function parseCommit(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit) {
+
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $refs_raw = DiffusionQuery::callConduitWithDiffusionRequest(
+      $viewer,
+      DiffusionRequest::newFromDictionary(
+        array(
+          'repository' => $repository,
+          'user' => $viewer,
+        )),
+      'diffusion.querycommits',
+      array(
+        'phids' => array($commit->getPHID()),
+        'bypassCache' => true,
+        'needMessages' => true,
+      ));
+
+    if (empty($refs_raw['data'])) {
+      throw new Exception(
+        pht(
+          'Unable to retrieve details for commit "%s"!',
+          $commit->getPHID()));
+    }
+
+    $ref = DiffusionCommitRef::newFromConduitResult(head($refs_raw['data']));
+
+    $this->parseCommitWithRef($repository, $commit, $ref);
+  }
+
   final protected function updateCommitData(DiffusionCommitRef $ref) {
     $commit = $this->commit;
     $author = $ref->getAuthor();
@@ -86,7 +123,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
     $force_autoclose = idx($this->getTaskData(), 'forceAutoclose', false);
     if ($force_autoclose) {
-      $autoclose_reason = $repository::BECAUSE_AUTOCLOSE_FORCED;
+      $autoclose_reason = PhabricatorRepository::BECAUSE_AUTOCLOSE_FORCED;
     } else {
       $autoclose_reason = $repository->shouldSkipAutocloseCommit($commit);
     }
@@ -280,17 +317,10 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       ->setUnitStatus(DifferentialUnitStatus::UNIT_AUTO_SKIP)
       ->setDateCreated($this->commit->getEpoch())
       ->setDescription(
-        'Commit r'.
-        $this->repository->getCallsign().
-        $this->commit->getCommitIdentifier());
-
-    // TODO: This is not correct in SVN where one repository can have multiple
-    // Arcanist projects.
-    $arcanist_project = id(new PhabricatorRepositoryArcanistProject())
-      ->loadOneWhere('repositoryID = %d LIMIT 1', $this->repository->getID());
-    if ($arcanist_project) {
-      $diff->setArcanistProjectPHID($arcanist_project->getPHID());
-    }
+        pht(
+          'Commit %s',
+          'r'.$this->repository->getCallsign().
+          $this->commit->getCommitIdentifier()));
 
     $parents = DiffusionQuery::callConduitWithDiffusionRequest(
       $viewer,
@@ -375,7 +405,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         }
         $drequest = DiffusionRequest::newFromDictionary(array(
           'user' => PhabricatorUser::getOmnipotentUser(),
-          'initFromConduit' => false,
           'repository' => $this->repository,
           'commit' => $this->commit->getCommitIdentifier(),
           'path' => $path,
@@ -402,8 +431,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         //   -echo "test";
         //   -(empty line)
 
-        $hunk = id(new DifferentialHunkModern())->setChanges($context);
-        $vs_hunk = id(new DifferentialHunkModern())->setChanges($vs_context);
+        $hunk = id(new DifferentialModernHunk())->setChanges($context);
+        $vs_hunk = id(new DifferentialModernHunk())->setChanges($vs_context);
         if ($hunk->makeOldFile() != $vs_hunk->makeOldFile() ||
             $hunk->makeNewFile() != $vs_hunk->makeNewFile()) {
           return $vs_diff;

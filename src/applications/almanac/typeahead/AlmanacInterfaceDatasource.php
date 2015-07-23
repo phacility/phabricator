@@ -3,6 +3,16 @@
 final class AlmanacInterfaceDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function isBrowsable() {
+    // TODO: We should make this browsable, but need to make the result set
+    // orderable by device name.
+    return false;
+  }
+
+  public function getBrowseTitle() {
+    return pht('Browse Interfaces');
+  }
+
   public function getPlaceholderText() {
     return pht('Type an interface name...');
   }
