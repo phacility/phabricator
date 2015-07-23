@@ -67,6 +67,7 @@ final class PhabricatorDashboardEditController
     }
 
     $v_name = $dashboard->getName();
+    $v_stat = $dashboard->getStatus();
     $v_layout_mode = $dashboard->getLayoutConfigObject()->getLayoutMode();
     $e_name = true;
 
@@ -77,11 +78,13 @@ final class PhabricatorDashboardEditController
       $v_view_policy = $request->getStr('viewPolicy');
       $v_edit_policy = $request->getStr('editPolicy');
       $v_projects = $request->getArr('projects');
+      $v_stat = $request->getStr('status');
 
       $xactions = array();
 
       $type_name = PhabricatorDashboardTransaction::TYPE_NAME;
       $type_layout_mode = PhabricatorDashboardTransaction::TYPE_LAYOUT_MODE;
+      $type_stat = PhabricatorDashboardTransaction::TYPE_STATUS;
       $type_view_policy = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit_policy = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -97,6 +100,9 @@ final class PhabricatorDashboardEditController
       $xactions[] = id(new PhabricatorDashboardTransaction())
         ->setTransactionType($type_edit_policy)
         ->setNewValue($v_edit_policy);
+      $xactions[] = id(new PhabricatorDashboardTransaction())
+        ->setTransactionType($type_stat)
+        ->setNewValue($v_stat);
 
       $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
       $xactions[] = id(new PhabricatorDashboardTransaction())
@@ -157,7 +163,13 @@ final class PhabricatorDashboardEditController
           ->setLabel(pht('Layout Mode'))
           ->setName('layout_mode')
           ->setValue($v_layout_mode)
-          ->setOptions($layout_mode_options));
+          ->setOptions($layout_mode_options))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Status'))
+          ->setName('status')
+          ->setValue($v_stat)
+          ->setOptions($dashboard->getStatusNameMap()));
 
     $form->appendControl(
       id(new AphrontFormTokenizerControl())

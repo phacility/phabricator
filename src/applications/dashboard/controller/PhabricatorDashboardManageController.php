@@ -81,10 +81,23 @@ final class PhabricatorDashboardManageController
   private function buildHeaderView(PhabricatorDashboard $dashboard) {
     $viewer = $this->getRequest()->getUser();
 
+    if ($dashboard->isClosed()) {
+      $status_icon = 'fa-ban';
+      $status_color = 'dark';
+    } else {
+      $status_icon = 'fa-check';
+      $status_color = 'bluegrey';
+    }
+
+    $status_name = idx(
+      PhabricatorDashboard::getStatusNameMap(),
+      $dashboard->getStatus());
+
     return id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($dashboard->getName())
-      ->setPolicyObject($dashboard);
+      ->setPolicyObject($dashboard)
+      ->setStatus($status_icon, $status_color, $status_name);
   }
 
   private function buildActionView(PhabricatorDashboard $dashboard) {
