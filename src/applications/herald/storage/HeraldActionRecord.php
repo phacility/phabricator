@@ -1,6 +1,6 @@
 <?php
 
-final class HeraldAction extends HeraldDAO {
+final class HeraldActionRecord extends HeraldDAO {
 
   protected $ruleID;
 

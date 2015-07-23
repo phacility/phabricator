@@ -313,7 +313,7 @@ final class HeraldRuleController extends HeraldController {
         $action[1] = null;
       }
 
-      $obj = new HeraldAction();
+      $obj = new HeraldActionRecord();
       $obj->setAction($action[0]);
       $obj->setTarget($action[1]);
 
