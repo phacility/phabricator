@@ -41,12 +41,14 @@ final class PhabricatorCountdownEditController
     $e_epoch = null;
 
     $v_text = $countdown->getTitle();
+    $v_desc = $countdown->getDescription();
     $v_space = $countdown->getSpacePHID();
     $v_view = $countdown->getViewPolicy();
     $v_edit = $countdown->getEditPolicy();
 
     if ($request->isFormPost()) {
       $v_text = $request->getStr('title');
+      $v_desc = $request->getStr('description');
       $v_space = $request->getStr('spacePHID');
       $date_value = AphrontFormDateControlValue::newFromRequest(
         $request,
@@ -57,6 +59,7 @@ final class PhabricatorCountdownEditController
 
       $type_title = PhabricatorCountdownTransaction::TYPE_TITLE;
       $type_epoch = PhabricatorCountdownTransaction::TYPE_EPOCH;
+      $type_description = PhabricatorCountdownTransaction::TYPE_DESCRIPTION;
       $type_space = PhabricatorTransactions::TYPE_SPACE;
       $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -70,6 +73,10 @@ final class PhabricatorCountdownEditController
       $xactions[] = id(new PhabricatorCountdownTransaction())
         ->setTransactionType($type_epoch)
         ->setNewValue($date_value);
+
+      $xactions[] = id(new PhabricatorCountdownTransaction())
+        ->setTransactionType($type_description)
+        ->setNewValue($v_desc);
 
       $xactions[] = id(new PhabricatorCountdownTransaction())
         ->setTransactionType($type_space)
@@ -141,6 +148,11 @@ final class PhabricatorCountdownEditController
           ->setLabel(pht('End Date'))
           ->setError($e_epoch)
           ->setValue($date_value))
+      ->appendControl(
+        id(new PhabricatorRemarkupControl())
+          ->setName('description')
+          ->setLabel(pht('Description'))
+          ->setValue($v_desc))
       ->appendControl(
         id(new AphrontFormPolicyControl())
           ->setName('viewPolicy')

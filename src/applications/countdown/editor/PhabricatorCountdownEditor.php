@@ -16,6 +16,7 @@ final class PhabricatorCountdownEditor
 
     $types[] = PhabricatorCountdownTransaction::TYPE_TITLE;
     $types[] = PhabricatorCountdownTransaction::TYPE_EPOCH;
+    $types[] = PhabricatorCountdownTransaction::TYPE_DESCRIPTION;
 
     $types[] = PhabricatorTransactions::TYPE_EDGE;
     $types[] = PhabricatorTransactions::TYPE_SPACE;
@@ -31,6 +32,8 @@ final class PhabricatorCountdownEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorCountdownTransaction::TYPE_TITLE:
         return $object->getTitle();
+      case PhabricatorCountdownTransaction::TYPE_DESCRIPTION:
+        return $object->getDescription();
       case PhabricatorCountdownTransaction::TYPE_EPOCH:
         return $object->getEpoch();
     }
@@ -44,6 +47,8 @@ final class PhabricatorCountdownEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorCountdownTransaction::TYPE_TITLE:
+        return $xaction->getNewValue();
+      case PhabricatorCountdownTransaction::TYPE_DESCRIPTION:
         return $xaction->getNewValue();
       case PhabricatorCountdownTransaction::TYPE_EPOCH:
         return $xaction->getNewValue()->getEpoch();
@@ -61,6 +66,9 @@ final class PhabricatorCountdownEditor
       case PhabricatorCountdownTransaction::TYPE_TITLE:
         $object->setTitle($xaction->getNewValue());
         return;
+      case PhabricatorCountdownTransaction::TYPE_DESCRIPTION:
+        $object->setDescription($xaction->getNewValue());
+        return;
       case PhabricatorCountdownTransaction::TYPE_EPOCH:
         $object->setEpoch($xaction->getNewValue());
         return;
@@ -76,6 +84,8 @@ final class PhabricatorCountdownEditor
     $type = $xaction->getTransactionType();
     switch ($type) {
       case PhabricatorCountdownTransaction::TYPE_TITLE:
+        return;
+      case PhabricatorCountdownTransaction::TYPE_DESCRIPTION:
         return;
       case PhabricatorCountdownTransaction::TYPE_EPOCH:
         return;
@@ -138,6 +148,8 @@ final class PhabricatorCountdownEditor
     return array(
       PhabricatorCountdownTransaction::MAILTAG_TITLE =>
         pht('Someone changes the countdown title.'),
+      PhabricatorCountdownTransaction::MAILTAG_DESCRIPTION =>
+        pht('Someone changes the countdown description.'),
       PhabricatorCountdownTransaction::MAILTAG_EPOCH =>
         pht('Someone changes the countdown end date.'),
       PhabricatorCountdownTransaction::MAILTAG_OTHER =>

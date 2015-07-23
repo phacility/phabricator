@@ -123,6 +123,21 @@ final class PhabricatorCountdownViewController
       pht('Author'),
       $viewer->renderHandle($countdown->getAuthorPHID()));
 
+        $view->invokeWillRenderEvent();
+
+    $description = $countdown->getDescription();
+    if (strlen($description)) {
+      $description = PhabricatorMarkupEngine::renderOneObject(
+        id(new PhabricatorMarkupOneOff())->setContent($description),
+        'default',
+        $viewer);
+
+      $view->addSectionHeader(
+        pht('Description'),
+        PHUIPropertyListView::ICON_SUMMARY);
+      $view->addTextContent($description);
+    }
+
     return $view;
   }
 

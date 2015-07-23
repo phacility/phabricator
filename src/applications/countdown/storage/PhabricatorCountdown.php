@@ -13,6 +13,7 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
   protected $title;
   protected $authorPHID;
   protected $epoch;
+  protected $description;
   protected $viewPolicy;
   protected $editPolicy;
 
@@ -39,6 +40,7 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255',
+        'description' => 'text',
       ),
     ) + parent::getConfiguration();
   }
