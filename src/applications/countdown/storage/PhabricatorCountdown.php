@@ -6,6 +6,7 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
     PhabricatorFlaggableInterface,
     PhabricatorSubscribableInterface,
     PhabricatorApplicationTransactionInterface,
+    PhabricatorTokenReceiverInterface,
     PhabricatorSpacesInterface,
     PhabricatorProjectInterface {
 
@@ -87,6 +88,13 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
     AphrontRequest $request) {
 
     return $timeline;
+  }
+
+/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
+
+  public function getUsersToNotifyOfTokenGiven() {
+    return array($this->getAuthorPHID());
   }
 
 

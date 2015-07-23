@@ -5610,6 +5610,7 @@ phutil_register_library_map(array(
       'PhabricatorFlaggableInterface',
       'PhabricatorSubscribableInterface',
       'PhabricatorApplicationTransactionInterface',
+      'PhabricatorTokenReceiverInterface',
       'PhabricatorSpacesInterface',
       'PhabricatorProjectInterface',
     ),
