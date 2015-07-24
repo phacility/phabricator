@@ -233,7 +233,9 @@ final class HeraldTranscriptController extends HeraldController {
     $rule_list = id(new PHUIObjectItemListView())
       ->setNoDataString(pht('No Herald rules applied to this object.'));
 
-    foreach ($xscript->getRuleTranscripts() as $rule_xscript) {
+    $rule_xscripts = $xscript->getRuleTranscripts();
+    $rule_xscripts = msort($rule_xscripts, 'getRuleID');
+    foreach ($rule_xscripts as $rule_xscript) {
       $rule_id = $rule_xscript->getRuleID();
 
       $rule_item = id(new PHUIObjectItemView())

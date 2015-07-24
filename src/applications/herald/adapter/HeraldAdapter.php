@@ -27,7 +27,6 @@ abstract class HeraldAdapter extends Phobject {
   const CONDITION_IS_FALSE        = 'false';
 
   const ACTION_AUDIT        = 'audit';
-  const ACTION_ASSIGN_TASK  = 'assigntask';
   const ACTION_ADD_REVIEWERS = 'addreviewers';
   const ACTION_ADD_BLOCKING_REVIEWERS = 'addblockingreviewers';
   const ACTION_APPLY_BUILD_PLANS = 'applybuildplans';
@@ -718,7 +717,6 @@ abstract class HeraldAdapter extends Phobject {
       case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
         $standard = array(
           self::ACTION_AUDIT        => pht('Trigger an Audit by'),
-          self::ACTION_ASSIGN_TASK  => pht('Assign task to'),
           self::ACTION_ADD_REVIEWERS => pht('Add reviewers'),
           self::ACTION_ADD_BLOCKING_REVIEWERS => pht('Add blocking reviewers'),
           self::ACTION_APPLY_BUILD_PLANS => pht('Run build plans'),
@@ -729,7 +727,6 @@ abstract class HeraldAdapter extends Phobject {
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         $standard = array(
           self::ACTION_AUDIT        => pht('Trigger an Audit by me'),
-          self::ACTION_ASSIGN_TASK  => pht('Assign task to me'),
           self::ACTION_ADD_REVIEWERS => pht('Add me as a reviewer'),
           self::ACTION_ADD_BLOCKING_REVIEWERS =>
             pht('Add me as a blocking reviewer'),
@@ -772,7 +769,6 @@ abstract class HeraldAdapter extends Phobject {
     if ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
       switch ($action->getAction()) {
         case self::ACTION_AUDIT:
-        case self::ACTION_ASSIGN_TASK:
         case self::ACTION_ADD_REVIEWERS:
         case self::ACTION_ADD_BLOCKING_REVIEWERS:
           // For personal rules, force these actions to target the rule owner.
@@ -812,16 +808,12 @@ abstract class HeraldAdapter extends Phobject {
     if ($is_personal) {
       switch ($action) {
         case self::ACTION_AUDIT:
-        case self::ACTION_ASSIGN_TASK:
         case self::ACTION_ADD_REVIEWERS:
         case self::ACTION_ADD_BLOCKING_REVIEWERS:
           return new HeraldEmptyFieldValue();
       }
     } else {
       switch ($action) {
-        case self::ACTION_ASSIGN_TASK:
-          return $this->buildTokenizerFieldValue(
-            new PhabricatorPeopleDatasource());
         case self::ACTION_AUDIT:
         case self::ACTION_ADD_REVIEWERS:
         case self::ACTION_ADD_BLOCKING_REVIEWERS:

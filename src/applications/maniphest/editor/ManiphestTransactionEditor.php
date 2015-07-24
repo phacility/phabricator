@@ -506,23 +506,6 @@ final class ManiphestTransactionEditor
       ->setTask($object);
   }
 
-  protected function didApplyHeraldRules(
-    PhabricatorLiskDAO $object,
-    HeraldAdapter $adapter,
-    HeraldTranscript $transcript) {
-
-    $xactions = array();
-
-    $assign_phid = $adapter->getAssignPHID();
-    if ($assign_phid) {
-      $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
-        ->setNewValue($assign_phid);
-    }
-
-    return $xactions;
-  }
-
   protected function requireCapabilities(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
