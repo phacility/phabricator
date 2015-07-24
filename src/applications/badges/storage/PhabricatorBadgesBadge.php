@@ -63,8 +63,7 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
       ->withClasses(array('PhabricatorBadgesApplication'))
       ->executeOne();
 
-    $view_policy =
-      $app->getPolicy(PhabricatorBadgesDefaultViewCapability::CAPABILITY);
+    $view_policy = PhabricatorPolicies::getMostOpenPolicy();
 
     $edit_policy =
       $app->getPolicy(PhabricatorBadgesDefaultEditCapability::CAPABILITY);
@@ -129,7 +128,7 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
   public function getPolicy($capability) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        return $this->getViewPolicy();
+        return PhabricatorPolicies::getMostOpenPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
         return $this->getEditPolicy();
     }

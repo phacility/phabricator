@@ -71,10 +71,6 @@ final class PhabricatorBadgesApplication extends PhabricatorApplication {
         'caption' => pht('Default edit policy for badges.'),
         'template' => PhabricatorBadgesPHIDType::TYPECONST,
       ),
-      PhabricatorBadgesDefaultViewCapability::CAPABILITY => array(
-        'caption' => pht('Default view policy for badges.'),
-        'template' => PhabricatorBadgesPHIDType::TYPECONST,
-      ),
     );
   }
 
