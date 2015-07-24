@@ -48,24 +48,6 @@ final class PhrictionDocumentHeraldAdapter extends HeraldAdapter {
     }
   }
 
-  public function getActions($rule_type) {
-    switch ($rule_type) {
-      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
-        return array_merge(
-          array(
-            self::ACTION_EMAIL,
-          ),
-          parent::getActions($rule_type));
-      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-        return array_merge(
-          array(
-            self::ACTION_EMAIL,
-          ),
-          parent::getActions($rule_type));
-    }
-  }
-
-
   public function getHeraldName() {
     return pht('Wiki Document %d', $this->getDocument()->getID());
   }

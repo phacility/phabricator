@@ -26,7 +26,6 @@ abstract class HeraldAdapter extends Phobject {
   const CONDITION_IS_TRUE         = 'true';
   const CONDITION_IS_FALSE        = 'false';
 
-  const ACTION_EMAIL        = 'email';
   const ACTION_AUDIT        = 'audit';
   const ACTION_ASSIGN_TASK  = 'assigntask';
   const ACTION_ADD_PROJECTS = 'addprojects';
@@ -54,6 +53,14 @@ abstract class HeraldAdapter extends Phobject {
 
   public function getForcedEmailPHIDs() {
     return array_values($this->forcedEmailPHIDs);
+  }
+
+  public function addEmailPHID($phid, $force) {
+    $this->emailPHIDs[$phid] = $phid;
+    if ($force) {
+      $this->forcedEmailPHIDs[$phid] = $phid;
+    }
+    return $this;
   }
 
   public function getCustomActions() {
@@ -721,7 +728,6 @@ abstract class HeraldAdapter extends Phobject {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
       case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
         $standard = array(
-          self::ACTION_EMAIL        => pht('Send an email to'),
           self::ACTION_AUDIT        => pht('Trigger an Audit by'),
           self::ACTION_ASSIGN_TASK  => pht('Assign task to'),
           self::ACTION_ADD_PROJECTS => pht('Add projects'),
@@ -735,7 +741,6 @@ abstract class HeraldAdapter extends Phobject {
         break;
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         $standard = array(
-          self::ACTION_EMAIL        => pht('Send me an email'),
           self::ACTION_AUDIT        => pht('Trigger an Audit by me'),
           self::ACTION_ASSIGN_TASK  => pht('Assign task to me'),
           self::ACTION_ADD_REVIEWERS => pht('Add me as a reviewer'),
@@ -779,7 +784,6 @@ abstract class HeraldAdapter extends Phobject {
     $rule_type = $rule->getRuleType();
     if ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
       switch ($action->getAction()) {
-        case self::ACTION_EMAIL:
         case self::ACTION_AUDIT:
         case self::ACTION_ASSIGN_TASK:
         case self::ACTION_ADD_REVIEWERS:
@@ -820,7 +824,6 @@ abstract class HeraldAdapter extends Phobject {
 
     if ($is_personal) {
       switch ($action) {
-        case self::ACTION_EMAIL:
         case self::ACTION_AUDIT:
         case self::ACTION_ASSIGN_TASK:
         case self::ACTION_ADD_REVIEWERS:
@@ -833,9 +836,6 @@ abstract class HeraldAdapter extends Phobject {
       }
     } else {
       switch ($action) {
-        case self::ACTION_EMAIL:
-          return $this->buildTokenizerFieldValue(
-            new PhabricatorMetaMTAMailableDatasource());
         case self::ACTION_ADD_PROJECTS:
         case self::ACTION_REMOVE_PROJECTS:
           return $this->buildTokenizerFieldValue(
@@ -1204,8 +1204,6 @@ abstract class HeraldAdapter extends Phobject {
       case self::ACTION_ADD_PROJECTS:
       case self::ACTION_REMOVE_PROJECTS:
         return $this->applyProjectsEffect($effect);
-      case self::ACTION_EMAIL:
-        return $this->applyEmailEffect($effect);
       default:
         break;
     }
@@ -1251,29 +1249,6 @@ abstract class HeraldAdapter extends Phobject {
       $effect,
       true,
       pht('Added projects.'));
-  }
-
-
-  /**
-   * @task apply
-   */
-  private function applyEmailEffect(HeraldEffect $effect) {
-    foreach ($effect->getTarget() as $phid) {
-      $this->emailPHIDs[$phid] = $phid;
-
-      // If this is a personal rule, we'll force delivery of a real email. This
-      // effect is stronger than notification preferences, so you get an actual
-      // email even if your preferences are set to "Notify" or "Ignore".
-      $rule = $effect->getRule();
-      if ($rule->isPersonalRule()) {
-        $this->forcedEmailPHIDs[$phid] = $phid;
-      }
-    }
-
-    return new HeraldApplyTranscript(
-      $effect,
-      true,
-      pht('Added mailable to mail targets.'));
   }
 
   public function loadEdgePHIDs($type) {

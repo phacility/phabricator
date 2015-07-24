@@ -9,14 +9,6 @@ final class PhabricatorSubscriptionsRemoveSubscribersHeraldAction
     return pht('Remove subscribers');
   }
 
-  public function getActionGroupKey() {
-    return HeraldSupportActionGroup::ACTIONGROUPKEY;
-  }
-
-  public function supportsObject($object) {
-    return ($object instanceof PhabricatorSubscribableInterface);
-  }
-
   public function supportsRuleType($rule_type) {
     return ($rule_type != HeraldRuleTypeConfig::RULE_TYPE_PERSONAL);
   }

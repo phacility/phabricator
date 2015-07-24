@@ -12,6 +12,14 @@ abstract class PhabricatorSubscriptionsHeraldAction
   const DO_SUBSCRIBED = 'do.subscribed';
   const DO_UNSUBSCRIBED = 'do.unsubscribed';
 
+  public function getActionGroupKey() {
+    return HeraldSupportActionGroup::ACTIONGROUPKEY;
+  }
+
+  public function supportsObject($object) {
+    return ($object instanceof PhabricatorSubscribableInterface);
+  }
+
   protected function applySubscribe(array $phids, $is_add) {
     $adapter = $this->getAdapter();
 

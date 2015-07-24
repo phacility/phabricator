@@ -1290,6 +1290,19 @@ final class PhabricatorUSEnglishTranslation
         'Removed subscribers: %2$s.',
       ),
 
+      'Queued email to be delivered to %s target(s): %s.' => array(
+        'Queued email to be delivered to target: %2$s.',
+        'Queued email to be delivered to targets: %2$s.',
+      ),
+
+      'Queued email to be delivered to %s target(s), ignoring their '.
+      'notification preferences: %s.' => array(
+        'Queued email to be delivered to target, ignoring notification '.
+        'preferences: %2$s.',
+        'Queued email to be delivered to targets, ignoring notification '.
+        'preferences: %2$s.',
+      ),
+
     );
   }
 

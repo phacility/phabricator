@@ -72,14 +72,12 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
         return array_merge(
           array(
-            self::ACTION_EMAIL,
             self::ACTION_ASSIGN_TASK,
           ),
           parent::getActions($rule_type));
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         return array_merge(
           array(
-            self::ACTION_EMAIL,
             self::ACTION_ASSIGN_TASK,
           ),
           parent::getActions($rule_type));

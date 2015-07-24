@@ -1,12 +1,12 @@
 <?php
 
-final class PhabricatorSubscriptionsAddSubscribersHeraldAction
-  extends PhabricatorSubscriptionsHeraldAction {
+final class PhabricatorMetaMTAEmailOthersHeraldAction
+  extends PhabricatorMetaMTAEmailHeraldAction {
 
-  const ACTIONCONST = 'subscribers.add';
+  const ACTIONCONST = 'email.other';
 
   public function getHeraldActionName() {
-    return pht('Add subscribers');
+    return pht('Send an email to');
   }
 
   public function supportsRuleType($rule_type) {
@@ -14,7 +14,7 @@ final class PhabricatorSubscriptionsAddSubscribersHeraldAction
   }
 
   public function applyEffect($object, HeraldEffect $effect) {
-    return $this->applySubscribe($effect->getTarget(), $is_add = true);
+    return $this->applyEmail($effect->getTarget(), $force = false);
   }
 
   public function getHeraldActionStandardType() {
@@ -26,7 +26,7 @@ final class PhabricatorSubscriptionsAddSubscribersHeraldAction
   }
 
   public function renderActionDescription($value) {
-    return pht('Add subscribers: %s.', $this->renderHandleList($value));
+    return pht('Send an email to: %s.', $this->renderHandleList($value));
   }
 
 }
