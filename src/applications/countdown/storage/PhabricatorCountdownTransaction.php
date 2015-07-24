@@ -21,7 +21,7 @@ final class PhabricatorCountdownTransaction
   }
 
   public function getApplicationTransactionCommentObject() {
-    return null;
+    return new PhabricatorCountdownTransactionComment();
   }
 
   public function getTitle() {

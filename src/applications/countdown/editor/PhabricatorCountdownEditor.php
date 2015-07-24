@@ -22,6 +22,7 @@ final class PhabricatorCountdownEditor
     $types[] = PhabricatorTransactions::TYPE_SPACE;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_COMMENT;
 
     return $types;
   }
