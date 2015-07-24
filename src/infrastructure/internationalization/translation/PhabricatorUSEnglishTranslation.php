@@ -1303,6 +1303,26 @@ final class PhabricatorUSEnglishTranslation
         'preferences: %2$s.',
       ),
 
+      '%s project(s) are not associated: %s.' => array(
+        'A project is not associated: %2$s.',
+        'Projects are not associated: %2$s.',
+      ),
+
+      '%s project(s) are already associated: %s.' => array(
+        'A project is already associated: %2$s.',
+        'Projects are already associated: %2$s.',
+      ),
+
+      'Added %s project(s): %s.' => array(
+        'Added a project: %2$s.',
+        'Added projects: %2$s.',
+      ),
+
+      'Removed %s project(s): %s.' => array(
+        'Removed a project: %2$s.',
+        'Removed projects: %2$s.',
+      ),
+
     );
   }
 

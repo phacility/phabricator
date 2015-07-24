@@ -28,8 +28,6 @@ abstract class HeraldAdapter extends Phobject {
 
   const ACTION_AUDIT        = 'audit';
   const ACTION_ASSIGN_TASK  = 'assigntask';
-  const ACTION_ADD_PROJECTS = 'addprojects';
-  const ACTION_REMOVE_PROJECTS = 'removeprojects';
   const ACTION_ADD_REVIEWERS = 'addreviewers';
   const ACTION_ADD_BLOCKING_REVIEWERS = 'addblockingreviewers';
   const ACTION_APPLY_BUILD_PLANS = 'applybuildplans';
@@ -707,15 +705,6 @@ abstract class HeraldAdapter extends Phobject {
 
     $actions = $custom_actions;
 
-    $object = $this->newObject();
-
-    if (($object instanceof PhabricatorProjectInterface)) {
-      if ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) {
-        $actions[] = self::ACTION_ADD_PROJECTS;
-        $actions[] = self::ACTION_REMOVE_PROJECTS;
-      }
-    }
-
     foreach ($this->getActionsForRuleType($rule_type) as $key => $action) {
       $actions[] = $key;
     }
@@ -730,8 +719,6 @@ abstract class HeraldAdapter extends Phobject {
         $standard = array(
           self::ACTION_AUDIT        => pht('Trigger an Audit by'),
           self::ACTION_ASSIGN_TASK  => pht('Assign task to'),
-          self::ACTION_ADD_PROJECTS => pht('Add projects'),
-          self::ACTION_REMOVE_PROJECTS => pht('Remove projects'),
           self::ACTION_ADD_REVIEWERS => pht('Add reviewers'),
           self::ACTION_ADD_BLOCKING_REVIEWERS => pht('Add blocking reviewers'),
           self::ACTION_APPLY_BUILD_PLANS => pht('Run build plans'),
@@ -829,17 +816,9 @@ abstract class HeraldAdapter extends Phobject {
         case self::ACTION_ADD_REVIEWERS:
         case self::ACTION_ADD_BLOCKING_REVIEWERS:
           return new HeraldEmptyFieldValue();
-        case self::ACTION_ADD_PROJECTS:
-        case self::ACTION_REMOVE_PROJECTS:
-          return $this->buildTokenizerFieldValue(
-            new PhabricatorProjectDatasource());
       }
     } else {
       switch ($action) {
-        case self::ACTION_ADD_PROJECTS:
-        case self::ACTION_REMOVE_PROJECTS:
-          return $this->buildTokenizerFieldValue(
-            new PhabricatorProjectDatasource());
         case self::ACTION_ASSIGN_TASK:
           return $this->buildTokenizerFieldValue(
             new PhabricatorPeopleDatasource());
@@ -1200,14 +1179,6 @@ abstract class HeraldAdapter extends Phobject {
           $rule_type));
     }
 
-    switch ($action) {
-      case self::ACTION_ADD_PROJECTS:
-      case self::ACTION_REMOVE_PROJECTS:
-        return $this->applyProjectsEffect($effect);
-      default:
-        break;
-    }
-
     $result = $this->handleCustomHeraldEffect($effect);
 
     if (!$result) {
@@ -1220,35 +1191,6 @@ abstract class HeraldAdapter extends Phobject {
     }
 
     return $result;
-  }
-
-  /**
-   * @task apply
-   */
-  private function applyProjectsEffect(HeraldEffect $effect) {
-
-    if ($effect->getAction() == self::ACTION_ADD_PROJECTS) {
-      $kind = '+';
-    } else {
-      $kind = '-';
-    }
-
-    $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
-    $project_phids = $effect->getTarget();
-    $xaction = $this->newTransaction()
-      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-      ->setMetadataValue('edge:type', $project_type)
-      ->setNewValue(
-        array(
-          $kind => array_fuse($project_phids),
-        ));
-
-    $this->queueTransaction($xaction);
-
-    return new HeraldApplyTranscript(
-      $effect,
-      true,
-      pht('Added projects.'));
   }
 
   public function loadEdgePHIDs($type) {
