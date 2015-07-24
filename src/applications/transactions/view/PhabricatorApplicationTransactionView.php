@@ -211,17 +211,21 @@ class PhabricatorApplicationTransactionView extends AphrontView {
       throw new PhutilInvalidStateException('setObjectPHID');
     }
 
-    $view = new PHUITimelineView();
-    $view->setShouldTerminate($this->shouldTerminate);
-    $view->setQuoteTargetID($this->getQuoteTargetID());
-    $view->setQuoteRef($this->getQuoteRef());
+    $view = id(new PHUITimelineView())
+      ->setUser($this->getUser())
+      ->setShouldTerminate($this->shouldTerminate)
+      ->setQuoteTargetID($this->getQuoteTargetID())
+      ->setQuoteRef($this->getQuoteRef());
+
     $events = $this->buildEvents($with_hiding);
     foreach ($events as $event) {
       $view->addEvent($event);
     }
+
     if ($this->getPager()) {
       $view->setPager($this->getPager());
     }
+
     if ($this->getRenderData()) {
       $view->setRenderData($this->getRenderData());
     }
@@ -394,6 +398,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
     $event = id(new PHUITimelineEventView())
       ->setUser($viewer)
+      ->setAuthorPHID($xaction->getAuthorPHID())
       ->setTransactionPHID($xaction->getPHID())
       ->setUserHandle($xaction->getHandle($xaction->getAuthorPHID()))
       ->setIcon($xaction->getIcon())

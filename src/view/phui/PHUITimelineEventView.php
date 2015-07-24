@@ -26,7 +26,17 @@ final class PHUITimelineEventView extends AphrontView {
   private $quoteRef;
   private $reallyMajorEvent;
   private $hideCommentOptions = false;
+  private $authorPHID;
   private $badges = array();
+
+  public function setAuthorPHID($author_phid) {
+    $this->authorPHID = $author_phid;
+    return $this;
+  }
+
+  public function getAuthorPHID() {
+    return $this->authorPHID;
+  }
 
   public function setQuoteRef($quote_ref) {
     $this->quoteRef = $quote_ref;

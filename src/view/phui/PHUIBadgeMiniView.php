@@ -46,20 +46,18 @@ final class PHUIBadgeMiniView extends AphrontTagView {
     }
 
     return array(
-        'class' => implode(' ', $classes),
-        'sigil' => 'has-tooltip',
-        'href'  => $this->href,
-        'meta'  => array(
-          'tip' => $this->header,
-          ),
-        );
+      'class' => implode(' ', $classes),
+      'sigil' => 'has-tooltip',
+      'href'  => $this->href,
+      'meta'  => array(
+        'tip' => $this->header,
+      ),
+    );
   }
 
   protected function getTagContent() {
-
     return id(new PHUIIconView())
       ->setIconFont($this->icon);
-
   }
 
 }
