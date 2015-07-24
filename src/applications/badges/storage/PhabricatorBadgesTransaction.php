@@ -19,8 +19,9 @@ final class PhabricatorBadgesTransaction
   }
 
   public function getApplicationTransactionCommentObject() {
-    return null;
+    return new PhabricatorBadgesTransactionComment();
   }
+
 
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();

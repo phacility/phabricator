@@ -41,6 +41,8 @@ final class PhabricatorBadgesApplication extends PhabricatorApplication {
           => 'PhabricatorBadgesListController',
         'create/'
           => 'PhabricatorBadgesEditController',
+        'comment/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorBadgesCommentController',
         'edit/(?:(?P<id>\d+)/)?'
           => 'PhabricatorBadgesEditController',
         'view/(?:(?P<id>\d+)/)?'
