@@ -13,6 +13,7 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
   protected $description;
   protected $icon;
   protected $quality;
+  protected $mailKey;
   protected $viewPolicy;
   protected $editPolicy;
   protected $status;
@@ -87,6 +88,7 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
         'icon' => 'text255',
         'quality' => 'text255',
         'status' => 'text32',
+        'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_creator' => array(
@@ -112,6 +114,13 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
 
   public function getRecipientPHIDs() {
     return $this->assertAttached($this->recipientPHIDs);
+  }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
   }
 
 
