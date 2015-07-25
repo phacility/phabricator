@@ -7,6 +7,9 @@ final class PhabricatorPhurlURLTransaction
   const TYPE_URL = 'phurl.longurl';
   const TYPE_DESCRIPTION = 'phurl.description';
 
+  const MAILTAG_CONTENT = 'phurl:content';
+  const MAILTAG_OTHER = 'phurl:other';
+
   public function getApplicationName() {
     return 'phurl';
   }
