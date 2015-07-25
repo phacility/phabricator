@@ -14,7 +14,6 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
   protected $icon;
   protected $quality;
   protected $mailKey;
-  protected $viewPolicy;
   protected $editPolicy;
   protected $status;
   protected $creatorPHID;
@@ -73,7 +72,6 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
       ->setIcon(self::DEFAULT_ICON)
       ->setQuality(self::DEFAULT_QUALITY)
       ->setCreatorPHID($actor->getPHID())
-      ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
       ->setStatus(self::STATUS_OPEN);
   }
