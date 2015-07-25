@@ -171,12 +171,12 @@
 .phui-badge-mini {
   background-color: {$greyborder};
   border-radius: 18px;
-  height: 25px;
-  width: 25px;
-  line-height: 24px;
+  height: 20px;
+  width: 20px;
+  line-height: 19px;
   text-align: center;
   display: inline-block;
-  opacity: 0.7;
+  opacity: 0.8;
 }
 
 .phui-badge-mini:hover {
@@ -185,7 +185,7 @@
 
 .phui-badge-mini .phui-icon-view {
   color: #fff;
-  font-size: 12px;
+  font-size: 10px;
   margin: 0;
 }
 
