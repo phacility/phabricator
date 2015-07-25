@@ -172,6 +172,13 @@ final class PhabricatorCountdownEditor
     array $xactions) {
 
     $body = parent::buildMailBody($object, $xactions);
+    $description = $object->getDescription();
+
+    if (strlen($description)) {
+      $body->addTextSection(
+        pht('COUNTDOWN DESCRIPTION'),
+        $object->getDescription());
+    }
 
     $body->addLinkSection(
       pht('COUNTDOWN DETAIL'),

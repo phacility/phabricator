@@ -16,7 +16,7 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
   protected $description;
   protected $viewPolicy;
   protected $editPolicy;
-
+  protected $mailKey;
   protected $spacePHID;
 
   public static function initializeNewCountdown(PhabricatorUser $actor) {
@@ -41,6 +41,7 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255',
         'description' => 'text',
+        'mailKey' => 'bytes20',
       ),
     ) + parent::getConfiguration();
   }
@@ -52,6 +53,13 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
 
   public function getMonogram() {
     return 'C'.$this->getID();
+  }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
   }
 
 
