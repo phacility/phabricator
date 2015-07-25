@@ -91,16 +91,6 @@
   float: left;
 }
 
-.hovercard-badges .phui-badge-mini {
-  height: 25px;
-  width: 25px;
-  line-height: 24px;
-}
-
-.hovercard-badges .phui-badge-mini .phui-icon-view {
-  font-size: 12px;
-}
-
 .phabricator-hovercard-tail {
   width: 396px;
   float: left;
