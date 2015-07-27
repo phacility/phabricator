@@ -2,23 +2,17 @@
 
 final class PhabricatorMacroEditController extends PhabricatorMacroController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
     $this->requireApplicationCapability(
       PhabricatorMacroManageCapability::CAPABILITY);
 
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    if ($this->id) {
+    if ($id) {
       $macro = id(new PhabricatorMacroQuery())
-        ->setViewer($user)
-        ->withIDs(array($this->id))
+        ->setViewer($viewer)
+        ->withIDs(array($id))
         ->needFiles(true)
         ->executeOne();
       if (!$macro) {
@@ -26,7 +20,7 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
       }
     } else {
       $macro = new PhabricatorFileImageMacro();
-      $macro->setAuthorPHID($user->getPHID());
+      $macro->setAuthorPHID($viewer->getPHID());
     }
 
     $errors = array();
@@ -66,7 +60,7 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
           $_FILES['file'],
           array(
             'name' => $request->getStr('name'),
-            'authorPHID' => $user->getPHID(),
+            'authorPHID' => $viewer->getPHID(),
             'isExplicitUpload' => true,
             'canCDN' => true,
           ));
@@ -75,7 +69,7 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
           // Rate limit outbound fetches to make this mechanism less useful for
           // scanning networks and ports.
           PhabricatorSystemActionEngine::willTakeAction(
-            array($user->getPHID()),
+            array($viewer->getPHID()),
             new PhabricatorFilesOutboundRequestAction(),
             1);
 
@@ -101,7 +95,7 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
                 $mime_type));
           } else {
             $file
-              ->setAuthorPHID($user->getPHID())
+              ->setAuthorPHID($viewer->getPHID())
               ->save();
           }
         } catch (HTTPFutureHTTPResponseStatus $status) {
@@ -114,7 +108,7 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
         }
       } else if ($request->getStr('phid')) {
         $file = id(new PhabricatorFileQuery())
-          ->setViewer($user)
+          ->setViewer($viewer)
           ->withPHIDs(array($request->getStr('phid')))
           ->executeOne();
       }
@@ -152,7 +146,7 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
           }
 
           $editor = id(new PhabricatorMacroEditor())
-            ->setActor($user)
+            ->setActor($viewer)
             ->setContinueOnNoEffect(true)
             ->setContentSourceFromRequest($request);
 

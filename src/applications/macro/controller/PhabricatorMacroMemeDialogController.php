@@ -3,9 +3,8 @@
 final class PhabricatorMacroMemeDialogController
   extends PhabricatorMacroController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $phid = head($request->getArr('macro'));
     $above = $request->getStr('above');
@@ -19,7 +18,7 @@ final class PhabricatorMacroMemeDialogController
         $errors[] = pht('Macro name is required.');
       } else {
         $macro = id(new PhabricatorMacroQuery())
-          ->setViewer($user)
+          ->setViewer($viewer)
           ->withPHIDs(array($phid))
           ->executeOne();
         if (!$macro) {
@@ -45,7 +44,7 @@ final class PhabricatorMacroMemeDialogController
     }
 
     $view = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Macro'))
@@ -65,7 +64,7 @@ final class PhabricatorMacroMemeDialogController
           ->setValue($below));
 
     $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setTitle(pht('Create Meme'))
       ->appendForm($view)
       ->addCancelButton('/')

@@ -7,14 +7,13 @@ final class PhabricatorMacroMemeController
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $macro_name = $request->getStr('macro');
     $upper_text = $request->getStr('uppertext');
     $lower_text = $request->getStr('lowertext');
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
 
-    $uri = self::generateMacro($user, $macro_name,
+    $uri = self::generateMacro($viewer, $macro_name,
       $upper_text, $lower_text);
     if ($uri === false) {
       return new Aphront404Response();
@@ -24,10 +23,10 @@ final class PhabricatorMacroMemeController
       ->setURI($uri);
   }
 
-  public static function generateMacro($user, $macro_name, $upper_text,
+  public static function generateMacro($viewer, $macro_name, $upper_text,
       $lower_text) {
     $macro = id(new PhabricatorMacroQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withNames(array($macro_name))
       ->needFiles(true)
       ->executeOne();
@@ -46,7 +45,7 @@ final class PhabricatorMacroMemeController
 
     if ($xform) {
       $memefile = id(new PhabricatorFileQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withPHIDs(array($xform->getTransformedPHID()))
         ->executeOne();
       if ($memefile) {
