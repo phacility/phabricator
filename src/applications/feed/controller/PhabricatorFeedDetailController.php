@@ -2,19 +2,13 @@
 
 final class PhabricatorFeedDetailController extends PhabricatorFeedController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $story = id(new PhabricatorFeedQuery())
-      ->setViewer($user)
-      ->withChronologicalKeys(array($this->id))
+      ->setViewer($viewer)
+      ->withChronologicalKeys(array($id))
       ->executeOne();
     if (!$story) {
       return new Aphront404Response();
@@ -27,7 +21,7 @@ final class PhabricatorFeedDetailController extends PhabricatorFeedController {
 
     $feed = array($story);
     $builder = new PhabricatorFeedBuilder($feed);
-    $builder->setUser($user);
+    $builder->setUser($viewer);
     $feed_view = $builder->buildView();
 
     $title = pht('Story');
