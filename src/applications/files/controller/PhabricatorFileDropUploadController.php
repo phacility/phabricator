@@ -6,9 +6,8 @@ final class PhabricatorFileDropUploadController
   /**
    * @phutil-external-symbol class PhabricatorStartup
    */
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     // NOTE: Throws if valid CSRF token is not present in the request.
     $request->validateCSRF();

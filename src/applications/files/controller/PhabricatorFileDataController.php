@@ -7,19 +7,15 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
   private $token;
   private $file;
 
-  public function willProcessRequest(array $data) {
-    $this->phid = $data['phid'];
-    $this->key  = $data['key'];
-    $this->token = idx($data, 'token');
-  }
-
   public function shouldRequireLogin() {
     return false;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $this->getViewer();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $this->phid = $request->getURIData('phid');
+    $this->key = $request->getURIData('key');
+    $this->token = $request->getURIData('token');
 
     $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
     $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
