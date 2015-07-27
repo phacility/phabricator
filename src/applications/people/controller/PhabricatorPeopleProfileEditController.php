@@ -84,9 +84,12 @@ final class PhabricatorPeopleProfileEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Edit Profile'))
-      ->setInfoView($note)
       ->setValidationException($validation_exception)
       ->setForm($form);
+
+    if ($note) {
+      $form_box->setInfoView($note);
+    }
 
     $nav = $this->buildIconNavView($user);
     $nav->selectFilter('/');
