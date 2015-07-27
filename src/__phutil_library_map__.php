@@ -5924,6 +5924,7 @@ phutil_register_library_map(array(
       'PhabricatorSubscribableInterface',
       'PhabricatorApplicationTransactionInterface',
       'PhabricatorFlaggableInterface',
+      'PhabricatorTokenReceiverInterface',
       'PhabricatorPolicyInterface',
     ),
     'PhabricatorFileImageTransform' => 'PhabricatorFileTransform',
