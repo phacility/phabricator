@@ -2,19 +2,13 @@
 
 final class DrydockLeaseReleaseController extends DrydockLeaseController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $lease = id(new DrydockLeaseQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->executeOne();
     if (!$lease) {
       return new Aphront404Response();
@@ -25,7 +19,7 @@ final class DrydockLeaseReleaseController extends DrydockLeaseController {
 
     if ($lease->getStatus() != DrydockLeaseStatus::STATUS_ACTIVE) {
       $dialog = id(new AphrontDialogView())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setTitle(pht('Lease Not Active'))
         ->appendChild(
           phutil_tag(
@@ -39,7 +33,7 @@ final class DrydockLeaseReleaseController extends DrydockLeaseController {
 
     if (!$request->isDialogFormPost()) {
       $dialog = id(new AphrontDialogView())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setTitle(pht('Really release lease?'))
         ->appendChild(
           phutil_tag(
