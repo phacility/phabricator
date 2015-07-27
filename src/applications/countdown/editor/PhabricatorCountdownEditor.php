@@ -160,7 +160,7 @@ final class PhabricatorCountdownEditor
 
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
     $monogram = $object->getMonogram();
-    $name = $object->getName();
+    $name = $object->getTitle();
 
     return id(new PhabricatorMetaMTAMail())
       ->setSubject("{$monogram}: {$name}")
