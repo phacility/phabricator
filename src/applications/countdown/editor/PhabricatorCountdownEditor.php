@@ -188,11 +188,13 @@ final class PhabricatorCountdownEditor
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
-    return array($object->getAuthorPHID());
+    return array(
+      $object->getAuthorPHID(),
+      $this->requireActor()->getPHID(),
+    );
   }
-
   protected function getMailSubjectPrefix() {
-    return 'Countdown';
+    return '[Countdown]';
   }
 
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {
