@@ -3,15 +3,24 @@
  */
 
 .phabricator-timer {
-  margin: 16px;
+  margin: 16px 16px 0 16px;
   border: 1px solid {$lightblueborder};
-  border-radius: 4px;
+  border-radius: 3px;
   background: #ffffff;
+}
+
+.device-phone .phabricator-timer {
+  margin-left: 8px;
+  margin-right: 8px;
 }
 
 .phabricator-remarkup .phabricator-timer {
   width: 360px;
   margin: 0 0 12px 0;
+}
+
+.device-phone .phabricator-remarkup .phabricator-timer {
+  width: auto;
 }
 
 .phabricator-timer-header {
@@ -30,6 +39,7 @@
 
 .phabricator-timer-table th {
   text-align: center;
+  font-size: {$biggerfontsize};
   color: {$greytext};
   width: 10%;
   padding: 4px;
