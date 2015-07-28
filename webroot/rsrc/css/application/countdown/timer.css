@@ -9,13 +9,13 @@
   background: #ffffff;
 }
 
-.device-phone .phabricator-timer {
+.device .phabricator-timer {
   margin-left: 8px;
   margin-right: 8px;
 }
 
 .phabricator-remarkup .phabricator-timer {
-  width: 360px;
+  max-width: 360px;
   margin: 0 0 12px 0;
 }
 
