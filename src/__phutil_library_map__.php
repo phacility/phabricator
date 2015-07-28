@@ -5391,6 +5391,7 @@ phutil_register_library_map(array(
       'PhabricatorPolicyInterface',
       'PhabricatorApplicationTransactionInterface',
       'PhabricatorSubscribableInterface',
+      'PhabricatorTokenReceiverInterface',
       'PhabricatorFlaggableInterface',
       'PhabricatorDestructibleInterface',
     ),

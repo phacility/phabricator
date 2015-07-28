@@ -5,6 +5,7 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
     PhabricatorPolicyInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorSubscribableInterface,
+    PhabricatorTokenReceiverInterface,
     PhabricatorFlaggableInterface,
     PhabricatorDestructibleInterface {
 
@@ -187,6 +188,15 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
   public function shouldAllowSubscription($phid) {
     return true;
   }
+
+
+/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
+
+  public function getUsersToNotifyOfTokenGiven() {
+    return array($this->getCreatorPHID());
+  }
+
 
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
