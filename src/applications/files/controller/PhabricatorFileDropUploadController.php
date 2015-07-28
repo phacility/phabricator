@@ -3,6 +3,12 @@
 final class PhabricatorFileDropUploadController
   extends PhabricatorFileController {
 
+  public function shouldAllowRestrictedParameter($parameter_name) {
+    // Prevent false positives from file content when it is submitted via
+    // drag-and-drop upload.
+    return true;
+  }
+
   /**
    * @phutil-external-symbol class PhabricatorStartup
    */
