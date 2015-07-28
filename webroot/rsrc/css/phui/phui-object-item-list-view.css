@@ -627,6 +627,19 @@ ul.phui-object-item-list-view .phui-object-item-selected
   left: 0;
 }
 
+/* - Countdowns ------------------------------------------------------------ */
+
+.phui-object-item-col0.phui-object-item-countdown {
+  width: 52px;
+  padding: 0;
+}
+
+.phui-object-item-countdown .phui-object-item-countdown-number {
+  border-right: 1px solid {$thinblueborder};
+  text-align: center;
+  color: {$bluetext};
+}
+
 
 /* - Dashboards ------------------------------------------------------------ */
 
