@@ -181,6 +181,7 @@ final class PhabricatorBadgesEditor
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
     return array(
+      $object->getCreatorPHID(),
       $this->requireActor()->getPHID(),
     );
   }
