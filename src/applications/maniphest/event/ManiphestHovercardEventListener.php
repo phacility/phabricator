@@ -53,12 +53,15 @@ final class ManiphestHovercardEventListener extends PhabricatorEventListener {
       $owner = phutil_tag('em', array(), pht('None'));
     }
     $hovercard->addField(pht('Assigned To'), $owner);
+    $hovercard->addField(
+      pht('Priority'),
+      ManiphestTaskPriority::getTaskPriorityName($task->getPriority()));
 
     if ($edge_phids) {
       $edge_types = array(
         $e_project => pht('Projects'),
-        $e_dep_by => pht('Dependent Tasks'),
-        $e_dep_on  => pht('Depends On'),
+        $e_dep_by => pht('Blocks'),
+        $e_dep_on  => pht('Blocked By'),
       );
 
       $max_count = 6;
