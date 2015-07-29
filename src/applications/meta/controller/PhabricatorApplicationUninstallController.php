@@ -6,10 +6,6 @@ final class PhabricatorApplicationUninstallController
   private $application;
   private $action;
 
-  public function shouldRequireAdmin() {
-    return true;
-  }
-
   public function willProcessRequest(array $data) {
     $this->application = $data['application'];
     $this->action = $data['action'];
@@ -19,7 +15,15 @@ final class PhabricatorApplicationUninstallController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $selected = PhabricatorApplication::getByClass($this->application);
+    $selected = id(new PhabricatorApplicationQuery())
+      ->setViewer($user)
+      ->withClasses(array($this->application))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
 
     if (!$selected) {
       return new Aphront404Response();
