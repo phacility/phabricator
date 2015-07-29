@@ -5,6 +5,7 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
     PhabricatorPolicyInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorSubscribableInterface,
+    PhabricatorTokenReceiverInterface,
     PhabricatorFlaggableInterface,
     PhabricatorDestructibleInterface {
 
@@ -13,7 +14,7 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
   protected $description;
   protected $icon;
   protected $quality;
-  protected $viewPolicy;
+  protected $mailKey;
   protected $editPolicy;
   protected $status;
   protected $creatorPHID;
@@ -63,8 +64,7 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
       ->withClasses(array('PhabricatorBadgesApplication'))
       ->executeOne();
 
-    $view_policy =
-      $app->getPolicy(PhabricatorBadgesDefaultViewCapability::CAPABILITY);
+    $view_policy = PhabricatorPolicies::getMostOpenPolicy();
 
     $edit_policy =
       $app->getPolicy(PhabricatorBadgesDefaultEditCapability::CAPABILITY);
@@ -73,7 +73,6 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
       ->setIcon(self::DEFAULT_ICON)
       ->setQuality(self::DEFAULT_QUALITY)
       ->setCreatorPHID($actor->getPHID())
-      ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
       ->setStatus(self::STATUS_OPEN);
   }
@@ -88,6 +87,7 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
         'icon' => 'text255',
         'quality' => 'text255',
         'status' => 'text32',
+        'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_creator' => array(
@@ -115,6 +115,13 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
     return $this->assertAttached($this->recipientPHIDs);
   }
 
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -129,7 +136,7 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
   public function getPolicy($capability) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        return $this->getViewPolicy();
+        return PhabricatorPolicies::getMostOpenPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
         return $this->getEditPolicy();
     }
@@ -181,6 +188,15 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
   public function shouldAllowSubscription($phid) {
     return true;
   }
+
+
+/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
+
+  public function getUsersToNotifyOfTokenGiven() {
+    return array($this->getCreatorPHID());
+  }
+
 
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */

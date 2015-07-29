@@ -3,19 +3,13 @@
 final class PhabricatorSlowvotePollController
   extends PhabricatorSlowvoteController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $poll = id(new PhabricatorSlowvoteQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->needOptions(true)
       ->needChoices(true)
       ->needViewerChoices(true)
@@ -26,7 +20,7 @@ final class PhabricatorSlowvotePollController
 
     $poll_view = id(new SlowvoteEmbedView())
       ->setHeadless(true)
-      ->setUser($user)
+      ->setUser($viewer)
       ->setPoll($poll);
 
     if ($request->isAjax()) {
@@ -44,7 +38,7 @@ final class PhabricatorSlowvotePollController
 
     $header = id(new PHUIHeaderView())
       ->setHeader($poll->getQuestion())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setStatus($header_icon, $header_color, $header_name)
       ->setPolicyObject($poll);
 

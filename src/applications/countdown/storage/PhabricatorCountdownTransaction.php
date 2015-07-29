@@ -5,9 +5,11 @@ final class PhabricatorCountdownTransaction
 
   const TYPE_TITLE = 'countdown:title';
   const TYPE_EPOCH = 'countdown:epoch';
+  const TYPE_DESCRIPTION = 'countdown:description';
 
   const MAILTAG_TITLE = 'countdown:title';
   const MAILTAG_EPOCH = 'countdown:epoch';
+  const MAILTAG_DESCRIPTION = 'countdown:description';
   const MAILTAG_OTHER  = 'countdown:other';
 
   public function getApplicationName() {
@@ -19,7 +21,7 @@ final class PhabricatorCountdownTransaction
   }
 
   public function getApplicationTransactionCommentObject() {
-    return null;
+    return new PhabricatorCountdownTransactionComment();
   }
 
   public function getTitle() {
@@ -43,6 +45,18 @@ final class PhabricatorCountdownTransaction
             $old,
             $new);
         }
+      break;
+      case self::TYPE_DESCRIPTION:
+        if ($old === null) {
+          return pht(
+            '%s set the description of this countdown.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s edited the description of this countdown.',
+            $this->renderHandleLink($author_phid));
+        }
+      break;
       case self::TYPE_EPOCH:
         if ($old === null) {
           return pht(
@@ -84,6 +98,34 @@ final class PhabricatorCountdownTransaction
             $this->renderHandleLink($object_phid));
         }
       break;
+      case self::TYPE_DESCRIPTION:
+        if ($old === null) {
+          return pht(
+            '%s set the description of %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+
+        } else {
+          return pht(
+            '%s edited the description of %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+      break;
+      case self::TYPE_EPOCH:
+        if ($old === null) {
+          return pht(
+            '%s set the end date of %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+
+        } else {
+          return pht(
+            '%s edited the end date of %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+      break;
     }
 
     return parent::getTitleForFeed();
@@ -99,12 +141,40 @@ final class PhabricatorCountdownTransaction
       case self::TYPE_EPOCH:
         $tags[] = self::MAILTAG_EPOCH;
         break;
+      case self::TYPE_DESCRIPTION:
+        $tags[] = self::MAILTAG_DESCRIPTION;
+        break;
       default:
         $tags[] = self::MAILTAG_OTHER;
         break;
     }
 
     return $tags;
+  }
+
+  public function shouldHide() {
+    $old = $this->getOldValue();
+    switch ($this->getTransactionType()) {
+      case self::TYPE_DESCRIPTION:
+        return ($old === null);
+    }
+    return parent::shouldHide();
+  }
+
+  public function hasChangeDetails() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_DESCRIPTION:
+        return ($this->getOldValue() !== null);
+    }
+
+    return parent::hasChangeDetails();
+  }
+
+  public function renderChangeDetails(PhabricatorUser $viewer) {
+    return $this->renderTextCorpusChangeDetails(
+      $viewer,
+      $this->getOldValue(),
+      $this->getNewValue());
   }
 
 }

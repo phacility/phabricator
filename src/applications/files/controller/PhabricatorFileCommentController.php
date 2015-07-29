@@ -2,23 +2,17 @@
 
 final class PhabricatorFileCommentController extends PhabricatorFileController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     if (!$request->isFormPost()) {
       return new Aphront400Response();
     }
 
     $file = id(new PhabricatorFileQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->executeOne();
     if (!$file) {
       return new Aphront404Response();
@@ -37,7 +31,7 @@ final class PhabricatorFileCommentController extends PhabricatorFileController {
           ->setContent($request->getStr('comment')));
 
     $editor = id(new PhabricatorFileEditor())
-      ->setActor($user)
+      ->setActor($viewer)
       ->setContinueOnNoEffect($request->isContinueRequest())
       ->setContentSourceFromRequest($request)
       ->setIsPreview($is_preview);
@@ -56,7 +50,7 @@ final class PhabricatorFileCommentController extends PhabricatorFileController {
 
     if ($request->isAjax() && $is_preview) {
       return id(new PhabricatorApplicationTransactionResponse())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->setTransactions($xactions)
         ->setIsPreview($is_preview);
     } else {

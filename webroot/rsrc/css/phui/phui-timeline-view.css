@@ -395,3 +395,13 @@ a.phui-timeline-menu .phui-icon-view {
   top: 52px;
   width: 54px;
 }
+
+.phui-timeline-badges .phui-badge-mini {
+  height: 18px;
+  width: 18px;
+  line-height: 16px;
+}
+
+.phui-timeline-badges .phui-badge-mini .phui-icon-view {
+  font-size: 10px;
+}

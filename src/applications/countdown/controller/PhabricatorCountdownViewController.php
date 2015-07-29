@@ -58,19 +58,22 @@ final class PhabricatorCountdownViewController
     $timeline = $this->buildTransactionTimeline(
       $countdown,
       new PhabricatorCountdownTransactionQuery());
-    $timeline->setShouldTerminate(true);
+
+    $add_comment = $this->buildCommentForm($countdown);
 
     $content = array(
       $crumbs,
       $object_box,
       $countdown_view,
       $timeline,
+      $add_comment,
     );
 
     return $this->buildApplicationPage(
       $content,
       array(
         'title' => $title,
+        'pageObjects' => array($countdown->getPHID()),
       ));
   }
 
@@ -123,7 +126,43 @@ final class PhabricatorCountdownViewController
       pht('Author'),
       $viewer->renderHandle($countdown->getAuthorPHID()));
 
+        $view->invokeWillRenderEvent();
+
+    $description = $countdown->getDescription();
+    if (strlen($description)) {
+      $description = PhabricatorMarkupEngine::renderOneObject(
+        id(new PhabricatorMarkupOneOff())->setContent($description),
+        'default',
+        $viewer);
+
+      $view->addSectionHeader(
+        pht('Description'),
+        PHUIPropertyListView::ICON_SUMMARY);
+      $view->addTextContent($description);
+    }
+
     return $view;
+  }
+
+  private function buildCommentForm(PhabricatorCountdown $countdown) {
+    $viewer = $this->getViewer();
+
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+
+    $add_comment_header = $is_serious
+      ? pht('Add Comment')
+      : pht('Last Words');
+
+    $draft = PhabricatorDraft::newFromUserAndKey(
+      $viewer, $countdown->getPHID());
+
+    return id(new PhabricatorApplicationTransactionCommentView())
+      ->setUser($viewer)
+      ->setObjectPHID($countdown->getPHID())
+      ->setDraft($draft)
+      ->setHeaderText($add_comment_header)
+      ->setAction($this->getApplicationURI('/comment/'.$countdown->getID().'/'))
+      ->setSubmitButtonName(pht('Add Comment'));
   }
 
 }

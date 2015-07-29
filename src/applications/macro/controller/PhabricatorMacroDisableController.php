@@ -3,28 +3,22 @@
 final class PhabricatorMacroDisableController
   extends PhabricatorMacroController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
     $this->requireApplicationCapability(
       PhabricatorMacroManageCapability::CAPABILITY);
 
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
     $macro = id(new PhabricatorMacroQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->executeOne();
     if (!$macro) {
       return new Aphront404Response();
     }
 
-    $view_uri = $this->getApplicationURI('/view/'.$this->id.'/');
+    $view_uri = $this->getApplicationURI('/view/'.$id.'/');
 
     if ($request->isDialogFormPost() || $macro->getIsDisabled()) {
       $xaction = id(new PhabricatorMacroTransaction())
@@ -32,7 +26,7 @@ final class PhabricatorMacroDisableController
         ->setNewValue($macro->getIsDisabled() ? 0 : 1);
 
       $editor = id(new PhabricatorMacroEditor())
-        ->setActor($user)
+        ->setActor($viewer)
         ->setContentSourceFromRequest($request);
 
       $xactions = $editor->applyTransactions($macro, array($xaction));
@@ -52,7 +46,7 @@ final class PhabricatorMacroDisableController
             'Really disable the much-beloved image macro %s? '.
             'It will be sorely missed.',
           $macro->getName())))
-      ->setSubmitURI($this->getApplicationURI('/disable/'.$this->id.'/'))
+      ->setSubmitURI($this->getApplicationURI('/disable/'.$id.'/'))
       ->addSubmitButton(pht('Disable'))
       ->addCancelButton($view_uri);
 

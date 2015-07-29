@@ -90,6 +90,11 @@
   width: 300px;
 }
 
+.device-phone .aphront-multi-column-fixed .phui-workpanel-view,
+.device-phone .phui-workpanel-view .phui-header-shell {
+  width: auto;
+}
+
 .phui-workpanel-body .phui-object-item-list-view {
   min-height: 54px;
 }

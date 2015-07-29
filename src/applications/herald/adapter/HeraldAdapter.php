@@ -690,7 +690,7 @@ abstract class HeraldAdapter extends Phobject {
 
   public function willSaveAction(
     HeraldRule $rule,
-    HeraldAction $action) {
+    HeraldActionRecord $action) {
 
     $target = $action->getTarget();
     if (is_array($target)) {
@@ -996,7 +996,7 @@ abstract class HeraldAdapter extends Phobject {
   }
 
   private function renderActionAsText(
-    HeraldAction $action,
+    HeraldActionRecord $action,
     PhabricatorHandleList $handles) {
     $rule_global = HeraldRuleTypeConfig::RULE_TYPE_GLOBAL;
 
@@ -1028,7 +1028,7 @@ abstract class HeraldAdapter extends Phobject {
   }
 
   private function renderActionTargetAsText(
-    HeraldAction $action,
+    HeraldActionRecord $action,
     PhabricatorHandleList $handles) {
 
     $target = $action->getTarget();

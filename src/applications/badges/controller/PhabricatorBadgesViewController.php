@@ -52,8 +52,6 @@ final class PhabricatorBadgesViewController
     $timeline = $this->buildTransactionTimeline(
       $badge,
       new PhabricatorBadgesTransactionQuery());
-    $timeline
-      ->setShouldTerminate(true);
 
     $recipient_phids = $badge->getRecipientPHIDs();
     $recipient_phids = array_reverse($recipient_phids);
@@ -64,12 +62,15 @@ final class PhabricatorBadgesViewController
       ->setHandles($handles)
       ->setUser($viewer);
 
+    $add_comment = $this->buildCommentForm($badge);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $box,
         $recipient_list,
         $timeline,
+        $add_comment,
       ),
       array(
         'title' => $title,
@@ -152,6 +153,26 @@ final class PhabricatorBadgesViewController
         ->setHref($this->getApplicationURI("/recipients/{$id}/")));
 
     return $view;
+  }
+
+  private function buildCommentForm(PhabricatorBadgesBadge $badge) {
+    $viewer = $this->getViewer();
+
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+
+    $add_comment_header = $is_serious
+      ? pht('Add Comment')
+      : pht('Render Honors');
+
+    $draft = PhabricatorDraft::newFromUserAndKey($viewer, $badge->getPHID());
+
+    return id(new PhabricatorApplicationTransactionCommentView())
+      ->setUser($viewer)
+      ->setObjectPHID($badge->getPHID())
+      ->setDraft($draft)
+      ->setHeaderText($add_comment_header)
+      ->setAction($this->getApplicationURI('/comment/'.$badge->getID().'/'))
+      ->setSubmitButtonName(pht('Add Comment'));
   }
 
 }

@@ -35,4 +35,14 @@ final class HeraldAnotherRuleField extends HeraldField {
       ->setOptions(array());
   }
 
+  public function renderConditionValue(
+    PhabricatorUser $viewer,
+    $condition,
+    $value) {
+
+    $value = (array)$value;
+
+    return $viewer->renderHandleList($value);
+  }
+
 }

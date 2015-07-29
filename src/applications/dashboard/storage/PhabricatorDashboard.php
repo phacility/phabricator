@@ -14,7 +14,11 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
   protected $name;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $status;
   protected $layoutConfig = array();
+
+  const STATUS_ACTIVE = 'active';
+  const STATUS_ARCHIVED = 'archived';
 
   private $panelPHIDs = self::ATTACHABLE;
   private $panels = self::ATTACHABLE;
@@ -26,8 +30,16 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
       ->setName('')
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
       ->setEditPolicy($actor->getPHID())
+      ->setStatus(self::STATUS_ACTIVE)
       ->attachPanels(array())
       ->attachPanelPHIDs(array());
+  }
+
+  public static function getStatusNameMap() {
+    return array(
+      self::STATUS_ACTIVE => pht('Active'),
+      self::STATUS_ARCHIVED => pht('Archived'),
+    );
   }
 
   public static function copyDashboard(
@@ -48,6 +60,7 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text255',
+        'status' => 'text32',
       ),
     ) + parent::getConfiguration();
   }
@@ -94,6 +107,10 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
 
   public function getPanels() {
     return $this->assertAttached($this->panels);
+  }
+
+  public function isClosed() {
+    return ($this->getStatus() == self::STATUS_ARCHIVED);
   }
 
 

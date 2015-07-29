@@ -8,16 +8,12 @@ final class PhabricatorConfigDatabaseStatusController
   private $column;
   private $key;
 
-  public function willProcessRequest(array $data) {
-    $this->database = idx($data, 'database');
-    $this->table = idx($data, 'table');
-    $this->column = idx($data, 'column');
-    $this->key = idx($data, 'key');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $this->database = $request->getURIData('database');
+    $this->table = $request->getURIData('table');
+    $this->column = $request->getURIData('column');
+    $this->key = $request->getURIData('key');
 
     $query = $this->buildSchemaQuery();
 

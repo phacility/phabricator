@@ -41,6 +41,8 @@ final class PhabricatorBadgesApplication extends PhabricatorApplication {
           => 'PhabricatorBadgesListController',
         'create/'
           => 'PhabricatorBadgesEditController',
+        'comment/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorBadgesCommentController',
         'edit/(?:(?P<id>\d+)/)?'
           => 'PhabricatorBadgesEditController',
         'view/(?:(?P<id>\d+)/)?'
@@ -67,10 +69,6 @@ final class PhabricatorBadgesApplication extends PhabricatorApplication {
       PhabricatorBadgesDefaultEditCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
         'caption' => pht('Default edit policy for badges.'),
-        'template' => PhabricatorBadgesPHIDType::TYPECONST,
-      ),
-      PhabricatorBadgesDefaultViewCapability::CAPABILITY => array(
-        'caption' => pht('Default view policy for badges.'),
         'template' => PhabricatorBadgesPHIDType::TYPECONST,
       ),
     );

@@ -49,7 +49,6 @@ final class PhabricatorBadgesEditController
     $v_stat = $badge->getStatus();
 
     $v_edit = $badge->getEditPolicy();
-    $v_view = $badge->getViewPolicy();
 
     $validation_exception = null;
     if ($request->isFormPost()) {
@@ -70,7 +69,6 @@ final class PhabricatorBadgesEditController
       $type_qual = PhabricatorBadgesTransaction::TYPE_QUALITY;
       $type_stat = PhabricatorBadgesTransaction::TYPE_STATUS;
 
-      $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
       $xactions = array();
@@ -98,10 +96,6 @@ final class PhabricatorBadgesEditController
       $xactions[] = id(new PhabricatorBadgesTransaction())
         ->setTransactionType($type_stat)
         ->setNewValue($v_stat);
-
-      $xactions[] = id(new PhabricatorBadgesTransaction())
-        ->setTransactionType($type_view)
-        ->setNewValue($v_view);
 
       $xactions[] = id(new PhabricatorBadgesTransaction())
         ->setTransactionType($type_edit)
@@ -175,13 +169,6 @@ final class PhabricatorBadgesEditController
           ->setName('description')
           ->setLabel(pht('Description'))
           ->setValue($v_desc))
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-          ->setName('viewPolicy')
-          ->setPolicyObject($badge)
-          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
-          ->setValue($v_view)
-          ->setPolicies($policies))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setName('editPolicy')

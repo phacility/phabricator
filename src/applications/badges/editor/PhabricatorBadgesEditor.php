@@ -21,8 +21,8 @@ final class PhabricatorBadgesEditor
     $types[] = PhabricatorBadgesTransaction::TYPE_STATUS;
     $types[] = PhabricatorBadgesTransaction::TYPE_QUALITY;
 
+    $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_EDGE;
-    $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
     return $types;
@@ -142,6 +142,23 @@ final class PhabricatorBadgesEditor
     return $errors;
   }
 
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  public function getMailTagsMap() {
+    return array(
+      PhabricatorBadgesTransaction::MAILTAG_DETAILS =>
+        pht('Someone changes the badge\'s details.'),
+      PhabricatorBadgesTransaction::MAILTAG_COMMENT =>
+        pht('Someone comments on a badge.'),
+      PhabricatorBadgesTransaction::MAILTAG_OTHER =>
+        pht('Other badge activity not listed above occurs.'),
+    );
+  }
+
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -149,7 +166,7 @@ final class PhabricatorBadgesEditor
   }
 
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {
-    return id(new PhabricatorMacroReplyHandler())
+    return id(new PhabricatorBadgesReplyHandler())
       ->setMailReceiver($object);
   }
 
@@ -164,6 +181,7 @@ final class PhabricatorBadgesEditor
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
     return array(
+      $object->getCreatorPHID(),
       $this->requireActor()->getPHID(),
     );
   }
