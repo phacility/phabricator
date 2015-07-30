@@ -1323,6 +1323,16 @@ final class PhabricatorUSEnglishTranslation
         'Removed projects: %2$s.',
       ),
 
+      'Added %s reviewer(s): %s.' => array(
+        'Added a reviewer: %2$s.',
+        'Added reviewers: %2$s.',
+      ),
+
+      'Added %s blocking reviewer(s): %s.' => array(
+        'Added a blocking reviewer: %2$s.',
+        'Added blocking reviewers: %2$s.',
+      ),
+
     );
   }
 

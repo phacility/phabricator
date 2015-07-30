@@ -1588,11 +1588,6 @@ final class DifferentialTransactionEditor
       $revision,
       $revision->getActiveDiff());
 
-    $reviewers = $revision->getReviewerStatus();
-    $reviewer_phids = mpull($reviewers, 'getReviewerPHID');
-
-    $adapter->setExplicitReviewers($reviewer_phids);
-
     return $adapter;
   }
 
@@ -1602,60 +1597,6 @@ final class DifferentialTransactionEditor
     HeraldTranscript $transcript) {
 
     $xactions = array();
-
-    // Build a transaction to adjust reviewers.
-    $reviewers = array(
-      DifferentialReviewerStatus::STATUS_ADDED =>
-        array_keys($adapter->getReviewersAddedByHerald()),
-      DifferentialReviewerStatus::STATUS_BLOCKING =>
-        array_keys($adapter->getBlockingReviewersAddedByHerald()),
-    );
-
-    $old_reviewers = $object->getReviewerStatus();
-    $old_reviewers = mpull($old_reviewers, null, 'getReviewerPHID');
-
-    $value = array();
-    foreach ($reviewers as $status => $phids) {
-      foreach ($phids as $phid) {
-        if ($phid == $object->getAuthorPHID()) {
-          // Don't try to add the revision's author as a reviewer, since this
-          // isn't valid and doesn't make sense.
-          continue;
-        }
-
-        // If the target is already a reviewer, don't try to change anything
-        // if their current status is at least as strong as the new status.
-        // For example, don't downgrade an "Accepted" to a "Blocking Reviewer".
-        $old_reviewer = idx($old_reviewers, $phid);
-        if ($old_reviewer) {
-          $old_status = $old_reviewer->getStatus();
-
-          $old_strength = DifferentialReviewerStatus::getStatusStrength(
-            $old_status);
-          $new_strength = DifferentialReviewerStatus::getStatusStrength(
-            $status);
-
-          if ($new_strength <= $old_strength) {
-            continue;
-          }
-        }
-
-        $value['+'][$phid] = array(
-          'data' => array(
-            'status' => $status,
-          ),
-        );
-      }
-    }
-
-    if ($value) {
-      $edge_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
-
-      $xactions[] = id(new DifferentialTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-        ->setMetadataValue('edge:type', $edge_reviewer)
-        ->setNewValue($value);
-    }
 
     // Require legalpad document signatures.
     $legal_phids = $adapter->getRequiredSignatureDocumentPHIDs();

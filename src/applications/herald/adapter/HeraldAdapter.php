@@ -27,8 +27,6 @@ abstract class HeraldAdapter extends Phobject {
   const CONDITION_IS_FALSE        = 'false';
 
   const ACTION_AUDIT        = 'audit';
-  const ACTION_ADD_REVIEWERS = 'addreviewers';
-  const ACTION_ADD_BLOCKING_REVIEWERS = 'addblockingreviewers';
   const ACTION_APPLY_BUILD_PLANS = 'applybuildplans';
   const ACTION_BLOCK = 'block';
   const ACTION_REQUIRE_SIGNATURE = 'signature';
@@ -717,8 +715,6 @@ abstract class HeraldAdapter extends Phobject {
       case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
         $standard = array(
           self::ACTION_AUDIT        => pht('Trigger an Audit by'),
-          self::ACTION_ADD_REVIEWERS => pht('Add reviewers'),
-          self::ACTION_ADD_BLOCKING_REVIEWERS => pht('Add blocking reviewers'),
           self::ACTION_APPLY_BUILD_PLANS => pht('Run build plans'),
           self::ACTION_REQUIRE_SIGNATURE => pht('Require legal signatures'),
           self::ACTION_BLOCK => pht('Block change with message'),
@@ -727,9 +723,6 @@ abstract class HeraldAdapter extends Phobject {
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         $standard = array(
           self::ACTION_AUDIT        => pht('Trigger an Audit by me'),
-          self::ACTION_ADD_REVIEWERS => pht('Add me as a reviewer'),
-          self::ACTION_ADD_BLOCKING_REVIEWERS =>
-            pht('Add me as a blocking reviewer'),
         );
         break;
       default:
@@ -769,10 +762,6 @@ abstract class HeraldAdapter extends Phobject {
     if ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
       switch ($action->getAction()) {
         case self::ACTION_AUDIT:
-        case self::ACTION_ADD_REVIEWERS:
-        case self::ACTION_ADD_BLOCKING_REVIEWERS:
-          // For personal rules, force these actions to target the rule owner.
-          $target = array($author_phid);
           break;
         case self::ACTION_BLOCK:
           break;
@@ -808,17 +797,11 @@ abstract class HeraldAdapter extends Phobject {
     if ($is_personal) {
       switch ($action) {
         case self::ACTION_AUDIT:
-        case self::ACTION_ADD_REVIEWERS:
-        case self::ACTION_ADD_BLOCKING_REVIEWERS:
           return new HeraldEmptyFieldValue();
       }
     } else {
       switch ($action) {
         case self::ACTION_AUDIT:
-        case self::ACTION_ADD_REVIEWERS:
-        case self::ACTION_ADD_BLOCKING_REVIEWERS:
-          return $this->buildTokenizerFieldValue(
-            new PhabricatorProjectOrUserDatasource());
         case self::ACTION_APPLY_BUILD_PLANS:
           return $this->buildTokenizerFieldValue(
             new HarbormasterBuildPlanDatasource());
