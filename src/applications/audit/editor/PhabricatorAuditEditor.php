@@ -901,11 +901,6 @@ final class PhabricatorAuditEditor
           'auditReasonMap', $this->auditReasonMap);
     }
 
-    HarbormasterBuildable::applyBuildPlans(
-      $object->getPHID(),
-      $object->getRepository()->getPHID(),
-      $adapter->getBuildPlans());
-
     $limit = self::MAX_FILES_SHOWN_IN_EMAIL;
     $files = $adapter->loadAffectedPaths();
     sort($files);

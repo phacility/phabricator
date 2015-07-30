@@ -2811,6 +2811,13 @@ abstract class PhabricatorApplicationTransactionEditor
     $this->setHeraldAdapter($adapter);
     $this->setHeraldTranscript($xscript);
 
+    if ($adapter instanceof HarbormasterBuildableAdapterInterface) {
+      HarbormasterBuildable::applyBuildPlans(
+        $adapter->getHarbormasterBuildablePHID(),
+        $adapter->getHarbormasterContainerPHID(),
+        $adapter->getQueuedHarbormasterBuildPlanPHIDs());
+    }
+
     return array_merge(
       $this->didApplyHeraldRules($object, $adapter, $xscript),
       $adapter->getQueuedTransactions());

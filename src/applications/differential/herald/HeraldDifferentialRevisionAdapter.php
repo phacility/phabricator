@@ -1,15 +1,16 @@
 <?php
 
 final class HeraldDifferentialRevisionAdapter
-  extends HeraldDifferentialAdapter {
+  extends HeraldDifferentialAdapter
+  implements HarbormasterBuildableAdapterInterface {
 
   protected $revision;
-
-  protected $buildPlans = array();
 
   protected $affectedPackages;
   protected $changesets;
   private $haveHunks;
+
+  private $buildPlanPHIDs = array();
 
   public function getAdapterApplicationClass() {
     return 'PhabricatorDifferentialApplication';
@@ -79,10 +80,6 @@ final class HeraldDifferentialRevisionAdapter
     return $object;
   }
 
-  public function getBuildPlans() {
-    return $this->buildPlans;
-  }
-
   public function getHeraldName() {
     return $this->revision->getTitle();
   }
@@ -130,44 +127,24 @@ final class HeraldDifferentialRevisionAdapter
     return mpull($reviewers, 'getReviewerPHID');
   }
 
-  public function getActions($rule_type) {
-    switch ($rule_type) {
-      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
-        return array_merge(
-          array(
-            self::ACTION_APPLY_BUILD_PLANS,
-          ),
-          parent::getActions($rule_type));
-      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-        return array_merge(
-          array(),
-          parent::getActions($rule_type));
-    }
+
+/* -(  HarbormasterBuildableAdapterInterface  )------------------------------ */
+
+
+  public function getHarbormasterBuildablePHID() {
+    return $this->getDiff()->getPHID();
   }
 
-  public function applyHeraldEffects(array $effects) {
-    assert_instances_of($effects, 'HeraldEffect');
+  public function getHarbormasterContainerPHID() {
+    return $this->getObject()->getPHID();
+  }
 
-    $result = array();
+  public function getQueuedHarbormasterBuildPlanPHIDs() {
+    return $this->buildPlanPHIDs;
+  }
 
-    foreach ($effects as $effect) {
-      $action = $effect->getAction();
-      switch ($action) {
-        case self::ACTION_APPLY_BUILD_PLANS:
-          foreach ($effect->getTarget() as $phid) {
-            $this->buildPlans[] = $phid;
-          }
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Applied build plans.'));
-          break;
-        default:
-          $result[] = $this->applyStandardEffect($effect);
-          break;
-      }
-    }
-    return $result;
+  public function queueHarbormasterBuildPlanPHID($phid) {
+    $this->buildPlanPHIDs[] = $phid;
   }
 
 }

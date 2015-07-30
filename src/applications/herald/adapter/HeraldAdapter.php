@@ -27,7 +27,6 @@ abstract class HeraldAdapter extends Phobject {
   const CONDITION_IS_FALSE        = 'false';
 
   const ACTION_AUDIT        = 'audit';
-  const ACTION_APPLY_BUILD_PLANS = 'applybuildplans';
   const ACTION_BLOCK = 'block';
 
   private $contentSource;
@@ -714,7 +713,6 @@ abstract class HeraldAdapter extends Phobject {
       case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
         $standard = array(
           self::ACTION_AUDIT        => pht('Trigger an Audit by'),
-          self::ACTION_APPLY_BUILD_PLANS => pht('Run build plans'),
           self::ACTION_BLOCK => pht('Block change with message'),
         );
         break;
@@ -800,9 +798,6 @@ abstract class HeraldAdapter extends Phobject {
     } else {
       switch ($action) {
         case self::ACTION_AUDIT:
-        case self::ACTION_APPLY_BUILD_PLANS:
-          return $this->buildTokenizerFieldValue(
-            new HarbormasterBuildPlanDatasource());
         case self::ACTION_BLOCK:
           return new HeraldTextFieldValue();
       }

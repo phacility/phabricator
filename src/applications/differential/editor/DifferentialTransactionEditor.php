@@ -1591,20 +1591,6 @@ final class DifferentialTransactionEditor
     return $adapter;
   }
 
-  protected function didApplyHeraldRules(
-    PhabricatorLiskDAO $object,
-    HeraldAdapter $adapter,
-    HeraldTranscript $transcript) {
-
-    // Apply build plans.
-    HarbormasterBuildable::applyBuildPlans(
-      $adapter->getDiff()->getPHID(),
-      $adapter->getPHID(),
-      $adapter->getBuildPlans());
-
-    return array();
-  }
-
   /**
    * Update the table which links Differential revisions to paths they affect,
    * so Diffusion can efficiently find pending revisions for a given file.

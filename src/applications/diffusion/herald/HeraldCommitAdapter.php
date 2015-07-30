@@ -1,6 +1,8 @@
 <?php
 
-final class HeraldCommitAdapter extends HeraldAdapter {
+final class HeraldCommitAdapter
+  extends HeraldAdapter
+  implements HarbormasterBuildableAdapterInterface {
 
   protected $diff;
   protected $revision;
@@ -11,12 +13,13 @@ final class HeraldCommitAdapter extends HeraldAdapter {
   private $commitDiff;
 
   protected $auditMap = array();
-  protected $buildPlans = array();
 
   protected $affectedPaths;
   protected $affectedRevision;
   protected $affectedPackages;
   protected $auditNeededPackages;
+
+  private $buildPlanPHIDs = array();
 
   public function getAdapterApplicationClass() {
     return 'PhabricatorDiffusionApplication';
@@ -90,7 +93,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         return array_merge(
           array(
             self::ACTION_AUDIT,
-            self::ACTION_APPLY_BUILD_PLANS,
           ),
           parent::getActions($rule_type));
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
@@ -149,10 +151,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
 
   public function getAuditMap() {
     return $this->auditMap;
-  }
-
-  public function getBuildPlans() {
-    return $this->buildPlans;
   }
 
   public function getHeraldName() {
@@ -343,21 +341,32 @@ final class HeraldCommitAdapter extends HeraldAdapter {
             true,
             pht('Triggered an audit.'));
           break;
-        case self::ACTION_APPLY_BUILD_PLANS:
-          foreach ($effect->getTarget() as $phid) {
-            $this->buildPlans[] = $phid;
-          }
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Applied build plans.'));
-          break;
         default:
           $result[] = $this->applyStandardEffect($effect);
           break;
       }
     }
     return $result;
+  }
+
+
+/* -(  HarbormasterBuildableAdapterInterface  )------------------------------ */
+
+
+  public function getHarbormasterBuildablePHID() {
+    return $this->getObject()->getPHID();
+  }
+
+  public function getHarbormasterContainerPHID() {
+    return $this->getObject()->getRepository()->getPHID();
+  }
+
+  public function getQueuedHarbormasterBuildPlanPHIDs() {
+    return $this->buildPlanPHIDs;
+  }
+
+  public function queueHarbormasterBuildPlanPHID($phid) {
+    $this->buildPlanPHIDs[] = $phid;
   }
 
 }
