@@ -29,7 +29,6 @@ abstract class HeraldAdapter extends Phobject {
   const ACTION_AUDIT        = 'audit';
   const ACTION_APPLY_BUILD_PLANS = 'applybuildplans';
   const ACTION_BLOCK = 'block';
-  const ACTION_REQUIRE_SIGNATURE = 'signature';
 
   private $contentSource;
   private $isNewObject;
@@ -716,7 +715,6 @@ abstract class HeraldAdapter extends Phobject {
         $standard = array(
           self::ACTION_AUDIT        => pht('Trigger an Audit by'),
           self::ACTION_APPLY_BUILD_PLANS => pht('Run build plans'),
-          self::ACTION_REQUIRE_SIGNATURE => pht('Require legal signatures'),
           self::ACTION_BLOCK => pht('Block change with message'),
         );
         break;
@@ -805,9 +803,6 @@ abstract class HeraldAdapter extends Phobject {
         case self::ACTION_APPLY_BUILD_PLANS:
           return $this->buildTokenizerFieldValue(
             new HarbormasterBuildPlanDatasource());
-        case self::ACTION_REQUIRE_SIGNATURE:
-          return $this->buildTokenizerFieldValue(
-            new LegalpadDocumentDatasource());
         case self::ACTION_BLOCK:
           return new HeraldTextFieldValue();
       }

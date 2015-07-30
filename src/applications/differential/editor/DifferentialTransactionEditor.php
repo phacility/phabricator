@@ -1596,43 +1596,13 @@ final class DifferentialTransactionEditor
     HeraldAdapter $adapter,
     HeraldTranscript $transcript) {
 
-    $xactions = array();
-
-    // Require legalpad document signatures.
-    $legal_phids = $adapter->getRequiredSignatureDocumentPHIDs();
-    if ($legal_phids) {
-      // We only require signatures of documents which have not already
-      // been signed. In general, this reduces the amount of churn that
-      // signature rules cause.
-
-      $signatures = id(new LegalpadDocumentSignatureQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withDocumentPHIDs($legal_phids)
-        ->withSignerPHIDs(array($object->getAuthorPHID()))
-        ->execute();
-      $signed_phids = mpull($signatures, 'getDocumentPHID');
-      $legal_phids = array_diff($legal_phids, $signed_phids);
-
-      // If we still have something to trigger, add the edges.
-      if ($legal_phids) {
-        $edge_legal = LegalpadObjectNeedsSignatureEdgeType::EDGECONST;
-        $xactions[] = id(new DifferentialTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-          ->setMetadataValue('edge:type', $edge_legal)
-          ->setNewValue(
-            array(
-              '+' => array_fuse($legal_phids),
-            ));
-      }
-    }
-
     // Apply build plans.
     HarbormasterBuildable::applyBuildPlans(
       $adapter->getDiff()->getPHID(),
       $adapter->getPHID(),
       $adapter->getBuildPlans());
 
-    return $xactions;
+    return array();
   }
 
   /**

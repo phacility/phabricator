@@ -1333,6 +1333,11 @@ final class PhabricatorUSEnglishTranslation
         'Added blocking reviewers: %2$s.',
       ),
 
+      'Required %s signature(s): %s.' => array(
+        'Required a signature: %2$s.',
+        'Required signatures: %2$s.',
+      ),
+
     );
   }
 

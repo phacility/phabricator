@@ -6,7 +6,6 @@ final class HeraldDifferentialRevisionAdapter
   protected $revision;
 
   protected $buildPlans = array();
-  protected $requiredSignatureDocumentPHIDs = array();
 
   protected $affectedPackages;
   protected $changesets;
@@ -80,10 +79,6 @@ final class HeraldDifferentialRevisionAdapter
     return $object;
   }
 
-  public function getRequiredSignatureDocumentPHIDs() {
-    return $this->requiredSignatureDocumentPHIDs;
-  }
-
   public function getBuildPlans() {
     return $this->buildPlans;
   }
@@ -141,7 +136,6 @@ final class HeraldDifferentialRevisionAdapter
         return array_merge(
           array(
             self::ACTION_APPLY_BUILD_PLANS,
-            self::ACTION_REQUIRE_SIGNATURE,
           ),
           parent::getActions($rule_type));
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
@@ -167,15 +161,6 @@ final class HeraldDifferentialRevisionAdapter
             $effect,
             true,
             pht('Applied build plans.'));
-          break;
-        case self::ACTION_REQUIRE_SIGNATURE:
-          foreach ($effect->getTarget() as $phid) {
-            $this->requiredSignatureDocumentPHIDs[] = $phid;
-          }
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Required signatures.'));
           break;
         default:
           $result[] = $this->applyStandardEffect($effect);
