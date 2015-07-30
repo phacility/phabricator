@@ -22,8 +22,6 @@ final class PhameBlogViewController extends PhameController {
       ->withBlogPHIDs(array($blog->getPHID()))
       ->executeWithCursorPager($pager);
 
-    $nav = $this->renderSideNavFilterView(null);
-
     $header = id(new PHUIHeaderView())
       ->setHeader($blog->getName())
       ->setUser($user)
@@ -36,29 +34,24 @@ final class PhameBlogViewController extends PhameController {
       $user,
       pht('This blog has no visible posts.'));
 
-    require_celerity_resource('phame-css');
-    $post_list = id(new PHUIBoxView())
-      ->addPadding(PHUI::PADDING_LARGE)
-      ->addClass('phame-post-list')
+    $post_list = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Latest Posts'))
       ->appendChild($post_list);
 
-
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Blogs'), $this->getApplicationURI('blog/'));
     $crumbs->addTextCrumb($blog->getName(), $this->getApplicationURI());
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    $nav->appendChild(
+    return $this->buildApplicationPage(
       array(
         $crumbs,
         $object_box,
         $post_list,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
+      ),
       array(
         'title' => $blog->getName(),
       ));

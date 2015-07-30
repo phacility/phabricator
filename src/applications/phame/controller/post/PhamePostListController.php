@@ -21,12 +21,6 @@ final class PhamePostListController extends PhameController {
         $title = pht('Unpublished Drafts');
         $nav->selectFilter('post/draft');
         break;
-      case 'all':
-        $nodata = pht('There are no visible posts.');
-        $title = pht('Posts');
-        $nav->selectFilter('post/all');
-        break;
-      default:
       case 'blogger':
         if ($bloggername) {
           $blogger = id(new PhabricatorUser())->loadOneWhere(
@@ -48,6 +42,12 @@ final class PhamePostListController extends PhameController {
         }
         $title = pht('Posts by %s', $blogger);
         break;
+      default:
+      case 'all':
+        $nodata = pht('There are no visible posts.');
+        $title = pht('Posts');
+        $nav->selectFilter('post/all');
+        break;
     }
 
     $pager = id(new AphrontCursorPagerView())
@@ -55,7 +55,6 @@ final class PhamePostListController extends PhameController {
 
     $posts = $query->executeWithCursorPager($pager);
 
-    require_celerity_resource('phame-css');
     $post_list = $this->renderPostList($posts, $viewer, $nodata);
     $post_list = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
