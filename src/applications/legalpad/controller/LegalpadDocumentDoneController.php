@@ -6,9 +6,8 @@ final class LegalpadDocumentDoneController extends LegalpadController {
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     return $this->newDialog()
       ->setTitle(pht('Verify Signature'))
