@@ -3,24 +3,20 @@
 final class PhabricatorCalendarEventCommentController
   extends PhabricatorCalendarController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
   public function handleRequest(AphrontRequest $request) {
     if (!$request->isFormPost()) {
       return new Aphront400Response();
     }
 
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+
     $is_preview = $request->isPreviewRequest();
     $draft = PhabricatorDraft::buildFromRequest($request);
 
     $event = id(new PhabricatorCalendarEventQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->executeOne();
     if (!$event) {
       return new Aphront404Response();
@@ -29,7 +25,7 @@ final class PhabricatorCalendarEventCommentController
     $index = $request->getURIData('sequence');
     if ($index && !$is_preview) {
       $result = $this->getEventAtIndexForGhostPHID(
-        $user,
+        $viewer,
         $event->getPHID(),
         $index);
 
@@ -37,10 +33,10 @@ final class PhabricatorCalendarEventCommentController
         $event = $result;
       } else {
         $event = $this->createEventFromGhost(
-          $user,
+          $viewer,
           $event,
           $index);
-        $event->applyViewerTimezone($user);
+        $event->applyViewerTimezone($viewer);
       }
     }
 
@@ -54,7 +50,7 @@ final class PhabricatorCalendarEventCommentController
           ->setContent($request->getStr('comment')));
 
     $editor = id(new PhabricatorCalendarEventEditor())
-      ->setActor($user)
+      ->setActor($viewer)
       ->setContinueOnNoEffect($request->isContinueRequest())
       ->setContentSourceFromRequest($request)
       ->setIsPreview($is_preview);
@@ -73,7 +69,7 @@ final class PhabricatorCalendarEventCommentController
 
     if ($request->isAjax() && $is_preview) {
       return id(new PhabricatorApplicationTransactionResponse())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->setTransactions($xactions)
         ->setIsPreview($is_preview);
     } else {
