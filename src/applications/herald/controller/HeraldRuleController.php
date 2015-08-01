@@ -2,24 +2,16 @@
 
 final class HeraldRuleController extends HeraldController {
 
-  private $id;
-  private $filter;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = (int)idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $content_type_map = HeraldAdapter::getEnabledAdapterMap($user);
+    $content_type_map = HeraldAdapter::getEnabledAdapterMap($viewer);
     $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();
 
-    if ($this->id) {
-      $id = $this->id;
+    if ($id) {
       $rule = id(new HeraldRuleQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withIDs(array($id))
         ->requireCapabilities(
           array(
@@ -33,7 +25,7 @@ final class HeraldRuleController extends HeraldController {
       $cancel_uri = $this->getApplicationURI("rule/{$id}/");
     } else {
       $rule = new HeraldRule();
-      $rule->setAuthorPHID($user->getPHID());
+      $rule->setAuthorPHID($viewer->getPHID());
       $rule->setMustMatchAll(1);
 
       $content_type = $request->getStr('content_type');
@@ -58,7 +50,7 @@ final class HeraldRuleController extends HeraldController {
       if ($rule->isObjectRule()) {
         $rule->setTriggerObjectPHID($request->getStr('targetPHID'));
         $object = id(new PhabricatorObjectQuery())
-          ->setViewer($user)
+          ->setViewer($viewer)
           ->withPHIDs(array($rule->getTriggerObjectPHID()))
           ->requireCapabilities(
             array(
@@ -128,7 +120,7 @@ final class HeraldRuleController extends HeraldController {
     $rule_type_name = $rule_type_map[$rule->getRuleType()];
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setID('herald-rule-edit-form')
       ->addHiddenInput('content_type', $rule->getContentType())
       ->addHiddenInput('rule_type', $rule->getRuleType())
