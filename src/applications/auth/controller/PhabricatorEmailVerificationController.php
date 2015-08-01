@@ -3,12 +3,6 @@
 final class PhabricatorEmailVerificationController
   extends PhabricatorAuthController {
 
-  private $code;
-
-  public function willProcessRequest(array $data) {
-    $this->code = $data['code'];
-  }
-
   public function shouldRequireEmailVerification() {
     // Since users need to be able to hit this endpoint in order to verify
     // email, we can't ever require email verification here.
@@ -21,11 +15,11 @@ final class PhabricatorEmailVerificationController
     return false;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $code = $request->getURIData('code');
 
-    if ($user->getIsDisabled()) {
+    if ($viewer->getIsDisabled()) {
       // We allowed unapproved and disabled users to hit this controller, but
       // want to kick out disabled users now.
       return new Aphront400Response();
@@ -33,8 +27,8 @@ final class PhabricatorEmailVerificationController
 
     $email = id(new PhabricatorUserEmail())->loadOneWhere(
       'userPHID = %s AND verificationCode = %s',
-      $user->getPHID(),
-      $this->code);
+      $viewer->getPHID(),
+      $code);
 
     $submit = null;
 
@@ -46,7 +40,7 @@ final class PhabricatorEmailVerificationController
         'user. Make sure you followed the link in the email correctly and are '.
         'logged in with the user account associated with the email address.');
       $continue = pht('Rats!');
-    } else if ($email->getIsVerified() && $user->getIsEmailVerified()) {
+    } else if ($email->getIsVerified() && $viewer->getIsEmailVerified()) {
       $title = pht('Address Already Verified');
       $content = pht(
         'This email address has already been verified.');
@@ -54,8 +48,8 @@ final class PhabricatorEmailVerificationController
     } else if ($request->isFormPost()) {
 
       id(new PhabricatorUserEditor())
-        ->setActor($user)
-        ->verifyEmail($user, $email);
+        ->setActor($viewer)
+        ->verifyEmail($viewer, $email);
 
       $title = pht('Address Verified');
       $content = pht(
@@ -72,7 +66,7 @@ final class PhabricatorEmailVerificationController
     }
 
     $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setTitle($title)
       ->addCancelButton('/', $continue)
       ->appendChild($content);

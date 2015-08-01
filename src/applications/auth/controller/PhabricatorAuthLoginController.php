@@ -20,18 +20,14 @@ final class PhabricatorAuthLoginController
     return parent::shouldAllowRestrictedParameter($parameter_name);
   }
 
-  public function willProcessRequest(array $data) {
-    $this->providerKey = $data['pkey'];
-    $this->extraURIData = idx($data, 'extra');
-  }
-
   public function getExtraURIData() {
     return $this->extraURIData;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $this->providerKey = $request->getURIData('pkey');
+    $this->extraURIData = $request->getURIData('extra');
 
     $response = $this->loadProvider();
     if ($response) {

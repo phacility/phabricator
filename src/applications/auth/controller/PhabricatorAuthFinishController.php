@@ -15,9 +15,8 @@ final class PhabricatorAuthFinishController
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     // If the user already has a full session, just kick them out of here.
     $has_partial_session = $viewer->hasSession() &&
