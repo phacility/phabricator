@@ -25,6 +25,10 @@ final class PhabricatorDaemonManagementStartWorkflow
             'name' => 'force',
             'help' => pht('Start daemons even if daemons are already running.'),
           ),
+          array(
+            'name' => 'foreground',
+            'help' => pht('Start daemons in foreground.'),
+          ),
           $this->getAutoscaleReserveArgument(),
         ));
   }
@@ -34,6 +38,7 @@ final class PhabricatorDaemonManagementStartWorkflow
       array(
         'keep-leases' => $args->getArg('keep-leases'),
         'force' => $args->getArg('force'),
+        'foreground' => $args->getArg('foreground'),
         'reserve' => (float)$args->getArg('autoscale-reserve', 0.0),
       ));
   }

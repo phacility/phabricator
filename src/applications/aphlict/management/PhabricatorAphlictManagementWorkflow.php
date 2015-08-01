@@ -21,6 +21,10 @@ abstract class PhabricatorAphlictManagementWorkflow
             'param' => 'port',
             'help'  => pht('Port to bind to for the client server.'),
           ),
+          array(
+            'name' => 'foreground',
+            'help' => pht('Start daemons in foreground.'),
+          ),
         ));
   }
 
@@ -197,10 +201,10 @@ abstract class PhabricatorAphlictManagementWorkflow
     return $root.'/support/aphlict/server/aphlict_server.js';
   }
 
-  final protected function launch() {
+  final protected function launch($is_foreground = false) {
     $console = PhutilConsole::getConsole();
 
-    if ($this->debug) {
+    if ($this->debug || $is_foreground) {
       $console->writeOut(
         "%s\n",
         pht('Starting Aphlict server in foreground...'));
@@ -214,14 +218,14 @@ abstract class PhabricatorAphlictManagementWorkflow
       $this->getAphlictScriptPath(),
       $this->getServerArgv());
 
-    if (!$this->debug) {
+    if (!($this->debug || $is_foreground)) {
       declare(ticks = 1);
       pcntl_signal(SIGINT, array($this, 'cleanup'));
       pcntl_signal(SIGTERM, array($this, 'cleanup'));
     }
     register_shutdown_function(array($this, 'cleanup'));
 
-    if ($this->debug) {
+    if ($this->debug || $is_foreground) {
       $console->writeOut(
         "%s\n\n    $ %s\n\n",
         pht('Launching server:'),
@@ -247,9 +251,17 @@ abstract class PhabricatorAphlictManagementWorkflow
 /* -(  Commands  )----------------------------------------------------------- */
 
 
-  final protected function executeStartCommand() {
+  final protected function executeStartCommand(array $options = array()) {
+    PhutilTypeSpec::checkMap($options, array('foreground' => 'optional bool'));
+
     $console = PhutilConsole::getConsole();
     $this->willLaunch();
+
+    // Do not fork if $is_foreground
+    if (idx($options, 'foreground')) {
+      $this->launch($is_foreground = true);
+      return 0;
+    }
 
     $pid = pcntl_fork();
     if ($pid < 0) {
