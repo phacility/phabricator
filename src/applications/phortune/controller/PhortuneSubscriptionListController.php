@@ -3,29 +3,21 @@
 final class PhortuneSubscriptionListController
   extends PhortuneController {
 
-  private $accountID;
-  private $merchantID;
-  private $queryKey;
-
   private $merchant;
   private $account;
 
-  public function willProcessRequest(array $data) {
-    $this->merchantID = idx($data, 'merchantID');
-    $this->accountID = idx($data, 'accountID');
-    $this->queryKey = idx($data, 'queryKey');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $querykey = $request->getURIData('queryKey');
+    $merchant_id = $request->getURIData('merchantID');
+    $account_id = $request->getURIData('accountID');
 
     $engine = new PhortuneSubscriptionSearchEngine();
 
-    if ($this->merchantID) {
+    if ($merchant_id) {
       $merchant = id(new PhortuneMerchantQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->merchantID))
+        ->withIDs(array($merchant_id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -38,10 +30,10 @@ final class PhortuneSubscriptionListController
       $this->merchant = $merchant;
       $viewer->grantAuthority($merchant);
       $engine->setMerchant($merchant);
-    } else if ($this->accountID) {
+    } else if ($account_id) {
       $account = id(new PhortuneAccountQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->accountID))
+        ->withIDs(array($account_id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -58,7 +50,7 @@ final class PhortuneSubscriptionListController
     }
 
     $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($this->queryKey)
+      ->setQueryKey($querykey)
       ->setSearchEngine($engine)
       ->setNavigation($this->buildSideNavView());
 
@@ -66,7 +58,7 @@ final class PhortuneSubscriptionListController
   }
 
   public function buildSideNavView() {
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));

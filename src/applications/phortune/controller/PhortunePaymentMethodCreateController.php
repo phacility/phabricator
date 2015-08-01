@@ -3,19 +3,13 @@
 final class PhortunePaymentMethodCreateController
   extends PhortuneController {
 
-  private $accountID;
-
-  public function willProcessRequest(array $data) {
-    $this->accountID = $data['accountID'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $account_id = $request->getURIData('accountID');
 
     $account = id(new PhortuneAccountQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->accountID))
+      ->withIDs(array($account_id))
       ->executeOne();
     if (!$account) {
       return new Aphront404Response();
