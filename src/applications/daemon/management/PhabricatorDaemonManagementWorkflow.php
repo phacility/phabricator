@@ -117,7 +117,8 @@ abstract class PhabricatorDaemonManagementWorkflow
   final protected function launchDaemons(
     array $daemons,
     $debug,
-    $run_as_current_user = false) {
+    $run_as_current_user = false,
+    $is_foreground = false) {
 
     // Convert any shorthand classnames like "taskmaster" into proper class
     // names.
@@ -176,7 +177,7 @@ abstract class PhabricatorDaemonManagementWorkflow
 
     $config = array();
 
-    if (!$debug) {
+    if (!$debug && !$is_foreground) {
       $config['daemonize'] = true;
     }
 
@@ -199,7 +200,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     $phabricator_root = dirname(phutil_get_library_root('phabricator'));
     $daemon_script_dir = $phabricator_root.'/scripts/daemon/';
 
-    if ($debug) {
+    if ($debug || $is_foreground) {
       // Don't terminate when the user sends ^C; it will be sent to the
       // subprocess which will terminate normally.
       pcntl_signal(
@@ -313,6 +314,7 @@ abstract class PhabricatorDaemonManagementWorkflow
       array(
         'keep-leases' => 'optional bool',
         'force' => 'optional bool',
+        'foreground' => 'optional bool',
         'reserve' => 'optional float',
       ));
 
@@ -371,7 +373,10 @@ abstract class PhabricatorDaemonManagementWorkflow
       ),
     );
 
-    $this->launchDaemons($daemons, $is_debug = false);
+    $this->launchDaemons($daemons,
+    $is_debug = false,
+    $run_as_current_user = false,
+    $is_foreground = idx($options, 'foreground'));
 
     $console->writeErr("%s\n", pht('Done.'));
     return 0;
