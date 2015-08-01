@@ -12,7 +12,9 @@ final class PhabricatorAphlictManagementStartWorkflow
 
   public function execute(PhutilArgumentParser $args) {
     parent::execute($args);
-    return $this->executeStartCommand();
+    return $this->executeStartCommand(array(
+      'foreground' => $args->getArg('foreground')
+    ));
   }
 
 }
