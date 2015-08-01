@@ -2,29 +2,23 @@
 
 final class PhabricatorPasteEditController extends PhabricatorPasteController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $parent = null;
     $parent_id = null;
-    if (!$this->id) {
+    if (!$id) {
       $is_create = true;
 
-      $paste = PhabricatorPaste::initializeNewPaste($user);
+      $paste = PhabricatorPaste::initializeNewPaste($viewer);
 
       $parent_id = $request->getStr('parent');
       if ($parent_id) {
         // NOTE: If the Paste is forked from a paste which the user no longer
         // has permission to see, we still let them edit it.
         $parent = id(new PhabricatorPasteQuery())
-          ->setViewer($user)
+          ->setViewer($viewer)
           ->withIDs(array($parent_id))
           ->needContent(true)
           ->needRawContent(true)
@@ -37,19 +31,19 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
         }
       }
 
-      $paste->setAuthorPHID($user->getPHID());
+      $paste->setAuthorPHID($viewer->getPHID());
       $paste->attachRawContent('');
     } else {
       $is_create = false;
 
       $paste = id(new PhabricatorPasteQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
             PhabricatorPolicyCapability::CAN_EDIT,
           ))
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->needRawContent(true)
         ->executeOne();
       if (!$paste) {
@@ -97,7 +91,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
 
       if ($is_create || ($v_text !== $paste->getRawContent())) {
         $file = PhabricatorPasteEditor::initializeFileForPaste(
-          $user,
+          $viewer,
           $v_title,
           $v_text);
 
@@ -129,7 +123,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
         ->setNewValue(array('=' => array_fuse($v_projects)));
 
       $editor = id(new PhabricatorPasteEditor())
-        ->setActor($user)
+        ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true);
 
@@ -148,7 +142,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
     ) + PhabricatorEnv::getEnvConfig('pygments.dropdown-choices');
 
     $form
-      ->setUser($user)
+      ->setUser($viewer)
       ->addHiddenInput('parent', $parent_id)
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -163,13 +157,13 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
           ->setOptions($langs));
 
     $policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->setObject($paste)
       ->execute();
 
     $form->appendChild(
       id(new AphrontFormPolicyControl())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
         ->setPolicyObject($paste)
         ->setPolicies($policies)
@@ -179,7 +173,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
 
     $form->appendChild(
       id(new AphrontFormPolicyControl())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
         ->setPolicyObject($paste)
         ->setPolicies($policies)
