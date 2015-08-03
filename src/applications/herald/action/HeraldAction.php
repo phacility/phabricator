@@ -8,12 +8,15 @@ abstract class HeraldAction extends Phobject {
 
   const STANDARD_NONE = 'standard.none';
   const STANDARD_PHID_LIST = 'standard.phid.list';
+  const STANDARD_TEXT = 'standard.text';
 
   const DO_STANDARD_EMPTY = 'do.standard.empty';
   const DO_STANDARD_NO_EFFECT = 'do.standard.no-effect';
   const DO_STANDARD_INVALID = 'do.standard.invalid';
   const DO_STANDARD_UNLOADABLE = 'do.standard.unloadable';
   const DO_STANDARD_PERMISSION = 'do.standard.permission';
+  const DO_STANDARD_INVALID_ACTION = 'do.standard.invalid-action';
+  const DO_STANDARD_WRONG_RULE_TYPE = 'do.standard.wrong-rule-type';
 
   abstract public function getHeraldActionName();
   abstract public function supportsObject($object);
@@ -48,6 +51,8 @@ abstract class HeraldAction extends Phobject {
     switch ($this->getHeraldActionStandardType()) {
       case self::STANDARD_NONE:
         return new HeraldEmptyFieldValue();
+      case self::STANDARD_TEXT:
+        return new HeraldTextFieldValue();
       case self::STANDARD_PHID_LIST:
         $tokenizer = id(new HeraldTokenizerFieldValue())
           ->setKey($this->getHeraldActionName())
@@ -324,6 +329,16 @@ abstract class HeraldAction extends Phobject {
         'color' => 'red',
         'name' => pht('No Permission'),
       ),
+      self::DO_STANDARD_INVALID_ACTION => array(
+        'icon' => 'fa-ban',
+        'color' => 'red',
+        'name' => pht('Invalid Action'),
+      ),
+      self::DO_STANDARD_WRONG_RULE_TYPE => array(
+        'icon' => 'fa-ban',
+        'color' => 'red',
+        'name' => pht('Wrong Rule Type'),
+      ),
     );
   }
 
@@ -357,6 +372,14 @@ abstract class HeraldAction extends Phobject {
           '%s target(s) do not have permission to see this object: %s.',
           new PhutilNumber(count($data)),
           $this->renderHandleList($data));
+      case self::DO_STANDARD_INVALID_ACTION:
+        return pht(
+          'No implementation is available for rule "%s".',
+          $data);
+      case self::DO_STANDARD_WRONG_RULE_TYPE:
+        return pht(
+          'This action does not support rules of type "%s".',
+          $data);
     }
 
     return null;

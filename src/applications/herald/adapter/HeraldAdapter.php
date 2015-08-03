@@ -26,12 +26,9 @@ abstract class HeraldAdapter extends Phobject {
   const CONDITION_IS_TRUE         = 'true';
   const CONDITION_IS_FALSE        = 'false';
 
-  const ACTION_BLOCK = 'block';
-
   private $contentSource;
   private $isNewObject;
   private $applicationEmail;
-  private $customActions = null;
   private $queuedTransactions = array();
   private $emailPHIDs = array();
   private $forcedEmailPHIDs = array();
@@ -53,37 +50,6 @@ abstract class HeraldAdapter extends Phobject {
       $this->forcedEmailPHIDs[$phid] = $phid;
     }
     return $this;
-  }
-
-  public function getCustomActions() {
-    if ($this->customActions === null) {
-      $custom_actions = id(new PhutilSymbolLoader())
-        ->setAncestorClass('HeraldCustomAction')
-        ->loadObjects();
-
-      foreach ($custom_actions as $key => $object) {
-        if (!$object->appliesToAdapter($this)) {
-          unset($custom_actions[$key]);
-        }
-      }
-
-      $this->customActions = array();
-      foreach ($custom_actions as $action) {
-        $key = $action->getActionKey();
-
-        if (array_key_exists($key, $this->customActions)) {
-          throw new Exception(
-            pht(
-              "More than one Herald custom action implementation ".
-              "handles the action key: '%s'.",
-              $key));
-        }
-
-        $this->customActions[$key] = $action;
-      }
-    }
-
-    return $this->customActions;
   }
 
   public function setContentSource(PhabricatorContentSource $content_source) {
@@ -143,19 +109,6 @@ abstract class HeraldAdapter extends Phobject {
     }
 
     return $result;
-  }
-
-  protected function handleCustomHeraldEffect(HeraldEffect $effect) {
-    $custom_action = idx($this->getCustomActions(), $effect->getAction());
-
-    if ($custom_action !== null) {
-      return $custom_action->applyEffect(
-        $this,
-        $this->getObject(),
-        $effect);
-    }
-
-    return null;
   }
 
   public function isAvailableToUser(PhabricatorUser $viewer) {
@@ -654,6 +607,20 @@ abstract class HeraldAdapter extends Phobject {
     return $this->actionMap;
   }
 
+  private function requireActionImplementation($action_key) {
+    $action = $this->getActionImplementation($action_key);
+
+    if (!$action) {
+      throw new Exception(
+        pht(
+          'No action with key "%s" is available to Herald adapter "%s".',
+          $action_key,
+          get_class($this)));
+    }
+
+    return $action;
+  }
+
   private function getActionsForRuleType($rule_type) {
     $actions = $this->getActionImplementationMap();
 
@@ -683,22 +650,8 @@ abstract class HeraldAdapter extends Phobject {
     return $action->getActionGroupKey();
   }
 
-  public function getCustomActionsForRuleType($rule_type) {
-    $results = array();
-    foreach ($this->getCustomActions() as $custom_action) {
-      if ($custom_action->appliesToRuleType($rule_type)) {
-        $results[] = $custom_action;
-      }
-    }
-    return $results;
-  }
-
   public function getActions($rule_type) {
-    $custom_actions = $this->getCustomActionsForRuleType($rule_type);
-    $custom_actions = mpull($custom_actions, 'getActionKey');
-
-    $actions = $custom_actions;
-
+    $actions = array();
     foreach ($this->getActionsForRuleType($rule_type) as $key => $action) {
       $actions[] = $key;
     }
@@ -707,62 +660,21 @@ abstract class HeraldAdapter extends Phobject {
   }
 
   public function getActionNameMap($rule_type) {
-    switch ($rule_type) {
-      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
-      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
-        $standard = array(
-          self::ACTION_BLOCK => pht('Block change with message'),
-        );
-        break;
-      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-        $standard = array(
-        );
-        break;
-      default:
-        throw new Exception(pht("Unknown rule type '%s'!", $rule_type));
-    }
-
-    $custom_actions = $this->getCustomActionsForRuleType($rule_type);
-    $standard += mpull($custom_actions, 'getActionName', 'getActionKey');
-
+    $map = array();
     foreach ($this->getActionsForRuleType($rule_type) as $key => $action) {
-      $standard[$key] = $action->getHeraldActionName();
+      $map[$key] = $action->getHeraldActionName();
     }
 
-    return $standard;
+    return $map;
   }
 
   public function willSaveAction(
     HeraldRule $rule,
     HeraldActionRecord $action) {
 
-    $impl = $this->getActionImplementation($action->getAction());
-    if ($impl) {
-      $target = $action->getTarget();
-      $target = $impl->willSaveActionValue($target);
-      $action->setTarget($target);
-      return;
-    }
-
+    $impl = $this->requireActionImplementation($action->getAction());
     $target = $action->getTarget();
-    if (is_array($target)) {
-      $target = array_keys($target);
-    }
-
-    $author_phid = $rule->getAuthorPHID();
-
-    $rule_type = $rule->getRuleType();
-    if ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
-      switch ($action->getAction()) {
-        case self::ACTION_BLOCK:
-          break;
-        default:
-          throw new HeraldInvalidActionException(
-            pht(
-              'Unrecognized action type "%s"!',
-              $action->getAction()));
-      }
-    }
+    $target = $impl->willSaveActionValue($target);
 
     $action->setTarget($target);
   }
@@ -778,26 +690,8 @@ abstract class HeraldAdapter extends Phobject {
   }
 
   public function getValueTypeForAction($action, $rule_type) {
-    $impl = $this->getActionImplementation($action);
-    if ($impl) {
-      return $impl->getHeraldActionValueType();
-    }
-
-    $is_personal = ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL);
-
-    if (!$is_personal) {
-      switch ($action) {
-        case self::ACTION_BLOCK:
-          return new HeraldTextFieldValue();
-      }
-    }
-
-    $custom_action = idx($this->getCustomActions(), $action);
-    if ($custom_action !== null) {
-      return $custom_action->getActionType();
-    }
-
-    throw new Exception(pht("Unknown or invalid action '%s'.", $action));
+    $impl = $this->requireActionImplementation($action);
+    return $impl->getHeraldActionValueType();
   }
 
   private function buildTokenizerFieldValue(
@@ -1113,38 +1007,32 @@ abstract class HeraldAdapter extends Phobject {
     $rule_type = $effect->getRule()->getRuleType();
 
     $impl = $this->getActionImplementation($action);
-    if ($impl) {
-      if ($impl->supportsRuleType($rule_type)) {
-        $impl->applyEffect($this->getObject(), $effect);
-        return $impl->getApplyTranscript($effect);
-      }
-    }
-
-    $supported = $this->getActions($rule_type);
-    $supported = array_fuse($supported);
-    if (empty($supported[$action])) {
+    if (!$impl) {
       return new HeraldApplyTranscript(
         $effect,
         false,
-        pht(
-          'Adapter "%s" does not support action "%s" for rule type "%s".',
-          get_class($this),
-          $action,
-          $rule_type));
+        array(
+          array(
+            HeraldAction::DO_STANDARD_INVALID_ACTION,
+            $action,
+          ),
+        ));
     }
 
-    $result = $this->handleCustomHeraldEffect($effect);
-
-    if (!$result) {
+    if (!$impl->supportsRuleType($rule_type)) {
       return new HeraldApplyTranscript(
         $effect,
         false,
-        pht(
-          'No custom action exists to handle rule action "%s".',
-          $action));
+        array(
+          array(
+            HeraldAction::DO_STANDARD_WRONG_RULE_TYPE,
+            $rule_type,
+          ),
+        ));
     }
 
-    return $result;
+    $impl->applyEffect($this->getObject(), $effect);
+    return $impl->getApplyTranscript($effect);
   }
 
   public function loadEdgePHIDs($type) {
