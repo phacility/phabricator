@@ -23,6 +23,8 @@ abstract class HeraldAction extends Phobject {
   abstract public function supportsRuleType($rule_type);
   abstract public function applyEffect($object, HeraldEffect $effect);
 
+  abstract public function renderActionDescription($value);
+
   protected function renderActionEffectDescription($type, $data) {
     return null;
   }
