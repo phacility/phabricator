@@ -3,11 +3,7 @@
 abstract class DifferentialReviewersHeraldAction
   extends HeraldAction {
 
-  const DO_NO_TARGETS = 'do.no-targets';
   const DO_AUTHORS = 'do.authors';
-  const DO_INVALID = 'do.invalid';
-  const DO_ALREADY_REVIEWERS = 'do.already-reviewers';
-  const DO_PERMISSION = 'do.permission';
   const DO_ADD_REVIEWERS = 'do.add-reviewers';
   const DO_ADD_BLOCKING_REVIEWERS = 'do.add-blocking-reviewers';
 
@@ -24,10 +20,6 @@ abstract class DifferentialReviewersHeraldAction
     $object = $adapter->getObject();
 
     $phids = array_fuse($phids);
-    if (!$phids) {
-      $this->logEffect(self::DO_NO_TARGETS);
-      return;
-    }
 
     // Don't try to add revision authors as reviewers.
     $authors = array();
@@ -40,10 +32,9 @@ abstract class DifferentialReviewersHeraldAction
 
     if ($authors) {
       $this->logEffect(self::DO_AUTHORS, $authors);
-    }
-
-    if (!$phids) {
-      return;
+      if (!$phids) {
+        return;
+      }
     }
 
     $reviewers = $object->getReviewerStatus();
@@ -58,7 +49,7 @@ abstract class DifferentialReviewersHeraldAction
     $new_strength = DifferentialReviewerStatus::getStatusStrength(
       $new_status);
 
-    $already = array();
+    $current = array();
     foreach ($phids as $phid) {
       if (!isset($reviewers[$phid])) {
         continue;
@@ -72,65 +63,20 @@ abstract class DifferentialReviewersHeraldAction
         continue;
       }
 
-      $already[] = $phid;
-      unset($phids[$phid]);
+      $current[] = $phid;
     }
 
-    if ($already) {
-      $this->logEffect(self::DO_ALREADY_REVIEWERS, $already);
-    }
+    $allowed_types = array(
+      PhabricatorPeopleUserPHIDType::TYPECONST,
+      PhabricatorProjectProjectPHIDType::TYPECONST,
+    );
 
-    if (!$phids) {
+    $targets = $this->loadStandardTargets($phids, $allowed_types, $current);
+    if (!$targets) {
       return;
     }
 
-    $targets = id(new PhabricatorObjectQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPHIDs($phids)
-      ->execute();
-    $targets = mpull($targets, null, 'getPHID');
-
-    $invalid = array();
-    foreach ($phids as $phid) {
-      if (empty($targets[$phid])) {
-        $invalid[] = $phid;
-        unset($phids[$phid]);
-      }
-    }
-
-    if ($invalid) {
-      $this->logEffect(self::DO_INVALID, $invalid);
-    }
-
-    if (!$phids) {
-      return;
-    }
-
-    $no_access = array();
-    foreach ($targets as $phid => $target) {
-      if (!($target instanceof PhabricatorUser)) {
-        continue;
-      }
-
-      $can_view = PhabricatorPolicyFilter::hasCapability(
-        $target,
-        $object,
-        PhabricatorPolicyCapability::CAN_VIEW);
-      if ($can_view) {
-        continue;
-      }
-
-      $no_access[] = $phid;
-      unset($phids[$phid]);
-    }
-
-    if ($no_access) {
-      $this->logEffect(self::DO_PERMISSION, $no_access);
-    }
-
-    if (!$phids) {
-      return;
-    }
+    $phids = array_fuse(array_keys($targets));
 
     $value = array();
     foreach ($phids as $phid) {
@@ -162,30 +108,10 @@ abstract class DifferentialReviewersHeraldAction
 
   protected function getActionEffectMap() {
     return array(
-      self::DO_NO_TARGETS => array(
-        'icon' => 'fa-ban',
-        'color' => 'grey',
-        'name' => pht('No Targets'),
-      ),
       self::DO_AUTHORS => array(
         'icon' => 'fa-user',
         'color' => 'grey',
         'name' => pht('Revision Author'),
-      ),
-      self::DO_INVALID => array(
-        'icon' => 'fa-ban',
-        'color' => 'red',
-        'name' => pht('Invalid Targets'),
-      ),
-      self::DO_ALREADY_REVIEWERS => array(
-        'icon' => 'fa-user',
-        'color' => 'grey',
-        'name' => pht('Already Reviewers'),
-      ),
-      self::DO_PERMISSION => array(
-        'icon' => 'fa-ban',
-        'color' => 'red',
-        'name' => pht('No Permission'),
       ),
       self::DO_ADD_REVIEWERS => array(
         'icon' => 'fa-user',
@@ -202,26 +128,9 @@ abstract class DifferentialReviewersHeraldAction
 
   protected function renderActionEffectDescription($type, $data) {
     switch ($type) {
-      case self::DO_NO_TARGETS:
-        return pht('Rule lists no targets.');
       case self::DO_AUTHORS:
         return pht(
           'Declined to add revision author as reviewer: %s.',
-          $this->renderHandleList($data));
-      case self::DO_INVALID:
-        return pht(
-          'Declined to act on %s invalid target(s): %s.',
-          new PhutilNumber(count($data)),
-          $this->renderHandleList($data));
-      case self::DO_ALREADY_REVIEWERS:
-        return pht(
-          '%s target(s) were already reviewers: %s.',
-          new PhutilNumber(count($data)),
-          $this->renderHandleList($data));
-      case self::DO_PERMISSION:
-        return pht(
-          '%s target(s) do not have permission to see the revision: %s.',
-          new PhutilNumber(count($data)),
           $this->renderHandleList($data));
       case self::DO_ADD_REVIEWERS:
         return pht(

@@ -3,9 +3,6 @@
 final class LegalpadRequireSignatureHeraldAction
   extends HeraldAction {
 
-  const DO_NO_TARGETS = 'do.no-targets';
-  const DO_ALREADY_REQUIRED = 'do.already-required';
-  const DO_INVALID = 'do.invalid';
   const DO_SIGNED = 'do.signed';
   const DO_REQUIRED = 'do.required';
 
@@ -24,54 +21,20 @@ final class LegalpadRequireSignatureHeraldAction
 
   protected function applyRequire(array $phids) {
     $adapter = $this->getAdapter();
+
     $edgetype_legal = LegalpadObjectNeedsSignatureEdgeType::EDGECONST;
-
-    $phids = array_fuse($phids);
-
-    if (!$phids) {
-      $this->logEffect(self::DO_NO_TARGETS);
-      return;
-    }
-
     $current = $adapter->loadEdgePHIDs($edgetype_legal);
 
-    $already = array();
-    foreach ($phids as $phid) {
-      if (isset($current[$phid])) {
-        $already[] = $phid;
-        unset($phids[$phid]);
-      }
-    }
+    $allowed_types = array(
+      PhabricatorLegalpadDocumentPHIDType::TYPECONST,
+    );
 
-    if ($already) {
-      $this->logEffect(self::DO_ALREADY_REQUIRED, $phids);
-    }
-
-    if (!$phids) {
+    $targets = $this->loadStandardTargets($phids, $allowed_types, $current);
+    if (!$targets) {
       return;
     }
 
-    $documents = id(new LegalpadDocumentQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPHIDs($phids)
-      ->execute();
-    $documents = mpull($documents, null, 'getPHID');
-
-    $invalid = array();
-    foreach ($phids as $phid) {
-      if (empty($documents[$phid])) {
-        $invalid[] = $phid;
-        unset($documents[$phid]);
-      }
-    }
-
-    if ($invalid) {
-      $this->logEffect(self::DO_INVALID, $phids);
-    }
-
-    if (!$phids) {
-      return;
-    }
+    $phids = array_fuse(array_keys($targets));
 
     $object = $adapter->getObject();
     $author_phid = $object->getAuthorPHID();
@@ -114,21 +77,6 @@ final class LegalpadRequireSignatureHeraldAction
 
   protected function getActionEffectMap() {
     return array(
-      self::DO_NO_TARGETS => array(
-        'icon' => 'fa-ban',
-        'color' => 'grey',
-        'name' => pht('No Targets'),
-      ),
-      self::DO_INVALID => array(
-        'icon' => 'fa-ban',
-        'color' => 'red',
-        'name' => pht('Invalid Targets'),
-      ),
-      self::DO_ALREADY_REQUIRED => array(
-        'icon' => 'fa-terminal',
-        'color' => 'grey',
-        'name' => pht('Already Required'),
-      ),
       self::DO_SIGNED => array(
         'icon' => 'fa-terminal',
         'color' => 'green',
@@ -144,18 +92,6 @@ final class LegalpadRequireSignatureHeraldAction
 
   protected function renderActionEffectDescription($type, $data) {
     switch ($type) {
-      case self::DO_NO_TARGETS:
-        return pht('Rule lists no targets.');
-      case self::DO_INVALID:
-        return pht(
-          '%s document(s) are not valid: %s.',
-          new PhutilNumber(count($data)),
-          $this->renderHandleList($data));
-      case self::DO_ALREADY_REQUIRED:
-        return pht(
-          '%s document signature(s) are already required: %s.',
-          new PhutilNumber(count($data)),
-          $this->renderHandleList($data));
       case self::DO_SIGNED:
         return pht(
           '%s document(s) are already signed: %s.',

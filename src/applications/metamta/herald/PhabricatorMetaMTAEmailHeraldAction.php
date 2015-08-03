@@ -24,6 +24,22 @@ abstract class PhabricatorMetaMTAEmailHeraldAction
   protected function applyEmail(array $phids, $force) {
     $adapter = $this->getAdapter();
 
+    $allowed_types = array(
+      PhabricatorPeopleUserPHIDType::TYPECONST,
+      PhabricatorProjectProjectPHIDType::TYPECONST,
+    );
+
+    // There's no stateful behavior for this action: we always just send an
+    // email.
+    $current = array();
+
+    $targets = $this->loadStandardTargets($phids, $allowed_types, $current);
+    if (!$targets) {
+      return;
+    }
+
+    $phids = array_fuse(array_keys($targets));
+
     foreach ($phids as $phid) {
       $adapter->addEmailPHID($phid, $force);
     }

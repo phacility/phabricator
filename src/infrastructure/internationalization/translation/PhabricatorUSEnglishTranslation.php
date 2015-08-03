@@ -1348,6 +1348,16 @@ final class PhabricatorUSEnglishTranslation
         'Added auditors: %2$s.',
       ),
 
+      '%s target(s) do not have permission to see this object: %s.' => array(
+        'A target does not have permission to see this object: %2$s.',
+        'Targets do not have permission to see this object: %2$s.',
+      ),
+
+      'This action has no effect on %s target(s): %s.' => array(
+        'This action has no effect on a target: %2$s.',
+        'This action has no effect on targets: %2$s.',
+      ),
+
     );
   }
 

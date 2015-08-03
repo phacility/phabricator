@@ -3,10 +3,6 @@
 abstract class PhabricatorProjectHeraldAction
   extends HeraldAction {
 
-  const DO_NO_TARGETS = 'do.no-targets';
-  const DO_INVALID = 'do.invalid';
-  const DO_ALREADY_ASSOCIATED = 'do.already-associated';
-  const DO_ALREADY_UNASSOCIATED = 'do.already-unassociated';
   const DO_ADD_PROJECTS = 'do.add-projects';
   const DO_REMOVE_PROJECTS = 'do.remove-projects';
 
@@ -23,38 +19,24 @@ abstract class PhabricatorProjectHeraldAction
   }
 
   protected function applyProjects(array $phids, $is_add) {
-    $phids = array_fuse($phids);
     $adapter = $this->getAdapter();
 
-    if (!$phids) {
-      $this->logEffect(self::DO_NO_TARGETS);
+    $allowed_types = array(
+      PhabricatorProjectProjectPHIDType::TYPECONST,
+    );
+
+    // Detection of "No Effect" is a bit tricky for this action, so just do it
+    // manually a little later on.
+    $current = array();
+
+    $targets = $this->loadStandardTargets($phids, $allowed_types, $current);
+    if (!$targets) {
       return;
     }
 
-    $projects = id(new PhabricatorProjectQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPHIDs($phids)
-      ->execute();
-    $projects = mpull($projects, null, 'getPHID');
-
-    $invalid = array();
-    foreach ($phids as $phid) {
-      if (empty($projects[$phid])) {
-        $invalid[] = $phid;
-        unset($phids[$phid]);
-      }
-    }
-
-    if ($invalid) {
-      $this->logEffect(self::DO_INVALID, $invalid);
-    }
-
-    if (!$phids) {
-      return;
-    }
+    $phids = array_fuse(array_keys($targets));
 
     $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
-
     $current = $adapter->loadEdgePHIDs($project_type);
 
     if ($is_add) {
@@ -67,7 +49,7 @@ abstract class PhabricatorProjectHeraldAction
       }
 
       if ($already) {
-        $this->logEffect(self::DO_ALREADY_ASSOCIATED, $already);
+        $this->logEffect(self::DO_STANDARD_NO_EFFECT, $already);
       }
     } else {
       $already = array();
@@ -79,7 +61,7 @@ abstract class PhabricatorProjectHeraldAction
       }
 
       if ($already) {
-        $this->logEffect(self::DO_ALREADY_UNASSOCIATED, $already);
+        $this->logEffect(self::DO_STANDARD_NO_EFFECT, $already);
       }
     }
 
@@ -112,26 +94,6 @@ abstract class PhabricatorProjectHeraldAction
 
   protected function getActionEffectMap() {
     return array(
-      self::DO_NO_TARGETS => array(
-        'icon' => 'fa-ban',
-        'color' => 'grey',
-        'name' => pht('No Targets'),
-      ),
-      self::DO_INVALID => array(
-        'icon' => 'fa-ban',
-        'color' => 'red',
-        'name' => pht('Invalid Targets'),
-      ),
-      self::DO_ALREADY_ASSOCIATED => array(
-        'icon' => 'fa-chevron-right',
-        'color' => 'grey',
-        'name' => pht('Already Associated'),
-      ),
-      self::DO_ALREADY_UNASSOCIATED => array(
-        'icon' => 'fa-chevron-right',
-        'color' => 'grey',
-        'name' => pht('Already Unassociated'),
-      ),
       self::DO_ADD_PROJECTS => array(
         'icon' => 'fa-briefcase',
         'color' => 'green',
@@ -147,23 +109,6 @@ abstract class PhabricatorProjectHeraldAction
 
   protected function renderActionEffectDescription($type, $data) {
     switch ($type) {
-      case self::DO_NO_TARGETS:
-        return pht('Rule lists no projects.');
-      case self::DO_INVALID:
-        return pht(
-          'Declined to act on %s invalid project(s): %s.',
-          new PhutilNumber(count($data)),
-          $this->renderHandleList($data));
-      case self::DO_ALREADY_ASSOCIATED:
-        return pht(
-          '%s project(s) are already associated: %s.',
-          new PhutilNumber(count($data)),
-          $this->renderHandleList($data));
-      case self::DO_ALREADY_UNASSOCIATED:
-        return pht(
-          '%s project(s) are not associated: %s.',
-          new PhutilNumber(count($data)),
-          $this->renderHandleList($data));
       case self::DO_ADD_PROJECTS:
         return pht(
           'Added %s project(s): %s.',

@@ -3,10 +3,6 @@
 abstract class ManiphestTaskAssignHeraldAction
   extends HeraldAction {
 
-  const DO_EMPTY = 'do.send';
-  const DO_ALREADY = 'do.already';
-  const DO_INVALID = 'do.invalid';
-  const DO_PERMISSION = 'do.permission';
   const DO_ASSIGN = 'do.assign';
 
   public function supportsObject($object) {
@@ -18,38 +14,21 @@ abstract class ManiphestTaskAssignHeraldAction
   }
 
   protected function applyAssign(array $phids) {
-    $phid = head($phids);
-
-    if (!$phid) {
-      $this->logEffect(self::DO_EMPTY);
-      return;
-    }
-
     $adapter = $this->getAdapter();
     $object = $adapter->getObject();
 
-    if ($object->getOwnerPHID() == $phid) {
-      $this->logEffect(self::DO_ALREADY, array($phid));
+    $current = array($object->getOwnerPHID());
+
+    $allowed_types = array(
+      PhabricatorPeopleUserPHIDType::TYPECONST,
+    );
+
+    $targets = $this->loadStandardTargets($phids, $allowed_types, $current);
+    if (!$targets) {
       return;
     }
 
-    $user = id(new PhabricatorPeopleQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPHIDs(array($phid))
-      ->executeOne();
-    if (!$user) {
-      $this->logEffect(self::DO_INVALID, array($phid));
-      return;
-    }
-
-    $can_view = PhabricatorPolicyFilter::hasCapability(
-      $user,
-      $object,
-      PhabricatorPolicyCapability::CAN_VIEW);
-    if (!$can_view) {
-      $this->logEffect(self::DO_PERMISSION, array($phid));
-      return;
-    }
+    $phid = head_key($targets);
 
     $xaction = $adapter->newTransaction()
       ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
@@ -62,26 +41,6 @@ abstract class ManiphestTaskAssignHeraldAction
 
   protected function getActionEffectMap() {
     return array(
-      self::DO_EMPTY => array(
-        'icon' => 'fa-ban',
-        'color' => 'grey',
-        'name' => pht('Empty Action'),
-      ),
-      self::DO_ALREADY => array(
-        'icon' => 'fa-user',
-        'color' => 'grey',
-        'name' => pht('Already Assigned'),
-      ),
-      self::DO_INVALID => array(
-        'icon' => 'fa-ban',
-        'color' => 'red',
-        'name' => pht('Invalid Owner'),
-      ),
-      self::DO_PERMISSION => array(
-        'icon' => 'fa-ban',
-        'color' => 'red',
-        'name' => pht('No Permission'),
-      ),
       self::DO_ASSIGN => array(
         'icon' => 'fa-user',
         'color' => 'green',
@@ -92,20 +51,6 @@ abstract class ManiphestTaskAssignHeraldAction
 
   protected function renderActionEffectDescription($type, $data) {
     switch ($type) {
-      case self::DO_EMPTY:
-        return pht('Action lists no user to assign.');
-      case self::DO_ALREADY:
-        return pht(
-          'User is already task owner: %s.',
-          $this->renderHandleList($data));
-      case self::DO_INVALID:
-        return pht(
-          'User is invalid: %s.',
-          $this->renderHandleList($data));
-      case self::DO_PERMISSION:
-        return pht(
-          'User does not have permission to see task: %s.',
-          $this->renderHandleList($data));
       case self::DO_ASSIGN:
         return pht(
           'Assigned task to: %s.',
