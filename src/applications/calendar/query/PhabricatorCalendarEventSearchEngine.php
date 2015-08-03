@@ -287,10 +287,21 @@ final class PhabricatorCalendarEventSearchEngine
           $event->getDuration());
       }
 
+      if ($event->getIsGhostEvent()) {
+        $title_text = $event->getMonogram()
+          .' ('
+          .$event->getSequenceIndex()
+          .'): '
+          .$event->getName();
+      } else {
+        $title_text = $event->getMonogram().': '.$event->getName();
+      }
+
       $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
         ->setObject($event)
-        ->setHeader($viewer->renderHandle($event->getPHID())->render())
+        ->setHeader($title_text)
+        ->setHref($event->getURI())
         ->addAttribute($event_date_info)
         ->addAttribute($attendees)
         ->addIcon('none', $duration);
