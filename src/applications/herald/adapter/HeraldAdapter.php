@@ -878,7 +878,9 @@ abstract class HeraldAdapter extends Phobject {
 
     return array(
       $field_name,
+      ' ',
       $condition_name,
+      ' ',
       $value,
     );
   }
