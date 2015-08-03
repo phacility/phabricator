@@ -10,8 +10,8 @@ final class PhabricatorAuthOneTimeLoginController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
     $id = $request->getURIData('id');
-    $link_type = $request->getURIData('key');
-    $key = $request->getURIData('type');
+    $link_type = $request->getURIData('type');
+    $key = $request->getURIData('key');
     $email_id = $request->getURIData('emailID');
 
     if ($request->getUser()->isLoggedIn()) {
