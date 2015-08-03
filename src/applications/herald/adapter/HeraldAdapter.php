@@ -26,7 +26,6 @@ abstract class HeraldAdapter extends Phobject {
   const CONDITION_IS_TRUE         = 'true';
   const CONDITION_IS_FALSE        = 'false';
 
-  const ACTION_AUDIT        = 'audit';
   const ACTION_BLOCK = 'block';
 
   private $contentSource;
@@ -712,13 +711,11 @@ abstract class HeraldAdapter extends Phobject {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
       case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
         $standard = array(
-          self::ACTION_AUDIT        => pht('Trigger an Audit by'),
           self::ACTION_BLOCK => pht('Block change with message'),
         );
         break;
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         $standard = array(
-          self::ACTION_AUDIT        => pht('Trigger an Audit by me'),
         );
         break;
       default:
@@ -757,8 +754,6 @@ abstract class HeraldAdapter extends Phobject {
     $rule_type = $rule->getRuleType();
     if ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
       switch ($action->getAction()) {
-        case self::ACTION_AUDIT:
-          break;
         case self::ACTION_BLOCK:
           break;
         default:
@@ -790,14 +785,8 @@ abstract class HeraldAdapter extends Phobject {
 
     $is_personal = ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL);
 
-    if ($is_personal) {
+    if (!$is_personal) {
       switch ($action) {
-        case self::ACTION_AUDIT:
-          return new HeraldEmptyFieldValue();
-      }
-    } else {
-      switch ($action) {
-        case self::ACTION_AUDIT:
         case self::ACTION_BLOCK:
           return new HeraldTextFieldValue();
       }

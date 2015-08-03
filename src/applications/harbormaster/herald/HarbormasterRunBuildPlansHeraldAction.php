@@ -68,7 +68,7 @@ final class HarbormasterRunBuildPlansHeraldAction
         'color' => 'red',
         'name' => pht('Invalid Targets'),
       ),
-      self::DO_ALREADY_REQUIRED => array(
+      self::DO_BUILD => array(
         'icon' => 'fa-play',
         'color' => 'green',
         'name' => pht('Building'),
@@ -76,7 +76,7 @@ final class HarbormasterRunBuildPlansHeraldAction
     );
   }
 
-  public function renderActionEffectDescription($type, $data) {
+  protected function renderActionEffectDescription($type, $data) {
     switch ($type) {
       case self::DO_NO_TARGETS:
         return pht('Rule lists no targets.');
@@ -85,7 +85,7 @@ final class HarbormasterRunBuildPlansHeraldAction
           '%s build plan(s) are not valid: %s.',
           new PhutilNumber(count($data)),
           $this->renderHandleList($data));
-      case self::DO_REQUIRED:
+      case self::DO_BUILD:
         return pht(
           'Started %s build(s): %s.',
           new PhutilNumber(count($data)),

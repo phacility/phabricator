@@ -376,7 +376,7 @@ final class HeraldTranscriptController extends HeraldController {
             $icon = $action->renderActionEffectIcon($type, $data);
             $color = $action->renderActionEffectColor($type, $data);
             $name = $action->renderActionEffectName($type, $data);
-            $note = $action->renderActionEffectDescription($type, $data);
+            $note = $action->renderEffectDescription($type, $data);
           } else {
             $icon = 'fa-question-circle';
             $color = 'indigo';

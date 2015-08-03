@@ -9,11 +9,20 @@ abstract class HeraldAction extends Phobject {
   const STANDARD_NONE = 'standard.none';
   const STANDARD_PHID_LIST = 'standard.phid.list';
 
+  const DO_STANDARD_EMPTY = 'do.standard.empty';
+  const DO_STANDARD_NO_EFFECT = 'do.standard.no-effect';
+  const DO_STANDARD_INVALID = 'do.standard.invalid';
+  const DO_STANDARD_UNLOADABLE = 'do.standard.unloadable';
+  const DO_STANDARD_PERMISSION = 'do.standard.permission';
+
   abstract public function getHeraldActionName();
   abstract public function supportsObject($object);
   abstract public function supportsRuleType($rule_type);
   abstract public function applyEffect($object, HeraldEffect $effect);
-  abstract public function renderActionEffectDescription($type, $data);
+
+  protected function renderActionEffectDescription($type, $data) {
+    return null;
+  }
 
   public function getActionGroupKey() {
     return null;
@@ -154,21 +163,21 @@ abstract class HeraldAction extends Phobject {
   }
 
   private function getActionEffectSpec($type) {
-    $map = $this->getActionEffectMap();
+    $map = $this->getActionEffectMap() + $this->getStandardEffectMap();
     return idx($map, $type, array());
   }
 
-  public function renderActionEffectIcon($type, $data) {
+  final public function renderActionEffectIcon($type, $data) {
     $map = $this->getActionEffectSpec($type);
     return idx($map, 'icon');
   }
 
-  public function renderActionEffectColor($type, $data) {
+  final public function renderActionEffectColor($type, $data) {
     $map = $this->getActionEffectSpec($type);
     return idx($map, 'color');
   }
 
-  public function renderActionEffectName($type, $data) {
+  final public function renderActionEffectName($type, $data) {
     $map = $this->getActionEffectSpec($type);
     return idx($map, 'name');
   }
@@ -182,6 +191,175 @@ abstract class HeraldAction extends Phobject {
       ->renderHandleList($phids)
       ->setAsInline(true)
       ->render();
+  }
+
+  protected function loadStandardTargets(
+    array $phids,
+    array $allowed_types,
+    array $current_value) {
+
+    $phids = array_fuse($phids);
+    if (!$phids) {
+      $this->logEffect(self::DO_STANDARD_EMPTY);
+    }
+
+    $current_value = array_fuse($current_value);
+    $no_effect = array();
+    foreach ($phids as $phid) {
+      if (isset($current_value[$phid])) {
+        $no_effect[] = $phid;
+        unset($phids[$phid]);
+      }
+    }
+
+    if ($no_effect) {
+      $this->logEffect(self::DO_STANDARD_NO_EFFECT, $no_effect);
+    }
+
+    if (!$phids) {
+      return;
+    }
+
+    $allowed_types = array_fuse($allowed_types);
+    $invalid = array();
+    foreach ($phids as $phid) {
+      $type = phid_get_type($phid);
+      if ($type == PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN) {
+        $invalid[] = $phid;
+        unset($phids[$phid]);
+        continue;
+      }
+
+      if ($allowed_types && empty($allowed_types[$type])) {
+        $invalid[] = $phid;
+        unset($phids[$phid]);
+        continue;
+      }
+    }
+
+    if ($invalid) {
+      $this->logEffect(self::DO_STANDARD_INVALID, $invalid);
+    }
+
+    if (!$phids) {
+      return;
+    }
+
+    $targets = id(new PhabricatorObjectQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs($phids)
+      ->execute();
+    $targets = mpull($targets, null, 'getPHID');
+
+    $unloadable = array();
+    foreach ($phids as $phid) {
+      if (empty($targets[$phid])) {
+        $unloadable[] = $phid;
+        unset($phids[$phid]);
+      }
+    }
+
+    if ($unloadable) {
+      $this->logEffect(self::DO_STANDARD_UNLOADABLE, $unloadable);
+    }
+
+    if (!$phids) {
+      return;
+    }
+
+    $adapter = $this->getAdapter();
+    $object = $adapter->getObject();
+
+    if ($object instanceof PhabricatorPolicyInterface) {
+      $no_permission = array();
+      foreach ($targets as $phid => $target) {
+        if (!($target instanceof PhabricatorUser)) {
+          continue;
+        }
+
+        $can_view = PhabricatorPolicyFilter::hasCapability(
+          $target,
+          $object,
+          PhabricatorPolicyCapability::CAN_VIEW);
+        if ($can_view) {
+          continue;
+        }
+
+        $no_permission[] = $phid;
+        unset($targets[$phid]);
+      }
+    }
+
+    if ($no_permission) {
+      $this->logEffect(self::DO_STANDARD_PERMISSION, $no_permission);
+    }
+
+    return $targets;
+  }
+
+  protected function getStandardEffectMap() {
+    return array(
+      self::DO_STANDARD_EMPTY => array(
+        'icon' => 'fa-ban',
+        'color' => 'grey',
+        'name' => pht('No Targets'),
+      ),
+      self::DO_STANDARD_NO_EFFECT => array(
+        'icon' => 'fa-circle-o',
+        'color' => 'grey',
+        'name' => pht('No Effect'),
+      ),
+      self::DO_STANDARD_INVALID => array(
+        'icon' => 'fa-ban',
+        'color' => 'red',
+        'name' => pht('Invalid Targets'),
+      ),
+      self::DO_STANDARD_UNLOADABLE => array(
+        'icon' => 'fa-ban',
+        'color' => 'red',
+        'name' => pht('Unloadable Targets'),
+      ),
+      self::DO_STANDARD_PERMISSION => array(
+        'icon' => 'fa-lock',
+        'color' => 'red',
+        'name' => pht('No Permission'),
+      ),
+    );
+  }
+
+  final public function renderEffectDescription($type, $data) {
+    $result = $this->renderActionEffectDescription($type, $data);
+    if ($result !== null) {
+      return $result;
+    }
+
+    switch ($type) {
+      case self::DO_STANDARD_EMPTY:
+        return pht(
+          'This action specifies no targets.');
+      case self::DO_STANDARD_NO_EFFECT:
+        return pht(
+          'This action has no effect on %s target(s): %s.',
+          new PhutilNumber(count($data)),
+          $this->renderHandleList($data));
+      case self::DO_STANDARD_INVALID:
+        return pht(
+          '%s target(s) are invalid or of the wrong type: %s.',
+          new PhutilNumber(count($data)),
+          $this->renderHandleList($data));
+      case self::DO_STANDARD_UNLOADABLE:
+        return pht(
+          '%s target(s) could not be loaded: %s.',
+          new PhutilNumber(count($data)),
+          $this->renderHandleList($data));
+      case self::DO_STANDARD_PERMISSION:
+        return pht(
+          '%s target(s) do not have permission to see this object: %s.',
+          new PhutilNumber(count($data)),
+          $this->renderHandleList($data));
+    }
+
+    return null;
   }
 
 }

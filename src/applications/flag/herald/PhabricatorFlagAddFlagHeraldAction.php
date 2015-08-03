@@ -72,7 +72,7 @@ final class PhabricatorFlagAddFlagHeraldAction extends HeraldAction {
     return pht('Mark with %s flag.', $color);
   }
 
-  public function renderActionEffectDescription($type, $data) {
+  protected function renderActionEffectDescription($type, $data) {
     switch ($type) {
       case self::DO_IGNORE:
         return pht(

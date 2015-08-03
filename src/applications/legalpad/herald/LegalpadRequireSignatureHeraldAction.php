@@ -142,7 +142,7 @@ final class LegalpadRequireSignatureHeraldAction
     );
   }
 
-  public function renderActionEffectDescription($type, $data) {
+  protected function renderActionEffectDescription($type, $data) {
     switch ($type) {
       case self::DO_NO_TARGETS:
         return pht('Rule lists no targets.');

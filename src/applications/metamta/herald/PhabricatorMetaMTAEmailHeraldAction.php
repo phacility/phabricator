@@ -50,7 +50,7 @@ abstract class PhabricatorMetaMTAEmailHeraldAction
     );
   }
 
-  public function renderActionEffectDescription($type, $data) {
+  protected function renderActionEffectDescription($type, $data) {
     switch ($type) {
       case self::DO_SEND:
         return pht(

@@ -12,8 +12,6 @@ final class HeraldCommitAdapter
   protected $commitData;
   private $commitDiff;
 
-  protected $auditMap = array();
-
   protected $affectedPaths;
   protected $affectedRevision;
   protected $affectedPackages;
@@ -86,24 +84,6 @@ final class HeraldCommitAdapter
     return pht('This rule can trigger for **repositories** and **projects**.');
   }
 
-  public function getActions($rule_type) {
-    switch ($rule_type) {
-      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
-      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
-        return array_merge(
-          array(
-            self::ACTION_AUDIT,
-          ),
-          parent::getActions($rule_type));
-      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-        return array_merge(
-          array(
-            self::ACTION_AUDIT,
-          ),
-          parent::getActions($rule_type));
-    }
-  }
-
   public static function newLegacyAdapter(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit,
@@ -147,10 +127,6 @@ final class HeraldCommitAdapter
     $this->commitData = $data;
 
     return $this;
-  }
-
-  public function getAuditMap() {
-    return $this->auditMap;
   }
 
   public function getHeraldName() {
@@ -319,33 +295,6 @@ final class HeraldCommitAdapter
       $result[$change->getFilename()] = implode("\n", $lines);
     }
 
-    return $result;
-  }
-
-  public function applyHeraldEffects(array $effects) {
-    assert_instances_of($effects, 'HeraldEffect');
-
-    $result = array();
-    foreach ($effects as $effect) {
-      $action = $effect->getAction();
-      switch ($action) {
-        case self::ACTION_AUDIT:
-          foreach ($effect->getTarget() as $phid) {
-            if (empty($this->auditMap[$phid])) {
-              $this->auditMap[$phid] = array();
-            }
-            $this->auditMap[$phid][] = $effect->getRule()->getID();
-          }
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Triggered an audit.'));
-          break;
-        default:
-          $result[] = $this->applyStandardEffect($effect);
-          break;
-      }
-    }
     return $result;
   }
 

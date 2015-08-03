@@ -1338,6 +1338,16 @@ final class PhabricatorUSEnglishTranslation
         'Required signatures: %2$s.',
       ),
 
+      'Started %s build(s): %s.' => array(
+        'Started a build: %2$s.',
+        'Started builds: %2$s.',
+      ),
+
+      'Added %s auditor(s): %s.' => array(
+        'Added an auditor: %2$s.',
+        'Added auditors: %2$s.',
+      ),
+
     );
   }
 

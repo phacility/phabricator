@@ -43,7 +43,7 @@ final class HeraldDoNothingAction extends HeraldAction {
     return pht('Do nothing.');
   }
 
-  public function renderActionEffectDescription($type, $data) {
+  protected function renderActionEffectDescription($type, $data) {
     return pht('Did nothing.');
   }
 

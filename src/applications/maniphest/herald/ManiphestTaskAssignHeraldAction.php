@@ -90,7 +90,7 @@ abstract class ManiphestTaskAssignHeraldAction
     );
   }
 
-  public function renderActionEffectDescription($type, $data) {
+  protected function renderActionEffectDescription($type, $data) {
     switch ($type) {
       case self::DO_EMPTY:
         return pht('Action lists no user to assign.');
