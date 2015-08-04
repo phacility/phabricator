@@ -7,7 +7,7 @@ final class PhabricatorXHPASTViewTreeController
     return true;
   }
 
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
     $storage = $this->getStorageTree();
     $input = $storage->getInput();
     $stdout = $storage->getStdout();
