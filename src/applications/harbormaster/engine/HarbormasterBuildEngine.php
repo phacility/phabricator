@@ -317,13 +317,16 @@ final class HarbormasterBuildEngine extends Phobject {
     foreach ($messages as $message) {
       $target = $waiting_targets[$message->getBuildTargetPHID()];
 
-      $new_status = null;
       switch ($message->getType()) {
-        case 'pass':
+        case HarbormasterMessageType::MESSAGE_PASS:
           $new_status = HarbormasterBuildTarget::STATUS_PASSED;
           break;
-        case 'fail':
+        case HarbormasterMessageType::MESSAGE_FAIL:
           $new_status = HarbormasterBuildTarget::STATUS_FAILED;
+          break;
+        case HarbormasterMessageType::MESSAGE_WORK:
+        default:
+          $new_status = null;
           break;
       }
 
