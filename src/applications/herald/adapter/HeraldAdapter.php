@@ -770,8 +770,7 @@ abstract class HeraldAdapter extends Phobject {
 
   public function getEditorValueForCondition(
     PhabricatorUser $viewer,
-    HeraldCondition $condition,
-    array $handles) {
+    HeraldCondition $condition) {
 
     $field = $this->requireFieldImplementation($condition->getFieldName());
 
@@ -779,6 +778,17 @@ abstract class HeraldAdapter extends Phobject {
       $viewer,
       $condition->getFieldCondition(),
       $condition->getValue());
+  }
+
+  public function getEditorValueForAction(
+    PhabricatorUser $viewer,
+    HeraldActionRecord $action_record) {
+
+    $action = $this->requireActionImplementation($action_record->getAction());
+
+    return $action->getEditorValue(
+      $viewer,
+      $action_record->getTarget());
   }
 
   public function renderRuleAsText(

@@ -86,6 +86,23 @@ abstract class HeraldAction extends Phobject {
     return $value;
   }
 
+  public function getEditorValue(PhabricatorUser $viewer, $target) {
+    try {
+      $type = $this->getHeraldActionStandardType();
+    } catch (PhutilMethodNotImplementedException $ex) {
+      return $target;
+    }
+
+    switch ($type) {
+      case self::STANDARD_PHID_LIST:
+        $handles = $viewer->loadHandles($target);
+        $handles = iterator_to_array($handles);
+        return mpull($handles, 'getName', 'getPHID');
+    }
+
+    return $target;
+  }
+
   final public function setAdapter(HeraldAdapter $adapter) {
     $this->adapter = $adapter;
     return $this;

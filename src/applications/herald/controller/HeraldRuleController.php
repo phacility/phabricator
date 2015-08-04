@@ -348,8 +348,7 @@ final class HeraldRuleController extends HeraldController {
       foreach ($rule->getConditions() as $condition) {
         $value = $adapter->getEditorValueForCondition(
           $this->getViewer(),
-          $condition,
-          $handles);
+          $condition);
 
         $serial_conditions[] = array(
           $condition->getFieldName(),
@@ -366,26 +365,13 @@ final class HeraldRuleController extends HeraldController {
     if ($rule->getActions()) {
       $serial_actions = array();
       foreach ($rule->getActions() as $action) {
-        switch ($action->getAction()) {
-          case HeraldAdapter::ACTION_BLOCK:
-            $current_value = $action->getTarget();
-            break;
-          default:
-            if (is_array($action->getTarget())) {
-              $target_map = array();
-              foreach ((array)$action->getTarget() as $fbid) {
-                $target_map[$fbid] = $handles[$fbid]->getName();
-              }
-              $current_value = $target_map;
-            } else {
-              $current_value = $action->getTarget();
-            }
-            break;
-        }
+        $value = $adapter->getEditorValueForAction(
+          $this->getViewer(),
+          $action);
 
         $serial_actions[] = array(
           $action->getAction(),
-          $current_value,
+          $value,
         );
       }
     }
