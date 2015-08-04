@@ -49,7 +49,7 @@ final class DifferentialBlockHeraldAction
 
   protected function renderActionEffectDescription($type, $data) {
     switch ($type) {
-      case self::DO_ADD_AUDITORS:
+      case self::DO_BLOCK:
         return pht('Blocked diff.');
     }
   }
