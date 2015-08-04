@@ -91,6 +91,19 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
     );
   }
 
+  protected function getCustomCapabilities() {
+    return array(
+      PonderQuestionDefaultViewCapability::CAPABILITY => array(
+        'template' => PonderQuestionPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_VIEW,
+      ),
+      PonderQuestionDefaultEditCapability::CAPABILITY => array(
+        'template' => PonderQuestionPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_EDIT,
+      ),
+    );
+  }
+
   public function getApplicationSearchDocumentTypes() {
     return array(
       PonderQuestionPHIDType::TYPECONST,
