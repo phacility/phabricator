@@ -3,10 +3,9 @@
 final class PhabricatorNotificationClearController
   extends PhabricatorNotificationController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
     $chrono_key = $request->getStr('chronoKey');
-    $user = $request->getUser();
 
     if ($request->isDialogFormPost()) {
       $table = new PhabricatorFeedStoryNotification();
@@ -16,7 +15,7 @@ final class PhabricatorNotificationClearController
         'UPDATE %T SET hasViewed = 1 '.
         'WHERE userPHID = %s AND hasViewed = 0 and chronologicalKey <= %s',
         $table->getTableName(),
-        $user->getPHID(),
+        $viewer->getPHID(),
         $chrono_key);
 
       return id(new AphrontReloadResponse())
@@ -24,7 +23,7 @@ final class PhabricatorNotificationClearController
     }
 
     $dialog = new AphrontDialogView();
-    $dialog->setUser($user);
+    $dialog->setUser($viewer);
     $dialog->addCancelButton('/notification/');
     if ($chrono_key) {
       $dialog->setTitle(pht('Really mark all notifications as read?'));

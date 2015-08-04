@@ -3,7 +3,8 @@
 final class PhabricatorNotificationStatusController
   extends PhabricatorNotificationController {
 
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
+
     try {
       $status = PhabricatorNotificationClient::getServerStatus();
       $status = $this->renderServerStatus($status);
