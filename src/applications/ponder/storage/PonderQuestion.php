@@ -10,7 +10,8 @@ final class PonderQuestion extends PonderDAO
     PhabricatorPolicyInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorProjectInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorSpacesInterface {
 
   const MARKUP_FIELD_CONTENT = 'markup:content';
 
@@ -23,6 +24,7 @@ final class PonderQuestion extends PonderDAO
   protected $contentSource;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $spacePHID;
 
   protected $voteCount;
   protected $answerCount;
@@ -53,7 +55,8 @@ final class PonderQuestion extends PonderDAO
       ->setStatus(PonderQuestionStatus::STATUS_OPEN)
       ->setVoteCount(0)
       ->setAnswerCount(0)
-      ->setHeat(0.0);
+      ->setHeat(0.0)
+      ->setSpacePHID($actor->getDefaultSpacePHID());
   }
 
   protected function getConfiguration() {
@@ -327,6 +330,14 @@ final class PonderQuestion extends PonderDAO
 
       $this->delete();
     $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorSpacesInterface  )----------------------------------------- */
+
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
   }
 
 }

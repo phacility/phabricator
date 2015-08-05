@@ -38,7 +38,9 @@ final class PonderQuestionViewController extends PonderController {
     }
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($question->getTitle());
+      ->setHeader($question->getTitle())
+      ->setUser($user)
+      ->setPolicyObject($question);
 
     if ($question->getStatus() == PonderQuestionStatus::STATUS_OPEN) {
       $header->setStatus('fa-square-o', 'bluegrey', pht('Open'));

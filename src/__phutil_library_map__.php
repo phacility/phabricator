@@ -7590,6 +7590,7 @@ phutil_register_library_map(array(
       'PhabricatorTokenReceiverInterface',
       'PhabricatorProjectInterface',
       'PhabricatorDestructibleInterface',
+      'PhabricatorSpacesInterface',
     ),
     'PonderQuestionCommentController' => 'PonderController',
     'PonderQuestionDefaultEditCapability' => 'PhabricatorPolicyCapability',

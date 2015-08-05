@@ -32,6 +32,7 @@ final class PonderQuestionEditController extends PonderController {
     $v_content = $question->getContent();
     $v_view = $question->getViewPolicy();
     $v_edit = $question->getEditPolicy();
+    $v_space = $question->getSpacePHID();
 
     $errors = array();
     $e_title = true;
@@ -41,6 +42,7 @@ final class PonderQuestionEditController extends PonderController {
       $v_projects = $request->getArr('projects');
       $v_view = $request->getStr('viewPolicy');
       $v_edit = $request->getStr('editPolicy');
+      $v_space = $request->getStr('spacePHID');
 
       $len = phutil_utf8_strlen($v_title);
       if ($len < 1) {
@@ -70,6 +72,10 @@ final class PonderQuestionEditController extends PonderController {
         $xactions[] = id(clone $template)
           ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
           ->setNewValue($v_edit);
+
+        $xactions[] = id(clone $template)
+          ->setTransactionType(PhabricatorTransactions::TYPE_SPACE)
+          ->setNewValue($v_space);
 
         $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
         $xactions[] = id(new PonderQuestionTransaction())
@@ -114,6 +120,7 @@ final class PonderQuestionEditController extends PonderController {
         id(new AphrontFormPolicyControl())
           ->setName('viewPolicy')
           ->setPolicyObject($question)
+          ->setSpacePHID($v_space)
           ->setPolicies($policies)
           ->setValue($v_view)
           ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
