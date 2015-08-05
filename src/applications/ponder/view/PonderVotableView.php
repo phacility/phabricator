@@ -28,7 +28,7 @@ final class PonderVotableView extends AphrontView {
   }
 
   public function render() {
-    require_celerity_resource('ponder-vote-css');
+    require_celerity_resource('ponder-view-css');
     require_celerity_resource('javelin-behavior-ponder-votebox');
 
     Javelin::initBehavior('ponder-votebox', array());
