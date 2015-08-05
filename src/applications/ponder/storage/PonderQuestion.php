@@ -33,6 +33,8 @@ final class PonderQuestion extends PonderDAO
   private $vote;
   private $comments;
 
+  private $projectPHIDs = self::ATTACHABLE;
+
   public static function initializeNewQuestion(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
@@ -162,6 +164,15 @@ final class PonderQuestion extends PonderDAO
 
   public function getAnswers() {
     return $this->answers;
+  }
+
+  public function getProjectPHIDs() {
+    return $this->assertAttached($this->projectPHIDs);
+  }
+
+  public function attachProjectPHIDs(array $phids) {
+    $this->projectPHIDs = $phids;
+    return $this;
   }
 
   public function getMarkupField() {

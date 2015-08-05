@@ -32,6 +32,8 @@ final class PhabricatorUSEnglishTranslation
       '%d path(s)' => array('%d path', '%d paths'),
       '%d diff(s)' => array('%d diff', '%d diffs'),
 
+      '%d Answer(s)' => array('%d Answer', '%d Answers'),
+
       '%s DIFF LINK(S)' => array('DIFF LINK', 'DIFF LINKS'),
       'You successfully created %d diff(s).' => array(
         'You successfully created %d diff.',
