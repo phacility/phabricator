@@ -33,6 +33,7 @@ final class PhabricatorPasteEditor
     $types[] = PhabricatorPasteTransaction::TYPE_CONTENT;
     $types[] = PhabricatorPasteTransaction::TYPE_TITLE;
     $types[] = PhabricatorPasteTransaction::TYPE_LANGUAGE;
+    $types[] = PhabricatorPasteTransaction::TYPE_STATUS;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
@@ -51,6 +52,8 @@ final class PhabricatorPasteEditor
         return $object->getTitle();
       case PhabricatorPasteTransaction::TYPE_LANGUAGE:
         return $object->getLanguage();
+      case PhabricatorPasteTransaction::TYPE_STATUS:
+        return $object->getStatus();
     }
   }
 
@@ -62,6 +65,7 @@ final class PhabricatorPasteEditor
       case PhabricatorPasteTransaction::TYPE_CONTENT:
       case PhabricatorPasteTransaction::TYPE_TITLE:
       case PhabricatorPasteTransaction::TYPE_LANGUAGE:
+      case PhabricatorPasteTransaction::TYPE_STATUS:
         return $xaction->getNewValue();
     }
   }
@@ -80,6 +84,9 @@ final class PhabricatorPasteEditor
       case PhabricatorPasteTransaction::TYPE_LANGUAGE:
         $object->setLanguage($xaction->getNewValue());
         return;
+      case PhabricatorPasteTransaction::TYPE_STATUS:
+        $object->setStatus($xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -93,6 +100,7 @@ final class PhabricatorPasteEditor
       case PhabricatorPasteTransaction::TYPE_CONTENT:
       case PhabricatorPasteTransaction::TYPE_TITLE:
       case PhabricatorPasteTransaction::TYPE_LANGUAGE:
+      case PhabricatorPasteTransaction::TYPE_STATUS:
         return;
     }
 

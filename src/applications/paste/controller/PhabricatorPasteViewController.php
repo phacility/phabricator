@@ -115,9 +115,21 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
   private function buildHeaderView(PhabricatorPaste $paste) {
     $title = (nonempty($paste->getTitle())) ?
       $paste->getTitle() : pht('(An Untitled Masterwork)');
+
+    if ($paste->isArchived()) {
+      $header_icon = 'fa-ban';
+      $header_name = pht('Archived');
+      $header_color = 'dark';
+    } else {
+      $header_icon = 'fa-check';
+      $header_name = pht('Active');
+      $header_color = 'bluegrey';
+    }
+
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
       ->setUser($this->getRequest()->getUser())
+      ->setStatus($header_icon, $header_color, $header_name)
       ->setPolicyObject($paste);
 
     return $header;

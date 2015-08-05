@@ -64,6 +64,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
     }
     $v_view_policy = $paste->getViewPolicy();
     $v_edit_policy = $paste->getEditPolicy();
+    $v_status = $paste->getStatus();
 
     if ($is_create) {
       $v_projects = array();
@@ -85,6 +86,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       $v_edit_policy = $request->getStr('can_edit');
       $v_projects = $request->getArr('projects');
       $v_space = $request->getStr('spacePHID');
+      $v_status = $request->getStr('status');
 
       // NOTE: The author is the only editor and can always view the paste,
       // so it's impossible for them to choose an invalid policy.
@@ -115,6 +117,9 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       $xactions[] = id(new PhabricatorPasteTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_SPACE)
         ->setNewValue($v_space);
+      $xactions[] = id(new PhabricatorPasteTransaction())
+        ->setTransactionType(PhabricatorPasteTransaction::TYPE_STATUS)
+        ->setNewValue($v_status);
 
       $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
       $xactions[] = id(new PhabricatorPasteTransaction())
@@ -179,6 +184,13 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
         ->setPolicies($policies)
         ->setValue($v_edit_policy)
         ->setName('can_edit'));
+
+    $form->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Status'))
+          ->setName('status')
+          ->setValue($v_status)
+          ->setOptions($paste->getStatusNameMap()));
 
     $form->appendControl(
       id(new AphrontFormTokenizerControl())
