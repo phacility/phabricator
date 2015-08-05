@@ -19,7 +19,6 @@ final class PhabricatorMetaMTAMailableDatasource
     return array(
       new PhabricatorPeopleDatasource(),
       new PhabricatorProjectDatasource(),
-      new PhabricatorMailingListDatasource(),
     );
   }
 

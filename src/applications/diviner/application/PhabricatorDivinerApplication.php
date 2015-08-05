@@ -39,6 +39,7 @@ final class PhabricatorDivinerApplication extends PhabricatorApplication {
         'find/' => 'DivinerFindController',
       ),
       '/book/(?P<book>[^/]+)/' => 'DivinerBookController',
+      '/book/(?P<book>[^/]+)/edit/' => 'DivinerBookEditController',
       '/book/'.
         '(?P<book>[^/]+)/'.
         '(?P<type>[^/]+)/'.
@@ -52,9 +53,30 @@ final class PhabricatorDivinerApplication extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
+  protected function getCustomCapabilities() {
+    return array(
+      DivinerDefaultViewCapability::CAPABILITY => array(
+        'template' => DivinerBookPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_VIEW,
+      ),
+      DivinerDefaultEditCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+        'template' => DivinerBookPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_EDIT,
+      ),
+    );
+  }
+
   public function getRemarkupRules() {
     return array(
       new DivinerSymbolRemarkupRule(),
+    );
+  }
+
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      DivinerAtomPHIDType::TYPECONST,
+      DivinerBookPHIDType::TYPECONST,
     );
   }
 

@@ -24,7 +24,6 @@ final class PhabricatorUIConfigOptions
     $custom_header_example =
       PhabricatorCustomHeaderConfigType::getExampleConfig();
     $experimental_link = 'https://secure.phabricator.com/T4214';
-
     $options = array();
     foreach (array_keys($manifest) as $sprite_name) {
       $key = substr($sprite_name, strlen('main-header-'));
@@ -48,7 +47,7 @@ final class PhabricatorUIConfigOptions
 EOJSON;
 
     return array(
-      $this->newOption('ui.header-color', 'enum', 'dark')
+      $this->newOption('ui.header-color', 'enum', 'blindigo')
         ->setDescription(
           pht('Sets the color of the main header.'))
         ->setEnumOptions($options),

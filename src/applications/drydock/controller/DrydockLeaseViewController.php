@@ -2,19 +2,13 @@
 
 final class DrydockLeaseViewController extends DrydockLeaseController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $lease = id(new DrydockLeaseQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$lease) {
       return new Aphront404Response();
@@ -30,7 +24,7 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
     $actions = $this->buildActionListView($lease);
     $properties = $this->buildPropertyListView($lease, $actions);
 
-    $pager = new AphrontPagerView();
+    $pager = new PHUIPagerView();
     $pager->setURI(new PhutilURI($lease_uri), 'offset');
     $pager->setOffset($request->getInt('offset'));
 

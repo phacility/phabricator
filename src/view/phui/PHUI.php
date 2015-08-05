@@ -1,6 +1,6 @@
 <?php
 
-final class PHUI {
+final class PHUI extends Phobject {
 
   const MARGIN_SMALL = 'ms';
   const MARGIN_MEDIUM = 'mm';

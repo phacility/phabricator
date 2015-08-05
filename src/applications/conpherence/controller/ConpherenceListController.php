@@ -34,7 +34,7 @@ final class ConpherenceListController extends ConpherenceController {
     $title = pht('Conpherence');
     $conpherence = null;
 
-    $limit = ConpherenceThreadListView::SEE_MORE_LIMIT * 5;
+    $limit = (ConpherenceThreadListView::SEE_MORE_LIMIT * 2) + 1;
     $all_participation = array();
 
     $mode = $this->determineMode();
@@ -62,9 +62,28 @@ final class ConpherenceListController extends ConpherenceController {
         } else {
           $menu_participation = $cursor;
         }
-        $all_participation =
-          array($conpherence->getPHID() => $menu_participation) +
-          $all_participation;
+
+        // check to see if the loaded conpherence is going to show up
+        // within the SEE_MORE_LIMIT amount of conpherences.
+        // If its not there, then we just pre-pend it as the "first"
+        // conpherence so folks have a navigation item in the menu.
+        $count = 0;
+        $found = false;
+        foreach ($all_participation as $phid => $curr_participation) {
+          if ($conpherence->getPHID() == $phid) {
+            $found = true;
+            break;
+          }
+          $count++;
+          if ($count > ConpherenceThreadListView::SEE_MORE_LIMIT) {
+            break;
+          }
+        }
+        if (!$found) {
+          $all_participation =
+            array($conpherence->getPHID() => $menu_participation) +
+            $all_participation;
+        }
         break;
       case self::UNSELECTED_MODE:
       default:
@@ -93,22 +112,21 @@ final class ConpherenceListController extends ConpherenceController {
           ->setThreadView($thread_view)
           ->setRole('list');
         if ($conpherence) {
-          $policy_objects = id(new PhabricatorPolicyQuery())
-            ->setViewer($user)
-            ->setObject($conpherence)
-            ->execute();
-          $layout->setHeader($this->buildHeaderPaneContent(
-            $conpherence,
-            $policy_objects));
           $layout->setThread($conpherence);
         } else {
-          $thread = ConpherenceThread::initializeNewThread($user);
-          $thread->attachHandles(array());
-          $thread->attachTransactions(array());
-          $thread->makeEphemeral();
-          $layout->setHeader(
-            $this->buildHeaderPaneContent($thread, array()));
+          // make a dummy conpherence so we can render something
+          $conpherence = ConpherenceThread::initializeNewRoom($user);
+          $conpherence->attachHandles(array());
+          $conpherence->attachTransactions(array());
+          $conpherence->makeEphemeral();
         }
+        $policy_objects = id(new PhabricatorPolicyQuery())
+          ->setViewer($user)
+          ->setObject($conpherence)
+          ->execute();
+        $layout->setHeader($this->buildHeaderPaneContent(
+            $conpherence,
+            $policy_objects));
         $response = $this->buildApplicationPage(
           $layout,
           array(

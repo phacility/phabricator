@@ -1,6 +1,6 @@
 <?php
 
-final class DivinerAtom {
+final class DivinerAtom extends Phobject {
 
   const TYPE_ARTICLE   = 'article';
   const TYPE_CLASS     = 'class';
@@ -370,6 +370,7 @@ final class DivinerAtom {
 
   public function setProperty($key, $value) {
     $this->properties[$key] = $value;
+    return $this;
   }
 
   public function getProperties() {

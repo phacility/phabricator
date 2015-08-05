@@ -3,14 +3,12 @@
 final class PhabricatorCalendarEventJoinController
   extends PhabricatorCalendarController {
 
-  private $id;
-
   const ACTION_ACCEPT = 'accept';
   const ACTION_DECLINE = 'decline';
   const ACTION_JOIN = 'join';
 
   public function handleRequest(AphrontRequest $request) {
-    $this->id = $request->getURIData('id');
+    $id = $request->getURIData('id');
     $action = $request->getURIData('action');
 
     $request = $this->getRequest();
@@ -20,7 +18,7 @@ final class PhabricatorCalendarEventJoinController
 
     $event = id(new PhabricatorCalendarEventQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
 
     if (!$event) {
@@ -54,8 +52,7 @@ final class PhabricatorCalendarEventJoinController
       $new_status = array($viewer->getPHID() => $new_status);
 
       $xaction = id(new PhabricatorCalendarEventTransaction())
-        ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_INVITE)
+        ->setTransactionType(PhabricatorCalendarEventTransaction::TYPE_INVITE)
         ->setNewValue($new_status);
 
       $editor = id(new PhabricatorCalendarEventEditor())

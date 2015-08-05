@@ -127,8 +127,9 @@ final class PhortuneChargeSearchEngine
       ->setCharges($charges)
       ->setHandles($handles);
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Charges'))
-      ->appendChild($table);
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setTable($table);
+
+    return $table;
   }
 }

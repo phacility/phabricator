@@ -243,10 +243,18 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
-        if (!PhabricatorPolicyQuery::isGlobalPolicy($old)) {
+        if (!PhabricatorPolicyQuery::isSpecialPolicy($old)) {
           $phids[] = array($old);
         }
-        if (!PhabricatorPolicyQuery::isGlobalPolicy($new)) {
+        if (!PhabricatorPolicyQuery::isSpecialPolicy($new)) {
+          $phids[] = array($new);
+        }
+        break;
+      case PhabricatorTransactions::TYPE_SPACE:
+        if ($old) {
+          $phids[] = array($old);
+        }
+        if ($new) {
           $phids[] = array($new);
         }
         break;
@@ -369,6 +377,8 @@ abstract class PhabricatorApplicationTransaction
         return 'fa-wrench';
       case PhabricatorTransactions::TYPE_TOKEN:
         return 'fa-trophy';
+      case PhabricatorTransactions::TYPE_SPACE:
+        return 'fa-th-large';
     }
 
     return 'fa-pencil';
@@ -438,6 +448,7 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorTransactions::TYPE_SPACE:
         if ($this->getOldValue() === null) {
           return true;
         } else {
@@ -597,6 +608,8 @@ abstract class PhabricatorApplicationTransaction
         return pht(
           'All users are already subscribed to this %s.',
           $this->getApplicationObjectTypeName());
+      case PhabricatorTransactions::TYPE_SPACE:
+        return pht('This object is already in that space.');
       case PhabricatorTransactions::TYPE_EDGE:
         return pht('Edges already exist; transaction has no effect.');
     }
@@ -636,6 +649,12 @@ abstract class PhabricatorApplicationTransaction
           $this->getApplicationObjectTypeName(),
           $this->renderPolicyName($old, 'old'),
           $this->renderPolicyName($new, 'new'));
+      case PhabricatorTransactions::TYPE_SPACE:
+        return pht(
+          '%s shifted this object from the %s space to the %s space.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($old),
+          $this->renderHandleLink($new));
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
@@ -821,6 +840,13 @@ abstract class PhabricatorApplicationTransaction
           '%s updated subscribers of %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
+      case PhabricatorTransactions::TYPE_SPACE:
+        return pht(
+          '%s shifted %s from the %s space to the %s space.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid),
+          $this->renderHandleLink($old),
+          $this->renderHandleLink($new));
       case PhabricatorTransactions::TYPE_EDGE:
         $new = ipull($new, 'dst');
         $old = ipull($old, 'dst');

@@ -109,8 +109,11 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       if (!$viewer) {
         throw new Exception(
           pht(
-            'Call setUser() before rendering tokenizers. Use appendControl() '.
-            'on AphrontFormView to do this easily.'));
+            'Call %s before rendering tokenizers. '.
+            'Use %s on %s to do this easily.',
+            'setUser()',
+            'appendControl()',
+            'AphrontFormView'));
       }
 
       $values = nonempty($this->getValue(), array());

@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephRequestStatus {
+final class ReleephRequestStatus extends Phobject {
 
   const STATUS_REQUESTED       = 1;
   const STATUS_NEEDS_PICK      = 2;  // aka approved

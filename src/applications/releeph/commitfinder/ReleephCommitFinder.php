@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephCommitFinder {
+final class ReleephCommitFinder extends Phobject {
 
   private $releephProject;
   private $user;

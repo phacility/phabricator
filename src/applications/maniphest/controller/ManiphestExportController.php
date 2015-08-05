@@ -2,27 +2,19 @@
 
 final class ManiphestExportController extends ManiphestController {
 
-  private $key;
-
-  public function willProcessRequest(array $data) {
-    $this->key = $data['key'];
-    return $this;
-  }
-
   /**
    * @phutil-external-symbol class PHPExcel
    * @phutil-external-symbol class PHPExcel_IOFactory
    * @phutil-external-symbol class PHPExcel_Style_NumberFormat
    * @phutil-external-symbol class PHPExcel_Cell_DataType
    */
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $key = $request->getURIData('key');
 
     $ok = @include_once 'PHPExcel.php';
     if (!$ok) {
-      $dialog = new AphrontDialogView();
-      $dialog->setUser($user);
+      $dialog = $this->newDialog();
 
       $inst1 = pht(
         'This system does not have PHPExcel installed. This software '.
@@ -54,14 +46,14 @@ final class ManiphestExportController extends ManiphestController {
     // for that here, since it fatals if we don't have the ZipArchive class.
 
     $saved = id(new PhabricatorSavedQueryQuery())
-      ->setViewer($user)
-      ->withQueryKeys(array($this->key))
+      ->setViewer($viewer)
+      ->withQueryKeys(array($key))
       ->executeOne();
     if (!$saved) {
       $engine = id(new ManiphestTaskSearchEngine())
-        ->setViewer($user);
-      if ($engine->isBuiltinQuery($this->key)) {
-        $saved = $engine->buildSavedQueryFromBuiltin($this->key);
+        ->setViewer($viewer);
+      if ($engine->isBuiltinQuery($key)) {
+        $saved = $engine->buildSavedQueryFromBuiltin($key);
       }
       if (!$saved) {
         return new Aphront404Response();
@@ -76,7 +68,7 @@ final class ManiphestExportController extends ManiphestController {
 
     if (!$request->isDialogFormPost()) {
       $dialog = new AphrontDialogView();
-      $dialog->setUser($user);
+      $dialog->setUser($viewer);
 
       $dialog->setTitle(pht('Export Tasks to Excel'));
       $dialog->appendChild(
@@ -108,22 +100,22 @@ final class ManiphestExportController extends ManiphestController {
     $saved->setParameter('limit', PHP_INT_MAX);
 
     $engine = id(new ManiphestTaskSearchEngine())
-      ->setViewer($user);
+      ->setViewer($viewer);
 
     $query = $engine->buildQueryFromSavedQuery($saved);
-    $query->setViewer($user);
+    $query->setViewer($viewer);
     $tasks = $query->execute();
 
     $all_projects = array_mergev(mpull($tasks, 'getProjectPHIDs'));
     $all_assigned = mpull($tasks, 'getOwnerPHID');
 
     $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withPHIDs(array_merge($all_projects, $all_assigned))
       ->execute();
 
     $workbook = new PHPExcel();
-    $format->buildWorkbook($workbook, $tasks, $handles, $user);
+    $format->buildWorkbook($workbook, $tasks, $handles, $viewer);
     $writer = PHPExcel_IOFactory::createWriter($workbook, 'Excel2007');
 
     ob_start();

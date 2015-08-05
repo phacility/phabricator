@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorPHIDType {
+abstract class PhabricatorPHIDType extends Phobject {
 
   final public function getTypeConstant() {
     $class = new ReflectionClass($this);
@@ -158,38 +158,11 @@ abstract class PhabricatorPHIDType {
    *
    * @return dict<string, PhabricatorPHIDType> Map of type constants to types.
    */
-  public static function getAllTypes() {
-    static $types;
-    if ($types === null) {
-      $objects = id(new PhutilSymbolLoader())
-        ->setAncestorClass(__CLASS__)
-        ->loadObjects();
-
-      $map = array();
-      $original = array();
-      foreach ($objects as $object) {
-        $type = $object->getTypeConstant();
-        if (isset($map[$type])) {
-          $that_class = $original[$type];
-          $this_class = get_class($object);
-          throw new Exception(
-            pht(
-              "Two %s classes (%s, %s) both handle PHID type '%s'. ".
-              "A type may be handled by only one class.",
-              __CLASS__,
-              $that_class,
-              $this_class,
-              $type));
-        }
-
-        $original[$type] = get_class($object);
-        $map[$type] = $object;
-      }
-
-      $types = $map;
-    }
-
-    return $types;
+  final public static function getAllTypes() {
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->setUniqueMethod('getTypeConstant')
+      ->execute();
   }
 
 

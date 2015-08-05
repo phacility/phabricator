@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionPathChange {
+final class DiffusionPathChange extends Phobject {
 
   private $path;
   private $commitIdentifier;

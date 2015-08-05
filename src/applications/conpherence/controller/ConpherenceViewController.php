@@ -9,6 +9,12 @@ final class ConpherenceViewController extends
     return true;
   }
 
+  protected function buildApplicationCrumbs() {
+    $crumbs = $this->buildConpherenceApplicationCrumbs();
+    $crumbs->setBorder(true);
+    return $crumbs;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
 

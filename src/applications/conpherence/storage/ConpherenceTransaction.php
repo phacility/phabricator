@@ -2,6 +2,13 @@
 
 final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
 
+  const TYPE_FILES           = 'files';
+  const TYPE_TITLE           = 'title';
+  const TYPE_PARTICIPANTS    = 'participants';
+  const TYPE_DATE_MARKER     = 'date-marker';
+  const TYPE_PICTURE         = 'picture';
+  const TYPE_PICTURE_CROP    = 'picture-crop';
+
   public function getApplicationName() {
     return 'conpherence';
   }
@@ -16,7 +23,7 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
 
   public function getNoEffectDescription() {
     switch ($this->getTransactionType()) {
-      case ConpherenceTransactionType::TYPE_PARTICIPANTS:
+      case self::TYPE_PARTICIPANTS:
         return pht(
           'You can not add a participant who has already been added.');
         break;
@@ -29,15 +36,15 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
     $old = $this->getOldValue();
 
     switch ($this->getTransactionType()) {
-      case ConpherenceTransactionType::TYPE_PARTICIPANTS:
+      case self::TYPE_PARTICIPANTS:
         return ($old === null);
-      case ConpherenceTransactionType::TYPE_TITLE:
-      case ConpherenceTransactionType::TYPE_PICTURE:
-      case ConpherenceTransactionType::TYPE_DATE_MARKER:
+      case self::TYPE_TITLE:
+      case self::TYPE_PICTURE:
+      case self::TYPE_DATE_MARKER:
         return false;
-      case ConpherenceTransactionType::TYPE_FILES:
+      case self::TYPE_FILES:
         return true;
-      case ConpherenceTransactionType::TYPE_PICTURE_CROP:
+      case self::TYPE_PICTURE_CROP:
         return true;
     }
 
@@ -51,18 +58,14 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case ConpherenceTransactionType::TYPE_TITLE:
+      case self::TYPE_TITLE:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
-      case ConpherenceTransactionType::TYPE_PICTURE:
-        if ($this->getObject()->getIsRoom()) {
-          return $this->getRoomTitle();
-        } else {
-          return $this->getThreadTitle();
-        }
+      case self::TYPE_PICTURE:
+        return $this->getRoomTitle();
         break;
-      case ConpherenceTransactionType::TYPE_FILES:
+      case self::TYPE_FILES:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
 
@@ -85,7 +88,7 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
         }
         return $title;
         break;
-      case ConpherenceTransactionType::TYPE_PARTICIPANTS:
+      case self::TYPE_PARTICIPANTS:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
 
@@ -124,7 +127,7 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case ConpherenceTransactionType::TYPE_TITLE:
+      case self::TYPE_TITLE:
         if ($old && $new) {
           $title = pht(
             '%s renamed this room from "%s" to "%s".',
@@ -144,7 +147,7 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
         }
         return $title;
         break;
-      case ConpherenceTransactionType::TYPE_PICTURE:
+      case self::TYPE_PICTURE:
         return pht(
           '%s updated the room image.',
           $this->renderHandleLink($author_phid));
@@ -173,62 +176,6 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
     }
   }
 
-  private function getThreadTitle() {
-    $author_phid = $this->getAuthorPHID();
-
-    $old = $this->getOldValue();
-    $new = $this->getNewValue();
-
-    switch ($this->getTransactionType()) {
-      case ConpherenceTransactionType::TYPE_TITLE:
-        if ($old && $new) {
-          $title = pht(
-            '%s renamed this thread from "%s" to "%s".',
-            $this->renderHandleLink($author_phid),
-            $old,
-            $new);
-        } else if ($old) {
-          $title = pht(
-            '%s deleted the thread name "%s".',
-            $this->renderHandleLink($author_phid),
-            $old);
-        } else {
-          $title = pht(
-            '%s named this thread "%s".',
-            $this->renderHandleLink($author_phid),
-            $new);
-        }
-        return $title;
-        break;
-      case ConpherenceTransactionType::TYPE_PICTURE:
-        return pht(
-          '%s updated the room image.',
-          $this->renderHandleLink($author_phid));
-        break;
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        return pht(
-          '%s changed the visibility of this thread from "%s" to "%s".',
-          $this->renderHandleLink($author_phid),
-          $this->renderPolicyName($old, 'old'),
-          $this->renderPolicyName($new, 'new'));
-        break;
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        return pht(
-          '%s changed the edit policy of this thread from "%s" to "%s".',
-          $this->renderHandleLink($author_phid),
-          $this->renderPolicyName($old, 'old'),
-          $this->renderPolicyName($new, 'new'));
-        break;
-      case PhabricatorTransactions::TYPE_JOIN_POLICY:
-        return pht(
-          '%s changed the join policy of this thread from "%s" to "%s".',
-          $this->renderHandleLink($author_phid),
-          $this->renderPolicyName($old, 'old'),
-          $this->renderPolicyName($new, 'new'));
-        break;
-    }
-  }
-
   public function getRequiredHandlePHIDs() {
     $phids = parent::getRequiredHandlePHIDs();
 
@@ -237,12 +184,12 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
 
     $phids[] = $this->getAuthorPHID();
     switch ($this->getTransactionType()) {
-      case ConpherenceTransactionType::TYPE_TITLE:
-      case ConpherenceTransactionType::TYPE_PICTURE:
-      case ConpherenceTransactionType::TYPE_FILES:
-      case ConpherenceTransactionType::TYPE_DATE_MARKER:
+      case self::TYPE_TITLE:
+      case self::TYPE_PICTURE:
+      case self::TYPE_FILES:
+      case self::TYPE_DATE_MARKER:
         break;
-      case ConpherenceTransactionType::TYPE_PARTICIPANTS:
+      case self::TYPE_PARTICIPANTS:
         $phids = array_merge($phids, $this->getOldValue());
         $phids = array_merge($phids, $this->getNewValue());
         break;

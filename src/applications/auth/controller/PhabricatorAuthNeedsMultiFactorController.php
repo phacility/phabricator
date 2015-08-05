@@ -9,9 +9,8 @@ final class PhabricatorAuthNeedsMultiFactorController
     return false;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $panel = id(new PhabricatorMultiFactorSettingsPanel())
       ->setUser($viewer)

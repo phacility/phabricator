@@ -4,7 +4,6 @@
  * This protocol has a good spec here:
  *
  *   http://svn.apache.org/repos/asf/subversion/trunk/subversion/libsvn_ra_svn/protocol
- *
  */
 final class DiffusionSubversionServeSSHWorkflow
   extends DiffusionSubversionSSHWorkflow {

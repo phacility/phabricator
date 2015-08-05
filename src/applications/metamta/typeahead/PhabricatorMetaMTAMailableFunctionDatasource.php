@@ -21,7 +21,6 @@ final class PhabricatorMetaMTAMailableFunctionDatasource
       new PhabricatorPeopleDatasource(),
       new PhabricatorProjectMembersDatasource(),
       new PhabricatorProjectDatasource(),
-      new PhabricatorMailingListDatasource(),
     );
   }
 

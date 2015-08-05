@@ -127,13 +127,11 @@ final class PhabricatorNotificationSearchEngine
       ->addClass('phabricator-notification-list')
       ->appendChild($view);
 
-    $notif_header = id(new PHUIHeaderView())
-      ->setHeader($header)
-      ->addActionLink($button);
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->addAction($button);
+    $result->setContent($view);
 
-    return id(new PHUIObjectBoxView())
-      ->setHeader($notif_header)
-      ->appendChild($view);
+    return $result;
   }
 
   public function shouldUseOffsetPaging() {

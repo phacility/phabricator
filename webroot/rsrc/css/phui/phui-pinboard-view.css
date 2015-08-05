@@ -3,31 +3,34 @@
  */
 
 .phui-pinboard-view {
-  padding: 8px 0 16px 16px;
+  padding: 16px 8px;
   overflow: hidden;
-  margin: 12px 0;
+  text-align: center;
 }
 
-.device-phone .phui-pinboard-view {
-  padding: 0;
+.phui-pinboard-list-item {
+  display: inline;
 }
 
 .phui-pinboard-item-view {
   margin: 0 12px 16px 0;
-  background: #ffffff;
-  border-radius: 3px;
-  border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
   text-align: left;
-  width: 288px;
+  width: 280px;
+  background: #fff;
+  border: 1px solid {$lightblueborder};
+  border-radius: 3px;
 }
 
 .phui-pinboard-view .phui-pinboard-item-view {
-  float: left;
+  display: inline-block;
 }
 
 .device-desktop .phui-pinboard-item-view:hover {
-  box-shadow: {$dropshadow};
+  border-color: {$blue};
+}
+
+.device-desktop .phui-pinboard-item-view:hover .phui-pinboard-item-header a {
+  color: {$blue};
 }
 
 /* On phones, show a single column of items. */
@@ -40,32 +43,29 @@
   padding: 6px 8px;
   display: block;
   font-weight: bold;
-  border-top-left-radius: 3px;
-  border-top-right-radius: 3px;
-  border-bottom: 1px solid {$lightblueborder};
   white-space: nowrap;
   overflow: hidden;
+  border-top: 1px solid {$thinblueborder};
 }
 
 .phui-pinboard-item-header a {
-  color: {$bluetext};
+  color: {$darkbluetext};
 }
 
 .phui-pinboard-item-image-link {
-  padding: 8px 4px;
   display: block;
 }
 
-.phui-pinboard-item-content {
-  padding: 8px;
-  overflow: hidden;
-  color: {$bluetext};
-  font-size: 12px;
+.phui-pinboard-item-image-link img {
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
 }
 
-.phui-pinboard-item-content + .phui-pinboard-icons,
-.phui-pinboard-item-image-link + .phui-pinboard-icons {
-  border-top: 1px solid {$thinblueborder};
+.phui-pinboard-item-content {
+  padding: 0 8px 8px;
+  overflow: hidden;
+  color: {$bluetext};
+  font-size: {$smallerfontsize};
 }
 
 .phui-pinboard-item-count {

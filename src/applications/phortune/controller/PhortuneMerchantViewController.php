@@ -3,19 +3,13 @@
 final class PhortuneMerchantViewController
   extends PhortuneMerchantController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $merchant = id(new PhortuneMerchantQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$merchant) {
       return new Aphront404Response();
@@ -30,7 +24,6 @@ final class PhortuneMerchantViewController
       $merchant->getName());
 
     $header = id(new PHUIHeaderView())
-      ->setObjectName(pht('Merchant %d', $merchant->getID()))
       ->setHeader($merchant->getName())
       ->setUser($viewer)
       ->setPolicyObject($merchant);
@@ -50,7 +43,7 @@ final class PhortuneMerchantViewController
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($properties);
+      ->addPropertyList($properties);
 
     $timeline = $this->buildTransactionTimeline(
       $merchant,
@@ -229,9 +222,9 @@ final class PhortuneMerchantViewController
 
       if ($provider->isEnabled()) {
         if ($provider->isAcceptingLivePayments()) {
-          $item->setBarColor('green');
+          $item->setStatusIcon('fa-check green');
         } else {
-          $item->setBarColor('yellow');
+          $item->setStatusIcon('fa-warning yellow');
           $item->addIcon('fa-exclamation-triangle', pht('Test Mode'));
         }
 
@@ -293,7 +286,7 @@ final class PhortuneMerchantViewController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($provider_list);
+      ->setObjectList($provider_list);
   }
 
 

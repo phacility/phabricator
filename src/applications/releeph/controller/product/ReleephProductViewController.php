@@ -1,7 +1,6 @@
 <?php
 
-final class ReleephProductViewController extends ReleephProductController
-  implements PhabricatorApplicationSearchResultsControllerInterface {
+final class ReleephProductViewController extends ReleephProductController {
 
   private $productID;
   private $queryKey;
@@ -37,91 +36,6 @@ final class ReleephProductViewController extends ReleephProductController
       ->setNavigation($this->buildSideNavView());
 
     return $this->delegateToController($controller);
-  }
-
-  public function renderResultsList(
-    array $branches,
-    PhabricatorSavedQuery $saved) {
-    assert_instances_of($branches, 'ReleephBranch');
-
-    $viewer = $this->getRequest()->getUser();
-
-    $products = mpull($branches, 'getProduct');
-    $repo_phids = mpull($products, 'getRepositoryPHID');
-
-    $repos = id(new PhabricatorRepositoryQuery())
-      ->setViewer($viewer)
-      ->withPHIDs($repo_phids)
-      ->execute();
-    $repos = mpull($repos, null, 'getPHID');
-
-    $requests = array();
-    if ($branches) {
-      $requests = id(new ReleephRequestQuery())
-        ->setViewer($viewer)
-        ->withBranchIDs(mpull($branches, 'getID'))
-        ->withStatus(ReleephRequestQuery::STATUS_OPEN)
-        ->execute();
-      $requests = mgroup($requests, 'getBranchID');
-    }
-
-    $list = id(new PHUIObjectItemListView())
-      ->setUser($viewer);
-    foreach ($branches as $branch) {
-      $diffusion_href = null;
-      $repo = idx($repos, $branch->getProduct()->getRepositoryPHID());
-      if ($repo) {
-        $drequest = DiffusionRequest::newFromDictionary(
-          array(
-            'user' => $viewer,
-            'repository' => $repo,
-          ));
-
-        $diffusion_href = $drequest->generateURI(
-          array(
-            'action' => 'branch',
-            'branch' => $branch->getName(),
-          ));
-      }
-
-      $branch_link = $branch->getName();
-      if ($diffusion_href) {
-        $branch_link = phutil_tag(
-          'a',
-          array(
-            'href' => $diffusion_href,
-          ),
-          $branch_link);
-      }
-
-      $item = id(new PHUIObjectItemView())
-        ->setHeader($branch->getDisplayName())
-        ->setHref($this->getApplicationURI('branch/'.$branch->getID().'/'))
-        ->addAttribute($branch_link);
-
-      if (!$branch->getIsActive()) {
-        $item->setDisabled(true);
-      }
-
-      $commit = $branch->getCutPointCommit();
-      if ($commit) {
-        $item->addIcon(
-          'none',
-          phabricator_datetime($commit->getEpoch(), $viewer));
-      }
-
-      $open_count = count(idx($requests, $branch->getID(), array()));
-      if ($open_count) {
-        $item->setBarColor('orange');
-        $item->addIcon(
-          'fa-code-fork',
-          pht('%d Open Pull Request(s)', new PhutilNumber($open_count)));
-      }
-
-      $list->addItem($item);
-    }
-
-    return $list;
   }
 
   public function buildSideNavView($for_app = false) {

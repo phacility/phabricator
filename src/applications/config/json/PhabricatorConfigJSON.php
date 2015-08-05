@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorConfigJSON {
+final class PhabricatorConfigJSON extends Phobject {
   /**
    * Properly format a JSON value.
    *

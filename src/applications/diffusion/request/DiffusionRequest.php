@@ -7,7 +7,7 @@
  * @task new Creating Requests
  * @task uri Managing Diffusion URIs
  */
-abstract class DiffusionRequest {
+abstract class DiffusionRequest extends Phobject {
 
   protected $callsign;
   protected $path;

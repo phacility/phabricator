@@ -227,16 +227,8 @@ final class DiffusionRepositoryController extends DiffusionController {
     $actions = $this->buildActionList($repository);
 
     $view = id(new PHUIPropertyListView())
+      ->setObject($repository)
       ->setUser($user);
-
-    $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $repository->getPHID(),
-      PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
-    if ($project_phids) {
-      $view->addProperty(
-        pht('Projects'),
-        $user->renderHandleList($project_phids));
-    }
 
     if ($repository->isHosted()) {
       $ssh_uri = $repository->getSSHCloneURIObject();
@@ -289,6 +281,8 @@ final class DiffusionRepositoryController extends DiffusionController {
           break;
       }
     }
+
+    $view->invokeWillRenderEvent();
 
     $description = $repository->getDetail('description');
     if (strlen($description)) {
@@ -396,7 +390,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $header->addActionLink($button);
     $panel->setHeader($header);
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     return $panel;
   }
@@ -469,7 +463,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $header->addActionLink($button);
 
     $panel->setHeader($header);
-    $panel->appendChild($view);
+    $panel->setTable($view);
 
     return $panel;
   }
@@ -571,7 +565,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setHeader(pht('Recent Commits'))
       ->addActionLink($button);
     $panel->setHeader($header);
-    $panel->appendChild($history_table);
+    $panel->setTable($history_table);
 
     return $panel;
   }
@@ -628,6 +622,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $header->addActionLink($button);
     $browse_panel->setHeader($header);
 
+    $locate_panel = null;
     if ($repository->canUsePathTree()) {
       Javelin::initBehavior(
         'diffusion-locate-file',
@@ -652,14 +647,15 @@ final class DiffusionRepositoryController extends DiffusionController {
             ->setID('locate-input')
             ->setLabel(pht('Locate File')));
       $form_box = id(new PHUIBoxView())
-        ->addClass('diffusion-locate-file-view')
         ->appendChild($form->buildLayoutView());
-      $browse_panel->appendChild($form_box);
+      $locate_panel = id(new PHUIObjectBoxView())
+        ->setHeaderText('Locate File')
+        ->appendChild($form_box);
     }
 
-    $browse_panel->appendChild($browse_table);
+    $browse_panel->setTable($browse_table);
 
-    return $browse_panel;
+    return array($locate_panel, $browse_panel);
   }
 
   private function renderCloneCommand(

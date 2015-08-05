@@ -11,27 +11,22 @@ final class PhabricatorSlowvoteSearchEngine
     return 'PhabricatorSlowvoteApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-    $saved->setParameter(
-      'authorPHIDs',
-      $this->readUsersFromRequest($request, 'authors'));
-
-    $saved->setParameter('voted', $request->getBool('voted'));
-    $saved->setParameter('statuses', $request->getArr('statuses'));
-
-    return $saved;
+  public function newQuery() {
+    return new PhabricatorSlowvoteQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorSlowvoteQuery())
-      ->withAuthorPHIDs($saved->getParameter('authorPHIDs', array()));
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
 
-    if ($saved->getParameter('voted')) {
+    if ($map['voted']) {
       $query->withVotesByViewer(true);
     }
 
-    $statuses = $saved->getParameter('statuses', array());
+    if ($map['authorPHIDs']) {
+      $query->withAuthorPHIDs($map['authorPHIDs']);
+    }
+
+    $statuses = $map['statuses'];
     if (count($statuses) == 1) {
       $status = head($statuses);
       if ($status == 'open') {
@@ -44,41 +39,27 @@ final class PhabricatorSlowvoteSearchEngine
     return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
-    $author_phids = $saved_query->getParameter('authorPHIDs', array());
+  protected function buildCustomSearchFields() {
 
-    $voted = $saved_query->getParameter('voted', false);
-    $statuses = $saved_query->getParameter('statuses', array());
+    return array(
+      id(new PhabricatorUsersSearchField())
+        ->setKey('authorPHIDs')
+        ->setAliases(array('authors'))
+        ->setLabel(pht('Authors')),
 
-    $form
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('authors')
-          ->setLabel(pht('Authors'))
-          ->setValue($author_phids))
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->addCheckbox(
-            'voted',
-            1,
-            pht("Show only polls I've voted in."),
-            $voted))
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->setLabel(pht('Status'))
-          ->addCheckbox(
-            'statuses[]',
-            'open',
-            pht('Open'),
-            in_array('open', $statuses))
-          ->addCheckbox(
-            'statuses[]',
-            'closed',
-            pht('Closed'),
-            in_array('closed', $statuses)));
+      id(new PhabricatorSearchCheckboxesField())
+        ->setKey('voted')
+        ->setOptions(array(
+          'voted' => pht("Show only polls I've voted in."),
+          )),
+
+      id(new PhabricatorSearchCheckboxesField())
+        ->setKey('statuses')
+        ->setOptions(array(
+          'open' => pht('Open'),
+          'closed' => pht('Closed'),
+          )),
+    );
   }
 
   protected function getURI($path) {
@@ -113,7 +94,7 @@ final class PhabricatorSlowvoteSearchEngine
           'authorPHIDs',
           array($this->requireViewer()->getPHID()));
       case 'voted':
-        return $query->setParameter('voted', true);
+        return $query->setParameter('voted', array('voted'));
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
@@ -147,11 +128,19 @@ final class PhabricatorSlowvoteSearchEngine
       }
 
       $item = id(new PHUIObjectItemView())
+        ->setUser($viewer)
+        ->setObject($poll)
         ->setObjectName('V'.$poll->getID())
         ->setHeader($poll->getQuestion())
         ->setHref('/V'.$poll->getID())
-        ->setDisabled($poll->getIsClosed())
         ->addIcon('none', $date_created);
+
+      if ($poll->getIsClosed()) {
+        $item->setStatusIcon('fa-ban grey');
+        $item->setDisabled(true);
+      } else {
+        $item->setStatusIcon('fa-bar-chart');
+      }
 
       $description = $poll->getDescription();
       if (strlen($description)) {
@@ -167,7 +156,11 @@ final class PhabricatorSlowvoteSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No polls found.'));
+
+    return $result;
   }
 
 }

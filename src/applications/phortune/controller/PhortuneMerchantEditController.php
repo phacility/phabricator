@@ -3,20 +3,14 @@
 final class PhortuneMerchantEditController
   extends PhortuneMerchantController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    if ($this->id) {
+    if ($id) {
       $merchant = id(new PhortuneMerchantQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -164,7 +158,7 @@ final class PhortuneMerchantEditController
     $box = id(new PHUIObjectBoxView())
       ->setValidationException($validation_exception)
       ->setHeaderText($title)
-      ->appendChild($form);
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(

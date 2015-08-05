@@ -2,19 +2,13 @@
 
 final class PassphraseCredentialViewController extends PassphraseController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $credential = id(new PassphraseCredentialQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$credential) {
       return new Aphront404Response();
@@ -96,6 +90,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
 
     $actions = id(new PhabricatorActionListView())
       ->setObjectURI('/K'.$id)
+      ->setObject($credential)
       ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -182,9 +177,11 @@ final class PassphraseCredentialViewController extends PassphraseController {
       pht('Editable By'),
       $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
 
-    $properties->addProperty(
-      pht('Username'),
-      $credential->getUsername());
+    if ($type->shouldRequireUsername()) {
+      $properties->addProperty(
+        pht('Username'),
+        $credential->getUsername());
+    }
 
     $used_by_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $credential->getPHID(),

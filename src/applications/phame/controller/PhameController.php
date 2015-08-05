@@ -9,14 +9,10 @@ abstract class PhameController extends PhabricatorController {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI($base_uri);
 
-    $nav->addLabel(pht('Create'));
-    $nav->addFilter('post/new', pht('New Post'));
-    $nav->addFilter('blog/new', pht('New Blog'));
-
     $nav->addLabel(pht('Posts'));
+    $nav->addFilter('post/all', pht('Latest Posts'));
     $nav->addFilter('post/draft', pht('My Drafts'));
     $nav->addFilter('post', pht('My Posts'));
-    $nav->addFilter('post/all', pht('All Posts'));
 
     $nav->addLabel(pht('Blogs'));
     $nav->addFilter('blog/user', pht('Joinable Blogs'));
@@ -107,9 +103,9 @@ abstract class PhameController extends PhabricatorController {
     }
 
     if (empty($stories)) {
-      return id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
-        ->appendChild($nodata);
+      return id(new PHUIBoxView())
+        ->appendChild($nodata)
+        ->addClass('mlt mlb msr msl');
     }
 
     return $stories;

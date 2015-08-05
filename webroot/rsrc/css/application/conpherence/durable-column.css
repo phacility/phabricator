@@ -46,8 +46,7 @@
 }
 
 .with-durable-margin .conpherence-durable-column {
-  right: 12px;
-  box-shadow: 1px 0px 2px rgba(0, 0, 0, 0.10);
+  border-right: 12px solid {$lightgreybackground};
 }
 
 .conpherence-durable-column .loading-mask {
@@ -64,10 +63,6 @@
 
 .device-desktop .conpherence-durable-column.loading .loading-mask {
   display: block;
-}
-
-.conpherence-durable-column-header {
-  height: 44px;
 }
 
 .conpherence-durable-column-header .conpherence-settings-dropdown {
@@ -106,50 +101,30 @@
 .phabricator-dark-menu .phui-list-item-type-link {
   background: transparent;
 }
-.device-desktop
-.conpherence-durable-column-header
-.phabricator-application-menu
-.core-menu-item.phui-list-item-view:hover
-.phui-list-item-icon.phui-font-fa {
-  color: #fff;
-}
 .conpherence-durable-column-header
 .phabricator-application-menu
 .phui-list-item-view.core-menu-item {
   display: block;
 }
-.device-desktop
-.conpherence-durable-column-header
-.phabricator-application-menu
-.core-menu-item.phui-list-item-view:hover {
-  background-color: rgba(0,0,0,.33);
-  border-radius: 3px;
-}
-.conpherence-durable-column-header
-.phabricator-application-menu .phui-list-item-icon.phui-font-fa {
-  font-size: 20px;
-  height: 20px;
-  width: 20px;
-  color: rgba(255,255,255,.8);
-  margin: 8px;
-  text-align: center;
-  vertical-align: middle;
+
+.conpherence-durable-column-header {
+  border-left: 1px solid rgba(0,0,0,.1);
+  border-right: 1px solid rgba(0,0,0,.1);
 }
 
 .conpherence-durable-column-header-text {
   float: left;
   padding: 13px 0 12px 12px;
   font-size: 15px;
-  color: rgba(255,255,255,.8);
+  color: {$hoverwhite};
   width: 230px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  border-left: 1px solid rgba(0,0,0,.2);
 }
 
 .conpherence-durable-column-header-text .phui-icon-view {
-  color: rgba(255, 255, 255, 0.8);
+  color: {$hoverwhite};
 }
 
 .conpherence-durable-column-icon-bar {
@@ -226,7 +201,7 @@
 .conpherence-durable-column-transactions
   .conpherence-transaction-view.conpherence-edited {
     color: {$lightgreytext};
-    font-size: 12px;
+    font-size: {$smallerfontsize};
     margin: 0;
     padding: 0;
 }
@@ -268,16 +243,20 @@
 .conpherence-durable-column-transactions
 .conpherence-transaction-view.date-marker .date {
   left: 0;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
+  top: -14px;
   padding: 0 6px 0 0;
 }
 
 .conpherence-durable-column-transactions .conpherence-transaction-detail
-.conpherence-transaction-header .conpherence-transaction-info,
-.conpherence-transaction-header .epoch-link {
+.conpherence-transaction-header .conpherence-transaction-info {
   color: {$lightbluetext};
   float: none;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
+}
+
+.conpherence-transaction-header .epoch-link {
+  color: {$lightgreytext};
 }
 
 .conpherence-durable-column-transactions .conpherence-transaction-detail
@@ -353,6 +332,6 @@ img {
 .conpherence-durable-column-status {
   vertical-align: middle;
   line-height: 24px;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   color: {$lightbluetext};
 }

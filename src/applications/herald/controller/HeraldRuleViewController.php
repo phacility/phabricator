@@ -2,19 +2,13 @@
 
 final class HeraldRuleViewController extends HeraldController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $rule = id(new HeraldRuleQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->needConditionsAndActions(true)
       ->executeOne();
     if (!$rule) {
@@ -152,7 +146,8 @@ final class HeraldRuleViewController extends HeraldController {
         PHUIPropertyListView::ICON_SUMMARY);
 
       $handles = $viewer->loadHandles(HeraldAdapter::getHandlePHIDs($rule));
-      $view->addTextContent($adapter->renderRuleAsText($rule, $handles));
+      $rule_text = $adapter->renderRuleAsText($rule, $handles, $viewer);
+      $view->addTextContent($rule_text);
     }
 
     return $view;

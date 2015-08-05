@@ -1,7 +1,6 @@
 <?php
 
 function phabricator_read_config_file($original_config) {
-
   $root = dirname(dirname(__FILE__));
 
   // Accept either "myconfig" (preferred) or "myconfig.conf.php".
@@ -9,7 +8,6 @@ function phabricator_read_config_file($original_config) {
   $full_config_path = $root.'/conf/'.$config.'.conf.php';
 
   if (!Filesystem::pathExists($full_config_path)) {
-
     // These are very old configuration files which we used to ship with
     // by default. File based configuration was de-emphasized once web-based
     // configuration was built. The actual files were removed to reduce
@@ -37,12 +35,14 @@ function phabricator_read_config_file($original_config) {
       $file = trim($file, './');
       $files[$key] = preg_replace('/\.conf\.php$/', '', $file);
     }
-    $files = "    ".implode("\n    ", $files);
+    $files = '    '.implode("\n    ", $files);
 
     throw new Exception(
-      "CONFIGURATION ERROR\n".
-      "Config file '{$original_config}' does not exist. Valid config files ".
-      "are:\n\n".$files);
+      pht(
+        "CONFIGURATION ERROR\n".
+        "Config file '%s' does not exist. Valid config files are:\n\n%s",
+        $original_config,
+        $files));
   }
 
   // Make sure config file errors are reported.
@@ -58,7 +58,11 @@ function phabricator_read_config_file($original_config) {
   ini_set('display_errors', $old_display_errors);
 
   if ($conf === false) {
-    throw new Exception("Failed to read config file '{$config}': {$errors}");
+    throw new Exception(
+      pht(
+        "Failed to read config file '%s': %s",
+        $config,
+        $errors));
   }
 
   return $conf;

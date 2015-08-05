@@ -108,7 +108,7 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $rule_ids);
       $conditions = mgroup($conditions, 'getRuleID');
 
-      $actions = id(new HeraldAction())->loadAllWhere(
+      $actions = id(new HeraldActionRecord())->loadAllWhere(
         'ruleID IN (%Ld)',
         $rule_ids);
       $actions = mgroup($actions, 'getRuleID');

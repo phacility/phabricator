@@ -18,7 +18,6 @@
   color: {$darkbluetext};
   font-weight: bold;
   text-decoration: none;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.9);
 }
 
 .device-phone .phui-crumbs-view {
@@ -80,7 +79,7 @@
 
 .device-desktop .phui-crumbs-view a:hover,
 .device-desktop .phui-crumbs-view a:hover .phui-icon-view {
-  color: {$sky};
+  color: {$blue};
   text-decoration: none;
 }
 
@@ -102,7 +101,7 @@ a.phui-crumbs-action .phui-icon-view {
 }
 
 .phui-crumbs-view.phui-crumbs-border {
-  border-bottom: 1px solid rgba(205, 207, 211, 1);
+  border-bottom: 1px solid rgba(55,55,55,.1);
 }
 
 body .phui-crumbs-view + .phui-object-box {

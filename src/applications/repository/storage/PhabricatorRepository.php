@@ -11,7 +11,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     PhabricatorFlaggableInterface,
     PhabricatorMarkupInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorProjectInterface {
+    PhabricatorProjectInterface,
+    PhabricatorSpacesInterface {
 
   /**
    * Shortest hash we'll recognize in raw "a829f32" form.
@@ -54,6 +55,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   protected $details = array();
   protected $credentialPHID;
   protected $almanacServicePHID;
+  protected $spacePHID;
 
   private $commitCount = self::ATTACHABLE;
   private $mostRecentCommit = self::ATTACHABLE;
@@ -72,7 +74,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $repository = id(new PhabricatorRepository())
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
-      ->setPushPolicy($push_policy);
+      ->setPushPolicy($push_policy)
+      ->setSpacePHID($actor->getDefaultSpacePHID());
 
     // Put the repository in "Importing" mode until we finish
     // parsing it.
@@ -136,6 +139,11 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       'isHosted'    => $this->isHosted(),
       'isImporting' => $this->isImporting(),
       'encoding'    => $this->getDetail('encoding'),
+      'staging' => array(
+        'supported' => $this->supportsStaging(),
+        'prefix' => 'phabricator',
+        'uri' => $this->getStagingURI(),
+      ),
     );
   }
 
@@ -1161,12 +1169,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $path->delete();
       }
 
-      $projects = id(new PhabricatorRepositoryArcanistProject())
-        ->loadAllWhere('repositoryID = %d', $this->getID());
-      foreach ($projects as $project) {
-        $project->delete();
-      }
-
       queryfx(
         $this->establishConnection('w'),
         'DELETE FROM %T WHERE repositoryPHID = %s',
@@ -1797,6 +1799,22 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
 
+/* -(  Staging  )-------------------------------------------------------------*/
+
+
+  public function supportsStaging() {
+    return $this->isGit();
+  }
+
+
+  public function getStagingURI() {
+    if (!$this->supportsStaging()) {
+      return null;
+    }
+    return $this->getDetail('staging-uri', null);
+  }
+
+
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
 
@@ -1888,12 +1906,39 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
+
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
 
     $this->openTransaction();
-    $this->delete();
+
+      $this->delete();
+
+      $books = id(new DivinerBookQuery())
+        ->setViewer($engine->getViewer())
+        ->withRepositoryPHIDs(array($this->getPHID()))
+        ->execute();
+      foreach ($books as $book) {
+        $engine->destroyObject($book);
+      }
+
+      $atoms = id(new DivinerAtomQuery())
+        ->setViewer($engine->getViewer())
+        ->withRepositoryPHIDs(array($this->getPHID()))
+        ->execute();
+      foreach ($atoms as $atom) {
+        $engine->destroyObject($atom);
+      }
+
     $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorSpacesInterface  )----------------------------------------- */
+
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
   }
 
 }

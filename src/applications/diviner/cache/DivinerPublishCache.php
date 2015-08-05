@@ -45,6 +45,7 @@ final class DivinerPublishCache extends DivinerDiskCache {
 
 /* -(  Index  )-------------------------------------------------------------- */
 
+
   public function getIndex() {
     if ($this->index === null) {
       $this->index = $this->getCache()->getKey('index', array());

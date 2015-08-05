@@ -7,6 +7,7 @@ final class DivinerLiveSymbol extends DivinerDAO
     PhabricatorDestructibleInterface {
 
   protected $bookPHID;
+  protected $repositoryPHID;
   protected $context;
   protected $type;
   protected $name;
@@ -22,6 +23,7 @@ final class DivinerLiveSymbol extends DivinerDAO
   protected $isDocumentable = 0;
 
   private $book = self::ATTACHABLE;
+  private $repository = self::ATTACHABLE;
   private $atom = self::ATTACHABLE;
   private $extends = self::ATTACHABLE;
   private $children = self::ATTACHABLE;
@@ -43,6 +45,7 @@ final class DivinerLiveSymbol extends DivinerDAO
         'summary' => 'text?',
         'isDocumentable' => 'bool',
         'nodeHash' => 'text64?',
+        'repositoryPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -94,12 +97,25 @@ final class DivinerLiveSymbol extends DivinerDAO
     return $this;
   }
 
+  public function getRepository() {
+    return $this->assertAttached($this->repository);
+  }
+
+  public function attachRepository(PhabricatorRepository $repository = null) {
+    $this->repository = $repository;
+    return $this;
+  }
+
   public function getAtom() {
     return $this->assertAttached($this->atom);
   }
 
-  public function attachAtom(DivinerLiveAtom $atom) {
-    $this->atom = DivinerAtom::newFromDictionary($atom->getAtomData());
+  public function attachAtom(DivinerLiveAtom $atom = null) {
+    if ($atom === null) {
+      $this->atom = null;
+    } else {
+      $this->atom = DivinerAtom::newFromDictionary($atom->getAtomData());
+    }
     return $this;
   }
 
@@ -133,10 +149,9 @@ final class DivinerLiveSymbol extends DivinerDAO
   }
 
   public function save() {
-
     // NOTE: The identity hash is just a sanity check because the unique tuple
-    // on this table is way way too long to fit into a normal UNIQUE KEY. We
-    // don't use it directly, but its existence prevents duplicate records.
+    // on this table is way too long to fit into a normal `UNIQUE KEY`.
+    // We don't use it directly, but its existence prevents duplicate records.
 
     if (!$this->identityHash) {
       $this->identityHash = PhabricatorHash::digestForIndex(
@@ -155,14 +170,17 @@ final class DivinerLiveSymbol extends DivinerDAO
 
   public function getTitle() {
     $title = parent::getTitle();
+
     if (!strlen($title)) {
       $title = $this->getName();
     }
+
     return $title;
   }
 
   public function setTitle($value) {
     $this->writeField('title', $value);
+
     if (strlen($value)) {
       $slug = DivinerAtomRef::normalizeTitleString($value);
       $hash = PhabricatorHash::digestForIndex($slug);
@@ -170,6 +188,7 @@ final class DivinerLiveSymbol extends DivinerDAO
     } else {
       $this->titleSlugHash = null;
     }
+
     return $this;
   }
 
@@ -196,15 +215,14 @@ final class DivinerLiveSymbol extends DivinerDAO
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
+
   public function getCapabilities() {
     return $this->getBook()->getCapabilities();
   }
 
-
   public function getPolicy($capability) {
     return $this->getBook()->getPolicy($capability);
   }
-
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return $this->getBook()->hasAutomaticCapability($capability, $viewer);
@@ -215,37 +233,36 @@ final class DivinerLiveSymbol extends DivinerDAO
   }
 
 
-/* -(  Markup Interface  )--------------------------------------------------- */
+/* -( PhabricatorMarkupInterface  )------------------------------------------ */
 
 
   public function getMarkupFieldKey($field) {
     return $this->getPHID().':'.$field.':'.$this->getGraphHash();
   }
 
-
   public function newMarkupEngine($field) {
     return PhabricatorMarkupEngine::getEngine('diviner');
   }
 
-
   public function getMarkupText($field) {
+    if (!$this->getAtom()) {
+      return;
+    }
+
     return $this->getAtom()->getDocblockText();
   }
 
-
-  public function didMarkupText(
-    $field,
-    $output,
-    PhutilMarkupEngine $engine) {
+  public function didMarkupText($field, $output, PhutilMarkupEngine $engine) {
     return $output;
   }
-
 
   public function shouldUseMarkupCache($field) {
     return true;
   }
 
+
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
 
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {

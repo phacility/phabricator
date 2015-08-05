@@ -86,8 +86,9 @@ abstract class PhabricatorAphlictManagementWorkflow
     exit(1);
   }
 
-  protected final function setDebug($debug) {
+  final protected function setDebug($debug) {
     $this->debug = $debug;
+    return $this;
   }
 
   public static function requireExtensions() {

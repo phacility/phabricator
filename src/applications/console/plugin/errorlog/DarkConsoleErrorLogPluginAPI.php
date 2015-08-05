@@ -1,6 +1,6 @@
 <?php
 
-final class DarkConsoleErrorLogPluginAPI {
+final class DarkConsoleErrorLogPluginAPI extends Phobject {
 
   private static $errors = array();
 

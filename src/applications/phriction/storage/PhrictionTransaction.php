@@ -9,9 +9,11 @@ final class PhrictionTransaction
   const TYPE_MOVE_TO = 'move-to';
   const TYPE_MOVE_AWAY = 'move-away';
 
-  const MAILTAG_TITLE = 'phriction-title';
-  const MAILTAG_CONTENT = 'phriction-content';
-  const MAILTAG_DELETE  = 'phriction-delete';
+  const MAILTAG_TITLE       = 'phriction-title';
+  const MAILTAG_CONTENT     = 'phriction-content';
+  const MAILTAG_DELETE      = 'phriction-delete';
+  const MAILTAG_SUBSCRIBERS = 'phriction-subscribers';
+  const MAILTAG_OTHER       = 'phriction-other';
 
   public function getApplicationName() {
     return 'phriction';
@@ -280,7 +282,12 @@ final class PhrictionTransaction
       case self::TYPE_DELETE:
         $tags[] = self::MAILTAG_DELETE;
         break;
-
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+        $tags[] = self::MAILTAG_SUBSCRIBERS;
+        break;
+      default:
+        $tags[] = self::MAILTAG_OTHER;
+        break;
     }
     return $tags;
   }

@@ -3,15 +3,9 @@
 final class PhabricatorDashboardPanelEditController
   extends PhabricatorDashboardController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     // If the user is trying to create a panel directly on a dashboard, make
     // sure they have permission to see and edit the dashboard.
@@ -35,7 +29,7 @@ final class PhabricatorDashboardPanelEditController
       $manage_uri = $this->getApplicationURI('manage/'.$dashboard_id.'/');
     }
 
-    if ($this->id) {
+    if ($id) {
       $is_create = false;
 
       if ($dashboard) {
@@ -51,12 +45,16 @@ final class PhabricatorDashboardPanelEditController
 
       $panel = id(new PhabricatorDashboardPanelQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->requireCapabilities($capabilities)
         ->executeOne();
       if (!$panel) {
         return new Aphront404Response();
       }
+      $v_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $panel->getPHID(),
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+      $v_projects = array_reverse($v_projects);
 
       if ($dashboard) {
         $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -86,6 +84,7 @@ final class PhabricatorDashboardPanelEditController
       if (empty($types[$type])) {
         return $this->processPanelTypeRequest($request);
       }
+      $v_projects = array();
 
       $panel->setPanelType($type);
     }
@@ -136,6 +135,7 @@ final class PhabricatorDashboardPanelEditController
       $v_name = $request->getStr('name');
       $v_view_policy = $request->getStr('viewPolicy');
       $v_edit_policy = $request->getStr('editPolicy');
+      $v_projects = $request->getArr('projects');
 
       $type_name = PhabricatorDashboardPanelTransaction::TYPE_NAME;
       $type_view_policy = PhabricatorTransactions::TYPE_VIEW_POLICY;
@@ -154,6 +154,12 @@ final class PhabricatorDashboardPanelEditController
       $xactions[] = id(new PhabricatorDashboardPanelTransaction())
         ->setTransactionType($type_edit_policy)
         ->setNewValue($v_edit_policy);
+
+      $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+      $xactions[] = id(new PhabricatorDashboardPanelTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $proj_edge_type)
+        ->setNewValue(array('=' => array_fuse($v_projects)));
 
       $field_xactions = $field_list->buildFieldTransactionsFromRequest(
         new PhabricatorDashboardPanelTransaction(),
@@ -231,6 +237,13 @@ final class PhabricatorDashboardPanelEditController
           ->setPolicyObject($panel)
           ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
           ->setPolicies($policies));
+
+    $form->appendControl(
+      id(new AphrontFormTokenizerControl())
+        ->setLabel(pht('Projects'))
+        ->setName('projects')
+        ->setValue($v_projects)
+        ->setDatasource(new PhabricatorProjectDatasource()));
 
     $field_list->appendFieldsToForm($form);
 

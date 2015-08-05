@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhortuneProductImplementation {
+abstract class PhortuneProductImplementation extends Phobject {
 
   abstract public function loadImplementationsForRefs(
     PhabricatorUser $viewer,

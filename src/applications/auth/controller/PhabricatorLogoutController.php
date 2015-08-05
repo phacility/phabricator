@@ -26,14 +26,13 @@ final class PhabricatorLogoutController
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $this->getViewer();
 
     if ($request->isFormPost()) {
 
       $log = PhabricatorUserLog::initializeNewLog(
-        $user,
-        $user->getPHID(),
+        $viewer,
+        $viewer->getPHID(),
         PhabricatorUserLog::ACTION_LOGOUT);
       $log->save();
 
@@ -43,7 +42,7 @@ final class PhabricatorLogoutController
       $phsid = $request->getCookie(PhabricatorCookies::COOKIE_SESSION);
       if (strlen($phsid)) {
         $session = id(new PhabricatorAuthSessionQuery())
-          ->setViewer($user)
+          ->setViewer($viewer)
           ->withSessionKeys(array($phsid))
           ->executeOne();
         if ($session) {
@@ -56,9 +55,9 @@ final class PhabricatorLogoutController
         ->setURI('/auth/loggedout/');
     }
 
-    if ($user->getPHID()) {
+    if ($viewer->getPHID()) {
       $dialog = id(new AphrontDialogView())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setTitle(pht('Log out of Phabricator?'))
         ->appendChild(pht('Are you sure you want to log out?'))
         ->addSubmitButton(pht('Logout'))

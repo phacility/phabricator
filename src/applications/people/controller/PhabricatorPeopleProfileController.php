@@ -5,6 +5,10 @@ final class PhabricatorPeopleProfileController
 
   private $username;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function shouldRequireAdmin() {
     return false;
   }
@@ -19,14 +23,13 @@ final class PhabricatorPeopleProfileController
     $user = id(new PhabricatorPeopleQuery())
       ->setViewer($viewer)
       ->withUsernames(array($this->username))
+      ->needBadges(true)
       ->needProfileImage(true)
       ->needAvailability(true)
       ->executeOne();
     if (!$user) {
       return new Aphront404Response();
     }
-
-    require_celerity_resource('phabricator-profile-css');
 
     $profile = $user->loadUserProfile();
     $username = phutil_escape_uri($user->getUserName());
@@ -63,6 +66,19 @@ final class PhabricatorPeopleProfileController
         ->setHref($this->getApplicationURI('picture/'.$user->getID().'/'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
+
+    $class = 'PhabricatorConpherenceApplication';
+    if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
+      $href = id(new PhutilURI('/conpherence/new/'))
+        ->setQueryParam('participant', $user->getPHID());
+
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('fa-comments')
+          ->setName(pht('Send Message'))
+          ->setWorkflow(true)
+          ->setHref($href));
+    }
 
     if ($viewer->getIsAdmin()) {
       $actions->addAction(
@@ -134,28 +150,21 @@ final class PhabricatorPeopleProfileController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($name);
 
-    $class = 'PhabricatorConpherenceApplication';
-    if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
-      $href = '/conpherence/new/?participant='.$user->getPHID();
-      $image = id(new PHUIIconView())
-          ->setIconFont('fa-comments');
-      $button = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setColor(PHUIButtonView::SIMPLE)
-        ->setIcon($image)
-        ->setHref($href)
-        ->setText(pht('Send Message'))
-        ->setWorkflow(true);
-      $header->addActionLink($button);
-    }
-
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    $feed = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Recent Activity'))
+      ->appendChild($this->buildPeopleFeed($user, $viewer));
+
+    $badges = $this->buildBadgesView($user);
+
     $nav = $this->buildIconNavView($user);
     $nav->selectFilter("{$name}/");
     $nav->appendChild($object_box);
+    $nav->appendChild($badges);
+    $nav->appendChild($feed);
 
     return $this->buildApplicationPage(
       $nav,
@@ -180,6 +189,63 @@ final class PhabricatorPeopleProfileController
     $field_list->appendFieldsToPropertyList($user, $viewer, $view);
 
     return $view;
+  }
+
+  private function buildBadgesView(
+    PhabricatorUser $user) {
+
+    $viewer = $this->getViewer();
+    $class = 'PhabricatorBadgesApplication';
+    $box = null;
+
+    if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
+      $badge_phids = $user->getBadgePHIDs();
+      if ($badge_phids) {
+        $badges = id(new PhabricatorBadgesQuery())
+          ->setViewer($viewer)
+          ->withPHIDs($badge_phids)
+          ->execute();
+
+        $flex = new PHUIBadgeBoxView();
+        foreach ($badges as $badge) {
+          $item = id(new PHUIBadgeView())
+            ->setIcon($badge->getIcon())
+            ->setHeader($badge->getName())
+            ->setSubhead($badge->getFlavor())
+            ->setQuality($badge->getQuality());
+          $flex->addItem($item);
+        }
+
+        $box = id(new PHUIObjectBoxView())
+          ->setHeaderText(pht('Badges'))
+          ->appendChild($flex);
+        }
+      }
+    return $box;
+  }
+
+  private function buildPeopleFeed(
+    PhabricatorUser $user,
+    $viewer) {
+
+    $query = new PhabricatorFeedQuery();
+    $query->setFilterPHIDs(
+      array(
+        $user->getPHID(),
+      ));
+    $query->setLimit(100);
+    $query->setViewer($viewer);
+    $stories = $query->execute();
+
+    $builder = new PhabricatorFeedBuilder($stories);
+    $builder->setUser($viewer);
+    $builder->setShowHovercards(true);
+    $builder->setNoDataString(pht('To begin on such a grand journey, '.
+      'requires but just a single step.'));
+    $view = $builder->buildView();
+
+    return phutil_tag_div('phabricator-project-feed', $view->render());
+
   }
 
 }

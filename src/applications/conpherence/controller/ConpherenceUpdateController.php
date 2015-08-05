@@ -67,7 +67,7 @@ final class ConpherenceUpdateController
         case ConpherenceUpdateActions::JOIN_ROOM:
           $xactions[] = id(new ConpherenceTransaction())
             ->setTransactionType(
-              ConpherenceTransactionType::TYPE_PARTICIPANTS)
+              ConpherenceTransaction::TYPE_PARTICIPANTS)
             ->setNewValue(array('+' => array($user->getPHID())));
           $delete_draft = true;
           $message = $request->getStr('text');
@@ -101,7 +101,7 @@ final class ConpherenceUpdateController
           if (!empty($person_phids)) {
             $xactions[] = id(new ConpherenceTransaction())
               ->setTransactionType(
-                ConpherenceTransactionType::TYPE_PARTICIPANTS)
+                ConpherenceTransaction::TYPE_PARTICIPANTS)
               ->setNewValue(array('+' => $person_phids));
           }
           break;
@@ -114,7 +114,7 @@ final class ConpherenceUpdateController
           if ($person_phid && $person_phid == $user->getPHID()) {
             $xactions[] = id(new ConpherenceTransaction())
               ->setTransactionType(
-                ConpherenceTransactionType::TYPE_PARTICIPANTS)
+                ConpherenceTransaction::TYPE_PARTICIPANTS)
               ->setNewValue(array('-' => array($person_phid)));
             $response_mode = 'go-home';
           }
@@ -144,7 +144,7 @@ final class ConpherenceUpdateController
               ->withIDs(array($file_id))
               ->executeOne();
             $xactions[] = id(new ConpherenceTransaction())
-              ->setTransactionType(ConpherenceTransactionType::TYPE_PICTURE)
+              ->setTransactionType(ConpherenceTransaction::TYPE_PICTURE)
               ->setNewValue($orig_file);
             $okay = $orig_file->isTransformableImage();
             if ($okay) {
@@ -157,7 +157,7 @@ final class ConpherenceUpdateController
                 ConpherenceImageData::CROP_HEIGHT);
               $xactions[] = id(new ConpherenceTransaction())
                 ->setTransactionType(
-                  ConpherenceTransactionType::TYPE_PICTURE_CROP)
+                  ConpherenceTransaction::TYPE_PICTURE_CROP)
                 ->setNewValue($crop_file->getPHID());
             }
             $response_mode = 'redirect';
@@ -181,24 +181,22 @@ final class ConpherenceUpdateController
 
             $xactions[] = id(new ConpherenceTransaction())
               ->setTransactionType(
-                ConpherenceTransactionType::TYPE_PICTURE_CROP)
+                ConpherenceTransaction::TYPE_PICTURE_CROP)
               ->setNewValue($image_phid);
           }
           $title = $request->getStr('title');
           $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(ConpherenceTransactionType::TYPE_TITLE)
+            ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
             ->setNewValue($title);
-          if ($conpherence->getIsRoom()) {
-            $xactions[] = id(new ConpherenceTransaction())
-              ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
-              ->setNewValue($request->getStr('viewPolicy'));
-            $xactions[] = id(new ConpherenceTransaction())
-              ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
-              ->setNewValue($request->getStr('editPolicy'));
-            $xactions[] = id(new ConpherenceTransaction())
-              ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
-              ->setNewValue($request->getStr('joinPolicy'));
-          }
+          $xactions[] = id(new ConpherenceTransaction())
+            ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+            ->setNewValue($request->getStr('viewPolicy'));
+          $xactions[] = id(new ConpherenceTransaction())
+            ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+            ->setNewValue($request->getStr('editPolicy'));
+          $xactions[] = id(new ConpherenceTransaction())
+            ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
+            ->setNewValue($request->getStr('joinPolicy'));
           if (!$request->getExists('force_ajax')) {
             $response_mode = 'redirect';
           }
@@ -245,8 +243,11 @@ final class ConpherenceUpdateController
               ->setContent($content);
             break;
           case 'go-home':
-            return id(new AphrontRedirectResponse())
-              ->setURI($this->getApplicationURI());
+            $content = array(
+              'href' => $this->getApplicationURI(),
+            );
+            return id(new AphrontAjaxResponse())
+              ->setContent($content);
             break;
           case 'redirect':
           default:
@@ -323,18 +324,21 @@ final class ConpherenceUpdateController
     $user = $request->getUser();
     $remove_person = $request->getStr('remove_person');
     $participants = $conpherence->getParticipants();
-    if ($conpherence->getIsRoom()) {
-      $message = pht(
-        'Are you sure you want to remove yourself from this room?');
-    } else {
-      $message = pht(
-        'Are you sure you want to remove yourself from this thread?');
+
+    $message = pht(
+      'Are you sure you want to leave this room?');
+    $test_conpherence = clone $conpherence;
+    $test_conpherence->attachParticipants(array());
+    if (!PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $test_conpherence,
+      PhabricatorPolicyCapability::CAN_VIEW)) {
       if (count($participants) == 1) {
         $message .= pht(
-          'The thread will be inaccessible forever and ever.');
+          ' The room will be inaccessible forever and ever.');
       } else {
         $message .= pht(
-          'Someone else in the thread can add you back later.');
+          ' Someone else in the room can add you back later.');
       }
     }
     $body = phutil_tag(
@@ -345,7 +349,7 @@ final class ConpherenceUpdateController
 
     require_celerity_resource('conpherence-update-css');
     return id(new AphrontDialogView())
-      ->setTitle(pht('Remove Participants'))
+      ->setTitle(pht('Leave Room'))
       ->addHiddenInput('action', 'remove_person')
       ->addHiddenInput('remove_person', $remove_person)
       ->addHiddenInput(
@@ -362,6 +366,7 @@ final class ConpherenceUpdateController
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    $title = pht('Update Room');
     $form = id(new PHUIFormLayoutView())
       ->appendChild($error_view)
       ->appendChild(
@@ -399,14 +404,13 @@ final class ConpherenceUpdateController
           ->setLabel(pht('Image')));
     }
 
-    if ($conpherence->getIsRoom()) {
-      $title = pht('Update Room');
-      $policies = id(new PhabricatorPolicyQuery())
-        ->setViewer($user)
-        ->setObject($conpherence)
-        ->execute();
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($user)
+      ->setObject($conpherence)
+      ->execute();
 
-      $form->appendChild(
+    $form
+      ->appendChild(
         id(new AphrontFormPolicyControl())
         ->setName('viewPolicy')
         ->setPolicyObject($conpherence)
@@ -424,9 +428,6 @@ final class ConpherenceUpdateController
         ->setPolicyObject($conpherence)
         ->setCapability(PhabricatorPolicyCapability::CAN_JOIN)
         ->setPolicies($policies));
-    } else {
-      $title = pht('Update Thread');
-    }
 
     require_celerity_resource('conpherence-update-css');
     $view = id(new AphrontDialogView())
@@ -520,7 +521,7 @@ final class ConpherenceUpdateController
           $nav_item = id(new ConpherenceThreadListView())
             ->setUser($user)
             ->setBaseURI($this->getApplicationURI())
-            ->renderSingleThread($conpherence);
+            ->renderSingleThread($conpherence, $policy_objects);
           $nav_item = hsprintf('%s', $nav_item);
           break;
         case ConpherenceUpdateActions::MESSAGE:

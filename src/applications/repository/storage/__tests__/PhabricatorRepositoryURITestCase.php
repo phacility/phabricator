@@ -19,15 +19,15 @@ final class PhabricatorRepositoryURITestCase
     $http_secret = id(new PassphraseSecret())->setSecretData('quack')->save();
 
     $http_credential = PassphraseCredential::initializeNewCredential($user)
-      ->setCredentialType(PassphraseCredentialTypePassword::CREDENTIAL_TYPE)
-      ->setProvidesType(PassphraseCredentialTypePassword::PROVIDES_TYPE)
+      ->setCredentialType(PassphrasePasswordCredentialType::CREDENTIAL_TYPE)
+      ->setProvidesType(PassphrasePasswordCredentialType::PROVIDES_TYPE)
       ->setUsername('duck')
       ->setSecretID($http_secret->getID())
       ->save();
 
     $repo = PhabricatorRepository::initializeNewRepository($user)
       ->setVersionControlSystem($svn)
-      ->setName('Test Repo')
+      ->setName(pht('Test Repo'))
       ->setCallsign('TESTREPO')
       ->setCredentialPHID($http_credential->getPHID())
       ->save();

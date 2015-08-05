@@ -3,9 +3,8 @@
 final class PhabricatorConfigDatabaseIssueController
   extends PhabricatorConfigDatabaseController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $query = $this->buildSchemaQuery();
 
@@ -150,7 +149,7 @@ final class PhabricatorConfigDatabaseIssueController
     $table_box = id(new PHUIObjectBoxView())
       ->setHeader($this->buildHeaderWithDocumentationLink($title))
       ->setFormErrors($errors)
-      ->appendChild($table);
+      ->setTable($table);
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('dbissue/');

@@ -9,6 +9,8 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
   protected function run() {
     $this->setEngines(PhabricatorFactEngine::loadAllEngines());
     while (!$this->shouldExit()) {
+      PhabricatorCaches::destroyRequestCache();
+
       $iterators = $this->getAllApplicationIterators();
       foreach ($iterators as $iterator_name => $iterator) {
         $this->processIteratorWithCursor($iterator_name, $iterator);

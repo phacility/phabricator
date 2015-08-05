@@ -21,6 +21,8 @@ final class PonderQuestion extends PonderDAO
   protected $status;
   protected $content;
   protected $contentSource;
+  protected $viewPolicy;
+  protected $editPolicy;
 
   protected $voteCount;
   protected $answerCount;
@@ -30,6 +32,27 @@ final class PonderQuestion extends PonderDAO
   private $answers;
   private $vote;
   private $comments;
+
+  public static function initializeNewQuestion(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorPonderApplication'))
+      ->executeOne();
+
+    $view_policy = $app->getPolicy(
+      PonderQuestionDefaultViewCapability::CAPABILITY);
+    $edit_policy = $app->getPolicy(
+      PonderQuestionDefaultEditCapability::CAPABILITY);
+
+    return id(new PonderQuestion())
+      ->setAuthorPHID($actor->getPHID())
+      ->setViewPolicy($view_policy)
+      ->setEditPolicy($edit_policy)
+      ->setStatus(PonderQuestionStatus::STATUS_OPEN)
+      ->setVoteCount(0)
+      ->setAnswerCount(0)
+      ->setHeat(0.0);
+  }
 
   protected function getConfiguration() {
     return array(
@@ -234,15 +257,12 @@ final class PonderQuestion extends PonderDAO
   }
 
   public function getPolicy($capability) {
-    $policy = PhabricatorPolicies::POLICY_NOONE;
-
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        $policy = PhabricatorPolicies::POLICY_USER;
-        break;
+        return $this->getViewPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return $this->getEditPolicy();
     }
-
-    return $policy;
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {

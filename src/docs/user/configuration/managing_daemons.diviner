@@ -1,7 +1,7 @@
 @title Managing Daemons with phd
 @group config
 
-Explains Phabricator daemons and the daemon control program ##phd##.
+Explains Phabricator daemons and the daemon control program `phd`.
 
 = Overview =
 
@@ -23,8 +23,8 @@ daemons.
 
 = phd =
 
-**phd** is a command-line script (located at ##phabricator/bin/phd##). To get
-a list of commands, run ##phd help##:
+**phd** is a command-line script (located at `phabricator/bin/phd`). To get
+a list of commands, run `phd help`:
 
   phabricator/ $ ./bin/phd help
   NAME
@@ -49,7 +49,7 @@ the daemons by running `phd restart`.
 = Daemon Console =
 
 You can view status and debugging information for daemons in the Daemon Console
-via the web interface. Go to ##/daemon/## in your install or click
+via the web interface. Go to `/daemon/` in your install or click
 **Daemon Console** from "More Stuff".
 
 The Daemon Console shows a list of all the daemons that have ever launched, and
@@ -109,7 +109,7 @@ This daemon will daemonize and run normally.
     just those started with `phd start`. If you're writing a restart script,
     have it launch any custom daemons explicitly after `phd restart`.
   - You can write your own daemons and manage them with `phd` by extending
-    @{class:PhabricatorDaemon}. See @{article:libphutil Libraries User Guide}.
+    @{class:PhabricatorDaemon}. See {article@contributor:Adding New Classes}.
   - See @{article:Diffusion User Guide} for details about tuning the repository
     daemon.
 
@@ -137,4 +137,4 @@ Continue by:
 
   - learning about the repository daemon with @{article:Diffusion User Guide};
     or
-  - writing your own daemons with @{article:libphutil Libraries User Guide}.
+  - writing your own daemons with {article@contributor:Adding New Classes}.

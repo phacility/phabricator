@@ -28,33 +28,11 @@ abstract class PhabricatorFileTransform extends Phobject {
   }
 
   public static function getAllTransforms() {
-    static $map;
-
-    if ($map === null) {
-      $xforms = id(new PhutilSymbolLoader())
-        ->setAncestorClass(__CLASS__)
-        ->loadObjects();
-
-      $result = array();
-      foreach ($xforms as $xform_template) {
-        foreach ($xform_template->generateTransforms() as $xform) {
-          $key = $xform->getTransformKey();
-          if (isset($result[$key])) {
-            throw new Exception(
-              pht(
-                'Two %s objects define the same transform key ("%s"), but '.
-                'each transform must have a unique key.',
-                __CLASS__,
-                $key));
-          }
-          $result[$key] = $xform;
-        }
-      }
-
-      $map = $result;
-    }
-
-    return $map;
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->setExpandMethod('generateTransforms')
+      ->setUniqueMethod('getTransformKey')
+      ->execute();
   }
 
   public static function getTransformByKey($key) {

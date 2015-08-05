@@ -8,16 +8,12 @@ final class PhabricatorConfigDatabaseStatusController
   private $column;
   private $key;
 
-  public function willProcessRequest(array $data) {
-    $this->database = idx($data, 'database');
-    $this->table = idx($data, 'table');
-    $this->column = idx($data, 'column');
-    $this->key = idx($data, 'key');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $this->database = $request->getURIData('database');
+    $this->table = $request->getURIData('table');
+    $this->column = $request->getURIData('column');
+    $this->key = $request->getURIData('key');
 
     $query = $this->buildSchemaQuery();
 
@@ -165,12 +161,15 @@ final class PhabricatorConfigDatabaseStatusController
       ),
       $comp->getIssues());
 
-    $box = id(new PHUIObjectBoxView())
+    $prop_box = id(new PHUIObjectBoxView())
       ->setHeader($this->buildHeaderWithDocumentationLink($title))
-      ->addPropertyList($properties)
-      ->appendChild($table);
+      ->addPropertyList($properties);
 
-    return $this->buildResponse($title, $box);
+    $table_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Databases'))
+      ->setTable($table);
+
+    return $this->buildResponse($title, array($prop_box, $table_box));
   }
 
   private function renderDatabase(
@@ -219,7 +218,7 @@ final class PhabricatorConfigDatabaseStatusController
           null,
         ));
 
-    $title = pht('Database Status: %s', $database_name);
+    $title = pht('Database: %s', $database_name);
 
     $actual_database = $actual->getDatabase($database_name);
     if ($actual_database) {
@@ -260,12 +259,15 @@ final class PhabricatorConfigDatabaseStatusController
       ),
       $database->getIssues());
 
-    $box = id(new PHUIObjectBoxView())
+    $prop_box = id(new PHUIObjectBoxView())
       ->setHeader($this->buildHeaderWithDocumentationLink($title))
-      ->addPropertyList($properties)
-      ->appendChild($table);
+      ->addPropertyList($properties);
 
-    return $this->buildResponse($title, $box);
+    $table_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Database Status'))
+      ->setTable($table);
+
+    return $this->buildResponse($title, array($prop_box, $table_box));
   }
 
   private function renderTable(
@@ -443,7 +445,7 @@ final class PhabricatorConfigDatabaseStatusController
           null,
         ));
 
-    $title = pht('Database Status: %s.%s', $database_name, $table_name);
+    $title = pht('Database: %s.%s', $database_name, $table_name);
 
     if ($actual_table) {
       $actual_collation = $actual_table->getCollation();
@@ -470,13 +472,19 @@ final class PhabricatorConfigDatabaseStatusController
       ),
       $table->getIssues());
 
-    $box = id(new PHUIObjectBoxView())
+    $prop_box = id(new PHUIObjectBoxView())
       ->setHeader($this->buildHeaderWithDocumentationLink($title))
-      ->addPropertyList($properties)
-      ->appendChild($table_view)
-      ->appendChild($keys_view);
+      ->addPropertyList($properties);
 
-    return $this->buildResponse($title, $box);
+    $table_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Database'))
+      ->setTable($table_view);
+
+    $key_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Keys'))
+      ->setTable($keys_view);
+
+    return $this->buildResponse($title, array($prop_box, $table_box, $key_box));
   }
 
   private function renderColumn(

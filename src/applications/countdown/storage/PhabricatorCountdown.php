@@ -1,13 +1,23 @@
 <?php
 
-final class PhabricatorCountdown
-  extends PhabricatorCountdownDAO
-  implements PhabricatorPolicyInterface {
+final class PhabricatorCountdown extends PhabricatorCountdownDAO
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorFlaggableInterface,
+    PhabricatorSubscribableInterface,
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorTokenReceiverInterface,
+    PhabricatorSpacesInterface,
+    PhabricatorProjectInterface {
 
   protected $title;
   protected $authorPHID;
   protected $epoch;
+  protected $description;
   protected $viewPolicy;
+  protected $editPolicy;
+  protected $mailKey;
+  protected $spacePHID;
 
   public static function initializeNewCountdown(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -21,7 +31,8 @@ final class PhabricatorCountdown
     return id(new PhabricatorCountdown())
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
-      ->setEpoch(PhabricatorTime::getNow());
+      ->setEpoch(PhabricatorTime::getNow())
+      ->setSpacePHID($actor->getDefaultSpacePHID());
   }
 
   protected function getConfiguration() {
@@ -29,6 +40,8 @@ final class PhabricatorCountdown
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255',
+        'description' => 'text',
+        'mailKey' => 'bytes20',
       ),
     ) + parent::getConfiguration();
   }
@@ -36,6 +49,62 @@ final class PhabricatorCountdown
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorCountdownCountdownPHIDType::TYPECONST);
+  }
+
+  public function getMonogram() {
+    return 'C'.$this->getID();
+  }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
+  }
+
+
+/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+    return ($phid == $this->getAuthorPHID());
+  }
+
+  public function shouldShowSubscribersProperty() {
+    return true;
+  }
+
+  public function shouldAllowSubscription($phid) {
+    return true;
+  }
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorCountdownEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorCountdownTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
+/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
+
+  public function getUsersToNotifyOfTokenGiven() {
+    return array($this->getAuthorPHID());
   }
 
 
@@ -54,16 +123,22 @@ final class PhabricatorCountdown
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        return PhabricatorPolicies::POLICY_NOONE;
+        return $this->getEditPolicy();
     }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return ($viewer->getPHID() == $this->getAuthorPHID());
+    return false;
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht('The author of a countdown can always view and edit it.');
+    return false;
+  }
+
+/* -( PhabricatorSpacesInterface )------------------------------------------- */
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
   }
 
 }

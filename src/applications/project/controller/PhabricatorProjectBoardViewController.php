@@ -163,7 +163,7 @@ final class PhabricatorProjectBoardViewController
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
         PhabricatorQueryConstraint::OPERATOR_AND,
         array($project->getPHID()))
-      ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
+      ->setOrder(ManiphestTaskQuery::ORDER_PRIORITY)
       ->setViewer($viewer)
       ->execute();
     $tasks = mpull($tasks, null, 'getPHID');
@@ -362,7 +362,7 @@ final class PhabricatorProjectBoardViewController
       $project->getName());
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('%s Workboard', $header_link))
+      ->setHeader($header_link)
       ->setUser($viewer)
       ->setNoBackground(true)
       ->addActionLink($sort_menu)
@@ -370,12 +370,16 @@ final class PhabricatorProjectBoardViewController
       ->addActionLink($manage_menu)
       ->setPolicyObject($project);
 
+    $header_box = id(new PHUIBoxView())
+      ->appendChild($header)
+      ->addClass('project-board-header');
+
     $board_box = id(new PHUIBoxView())
       ->appendChild($board)
       ->addClass('project-board-wrapper');
 
     $nav = $this->buildIconNavView($project);
-    $nav->appendChild($header);
+    $nav->appendChild($header_box);
     $nav->appendChild($board_box);
 
     return $this->buildApplicationPage(

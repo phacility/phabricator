@@ -2,19 +2,13 @@
 
 final class DrydockResourceViewController extends DrydockResourceController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $resource = id(new DrydockResourceQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$resource) {
       return new Aphront404Response();
@@ -42,7 +36,7 @@ final class DrydockResourceViewController extends DrydockResourceController {
       ->render();
     $lease_list->setNoDataString(pht('This resource has no leases.'));
 
-    $pager = new AphrontPagerView();
+    $pager = new PHUIPagerView();
     $pager->setURI(new PhutilURI($resource_uri), 'offset');
     $pager->setOffset($request->getInt('offset'));
 

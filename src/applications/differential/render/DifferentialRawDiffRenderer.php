@@ -1,5 +1,6 @@
 <?php
-final class DifferentialRawDiffRenderer {
+
+final class DifferentialRawDiffRenderer extends Phobject {
 
   private $changesets;
   private $format = 'unified';

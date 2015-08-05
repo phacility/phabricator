@@ -34,7 +34,7 @@ to write more sophisticated mail rules.
 Phabricator sends a variety of mail headers that can be useful in crafting rules
 to route and manage mail.
 
-Headers in plural contain lists. A list containing two items, ##1## and
+Headers in plural contain lists. A list containing two items, `1` and
 `15` will generally be formatted like this:
 
   X-Header: <1>, <15>
@@ -49,33 +49,33 @@ expressions or wildcards (namely Outlook).
 
 The headers Phabricator adds to mail are:
 
-  - ##X-Phabricator-Sent-This-Message##: this is attached to all mail
+  - `X-Phabricator-Sent-This-Message`: this is attached to all mail
     Phabricator sends. You can use it to differentiate between email from
     Phabricator and replies/forwards of Phabricator mail from human beings.
-  - ##X-Phabricator-To##: this is attached to all mail Phabricator sends.
+  - `X-Phabricator-To`: this is attached to all mail Phabricator sends.
     It shows the PHIDs of the original "To" line, before any mutation
     by the mailer configuration.
-  - ##X-Phabricator-Cc##: this is attached to all mail Phabricator sends.
+  - `X-Phabricator-Cc`: this is attached to all mail Phabricator sends.
     It shows the PHIDs of the original "Cc" line, before any mutation by the
     mailer configuration.
-  - ##X-Differential-Author##: this is attached to Differential mail and shows
+  - `X-Differential-Author`: this is attached to Differential mail and shows
     the revision's author. You can use it to filter mail about your revisions
     (or other users' revisions).
-  - ##X-Differential-Reviewer##: this is attached to Differential mail and
+  - `X-Differential-Reviewer`: this is attached to Differential mail and
     shows the reviewers. You can use it to filter mail about revisions you
     are reviewing, versus revisions you are explicitly CC'd on or CC'd as
     a result of Herald rules.
-  - ##X-Differential-Reviewers##: list version of the previous.
-  - ##X-Differential-CC##: this is attached to Differential mail and shows
+  - `X-Differential-Reviewers`: list version of the previous.
+  - `X-Differential-CC`: this is attached to Differential mail and shows
     the CCs on the revision.
-  - ##X-Differential-CCs##: list version of the previous.
-  - ##X-Differential-Explicit-CC##: this is attached to Differential mail and
+  - `X-Differential-CCs`: list version of the previous.
+  - `X-Differential-Explicit-CC`: this is attached to Differential mail and
     shows the explicit CCs on the revision (those that were added by humans,
     not by Herald).
-  - ##X-Differential-Explicit-CCs##: list version of the previous.
-  - ##X-Phabricator-Mail-Tags##: this is attached to some mail and has
+  - `X-Differential-Explicit-CCs`: list version of the previous.
+  - `X-Phabricator-Mail-Tags`: this is attached to some mail and has
     a list of descriptors about the mail. (This is fairly new and subject
     to some change.)
-  - ##X-Herald-Rules##: this is attached to some mail and shows Herald rule
+  - `X-Herald-Rules`: this is attached to some mail and shows Herald rule
     IDs which have triggered for the object. You can use this to sort or
     categorize mail that has triggered specific rules.

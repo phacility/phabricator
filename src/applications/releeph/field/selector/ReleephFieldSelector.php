@@ -1,6 +1,6 @@
 <?php
 
-abstract class ReleephFieldSelector {
+abstract class ReleephFieldSelector extends Phobject {
 
   final public function __construct() {
     // <empty>

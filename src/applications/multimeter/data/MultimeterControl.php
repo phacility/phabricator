@@ -1,6 +1,6 @@
 <?php
 
-final class MultimeterControl {
+final class MultimeterControl extends Phobject {
 
   private static $instance;
 

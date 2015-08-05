@@ -4,8 +4,8 @@
 
 .maniphest-auxiliary-header {
   font-weight: bold;
-  font-size: 14px;
-  color: #333333;
+  font-size: {$biggerfontsize};
+  color: {$darkbluetext};
   border-bottom: 1px solid {$lightgreytext};
   padding: 12px 0 4px;
   margin-bottom: 4px;

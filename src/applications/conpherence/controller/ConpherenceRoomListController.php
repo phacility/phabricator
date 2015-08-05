@@ -33,7 +33,7 @@ final class ConpherenceRoomListController extends ConpherenceController {
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     if ($for_app) {
-      $nav->addFilter('room/new/', pht('Create Room'));
+      $nav->addFilter('new/', pht('Create Room'));
     }
 
     id(new ConpherenceThreadSearchEngine())

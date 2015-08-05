@@ -6,11 +6,10 @@ final class DivinerFindController extends DivinerController {
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
-    $book_name = $request->getStr('book');
+    $book_name  = $request->getStr('book');
     $query_text = $request->getStr('name');
 
     $book = null;
@@ -19,6 +18,7 @@ final class DivinerFindController extends DivinerController {
         ->setViewer($viewer)
         ->withNames(array($book_name))
         ->executeOne();
+
       if (!$book) {
         return new Aphront404Response();
       }
@@ -40,6 +40,9 @@ final class DivinerFindController extends DivinerController {
     if (strlen($type)) {
       $query->withTypes(array($type));
     }
+
+    $query->withGhosts(false);
+    $query->withIsDocumentable(true);
 
     $name_query = clone $query;
 
@@ -67,8 +70,8 @@ final class DivinerFindController extends DivinerController {
         ->setTitle(pht('Documentation Not Found'))
         ->appendChild(
           pht(
-            'Unable to find the specified documentation. You may have '.
-            'followed a bad or outdated link.'))
+            'Unable to find the specified documentation. '.
+            'You may have followed a bad or outdated link.'))
         ->addCancelButton($not_found_uri, pht('Read More Documentation'));
 
       return id(new AphrontDialogResponse())->setDialog($dialog);

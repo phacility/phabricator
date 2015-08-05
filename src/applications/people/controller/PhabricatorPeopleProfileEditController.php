@@ -66,17 +66,30 @@ final class PhabricatorPeopleProfileEditController
       ->setUser($viewer);
 
     $field_list->appendFieldsToForm($form);
-
     $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($profile_uri)
           ->setValue(pht('Save Profile')));
 
+    $allow_public = PhabricatorEnv::getEnvConfig('policy.allow-public');
+    $note = null;
+    if ($allow_public) {
+      $note = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->appendChild(pht(
+          'Information on user profiles on this install is publicly '.
+          'visible.'));
+    }
+
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Edit Profile'))
       ->setValidationException($validation_exception)
       ->setForm($form);
+
+    if ($note) {
+      $form_box->setInfoView($note);
+    }
 
     $nav = $this->buildIconNavView($user);
     $nav->selectFilter('/');

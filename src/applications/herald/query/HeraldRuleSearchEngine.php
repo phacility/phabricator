@@ -197,19 +197,18 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
         $item->addIcon('fa-lock grey', pht('Disabled'));
       }
 
-      $item->addAction(
-        id(new PHUIListItemView())
-          ->setHref($this->getApplicationURI("history/{$id}/"))
-          ->setIcon('fa-file-text-o')
-          ->setName(pht('Edit Log')));
-
       $content_type_name = idx($content_type_map, $rule->getContentType());
       $item->addAttribute(pht('Affects: %s', $content_type_name));
 
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No rules found.'));
+
+    return $result;
+
   }
 
 }

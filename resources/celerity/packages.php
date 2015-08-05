@@ -96,12 +96,10 @@ return array(
 
     'phabricator-remarkup-css',
     'syntax-highlighting-css',
-    'aphront-pager-view-css',
+    'phui-pager-css',
     'aphront-tooltip-css',
     'phabricator-flag-css',
     'phui-info-view-css',
-
-    'sprite-gradient-css',
     'sprite-menu-css',
 
     'phabricator-main-menu-view',
@@ -127,7 +125,6 @@ return array(
 
     'font-fontawesome',
     'phui-font-icon-base-css',
-    'sprite-main-header-css',
     'phui-box-css',
     'phui-object-box-css',
     'phui-timeline-view-css',
@@ -139,13 +136,11 @@ return array(
     'phabricator-feed-css',
     'phabricator-dashboard-css',
     'aphront-multi-column-view-css',
-    'phui-action-header-view-css',
     'conpherence-durable-column-view',
   ),
   'differential.pkg.css' => array(
     'differential-core-view-css',
     'differential-changeset-view-css',
-    'differential-results-table-css',
     'differential-revision-history-css',
     'differential-revision-list-css',
     'differential-table-of-contents-css',

@@ -13,6 +13,8 @@ PhabricatorStartup::didStartup();
 
 try {
   PhabricatorStartup::loadCoreLibraries();
+  PhabricatorCaches::destroyRequestCache();
+
   $sink = new AphrontPHPHTTPSink();
 
   try {

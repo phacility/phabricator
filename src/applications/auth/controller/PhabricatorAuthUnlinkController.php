@@ -5,13 +5,9 @@ final class PhabricatorAuthUnlinkController
 
   private $providerKey;
 
-  public function willProcessRequest(array $data) {
-    $this->providerKey = $data['pkey'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $this->providerKey = $request->getURIData('pkey');
 
     list($type, $domain) = explode(':', $this->providerKey, 2);
 

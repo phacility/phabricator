@@ -23,12 +23,20 @@ final class DifferentialPathField
     return true;
   }
 
-  public function renderPropertyViewLabel() {
+  public function renderPropertyViewValue(array $handles) {
+    return null;
+  }
+
+  public function shouldAppearInDiffPropertyView() {
+    return true;
+  }
+
+  public function renderDiffPropertyViewLabel(DifferentialDiff $diff) {
     return $this->getFieldName();
   }
 
-  public function renderPropertyViewValue(array $handles) {
-    $path = $this->getObject()->getActiveDiff()->getSourcePath();
+  public function renderDiffPropertyViewValue(DifferentialDiff $diff) {
+    $path = $diff->getSourcePath();
     if (!$path) {
       return null;
     }

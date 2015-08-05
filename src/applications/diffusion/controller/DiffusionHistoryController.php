@@ -32,7 +32,7 @@ final class DiffusionHistoryController extends DiffusionController {
     $history = DiffusionPathChange::newFromConduit(
       $history_results['pathChanges']);
 
-    $pager = new AphrontPagerView();
+    $pager = new PHUIPagerView();
     $pager->setPageSize($page_size);
     $pager->setOffset($offset);
     $history = $pager->sliceResults($history);
@@ -59,7 +59,7 @@ final class DiffusionHistoryController extends DiffusionController {
 
     $history_panel = new PHUIObjectBoxView();
     $history_panel->setHeaderText(pht('History'));
-    $history_panel->appendChild($history_table);
+    $history_panel->setTable($history_table);
 
     $content[] = $history_panel;
 

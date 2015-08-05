@@ -6,7 +6,7 @@
  * @task compose  Composition
  * @task render   Rendering
  */
-final class PhabricatorMetaMTAMailBody {
+final class PhabricatorMetaMTAMailBody extends Phobject {
 
   private $sections = array();
   private $htmlSections = array();
@@ -20,6 +20,7 @@ final class PhabricatorMetaMTAMailBody {
 
   public function setViewer($viewer) {
     $this->viewer = $viewer;
+    return $this;
   }
 
 /* -(  Composition  )-------------------------------------------------------- */
@@ -157,26 +158,6 @@ final class PhabricatorMetaMTAMailBody {
 
     return $this;
   }
-
-
-  /**
-   * Add a section with a link to email preferences.
-   *
-   * @return this
-   * @task compose
-   */
-  public function addEmailPreferenceSection() {
-    if (!PhabricatorEnv::getEnvConfig('metamta.email-preferences')) {
-      return $this;
-    }
-
-    $href = PhabricatorEnv::getProductionURI(
-      '/settings/panel/emailpreferences/');
-    $this->addLinkSection(pht('EMAIL PREFERENCES'), $href);
-
-    return $this;
-  }
-
 
   /**
    * Add an attachment.

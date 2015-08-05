@@ -10,7 +10,9 @@ final class PhabricatorRemarkupGraphvizBlockInterpreter
   public function markupContent($content, array $argv) {
     if (!Filesystem::binaryExists('dot')) {
       return $this->markupError(
-        pht('Unable to locate the `dot` binary. Install Graphviz.'));
+        pht(
+          'Unable to locate the `%s` binary. Install Graphviz.',
+          'dot'));
     }
 
     $width = $this->parseDimension(idx($argv, 'width'));
@@ -24,7 +26,8 @@ final class PhabricatorRemarkupGraphvizBlockInterpreter
     if ($err) {
       return $this->markupError(
         pht(
-          'Execution of `dot` failed (#%d), check your syntax: %s',
+          'Execution of `%s` failed (#%d), check your syntax: %s',
+          'dot',
           $err,
           $stderr));
     }
@@ -39,12 +42,13 @@ final class PhabricatorRemarkupGraphvizBlockInterpreter
       return '<'.$file->getBestURI().'>';
     }
 
-    return phutil_tag(
+    $img = phutil_tag(
       'img',
       array(
         'src' => $file->getBestURI(),
         'width' => nonempty($width, null),
       ));
+    return phutil_tag_div('phabricator-remarkup-embed-image-full', $img);
   }
 
   // TODO: This is duplicated from PhabricatorEmbedFileRemarkupRule since they

@@ -16,7 +16,6 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
       if ($name) {
         $nav->setBaseURI(new PhutilURI('/p/'));
         $nav->addFilter("{$name}/", $name);
-        $nav->addFilter("{$name}/feed/", pht('Feed'));
         $nav->addFilter("{$name}/calendar/", pht('Calendar'));
       }
     }
@@ -54,7 +53,6 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
     $nav->setIconNav(true);
     $nav->setBaseURI(new PhutilURI('/p/'));
     $nav->addIcon("{$name}/", $name, null, $picture);
-    $nav->addIcon("{$name}/feed/", pht('Feed'), 'fa-newspaper-o');
 
     $class = 'PhabricatorCalendarApplication';
     if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {

@@ -3,9 +3,8 @@
 final class PhabricatorConfigListController
   extends PhabricatorConfigController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('/');
@@ -18,11 +17,11 @@ final class PhabricatorConfigListController
 
     $core = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->appendChild($core_list);
+      ->setObjectList($core_list);
 
     $apps = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Applications Configuration'))
-      ->appendChild($apps_list);
+      ->setObjectList($apps_list);
 
     $nav->appendChild(
       array(
@@ -47,7 +46,6 @@ final class PhabricatorConfigListController
     assert_instances_of($groups, 'PhabricatorApplicationConfigOptions');
 
     $list = new PHUIObjectItemListView();
-    $list->setStackable(true);
     $groups = msort($groups, 'getName');
     foreach ($groups as $group) {
       if ($group->getGroup() == $type) {

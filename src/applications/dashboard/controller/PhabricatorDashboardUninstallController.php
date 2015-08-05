@@ -3,19 +3,13 @@
 final class PhabricatorDashboardUninstallController
   extends PhabricatorDashboardController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $dashboard = id(new PhabricatorDashboardQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$dashboard) {
       return new Aphront404Response();
@@ -73,7 +67,7 @@ final class PhabricatorDashboardUninstallController
       ->setTitle(pht('Uninstall Dashboard'))
       ->appendChild($form->buildLayoutView())
       ->addCancelButton($this->getCancelURI(
-        $application_class, $object_phid))
+        $application_class, $object_phid, $id))
       ->addSubmitButton(pht('Uninstall Dashboard'));
   }
 
@@ -114,11 +108,11 @@ final class PhabricatorDashboardUninstallController
     return $body;
   }
 
-  private function getCancelURI($application_class, $object_phid) {
+  private function getCancelURI($application_class, $object_phid, $id) {
     $uri = null;
     switch ($application_class) {
       case 'PhabricatorHomeApplication':
-        $uri = '/dashboard/view/'.$this->id.'/';
+        $uri = '/dashboard/view/'.$id.'/';
         break;
     }
     return $uri;

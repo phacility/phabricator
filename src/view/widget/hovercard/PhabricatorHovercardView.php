@@ -10,17 +10,27 @@ final class PhabricatorHovercardView extends AphrontView {
    * @var PhabricatorObjectHandle
    */
   private $handle;
+  private $object;
 
   private $title = array();
   private $detail;
   private $tags = array();
   private $fields = array();
   private $actions = array();
+  private $badges = array();
 
-  private $color = 'lightblue';
   public function setObjectHandle(PhabricatorObjectHandle $handle) {
     $this->handle = $handle;
     return $this;
+  }
+
+  public function setObject($object) {
+    $this->object = $object;
+    return $this;
+  }
+
+  public function getObject() {
+    return $this->object;
   }
 
   public function setTitle($title) {
@@ -55,8 +65,8 @@ final class PhabricatorHovercardView extends AphrontView {
     return $this;
   }
 
-  public function setColor($color) {
-    $this->color = $color;
+  public function addBadge(PHUIBadgeMiniView $badge) {
+    $this->badges[] = $badge;
     return $this;
   }
 
@@ -65,20 +75,26 @@ final class PhabricatorHovercardView extends AphrontView {
       throw new PhutilInvalidStateException('setObjectHandle');
     }
 
+    $viewer = $this->getUser();
     $handle = $this->handle;
 
     require_celerity_resource('phabricator-hovercard-view-css');
 
-    $title = pht('%s: %s',
-      $handle->getTypeName(),
-      $this->title ? $this->title : $handle->getName());
+    $title = array(
+      id(new PHUISpacesNamespaceContextView())
+        ->setUser($viewer)
+        ->setObject($this->getObject()),
+      pht(
+        '%s: %s',
+        $handle->getTypeName(),
+        $this->title ? $this->title : $handle->getName()),
+    );
 
-    $header = new PHUIActionHeaderView();
-    $header->setHeaderColor($this->color);
-    $header->setHeaderTitle($title);
+    $header = new PHUIHeaderView();
+    $header->setHeader($title);
     if ($this->tags) {
       foreach ($this->tags as $tag) {
-        $header->setTag($tag);
+        $header->addTag($tag);
       }
     }
 
@@ -96,10 +112,22 @@ final class PhabricatorHovercardView extends AphrontView {
     foreach ($this->fields as $field) {
       $item = array(
         phutil_tag('strong', array(), $field['label']),
-        ' ',
+        ': ',
         phutil_tag('span', array(), $field['value']),
       );
       $body[] = phutil_tag_div('phabricator-hovercard-body-item', $item);
+    }
+
+    if ($this->badges) {
+      $badges = id(new PHUIBadgeBoxView())
+        ->addItems($this->badges)
+        ->setCollapsed(true);
+      $body[] = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-hovercard-body-item hovercard-badges',
+        ),
+        $badges);
     }
 
     if ($handle->getImageURI()) {
@@ -153,8 +181,6 @@ final class PhabricatorHovercardView extends AphrontView {
       $tail = phutil_tag_div('phabricator-hovercard-tail', $buttons);
     }
 
-    // Assemble container
-    // TODO: Add color support
     $hovercard = phutil_tag_div(
       'phabricator-hovercard-container',
       array(
@@ -163,8 +189,6 @@ final class PhabricatorHovercardView extends AphrontView {
         $tail,
       ));
 
-    // Wrap for thick border
-    // and later the tip at the bottom
     return phutil_tag_div('phabricator-hovercard-wrapper', $hovercard);
   }
 

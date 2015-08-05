@@ -3,21 +3,15 @@
 final class PhortuneCartViewController
   extends PhortuneCartController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $authority = $this->loadMerchantAuthority();
 
     $query = id(new PhortuneCartQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->needPurchases(true);
 
     if ($authority) {
@@ -146,8 +140,8 @@ final class PhortuneCartViewController
 
     $cart_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($properties)
-      ->appendChild($cart_table);
+      ->addPropertyList($properties)
+      ->setTable($cart_table);
 
     if ($errors) {
       $cart_box->setFormErrors($errors);
@@ -180,7 +174,7 @@ final class PhortuneCartViewController
 
     $charges = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Charges'))
-      ->appendChild($charges_table);
+      ->setTable($charges_table);
 
     $account = $cart->getAccount();
 

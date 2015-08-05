@@ -12,6 +12,6 @@
 }
 
 .aphront-dialog-view .conpherence-dialogue-upload-photo {
-  background: #99ff99;
-  border-color: #669966;
+  background: {$lightgreen};
+  border-color: {$green};
 }

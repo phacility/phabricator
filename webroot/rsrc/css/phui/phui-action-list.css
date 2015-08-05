@@ -2,14 +2,6 @@
  * @provides phabricator-action-list-view-css
  */
 
-.device-desktop .phabricator-action-list-view {
-  font-size: 12px;
-}
-
-.phuix-dropdown-menu .phabricator-action-list-view {
-  font-size: 13px;
-}
-
 .device .phabricator-action-list-view {
   padding: 4px 0;
   display: none;
@@ -58,7 +50,7 @@
   text-shadow: none;
 
   border-radius: 0;
-  color: #18559D;
+  color: {$anchor};
   font: inherit;
   display: inline;
   min-width: 0;
@@ -66,15 +58,14 @@
 
 .phabricator-action-view button.phabricator-action-view-item,
 .phabricator-action-view-item {
-  padding: 3px 4px 3px 28px;
-  line-height: 18px;
+  padding: 4px 4px 4px 28px;
   display: block;
   text-decoration: none;
-  color: {$darkgreytext};
+  color: {$darkbluetext};
 }
 
 .phabricator-action-view-label .phabricator-action-view-item {
-  font-size: 13px;
+  font-size: {$normalfontsize};
   font-weight: bold;
   color: {$bluetext};
   padding: 4px 8px 6px 8px;
@@ -96,9 +87,9 @@
   width: 14px;
   height: 14px;
   position: absolute;
-  top: 5px;
+  top: 6px;
   left: 9px;
-  font-size: 13px;
+  text-align: center;
 }
 
 .device-desktop .phabricator-action-view:hover .phabricator-action-view-item {

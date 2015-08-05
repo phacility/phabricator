@@ -29,18 +29,25 @@ final class PhabricatorCommitBranchesField
       'callsign' => $this->getObject()->getRepository()->getCallsign(),
     );
 
-    $branches_raw = id(new ConduitCall('diffusion.branchquery', $params))
-      ->setUser($this->getViewer())
-      ->execute();
+    try {
+      $branches_raw = id(new ConduitCall('diffusion.branchquery', $params))
+        ->setUser($this->getViewer())
+        ->execute();
 
-    $branches = DiffusionRepositoryRef::loadAllFromDictionaries($branches_raw);
-    if (!$branches) {
-      return;
+      $branches = DiffusionRepositoryRef::loadAllFromDictionaries(
+        $branches_raw);
+      if (!$branches) {
+        return;
+      }
+
+      $branch_names = mpull($branches, 'getShortName');
+      sort($branch_names);
+      $branch_text = implode(', ', $branch_names);
+    } catch (Exception $ex) {
+      $branch_text = pht('<%s: %s>', get_class($ex), $ex->getMessage());
     }
-    $branch_names = mpull($branches, 'getShortName');
-    sort($branch_names);
 
-    $body->addTextSection(pht('BRANCHES'), implode(', ', $branch_names));
+    $body->addTextSection(pht('BRANCHES'), $branch_text);
   }
 
 }

@@ -10,8 +10,7 @@ final class AlmanacConsoleController extends AlmanacController {
     $viewer = $request->getViewer();
 
     $menu = id(new PHUIObjectItemListView())
-      ->setUser($viewer)
-      ->setStackable(true);
+      ->setUser($viewer);
 
     $menu->addItem(
       id(new PHUIObjectItemView())
@@ -38,8 +37,8 @@ final class AlmanacConsoleController extends AlmanacController {
     $crumbs->addTextCrumb(pht('Console'));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText('Console')
-      ->appendChild($menu);
+      ->setHeaderText(pht('Console'))
+      ->setObjectList($menu);
 
     return $this->buildApplicationPage(
       array(

@@ -52,18 +52,18 @@ The callback you pass to @{function:JX.behavior} should have this signature:
 
 The function will be invoked once for each configuration dictionary passed to
 @{function:JX.initBehaviors}, and the dictionary will be passed as the
-##config## parameter. For example, to alert the user that they've won two hogs:
+`config` parameter. For example, to alert the user that they've won two hogs:
 
   lang=js
   JX.initBehaviors({
     "win-a-hog" : [{hogName : "Ethel"}, {hogName: "Beatrice"}]
   });
 
-This will invoke the function twice, once for each ##config## dictionary.
+This will invoke the function twice, once for each `config` dictionary.
 Usually, you invoke a behavior multiple times if you have several similar
 controls on a page, like multiple @{class:JX.Tokenizer}s.
 
-An initially empty object will be passed in the ##statics## parameter, but
+An initially empty object will be passed in the `statics` parameter, but
 changes to this object will persist across invocations of the behavior. For
 example:
 
@@ -142,7 +142,7 @@ code like this in order to address some of the other problems:
 By 2010 (particularly with the introduction of XHP) the API had become more
 sophisticated, but this is basically how most of Facebook's glue code still
 works as of mid-2011. If you view the source of any page, you'll see a bunch
-of ##onloadRegister()## calls in the markup which are generated like this.
+of `onloadRegister()` calls in the markup which are generated like this.
 
 This mitigates many of the problems but is still fairly awkward. Escaping is
 easier, but still possible to get wrong. Stuff is a bit easier to grep for, but
@@ -168,7 +168,7 @@ Javelin behaviors provide a more structured solution to some of these problems:
   - The entire interface the server may invoke against can be readily inferred.
 
 Note that Javelin does provide @{function:JX.onload}, which behaves like
-##onloadRegister()##. However, its use is discouraged.
+`onloadRegister()`. However, its use is discouraged.
 
 The two major downsides to the behavior design appear to be:
 

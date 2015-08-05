@@ -5,8 +5,8 @@ final class PhameBlogEditController
 
   public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
-
     $id = $request->getURIData('id');
+
     if ($id) {
       $blog = id(new PhameBlogQuery())
         ->setViewer($user)
@@ -23,12 +23,19 @@ final class PhameBlogEditController
       $submit_button = pht('Save Changes');
       $page_title = pht('Edit Blog');
       $cancel_uri = $this->getApplicationURI('blog/view/'.$blog->getID().'/');
+
+      $v_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $blog->getPHID(),
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+      $v_projects = array_reverse($v_projects);
+
     } else {
       $blog = PhameBlog::initializeNewBlog($user);
 
       $submit_button = pht('Create Blog');
       $page_title = pht('Create Blog');
       $cancel_uri = $this->getApplicationURI();
+      $v_projects = array();
     }
     $name          = $blog->getName();
     $description   = $blog->getDescription();
@@ -50,6 +57,7 @@ final class PhameBlogEditController
       $can_view      = $request->getStr('can_view');
       $can_edit      = $request->getStr('can_edit');
       $can_join      = $request->getStr('can_join');
+      $v_projects      = $request->getArr('projects');
 
       $xactions = array(
         id(new PhameBlogTransaction())
@@ -74,6 +82,12 @@ final class PhameBlogEditController
           ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
           ->setNewValue($can_join),
       );
+
+      $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+      $xactions[] = id(new PhameBlogTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $proj_edge_type)
+        ->setNewValue(array('=' => array_fuse($v_projects)));
 
       $editor = id(new PhameBlogEditor())
         ->setActor($user)
@@ -147,6 +161,12 @@ final class PhameBlogEditController
           ->setPolicies($policies)
           ->setValue($can_join)
           ->setName('can_join'))
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('Projects'))
+          ->setName('projects')
+          ->setValue($v_projects)
+          ->setDatasource(new PhabricatorProjectDatasource()))
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel(pht('Custom Domain'))
@@ -172,18 +192,14 @@ final class PhameBlogEditController
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Blogs'), $this->getApplicationURI('blog/'));
     $crumbs->addTextCrumb($page_title, $this->getApplicationURI('blog/new'));
 
-    $nav = $this->renderSideNavFilterView();
-    $nav->selectFilter($id ? null : 'blog/new');
-    $nav->appendChild(
+    return $this->buildApplicationPage(
       array(
         $crumbs,
         $form_box,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
+      ),
       array(
         'title' => $page_title,
       ));

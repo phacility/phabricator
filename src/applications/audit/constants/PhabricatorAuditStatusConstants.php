@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorAuditStatusConstants {
+final class PhabricatorAuditStatusConstants extends Phobject {
 
   const NONE                    = '';
   const AUDIT_NOT_REQUIRED      = 'audit-not-required';

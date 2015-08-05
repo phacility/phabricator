@@ -25,18 +25,21 @@
   background-color: #fff;
 }
 
-.phabricator-hovercard-head {
-  border-bottom: 1px solid {$thinblueborder};
+.phabricator-hovercard-head .phui-header-shell {
+  padding: 6px 8px 6px 12px;
+  background-color: {$bluebackground};
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
 }
 
-.phabricator-hovercard-head .phui-action-header {
-  border-top-right-radius: 3px;
-  border-top-left-radius: 3px;
+.phabricator-hovercard-head .phui-header-header {
+  font-size: 14px;
 }
 
 .phabricator-hovercard-head .phui-tag-type-state {
-  color: {$bluetext};
+  color: {$darkbluetext};
   text-shadow: none;
+  font-weight: normal;
 }
 
 .phabricator-hovercard-tags {
@@ -45,7 +48,7 @@
 }
 
 .phabricator-hovercard-body {
-  padding: 12px 8px;
+  padding: 12px;
   color: {$darkgreytext};
   border-bottom-right-radius: 3px;
   border-bottom-left-radius: 3px;
@@ -53,7 +56,7 @@
 }
 
 .phabricator-hovercard-body-item {
-  margin: 2px 0 0 0px;
+  margin: 4px 0 0 0;
 }
 
 .phabricator-hovercard-body-header {
@@ -79,6 +82,15 @@
   background-repeat: no-repeat;
   background-size: 100%;
 }
+
+.hovercard-badges {
+  margin: 8px 0 0 0;
+}
+
+.hovercard-badges .phui-badge-flex-item {
+  float: left;
+}
+
 .phabricator-hovercard-tail {
   width: 396px;
   float: left;

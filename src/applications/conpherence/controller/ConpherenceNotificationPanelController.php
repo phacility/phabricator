@@ -83,7 +83,7 @@ final class ConpherenceNotificationPanelController
         array(
           'href' => '/conpherence/',
         ),
-        pht('Messages')),
+        pht('Rooms')),
       $content);
 
     $unread = id(new ConpherenceParticipantCountQuery())

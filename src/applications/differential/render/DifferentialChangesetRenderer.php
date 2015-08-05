@@ -1,6 +1,6 @@
 <?php
 
-abstract class DifferentialChangesetRenderer {
+abstract class DifferentialChangesetRenderer extends Phobject {
 
   private $user;
   private $changeset;

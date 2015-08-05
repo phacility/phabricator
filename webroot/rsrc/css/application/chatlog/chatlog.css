@@ -2,18 +2,8 @@
  * @provides phabricator-chatlog-css
  */
 
-.phabricator-chat-log-wrap {
-  padding: 0 16px;
-}
-
 .device-phone .phabricator-chat-log-wrap {
   padding: 0;
-}
-
-.phabricator-chat-log-pager-top {
-  padding: 16px 4px 8px;
-  font-weight: bold;
-  float: right;
 }
 
 .phabricator-chat-log-pager-bottom {
@@ -22,20 +12,12 @@
   float: right;
 }
 
-.phabricator-chat-log-pager-top a, .phabricator-chat-log-pager-bottom a {
+.phabricator-chat-log-pager-bottom a {
   padding: 2px 3px;
-}
-
-.phabricator-chat-log-jump {
-  padding: 16px 4px 8px;
-  font-weight: bold;
-  float: left;
 }
 
 .phabricator-chat-log-panel {
   clear: both;
-  border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
 }
 
 .phabricator-chat-log {
@@ -61,7 +43,7 @@
 }
 
 .phabricator-chat-log tr.alternate td.author {
-  background: {$darkgreybackground};
+  background: {$lightgreybackground};
 }
 
 .phabricator-chat-log tr.highlight td {
@@ -76,7 +58,7 @@
 
 .phabricator-chat-log td.message .timestamp {
   color: {$bluetext};
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   float: right;
   margin-left: 5px;
 }

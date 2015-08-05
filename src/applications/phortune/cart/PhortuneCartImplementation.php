@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhortuneCartImplementation {
+abstract class PhortuneCartImplementation extends Phobject {
 
   /**
    * Load implementations for a given set of carts.

@@ -4,7 +4,7 @@
  * @task config     Configuring Repository Engines
  * @task internal   Internals
  */
-abstract class PhabricatorRepositoryEngine {
+abstract class PhabricatorRepositoryEngine extends Phobject {
 
   private $repository;
   private $verbose;
@@ -68,7 +68,10 @@ abstract class PhabricatorRepositoryEngine {
     $matches = null;
     if (!preg_match('/^\s*Fetch URL:\s*(.*?)\s*$/m', $remotes, $matches)) {
       throw new Exception(
-        "Expected 'Fetch URL' in 'git remote show -n origin'.");
+        pht(
+          "Expected '%s' in '%s'.",
+          'Fetch URL',
+          'git remote show -n origin'));
     }
 
     $remote_uri = $matches[1];

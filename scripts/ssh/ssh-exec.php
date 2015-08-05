@@ -182,11 +182,11 @@ try {
       'P' => $user->getPHID(),
     ));
 
-  if (!$user->isUserActivated()) {
+  if (!$user->canEstablishSSHSessions()) {
     throw new Exception(
       pht(
-        'Your account ("%s") is not activated. Visit the web interface '.
-        'for more information.',
+        'Your account ("%s") does not have permission to establish SSH '.
+        'sessions. Visit the web interface for more information.',
         $user->getUsername()));
   }
 

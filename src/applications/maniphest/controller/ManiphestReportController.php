@@ -4,13 +4,9 @@ final class ManiphestReportController extends ManiphestController {
 
   private $view;
 
-  public function willProcessRequest(array $data) {
-    $this->view = idx($data, 'view');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $this->view = $request->getURIData('view');
 
     if ($request->isFormPost()) {
       $uri = $request->getRequestURI();
@@ -52,7 +48,6 @@ final class ManiphestReportController extends ManiphestController {
     $nav->appendChild($core);
     $nav->setCrumbs(
       $this->buildApplicationCrumbs()
-        ->setBorder(true)
         ->addTextCrumb(pht('Reports')));
 
     return $this->buildApplicationPage(
@@ -65,7 +60,7 @@ final class ManiphestReportController extends ManiphestController {
 
   public function renderBurn() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
     $handle = null;
 
@@ -133,7 +128,7 @@ final class ManiphestReportController extends ManiphestController {
 
       $day_bucket = phabricator_format_local_time(
         $row['dateCreated'],
-        $user,
+        $viewer,
         'Yz');
       $day_buckets[$day_bucket] = $row['dateCreated'];
       if (empty($stats[$day_bucket])) {
@@ -167,12 +162,12 @@ final class ManiphestReportController extends ManiphestController {
 
       $week_bucket = phabricator_format_local_time(
         $epoch,
-        $user,
+        $viewer,
         'YW');
       if ($week_bucket != $last_week) {
         if ($week) {
           $rows[] = $this->formatBurnRow(
-            pht('Week of %s', phabricator_date($last_week_epoch, $user)),
+            pht('Week of %s', phabricator_date($last_week_epoch, $viewer)),
             $week);
           $rowc[] = 'week';
         }
@@ -183,12 +178,12 @@ final class ManiphestReportController extends ManiphestController {
 
       $month_bucket = phabricator_format_local_time(
         $epoch,
-        $user,
+        $viewer,
         'Ym');
       if ($month_bucket != $last_month) {
         if ($month) {
           $rows[] = $this->formatBurnRow(
-            phabricator_format_local_time($last_month_epoch, $user, 'F, Y'),
+            phabricator_format_local_time($last_month_epoch, $viewer, 'F, Y'),
             $month);
           $rowc[] = 'month';
         }
@@ -197,7 +192,7 @@ final class ManiphestReportController extends ManiphestController {
         $last_month_epoch = $epoch;
       }
 
-      $rows[] = $this->formatBurnRow(phabricator_date($epoch, $user), $info);
+      $rows[] = $this->formatBurnRow(phabricator_date($epoch, $viewer), $info);
       $rowc[] = null;
       $week['open'] += $info['open'];
       $week['close'] += $info['close'];
@@ -272,7 +267,7 @@ final class ManiphestReportController extends ManiphestController {
     if ($caption) {
       $panel->setInfoView($caption);
     }
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     $tokens = array();
     if ($handle) {
@@ -316,10 +311,10 @@ final class ManiphestReportController extends ManiphestController {
 
   private function renderReportFilters(array $tokens, $has_window) {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorProjectDatasource())
@@ -391,11 +386,11 @@ final class ManiphestReportController extends ManiphestController {
 
   public function renderOpenTasks() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
 
     $query = id(new ManiphestTaskQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants());
 
     switch ($this->view) {
@@ -421,7 +416,7 @@ final class ManiphestReportController extends ManiphestController {
 
     $recently_closed = $this->loadRecentlyClosedTasks();
 
-    $date = phabricator_date(time(), $user);
+    $date = phabricator_date(time(), $viewer);
 
     switch ($this->view) {
       case 'user':
@@ -589,7 +584,7 @@ final class ManiphestReportController extends ManiphestController {
       $cname[] = $label;
       $cclass[] = 'n';
     }
-    $cname[] = 'Total';
+    $cname[] = pht('Total');
     $cclass[] = 'n';
     $cname[] = javelin_tag(
       'span',
@@ -616,7 +611,7 @@ final class ManiphestReportController extends ManiphestController {
     $cclass[] = 'n';
 
     list($ignored, $window_epoch) = $this->getWindow();
-    $edate = phabricator_datetime($window_epoch, $user);
+    $edate = phabricator_datetime($window_epoch, $viewer);
     $cname[] = javelin_tag(
       'span',
       array(
@@ -653,7 +648,7 @@ final class ManiphestReportController extends ManiphestController {
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText($header);
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     $tokens = array();
     if ($project_handle) {
@@ -727,7 +722,7 @@ final class ManiphestReportController extends ManiphestController {
    */
   private function getWindow() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
     $window_str = $this->getRequest()->getStr('window', '12 AM 7 days ago');
 
@@ -737,7 +732,7 @@ final class ManiphestReportController extends ManiphestController {
     // Do locale-aware parsing so that the user's timezone is assumed for
     // time windows like "3 PM", rather than assuming the server timezone.
 
-    $window_epoch = PhabricatorTime::parseLocalTime($window_str, $user);
+    $window_epoch = PhabricatorTime::parseLocalTime($window_str, $viewer);
     if (!$window_epoch) {
       $error = 'Invalid';
       $window_epoch = time() - (60 * 60 * 24 * 7);

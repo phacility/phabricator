@@ -18,7 +18,7 @@ final class PhabricatorAuthInviteEngine extends Phobject {
 
   public function getViewer() {
     if (!$this->viewer) {
-      throw new Exception(pht('Call setViewer() before getViewer()!'));
+      throw new PhutilInvalidStateException('setViewer');
     }
     return $this->viewer;
   }

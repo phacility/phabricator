@@ -36,13 +36,14 @@ final class PhrictionMoveController extends PhrictionController {
       // about it.
       if (strlen($v_slug)) {
         $normal_slug = PhabricatorSlug::normalize($v_slug);
-        if ($normal_slug !== $v_slug) {
+        $no_slash_slug = rtrim($normal_slug, '/');
+        if ($normal_slug !== $v_slug && $no_slash_slug !== $v_slug) {
           return $this->newDialog()
             ->setTitle(pht('Adjust Path'))
             ->appendParagraph(
               pht(
                 'The path you entered (%s) is not a valid wiki document '.
-                'path. Paths may not contain special characters.',
+                'path. Paths may not contain spaces or special characters.',
                 phutil_tag('strong', array(), $v_slug)))
             ->appendParagraph(
               pht(

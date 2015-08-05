@@ -48,6 +48,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
           'italic text' => pht('italic text'),
           'monospaced text' => pht('monospaced text'),
           'List Item' => pht('List Item'),
+          'Quoted Text' => pht('Quoted Text'),
           'data' => pht('data'),
           'name' => pht('name'),
           'URL' => pht('URL'),
@@ -79,6 +80,9 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       ),
       'fa-code' => array(
         'tip' => pht('Code Block'),
+      ),
+      'fa-quote-right' => array(
+        'tip' => pht('Quote'),
       ),
       'fa-table' => array(
         'tip' => pht('Table'),

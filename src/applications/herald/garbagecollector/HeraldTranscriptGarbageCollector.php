@@ -20,7 +20,7 @@ final class HeraldTranscriptGarbageCollector
           conditionTranscripts = "",
           applyTranscripts     = "",
           garbageCollected     = 1
-        WHERE garbageCollected = 0 AND `time` < %d
+        WHERE garbageCollected = 0 AND time < %d
         LIMIT 100',
       $table->getTableName(),
       time() - $ttl);

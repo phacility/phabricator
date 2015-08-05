@@ -23,6 +23,12 @@ final class PhabricatorCalendarEventEditor
     $types[] = PhabricatorCalendarEventTransaction::TYPE_ALL_DAY;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_ICON;
 
+    $types[] = PhabricatorCalendarEventTransaction::TYPE_RECURRING;
+    $types[] = PhabricatorCalendarEventTransaction::TYPE_FREQUENCY;
+    $types[] = PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE;
+    $types[] = PhabricatorCalendarEventTransaction::TYPE_INSTANCE_OF_EVENT;
+    $types[] = PhabricatorCalendarEventTransaction::TYPE_SEQUENCE_INDEX;
+
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -34,6 +40,16 @@ final class PhabricatorCalendarEventEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRING:
+        return $object->getIsRecurring();
+      case PhabricatorCalendarEventTransaction::TYPE_FREQUENCY:
+        return $object->getRecurrenceFrequency();
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
+        return $object->getRecurrenceEndDate();
+      case PhabricatorCalendarEventTransaction::TYPE_INSTANCE_OF_EVENT:
+        return $object->getInstanceOfEventPHID();
+      case PhabricatorCalendarEventTransaction::TYPE_SEQUENCE_INDEX:
+        return $object->getSequenceIndex();
       case PhabricatorCalendarEventTransaction::TYPE_NAME:
         return $object->getName();
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
@@ -72,6 +88,10 @@ final class PhabricatorCalendarEventEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRING:
+      case PhabricatorCalendarEventTransaction::TYPE_FREQUENCY:
+      case PhabricatorCalendarEventTransaction::TYPE_INSTANCE_OF_EVENT:
+      case PhabricatorCalendarEventTransaction::TYPE_SEQUENCE_INDEX:
       case PhabricatorCalendarEventTransaction::TYPE_NAME:
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
       case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
@@ -80,6 +100,7 @@ final class PhabricatorCalendarEventEditor
         return $xaction->getNewValue();
       case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
         return (int)$xaction->getNewValue();
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
         return $xaction->getNewValue()->getEpoch();
@@ -93,6 +114,14 @@ final class PhabricatorCalendarEventEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRING:
+        return $object->setIsRecurring($xaction->getNewValue());
+      case PhabricatorCalendarEventTransaction::TYPE_FREQUENCY:
+        return $object->setRecurrenceFrequency($xaction->getNewValue());
+      case PhabricatorCalendarEventTransaction::TYPE_INSTANCE_OF_EVENT:
+        return $object->setInstanceOfEventPHID($xaction->getNewValue());
+      case PhabricatorCalendarEventTransaction::TYPE_SEQUENCE_INDEX:
+        return $object->setSequenceIndex($xaction->getNewValue());
       case PhabricatorCalendarEventTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
         return;
@@ -101,6 +130,9 @@ final class PhabricatorCalendarEventEditor
         return;
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
         $object->setDateTo($xaction->getNewValue());
+        return;
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
+        $object->setRecurrenceEndDate($xaction->getNewValue());
         return;
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
         $object->setDescription($xaction->getNewValue());
@@ -126,6 +158,11 @@ final class PhabricatorCalendarEventEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRING:
+      case PhabricatorCalendarEventTransaction::TYPE_FREQUENCY:
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
+      case PhabricatorCalendarEventTransaction::TYPE_INSTANCE_OF_EVENT:
+      case PhabricatorCalendarEventTransaction::TYPE_SEQUENCE_INDEX:
       case PhabricatorCalendarEventTransaction::TYPE_NAME:
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
@@ -181,6 +218,11 @@ final class PhabricatorCalendarEventEditor
       switch ($xaction->getTransactionType()) {
         case PhabricatorCalendarEventTransaction::TYPE_ICON:
           break;
+        case PhabricatorCalendarEventTransaction::TYPE_RECURRING:
+        case PhabricatorCalendarEventTransaction::TYPE_FREQUENCY:
+        case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
+        case PhabricatorCalendarEventTransaction::TYPE_INSTANCE_OF_EVENT:
+        case PhabricatorCalendarEventTransaction::TYPE_SEQUENCE_INDEX:
         case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
         case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
         case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
@@ -223,10 +265,20 @@ final class PhabricatorCalendarEventEditor
   protected function validateAllTransactions(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    $start_date_xaction = PhabricatorCalendarEventTransaction::TYPE_START_DATE;
-    $end_date_xaction = PhabricatorCalendarEventTransaction::TYPE_END_DATE;
+    $start_date_xaction =
+      PhabricatorCalendarEventTransaction::TYPE_START_DATE;
+    $end_date_xaction =
+      PhabricatorCalendarEventTransaction::TYPE_END_DATE;
+    $is_recurrence_xaction =
+      PhabricatorCalendarEventTransaction::TYPE_RECURRING;
+    $recurrence_end_xaction =
+      PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE;
+
     $start_date = $object->getDateFrom();
     $end_date = $object->getDateTo();
+    $recurrence_end = $object->getRecurrenceEndDate();
+    $is_recurring = $object->getIsRecurring();
+
     $errors = array();
 
     foreach ($xactions as $xaction) {
@@ -234,6 +286,10 @@ final class PhabricatorCalendarEventEditor
         $start_date = $xaction->getNewValue()->getEpoch();
       } else if ($xaction->getTransactionType() == $end_date_xaction) {
         $end_date = $xaction->getNewValue()->getEpoch();
+      } else if ($xaction->getTransactionType() == $recurrence_end_xaction) {
+        $recurrence_end = $xaction->getNewValue();
+      } else if ($xaction->getTransactionType() == $is_recurrence_xaction) {
+        $is_recurring = $xaction->getNewValue();
       }
     }
     if ($start_date > $end_date) {
@@ -242,6 +298,16 @@ final class PhabricatorCalendarEventEditor
         $type,
         pht('Invalid'),
         pht('End date must be after start date.'),
+        null);
+    }
+
+    if ($recurrence_end && !$is_recurring) {
+      $type =
+        PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE;
+      $errors[] = new PhabricatorApplicationTransactionValidationError(
+        $type,
+        pht('Invalid'),
+        pht('Event must be recurring to have a recurrence end date.').
         null);
     }
 
@@ -272,6 +338,7 @@ final class PhabricatorCalendarEventEditor
           $errors[] = $error;
         }
         break;
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
         foreach ($xactions as $xaction) {
@@ -303,9 +370,7 @@ final class PhabricatorCalendarEventEditor
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-
-    $xactions = mfilter($xactions, 'shouldHide', true);
-    return $xactions;
+    return true;
   }
 
   protected function getMailSubjectPrefix() {

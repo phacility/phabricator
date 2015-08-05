@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorAuthProvider {
+abstract class PhabricatorAuthProvider extends Phobject {
 
   private $providerConfig;
 
@@ -55,16 +55,9 @@ abstract class PhabricatorAuthProvider {
   }
 
   public static function getAllBaseProviders() {
-    static $providers;
-
-    if ($providers === null) {
-      $objects = id(new PhutilSymbolLoader())
-        ->setAncestorClass(__CLASS__)
-        ->loadObjects();
-      $providers = $objects;
-    }
-
-    return $providers;
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->execute();
   }
 
   public static function getAllProviders() {

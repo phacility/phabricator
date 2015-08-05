@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorSetupCheck {
+abstract class PhabricatorSetupCheck extends Phobject {
 
   private $issues;
 
@@ -111,18 +111,15 @@ abstract class PhabricatorSetupCheck {
     }
   }
 
-  final public static function runAllChecks() {
-    $symbols = id(new PhutilSymbolLoader())
+  final public static function loadAllChecks() {
+    return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
-      ->setConcreteOnly(true)
-      ->selectAndLoadSymbols();
+      ->setSortMethod('getExecutionOrder')
+      ->execute();
+  }
 
-    $checks = array();
-    foreach ($symbols as $symbol) {
-      $checks[] = newv($symbol['name'], array());
-    }
-
-    $checks = msort($checks, 'getExecutionOrder');
+  final public static function runAllChecks() {
+    $checks = self::loadAllChecks();
 
     $issues = array();
     foreach ($checks as $check) {

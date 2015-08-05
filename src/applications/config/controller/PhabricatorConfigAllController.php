@@ -3,9 +3,8 @@
 final class PhabricatorConfigAllController
   extends PhabricatorConfigController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $db_values = id(new PhabricatorConfigEntry())
       ->loadAllWhere('namespace = %s', 'default');
@@ -57,7 +56,7 @@ final class PhabricatorConfigAllController
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText(pht('Current Settings'));
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     $versions = $this->loadVersions();
 

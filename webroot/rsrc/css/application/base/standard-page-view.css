@@ -9,8 +9,12 @@
 }
 
 .phabricator-chromeless-page .phabricator-standard-page {
-  background:           transparent;
-  border-width:         0px;
+  background: transparent;
+  border-width: 0px;
+}
+
+.phabricator-standard-page-body {
+  clear: both;
 }
 
 .phabricator-standard-page-footer {
@@ -58,18 +62,6 @@
   border: 1px solid #999900;
 }
 
-.workflow-header {
-  background: #efefef;
-  padding: 6px 2em;
-  text-align: right;
-  margin-bottom: 6px;
-  border-bottom: 1px solid #dfdfdf;
-}
-
-.workflow-header button {
-  float: right;
-}
-
 a.handle-status-closed {
   text-decoration: line-through;
   color: #676767;
@@ -106,8 +98,7 @@ a.handle-availability-disabled {
   background: #aa0000;
   color: white;
   text-align: center;
-  font-size: 11px;
-  font-family: "Verdana";
+  font-size: {$smallerfontsize};
 }
 
 .setup-warning-callout {

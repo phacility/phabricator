@@ -24,6 +24,7 @@ final class PasteEmbedView extends AphrontView {
 
   public function setLines($lines) {
     $this->lines = $lines;
+    return $this;
   }
 
   public function render() {

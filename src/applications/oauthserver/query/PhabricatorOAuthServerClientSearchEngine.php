@@ -108,7 +108,11 @@ final class PhabricatorOAuthServerClientSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No clients found.'));
+
+    return $result;
   }
 
 }

@@ -61,6 +61,20 @@ final class PHUIButtonBarExample extends PhabricatorUIExample {
       $button_bar3->addButton($button);
     }
 
+    $button_bar4 = new PHUIButtonBarView();
+    $button_bar4->setBorderless(true);
+    foreach ($icons as $text => $icon) {
+      $image = id(new PHUIIconView())
+          ->setIconFont($icon);
+      $button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setTitle($text)
+        ->setTooltip($text)
+        ->setIcon($image);
+
+      $button_bar4->addButton($button);
+    }
+
     $layout1 = id(new PHUIBoxView())
       ->appendChild($button_bar1)
       ->addClass('ml');
@@ -73,11 +87,16 @@ final class PHUIButtonBarExample extends PhabricatorUIExample {
       ->appendChild($button_bar3)
       ->addClass('mlr mll mlb');
 
+    $layout4 = id(new PHUIBoxView())
+      ->appendChild($button_bar4)
+      ->addClass('mlr mll mlb');
+
     $wrap1 = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Button Bar Example'))
       ->appendChild($layout1)
       ->appendChild($layout2)
-      ->appendChild($layout3);
+      ->appendChild($layout3)
+      ->appendChild($layout4);
 
     return array($wrap1);
   }

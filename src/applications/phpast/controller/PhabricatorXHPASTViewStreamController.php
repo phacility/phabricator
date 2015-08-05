@@ -3,7 +3,7 @@
 final class PhabricatorXHPASTViewStreamController
   extends PhabricatorXHPASTViewPanelController {
 
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
     $storage = $this->getStorageTree();
     $input = $storage->getInput();
     $stdout = $storage->getStdout();

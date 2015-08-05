@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorAuditCommitStatusConstants {
+final class PhabricatorAuditCommitStatusConstants extends Phobject {
 
   const NONE                = 0;
   const NEEDS_AUDIT         = 1;
@@ -48,6 +48,25 @@ final class PhabricatorAuditCommitStatusConstants {
         break;
     }
     return $color;
+  }
+
+    public static function getStatusIcon($code) {
+    switch ($code) {
+      case self::CONCERN_RAISED:
+        $icon = 'fa-exclamation-triangle';
+        break;
+      case self::NEEDS_AUDIT:
+      case self::PARTIALLY_AUDITED:
+        $icon = 'fa-exclamation-triangle';
+        break;
+      case self::FULLY_AUDITED:
+        $icon = 'fa-check';
+        break;
+      default:
+        $icon = null;
+        break;
+    }
+    return $icon;
   }
 
 }

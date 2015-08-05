@@ -48,7 +48,7 @@
  * @task test     Unit Test Support
  * @task internal Internals
  */
-final class PhabricatorEnv {
+final class PhabricatorEnv extends Phobject {
 
   private static $sourceStack;
   private static $repairSource;
@@ -129,7 +129,19 @@ final class PhabricatorEnv {
     self::setLocaleCode('en_US');
   }
 
+  public static function beginScopedLocale($locale_code) {
+    return new PhabricatorLocaleScopeGuard($locale_code);
+  }
+
+  public static function getLocaleCode() {
+    return self::$localeCode;
+  }
+
   public static function setLocaleCode($locale_code) {
+    if (!$locale_code) {
+      return;
+    }
+
     if ($locale_code == self::$localeCode) {
       return;
     }

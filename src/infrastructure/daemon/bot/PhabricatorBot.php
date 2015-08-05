@@ -15,6 +15,7 @@ final class PhabricatorBot extends PhabricatorDaemon {
   private $conduit;
   private $config;
   private $pollFrequency;
+  private $protocolAdapter;
 
   protected function run() {
     $argv = $this->getArgv();
@@ -106,6 +107,8 @@ final class PhabricatorBot extends PhabricatorDaemon {
 
   private function runLoop() {
     do {
+      PhabricatorCaches::destroyRequestCache();
+
       $this->stillWorking();
 
       $messages = $this->protocolAdapter->getNextMessages($this->pollFrequency);

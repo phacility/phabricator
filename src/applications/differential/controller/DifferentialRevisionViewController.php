@@ -175,6 +175,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
       $query = id(new DifferentialInlineCommentQuery())
         ->setViewer($user)
+        ->needHidden(true)
         ->withRevisionPHIDs(array($revision->getPHID()));
       $inlines = $query->execute();
       $inlines = $query->adjustInlinesForChangesets(
@@ -203,27 +204,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
     } else {
       $warning = null;
       $visible_changesets = $changesets;
-    }
-
-
-    // TODO: This should be in a DiffQuery or similar.
-    $need_props = array();
-    foreach ($field_list->getFields() as $field) {
-      foreach ($field->getRequiredDiffPropertiesForRevisionView() as $prop) {
-        $need_props[$prop] = $prop;
-      }
-    }
-
-    if ($need_props) {
-      $prop_diff = $revision->getActiveDiff();
-      $load_props = id(new DifferentialDiffProperty())->loadAllWhere(
-        'diffID = %d AND name IN (%Ls)',
-        $prop_diff->getID(),
-        $need_props);
-      $load_props = mpull($load_props, 'getData', 'getName');
-      foreach ($need_props as $need) {
-        $prop_diff->attachProperty($need, idx($load_props, $need));
-      }
     }
 
     $commit_hashes = mpull($diffs, 'getSourceControlBaseRevision');
@@ -284,6 +264,28 @@ final class DifferentialRevisionViewController extends DifferentialController {
         ->setErrors($revision_warnings);
       $revision_detail_box->setInfoView($revision_warnings);
     }
+
+    $detail_diffs = array_select_keys(
+      $diffs,
+      array($diff_vs, $target->getID()));
+    $detail_diffs = mpull($detail_diffs, null, 'getPHID');
+
+    $buildables = id(new HarbormasterBuildableQuery())
+      ->setViewer($user)
+      ->withBuildablePHIDs(array_keys($detail_diffs))
+      ->withManualBuildables(false)
+      ->needBuilds(true)
+      ->needTargets(true)
+      ->execute();
+    $buildables = mpull($buildables, null, 'getBuildablePHID');
+    foreach ($detail_diffs as $diff_phid => $detail_diff) {
+      $detail_diff->attachBuildable(idx($buildables, $diff_phid));
+    }
+
+    $diff_detail_box = $this->buildDiffDetailView(
+      $detail_diffs,
+      $revision,
+      $field_list);
 
     $comment_view = $this->buildTransactions(
       $revision,
@@ -485,6 +487,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $content = array(
       $revision_detail_box,
+      $diff_detail_box,
       $page_pane,
     );
 
@@ -835,9 +838,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $viewer = $this->getViewer();
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Similar Open Revisions'))
-      ->setSubheader(
-        pht('Recently updated open revisions affecting the same files.'));
+      ->setHeader(pht('Recent Similar Open Revisions'));
 
     $view = id(new DifferentialRevisionListView())
       ->setHeader($header)
@@ -972,5 +973,86 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     return $warnings;
   }
+
+  private function buildDiffDetailView(
+    array $diffs,
+    DifferentialRevision $revision,
+    PhabricatorCustomFieldList $field_list) {
+    $viewer = $this->getViewer();
+
+    $fields = array();
+    foreach ($field_list->getFields() as $field) {
+      if ($field->shouldAppearInDiffPropertyView()) {
+        $fields[] = $field;
+      }
+    }
+
+    if (!$fields) {
+      return null;
+    }
+
+    // Make sure we're only going to render unique diffs.
+    $diffs = mpull($diffs, null, 'getID');
+    $labels = array(pht('Left'), pht('Right'));
+
+    $property_lists = array();
+    foreach ($diffs as $diff) {
+      if (count($diffs) == 2) {
+        $label = array_shift($labels);
+        $label = pht('%s (Diff %d)', $label, $diff->getID());
+      } else {
+        $label = pht('Diff %d', $diff->getID());
+      }
+
+      $property_lists[] = array(
+        $label,
+        $this->buildDiffPropertyList($diff, $revision, $fields),
+      );
+    }
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Diff Detail'))
+      ->setUser($viewer);
+
+    $last_tab = null;
+    foreach ($property_lists as $key => $property_list) {
+      list($tab_name, $list_view) = $property_list;
+
+      $tab = id(new PHUIListItemView())
+        ->setKey($key)
+        ->setName($tab_name);
+
+      $box->addPropertyList($list_view, $tab);
+      $last_tab = $tab;
+    }
+
+    if ($last_tab) {
+      $last_tab->setSelected(true);
+    }
+
+    return $box;
+  }
+
+  private function buildDiffPropertyList(
+    DifferentialDiff $diff,
+    DifferentialRevision $revision,
+    array $fields) {
+    $viewer = $this->getViewer();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setObject($diff);
+
+    foreach ($fields as $field) {
+      $label = $field->renderDiffPropertyViewLabel($diff);
+      $value = $field->renderDiffPropertyViewValue($diff);
+      if ($value !== null) {
+        $view->addProperty($label, $value);
+      }
+    }
+
+    return $view;
+  }
+
 
 }

@@ -113,8 +113,7 @@ final class DiffusionReadmeView extends DiffusionView {
       ->setFluid(true)
       ->appendChild($readme_content)
       ->addClass('diffusion-readme-view')
-      ->setHeader($header)
-      ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS);
+      ->setHeader($header);
   }
 
 }

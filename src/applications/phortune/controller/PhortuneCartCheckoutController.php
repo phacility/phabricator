@@ -3,19 +3,13 @@
 final class PhortuneCartCheckoutController
   extends PhortuneCartController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $cart = id(new PhortuneCartQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->needPurchases(true)
       ->executeOne();
     if (!$cart) {
@@ -113,7 +107,7 @@ final class PhortuneCartCheckoutController
     $cart_box = id(new PHUIObjectBoxView())
       ->setFormErrors($errors)
       ->setHeaderText(pht('Cart Contents'))
-      ->appendChild($cart_table);
+      ->setTable($cart_table);
 
     $title = $cart->getName();
 

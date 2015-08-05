@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionMercurialWireProtocol {
+final class DiffusionMercurialWireProtocol extends Phobject {
 
   public static function getCommandArgs($command) {
     // We need to enumerate all of the Mercurial wire commands because the

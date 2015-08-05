@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorFeedStoryPublisher {
+final class PhabricatorFeedStoryPublisher extends Phobject {
 
   private $relatedPHIDs;
   private $storyType;

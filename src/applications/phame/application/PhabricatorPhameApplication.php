@@ -15,7 +15,7 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'Blog';
+    return pht('Blog');
   }
 
   public function getTitleGlyph() {

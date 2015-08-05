@@ -96,9 +96,6 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     id(new PhabricatorSearchIndexer())
       ->queueDocumentForIndexing($commit->getPHID());
 
-    PhabricatorOwnersPackagePathValidator::updateOwnersPackagePaths(
-      $commit,
-      PhabricatorUser::getOmnipotentUser());
     if ($this->shouldQueueFollowupTasks()) {
       $this->queueTask(
         'PhabricatorRepositoryCommitOwnersWorker',

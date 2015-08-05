@@ -171,9 +171,10 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     require_celerity_resource('phui-button-css');
     require_celerity_resource('phui-spacing-css');
     require_celerity_resource('phui-form-css');
-    require_celerity_resource('sprite-gradient-css');
     require_celerity_resource('phabricator-standard-page-view');
     require_celerity_resource('conpherence-durable-column-view');
+    require_celerity_resource('font-lato');
+    require_celerity_resource('font-roboto-slab');
 
     Javelin::initBehavior('workflow', array());
 
@@ -508,6 +509,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     if ($this->getRequest()->getStr('__aural__')) {
       $classes[] = 'audible';
     }
+
+    $classes[] = 'phui-theme-'.PhabricatorEnv::getEnvConfig('ui.header-color');
+
 
     return implode(' ', $classes);
   }

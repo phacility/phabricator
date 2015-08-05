@@ -1,8 +1,13 @@
 <?php
 
-final class ReleephBranchTemplate {
+final class ReleephBranchTemplate extends Phobject {
 
   const KEY = 'releeph.default-branch-template';
+
+  private $commitHandle;
+  private $branchDate = null;
+  private $projectName;
+  private $isSymbolic;
 
   public static function getDefaultTemplate() {
     return PhabricatorEnv::getEnvConfig(self::KEY);
@@ -35,11 +40,6 @@ final class ReleephBranchTemplate {
     }
     return $fake_handle;
   }
-
-  private $commitHandle;
-  private $branchDate = null;
-  private $projectName;
-  private $isSymbolic;
 
   public function setCommitHandle(PhabricatorObjectHandle $handle) {
     $this->commitHandle = $handle;

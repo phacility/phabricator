@@ -3,33 +3,35 @@
 final class PhabricatorXHProfSampleListController
   extends PhabricatorXHProfController {
 
-  private $view;
-
-  public function willProcessRequest(array $data) {
-    $this->view = idx($data, 'view', 'all');
+  public function shouldAllowPublic() {
+    return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $view = $request->getURIData('view');
 
-    $pager = new AphrontPagerView();
+    if (!$view) {
+      $view = 'all';
+    }
+
+    $pager = new PHUIPagerView();
     $pager->setOffset($request->getInt('page'));
 
-    switch ($this->view) {
+    switch ($view) {
       case 'sampled':
-        $clause = '`sampleRate` > 0';
+        $clause = 'sampleRate > 0';
         $show_type = false;
         break;
       case 'my-runs':
         $clause = qsprintf(
           id(new PhabricatorXHProfSample())->establishConnection('r'),
-          '`sampleRate` = 0 AND `userPHID` = %s',
+          'sampleRate = 0 AND userPHID = %s',
           $request->getUser()->getPHID());
         $show_type = false;
         break;
       case 'manual':
-        $clause = '`sampleRate` = 0';
+        $clause = 'sampleRate = 0';
         $show_type = false;
         break;
       case 'all':
@@ -74,7 +76,7 @@ final class PhabricatorXHProfSampleListController
 
       $item->addIcon(
         'none',
-        phabricator_datetime($sample->getDateCreated(), $user));
+        phabricator_datetime($sample->getDateCreated(), $viewer));
 
       $list->addItem($item);
     }

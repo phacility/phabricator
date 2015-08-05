@@ -250,7 +250,7 @@ final class ReleephRequestEditController extends ReleephBranchController {
           ->addHiddenInput('requestIdentifierRaw', 'D'.$diff_rev_id)
           ->appendChild(
             id(new AphrontFormStaticControl())
-              ->setLabel('Diff')
+              ->setLabel(pht('Diff'))
               ->setValue($title));
       } else {
         $origin = $branch->getURI();

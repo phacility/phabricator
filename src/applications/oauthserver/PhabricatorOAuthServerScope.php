@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorOAuthServerScope {
+final class PhabricatorOAuthServerScope extends Phobject {
 
   const SCOPE_OFFLINE_ACCESS = 'offline_access';
   const SCOPE_WHOAMI         = 'whoami';
@@ -11,18 +11,18 @@ final class PhabricatorOAuthServerScope {
    * used to simplify code for data that is not currently accessible
    * via OAuth.
    */
-  static public function getScopesDict() {
+  public static function getScopesDict() {
     return array(
       self::SCOPE_OFFLINE_ACCESS => 1,
       self::SCOPE_WHOAMI         => 1,
     );
   }
 
-  static public function getDefaultScope() {
+  public static function getDefaultScope() {
     return self::SCOPE_WHOAMI;
   }
 
-  static public function getCheckboxControl(
+  public static function getCheckboxControl(
     array $current_scopes) {
 
     $have_options = false;
@@ -56,7 +56,7 @@ final class PhabricatorOAuthServerScope {
     return null;
   }
 
-  static private function getCheckboxLabel($scope) {
+  private static function getCheckboxLabel($scope) {
     $label = null;
     switch ($scope) {
       case self::SCOPE_OFFLINE_ACCESS:
@@ -70,7 +70,7 @@ final class PhabricatorOAuthServerScope {
     return $label;
   }
 
-  static public function getScopesFromRequest(AphrontRequest $request) {
+  public static function getScopesFromRequest(AphrontRequest $request) {
     $scopes = self::getScopesDict();
     $requested_scopes = array();
     foreach ($scopes as $scope => $bit) {
@@ -86,7 +86,7 @@ final class PhabricatorOAuthServerScope {
    * A scopes list is considered valid if each scope is a known scope
    * and each scope is seen only once. Otherwise, the list is invalid.
    */
-  static public function validateScopesList($scope_list) {
+  public static function validateScopesList($scope_list) {
     $scopes       = explode(' ', $scope_list);
     $known_scopes = self::getScopesDict();
     $seen_scopes  = array();
@@ -107,7 +107,7 @@ final class PhabricatorOAuthServerScope {
    * A scopes dictionary is considered valid if each key is a known scope.
    * Otherwise, the dictionary is invalid.
    */
-  static public function validateScopesDict($scope_dict) {
+  public static function validateScopesDict($scope_dict) {
     $known_scopes   = self::getScopesDict();
     $unknown_scopes = array_diff_key($scope_dict,
                                      $known_scopes);
@@ -119,7 +119,7 @@ final class PhabricatorOAuthServerScope {
    * should be validated by @{method:validateScopesList} before
    * transformation.
    */
-   static public function scopesListToDict($scope_list) {
+   public static function scopesListToDict($scope_list) {
     $scopes = explode(' ', $scope_list);
     return array_fill_keys($scopes, 1);
   }

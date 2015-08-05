@@ -3,24 +3,16 @@
 final class PhabricatorAuthOneTimeLoginController
   extends PhabricatorAuthController {
 
-  private $id;
-  private $key;
-  private $emailID;
-  private $linkType;
-
   public function shouldRequireLogin() {
     return false;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->linkType = $data['type'];
-    $this->id = $data['id'];
-    $this->key = $data['key'];
-    $this->emailID = idx($data, 'emailID');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
+    $link_type = $request->getURIData('type');
+    $key = $request->getURIData('key');
+    $email_id = $request->getURIData('emailID');
 
     if ($request->getUser()->isLoggedIn()) {
       return $this->renderError(
@@ -29,7 +21,7 @@ final class PhabricatorAuthOneTimeLoginController
 
     $target_user = id(new PhabricatorPeopleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$target_user) {
       return new Aphront404Response();
@@ -58,11 +50,11 @@ final class PhabricatorAuthOneTimeLoginController
     //  - get a "verified" address you don't control.
 
     $target_email = null;
-    if ($this->emailID) {
+    if ($email_id) {
       $target_email = id(new PhabricatorUserEmail())->loadOneWhere(
         'userPHID = %s AND id = %d',
         $target_user->getPHID(),
-        $this->emailID);
+        $email_id);
       if (!$target_email) {
         return new Aphront404Response();
       }
@@ -72,7 +64,7 @@ final class PhabricatorAuthOneTimeLoginController
     $token = $engine->loadOneTimeLoginKey(
       $target_user,
       $target_email,
-      $this->key);
+      $key);
 
     if (!$token) {
       return $this->newDialog()
@@ -154,7 +146,7 @@ final class PhabricatorAuthOneTimeLoginController
     // then log a user in to an account they control via sneaky invisible
     // form submissions.
 
-    switch ($this->linkType) {
+    switch ($link_type) {
       case PhabricatorAuthSessionEngine::ONETIME_WELCOME:
         $title = pht('Welcome to Phabricator');
         break;

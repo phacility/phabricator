@@ -6,10 +6,6 @@ final class PhabricatorApplicationUninstallController
   private $application;
   private $action;
 
-  public function shouldRequireAdmin() {
-    return true;
-  }
-
   public function willProcessRequest(array $data) {
     $this->application = $data['application'];
     $this->action = $data['action'];
@@ -19,7 +15,15 @@ final class PhabricatorApplicationUninstallController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $selected = PhabricatorApplication::getByClass($this->application);
+    $selected = id(new PhabricatorApplicationQuery())
+      ->setViewer($user)
+      ->withClasses(array($this->application))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
 
     if (!$selected) {
       return new Aphront404Response();
@@ -53,16 +57,16 @@ final class PhabricatorApplicationUninstallController
     if ($this->action == 'install') {
       if ($selected->canUninstall()) {
         $dialog
-          ->setTitle('Confirmation')
+          ->setTitle(pht('Confirmation'))
           ->appendChild(
             pht(
               'Install %s application?',
               $selected->getName()))
-          ->addSubmitButton('Install');
+          ->addSubmitButton(pht('Install'));
 
       } else {
         $dialog
-          ->setTitle('Information')
+          ->setTitle(pht('Information'))
           ->appendChild(pht('You cannot install an installed application.'));
       }
     } else {

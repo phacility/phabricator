@@ -150,22 +150,13 @@ final class PhabricatorRepositoryQuery
     $this->identifierMap = array();
   }
 
+  public function newResultObject() {
+    return new PhabricatorRepository();
+  }
+
   protected function loadPage() {
-    $table = new PhabricatorRepository();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      '%Q FROM %T r %Q %Q %Q %Q %Q %Q',
-      $this->buildSelectClause($conn_r),
-      $table->getTableName(),
-      $this->buildJoinClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildGroupClause($conn_r),
-      $this->buildHavingClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
+    $table = $this->newResultObject();
+    $data = $this->loadStandardPageRows($table);
     $repositories = $table->loadAllFromArray($data);
 
     if ($this->needCommitCounts) {
@@ -386,25 +377,27 @@ final class PhabricatorRepositoryQuery
     return $map;
   }
 
-  protected function buildSelectClause(AphrontDatabaseConnection $conn) {
-    $parts = $this->buildSelectClauseParts($conn);
+  protected function buildSelectClauseParts(AphrontDatabaseConnection $conn) {
+    $parts = parent::buildSelectClauseParts($conn);
+
     if ($this->shouldJoinSummaryTable()) {
       $parts[] = 's.*';
     }
-    return $this->formatSelectClause($parts);
+
+    return $parts;
   }
 
-  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
-    $joins = $this->buildJoinClauseParts($conn_r);
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
 
     if ($this->shouldJoinSummaryTable()) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'LEFT JOIN %T s ON r.id = s.repositoryID',
         PhabricatorRepository::TABLE_SUMMARY);
     }
 
-    return $this->formatJoinClause($joins);
+    return $joins;
   }
 
   private function shouldJoinSummaryTable() {
@@ -428,26 +421,26 @@ final class PhabricatorRepositoryQuery
     return false;
   }
 
-  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn_r) {
-    $where = parent::buildWhereClauseParts($conn_r);
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->callsigns) {
+    if ($this->callsigns !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.callsign IN (%Ls)',
         $this->callsigns);
     }
@@ -459,21 +452,21 @@ final class PhabricatorRepositoryQuery
 
       if ($this->numericIdentifiers) {
         $identifier_clause[] = qsprintf(
-          $conn_r,
+          $conn,
           'r.id IN (%Ld)',
           $this->numericIdentifiers);
       }
 
       if ($this->callsignIdentifiers) {
         $identifier_clause[] = qsprintf(
-          $conn_r,
+          $conn,
           'r.callsign IN (%Ls)',
           $this->callsignIdentifiers);
       }
 
       if ($this->phidIdentifiers) {
         $identifier_clause[] = qsprintf(
-          $conn_r,
+          $conn,
           'r.phid IN (%Ls)',
           $this->phidIdentifiers);
       }
@@ -483,21 +476,21 @@ final class PhabricatorRepositoryQuery
 
     if ($this->types) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.versionControlSystem IN (%Ls)',
         $this->types);
     }
 
     if ($this->uuids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.uuid IN (%Ls)',
         $this->uuids);
     }
 
     if (strlen($this->nameContains)) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'name LIKE %~',
         $this->nameContains);
     }
@@ -511,7 +504,7 @@ final class PhabricatorRepositoryQuery
         $callsign = $query;
       }
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.name LIKE %> OR r.callsign LIKE %>',
         $query,
         $callsign);

@@ -278,22 +278,6 @@ final class PhabricatorSecurityConfigOptions
               'unsecured content over plain HTTP. It is very difficult to '.
               'undo this change once users\' browsers have accepted the '.
               'setting.')),
-        $this->newOption('security.allow-conduit-act-as-user', 'bool', false)
-          ->setBoolOptions(
-            array(
-              pht('Allow'),
-              pht('Disallow'),
-            ))
-          ->setLocked(true)
-          ->setSummary(
-            pht('Allow administrators to use the Conduit API as other users.'))
-          ->setDescription(
-            pht(
-              'DEPRECATED - if you enable this, you are allowing '.
-              'administrators to act as any user via the Conduit API. '.
-              'Enabling this is not advised as it introduces a huge policy '.
-              'violation and has been obsoleted in functionality.')),
-
     );
   }
 

@@ -190,7 +190,7 @@ final class DifferentialChangesetListView extends AphrontView {
       } else {
         $detail->setAutoload(isset($this->visibleChangesets[$key]));
         if (isset($this->visibleChangesets[$key])) {
-          $load = 'Loading...';
+          $load = pht('Loading...');
         } else {
           $load = javelin_tag(
             'a',
@@ -232,8 +232,9 @@ final class DifferentialChangesetListView extends AphrontView {
 
     if ($this->inlineURI) {
       Javelin::initBehavior('differential-edit-inline-comments', array(
-        'uri'             => $this->inlineURI,
-        'stage'           => 'differential-review-stage',
+        'uri' => $this->inlineURI,
+        'stage' => 'differential-review-stage',
+        'revealIcon' => hsprintf('%s', new PHUIDiffRevealIconView()),
       ));
     }
 
@@ -250,6 +251,7 @@ final class DifferentialChangesetListView extends AphrontView {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setCollapsed(true)
       ->appendChild($content);
 
     return $object_box;
@@ -327,7 +329,7 @@ final class DifferentialChangesetListView extends AphrontView {
     return javelin_tag(
       'a',
       array(
-        'class'   => 'button grey small dropdown',
+        'class'   => 'button grey dropdown',
         'meta'    => $meta,
         'href'    => idx($meta, 'detailURI', '#'),
         'target'  => '_blank',

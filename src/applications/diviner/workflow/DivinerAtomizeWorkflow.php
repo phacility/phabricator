@@ -36,8 +36,10 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
 
     $atomizer_class = $args->getArg('atomizer');
     if (!$atomizer_class) {
-      throw new Exception(
-        pht('Specify an atomizer class with %s.', '--atomizer'));
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Specify an atomizer class with %s.',
+          '--atomizer'));
     }
 
     $symbols = id(new PhutilSymbolLoader())
@@ -46,7 +48,7 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
       ->setAncestorClass('DivinerAtomizer')
       ->selectAndLoadSymbols();
     if (!$symbols) {
-      throw new Exception(
+      throw new PhutilArgumentUsageException(
         pht(
           "Atomizer class '%s' must be a concrete subclass of %s.",
           $atomizer_class,

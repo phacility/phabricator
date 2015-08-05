@@ -2,20 +2,14 @@
 
 final class PhortuneAccountEditController extends PhortuneController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    if ($this->id) {
+    if ($id) {
       $account = id(new PhortuneAccountQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -120,7 +114,7 @@ final class PhortuneAccountEditController extends PhortuneController {
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setValidationException($validation_exception)
-      ->appendChild($form);
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(

@@ -21,9 +21,8 @@ final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
     }
   }
 
-  public function getPrivateReplyHandlerEmailAddress(
-    PhabricatorObjectHandle $handle) {
-    return $this->getDefaultPrivateReplyHandlerEmailAddress($handle, 'Z');
+  public function getPrivateReplyHandlerEmailAddress(PhabricatorUser $user) {
+    return $this->getDefaultPrivateReplyHandlerEmailAddress($user, 'Z');
   }
 
   public function getPublicReplyHandlerEmailAddress() {
@@ -66,7 +65,7 @@ final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
     $xactions = array();
     if ($this->getMailAddedParticipantPHIDs()) {
       $xactions[] = id(new ConpherenceTransaction())
-        ->setTransactionType(ConpherenceTransactionType::TYPE_PARTICIPANTS)
+        ->setTransactionType(ConpherenceTransaction::TYPE_PARTICIPANTS)
         ->setNewValue(array('+' => $this->getMailAddedParticipantPHIDs()));
     }
 

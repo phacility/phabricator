@@ -129,7 +129,7 @@ final class PhabricatorMultiFactorSettingsPanel
     $header->addActionLink($create_button);
 
     $panel->setHeader($header);
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     return $panel;
   }

@@ -91,7 +91,7 @@ final class PhabricatorTokensSettingsPanel extends PhabricatorSettingsPanel {
 
     $panel = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
+      ->setTable($table);
 
     return $panel;
   }

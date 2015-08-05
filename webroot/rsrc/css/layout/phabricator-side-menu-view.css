@@ -14,16 +14,25 @@
   display: block;
   padding: 6px 8px 6px 24px;
   color: {$darkbluetext};
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 .phabricator-side-menu .phui-list-item-selected {
-  background-color: {$hovergrey};
+  background-color: rgba(0,0,0,.05);
   border-left: 4px solid {$sky};
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+  font-weight: bold;
+}
+
+.phabricator-icon-nav .phabricator-side-menu .phui-list-item-selected {
+  background-color: rgba(0,0,0,.1);
 }
 
 .device-desktop .phabricator-side-menu .phui-list-item-selected
   a.phui-list-item-href:hover {
-  background-color: {$hoverselectedgrey};
+  background-color: rgba(0,0,0,.05);
 }
 
 .phabricator-side-menu .phui-list-item-selected .phui-list-item-href {
@@ -41,12 +50,23 @@
 
 .device-desktop .phabricator-side-menu a.phui-list-item-href:hover {
   text-decoration: none;
-  background-color: {$hovergrey};
+  background-color: rgba(0,0,0,.07);
 }
 
-.device-desktop .phabricator-icon-nav .phabricator-nav-column-background,
+.device-desktop .phabricator-icon-nav a.phui-list-item-href:hover
+ .phui-list-item-icon {
+   color: {$darkbluetext};
+ }
+
 .device-desktop .phabricator-icon-nav .phabricator-nav-local {
   width: 40px;
+  margin-top: 16px;
+  border-color: {$lightblueborder};
+  border-width: 1px 1px 1px 0;
+  border-style: solid;
+  background-color: #fff;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 .device-desktop .phabricator-icon-nav .phabricator-nav-content {
@@ -65,6 +85,8 @@
   line-height: 38px;
   text-align: center;
   vertical-align: bottom;
+  text-shadow: {$whitetextshadow};
+  color: {$blue};
 }
 
 .phabricator-icon-nav .phabricator-side-menu .phui-list-item-selected {
@@ -73,7 +95,7 @@
 
 .phabricator-icon-nav .phabricator-side-menu .phui-list-item-selected
   .phui-icon-view {
-    color: {$sky};
+    color: {$darkbluetext};
 }
 
 .phabricator-icon-nav .phui-icon-view.phuihead-small {

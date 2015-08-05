@@ -143,7 +143,6 @@ JX.behavior('durable-column', function(config, statics) {
   });
   threadManager.setDidUpdateThreadCallback(function(r) {
     var messages = _getColumnMessagesNode();
-    JX.DOM.appendContent(messages, JX.$H(r.transactions));
     scrollbar.scrollTo(messages.scrollHeight);
   });
 

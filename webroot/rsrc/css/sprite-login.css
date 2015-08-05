@@ -10,10 +10,11 @@
 
 @media
 only screen and (min-device-pixel-ratio: 1.5),
-only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+only screen and (-webkit-min-device-pixel-ratio: 1.5),
+only screen and (min-resolution: 1.5dppx) {
   .sprite-login {
     background-image: url(/rsrc/image/sprite-login-X2.png);
-    background-size: 175px 175px;
+    background-size: 145px 145px;
   }
 }
 
@@ -23,97 +24,97 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 .login-Asana {
-  background-position: -35px 0px;
+  background-position: -29px 0px;
 }
 
 .login-Bitbucket {
-  background-position: -70px 0px;
+  background-position: -58px 0px;
 }
 
 .login-Disqus {
-  background-position: -105px 0px;
+  background-position: -87px 0px;
 }
 
 .login-Dropbox {
-  background-position: -140px 0px;
+  background-position: -116px 0px;
 }
 
 .login-Facebook {
-  background-position: 0px -35px;
+  background-position: 0px -29px;
 }
 
 .login-Generic {
-  background-position: -35px -35px;
+  background-position: -29px -29px;
 }
 
 .login-Github {
-  background-position: -70px -35px;
+  background-position: -58px -29px;
 }
 
 .login-Google {
-  background-position: -105px -35px;
+  background-position: -87px -29px;
 }
 
 .login-HTTP {
-  background-position: -140px -35px;
+  background-position: -116px -29px;
 }
 
 .login-Jira {
-  background-position: 0px -70px;
+  background-position: 0px -58px;
 }
 
 .login-LDAP {
-  background-position: -35px -70px;
+  background-position: -29px -58px;
 }
 
 .login-Linkedin {
-  background-position: -70px -70px;
+  background-position: -58px -58px;
 }
 
 .login-MediaWiki {
-  background-position: -105px -70px;
+  background-position: -87px -58px;
 }
 
 .login-Openid {
-  background-position: -140px -70px;
+  background-position: -116px -58px;
 }
 
 .login-PayPal {
-  background-position: 0px -105px;
+  background-position: 0px -87px;
 }
 
 .login-Persona {
-  background-position: -35px -105px;
+  background-position: -29px -87px;
 }
 
 .login-Phabricator {
-  background-position: -70px -105px;
+  background-position: -58px -87px;
 }
 
 .login-Stripe {
-  background-position: -105px -105px;
+  background-position: -87px -87px;
 }
 
 .login-TestPayment {
-  background-position: -140px -105px;
+  background-position: -116px -87px;
 }
 
 .login-TwitchTV {
-  background-position: 0px -140px;
+  background-position: 0px -116px;
 }
 
 .login-Twitter {
-  background-position: -35px -140px;
+  background-position: -29px -116px;
 }
 
 .login-WePay {
-  background-position: -70px -140px;
+  background-position: -58px -116px;
 }
 
 .login-WordPressCOM {
-  background-position: -105px -140px;
+  background-position: -87px -116px;
 }
 
 .login-Yahoo {
-  background-position: -140px -140px;
+  background-position: -116px -116px;
 }

@@ -100,13 +100,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     }
     $users = id(new PhabricatorUserEmail())
       ->loadAllWhere('address IN (%Ls)', $addresses);
-    $user_phids = mpull($users, 'getUserPHID');
-
-    $mailing_lists = id(new PhabricatorMetaMTAMailingList())
-      ->loadAllWhere('email in (%Ls)', $addresses);
-    $mailing_list_phids = mpull($mailing_lists, 'getPHID');
-
-    return array_merge($user_phids,  $mailing_list_phids);
+    return mpull($users, 'getUserPHID');
   }
 
   public function processReceivedMail() {

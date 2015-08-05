@@ -9,6 +9,7 @@ final class PonderQuestionQuery
   private $answererPHIDs;
 
   private $status = 'status-any';
+
   const STATUS_ANY      = 'status-any';
   const STATUS_OPEN     = 'status-open';
   const STATUS_CLOSED   = 'status-closed';
@@ -51,43 +52,43 @@ final class PonderQuestionQuery
     return $this;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'q.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'q.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->authorPHIDs) {
+    if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'q.authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
-    if ($this->status) {
+    if ($this->status !== null) {
       switch ($this->status) {
         case self::STATUS_ANY:
           break;
         case self::STATUS_OPEN:
           $where[] = qsprintf(
-            $conn_r,
+            $conn,
             'q.status = %d',
             PonderQuestionStatus::STATUS_OPEN);
           break;
         case self::STATUS_CLOSED:
           $where[] = qsprintf(
-            $conn_r,
+            $conn,
             'q.status = %d',
             PonderQuestionStatus::STATUS_CLOSED);
           break;
@@ -96,25 +97,15 @@ final class PonderQuestionQuery
       }
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    return $where;
+  }
 
-    return $this->formatWhereClause($where);
+  public function newResultObject() {
+    return new PonderQuestion();
   }
 
   protected function loadPage() {
-    $question = new PonderQuestion();
-    $conn_r = $question->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT q.* FROM %T q %Q %Q %Q %Q',
-      $question->getTableName(),
-      $this->buildJoinsClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $question->loadAllFromArray($data);
+    return $this->loadStandardPage(new PonderQuestion());
   }
 
   protected function willFilterPage(array $questions) {
@@ -173,6 +164,10 @@ final class PonderQuestionQuery
     }
 
     return implode(' ', $joins);
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'q';
   }
 
   public function getQueryApplicationClass() {

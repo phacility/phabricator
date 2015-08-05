@@ -7,17 +7,24 @@ final class ConpherenceNewRoomController extends ConpherenceController {
 
     $title = pht('New Room');
     $e_title = true;
+    $v_message = null;
     $validation_exception = null;
 
     $conpherence = ConpherenceThread::initializeNewRoom($user);
+    $participants = array();
     if ($request->isFormPost()) {
-
+      $editor = new ConpherenceEditor();
       $xactions = array();
+
+      $participants = $request->getArr('participants');
+      $participants[] = $user->getPHID();
+      $participants = array_unique($participants);
       $xactions[] = id(new ConpherenceTransaction())
-        ->setTransactionType(ConpherenceTransactionType::TYPE_PARTICIPANTS)
-        ->setNewValue(array('+' => array($user->getPHID())));
+        ->setTransactionType(ConpherenceTransaction::TYPE_PARTICIPANTS)
+        ->setNewValue(array('+' => $participants));
+
       $xactions[] = id(new ConpherenceTransaction())
-        ->setTransactionType(ConpherenceTransactionType::TYPE_TITLE)
+        ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
         ->setNewValue($request->getStr('title'));
       $xactions[] = id(new ConpherenceTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
@@ -29,8 +36,17 @@ final class ConpherenceNewRoomController extends ConpherenceController {
         ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
         ->setNewValue($request->getStr('joinPolicy'));
 
+      $v_message = $request->getStr('message');
+      if (strlen($v_message)) {
+        $message_xactions = $editor->generateTransactionsFromText(
+          $user,
+          $conpherence,
+          $v_message);
+        $xactions = array_merge($xactions, $message_xactions);
+      }
+
       try {
-        id(new ConpherenceEditor())
+        $editor
           ->setContentSourceFromRequest($request)
           ->setContinueOnNoEffect(true)
           ->setActor($user)
@@ -41,11 +57,15 @@ final class ConpherenceNewRoomController extends ConpherenceController {
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
 
-        $e_title = $ex->getShortMessage(ConpherenceTransactionType::TYPE_TITLE);
+        $e_title = $ex->getShortMessage(ConpherenceTransaction::TYPE_TITLE);
 
         $conpherence->setViewPolicy($request->getStr('viewPolicy'));
         $conpherence->setEditPolicy($request->getStr('editPolicy'));
         $conpherence->setJoinPolicy($request->getStr('joinPolicy'));
+      }
+    } else {
+      if ($request->getStr('participant')) {
+        $participants[] = $request->getStr('participant');
       }
     }
 
@@ -54,7 +74,7 @@ final class ConpherenceNewRoomController extends ConpherenceController {
       ->setObject($conpherence)
       ->execute();
 
-    $submit_uri = $this->getApplicationURI('room/new/');
+    $submit_uri = $this->getApplicationURI('new/');
     $cancel_uri = $this->getApplicationURI('search/');
 
     $dialog = $this->newDialog()
@@ -67,13 +87,19 @@ final class ConpherenceNewRoomController extends ConpherenceController {
 
     $form = id(new PHUIFormLayoutView())
       ->setUser($user)
-      ->setFullWidth(true)
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setError($e_title)
-        ->setLabel(pht('Title'))
+        ->setLabel(pht('Name'))
         ->setName('title')
         ->setValue($request->getStr('title')))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+        ->setName('participants')
+        ->setUser($user)
+        ->setDatasource(new PhabricatorPeopleDatasource())
+        ->setValue($participants)
+        ->setLabel(pht('Other Participants')))
       ->appendChild(
         id(new AphrontFormPolicyControl())
         ->setName('viewPolicy')
@@ -91,7 +117,13 @@ final class ConpherenceNewRoomController extends ConpherenceController {
         ->setName('joinPolicy')
         ->setPolicyObject($conpherence)
         ->setCapability(PhabricatorPolicyCapability::CAN_JOIN)
-        ->setPolicies($policies));
+        ->setPolicies($policies))
+      ->appendChild(
+        id(new PhabricatorRemarkupControl())
+        ->setUser($user)
+        ->setName('message')
+        ->setLabel(pht('First Message'))
+        ->setValue($v_message));
 
     $dialog->appendChild($form);
 

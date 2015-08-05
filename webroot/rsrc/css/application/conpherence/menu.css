@@ -43,8 +43,8 @@
   overflow-y: auto;
   top: 0;
   bottom: 0;
-  background: #dbdde0;
-  border-right: 1px solid {$hovergrey}
+  background: #f7f7f7;
+  border-right: 1px solid {$lightblueborder}
 }
 
 .conpherence-menu-pane .phui-list-item-view.hidden {
@@ -88,16 +88,7 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.conpherence-layout .phabricator-nav-column-background {
-  display: block;
-}
-
-.device .phabricator-nav-column-background {
-  top: 44px;
-}
-
-.device .conpherence-role-thread .conpherence-menu-pane,
-.device .conpherence-role-thread .phabricator-nav-column-background {
+.device .conpherence-role-thread .conpherence-menu-pane {
   display: none;
 }
 
@@ -118,16 +109,16 @@
 
 .conpherence-menu .conpherence-menu-item-view {
   display: block;
-  height: 36px;
   overflow: hidden;
   position: relative;
   text-decoration: none;
-  border-left: 3px solid transparent;
+  border-left: 4px solid transparent;
+  padding: 4px;
 }
 
 .conpherence-menu .conpherence-selected {
-  background: {$hovergrey};
-  border-left: 3px solid {$sky};
+  background: rgba(0,0,0,0.05);
+  border-left: 4px solid {$sky};
 }
 
 .conpherence-menu .phui-list-item-type-link .phui-list-item-href {
@@ -136,7 +127,7 @@
 
 .device-desktop .conpherence-menu
  .conpherence-selected.conpherence-menu-item-view:hover {
-  background-color: {$hoverselectedgrey};
+  background-color: rgba(0,0,0,0.07);
 }
 
 .conpherence-menu .loading {
@@ -144,27 +135,26 @@
 }
 
 .device-desktop .conpherence-menu .conpherence-menu-item-view:hover {
-  background-color: {$hovergrey};
+  background-color: rgba(0,0,0,0.05);
 }
 
 .conpherence-menu .conpherence-menu-item-view .conpherence-menu-item-image {
-  top: 4px;
-  left: 6px;
-  display: block;
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  background-size: 24px;
-  border: 2px solid #fff;
+  width: 26px;
+  height: 26px;
+  background-size: 26px;
+  box-shadow: {$borderinset};
+  border-radius: 3px;
+  float: left;
+  margin-left: 4px;
 }
 
 .conpherence-menu .conpherence-menu-item-view .conpherence-menu-item-title {
   display: block;
-  margin-top: 9px;
-  margin-left: 40px;
+  padding: 4px 0 4px 8px;
+  float: left;
   text-align: left;
   font-weight: bold;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   color: {$darkbluetext};
   text-shadow: 0px 1px 1px #fff;
   overflow: hidden;
@@ -186,7 +176,7 @@
   color: #fff;
   font-weight: bold;
   padding: 0 5px 1px;
-  font-size: 11px;
+  font-size: {$smallestfontsize};
 }
 
 .conpherence-menu .hide-unread-count .conpherence-menu-item-unread-count,
@@ -199,7 +189,7 @@
   top: 15px;
   right: 16px;
   color: {$bluetext};
-  font-size: 11px;
+  font-size: {$smallestfontsize};
 }
 
 .conpherence-menu-item-header {

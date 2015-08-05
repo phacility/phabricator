@@ -1,6 +1,7 @@
 <?php
 
 final class DifferentialInlineComment
+  extends Phobject
   implements PhabricatorInlineCommentInterface {
 
   private $proxy;
@@ -24,6 +25,7 @@ final class DifferentialInlineComment
       ->setViewPolicy('public')
       ->setEditPolicy($this->getAuthorPHID())
       ->setContentSource($content_source)
+      ->attachIsHidden(false)
       ->setCommentVersion(1);
 
     return $this->proxy;
@@ -47,6 +49,20 @@ final class DifferentialInlineComment
     $this->proxy->delete();
 
     return $this;
+  }
+
+  public function supportsHiding() {
+    if ($this->getSyntheticAuthor()) {
+      return false;
+    }
+    return true;
+  }
+
+  public function isHidden() {
+    if (!$this->supportsHiding()) {
+      return false;
+    }
+    return $this->proxy->getIsHidden();
   }
 
   public function getID() {

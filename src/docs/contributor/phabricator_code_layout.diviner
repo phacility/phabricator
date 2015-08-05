@@ -20,21 +20,21 @@ most of its code in standardized subdirectories and classes.
 
 = Best Practice Class and Subdirectory Organization =
 
-Suppose you were working on the application ##Derp##.
+Suppose you were working on the application `Derp`.
 
   phabricator/src/applications/derp/
 
-If ##Derp## were as simple as possible, it would have one subdirectory:
+If `Derp` were as simple as possible, it would have one subdirectory:
 
   phabricator/src/applications/derp/controller/
 
-containing the file ##DerpController.php## with the class
+containing the file `DerpController.php` with the class
 
- - ##DerpController##: minimally implements a ##processRequest()## method
+ - `DerpController`: minimally implements a `processRequest()` method
    which returns some @{class:AphrontResponse} object. The class would probably
    extend @{class:PhabricatorController}.
 
-If ##Derp## were (relatively) complex, one could reasonably expect to see
+If `Derp` were (relatively) complex, one could reasonably expect to see
 the following directory layout:
 
   phabricator/src/applications/derp/conduit/
@@ -54,54 +54,54 @@ this document. See @{article:Adding New CSS and JS}.)
   phabricator/webroot/rsrc/js/application/derp/
   phabricator/webroot/rsrc/css/application/derp/
 
-These directories under ##phabricator/src/applications/derp/## represent
+These directories under `phabricator/src/applications/derp/` represent
 the basic set of class types from which most Phabrictor applications are
-assembled. Each would contain a class file. For ##Derp##, these classes could be
+assembled. Each would contain a class file. For `Derp`, these classes could be
 something like:
 
- - **DerpConstants**: constants used in the ##Derp## application.
+ - **DerpConstants**: constants used in the `Derp` application.
  - **DerpController**: business logic providing functionality for a given
    URI. Typically, controllers load data via Storage or Query classes, then
    present the data to the user via one or more View classes.
  - **DerpEditor**:  business logic for workflows that change one or more
    Storage objects. Editor classes are only necessary for particularly
    complicated edits and should be used pragmatically versus Storage objects.
- - **DerpException**: exceptions used in the ##Derp## application.
- - **DerpQuery**: query one or more storage objects for pertinent ##Derp##
+ - **DerpException**: exceptions used in the `Derp` application.
+ - **DerpQuery**: query one or more storage objects for pertinent `Derp`
    application data. @{class:PhabricatorOffsetPagedQuery} is particularly
    handy for pagination and works well with @{class:AphrontPagerView}.
  - **DerpReplyHandler**: business logic from any configured email interactions
-   users can have with the ##Derp## application.
- - **DerpStorage**: storage objects for the ##Derp## application. Typically
+   users can have with the `Derp` application.
+ - **DerpStorage**: storage objects for the `Derp` application. Typically
    there is a base class which extends @{class:PhabricatorLiskDAO} to configure
    application-wide storage settings like the application (thus database) name.
    Reading more about the @{class:LiskDAO} is highly recommended.
- - **DerpView**: view objects for the ##Derp## application. Typically these
+ - **DerpView**: view objects for the `Derp` application. Typically these
    extend @{class:AphrontView}.
- - **DerpConduitAPIMethod**: provides any and all ##Derp## application
+ - **DerpConduitAPIMethod**: provides any and all `Derp` application
    functionality that is accessible over Conduit.
 
-However, it is likely that ##Derp## is even more complex, and rather than
+However, it is likely that `Derp` is even more complex, and rather than
 containing one class, each directory has several classes. A typical example
 happens around the CRUD of an object:
 
  - **DerpBaseController**: typically extends @{class:PhabricatorController},
-   implements ##buildStandardPageResponse## with the ##Derp## application name
-   and other ##Derp##-specific meta-data, and contains any controller-specific
-   functionality used throughout the ##Derp## application.
- - **DerpDeleteController**: typically extends ##DerpBaseController## and
-   presents a confirmation dialogue to the user about deleting a ##Derp##.
- - **DerpEditController**: typically extends ##DerpBaseController## and
-   presents a form to create and edit ##Derps##. Most likely uses
-   @{class:AphrontFormView} and various ##AphrontFormXControl## classes such as
+   implements `buildStandardPageResponse` with the `Derp` application name
+   and other `Derp`-specific meta-data, and contains any controller-specific
+   functionality used throughout the `Derp` application.
+ - **DerpDeleteController**: typically extends `DerpBaseController` and
+   presents a confirmation dialogue to the user about deleting a `Derp`.
+ - **DerpEditController**: typically extends `DerpBaseController` and
+   presents a form to create and edit `Derps`. Most likely uses
+   @{class:AphrontFormView} and various `AphrontFormXControl` classes such as
    @{class:AphrontFormTextControl} to create the form.
- - **DerpListController**: typically extends ##DerpBaseController## and displays
-   a set of one or more ##Derps##. Might use @{class:AphrontTableView} to create
-   a table of ##Derps##.
- - **DerpViewController**: typically extends ##DerpBaseController## and displays
-   a single ##Derp##.
+ - **DerpListController**: typically extends `DerpBaseController` and displays
+   a set of one or more `Derps`. Might use @{class:AphrontTableView} to create
+   a table of `Derps`.
+ - **DerpViewController**: typically extends `DerpBaseController` and displays
+   a single `Derp`.
 
-Some especially awesome directories might have a ##__tests__## subdirectory
+Some especially awesome directories might have a `__tests__` subdirectory
 containing all pertinent unit test code for the class.
 
 = Next Steps =

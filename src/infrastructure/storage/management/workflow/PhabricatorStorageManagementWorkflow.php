@@ -665,7 +665,7 @@ abstract class PhabricatorStorageManagementWorkflow
     return 2;
   }
 
-  protected final function getBareHostAndPort($host) {
+  final protected function getBareHostAndPort($host) {
     // Split out port information, since the command-line client requires a
     // separate flag for the port.
     $uri = new PhutilURI('mysql://'.$host);

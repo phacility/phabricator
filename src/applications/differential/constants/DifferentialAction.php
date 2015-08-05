@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialAction {
+final class DifferentialAction extends Phobject {
 
   const ACTION_CLOSE          = 'commit';
   const ACTION_COMMENT        = 'none';

@@ -235,7 +235,7 @@ final class MultimeterSampleController extends MultimeterController {
           'Samples (%s - %s)',
           phabricator_datetime($ago, $viewer),
           phabricator_datetime($now, $viewer)))
-      ->appendChild($table);
+      ->setTable($table);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(

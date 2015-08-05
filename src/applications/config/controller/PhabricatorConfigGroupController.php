@@ -3,18 +3,12 @@
 final class PhabricatorConfigGroupController
   extends PhabricatorConfigController {
 
-  private $groupKey;
-
-  public function willProcessRequest(array $data) {
-    $this->groupKey = $data['key'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $group_key = $request->getURIData('key');
 
     $groups = PhabricatorApplicationConfigOptions::loadAll();
-    $options = idx($groups, $this->groupKey);
+    $options = idx($groups, $group_key);
     if (!$options) {
       return new Aphront404Response();
     }
@@ -24,7 +18,7 @@ final class PhabricatorConfigGroupController
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->appendChild($list);
+      ->setObjectList($list);
 
     $crumbs = $this
       ->buildApplicationCrumbs()
@@ -63,7 +57,6 @@ final class PhabricatorConfigGroupController
     $engine->process();
 
     $list = new PHUIObjectItemListView();
-    $list->setStackable(true);
     foreach ($options as $option) {
       $summary = $engine->getOutput($option, 'summary');
 

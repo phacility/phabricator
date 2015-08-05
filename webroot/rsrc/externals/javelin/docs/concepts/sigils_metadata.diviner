@@ -21,7 +21,7 @@ about the structure of the document.
 It is reasonable to think of sigils as being CSS class names in a different,
 semantic namespace.
 
-If you're emitting raw tags, you specify sigils by adding a ##data-sigil##
+If you're emitting raw tags, you specify sigils by adding a `data-sigil`
 attribute to a node:
 
   lang=html
@@ -94,7 +94,7 @@ This calls the function you provide when the user clicks on a "like" link, but
 you need to be able to distinguish between the different links so you can know
 which story the user is trying to like. Javelin allows you to do this by
 attaching **metadata** to each node. Metadata is attached to a node by adding a
-##data-meta## attribute which has an index into data later provided to
+`data-meta` attribute which has an index into data later provided to
 @{method:JX.Stratcom.mergeData}:
 
   lang=html

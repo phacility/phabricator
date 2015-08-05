@@ -19,6 +19,14 @@ final class PhabricatorConduitCertificateSettingsPanel
     return pht('Authentication');
   }
 
+  public function isEnabled() {
+    if ($this->getUser()->getIsMailingList()) {
+      return false;
+    }
+
+    return true;
+  }
+
   public function processRequest(AphrontRequest $request) {
     $user = $this->getUser();
     $viewer = $request->getUser();

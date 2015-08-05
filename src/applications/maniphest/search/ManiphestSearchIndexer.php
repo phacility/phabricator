@@ -17,7 +17,7 @@ final class ManiphestSearchIndexer extends PhabricatorSearchDocumentIndexer {
     $doc->setDocumentModified($task->getDateModified());
 
     $doc->addField(
-      PhabricatorSearchField::FIELD_BODY,
+      PhabricatorSearchDocumentFieldType::FIELD_BODY,
       $task->getDescription());
 
     $doc->addRelationship(

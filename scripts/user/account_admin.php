@@ -125,7 +125,7 @@ if (strlen($password)) {
 
 $is_system_agent = $user->getIsSystemAgent();
 $set_system_agent = phutil_console_confirm(
-  pht('Is this user a bot/script?'),
+  pht('Is this user a bot?'),
   $default_no = !$is_system_agent);
 
 $verify_email = null;
@@ -165,7 +165,7 @@ printf($tpl, pht('Password'), null,
 
 printf(
   $tpl,
-  pht('Bot/Script'),
+  pht('Bot'),
   $original->getIsSystemAgent() ? 'Y' : 'N',
   $set_system_agent ? 'Y' : 'N');
 

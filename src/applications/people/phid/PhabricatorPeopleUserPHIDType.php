@@ -44,6 +44,10 @@ final class PhabricatorPeopleUserPHIDType extends PhabricatorPHIDType {
       $handle->setFullName($user->getFullName());
       $handle->setImageURI($user->getProfileImageURI());
 
+      if ($user->getIsMailingList()) {
+        $handle->setIcon('fa-envelope-o');
+      }
+
       $availability = null;
       if (!$user->isUserActivated()) {
         $availability = PhabricatorObjectHandle::AVAILABILITY_DISABLED;

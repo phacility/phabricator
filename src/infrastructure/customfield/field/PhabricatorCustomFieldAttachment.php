@@ -8,7 +8,7 @@
  * Generally, you should not use this class directly. It is used by
  * @{class:PhabricatorCustomField} to manage field storage on objects.
  */
-final class PhabricatorCustomFieldAttachment {
+final class PhabricatorCustomFieldAttachment extends Phobject {
 
   private $lists = array();
 
@@ -20,7 +20,9 @@ final class PhabricatorCustomFieldAttachment {
   public function getCustomFieldList($role) {
     if (empty($this->lists[$role])) {
       throw new PhabricatorCustomFieldNotAttachedException(
-        "Role list '{$role}' is not available!");
+        pht(
+          "Role list '%s' is not available!",
+          $role));
     }
     return $this->lists[$role];
   }

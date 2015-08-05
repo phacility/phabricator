@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionRenameHistoryQuery {
+final class DiffusionRenameHistoryQuery extends Phobject {
 
   private $oldCommit;
   private $wasCreated;

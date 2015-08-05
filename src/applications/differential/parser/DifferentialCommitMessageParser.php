@@ -19,7 +19,7 @@
  * @task support  Support Methods
  * @task internal Internals
  */
-final class DifferentialCommitMessageParser {
+final class DifferentialCommitMessageParser extends Phobject {
 
   private $labelMap;
   private $titleKey;

@@ -5,11 +5,19 @@ final class DivinerBookPHIDType extends PhabricatorPHIDType {
   const TYPECONST = 'BOOK';
 
   public function getTypeName() {
-    return pht('Book');
+    return pht('Diviner Book');
   }
 
   public function newObject() {
     return new DivinerLiveBook();
+  }
+
+  public function getTypeIcon() {
+    return 'fa-book';
+  }
+
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorDivinerApplication';
   }
 
   protected function buildQueryForObjects(
@@ -30,9 +38,10 @@ final class DivinerBookPHIDType extends PhabricatorPHIDType {
 
       $name = $book->getName();
 
-      $handle->setName($book->getShortTitle());
-      $handle->setFullName($book->getTitle());
-      $handle->setURI("/diviner/book/{$name}/");
+      $handle
+        ->setName($book->getShortTitle())
+        ->setFullName($book->getTitle())
+        ->setURI("/book/{$name}/");
     }
   }
 

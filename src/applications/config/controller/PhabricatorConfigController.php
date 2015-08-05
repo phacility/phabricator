@@ -24,6 +24,12 @@ abstract class PhabricatorConfigController extends PhabricatorController {
     $nav->addFilter('cache/', pht('Cache Status'));
     $nav->addLabel(pht('Welcome'));
     $nav->addFilter('welcome/', pht('Welcome Screen'));
+    $nav->addLabel(pht('Modules'));
+
+    $modules = PhabricatorConfigModule::getAllModules();
+    foreach ($modules as $key => $module) {
+      $nav->addFilter('module/'.$key.'/', $module->getModuleName());
+    }
 
     return $nav;
   }

@@ -2,29 +2,23 @@
 
 final class PhabricatorPasteEditController extends PhabricatorPasteController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $parent = null;
     $parent_id = null;
-    if (!$this->id) {
+    if (!$id) {
       $is_create = true;
 
-      $paste = PhabricatorPaste::initializeNewPaste($user);
+      $paste = PhabricatorPaste::initializeNewPaste($viewer);
 
       $parent_id = $request->getStr('parent');
       if ($parent_id) {
         // NOTE: If the Paste is forked from a paste which the user no longer
         // has permission to see, we still let them edit it.
         $parent = id(new PhabricatorPasteQuery())
-          ->setViewer($user)
+          ->setViewer($viewer)
           ->withIDs(array($parent_id))
           ->needContent(true)
           ->needRawContent(true)
@@ -37,19 +31,19 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
         }
       }
 
-      $paste->setAuthorPHID($user->getPHID());
+      $paste->setAuthorPHID($viewer->getPHID());
       $paste->attachRawContent('');
     } else {
       $is_create = false;
 
       $paste = id(new PhabricatorPasteQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
             PhabricatorPolicyCapability::CAN_EDIT,
           ))
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->needRawContent(true)
         ->executeOne();
       if (!$paste) {
@@ -57,13 +51,12 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       }
     }
 
-    $text = null;
-    $e_text = true;
-    $errors = array();
+    $v_space = $paste->getSpacePHID();
     if ($is_create && $parent) {
       $v_title = pht('Fork of %s', $parent->getFullName());
       $v_language = $parent->getLanguage();
       $v_text = $parent->getRawContent();
+      $v_space = $parent->getSpacePHID();
     } else {
       $v_title = $paste->getTitle();
       $v_language = $paste->getLanguage();
@@ -81,68 +74,64 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       $v_projects = array_reverse($v_projects);
     }
 
+    $validation_exception = null;
     if ($request->isFormPost()) {
       $xactions = array();
 
       $v_text = $request->getStr('text');
-      if (!strlen($v_text)) {
-        $e_text = pht('Required');
-        $errors[] = pht('The paste may not be blank.');
-      } else {
-        $e_text = null;
-      }
-
       $v_title = $request->getStr('title');
       $v_language = $request->getStr('language');
       $v_view_policy = $request->getStr('can_view');
       $v_edit_policy = $request->getStr('can_edit');
       $v_projects = $request->getArr('projects');
+      $v_space = $request->getStr('spacePHID');
 
       // NOTE: The author is the only editor and can always view the paste,
       // so it's impossible for them to choose an invalid policy.
 
-      if (!$errors) {
-        if ($is_create || ($v_text !== $paste->getRawContent())) {
-          $file = PhabricatorPasteEditor::initializeFileForPaste(
-            $user,
-            $v_title,
-            $v_text);
-
-          $xactions[] = id(new PhabricatorPasteTransaction())
-            ->setTransactionType(PhabricatorPasteTransaction::TYPE_CONTENT)
-            ->setNewValue($file->getPHID());
-        }
+      if ($is_create || ($v_text !== $paste->getRawContent())) {
+        $file = PhabricatorPasteEditor::initializeFileForPaste(
+          $viewer,
+          $v_title,
+          $v_text);
 
         $xactions[] = id(new PhabricatorPasteTransaction())
-          ->setTransactionType(PhabricatorPasteTransaction::TYPE_TITLE)
-          ->setNewValue($v_title);
-        $xactions[] = id(new PhabricatorPasteTransaction())
-          ->setTransactionType(PhabricatorPasteTransaction::TYPE_LANGUAGE)
-          ->setNewValue($v_language);
-        $xactions[] = id(new PhabricatorPasteTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
-          ->setNewValue($v_view_policy);
-        $xactions[] = id(new PhabricatorPasteTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
-          ->setNewValue($v_edit_policy);
+          ->setTransactionType(PhabricatorPasteTransaction::TYPE_CONTENT)
+          ->setNewValue($file->getPHID());
+      }
 
-        $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
-        $xactions[] = id(new PhabricatorPasteTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-          ->setMetadataValue('edge:type', $proj_edge_type)
-          ->setNewValue(array('=' => array_fuse($v_projects)));
+      $xactions[] = id(new PhabricatorPasteTransaction())
+        ->setTransactionType(PhabricatorPasteTransaction::TYPE_TITLE)
+        ->setNewValue($v_title);
+      $xactions[] = id(new PhabricatorPasteTransaction())
+        ->setTransactionType(PhabricatorPasteTransaction::TYPE_LANGUAGE)
+        ->setNewValue($v_language);
+      $xactions[] = id(new PhabricatorPasteTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+        ->setNewValue($v_view_policy);
+      $xactions[] = id(new PhabricatorPasteTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+        ->setNewValue($v_edit_policy);
+      $xactions[] = id(new PhabricatorPasteTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_SPACE)
+        ->setNewValue($v_space);
 
-        $editor = id(new PhabricatorPasteEditor())
-          ->setActor($user)
-          ->setContentSourceFromRequest($request)
-          ->setContinueOnNoEffect(true);
+      $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+      $xactions[] = id(new PhabricatorPasteTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $proj_edge_type)
+        ->setNewValue(array('=' => array_fuse($v_projects)));
+
+      $editor = id(new PhabricatorPasteEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true);
+
+      try {
         $xactions = $editor->applyTransactions($paste, $xactions);
         return id(new AphrontRedirectResponse())->setURI($paste->getURI());
-      } else {
-        // make sure we update policy so its correctly populated to what
-        // the user chose
-        $paste->setViewPolicy($v_view_policy);
-        $paste->setEditPolicy($v_edit_policy);
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
       }
     }
 
@@ -153,7 +142,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
     ) + PhabricatorEnv::getEnvConfig('pygments.dropdown-choices');
 
     $form
-      ->setUser($user)
+      ->setUser($viewer)
       ->addHiddenInput('parent', $parent_id)
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -168,24 +157,27 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
           ->setOptions($langs));
 
     $policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->setObject($paste)
       ->execute();
 
     $form->appendChild(
       id(new AphrontFormPolicyControl())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
         ->setPolicyObject($paste)
         ->setPolicies($policies)
+        ->setValue($v_view_policy)
+        ->setSpacePHID($v_space)
         ->setName('can_view'));
 
     $form->appendChild(
       id(new AphrontFormPolicyControl())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
         ->setPolicyObject($paste)
         ->setPolicies($policies)
+        ->setValue($v_edit_policy)
         ->setName('can_edit'));
 
     $form->appendControl(
@@ -199,7 +191,6 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel(pht('Text'))
-          ->setError($e_text)
           ->setValue($v_text)
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
           ->setCustomClass('PhabricatorMonospaced')
@@ -222,8 +213,11 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->setFormErrors($errors)
       ->setForm($form);
+
+    if ($validation_exception) {
+      $form_box->setValidationException($validation_exception);
+    }
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     if (!$is_create) {

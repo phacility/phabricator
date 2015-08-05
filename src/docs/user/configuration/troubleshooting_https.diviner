@@ -12,7 +12,7 @@ the problem.
 
 Connection negotiation can fail for several reasons. The major ones are:
 
-  - You have not added the the Certificate Authority as a trusted authority
+  - You have not added the Certificate Authority as a trusted authority
     (this is the most common problem, and usually the issue for self-signed
     certificates).
   - The SSL certificate is signed for the wrong domain. For example, a

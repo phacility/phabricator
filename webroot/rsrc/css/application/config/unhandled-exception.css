@@ -6,19 +6,17 @@
   max-width: 760px;
   margin: 24px auto;
   background: #fff;
-  border: 1px solid #f4c6c6;
-  border-bottom: 1px solid #eb9797;
+  border: 1px solid #c0392b;
+  border-radius: 3px;
+  padding: 0 8px;
 }
 
 .unhandled-exception-detail .unhandled-exception-title {
-  color: #802b2b;
-  text-shadow: 0 1px #fff;
-  padding: 16px 12px;
-  border-bottom: 1px solid #f4c6c6;
-  font-size: 15px;
-  font-weight: bold;
-  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAADwCAIAAABHUjkYAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAEpJREFUeNrs0TEKADAIBEER//9aa00bmzTGNNnrBhEO1ayxcJctKjUmmaf5a5tEtPazt/+67/Q/bvfr3nu6D8YYY4wxxvgfLwEGAIQkJawSMraKAAAAAElFTkSuQmCC');
-  background-repeat: repeat-x;
+  color: #c0392b;
+  padding: 12px 8px;
+  border-bottom: 1px solid #f4dddb;
+  font-size: 16px;
+  font-weight: 500;
   margin: 0;
 }
 

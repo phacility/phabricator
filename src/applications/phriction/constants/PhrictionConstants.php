@@ -1,3 +1,3 @@
 <?php
 
-abstract class PhrictionConstants {}
+abstract class PhrictionConstants extends Phobject {}

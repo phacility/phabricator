@@ -1,0 +1,256 @@
+@title Adding New Classes
+@group developer
+
+Guide to adding new classes to extend Phabricator.
+
+Overview
+========
+
+Phabricator is highly modular, and many parts of it can be extended by adding
+new classes. This document explains how to write new classes to change or
+expand the behavior of Phabricator.
+
+IMPORTANT: The upstream does not offer support with extension development.
+
+Fundamentals
+============
+
+Phabricator primarily discovers functionality by looking at concrete subclasses
+of some base class. For example, Phabricator determines which applications are
+available by looking at all of the subclasses of
+@{class@phabricator:PhabricatorApplication}. It
+discovers available workflows in `arc` by looking at all of the subclasses of
+@{class@arcanist:ArcanistWorkflow}. It discovers available locales
+by looking at all of the subclasses of @{class@libphutil:PhutilLocale}.
+
+This pattern holds in many cases, so you can often add functionality by adding
+new classes with no other work. Phabricator will automatically discover and
+integrate the new capabilities or features at runtime.
+
+There are two main ways to add classes:
+
+  - **Extensions Directory**: This is a simple way to add new code. It is
+    less powerful, but takes a lot less work. This is good for quick changes,
+    testing and development, or getting started on a larger project.
+  - **Creating Libraries**: This is a more advanced and powerful way to
+    organize extension code. This is better for larger or longer-lived
+    projects, or any code which you plan to distribute.
+
+The next sections walk through these approaches in greater detail.
+
+
+Extensions Directory
+====================
+
+The easiest way to extend Phabricator by adding new classes is to drop them
+into the extensions directory, at `phabricator/src/extensions/`.
+
+This is intended as a quick way to add small pieces of functionality, test new
+features, or get started on a larger project. Extending Phabricator like this
+imposes a small performance penalty compared to using a library.
+
+This directory exists in all libphutil libraries, so you can find similar
+directories in `arcanist/src/extensions/` and `libphutil/src/extensions/`.
+
+For example, to add a new application, create a file like this one and add it
+to `phabricator/src/extensions/`.
+
+```name=phabricator/src/extensions/ExampleApplication.php, lang=php
+<?php
+
+final class ExampleApplication extends PhabricatorApplication {
+
+  public function getName() {
+    return pht('Example');
+  }
+
+}
+```
+
+If you load {nav Applications} in the web UI, you should now see your new
+application in the list. It won't do anything yet since you haven't defined
+any interesting behavior, but this is the basic building block of Phabricator
+extensions.
+
+
+Creating Libraries
+==================
+
+A more powerful (but more complicated) way to extend Phabricator is to create
+a libphutil library. Libraries can organize a larger amount of code, are easier
+to work with and distribute, and have slightly better performance than loose
+source files in the extensions directory.
+
+In general, you'll perform these one-time setup steps to create a library:
+
+  - Create a new directory.
+  - Use `arc liberate` to initialize and name the library.
+  - Configure Phabricator or Arcanist to load the library.
+
+Then, to add new code, you do this:
+
+  - Write or update classes.
+  - Update the library metadata by running `arc liberate` again.
+
+Initializing a Library
+======================
+
+To create a new libphutil library, create a directory for it and run
+`arc liberate` on the directory. This documentation will use a conventional
+directory layout, which is recommended, but you are free to deviate from this.
+
+```
+$ mkdir libcustom/
+$ cd libcustom/
+libcustom/ $ arc liberate src/
+```
+
+Now you'll get a prompt like this:
+
+```lang=txt
+No library currently exists at that path...
+The directory '/some/path/libcustom/src' does not exist.
+
+  Do you want to create it? [y/N] y
+Creating new libphutil library in '/some/path/libcustom/src'.
+Choose a name for the new library.
+
+  What do you want to name this library?
+```
+
+Choose a library name (in this case, "libcustom" would be appropriate) and it
+you should get some details about the library initialization:
+
+```lang=txt
+Writing '__phutil_library_init__.php' to
+  '/some/path/libcustom/src/__phutil_library_init__.php'...
+Using library root at 'src'...
+Mapping library...
+Verifying library...
+Finalizing library map...
+  OKAY   Library updated.
+```
+
+This will write three files:
+
+  - `src/.phutil_module_cache` This is a cache which makes "arc liberate"
+    faster when you run it to update the library. You can safely remove it at
+    any time. If you check your library into version control, you can add this
+    file to ignore rules (like `.gitignore`).
+  - `src/__phutil_library_init__.php` This records the name of the library and
+    tells libphutil that a library exists here.
+  - `src/__phutil_library_map__.php` This is a map of all the symbols
+    (functions and classes) in the library, which allows them to be autoloaded
+    at runtime and dependencies to be statically managed by `arc liberate`.
+
+Linking with Phabricator
+========================
+
+If you aren't using this library with Phabricator (e.g., you are only using it
+with Arcanist or are building something else on libphutil) you can skip this
+step.
+
+But, if you intend to use this library with Phabricator, you need to define its
+dependency on Phabricator by creating a `.arcconfig` file which points at
+Phabricator. For example, you might write this file to
+`libcustom/.arcconfig`:
+
+```lang=json
+{
+  "load": [
+    "phabricator/src/"
+  ]
+}
+```
+
+For details on creating a `.arcconfig`, see
+@{article:Arcanist User Guide: Configuring a New Project}. In general, this
+tells `arc liberate` that it should look for symbols in Phabricator when
+performing static analysis.
+
+NOTE: If Phabricator isn't located next to your custom library, specify a
+path which actually points to the `phabricator/` directory.
+
+You do not need to declare dependencies on `arcanist` or `libphutil`,
+since `arc liberate` automatically loads them.
+
+Finally, edit your Phabricator config to tell it to load your library at
+runtime, by adding it to `load-libraries`:
+
+```lang=json
+...
+'load-libraries' => array(
+  'libcustom' => 'libcustom/src/',
+),
+...
+```
+
+Now, Phabricator will be able to load classes from your custom library.
+
+
+Writing Classes
+===============
+
+To actually write classes, create a new module and put code in it:
+
+  libcustom/ $ mkdir src/example/
+  libcustom/ $ nano src/example/ExampleClass.php # Edit some code.
+
+Now, run `arc liberate` to regenerate the static resource map:
+
+  libcustom/ $ arc liberate src/
+
+This will automatically regenerate the static map of the library.
+
+
+What You Can Extend And Invoke
+==============================
+
+libphutil, Arcanist and Phabricator are strict about extensibility of classes
+and visibility of methods and properties. Most classes are marked `final`, and
+methods have the minimum required visibility (protected or private). The goal
+of this strictness is to make it clear what you can safely extend, access, and
+invoke, so your code will keep working as the upstream changes.
+
+IMPORTANT: We'll still break APIs frequently. The upstream does not support
+extension development, and none of these APIs are stable.
+
+When developing libraries to work with libphutil, Arcanist and Phabricator, you
+should respect method and property visibility.
+
+If you want to add features but can't figure out how to do it without changing
+Phabricator code, here are some approaches you may be able to take:
+
+  - {icon check, color=green} **Use Composition**: If possible, use composition
+    rather than extension to build your feature.
+  - {icon check, color=green} **Find Another Approach**: Check the
+    documentation for a better way to accomplish what you're trying to do.
+  - {icon check, color=green} **File a Feature Request**: Let us know what your
+    use case is so we can make the class tree more flexible or configurable, or
+    point you at the right way to do whatever you're trying to do, or explain
+    why we don't let you do it. Note that we **do not support** extension
+    development so you may have mixed luck with this one.
+
+These approaches are **discouraged**, but also possible:
+
+  - {icon times, color=red} **Fork**: Create an ad-hoc local fork and remove
+    `final` in your copy of the code. This will make it more difficult for you
+    to upgrade in the future, although it may be the only real way forward
+    depending on what you're trying to do.
+  - {icon times, color=red} **Use Reflection**: You can use
+    [[ http://php.net/manual/en/book.reflection.php | Reflection ]] to remove
+    modifiers at runtime. This is fragile and discouraged, but technically
+    possible.
+  - {icon times, color=red} **Remove Modifiers**: Send us a patch removing
+    `final` (or turning `protected` or `private` into `public`). We will almost
+    never accept these patches unless there's a very good reason that the
+    current behavior is wrong.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - visiting the [[ https://secure.phabricator.com/w/community_resources/ |
+    Community Resources ]] page to find or share extensions and libraries.

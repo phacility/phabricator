@@ -135,11 +135,11 @@ final class PhabricatorExternalAccountsSettingsPanel
 
     $linked_box = id(new PHUIObjectBoxView())
       ->setHeader($linked_head)
-      ->appendChild($linked);
+      ->setObjectList($linked);
 
     $linkable_box = id(new PHUIObjectBoxView())
       ->setHeader($linkable_head)
-      ->appendChild($linkable);
+      ->setObjectList($linkable);
 
     return array(
       $linked_box,

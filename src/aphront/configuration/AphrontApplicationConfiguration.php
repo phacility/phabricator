@@ -3,7 +3,7 @@
 /**
  * @task  routing URI Routing
  */
-abstract class AphrontApplicationConfiguration {
+abstract class AphrontApplicationConfiguration extends Phobject {
 
   private $request;
   private $host;
@@ -80,7 +80,7 @@ abstract class AphrontApplicationConfiguration {
     // This is the earliest we can get away with this, we need env config first.
     PhabricatorAccessLog::init();
     $access_log = PhabricatorAccessLog::getLog();
-    PhabricatorStartup::setGlobal('log.access', $access_log);
+    PhabricatorStartup::setAccessLog($access_log);
     $access_log->setData(
       array(
         'R' => AphrontRequest::getHTTPHeader('Referer', '-'),
@@ -350,7 +350,9 @@ abstract class AphrontApplicationConfiguration {
       }
     }
 
-    if (PhabricatorEnv::getEnvConfig('security.require-https')) {
+    $site = $this->buildSiteForRequest($request);
+
+    if ($site->shouldRequireHTTPS()) {
       if (!$request->isHTTPS()) {
         $https_uri = $request->getRequestURI();
         $https_uri->setDomain($request->getHost());
@@ -362,82 +364,9 @@ abstract class AphrontApplicationConfiguration {
       }
     }
 
-    $path         = $request->getPath();
-    $host         = $request->getHost();
-    $base_uri     = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
-    $prod_uri     = PhabricatorEnv::getEnvConfig('phabricator.production-uri');
-    $file_uri     = PhabricatorEnv::getEnvConfig(
-      'security.alternate-file-domain');
-    $allowed_uris = PhabricatorEnv::getEnvConfig('phabricator.allowed-uris');
-
-    $uris = array_merge(
-      array(
-        $base_uri,
-        $prod_uri,
-      ),
-      $allowed_uris);
-
-    $cdn_routes = array(
-      '/res/',
-      '/file/data/',
-      '/file/xform/',
-      '/phame/r/',
-      );
-
-    $host_match = false;
-    foreach ($uris as $uri) {
-      if ($host === id(new PhutilURI($uri))->getDomain()) {
-        $host_match = true;
-        break;
-      }
-    }
-
-    if (!$host_match) {
-      if ($host === id(new PhutilURI($file_uri))->getDomain()) {
-        foreach ($cdn_routes as $route) {
-          if (strncmp($path, $route, strlen($route)) == 0) {
-            $host_match = true;
-            break;
-          }
-        }
-      }
-    }
-
-    // NOTE: If the base URI isn't defined yet, don't activate alternate
-    // domains.
-    if ($base_uri && !$host_match) {
-
-      try {
-        $blog = id(new PhameBlogQuery())
-          ->setViewer(new PhabricatorUser())
-          ->withDomain($host)
-          ->executeOne();
-      } catch (PhabricatorPolicyException $ex) {
-        throw new Exception(
-          pht(
-            'This blog is not visible to logged out users, so it can not be '.
-            'visited from a custom domain.'));
-      }
-
-      if (!$blog) {
-        if ($prod_uri && $prod_uri != $base_uri) {
-          $prod_str = pht('%s or %s', $base_uri, $prod_uri);
-        } else {
-          $prod_str = $base_uri;
-        }
-        throw new Exception(
-          pht(
-            'Specified domain %s is not configured for Phabricator '.
-            'requests. Please use %s to visit this instance.',
-            $host,
-            $prod_str));
-      }
-
-      // TODO: Make this more flexible and modular so any application can
-      // do crazy stuff here if it wants.
-
-      $path = '/phame/live/'.$blog->getID().'/'.$path;
-    }
+    // TODO: Really, the Site should get more control here and be able to
+    // do its own routing logic if it wants, but we don't need that for now.
+    $path = $site->getPathForRouting($request);
 
     list($controller, $uri_data) = $this->buildControllerForPath($path);
     if (!$controller) {
@@ -507,6 +436,31 @@ abstract class AphrontApplicationConfiguration {
     }
 
     return array($controller, $uri_data);
+  }
+
+  private function buildSiteForRequest(AphrontRequest $request) {
+    $sites = PhabricatorSite::getAllSites();
+
+    $site = null;
+    foreach ($sites as $candidate) {
+      $site = $candidate->newSiteForRequest($request);
+      if ($site) {
+        break;
+      }
+    }
+
+    if (!$site) {
+      $path = $request->getPath();
+      $host = $request->getHost();
+      throw new Exception(
+        pht(
+          'This request asked for "%s" on host "%s", but no site is '.
+          'configured which can serve this request.',
+          $path,
+          $host));
+    }
+
+    return $site;
   }
 
 }

@@ -3,26 +3,21 @@
 final class PhabricatorAuthRegisterController
   extends PhabricatorAuthController {
 
-  private $accountKey;
-
   public function shouldRequireLogin() {
     return false;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->accountKey = idx($data, 'akey');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $account_key = $request->getURIData('akey');
 
     if ($request->getUser()->isLoggedIn()) {
       return $this->renderError(pht('You are already logged in.'));
     }
 
     $is_setup = false;
-    if (strlen($this->accountKey)) {
-      $result = $this->loadAccountForRegistrationOrLinking($this->accountKey);
+    if (strlen($account_key)) {
+      $result = $this->loadAccountForRegistrationOrLinking($account_key);
       list($account, $provider, $response) = $result;
       $is_default = false;
     } else if ($this->isFirstTimeSetup()) {

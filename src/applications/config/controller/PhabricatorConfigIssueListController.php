@@ -3,9 +3,8 @@
 final class PhabricatorConfigIssueListController
   extends PhabricatorConfigController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('issue/');
@@ -27,25 +26,26 @@ final class PhabricatorConfigIssueListController
     if ($important) {
       $setup_issues[] = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Important Setup Issues'))
-        ->appendChild($important);
+        ->setColor(PHUIObjectBoxView::COLOR_RED)
+        ->setObjectList($important);
     }
 
     if ($php) {
       $setup_issues[] = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('PHP Setup Issues'))
-        ->appendChild($php);
+        ->setObjectList($php);
     }
 
     if ($mysql) {
       $setup_issues[] = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('MySQL Setup Issues'))
-        ->appendChild($mysql);
+        ->setObjectList($mysql);
     }
 
     if ($other) {
       $setup_issues[] = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Other Setup Issues'))
-        ->appendChild($other);
+        ->setObjectList($other);
     }
 
     if (empty($setup_issues)) {
@@ -76,7 +76,6 @@ final class PhabricatorConfigIssueListController
   private function buildIssueList(array $issues, $group) {
     assert_instances_of($issues, 'PhabricatorSetupIssue');
     $list = new PHUIObjectItemListView();
-    $list->setStackable(true);
     $ignored_items = array();
     $items = 0;
 
@@ -89,12 +88,12 @@ final class PhabricatorConfigIssueListController
           ->setHref($href)
           ->addAttribute($issue->getSummary());
         if (!$issue->getIsIgnored()) {
-          $item->setBarColor('yellow');
+          $item->setStatusIcon('fa-warning yellow');
           $list->addItem($item);
         } else {
           $item->addIcon('fa-eye-slash', pht('Ignored'));
           $item->setDisabled(true);
-          $item->setBarColor('none');
+          $item->setStatusIcon('fa-warning grey');
           $ignored_items[] = $item;
         }
       }

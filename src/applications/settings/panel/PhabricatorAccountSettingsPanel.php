@@ -14,8 +14,13 @@ final class PhabricatorAccountSettingsPanel extends PhabricatorSettingsPanel {
     return pht('Account Information');
   }
 
+  public function isEditableByAdministrators() {
+    return true;
+  }
+
   public function processRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $this->getViewer();
+    $user = $this->getUser();
     $username = $user->getUsername();
 
     $errors = array();
@@ -74,7 +79,7 @@ final class PhabricatorAccountSettingsPanel extends PhabricatorSettingsPanel {
 
     $form = new AphrontFormView();
     $form
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setOptions($translations)

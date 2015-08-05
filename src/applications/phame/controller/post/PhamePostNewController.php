@@ -56,12 +56,10 @@ final class PhamePostNewController extends PhameController {
         ))
       ->execute();
 
-    $nav = $this->renderSideNavFilterView();
-    $nav->selectFilter('post/new');
-
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title, $view_uri);
-    $nav->appendChild($crumbs);
+    $display = array();
+    $display[] = $crumbs;
 
     if (!$blogs) {
       $notification = id(new PHUIInfoView())
@@ -70,7 +68,7 @@ final class PhamePostNewController extends PhameController {
           pht('You do not have permission to join any blogs. Create a blog '.
               'first, then you can post to it.'));
 
-      $nav->appendChild($notification);
+      $display[] = $notification;
     } else {
       $options = mpull($blogs, 'getName', 'getID');
       asort($options);
@@ -109,11 +107,11 @@ final class PhamePostNewController extends PhameController {
         ->setHeaderText($title)
         ->setForm($form);
 
-      $nav->appendChild($form_box);
+      $display[] = $form_box;
     }
 
     return $this->buildApplicationPage(
-      $nav,
+      $display,
       array(
         'title'   => $title,
       ));

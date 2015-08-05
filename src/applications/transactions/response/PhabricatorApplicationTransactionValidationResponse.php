@@ -34,13 +34,10 @@ final class PhabricatorApplicationTransactionValidationResponse
 
     $list = array();
     foreach ($ex->getErrors() as $error) {
-      $list[] = phutil_tag(
-        'li',
-        array(),
-        $error->getMessage());
+      $list[] = $error->getMessage();
     }
 
-    $dialog->appendChild(phutil_tag('ul', array(), $list));
+    $dialog->appendList($list);
     $dialog->addCancelButton($this->cancelURI);
 
     return $this->getProxy()->setDialog($dialog);

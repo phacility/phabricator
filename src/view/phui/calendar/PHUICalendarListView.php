@@ -89,7 +89,7 @@ final class PHUICalendarListView extends AphrontTagView {
       $content = javelin_tag(
         'a',
         array(
-          'href' => '/E'.$event->getEventID(),
+          'href' => $event->getURI(),
           'sigil' => 'has-tooltip',
           'meta'  => array(
             'tip'  => $tip,
@@ -141,6 +141,9 @@ final class PHUICalendarListView extends AphrontTagView {
   }
 
   private function getEventTooltip(AphrontCalendarEventView $event) {
+    $time_pref = $this->getUser()
+      ->getPreference(PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT);
+
     Javelin::initBehavior('phabricator-tooltips');
 
     $start = id(AphrontFormDateControlValue::newFromEpoch(
@@ -166,13 +169,13 @@ final class PHUICalendarListView extends AphrontTagView {
       if ($start->getValueDate() == $end->getValueDate()) {
         $tip = pht(
           '%s - %s',
-          $start->getValueAsFormat('g:i A'),
-          $end->getValueAsFormat('g:i A'));
+          $start->getValueAsFormat($time_pref),
+          $end->getValueAsFormat($time_pref));
       } else {
         $tip = pht(
           '%s - %s',
-          $start->getValueAsFormat('M j, Y, g:i A'),
-          $end->getValueAsFormat('M j, Y, g:i A'));
+          $start->getValueAsFormat('M j, Y, '.$time_pref),
+          $end->getValueAsFormat('M j, Y, '.$time_pref));
       }
     }
     return $tip;

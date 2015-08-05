@@ -11,6 +11,7 @@ final class AphrontTableView extends AphrontView {
   protected $zebraStripes = true;
   protected $noDataString;
   protected $className;
+  protected $notice;
   protected $columnVisibility = array();
   private $deviceVisibility = array();
 
@@ -52,6 +53,11 @@ final class AphrontTableView extends AphrontView {
 
   public function setClassName($class_name) {
     $this->className = $class_name;
+    return $this;
+  }
+
+  public function setNotice($notice) {
+    $this->notice = $notice;
     return $this;
   }
 
@@ -140,6 +146,21 @@ final class AphrontTableView extends AphrontView {
       }
       while (count($headers) > count($sort_values)) {
         $sort_values[] = null;
+      }
+
+      if ($this->notice) {
+        $colspan = max(count(array_filter($visibility)), 1);
+        $table[] = phutil_tag(
+          'tr',
+          array(),
+          phutil_tag(
+            'td',
+            array(
+              'colspan' => $colspan,
+              'class' => 'aphront-table-notice',
+            ),
+            $this->notice));
+
       }
 
       $tr = array();

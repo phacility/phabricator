@@ -29,8 +29,7 @@ final class PhabricatorStandardCustomFieldUsers
   public function appendToApplicationSearchForm(
     PhabricatorApplicationSearchEngine $engine,
     AphrontFormView $form,
-    $value,
-    array $handles) {
+    $value) {
 
     $control = id(new AphrontFormTokenizerControl())
       ->setLabel($this->getFieldName())
@@ -42,7 +41,9 @@ final class PhabricatorStandardCustomFieldUsers
   }
 
   public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_USER;
+    return id(new HeraldTokenizerFieldValue())
+      ->setKey('custom.'.$this->getFieldKey())
+      ->setDatasource(new PhabricatorPeopleDatasource());
   }
 
 }

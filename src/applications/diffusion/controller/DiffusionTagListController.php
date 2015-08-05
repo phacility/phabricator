@@ -12,7 +12,7 @@ final class DiffusionTagListController extends DiffusionController {
 
     $repository = $drequest->getRepository();
 
-    $pager = new AphrontPagerView();
+    $pager = new PHUIPagerView();
     $pager->setURI($request->getRequestURI(), 'offset');
     $pager->setOffset($request->getInt('offset'));
 

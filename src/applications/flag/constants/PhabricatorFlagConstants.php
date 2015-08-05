@@ -1,3 +1,3 @@
 <?php
 
-abstract class PhabricatorFlagConstants {}
+abstract class PhabricatorFlagConstants extends Phobject {}

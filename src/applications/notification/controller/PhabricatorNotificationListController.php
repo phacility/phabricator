@@ -3,15 +3,11 @@
 final class PhabricatorNotificationListController
   extends PhabricatorNotificationController {
 
-  private $queryKey;
+  public function handleRequest(AphrontRequest $request) {
+    $querykey = $request->getURIData('queryKey');
 
-  public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey');
-  }
-
-  public function processRequest() {
     $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($this->queryKey)
+      ->setQueryKey($querykey)
       ->setSearchEngine(new PhabricatorNotificationSearchEngine())
       ->setNavigation($this->buildSideNavView());
 
@@ -19,13 +15,13 @@ final class PhabricatorNotificationListController
   }
 
   public function buildSideNavView() {
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     id(new PhabricatorNotificationSearchEngine())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->addNavigationItems($nav->getMenu());
     $nav->selectFilter(null);
 

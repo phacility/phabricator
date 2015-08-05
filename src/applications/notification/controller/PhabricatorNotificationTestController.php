@@ -3,11 +3,10 @@
 final class PhabricatorNotificationTestController
   extends PhabricatorNotificationController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
-    $story_type = 'PhabricatorNotificationAdHocFeedStory';
+    $story_type = 'PhabricatorNotificationTestFeedStory';
     $story_data = array(
       'title' => pht(
         'This is a test notification, sent at %s.',

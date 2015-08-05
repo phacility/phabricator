@@ -2,6 +2,7 @@
 
 /**
  * @task commitmessage    Integration with Commit Messages
+ * @task diff             Integration with Diff Properties
  */
 abstract class DifferentialCustomField
   extends PhabricatorCustomField {
@@ -29,13 +30,6 @@ abstract class DifferentialCustomField
     }
 
     return parent::shouldEnableForRole($role);
-  }
-
-  public function getRequiredDiffPropertiesForRevisionView() {
-    if ($this->getProxy()) {
-      return $this->getProxy()->getRequiredDiffPropertiesForRevisionView();
-    }
-    return array();
   }
 
   protected function parseObjectList(
@@ -81,6 +75,7 @@ abstract class DifferentialCustomField
   public function getWarningsForRevisionHeader(array $handles) {
     return array();
   }
+
 
 /* -(  Integration with Commit Messages  )----------------------------------- */
 
@@ -215,6 +210,42 @@ abstract class DifferentialCustomField
       return $this->getProxy()->validateCommitMessageValue($value);
     }
     return;
+  }
+
+
+/* -(  Integration with Diff Properties  )----------------------------------- */
+
+
+  /**
+   * @task diff
+   */
+  public function shouldAppearInDiffPropertyView() {
+    if ($this->getProxy()) {
+      return $this->getProxy()->shouldAppearInDiffPropertyView();
+    }
+    return false;
+  }
+
+
+  /**
+   * @task diff
+   */
+  public function renderDiffPropertyViewLabel(DifferentialDiff $diff) {
+    if ($this->proxy) {
+      return $this->proxy->renderDiffPropertyViewLabel($diff);
+    }
+    return $this->getFieldName();
+  }
+
+
+  /**
+   * @task diff
+   */
+  public function renderDiffPropertyViewValue(DifferentialDiff $diff) {
+    if ($this->proxy) {
+      return $this->proxy->renderDiffPropertyViewValue($diff);
+    }
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
 }

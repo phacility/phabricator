@@ -163,6 +163,12 @@ final class FundInitiativeSearchEngine
       $list->addItem($item);
     }
 
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No initiatives found.'));
+
+    return $result;
+
 
     return $list;
   }

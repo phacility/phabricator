@@ -2,10 +2,6 @@
  * @provides phabricator-zindex-css
  */
 
-.phabricator-nav-column-background {
-  z-index: -1;
-}
-
 .keyboard-focus-focus-reticle {
   z-index: 1;
 }
@@ -53,6 +49,10 @@ div.phui-calendar-day-event {
 }
 
 .phabricator-nav-local {
+  z-index: 4;
+}
+
+.project-board-header {
   z-index: 4;
 }
 

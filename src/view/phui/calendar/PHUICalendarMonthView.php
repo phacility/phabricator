@@ -89,13 +89,22 @@ final class PHUICalendarMonthView extends AphrontView {
         }
       }
 
+      $max_daily = 15;
+      $counter = 0;
+
       $list = new PHUICalendarListView();
       $list->setUser($this->user);
       foreach ($all_day_events as $item) {
-        $list->addEvent($item);
+        if ($counter <= $max_daily) {
+          $list->addEvent($item);
+        }
+        $counter++;
       }
       foreach ($list_events as $item) {
-        $list->addEvent($item);
+        if ($counter <= $max_daily) {
+          $list->addEvent($item);
+        }
+        $counter++;
       }
 
       $uri = $this->getBrowseURI();
@@ -228,7 +237,8 @@ final class PHUICalendarMonthView extends AphrontView {
       $cell_day = null;
     }
 
-    if ($date && $date->format('j') == $this->day) {
+    if ($date && $date->format('j') == $this->day &&
+      $date->format('m') == $this->month) {
       $today_class = 'phui-calendar-today-slot phui-calendar-today';
     } else {
       $today_class = 'phui-calendar-today-slot';
@@ -425,8 +435,15 @@ final class PHUICalendarMonthView extends AphrontView {
   private function getQueryRangeWarning() {
     $errors = array();
 
-    $range_start_epoch = $this->rangeStart->getEpoch();
-    $range_end_epoch = $this->rangeEnd->getEpoch();
+    $range_start_epoch = null;
+    $range_end_epoch = null;
+
+    if ($this->rangeStart) {
+      $range_start_epoch = $this->rangeStart->getEpoch();
+    }
+    if ($this->rangeEnd) {
+      $range_end_epoch = $this->rangeEnd->getEpoch();
+    }
 
     $month_start = $this->getDateTime();
     $month_end = id(clone $month_start)->modify('+1 month');
@@ -443,10 +460,10 @@ final class PHUICalendarMonthView extends AphrontView {
       $errors[] = pht('Part of the month is out of range');
     }
 
-    if (($this->rangeEnd->getEpoch() != null &&
-        $this->rangeEnd->getEpoch() < $month_start) ||
-      ($this->rangeStart->getEpoch() != null &&
-        $this->rangeStart->getEpoch() > $month_end)) {
+    if (($range_end_epoch != null &&
+        $range_end_epoch < $month_start) ||
+      ($range_start_epoch != null &&
+        $range_start_epoch > $month_end)) {
       $errors[] = pht('Month is out of query range');
     }
 

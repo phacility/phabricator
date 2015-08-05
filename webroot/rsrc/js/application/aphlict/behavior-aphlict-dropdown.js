@@ -125,13 +125,13 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
     if (menu) {
       statics.visible = {menu: menu, icon: icon};
       if (icon) {
-        JX.DOM.alterClass(icon, 'white', true);
+        JX.DOM.alterClass(icon, 'menu-icon-selected', true);
       }
     } else {
       if (statics.visible) {
         JX.DOM.hide(statics.visible.menu);
         if (statics.visible.icon) {
-          JX.DOM.alterClass(statics.visible.icon, 'white', false);
+          JX.DOM.alterClass(statics.visible.icon, 'menu-icon-selected', false);
         }
       }
       statics.visible = null;

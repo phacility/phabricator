@@ -1,6 +1,6 @@
 <?php
 
-final class DivinerAtomRef {
+final class DivinerAtomRef extends Phobject {
 
   private $book;
   private $context;

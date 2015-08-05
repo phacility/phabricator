@@ -397,14 +397,13 @@ final class PhabricatorProjectTransactionEditor
     return parent::requireCapabilities($object, $xaction);
   }
 
-  protected function loadEdges(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-
+  protected function willPublish(PhabricatorLiskDAO $object, array $xactions) {
     $member_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $object->getPHID(),
       PhabricatorProjectProjectHasMemberEdgeType::EDGECONST);
     $object->attachMemberPHIDs($member_phids);
+
+    return $object;
   }
 
   protected function shouldSendMail(
@@ -434,6 +433,8 @@ final class PhabricatorProjectTransactionEditor
         pht('Project membership changes.'),
       PhabricatorProjectTransaction::MAILTAG_WATCHERS =>
         pht('Project watcher list changes.'),
+      PhabricatorProjectTransaction::MAILTAG_SUBSCRIBERS =>
+        pht('Project subscribers change.'),
       PhabricatorProjectTransaction::MAILTAG_OTHER =>
         pht('Other project activity not listed above occurs.'),
     );

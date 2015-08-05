@@ -9,7 +9,8 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     PhabricatorPolicyInterface,
     PhabricatorProjectInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorSpacesInterface {
 
   protected $title;
   protected $authorPHID;
@@ -19,6 +20,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   protected $viewPolicy;
   protected $editPolicy;
   protected $mailKey;
+  protected $spacePHID;
 
   private $content = self::ATTACHABLE;
   private $rawContent = self::ATTACHABLE;
@@ -36,11 +38,16 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
       ->setTitle('')
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($edit_policy);
+      ->setEditPolicy($edit_policy)
+      ->setSpacePHID($actor->getDefaultSpacePHID());
   }
 
   public function getURI() {
-    return '/P'.$this->getID();
+    return '/'.$this->getMonogram();
+  }
+
+  public function getMonogram() {
+    return 'P'.$this->getID();
   }
 
   protected function getConfiguration() {
@@ -204,6 +211,14 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     AphrontRequest $request) {
 
     return $timeline;
+  }
+
+
+/* -(  PhabricatorSpacesInterface  )----------------------------------------- */
+
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
   }
 
 }

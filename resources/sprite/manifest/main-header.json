@@ -3,57 +3,62 @@
   "sprites": {
     "main-header-applebloom": {
       "name": "main-header-applebloom",
-      "rule": ".main-header-applebloom",
+      "rule": ".phui-theme-applebloom .phabricator-main-menu-background",
       "hash": "64822776b129e724709983db1ac5a712"
     },
     "main-header-blindigo": {
       "name": "main-header-blindigo",
-      "rule": ".main-header-blindigo",
+      "rule": ".phui-theme-blindigo .phabricator-main-menu-background",
       "hash": "8c4f5b1f1f3faceb6ca6e8278a1b082f"
     },
     "main-header-blue": {
       "name": "main-header-blue",
-      "rule": ".main-header-blue",
+      "rule": ".phui-theme-blue .phabricator-main-menu-background",
       "hash": "b5dd317b7bd35e0592b3f4b66267437c"
     },
     "main-header-dark": {
       "name": "main-header-dark",
-      "rule": ".main-header-dark",
+      "rule": ".phui-theme-dark .phabricator-main-menu-background",
       "hash": "817815d84c0c935b4875f6ecc7dbb526"
     },
     "main-header-fluttershy": {
       "name": "main-header-fluttershy",
-      "rule": ".main-header-fluttershy",
+      "rule": ".phui-theme-fluttershy .phabricator-main-menu-background",
       "hash": "55d4e9f813cf354693290105cf83cf78"
     },
     "main-header-green": {
       "name": "main-header-green",
-      "rule": ".main-header-green",
+      "rule": ".phui-theme-green .phabricator-main-menu-background",
       "hash": "c230f09e307d167fab3ea0d8c3b33755"
     },
     "main-header-indigo": {
       "name": "main-header-indigo",
-      "rule": ".main-header-indigo",
+      "rule": ".phui-theme-indigo .phabricator-main-menu-background",
       "hash": "a27394ff1eff4d24398ec57e54d7f5fd"
+    },
+    "main-header-light": {
+      "name": "main-header-light",
+      "rule": ".phui-theme-light .phabricator-main-menu-background",
+      "hash": "3c41fbfbe13cae2451467a1e307115aa"
     },
     "main-header-nightmaremoon": {
       "name": "main-header-nightmaremoon",
-      "rule": ".main-header-nightmaremoon",
+      "rule": ".phui-theme-nightmaremoon .phabricator-main-menu-background",
       "hash": "9e7cc7b18d2132d2dd47586ba0cd6400"
     },
     "main-header-red": {
       "name": "main-header-red",
-      "rule": ".main-header-red",
+      "rule": ".phui-theme-red .phabricator-main-menu-background",
       "hash": "3f12cc098afddb8e6c830ef761dcaa61"
     },
     "main-header-scootaloo": {
       "name": "main-header-scootaloo",
-      "rule": ".main-header-scootaloo",
+      "rule": ".phui-theme-scootaloo .phabricator-main-menu-background",
       "hash": "8cedc359dccab1bbd49cbc69940f566a"
     },
     "main-header-yellow": {
       "name": "main-header-yellow",
-      "rule": ".main-header-yellow",
+      "rule": ".phui-theme-yellow .phabricator-main-menu-background",
       "hash": "d920e70a6d2662cfb83e1d7e4b4000fd"
     }
   },

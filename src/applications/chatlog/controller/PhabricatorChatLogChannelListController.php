@@ -7,12 +7,11 @@ final class PhabricatorChatLogChannelListController
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $channels = id(new PhabricatorChatLogChannelQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->execute();
 
     $list = new PHUIObjectItemListView();
@@ -29,10 +28,14 @@ final class PhabricatorChatLogChannelListController
       ->buildApplicationCrumbs()
       ->addTextCrumb(pht('Channel List'), $this->getApplicationURI());
 
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText('Channel List')
+      ->setObjectList($list);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $list,
+        $box,
       ),
       array(
         'title' => pht('Channel List'),

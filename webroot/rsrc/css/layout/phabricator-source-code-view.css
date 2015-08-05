@@ -3,14 +3,16 @@
  */
 
 .phabricator-source-code-container {
-  background: #ffffff;
+  background: #fff;
   overflow-x: auto;
   overflow-y: hidden;
+  border: 1px solid {$sh-lightyellowborder};
+  border-radius: 3px;
+  background-color: #FCFBF7;
 }
 
 .phui-object-item .phabricator-source-code-container {
   margin-left: 8px;
-  border: 1px solid #d7d7d7;
 }
 
 .phabricator-source-code-view tr:first-child * {
@@ -28,10 +30,11 @@
 }
 
 .phabricator-source-line {
+  background-color: {$sh-yellowbackground};
   text-align: right;
   padding: 2px 6px 1px 12px;
-  border-right: 1px solid {$thinblueborder};
-  color: {$darkbluetext};
+  border-right: 1px solid {$sh-lightyellowborder};
+  color: {$sh-yellowtext};
 
   /* When the user selects rows of source, don't visibly select the line
      numbers beside them. We use JS to strip the line numbers out when the user
@@ -48,11 +51,12 @@ th.phabricator-source-line a {
 }
 
 th.phabricator-source-line:hover {
-  background-color: {$greybackground};
+  background: {$sh-lightyellowborder};
+  cursor: pointer;
 }
 
 .phabricator-source-highlight {
-  background: {$lightyellow};
+  background: {$sh-yellowbackground};
 }
 
 .phabricator-source-code-summary {

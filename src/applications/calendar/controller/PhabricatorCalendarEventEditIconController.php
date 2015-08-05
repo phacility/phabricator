@@ -3,19 +3,14 @@
 final class PhabricatorCalendarEventEditIconController
   extends PhabricatorCalendarController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
+    $id = $request->getURIData('id');
 
-    if ($this->id) {
+    if ($id) {
       $event = id(new PhabricatorCalendarEventQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,

@@ -1,6 +1,6 @@
 <?php
 
-final class AphrontURIMapper {
+final class AphrontURIMapper extends Phobject {
 
   private $map;
 

@@ -2,10 +2,12 @@
  * @provides phui-feed-story-css
  */
 
-.phui-feed-story {
-  background: 5px 2px no-repeat;
-  min-height: 44px;
-  background-color: #fff;
+.phui-object-box .phui-box.phui-feed-story {
+  border-bottom: 1px solid {$thinblueborder};
+}
+
+.phui-object-box .phui-box.phui-feed-story:last-child {
+  border: none;
 }
 
 .phui-feed-story-head .phui-feed-story-actor-image {
@@ -14,12 +16,16 @@
   background-size: 35px;
   float: left;
   margin-right: 8px;
+  box-shadow: {$borderinset};
+  border-radius: 3px;
 }
 
 .phui-feed-story-head {
-  padding: 8px;
+  padding: 12px 4px;
   overflow: hidden;
   color: {$greytext};
+  line-height: 16px;
+  word-break: break-word;
 }
 
 .phui-feed-story-head .phui-link-person {
@@ -28,22 +34,16 @@
 }
 
 .phui-feed-story-body {
-  margin: 0 8px 8px;
+  margin: 4px 4px 8px;
   color: {$darkgreytext};
   word-break: break-word;
   max-height: 300px;
   overflow: hidden;
 }
 
-.phui-feed-story-body.phabricator-remarkup {
-  line-height: inherit;
-}
-
 .phui-feed-story-foot {
-  font-size: 11px;
-  background: {$lightgreybackground};
-  padding: 8px;
-  line-height: 14px;
+  font-size: {$smallerfontsize};
+  padding: 8px 4px 12px;
 }
 
 .phui-feed-story-foot,
@@ -61,8 +61,7 @@
 }
 
 .phui-feed-story-bigtext-post h3 {
-  font-size: 18px;
-  font-weight: 200;
+  font-size: {$biggestfontsize};
   line-height: 18px;
   color: {$darkgreytext};
   margin: 0 0 5px 0;

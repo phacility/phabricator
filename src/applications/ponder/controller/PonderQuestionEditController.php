@@ -2,20 +2,14 @@
 
 final class PonderQuestionEditController extends PonderController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    if ($this->id) {
+    if ($id) {
       $question = id(new PonderQuestionQuery())
-        ->setViewer($user)
-        ->withIDs(array($this->id))
+        ->setViewer($viewer)
+        ->withIDs(array($id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -30,17 +24,14 @@ final class PonderQuestionEditController extends PonderController {
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
       $v_projects = array_reverse($v_projects);
     } else {
-      $question = id(new PonderQuestion())
-        ->setStatus(PonderQuestionStatus::STATUS_OPEN)
-        ->setAuthorPHID($user->getPHID())
-        ->setVoteCount(0)
-        ->setAnswerCount(0)
-        ->setHeat(0.0);
+      $question = PonderQuestion::initializeNewQuestion($viewer);
       $v_projects = array();
     }
 
     $v_title = $question->getTitle();
     $v_content = $question->getContent();
+    $v_view = $question->getViewPolicy();
+    $v_edit = $question->getEditPolicy();
 
     $errors = array();
     $e_title = true;
@@ -48,6 +39,8 @@ final class PonderQuestionEditController extends PonderController {
       $v_title = $request->getStr('title');
       $v_content = $request->getStr('content');
       $v_projects = $request->getArr('projects');
+      $v_view = $request->getStr('viewPolicy');
+      $v_edit = $request->getStr('editPolicy');
 
       $len = phutil_utf8_strlen($v_title);
       if ($len < 1) {
@@ -70,6 +63,14 @@ final class PonderQuestionEditController extends PonderController {
           ->setTransactionType(PonderQuestionTransaction::TYPE_CONTENT)
           ->setNewValue($v_content);
 
+        $xactions[] = id(clone $template)
+          ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+          ->setNewValue($v_view);
+
+        $xactions[] = id(clone $template)
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+          ->setNewValue($v_edit);
+
         $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
         $xactions[] = id(new PonderQuestionTransaction())
           ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
@@ -77,7 +78,7 @@ final class PonderQuestionEditController extends PonderController {
           ->setNewValue(array('=' => array_fuse($v_projects)));
 
         $editor = id(new PonderQuestionEditor())
-          ->setActor($user)
+          ->setActor($viewer)
           ->setContentSourceFromRequest($request)
           ->setContinueOnNoEffect(true);
 
@@ -88,8 +89,13 @@ final class PonderQuestionEditController extends PonderController {
       }
     }
 
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($viewer)
+      ->setObject($question)
+      ->execute();
+
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Question'))
@@ -98,12 +104,26 @@ final class PonderQuestionEditController extends PonderController {
           ->setError($e_title))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setName('content')
           ->setID('content')
           ->setValue($v_content)
           ->setLabel(pht('Description'))
-          ->setUser($user));
+          ->setUser($viewer))
+      ->appendControl(
+        id(new AphrontFormPolicyControl())
+          ->setName('viewPolicy')
+          ->setPolicyObject($question)
+          ->setPolicies($policies)
+          ->setValue($v_view)
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
+      ->appendControl(
+        id(new AphrontFormPolicyControl())
+          ->setName('editPolicy')
+          ->setPolicyObject($question)
+          ->setPolicies($policies)
+          ->setValue($v_edit)
+          ->setCapability(PhabricatorPolicyCapability::CAN_EDIT));
 
     $form->appendControl(
       id(new AphrontFormTokenizerControl())

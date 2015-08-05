@@ -3,24 +3,25 @@
  */
 
 .aphront-list-filter-wrap {
-  border-left: 1px solid {$lightblueborder};
-  border-right: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
+  border: 1px solid {$lightblueborder};
   margin: 0 16px;
+  background: #fff;
+  border-radius: 3px;
 }
 
 .aphront-list-filter-view {
-  background: #fff;
   padding: 0;
 }
 
 .device-phone .aphront-list-filter-view {
-  padding: 0 8px 8px;
+  padding: 0;
 }
 
 .device-phone .aphront-list-filter-wrap {
   margin: 0;
   border: none;
+  border-radius: 0;
+  border-top: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$lightblueborder};
 }
 
@@ -35,7 +36,7 @@
 }
 
 .device-phone .aphront-list-filter-view-content .phui-form-view {
-  padding: 0;
+  padding: 0 0 4px 4px;
 }
 
 /* When a list filter view contains two consecuitive forms, lay them out

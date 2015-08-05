@@ -36,15 +36,14 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
   }
 
   public function render() {
-
     $this->requireResource('differential-core-view-css');
     $this->requireResource('differential-revision-history-css');
 
     $data = array(
       array(
-        'name' => 'Base',
+        'name' => pht('Base'),
         'id'   => null,
-        'desc' => 'Base',
+        'desc' => pht('Base'),
         'age'  => null,
         'obj'  => null,
       ),
@@ -53,7 +52,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     $seq = 0;
     foreach ($this->diffs as $diff) {
       $data[] = array(
-        'name' => 'Diff '.(++$seq),
+        'name' => pht('Diff %d', ++$seq),
         'id'   => $diff->getID(),
         'desc' => $diff->getDescription(),
         'age'  => $diff->getDateCreated(),
@@ -307,7 +306,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Revision Update History'))
       ->setFlush(true)
-      ->appendChild($content);
+      ->setTable($content);
   }
 
   const STAR_NONE = 'none';

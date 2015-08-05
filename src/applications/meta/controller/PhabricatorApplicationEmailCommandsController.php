@@ -136,7 +136,6 @@ final class PhabricatorApplicationEmailCommandsController
 
     $document = id(new PHUIDocumentView())
       ->setHeader($header)
-      ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
       ->appendChild($info_view)
       ->appendChild($content_box);
 

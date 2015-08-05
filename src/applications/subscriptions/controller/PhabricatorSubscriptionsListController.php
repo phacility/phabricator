@@ -3,33 +3,27 @@
 final class PhabricatorSubscriptionsListController
   extends PhabricatorController {
 
-  private $phid;
-
-  public function willProcessRequest(array $data) {
-    $this->phid = idx($data, 'phid');
-  }
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-
+  public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
-    $phid = $this->phid;
-
     $object = id(new PhabricatorObjectQuery())
       ->setViewer($viewer)
-      ->withPHIDs(array($phid))
+      ->withPHIDs(array($request->getURIData('phid')))
       ->executeOne();
-
-    if ($object instanceof PhabricatorSubscribableInterface) {
-      $subscriber_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-        $phid);
+    if (!$object) {
+      return new Aphront404Response();
     }
 
-    $handle_phids = $subscriber_phids;
+    if (!($object instanceof PhabricatorSubscribableInterface)) {
+      return new Aphront404Response();
+    }
+
+    $phid = $object->getPHID();
+
+    $handle_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID($phid);
     $handle_phids[] = $phid;
 
     $handles = id(new PhabricatorHandleQuery())

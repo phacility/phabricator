@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorTransactions {
+final class PhabricatorTransactions extends Phobject {
 
   const TYPE_COMMENT      = 'core:comment';
   const TYPE_SUBSCRIBERS  = 'core:subscribers';
@@ -12,6 +12,7 @@ final class PhabricatorTransactions {
   const TYPE_BUILDABLE    = 'harbormaster:buildable';
   const TYPE_TOKEN        = 'token:give';
   const TYPE_INLINESTATE  = 'core:inlinestate';
+  const TYPE_SPACE = 'core:space';
 
   const COLOR_RED         = 'red';
   const COLOR_ORANGE      = 'orange';

@@ -6,13 +6,13 @@
  */
 final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
-  private $taskIDs             = array();
-  private $taskPHIDs           = array();
-  private $authorPHIDs         = array();
-  private $ownerPHIDs          = array();
+  private $taskIDs;
+  private $taskPHIDs;
+  private $authorPHIDs;
+  private $ownerPHIDs;
   private $noOwner;
   private $anyOwner;
-  private $subscriberPHIDs     = array();
+  private $subscriberPHIDs;
   private $dateCreatedAfter;
   private $dateCreatedBefore;
   private $dateModifiedAfter;
@@ -43,7 +43,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   const GROUP_STATUS        = 'group-status';
   const GROUP_PROJECT       = 'group-project';
 
-  private $orderBy          = 'order-modified';
   const ORDER_PRIORITY      = 'order-priority';
   const ORDER_CREATED       = 'order-created';
   const ORDER_MODIFIED      = 'order-modified';
@@ -127,11 +126,27 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function setGroupBy($group) {
     $this->groupBy = $group;
-    return $this;
-  }
 
-  public function setOrderBy($order) {
-    $this->orderBy = $order;
+    switch ($this->groupBy) {
+      case self::GROUP_NONE:
+        $vector = array();
+        break;
+      case self::GROUP_PRIORITY:
+        $vector = array('priority');
+        break;
+      case self::GROUP_OWNER:
+        $vector = array('owner');
+        break;
+      case self::GROUP_STATUS:
+        $vector = array('status');
+        break;
+      case self::GROUP_PROJECT:
+        $vector = array('project');
+        break;
+    }
+
+    $this->setGroupVector($vector);
+
     return $this;
   }
 
@@ -193,146 +208,15 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
-  protected function newResultObject() {
+  public function newResultObject() {
     return new ManiphestTask();
-  }
-
-  protected function willExecute() {
-    // If we already have an order vector, use it as provided.
-    // TODO: This is a messy hack to make setOrderVector() stronger than
-    // setPriority().
-    $vector = $this->getOrderVector();
-    $keys = mpull(iterator_to_array($vector), 'getOrderKey');
-    if (array_values($keys) !== array('id')) {
-      return;
-    }
-
-    $parts = array();
-    switch ($this->groupBy) {
-      case self::GROUP_NONE:
-        break;
-      case self::GROUP_PRIORITY:
-        $parts[] = array('priority');
-        break;
-      case self::GROUP_OWNER:
-        $parts[] = array('owner');
-        break;
-      case self::GROUP_STATUS:
-        $parts[] = array('status');
-        break;
-      case self::GROUP_PROJECT:
-        $parts[] = array('project');
-        break;
-    }
-
-    if ($this->applicationSearchOrders) {
-      $columns = array();
-      foreach ($this->applicationSearchOrders as $order) {
-        $part = 'custom:'.$order['key'];
-        if ($order['ascending']) {
-          $part = '-'.$part;
-        }
-        $columns[] = $part;
-      }
-      $columns[] = 'id';
-      $parts[] = $columns;
-    } else {
-      switch ($this->orderBy) {
-        case self::ORDER_PRIORITY:
-          $parts[] = array('priority', 'subpriority', 'id');
-          break;
-        case self::ORDER_CREATED:
-          $parts[] = array('id');
-          break;
-        case self::ORDER_MODIFIED:
-          $parts[] = array('updated', 'id');
-          break;
-        case self::ORDER_TITLE:
-          $parts[] = array('title', 'id');
-          break;
-      }
-    }
-
-    $parts = array_mergev($parts);
-    // We may have a duplicate column if we are both ordering and grouping
-    // by priority.
-    $parts = array_unique($parts);
-    $this->setOrderVector($parts);
   }
 
   protected function loadPage() {
     $task_dao = new ManiphestTask();
     $conn = $task_dao->establishConnection('r');
 
-    $where = array();
-    $where[] = $this->buildTaskIDsWhereClause($conn);
-    $where[] = $this->buildTaskPHIDsWhereClause($conn);
-    $where[] = $this->buildStatusWhereClause($conn);
-    $where[] = $this->buildStatusesWhereClause($conn);
-    $where[] = $this->buildDependenciesWhereClause($conn);
-    $where[] = $this->buildAuthorWhereClause($conn);
-    $where[] = $this->buildOwnerWhereClause($conn);
-    $where[] = $this->buildFullTextWhereClause($conn);
-
-    if ($this->dateCreatedAfter) {
-      $where[] = qsprintf(
-        $conn,
-        'task.dateCreated >= %d',
-        $this->dateCreatedAfter);
-    }
-
-    if ($this->dateCreatedBefore) {
-      $where[] = qsprintf(
-        $conn,
-        'task.dateCreated <= %d',
-        $this->dateCreatedBefore);
-    }
-
-    if ($this->dateModifiedAfter) {
-      $where[] = qsprintf(
-        $conn,
-        'task.dateModified >= %d',
-        $this->dateModifiedAfter);
-    }
-
-    if ($this->dateModifiedBefore) {
-      $where[] = qsprintf(
-        $conn,
-        'task.dateModified <= %d',
-        $this->dateModifiedBefore);
-    }
-
-    if ($this->priorities) {
-      $where[] = qsprintf(
-        $conn,
-        'task.priority IN (%Ld)',
-        $this->priorities);
-    }
-
-    if ($this->subpriorities) {
-      $where[] = qsprintf(
-        $conn,
-        'task.subpriority IN (%Lf)',
-        $this->subpriorities);
-    }
-
-    if ($this->subpriorityMin) {
-      $where[] = qsprintf(
-        $conn,
-        'task.subpriority >= %f',
-        $this->subpriorityMin);
-    }
-
-    if ($this->subpriorityMax) {
-      $where[] = qsprintf(
-        $conn,
-        'task.subpriority <= %f',
-        $this->subpriorityMax);
-    }
-
-    $where[] = $this->buildWhereClauseParts($conn);
-
-    $where = $this->formatWhereClause($where);
+    $where = $this->buildWhereClause($conn);
 
     $group_column = '';
     switch ($this->groupBy) {
@@ -440,26 +324,99 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $tasks;
   }
 
-  private function buildTaskIDsWhereClause(AphrontDatabaseConnection $conn) {
-    if (!$this->taskIDs) {
-      return null;
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
+
+    $where[] = $this->buildStatusWhereClause($conn);
+    $where[] = $this->buildDependenciesWhereClause($conn);
+    $where[] = $this->buildOwnerWhereClause($conn);
+    $where[] = $this->buildFullTextWhereClause($conn);
+
+    if ($this->taskIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.id in (%Ld)',
+        $this->taskIDs);
     }
 
-    return qsprintf(
-      $conn,
-      'task.id in (%Ld)',
-      $this->taskIDs);
-  }
-
-  private function buildTaskPHIDsWhereClause(AphrontDatabaseConnection $conn) {
-    if (!$this->taskPHIDs) {
-      return null;
+    if ($this->taskPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.phid in (%Ls)',
+        $this->taskPHIDs);
     }
 
-    return qsprintf(
-      $conn,
-      'task.phid in (%Ls)',
-      $this->taskPHIDs);
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.status IN (%Ls)',
+        $this->statuses);
+    }
+
+    if ($this->authorPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.authorPHID in (%Ls)',
+        $this->authorPHIDs);
+    }
+
+    if ($this->dateCreatedAfter) {
+      $where[] = qsprintf(
+        $conn,
+        'task.dateCreated >= %d',
+        $this->dateCreatedAfter);
+    }
+
+    if ($this->dateCreatedBefore) {
+      $where[] = qsprintf(
+        $conn,
+        'task.dateCreated <= %d',
+        $this->dateCreatedBefore);
+    }
+
+    if ($this->dateModifiedAfter) {
+      $where[] = qsprintf(
+        $conn,
+        'task.dateModified >= %d',
+        $this->dateModifiedAfter);
+    }
+
+    if ($this->dateModifiedBefore) {
+      $where[] = qsprintf(
+        $conn,
+        'task.dateModified <= %d',
+        $this->dateModifiedBefore);
+    }
+
+    if ($this->priorities !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.priority IN (%Ld)',
+        $this->priorities);
+    }
+
+    if ($this->subpriorities !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.subpriority IN (%Lf)',
+        $this->subpriorities);
+    }
+
+    if ($this->subpriorityMin !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.subpriority >= %f',
+        $this->subpriorityMin);
+    }
+
+    if ($this->subpriorityMax !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.subpriority <= %f',
+        $this->subpriorityMax);
+    }
+
+    return $where;
   }
 
   private function buildStatusWhereClause(AphrontDatabaseConnection $conn) {
@@ -494,27 +451,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           'task.status = %s',
           $constant);
     }
-  }
-
-  private function buildStatusesWhereClause(AphrontDatabaseConnection $conn) {
-    if ($this->statuses) {
-      return qsprintf(
-        $conn,
-        'task.status IN (%Ls)',
-        $this->statuses);
-    }
-    return null;
-  }
-
-  private function buildAuthorWhereClause(AphrontDatabaseConnection $conn) {
-    if (!$this->authorPHIDs) {
-      return null;
-    }
-
-    return qsprintf(
-      $conn,
-      'task.authorPHID in (%Ls)',
-      $this->authorPHIDs);
   }
 
   private function buildOwnerWhereClause(AphrontDatabaseConnection $conn) {
@@ -638,7 +574,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         id(new ManiphestTask())->getTableName());
     }
 
-    if ($this->subscriberPHIDs) {
+    if ($this->subscriberPHIDs !== null) {
       $joins[] = qsprintf(
         $conn_r,
         'JOIN %T e_ccs ON e_ccs.src = task.phid '.
@@ -758,6 +694,46 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     }
 
     return $id;
+  }
+
+  public function getBuiltinOrders() {
+    $orders = array(
+      'priority' => array(
+        'vector' => array('priority', 'subpriority', 'id'),
+        'name' => pht('Priority'),
+        'aliases' => array(self::ORDER_PRIORITY),
+      ),
+      'updated' => array(
+        'vector' => array('updated', 'id'),
+        'name' => pht('Date Updated (Latest First)'),
+        'aliases' => array(self::ORDER_MODIFIED),
+      ),
+      'outdated' => array(
+        'vector' => array('-updated', '-id'),
+        'name' => pht('Date Updated (Oldest First)'),
+       ),
+      'title' => array(
+        'vector' => array('title', 'id'),
+        'name' => pht('Title'),
+        'aliases' => array(self::ORDER_TITLE),
+      ),
+    ) + parent::getBuiltinOrders();
+
+    // Alias the "newest" builtin to the historical key for it.
+    $orders['newest']['aliases'][] = self::ORDER_CREATED;
+
+    $orders = array_select_keys(
+      $orders,
+      array(
+        'priority',
+        'updated',
+        'outdated',
+        'newest',
+        'oldest',
+        'title',
+      )) + $orders;
+
+    return $orders;
   }
 
   public function getOrderableColumns() {

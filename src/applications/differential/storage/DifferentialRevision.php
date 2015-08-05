@@ -4,6 +4,7 @@ final class DifferentialRevision extends DifferentialDAO
   implements
     PhabricatorTokenReceiverInterface,
     PhabricatorPolicyInterface,
+    PhabricatorExtendedPolicyInterface,
     PhabricatorFlaggableInterface,
     PhrequentTrackableInterface,
     HarbormasterBuildableInterface,
@@ -29,7 +30,6 @@ final class DifferentialRevision extends DifferentialDAO
 
   protected $mailKey;
   protected $branchName;
-  protected $arcanistProjectPHID;
   protected $repositoryPHID;
   protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
   protected $editPolicy = PhabricatorPolicies::POLICY_USER;
@@ -64,6 +64,7 @@ final class DifferentialRevision extends DifferentialDAO
       ->setViewPolicy($view_policy)
       ->setAuthorPHID($actor->getPHID())
       ->attachRelationships(array())
+      ->attachRepository(null)
       ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
   }
 
@@ -85,7 +86,6 @@ final class DifferentialRevision extends DifferentialDAO
         'lineCount' => 'uint32?',
         'mailKey' => 'bytes40',
         'branchName' => 'text255?',
-        'arcanistProjectPHID' => 'phid?',
         'repositoryPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -99,6 +99,14 @@ final class DifferentialRevision extends DifferentialDAO
         ),
         'repositoryPHID' => array(
           'columns' => array('repositoryPHID'),
+        ),
+        // If you (or a project you are a member of) is reviewing a significant
+        // fraction of the revisions on an install, the result set of open
+        // revisions may be smaller than the result set of revisions where you
+        // are a reviewer. In these cases, this key is better than keys on the
+        // edge table.
+        'key_status' => array(
+          'columns' => array('status', 'phid'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -280,6 +288,10 @@ final class DifferentialRevision extends DifferentialDAO
     return $this;
   }
 
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
@@ -325,6 +337,45 @@ final class DifferentialRevision extends DifferentialDAO
 
     return $description;
   }
+
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    $extended = array();
+
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        // NOTE: In Differential, an automatic capability on a revision (being
+        // an author) is sufficient to view it, even if you can not see the
+        // repository the revision belongs to. We can bail out early in this
+        // case.
+        if ($this->hasAutomaticCapability($capability, $viewer)) {
+          break;
+        }
+
+        $repository_phid = $this->getRepositoryPHID();
+        $repository = $this->getRepository();
+
+        // Try to use the object if we have it, since it will save us some
+        // data fetching later on. In some cases, we might not have it.
+        $repository_ref = nonempty($repository, $repository_phid);
+        if ($repository_ref) {
+          $extended[] = array(
+            $repository_ref,
+            PhabricatorPolicyCapability::CAN_VIEW,
+          );
+        }
+        break;
+    }
+
+    return $extended;
+  }
+
+
+/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
 
   public function getUsersToNotifyOfTokenGiven() {
     return array(
@@ -522,6 +573,7 @@ final class DifferentialRevision extends DifferentialDAO
     }
 
     $query = id(new DifferentialInlineCommentQuery())
+      ->needHidden(true)
       ->setViewer($viewer);
 
     // NOTE: This is a bit sketchy: this method adjusts the inlines as a

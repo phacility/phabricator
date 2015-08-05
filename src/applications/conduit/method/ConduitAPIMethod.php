@@ -1,18 +1,41 @@
 <?php
 
 /**
- * @task  status  Method Status
- * @task  pager   Paging Results
+ * @task info Method Information
+ * @task status Method Status
+ * @task pager Paging Results
  */
 abstract class ConduitAPIMethod
   extends Phobject
   implements PhabricatorPolicyInterface {
 
+
   const METHOD_STATUS_STABLE      = 'stable';
   const METHOD_STATUS_UNSTABLE    = 'unstable';
   const METHOD_STATUS_DEPRECATED  = 'deprecated';
 
+
+  /**
+   * Get a short, human-readable text summary of the method.
+   *
+   * @return string Short summary of method.
+   * @task info
+   */
+  public function getMethodSummary() {
+    return $this->getMethodDescription();
+  }
+
+
+  /**
+   * Get a detailed description of the method.
+   *
+   * This method should return remarkup.
+   *
+   * @return string Detailed description of the method.
+   * @task info
+   */
   abstract public function getMethodDescription();
+
   abstract protected function defineParamTypes();
   abstract protected function defineReturnType();
 
@@ -30,7 +53,7 @@ abstract class ConduitAPIMethod
 
     $query = $this->newQueryObject();
     if ($query) {
-      $types['order'] = 'order';
+      $types['order'] = 'optional order';
       $types += $this->getPagerParamTypes();
     }
 
@@ -90,7 +113,7 @@ abstract class ConduitAPIMethod
     return $this->execute($request);
   }
 
-  public abstract function getAPIMethodName();
+  abstract public function getAPIMethodName();
 
   /**
    * Return a key which sorts methods by application name, then method status,
@@ -115,7 +138,7 @@ abstract class ConduitAPIMethod
     return head(explode('.', $this->getAPIMethodName(), 2));
   }
 
-  public static function getConduitMethod($method_name) {
+  public static function loadAllConduitMethods() {
     static $method_map = null;
 
     if ($method_map === null) {
@@ -143,6 +166,11 @@ abstract class ConduitAPIMethod
       }
     }
 
+    return $method_map;
+  }
+
+  public static function getConduitMethod($method_name) {
+    $method_map = self::loadAllConduitMethods();
     return idx($method_map, $method_name);
   }
 

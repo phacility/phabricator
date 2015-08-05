@@ -29,8 +29,7 @@ final class DoorkeeperObjectRef extends Phobject {
 
   public function getExternalObject() {
     if (!$this->externalObject) {
-      throw new Exception(
-        'Call attachExternalObject() before getExternalObject()!');
+      throw new PhutilInvalidStateException('attachExternalObject');
     }
     return $this->externalObject;
   }

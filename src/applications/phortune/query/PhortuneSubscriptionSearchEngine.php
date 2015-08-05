@@ -158,8 +158,11 @@ final class PhortuneSubscriptionSearchEngine
       $header = pht('Your Subscriptions');
     }
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText($header)
-      ->appendChild($table);
+    $table->setNotice($header);
+
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setTable($table);
+
+    return $result;
   }
 }

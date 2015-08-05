@@ -134,7 +134,7 @@ final class DiffusionExternalController extends DiffusionController {
       $content = new PHUIObjectBoxView();
       $content->setHeaderText(pht('Multiple Matching Commits'));
       $content->setInfoView($caption);
-      $content->appendChild($table);
+      $content->setTable($table);
     }
 
     return $this->buildApplicationPage(

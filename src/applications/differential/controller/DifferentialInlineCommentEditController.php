@@ -42,6 +42,7 @@ final class DifferentialInlineCommentEditController
       ->setViewer($this->getViewer())
       ->withIDs(array($id))
       ->withDeletedDrafts(true)
+      ->needHidden(true)
       ->executeOne();
   }
 
@@ -50,6 +51,7 @@ final class DifferentialInlineCommentEditController
       ->setViewer($this->getViewer())
       ->withPHIDs(array($phid))
       ->withDeletedDrafts(true)
+      ->needHidden(true)
       ->executeOne();
   }
 
@@ -129,11 +131,26 @@ final class DifferentialInlineCommentEditController
 
   protected function deleteComment(PhabricatorInlineCommentInterface $inline) {
     $inline->openTransaction();
+
+      $inline->setIsDeleted(1)->save();
       DifferentialDraft::deleteHasDraft(
         $inline->getAuthorPHID(),
         $inline->getRevisionPHID(),
         $inline->getPHID());
-      $inline->delete();
+
+    $inline->saveTransaction();
+  }
+
+  protected function undeleteComment(
+    PhabricatorInlineCommentInterface $inline) {
+    $inline->openTransaction();
+
+      $inline->setIsDeleted(0)->save();
+      DifferentialDraft::markHasDraft(
+        $inline->getAuthorPHID(),
+        $inline->getRevisionPHID(),
+        $inline->getPHID());
+
     $inline->saveTransaction();
   }
 
@@ -150,6 +167,40 @@ final class DifferentialInlineCommentEditController
   protected function loadObjectOwnerPHID(
     PhabricatorInlineCommentInterface $inline) {
     return $this->loadRevision()->getAuthorPHID();
+  }
+
+  protected function hideComments(array $ids) {
+    $viewer = $this->getViewer();
+    $table = new DifferentialHiddenComment();
+    $conn_w = $table->establishConnection('w');
+
+    $sql = array();
+    foreach ($ids as $id) {
+      $sql[] = qsprintf(
+        $conn_w,
+        '(%s, %d)',
+        $viewer->getPHID(),
+        $id);
+    }
+
+    queryfx(
+      $conn_w,
+      'INSERT IGNORE INTO %T (userPHID, commentID) VALUES %Q',
+      $table->getTableName(),
+      implode(', ', $sql));
+  }
+
+  protected function showComments(array $ids) {
+    $viewer = $this->getViewer();
+    $table = new DifferentialHiddenComment();
+    $conn_w = $table->establishConnection('w');
+
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE userPHID = %s AND commentID IN (%Ld)',
+      $table->getTableName(),
+      $viewer->getPHID(),
+      $ids);
   }
 
 }

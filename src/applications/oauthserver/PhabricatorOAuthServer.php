@@ -26,7 +26,7 @@
  *             and generating @{class:PhabricatorOAuthServerAccessToken}s
  * @task internal Internals
  */
-final class PhabricatorOAuthServer {
+final class PhabricatorOAuthServer extends Phobject {
 
   const AUTHORIZATION_CODE_TIMEOUT = 300;
   const ACCESS_TOKEN_TIMEOUT       = 3600;

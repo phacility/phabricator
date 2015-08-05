@@ -101,6 +101,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
             '(?P<serve>serve)/' => 'DiffusionRepositoryEditHostingController',
             'update/' => 'DiffusionRepositoryEditUpdateController',
             'symbol/' => 'DiffusionRepositorySymbolsController',
+            'staging/' => 'DiffusionRepositoryEditStagingController',
           ),
           'pathtree/(?P<dblob>.*)' => 'DiffusionPathTreeController',
           'mirror/' => array(
@@ -139,11 +140,18 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
 
   protected function getCustomCapabilities() {
     return array(
-      DiffusionDefaultViewCapability::CAPABILITY => array(),
+      DiffusionDefaultViewCapability::CAPABILITY => array(
+        'template' => PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_VIEW,
+      ),
       DiffusionDefaultEditCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
+        'template' => PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_EDIT,
       ),
-      DiffusionDefaultPushCapability::CAPABILITY => array(),
+      DiffusionDefaultPushCapability::CAPABILITY => array(
+        'template' => PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
+      ),
       DiffusionCreateRepositoriesCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),

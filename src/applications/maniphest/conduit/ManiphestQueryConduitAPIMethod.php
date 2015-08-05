@@ -102,7 +102,7 @@ final class ManiphestQueryConduitAPIMethod extends ManiphestConduitAPIMethod {
 
     $order = $request->getValue('order');
     if ($order) {
-      $query->setOrderBy($order);
+      $query->setOrder($order);
     }
 
     $limit = $request->getValue('limit');

@@ -101,7 +101,7 @@ JX.behavior('policy-control', function(config) {
    * Get the workflow URI to create or edit a policy with a given PHID.
    */
   var get_custom_uri = function(phid, capability) {
-    var uri = '/policy/edit/';
+    var uri = config.editURI;
     if (phid != config.customPlaceholder) {
       uri += phid + '/';
     }

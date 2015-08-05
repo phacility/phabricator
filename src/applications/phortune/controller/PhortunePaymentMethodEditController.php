@@ -3,19 +3,13 @@
 final class PhortunePaymentMethodEditController
   extends PhortuneController {
 
-  private $methodID;
-
-  public function willProcessRequest(array $data) {
-    $this->methodID = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $method_id = $request->getURIData('id');
 
     $method = id(new PhortunePaymentMethodQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->methodID))
+      ->withIDs(array($method_id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -65,7 +59,7 @@ final class PhortunePaymentMethodEditController
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Edit Payment Method'))
-      ->appendChild($form);
+      ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($account->getName(), $account_uri);

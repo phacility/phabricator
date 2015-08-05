@@ -154,7 +154,7 @@ abstract class PhabricatorSearchDocumentIndexer extends Phobject {
 
       $comment = $xaction->getComment();
       $doc->addField(
-        PhabricatorSearchField::FIELD_COMMENT,
+        PhabricatorSearchDocumentFieldType::FIELD_COMMENT,
         $comment->getContent());
     }
   }

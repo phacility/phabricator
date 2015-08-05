@@ -5,7 +5,7 @@
  * @task resource   Resource Allocation
  * @task log        Logging
  */
-abstract class DrydockBlueprintImplementation {
+abstract class DrydockBlueprintImplementation extends Phobject {
 
   private $activeResource;
   private $activeLease;
@@ -155,7 +155,7 @@ abstract class DrydockBlueprintImplementation {
       $resource->endReadLocking();
     if ($allocated) {
       $resource->saveTransaction();
-      $this->log('Allocated Lease');
+      $this->log(pht('Allocated Lease'));
     } else {
       $resource->killTransaction();
       $this->log(pht('Failed to Allocate Lease'));
@@ -372,21 +372,9 @@ abstract class DrydockBlueprintImplementation {
 
 
   public static function getAllBlueprintImplementations() {
-    static $list = null;
-
-    if ($list === null) {
-      $blueprints = id(new PhutilSymbolLoader())
-        ->setType('class')
-        ->setAncestorClass(__CLASS__)
-        ->setConcreteOnly(true)
-        ->selectAndLoadSymbols();
-      $list = ipull($blueprints, 'name', 'name');
-      foreach ($list as $class_name => $ignored) {
-        $list[$class_name] = newv($class_name, array());
-      }
-    }
-
-    return $list;
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->execute();
   }
 
   public static function getAllBlueprintImplementationsForResource($type) {

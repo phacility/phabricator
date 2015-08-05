@@ -31,9 +31,9 @@ input[type="submit"] {
   color: white;
   cursor: pointer;
   font-weight: bold;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   display: inline-block;
-  padding: 4px 14px 5px;
+  padding: 3px 12px 4px;
   text-align: center;
   white-space: nowrap;
   border-radius: 3px;
@@ -68,11 +68,20 @@ button.simple,
 input[type="submit"].simple,
 a.simple,
 a.simple:visited {
-  background-color: transparent;
-  background-image: none;
-  border: 1px solid transparent;
-  color: {$bluetext};
-  border: 1px solid {$lightblueborder};
+  background: #fff;
+  color: {$blue};
+  border: 1px solid {$blue};
+}
+
+a.simple.current {
+  background: {$lightblue};
+}
+
+button.simple .phui-icon-view,
+input[type="submit"].simple .phui-icon-view,
+a.simple .phui-icon-view,
+a.simple:visited .phui-icon-view {
+  color: {$blue};
 }
 
 a.disabled,
@@ -106,12 +115,13 @@ button.green:hover {
 
 a.button.simple:hover,
 button.simple:hover {
-  background-color: #fff;
-  border-color: {$blueborder};
-  background-image: none;
-  border-bottom-color: {$darkblueborder};
-  box-shadow: none;
-  text-decoration: none;
+  background-color: {$blue};
+  color: #fff;
+}
+
+a.button.simple:hover .phui-icon-view,
+button.simple:hover .phui-icon-view {
+  color: #fff;
 }
 
 a.button.simple .phui-icon-view {
@@ -120,7 +130,12 @@ a.button.simple .phui-icon-view {
 
 a.button.simple.phuix-dropdown-open {
   background-color: #fff;
+  color: {$blue};
   box-shadow: none;
+}
+
+a.button.simple.phuix-dropdown-open:hover .phui-icon-view {
+  color: {$blue};
 }
 
 body a.button.disabled:hover,
@@ -135,7 +150,7 @@ a.small,
 a.small:visited {
   padding: 2px 8px;
   height: auto;
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   line-height: 16px;
 }
 
@@ -166,8 +181,7 @@ button.link:hover {
   margin-top: -1px;
   padding: 5px 0;
   box-shadow: {$dropshadow};
-  border: 1px solid {$lightgreyborder};
-  border-bottom: 1px solid {$greyborder};
+  border: 1px solid {$blueborder};
   border-radius: 3px;
   margin-bottom: 16px;
 }
@@ -185,35 +199,6 @@ a.policy-control {
 
 a.policy-control .caret {
   float: right;
-}
-
-a.toggle {
-  display: inline-block;
-  padding: 4px 8px;
-  font-size: 12px;
-  font-weight: bold;
-  color: #555;
-  text-decoration: none;
-  white-space: nowrap;
-  vertical-align: baseline;
-  background-color: {$lightgreybackground};
-  margin: 0 6px 0 0;
-  border-radius: 3px;
-  box-shadow: inset 0 0 3px rgba(0,0,0,.4);
-}
-
-a.toggle:hover {
-  background-color: #14568e;
-  color: #fff
-}
-
-a.toggle-selected {
-  background-color: #14568e;
-  color: #fff
-}
-
-a.toggle-fixed {
-  cursor: default;
 }
 
 .caret {
@@ -273,43 +258,76 @@ a.toggle-fixed {
   display: inline-block;
   position: absolute;
   top: 6px;
-  left: 12px;
+  left: 10px;
+}
+
+.button.icon-last .phui-icon-view {
+  left: auto;
+  right: 10px;
 }
 
 .phui-button-bar .button .phui-icon-view {
-  left: 11px;
+  left: 9px;
 }
 
 .button.has-icon .phui-button-text {
   margin-left: 16px;
 }
 
+.button.has-icon.icon-last .phui-button-text {
+  margin: 0 16px 0 0;
+}
+
 /* Login Buttons */
 
 .button.big.has-icon {
-  padding: 6px 20px 6px 12px;
+  padding: 4px 20px 4px 14px;
   border-radius: 4px;
   text-align: left;
 }
 
 .button.big.has-icon .phui-button-text {
-  margin-left: 40px;
-  font-size: 14px;
+  margin-left: 30px;
   display: block;
 }
 
 .button.big.has-icon .phui-button-subtext {
-  color: {$lightgreytext};
-  font-size: 12px;
+  color: {$greytext};
+  font-size: {$smallerfontsize};
   line-height: 15px;
   font-weight: normal;
 }
 
 /* PHUI Button Bar */
 
+.phui-button-bar-borderless .button {
+  border: 0;
+  background-color: transparent;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.phui-button-bar-borderless .button .phui-icon-view {
+  font-size: 15px;
+  color: rgba(55,55,55,.4);
+}
+
+.phui-button-bar-borderless .button:hover {
+  background-color: transparent;
+  border-radius: 3px;
+}
+
+.phui-button-bar-borderless .button:hover .phui-icon-view {
+  color: rgba(55,55,55,.9);
+}
+
+.phui-button-bar-borderless .button {
+  border: 0;
+}
+
 .phui-button-bar a.button.has-icon {
   display: inline-block;
-  height: 16px;
+  height: 18px;
   width: 6px;
 }
 
@@ -331,65 +349,11 @@ a.toggle-fixed {
 
 .phui-button-bar .button.simple:hover {
   border-color: {$lightblueborder};
+  background-color: #fff;
   color: {$sky};
 }
 
 .phui-button-bar .button.simple:hover .phui-icon-view {
   border-color: {$lightblueborder};
   color: {$sky};
-}
-
-/* Simple Button Colors */
-a.simple.simple-blue,
-button.simple.simple-blue {
-  border-color: {$blue};
-  background: {$lightblue};
-  color: {$blue};
-}
-
-a.simple.simple-blue:hover,
-button.simple.simple-blue:hover {
-  color: {$blue};
-  border-color: {$blue};
-}
-
-a.simple.simple-blue .phui-icon-view,
-button.simple.simple-blue .phui-icon-view {
-  color: {$blue};
-}
-
-a.simple.simple-yellow,
-button.simple.simple-yellow {
-  border-color: #bc7837;
-  background: {$lightyellow};
-  color: #bc7837;
-}
-
-a.simple.simple-yellow:hover,
-button.simple.simple-yellow:hover {
-  color: #bc7837;
-  border-color: #bc7837;
-}
-
-a.simple.simple-yellow .phui-icon-view,
-button.simple.simple-yellow .phui-icon-view {
-  color: #bc7837;
-}
-
-a.simple.simple-grey,
-button.simple.simple-grey {
-  border-color: {$greyborder};
-  background: {$lightgreybackground};
-  color: {$greytext};
-}
-
-a.simple.simple-grey:hover,
-button.simple.simple-grey:hover {
-  color: {$greytext};
-  border-color: {$greyborder};
-}
-
-a.simple.simple-grey .phui-icon-view,
-button.simple.simple-grey .phui-icon-view {
-  color: {$greytext};
 }

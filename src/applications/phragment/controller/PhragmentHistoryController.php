@@ -67,7 +67,7 @@ final class PhragmentHistoryController extends PhragmentController {
 
       if ($version->getFilePHID() === null) {
         $item->setDisabled(true);
-        $item->addAttribute('Deletion');
+        $item->addAttribute(pht('Deletion'));
       }
 
       if (!$first && $can_edit) {

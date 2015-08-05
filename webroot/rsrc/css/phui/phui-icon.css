@@ -15,8 +15,8 @@
 }
 
 .phui-icon-view.sprite-login {
-  height: 34px;
-  width: 34px;
+  height: 28px;
+  width: 28px;
 }
 
 .phui-icon-view.phuihead-medium {
@@ -36,4 +36,5 @@
 
 a.phui-icon-view:hover {
   text-decoration: none;
+  color: {$sky};
 }

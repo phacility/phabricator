@@ -585,8 +585,27 @@ final class DifferentialTransactionEditor
               'a race?'));
         }
 
+        // TODO: This can race with diff updates, particularly those from
+        // Harbormaster. See discussion in T8650.
         $diff->setRevisionID($object->getID());
         $diff->save();
+
+        // Update Harbormaster to set the containerPHID correctly for any
+        // existing buildables. We may otherwise have buildables stuck with
+        // the old (`null`) container.
+
+        // TODO: This is a bit iffy, maybe we can find a cleaner approach?
+        // In particular, this could (rarely) be overwritten by Harbormaster
+        // workers.
+        $table = new HarbormasterBuildable();
+        $conn_w = $table->establishConnection('w');
+        queryfx(
+          $conn_w,
+          'UPDATE %T SET containerPHID = %s WHERE buildablePHID = %s',
+          $table->getTableName(),
+          $object->getPHID(),
+          $diff->getPHID());
+
         return;
     }
 
@@ -1258,19 +1277,19 @@ final class DifferentialTransactionEditor
 
   public function getMailTagsMap() {
     return array(
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEW_REQUEST =>
+      DifferentialTransaction::MAILTAG_REVIEW_REQUEST =>
         pht('A revision is created.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_UPDATED =>
+      DifferentialTransaction::MAILTAG_UPDATED =>
         pht('A revision is updated.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT =>
+      DifferentialTransaction::MAILTAG_COMMENT =>
         pht('Someone comments on a revision.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED =>
+      DifferentialTransaction::MAILTAG_CLOSED =>
         pht('A revision is closed.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS =>
+      DifferentialTransaction::MAILTAG_REVIEWERS =>
         pht("A revision's reviewers change."),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_CC =>
+      DifferentialTransaction::MAILTAG_CC =>
         pht("A revision's CCs change."),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_OTHER =>
+      DifferentialTransaction::MAILTAG_OTHER =>
         pht('Other revision activity not listed above occurs.'),
     );
   }
@@ -1554,13 +1573,6 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $unsubscribed_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $object->getPHID(),
-      PhabricatorObjectHasUnsubscriberEdgeType::EDGECONST);
-
-    $subscribed_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-      $object->getPHID());
-
     $revision = id(new DifferentialRevisionQuery())
       ->setViewer($this->getActor())
       ->withPHIDs(array($object->getPHID()))
@@ -1576,130 +1588,7 @@ final class DifferentialTransactionEditor
       $revision,
       $revision->getActiveDiff());
 
-    $reviewers = $revision->getReviewerStatus();
-    $reviewer_phids = mpull($reviewers, 'getReviewerPHID');
-
-    $adapter->setExplicitCCs($subscribed_phids);
-    $adapter->setExplicitReviewers($reviewer_phids);
-    $adapter->setForbiddenCCs($unsubscribed_phids);
-
     return $adapter;
-  }
-
-  protected function didApplyHeraldRules(
-    PhabricatorLiskDAO $object,
-    HeraldAdapter $adapter,
-    HeraldTranscript $transcript) {
-
-    $xactions = array();
-
-    // Build a transaction to adjust CCs.
-    $ccs = array(
-      '+' => array_keys($adapter->getCCsAddedByHerald()),
-      '-' => array_keys($adapter->getCCsRemovedByHerald()),
-    );
-    $value = array();
-    foreach ($ccs as $type => $phids) {
-      foreach ($phids as $phid) {
-        $value[$type][$phid] = $phid;
-      }
-    }
-
-    if ($value) {
-      $xactions[] = id(new DifferentialTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
-        ->setNewValue($value);
-    }
-
-    // Build a transaction to adjust reviewers.
-    $reviewers = array(
-      DifferentialReviewerStatus::STATUS_ADDED =>
-        array_keys($adapter->getReviewersAddedByHerald()),
-      DifferentialReviewerStatus::STATUS_BLOCKING =>
-        array_keys($adapter->getBlockingReviewersAddedByHerald()),
-    );
-
-    $old_reviewers = $object->getReviewerStatus();
-    $old_reviewers = mpull($old_reviewers, null, 'getReviewerPHID');
-
-    $value = array();
-    foreach ($reviewers as $status => $phids) {
-      foreach ($phids as $phid) {
-        if ($phid == $object->getAuthorPHID()) {
-          // Don't try to add the revision's author as a reviewer, since this
-          // isn't valid and doesn't make sense.
-          continue;
-        }
-
-        // If the target is already a reviewer, don't try to change anything
-        // if their current status is at least as strong as the new status.
-        // For example, don't downgrade an "Accepted" to a "Blocking Reviewer".
-        $old_reviewer = idx($old_reviewers, $phid);
-        if ($old_reviewer) {
-          $old_status = $old_reviewer->getStatus();
-
-          $old_strength = DifferentialReviewerStatus::getStatusStrength(
-            $old_status);
-          $new_strength = DifferentialReviewerStatus::getStatusStrength(
-            $status);
-
-          if ($new_strength <= $old_strength) {
-            continue;
-          }
-        }
-
-        $value['+'][$phid] = array(
-          'data' => array(
-            'status' => $status,
-          ),
-        );
-      }
-    }
-
-    if ($value) {
-      $edge_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
-
-      $xactions[] = id(new DifferentialTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-        ->setMetadataValue('edge:type', $edge_reviewer)
-        ->setNewValue($value);
-    }
-
-    // Require legalpad document signatures.
-    $legal_phids = $adapter->getRequiredSignatureDocumentPHIDs();
-    if ($legal_phids) {
-      // We only require signatures of documents which have not already
-      // been signed. In general, this reduces the amount of churn that
-      // signature rules cause.
-
-      $signatures = id(new LegalpadDocumentSignatureQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withDocumentPHIDs($legal_phids)
-        ->withSignerPHIDs(array($object->getAuthorPHID()))
-        ->execute();
-      $signed_phids = mpull($signatures, 'getDocumentPHID');
-      $legal_phids = array_diff($legal_phids, $signed_phids);
-
-      // If we still have something to trigger, add the edges.
-      if ($legal_phids) {
-        $edge_legal = LegalpadObjectNeedsSignatureEdgeType::EDGECONST;
-        $xactions[] = id(new DifferentialTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-          ->setMetadataValue('edge:type', $edge_legal)
-          ->setNewValue(
-            array(
-              '+' => array_fuse($legal_phids),
-            ));
-      }
-    }
-
-    // Apply build plans.
-    HarbormasterBuildable::applyBuildPlans(
-      $adapter->getDiff()->getPHID(),
-      $adapter->getPHID(),
-      $adapter->getBuildPlans());
-
-    return $xactions;
   }
 
   /**
@@ -1900,6 +1789,27 @@ final class DifferentialTransactionEditor
     $section->addPlaintextFragment($patch);
 
     return $section;
+  }
+
+  protected function willPublish(PhabricatorLiskDAO $object, array $xactions) {
+    // Reload to pick up the active diff and reviewer status.
+    return id(new DifferentialRevisionQuery())
+      ->setViewer($this->getActor())
+      ->needReviewerStatus(true)
+      ->needActiveDiffs(true)
+      ->withIDs(array($object->getID()))
+      ->executeOne();
+  }
+
+  protected function getCustomWorkerState() {
+    return array(
+      'changedPriorToCommitURI' => $this->changedPriorToCommitURI,
+    );
+  }
+
+  protected function loadCustomWorkerState(array $state) {
+    $this->changedPriorToCommitURI = idx($state, 'changedPriorToCommitURI');
+    return $this;
   }
 
 }

@@ -4,7 +4,7 @@
  * Represents something which can be the target of messages, like a user or
  * channel.
  */
-abstract class PhabricatorBotTarget {
+abstract class PhabricatorBotTarget extends Phobject {
 
   private $name;
 

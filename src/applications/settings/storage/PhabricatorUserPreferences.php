@@ -8,6 +8,7 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
   const PREFERENCE_MULTIEDIT            = 'multiedit';
   const PREFERENCE_TITLES               = 'titles';
   const PREFERENCE_MONOSPACED_TEXTAREAS = 'monospaced-textareas';
+  const PREFERENCE_DATE_FORMAT          = 'date-format';
   const PREFERENCE_TIME_FORMAT          = 'time-format';
   const PREFERENCE_WEEK_START_DAY       = 'week-start-day';
 
@@ -36,6 +37,9 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
 
   const PREFERENCE_CONPH_NOTIFICATIONS = 'conph-notifications';
   const PREFERENCE_CONPHERENCE_COLUMN  = 'conpherence-column';
+
+  const PREFERENCE_RESOURCE_POSTPROCESSOR = 'resource-postprocessor';
+  const PREFERENCE_DESKTOP_NOTIFICATIONS = 'desktop-notifications';
 
   // These are in an unusual order for historic reasons.
   const MAILTAG_PREFERENCE_NOTIFY       = 0;

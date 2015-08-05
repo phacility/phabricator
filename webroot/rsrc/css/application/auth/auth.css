@@ -24,9 +24,9 @@
 }
 
 .auth-account-view {
-  background-color: #fff;
-  border: 1px solid {$lightblueborder};
-  border-radius: 2px;
+  background-color: {$lightbluebackground};
+  border: 1px solid {$thinblueborder};
+  border-radius: 3px;
   min-height: 50px;
   position: relative;
   padding: 4px 4px 4px 64px;
@@ -35,11 +35,12 @@
 .auth-account-view-profile-image {
   width: 50px;
   height: 50px;
-  top: 4px;
-  left: 4px;
+  top: 6px;
+  left: 6px;
 
   background-repeat: no-repeat;
   background-size: 100%;
+  box-shadow: {$borderinset};
   position: absolute;
 }
 
@@ -49,4 +50,8 @@
 
 .auth-account-view-provider-name {
   color: {$lightgreytext};
+}
+
+.auth-account-view-account-uri {
+  word-break: break-word;
 }

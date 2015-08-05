@@ -56,6 +56,16 @@ final class PhabricatorCountdownView extends AphrontTagView {
       javelin_tag('td', array('sigil' => 'phabricator-timer-seconds'), '-'),
     );
 
+    $epoch = $countdown->getEpoch();
+    $launch_date = phabricator_datetime($epoch, $this->getUser());
+    $foot = phutil_tag(
+      'td',
+      array(
+        'colspan' => '4',
+        'class' => 'phabricator-timer-foot',
+      ),
+      $launch_date);
+
     $container = celerity_generate_unique_node_id();
     $content = phutil_tag(
       'div',
@@ -65,6 +75,7 @@ final class PhabricatorCountdownView extends AphrontTagView {
         phutil_tag('table', array('class' => 'phabricator-timer-table'), array(
           phutil_tag('tr', array(), $ths),
           phutil_tag('tr', array(), $dashes),
+          phutil_tag('tr', array(), $foot),
         )),
       ));
 

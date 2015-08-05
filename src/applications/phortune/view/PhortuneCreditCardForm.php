@@ -1,6 +1,6 @@
 <?php
 
-final class PhortuneCreditCardForm {
+final class PhortuneCreditCardForm extends Phobject {
 
   private $formID;
   private $scripts = array();

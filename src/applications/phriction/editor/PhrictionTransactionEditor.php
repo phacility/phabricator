@@ -13,6 +13,7 @@ final class PhrictionTransactionEditor
   private $skipAncestorCheck;
   private $contentVersion;
   private $processContentVersionError = true;
+  private $contentDiffURI;
 
   public function setDescription($description) {
     $this->description = $description;
@@ -348,6 +349,20 @@ final class PhrictionTransactionEditor
         ->applyTransactions($this->moveAwayDocument, $move_away_xactions);
     }
 
+    // Compute the content diff URI for the publishing phase.
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhrictionTransaction::TYPE_CONTENT:
+          $uri = id(new PhutilURI('/phriction/diff/'.$object->getID().'/'))
+            ->alter('l', $this->getOldContent()->getVersion())
+            ->alter('r', $this->getNewContent()->getVersion());
+          $this->contentDiffURI = (string)$uri;
+          break 2;
+        default:
+          break;
+      }
+    }
+
     return $xactions;
   }
 
@@ -376,6 +391,10 @@ final class PhrictionTransactionEditor
         pht("A document's content changes."),
       PhrictionTransaction::MAILTAG_DELETE =>
         pht('A document is deleted.'),
+      PhrictionTransaction::MAILTAG_SUBSCRIBERS =>
+        pht('A document\'s subscribers change.'),
+      PhrictionTransaction::MAILTAG_OTHER =>
+        pht('Other document activity not listed above occurs.'),
     );
   }
 
@@ -403,24 +422,10 @@ final class PhrictionTransactionEditor
       $body->addTextSection(
         pht('DOCUMENT CONTENT'),
         $object->getContent()->getContent());
-    } else {
-
-      foreach ($xactions as $xaction) {
-        switch ($xaction->getTransactionType()) {
-          case PhrictionTransaction::TYPE_CONTENT:
-            $diff_uri = id(new PhutilURI(
-              '/phriction/diff/'.$object->getID().'/'))
-              ->alter('l', $this->getOldContent()->getVersion())
-              ->alter('r', $this->getNewContent()->getVersion());
-            $body->addLinkSection(
-              pht('DOCUMENT DIFF'),
-              PhabricatorEnv::getProductionURI($diff_uri));
-            break 2;
-          default:
-            break;
-        }
-      }
-
+    } else if ($this->contentDiffURI) {
+      $body->addLinkSection(
+        pht('DOCUMENT DIFF'),
+        PhabricatorEnv::getProductionURI($this->contentDiffURI));
     }
 
     $body->addLinkSection(
@@ -775,24 +780,6 @@ final class PhrictionTransactionEditor
       ->setDocument($object);
   }
 
-  protected function didApplyHeraldRules(
-    PhabricatorLiskDAO $object,
-    HeraldAdapter $adapter,
-    HeraldTranscript $transcript) {
-
-    $xactions = array();
-
-    $cc_phids = $adapter->getCcPHIDs();
-    if ($cc_phids) {
-      $value = array_fuse($cc_phids);
-      $xactions[] = id(new PhrictionTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
-        ->setNewValue(array('+' => $value));
-    }
-
-    return $xactions;
-  }
-
   private function buildNewContentTemplate(
     PhrictionDocument $document) {
 
@@ -808,6 +795,17 @@ final class PhrictionTransactionEditor
     $new_content->setVersion($this->getOldContent()->getVersion() + 1);
 
     return $new_content;
+  }
+
+  protected function getCustomWorkerState() {
+    return array(
+      'contentDiffURI' => $this->contentDiffURI,
+    );
+  }
+
+  protected function loadCustomWorkerState(array $state) {
+    $this->contentDiffURI = idx($state, 'contentDiffURI');
+    return $this;
   }
 
 }

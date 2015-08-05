@@ -1,18 +1,15 @@
 <?php
 
-final class PhabricatorMetaMTAMailingList extends PhabricatorMetaMTADAO
-  implements
-    PhabricatorPolicyInterface,
-    PhabricatorDestructibleInterface {
+/**
+ * TODO: This class is just here to keep `storage adjust` happy until we
+ * destroy the table.
+ */
+final class PhabricatorMetaMTAMailingList extends PhabricatorMetaMTADAO {
 
   protected $name;
   protected $email;
   protected $uri;
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorMailingListListPHIDType::TYPECONST);
-  }
 
   protected function getConfiguration() {
     return array(
@@ -38,40 +35,6 @@ final class PhabricatorMetaMTAMailingList extends PhabricatorMetaMTADAO
         ),
       ),
     ) + parent::getConfiguration();
-  }
-
-
-/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
-
-
-  public function getCapabilities() {
-    return array(
-      PhabricatorPolicyCapability::CAN_VIEW,
-    );
-  }
-
-  public function getPolicy($capability) {
-    return PhabricatorPolicies::getMostOpenPolicy();
-  }
-
-  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return false;
-  }
-
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
-
-/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
-
-
-  public function destroyObjectPermanently(
-    PhabricatorDestructionEngine $engine) {
-
-    $this->openTransaction();
-    $this->delete();
-    $this->saveTransaction();
   }
 
 }

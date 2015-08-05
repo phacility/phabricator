@@ -6,8 +6,8 @@
   width: 540px;
   margin: 32px auto 16px;
   border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
-  box-shadow: {$dropshadow};
+  border-radius: 3px;
+  background-color: #fff;
 }
 
 .device-phone .aphront-dialog-view {
@@ -19,17 +19,8 @@
   margin: auto;
 }
 
-.aphront-dialog-head .phui-action-header {
-  border-bottom: 1px solid {$lightblueborder};
-  padding: 8px 16px;
-  white-space: nowrap;
-}
-
-.aphront-dialog-head .phui-action-header
-  .phui-action-header-title {
-  font-size: 15px;
-  color: {$darkbluetext};
-  text-shadow: 0 1px 2px #fff;
+.aphront-dialog-head {
+  padding: 12px 12px 0 12px;
 }
 
 .aphront-dialog-flush .aphront-dialog-body {
@@ -45,7 +36,7 @@
 }
 
 .aphront-dialog-body {
-  background: #ffffff;
+  background: #fff;
   padding: 16px;
   border: none;
 }
@@ -55,6 +46,8 @@
   background: {$lightgreybackground};
   padding: 8px 16px;
   border-top: 1px solid {$thinblueborder};
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 .aphront-dialog-foot {
@@ -69,8 +62,8 @@
 }
 
 .jx-client-dialog {
-  position:   absolute;
-  width:      100%;
+  position: absolute;
+  width: 100%;
 }
 
 .jx-mask {
@@ -106,11 +99,6 @@
 
 .aphront-access-dialog {
   width: 50%;
-}
-
-.aphront-dialog-view ul {
-  margin: 12px 24px;
-  list-style: circle;
 }
 
 .aphront-policy-rejection {

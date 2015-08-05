@@ -4,69 +4,131 @@
 
 .phui-object-box {
   position: relative;
+  padding: 12px 12px 4px 12px;
+}
+
+.phui-object-box.phui-object-box-collapsed {
+  padding: 12px 0 0 0;
+}
+
+.device-phone .phui-object-box.phui-object-box-collapsed {
+  padding: 8px 0 0 0;
+}
+
+.phui-object-box.phui-object-box-collapsed .phui-header-shell {
+  padding: 0 8px 12px 16px;
+}
+
+.device-phone .phui-object-box.phui-object-box-collapsed .phui-header-shell {
+  padding: 0 8px 8px;
 }
 
 div.phui-object-box.phui-object-box-flush {
   margin-top: 0;
 }
 
-.phui-object-box .phui-header-shell {
-  padding: 4px 5px 4px 12px;
-  border-bottom: 1px solid {$lightblueborder};
-  border-top: none;
-}
-
-.phui-object-box .phui-header-image {
-  margin: 1px 8px -7px -7px;
-}
-
-.phui-object-box .phui-header-shell h1 {
-  text-shadow: 0 1px #fff;
-  padding: 8px 0;
-}
-
 .phui-object-box .phui-header-shell + .phui-info-view {
+  margin: 12px 0 0 0;
+}
+
+.phui-object-box.phui-object-box-collapsed
+  .phui-header-shell + .phui-info-view {
   margin: 0;
-  border-width: 0;
-  border-bottom: 1px solid {$lightblueborder};
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 .device-phone .phui-object-box {
+  margin: 8px;
+  padding: 8px 8px 4px 8px;
+}
+
+.device-phone .phui-object-box .phui-header-shell {
+  padding: 4px 0 12px 4px;
+}
+
+.device-tablet .phui-object-box {
   margin: 8px 8px 0 8px;
 }
 
-.phui-box-border.phui-object-box-lightgreen {
-  border: 1px solid {$lightgreenborder};
-  border-bottom: 1px solid {$greenborder};
+/* - Object Box Colors ------------------------------------------------------ */
+
+.phui-box-border.phui-object-box-green {
+  border: 1px solid {$green};
 }
 
-.phui-box-border.phui-object-box-lightgreen .phui-action-header {
-  border-bottom: 1px solid {$lightgreenborder};
+.phui-box-border.phui-object-box-green .phui-header-view {
+  color: {$green};
 }
 
-.phui-box-border.phui-object-box-lightblue {
-  border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
+.phui-box-border.phui-object-box-green .phui-header-shell {
+  border-bottom-color: {$lightgreen};
 }
 
-.phui-box-border.phui-object-box-lightblue .phui-action-header {
-  border-bottom: 1px solid {$lightblueborder};
+.phui-box-border.phui-object-box-blue {
+  border: 1px solid {$blue};
 }
 
-.phui-box-border.phui-object-box-lightred {
-  border: 1px solid {$lightredborder};
-  border-bottom: 1px solid {$redborder};
+.phui-box-border.phui-object-box-blue .phui-header-view {
+  color: {$blue};
 }
 
-.phui-box-border.phui-object-box-lightred .phui-action-header {
-  border-bottom: 1px solid {$lightredborder};
+.phui-box-border.phui-object-box-blue .phui-header-shell {
+  border-bottom-color: {$lightblue};
 }
 
-.phui-box-border.phui-object-box-lightviolet {
-  border: 1px solid {$lightvioletborder};
-  border-bottom: 1px solid {$violetborder};
+.phui-box-border.phui-object-box-red {
+  border: 1px solid {$red};
 }
 
-.phui-box-border.phui-object-box-lightviolet .phui-action-header {
-  border-bottom: 1px solid {$lightvioletborder};
+.phui-box-border.phui-object-box-red .phui-header-view {
+  color: {$red};
+}
+
+.phui-box-border.phui-object-box-red .phui-header-shell {
+  border-bottom-color: {$lightred};
+}
+
+.phui-object-box-hidden-content {
+  background: {$lightgreybackground};
+  border-bottom: 1px solid {$thinblueborder};
+}
+
+.phui-object-box.phui-object-box-collapsed .phui-object-box-hidden-content {
+  margin: 0;
+}
+
+/* - Double Object Box Override --------------------------------------------- */
+
+.phui-object-box .phui-object-box {
+  padding: 0;
+}
+
+/* eh oh el */
+.phui-object-box .phui-object-box + .phui-object-box {
+  border-top: 1px solid {$thinblueborder};
+}
+
+.phui-object-box .phui-object-box .phui-header-shell .phui-header-header {
+  font-family: {$fontfamily};
+}
+
+.phui-object-box .phui-box-border {
+  border-width: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.phui-object-box .phui-object-box .phui-header-shell .phui-header-header {
+  font-size: {$normalfontsize};
+  margin: 0;
+  color: {$darkbluetext};
+  font-weight: bold;
+}
+
+.phui-object-box .phui-object-box .phui-header-shell {
+  margin: 0;
+  padding: 4px 8px;
+  background-color: {$lightgreybackground};
 }
