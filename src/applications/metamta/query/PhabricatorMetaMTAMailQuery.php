@@ -7,6 +7,8 @@ final class PhabricatorMetaMTAMailQuery
   private $phids;
   private $actorPHIDs;
   private $recipientPHIDs;
+  private $createdMin;
+  private $createdMax;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -28,53 +30,73 @@ final class PhabricatorMetaMTAMailQuery
     return $this;
   }
 
+  public function withDateCreatedBetween($min, $max) {
+    $this->createdMin = $min;
+    $this->createdMax = $max;
+    return $this;
+  }
+
   protected function loadPage() {
     return $this->loadStandardPage($this->newResultObject());
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'mail.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'mail.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->actorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'mail.actorPHID IN (%Ls)',
         $this->actorPHIDs);
     }
 
     if ($this->recipientPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'recipient.dst IN (%Ls)',
         $this->recipientPHIDs);
     }
 
     if ($this->actorPHIDs === null && $this->recipientPHIDs === null) {
       $viewer = $this->getViewer();
-      $where[] = qsprintf(
-        $conn_r,
-        'edge.dst = %s OR actorPHID = %s',
-        $viewer->getPHID(),
-        $viewer->getPHID());
+      if (!$viewer->isOmnipotent()) {
+        $where[] = qsprintf(
+          $conn,
+          'edge.dst = %s OR actorPHID = %s',
+          $viewer->getPHID(),
+          $viewer->getPHID());
+      }
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    if ($this->createdMin !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'mail.dateCreated >= %d',
+        $this->createdMin);
+    }
 
-    return $this->formatWhereClause($where);
+    if ($this->createdMax !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'mail.dateCreated <= %d',
+        $this->createdMax);
+    }
+
+    return $where;
   }
 
   protected function buildJoinClause(AphrontDatabaseConnection $conn) {
