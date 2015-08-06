@@ -11,6 +11,10 @@ final class HarbormasterHTTPRequestBuildStepImplementation
     return pht('Make an HTTP request.');
   }
 
+  public function getBuildStepGroupKey() {
+    return HarbormasterExternalBuildStepGroup::GROUPKEY;
+  }
+
   public function getDescription() {
     $domain = null;
     $uri = $this->getSetting('uri');

@@ -13,6 +13,10 @@ final class HarbormasterCommandBuildStepImplementation
     return pht('Run a command on Drydock host.');
   }
 
+  public function getBuildStepGroupKey() {
+    return HarbormasterPrototypeBuildStepGroup::GROUPKEY;
+  }
+
   public function getDescription() {
     return pht(
       'Run command %s on host %s.',

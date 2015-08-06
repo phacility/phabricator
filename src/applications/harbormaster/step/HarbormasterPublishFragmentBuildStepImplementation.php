@@ -11,6 +11,11 @@ final class HarbormasterPublishFragmentBuildStepImplementation
     return pht('Publish a fragment based on a file artifact.');
   }
 
+
+  public function getBuildStepGroupKey() {
+    return HarbormasterPrototypeBuildStepGroup::GROUPKEY;
+  }
+
   public function getDescription() {
     return pht(
       'Publish file artifact %s as fragment %s.',

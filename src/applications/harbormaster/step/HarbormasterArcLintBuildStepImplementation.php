@@ -25,6 +25,10 @@ final class HarbormasterArcLintBuildStepImplementation
     return pht('Automatic `arc lint` step.');
   }
 
+  public function getBuildStepGroupKey() {
+    return HarbormasterBuiltinBuildStepGroup::GROUPKEY;
+  }
+
   public function execute(
     HarbormasterBuild $build,
     HarbormasterBuildTarget $build_target) {

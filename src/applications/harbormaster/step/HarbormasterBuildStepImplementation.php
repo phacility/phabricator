@@ -41,6 +41,10 @@ abstract class HarbormasterBuildStepImplementation extends Phobject {
    */
   abstract public function getName();
 
+  public function getBuildStepGroupKey() {
+    return HarbormasterOtherBuildStepGroup::GROUPKEY;
+  }
+
   /**
    * The generic description of the implementation.
    */
