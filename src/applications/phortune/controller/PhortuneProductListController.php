@@ -2,15 +2,14 @@
 
 final class PhortuneProductListController extends PhabricatorController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $pager = new AphrontCursorPagerView();
     $pager->readFromRequest($request);
 
     $query = id(new PhortuneProductQuery())
-      ->setViewer($user);
+      ->setViewer($viewer);
 
     $products = $query->executeWithCursorPager($pager);
 
@@ -27,7 +26,7 @@ final class PhortuneProductListController extends PhabricatorController {
         ->setIcon('fa-plus-square'));
 
     $product_list = id(new PHUIObjectItemListView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setNoDataString(pht('No products.'));
 
     foreach ($products as $product) {

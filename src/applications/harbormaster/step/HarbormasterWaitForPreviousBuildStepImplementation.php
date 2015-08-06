@@ -13,6 +13,10 @@ final class HarbormasterWaitForPreviousBuildStepImplementation
       'before continuing.');
   }
 
+  public function getBuildStepGroupKey() {
+    return HarbormasterPrototypeBuildStepGroup::GROUPKEY;
+  }
+
   public function execute(
     HarbormasterBuild $build,
     HarbormasterBuildTarget $build_target) {

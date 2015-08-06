@@ -1,6 +1,8 @@
 <?php
 
-final class HeraldCommitAdapter extends HeraldAdapter {
+final class HeraldCommitAdapter
+  extends HeraldAdapter
+  implements HarbormasterBuildableAdapterInterface {
 
   protected $diff;
   protected $revision;
@@ -10,13 +12,12 @@ final class HeraldCommitAdapter extends HeraldAdapter {
   protected $commitData;
   private $commitDiff;
 
-  protected $auditMap = array();
-  protected $buildPlans = array();
-
   protected $affectedPaths;
   protected $affectedRevision;
   protected $affectedPackages;
   protected $auditNeededPackages;
+
+  private $buildPlanPHIDs = array();
 
   public function getAdapterApplicationClass() {
     return 'PhabricatorDiffusionApplication';
@@ -83,34 +84,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     return pht('This rule can trigger for **repositories** and **projects**.');
   }
 
-  public function getActions($rule_type) {
-    switch ($rule_type) {
-      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
-      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
-        return array_merge(
-          array(
-            self::ACTION_ADD_CC,
-            self::ACTION_REMOVE_CC,
-            self::ACTION_EMAIL,
-            self::ACTION_AUDIT,
-            self::ACTION_APPLY_BUILD_PLANS,
-            self::ACTION_NOTHING,
-          ),
-          parent::getActions($rule_type));
-      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-        return array_merge(
-          array(
-            self::ACTION_ADD_CC,
-            self::ACTION_REMOVE_CC,
-            self::ACTION_EMAIL,
-            self::ACTION_FLAG,
-            self::ACTION_AUDIT,
-            self::ACTION_NOTHING,
-          ),
-          parent::getActions($rule_type));
-    }
-  }
-
   public static function newLegacyAdapter(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit,
@@ -154,14 +127,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     $this->commitData = $data;
 
     return $this;
-  }
-
-  public function getAuditMap() {
-    return $this->auditMap;
-  }
-
-  public function getBuildPlans() {
-    return $this->buildPlans;
   }
 
   public function getHeraldName() {
@@ -333,40 +298,24 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     return $result;
   }
 
-  public function applyHeraldEffects(array $effects) {
-    assert_instances_of($effects, 'HeraldEffect');
 
-    $result = array();
-    foreach ($effects as $effect) {
-      $action = $effect->getAction();
-      switch ($action) {
-        case self::ACTION_AUDIT:
-          foreach ($effect->getTarget() as $phid) {
-            if (empty($this->auditMap[$phid])) {
-              $this->auditMap[$phid] = array();
-            }
-            $this->auditMap[$phid][] = $effect->getRule()->getID();
-          }
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Triggered an audit.'));
-          break;
-        case self::ACTION_APPLY_BUILD_PLANS:
-          foreach ($effect->getTarget() as $phid) {
-            $this->buildPlans[] = $phid;
-          }
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Applied build plans.'));
-          break;
-        default:
-          $result[] = $this->applyStandardEffect($effect);
-          break;
-      }
-    }
-    return $result;
+/* -(  HarbormasterBuildableAdapterInterface  )------------------------------ */
+
+
+  public function getHarbormasterBuildablePHID() {
+    return $this->getObject()->getPHID();
+  }
+
+  public function getHarbormasterContainerPHID() {
+    return $this->getObject()->getRepository()->getPHID();
+  }
+
+  public function getQueuedHarbormasterBuildPlanPHIDs() {
+    return $this->buildPlanPHIDs;
+  }
+
+  public function queueHarbormasterBuildPlanPHID($phid) {
+    $this->buildPlanPHIDs[] = $phid;
   }
 
 }

@@ -19,21 +19,59 @@ final class HarbormasterBuildUnitMessage
       ->setBuildTargetPHID($build_target->getPHID());
   }
 
+  public static function getParameterSpec() {
+    return array(
+      'name' => array(
+        'type' => 'string',
+        'description' => pht(
+          'Short test name, like "ExampleTest".'),
+      ),
+      'result' => array(
+        'type' => 'string',
+        'description' => pht(
+          'Result of the test.'),
+      ),
+      'namespace' => array(
+        'type' => 'optional string',
+        'description' => pht(
+          'Optional namespace for this test. This is organizational and '.
+          'is often a class or module name, like "ExampleTestCase".'),
+      ),
+      'engine' => array(
+        'type' => 'optional string',
+        'description' => pht(
+          'Test engine running the test, like "JavascriptTestEngine". This '.
+          'primarily prevents collisions between tests with the same name '.
+          'in different test suites (for example, a Javascript test and a '.
+          'Python test).'),
+      ),
+      'duration' => array(
+        'type' => 'optional float|int',
+        'description' => pht(
+          'Runtime duration of the test, in seconds.'),
+      ),
+      'path' => array(
+        'type' => 'optional string',
+        'description' => pht(
+          'Path to the file where the test is declared, relative to the '.
+          'project root.'),
+      ),
+      'coverage' => array(
+        'type' => 'optional map<string, wild>',
+        'description' => pht(
+          'Coverage information for this test.'),
+      ),
+    );
+  }
+
   public static function newFromDictionary(
     HarbormasterBuildTarget $build_target,
     array $dict) {
 
     $obj = self::initializeNewUnitMessage($build_target);
 
-    $spec = array(
-      'engine' => 'optional string',
-      'namespace' => 'optional string',
-      'name' => 'string',
-      'result' => 'string',
-      'duration' => 'optional float|int',
-      'path' => 'optional string',
-      'coverage' => 'optional map<string, wild>',
-    );
+    $spec = self::getParameterSpec();
+    $spec = ipull($spec, 'type');
 
     // We're just going to ignore extra keys for now, to make it easier to
     // add stuff here later on.

@@ -24,6 +24,7 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   protected $responseVisibility;
   protected $shuffle;
   protected $method;
+  protected $mailKey;
   protected $viewPolicy;
   protected $isClosed = 0;
   protected $spacePHID;
@@ -57,6 +58,7 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
         'method' => 'uint32',
         'description' => 'text',
         'isClosed' => 'bool',
+        'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -104,6 +106,17 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
     assert_instances_of($choices, 'PhabricatorSlowvoteChoice');
     $this->viewerChoices[$viewer->getPHID()] = $choices;
     return $this;
+  }
+
+  public function getMonogram() {
+    return 'V'.$this->getID();
+  }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
   }
 
 

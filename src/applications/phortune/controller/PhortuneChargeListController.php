@@ -3,26 +3,19 @@
 final class PhortuneChargeListController
   extends PhortuneController {
 
-  private $accountID;
-  private $queryKey;
-
   private $account;
 
-  public function willProcessRequest(array $data) {
-    $this->accountID = idx($data, 'accountID');
-    $this->queryKey = idx($data, 'queryKey');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $querykey = $request->getURIData('queryKey');
+    $account_id = $request->getURIData('accountID');
 
     $engine = new PhortuneChargeSearchEngine();
 
-    if ($this->accountID) {
+    if ($account_id) {
       $account = id(new PhortuneAccountQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->accountID))
+        ->withIDs(array($account_id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -39,7 +32,7 @@ final class PhortuneChargeListController
     }
 
     $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($this->queryKey)
+      ->setQueryKey($querykey)
       ->setSearchEngine($engine)
       ->setNavigation($this->buildSideNavView());
 
@@ -47,7 +40,7 @@ final class PhortuneChargeListController
   }
 
   public function buildSideNavView() {
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));

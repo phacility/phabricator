@@ -12,7 +12,8 @@ final class PonderQuestionSearchEngine
   }
 
   public function newQuery() {
-    return new PonderQuestionQuery();
+    return id(new PonderQuestionQuery())
+      ->needProjectPHIDs(true);
   }
 
   protected function buildQueryFromParameters(array $map) {
@@ -112,6 +113,18 @@ final class PonderQuestionSearchEngine
 
     $viewer = $this->requireViewer();
 
+    $proj_phids = array();
+    foreach ($questions as $question) {
+      foreach ($question->getProjectPHIDs() as $project_phid) {
+        $proj_phids[] = $project_phid;
+      }
+    }
+
+    $proj_handles = id(new PhabricatorHandleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($proj_phids)
+      ->execute();
+
     $view = id(new PHUIObjectItemListView())
       ->setUser($viewer);
 
@@ -129,6 +142,10 @@ final class PonderQuestionSearchEngine
       $item->setObject($question);
       $item->setStatusIcon($icon.' '.$color, $full_status);
 
+      $project_handles = array_select_keys(
+        $proj_handles,
+        $question->getProjectPHIDs());
+
       $created_date = phabricator_date($question->getDateCreated(), $viewer);
       $item->addIcon('none', $created_date);
       $item->addByline(
@@ -138,6 +155,14 @@ final class PonderQuestionSearchEngine
 
       $item->addAttribute(
         pht('%d Answer(s)', $question->getAnswerCount()));
+
+      if ($project_handles) {
+        $item->addAttribute(
+          id(new PHUIHandleTagListView())
+            ->setLimit(4)
+            ->setSlim(true)
+            ->setHandles($project_handles));
+      }
 
       $view->addItem($item);
     }

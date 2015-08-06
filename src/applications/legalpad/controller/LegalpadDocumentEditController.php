@@ -3,25 +3,25 @@
 final class LegalpadDocumentEditController extends LegalpadController {
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
-
+    $viewer = $request->getViewer();
     $id = $request->getURIData('id');
+
     if (!$id) {
       $is_create = true;
 
       $this->requireApplicationCapability(
         LegalpadCreateDocumentsCapability::CAPABILITY);
 
-      $document = LegalpadDocument::initializeNewDocument($user);
+      $document = LegalpadDocument::initializeNewDocument($viewer);
       $body = id(new LegalpadDocumentBody())
-        ->setCreatorPHID($user->getPHID());
+        ->setCreatorPHID($viewer->getPHID());
       $document->attachDocumentBody($body);
       $document->setDocumentBodyPHID(PhabricatorPHIDConstants::PHID_VOID);
     } else {
       $is_create = false;
 
       $document = id(new LegalpadDocumentQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->needDocumentBodies(true)
         ->requireCapabilities(
           array(
@@ -94,7 +94,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
 
       $v_require_signature = $request->getBool('requireSignature', 0);
       if ($v_require_signature) {
-        if (!$user->getIsAdmin()) {
+        if (!$viewer->getIsAdmin()) {
           $errors[] = pht('Only admins may require signature.');
         }
         $individual = LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL;
@@ -104,7 +104,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
             'signing to use Phabricator.');
         }
       }
-      if ($user->getIsAdmin()) {
+      if ($viewer->getIsAdmin()) {
         $xactions[] = id(new LegalpadTransaction())
           ->setTransactionType(LegalpadTransaction::TYPE_REQUIRE_SIGNATURE)
           ->setNewValue($v_require_signature);
@@ -114,7 +114,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
         $editor = id(new LegalpadDocumentEditor())
           ->setContentSourceFromRequest($request)
           ->setContinueOnNoEffect(true)
-          ->setActor($user);
+          ->setActor($viewer);
 
         $xactions = $editor->applyTransactions($document, $xactions);
 
@@ -130,7 +130,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
     }
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setID('document-title')
@@ -162,7 +162,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
       $form
         ->appendChild(
           id(new AphrontFormCheckboxControl())
-          ->setDisabled(!$user->getIsAdmin())
+          ->setDisabled(!$viewer->getIsAdmin())
           ->setLabel(pht('Require Signature'))
           ->addCheckbox(
             'requireSignature',
@@ -175,7 +175,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
     $form
       ->appendChild(
         id(new PhabricatorRemarkupControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setID('preamble')
           ->setLabel(pht('Preamble'))
           ->setValue($v_preamble)
@@ -184,7 +184,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
             pht('Optional help text for users signing this document.')))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setID('document-text')
           ->setLabel(pht('Document Body'))
           ->setError($e_text)
@@ -193,21 +193,21 @@ final class LegalpadDocumentEditController extends LegalpadController {
           ->setName('text'));
 
     $policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->setObject($document)
       ->execute();
 
     $form
       ->appendChild(
         id(new AphrontFormPolicyControl())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
         ->setPolicyObject($document)
         ->setPolicies($policies)
         ->setName('can_view'))
       ->appendChild(
         id(new AphrontFormPolicyControl())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
         ->setPolicyObject($document)
         ->setPolicies($policies)

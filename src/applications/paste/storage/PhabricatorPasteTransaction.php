@@ -6,6 +6,7 @@ final class PhabricatorPasteTransaction
   const TYPE_CONTENT = 'paste.create';
   const TYPE_TITLE = 'paste.title';
   const TYPE_LANGUAGE = 'paste.language';
+  const TYPE_STATUS = 'paste.status';
 
   const MAILTAG_CONTENT = 'paste-content';
   const MAILTAG_OTHER = 'paste-other';
@@ -89,6 +90,12 @@ final class PhabricatorPasteTransaction
           "%s updated the paste's language.",
           $this->renderHandleLink($author_phid));
         break;
+      case self::TYPE_STATUS:
+        return pht(
+          "%s updated the paste's status.",
+          $this->renderHandleLink($author_phid));
+        break;
+
     }
 
     return parent::getTitle();
@@ -127,6 +134,20 @@ final class PhabricatorPasteTransaction
           '%s updated the language for %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
+        break;
+      case self::TYPE_STATUS:
+        switch ($new) {
+          case self::STATUS_OPEN:
+            return pht(
+              '%s activated %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+          case self::STATUS_CLOSED:
+            return pht(
+              '%s archived %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+        }
         break;
     }
 

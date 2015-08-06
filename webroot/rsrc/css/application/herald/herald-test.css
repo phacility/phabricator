@@ -2,77 +2,8 @@
  * @provides herald-test-css
  */
 
-ul.herald-explain-list {
-  margin: 12px;
-}
-
-div.herald-condition-note {
-  clear: both;
-  margin: .5em 0em .53em 86px;
-  padding: .5em 1em;
-  background: #FFFF00;
-  font-weight: bold;
-}
-
-ul.herald-explain-list .herald-outcome {
-  margin-right: 6px;
-  width: 50px;
-  text-align: center;
-  position: relative;
-  float: left;
-  font-weight: bold;
-  padding: 1px 2px;
-}
-
-ul.herald-explain-list .condition-fail,
-ul.herald-explain-list .rule-fail {
+.herald-condition-note {
   color: {$red};
-}
-
-ul.herald-explain-list .condition-pass,
-ul.herald-explain-list .rule-pass {
-  color: {$green};
-}
-
-ul.herald-explain-list li.herald-rule-pass,
-ul.herald-explain-list li.herald-rule-fail {
-  margin: 0 0 8px;
-}
-
-ul.herald-explain-list div.rule-name {
-  padding: 4px 0 8px 0;
-}
-
-ul.herald-explain-list li.herald-rule-fail,
-ul.herald-explain-list li.herald-rule-pass {
-  background: #ffffff;
-}
-
-ul.herald-explain-list ul {
-  margin: 4px;
-}
-
-ul.herald-explain-list ul li {
-  padding: 2px 0;
-}
-
-.outcome-failure,
-.outcome-success {
-  font-weight: bold;
-}
-
-.outcome-failure {
-  color: {$red};
-}
-
-.outcome-success {
-  color: {$green};
-}
-
-.action-header {
-  font-weight: bold;
-  padding-top: 12px;
-  border-bottom: 1px solid {$thinblueborder};
 }
 
 textarea.herald-field-value-transcript {

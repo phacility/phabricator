@@ -173,6 +173,7 @@ final class PhamePostView extends AphrontView {
 
     $uri = $this->getSkin()->getURI('post/'.$this->getPost()->getPhameTitle());
 
+    require_celerity_resource('phame-css');
     $fb_comments = phutil_tag('div',
       array(
         'class'            => 'fb-comments',

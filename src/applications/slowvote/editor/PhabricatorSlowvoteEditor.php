@@ -8,7 +8,7 @@ final class PhabricatorSlowvoteEditor
   }
 
   public function getEditorObjectsDescription() {
-    return pht('Slowvotes');
+    return pht('Slowvote');
   }
 
   public function getTransactionTypes() {
@@ -109,6 +109,73 @@ final class PhabricatorSlowvoteEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     return;
+  }
+
+    protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  public function getMailTagsMap() {
+    return array(
+      PhabricatorSlowvoteTransaction::MAILTAG_DETAILS =>
+        pht('Someone changes the poll details.'),
+      PhabricatorSlowvoteTransaction::MAILTAG_RESPONSES =>
+        pht('Someone votes on a poll.'),
+      PhabricatorSlowvoteTransaction::MAILTAG_OTHER =>
+        pht('Other poll activity not listed above occurs.'),
+    );
+  }
+
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $monogram = $object->getMonogram();
+    $name = $object->getQuestion();
+
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject("{$monogram}: {$name}")
+      ->addHeader('Thread-Topic', $monogram);
+  }
+
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $body = parent::buildMailBody($object, $xactions);
+    $description = $object->getDescription();
+
+    if (strlen($description)) {
+      $body->addTextSection(
+        pht('SLOWVOTE DESCRIPTION'),
+        $object->getDescription());
+    }
+
+    $body->addLinkSection(
+      pht('SLOWVOTE DETAIL'),
+      PhabricatorEnv::getProductionURI('/'.$object->getMonogram()));
+
+    return $body;
+  }
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    return array(
+      $object->getAuthorPHID(),
+      $this->requireActor()->getPHID(),
+    );
+  }
+  protected function getMailSubjectPrefix() {
+    return '[Slowvote]';
+  }
+
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new PhabricatorSlowvoteReplyHandler())
+      ->setMailReceiver($object);
+  }
+
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
   }
 
 }

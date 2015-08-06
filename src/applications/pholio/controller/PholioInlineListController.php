@@ -2,19 +2,13 @@
 
 final class PholioInlineListController extends PholioController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $image = id(new PholioImageQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->executeOne();
     if (!$image) {
       return new Aphront404Response();
@@ -23,8 +17,8 @@ final class PholioInlineListController extends PholioController {
     $inline_comments = id(new PholioTransactionComment())->loadAllWhere(
       'imageid = %d AND (transactionphid IS NOT NULL
       OR (authorphid = %s AND transactionphid IS NULL))',
-      $this->id,
-      $user->getPHID());
+      $id,
+      $viewer->getPHID());
 
     $author_phids = mpull($inline_comments, 'getAuthorPHID');
     $authors = $this->loadViewerHandles($author_phids);

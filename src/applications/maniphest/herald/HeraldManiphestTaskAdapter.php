@@ -3,7 +3,6 @@
 final class HeraldManiphestTaskAdapter extends HeraldAdapter {
 
   private $task;
-  private $assignPHID;
 
   protected function newObject() {
     return new ManiphestTask();
@@ -55,70 +54,12 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
     return $this->task;
   }
 
-  public function setAssignPHID($assign_phid) {
-    $this->assignPHID = $assign_phid;
-    return $this;
-  }
-  public function getAssignPHID() {
-    return $this->assignPHID;
-  }
-
   public function getAdapterContentName() {
     return pht('Maniphest Tasks');
   }
 
-  public function getActions($rule_type) {
-    switch ($rule_type) {
-      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
-        return array_merge(
-          array(
-            self::ACTION_ADD_CC,
-            self::ACTION_REMOVE_CC,
-            self::ACTION_EMAIL,
-            self::ACTION_ASSIGN_TASK,
-            self::ACTION_NOTHING,
-          ),
-          parent::getActions($rule_type));
-      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-        return array_merge(
-          array(
-            self::ACTION_ADD_CC,
-            self::ACTION_REMOVE_CC,
-            self::ACTION_EMAIL,
-            self::ACTION_FLAG,
-            self::ACTION_ASSIGN_TASK,
-            self::ACTION_NOTHING,
-          ),
-          parent::getActions($rule_type));
-    }
-  }
-
   public function getHeraldName() {
     return 'T'.$this->getTask()->getID();
-  }
-
-  public function applyHeraldEffects(array $effects) {
-    assert_instances_of($effects, 'HeraldEffect');
-
-    $result = array();
-    foreach ($effects as $effect) {
-      $action = $effect->getAction();
-      switch ($action) {
-        case self::ACTION_ASSIGN_TASK:
-          $target_array = $effect->getTarget();
-          $assign_phid = reset($target_array);
-          $this->setAssignPHID($assign_phid);
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Assigned task.'));
-          break;
-        default:
-          $result[] = $this->applyStandardEffect($effect);
-          break;
-      }
-    }
-    return $result;
   }
 
 }

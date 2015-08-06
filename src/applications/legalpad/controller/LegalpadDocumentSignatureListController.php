@@ -2,23 +2,17 @@
 
 final class LegalpadDocumentSignatureListController extends LegalpadController {
 
-  private $documentID;
-  private $queryKey;
   private $document;
 
-  public function willProcessRequest(array $data) {
-    $this->documentID = idx($data, 'id');
-    $this->queryKey = idx($data, 'queryKey');
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $querykey = $request->getURIData('queryKey');
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    if ($this->documentID) {
+    if ($id) {
       $document = id(new LegalpadDocumentQuery())
-        ->setViewer($user)
-        ->withIDs(array($this->documentID))
+        ->setViewer($viewer)
+        ->withIDs(array($id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -39,7 +33,7 @@ final class LegalpadDocumentSignatureListController extends LegalpadController {
     }
 
     $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($this->queryKey)
+      ->setQueryKey($querykey)
       ->setSearchEngine($engine)
       ->setNavigation($this->buildSideNav());
 
@@ -47,13 +41,13 @@ final class LegalpadDocumentSignatureListController extends LegalpadController {
   }
 
   public function buildSideNav($for_app = false) {
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     $engine = id(new LegalpadDocumentSignatureSearchEngine())
-      ->setViewer($user);
+      ->setViewer($viewer);
 
     if ($this->document) {
       $engine->setDocument($this->document);

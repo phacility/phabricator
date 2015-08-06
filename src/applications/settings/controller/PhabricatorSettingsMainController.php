@@ -3,8 +3,6 @@
 final class PhabricatorSettingsMainController
   extends PhabricatorController {
 
-  private $id;
-  private $key;
   private $user;
 
   private function getUser() {
@@ -12,24 +10,20 @@ final class PhabricatorSettingsMainController
   }
 
   private function isSelf() {
-    $viewer_phid = $this->getRequest()->getUser()->getPHID();
+    $viewer_phid = $this->getViewer()->getPHID();
     $user_phid = $this->getUser()->getPHID();
     return ($viewer_phid == $user_phid);
   }
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-    $this->key = idx($data, 'key');
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
+    $key = $request->getURIData('key');
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    if ($this->id) {
+    if ($id) {
       $user = id(new PhabricatorPeopleQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -49,7 +43,7 @@ final class PhabricatorSettingsMainController
     $panels = $this->buildPanels();
     $nav = $this->renderSideNav($panels);
 
-    $key = $nav->selectFilter($this->key, head($panels)->getPanelKey());
+    $key = $nav->selectFilter($key, head($panels)->getPanelKey());
 
     $panel = $panels[$key];
     $panel->setUser($this->getUser());

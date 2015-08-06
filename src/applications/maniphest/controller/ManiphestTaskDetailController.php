@@ -2,27 +2,21 @@
 
 final class ManiphestTaskDetailController extends ManiphestController {
 
-  private $id;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
 
     $e_title = null;
 
     $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
 
     $task = id(new ManiphestTaskQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->needSubscriberPHIDs(true)
       ->executeOne();
     if (!$task) {
@@ -33,7 +27,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $parent_task = null;
     if ($workflow && is_numeric($workflow)) {
       $parent_task = id(new ManiphestTaskQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withIDs(array($workflow))
         ->executeOne();
     }
@@ -42,7 +36,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $task,
       PhabricatorCustomField::ROLE_VIEW);
     $field_list
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->readFieldsFromStorage($task);
 
     $e_commit = ManiphestTaskHasCommitEdgeType::EDGECONST;
@@ -83,7 +77,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     }
 
     $phids = array_keys($phids);
-    $handles = $user->loadHandles($phids);
+    $handles = $viewer->loadHandles($phids);
 
     $info_view = null;
     if ($parent_task) {
@@ -115,7 +109,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     }
 
     $engine = new PhabricatorMarkupEngine();
-    $engine->setViewer($user);
+    $engine->setViewer($viewer);
     $engine->setContextObject($task);
     $engine->addObject($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION);
 
@@ -169,12 +163,13 @@ final class ManiphestTaskDetailController extends ManiphestController {
     }
 
     $default_claim = array(
-      $user->getPHID() => $user->getUsername().' ('.$user->getRealName().')',
+      $viewer->getPHID() => $viewer->getUsername().
+        ' ('.$viewer->getRealName().')',
     );
 
     $draft = id(new PhabricatorDraft())->loadOneWhere(
       'authorPHID = %s AND draftKey = %s',
-      $user->getPHID(),
+      $viewer->getPHID(),
       $task->getPHID());
     if ($draft) {
       $draft_text = $draft->getDraft();
@@ -188,7 +183,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $comment_form = new AphrontFormView();
     $comment_form
-      ->setUser($user)
+      ->setUser($viewer)
       ->setWorkflow(true)
       ->setAction('/maniphest/transaction/save/')
       ->setEncType('multipart/form-data')
@@ -249,12 +244,12 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setControlStyle('display: none'))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setLabel(pht('Comments'))
           ->setName('comments')
           ->setValue($draft_text)
           ->setID('transaction-comments')
-          ->setUser($user))
+          ->setUser($viewer))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Submit')));
@@ -288,7 +283,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     );
 
     // TODO: Initializing these behaviors for logged out users fatals things.
-    if ($user->isLoggedIn()) {
+    if ($viewer->isLoggedIn()) {
       Javelin::initBehavior('maniphest-transaction-controls', array(
         'select'     => 'transaction-action',
         'controlMap' => $control_map,
@@ -330,11 +325,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $task, $field_list, $edges, $actions, $handles);
     $description = $this->buildDescriptionView($task, $engine);
 
-    if (!$user->isLoggedIn()) {
+    if (!$viewer->isLoggedIn()) {
       // TODO: Eventually, everything should run through this. For now, we're
       // only using it to get a consistent "Login to Comment" button.
       $comment_box = id(new PhabricatorApplicationTransactionCommentView())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setRequestURI($request->getRequestURI());
       $preview_panel = null;
     } else {

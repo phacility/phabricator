@@ -2,24 +2,16 @@
 
 final class HeraldRuleController extends HeraldController {
 
-  private $id;
-  private $filter;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = (int)idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $content_type_map = HeraldAdapter::getEnabledAdapterMap($user);
+    $content_type_map = HeraldAdapter::getEnabledAdapterMap($viewer);
     $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();
 
-    if ($this->id) {
-      $id = $this->id;
+    if ($id) {
       $rule = id(new HeraldRuleQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withIDs(array($id))
         ->requireCapabilities(
           array(
@@ -33,7 +25,7 @@ final class HeraldRuleController extends HeraldController {
       $cancel_uri = $this->getApplicationURI("rule/{$id}/");
     } else {
       $rule = new HeraldRule();
-      $rule->setAuthorPHID($user->getPHID());
+      $rule->setAuthorPHID($viewer->getPHID());
       $rule->setMustMatchAll(1);
 
       $content_type = $request->getStr('content_type');
@@ -58,7 +50,7 @@ final class HeraldRuleController extends HeraldController {
       if ($rule->isObjectRule()) {
         $rule->setTriggerObjectPHID($request->getStr('targetPHID'));
         $object = id(new PhabricatorObjectQuery())
-          ->setViewer($user)
+          ->setViewer($viewer)
           ->withPHIDs(array($rule->getTriggerObjectPHID()))
           ->requireCapabilities(
             array(
@@ -128,7 +120,7 @@ final class HeraldRuleController extends HeraldController {
     $rule_type_name = $rule_type_map[$rule->getRuleType()];
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setID('herald-rule-edit-form')
       ->addHiddenInput('content_type', $rule->getContentType())
       ->addHiddenInput('rule_type', $rule->getRuleType())
@@ -356,8 +348,7 @@ final class HeraldRuleController extends HeraldController {
       foreach ($rule->getConditions() as $condition) {
         $value = $adapter->getEditorValueForCondition(
           $this->getViewer(),
-          $condition,
-          $handles);
+          $condition);
 
         $serial_conditions[] = array(
           $condition->getFieldName(),
@@ -374,27 +365,13 @@ final class HeraldRuleController extends HeraldController {
     if ($rule->getActions()) {
       $serial_actions = array();
       foreach ($rule->getActions() as $action) {
-        switch ($action->getAction()) {
-          case HeraldAdapter::ACTION_FLAG:
-          case HeraldAdapter::ACTION_BLOCK:
-            $current_value = $action->getTarget();
-            break;
-          default:
-            if (is_array($action->getTarget())) {
-              $target_map = array();
-              foreach ((array)$action->getTarget() as $fbid) {
-                $target_map[$fbid] = $handles[$fbid]->getName();
-              }
-              $current_value = $target_map;
-            } else {
-              $current_value = $action->getTarget();
-            }
-            break;
-        }
+        $value = $adapter->getEditorValueForAction(
+          $this->getViewer(),
+          $action);
 
         $serial_actions[] = array(
           $action->getAction(),
-          $current_value,
+          $value,
         );
       }
     }
@@ -435,40 +412,10 @@ final class HeraldRuleController extends HeraldController {
       }
     }
 
-    $group_map = array();
-    foreach ($field_map as $field_key => $field_name) {
-      $group_key = $adapter->getFieldGroupKey($field_key);
-      $group_map[$group_key][$field_key] = $field_name;
-    }
-
-    $field_groups = HeraldFieldGroup::getAllFieldGroups();
-
-    $groups = array();
-    foreach ($group_map as $group_key => $options) {
-      asort($options);
-
-      $field_group = idx($field_groups, $group_key);
-      if ($field_group) {
-        $group_label = $field_group->getGroupLabel();
-        $group_order = $field_group->getSortKey();
-      } else {
-        $group_label = nonempty($group_key, pht('Other'));
-        $group_order = 'Z';
-      }
-
-      $groups[] = array(
-        'label' => $group_label,
-        'options' => $options,
-        'order' => $group_order,
-      );
-    }
-
-    $groups = array_values(isort($groups, 'order'));
-
     $config_info = array();
-    $config_info['fields'] = $groups;
+    $config_info['fields'] = $this->getFieldGroups($adapter, $field_map);
     $config_info['conditions'] = $all_conditions;
-    $config_info['actions'] = $action_map;
+    $config_info['actions'] = $this->getActionGroups($adapter, $action_map);
     $config_info['valueMap'] = array();
 
     foreach ($field_map as $field => $name) {
@@ -500,7 +447,7 @@ final class HeraldRuleController extends HeraldController {
 
     $config_info['rule_type'] = $rule->getRuleType();
 
-    foreach ($config_info['actions'] as $action => $name) {
+    foreach ($action_map as $action => $name) {
       try {
         $value_key = $adapter->getValueTypeForAction(
           $action,
@@ -666,5 +613,56 @@ final class HeraldRuleController extends HeraldController {
 
     return $all_rules;
   }
+
+  private function getFieldGroups(HeraldAdapter $adapter, array $field_map) {
+    $group_map = array();
+    foreach ($field_map as $field_key => $field_name) {
+      $group_key = $adapter->getFieldGroupKey($field_key);
+      $group_map[$group_key][$field_key] = $field_name;
+    }
+
+    return $this->getGroups(
+      $group_map,
+      HeraldFieldGroup::getAllFieldGroups());
+  }
+
+  private function getActionGroups(HeraldAdapter $adapter, array $action_map) {
+    $group_map = array();
+    foreach ($action_map as $action_key => $action_name) {
+      $group_key = $adapter->getActionGroupKey($action_key);
+      $group_map[$group_key][$action_key] = $action_name;
+    }
+
+    return $this->getGroups(
+      $group_map,
+      HeraldActionGroup::getAllActionGroups());
+  }
+
+  private function getGroups(array $item_map, array $group_list) {
+    assert_instances_of($group_list, 'HeraldGroup');
+
+    $groups = array();
+    foreach ($item_map as $group_key => $options) {
+      asort($options);
+
+      $group_object = idx($group_list, $group_key);
+      if ($group_object) {
+        $group_label = $group_object->getGroupLabel();
+        $group_order = $group_object->getSortKey();
+      } else {
+        $group_label = nonempty($group_key, pht('Other'));
+        $group_order = 'Z';
+      }
+
+      $groups[] = array(
+        'label' => $group_label,
+        'options' => $options,
+        'order' => $group_order,
+      );
+    }
+
+    return array_values(isort($groups, 'order'));
+  }
+
 
 }

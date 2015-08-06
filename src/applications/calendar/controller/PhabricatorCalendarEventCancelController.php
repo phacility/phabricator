@@ -3,20 +3,14 @@
 final class PhabricatorCalendarEventCancelController
   extends PhabricatorCalendarController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request  = $this->getRequest();
-    $user     = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
     $sequence = $request->getURIData('sequence');
 
     $event = id(new PhabricatorCalendarEventQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -26,7 +20,7 @@ final class PhabricatorCalendarEventCancelController
 
     if ($sequence) {
       $parent_event = $event;
-      $event = $parent_event->generateNthGhost($sequence, $user);
+      $event = $parent_event->generateNthGhost($sequence, $viewer);
       $event->attachParentEvent($parent_event);
     }
 
@@ -51,10 +45,10 @@ final class PhabricatorCalendarEventCancelController
         return id(new AphrontRedirectResponse())->setURI($cancel_uri);
       } else if ($sequence) {
         $event = $this->createEventFromGhost(
-          $user,
+          $viewer,
           $event,
           $sequence);
-        $event->applyViewerTimezone($user);
+        $event->applyViewerTimezone($viewer);
       }
 
       $xactions = array();
@@ -65,7 +59,7 @@ final class PhabricatorCalendarEventCancelController
         ->setNewValue(!$is_cancelled);
 
       $editor = id(new PhabricatorCalendarEventEditor())
-        ->setActor($user)
+        ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true)
         ->setContinueOnMissingFields(true);

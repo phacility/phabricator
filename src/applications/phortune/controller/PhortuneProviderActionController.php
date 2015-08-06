@@ -3,13 +3,7 @@
 final class PhortuneProviderActionController
   extends PhortuneController {
 
-  private $id;
   private $action;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-    $this->setAction($data['action']);
-  }
 
   public function setAction($action) {
     $this->action = $action;
@@ -20,13 +14,14 @@ final class PhortuneProviderActionController
     return $this->action;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $this->setAction($request->getURIData('action'));
 
     $provider_config = id(new PhortunePaymentProviderConfigQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$provider_config) {
       return new Aphront404Response();

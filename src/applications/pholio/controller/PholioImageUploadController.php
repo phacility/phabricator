@@ -2,9 +2,8 @@
 
 final class PholioImageUploadController extends PholioController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $phid = $request->getStr('filePHID');
     $replaces_phid = $request->getStr('replacesPHID');

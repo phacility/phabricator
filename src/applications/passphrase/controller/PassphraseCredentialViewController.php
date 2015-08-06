@@ -193,6 +193,8 @@ final class PassphraseCredentialViewController extends PassphraseController {
         $viewer->renderHandleList($used_by_phids));
     }
 
+    $properties->invokeWillRenderEvent();
+
     $description = $credential->getDescription();
     if (strlen($description)) {
       $properties->addSectionHeader(

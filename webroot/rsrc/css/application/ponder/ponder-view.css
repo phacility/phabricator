@@ -1,5 +1,5 @@
 /**
- * @provides ponder-vote-css
+ * @provides ponder-view-css
  */
 
 .ponder-votable {
@@ -39,4 +39,21 @@
   font-size: {$biggerfontsize};
   line-height: 20px;
   font-weight: bold;
+}
+
+.ponder-show-comments {
+  text-align: center;
+  padding: 8px;
+  margin: 0 16px;
+  float: right;
+  font-weight: bold;
+  background: #fff;
+  border-bottom: 1px solid {$blueborder};
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+}
+
+.device-desktop .ponder-comments-view {
+  width: 90%;
+  margin: 0 auto;
 }

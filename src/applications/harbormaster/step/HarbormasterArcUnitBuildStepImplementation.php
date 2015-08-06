@@ -25,6 +25,10 @@ final class HarbormasterArcUnitBuildStepImplementation
     return pht('Automatic `arc unit` step.');
   }
 
+  public function getBuildStepGroupKey() {
+    return HarbormasterBuiltinBuildStepGroup::GROUPKEY;
+  }
+
   public function execute(
     HarbormasterBuild $build,
     HarbormasterBuildTarget $build_target) {

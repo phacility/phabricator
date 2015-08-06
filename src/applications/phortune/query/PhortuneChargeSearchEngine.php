@@ -130,6 +130,6 @@ final class PhortuneChargeSearchEngine
     $result = new PhabricatorApplicationSearchResultView();
     $result->setTable($table);
 
-    return $table;
+    return $result;
   }
 }

@@ -9,6 +9,10 @@ final class PhabricatorSlowvoteTransaction
   const TYPE_SHUFFLE      = 'vote:shuffle';
   const TYPE_CLOSE        = 'vote:close';
 
+  const MAILTAG_DETAILS = 'vote:details';
+  const MAILTAG_RESPONSES = 'vote:responses';
+  const MAILTAG_OTHER  = 'vote:vote';
+
   public function getApplicationName() {
     return 'slowvote';
   }
@@ -93,6 +97,82 @@ final class PhabricatorSlowvoteTransaction
     return parent::getTitle();
   }
 
+    public function getTitleForFeed() {
+    $author_phid = $this->getAuthorPHID();
+    $object_phid = $this->getObjectPHID();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    $type = $this->getTransactionType();
+    switch ($type) {
+      case self::TYPE_QUESTION:
+        if ($old === null) {
+          return pht(
+            '%s created %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+
+        } else {
+          return pht(
+            '%s renamed %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+      break;
+      case self::TYPE_DESCRIPTION:
+        if ($old === null) {
+          return pht(
+            '%s set the description of %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+
+        } else {
+          return pht(
+            '%s edited the description of %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+      break;
+      case self::TYPE_RESPONSES:
+        // TODO: This could be more detailed
+        return pht(
+          '%s changed who can see the responses of %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+
+      case self::TYPE_SHUFFLE:
+        if ($new) {
+          return pht(
+            '%s made %s responses appear in a random order.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+
+        } else {
+          return pht(
+            '%s made %s responses appear in a fixed order.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+        case self::TYPE_CLOSE:
+        if ($new) {
+          return pht(
+            '%s closed %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+
+        } else {
+          return pht(
+            '%s reopened %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+      break;
+    }
+
+    return parent::getTitleForFeed();
+  }
+
   public function getIcon() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();
@@ -150,6 +230,27 @@ final class PhabricatorSlowvoteTransaction
       $viewer,
       $this->getOldValue(),
       $this->getNewValue());
+  }
+
+  public function getMailTags() {
+    $tags = parent::getMailTags();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_QUESTION:
+      case self::TYPE_DESCRIPTION:
+      case self::TYPE_SHUFFLE:
+      case self::TYPE_CLOSE:
+        $tags[] = self::MAILTAG_DETAILS;
+        break;
+      case self::TYPE_RESPONSES:
+        $tags[] = self::MAILTAG_RESPONSES;
+        break;
+      default:
+        $tags[] = self::MAILTAG_OTHER;
+        break;
+    }
+
+    return $tags;
   }
 
 

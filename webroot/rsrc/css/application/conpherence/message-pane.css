@@ -344,3 +344,7 @@
   height: 24px;
   width: 100%;
 }
+
+.conpherence-message .phabricator-remarkup .remarkup-code-block pre {
+  max-height: 200px;
+}

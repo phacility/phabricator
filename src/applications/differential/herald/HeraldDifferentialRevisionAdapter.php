@@ -1,19 +1,16 @@
 <?php
 
 final class HeraldDifferentialRevisionAdapter
-  extends HeraldDifferentialAdapter {
+  extends HeraldDifferentialAdapter
+  implements HarbormasterBuildableAdapterInterface {
 
   protected $revision;
-
-  protected $explicitReviewers;
-  protected $addReviewerPHIDs = array();
-  protected $blockingReviewerPHIDs = array();
-  protected $buildPlans = array();
-  protected $requiredSignatureDocumentPHIDs = array();
 
   protected $affectedPackages;
   protected $changesets;
   private $haveHunks;
+
+  private $buildPlanPHIDs = array();
 
   public function getAdapterApplicationClass() {
     return 'PhabricatorDifferentialApplication';
@@ -83,27 +80,6 @@ final class HeraldDifferentialRevisionAdapter
     return $object;
   }
 
-  public function setExplicitReviewers($explicit_reviewers) {
-    $this->explicitReviewers = $explicit_reviewers;
-    return $this;
-  }
-
-  public function getReviewersAddedByHerald() {
-    return $this->addReviewerPHIDs;
-  }
-
-  public function getBlockingReviewersAddedByHerald() {
-    return $this->blockingReviewerPHIDs;
-  }
-
-  public function getRequiredSignatureDocumentPHIDs() {
-    return $this->requiredSignatureDocumentPHIDs;
-  }
-
-  public function getBuildPlans() {
-    return $this->buildPlans;
-  }
-
   public function getHeraldName() {
     return $this->revision->getTitle();
   }
@@ -147,98 +123,28 @@ final class HeraldDifferentialRevisionAdapter
   }
 
   public function loadReviewers() {
-    // TODO: This can probably go away as I believe it's just a performance
-    // optimization, just retaining it while modularizing fields to limit the
-    // scope of that change.
-    if (isset($this->explicitReviewers)) {
-      return array_keys($this->explicitReviewers);
-    } else {
-      return $this->revision->getReviewers();
-    }
+    $reviewers = $this->getObject()->getReviewerStatus();
+    return mpull($reviewers, 'getReviewerPHID');
   }
 
-  public function getActions($rule_type) {
-    switch ($rule_type) {
-      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
-        return array_merge(
-          array(
-            self::ACTION_ADD_CC,
-            self::ACTION_REMOVE_CC,
-            self::ACTION_EMAIL,
-            self::ACTION_ADD_REVIEWERS,
-            self::ACTION_ADD_BLOCKING_REVIEWERS,
-            self::ACTION_APPLY_BUILD_PLANS,
-            self::ACTION_REQUIRE_SIGNATURE,
-            self::ACTION_NOTHING,
-          ),
-          parent::getActions($rule_type));
-      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-        return array_merge(
-          array(
-            self::ACTION_ADD_CC,
-            self::ACTION_REMOVE_CC,
-            self::ACTION_EMAIL,
-            self::ACTION_FLAG,
-            self::ACTION_ADD_REVIEWERS,
-            self::ACTION_ADD_BLOCKING_REVIEWERS,
-            self::ACTION_NOTHING,
-          ),
-          parent::getActions($rule_type));
-    }
+
+/* -(  HarbormasterBuildableAdapterInterface  )------------------------------ */
+
+
+  public function getHarbormasterBuildablePHID() {
+    return $this->getDiff()->getPHID();
   }
 
-  public function applyHeraldEffects(array $effects) {
-    assert_instances_of($effects, 'HeraldEffect');
+  public function getHarbormasterContainerPHID() {
+    return $this->getObject()->getPHID();
+  }
 
-    $result = array();
+  public function getQueuedHarbormasterBuildPlanPHIDs() {
+    return $this->buildPlanPHIDs;
+  }
 
-    foreach ($effects as $effect) {
-      $action = $effect->getAction();
-      switch ($action) {
-        case self::ACTION_ADD_REVIEWERS:
-          foreach ($effect->getTarget() as $phid) {
-            $this->addReviewerPHIDs[$phid] = true;
-          }
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Added reviewers.'));
-          break;
-        case self::ACTION_ADD_BLOCKING_REVIEWERS:
-          // This adds reviewers normally, it just also marks them blocking.
-          foreach ($effect->getTarget() as $phid) {
-            $this->addReviewerPHIDs[$phid] = true;
-            $this->blockingReviewerPHIDs[$phid] = true;
-          }
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Added blocking reviewers.'));
-          break;
-        case self::ACTION_APPLY_BUILD_PLANS:
-          foreach ($effect->getTarget() as $phid) {
-            $this->buildPlans[] = $phid;
-          }
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Applied build plans.'));
-          break;
-        case self::ACTION_REQUIRE_SIGNATURE:
-          foreach ($effect->getTarget() as $phid) {
-            $this->requiredSignatureDocumentPHIDs[] = $phid;
-          }
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Required signatures.'));
-          break;
-        default:
-          $result[] = $this->applyStandardEffect($effect);
-          break;
-      }
-    }
-    return $result;
+  public function queueHarbormasterBuildPlanPHID($phid) {
+    $this->buildPlanPHIDs[] = $phid;
   }
 
 }

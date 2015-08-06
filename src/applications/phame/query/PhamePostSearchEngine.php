@@ -102,7 +102,7 @@ final class PhamePostSearchEngine
 
     $result = new PhabricatorApplicationSearchResultView();
     $result->setObjectList($list);
-    $result->setNoDataString(pht('No blogs found.'));
+    $result->setNoDataString(pht('No blogs posts found.'));
 
     return $result;
   }

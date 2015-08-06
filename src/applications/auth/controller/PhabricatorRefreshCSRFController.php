@@ -2,14 +2,13 @@
 
 final class PhabricatorRefreshCSRFController extends PhabricatorAuthController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     return id(new AphrontAjaxResponse())
       ->setContent(
         array(
-          'token' => $user->getCSRFToken(),
+          'token' => $viewer->getCSRFToken(),
         ));
   }
 
