@@ -214,6 +214,10 @@ final class HarbormasterBuild extends HarbormasterDAO
       $this->getBuildStatus() === self::STATUS_BUILDING;
   }
 
+  public function isAutobuild() {
+    return ($this->getPlanAutoKey() !== null);
+  }
+
   public function createLog(
     HarbormasterBuildTarget $build_target,
     $log_source,
@@ -336,16 +340,28 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
   public function canRestartBuild() {
+    if ($this->isAutobuild()) {
+      return false;
+    }
+
     return !$this->isRestarting();
   }
 
   public function canStopBuild() {
+    if ($this->isAutobuild()) {
+      return false;
+    }
+
     return !$this->isComplete() &&
            !$this->isStopped() &&
            !$this->isStopping();
   }
 
   public function canResumeBuild() {
+    if ($this->isAutobuild()) {
+      return false;
+    }
+
     return $this->isStopped() &&
            !$this->isResuming();
   }
