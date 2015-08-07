@@ -137,12 +137,12 @@ final class PhabricatorPasteTransaction
         break;
       case self::TYPE_STATUS:
         switch ($new) {
-          case self::STATUS_OPEN:
+          case PhabricatorPaste::STATUS_ACTIVE:
             return pht(
               '%s activated %s.',
               $this->renderHandleLink($author_phid),
               $this->renderHandleLink($object_phid));
-          case self::STATUS_CLOSED:
+          case PhabricatorPaste::STATUS_ARCHIVED:
             return pht(
               '%s archived %s.',
               $this->renderHandleLink($author_phid),
