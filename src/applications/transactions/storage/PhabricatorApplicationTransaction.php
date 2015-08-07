@@ -428,21 +428,6 @@ abstract class PhabricatorApplicationTransaction
             return 'red';
         }
         break;
-      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-        $old = $this->getOldValue();
-        $new = $this->getNewValue();
-        $add = array_diff($new, $old);
-        $rem = array_diff($old, $new);
-        if ($add && $rem) {
-          return 'green';
-        } else if ($add) {
-          return 'green';
-        } else if ($rem) {
-          return 'black';
-        } else {
-          return null;
-        }
-      break;
     }
     return null;
   }
