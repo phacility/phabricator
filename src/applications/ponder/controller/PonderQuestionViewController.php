@@ -155,16 +155,9 @@ final class PonderQuestionViewController extends PonderController {
 
     $view->invokeWillRenderEvent();
 
-    $votable = id(new PonderVotableView())
-      ->setPHID($question->getPHID())
-      ->setURI($this->getApplicationURI('vote/'))
-      ->setCount($question->getVoteCount())
-      ->setVote($question->getUserVote());
-
     $view->addSectionHeader(pht('Question'));
     $view->addTextContent(
       array(
-        $votable,
         phutil_tag(
           'div',
           array(
@@ -334,16 +327,9 @@ final class PonderQuestionViewController extends PonderController {
 
     $view->invokeWillRenderEvent();
 
-    $votable = id(new PonderVotableView())
-      ->setPHID($answer->getPHID())
-      ->setURI($this->getApplicationURI('vote/'))
-      ->setCount($answer->getVoteCount())
-      ->setVote($answer->getUserVote());
-
     $view->addSectionHeader(pht('Answer'));
     $view->addTextContent(
       array(
-        $votable,
         phutil_tag(
           'div',
           array(
