@@ -2,22 +2,17 @@
 
 final class PhabricatorFlagDeleteController extends PhabricatorFlagController {
 
-  private $id;
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $flag = id(new PhabricatorFlag())->load($this->id);
+    $flag = id(new PhabricatorFlag())->load($id);
     if (!$flag) {
       return new Aphront404Response();
     }
 
-    if ($flag->getOwnerPHID() != $user->getPHID()) {
+    if ($flag->getOwnerPHID() != $viewer->getPHID()) {
       return new Aphront400Response();
     }
 

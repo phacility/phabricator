@@ -255,6 +255,7 @@ final class PHUITimelineView extends AphrontView {
           ->setIcon($badge->getIcon())
           ->setQuality($badge->getQuality())
           ->setHeader($badge->getName())
+          ->setTipDirection('E')
           ->setHref('/badges/view/'.$badge->getID());
 
         $event->addBadge($badge_view);

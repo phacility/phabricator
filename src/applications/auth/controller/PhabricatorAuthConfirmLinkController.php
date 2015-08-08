@@ -3,17 +3,11 @@
 final class PhabricatorAuthConfirmLinkController
   extends PhabricatorAuthController {
 
-  private $accountKey;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $accountkey = $request->getURIData('akey');
 
-  public function willProcessRequest(array $data) {
-    $this->accountKey = idx($data, 'akey');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $result = $this->loadAccountForRegistrationOrLinking($this->accountKey);
+    $result = $this->loadAccountForRegistrationOrLinking($accountkey);
     list($account, $provider, $response) = $result;
 
     if ($response) {

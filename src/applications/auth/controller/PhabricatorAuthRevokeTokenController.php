@@ -3,23 +3,17 @@
 final class PhabricatorAuthRevokeTokenController
   extends PhabricatorAuthController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $is_all = ($this->id === 'all');
+    $is_all = ($id === 'all');
 
     $query = id(new PhabricatorAuthTemporaryTokenQuery())
       ->setViewer($viewer)
       ->withObjectPHIDs(array($viewer->getPHID()));
     if (!$is_all) {
-      $query->withIDs(array($this->id));
+      $query->withIDs(array($id));
     }
 
     $tokens = $query->execute();

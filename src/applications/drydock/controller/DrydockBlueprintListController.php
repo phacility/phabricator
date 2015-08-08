@@ -2,20 +2,16 @@
 
 final class DrydockBlueprintListController extends DrydockBlueprintController {
 
-  private $queryKey;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey');
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $querykey = $request->getURIData('queryKey');
 
-  public function processRequest() {
     $request = $this->getRequest();
     $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($this->queryKey)
+      ->setQueryKey($querykey)
       ->setSearchEngine(new DrydockBlueprintSearchEngine())
       ->setNavigation($this->buildSideNavView());
 

@@ -6,6 +6,7 @@ final class PhabricatorPasteTransaction
   const TYPE_CONTENT = 'paste.create';
   const TYPE_TITLE = 'paste.title';
   const TYPE_LANGUAGE = 'paste.language';
+  const TYPE_STATUS = 'paste.status';
 
   const MAILTAG_CONTENT = 'paste-content';
   const MAILTAG_OTHER = 'paste-other';
@@ -54,6 +55,15 @@ final class PhabricatorPasteTransaction
       case self::TYPE_LANGUAGE:
         return 'fa-pencil';
         break;
+      case self::TYPE_STATUS:
+        $new = $this->getNewValue();
+        switch ($new) {
+          case PhabricatorPaste::STATUS_ACTIVE:
+            return 'fa-check';
+          case PhabricatorPaste::STATUS_ARCHIVED:
+            return 'fa-ban';
+        }
+      break;
     }
     return parent::getIcon();
   }
@@ -89,6 +99,19 @@ final class PhabricatorPasteTransaction
           "%s updated the paste's language.",
           $this->renderHandleLink($author_phid));
         break;
+      case self::TYPE_STATUS:
+        switch ($new) {
+          case PhabricatorPaste::STATUS_ACTIVE:
+            return pht(
+              '%s activated this paste.',
+              $this->renderHandleLink($author_phid));
+          case PhabricatorPaste::STATUS_ARCHIVED:
+            return pht(
+              '%s archived this paste.',
+              $this->renderHandleLink($author_phid));
+        }
+        break;
+
     }
 
     return parent::getTitle();
@@ -128,6 +151,20 @@ final class PhabricatorPasteTransaction
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
+      case self::TYPE_STATUS:
+        switch ($new) {
+          case PhabricatorPaste::STATUS_ACTIVE:
+            return pht(
+              '%s activated %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+          case PhabricatorPaste::STATUS_ARCHIVED:
+            return pht(
+              '%s archived %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+        }
+        break;
     }
 
     return parent::getTitleForFeed();
@@ -140,6 +177,14 @@ final class PhabricatorPasteTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
         return PhabricatorTransactions::COLOR_GREEN;
+      case self::TYPE_STATUS:
+        switch ($new) {
+          case PhabricatorPaste::STATUS_ACTIVE:
+            return 'green';
+          case PhabricatorPaste::STATUS_ARCHIVED:
+            return 'indigo';
+        }
+      break;
     }
 
     return parent::getColor();

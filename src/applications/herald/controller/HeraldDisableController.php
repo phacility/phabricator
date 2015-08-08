@@ -2,18 +2,10 @@
 
 final class HeraldDisableController extends HeraldController {
 
-  private $id;
-  private $action;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-    $this->action = $data['action'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-    $id = $this->id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $action = $request->getURIData('action');
 
     $rule = id(new HeraldRuleQuery())
       ->setViewer($viewer)
@@ -35,7 +27,7 @@ final class HeraldDisableController extends HeraldController {
 
     $view_uri = $this->getApplicationURI("rule/{$id}/");
 
-    $is_disable = ($this->action === 'disable');
+    $is_disable = ($action === 'disable');
 
     if ($request->isFormPost()) {
       $xaction = id(new HeraldRuleTransaction())

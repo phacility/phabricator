@@ -23,48 +23,83 @@ final class HarbormasterStepAddController extends HarbormasterController {
 
     $plan_id = $plan->getID();
     $cancel_uri = $this->getApplicationURI("plan/{$plan_id}/");
+    $plan_title = pht('Plan %d', $plan_id);
 
     $all = HarbormasterBuildStepImplementation::getImplementations();
-    foreach ($all as $key => $impl) {
-      if ($impl->shouldRequireAutotargeting()) {
-        unset($all[$key]);
+    $all = msort($all, 'getName');
+
+    $all_groups = HarbormasterBuildStepGroup::getAllGroups();
+    foreach ($all as $impl) {
+      $group_key = $impl->getBuildStepGroupKey();
+      if (empty($all_groups[$group_key])) {
+        throw new Exception(
+          pht(
+            'Build step "%s" has step group key "%s", but no step group '.
+            'with that key exists.',
+            get_class($impl),
+            $group_key));
       }
     }
 
-    $errors = array();
-    if ($request->isFormPost()) {
-      $class = $request->getStr('class');
-      if (empty($all[$class])) {
-        $errors[] = pht('Choose the type of build step you want to add.');
+    $groups = mgroup($all, 'getBuildStepGroupKey');
+    $lists = array();
+
+    $enabled_groups = HarbormasterBuildStepGroup::getAllEnabledGroups();
+    foreach ($enabled_groups as $group) {
+      $list = id(new PHUIObjectItemListView())
+        ->setHeader($group->getGroupName())
+        ->setNoDataString(
+          pht(
+            'This group has no available build steps.'));
+
+      $steps = idx($groups, $group->getGroupKey(), array());
+
+      foreach ($steps as $key => $impl) {
+        if ($impl->shouldRequireAutotargeting()) {
+          unset($steps[$key]);
+          continue;
+        }
       }
-      if (!$errors) {
+
+      if (!$steps && !$group->shouldShowIfEmpty()) {
+        continue;
+      }
+
+      foreach ($steps as $key => $impl) {
+        $class = get_class($impl);
+
         $new_uri = $this->getApplicationURI("step/new/{$plan_id}/{$class}/");
-        return id(new AphrontRedirectResponse())->setURI($new_uri);
+
+        $item = id(new PHUIObjectItemView())
+          ->setHeader($impl->getName())
+          ->setHref($new_uri)
+          ->addAttribute($impl->getGenericDescription());
+
+        $list->addItem($item);
       }
+
+      $lists[] = $list;
     }
 
-    $control = id(new AphrontFormRadioButtonControl())
-      ->setName('class');
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb($plan_title, $cancel_uri)
+      ->addTextCrumb(pht('Add Build Step'));
 
-    foreach ($all as $class => $implementation) {
-      $control->addButton(
-        $class,
-        $implementation->getName(),
-        $implementation->getGenericDescription());
-    }
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Add Build Step'))
+      ->appendChild($lists);
 
-    if ($errors) {
-      $errors = id(new PHUIInfoView())
-        ->setErrors($errors);
-    }
-
-    return $this->newDialog()
-      ->setTitle(pht('Add New Step'))
-      ->addSubmitButton(pht('Add Build Step'))
-      ->addCancelButton($cancel_uri)
-      ->appendChild($errors)
-      ->appendParagraph(pht('Choose a type of build step to add:'))
-      ->appendChild($control);
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $box,
+      ),
+      array(
+        'title' => array(
+          $plan_title,
+          pht('Add Build Step'),
+        ),
+      ));
   }
 
 }

@@ -2,8 +2,6 @@
 
 final class HeraldTranscriptListController extends HeraldController {
 
-  private $queryKey;
-
   public function buildSideNavView($for_app = false) {
     $user = $this->getRequest()->getUser();
 
@@ -32,13 +30,11 @@ final class HeraldTranscriptListController extends HeraldController {
     return $crumbs;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey');
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $querykey = $request->getURIData('queryKey');
 
-  public function processRequest() {
     $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($this->queryKey)
+      ->setQueryKey($querykey)
       ->setSearchEngine(new HeraldTranscriptSearchEngine())
       ->setNavigation($this->buildSideNavView());
 

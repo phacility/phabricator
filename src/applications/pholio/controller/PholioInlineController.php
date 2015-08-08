@@ -2,18 +2,12 @@
 
 final class PholioInlineController extends PholioController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    if ($this->id) {
-      $inline = id(new PholioTransactionComment())->load($this->id);
+    if ($id) {
+      $inline = id(new PholioTransactionComment())->load($id);
 
       if (!$inline) {
         return new Aphront404Response();

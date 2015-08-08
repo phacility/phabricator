@@ -2,9 +2,8 @@
 
 final class PhabricatorFactChartController extends PhabricatorFactController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $table = new PhabricatorFactRaw();
     $conn_r = $table->establishConnection('r');

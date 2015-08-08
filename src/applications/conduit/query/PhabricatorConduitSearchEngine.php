@@ -174,7 +174,7 @@ final class PhabricatorConduitSearchEngine
       $item = id(new PHUIObjectItemView())
         ->setHeader($method_name)
         ->setHref($this->getApplicationURI('method/'.$method_name.'/'))
-        ->addAttribute($method->getMethodDescription());
+        ->addAttribute($method->getMethodSummary());
 
       switch ($method->getMethodStatus()) {
         case ConduitAPIMethod::METHOD_STATUS_STABLE:

@@ -66,6 +66,10 @@ final class PonderQuestionEditor
     $types = parent::getTransactionTypes();
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
+    $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_SPACE;
+
     $types[] = PonderQuestionTransaction::TYPE_TITLE;
     $types[] = PonderQuestionTransaction::TYPE_CONTENT;
     $types[] = PonderQuestionTransaction::TYPE_ANSWERS;

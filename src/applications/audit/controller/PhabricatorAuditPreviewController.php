@@ -3,17 +3,11 @@
 final class PhabricatorAuditPreviewController
   extends PhabricatorAuditController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $commit = id(new PhabricatorRepositoryCommit())->load($this->id);
+    $commit = id(new PhabricatorRepositoryCommit())->load($id);
     if (!$commit) {
       return new Aphront404Response();
     }
@@ -23,7 +17,7 @@ final class PhabricatorAuditPreviewController
     $action = $request->getStr('action');
     if ($action != PhabricatorAuditActionConstants::COMMENT) {
       $action_xaction = id(new PhabricatorAuditTransaction())
-        ->setAuthorPHID($user->getPHID())
+        ->setAuthorPHID($viewer->getPHID())
         ->setObjectPHID($commit->getPHID())
         ->setTransactionType(PhabricatorAuditActionConstants::ACTION)
         ->setNewValue($action);
@@ -52,7 +46,7 @@ final class PhabricatorAuditPreviewController
     $content = $request->getStr('content');
     if (strlen($content)) {
       $xactions[] = id(new PhabricatorAuditTransaction())
-        ->setAuthorPHID($user->getPHID())
+        ->setAuthorPHID($viewer->getPHID())
         ->setObjectPHID($commit->getPHID())
         ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
         ->attachComment(
@@ -72,13 +66,13 @@ final class PhabricatorAuditPreviewController
 
     $view = id(new PhabricatorAuditTransactionView())
       ->setIsPreview(true)
-      ->setUser($user)
+      ->setUser($viewer)
       ->setObjectPHID($commit->getPHID())
       ->setTransactions($xactions);
 
     id(new PhabricatorDraft())
-      ->setAuthorPHID($user->getPHID())
-      ->setDraftKey('diffusion-audit-'.$this->id)
+      ->setAuthorPHID($viewer->getPHID())
+      ->setDraftKey('diffusion-audit-'.$id)
       ->setDraft($content)
       ->replaceOrDelete();
 

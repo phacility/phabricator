@@ -3,10 +3,8 @@
 final class PhabricatorXHPASTViewRunController
   extends PhabricatorXHPASTViewController {
 
-  public function processRequest() {
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     if ($request->isFormPost()) {
       $source = $request->getStr('source');
@@ -24,7 +22,7 @@ final class PhabricatorXHPASTViewRunController
       $storage_tree = new PhabricatorXHPASTViewParseTree();
       $storage_tree->setInput($source);
       $storage_tree->setStdout($stdout);
-      $storage_tree->setAuthorPHID($user->getPHID());
+      $storage_tree->setAuthorPHID($viewer->getPHID());
       $storage_tree->save();
 
       return id(new AphrontRedirectResponse())
@@ -32,7 +30,7 @@ final class PhabricatorXHPASTViewRunController
     }
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel(pht('Source'))

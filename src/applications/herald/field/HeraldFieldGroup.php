@@ -1,12 +1,6 @@
 <?php
 
-abstract class HeraldFieldGroup extends Phobject {
-
-  abstract public function getGroupLabel();
-
-  protected function getGroupOrder() {
-    return 1000;
-  }
+abstract class HeraldFieldGroup extends HeraldGroup {
 
   final public function getGroupKey() {
     $class = new ReflectionClass($this);
@@ -18,14 +12,10 @@ abstract class HeraldFieldGroup extends Phobject {
           '"%s" class "%s" must define a "%s" property.',
           __CLASS__,
           get_class($this),
-          'FIELDCONST'));
+          'FIELDGROUPKEY'));
     }
 
     return $const;
-  }
-
-  public function getSortKey() {
-    return sprintf('A%08d%s', $this->getGroupOrder(), $this->getGroupLabel());
   }
 
   final public static function getAllFieldGroups() {

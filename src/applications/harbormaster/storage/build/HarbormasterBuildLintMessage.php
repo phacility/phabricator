@@ -20,21 +20,60 @@ final class HarbormasterBuildLintMessage
       ->setBuildTargetPHID($build_target->getPHID());
   }
 
+  public static function getParameterSpec() {
+    return array(
+      'name' => array(
+        'type' => 'string',
+        'description' => pht(
+          'Short message name, like "Syntax Error".'),
+      ),
+      'code' => array(
+        'type' => 'string',
+        'description' => pht(
+          'Lint message code identifying the type of message, like "ERR123".'),
+      ),
+      'severity' => array(
+        'type' => 'string',
+        'description' => pht(
+          'Severity of the message.'),
+      ),
+      'path' => array(
+        'type' => 'string',
+        'description' => pht(
+          'Path to the file containing the lint message, from the project '.
+          'root.'),
+      ),
+      'line' => array(
+        'type' => 'optional int',
+        'description' => pht(
+          'Line number in the file where the text which triggered the '.
+          'message first appears. The first line of the file is line 1, '.
+          'not line 0.'),
+      ),
+      'char' => array(
+        'type' => 'optional int',
+        'description' => pht(
+          'Byte position on the line where the text which triggered the '.
+          'message starts. The first byte on the line is byte 1, not byte '.
+          '0. This position is byte-based (not character-based) because '.
+          'not all lintable files have a valid character encoding.'),
+      ),
+      'description' => array(
+        'type' => 'optional string',
+        'description' => pht(
+          'Long explanation of the lint message.'),
+      ),
+    );
+  }
+
   public static function newFromDictionary(
     HarbormasterBuildTarget $build_target,
     array $dict) {
 
     $obj = self::initializeNewLintMessage($build_target);
 
-    $spec = array(
-      'path' => 'string',
-      'line' => 'optional int',
-      'char' => 'optional int',
-      'code' => 'string',
-      'severity' => 'string',
-      'name' => 'string',
-      'description' => 'optional string',
-    );
+    $spec = self::getParameterSpec();
+    $spec = ipull($spec, 'type');
 
     // We're just going to ignore extra keys for now, to make it easier to
     // add stuff here later on.

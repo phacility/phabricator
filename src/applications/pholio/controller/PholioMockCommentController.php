@@ -2,23 +2,17 @@
 
 final class PholioMockCommentController extends PholioController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     if (!$request->isFormPost()) {
       return new Aphront400Response();
     }
 
     $mock = id(new PholioMockQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->needImages(true)
       ->executeOne();
 
@@ -38,7 +32,7 @@ final class PholioMockCommentController extends PholioController {
 
     $inline_comments = id(new PholioTransactionComment())->loadAllWhere(
       'authorphid = %s AND transactionphid IS NULL AND imageid IN (%Ld)',
-      $user->getPHID(),
+      $viewer->getPHID(),
       mpull($mock->getImages(), 'getID'));
 
     if (!$inline_comments || strlen($comment)) {
@@ -56,7 +50,7 @@ final class PholioMockCommentController extends PholioController {
     }
 
     $editor = id(new PholioMockEditor())
-      ->setActor($user)
+      ->setActor($viewer)
       ->setContentSourceFromRequest($request)
       ->setContinueOnNoEffect($request->isContinueRequest())
       ->setIsPreview($is_preview);
@@ -78,7 +72,7 @@ final class PholioMockCommentController extends PholioController {
         ->setMock($mock);
 
       return id(new PhabricatorApplicationTransactionResponse())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->setTransactions($xactions)
         ->setTransactionView($xaction_view)
         ->setIsPreview($is_preview);

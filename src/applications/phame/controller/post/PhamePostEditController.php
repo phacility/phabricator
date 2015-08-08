@@ -169,7 +169,6 @@ final class PhamePostEditController extends PhameController {
       phutil_tag('div', array('id' => 'post-preview'), $loading),
     ));
 
-    require_celerity_resource('phame-css');
     Javelin::initBehavior(
       'phame-post-preview',
       array(
@@ -190,16 +189,12 @@ final class PhamePostEditController extends PhameController {
       $page_title,
       $this->getApplicationURI('/post/view/'.$id.'/'));
 
-    $nav = $this->renderSideNavFilterView(null);
-    $nav->appendChild(
+    return $this->buildApplicationPage(
       array(
         $crumbs,
         $form_box,
         $preview_panel,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
+      ),
       array(
         'title' => $page_title,
       ));

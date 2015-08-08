@@ -10,6 +10,11 @@ final class PhabricatorBadgesTransaction
   const TYPE_STATUS = 'badges:status';
   const TYPE_FLAVOR = 'badges:flavor';
 
+  const MAILTAG_NAME = 'badges:name';
+  const MAILTAG_DETAILS = 'badges:details';
+  const MAILTAG_COMMENT = 'badges:comment';
+  const MAILTAG_OTHER  = 'badges:other';
+
   public function getApplicationName() {
     return 'badges';
   }
@@ -166,6 +171,28 @@ final class PhabricatorBadgesTransaction
     }
 
     return parent::getTitleForFeed();
+  }
+
+  public function getMailTags() {
+    $tags = parent::getMailTags();
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $tags[] = self::MAILTAG_COMMENT;
+        break;
+      case self::TYPE_NAME:
+      case self::TYPE_DESCRIPTION:
+      case self::TYPE_FLAVOR:
+      case self::TYPE_ICON:
+      case self::TYPE_STATUS:
+      case self::TYPE_QUALITY:
+        $tags[] = self::MAILTAG_DETAILS;
+        break;
+      default:
+        $tags[] = self::MAILTAG_OTHER;
+        break;
+    }
+    return $tags;
   }
 
 

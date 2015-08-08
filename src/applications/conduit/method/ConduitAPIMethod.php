@@ -1,18 +1,41 @@
 <?php
 
 /**
- * @task  status  Method Status
- * @task  pager   Paging Results
+ * @task info Method Information
+ * @task status Method Status
+ * @task pager Paging Results
  */
 abstract class ConduitAPIMethod
   extends Phobject
   implements PhabricatorPolicyInterface {
 
+
   const METHOD_STATUS_STABLE      = 'stable';
   const METHOD_STATUS_UNSTABLE    = 'unstable';
   const METHOD_STATUS_DEPRECATED  = 'deprecated';
 
+
+  /**
+   * Get a short, human-readable text summary of the method.
+   *
+   * @return string Short summary of method.
+   * @task info
+   */
+  public function getMethodSummary() {
+    return $this->getMethodDescription();
+  }
+
+
+  /**
+   * Get a detailed description of the method.
+   *
+   * This method should return remarkup.
+   *
+   * @return string Detailed description of the method.
+   * @task info
+   */
   abstract public function getMethodDescription();
+
   abstract protected function defineParamTypes();
   abstract protected function defineReturnType();
 

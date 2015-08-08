@@ -2,26 +2,20 @@
 
 final class PholioMockEditController extends PholioController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    if ($this->id) {
+    if ($id) {
       $mock = id(new PholioMockQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->needImages(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
             PhabricatorPolicyCapability::CAN_EDIT,
           ))
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->executeOne();
 
       if (!$mock) {
@@ -35,7 +29,7 @@ final class PholioMockEditController extends PholioController {
       $files = mpull($mock_images, 'getFile');
       $mock_images = mpull($mock_images, null, 'getFilePHID');
     } else {
-      $mock = PholioMock::initializeNewMock($user);
+      $mock = PholioMock::initializeNewMock($viewer);
 
       $title = pht('Create Mock');
 
@@ -104,7 +98,7 @@ final class PholioMockEditController extends PholioController {
       $file_phids = $request->getArr('file_phids');
       if ($file_phids) {
         $files = id(new PhabricatorFileQuery())
-          ->setViewer($user)
+          ->setViewer($viewer)
           ->withPHIDs($file_phids)
           ->execute();
         $files = mpull($files, null, 'getPHID');
@@ -219,7 +213,7 @@ final class PholioMockEditController extends PholioController {
         $editor = id(new PholioMockEditor())
           ->setContentSourceFromRequest($request)
           ->setContinueOnNoEffect(true)
-          ->setActor($user);
+          ->setActor($viewer);
 
         $xactions = $editor->applyTransactions($mock, $xactions);
 
@@ -230,9 +224,9 @@ final class PholioMockEditController extends PholioController {
       }
     }
 
-    if ($this->id) {
+    if ($id) {
       $submit = id(new AphrontFormSubmitControl())
-        ->addCancelButton('/M'.$this->id)
+        ->addCancelButton('/M'.$id)
         ->setValue(pht('Save'));
     } else {
       $submit = id(new AphrontFormSubmitControl())
@@ -241,7 +235,7 @@ final class PholioMockEditController extends PholioController {
     }
 
     $policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->setObject($mock)
       ->execute();
 
@@ -257,7 +251,7 @@ final class PholioMockEditController extends PholioController {
     }
     foreach ($display_mock_images as $mock_image) {
       $image_elements[] = id(new PholioUploadedImageView())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setImage($mock_image)
         ->setReplacesPHID($mock_image->getFilePHID());
     }
@@ -308,7 +302,7 @@ final class PholioMockEditController extends PholioController {
 
     require_celerity_resource('pholio-edit-css');
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendChild($order_control)
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -321,9 +315,9 @@ final class PholioMockEditController extends PholioController {
         ->setName('description')
         ->setValue($v_desc)
         ->setLabel(pht('Description'))
-        ->setUser($user));
+        ->setUser($viewer));
 
-    if ($this->id) {
+    if ($id) {
       $form->appendChild(
         id(new AphrontFormSelectControl())
         ->setLabel(pht('Status'))
@@ -346,11 +340,11 @@ final class PholioMockEditController extends PholioController {
           ->setLabel(pht('Subscribers'))
           ->setName('cc')
           ->setValue($v_cc)
-          ->setUser($user)
+          ->setUser($viewer)
           ->setDatasource(new PhabricatorMetaMTAMailableDatasource()))
       ->appendChild(
         id(new AphrontFormPolicyControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
           ->setPolicyObject($mock)
           ->setPolicies($policies)
@@ -358,7 +352,7 @@ final class PholioMockEditController extends PholioController {
           ->setName('can_view'))
       ->appendChild(
         id(new AphrontFormPolicyControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
           ->setPolicyObject($mock)
           ->setPolicies($policies)

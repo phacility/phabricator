@@ -152,4 +152,29 @@ final class PhabricatorCountdownTransaction
     return $tags;
   }
 
+  public function shouldHide() {
+    $old = $this->getOldValue();
+    switch ($this->getTransactionType()) {
+      case self::TYPE_DESCRIPTION:
+        return ($old === null);
+    }
+    return parent::shouldHide();
+  }
+
+  public function hasChangeDetails() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_DESCRIPTION:
+        return ($this->getOldValue() !== null);
+    }
+
+    return parent::hasChangeDetails();
+  }
+
+  public function renderChangeDetails(PhabricatorUser $viewer) {
+    return $this->renderTextCorpusChangeDetails(
+      $viewer,
+      $this->getOldValue(),
+      $this->getNewValue());
+  }
+
 }

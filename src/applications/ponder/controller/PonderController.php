@@ -2,11 +2,15 @@
 
 abstract class PonderController extends PhabricatorController {
 
-  protected function buildSideNavView() {
+  protected function buildSideNavView($for_app = false) {
     $user = $this->getRequest()->getUser();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
+
+    if ($for_app) {
+      $nav->addFilter('question/create/', pht('Ask Question'));
+    }
 
     id(new PonderQuestionSearchEngine())
       ->setViewer($user)
@@ -17,13 +21,18 @@ abstract class PonderController extends PhabricatorController {
     return $nav;
   }
 
+  public function buildApplicationMenu() {
+    return $this->buildSideNavView($for_app = true)->getMenu();
+  }
+
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
+    $href = $this->getApplicationURI('question/create/');
     $crumbs
       ->addAction(
         id(new PHUIListItemView())
-          ->setName(pht('Create Question'))
-          ->setHref('/ponder/question/edit/')
+          ->setName(pht('Ask Question'))
+          ->setHref($href)
           ->setIcon('fa-plus-square'));
 
     return $crumbs;

@@ -60,7 +60,8 @@
   display: block;
   position: absolute;
   width: 128px;
-  height: 100%;
+  height: 180px;
+  overflow: hidden;
 
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
@@ -113,6 +114,7 @@
   font-weight: bold;
   padding-top: 12px;
   display: block;
+  word-break: break-word;
 }
 
 .phui-badge-quality {
@@ -124,6 +126,7 @@
 .phui-badge-view-subhead {
   color: {$lightgreytext};
   font-size: {$smallerfontsize};
+  word-break: break-word;
 }
 
 .phui-badge-card-back {

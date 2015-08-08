@@ -222,7 +222,6 @@ final class PhabricatorDaemonConsoleController
       $nav,
       array(
         'title' => pht('Console'),
-        'device' => false,
       ));
   }
 

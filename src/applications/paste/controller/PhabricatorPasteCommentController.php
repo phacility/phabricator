@@ -3,23 +3,17 @@
 final class PhabricatorPasteCommentController
   extends PhabricatorPasteController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     if (!$request->isFormPost()) {
       return new Aphront400Response();
     }
 
     $paste = id(new PhabricatorPasteQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->executeOne();
     if (!$paste) {
       return new Aphront404Response();
@@ -38,7 +32,7 @@ final class PhabricatorPasteCommentController
           ->setContent($request->getStr('comment')));
 
     $editor = id(new PhabricatorPasteEditor())
-      ->setActor($user)
+      ->setActor($viewer)
       ->setContinueOnNoEffect($request->isContinueRequest())
       ->setContentSourceFromRequest($request)
       ->setIsPreview($is_preview);
@@ -57,7 +51,7 @@ final class PhabricatorPasteCommentController
 
     if ($request->isAjax() && $is_preview) {
       return id(new PhabricatorApplicationTransactionResponse())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->setTransactions($xactions)
         ->setIsPreview($is_preview);
     } else {

@@ -3,9 +3,8 @@
 final class PhabricatorAuthDowngradeSessionController
   extends PhabricatorAuthController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $panel_uri = '/settings/panel/sessions/';
 

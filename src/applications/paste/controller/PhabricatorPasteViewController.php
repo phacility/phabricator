@@ -5,7 +5,6 @@
  */
 final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
-  private $id;
   private $highlightMap;
 
   public function shouldAllowPublic() {
@@ -13,7 +12,6 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
   }
 
   public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
     $raw_lines = idx($data, 'lines');
     $map = array();
     if ($raw_lines) {
@@ -31,13 +29,13 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     $this->highlightMap = $map;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $paste = id(new PhabricatorPasteQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->needContent(true)
       ->executeOne();
     if (!$paste) {
@@ -45,7 +43,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     }
 
     $file = id(new PhabricatorFileQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withPHIDs(array($paste->getFilePHID()))
       ->executeOne();
     if (!$file) {
@@ -53,13 +51,13 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     }
 
     $forks = id(new PhabricatorPasteQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withParentPHIDs(array($paste->getPHID()))
       ->execute();
     $fork_phids = mpull($forks, 'getPHID');
 
     $header = $this->buildHeaderView($paste);
-    $actions = $this->buildActionView($user, $paste, $file);
+    $actions = $this->buildActionView($viewer, $paste, $file);
     $properties = $this->buildPropertyView($paste, $fork_phids, $actions);
 
     $object_box = id(new PHUIObjectBoxView())
@@ -90,10 +88,10 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ? pht('Add Comment')
       : pht('Eat Paste');
 
-    $draft = PhabricatorDraft::newFromUserAndKey($user, $paste->getPHID());
+    $draft = PhabricatorDraft::newFromUserAndKey($viewer, $paste->getPHID());
 
     $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setObjectPHID($paste->getPHID())
       ->setDraft($draft)
       ->setHeaderText($add_comment_header)
@@ -117,29 +115,41 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
   private function buildHeaderView(PhabricatorPaste $paste) {
     $title = (nonempty($paste->getTitle())) ?
       $paste->getTitle() : pht('(An Untitled Masterwork)');
+
+    if ($paste->isArchived()) {
+      $header_icon = 'fa-ban';
+      $header_name = pht('Archived');
+      $header_color = 'dark';
+    } else {
+      $header_icon = 'fa-check';
+      $header_name = pht('Active');
+      $header_color = 'bluegrey';
+    }
+
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
       ->setUser($this->getRequest()->getUser())
+      ->setStatus($header_icon, $header_color, $header_name)
       ->setPolicyObject($paste);
 
     return $header;
   }
 
   private function buildActionView(
-    PhabricatorUser $user,
+    PhabricatorUser $viewer,
     PhabricatorPaste $paste,
     PhabricatorFile $file) {
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $user,
+      $viewer,
       $paste,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $can_fork = $user->isLoggedIn();
+    $can_fork = $viewer->isLoggedIn();
     $fork_uri = $this->getApplicationURI('/create/?parent='.$paste->getID());
 
     return id(new PhabricatorActionListView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setObject($paste)
       ->setObjectURI($this->getRequest()->getRequestURI())
       ->addAction(

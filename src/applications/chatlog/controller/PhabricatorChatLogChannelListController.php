@@ -7,12 +7,11 @@ final class PhabricatorChatLogChannelListController
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $channels = id(new PhabricatorChatLogChannelQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->execute();
 
     $list = new PHUIObjectItemListView();

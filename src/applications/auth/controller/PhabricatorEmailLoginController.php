@@ -7,8 +7,7 @@ final class PhabricatorEmailLoginController
     return false;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
 
     if (!PhabricatorPasswordAuthProvider::getPasswordProvider()) {
       return new Aphront400Response();

@@ -2,16 +2,15 @@
 
 final class ManiphestSubpriorityController extends ManiphestController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     if (!$request->validateCSRF()) {
       return new Aphront403Response();
     }
 
     $task = id(new ManiphestTaskQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withIDs(array($request->getInt('task')))
       ->needProjectPHIDs(true)
       ->requireCapabilities(
@@ -26,7 +25,7 @@ final class ManiphestSubpriorityController extends ManiphestController {
 
     if ($request->getInt('after')) {
       $after_task = id(new ManiphestTaskQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withIDs(array($request->getInt('after')))
         ->executeOne();
       if (!$after_task) {
@@ -52,7 +51,7 @@ final class ManiphestSubpriorityController extends ManiphestController {
       ->setNewValue($sub);
 
     $editor = id(new ManiphestTransactionEditor())
-      ->setActor($user)
+      ->setActor($viewer)
       ->setContinueOnMissingFields(true)
       ->setContinueOnNoEffect(true)
       ->setContentSourceFromRequest($request);

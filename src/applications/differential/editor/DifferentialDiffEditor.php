@@ -131,10 +131,11 @@ final class DifferentialDiffEditor
           $rules = mpull($rules, null, 'getID');
 
           $effects = $engine->applyRules($rules, $adapter);
+          $action_block = DifferentialBlockHeraldAction::ACTIONCONST;
 
           $blocking_effect = null;
           foreach ($effects as $effect) {
-            if ($effect->getAction() == HeraldAdapter::ACTION_BLOCK) {
+            if ($effect->getAction() == $action_block) {
               $blocking_effect = $effect;
               break;
             }

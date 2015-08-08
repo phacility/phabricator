@@ -300,7 +300,7 @@ final class DiffusionCommitQuery
     $where = array();
 
     if ($this->repositoryPHIDs !== null) {
-      $map_repositories = id (new PhabricatorRepositoryQuery())
+      $map_repositories = id(new PhabricatorRepositoryQuery())
         ->setViewer($this->getViewer())
         ->withPHIDs($this->repositoryPHIDs)
         ->execute();

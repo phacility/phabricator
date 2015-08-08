@@ -192,18 +192,14 @@ final class PhameBlogEditController
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Blogs'), $this->getApplicationURI('blog/'));
     $crumbs->addTextCrumb($page_title, $this->getApplicationURI('blog/new'));
 
-    $nav = $this->renderSideNavFilterView();
-    $nav->selectFilter($id ? null : 'blog/new');
-    $nav->appendChild(
+    return $this->buildApplicationPage(
       array(
         $crumbs,
         $form_box,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
+      ),
       array(
         'title' => $page_title,
       ));

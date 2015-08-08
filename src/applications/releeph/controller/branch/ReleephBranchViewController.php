@@ -2,25 +2,18 @@
 
 final class ReleephBranchViewController extends ReleephBranchController {
 
-  private $queryKey;
-  private $branchID;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->branchID = $data['branchID'];
-    $this->queryKey = idx($data, 'queryKey');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('branchID');
+    $querykey = $request->getURIData('queryKey');
 
     $branch = id(new ReleephBranchQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->branchID))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$branch) {
       return new Aphront404Response();
@@ -29,7 +22,7 @@ final class ReleephBranchViewController extends ReleephBranchController {
 
     $controller = id(new PhabricatorApplicationSearchController())
       ->setPreface($this->renderPreface())
-      ->setQueryKey($this->queryKey)
+      ->setQueryKey($querykey)
       ->setSearchEngine($this->getSearchEngine())
       ->setNavigation($this->buildSideNavView());
 

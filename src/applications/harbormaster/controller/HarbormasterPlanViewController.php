@@ -235,7 +235,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
             id(new PHUIIconView())
               ->setIconFont('fa-plus'))
           ->setDisabled(!$can_edit)
-          ->setWorkflow(true));
+          ->setWorkflow(!$can_edit));
 
     $step_box = id(new PHUIObjectBoxView())
       ->setHeader($header)

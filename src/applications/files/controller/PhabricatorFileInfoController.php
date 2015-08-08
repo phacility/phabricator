@@ -2,26 +2,19 @@
 
 final class PhabricatorFileInfoController extends PhabricatorFileController {
 
-  private $phid;
-  private $id;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->phid = idx($data, 'phid');
-    $this->id = idx($data, 'id');
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $phid = $request->getURIData('phid');
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    if ($this->phid) {
+    if ($phid) {
       $file = id(new PhabricatorFileQuery())
-        ->setViewer($user)
-        ->withPHIDs(array($this->phid))
+        ->setViewer($viewer)
+        ->withPHIDs(array($phid))
         ->executeOne();
 
       if (!$file) {
@@ -30,8 +23,8 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       return id(new AphrontRedirectResponse())->setURI($file->getInfoURI());
     }
     $file = id(new PhabricatorFileQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->executeOne();
     if (!$file) {
       return new Aphront404Response();
@@ -40,7 +33,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     $phid = $file->getPHID();
 
     $header = id(new PHUIHeaderView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setPolicyObject($file)
       ->setHeader($file->getName());
 
@@ -87,7 +80,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
   }
 
   private function buildTransactionView(PhabricatorFile $file) {
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $timeline = $this->buildTransactionTimeline(
       $file,
@@ -99,10 +92,10 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       ? pht('Add Comment')
       : pht('Question File Integrity');
 
-    $draft = PhabricatorDraft::newFromUserAndKey($user, $file->getPHID());
+    $draft = PhabricatorDraft::newFromUserAndKey($viewer, $file->getPHID());
 
     $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setObjectPHID($file->getPHID())
       ->setDraft($draft)
       ->setHeaderText($add_comment_header)
@@ -116,8 +109,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
   }
 
   private function buildActionView(PhabricatorFile $file) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
 
     $id = $file->getID();
 
@@ -184,7 +176,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     PhabricatorFile $file,
     PhabricatorActionListView $actions) {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
     $properties = id(new PHUIPropertyListView());
     $properties->setActionList($actions);
@@ -193,12 +185,12 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     if ($file->getAuthorPHID()) {
       $properties->addProperty(
         pht('Author'),
-        $user->renderHandle($file->getAuthorPHID()));
+        $viewer->renderHandle($file->getAuthorPHID()));
     }
 
     $properties->addProperty(
       pht('Created'),
-      phabricator_datetime($file->getDateCreated(), $user));
+      phabricator_datetime($file->getDateCreated(), $viewer));
 
 
     $finfo = id(new PHUIPropertyListView());
@@ -276,7 +268,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
       $attached->addProperty(
         pht('Attached To'),
-        $user->renderHandleList($phids));
+        $viewer->renderHandleList($phids));
     }
 
     if ($file->isViewableImage()) {
@@ -330,7 +322,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
         $box->addPropertyList($chunkinfo, pht('Chunks'));
 
         $chunks = id(new PhabricatorFileChunkQuery())
-          ->setViewer($user)
+          ->setViewer($viewer)
           ->withChunkHandles(array($file->getStorageHandle()))
           ->execute();
         $chunks = msort($chunks, 'getByteStart');

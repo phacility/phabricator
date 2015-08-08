@@ -73,47 +73,4 @@ abstract class HeraldPreCommitAdapter extends HeraldAdapter {
       $this->hookEngine->getRepository()->getProjectPHIDs());
   }
 
-  public function getActions($rule_type) {
-    switch ($rule_type) {
-      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
-      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
-        return array_merge(
-          array(
-            self::ACTION_BLOCK,
-            self::ACTION_EMAIL,
-            self::ACTION_NOTHING,
-          ),
-          parent::getActions($rule_type));
-      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-        return array_merge(
-          array(
-            self::ACTION_EMAIL,
-            self::ACTION_NOTHING,
-          ),
-          parent::getActions($rule_type));
-    }
-  }
-
-  public function applyHeraldEffects(array $effects) {
-    assert_instances_of($effects, 'HeraldEffect');
-
-    $result = array();
-    foreach ($effects as $effect) {
-      $action = $effect->getAction();
-      switch ($action) {
-        case self::ACTION_BLOCK:
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Blocked push.'));
-          break;
-        default:
-          $result[] = $this->applyStandardEffect($effect);
-          break;
-      }
-    }
-
-    return $result;
-  }
-
 }

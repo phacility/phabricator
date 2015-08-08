@@ -7,6 +7,7 @@ final class ConpherenceNewRoomController extends ConpherenceController {
 
     $title = pht('New Room');
     $e_title = true;
+    $v_message = null;
     $validation_exception = null;
 
     $conpherence = ConpherenceThread::initializeNewRoom($user);
@@ -35,12 +36,12 @@ final class ConpherenceNewRoomController extends ConpherenceController {
         ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
         ->setNewValue($request->getStr('joinPolicy'));
 
-      $message = $request->getStr('message');
-      if ($message) {
+      $v_message = $request->getStr('message');
+      if (strlen($v_message)) {
         $message_xactions = $editor->generateTransactionsFromText(
           $user,
           $conpherence,
-          $message);
+          $v_message);
         $xactions = array_merge($xactions, $message_xactions);
       }
 
@@ -121,7 +122,8 @@ final class ConpherenceNewRoomController extends ConpherenceController {
         id(new PhabricatorRemarkupControl())
         ->setUser($user)
         ->setName('message')
-        ->setLabel(pht('First Message')));
+        ->setLabel(pht('First Message'))
+        ->setValue($v_message));
 
     $dialog->appendChild($form);
 

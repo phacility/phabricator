@@ -61,8 +61,7 @@
 }
 
 .phui-feed-story-bigtext-post h3 {
-  font-size: 18px;
-  font-weight: 200;
+  font-size: {$biggestfontsize};
   line-height: 18px;
   color: {$darkgreytext};
   margin: 0 0 5px 0;

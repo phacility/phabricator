@@ -102,13 +102,9 @@ final class PhabricatorCountdownSearchEngine
     foreach ($countdowns as $countdown) {
       $id = $countdown->getID();
       $ended = false;
-      $icon = 'fa-clock-o';
-      $color = 'green';
       $epoch = $countdown->getEpoch();
       if ($epoch <= PhabricatorTime::getNow()) {
         $ended = true;
-        $icon = 'fa-check-square-o';
-        $color = 'grey';
       }
 
       $item = id(new PHUIObjectItemView())
@@ -116,7 +112,6 @@ final class PhabricatorCountdownSearchEngine
         ->setObject($countdown)
         ->setObjectName("C{$id}")
         ->setHeader($countdown->getTitle())
-        ->setStatusIcon($icon.' '.$color)
         ->setHref($this->getApplicationURI("{$id}/"))
         ->addByline(
           pht(
@@ -128,6 +123,14 @@ final class PhabricatorCountdownSearchEngine
           pht('Launched on %s', phabricator_datetime($epoch, $viewer)));
         $item->setDisabled(true);
       } else {
+        $time_left = ($epoch - PhabricatorTime::getNow());
+        $num = round($time_left / (60 * 60 * 24));
+        $noun = pht('Days');
+        if ($num < 1) {
+          $num = round($time_left / (60 * 60), 1);
+          $noun = pht('Hours');
+        }
+        $item->setCountdown($num, $noun);
         $item->addAttribute(
           phabricator_datetime($epoch, $viewer));
       }

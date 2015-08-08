@@ -6,6 +6,7 @@ final class PHUIBadgeMiniView extends AphrontTagView {
   private $icon;
   private $quality;
   private $header;
+  private $tipDirection;
 
   public function setIcon($icon) {
     $this->icon = $icon;
@@ -24,6 +25,11 @@ final class PHUIBadgeMiniView extends AphrontTagView {
 
   public function setHeader($header) {
     $this->header = $header;
+    return $this;
+  }
+
+  public function setTipDirection($direction) {
+    $this->tipDirection = $direction;
     return $this;
   }
 
@@ -51,6 +57,8 @@ final class PHUIBadgeMiniView extends AphrontTagView {
       'href'  => $this->href,
       'meta'  => array(
         'tip' => $this->header,
+        'align' => $this->tipDirection,
+        'size' => 300,
       ),
     );
   }

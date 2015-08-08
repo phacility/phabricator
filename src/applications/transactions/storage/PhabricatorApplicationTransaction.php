@@ -362,11 +362,23 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_COMMENT:
         $comment = $this->getComment();
         if ($comment && $comment->getIsRemoved()) {
-          return 'fa-eraser';
+          return 'fa-trash';
         }
         return 'fa-comment';
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-        return 'fa-envelope';
+        $old = $this->getOldValue();
+        $new = $this->getNewValue();
+        $add = array_diff($new, $old);
+        $rem = array_diff($old, $new);
+        if ($add && $rem) {
+          return 'fa-user';
+        } else if ($add) {
+          return 'fa-user-plus';
+        } else if ($rem) {
+          return 'fa-user-times';
+        } else {
+          return 'fa-user';
+        }
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
