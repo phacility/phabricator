@@ -45,6 +45,9 @@ final class HeraldTestConsoleController extends HeraldController {
           } else if ($object instanceof PhrictionDocument) {
             $adapter = id(new PhrictionDocumentHeraldAdapter())
               ->setDocument($object);
+          } else if ($object instanceof PonderQuestion) {
+            $adapter = id(new HeraldPonderQuestionAdapter())
+              ->setQuestion($object);
           } else {
             throw new Exception(pht('Can not build adapter for object!'));
           }
