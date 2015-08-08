@@ -45,7 +45,11 @@ final class PonderQuestionViewController extends PonderController {
     if ($question->getStatus() == PonderQuestionStatus::STATUS_OPEN) {
       $header->setStatus('fa-square-o', 'bluegrey', pht('Open'));
     } else {
-      $header->setStatus('fa-check-square-o', 'dark', pht('Closed'));
+      $text = PonderQuestionStatus::getQuestionStatusFullName(
+        $question->getStatus());
+      $icon = PonderQuestionStatus::getQuestionStatusIcon(
+        $question->getStatus());
+      $header->setStatus($icon, 'dark', $text);
     }
 
     $actions = $this->buildActionListView($question);
@@ -109,21 +113,18 @@ final class PonderQuestionViewController extends PonderController {
     if ($question->getStatus() == PonderQuestionStatus::STATUS_OPEN) {
       $name = pht('Close Question');
       $icon = 'fa-check-square-o';
-      $href = 'close';
     } else {
       $name = pht('Reopen Question');
       $icon = 'fa-square-o';
-      $href = 'open';
     }
 
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName($name)
         ->setIcon($icon)
-        ->setRenderAsForm($can_edit)
-        ->setWorkflow(!$can_edit)
+        ->setWorkflow(true)
         ->setDisabled(!$can_edit)
-        ->setHref($this->getApplicationURI("/question/{$href}/{$id}/")));
+        ->setHref($this->getApplicationURI("/question/status/{$id}/")));
 
     $view->addAction(
       id(new PhabricatorActionView())

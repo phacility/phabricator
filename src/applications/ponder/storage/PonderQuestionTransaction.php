@@ -87,9 +87,17 @@ final class PonderQuestionTransaction
             return pht(
               '%s reopened this question.',
               $this->renderHandleLink($author_phid));
-          case PonderQuestionStatus::STATUS_CLOSED:
+          case PonderQuestionStatus::STATUS_CLOSED_RESOLVED:
             return pht(
-              '%s closed this question.',
+              '%s closed this question as resolved.',
+              $this->renderHandleLink($author_phid));
+          case PonderQuestionStatus::STATUS_CLOSED_OBSOLETE:
+            return pht(
+              '%s closed this question as obsolete.',
+              $this->renderHandleLink($author_phid));
+          case PonderQuestionStatus::STATUS_CLOSED_DUPLICATE:
+            return pht(
+              '%s closed this question as a duplicate.',
               $this->renderHandleLink($author_phid));
         }
     }
@@ -106,12 +114,7 @@ final class PonderQuestionTransaction
       case self::TYPE_CONTENT:
         return 'fa-pencil';
       case self::TYPE_STATUS:
-        switch ($new) {
-          case PonderQuestionStatus::STATUS_OPEN:
-            return 'fa-check-circle';
-          case PonderQuestionStatus::STATUS_CLOSED:
-            return 'fa-minus-circle';
-        }
+        return PonderQuestionStatus::getQuestionStatusIcon($new);
       case self::TYPE_ANSWERS:
         return 'fa-plus';
     }
@@ -130,12 +133,7 @@ final class PonderQuestionTransaction
       case self::TYPE_ANSWERS:
         return PhabricatorTransactions::COLOR_GREEN;
       case self::TYPE_STATUS:
-        switch ($new) {
-          case PonderQuestionStatus::STATUS_OPEN:
-            return PhabricatorTransactions::COLOR_GREEN;
-          case PonderQuestionStatus::STATUS_CLOSED:
-            return PhabricatorTransactions::COLOR_INDIGO;
-        }
+        return PonderQuestionStatus::getQuestionStatusTagColor($new);
     }
   }
 

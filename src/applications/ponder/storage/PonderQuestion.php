@@ -65,7 +65,7 @@ final class PonderQuestion extends PonderDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255',
         'voteCount' => 'sint32',
-        'status' => 'uint32',
+        'status' => 'text32',
         'content' => 'text',
         'heat' => 'double',
         'answerCount' => 'uint32',

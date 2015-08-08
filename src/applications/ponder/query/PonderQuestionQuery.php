@@ -5,16 +5,11 @@ final class PonderQuestionQuery
 
   private $ids;
   private $phids;
+  private $status;
   private $authorPHIDs;
   private $answererPHIDs;
 
   private $needProjectPHIDs;
-
-  private $status = 'status-any';
-
-  const STATUS_ANY      = 'status-any';
-  const STATUS_OPEN     = 'status-open';
-  const STATUS_CLOSED   = 'status-closed';
 
   private $needAnswers;
   private $needViewerVotes;
@@ -34,7 +29,7 @@ final class PonderQuestionQuery
     return $this;
   }
 
-  public function withStatus($status) {
+  public function withStatuses($status) {
     $this->status = $status;
     return $this;
   }
@@ -84,24 +79,10 @@ final class PonderQuestionQuery
     }
 
     if ($this->status !== null) {
-      switch ($this->status) {
-        case self::STATUS_ANY:
-          break;
-        case self::STATUS_OPEN:
-          $where[] = qsprintf(
-            $conn,
-            'q.status = %d',
-            PonderQuestionStatus::STATUS_OPEN);
-          break;
-        case self::STATUS_CLOSED:
-          $where[] = qsprintf(
-            $conn,
-            'q.status = %d',
-            PonderQuestionStatus::STATUS_CLOSED);
-          break;
-        default:
-          throw new Exception(pht("Unknown status query '%s'!", $this->status));
-      }
+      $where[] = qsprintf(
+        $conn,
+        'q.status IN (%Ls)',
+        $this->status);
     }
 
     return $where;
