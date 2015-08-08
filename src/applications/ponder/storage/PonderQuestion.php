@@ -23,7 +23,6 @@ final class PonderQuestion extends PonderDAO
   protected $content;
   protected $contentSource;
   protected $viewPolicy;
-  protected $editPolicy;
   protected $spacePHID;
 
   protected $voteCount;
@@ -44,14 +43,11 @@ final class PonderQuestion extends PonderDAO
       ->executeOne();
 
     $view_policy = $app->getPolicy(
-      PonderQuestionDefaultViewCapability::CAPABILITY);
-    $edit_policy = $app->getPolicy(
-      PonderQuestionDefaultEditCapability::CAPABILITY);
+      PonderDefaultViewCapability::CAPABILITY);
 
     return id(new PonderQuestion())
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($edit_policy)
       ->setStatus(PonderQuestionStatus::STATUS_OPEN)
       ->setVoteCount(0)
       ->setAnswerCount(0)
@@ -275,17 +271,33 @@ final class PonderQuestion extends PonderDAO
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        return $this->getEditPolicy();
+        $app = PhabricatorApplication::getByClass(
+          'PhabricatorPonderApplication');
+        return $app->getPolicy(PonderModerateCapability::CAPABILITY);
     }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
+      if (PhabricatorPolicyFilter::hasCapability(
+        $viewer, $this, PhabricatorPolicyCapability::CAN_EDIT)) {
+        return true;
+      }
+    }
     return ($viewer->getPHID() == $this->getAuthorPHID());
   }
 
 
   public function describeAutomaticCapability($capability) {
-    return pht('The user who asked a question can always view and edit it.');
+    $out = array();
+    $out[] = pht('The user who asked a question can always view and edit it.');
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        $out[] = pht(
+          'A moderator can always view the question.');
+        break;
+    }
+    return $out;
   }
 
 

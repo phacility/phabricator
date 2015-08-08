@@ -17,7 +17,6 @@ final class PonderAnswer extends PonderDAO
   protected $questionID;
 
   protected $content;
-  protected $contentSource;
   protected $mailKey;
 
   protected $voteCount;
@@ -26,6 +25,20 @@ final class PonderAnswer extends PonderDAO
   private $comments;
 
   private $userVotes = array();
+
+  public static function initializeNewAnswer(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorPonderApplication'))
+      ->executeOne();
+
+    return id(new PonderAnswer())
+      ->setQuestionID(0)
+      ->setContent('')
+      ->setAuthorPHID($actor->getPHID())
+      ->setVoteCount(0);
+
+  }
 
   public function attachQuestion(PonderQuestion $question = null) {
     $this->question = $question;
@@ -73,10 +86,6 @@ final class PonderAnswer extends PonderDAO
         'voteCount' => 'sint32',
         'content' => 'text',
         'mailKey' => 'bytes20',
-
-        // T6203/NULLABILITY
-        // This should always exist.
-        'contentSource' => 'text?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -100,15 +109,6 @@ final class PonderAnswer extends PonderDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(PonderAnswerPHIDType::TYPECONST);
-  }
-
-  public function setContentSource(PhabricatorContentSource $content_source) {
-    $this->contentSource = $content_source->serialize();
-    return $this;
-  }
-
-  public function getContentSource() {
-    return PhabricatorContentSource::newFromSerialized($this->contentSource);
   }
 
   public function getMarkupField() {
@@ -198,7 +198,9 @@ final class PonderAnswer extends PonderDAO
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getQuestion()->getPolicy($capability);
       case PhabricatorPolicyCapability::CAN_EDIT:
-        return PhabricatorPolicies::POLICY_NOONE;
+        $app = PhabricatorApplication::getByClass(
+          'PhabricatorPonderApplication');
+        return $app->getPolicy(PonderModerateCapability::CAPABILITY);
     }
   }
 
@@ -224,6 +226,8 @@ final class PonderAnswer extends PonderDAO
       case PhabricatorPolicyCapability::CAN_VIEW:
         $out[] = pht(
           'The user who asks a question can always view the answers.');
+        $out[] = pht(
+          'A moderator can always view the answers.');
         break;
     }
     return $out;

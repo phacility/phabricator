@@ -4,6 +4,7 @@ final class PonderAnswerTransaction
   extends PhabricatorApplicationTransaction {
 
   const TYPE_CONTENT = 'ponder.answer:content';
+  const TYPE_QUESTION_ID = 'ponder.answer:question-id';
 
   public function getApplicationName() {
     return 'ponder';
@@ -45,16 +46,35 @@ final class PonderAnswerTransaction
     return $blocks;
   }
 
+  public function shouldHide() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_QUESTION_ID:
+        return true;
+    }
+    return parent::shouldHide();
+  }
+
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
 
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
-        return pht(
-          '%s edited %s.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid));
+        if ($old === '') {
+          return pht(
+            '%s added %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        } else {
+          return pht(
+            '%s edited %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+      break;
     }
 
     return parent::getTitle();
@@ -64,12 +84,23 @@ final class PonderAnswerTransaction
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
 
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
-        return pht(
-          '%s updated %s.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid));
+        if ($old === '') {
+          return pht(
+            '%s added %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        } else {
+          return pht(
+            '%s updated %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+      break;
     }
 
     return parent::getTitleForFeed();

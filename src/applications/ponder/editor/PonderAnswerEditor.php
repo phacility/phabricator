@@ -10,7 +10,9 @@ final class PonderAnswerEditor extends PonderEditor {
     $types = parent::getTransactionTypes();
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
+
     $types[] = PonderAnswerTransaction::TYPE_CONTENT;
+    $types[] = PonderAnswerTransaction::TYPE_QUESTION_ID;
 
     return $types;
   }
@@ -22,6 +24,8 @@ final class PonderAnswerEditor extends PonderEditor {
     switch ($xaction->getTransactionType()) {
       case PonderAnswerTransaction::TYPE_CONTENT:
         return $object->getContent();
+      case PonderAnswerTransaction::TYPE_QUESTION_ID:
+        return $object->getQuestionID();
     }
   }
 
@@ -31,6 +35,7 @@ final class PonderAnswerEditor extends PonderEditor {
 
     switch ($xaction->getTransactionType()) {
       case PonderAnswerTransaction::TYPE_CONTENT:
+      case PonderAnswerTransaction::TYPE_QUESTION_ID:
         return $xaction->getNewValue();
     }
   }
@@ -42,6 +47,9 @@ final class PonderAnswerEditor extends PonderEditor {
     switch ($xaction->getTransactionType()) {
       case PonderAnswerTransaction::TYPE_CONTENT:
         $object->setContent($xaction->getNewValue());
+        break;
+      case PonderAnswerTransaction::TYPE_QUESTION_ID:
+        $object->setQuestionID($xaction->getNewValue());
         break;
     }
   }
