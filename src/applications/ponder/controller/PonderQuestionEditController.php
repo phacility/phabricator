@@ -139,7 +139,7 @@ final class PonderQuestionEditController extends PonderController {
         ->setValue($v_projects)
         ->setDatasource(new PhabricatorProjectDatasource()));
 
-    $form ->appendChild(
+    $form->appendChild(
       id(new AphrontFormSubmitControl())
         ->addCancelButton($this->getApplicationURI())
         ->setValue(pht('Ask Away!')));
