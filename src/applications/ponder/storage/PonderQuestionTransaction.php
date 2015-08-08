@@ -237,12 +237,22 @@ final class PonderQuestionTransaction
         switch ($new) {
           case PonderQuestionStatus::STATUS_OPEN:
             return pht(
-              '%s reopened %s',
+              '%s reopened %s.',
               $this->renderHandleLink($author_phid),
               $this->renderHandleLink($object_phid));
-          case PonderQuestionStatus::STATUS_CLOSED:
+          case PonderQuestionStatus::STATUS_CLOSED_RESOLVED:
             return pht(
-              '%s closed %s',
+              '%s closed %s as resolved.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+          case PonderQuestionStatus::STATUS_CLOSED_DUPLICATE:
+            return pht(
+              '%s closed %s as duplicate.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+          case PonderQuestionStatus::STATUS_CLOSED_OBSOLETE:
+            return pht(
+              '%s closed %s as obsolete.',
               $this->renderHandleLink($author_phid),
               $this->renderHandleLink($object_phid));
         }
