@@ -10,13 +10,10 @@ final class PonderQuestionViewController extends PonderController {
       ->setViewer($viewer)
       ->withIDs(array($id))
       ->needAnswers(true)
-      ->needViewerVotes(true)
       ->executeOne();
     if (!$question) {
       return new Aphront404Response();
     }
-
-    $question->attachVotes($viewer->getPHID());
 
     $question_xactions = $this->buildQuestionTransactions($question);
     $answers = $this->buildAnswers($question->getAnswers());
