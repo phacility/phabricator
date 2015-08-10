@@ -291,6 +291,28 @@ final class PonderQuestionViewController extends PonderController {
       ->setObject($answer)
       ->setObjectURI($request->getRequestURI());
 
+    $user_marked = $answer->getUserVote();
+    $can_vote = $viewer->isLoggedIn();
+
+    if ($user_marked) {
+      $helpful_uri = "/answer/helpful/remove/{$id}/";
+      $helpful_icon = 'fa-times';
+      $helpful_text = pht('Remove Helpful');
+    } else {
+      $helpful_uri = "/answer/helpful/add/{$id}/";
+      $helpful_icon = 'fa-thumbs-up';
+      $helpful_text = pht('Mark as Helpful');
+    }
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon($helpful_icon)
+        ->setName($helpful_text)
+        ->setHref($this->getApplicationURI($helpful_uri))
+        ->setRenderAsForm(true)
+        ->setDisabled(!$can_vote)
+        ->setWorkflow($can_vote));
+
     $view->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
@@ -321,6 +343,10 @@ final class PonderQuestionViewController extends PonderController {
     $view->addProperty(
       pht('Created'),
       phabricator_datetime($answer->getDateCreated(), $viewer));
+
+    $view->addProperty(
+      pht('Helpfuls'),
+      $answer->getVoteCount());
 
     $view->invokeWillRenderEvent();
 

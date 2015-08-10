@@ -101,7 +101,6 @@ final class PonderAnswerQuery
           $edges[$answer->getPHID()][$etype],
           $viewer_phid,
           array());
-
         $answer->attachUserVote($viewer_phid, idx($user_edge, 'data', 0));
       }
     }
