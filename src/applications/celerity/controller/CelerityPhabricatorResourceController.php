@@ -17,14 +17,12 @@ final class CelerityPhabricatorResourceController
     return CelerityResourceMap::getNamedInstance($this->library);
   }
 
-  public function willProcessRequest(array $data) {
-    $this->path = $data['path'];
-    $this->hash = $data['hash'];
-    $this->library = $data['library'];
-    $this->postprocessorKey = idx($data, 'postprocessor');
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $this->path = $request->getURIData('path');
+    $this->hash = $request->getURIData('hash');
+    $this->library = $request->getURIData('library');
+    $this->postprocessorKey = $request->getURIData('postprocessor');
 
-  public function processRequest() {
     // Check that the resource library exists before trying to serve resources
     // from it.
     try {
