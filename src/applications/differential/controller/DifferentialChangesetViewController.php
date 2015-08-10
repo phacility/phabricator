@@ -203,6 +203,29 @@ final class DifferentialChangesetViewController extends DifferentialController {
       $inlines = array();
     }
 
+    if ($left_new || $right_new) {
+      $diff_map = array();
+      if ($left) {
+        $diff_map[] = $left->getDiff();
+      }
+      if ($right) {
+        $diff_map[] = $right->getDiff();
+      }
+      $diff_map = mpull($diff_map, null, 'getPHID');
+
+      $buildables = id(new HarbormasterBuildableQuery())
+        ->setViewer($viewer)
+        ->withBuildablePHIDs(array_keys($diff_map))
+        ->withManualBuildables(false)
+        ->needBuilds(true)
+        ->needTargets(true)
+        ->execute();
+      $buildables = mpull($buildables, null, 'getBuildablePHID');
+      foreach ($diff_map as $diff_phid => $changeset_diff) {
+        $changeset_diff->attachBuildable(idx($buildables, $diff_phid));
+      }
+    }
+
     if ($left_new) {
       $inlines = array_merge(
         $inlines,
@@ -356,30 +379,47 @@ final class DifferentialChangesetViewController extends DifferentialController {
   }
 
   private function buildLintInlineComments($changeset) {
-    $lint = id(new DifferentialDiffProperty())->loadOneWhere(
-      'diffID = %d AND name = %s',
-      $changeset->getDiffID(),
-      'arc:lint');
-    if (!$lint) {
+    $diff = $changeset->getDiff();
+
+    $buildable = $diff->getBuildable();
+    if (!$buildable) {
       return array();
     }
-    $lint = $lint->getData();
+
+    $target_phids = array();
+    foreach ($buildable->getBuilds() as $build) {
+      foreach ($build->getBuildTargets() as $target) {
+        $target_phids[] = $target->getPHID();
+      }
+    }
+
+    if (!$target_phids) {
+      return array();
+    }
+
+    $messages = id(new HarbormasterBuildLintMessage())->loadAllWhere(
+      'buildTargetPHID IN (%Ls) AND path = %s',
+      $target_phids,
+      $changeset->getFilename());
+
+    if (!$messages) {
+      return array();
+    }
+
+    $template = id(new DifferentialInlineComment())
+        ->setChangesetID($changeset->getID())
+        ->setIsNewFile(1)
+        ->setLineLength(0);
 
     $inlines = array();
-    foreach ($lint as $msg) {
-      if ($msg['path'] != $changeset->getFilename()) {
-        continue;
-      }
-      $inline = new DifferentialInlineComment();
-      $inline->setChangesetID($changeset->getID());
-      $inline->setIsNewFile(1);
-      $inline->setSyntheticAuthor(pht('Lint: %s', $msg['name']));
-      $inline->setLineNumber($msg['line']);
-      $inline->setLineLength(0);
+    foreach ($messages as $message) {
+      $description = $message->getProperty('description');
+      $description = '%%%'.$description.'%%%';
 
-      $inline->setContent('%%%'.$msg['description'].'%%%');
-
-      $inlines[] = $inline;
+      $inlines[] = id(clone $template)
+        ->setSyntheticAuthor(pht('Lint: %s', $message->getName()))
+        ->setLineNumber($message->getLine())
+        ->setContent($description);
     }
 
     return $inlines;
