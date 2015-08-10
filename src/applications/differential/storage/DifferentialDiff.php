@@ -331,6 +331,22 @@ final class DifferentialDiff
     return $this->assertAttached($this->buildable);
   }
 
+  public function getBuildTargetPHIDs() {
+    $buildable = $this->getBuildable();
+
+    if (!$buildable) {
+      return array();
+    }
+
+    $target_phids = array();
+    foreach ($buildable->getBuilds() as $build) {
+      foreach ($build->getBuildTargets() as $target) {
+        $target_phids[] = $target->getPHID();
+      }
+    }
+
+    return $target_phids;
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

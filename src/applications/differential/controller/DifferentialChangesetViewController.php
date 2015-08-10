@@ -127,29 +127,32 @@ final class DifferentialChangesetViewController extends DifferentialController {
       $changeset = $choice;
     }
 
-    $coverage = null;
-    if ($right && $right->getDiffID()) {
-      $unit = id(new DifferentialDiffProperty())->loadOneWhere(
-        'diffID = %d AND name = %s',
-        $right->getDiffID(),
-        'arc:unit');
-
-      if ($unit) {
-        $coverage = array();
-        foreach ($unit->getData() as $result) {
-          $result_coverage = idx($result, 'coverage');
-          if (!$result_coverage) {
-            continue;
-          }
-          $file_coverage = idx($result_coverage, $right->getFileName());
-          if (!$file_coverage) {
-            continue;
-          }
-          $coverage[] = $file_coverage;
-        }
-
-        $coverage = ArcanistUnitTestResult::mergeCoverage($coverage);
+    if ($left_new || $right_new) {
+      $diff_map = array();
+      if ($left) {
+        $diff_map[] = $left->getDiff();
       }
+      if ($right) {
+        $diff_map[] = $right->getDiff();
+      }
+      $diff_map = mpull($diff_map, null, 'getPHID');
+
+      $buildables = id(new HarbormasterBuildableQuery())
+        ->setViewer($viewer)
+        ->withBuildablePHIDs(array_keys($diff_map))
+        ->withManualBuildables(false)
+        ->needBuilds(true)
+        ->needTargets(true)
+        ->execute();
+      $buildables = mpull($buildables, null, 'getBuildablePHID');
+      foreach ($diff_map as $diff_phid => $changeset_diff) {
+        $changeset_diff->attachBuildable(idx($buildables, $diff_phid));
+      }
+    }
+
+    $coverage = null;
+    if ($right_new) {
+      $coverage = $this->loadCoverage($right);
     }
 
     $spec = $request->getStr('range');
@@ -201,29 +204,6 @@ final class DifferentialChangesetViewController extends DifferentialController {
         $revision);
     } else {
       $inlines = array();
-    }
-
-    if ($left_new || $right_new) {
-      $diff_map = array();
-      if ($left) {
-        $diff_map[] = $left->getDiff();
-      }
-      if ($right) {
-        $diff_map[] = $right->getDiff();
-      }
-      $diff_map = mpull($diff_map, null, 'getPHID');
-
-      $buildables = id(new HarbormasterBuildableQuery())
-        ->setViewer($viewer)
-        ->withBuildablePHIDs(array_keys($diff_map))
-        ->withManualBuildables(false)
-        ->needBuilds(true)
-        ->needTargets(true)
-        ->execute();
-      $buildables = mpull($buildables, null, 'getBuildablePHID');
-      foreach ($diff_map as $diff_phid => $changeset_diff) {
-        $changeset_diff->attachBuildable(idx($buildables, $diff_phid));
-      }
     }
 
     if ($left_new) {
@@ -381,18 +361,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
   private function buildLintInlineComments($changeset) {
     $diff = $changeset->getDiff();
 
-    $buildable = $diff->getBuildable();
-    if (!$buildable) {
-      return array();
-    }
-
-    $target_phids = array();
-    foreach ($buildable->getBuilds() as $build) {
-      foreach ($build->getBuildTargets() as $target) {
-        $target_phids[] = $target->getPHID();
-      }
-    }
-
+    $target_phids = $diff->getBuildTargetPHIDs();
     if (!$target_phids) {
       return array();
     }
@@ -423,6 +392,29 @@ final class DifferentialChangesetViewController extends DifferentialController {
     }
 
     return $inlines;
+  }
+
+  private function loadCoverage(DifferentialChangeset $changeset) {
+    $target_phids = $changeset->getDiff()->getBuildTargetPHIDs();
+    if (!$target_phids) {
+      return array();
+    }
+
+    $unit = id(new HarbormasterBuildUnitMessage())->loadAllWhere(
+      'buildTargetPHID IN (%Ls)',
+      $target_phids);
+
+    $coverage = array();
+    foreach ($unit as $message) {
+      $test_coverage = $message->getProperty('coverage', array());
+      $coverage_data = idx($test_coverage, $changeset->getFileName());
+      if (!strlen($coverage_data)) {
+        continue;
+      }
+      $coverage[] = $coverage_data;
+    }
+
+    return ArcanistUnitTestResult::mergeCoverage($coverage);
   }
 
 }
