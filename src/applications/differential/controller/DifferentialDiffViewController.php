@@ -108,7 +108,7 @@ final class DifferentialDiffViewController extends DifferentialController {
     $table_of_contents = id(new DifferentialDiffTableOfContentsView())
       ->setChangesets($changesets)
       ->setVisibleChangesets($changesets)
-      ->setUnitTestData(idx($props, 'arc:unit', array()));
+      ->setCoverageMap($diff->loadCoverageMap($viewer));
 
     $refs = array();
     foreach ($changesets as $changeset) {

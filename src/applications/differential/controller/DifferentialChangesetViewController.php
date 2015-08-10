@@ -251,15 +251,19 @@ final class DifferentialChangesetViewController extends DifferentialController {
       ->setMask($mask);
 
     if ($request->isAjax()) {
+      // NOTE: We must render the changeset before we render coverage
+      // information, since it builds some caches.
+      $rendered_changeset = $parser->renderChangeset();
+
       $mcov = $parser->renderModifiedCoverage();
 
-      $coverage = array(
+      $coverage_data = array(
         'differential-mcoverage-'.md5($changeset->getFilename()) => $mcov,
       );
 
       return id(new PhabricatorChangesetResponse())
-        ->setRenderedChangeset($parser->renderChangeset())
-        ->setCoverage($coverage)
+        ->setRenderedChangeset($rendered_changeset)
+        ->setCoverage($coverage_data)
         ->setUndoTemplates($parser->getRenderer()->renderUndoTemplates());
     }
 

@@ -353,7 +353,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $toc_view->setChangesets($changesets);
     $toc_view->setVisibleChangesets($visible_changesets);
     $toc_view->setRenderingReferences($rendering_references);
-    $toc_view->setUnitTestData(idx($props, 'arc:unit', array()));
+    $toc_view->setCoverageMap($target->loadCoverageMap($user));
     if ($repository) {
       $toc_view->setRepository($repository);
     }
