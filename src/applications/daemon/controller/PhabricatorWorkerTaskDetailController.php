@@ -149,9 +149,9 @@ final class PhabricatorWorkerTaskDetailController
     $worker = $task->getWorkerInstance();
     $data = $worker->renderForDisplay($viewer);
 
-    $view->addProperty(
-      pht('Data'),
-      $data);
+    if ($data !== null) {
+      $view->addProperty(pht('Data'), $data);
+    }
 
     return $view;
   }

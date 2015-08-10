@@ -210,8 +210,7 @@ abstract class PhabricatorWorker extends Phobject {
   }
 
   public function renderForDisplay(PhabricatorUser $viewer) {
-    $data = PhutilReadableSerializer::printableValue($this->data);
-    return phutil_tag('pre', array(), $data);
+    return null;
   }
 
   /**

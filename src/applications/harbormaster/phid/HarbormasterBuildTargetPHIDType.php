@@ -26,7 +26,17 @@ final class HarbormasterBuildTargetPHIDType extends PhabricatorPHIDType {
     array $objects) {
 
     foreach ($handles as $phid => $handle) {
-      $build_target = $objects[$phid];
+      $target = $objects[$phid];
+      $target_id = $target->getID();
+
+      // Build target don't currently have their own page, so just point
+      // the user at the build until we have one.
+      $build = $target->getBuild();
+      $build_id = $build->getID();
+      $uri = "/harbormaster/build/{$build_id}/";
+
+      $handle->setName(pht('Build Target %d', $target_id));
+      $handle->setURI($uri);
     }
   }
 
