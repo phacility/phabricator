@@ -10,6 +10,7 @@ final class PonderQuestionViewController extends PonderController {
       ->setViewer($viewer)
       ->withIDs(array($id))
       ->needAnswers(true)
+      ->needProjectPHIDs(true)
       ->executeOne();
     if (!$question) {
       return new Aphront404Response();
@@ -51,6 +52,7 @@ final class PonderQuestionViewController extends PonderController {
 
     $actions = $this->buildActionListView($question);
     $properties = $this->buildPropertyListView($question, $actions);
+    $sidebar = $this->buildSidebar($question);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -59,21 +61,19 @@ final class PonderQuestionViewController extends PonderController {
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     $crumbs->addTextCrumb('Q'.$id, '/Q'.$id);
 
-    $ponder_view = phutil_tag(
-      'div',
-      array(
-        'class' => 'ponder-question-view',
-      ),
-      array(
-        $crumbs,
-        $object_box,
-        $question_xactions,
-        $answers,
-        $answer_add_panel,
-      ));
+    $ponder_view = id(new PHUITwoColumnView())
+      ->setMainColumn(array(
+          $object_box,
+          $question_xactions,
+          $answers,
+          $answer_add_panel,
+        ))
+      ->setSideColumn($sidebar)
+      ->addClass('ponder-question-view');
 
     return $this->buildApplicationPage(
       array(
+        $crumbs,
         $ponder_view,
       ),
       array(
@@ -408,6 +408,48 @@ final class PonderQuestionViewController extends PonderController {
       $stuff);
 
     return array($show, $hide);
+  }
+
+  private function buildSidebar(PonderQuestion $question) {
+    $viewer = $this->getViewer();
+    $status = $question->getStatus();
+    $id = $question->getID();
+
+    $questions = id(new PonderQuestionQuery())
+      ->setViewer($viewer)
+      ->withStatuses(array($status))
+      ->withEdgeLogicPHIDs(
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        PhabricatorQueryConstraint::OPERATOR_OR,
+        $question->getProjectPHIDs())
+      ->setLimit(10)
+      ->execute();
+
+    $list = id(new PHUIObjectItemListView())
+      ->setUser($viewer)
+      ->setNoDataString(pht('No similar questions found.'));
+
+    foreach ($questions as $question) {
+      if ($id == $question->getID()) {
+        continue;
+      }
+      $item = new PHUIObjectItemView();
+      $item->setObjectName('Q'.$question->getID());
+      $item->setHeader($question->getTitle());
+      $item->setHref('/Q'.$question->getID());
+      $item->setObject($question);
+
+      $item->addAttribute(
+        pht('%d Answer(s)', $question->getAnswerCount()));
+
+      $list->addItem($item);
+    }
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Similar Questions'))
+      ->setObjectList($list);
+
+    return $box;
   }
 
 }

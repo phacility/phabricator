@@ -26,6 +26,16 @@ final class PonderQuestionStatus extends PonderConstants {
     return idx($map, $status, pht('Unknown'));
   }
 
+  public static function getQuestionStatusName($status) {
+    $map = array(
+      self::STATUS_OPEN              => pht('Open'),
+      self::STATUS_CLOSED_RESOLVED   => pht('Resolved'),
+      self::STATUS_CLOSED_OBSOLETE   => pht('Obsolete'),
+      self::STATUS_CLOSED_DUPLICATE  => pht('Duplicate'),
+    );
+    return idx($map, $status, pht('Unknown'));
+  }
+
   public static function getQuestionStatusDescription($status) {
     $map = array(
       self::STATUS_OPEN =>
