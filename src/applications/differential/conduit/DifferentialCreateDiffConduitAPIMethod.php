@@ -143,9 +143,10 @@ final class DifferentialCreateDiffConduitAPIMethod
       'unitStatus' => $unit_status,
     );
 
-    $xactions = array(id(new DifferentialTransaction())
-      ->setTransactionType(DifferentialDiffTransaction::TYPE_DIFF_CREATE)
-      ->setNewValue($diff_data_dict),
+    $xactions = array(
+      id(new DifferentialTransaction())
+        ->setTransactionType(DifferentialDiffTransaction::TYPE_DIFF_CREATE)
+        ->setNewValue($diff_data_dict),
     );
 
     id(new DifferentialDiffEditor())

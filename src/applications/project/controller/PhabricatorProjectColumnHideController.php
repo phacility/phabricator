@@ -60,9 +60,10 @@ final class PhabricatorProjectColumnHideController
       }
 
       $type_status = PhabricatorProjectColumnTransaction::TYPE_STATUS;
-      $xactions = array(id(new PhabricatorProjectColumnTransaction())
-        ->setTransactionType($type_status)
-        ->setNewValue($new_status),
+      $xactions = array(
+        id(new PhabricatorProjectColumnTransaction())
+          ->setTransactionType($type_status)
+          ->setNewValue($new_status),
       );
 
       $editor = id(new PhabricatorProjectColumnTransactionEditor())

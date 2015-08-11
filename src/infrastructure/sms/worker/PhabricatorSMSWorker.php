@@ -1,6 +1,4 @@
 <?php
 
 abstract class PhabricatorSMSWorker
-  extends PhabricatorWorker {
-
-}
+  extends PhabricatorWorker {}
