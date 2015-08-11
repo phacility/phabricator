@@ -14,7 +14,43 @@
   border-right: 1px solid {$lightblueborder};
 }
 
-.device-desktop .ponder-comments-view {
-  width: 90%;
-  margin: 0 auto;
+.ponder-question-view .phui-property-list-properties-wrap {
+  width: 66%;
+}
+
+.ponder-question-view .phui-property-list-actions {
+  width: 30%;
+}
+
+.ponder-answer-view {
+  margin-top: 16px;
+}
+
+.ponder-answer-view .phui-header-subheader {
+  display: inline;
+  margin-left: 12px;
+}
+
+.ponder-footer-view {
+  margin: 0 4px -4px;
+}
+
+.ponder-footer-view .ponder-footer-action {
+  padding: 4px 8px;
+  margin-right: 8px;
+  color: {$bluetext};
+  display: inline-block;
+  background-color: rgba(71, 87, 120, 0.06);
+  font-size: {$smallerfontsize};
+}
+
+.ponder-footer-view .ponder-footer-action .phui-icon-view {
+  color: {$bluetext};
+  margin-left: 4px;
+}
+
+.ponder-footer-view a:hover {
+  text-decoration: none;
+  color: {$darkbluetext};
+  background-color: rgba(71, 87, 120, 0.10);
 }

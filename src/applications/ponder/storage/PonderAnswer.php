@@ -8,7 +8,6 @@ final class PonderAnswer extends PonderDAO
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
     PhabricatorSubscribableInterface,
-    PhabricatorTokenReceiverInterface,
     PhabricatorDestructibleInterface {
 
   const MARKUP_FIELD_CONTENT = 'markup:content';
@@ -231,16 +230,6 @@ final class PonderAnswer extends PonderDAO
         break;
     }
     return $out;
-  }
-
-
-/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
-
-
-  public function getUsersToNotifyOfTokenGiven() {
-    return array(
-      $this->getAuthorPHID(),
-    );
   }
 
 
