@@ -68,7 +68,6 @@
 
 .phui-property-list-value {
   color: {$darkgreytext};
-  line-height: 17px;
 }
 
 .device-desktop .phui-property-list-value {
@@ -93,6 +92,12 @@
   padding: 16px 4px 0px;
   text-transform: uppercase;
   font-weight: 700;
+  border-color: {$thinblueborder};
+  border-style: solid;
+  border-width: 1px 0 0;
+}
+
+.phui-property-list-container + .phui-property-list-text-content {
   border-color: {$thinblueborder};
   border-style: solid;
   border-width: 1px 0 0;

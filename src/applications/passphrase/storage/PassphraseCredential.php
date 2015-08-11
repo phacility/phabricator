@@ -4,6 +4,8 @@ final class PassphraseCredential extends PassphraseDAO
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
+    PhabricatorFlaggableInterface,
+    PhabricatorSubscribableInterface,
     PhabricatorDestructibleInterface,
     PhabricatorSpacesInterface {
 
@@ -145,6 +147,23 @@ final class PassphraseCredential extends PassphraseDAO
   public function describeAutomaticCapability($capability) {
     return null;
   }
+
+
+/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+    return false;
+  }
+
+  public function shouldShowSubscribersProperty() {
+    return true;
+  }
+
+  public function shouldAllowSubscription($phid) {
+    return true;
+  }
+
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

@@ -38,7 +38,7 @@ final class PhameBlogListController extends PhameController {
     $blog_list = $this->renderBlogList($blogs, $user, $nodata);
     $blog_list->setPager($pager);
 
-    $box = id (new PHUIObjectBoxView())
+    $box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setObjectList($blog_list);
 
@@ -60,18 +60,23 @@ final class PhameBlogListController extends PhameController {
 
   private function renderBlogList(
     array $blogs,
-    PhabricatorUser $user,
+    PhabricatorUser $viewer,
     $nodata) {
 
     $view = new PHUIObjectItemListView();
     $view->setNoDataString($nodata);
-    $view->setUser($user);
+    $view->setUser($viewer);
     foreach ($blogs as $blog) {
 
+      $id = $blog->getID();
       $item = id(new PHUIObjectItemView())
+        ->setUser($viewer)
+        ->setObject($blog)
         ->setHeader($blog->getName())
-        ->setHref($this->getApplicationURI('blog/view/'.$blog->getID().'/'))
-        ->setObject($blog);
+        ->setStatusIcon('fa-star')
+        ->setHref($this->getApplicationURI("/blog/view/{$id}/"))
+        ->addAttribute($blog->getSkin())
+        ->addAttribute($blog->getDomain());
 
       $view->addItem($item);
     }

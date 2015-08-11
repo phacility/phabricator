@@ -217,18 +217,16 @@ final class PhabricatorApplicationSearchController
 
         $objects = $engine->executeQuery($query, $pager);
 
-        // TODO: To support Dashboard panels, rendering is moving into
-        // SearchEngines. Move it all the way in and then get rid of this.
+        $engine->setRequest($request);
+        $list = $engine->renderResults($objects, $saved_query);
 
-        $interface = 'PhabricatorApplicationSearchResultsControllerInterface';
-        if ($parent instanceof $interface) {
-          $list = $parent->renderResultsList($objects, $saved_query);
-        } else {
-          $engine->setRequest($request);
-
-          $list = $engine->renderResults(
-            $objects,
-            $saved_query);
+        if (!($list instanceof PhabricatorApplicationSearchResultView)) {
+          throw new Exception(
+            pht(
+              'SearchEngines must render a "%s" object, but this engine '.
+              '(of class "%s") rendered something else.',
+              'PhabricatorApplicationSearchResultView',
+              get_class($engine)));
         }
 
         if ($list->getActions()) {

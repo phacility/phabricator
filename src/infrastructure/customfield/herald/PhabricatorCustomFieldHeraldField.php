@@ -15,6 +15,10 @@ final class PhabricatorCustomFieldHeraldField extends HeraldField {
     return $this->customField;
   }
 
+  public function getFieldGroupKey() {
+    return PhabricatorCustomFieldHeraldFieldGroup::FIELDGROUPKEY;
+  }
+
   public function supportsObject($object) {
     return ($object instanceof PhabricatorCustomFieldInterface);
   }

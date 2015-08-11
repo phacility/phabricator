@@ -22,8 +22,6 @@ final class PhameBlogViewController extends PhameController {
       ->withBlogPHIDs(array($blog->getPHID()))
       ->executeWithCursorPager($pager);
 
-    $nav = $this->renderSideNavFilterView(null);
-
     $header = id(new PHUIHeaderView())
       ->setHeader($blog->getName())
       ->setUser($user)
@@ -36,29 +34,24 @@ final class PhameBlogViewController extends PhameController {
       $user,
       pht('This blog has no visible posts.'));
 
-    require_celerity_resource('phame-css');
-    $post_list = id(new PHUIBoxView())
-      ->addPadding(PHUI::PADDING_LARGE)
-      ->addClass('phame-post-list')
+    $post_list = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Latest Posts'))
       ->appendChild($post_list);
 
-
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Blogs'), $this->getApplicationURI('blog/'));
     $crumbs->addTextCrumb($blog->getName(), $this->getApplicationURI());
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    $nav->appendChild(
+    return $this->buildApplicationPage(
       array(
         $crumbs,
         $object_box,
         $post_list,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
+      ),
       array(
         'title' => $blog->getName(),
       ));
@@ -72,8 +65,10 @@ final class PhameBlogViewController extends PhameController {
     require_celerity_resource('aphront-tooltip-css');
     Javelin::initBehavior('phabricator-tooltips');
 
-    $properties = new PHUIPropertyListView();
-    $properties->setActionList($actions);
+    $properties = id(new PHUIPropertyListView())
+      ->setUser($user)
+      ->setObject($blog)
+      ->setActionList($actions);
 
     $properties->addProperty(
       pht('Skin'),
@@ -115,13 +110,18 @@ final class PhameBlogViewController extends PhameController {
       ->addObject($blog, PhameBlog::MARKUP_FIELD_DESCRIPTION)
       ->process();
 
-    $properties->addTextContent(
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'phabricator-remarkup',
-        ),
-        $engine->getOutput($blog, PhameBlog::MARKUP_FIELD_DESCRIPTION)));
+    $properties->invokeWillRenderEvent();
+
+    if (strlen($blog->getDescription())) {
+      $description = PhabricatorMarkupEngine::renderOneObject(
+        id(new PhabricatorMarkupOneOff())->setContent($blog->getDescription()),
+        'default',
+        $user);
+      $properties->addSectionHeader(
+        pht('Description'),
+        PHUIPropertyListView::ICON_SUMMARY);
+      $properties->addTextContent($description);
+    }
 
     return $properties;
   }

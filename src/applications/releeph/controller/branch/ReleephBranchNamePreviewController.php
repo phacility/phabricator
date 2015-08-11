@@ -3,8 +3,7 @@
 final class ReleephBranchNamePreviewController
   extends ReleephController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
 
     $is_symbolic = $request->getBool('isSymbolic');
     $template = $request->getStr('template');

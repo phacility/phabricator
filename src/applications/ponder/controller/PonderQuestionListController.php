@@ -2,19 +2,15 @@
 
 final class PonderQuestionListController extends PonderController {
 
-  private $queryKey;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey');
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $query_key = $request->getURIData('queryKey');
 
-  public function processRequest() {
     $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($this->queryKey)
+      ->setQueryKey($query_key)
       ->setSearchEngine(new PonderQuestionSearchEngine())
       ->setNavigation($this->buildSideNavView());
 

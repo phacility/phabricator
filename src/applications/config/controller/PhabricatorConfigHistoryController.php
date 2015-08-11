@@ -3,12 +3,12 @@
 final class PhabricatorConfigHistoryController
   extends PhabricatorConfigController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $xactions = id(new PhabricatorConfigTransactionQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->needComments(true)
       ->execute();
 
@@ -19,7 +19,7 @@ final class PhabricatorConfigHistoryController
     $view = $xaction->getApplicationTransactionViewObject();
 
     $timeline = $view
-      ->setUser($user)
+      ->setUser($viewer)
       ->setTransactions($xactions)
       ->setRenderAsFeed(true)
       ->setObjectPHID(PhabricatorPHIDConstants::PHID_VOID);

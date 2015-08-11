@@ -1706,7 +1706,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $lists = array($new_set, $new_add, $new_rem);
     foreach ($lists as $list) {
-      $this->checkEdgeList($list);
+      $this->checkEdgeList($list, $xaction->getMetadataValue('edge:type'));
     }
 
     $result = array();
@@ -1743,7 +1743,7 @@ abstract class PhabricatorApplicationTransactionEditor
     return $result;
   }
 
-  private function checkEdgeList($list) {
+  private function checkEdgeList($list, $edge_type) {
     if (!$list) {
       return;
     }
@@ -1751,16 +1751,18 @@ abstract class PhabricatorApplicationTransactionEditor
       if (phid_get_type($key) === PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN) {
         throw new Exception(
           pht(
-            "Edge transactions must have destination PHIDs as in edge ".
-            "lists (found key '%s').",
-            $key));
+            'Edge transactions must have destination PHIDs as in edge '.
+            'lists (found key "%s" on transaction of type "%s").',
+            $key,
+            $edge_type));
       }
       if (!is_array($item) && $item !== $key) {
         throw new Exception(
           pht(
-            "Edge transactions must have PHIDs or edge specs as values ".
-            "(found value '%s').",
-            $item));
+            'Edge transactions must have PHIDs or edge specs as values '.
+            '(found value "%s" on transaction of type "%s").',
+            $item,
+            $edge_type));
       }
     }
   }
@@ -2810,6 +2812,13 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $this->setHeraldAdapter($adapter);
     $this->setHeraldTranscript($xscript);
+
+    if ($adapter instanceof HarbormasterBuildableAdapterInterface) {
+      HarbormasterBuildable::applyBuildPlans(
+        $adapter->getHarbormasterBuildablePHID(),
+        $adapter->getHarbormasterContainerPHID(),
+        $adapter->getQueuedHarbormasterBuildPlanPHIDs());
+    }
 
     return array_merge(
       $this->didApplyHeraldRules($object, $adapter, $xscript),

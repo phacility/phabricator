@@ -4,6 +4,9 @@ final class PhameBlog extends PhameDAO
   implements
     PhabricatorPolicyInterface,
     PhabricatorMarkupInterface,
+    PhabricatorSubscribableInterface,
+    PhabricatorFlaggableInterface,
+    PhabricatorProjectInterface,
     PhabricatorApplicationTransactionInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:description';
@@ -326,5 +329,22 @@ final class PhameBlog extends PhameDAO
     AphrontRequest $request) {
     return $timeline;
   }
+
+
+/* -(  PhabricatorSubscribableInterface Implementation  )-------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+    return ($this->creatorPHID == $phid);
+  }
+
+  public function shouldShowSubscribersProperty() {
+    return true;
+  }
+
+  public function shouldAllowSubscription($phid) {
+    return true;
+  }
+
 
 }

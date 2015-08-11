@@ -3,19 +3,13 @@
 final class PhabricatorChatLogChannelLogController
   extends PhabricatorChatLogController {
 
-  private $channelID;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->channelID = $data['channelID'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('channelID');
 
     $uri = clone $request->getRequestURI();
     $uri->setQueryParams(array());
@@ -25,12 +19,12 @@ final class PhabricatorChatLogChannelLogController
     $pager->setPageSize(250);
 
     $query = id(new PhabricatorChatLogQuery())
-      ->setViewer($user)
-      ->withChannelIDs(array($this->channelID));
+      ->setViewer($viewer)
+      ->withChannelIDs(array($id));
 
     $channel = id(new PhabricatorChatLogChannelQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->channelID))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->executeOne();
 
     if (!$channel) {
@@ -115,7 +109,7 @@ final class PhabricatorChatLogChannelLogController
 
       $href = $uri->alter('at', $block['id']);
       $timestamp = $block['epoch'];
-      $timestamp = phabricator_datetime($timestamp, $user);
+      $timestamp = phabricator_datetime($timestamp, $viewer);
       $timestamp = phutil_tag(
         'a',
           array(
@@ -189,7 +183,7 @@ final class PhabricatorChatLogChannelLogController
       ->addTextCrumb($channel->getChannelName(), $uri);
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setMethod('GET')
       ->setAction($uri)
       ->appendChild(
@@ -273,7 +267,7 @@ final class PhabricatorChatLogChannelLogController
     AphrontRequest $request,
     PhabricatorChatLogQuery $query) {
 
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
 
     $at_id = $request->getInt('at');
     $at_date = $request->getStr('date');
@@ -298,7 +292,7 @@ final class PhabricatorChatLogChannelLogController
       );
 
     } else if ($at_date) {
-      $timestamp = PhabricatorTime::parseLocalTime($at_date, $user);
+      $timestamp = PhabricatorTime::parseLocalTime($at_date, $viewer);
 
       if ($timestamp) {
         $context_logs = $query

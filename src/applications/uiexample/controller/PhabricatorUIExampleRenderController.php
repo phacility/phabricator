@@ -2,17 +2,12 @@
 
 final class PhabricatorUIExampleRenderController extends PhabricatorController {
 
-  private $class;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->class = idx($data, 'class');
-  }
-
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
+    $id = $request->getURIData('class');
 
     $classes = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorUIExample')
@@ -27,7 +22,7 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
       $nav->addFilter($class, $name);
     }
 
-    $selected = $nav->selectFilter($this->class, head_key($classes));
+    $selected = $nav->selectFilter($id, head_key($classes));
 
     $example = $classes[$selected];
     $example->setRequest($this->getRequest());

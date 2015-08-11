@@ -104,6 +104,11 @@ body .phui-header-shell.phui-bleed-header
   margin-left: 8px;
 }
 
+.device-phone .phui-header-action-link.button .phui-icon-view {
+  width: 12px;
+  text-align: center;
+}
+
 .phui-header-divider {
   margin: 0 4px;
   font-weight: normal;
@@ -238,4 +243,13 @@ body .phui-header-shell.phui-bleed-header
 
 .spaces-name .phui-handle {
   color: {$sh-redtext};
+}
+
+.phui-header-subheader .phui-badge-flex-view {
+  display: inline;
+  margin-right: 4px;
+}
+
+.phui-header-subheader .phui-badge-flex-view:after {
+  display: inline;
 }

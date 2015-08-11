@@ -191,16 +191,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
           $visible_changesets[$changeset_id] = $changesets[$changeset_id];
         }
       }
-
-      if (!empty($props['arc:lint'])) {
-        $changeset_paths = mpull($changesets, null, 'getFilename');
-        foreach ($props['arc:lint'] as $lint) {
-          $changeset = idx($changeset_paths, $lint['path']);
-          if ($changeset) {
-            $visible_changesets[$changeset->getID()] = $changeset;
-          }
-        }
-      }
     } else {
       $warning = null;
       $visible_changesets = $changesets;
@@ -363,7 +353,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $toc_view->setChangesets($changesets);
     $toc_view->setVisibleChangesets($visible_changesets);
     $toc_view->setRenderingReferences($rendering_references);
-    $toc_view->setUnitTestData(idx($props, 'arc:unit', array()));
+    $toc_view->setCoverageMap($target->loadCoverageMap($user));
     if ($repository) {
       $toc_view->setRepository($repository);
     }

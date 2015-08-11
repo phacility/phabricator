@@ -1,0 +1,221 @@
+/**
+ * @provides phui-badge-view-css
+ */
+
+.phui-badge-flex-view {
+  padding: 12px 4px 8px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.phui-badge-flex-item {
+  display: inline-block;
+  padding: 4px 8px;
+}
+
+.phui-badge-flex-view.flex-view-collapsed {
+  padding: 0;
+}
+
+.flex-view-collapsed .phui-badge-flex-item {
+  padding: 1px;
+}
+
+.phui-badge-view {
+  display: inline-block;
+  position: relative;
+  perspective: 512px;
+}
+
+.phui-badge-card-container {
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+
+  transition: transform 0.5s;
+  -webkit-transition: -webkit-transform 0.5s;
+
+  transform-origin: right center;
+  -webkit-transform-origin: right center;
+
+  width: 100%;
+  height: 100%;
+}
+
+.phui-badge-card {
+  cursor: pointer;
+  padding: 12px;
+  height: 180px;
+  width: 128px;
+  border: 1px solid {$lightgreyborder};
+  background-color: {$lightbluebackground};
+}
+
+.card-flipped .phui-badge-card-container {
+  transform: translateX( -100% ) rotateY( -180deg );
+  -webkit-transform: translateX( -100% ) rotateY( -180deg );
+}
+
+.phui-badge-card-front,
+.phui-badge-card-back {
+  display: block;
+  position: absolute;
+  width: 128px;
+  height: 180px;
+  overflow: hidden;
+
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -moz-backface-visibility: hidden;
+}
+
+
+/* Firefox Fix */
+.phui-badge-card-front {
+  transform: rotateY(0deg);
+  -webkit-trasform: rotateY(0deg);
+}
+
+.phui-badge-front-view,
+.phui-badge-back-view {
+  display: table;
+  width: 100%;
+}
+
+.phui-badge-inner-front,
+.phui-badge-inner-back {
+  display: table-row;
+}
+
+.phui-badge-illustration {
+  background-color: #fff;
+  box-shadow: inset 0 -1px 1px 0 rgba(0,0,0,.1);
+  text-align: center;
+  height: 100px;
+  width: 100%;
+  vertical-align: middle;
+  display: table-cell;
+}
+
+.phui-badge-illustration .phui-icon-view {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  color: {$bluetext};
+}
+
+.phui-badge-view-information {
+  display: table-cell;
+  text-align: center;
+  color: {$greytext};
+}
+
+.phui-badge-view-header {
+  color: {$darkgreytext};
+  font-weight: bold;
+  padding-top: 12px;
+  display: block;
+  word-break: break-word;
+}
+
+.phui-badge-quality {
+  padding: 4px 0;
+  color: {$darkbluetext};
+  font-weight: bold;
+}
+
+.phui-badge-view-subhead {
+  color: {$lightgreytext};
+  font-size: {$smallerfontsize};
+  word-break: break-word;
+}
+
+.phui-badge-card-back {
+  transform: rotateY( 180deg );
+  -webkit-transform: rotateY( 180deg );
+}
+
+/** Quality Levels ***********************************************************/
+
+.phui-badge-view-grey .phui-badge-card {
+  background-color: {$lightgreybackground};
+}
+
+.phui-badge-view-white .phui-badge-card {
+  background-color: {$lightbluebackground};
+}
+
+.phui-badge-view-green .phui-badge-card {
+  background-color: {$sh-greenbackground};
+  border-color: {$sh-lightgreenborder};
+}
+
+.phui-badge-view-blue .phui-badge-card {
+  background-color: {$sh-bluebackground};
+  border-color: {$sh-lightblueborder};
+}
+
+.phui-badge-view-indigo .phui-badge-card {
+  background-color: {$sh-indigobackground};
+  border-color: {$sh-lightindigoborder};
+}
+
+.phui-badge-view-orange .phui-badge-card {
+  background-color: {$sh-orangebackground};
+  border-color: {$sh-lightorangeborder};
+}
+
+.phui-badge-view-yellow .phui-badge-card {
+  background-color: {$sh-yellowbackground};
+  border-color: {$sh-lightyellowborder};
+}
+
+/** Mini View ****************************************************************/
+
+.phui-badge-mini {
+  background-color: {$greyborder};
+  border-radius: 18px;
+  height: 25px;
+  width: 25px;
+  line-height: 24px;
+  text-align: center;
+  display: inline-block;
+  opacity: 0.7;
+}
+
+.phui-badge-mini:hover {
+  opacity: 1;
+}
+
+.phui-badge-mini .phui-icon-view {
+  color: #fff;
+  font-size: 12px;
+  margin: 0;
+}
+
+.phui-badge-mini-grey {
+  background-color: {$greyborder};
+}
+
+.phui-badge-mini-white {
+  background-color: {$lightblueborder};
+}
+
+.phui-badge-mini-green {
+  background-color: {$sh-greenicon};
+}
+
+.phui-badge-mini-blue {
+  background-color: {$blue};
+}
+
+.phui-badge-mini-indigo {
+  background-color: {$sh-indigoicon};
+}
+
+.phui-badge-mini-orange {
+  background-color: {$sh-orangeicon};
+}
+
+.phui-badge-mini-yellow {
+  background-color: {$sh-yellowicon};
+}

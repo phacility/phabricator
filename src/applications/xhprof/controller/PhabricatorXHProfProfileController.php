@@ -3,18 +3,16 @@
 final class PhabricatorXHProfProfileController
   extends PhabricatorXHProfController {
 
-  private $phid;
-
-  public function willProcessRequest(array $data) {
-    $this->phid = $data['phid'];
+  public function shouldAllowPublic() {
+    return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
+    $phid = $request->getURIData('phid');
 
     $file = id(new PhabricatorFileQuery())
       ->setViewer($request->getUser())
-      ->withPHIDs(array($this->phid))
+      ->withPHIDs(array($phid))
       ->executeOne();
     if (!$file) {
       return new Aphront404Response();

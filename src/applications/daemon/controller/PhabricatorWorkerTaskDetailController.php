@@ -3,20 +3,14 @@
 final class PhabricatorWorkerTaskDetailController
   extends PhabricatorDaemonController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $task = id(new PhabricatorWorkerActiveTask())->load($this->id);
+    $task = id(new PhabricatorWorkerActiveTask())->load($id);
     if (!$task) {
       $tasks = id(new PhabricatorWorkerArchiveTaskQuery())
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->execute();
       $task = reset($tasks);
     }
@@ -155,9 +149,9 @@ final class PhabricatorWorkerTaskDetailController
     $worker = $task->getWorkerInstance();
     $data = $worker->renderForDisplay($viewer);
 
-    $view->addProperty(
-      pht('Data'),
-      $data);
+    if ($data !== null) {
+      $view->addProperty(pht('Data'), $data);
+    }
 
     return $view;
   }

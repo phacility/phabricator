@@ -2,34 +2,6 @@
 
 abstract class HeraldAdapter extends Phobject {
 
-  const FIELD_TITLE                  = 'title';
-  const FIELD_BODY                   = 'body';
-  const FIELD_AUTHOR                 = 'author';
-  const FIELD_REVIEWER               = 'reviewer';
-  const FIELD_REVIEWERS              = 'reviewers';
-  const FIELD_COMMITTER              = 'committer';
-  const FIELD_DIFF_FILE              = 'diff-file';
-  const FIELD_DIFF_CONTENT           = 'diff-content';
-  const FIELD_DIFF_ADDED_CONTENT     = 'diff-added-content';
-  const FIELD_DIFF_REMOVED_CONTENT   = 'diff-removed-content';
-  const FIELD_DIFF_ENORMOUS          = 'diff-enormous';
-  const FIELD_REPOSITORY             = 'repository';
-  const FIELD_REPOSITORY_PROJECTS    = 'repository-projects';
-  const FIELD_AFFECTED_PACKAGE       = 'affected-package';
-  const FIELD_AFFECTED_PACKAGE_OWNER = 'affected-package-owner';
-  const FIELD_AUTHOR_PROJECTS        = 'authorprojects';
-  const FIELD_PUSHER                 = 'pusher';
-  const FIELD_PUSHER_PROJECTS        = 'pusher-projects';
-  const FIELD_DIFFERENTIAL_REVISION  = 'differential-revision';
-  const FIELD_DIFFERENTIAL_REVIEWERS = 'differential-reviewers';
-  const FIELD_DIFFERENTIAL_CCS       = 'differential-ccs';
-  const FIELD_DIFFERENTIAL_ACCEPTED  = 'differential-accepted';
-  const FIELD_IS_MERGE_COMMIT        = 'is-merge-commit';
-  const FIELD_BRANCHES               = 'branches';
-  const FIELD_AUTHOR_RAW             = 'author-raw';
-  const FIELD_COMMITTER_RAW          = 'committer-raw';
-  const FIELD_PUSHER_IS_COMMITTER    = 'pusher-is-committer';
-
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
   const CONDITION_IS              = 'is';
@@ -54,48 +26,15 @@ abstract class HeraldAdapter extends Phobject {
   const CONDITION_IS_TRUE         = 'true';
   const CONDITION_IS_FALSE        = 'false';
 
-  const ACTION_ADD_CC       = 'addcc';
-  const ACTION_REMOVE_CC    = 'remcc';
-  const ACTION_EMAIL        = 'email';
-  const ACTION_NOTHING      = 'nothing';
-  const ACTION_AUDIT        = 'audit';
-  const ACTION_FLAG         = 'flag';
-  const ACTION_ASSIGN_TASK  = 'assigntask';
-  const ACTION_ADD_PROJECTS = 'addprojects';
-  const ACTION_REMOVE_PROJECTS = 'removeprojects';
-  const ACTION_ADD_REVIEWERS = 'addreviewers';
-  const ACTION_ADD_BLOCKING_REVIEWERS = 'addblockingreviewers';
-  const ACTION_APPLY_BUILD_PLANS = 'applybuildplans';
-  const ACTION_BLOCK = 'block';
-  const ACTION_REQUIRE_SIGNATURE = 'signature';
-
-  const VALUE_TEXT            = 'text';
-  const VALUE_NONE            = 'none';
-  const VALUE_EMAIL           = 'email';
-  const VALUE_USER            = 'user';
-  const VALUE_RULE            = 'rule';
-  const VALUE_REPOSITORY      = 'repository';
-  const VALUE_OWNERS_PACKAGE  = 'package';
-  const VALUE_PROJECT         = 'project';
-  const VALUE_FLAG_COLOR      = 'flagcolor';
-  const VALUE_CONTENT_SOURCE  = 'contentsource';
-  const VALUE_USER_OR_PROJECT = 'userorproject';
-  const VALUE_BUILD_PLAN      = 'buildplan';
-  const VALUE_TASK_PRIORITY   = 'taskpriority';
-  const VALUE_TASK_STATUS     = 'taskstatus';
-  const VALUE_LEGAL_DOCUMENTS   = 'legaldocuments';
-  const VALUE_APPLICATION_EMAIL = 'applicationemail';
-  const VALUE_SPACE = 'space';
-
   private $contentSource;
   private $isNewObject;
   private $applicationEmail;
-  private $customActions = null;
   private $queuedTransactions = array();
   private $emailPHIDs = array();
   private $forcedEmailPHIDs = array();
-  private $unsubscribedPHIDs;
   private $fieldMap;
+  private $actionMap;
+  private $edgeCache = array();
 
   public function getEmailPHIDs() {
     return array_values($this->emailPHIDs);
@@ -105,35 +44,12 @@ abstract class HeraldAdapter extends Phobject {
     return array_values($this->forcedEmailPHIDs);
   }
 
-  public function getCustomActions() {
-    if ($this->customActions === null) {
-      $custom_actions = id(new PhutilSymbolLoader())
-        ->setAncestorClass('HeraldCustomAction')
-        ->loadObjects();
-
-      foreach ($custom_actions as $key => $object) {
-        if (!$object->appliesToAdapter($this)) {
-          unset($custom_actions[$key]);
-        }
-      }
-
-      $this->customActions = array();
-      foreach ($custom_actions as $action) {
-        $key = $action->getActionKey();
-
-        if (array_key_exists($key, $this->customActions)) {
-          throw new Exception(
-            pht(
-              "More than one Herald custom action implementation ".
-              "handles the action key: '%s'.",
-              $key));
-        }
-
-        $this->customActions[$key] = $action;
-      }
+  public function addEmailPHID($phid, $force) {
+    $this->emailPHIDs[$phid] = $phid;
+    if ($force) {
+      $this->forcedEmailPHIDs[$phid] = $phid;
     }
-
-    return $this->customActions;
+    return $this;
   }
 
   public function setContentSource(PhabricatorContentSource $content_source) {
@@ -179,13 +95,9 @@ abstract class HeraldAdapter extends Phobject {
 
   abstract public function getHeraldName();
 
-  public function getHeraldField($field_name) {
-    $impl = $this->getFieldImplementation($field_name);
-    if ($impl) {
-      return $impl->getHeraldFieldValue($this->getObject());
-    }
-
-    throw new Exception(pht("Unknown field '%s'!", $field_name));
+  public function getHeraldField($field_key) {
+    return $this->requireFieldImplementation($field_key)
+      ->getHeraldFieldValue($this->getObject());
   }
 
   public function applyHeraldEffects(array $effects) {
@@ -197,19 +109,6 @@ abstract class HeraldAdapter extends Phobject {
     }
 
     return $result;
-  }
-
-  protected function handleCustomHeraldEffect(HeraldEffect $effect) {
-    $custom_action = idx($this->getCustomActions(), $effect->getAction());
-
-    if ($custom_action !== null) {
-      return $custom_action->applyEffect(
-        $this,
-        $this->getObject(),
-        $effect);
-    }
-
-    return null;
   }
 
   public function isAvailableToUser(PhabricatorUser $viewer) {
@@ -230,7 +129,7 @@ abstract class HeraldAdapter extends Phobject {
     return $this->queuedTransactions;
   }
 
-  protected function newTransaction() {
+  public function newTransaction() {
     $object = $this->newObject();
 
     if (!($object instanceof PhabricatorApplicationTransactionInterface)) {
@@ -359,39 +258,17 @@ abstract class HeraldAdapter extends Phobject {
   }
 
   public function getFieldNameMap() {
-    $map = mpull($this->getFieldImplementationMap(), 'getHeraldFieldName');
+    return mpull($this->getFieldImplementationMap(), 'getHeraldFieldName');
+  }
 
-    return $map + array(
-      self::FIELD_TITLE => pht('Title'),
-      self::FIELD_BODY => pht('Body'),
-      self::FIELD_AUTHOR => pht('Author'),
-      self::FIELD_COMMITTER => pht('Committer'),
-      self::FIELD_REVIEWER => pht('Reviewer'),
-      self::FIELD_REVIEWERS => pht('Reviewers'),
-      self::FIELD_DIFF_FILE => pht('Any changed filename'),
-      self::FIELD_DIFF_CONTENT => pht('Any changed file content'),
-      self::FIELD_DIFF_ADDED_CONTENT => pht('Any added file content'),
-      self::FIELD_DIFF_REMOVED_CONTENT => pht('Any removed file content'),
-      self::FIELD_DIFF_ENORMOUS => pht('Change is enormous'),
-      self::FIELD_REPOSITORY => pht('Repository'),
-      self::FIELD_REPOSITORY_PROJECTS => pht('Repository\'s projects'),
-      self::FIELD_AFFECTED_PACKAGE => pht('Any affected package'),
-      self::FIELD_AFFECTED_PACKAGE_OWNER =>
-        pht("Any affected package's owner"),
-      self::FIELD_AUTHOR_PROJECTS => pht("Author's projects"),
-      self::FIELD_PUSHER => pht('Pusher'),
-      self::FIELD_PUSHER_PROJECTS => pht("Pusher's projects"),
-      self::FIELD_DIFFERENTIAL_REVISION => pht('Differential revision'),
-      self::FIELD_DIFFERENTIAL_REVIEWERS => pht('Differential reviewers'),
-      self::FIELD_DIFFERENTIAL_CCS => pht('Differential CCs'),
-      self::FIELD_DIFFERENTIAL_ACCEPTED
-        => pht('Accepted Differential revision'),
-      self::FIELD_IS_MERGE_COMMIT => pht('Commit is a merge'),
-      self::FIELD_BRANCHES => pht('Commit\'s branches'),
-      self::FIELD_AUTHOR_RAW => pht('Raw author name'),
-      self::FIELD_COMMITTER_RAW => pht('Raw committer name'),
-      self::FIELD_PUSHER_IS_COMMITTER => pht('Pusher same as committer'),
-    );
+  public function getFieldGroupKey($field_key) {
+    $field = $this->getFieldImplementation($field_key);
+
+    if (!$field) {
+      return null;
+    }
+
+    return $field->getFieldGroupKey();
   }
 
 
@@ -427,98 +304,22 @@ abstract class HeraldAdapter extends Phobject {
   }
 
   public function getConditionsForField($field) {
-    $impl = $this->getFieldImplementation($field);
-    if ($impl) {
-      return $impl->getHeraldFieldConditions();
+    return $this->requireFieldImplementation($field)
+      ->getHeraldFieldConditions();
+  }
+
+  private function requireFieldImplementation($field_key) {
+    $field = $this->getFieldImplementation($field_key);
+
+    if (!$field) {
+      throw new Exception(
+        pht(
+          'No field with key "%s" is available to Herald adapter "%s".',
+          $field_key,
+          get_class($this)));
     }
 
-    switch ($field) {
-      case self::FIELD_TITLE:
-      case self::FIELD_BODY:
-      case self::FIELD_COMMITTER_RAW:
-      case self::FIELD_AUTHOR_RAW:
-        return array(
-          self::CONDITION_CONTAINS,
-          self::CONDITION_NOT_CONTAINS,
-          self::CONDITION_IS,
-          self::CONDITION_IS_NOT,
-          self::CONDITION_REGEXP,
-        );
-      case self::FIELD_REVIEWER:
-      case self::FIELD_PUSHER:
-        return array(
-          self::CONDITION_IS_ANY,
-          self::CONDITION_IS_NOT_ANY,
-        );
-      case self::FIELD_REPOSITORY:
-      case self::FIELD_AUTHOR:
-      case self::FIELD_COMMITTER:
-        return array(
-          self::CONDITION_IS_ANY,
-          self::CONDITION_IS_NOT_ANY,
-          self::CONDITION_EXISTS,
-          self::CONDITION_NOT_EXISTS,
-        );
-      case self::FIELD_REVIEWERS:
-      case self::FIELD_AUTHOR_PROJECTS:
-      case self::FIELD_AFFECTED_PACKAGE:
-      case self::FIELD_AFFECTED_PACKAGE_OWNER:
-      case self::FIELD_PUSHER_PROJECTS:
-      case self::FIELD_REPOSITORY_PROJECTS:
-        return array(
-          self::CONDITION_INCLUDE_ALL,
-          self::CONDITION_INCLUDE_ANY,
-          self::CONDITION_INCLUDE_NONE,
-          self::CONDITION_EXISTS,
-          self::CONDITION_NOT_EXISTS,
-        );
-      case self::FIELD_DIFF_FILE:
-      case self::FIELD_BRANCHES:
-        return array(
-          self::CONDITION_CONTAINS,
-          self::CONDITION_REGEXP,
-        );
-      case self::FIELD_DIFF_CONTENT:
-      case self::FIELD_DIFF_ADDED_CONTENT:
-      case self::FIELD_DIFF_REMOVED_CONTENT:
-        return array(
-          self::CONDITION_CONTAINS,
-          self::CONDITION_REGEXP,
-          self::CONDITION_REGEXP_PAIR,
-        );
-      case self::FIELD_DIFFERENTIAL_REVIEWERS:
-        return array(
-          self::CONDITION_EXISTS,
-          self::CONDITION_NOT_EXISTS,
-          self::CONDITION_INCLUDE_ALL,
-          self::CONDITION_INCLUDE_ANY,
-          self::CONDITION_INCLUDE_NONE,
-        );
-      case self::FIELD_DIFFERENTIAL_CCS:
-        return array(
-          self::CONDITION_INCLUDE_ALL,
-          self::CONDITION_INCLUDE_ANY,
-          self::CONDITION_INCLUDE_NONE,
-        );
-      case self::FIELD_DIFFERENTIAL_REVISION:
-      case self::FIELD_DIFFERENTIAL_ACCEPTED:
-        return array(
-          self::CONDITION_EXISTS,
-          self::CONDITION_NOT_EXISTS,
-        );
-      case self::FIELD_IS_MERGE_COMMIT:
-      case self::FIELD_DIFF_ENORMOUS:
-      case self::FIELD_PUSHER_IS_COMMITTER:
-        return array(
-          self::CONDITION_IS_TRUE,
-          self::CONDITION_IS_FALSE,
-        );
-      default:
-        throw new Exception(
-          pht(
-            "This adapter does not define conditions for field '%s'!",
-            $field));
-    }
+    return $field;
   }
 
   public function doesConditionMatch(
@@ -763,120 +564,117 @@ abstract class HeraldAdapter extends Phobject {
 
 /* -(  Actions  )------------------------------------------------------------ */
 
-  public function getCustomActionsForRuleType($rule_type) {
-    $results = array();
-    foreach ($this->getCustomActions() as $custom_action) {
-      if ($custom_action->appliesToRuleType($rule_type)) {
-        $results[] = $custom_action;
+  private function getActionImplementationMap() {
+    if ($this->actionMap === null) {
+      // We can't use PhutilClassMapQuery here because action expansion
+      // depends on the adapter and object.
+
+      $object = $this->getObject();
+
+      $map = array();
+      $all = HeraldAction::getAllActions();
+      foreach ($all as $key => $action) {
+        $action = id(clone $action)->setAdapter($this);
+
+        if (!$action->supportsObject($object)) {
+          continue;
+        }
+
+        $subactions = $action->getActionsForObject($object);
+        foreach ($subactions as $subkey => $subaction) {
+          if (isset($map[$subkey])) {
+            throw new Exception(
+              pht(
+                'Two HeraldActions (of classes "%s" and "%s") have the same '.
+                'action key ("%s") after expansion for an object of class '.
+                '"%s" inside adapter "%s". Each action must have a unique '.
+                'action key.',
+                get_class($subaction),
+                get_class($map[$subkey]),
+                $subkey,
+                get_class($object),
+                get_class($this)));
+          }
+
+          $subaction = id(clone $subaction)->setAdapter($this);
+
+          $map[$subkey] = $subaction;
+        }
       }
+      $this->actionMap = $map;
     }
-    return $results;
+
+    return $this->actionMap;
   }
 
-  public function getActions($rule_type) {
-    $custom_actions = $this->getCustomActionsForRuleType($rule_type);
-    $custom_actions = mpull($custom_actions, 'getActionKey');
+  private function requireActionImplementation($action_key) {
+    $action = $this->getActionImplementation($action_key);
 
-    $actions = $custom_actions;
+    if (!$action) {
+      throw new Exception(
+        pht(
+          'No action with key "%s" is available to Herald adapter "%s".',
+          $action_key,
+          get_class($this)));
+    }
 
-    $object = $this->newObject();
+    return $action;
+  }
 
-    if (($object instanceof PhabricatorProjectInterface)) {
-      if ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) {
-        $actions[] = self::ACTION_ADD_PROJECTS;
-        $actions[] = self::ACTION_REMOVE_PROJECTS;
+  private function getActionsForRuleType($rule_type) {
+    $actions = $this->getActionImplementationMap();
+
+    foreach ($actions as $key => $action) {
+      if (!$action->supportsRuleType($rule_type)) {
+        unset($actions[$key]);
       }
     }
 
     return $actions;
   }
 
-  public function getActionNameMap($rule_type) {
-    switch ($rule_type) {
-      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
-      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
-        $standard = array(
-          self::ACTION_NOTHING      => pht('Do nothing'),
-          self::ACTION_ADD_CC       => pht('Add Subscribers'),
-          self::ACTION_REMOVE_CC    => pht('Remove Subscribers'),
-          self::ACTION_EMAIL        => pht('Send an email to'),
-          self::ACTION_AUDIT        => pht('Trigger an Audit by'),
-          self::ACTION_FLAG         => pht('Mark with flag'),
-          self::ACTION_ASSIGN_TASK  => pht('Assign task to'),
-          self::ACTION_ADD_PROJECTS => pht('Add projects'),
-          self::ACTION_REMOVE_PROJECTS => pht('Remove projects'),
-          self::ACTION_ADD_REVIEWERS => pht('Add reviewers'),
-          self::ACTION_ADD_BLOCKING_REVIEWERS => pht('Add blocking reviewers'),
-          self::ACTION_APPLY_BUILD_PLANS => pht('Run build plans'),
-          self::ACTION_REQUIRE_SIGNATURE => pht('Require legal signatures'),
-          self::ACTION_BLOCK => pht('Block change with message'),
-        );
-        break;
-      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-        $standard = array(
-          self::ACTION_NOTHING      => pht('Do nothing'),
-          self::ACTION_ADD_CC       => pht('Add me as a subscriber'),
-          self::ACTION_REMOVE_CC    => pht('Remove me as a subscriber'),
-          self::ACTION_EMAIL        => pht('Send me an email'),
-          self::ACTION_AUDIT        => pht('Trigger an Audit by me'),
-          self::ACTION_FLAG         => pht('Mark with flag'),
-          self::ACTION_ASSIGN_TASK  => pht('Assign task to me'),
-          self::ACTION_ADD_REVIEWERS => pht('Add me as a reviewer'),
-          self::ACTION_ADD_BLOCKING_REVIEWERS =>
-            pht('Add me as a blocking reviewer'),
-        );
-        break;
-      default:
-        throw new Exception(pht("Unknown rule type '%s'!", $rule_type));
+  public function getActionImplementation($key) {
+    return idx($this->getActionImplementationMap(), $key);
+  }
+
+  public function getActionKeys() {
+    return array_keys($this->getActionImplementationMap());
+  }
+
+  public function getActionGroupKey($action_key) {
+    $action = $this->getActionImplementation($action_key);
+    if (!$action) {
+      return null;
     }
 
-    $custom_actions = $this->getCustomActionsForRuleType($rule_type);
-    $standard += mpull($custom_actions, 'getActionName', 'getActionKey');
+    return $action->getActionGroupKey();
+  }
 
-    return $standard;
+  public function getActions($rule_type) {
+    $actions = array();
+    foreach ($this->getActionsForRuleType($rule_type) as $key => $action) {
+      $actions[] = $key;
+    }
+
+    return $actions;
+  }
+
+  public function getActionNameMap($rule_type) {
+    $map = array();
+    foreach ($this->getActionsForRuleType($rule_type) as $key => $action) {
+      $map[$key] = $action->getHeraldActionName();
+    }
+
+    return $map;
   }
 
   public function willSaveAction(
     HeraldRule $rule,
-    HeraldAction $action) {
+    HeraldActionRecord $action) {
 
+    $impl = $this->requireActionImplementation($action->getAction());
     $target = $action->getTarget();
-    if (is_array($target)) {
-      $target = array_keys($target);
-    }
-
-    $author_phid = $rule->getAuthorPHID();
-
-    $rule_type = $rule->getRuleType();
-    if ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
-      switch ($action->getAction()) {
-        case self::ACTION_EMAIL:
-        case self::ACTION_ADD_CC:
-        case self::ACTION_REMOVE_CC:
-        case self::ACTION_AUDIT:
-        case self::ACTION_ASSIGN_TASK:
-        case self::ACTION_ADD_REVIEWERS:
-        case self::ACTION_ADD_BLOCKING_REVIEWERS:
-          // For personal rules, force these actions to target the rule owner.
-          $target = array($author_phid);
-          break;
-        case self::ACTION_FLAG:
-          // Make sure flag color is valid; set to blue if not.
-          $color_map = PhabricatorFlagColor::getColorNameMap();
-          if (empty($color_map[$target])) {
-            $target = PhabricatorFlagColor::COLOR_BLUE;
-          }
-          break;
-        case self::ACTION_BLOCK:
-        case self::ACTION_NOTHING:
-          break;
-        default:
-          throw new HeraldInvalidActionException(
-            pht(
-              'Unrecognized action type "%s"!',
-              $action->getAction()));
-      }
-    }
+    $target = $impl->willSaveActionValue($target);
 
     $action->setTarget($target);
   }
@@ -887,117 +685,24 @@ abstract class HeraldAdapter extends Phobject {
 
 
   public function getValueTypeForFieldAndCondition($field, $condition) {
-    $impl = $this->getFieldImplementation($field);
-    if ($impl) {
-      return $impl->getHeraldFieldValueType($condition);
-    }
-
-    switch ($condition) {
-      case self::CONDITION_CONTAINS:
-      case self::CONDITION_NOT_CONTAINS:
-      case self::CONDITION_REGEXP:
-      case self::CONDITION_REGEXP_PAIR:
-        return self::VALUE_TEXT;
-      case self::CONDITION_IS:
-      case self::CONDITION_IS_NOT:
-        return self::VALUE_TEXT;
-      case self::CONDITION_IS_ANY:
-      case self::CONDITION_IS_NOT_ANY:
-        switch ($field) {
-          case self::FIELD_REPOSITORY:
-            return self::VALUE_REPOSITORY;
-          default:
-            return self::VALUE_USER;
-        }
-        break;
-      case self::CONDITION_INCLUDE_ALL:
-      case self::CONDITION_INCLUDE_ANY:
-      case self::CONDITION_INCLUDE_NONE:
-        switch ($field) {
-          case self::FIELD_REPOSITORY:
-            return self::VALUE_REPOSITORY;
-          case self::FIELD_AFFECTED_PACKAGE:
-            return self::VALUE_OWNERS_PACKAGE;
-          case self::FIELD_AUTHOR_PROJECTS:
-          case self::FIELD_PUSHER_PROJECTS:
-          case self::FIELD_REPOSITORY_PROJECTS:
-            return self::VALUE_PROJECT;
-          case self::FIELD_REVIEWERS:
-            return self::VALUE_USER_OR_PROJECT;
-          default:
-            return self::VALUE_USER;
-        }
-        break;
-      case self::CONDITION_IS_ME:
-      case self::CONDITION_IS_NOT_ME:
-      case self::CONDITION_EXISTS:
-      case self::CONDITION_NOT_EXISTS:
-      case self::CONDITION_UNCONDITIONALLY:
-      case self::CONDITION_NEVER:
-      case self::CONDITION_IS_TRUE:
-      case self::CONDITION_IS_FALSE:
-        return self::VALUE_NONE;
-      default:
-        throw new Exception(pht("Unknown condition '%s'.", $condition));
-    }
+    return $this->requireFieldImplementation($field)
+      ->getHeraldFieldValueType($condition);
   }
 
   public function getValueTypeForAction($action, $rule_type) {
-    $is_personal = ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL);
-
-    if ($is_personal) {
-      switch ($action) {
-        case self::ACTION_ADD_CC:
-        case self::ACTION_REMOVE_CC:
-        case self::ACTION_EMAIL:
-        case self::ACTION_NOTHING:
-        case self::ACTION_AUDIT:
-        case self::ACTION_ASSIGN_TASK:
-        case self::ACTION_ADD_REVIEWERS:
-        case self::ACTION_ADD_BLOCKING_REVIEWERS:
-          return self::VALUE_NONE;
-        case self::ACTION_FLAG:
-          return self::VALUE_FLAG_COLOR;
-        case self::ACTION_ADD_PROJECTS:
-        case self::ACTION_REMOVE_PROJECTS:
-          return self::VALUE_PROJECT;
-      }
-    } else {
-      switch ($action) {
-        case self::ACTION_ADD_CC:
-        case self::ACTION_REMOVE_CC:
-        case self::ACTION_EMAIL:
-          return self::VALUE_EMAIL;
-        case self::ACTION_NOTHING:
-          return self::VALUE_NONE;
-        case self::ACTION_ADD_PROJECTS:
-        case self::ACTION_REMOVE_PROJECTS:
-          return self::VALUE_PROJECT;
-        case self::ACTION_FLAG:
-          return self::VALUE_FLAG_COLOR;
-        case self::ACTION_ASSIGN_TASK:
-          return self::VALUE_USER;
-        case self::ACTION_AUDIT:
-        case self::ACTION_ADD_REVIEWERS:
-        case self::ACTION_ADD_BLOCKING_REVIEWERS:
-          return self::VALUE_USER_OR_PROJECT;
-        case self::ACTION_APPLY_BUILD_PLANS:
-          return self::VALUE_BUILD_PLAN;
-        case self::ACTION_REQUIRE_SIGNATURE:
-          return self::VALUE_LEGAL_DOCUMENTS;
-        case self::ACTION_BLOCK:
-          return self::VALUE_TEXT;
-      }
-    }
-
-    $custom_action = idx($this->getCustomActions(), $action);
-    if ($custom_action !== null) {
-      return $custom_action->getActionType();
-    }
-
-    throw new Exception(pht("Unknown or invalid action '%s'.", $action));
+    $impl = $this->requireActionImplementation($action);
+    return $impl->getHeraldActionValueType();
   }
 
+  private function buildTokenizerFieldValue(
+    PhabricatorTypeaheadDatasource $datasource) {
+
+    $key = 'action.'.get_class($datasource);
+
+    return id(new HeraldTokenizerFieldValue())
+      ->setKey($key)
+      ->setDatasource($datasource);
+  }
 
 /* -(  Repetition  )--------------------------------------------------------- */
 
@@ -1065,26 +770,25 @@ abstract class HeraldAdapter extends Phobject {
 
   public function getEditorValueForCondition(
     PhabricatorUser $viewer,
-    HeraldCondition $condition,
-    array $handles) {
+    HeraldCondition $condition) {
 
-    $impl = $this->getFieldImplementation($condition->getFieldName());
-    if ($impl) {
-      return $impl->getEditorValue(
-        $viewer,
-        $condition->getValue());
-    }
+    $field = $this->requireFieldImplementation($condition->getFieldName());
 
-    $value = $condition->getValue();
-    if (is_array($value)) {
-      $value_map = array();
-      foreach ($value as $k => $phid) {
-        $value_map[$phid] = $handles[$phid]->getName();
-      }
-      $value = $value_map;
-    }
+    return $field->getEditorValue(
+      $viewer,
+      $condition->getFieldCondition(),
+      $condition->getValue());
+  }
 
-    return $value;
+  public function getEditorValueForAction(
+    PhabricatorUser $viewer,
+    HeraldActionRecord $action_record) {
+
+    $action = $this->requireActionImplementation($action_record->getAction());
+
+    return $action->getEditorValue(
+      $viewer,
+      $action_record->getTarget());
   }
 
   public function renderRuleAsText(
@@ -1151,7 +855,7 @@ abstract class HeraldAdapter extends Phobject {
         ),
         array(
           $icon,
-          $this->renderActionAsText($action, $handles),
+          $this->renderActionAsText($viewer, $action, $handles),
         ));
     }
 
@@ -1169,22 +873,41 @@ abstract class HeraldAdapter extends Phobject {
     PhabricatorUser $viewer) {
 
     $field_type = $condition->getFieldName();
+    $field = $this->getFieldImplementation($field_type);
 
-    $default = pht('(Unknown Field "%s")', $field_type);
+    if (!$field) {
+      return pht('Unknown Field: "%s"', $field_type);
+    }
 
-    $field_name = idx($this->getFieldNameMap(), $field_type, $default);
+    $field_name = $field->getHeraldFieldName();
 
     $condition_type = $condition->getFieldCondition();
     $condition_name = idx($this->getConditionNameMap(), $condition_type);
 
     $value = $this->renderConditionValueAsText($condition, $handles, $viewer);
 
-    return hsprintf('    %s %s %s', $field_name, $condition_name, $value);
+    return array(
+      $field_name,
+      ' ',
+      $condition_name,
+      ' ',
+      $value,
+    );
   }
 
   private function renderActionAsText(
-    HeraldAction $action,
+    PhabricatorUser $viewer,
+    HeraldActionRecord $action,
     PhabricatorHandleList $handles) {
+
+    $impl = $this->getActionImplementation($action->getAction());
+    if ($impl) {
+      $impl->setViewer($viewer);
+
+      $value = $action->getTarget();
+      return $impl->renderActionDescription($value);
+    }
+
     $rule_global = HeraldRuleTypeConfig::RULE_TYPE_GLOBAL;
 
     $action_type = $action->getAction();
@@ -1206,45 +929,19 @@ abstract class HeraldAdapter extends Phobject {
     PhabricatorHandleList $handles,
     PhabricatorUser $viewer) {
 
-    $impl = $this->getFieldImplementation($condition->getFieldName());
-    if ($impl) {
-      return $impl->renderConditionValue(
-        $viewer,
-        $condition->getValue());
-    }
+    $field = $this->requireFieldImplementation($condition->getFieldName());
 
-    $value = $condition->getValue();
-    if (!is_array($value)) {
-      $value = array($value);
-    }
-
-    switch ($condition->getFieldName()) {
-      case HeraldPreCommitRefAdapter::FIELD_REF_CHANGE:
-        $change_map =
-          PhabricatorRepositoryPushLog::getHeraldChangeFlagConditionOptions();
-        foreach ($value as $index => $val) {
-          $name = idx($change_map, $val);
-          if ($name) {
-            $value[$index] = $name;
-          }
-        }
-        break;
-      default:
-        foreach ($value as $index => $val) {
-          $handle = $handles->getHandleIfExists($val);
-          if ($handle) {
-            $value[$index] = $handle->renderLink();
-          }
-        }
-        break;
-    }
-    $value = phutil_implode_html(', ', $value);
-    return $value;
+    return $field->renderConditionValue(
+      $viewer,
+      $condition->getFieldCondition(),
+      $condition->getValue());
   }
 
   private function renderActionTargetAsText(
-    HeraldAction $action,
+    HeraldActionRecord $action,
     PhabricatorHandleList $handles) {
+
+    // TODO: This should be driven through HeraldAction.
 
     $target = $action->getTarget();
     if (!is_array($target)) {
@@ -1252,9 +949,6 @@ abstract class HeraldAdapter extends Phobject {
     }
     foreach ($target as $index => $val) {
       switch ($action->getAction()) {
-        case self::ACTION_FLAG:
-          $target[$index] = PhabricatorFlagColor::getColorName($val);
-          break;
         default:
           $handle = $handles->getHandleIfExists($val);
           if ($handle) {
@@ -1322,244 +1016,46 @@ abstract class HeraldAdapter extends Phobject {
    */
   protected function applyStandardEffect(HeraldEffect $effect) {
     $action = $effect->getAction();
-
     $rule_type = $effect->getRule()->getRuleType();
-    $supported = $this->getActions($rule_type);
-    $supported = array_fuse($supported);
-    if (empty($supported[$action])) {
+
+    $impl = $this->getActionImplementation($action);
+    if (!$impl) {
       return new HeraldApplyTranscript(
         $effect,
         false,
-        pht(
-          'Adapter "%s" does not support action "%s" for rule type "%s".',
-          get_class($this),
-          $action,
-          $rule_type));
-    }
-
-    switch ($action) {
-      case self::ACTION_ADD_PROJECTS:
-      case self::ACTION_REMOVE_PROJECTS:
-        return $this->applyProjectsEffect($effect);
-      case self::ACTION_ADD_CC:
-      case self::ACTION_REMOVE_CC:
-        return $this->applySubscribersEffect($effect);
-      case self::ACTION_FLAG:
-        return $this->applyFlagEffect($effect);
-      case self::ACTION_EMAIL:
-        return $this->applyEmailEffect($effect);
-      case self::ACTION_NOTHING:
-        return $this->applyNothingEffect($effect);
-      default:
-        break;
-    }
-
-    $result = $this->handleCustomHeraldEffect($effect);
-
-    if (!$result) {
-      return new HeraldApplyTranscript(
-        $effect,
-        false,
-        pht(
-          'No custom action exists to handle rule action "%s".',
-          $action));
-    }
-
-    return $result;
-  }
-
-  private function applyNothingEffect(HeraldEffect $effect) {
-    return new HeraldApplyTranscript(
-      $effect,
-      true,
-      pht('Did nothing.'));
-  }
-
-  /**
-   * @task apply
-   */
-  private function applyProjectsEffect(HeraldEffect $effect) {
-
-    if ($effect->getAction() == self::ACTION_ADD_PROJECTS) {
-      $kind = '+';
-    } else {
-      $kind = '-';
-    }
-
-    $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
-    $project_phids = $effect->getTarget();
-    $xaction = $this->newTransaction()
-      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-      ->setMetadataValue('edge:type', $project_type)
-      ->setNewValue(
         array(
-          $kind => array_fuse($project_phids),
+          array(
+            HeraldAction::DO_STANDARD_INVALID_ACTION,
+            $action,
+          ),
         ));
-
-    $this->queueTransaction($xaction);
-
-    return new HeraldApplyTranscript(
-      $effect,
-      true,
-      pht('Added projects.'));
-  }
-
-  /**
-   * @task apply
-   */
-  private function applySubscribersEffect(HeraldEffect $effect) {
-    if ($effect->getAction() == self::ACTION_ADD_CC) {
-      $kind = '+';
-      $is_add = true;
-    } else {
-      $kind = '-';
-      $is_add = false;
     }
 
-    $subscriber_phids = array_fuse($effect->getTarget());
-    if (!$subscriber_phids) {
+    if (!$impl->supportsRuleType($rule_type)) {
       return new HeraldApplyTranscript(
         $effect,
         false,
-        pht('This action lists no users or objects to affect.'));
-    }
-
-    // The "Add Subscribers" rule only adds subscribers who haven't previously
-    // unsubscribed from the object explicitly. Filter these subscribers out
-    // before continuing.
-    $unsubscribed = array();
-    if ($is_add) {
-      if ($this->unsubscribedPHIDs === null) {
-        $this->unsubscribedPHIDs = PhabricatorEdgeQuery::loadDestinationPHIDs(
-          $this->getObject()->getPHID(),
-          PhabricatorObjectHasUnsubscriberEdgeType::EDGECONST);
-      }
-
-      foreach ($this->unsubscribedPHIDs as $phid) {
-        if (isset($subscriber_phids[$phid])) {
-          $unsubscribed[$phid] = $phid;
-          unset($subscriber_phids[$phid]);
-        }
-      }
-    }
-
-    if (!$subscriber_phids) {
-      return new HeraldApplyTranscript(
-        $effect,
-        false,
-        pht('All targets have previously unsubscribed explicitly.'));
-    }
-
-    // Filter out PHIDs which aren't valid subscribers. Lower levels of the
-    // stack will fail loudly if we try to add subscribers with invalid PHIDs
-    // or unknown PHID types, so drop them here.
-    $invalid = array();
-    foreach ($subscriber_phids as $phid) {
-      $type = phid_get_type($phid);
-      switch ($type) {
-        case PhabricatorPeopleUserPHIDType::TYPECONST:
-        case PhabricatorProjectProjectPHIDType::TYPECONST:
-          break;
-        default:
-          $invalid[$phid] = $phid;
-          unset($subscriber_phids[$phid]);
-          break;
-      }
-    }
-
-    if (!$subscriber_phids) {
-      return new HeraldApplyTranscript(
-        $effect,
-        false,
-        pht('All targets are invalid as subscribers.'));
-    }
-
-    $xaction = $this->newTransaction()
-      ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
-      ->setNewValue(
         array(
-          $kind => $subscriber_phids,
+          array(
+            HeraldAction::DO_STANDARD_WRONG_RULE_TYPE,
+            $rule_type,
+          ),
         ));
-
-    $this->queueTransaction($xaction);
-
-    // TODO: We could be more detailed about this, but doing it meaningfully
-    // probably requires substantial changes to how transactions are rendered
-    // first.
-    if ($is_add) {
-      $message = pht('Subscribed targets.');
-    } else {
-      $message = pht('Unsubscribed targets.');
     }
 
-    return new HeraldApplyTranscript($effect, true, $message);
+    $impl->applyEffect($this->getObject(), $effect);
+    return $impl->getApplyTranscript($effect);
   }
 
+  public function loadEdgePHIDs($type) {
+    if (!isset($this->edgeCache[$type])) {
+      $phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $this->getObject()->getPHID(),
+        $type);
 
-  /**
-   * @task apply
-   */
-  private function applyFlagEffect(HeraldEffect $effect) {
-    $phid = $this->getPHID();
-    $color = $effect->getTarget();
-
-    $rule = $effect->getRule();
-    $user = $rule->getAuthor();
-
-    $flag = PhabricatorFlagQuery::loadUserFlag($user, $phid);
-    if ($flag) {
-      return new HeraldApplyTranscript(
-        $effect,
-        false,
-        pht('Object already flagged.'));
+      $this->edgeCache[$type] = array_fuse($phids);
     }
-
-    $handle = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
-      ->withPHIDs(array($phid))
-      ->executeOne();
-
-    $flag = new PhabricatorFlag();
-    $flag->setOwnerPHID($user->getPHID());
-    $flag->setType($handle->getType());
-    $flag->setObjectPHID($handle->getPHID());
-
-    // TOOD: Should really be transcript PHID, but it doesn't exist yet.
-    $flag->setReasonPHID($user->getPHID());
-
-    $flag->setColor($color);
-    $flag->setNote(
-      pht('Flagged by Herald Rule "%s".', $rule->getName()));
-    $flag->save();
-
-    return new HeraldApplyTranscript(
-      $effect,
-      true,
-      pht('Added flag.'));
+    return $this->edgeCache[$type];
   }
-
-
-  /**
-   * @task apply
-   */
-  private function applyEmailEffect(HeraldEffect $effect) {
-    foreach ($effect->getTarget() as $phid) {
-      $this->emailPHIDs[$phid] = $phid;
-
-      // If this is a personal rule, we'll force delivery of a real email. This
-      // effect is stronger than notification preferences, so you get an actual
-      // email even if your preferences are set to "Notify" or "Ignore".
-      $rule = $effect->getRule();
-      if ($rule->isPersonalRule()) {
-        $this->forcedEmailPHIDs[$phid] = $phid;
-      }
-    }
-
-    return new HeraldApplyTranscript(
-      $effect,
-      true,
-      pht('Added mailable to mail targets.'));
-  }
-
 
 }

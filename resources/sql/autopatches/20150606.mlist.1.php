@@ -99,7 +99,7 @@ foreach (new LiskMigrationIterator($table) as $condition) {
   echo pht('Updated mailing lists in Herald condition %d.', $id)."\n";
 }
 
-$table = new HeraldAction();
+$table = new HeraldActionRecord();
 $conn_w = $table->establishConnection('w');
 foreach (new LiskMigrationIterator($table) as $action) {
   $name = $action->getAction();

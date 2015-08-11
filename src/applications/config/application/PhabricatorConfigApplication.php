@@ -57,7 +57,7 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
         ),
         'cache/' => 'PhabricatorConfigCacheController',
         'module/' => array(
-          'sites/' => 'PhabricatorConfigSiteModuleController',
+          '(?P<module>[^/]+)/' => 'PhabricatorConfigModuleController',
         ),
       ),
     );

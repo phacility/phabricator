@@ -99,14 +99,14 @@ final class HeraldRule extends HeraldDAO
     if (!$this->getID()) {
       return array();
     }
-    return id(new HeraldAction())->loadAllWhere(
+    return id(new HeraldActionRecord())->loadAllWhere(
       'ruleID = %d',
       $this->getID());
   }
 
   public function attachActions(array $actions) {
     // TODO: validate actions have been attached.
-    assert_instances_of($actions, 'HeraldAction');
+    assert_instances_of($actions, 'HeraldActionRecord');
     $this->actions = $actions;
     return $this;
   }
@@ -123,9 +123,9 @@ final class HeraldRule extends HeraldDAO
   }
 
   public function saveActions(array $actions) {
-    assert_instances_of($actions, 'HeraldAction');
+    assert_instances_of($actions, 'HeraldActionRecord');
     return $this->saveChildren(
-      id(new HeraldAction())->getTableName(),
+      id(new HeraldActionRecord())->getTableName(),
       $actions);
   }
 
@@ -162,7 +162,7 @@ final class HeraldRule extends HeraldDAO
       queryfx(
         $this->establishConnection('w'),
         'DELETE FROM %T WHERE ruleID = %d',
-        id(new HeraldAction())->getTableName(),
+        id(new HeraldActionRecord())->getTableName(),
         $this->getID());
       $result = parent::delete();
     $this->saveTransaction();

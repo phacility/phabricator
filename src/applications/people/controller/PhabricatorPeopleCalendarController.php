@@ -5,6 +5,10 @@ final class PhabricatorPeopleCalendarController
 
   private $username;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function shouldRequireAdmin() {
     return false;
   }

@@ -103,6 +103,7 @@
   background-color: #fff;
   border-bottom: 1px solid {$lightblueborder};
   padding: 12px;
+  position: relative;
 }
 
 .device .project-board-header {
@@ -126,6 +127,12 @@
   display: inline-block;
   margin: 0;
   padding: 0 8px;
+}
+
+.device-phone .project-board-header .phui-header-subheader {
+  display: block;
+  margin: 8px 0 2px 0;
+  padding: 0;
 }
 
 .device-desktop .phabricator-icon-nav.project-board-nav

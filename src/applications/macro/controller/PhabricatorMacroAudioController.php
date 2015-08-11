@@ -2,18 +2,12 @@
 
 final class PhabricatorMacroAudioController extends PhabricatorMacroController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
     $this->requireApplicationCapability(
       PhabricatorMacroManageCapability::CAPABILITY);
-
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
 
     $macro = id(new PhabricatorMacroQuery())
       ->setViewer($viewer)
@@ -21,7 +15,7 @@ final class PhabricatorMacroAudioController extends PhabricatorMacroController {
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
         ))
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
 
     if (!$macro) {

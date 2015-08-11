@@ -4,13 +4,13 @@ final class PonderQuestion extends PonderDAO
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorMarkupInterface,
-    PonderVotableInterface,
     PhabricatorSubscribableInterface,
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorProjectInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorSpacesInterface {
 
   const MARKUP_FIELD_CONTENT = 'markup:content';
 
@@ -21,25 +21,41 @@ final class PonderQuestion extends PonderDAO
   protected $status;
   protected $content;
   protected $contentSource;
+  protected $viewPolicy;
+  protected $spacePHID;
 
-  protected $voteCount;
   protected $answerCount;
-  protected $heat;
   protected $mailKey;
 
   private $answers;
-  private $vote;
   private $comments;
+
+  private $projectPHIDs = self::ATTACHABLE;
+
+  public static function initializeNewQuestion(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorPonderApplication'))
+      ->executeOne();
+
+    $view_policy = $app->getPolicy(
+      PonderDefaultViewCapability::CAPABILITY);
+
+    return id(new PonderQuestion())
+      ->setAuthorPHID($actor->getPHID())
+      ->setViewPolicy($view_policy)
+      ->setStatus(PonderQuestionStatus::STATUS_OPEN)
+      ->setAnswerCount(0)
+      ->setSpacePHID($actor->getDefaultSpacePHID());
+  }
 
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255',
-        'voteCount' => 'sint32',
-        'status' => 'uint32',
+        'status' => 'text32',
         'content' => 'text',
-        'heat' => 'double',
         'answerCount' => 'uint32',
         'mailKey' => 'bytes20',
 
@@ -55,9 +71,6 @@ final class PonderQuestion extends PonderDAO
         ),
         'authorPHID' => array(
           'columns' => array('authorPHID'),
-        ),
-        'heat' => array(
-          'columns' => array('heat'),
         ),
         'status' => array(
           'columns' => array('status'),
@@ -79,49 +92,6 @@ final class PonderQuestion extends PonderDAO
     return PhabricatorContentSource::newFromSerialized($this->contentSource);
   }
 
-  public function attachVotes($user_phid) {
-    $qa_phids = mpull($this->answers, 'getPHID') + array($this->getPHID());
-
-    $edges = id(new PhabricatorEdgeQuery())
-      ->withSourcePHIDs(array($user_phid))
-      ->withDestinationPHIDs($qa_phids)
-      ->withEdgeTypes(
-        array(
-          PonderVotingUserHasQuestionEdgeType::EDGECONST,
-          PonderVotingUserHasAnswerEdgeType::EDGECONST,
-        ))
-      ->needEdgeData(true)
-      ->execute();
-
-    $question_edge =
-      $edges[$user_phid][PonderVotingUserHasQuestionEdgeType::EDGECONST];
-    $answer_edges =
-      $edges[$user_phid][PonderVotingUserHasAnswerEdgeType::EDGECONST];
-    $edges = null;
-
-    $this->setUserVote(idx($question_edge, $this->getPHID()));
-    foreach ($this->answers as $answer) {
-      $answer->setUserVote(idx($answer_edges, $answer->getPHID()));
-    }
-  }
-
-  public function setUserVote($vote) {
-    $this->vote = $vote['data'];
-    if (!$this->vote) {
-      $this->vote = PonderVote::VOTE_NONE;
-    }
-    return $this;
-  }
-
-  public function attachUserVote($user_phid, $vote) {
-    $this->vote = $vote;
-    return $this;
-  }
-
-  public function getUserVote() {
-    return $this->vote;
-  }
-
   public function setComments($comments) {
     $this->comments = $comments;
     return $this;
@@ -139,6 +109,15 @@ final class PonderQuestion extends PonderDAO
 
   public function getAnswers() {
     return $this->answers;
+  }
+
+  public function getProjectPHIDs() {
+    return $this->assertAttached($this->projectPHIDs);
+  }
+
+  public function attachProjectPHIDs(array $phids) {
+    $this->projectPHIDs = $phids;
+    return $this;
   }
 
   public function getMarkupField() {
@@ -196,15 +175,6 @@ final class PonderQuestion extends PonderDAO
     return (bool)$this->getID();
   }
 
-  // votable interface
-  public function getUserVoteEdgeType() {
-    return PonderVotingUserHasQuestionEdgeType::EDGECONST;
-  }
-
-  public function getVotablePHID() {
-    return $this->getPHID();
-  }
-
   public function save() {
     if (!$this->getMailKey()) {
       $this->setMailKey(Filesystem::readRandomCharacters(20));
@@ -234,24 +204,37 @@ final class PonderQuestion extends PonderDAO
   }
 
   public function getPolicy($capability) {
-    $policy = PhabricatorPolicies::POLICY_NOONE;
-
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        $policy = PhabricatorPolicies::POLICY_USER;
-        break;
+        return $this->getViewPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        $app = PhabricatorApplication::getByClass(
+          'PhabricatorPonderApplication');
+        return $app->getPolicy(PonderModerateCapability::CAPABILITY);
     }
-
-    return $policy;
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
+      if (PhabricatorPolicyFilter::hasCapability(
+        $viewer, $this, PhabricatorPolicyCapability::CAN_EDIT)) {
+        return true;
+      }
+    }
     return ($viewer->getPHID() == $this->getAuthorPHID());
   }
 
 
   public function describeAutomaticCapability($capability) {
-    return pht('The user who asked a question can always view and edit it.');
+    $out = array();
+    $out[] = pht('The user who asked a question can always view and edit it.');
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        $out[] = pht(
+          'A moderator can always view the question.');
+        break;
+    }
+    return $out;
   }
 
 
@@ -296,6 +279,14 @@ final class PonderQuestion extends PonderDAO
 
       $this->delete();
     $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorSpacesInterface  )----------------------------------------- */
+
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
   }
 
 }

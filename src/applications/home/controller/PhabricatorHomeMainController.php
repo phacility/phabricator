@@ -219,7 +219,7 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     $revisions = $revision_query->execute();
 
-    list($blocking, $active, ) = DifferentialRevisionQuery::splitResponsible(
+    list($blocking, $active,) = DifferentialRevisionQuery::splitResponsible(
         $revisions,
         array($user_phid));
 

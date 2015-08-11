@@ -32,6 +32,7 @@ final class PhabricatorPeopleHovercardEventListener
       ->withIDs(array($user->getID()))
       ->needAvailability(true)
       ->needProfile(true)
+      ->needBadges(true)
       ->executeOne();
 
     $hovercard->setTitle($user->getUsername());
@@ -65,7 +66,38 @@ final class PhabricatorPeopleHovercardEventListener
         ->truncateString($profile->getBlurb()));
     }
 
+    $badges = $this->buildBadges($user, $viewer);
+    foreach ($badges as $badge) {
+      $hovercard->addBadge($badge);
+    }
+
     $event->setValue('hovercard', $hovercard);
+  }
+
+  private function buildBadges(
+    PhabricatorUser $user,
+    $viewer) {
+
+    $class = 'PhabricatorBadgesApplication';
+    $items = array();
+
+    if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
+      $badge_phids = $user->getBadgePHIDs();
+      if ($badge_phids) {
+        $badges = id(new PhabricatorBadgesQuery())
+          ->setViewer($viewer)
+          ->withPHIDs($badge_phids)
+          ->execute();
+
+        foreach ($badges as $badge) {
+          $items[] = id(new PHUIBadgeMiniView())
+            ->setIcon($badge->getIcon())
+            ->setHeader($badge->getName())
+            ->setQuality($badge->getQuality());
+        }
+      }
+    }
+    return $items;
   }
 
 

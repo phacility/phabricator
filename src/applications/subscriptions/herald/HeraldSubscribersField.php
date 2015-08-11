@@ -8,6 +8,10 @@ final class HeraldSubscribersField extends HeraldField {
     return pht('Subscribers');
   }
 
+  public function getFieldGroupKey() {
+    return HeraldSupportFieldGroup::FIELDGROUPKEY;
+  }
+
   public function supportsObject($object) {
     return ($object instanceof PhabricatorSubscribableInterface);
   }
@@ -17,18 +21,12 @@ final class HeraldSubscribersField extends HeraldField {
     return PhabricatorSubscribersQuery::loadSubscribersForPHID($phid);
   }
 
-  protected function getHeraldFieldStandardConditions() {
-    return self::STANDARD_LIST;
+  protected function getHeraldFieldStandardType() {
+    return self::STANDARD_PHID_LIST;
   }
 
-  public function getHeraldFieldValueType($condition) {
-    switch ($condition) {
-      case HeraldAdapter::CONDITION_EXISTS:
-      case HeraldAdapter::CONDITION_NOT_EXISTS:
-        return HeraldAdapter::VALUE_NONE;
-      default:
-        return HeraldAdapter::VALUE_USER_OR_PROJECT;
-    }
+  protected function getDatasource() {
+    return new PhabricatorProjectOrUserDatasource();
   }
 
 }

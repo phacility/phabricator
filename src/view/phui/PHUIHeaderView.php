@@ -4,7 +4,6 @@ final class PHUIHeaderView extends AphrontTagView {
 
   const PROPERTY_STATUS = 1;
 
-  private $objectName;
   private $header;
   private $tags = array();
   private $image;
@@ -20,14 +19,10 @@ final class PHUIHeaderView extends AphrontTagView {
   private $policyObject;
   private $epoch;
   private $actionIcons = array();
+  private $badges = array();
 
   public function setHeader($header) {
     $this->header = $header;
-    return $this;
-  }
-
-  public function setObjectName($object_name) {
-    $this->objectName = $object_name;
     return $this;
   }
 
@@ -43,6 +38,11 @@ final class PHUIHeaderView extends AphrontTagView {
 
   public function addTag(PHUITagView $tag) {
     $this->tags[] = $tag;
+    return $this;
+  }
+
+  public function addBadge(PHUIBadgeMiniView $badge) {
+    $this->badges[] = $badge;
     return $this;
   }
 
@@ -187,18 +187,6 @@ final class PHUIHeaderView extends AphrontTagView {
         ->setObject($this->policyObject);
     }
 
-    if ($this->objectName) {
-      $left[] = array(
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/'.$this->objectName,
-          ),
-          $this->objectName),
-        ' ',
-      );
-    }
-
     if ($this->actionLinks) {
       $actions = array();
       foreach ($this->actionLinks as $button) {
@@ -264,13 +252,23 @@ final class PHUIHeaderView extends AphrontTagView {
       ),
       $this->header);
 
-    if ($this->subheader) {
+    if ($this->subheader || $this->badges) {
+      $badges = null;
+      if ($this->badges) {
+        $badges = new PHUIBadgeBoxView();
+        $badges->addItems($this->badges);
+        $badges->setCollapsed(true);
+      }
+
       $left[] = phutil_tag(
         'div',
         array(
           'class' => 'phui-header-subheader',
         ),
-        $this->subheader);
+        array(
+          $badges,
+          $this->subheader,
+        ));
     }
 
     if ($this->properties || $this->policyObject) {

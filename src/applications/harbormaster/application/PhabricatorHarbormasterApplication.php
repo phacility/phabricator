@@ -36,13 +36,18 @@ final class PhabricatorHarbormasterApplication extends PhabricatorApplication {
     );
   }
 
-  public function isPrototype() {
-    return true;
-  }
-
   public function getRemarkupRules() {
     return array(
       new HarbormasterRemarkupRule(),
+    );
+  }
+
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Harbormaster User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Harbormaster User Guide'),
+      ),
     );
   }
 

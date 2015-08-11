@@ -5,10 +5,6 @@ final class PhabricatorCalendarEventEditController
 
   private $id;
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
   public function isCreate() {
     return !$this->id;
   }
@@ -16,6 +12,8 @@ final class PhabricatorCalendarEventEditController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $user_phid = $viewer->getPHID();
+    $this->id = $request->getURIData('id');
+
     $error_name = true;
     $error_recurrence_end_date = null;
     $error_start_date = true;

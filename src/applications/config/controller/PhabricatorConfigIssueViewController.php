@@ -3,21 +3,15 @@
 final class PhabricatorConfigIssueViewController
   extends PhabricatorConfigController {
 
-  private $issueKey;
-
-  public function willProcessRequest(array $data) {
-    $this->issueKey = $data['key'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $issue_key = $request->getURIData('key');
 
     $issues = PhabricatorSetupCheck::runAllChecks();
     PhabricatorSetupCheck::setOpenSetupIssueKeys(
       PhabricatorSetupCheck::getUnignoredIssueKeys($issues));
 
-    if (empty($issues[$this->issueKey])) {
+    if (empty($issues[$issue_key])) {
       $content = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->setTitle(pht('Issue Resolved'))
@@ -31,7 +25,7 @@ final class PhabricatorConfigIssueViewController
             pht('Return to Open Issue List')));
       $title = pht('Resolved Issue');
     } else {
-      $issue = $issues[$this->issueKey];
+      $issue = $issues[$issue_key];
       $content = $this->renderIssue($issue);
       $title = $issue->getShortName();
     }

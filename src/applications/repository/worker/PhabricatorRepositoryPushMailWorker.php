@@ -130,11 +130,6 @@ final class PhabricatorRepositoryPushMailWorker
     return $target->willSendMail($mail);
   }
 
-  public function renderForDisplay(PhabricatorUser $viewer) {
-    // This data has some sensitive stuff, so don't show it.
-    return null;
-  }
-
   private function renderRefs(array $logs) {
     $ref_lines = array();
     $ref_list = array();

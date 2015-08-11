@@ -3,34 +3,47 @@
  */
 
 .phabricator-timer {
-  margin: 16px;
+  margin: 16px 16px 0 16px;
   border: 1px solid {$lightblueborder};
-  border-radius: 4px;
+  border-radius: 3px;
   background: #ffffff;
 }
 
+.device .phabricator-timer {
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
 .phabricator-remarkup .phabricator-timer {
-  width: 360px;
+  max-width: 360px;
   margin: 0 0 12px 0;
 }
 
+.device-phone .phabricator-remarkup .phabricator-timer {
+  width: auto;
+}
+
 .phabricator-timer-header {
-  font-size: {$biggerfontsize};
   font-weight: bold;
-  padding: 4px 8px;
+  padding: 8px;
   background: {$bluebackground};
   border-radius: 3px 3px 0 0;
-  border-bottom: 1px solid {$lightblueborder};
+}
+
+.phabricator-timer-header a {
+  color: {$darkbluetext};
+  font-weight: normal;
 }
 
 .phabricator-timer-table {
   width: 100%;
-  margin: 8px 0;
+  margin: 8px 0 0 0;
 }
 
 .phabricator-timer-table th {
   text-align: center;
-  color: {$greytext};
+  font-size: {$biggerfontsize};
+  color: {$bluetext};
   width: 10%;
   padding: 4px;
 }
@@ -39,10 +52,23 @@
   padding: 4px;
   text-align: center;
   font-size: 36px;
+  font-weight: bold;
   overflow: hidden;
   line-height: auto;
   height: auto;
-  line-height: 36px;
+  line-height: 44px;
+}
+
+.phabricator-timer-table td.phabricator-timer-foot {
+  font-size: {$normalfontsize};
+  line-height: 16px;
+  border-top: 1px solid {$thinblueborder};
+  color: {$bluetext};
+  font-weight: normal;
+  padding: 8px;
+  border-bottom-right-radius: 3px;
+  border-bottom-left-radius: 3px;
+  text-align: center;
 }
 
 .phabricator-timer-table small {

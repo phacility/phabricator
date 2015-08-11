@@ -13,43 +13,16 @@ final class ManiphestTaskPriorityHeraldField
     return $object->getPriority();
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_PHID;
   }
 
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_TASK_PRIORITY;
+  protected function getDatasource() {
+    return new ManiphestTaskPriorityDatasource();
   }
 
-  public function renderConditionValue(
-    PhabricatorUser $viewer,
-    $value) {
-
-    $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
-
-    $value = (array)$value;
-    foreach ($value as $index => $val) {
-      $name = idx($priority_map, $val);
-      if ($name !== null) {
-        $value[$index] = $name;
-      }
-    }
-
-    return implode(', ', $value);
-  }
-
-  public function getEditorValue(
-    PhabricatorUser $viewer,
-    $value) {
-
-    $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
-
-    $value_map = array();
-    foreach ($value as $priority) {
-      $value_map[$priority] = idx($priority_map, $priority, $priority);
-    }
-
-    return $value_map;
+  protected function getDatasourceValueMap() {
+    return ManiphestTaskPriority::getTaskPriorityMap();
   }
 
 }

@@ -246,13 +246,14 @@ abstract class AphrontApplicationConfiguration extends Phobject {
         if ($response instanceof AphrontWebpageResponse) {
           echo phutil_tag(
             'div',
-            array('style' =>
-              'background: #eeddff;'.
-              'white-space: pre-wrap;'.
-              'z-index: 200000;'.
-              'position: relative;'.
-              'padding: 8px;'.
-              'font-family: monospace',
+            array(
+              'style' =>
+                'background: #eeddff;'.
+                'white-space: pre-wrap;'.
+                'z-index: 200000;'.
+                'position: relative;'.
+                'padding: 8px;'.
+                'font-family: monospace',
             ),
             $unexpected_output);
         }

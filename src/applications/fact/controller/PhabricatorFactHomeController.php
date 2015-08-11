@@ -6,9 +6,8 @@ final class PhabricatorFactHomeController extends PhabricatorFactController {
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     if ($request->isFormPost()) {
       $uri = new PhutilURI('/fact/chart/');
@@ -34,7 +33,7 @@ final class PhabricatorFactHomeController extends PhabricatorFactController {
       $spec = $specs[$fact->getFactType()];
 
       $name = $spec->getName();
-      $value = $spec->formatValueForDisplay($user, $fact->getValueX());
+      $value = $spec->formatValueForDisplay($viewer, $fact->getValueX());
 
       $rows[] = array($name, $value);
     }
@@ -73,7 +72,7 @@ final class PhabricatorFactHomeController extends PhabricatorFactController {
 
   private function buildChartForm() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
     $table = new PhabricatorFactRaw();
     $conn_r = $table->establishConnection('r');
@@ -106,7 +105,7 @@ final class PhabricatorFactHomeController extends PhabricatorFactController {
     }
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Y-Axis'))

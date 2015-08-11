@@ -22,6 +22,11 @@ final class PhamePostEditController extends PhameController {
       $cancel_uri = $this->getApplicationURI('/post/view/'.$id.'/');
       $submit_button = pht('Save Changes');
       $page_title = pht('Edit Post');
+
+      $v_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $post->getPHID(),
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+      $v_projects = array_reverse($v_projects);
     } else {
       $blog = id(new PhameBlogQuery())
         ->setViewer($user)
@@ -35,6 +40,7 @@ final class PhamePostEditController extends PhameController {
       if (!$blog) {
         return new Aphront404Response();
       }
+      $v_projects = array();
 
       $post = PhamePost::initializePost($user, $blog);
       $cancel_uri = $this->getApplicationURI('/blog/view/'.$blog->getID().'/');
@@ -57,6 +63,7 @@ final class PhamePostEditController extends PhameController {
       $phame_title     = PhabricatorSlug::normalize($phame_title);
       $body            = $request->getStr('body');
       $comments_widget = $request->getStr('comments_widget');
+      $v_projects      = $request->getArr('projects');
 
       $xactions = array(
         id(new PhamePostTransaction())
@@ -72,6 +79,12 @@ final class PhamePostEditController extends PhameController {
           ->setTransactionType(PhamePostTransaction::TYPE_COMMENTS_WIDGET)
           ->setNewValue($comments_widget),
       );
+
+      $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+      $xactions[] = id(new PhamePostTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $proj_edge_type)
+        ->setNewValue(array('=' => array_fuse($v_projects)));
 
       $editor = id(new PhamePostEditor())
         ->setActor($user)
@@ -130,6 +143,12 @@ final class PhamePostEditController extends PhameController {
         ->setID('post-body')
         ->setUser($user)
         ->setDisableMacros(true))
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('Projects'))
+          ->setName('projects')
+          ->setValue($v_projects)
+          ->setDatasource(new PhabricatorProjectDatasource()))
       ->appendChild(
         id(new AphrontFormSelectControl())
         ->setLabel(pht('Comments Widget'))
@@ -150,7 +169,6 @@ final class PhamePostEditController extends PhameController {
       phutil_tag('div', array('id' => 'post-preview'), $loading),
     ));
 
-    require_celerity_resource('phame-css');
     Javelin::initBehavior(
       'phame-post-preview',
       array(
@@ -171,16 +189,12 @@ final class PhamePostEditController extends PhameController {
       $page_title,
       $this->getApplicationURI('/post/view/'.$id.'/'));
 
-    $nav = $this->renderSideNavFilterView(null);
-    $nav->appendChild(
+    return $this->buildApplicationPage(
       array(
         $crumbs,
         $form_box,
         $preview_panel,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
+      ),
       array(
         'title' => $page_title,
       ));

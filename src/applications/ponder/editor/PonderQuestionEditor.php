@@ -66,6 +66,10 @@ final class PonderQuestionEditor
     $types = parent::getTransactionTypes();
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
+    $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_SPACE;
+
     $types[] = PonderQuestionTransaction::TYPE_TITLE;
     $types[] = PonderQuestionTransaction::TYPE_CONTENT;
     $types[] = PonderQuestionTransaction::TYPE_ANSWERS;
@@ -246,6 +250,20 @@ final class PonderQuestionEditor
       PhabricatorEnv::getProductionURI($uri));
 
     return $body;
+  }
+
+  protected function shouldApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  protected function buildHeraldAdapter(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    return id(new HeraldPonderQuestionAdapter())
+      ->setQuestion($object);
   }
 
 }

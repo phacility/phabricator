@@ -1,0 +1,2 @@
+ALTER TABLE {$NAMESPACE}_ponder.ponder_question
+  MODIFY status VARCHAR(32) NOT NULL COLLATE {$COLLATE_TEXT};

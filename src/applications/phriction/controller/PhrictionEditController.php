@@ -3,22 +3,15 @@
 final class PhrictionEditController
   extends PhrictionController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $current_version = null;
-    if ($this->id) {
+    if ($id) {
       $document = id(new PhrictionDocumentQuery())
-        ->setViewer($user)
-        ->withIDs(array($this->id))
+        ->setViewer($viewer)
+        ->withIDs(array($id))
         ->needContent(true)
         ->requireCapabilities(
           array(
@@ -53,7 +46,7 @@ final class PhrictionEditController
       }
 
       $document = id(new PhrictionDocumentQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withSlugs(array($slug))
         ->needContent(true)
         ->executeOne();
@@ -62,7 +55,7 @@ final class PhrictionEditController
         $content = $document->getContent();
         $current_version = $content->getVersion();
       } else {
-        $document = PhrictionDocument::initializeNewDocument($user, $slug);
+        $document = PhrictionDocument::initializeNewDocument($viewer, $slug);
         $content = $document->getContent();
       }
     }
@@ -78,7 +71,7 @@ final class PhrictionEditController
       }
       $draft = id(new PhabricatorDraft())->loadOneWhere(
         'authorPHID = %s AND draftKey = %s',
-        $user->getPHID(),
+        $viewer->getPHID(),
         $draft_key);
     }
 
@@ -141,7 +134,7 @@ final class PhrictionEditController
         ->setNewValue($v_edit);
 
       $editor = id(new PhrictionTransactionEditor())
-        ->setActor($user)
+        ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true)
         ->setDescription($notes)
@@ -198,14 +191,14 @@ final class PhrictionEditController
     $cancel_uri = PhrictionDocument::getSlugURI($document->getSlug());
 
     $policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->setObject($document)
       ->execute();
     $view_capability = PhabricatorPolicyCapability::CAN_VIEW;
     $edit_capability = PhabricatorPolicyCapability::CAN_EDIT;
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->addHiddenInput('slug', $document->getSlug())
       ->addHiddenInput('nodraft', $request->getBool('nodraft'))
       ->addHiddenInput('contentVersion', $current_version)
@@ -228,7 +221,7 @@ final class PhrictionEditController
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
           ->setName('content')
           ->setID('document-textarea')
-          ->setUser($user))
+          ->setUser($viewer))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setName('viewPolicy')

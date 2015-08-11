@@ -3,19 +3,15 @@
 final class FundInitiativeListController
   extends FundController {
 
-  private $queryKey;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey');
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $querykey = $request->getURIData('queryKey');
 
-  public function processRequest() {
     $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($this->queryKey)
+      ->setQueryKey($querykey)
       ->setSearchEngine(new FundInitiativeSearchEngine())
       ->setNavigation($this->buildSideNavView());
 
@@ -23,13 +19,13 @@ final class FundInitiativeListController
   }
 
   public function buildSideNavView() {
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     id(new FundInitiativeSearchEngine())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->addNavigationItems($nav->getMenu());
 
     $nav->addLabel(pht('Backers'));

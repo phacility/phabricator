@@ -5,16 +5,13 @@ final class PonderQuestionQuery
 
   private $ids;
   private $phids;
+  private $status;
   private $authorPHIDs;
   private $answererPHIDs;
 
-  private $status = 'status-any';
-  const STATUS_ANY      = 'status-any';
-  const STATUS_OPEN     = 'status-open';
-  const STATUS_CLOSED   = 'status-closed';
+  private $needProjectPHIDs;
 
   private $needAnswers;
-  private $needViewerVotes;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -31,7 +28,7 @@ final class PonderQuestionQuery
     return $this;
   }
 
-  public function withStatus($status) {
+  public function withStatuses($status) {
     $this->status = $status;
     return $this;
   }
@@ -46,87 +43,63 @@ final class PonderQuestionQuery
     return $this;
   }
 
-  public function needViewerVotes($need_viewer_votes) {
-    $this->needViewerVotes = $need_viewer_votes;
+  public function needProjectPHIDs($need_projects) {
+    $this->needProjectPHIDs = $need_projects;
     return $this;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'q.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'q.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->authorPHIDs) {
+    if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'q.authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
-    if ($this->status) {
-      switch ($this->status) {
-        case self::STATUS_ANY:
-          break;
-        case self::STATUS_OPEN:
-          $where[] = qsprintf(
-            $conn_r,
-            'q.status = %d',
-            PonderQuestionStatus::STATUS_OPEN);
-          break;
-        case self::STATUS_CLOSED:
-          $where[] = qsprintf(
-            $conn_r,
-            'q.status = %d',
-            PonderQuestionStatus::STATUS_CLOSED);
-          break;
-        default:
-          throw new Exception(pht("Unknown status query '%s'!", $this->status));
-      }
+    if ($this->status !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'q.status IN (%Ls)',
+        $this->status);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    return $where;
+  }
 
-    return $this->formatWhereClause($where);
+  public function newResultObject() {
+    return new PonderQuestion();
   }
 
   protected function loadPage() {
-    $question = new PonderQuestion();
-    $conn_r = $question->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT q.* FROM %T q %Q %Q %Q %Q',
-      $question->getTableName(),
-      $this->buildJoinsClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $question->loadAllFromArray($data);
+    return $this->loadStandardPage(new PonderQuestion());
   }
 
   protected function willFilterPage(array $questions) {
+
+    $phids = mpull($questions, 'getPHID');
+
     if ($this->needAnswers) {
       $aquery = id(new PonderAnswerQuery())
         ->setViewer($this->getViewer())
         ->setOrderVector(array('-id'))
+        ->needViewerVotes(true)
         ->withQuestionIDs(mpull($questions, 'getID'));
-
-      if ($this->needViewerVotes) {
-        $aquery->needViewerVotes($this->needViewerVotes);
-      }
 
       $answers = $aquery->execute();
       $answers = mgroup($answers, 'getQuestionID');
@@ -137,23 +110,19 @@ final class PonderQuestionQuery
       }
     }
 
-    if ($this->needViewerVotes) {
-      $viewer_phid = $this->getViewer()->getPHID();
+    if ($this->needProjectPHIDs) {
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs($phids)
+        ->withEdgeTypes(
+          array(
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+          ));
+      $edge_query->execute();
 
-      $etype = PonderQuestionHasVotingUserEdgeType::EDGECONST;
-      $edges = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs(mpull($questions, 'getPHID'))
-        ->withDestinationPHIDs(array($viewer_phid))
-        ->withEdgeTypes(array($etype))
-        ->needEdgeData(true)
-        ->execute();
       foreach ($questions as $question) {
-        $user_edge = idx(
-          $edges[$question->getPHID()][$etype],
-          $viewer_phid,
-          array());
-
-        $question->attachUserVote($viewer_phid, idx($user_edge, 'data', 0));
+        $project_phids = $edge_query->getDestinationPHIDs(
+          array($question->getPHID()));
+        $question->attachProjectPHIDs($project_phids);
       }
     }
 
@@ -173,6 +142,10 @@ final class PonderQuestionQuery
     }
 
     return implode(' ', $joins);
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'q';
   }
 
   public function getQueryApplicationClass() {

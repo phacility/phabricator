@@ -5,8 +5,8 @@ final class PhabricatorAuthSSHKeyEditController
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-
     $id = $request->getURIData('id');
+
     if ($id) {
       $key = id(new PhabricatorAuthSSHKeyQuery())
         ->setViewer($viewer)

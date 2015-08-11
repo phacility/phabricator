@@ -2,9 +2,8 @@
 
 final class PonderAnswerSaveController extends PonderController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     if (!$request->isFormPost()) {
       return new Aphront400Response();
@@ -20,9 +19,9 @@ final class PonderAnswerSaveController extends PonderController {
       return new Aphront404Response();
     }
 
-    $answer = $request->getStr('answer');
+    $content = $request->getStr('answer');
 
-    if (!strlen(trim($answer))) {
+    if (!strlen(trim($content))) {
       $dialog = id(new AphrontDialogView())
         ->setUser($viewer)
         ->setTitle(pht('Empty Answer'))
@@ -33,18 +32,9 @@ final class PonderAnswerSaveController extends PonderController {
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_WEB,
-      array(
-        'ip' => $request->getRemoteAddr(),
-      ));
+    $answer = PonderAnswer::initializeNewAnswer($viewer);
 
-    $res = id(new PonderAnswer())
-      ->setAuthorPHID($viewer->getPHID())
-      ->setQuestionID($question->getID())
-      ->setContent($answer)
-      ->setVoteCount(0)
-      ->setContentSource($content_source);
+    // Question Editor
 
     $xactions = array();
     $xactions[] = id(new PonderQuestionTransaction())
@@ -52,7 +42,7 @@ final class PonderAnswerSaveController extends PonderController {
       ->setNewValue(
         array(
           '+' => array(
-            array('answer' => $res),
+            array('answer' => $answer),
           ),
         ));
 
@@ -61,6 +51,27 @@ final class PonderAnswerSaveController extends PonderController {
       ->setContentSourceFromRequest($request);
 
     $editor->applyTransactions($question, $xactions);
+
+    // Answer Editor
+
+    $template = id(new PonderAnswerTransaction());
+    $xactions = array();
+
+    $xactions[] = id(clone $template)
+      ->setTransactionType(PonderAnswerTransaction::TYPE_QUESTION_ID)
+      ->setNewValue($question->getID());
+
+    $xactions[] = id(clone $template)
+      ->setTransactionType(PonderAnswerTransaction::TYPE_CONTENT)
+      ->setNewValue($content);
+
+    $editor = id(new PonderAnswerEditor())
+      ->setActor($viewer)
+      ->setContentSourceFromRequest($request)
+      ->setContinueOnNoEffect(true);
+
+    $editor->applyTransactions($answer, $xactions);
+
 
     return id(new AphrontRedirectResponse())->setURI(
       id(new PhutilURI('/Q'.$question->getID())));

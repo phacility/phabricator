@@ -104,7 +104,7 @@ final class HarbormasterBuildable extends HarbormasterDAO
     $container_phid,
     array $plan_phids) {
 
-    if (count($plan_phids) === 0) {
+    if (!$plan_phids) {
       return;
     }
 

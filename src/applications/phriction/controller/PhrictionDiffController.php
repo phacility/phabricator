@@ -2,23 +2,17 @@
 
 final class PhrictionDiffController extends PhrictionController {
 
-  private $id;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $document = id(new PhrictionDocumentQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->needContent(true)
       ->executeOne();
     if (!$document) {
@@ -73,7 +67,7 @@ final class PhrictionDiffController extends PhrictionController {
     $whitespace_mode = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
 
     $parser = id(new DifferentialChangesetParser())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setChangeset($changeset)
       ->setRenderingReference("{$l},{$r}");
 
@@ -81,7 +75,7 @@ final class PhrictionDiffController extends PhrictionController {
     $parser->setWhitespaceMode($whitespace_mode);
 
     $engine = new PhabricatorMarkupEngine();
-    $engine->setViewer($user);
+    $engine->setViewer($viewer);
     $engine->process();
     $parser->setMarkupEngine($engine);
 
@@ -262,7 +256,7 @@ final class PhrictionDiffController extends PhrictionController {
   private function renderComparisonTable(array $content) {
     assert_instances_of($content, 'PhrictionContent');
 
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $phids = mpull($content, 'getAuthorPHID');
     $handles = $this->loadViewerHandles($phids);
@@ -278,8 +272,8 @@ final class PhrictionDiffController extends PhrictionController {
           $author,
           pht('Version %s', $c->getVersion())))
         ->addAttribute(pht('%s %s',
-          phabricator_date($c->getDateCreated(), $user),
-          phabricator_time($c->getDateCreated(), $user)));
+          phabricator_date($c->getDateCreated(), $viewer),
+          phabricator_time($c->getDateCreated(), $viewer)));
 
       if ($c->getDescription()) {
         $item->addAttribute($c->getDescription());

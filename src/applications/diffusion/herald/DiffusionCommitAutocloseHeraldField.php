@@ -20,7 +20,7 @@ final class DiffusionCommitAutocloseHeraldField
   }
 
   public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_NONE;
+    return new HeraldEmptyFieldValue();
   }
 
 }

@@ -4,8 +4,10 @@ final class LiskChunkTestCase extends PhabricatorTestCase {
 
   public function testSQLChunking() {
     $fragments = array(
-      'a', 'a',
-      'b', 'b',
+      'a',
+      'a',
+      'b',
+      'b',
       'ccc',
       'dd',
       'e',
@@ -23,7 +25,14 @@ final class LiskChunkTestCase extends PhabricatorTestCase {
 
 
     $fragments = array(
-      'a', 'a', 'a', 'XX', 'a', 'a', 'a', 'a',
+      'a',
+      'a',
+      'a',
+      'XX',
+      'a',
+      'a',
+      'a',
+      'a',
     );
 
     $this->assertEqual(
@@ -38,7 +47,9 @@ final class LiskChunkTestCase extends PhabricatorTestCase {
     $fragments = array(
       'xxxxxxxxxx',
       'yyyyyyyyyy',
-      'a', 'b', 'c',
+      'a',
+      'b',
+      'c',
       'zzzzzzzzzz',
     );
 

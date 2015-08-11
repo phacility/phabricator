@@ -3,23 +3,17 @@
 final class PhabricatorMacroViewController
   extends PhabricatorMacroController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $macro = id(new PhabricatorMacroQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->needFiles(true)
       ->executeOne();
     if (!$macro) {
@@ -55,7 +49,7 @@ final class PhabricatorMacroViewController
       new PhabricatorMacroTransactionQuery());
 
     $header = id(new PHUIHeaderView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setPolicyObject($macro)
       ->setHeader($title_long);
 
@@ -71,10 +65,10 @@ final class PhabricatorMacroViewController
       ? pht('Add Comment')
       : pht('Grovel in Awe');
 
-    $draft = PhabricatorDraft::newFromUserAndKey($user, $macro->getPHID());
+    $draft = PhabricatorDraft::newFromUserAndKey($viewer, $macro->getPHID());
 
     $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setObjectPHID($macro->getPHID())
       ->setDraft($draft)
       ->setHeaderText($comment_header)

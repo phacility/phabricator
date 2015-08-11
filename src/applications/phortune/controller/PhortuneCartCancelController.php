@@ -3,23 +3,16 @@
 final class PhortuneCartCancelController
   extends PhortuneCartController {
 
-  private $id;
-  private $action;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-    $this->action = $data['action'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $action = $request->getURIData('action');
 
     $authority = $this->loadMerchantAuthority();
 
     $cart_query = id(new PhortuneCartQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->needPurchases(true);
 
     if ($authority) {
@@ -31,7 +24,7 @@ final class PhortuneCartCancelController
       return new Aphront404Response();
     }
 
-    switch ($this->action) {
+    switch ($action) {
       case 'cancel':
         // You must be able to edit the account to cancel an order.
         PhabricatorPolicyFilter::requireCapability(

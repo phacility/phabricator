@@ -3,14 +3,12 @@
 final class PhabricatorXHPASTViewFramesetController
   extends PhabricatorXHPASTViewController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
+  public function shouldAllowPublic() {
+    return true;
   }
 
-  public function processRequest() {
-    $id = $this->id;
+  public function handleRequest(AphrontRequest $request) {
+    $id = $request->getURIData('id');
 
     $response = new AphrontWebpageResponse();
     $response->setFrameable(true);

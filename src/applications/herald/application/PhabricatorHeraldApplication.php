@@ -58,7 +58,7 @@ final class PhabricatorHeraldApplication extends PhabricatorApplication {
         'transcript/' => array(
           '' => 'HeraldTranscriptListController',
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'HeraldTranscriptListController',
-          '(?P<id>[1-9]\d*)/(?:(?P<filter>\w+)/)?'
+          '(?P<id>[1-9]\d*)/'
             => 'HeraldTranscriptController',
         ),
       ),

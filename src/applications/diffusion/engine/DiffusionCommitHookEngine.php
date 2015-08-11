@@ -325,9 +325,11 @@ final class DiffusionCommitHookEngine extends Phobject {
         $this->emailPHIDs[$email_phid] = $email_phid;
       }
 
+      $block_action = DiffusionBlockHeraldAction::ACTIONCONST;
+
       if ($blocking_effect === null) {
         foreach ($effects as $effect) {
-          if ($effect->getAction() == HeraldAdapter::ACTION_BLOCK) {
+          if ($effect->getAction() == $block_action) {
             $blocking_effect = $effect;
             $blocked_update = $update;
             break;

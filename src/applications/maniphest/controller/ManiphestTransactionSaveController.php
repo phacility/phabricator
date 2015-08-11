@@ -2,12 +2,11 @@
 
 final class ManiphestTransactionSaveController extends ManiphestController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $task = id(new ManiphestTaskQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withIDs(array($request->getStr('taskID')))
       ->needSubscriberPHIDs(true)
       ->needProjectPHIDs(true)
@@ -102,7 +101,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         // this task.
         $assign = new ManiphestTransaction();
         $assign->setTransactionType(ManiphestTransaction::TYPE_OWNER);
-        $assign->setNewValue($user->getPHID());
+        $assign->setNewValue($viewer->getPHID());
         $transactions[] = $assign;
 
         $implicitly_claimed = true;
@@ -114,10 +113,10 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       $user_owns_task = true;
     } else {
       if ($action == ManiphestTransaction::TYPE_OWNER) {
-        if ($transaction->getNewValue() == $user->getPHID()) {
+        if ($transaction->getNewValue() == $viewer->getPHID()) {
           $user_owns_task = true;
         }
-      } else if ($task->getOwnerPHID() == $user->getPHID()) {
+      } else if ($task->getOwnerPHID() == $viewer->getPHID()) {
         $user_owns_task = true;
       }
     }
@@ -125,8 +124,8 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     if (!$user_owns_task) {
       // If we aren't making the user the new task owner and they aren't the
       // existing task owner, add them to CC unless they're aleady CC'd.
-      if (!in_array($user->getPHID(), $task->getSubscriberPHIDs())) {
-        $implicit_ccs[] = $user->getPHID();
+      if (!in_array($viewer->getPHID(), $task->getSubscriberPHIDs())) {
+        $implicit_ccs[] = $viewer->getPHID();
       }
     }
 
@@ -164,7 +163,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         'new'           => false,
         'transactions'  => $transactions,
       ));
-    $event->setUser($user);
+    $event->setUser($viewer);
     $event->setAphrontRequest($request);
     PhutilEventEngine::dispatchEvent($event);
 
@@ -172,7 +171,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     $transactions = $event->getValue('transactions');
 
     $editor = id(new ManiphestTransactionEditor())
-      ->setActor($user)
+      ->setActor($viewer)
       ->setContentSourceFromRequest($request)
       ->setContinueOnMissingFields(true)
       ->setContinueOnNoEffect($request->isContinueRequest());
@@ -187,7 +186,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
 
     $draft = id(new PhabricatorDraft())->loadOneWhere(
       'authorPHID = %s AND draftKey = %s',
-      $user->getPHID(),
+      $viewer->getPHID(),
       $task->getPHID());
     if ($draft) {
       $draft->delete();
@@ -200,7 +199,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         'new'           => false,
         'transactions'  => $transactions,
       ));
-    $event->setUser($user);
+    $event->setUser($viewer);
     $event->setAphrontRequest($request);
     PhutilEventEngine::dispatchEvent($event);
 

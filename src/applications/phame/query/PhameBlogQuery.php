@@ -22,54 +22,39 @@ final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
-  protected function loadPage() {
-    $table  = new PhameBlog();
-    $conn_r = $table->establishConnection('r');
-
-    $where_clause = $this->buildWhereClause($conn_r);
-    $order_clause = $this->buildOrderClause($conn_r);
-    $limit_clause = $this->buildLimitClause($conn_r);
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T b %Q %Q %Q',
-      $table->getTableName(),
-      $where_clause,
-      $order_clause,
-      $limit_clause);
-
-    $blogs = $table->loadAllFromArray($data);
-
-    return $blogs;
+  public function newResultObject() {
+    return new PhameBlog();
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function loadPage() {
+    return $this->loadStandardPage($this->newResultObject());
+  }
 
-    if ($this->ids) {
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ls)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->domain) {
+    if ($this->domain !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'domain = %s',
         $this->domain);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {

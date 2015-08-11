@@ -23,6 +23,9 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $fontIcon;
   private $imageIcon;
   private $titleText;
+  private $badge;
+  private $countdownNum;
+  private $countdownNoun;
 
   const AGE_FRESH = 'fresh';
   const AGE_STALE = 'stale';
@@ -96,6 +99,17 @@ final class PHUIObjectItemView extends AphrontTagView {
 
   public function setSubHead($subhead) {
     $this->subhead = $subhead;
+    return $this;
+  }
+
+  public function setBadge(PHUIBadgeMiniView $badge) {
+    $this->badge = $badge;
+    return $this;
+  }
+
+  public function setCountdown($num, $noun) {
+    $this->countdownNum = $num;
+    $this->countdownNoun = $noun;
     return $this;
   }
 
@@ -586,6 +600,33 @@ final class PHUIObjectItemView extends AphrontTagView {
           'class' => 'phui-object-item-col0',
         ),
         $status);
+    }
+
+    if ($this->badge) {
+      $column0 = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-object-item-col0 phui-object-item-badge',
+        ),
+        $this->badge);
+    }
+
+    if ($this->countdownNum) {
+      $countdown = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-object-item-countdown-number',
+        ),
+        array(
+          phutil_tag_div('', $this->countdownNum),
+          phutil_tag_div('', $this->countdownNoun),
+        ));
+      $column0 = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-object-item-col0 phui-object-item-countdown',
+        ),
+        $countdown);
     }
 
     $column1 = phutil_tag(

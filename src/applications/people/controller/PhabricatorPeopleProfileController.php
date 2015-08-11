@@ -5,6 +5,10 @@ final class PhabricatorPeopleProfileController
 
   private $username;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function shouldRequireAdmin() {
     return false;
   }
@@ -19,6 +23,7 @@ final class PhabricatorPeopleProfileController
     $user = id(new PhabricatorPeopleQuery())
       ->setViewer($viewer)
       ->withUsernames(array($this->username))
+      ->needBadges(true)
       ->needProfileImage(true)
       ->needAvailability(true)
       ->executeOne();
@@ -153,9 +158,12 @@ final class PhabricatorPeopleProfileController
       ->setHeaderText(pht('Recent Activity'))
       ->appendChild($this->buildPeopleFeed($user, $viewer));
 
+    $badges = $this->buildBadgesView($user);
+
     $nav = $this->buildIconNavView($user);
     $nav->selectFilter("{$name}/");
     $nav->appendChild($object_box);
+    $nav->appendChild($badges);
     $nav->appendChild($feed);
 
     return $this->buildApplicationPage(
@@ -181,6 +189,39 @@ final class PhabricatorPeopleProfileController
     $field_list->appendFieldsToPropertyList($user, $viewer, $view);
 
     return $view;
+  }
+
+  private function buildBadgesView(
+    PhabricatorUser $user) {
+
+    $viewer = $this->getViewer();
+    $class = 'PhabricatorBadgesApplication';
+    $box = null;
+
+    if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
+      $badge_phids = $user->getBadgePHIDs();
+      if ($badge_phids) {
+        $badges = id(new PhabricatorBadgesQuery())
+          ->setViewer($viewer)
+          ->withPHIDs($badge_phids)
+          ->execute();
+
+        $flex = new PHUIBadgeBoxView();
+        foreach ($badges as $badge) {
+          $item = id(new PHUIBadgeView())
+            ->setIcon($badge->getIcon())
+            ->setHeader($badge->getName())
+            ->setSubhead($badge->getFlavor())
+            ->setQuality($badge->getQuality());
+          $flex->addItem($item);
+        }
+
+        $box = id(new PHUIObjectBoxView())
+          ->setHeaderText(pht('Badges'))
+          ->appendChild($flex);
+        }
+      }
+    return $box;
   }
 
   private function buildPeopleFeed(

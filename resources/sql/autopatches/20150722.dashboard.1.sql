@@ -1,0 +1,2 @@
+ALTER TABLE {$NAMESPACE}_dashboard.dashboard
+  ADD status VARCHAR(32) NOT NULL COLLATE {$COLLATE_TEXT};

@@ -2,21 +2,14 @@
 
 final class ReleephBranchAccessController extends ReleephBranchController {
 
-  private $action;
-  private $branchID;
-
-  public function willProcessRequest(array $data) {
-    $this->action = $data['action'];
-    $this->branchID = $data['branchID'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $action = $request->getURIData('action');
+    $id = $request->getURIData('branchID');
 
     $branch = id(new ReleephBranchQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->branchID))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -28,7 +21,6 @@ final class ReleephBranchAccessController extends ReleephBranchController {
     }
     $this->setBranch($branch);
 
-    $action = $this->action;
     switch ($action) {
       case 'close':
       case 're-open':

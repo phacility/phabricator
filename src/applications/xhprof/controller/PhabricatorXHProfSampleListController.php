@@ -3,20 +3,22 @@
 final class PhabricatorXHProfSampleListController
   extends PhabricatorXHProfController {
 
-  private $view;
-
-  public function willProcessRequest(array $data) {
-    $this->view = idx($data, 'view', 'all');
+  public function shouldAllowPublic() {
+    return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $view = $request->getURIData('view');
+
+    if (!$view) {
+      $view = 'all';
+    }
 
     $pager = new PHUIPagerView();
     $pager->setOffset($request->getInt('page'));
 
-    switch ($this->view) {
+    switch ($view) {
       case 'sampled':
         $clause = 'sampleRate > 0';
         $show_type = false;
@@ -74,7 +76,7 @@ final class PhabricatorXHProfSampleListController
 
       $item->addIcon(
         'none',
-        phabricator_datetime($sample->getDateCreated(), $user));
+        phabricator_datetime($sample->getDateCreated(), $viewer));
 
       $list->addItem($item);
     }

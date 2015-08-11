@@ -1,0 +1,8 @@
+{
+  "engines": {
+    "phutil": {
+      "type": "phutil",
+      "include": "(\\.php$)"
+    }
+  }
+}

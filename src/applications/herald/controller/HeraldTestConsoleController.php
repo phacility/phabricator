@@ -2,13 +2,8 @@
 
 final class HeraldTestConsoleController extends HeraldController {
 
-  public function processRequest() {
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $request = $this->getRequest();
-
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
     $object_name = trim($request->getStr('object_name'));
 
     $e_name = true;
@@ -21,7 +16,7 @@ final class HeraldTestConsoleController extends HeraldController {
 
       if (!$errors) {
         $object = id(new PhabricatorObjectQuery())
-          ->setViewer($user)
+          ->setViewer($viewer)
           ->withNames(array($object_name))
           ->executeOne();
 
@@ -50,6 +45,9 @@ final class HeraldTestConsoleController extends HeraldController {
           } else if ($object instanceof PhrictionDocument) {
             $adapter = id(new PhrictionDocumentHeraldAdapter())
               ->setDocument($object);
+          } else if ($object instanceof PonderQuestion) {
+            $adapter = id(new HeraldPonderQuestionAdapter())
+              ->setQuestion($object);
           } else {
             throw new Exception(pht('Can not build adapter for object!'));
           }
@@ -57,7 +55,7 @@ final class HeraldTestConsoleController extends HeraldController {
           $adapter->setIsNewObject(false);
 
           $rules = id(new HeraldRuleQuery())
-            ->setViewer($user)
+            ->setViewer($viewer)
             ->withContentTypes(array($adapter->getAdapterContentType()))
             ->withDisabled(false)
             ->needConditionsAndActions(true)
@@ -80,7 +78,7 @@ final class HeraldTestConsoleController extends HeraldController {
     }
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendRemarkupInstructions(
         pht(
         'Enter an object to test rules for, like a Diffusion commit (e.g., '.

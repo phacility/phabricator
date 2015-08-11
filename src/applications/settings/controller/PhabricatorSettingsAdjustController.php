@@ -3,8 +3,7 @@
 final class PhabricatorSettingsAdjustController
   extends PhabricatorController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
     $prefs = $user->loadPreferences();

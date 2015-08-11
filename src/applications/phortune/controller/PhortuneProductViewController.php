@@ -2,19 +2,13 @@
 
 final class PhortuneProductViewController extends PhortuneController {
 
-  private $productID;
-
-  public function willProcessRequest(array $data) {
-    $this->productID = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $product = id(new PhortuneProductQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->productID))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->executeOne();
     if (!$product) {
       return new Aphront404Response();
@@ -28,7 +22,7 @@ final class PhortuneProductViewController extends PhortuneController {
     $edit_uri = $this->getApplicationURI('product/edit/'.$product->getID().'/');
 
     $actions = id(new PhabricatorActionListView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setObjectURI($request->getRequestURI());
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -40,7 +34,7 @@ final class PhortuneProductViewController extends PhortuneController {
       $request->getRequestURI());
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setActionList($actions)
       ->addProperty(
         pht('Price'),

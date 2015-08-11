@@ -22,6 +22,7 @@ final class PhabricatorPeopleQuery
   private $needProfile;
   private $needProfileImage;
   private $needAvailability;
+  private $needBadges;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -113,6 +114,11 @@ final class PhabricatorPeopleQuery
     return $this;
   }
 
+  public function needBadges($need) {
+    $this->needBadges = $need;
+    return $this;
+  }
+
   public function newResultObject() {
     return new PhabricatorUser();
   }
@@ -144,6 +150,24 @@ final class PhabricatorPeopleQuery
         }
 
         $user->attachUserProfile($profile);
+      }
+    }
+
+    if ($this->needBadges) {
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(mpull($users, 'getPHID'))
+        ->withEdgeTypes(
+          array(
+            PhabricatorRecipientHasBadgeEdgeType::EDGECONST,
+          ));
+      $edge_query->execute();
+
+      foreach ($users as $user) {
+        $phids = $edge_query->getDestinationPHIDs(
+          array(
+            $user->getPHID(),
+          ));
+        $user->attachBadgePHIDs($phids);
       }
     }
 

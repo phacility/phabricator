@@ -10,7 +10,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
   private $renderURI = '/differential/changeset/';
   private $revisionID;
   private $whitespace;
-  private $unitTestData;
+  private $coverageMap;
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;
@@ -37,8 +37,8 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
     return $this;
   }
 
-  public function setUnitTestData($unit_test_data) {
-    $this->unitTestData = $unit_test_data;
+  public function setCoverageMap(array $coverage_map) {
+    $this->coverageMap = $coverage_map;
     return $this;
   }
 
@@ -59,23 +59,6 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
     $this->requireResource('phui-text-css');
 
     $rows = array();
-
-    $coverage = array();
-    if ($this->unitTestData) {
-      $coverage_by_file = array();
-      foreach ($this->unitTestData as $result) {
-        $test_coverage = idx($result, 'coverage');
-        if (!$test_coverage) {
-          continue;
-        }
-        foreach ($test_coverage as $file => $results) {
-          $coverage_by_file[$file][] = $results;
-        }
-      }
-      foreach ($coverage_by_file as $file => $coverages) {
-        $coverage[$file] = ArcanistUnitTestResult::mergeCoverage($coverages);
-      }
-    }
 
     $changesets = $this->changesets;
     $paths = array();
@@ -144,7 +127,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
             'M');
 
       $fname = $changeset->getFilename();
-      $cov  = $this->renderCoverage($coverage, $fname);
+      $cov  = $this->renderCoverage($this->coverageMap, $fname);
       if ($cov === null) {
         $mcov = $cov = phutil_tag('em', array(), '-');
       } else {

@@ -2,43 +2,26 @@
 
 final class HeraldTranscriptController extends HeraldController {
 
-  const FILTER_AFFECTED = 'affected';
-  const FILTER_OWNED    = 'owned';
-  const FILTER_ALL      = 'all';
-
-  private $id;
-  private $filter;
   private $handles;
   private $adapter;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-    $map = $this->getFilterMap();
-    $this->filter = idx($data, 'filter');
-    if (empty($map[$this->filter])) {
-      $this->filter = self::FILTER_ALL;
-    }
-  }
 
   private function getAdapter() {
     return $this->adapter;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $xscript = id(new HeraldTranscriptQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($request->getURIData('id')))
       ->executeOne();
     if (!$xscript) {
       return new Aphront404Response();
     }
 
     require_celerity_resource('herald-test-css');
-
-    $nav = $this->buildSideNav();
+    $content = array();
 
     $object_xscript = $xscript->getObjectTranscript();
     if (!$object_xscript) {
@@ -49,7 +32,7 @@ final class HeraldTranscriptController extends HeraldController {
           'p',
           array(),
           pht('Details of this transcript have been garbage collected.')));
-      $nav->appendChild($notice);
+      $content[] = $notice;
     } else {
       $map = HeraldAdapter::getEnabledAdapterMap($viewer);
       $object_type = $object_xscript->getType();
@@ -65,9 +48,7 @@ final class HeraldTranscriptController extends HeraldController {
 
       $this->adapter = HeraldAdapter::getAdapterForContentType($object_type);
 
-      $filter = $this->getFilterPHIDs();
-      $this->filterTranscript($xscript, $filter);
-      $phids = array_merge($filter, $this->getTranscriptPHIDs($xscript));
+      $phids = $this->getTranscriptPHIDs($xscript);
       $phids = array_unique($phids);
       $phids = array_filter($phids);
 
@@ -82,23 +63,16 @@ final class HeraldTranscriptController extends HeraldController {
           pht(
             'This was a dry run to test Herald rules, '.
             'no actions were executed.'));
-        $nav->appendChild($notice);
+        $content[] = $notice;
       }
 
       $warning_panel = $this->buildWarningPanel($xscript);
-      $nav->appendChild($warning_panel);
+      $content[] = $warning_panel;
 
-      $apply_xscript_panel = $this->buildApplyTranscriptPanel(
-        $xscript);
-      $nav->appendChild($apply_xscript_panel);
-
-      $action_xscript_panel = $this->buildActionTranscriptPanel(
-        $xscript);
-      $nav->appendChild($action_xscript_panel);
-
-      $object_xscript_panel = $this->buildObjectTranscriptPanel(
-        $xscript);
-      $nav->appendChild($object_xscript_panel);
+      $content[] = array(
+        $this->buildActionTranscriptPanel($xscript),
+        $this->buildObjectTranscriptPanel($xscript),
+      );
     }
 
     $crumbs = id($this->buildApplicationCrumbs())
@@ -106,16 +80,21 @@ final class HeraldTranscriptController extends HeraldController {
         pht('Transcripts'),
         $this->getApplicationURI('/transcript/'))
       ->addTextCrumb($xscript->getID());
-    $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(
-      $nav,
+      array(
+        $crumbs,
+        $content,
+      ),
       array(
         'title' => pht('Transcript'),
       ));
   }
 
   protected function renderConditionTestValue($condition, $handles) {
+    // TODO: This is all a hacky mess and should be driven through FieldValue
+    // eventually.
+
     switch ($condition->getFieldName()) {
       case HeraldAnotherRuleField::FIELDCONST:
         $value = array($condition->getTestValue());
@@ -128,14 +107,12 @@ final class HeraldTranscriptController extends HeraldController {
     if (!is_scalar($value) && $value !== null) {
       foreach ($value as $key => $phid) {
         $handle = idx($handles, $phid);
-        if ($handle) {
+        if ($handle && $handle->isComplete()) {
           $value[$key] = $handle->getName();
         } else {
-          // This shouldn't ever really happen as we are supposed to have
-          // grabbed handles for everything, but be super liberal in what
-          // we accept here since we expect all sorts of weird issues as we
-          // version the system.
-          $value[$key] = pht('Unknown Object #%s', $phid);
+          // This happens for things like task priorities, statuses, and
+          // custom fields.
+          $value[$key] = $phid;
         }
       }
       sort($value);
@@ -143,33 +120,6 @@ final class HeraldTranscriptController extends HeraldController {
     }
 
     return phutil_tag('span', array('class' => 'condition-test-value'), $value);
-  }
-
-  private function buildSideNav() {
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI('/herald/transcript/'.$this->id.'/'));
-
-    $items = array();
-    $filters = $this->getFilterMap();
-    foreach ($filters as $key => $name) {
-      $nav->addFilter($key, $name);
-    }
-    $nav->selectFilter($this->filter, null);
-
-    return $nav;
-  }
-
-  protected function getFilterMap() {
-    return array(
-      self::FILTER_ALL      => pht('All Rules'),
-      self::FILTER_OWNED    => pht('Rules I Own'),
-      self::FILTER_AFFECTED => pht('Rules that Affected Me'),
-    );
-  }
-
-
-  protected function getFilterPHIDs() {
-    return array($this->getRequest()->getUser()->getPHID());
   }
 
   protected function getTranscriptPHIDs($xscript) {
@@ -227,71 +177,6 @@ final class HeraldTranscriptController extends HeraldController {
     return $phids;
   }
 
-  protected function filterTranscript($xscript, $filter_phids) {
-    $filter_owned = ($this->filter == self::FILTER_OWNED);
-    $filter_affected = ($this->filter == self::FILTER_AFFECTED);
-
-    if (!$filter_owned && !$filter_affected) {
-      // No filtering to be done.
-      return;
-    }
-
-    if (!$xscript->getObjectTranscript()) {
-      return;
-    }
-
-    $user_phid = $this->getRequest()->getUser()->getPHID();
-
-    $keep_apply_xscripts = array();
-    $keep_rule_xscripts  = array();
-
-    $filter_phids = array_fill_keys($filter_phids, true);
-
-    $rule_xscripts = $xscript->getRuleTranscripts();
-    foreach ($xscript->getApplyTranscripts() as $id => $apply_xscript) {
-      $rule_id = $apply_xscript->getRuleID();
-      if ($filter_owned) {
-        if (empty($rule_xscripts[$rule_id])) {
-          // No associated rule so you can't own this effect.
-          continue;
-        }
-        if ($rule_xscripts[$rule_id]->getRuleOwner() != $user_phid) {
-          continue;
-        }
-      } else if ($filter_affected) {
-        $targets = (array)$apply_xscript->getTarget();
-        if (!array_select_keys($filter_phids, $targets)) {
-          continue;
-        }
-      }
-      $keep_apply_xscripts[$id] = true;
-      if ($rule_id) {
-        $keep_rule_xscripts[$rule_id] = true;
-      }
-    }
-
-    foreach ($rule_xscripts as $rule_id => $rule_xscript) {
-      if ($filter_owned && $rule_xscript->getRuleOwner() == $user_phid) {
-        $keep_rule_xscripts[$rule_id] = true;
-      }
-    }
-
-    $xscript->setRuleTranscripts(
-      array_intersect_key(
-        $xscript->getRuleTranscripts(),
-        $keep_rule_xscripts));
-
-    $xscript->setApplyTranscripts(
-      array_intersect_key(
-        $xscript->getApplyTranscripts(),
-        $keep_apply_xscripts));
-
-    $xscript->setConditionTranscripts(
-      array_intersect_key(
-        $xscript->getConditionTranscripts(),
-        $keep_rule_xscripts));
-  }
-
   private function buildWarningPanel(HeraldTranscript $xscript) {
     $request = $this->getRequest();
     $panel = null;
@@ -332,163 +217,187 @@ final class HeraldTranscriptController extends HeraldController {
     return $panel;
   }
 
-  private function buildApplyTranscriptPanel(HeraldTranscript $xscript) {
-    $handles = $this->handles;
-    $adapter = $this->getAdapter();
-
-    $rule_type_global = HeraldRuleTypeConfig::RULE_TYPE_GLOBAL;
-    $action_names = $adapter->getActionNameMap($rule_type_global);
-
-    $list = new PHUIObjectItemListView();
-    $list->setStates(true);
-    $list->setNoDataString(pht('No actions were taken.'));
-    foreach ($xscript->getApplyTranscripts() as $apply_xscript) {
-
-      $target = $apply_xscript->getTarget();
-      switch ($apply_xscript->getAction()) {
-        case HeraldAdapter::ACTION_NOTHING:
-          $target = null;
-          break;
-        case HeraldAdapter::ACTION_FLAG:
-          $target = PhabricatorFlagColor::getColorName($target);
-          break;
-        case HeraldAdapter::ACTION_BLOCK:
-          // Target is a text string.
-          $target = $target;
-          break;
-        default:
-          if (is_array($target) && $target) {
-            foreach ($target as $k => $phid) {
-              if (isset($handles[$phid])) {
-                $target[$k] = $handles[$phid]->getName();
-              }
-            }
-            $target = implode(', ', $target);
-          } else if (is_string($target)) {
-            $target = $target;
-          } else {
-            $target = '<empty>';
-          }
-          break;
-      }
-
-      $item = new PHUIObjectItemView();
-
-      if ($apply_xscript->getApplied()) {
-        $item->setState(PHUIObjectItemView::STATE_SUCCESS);
-      } else {
-        $item->setState(PHUIObjectItemView::STATE_FAIL);
-      }
-
-      $rule = idx(
-        $action_names,
-        $apply_xscript->getAction(),
-        pht('Unknown Action "%s"', $apply_xscript->getAction()));
-
-      $item->setHeader(pht('%s: %s', $rule, $target));
-      $item->addAttribute($apply_xscript->getReason());
-      $item->addAttribute(
-        pht('Outcome: %s', $apply_xscript->getAppliedReason()));
-
-      $list->addItem($item);
-    }
-
-    $box = new PHUIObjectBoxView();
-    $box->setHeaderText(pht('Actions Taken'));
-    $box->appendChild($list);
-
-    return $box;
-  }
-
   private function buildActionTranscriptPanel(HeraldTranscript $xscript) {
     $action_xscript = mgroup($xscript->getApplyTranscripts(), 'getRuleID');
 
     $adapter = $this->getAdapter();
-
 
     $field_names = $adapter->getFieldNameMap();
     $condition_names = $adapter->getConditionNameMap();
 
     $handles = $this->handles;
 
-    $rule_markup = array();
-    foreach ($xscript->getRuleTranscripts() as $rule_id => $rule) {
-      $cond_markup = array();
-      foreach ($xscript->getConditionTranscriptsForRule($rule_id) as $cond) {
-        if ($cond->getNote()) {
-          $note = phutil_tag_div('herald-condition-note', $cond->getNote());
+    $action_map = $xscript->getApplyTranscripts();
+    $action_map = mgroup($action_map, 'getRuleID');
+
+    $rule_list = id(new PHUIObjectItemListView())
+      ->setNoDataString(pht('No Herald rules applied to this object.'));
+
+    $rule_xscripts = $xscript->getRuleTranscripts();
+    $rule_xscripts = msort($rule_xscripts, 'getRuleID');
+    foreach ($rule_xscripts as $rule_xscript) {
+      $rule_id = $rule_xscript->getRuleID();
+
+      $rule_item = id(new PHUIObjectItemView())
+        ->setObjectName(pht('H%d', $rule_id))
+        ->setHeader($rule_xscript->getRuleName());
+
+      if (!$rule_xscript->getResult()) {
+        $rule_item->setDisabled(true);
+      }
+
+      $rule_list->addItem($rule_item);
+
+      // Build the field/condition transcript.
+
+      $cond_xscripts = $xscript->getConditionTranscriptsForRule($rule_id);
+
+      $cond_list = id(new PHUIStatusListView());
+      $cond_list->addItem(
+        id(new PHUIStatusItemView())
+          ->setTarget(phutil_tag('strong', array(), pht('Conditions'))));
+
+      foreach ($cond_xscripts as $cond_xscript) {
+        if ($cond_xscript->getResult()) {
+          $icon = 'fa-check';
+          $color = 'green';
+          $result = pht('Passed');
+        } else {
+          $icon = 'fa-times';
+          $color = 'red';
+          $result = pht('Failed');
+        }
+
+        if ($cond_xscript->getNote()) {
+          $note = phutil_tag(
+            'div',
+            array(
+              'class' => 'herald-condition-note',
+            ),
+            $cond_xscript->getNote());
         } else {
           $note = null;
         }
 
-        if ($cond->getResult()) {
-          $result = phutil_tag(
-            'span',
-            array('class' => 'herald-outcome condition-pass'),
-            "\xE2\x9C\x93");
+        // TODO: This is not really translatable and should be driven through
+        // HeraldField.
+        $explanation = pht(
+          '%s %s %s',
+          idx($field_names, $cond_xscript->getFieldName(), pht('Unknown')),
+          idx($condition_names, $cond_xscript->getCondition(), pht('Unknown')),
+          $this->renderConditionTestValue($cond_xscript, $handles));
+
+        $cond_item = id(new PHUIStatusItemView())
+          ->setIcon($icon, $color)
+          ->setTarget($result)
+          ->setNote(array($explanation, $note));
+
+        $cond_list->addItem($cond_item);
+      }
+
+      if ($rule_xscript->getResult()) {
+        $last_icon = 'fa-check-circle';
+        $last_color = 'green';
+        $last_result = pht('Passed');
+        $last_note = pht('Rule passed.');
+      } else {
+        $last_icon = 'fa-times-circle';
+        $last_color = 'red';
+        $last_result = pht('Failed');
+        $last_note = pht('Rule failed.');
+      }
+
+      $cond_last = id(new PHUIStatusItemView())
+        ->setIcon($last_icon, $last_color)
+        ->setTarget(phutil_tag('strong', array(), $last_result))
+        ->setNote($last_note);
+      $cond_list->addItem($cond_last);
+
+      $cond_box = id(new PHUIBoxView())
+        ->appendChild($cond_list)
+        ->addMargin(PHUI::MARGIN_LARGE_LEFT);
+
+      $rule_item->appendChild($cond_box);
+
+      if (!$rule_xscript->getResult()) {
+        // If the rule didn't pass, don't generate an action transcript since
+        // actions didn't apply.
+        continue;
+      }
+
+      $cond_box->addMargin(PHUI::MARGIN_MEDIUM_BOTTOM);
+
+      $action_xscripts = idx($action_map, $rule_id, array());
+      foreach ($action_xscripts as $action_xscript) {
+        $action_key = $action_xscript->getAction();
+        $action = $adapter->getActionImplementation($action_key);
+
+        if ($action) {
+          $name = $action->getHeraldActionName();
+          $action->setViewer($this->getViewer());
         } else {
-          $result = phutil_tag(
-            'span',
-            array('class' => 'herald-outcome condition-fail'),
-            "\xE2\x9C\x98");
+          $name = pht('Unknown Action ("%s")', $action_key);
         }
 
-        $cond_markup[] = phutil_tag(
-          'li',
-          array(),
-          pht(
-            '%s Condition: %s %s %s%s',
-            $result,
-            idx($field_names, $cond->getFieldName(), pht('Unknown')),
-            idx($condition_names, $cond->getCondition(), pht('Unknown')),
-            $this->renderConditionTestValue($cond, $handles),
-            $note));
+        $name = pht('Action: %s', $name);
+
+        $action_list = id(new PHUIStatusListView());
+        $action_list->addItem(
+          id(new PHUIStatusItemView())
+            ->setTarget(phutil_tag('strong', array(), $name)));
+
+        $action_box = id(new PHUIBoxView())
+          ->appendChild($action_list)
+          ->addMargin(PHUI::MARGIN_LARGE_LEFT);
+
+        $rule_item->appendChild($action_box);
+
+        $log = $action_xscript->getAppliedReason();
+
+        // Handle older transcripts which used a static string to record
+        // action results.
+        if (!is_array($log)) {
+          $action_list->addItem(
+            id(new PHUIStatusItemView())
+              ->setIcon('fa-clock-o', 'grey')
+              ->setTarget(pht('Old Transcript'))
+              ->setNote(
+                pht(
+                  'This is an old transcript which uses an obsolete log '.
+                  'format. Detailed action information is not available.')));
+          continue;
+        }
+
+        foreach ($log as $entry) {
+          $type = idx($entry, 'type');
+          $data = idx($entry, 'data');
+
+          if ($action) {
+            $icon = $action->renderActionEffectIcon($type, $data);
+            $color = $action->renderActionEffectColor($type, $data);
+            $name = $action->renderActionEffectName($type, $data);
+            $note = $action->renderEffectDescription($type, $data);
+          } else {
+            $icon = 'fa-question-circle';
+            $color = 'indigo';
+            $name = pht('Unknown Effect ("%s")', $type);
+            $note = null;
+          }
+
+          $action_item = id(new PHUIStatusItemView())
+            ->setIcon($icon, $color)
+            ->setTarget($name)
+            ->setNote($note);
+
+          $action_list->addItem($action_item);
+        }
       }
-
-      if ($rule->getResult()) {
-        $result = phutil_tag(
-          'span',
-          array('class' => 'herald-outcome rule-pass'),
-          pht('PASS'));
-        $class = 'herald-rule-pass';
-      } else {
-        $result = phutil_tag(
-          'span',
-          array('class' => 'herald-outcome rule-fail'),
-          pht('FAIL'));
-        $class = 'herald-rule-fail';
-      }
-
-      $cond_markup[] = phutil_tag(
-        'li',
-        array(),
-        array($result, $rule->getReason()));
-      $user_phid = $this->getRequest()->getUser()->getPHID();
-
-      $name = $rule->getRuleName();
-
-      $rule_markup[] =
-        phutil_tag(
-          'li',
-          array(
-            'class' => $class,
-          ),
-          phutil_tag_div('rule-name', array(
-            phutil_tag('strong', array(), $name),
-            ' ',
-            phutil_tag('ul', array(), $cond_markup),
-          )));
     }
 
-    $box = null;
-    if ($rule_markup) {
-      $box = new PHUIObjectBoxView();
-      $box->setHeaderText(pht('Rule Details'));
-      $box->appendChild(phutil_tag(
-        'ul',
-        array('class' => 'herald-explain-list'),
-        $rule_markup));
-    }
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Rule Transcript'))
+      ->appendChild($rule_list);
+
     return $box;
   }
 

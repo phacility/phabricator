@@ -3,25 +3,19 @@
 final class LegalpadDocumentSignatureVerificationController
   extends LegalpadController {
 
-  private $code;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->code = $data['code'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $code = $request->getURIData('code');
 
     // NOTE: We're using the omnipotent user to handle logged-out signatures
     // and corporate signatures.
     $signature = id(new LegalpadDocumentSignatureQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withSecretKeys(array($this->code))
+      ->withSecretKeys(array($code))
       ->executeOne();
 
     if (!$signature) {

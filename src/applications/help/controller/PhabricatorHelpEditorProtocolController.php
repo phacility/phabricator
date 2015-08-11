@@ -7,9 +7,8 @@ final class PhabricatorHelpEditorProtocolController
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $dialog = id(new AphrontDialogView())
       ->setUser($viewer)

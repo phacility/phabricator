@@ -170,7 +170,7 @@ final class PhabricatorAuditEditor
             $audit_requested = PhabricatorAuditStatusConstants::AUDIT_REQUESTED;
             $audit_reason = $this->getAuditReasons($phid);
           }
-          $requests[] = id (new PhabricatorRepositoryAuditRequest())
+          $requests[] = id(new PhabricatorRepositoryAuditRequest())
             ->setCommitPHID($object->getPHID())
             ->setAuditorPHID($phid)
             ->setAuditStatus($audit_requested)
@@ -877,35 +877,6 @@ final class PhabricatorAuditEditor
     HeraldAdapter $adapter,
     HeraldTranscript $transcript) {
 
-    $xactions = array();
-
-    $audit_phids = $adapter->getAuditMap();
-    foreach ($audit_phids as $phid => $rule_ids) {
-      foreach ($rule_ids as $rule_id) {
-        $this->addAuditReason(
-          $phid,
-          pht(
-            '%s Triggered Audit',
-            "H{$rule_id}"));
-      }
-    }
-
-    if ($audit_phids) {
-      $xactions[] = id(new PhabricatorAuditTransaction())
-        ->setTransactionType(PhabricatorAuditActionConstants::ADD_AUDITORS)
-        ->setNewValue(array_fuse(array_keys($audit_phids)))
-        ->setMetadataValue(
-          'auditStatus',
-          PhabricatorAuditStatusConstants::AUDIT_REQUIRED)
-        ->setMetadataValue(
-          'auditReasonMap', $this->auditReasonMap);
-    }
-
-    HarbormasterBuildable::applyBuildPlans(
-      $object->getPHID(),
-      $object->getRepository()->getPHID(),
-      $adapter->getBuildPlans());
-
     $limit = self::MAX_FILES_SHOWN_IN_EMAIL;
     $files = $adapter->loadAffectedPaths();
     sort($files);
@@ -919,7 +890,7 @@ final class PhabricatorAuditEditor
     }
     $this->affectedFiles = implode("\n", $files);
 
-    return $xactions;
+    return array();
   }
 
   private function isCommitMostlyImported(PhabricatorLiskDAO $object) {

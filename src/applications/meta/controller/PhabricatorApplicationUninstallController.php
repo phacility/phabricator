@@ -6,20 +6,20 @@ final class PhabricatorApplicationUninstallController
   private $application;
   private $action;
 
-  public function shouldRequireAdmin() {
-    return true;
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $this->action = $request->getURIData('action');
+    $this->application = $request->getURIData('application');
 
-  public function willProcessRequest(array $data) {
-    $this->application = $data['application'];
-    $this->action = $data['action'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $selected = PhabricatorApplication::getByClass($this->application);
+    $selected = id(new PhabricatorApplicationQuery())
+      ->setViewer($viewer)
+      ->withClasses(array($this->application))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
 
     if (!$selected) {
       return new Aphront404Response();
@@ -31,7 +31,7 @@ final class PhabricatorApplicationUninstallController
       'phabricator.show-prototypes');
 
     $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->addCancelButton($view_uri);
 
     if ($selected->isPrototype() && !$prototypes_enabled) {
@@ -114,7 +114,7 @@ final class PhabricatorApplicationUninstallController
     }
 
     PhabricatorConfigEditor::storeNewValue(
-      $this->getRequest()->getUser(),
+      $this->getViewer(),
       $config_entry,
       $list,
       PhabricatorContentSource::newFromRequest($this->getRequest()));

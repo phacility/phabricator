@@ -8,6 +8,10 @@ final class HeraldSpaceField extends HeraldField {
     return pht('Space');
   }
 
+  public function getFieldGroupKey() {
+    return HeraldSupportFieldGroup::FIELDGROUPKEY;
+  }
+
   public function supportsObject($object) {
     return ($object instanceof PhabricatorSpacesInterface);
   }
@@ -16,12 +20,12 @@ final class HeraldSpaceField extends HeraldField {
     return PhabricatorSpacesNamespaceQuery::getObjectSpacePHID($object);
   }
 
-  protected function getHeraldFieldStandardConditions() {
+  protected function getHeraldFieldStandardType() {
     return self::STANDARD_PHID;
   }
 
-  public function getHeraldFieldValueType($condition) {
-    return HeraldAdapter::VALUE_SPACE;
+  protected function getDatasource() {
+    return new PhabricatorSpacesNamespaceDatasource();
   }
 
 }

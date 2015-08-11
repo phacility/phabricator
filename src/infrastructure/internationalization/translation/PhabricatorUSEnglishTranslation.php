@@ -32,6 +32,8 @@ final class PhabricatorUSEnglishTranslation
       '%d path(s)' => array('%d path', '%d paths'),
       '%d diff(s)' => array('%d diff', '%d diffs'),
 
+      '%d Answer(s)' => array('%d Answer', '%d Answers'),
+
       '%s DIFF LINK(S)' => array('DIFF LINK', 'DIFF LINKS'),
       'You successfully created %d diff(s).' => array(
         'You successfully created %d diff.',
@@ -1182,6 +1184,182 @@ final class PhabricatorUSEnglishTranslation
         '%s Task',
         '%s Tasks',
       ),
+
+      '%s added %s badge(s) for %s: %s.' => array(
+        array(
+          '%s added a badge for %s: %3$s.',
+          '%s added badges for %s: %3$s.',
+        ),
+      ),
+      '%s added %s badge(s): %s.' => array(
+        array(
+          '%s added a badge: %3$s.',
+          '%s added badges: %3$s.',
+        ),
+      ),
+      '%s awarded %s recipient(s) for %s: %s.' => array(
+        array(
+          '%s awarded %3$s to %4$s.',
+          '%s awarded %3$s to multiple recipients: %4$s.',
+        ),
+      ),
+      '%s awarded %s recipients(s): %s.' => array(
+        array(
+          '%s awarded a recipient: %3$s.',
+          '%s awarded multiple recipients: %3$s.',
+        ),
+      ),
+      '%s edited badge(s) for %s, added %s: %s; revoked %s: %s.' => array(
+        array(
+          '%s edited badges for %s, added %s: %s; revoked %s: %s.',
+          '%s edited badges for %s, added %s: %s; revoked %s: %s.',
+        ),
+      ),
+      '%s edited badge(s), added %s: %s; revoked %s: %s.' => array(
+        array(
+          '%s edited badges, added %s: %s; revoked %s: %s.',
+          '%s edited badges, added %s: %s; revoked %s: %s.',
+        ),
+      ),
+      '%s edited recipient(s) for %s, awarded %s: %s; revoked %s: %s.' => array(
+        array(
+          '%s edited recipients for %s, awarded %s: %s; revoked %s: %s.',
+          '%s edited recipients for %s, awarded %s: %s; revoked %s: %s.',
+        ),
+      ),
+      '%s edited recipient(s), awarded %s: %s; revoked %s: %s.' => array(
+        array(
+          '%s edited recipients, awarded %s: %s; revoked %s: %s.',
+          '%s edited recipients, awarded %s: %s; revoked %s: %s.',
+        ),
+      ),
+      '%s revoked %s badge(s) for %s: %s.' => array(
+        array(
+          '%s revoked a badge for %3$s: %4$s.',
+          '%s revoked multiple badges for %3$s: %4$s.',
+        ),
+      ),
+      '%s revoked %s badge(s): %s.' => array(
+        array(
+          '%s revoked a badge: %3$s.',
+          '%s revoked multiple badges: %3$s.',
+        ),
+      ),
+      '%s revoked %s recipient(s) for %s: %s.' => array(
+        array(
+          '%s revoked %3$s from %4$s.',
+          '%s revoked multiple recipients for %3$s: %4$s.',
+        ),
+      ),
+
+      '%s revoked %s recipients(s): %s.' => array(
+        array(
+          '%s revoked a recipient: %3$s.',
+          '%s revoked multiple recipients: %3$s.',
+        ),
+      ),
+
+      '%s automatically subscribed target(s) were not affected: %s.' => array(
+        'An automatically subscribed target was not affected: %2$s.',
+        'Automatically subscribed targets were not affected: %2$s.',
+      ),
+
+      'Declined to resubscribe %s target(s) because they previously '.
+      'unsubscribed: %s.' => array(
+        'Delined to resubscribe a target because they previously '.
+        'unsubscribed: %2$s.',
+        'Declined to resubscribe targets because they previously '.
+        'unsubscribed: %2$s.',
+      ),
+
+      '%s target(s) are not subscribed: %s.' => array(
+        'A target is not subscribed: %2$s.',
+        'Targets are not subscribed: %2$s.',
+      ),
+
+      '%s target(s) are already subscribed: %s.' => array(
+        'A target is already subscribed: %2$s.',
+        'Targets are already subscribed: %2$s.',
+      ),
+
+      'Added %s subscriber(s): %s.' => array(
+        'Added a subscriber: %2$s.',
+        'Added subscribers: %2$s.',
+      ),
+
+      'Removed %s subscriber(s): %s.' => array(
+        'Removed a subscriber: %2$s.',
+        'Removed subscribers: %2$s.',
+      ),
+
+      'Queued email to be delivered to %s target(s): %s.' => array(
+        'Queued email to be delivered to target: %2$s.',
+        'Queued email to be delivered to targets: %2$s.',
+      ),
+
+      'Queued email to be delivered to %s target(s), ignoring their '.
+      'notification preferences: %s.' => array(
+        'Queued email to be delivered to target, ignoring notification '.
+        'preferences: %2$s.',
+        'Queued email to be delivered to targets, ignoring notification '.
+        'preferences: %2$s.',
+      ),
+
+      '%s project(s) are not associated: %s.' => array(
+        'A project is not associated: %2$s.',
+        'Projects are not associated: %2$s.',
+      ),
+
+      '%s project(s) are already associated: %s.' => array(
+        'A project is already associated: %2$s.',
+        'Projects are already associated: %2$s.',
+      ),
+
+      'Added %s project(s): %s.' => array(
+        'Added a project: %2$s.',
+        'Added projects: %2$s.',
+      ),
+
+      'Removed %s project(s): %s.' => array(
+        'Removed a project: %2$s.',
+        'Removed projects: %2$s.',
+      ),
+
+      'Added %s reviewer(s): %s.' => array(
+        'Added a reviewer: %2$s.',
+        'Added reviewers: %2$s.',
+      ),
+
+      'Added %s blocking reviewer(s): %s.' => array(
+        'Added a blocking reviewer: %2$s.',
+        'Added blocking reviewers: %2$s.',
+      ),
+
+      'Required %s signature(s): %s.' => array(
+        'Required a signature: %2$s.',
+        'Required signatures: %2$s.',
+      ),
+
+      'Started %s build(s): %s.' => array(
+        'Started a build: %2$s.',
+        'Started builds: %2$s.',
+      ),
+
+      'Added %s auditor(s): %s.' => array(
+        'Added an auditor: %2$s.',
+        'Added auditors: %2$s.',
+      ),
+
+      '%s target(s) do not have permission to see this object: %s.' => array(
+        'A target does not have permission to see this object: %2$s.',
+        'Targets do not have permission to see this object: %2$s.',
+      ),
+
+      'This action has no effect on %s target(s): %s.' => array(
+        'This action has no effect on a target: %2$s.',
+        'This action has no effect on targets: %2$s.',
+      ),
+
     );
   }
 

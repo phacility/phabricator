@@ -11,6 +11,10 @@ final class HarbormasterLeaseHostBuildStepImplementation
     return pht('Obtain a lease on a Drydock host for performing builds.');
   }
 
+  public function getBuildStepGroupKey() {
+    return HarbormasterPrototypeBuildStepGroup::GROUPKEY;
+  }
+
   public function execute(
     HarbormasterBuild $build,
     HarbormasterBuildTarget $build_target) {

@@ -39,7 +39,6 @@ final class DifferentialCreateDiffConduitAPIMethod
       'sourceControlPath'         => 'required string',
       'sourceControlBaseRevision' => 'required string',
       'creationMethod'            => 'optional string',
-      'arcanistProject'           => 'deprecated',
       'lintStatus'                => 'required '.$status_const,
       'unitStatus'                => 'required '.$status_const,
       'repositoryPHID'            => 'optional phid',
@@ -144,9 +143,10 @@ final class DifferentialCreateDiffConduitAPIMethod
       'unitStatus' => $unit_status,
     );
 
-    $xactions = array(id(new DifferentialTransaction())
-      ->setTransactionType(DifferentialDiffTransaction::TYPE_DIFF_CREATE)
-      ->setNewValue($diff_data_dict),
+    $xactions = array(
+      id(new DifferentialTransaction())
+        ->setTransactionType(DifferentialDiffTransaction::TYPE_DIFF_CREATE)
+        ->setNewValue($diff_data_dict),
     );
 
     id(new DifferentialDiffEditor())

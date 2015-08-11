@@ -172,34 +172,26 @@ final class HarbormasterBuildViewController
       }
 
       $details = $build_target->getDetails();
-      if ($details) {
-        $properties = new PHUIPropertyListView();
-        foreach ($details as $key => $value) {
-          $properties->addProperty($key, $value);
-        }
-        $target_box->addPropertyList($properties, pht('Configuration'));
+      $properties = new PHUIPropertyListView();
+      foreach ($details as $key => $value) {
+        $properties->addProperty($key, $value);
       }
+      $target_box->addPropertyList($properties, pht('Configuration'));
 
       $variables = $build_target->getVariables();
-      if ($variables) {
-        $properties = new PHUIPropertyListView();
-        $properties->addRawContent($this->buildProperties($variables));
-        $target_box->addPropertyList($properties, pht('Variables'));
-      }
+      $properties = new PHUIPropertyListView();
+      $properties->addRawContent($this->buildProperties($variables));
+      $target_box->addPropertyList($properties, pht('Variables'));
 
       $artifacts = $this->buildArtifacts($build_target);
-      if ($artifacts) {
-        $properties = new PHUIPropertyListView();
-        $properties->addRawContent($artifacts);
-        $target_box->addPropertyList($properties, pht('Artifacts'));
-      }
+      $properties = new PHUIPropertyListView();
+      $properties->addRawContent($artifacts);
+      $target_box->addPropertyList($properties, pht('Artifacts'));
 
       $build_messages = idx($messages, $build_target->getPHID(), array());
-      if ($build_messages) {
-        $properties = new PHUIPropertyListView();
-        $properties->addRawContent($this->buildMessages($build_messages));
-        $target_box->addPropertyList($properties, pht('Messages'));
-      }
+      $properties = new PHUIPropertyListView();
+      $properties->addRawContent($this->buildMessages($build_messages));
+      $target_box->addPropertyList($properties, pht('Messages'));
 
       $properties = new PHUIPropertyListView();
       $properties->addProperty(
@@ -243,11 +235,8 @@ final class HarbormasterBuildViewController
       ->withBuildTargetPHIDs(array($build_target->getPHID()))
       ->execute();
 
-    if (count($artifacts) === 0) {
-      return null;
-    }
-
     $list = id(new PHUIObjectItemListView())
+      ->setNoDataString(pht('This target has no associated artifacts.'))
       ->setFlush(true);
 
     foreach ($artifacts as $artifact) {
