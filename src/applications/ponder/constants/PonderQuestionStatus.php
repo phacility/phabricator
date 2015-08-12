@@ -41,7 +41,7 @@ final class PonderQuestionStatus extends PonderConstants {
       self::STATUS_OPEN =>
         pht('This question is open for answers.'),
       self::STATUS_CLOSED_RESOLVED =>
-        pht('This question has been resolved.'),
+        pht('This question has been answered or resolved.'),
       self::STATUS_CLOSED_OBSOLETE =>
         pht('This question is no longer valid or out of date.'),
       self::STATUS_CLOSED_DUPLICATE =>

@@ -18,21 +18,10 @@ final class PonderQuestionViewController extends PonderController {
 
     $answers = $this->buildAnswers($question->getAnswers());
 
-    $authors = mpull($question->getAnswers(), null, 'getAuthorPHID');
-    if (isset($authors[$viewer->getPHID()])) {
-      $answer_add_panel = id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
-        ->appendChild(
-          pht(
-            'You have already answered this question. You can not answer '.
-            'twice, but you can edit your existing answer.'));
-    } else {
-      $answer_add_panel = new PonderAddAnswerView();
-      $answer_add_panel
-        ->setQuestion($question)
-        ->setUser($viewer)
-        ->setActionURI('/ponder/answer/add/');
-    }
+    $answer_add_panel = id(new PonderAddAnswerView())
+      ->setQuestion($question)
+      ->setUser($viewer)
+      ->setActionURI('/ponder/answer/add/');
 
     $header = new PHUIHeaderView();
     $header->setHeader($question->getTitle());
@@ -243,49 +232,6 @@ final class PonderQuestionViewController extends PonderController {
     }
 
     return $view;
-  }
-
-  private function wrapComments($n, $stuff) {
-    if ($n == 0) {
-      $text = pht('Add a Comment');
-    } else {
-      $text = pht('Show %s Comments', new PhutilNumber($n));
-    }
-
-    $show_id = celerity_generate_unique_node_id();
-    $hide_id = celerity_generate_unique_node_id();
-
-    Javelin::initBehavior('phabricator-reveal-content');
-    require_celerity_resource('ponder-view-css');
-
-    $show = phutil_tag(
-      'div',
-      array(
-        'id' => $show_id,
-        'class' => 'ponder-show-comments',
-      ),
-      javelin_tag(
-        'a',
-        array(
-          'href' => '#',
-          'sigil' => 'reveal-content',
-          'meta' => array(
-            'showIDs' => array($hide_id),
-            'hideIDs' => array($show_id),
-          ),
-        ),
-        $text));
-
-    $hide = phutil_tag(
-      'div',
-      array(
-        'class' => 'ponder-comments-view',
-        'id' => $hide_id,
-        'style' => 'display: none',
-      ),
-      $stuff);
-
-    return array($show, $hide);
   }
 
   private function buildSidebar(PonderQuestion $question) {
