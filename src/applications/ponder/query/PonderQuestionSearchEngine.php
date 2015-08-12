@@ -57,6 +57,7 @@ final class PonderQuestionSearchEngine
 
   protected function getBuiltinQueryNames() {
     $names = array(
+      'recent' => pht('Recent Questions'),
       'open' => pht('Open Questions'),
       'resolved' => pht('Resolved Questions'),
       'all' => pht('All Questions'),
@@ -80,6 +81,12 @@ final class PonderQuestionSearchEngine
       case 'open':
         return $query->setParameter(
           'statuses', array(PonderQuestionStatus::STATUS_OPEN));
+      case 'recent':
+        return $query->setParameter(
+          'statuses', array(
+            PonderQuestionStatus::STATUS_OPEN,
+            PonderQuestionStatus::STATUS_CLOSED_RESOLVED,
+          ));
       case 'resolved':
         return $query->setParameter(
           'statuses', array(PonderQuestionStatus::STATUS_CLOSED_RESOLVED));
