@@ -105,15 +105,13 @@ final class PhabricatorMailManagementReceiveTestWorkflow
             'to' => $to.'+1+'.$pseudohash,
           ));
 
-      $receivers = id(new PhutilSymbolLoader())
+      $receivers = id(new PhutilClassMapQuery())
         ->setAncestorClass('PhabricatorMailReceiver')
-        ->loadObjects();
+        ->setFilterMethod('isEnabled')
+        ->execute();
 
       $receiver = null;
       foreach ($receivers as $possible_receiver) {
-        if (!$possible_receiver->isEnabled()) {
-          continue;
-        }
         if (!$possible_receiver->canAcceptMail($pseudomail)) {
           continue;
         }

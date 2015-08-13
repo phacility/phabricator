@@ -12,11 +12,10 @@ final class PhabricatorDashboardPanelSearchQueryCustomField
   }
 
   public function renderEditControl(array $handles) {
-
-    $engines = id(new PhutilSymbolLoader())
+    $engines = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorApplicationSearchEngine')
-      ->loadObjects();
-    $engines = mfilter($engines, 'canUseInPanelContext');
+      ->setFilterMethod('canUseInPanelContext')
+      ->execute();
 
     $value = $this->getFieldValue();
 

@@ -75,19 +75,11 @@ final class PhabricatorSettingsMainController
   }
 
   private function buildPanels() {
-    $panel_specs = id(new PhutilSymbolLoader())
+    $panels = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorSettingsPanel')
-      ->setConcreteOnly(true)
-      ->selectAndLoadSymbols();
-
-    $panels = array();
-    foreach ($panel_specs as $spec) {
-      $class = newv($spec['name'], array());
-      $panels[] = $class->buildPanels();
-    }
-
-    $panels = array_mergev($panels);
-    $panels = mpull($panels, null, 'getPanelKey');
+      ->setExpandMethod('buildPanels')
+      ->setUniqueMethod('getPanelKey')
+      ->execute();
 
     $result = array();
     foreach ($panels as $key => $panel) {

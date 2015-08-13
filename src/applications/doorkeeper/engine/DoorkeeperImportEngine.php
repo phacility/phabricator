@@ -88,14 +88,12 @@ final class DoorkeeperImportEngine extends Phobject {
     }
 
     if (!$this->localOnly) {
-      $bridges = id(new PhutilSymbolLoader())
+      $bridges = id(new PhutilClassMapQuery())
         ->setAncestorClass('DoorkeeperBridge')
-        ->loadObjects();
+        ->setFilterMethod('isEnabled')
+        ->execute();
 
       foreach ($bridges as $key => $bridge) {
-        if (!$bridge->isEnabled()) {
-          unset($bridges[$key]);
-        }
         $bridge->setViewer($viewer);
         $bridge->setThrowOnMissingLink($this->throwOnMissingLink);
       }

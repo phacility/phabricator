@@ -37,9 +37,9 @@ final class PhabricatorPolicyEditController
       PhabricatorPolicy::ACTION_DENY => pht('Deny'),
     );
 
-    $rules = id(new PhutilSymbolLoader())
+    $rules = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorPolicyRule')
-      ->loadObjects();
+      ->execute();
 
     foreach ($rules as $key => $rule) {
       if (!$rule->canApplyToObject($object)) {

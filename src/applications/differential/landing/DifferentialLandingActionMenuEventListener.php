@@ -37,9 +37,10 @@ final class DifferentialLandingActionMenuEventListener
       return null;
     }
 
-    $strategies = id(new PhutilSymbolLoader())
+    $strategies = id(new PhutilClassMapQuery())
       ->setAncestorClass('DifferentialLandingStrategy')
-      ->loadObjects();
+      ->execute();
+
     foreach ($strategies as $strategy) {
       $viewer = $event->getUser();
       $action = $strategy->createMenuItem($viewer, $revision, $repository);
