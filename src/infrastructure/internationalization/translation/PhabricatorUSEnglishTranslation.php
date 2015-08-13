@@ -613,6 +613,14 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
+      '%s edited dependencie(s), added %s: %s; removed %s: %s.' => array(
+        '%s edited dependencies, added: %3$s; removed: %5$s.',
+      ),
+
+      '%s edited dependencie(s) for %s, added %s: %s; removed %s: %s.' => array(
+        '%s edited dependencies for %s, added: %3$s; removed: %5$s.',
+      ),
+
       '%s added %s dependent revision(s): %s.' => array(
         array(
           '%s added a dependent revision: %3$s.',
