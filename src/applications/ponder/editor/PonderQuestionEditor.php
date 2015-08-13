@@ -212,6 +212,19 @@ final class PonderQuestionEditor
     return true;
   }
 
+  public function getMailTagsMap() {
+    return array(
+      PonderQuestionTransaction::MAILTAG_DETAILS =>
+        pht('Someone changes the questions details.'),
+      PonderQuestionTransaction::MAILTAG_ANSWERS =>
+        pht('Someone adds a new answer.'),
+      PonderQuestionTransaction::MAILTAG_COMMENT =>
+        pht('Someone comments on the question.'),
+      PonderQuestionTransaction::MAILTAG_OTHER =>
+        pht('Other question activity not listed above occurs.'),
+    );
+  }
+
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {
     return id(new PonderQuestionReplyHandler())
       ->setMailReceiver($object);
