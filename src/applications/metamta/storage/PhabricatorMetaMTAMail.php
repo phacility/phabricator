@@ -7,11 +7,6 @@ final class PhabricatorMetaMTAMail
   extends PhabricatorMetaMTADAO
   implements PhabricatorPolicyInterface {
 
-  const STATUS_QUEUE = 'queued';
-  const STATUS_SENT  = 'sent';
-  const STATUS_FAIL  = 'fail';
-  const STATUS_VOID  = 'void';
-
   const RETRY_DELAY   = 5;
 
   protected $actorPHID;
@@ -24,7 +19,7 @@ final class PhabricatorMetaMTAMail
 
   public function __construct() {
 
-    $this->status     = self::STATUS_QUEUE;
+    $this->status     = PhabricatorMailOutboundStatus::STATUS_QUEUE;
     $this->parameters = array('sensitive' => true);
 
     parent::__construct();
@@ -430,7 +425,7 @@ final class PhabricatorMetaMTAMail
     }
 
     if (!$force_send) {
-      if ($this->getStatus() != self::STATUS_QUEUE) {
+      if ($this->getStatus() != PhabricatorMailOutboundStatus::STATUS_QUEUE) {
         throw new Exception(pht('Trying to send an already-sent mail!'));
       }
     }
@@ -662,7 +657,7 @@ final class PhabricatorMetaMTAMail
       $this->setParam('actors.sent', $actor_list);
 
       if (!$add_to && !$add_cc) {
-        $this->setStatus(self::STATUS_VOID);
+        $this->setStatus(PhabricatorMailOutboundStatus::STATUS_VOID);
         $this->setMessage(
           pht(
             'Message has no valid recipients: all To/Cc are disabled, '.
@@ -673,7 +668,7 @@ final class PhabricatorMetaMTAMail
       if ($this->getIsErrorEmail()) {
         $all_recipients = array_merge($add_to, $add_cc);
         if ($this->shouldRateLimitMail($all_recipients)) {
-          $this->setStatus(self::STATUS_VOID);
+          $this->setStatus(PhabricatorMailOutboundStatus::STATUS_VOID);
           $this->setMessage(
             pht(
               'This is an error email, but one or more recipients have '.
@@ -684,7 +679,7 @@ final class PhabricatorMetaMTAMail
       }
 
       if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
-        $this->setStatus(self::STATUS_VOID);
+        $this->setStatus(PhabricatorMailOutboundStatus::STATUS_VOID);
         $this->setMessage(
           pht(
             'Phabricator is running in silent mode. See `%s` '.
@@ -716,7 +711,7 @@ final class PhabricatorMetaMTAMail
       }
     } catch (Exception $ex) {
       $this
-        ->setStatus(self::STATUS_FAIL)
+        ->setStatus(PhabricatorMailOutboundStatus::STATUS_FAIL)
         ->setMessage($ex->getMessage())
         ->save();
 
@@ -732,13 +727,13 @@ final class PhabricatorMetaMTAMail
           pht('Mail adapter encountered an unexpected, unspecified failure.'));
       }
 
-      $this->setStatus(self::STATUS_SENT);
+      $this->setStatus(PhabricatorMailOutboundStatus::STATUS_SENT);
       $this->save();
 
       return $this;
     } catch (PhabricatorMetaMTAPermanentFailureException $ex) {
       $this
-        ->setStatus(self::STATUS_FAIL)
+        ->setStatus(PhabricatorMailOutboundStatus::STATUS_FAIL)
         ->setMessage($ex->getMessage())
         ->save();
 
@@ -750,17 +745,6 @@ final class PhabricatorMetaMTAMail
 
       throw $ex;
     }
-  }
-
-  public static function getReadableStatus($status_code) {
-    $readable = array(
-      self::STATUS_QUEUE => pht('Queued for Delivery'),
-      self::STATUS_FAIL  => pht('Delivery Failed'),
-      self::STATUS_SENT  => pht('Sent'),
-      self::STATUS_VOID  => pht('Void'),
-    );
-    $status_code = coalesce($status_code, '?');
-    return idx($readable, $status_code, $status_code);
   }
 
   private function generateThreadIndex($seed, $is_first_mail) {

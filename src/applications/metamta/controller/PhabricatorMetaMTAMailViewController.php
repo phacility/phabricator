@@ -25,34 +25,10 @@ final class PhabricatorMetaMTAMailViewController
       ->setUser($viewer)
       ->setPolicyObject($mail);
 
-    switch ($mail->getStatus()) {
-      case PhabricatorMetaMTAMail::STATUS_QUEUE:
-        $icon = 'fa-clock-o';
-        $color = 'blue';
-        $name = pht('Queued');
-        break;
-      case PhabricatorMetaMTAMail::STATUS_SENT:
-        $icon = 'fa-envelope';
-        $color = 'green';
-        $name = pht('Sent');
-        break;
-      case PhabricatorMetaMTAMail::STATUS_FAIL:
-        $icon = 'fa-envelope';
-        $color = 'red';
-        $name = pht('Delivery Failed');
-        break;
-      case PhabricatorMetaMTAMail::STATUS_VOID:
-        $icon = 'fa-envelope';
-        $color = 'black';
-        $name = pht('Voided');
-        break;
-      default:
-        $icon = 'fa-question-circle';
-        $color = 'yellow';
-        $name = pht('Unknown');
-        break;
-    }
-
+    $status = $mail->getStatus();
+    $name = PhabricatorMailOutboundStatus::getStatusName($status);
+    $icon = PhabricatorMailOutboundStatus::getStatusIcon($status);
+    $color = PhabricatorMailOutboundStatus::getStatusColor($status);
     $header->setStatus($icon, $color, $name);
 
     $crumbs = $this->buildApplicationCrumbs()
@@ -248,6 +224,8 @@ final class PhabricatorMetaMTAMailViewController
 
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer);
+
+    $properties->addProperty(pht('Message PHID'), $mail->getPHID());
 
     $details = $mail->getMessage();
     if (!strlen($details)) {
