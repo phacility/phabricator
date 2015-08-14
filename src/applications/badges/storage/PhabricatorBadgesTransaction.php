@@ -10,7 +10,6 @@ final class PhabricatorBadgesTransaction
   const TYPE_STATUS = 'badges:status';
   const TYPE_FLAVOR = 'badges:flavor';
 
-  const MAILTAG_NAME = 'badges:name';
   const MAILTAG_DETAILS = 'badges:details';
   const MAILTAG_COMMENT = 'badges:comment';
   const MAILTAG_OTHER  = 'badges:other';
