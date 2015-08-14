@@ -171,7 +171,10 @@ final class PonderQuestionViewController extends PonderController {
 
     $view->invokeWillRenderEvent();
 
-    $view->addSectionHeader(pht('Question'));
+    $view->addSectionHeader(
+        pht('Details'),
+        PHUIPropertyListView::ICON_SUMMARY);
+
     $view->addTextContent(
       array(
         phutil_tag(

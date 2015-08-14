@@ -23,7 +23,9 @@ final class PonderQuestionEditController extends PonderController {
         $question->getPHID(),
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
       $v_projects = array_reverse($v_projects);
+      $is_new = false;
     } else {
+      $is_new = true;
       $question = PonderQuestion::initializeNewQuestion($viewer);
       $v_projects = array();
     }
@@ -124,13 +126,17 @@ final class PonderQuestionEditController extends PonderController {
           ->setSpacePHID($v_space)
           ->setPolicies($policies)
           ->setValue($v_view)
-          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Status'))
-          ->setName('status')
-          ->setValue($v_status)
-          ->setOptions(PonderQuestionStatus::getQuestionStatusMap()));
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW));
+
+
+    if (!$is_new) {
+      $form->appendChild(
+          id(new AphrontFormSelectControl())
+            ->setLabel(pht('Status'))
+            ->setName('status')
+            ->setValue($v_status)
+            ->setOptions(PonderQuestionStatus::getQuestionStatusMap()));
+    }
 
     $form->appendControl(
       id(new AphrontFormTokenizerControl())
@@ -142,7 +148,7 @@ final class PonderQuestionEditController extends PonderController {
     $form->appendChild(
       id(new AphrontFormSubmitControl())
         ->addCancelButton($this->getApplicationURI())
-        ->setValue(pht('Ask Away!')));
+        ->setValue(pht('Submit')));
 
     $preview = id(new PHUIRemarkupPreviewPanel())
       ->setHeader(pht('Question Preview'))
