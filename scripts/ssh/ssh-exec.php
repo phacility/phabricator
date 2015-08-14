@@ -230,7 +230,7 @@ try {
 
   $parsed_args = new PhutilArgumentParser($parseable_argv);
 
-  if (empty($workflow_names[$command])) {
+  if (empty($workflows[$command])) {
     throw new Exception(pht('Invalid command.'));
   }
 
