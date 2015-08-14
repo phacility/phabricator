@@ -31,8 +31,37 @@ final class PonderAnswerView extends AphrontTagView {
     require_celerity_resource('ponder-view-css');
     $answer = $this->answer;
     $viewer = $this->getUser();
+    $status = $answer->getStatus();
     $author_phid = $answer->getAuthorPHID();
     $actions = $this->buildAnswerActions();
+    $id = $answer->getID();
+
+    if ($status == PonderAnswerStatus::ANSWER_STATUS_HIDDEN) {
+      $can_edit = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $answer,
+        PhabricatorPolicyCapability::CAN_EDIT);
+
+      $message = array();
+      $message[] = phutil_tag(
+        'em',
+        array(),
+        pht('This answer has been hidden.'));
+
+      if ($can_edit) {
+        $message[] = phutil_tag(
+          'a',
+          array(
+            'href' => "/ponder/answer/edit/{$id}/",
+          ),
+          pht('Edit Answer'));
+      }
+      $message = phutil_implode_html(' ', $message);
+
+      return id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
+        ->appendChild($message);
+    }
 
     $action_button = id(new PHUIButtonView())
       ->setTag('a')
@@ -57,7 +86,6 @@ final class PonderAnswerView extends AphrontTagView {
         $answer->getMarkupField(),
         $viewer));
 
-    $id = $answer->getID();
     $anchor = id(new PhabricatorAnchorView())
         ->setAnchorName("A$id");
 

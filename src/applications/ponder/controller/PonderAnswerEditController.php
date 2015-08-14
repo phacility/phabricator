@@ -20,6 +20,7 @@ final class PonderAnswerEditController extends PonderController {
     }
 
     $v_content = $answer->getContent();
+    $v_status = $answer->getStatus();
     $e_content = true;
 
 
@@ -31,6 +32,7 @@ final class PonderAnswerEditController extends PonderController {
     $errors = array();
     if ($request->isFormPost()) {
       $v_content = $request->getStr('content');
+      $v_status = $request->getStr('status');
 
       if (!strlen($v_content)) {
         $errors[] = pht('You must provide some substance in your answer.');
@@ -42,6 +44,10 @@ final class PonderAnswerEditController extends PonderController {
         $xactions[] = id(new PonderAnswerTransaction())
           ->setTransactionType(PonderAnswerTransaction::TYPE_CONTENT)
           ->setNewValue($v_content);
+
+        $xactions[] = id(new PonderAnswerTransaction())
+          ->setTransactionType(PonderAnswerTransaction::TYPE_STATUS)
+          ->setNewValue($v_status);
 
         $editor = id(new PonderAnswerEditor())
           ->setActor($viewer)
@@ -64,6 +70,12 @@ final class PonderAnswerEditController extends PonderController {
           ->setLabel(pht('Question'))
           ->setValue($question->getTitle()))
       ->appendChild(
+          id(new AphrontFormSelectControl())
+            ->setLabel(pht('Status'))
+            ->setName('status')
+            ->setValue($v_status)
+            ->setOptions(PonderAnswerStatus::getAnswerStatusMap()))
+      ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setUser($viewer)
           ->setLabel(pht('Answer'))
@@ -73,7 +85,7 @@ final class PonderAnswerEditController extends PonderController {
           ->setError($e_content))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue(pht('Update Answer'))
+          ->setValue(pht('Submit'))
           ->addCancelButton($answer_uri));
 
     $crumbs = $this->buildApplicationCrumbs();

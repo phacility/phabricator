@@ -7,6 +7,9 @@ final class PonderQuestionStatus extends PonderConstants {
   const STATUS_CLOSED_OBSOLETE    = 'obsolete';
   const STATUS_CLOSED_DUPLICATE   = 'duplicate';
 
+  const ANSWER_STATUS_VISIBLE     = 'visible';
+  const ANSWER_STATUS_HIDDEN      = 'hidden';
+
   public static function getQuestionStatusMap() {
     return array(
       self::STATUS_OPEN              => pht('Open'),
@@ -84,6 +87,21 @@ final class PonderQuestionStatus extends PonderConstants {
       self::STATUS_CLOSED_OBSOLETE,
       self::STATUS_CLOSED_DUPLICATE,
     );
+  }
+
+  public static function getAnswerStatusMap() {
+    return array(
+      self::ANSWER_STATUS_VISIBLE  => pht('Visible'),
+      self::ANSWER_STATUS_HIDDEN   => pht('Hidden'),
+    );
+  }
+
+  public static function getAnswerStatusName($status) {
+    $map = array(
+      self::ANSWER_STATUS_VISIBLE  => pht('Visible'),
+      self::ANSWER_STATUS_HIDDEN   => pht('Hidden'),
+    );
+    return idx($map, $status, pht('Unknown'));
   }
 
 

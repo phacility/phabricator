@@ -17,8 +17,9 @@ final class PonderAnswer extends PonderDAO
 
   protected $content;
   protected $mailKey;
-
+  protected $status;
   protected $voteCount;
+
   private $vote;
   private $question = self::ATTACHABLE;
   private $comments;
@@ -35,7 +36,8 @@ final class PonderAnswer extends PonderDAO
       ->setQuestionID(0)
       ->setContent('')
       ->setAuthorPHID($actor->getPHID())
-      ->setVoteCount(0);
+      ->setVoteCount(0)
+      ->setStatus(PonderAnswerStatus::ANSWER_STATUS_VISIBLE);
 
   }
 
@@ -84,6 +86,7 @@ final class PonderAnswer extends PonderDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'voteCount' => 'sint32',
         'content' => 'text',
+        'status' => 'text32',
         'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -101,6 +104,9 @@ final class PonderAnswer extends PonderDAO
         ),
         'authorPHID' => array(
           'columns' => array('authorPHID'),
+        ),
+        'status' => array(
+          'columns' => array('status'),
         ),
       ),
     ) + parent::getConfiguration();
