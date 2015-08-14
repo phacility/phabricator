@@ -171,23 +171,26 @@ final class PonderQuestionViewController extends PonderController {
 
     $view->invokeWillRenderEvent();
 
-    $view->addSectionHeader(
+    $details = PhabricatorMarkupEngine::renderOneObject(
+            $question,
+            $question->getMarkupField(),
+            $viewer);
+
+    if ($details) {
+      $view->addSectionHeader(
         pht('Details'),
         PHUIPropertyListView::ICON_SUMMARY);
 
-    $view->addTextContent(
-      array(
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'phabricator-remarkup',
-          ),
-          PhabricatorMarkupEngine::renderOneObject(
-            $question,
-            $question->getMarkupField(),
-            $viewer)),
-      ));
-
+      $view->addTextContent(
+        array(
+          phutil_tag(
+            'div',
+            array(
+              'class' => 'phabricator-remarkup',
+            ),
+            $details),
+        ));
+    }
 
     return $view;
   }

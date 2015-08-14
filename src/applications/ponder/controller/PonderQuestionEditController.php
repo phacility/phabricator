@@ -68,9 +68,11 @@ final class PonderQuestionEditController extends PonderController {
           ->setTransactionType(PonderQuestionTransaction::TYPE_CONTENT)
           ->setNewValue($v_content);
 
-        $xactions[] = id(clone $template)
-          ->setTransactionType(PonderQuestionTransaction::TYPE_STATUS)
-          ->setNewValue($v_status);
+        if (!$is_new) {
+          $xactions[] = id(clone $template)
+            ->setTransactionType(PonderQuestionTransaction::TYPE_STATUS)
+            ->setNewValue($v_status);
+        }
 
         $xactions[] = id(clone $template)
           ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
