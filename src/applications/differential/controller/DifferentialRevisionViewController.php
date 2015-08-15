@@ -349,16 +349,10 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $other_view = $this->renderOtherRevisions($other_revisions);
     }
 
-    $toc_view = new DifferentialDiffTableOfContentsView();
-    $toc_view->setChangesets($changesets);
-    $toc_view->setVisibleChangesets($visible_changesets);
-    $toc_view->setRenderingReferences($rendering_references);
-    $toc_view->setCoverageMap($target->loadCoverageMap($user));
-    if ($repository) {
-      $toc_view->setRepository($repository);
-    }
-    $toc_view->setDiff($target);
-    $toc_view->setUser($user);
+    $toc_view = $this->buildTableOfContents(
+      $changesets,
+      $visible_changesets,
+      $target->loadCoverageMap($user));
 
     $comment_form = null;
     if (!$viewer_is_anonymous) {
@@ -1040,6 +1034,35 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     return $view;
+  }
+
+  private function buildTableOfContents(
+    array $changesets,
+    array $visible_changesets,
+    array $coverage) {
+    $viewer = $this->getViewer();
+
+    $toc_view = id(new PHUIDiffTableOfContentsListView())
+      ->setUser($viewer);
+
+    foreach ($changesets as $changeset_id => $changeset) {
+      $is_visible = isset($visible_changesets[$changeset_id]);
+      $anchor = $changeset->getAnchorName();
+
+      $filename = $changeset->getFilename();
+      $coverage_id = 'differential-mcoverage-'.md5($filename);
+
+      $item = id(new PHUIDiffTableOfContentsItemView())
+        ->setChangeset($changeset)
+        ->setIsVisible($is_visible)
+        ->setAnchor($anchor)
+        ->setCoverage(idx($coverage, $filename))
+        ->setCoverageID($coverage_id);
+
+      $toc_view->addItem($item);
+    }
+
+    return $toc_view;
   }
 
 
