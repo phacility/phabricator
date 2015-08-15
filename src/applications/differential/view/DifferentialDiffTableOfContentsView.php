@@ -8,8 +8,6 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
   private $repository;
   private $diff;
   private $renderURI = '/differential/changeset/';
-  private $revisionID;
-  private $whitespace;
   private $coverageMap;
 
   public function setChangesets($changesets) {
@@ -39,16 +37,6 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
   public function setCoverageMap(array $coverage_map) {
     $this->coverageMap = $coverage_map;
-    return $this;
-  }
-
-  public function setRevisionID($revision_id) {
-    $this->revisionID = $revision_id;
-    return $this;
-  }
-
-  public function setWhitespace($whitespace) {
-    $this->whitespace = $whitespace;
     return $this;
   }
 

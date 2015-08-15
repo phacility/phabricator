@@ -359,8 +359,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
     $toc_view->setDiff($target);
     $toc_view->setUser($user);
-    $toc_view->setRevisionID($revision->getID());
-    $toc_view->setWhitespace($whitespace);
 
     $comment_form = null;
     if (!$viewer_is_anonymous) {
