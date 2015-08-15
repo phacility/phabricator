@@ -67,6 +67,18 @@ final class HarbormasterBuildViewController
       $messages = array();
     }
 
+    if ($build_targets) {
+      $artifacts = id(new HarbormasterBuildArtifactQuery())
+        ->setViewer($viewer)
+        ->withBuildTargetPHIDs(mpull($build_targets, 'getPHID'))
+        ->execute();
+      $artifacts = msort($artifacts, 'getArtifactKey');
+      $artifacts = mgroup($artifacts, 'getBuildTargetPHID');
+    } else {
+      $artifacts = array();
+    }
+
+
     $targets = array();
     foreach ($build_targets as $build_target) {
       $header = id(new PHUIHeaderView())
@@ -77,6 +89,27 @@ final class HarbormasterBuildViewController
         ->setHeader($header);
 
       $properties = new PHUIPropertyListView();
+
+      $target_artifacts = idx($artifacts, $build_target->getPHID(), array());
+
+      $links = array();
+      $type_uri = HarbormasterURIArtifact::ARTIFACTCONST;
+      foreach ($target_artifacts as $artifact) {
+        if ($artifact->getArtifactType() == $type_uri) {
+          $impl = $artifact->getArtifactImplementation();
+          if ($impl->isExternalLink()) {
+            $links[] = $impl->renderLink();
+          }
+        }
+      }
+
+      if ($links) {
+        $links = phutil_implode_html(phutil_tag('br'), $links);
+        $properties->addProperty(
+          pht('External Link'),
+          $links);
+      }
+
       $status_view = new PHUIStatusListView();
 
       $item = new PHUIStatusItemView();
@@ -177,9 +210,9 @@ final class HarbormasterBuildViewController
       $properties->addRawContent($this->buildProperties($variables));
       $target_box->addPropertyList($properties, pht('Variables'));
 
-      $artifacts = $this->buildArtifacts($build_target);
+      $artifacts_tab = $this->buildArtifacts($build_target, $target_artifacts);
       $properties = new PHUIPropertyListView();
-      $properties->addRawContent($artifacts);
+      $properties->addRawContent($artifacts_tab);
       $target_box->addPropertyList($properties, pht('Artifacts'));
 
       $build_messages = idx($messages, $build_target->getPHID(), array());
@@ -218,15 +251,10 @@ final class HarbormasterBuildViewController
       ));
   }
 
-  private function buildArtifacts(HarbormasterBuildTarget $build_target) {
+  private function buildArtifacts(
+    HarbormasterBuildTarget $build_target,
+    array $artifacts) {
     $viewer = $this->getViewer();
-
-    $artifacts = id(new HarbormasterBuildArtifactQuery())
-      ->setViewer($viewer)
-      ->withBuildTargetPHIDs(array($build_target->getPHID()))
-      ->execute();
-
-    $artifacts = msort($artifacts, 'getArtifactKey');
 
     $rows = array();
     foreach ($artifacts as $artifact) {

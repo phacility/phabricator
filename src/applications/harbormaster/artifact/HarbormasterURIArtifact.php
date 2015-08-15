@@ -46,6 +46,15 @@ final class HarbormasterURIArtifact extends HarbormasterArtifact {
   }
 
   public function renderArtifactSummary(PhabricatorUser $viewer) {
+    return $this->renderLink();
+  }
+
+  public function isExternalLink() {
+    $artifact = $this->getBuildArtifact();
+    return (bool)$artifact->getProperty('ui.external', false);
+  }
+
+  public function renderLink() {
     $artifact = $this->getBuildArtifact();
     $uri = $artifact->getProperty('uri');
 
