@@ -18,6 +18,8 @@ final class PhabricatorMetaMTAActor extends Phobject {
   const REASON_BOT = 'bot';
   const REASON_FORCE = 'force';
   const REASON_FORCE_HERALD = 'force-herald';
+  const REASON_ROUTE_AS_NOTIFICATION = 'route-as-notification';
+  const REASON_ROUTE_AS_MAIL = 'route-as-mail';
 
   private $phid;
   private $emailAddress;
@@ -77,6 +79,7 @@ final class PhabricatorMetaMTAActor extends Phobject {
       case self::REASON_NONE:
       case self::REASON_FORCE:
       case self::REASON_FORCE_HERALD:
+      case self::REASON_ROUTE_AS_MAIL:
         return true;
       default:
         // All other reasons cause the message to not be delivered.
@@ -99,6 +102,8 @@ final class PhabricatorMetaMTAActor extends Phobject {
       self::REASON_UNLOADABLE => pht('Bad Recipient'),
       self::REASON_FORCE => pht('Forced Mail'),
       self::REASON_FORCE_HERALD => pht('Forced by Herald'),
+      self::REASON_ROUTE_AS_NOTIFICATION => pht('Route as Notification'),
+      self::REASON_ROUTE_AS_MAIL => pht('Route as Mail'),
     );
 
     return idx($names, $reason, pht('Unknown ("%s")', $reason));
@@ -147,6 +152,12 @@ final class PhabricatorMetaMTAActor extends Phobject {
       self::REASON_FORCE_HERALD => pht(
         'This recipient was added by a "Send me an Email" rule in Herald, '.
         'which overrides some delivery settings.'),
+      self::REASON_ROUTE_AS_NOTIFICATION => pht(
+        'This message was downgraded to a notification by outbound mail '.
+        'rules in Herald.'),
+      self::REASON_ROUTE_AS_MAIL => pht(
+        'This message was upgraded to email by outbound mail rules '.
+        'in Herald.'),
     );
 
     return idx($descriptions, $reason, pht('Unknown Reason ("%s")', $reason));

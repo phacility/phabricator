@@ -356,7 +356,17 @@ final class HeraldTranscriptController extends HeraldController {
 
         // Handle older transcripts which used a static string to record
         // action results.
-        if (!is_array($log)) {
+
+        if ($xscript->getDryRun()) {
+          $action_list->addItem(
+            id(new PHUIStatusItemView())
+              ->setIcon('fa-ban', 'grey')
+              ->setTarget(pht('Dry Run'))
+              ->setNote(
+                pht(
+                  'This was a dry run, so no actions were taken.')));
+          continue;
+        } else if (!is_array($log)) {
           $action_list->addItem(
             id(new PHUIStatusItemView())
               ->setIcon('fa-clock-o', 'grey')

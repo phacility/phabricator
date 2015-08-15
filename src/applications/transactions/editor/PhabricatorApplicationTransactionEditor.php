@@ -1055,6 +1055,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if ($this->shouldPublishFeedStory($object, $xactions)) {
+
       $mailed = array();
       foreach ($messages as $mail) {
         foreach ($mail->buildRecipientList() as $phid) {
@@ -2299,6 +2300,8 @@ abstract class PhabricatorApplicationTransactionEditor
       }
     }
 
+    $this->runHeraldMailRules($messages);
+
     return $messages;
   }
 
@@ -3138,6 +3141,18 @@ abstract class PhabricatorApplicationTransactionEditor
       'feedNotifyPHIDs',
       'feedRelatedPHIDs',
     );
+  }
+
+  private function runHeraldMailRules(array $messages) {
+    foreach ($messages as $message) {
+      $engine = new HeraldEngine();
+      $adapter = id(new PhabricatorMailOutboundMailHeraldAdapter())
+        ->setObject($message);
+
+      $rules = $engine->loadRulesForAdapter($adapter);
+      $effects = $engine->applyRules($rules, $adapter);
+      $engine->applyEffects($effects, $adapter, $rules);
+    }
   }
 
 }
