@@ -31,22 +31,45 @@
   margin-left: 12px;
 }
 
+.ponder-answer-view .phui-header-shell {
+  padding-bottom: 8px;
+}
+
+.ponder-answer-view .phui-header-view .phui-header-header {
+  font-size: 16px;
+}
+
+.ponder-answer-view .phui-header-col1 {
+  width: 45px;
+}
+
+.ponder-answer-view .phui-header-image {
+  height: 35px;
+  width: 35px;
+  border-radius: 3px;
+}
+
 .ponder-footer-view {
   margin: 0 4px -4px;
+  text-align: right;
 }
 
 .ponder-footer-view .ponder-footer-action {
   padding: 4px 8px;
-  margin-right: 8px;
+  margin-left: 8px;
   color: {$bluetext};
   display: inline-block;
   background-color: rgba(71, 87, 120, 0.06);
   font-size: {$smallerfontsize};
 }
 
+.ponder-footer-view .ponder-footer-action.ponder-footer-action-helpful {
+  background-color: {$lightyellow};
+}
+
 .ponder-footer-view .ponder-footer-action .phui-icon-view {
   color: {$bluetext};
-  margin-left: 4px;
+  font-size: {$smallerfontsize};
 }
 
 .ponder-footer-view a:hover {

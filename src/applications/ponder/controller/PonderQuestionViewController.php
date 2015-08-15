@@ -223,16 +223,20 @@ final class PonderQuestionViewController extends PonderController {
     $engine->process();
 
     $xaction_groups = mgroup($xactions, 'getObjectPHID');
+    $author_phids = mpull($answers, 'getAuthorPHID');
+    $handles = $this->loadViewerHandles($author_phids);
 
     $view = array();
     foreach ($answers as $answer) {
       $xactions = idx($xaction_groups, $answer->getPHID(), array());
       $id = $answer->getID();
+      $handle = $handles[$answer->getAuthorPHID()];
 
       $view[] = id(new PonderAnswerView())
         ->setUser($viewer)
         ->setAnswer($answer)
         ->setTransactions($xactions)
+        ->setHandle($handle)
         ->setMarkupEngine($engine);
 
     }
