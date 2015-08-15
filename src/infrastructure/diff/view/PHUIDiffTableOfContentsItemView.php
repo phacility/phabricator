@@ -3,10 +3,12 @@
 final class PHUIDiffTableOfContentsItemView extends AphrontView {
 
   private $changeset;
-  private $isVisible;
+  private $isVisible = true;
   private $anchor;
   private $coverage;
   private $coverageID;
+  private $context;
+  private $package;
 
   public function setChangeset(DifferentialChangeset $changeset) {
     $this->changeset = $changeset;
@@ -53,10 +55,30 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
     return $this->coverageID;
   }
 
+  public function setContext($context) {
+    $this->context = $context;
+    return $this;
+  }
+
+  public function getContext() {
+    return $this->context;
+  }
+
+  public function setPackage(PhabricatorOwnersPackage $package) {
+    $this->package = $package;
+    return $this;
+  }
+
+  public function getPackage() {
+    return $this->package;
+  }
+
   public function render() {
     $changeset = $this->getChangeset();
 
     $cells = array();
+
+    $cells[] = $this->getContext();
 
     $cells[] = $this->renderPathChangeCharacter();
     $cells[] = $this->renderPropertyChangeCharacter();
@@ -75,6 +97,8 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
     $cells[] = $this->renderCoverage();
     $cells[] = $this->renderModifiedCoverage();
 
+    $cells[] = $this->renderPackage();
+
     return $cells;
   }
 
@@ -89,7 +113,7 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
     return javelin_tag(
       'span',
       array(
-        'sigil' => 'has-tip',
+        'sigil' => 'has-tooltip',
         'meta' => array(
           'tip' => $title,
           'align' => 'E',
@@ -112,10 +136,11 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
     return javelin_tag(
       'span',
       array(
-        'sigil' => 'has-tip',
+        'sigil' => 'has-tooltip',
         'meta' => array(
           'tip' => pht('Properties Modified'),
           'align' => 'E',
+          'size' => 200,
         ),
       ),
       'M');
@@ -257,6 +282,16 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
         'class' => 'differential-toc-meta',
       ),
       $meta);
+  }
+
+  private function renderPackage() {
+    $package = $this->getPackage();
+
+    if (!$package) {
+      return null;
+    }
+
+    return $this->getUser()->renderHandle($package->getPHID());
   }
 
   private function renderRename($self, $other, $arrow) {
