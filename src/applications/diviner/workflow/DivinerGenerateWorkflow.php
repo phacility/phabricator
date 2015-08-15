@@ -420,9 +420,10 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
 
     $atomizer_versions = array();
     foreach ($atomizers as $atomizer) {
-      $atomizer_versions[$atomizer['name']] = call_user_func(
+      $name = get_class($atomizer);
+      $atomizer_versions[$name] = call_user_func(
         array(
-          $atomizer['name'],
+          $name,
           'getAtomizerVersion',
         ));
     }
