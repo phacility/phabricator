@@ -139,34 +139,10 @@ abstract class ConduitAPIMethod
   }
 
   public static function loadAllConduitMethods() {
-    static $method_map = null;
-
-    if ($method_map === null) {
-      $methods = id(new PhutilSymbolLoader())
-        ->setAncestorClass(__CLASS__)
-        ->loadObjects();
-
-      foreach ($methods as $method) {
-        $name = $method->getAPIMethodName();
-
-        if (empty($method_map[$name])) {
-          $method_map[$name] = $method;
-          continue;
-        }
-
-        $orig_class = get_class($method_map[$name]);
-        $this_class = get_class($method);
-        throw new Exception(
-          pht(
-            'Two Conduit API method classes (%s, %s) both have the same '.
-            'method name (%s). API methods must have unique method names.',
-            $orig_class,
-            $this_class,
-            $name));
-      }
-    }
-
-    return $method_map;
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->setUniqueMethod('getAPIMethodName')
+      ->execute();
   }
 
   public static function getConduitMethod($method_name) {

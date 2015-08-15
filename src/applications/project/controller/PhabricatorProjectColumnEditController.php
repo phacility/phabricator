@@ -3,17 +3,10 @@
 final class PhabricatorProjectColumnEditController
   extends PhabricatorProjectBoardController {
 
-  private $id;
-  private $projectID;
-
-  public function willProcessRequest(array $data) {
-    $this->projectID = $data['projectID'];
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $project_id = $request->getURIData('projectID');
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
@@ -22,7 +15,7 @@ final class PhabricatorProjectColumnEditController
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
-      ->withIDs(array($this->projectID))
+      ->withIDs(array($project_id))
       ->needImages(true)
       ->executeOne();
 
@@ -31,12 +24,12 @@ final class PhabricatorProjectColumnEditController
     }
     $this->setProject($project);
 
-    $is_new = ($this->id ? false : true);
+    $is_new = ($id ? false : true);
 
     if (!$is_new) {
       $column = id(new PhabricatorProjectColumnQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -57,12 +50,12 @@ final class PhabricatorProjectColumnEditController
     $v_name = $column->getName();
 
     $validation_exception = null;
-    $base_uri = '/board/'.$this->projectID.'/';
+    $base_uri = '/board/'.$project_id.'/';
     if ($is_new) {
       // we want to go back to the board
       $view_uri = $this->getApplicationURI($base_uri);
     } else {
-      $view_uri = $this->getApplicationURI($base_uri.'column/'.$this->id.'/');
+      $view_uri = $this->getApplicationURI($base_uri.'column/'.$id.'/');
     }
 
     if ($request->isFormPost()) {

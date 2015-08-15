@@ -45,7 +45,7 @@ final class PhabricatorMailManagementListOutboundWorkflow
 
       $table->addRow(array(
         'id'      => $mail->getID(),
-        'status'  => PhabricatorMetaMTAMail::getReadableStatus($status),
+        'status'  => PhabricatorMailOutboundStatus::getStatusName($status),
         'subject' => $mail->getSubject(),
       ));
     }

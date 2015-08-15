@@ -3,24 +3,17 @@
 final class PhabricatorProjectUpdateController
   extends PhabricatorProjectController {
 
-  private $id;
-  private $action;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-    $this->action = $data['action'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $action = $request->getURIData('action');
 
     $capabilities = array(
       PhabricatorPolicyCapability::CAN_VIEW,
     );
 
     $process_action = false;
-    switch ($this->action) {
+    switch ($action) {
       case 'join':
         $capabilities[] = PhabricatorPolicyCapability::CAN_JOIN;
         $process_action = $request->isFormPost();
@@ -33,8 +26,8 @@ final class PhabricatorProjectUpdateController
     }
 
     $project = id(new PhabricatorProjectQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->needMembers(true)
       ->requireCapabilities($capabilities)
       ->executeOne();
@@ -47,7 +40,7 @@ final class PhabricatorProjectUpdateController
     if ($process_action) {
 
       $edge_action = null;
-      switch ($this->action) {
+      switch ($action) {
         case 'join':
           $edge_action = '+';
           break;
@@ -58,7 +51,7 @@ final class PhabricatorProjectUpdateController
 
       $type_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
       $member_spec = array(
-        $edge_action => array($user->getPHID() => $user->getPHID()),
+        $edge_action => array($viewer->getPHID() => $viewer->getPHID()),
       );
 
       $xactions = array();
@@ -68,7 +61,7 @@ final class PhabricatorProjectUpdateController
         ->setNewValue($member_spec);
 
       $editor = id(new PhabricatorProjectTransactionEditor($project))
-        ->setActor($user)
+        ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true)
         ->setContinueOnMissingFields(true)
@@ -78,10 +71,10 @@ final class PhabricatorProjectUpdateController
     }
 
     $dialog = null;
-    switch ($this->action) {
+    switch ($action) {
       case 'leave':
         $dialog = new AphrontDialogView();
-        $dialog->setUser($user);
+        $dialog->setUser($viewer);
         if ($this->userCannotLeave($project)) {
          $dialog->setTitle(pht('You can not leave this project.'));
           $body = pht('The membership is locked for this project.');
@@ -107,12 +100,12 @@ final class PhabricatorProjectUpdateController
    * this logic to render a better form for users hitting this case.
    */
   private function userCannotLeave(PhabricatorProject $project) {
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     return
       $project->getIsMembershipLocked() &&
       !PhabricatorPolicyFilter::hasCapability(
-        $user,
+        $viewer,
         $project,
         PhabricatorPolicyCapability::CAN_EDIT);
   }

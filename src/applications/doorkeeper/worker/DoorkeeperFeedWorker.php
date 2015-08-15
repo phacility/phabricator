@@ -125,9 +125,9 @@ abstract class DoorkeeperFeedWorker extends FeedPushWorker {
     $viewer = $this->getViewer();
     $object = $this->getStoryObject();
 
-    $publishers = id(new PhutilSymbolLoader())
+    $publishers = id(new PhutilClassMapQuery())
       ->setAncestorClass('DoorkeeperFeedStoryPublisher')
-      ->loadObjects();
+      ->execute();
 
     foreach ($publishers as $publisher) {
       if (!$publisher->canPublishStory($story, $object)) {

@@ -331,6 +331,47 @@ final class DifferentialDiff
     return $this->assertAttached($this->buildable);
   }
 
+  public function getBuildTargetPHIDs() {
+    $buildable = $this->getBuildable();
+
+    if (!$buildable) {
+      return array();
+    }
+
+    $target_phids = array();
+    foreach ($buildable->getBuilds() as $build) {
+      foreach ($build->getBuildTargets() as $target) {
+        $target_phids[] = $target->getPHID();
+      }
+    }
+
+    return $target_phids;
+  }
+
+  public function loadCoverageMap(PhabricatorUser $viewer) {
+    $target_phids = $this->getBuildTargetPHIDs();
+    if (!$target_phids) {
+      return array();
+    }
+
+    $unit = id(new HarbormasterBuildUnitMessage())->loadAllWhere(
+      'buildTargetPHID IN (%Ls)',
+      $target_phids);
+
+    $map = array();
+    foreach ($unit as $message) {
+      $coverage = $message->getProperty('coverage', array());
+      foreach ($coverage as $path => $coverage_data) {
+        $map[$path][] = $coverage_data;
+      }
+    }
+
+    foreach ($map as $path => $coverage_items) {
+      $map[$path] = ArcanistUnitTestResult::mergeCoverage($coverage_items);
+    }
+
+    return $map;
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

@@ -28,8 +28,11 @@ final class PhabricatorMailManagementVolumeWorkflow
       ->execute();
 
     $unfiltered = array();
+    $delivered = array();
 
     foreach ($mails as $mail) {
+      // Count messages we attempted to deliver. This includes messages which
+      // were voided by preferences or other rules.
       $unfiltered_actors = mpull($mail->loadAllActors(), 'getPHID');
       foreach ($unfiltered_actors as $phid) {
         if (empty($unfiltered[$phid])) {
@@ -37,9 +40,26 @@ final class PhabricatorMailManagementVolumeWorkflow
         }
         $unfiltered[$phid]++;
       }
+
+      // Now, count mail we actually delivered.
+      $result = $mail->getDeliveredActors();
+      if ($result) {
+        foreach ($result as $actor_phid => $actor_info) {
+          if (!$actor_info['deliverable']) {
+            continue;
+          }
+          if (empty($delivered[$actor_phid])) {
+            $delivered[$actor_phid] = 0;
+          }
+          $delivered[$actor_phid]++;
+        }
+      }
     }
 
+    // Sort users by delivered mail, then unfiltered mail.
+    arsort($delivered);
     arsort($unfiltered);
+    $delivered = $delivered + array_fill_keys(array_keys($unfiltered), 0);
 
     $table = id(new PhutilConsoleTable())
       ->setBorders(true)
@@ -52,16 +72,23 @@ final class PhabricatorMailManagementVolumeWorkflow
         'unfiltered',
         array(
           'title' => pht('Unfiltered'),
+        ))
+      ->addColumn(
+        'delivered',
+        array(
+          'title' => pht('Delivered'),
         ));
 
     $handles = $viewer->loadHandles(array_keys($unfiltered));
     $names = mpull(iterator_to_array($handles), 'getName', 'getPHID');
 
-    foreach ($unfiltered as $phid => $count) {
+    foreach ($delivered as $phid => $delivered_count) {
+      $unfiltered_count = idx($unfiltered, $phid, 0);
       $table->addRow(
         array(
           'user' => idx($names, $phid),
-          'unfiltered' => $count,
+          'unfiltered' => $unfiltered_count,
+          'delivered' => $delivered_count,
         ));
     }
 
@@ -70,7 +97,9 @@ final class PhabricatorMailManagementVolumeWorkflow
     echo "\n";
     echo pht('Mail sent in the last 30 days.')."\n";
     echo pht(
-      '"Unfiltered" is raw volume before preferences were applied.')."\n";
+      '"Unfiltered" is raw volume before rules applied.')."\n";
+    echo pht(
+      '"Delivered" shows email actually sent.')."\n";
     echo "\n";
 
     return 0;

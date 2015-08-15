@@ -47,7 +47,7 @@ final class PhabricatorMailManagementResendWorkflow
     }
 
     foreach ($messages as $message) {
-      $message->setStatus(PhabricatorMetaMTAMail::STATUS_QUEUE);
+      $message->setStatus(PhabricatorMailOutboundStatus::STATUS_QUEUE);
       $message->save();
 
       $mailer_task = PhabricatorWorker::scheduleTask(

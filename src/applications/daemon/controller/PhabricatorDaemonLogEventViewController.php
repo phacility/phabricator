@@ -3,16 +3,10 @@
 final class PhabricatorDaemonLogEventViewController
   extends PhabricatorDaemonController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-
-    $event = id(new PhabricatorDaemonLogEvent())->load($this->id);
+    $event = id(new PhabricatorDaemonLogEvent())->load($id);
     if (!$event) {
       return new Aphront404Response();
     }

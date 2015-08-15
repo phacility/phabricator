@@ -18,6 +18,28 @@ final class PonderAddAnswerView extends AphrontView {
 
   public function render() {
     $question = $this->question;
+    $viewer = $this->user;
+
+    $authors = mpull($question->getAnswers(), null, 'getAuthorPHID');
+    if (isset($authors[$viewer->getPHID()])) {
+      return id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+        ->setTitle(pht('Already Answered'))
+        ->appendChild(
+          pht(
+            'You have already answered this question. You can not answer '.
+            'twice, but you can edit your existing answer.'));
+    }
+
+    $info_panel = null;
+    if ($question->getStatus() != PonderQuestionStatus::STATUS_OPEN) {
+      $info_panel = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->appendChild(
+          pht(
+            'This question has been marked as closed,
+             but you can still leave a new answer.'));
+    }
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Add Answer'));
@@ -39,8 +61,14 @@ final class PonderAddAnswerView extends AphrontView {
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Add Answer')));
 
-    return id(new PHUIObjectBoxView())
+    $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->appendChild($form);
+
+    if ($info_panel) {
+      $box->setInfoView($info_panel);
+    }
+
+    return $box;
   }
 }

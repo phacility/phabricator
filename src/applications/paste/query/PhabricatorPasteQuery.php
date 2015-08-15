@@ -14,6 +14,8 @@ final class PhabricatorPasteQuery
   private $includeNoLanguage;
   private $dateCreatedAfter;
   private $dateCreatedBefore;
+  private $statuses;
+
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -64,6 +66,11 @@ final class PhabricatorPasteQuery
 
   public function withDateCreatedAfter($date_created_after) {
     $this->dateCreatedAfter = $date_created_after;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -137,6 +144,13 @@ final class PhabricatorPasteQuery
         $conn,
         'dateCreated <= %d',
         $this->dateCreatedBefore);
+    }
+
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'status IN (%Ls)',
+        $this->statuses);
     }
 
     return $where;

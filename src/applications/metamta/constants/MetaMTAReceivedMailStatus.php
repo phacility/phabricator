@@ -1,7 +1,7 @@
 <?php
 
 final class MetaMTAReceivedMailStatus
-  extends MetaMTAConstants {
+  extends Phobject {
 
   const STATUS_DUPLICATE            = 'err:duplicate';
   const STATUS_FROM_PHABRICATOR     = 'err:self';

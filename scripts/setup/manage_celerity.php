@@ -14,8 +14,8 @@ EOSYNOPSIS
   );
 $args->parseStandardArguments();
 
-$workflows = id(new PhutilSymbolLoader())
+$workflows = id(new PhutilClassMapQuery())
   ->setAncestorClass('CelerityManagementWorkflow')
-  ->loadObjects();
+  ->execute();
 $workflows[] = new PhutilHelpArgumentWorkflow();
 $args->parseWorkflows($workflows);

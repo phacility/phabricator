@@ -4,7 +4,6 @@ final class PonderQuestion extends PonderDAO
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorMarkupInterface,
-    PonderVotableInterface,
     PhabricatorSubscribableInterface,
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface,
@@ -23,16 +22,12 @@ final class PonderQuestion extends PonderDAO
   protected $content;
   protected $contentSource;
   protected $viewPolicy;
-  protected $editPolicy;
   protected $spacePHID;
 
-  protected $voteCount;
   protected $answerCount;
-  protected $heat;
   protected $mailKey;
 
   private $answers;
-  private $vote;
   private $comments;
 
   private $projectPHIDs = self::ATTACHABLE;
@@ -44,18 +39,13 @@ final class PonderQuestion extends PonderDAO
       ->executeOne();
 
     $view_policy = $app->getPolicy(
-      PonderQuestionDefaultViewCapability::CAPABILITY);
-    $edit_policy = $app->getPolicy(
-      PonderQuestionDefaultEditCapability::CAPABILITY);
+      PonderDefaultViewCapability::CAPABILITY);
 
     return id(new PonderQuestion())
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($edit_policy)
       ->setStatus(PonderQuestionStatus::STATUS_OPEN)
-      ->setVoteCount(0)
       ->setAnswerCount(0)
-      ->setHeat(0.0)
       ->setSpacePHID($actor->getDefaultSpacePHID());
   }
 
@@ -64,10 +54,8 @@ final class PonderQuestion extends PonderDAO
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255',
-        'voteCount' => 'sint32',
-        'status' => 'uint32',
+        'status' => 'text32',
         'content' => 'text',
-        'heat' => 'double',
         'answerCount' => 'uint32',
         'mailKey' => 'bytes20',
 
@@ -83,9 +71,6 @@ final class PonderQuestion extends PonderDAO
         ),
         'authorPHID' => array(
           'columns' => array('authorPHID'),
-        ),
-        'heat' => array(
-          'columns' => array('heat'),
         ),
         'status' => array(
           'columns' => array('status'),
@@ -105,49 +90,6 @@ final class PonderQuestion extends PonderDAO
 
   public function getContentSource() {
     return PhabricatorContentSource::newFromSerialized($this->contentSource);
-  }
-
-  public function attachVotes($user_phid) {
-    $qa_phids = mpull($this->answers, 'getPHID') + array($this->getPHID());
-
-    $edges = id(new PhabricatorEdgeQuery())
-      ->withSourcePHIDs(array($user_phid))
-      ->withDestinationPHIDs($qa_phids)
-      ->withEdgeTypes(
-        array(
-          PonderVotingUserHasQuestionEdgeType::EDGECONST,
-          PonderVotingUserHasAnswerEdgeType::EDGECONST,
-        ))
-      ->needEdgeData(true)
-      ->execute();
-
-    $question_edge =
-      $edges[$user_phid][PonderVotingUserHasQuestionEdgeType::EDGECONST];
-    $answer_edges =
-      $edges[$user_phid][PonderVotingUserHasAnswerEdgeType::EDGECONST];
-    $edges = null;
-
-    $this->setUserVote(idx($question_edge, $this->getPHID()));
-    foreach ($this->answers as $answer) {
-      $answer->setUserVote(idx($answer_edges, $answer->getPHID()));
-    }
-  }
-
-  public function setUserVote($vote) {
-    $this->vote = $vote['data'];
-    if (!$this->vote) {
-      $this->vote = PonderVote::VOTE_NONE;
-    }
-    return $this;
-  }
-
-  public function attachUserVote($user_phid, $vote) {
-    $this->vote = $vote;
-    return $this;
-  }
-
-  public function getUserVote() {
-    return $this->vote;
   }
 
   public function setComments($comments) {
@@ -233,15 +175,6 @@ final class PonderQuestion extends PonderDAO
     return (bool)$this->getID();
   }
 
-  // votable interface
-  public function getUserVoteEdgeType() {
-    return PonderVotingUserHasQuestionEdgeType::EDGECONST;
-  }
-
-  public function getVotablePHID() {
-    return $this->getPHID();
-  }
-
   public function save() {
     if (!$this->getMailKey()) {
       $this->setMailKey(Filesystem::readRandomCharacters(20));
@@ -275,17 +208,33 @@ final class PonderQuestion extends PonderDAO
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        return $this->getEditPolicy();
+        $app = PhabricatorApplication::getByClass(
+          'PhabricatorPonderApplication');
+        return $app->getPolicy(PonderModerateCapability::CAPABILITY);
     }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
+      if (PhabricatorPolicyFilter::hasCapability(
+        $viewer, $this, PhabricatorPolicyCapability::CAN_EDIT)) {
+        return true;
+      }
+    }
     return ($viewer->getPHID() == $this->getAuthorPHID());
   }
 
 
   public function describeAutomaticCapability($capability) {
-    return pht('The user who asked a question can always view and edit it.');
+    $out = array();
+    $out[] = pht('The user who asked a question can always view and edit it.');
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        $out[] = pht(
+          'A moderator can always view the question.');
+        break;
+    }
+    return $out;
   }
 
 

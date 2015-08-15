@@ -23,7 +23,9 @@ final class PonderQuestionEditController extends PonderController {
         $question->getPHID(),
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
       $v_projects = array_reverse($v_projects);
+      $is_new = false;
     } else {
+      $is_new = true;
       $question = PonderQuestion::initializeNewQuestion($viewer);
       $v_projects = array();
     }
@@ -31,8 +33,9 @@ final class PonderQuestionEditController extends PonderController {
     $v_title = $question->getTitle();
     $v_content = $question->getContent();
     $v_view = $question->getViewPolicy();
-    $v_edit = $question->getEditPolicy();
     $v_space = $question->getSpacePHID();
+    $v_status = $question->getStatus();
+
 
     $errors = array();
     $e_title = true;
@@ -41,8 +44,8 @@ final class PonderQuestionEditController extends PonderController {
       $v_content = $request->getStr('content');
       $v_projects = $request->getArr('projects');
       $v_view = $request->getStr('viewPolicy');
-      $v_edit = $request->getStr('editPolicy');
       $v_space = $request->getStr('spacePHID');
+      $v_status = $request->getStr('status');
 
       $len = phutil_utf8_strlen($v_title);
       if ($len < 1) {
@@ -65,13 +68,15 @@ final class PonderQuestionEditController extends PonderController {
           ->setTransactionType(PonderQuestionTransaction::TYPE_CONTENT)
           ->setNewValue($v_content);
 
+        if (!$is_new) {
+          $xactions[] = id(clone $template)
+            ->setTransactionType(PonderQuestionTransaction::TYPE_STATUS)
+            ->setNewValue($v_status);
+        }
+
         $xactions[] = id(clone $template)
           ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
           ->setNewValue($v_view);
-
-        $xactions[] = id(clone $template)
-          ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
-          ->setNewValue($v_edit);
 
         $xactions[] = id(clone $template)
           ->setTransactionType(PhabricatorTransactions::TYPE_SPACE)
@@ -123,14 +128,17 @@ final class PonderQuestionEditController extends PonderController {
           ->setSpacePHID($v_space)
           ->setPolicies($policies)
           ->setValue($v_view)
-          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
-      ->appendControl(
-        id(new AphrontFormPolicyControl())
-          ->setName('editPolicy')
-          ->setPolicyObject($question)
-          ->setPolicies($policies)
-          ->setValue($v_edit)
-          ->setCapability(PhabricatorPolicyCapability::CAN_EDIT));
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW));
+
+
+    if (!$is_new) {
+      $form->appendChild(
+          id(new AphrontFormSelectControl())
+            ->setLabel(pht('Status'))
+            ->setName('status')
+            ->setValue($v_status)
+            ->setOptions(PonderQuestionStatus::getQuestionStatusMap()));
+    }
 
     $form->appendControl(
       id(new AphrontFormTokenizerControl())
@@ -142,17 +150,12 @@ final class PonderQuestionEditController extends PonderController {
     $form->appendChild(
       id(new AphrontFormSubmitControl())
         ->addCancelButton($this->getApplicationURI())
-        ->setValue(pht('Ask Away!')));
+        ->setValue(pht('Submit')));
 
     $preview = id(new PHUIRemarkupPreviewPanel())
       ->setHeader(pht('Question Preview'))
       ->setControlID('content')
       ->setPreviewURI($this->getApplicationURI('preview/'));
-
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Ask New Question'))
-      ->setFormErrors($errors)
-      ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
 
@@ -160,9 +163,16 @@ final class PonderQuestionEditController extends PonderController {
     if ($id) {
       $crumbs->addTextCrumb("Q{$id}", "/Q{$id}");
       $crumbs->addTextCrumb(pht('Edit'));
+      $title = pht('Edit Question');
     } else {
       $crumbs->addTextCrumb(pht('Ask Question'));
+      $title = pht('Ask New Question');
     }
+
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setFormErrors($errors)
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(
@@ -171,7 +181,7 @@ final class PonderQuestionEditController extends PonderController {
         $preview,
       ),
       array(
-        'title'  => pht('Ask New Question'),
+        'title'  => $title,
       ));
   }
 

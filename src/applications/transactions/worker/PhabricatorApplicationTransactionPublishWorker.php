@@ -112,9 +112,9 @@ final class PhabricatorApplicationTransactionPublishWorker
    * the transactions.
    */
   private function buildTransactionQuery($type) {
-    $queries = id(new PhutilSymbolLoader())
+    $queries = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorApplicationTransactionQuery')
-      ->loadObjects();
+      ->execute();
 
     foreach ($queries as $query) {
       $query_type = $query

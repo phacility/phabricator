@@ -11,9 +11,10 @@ final class PhabricatorTypeaheadFunctionHelpController
     $viewer = $this->getViewer();
     $class = $request->getURIData('class');
 
-    $sources = id(new PhutilSymbolLoader())
+    $sources = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorTypeaheadDatasource')
-      ->loadObjects();
+      ->execute();
+
     if (!isset($sources[$class])) {
       return new Aphront404Response();
     }

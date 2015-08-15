@@ -3,9 +3,9 @@
 final class PhabricatorConduitTestCase extends PhabricatorTestCase {
 
   public function testConduitMethods() {
-    $methods = id(new PhutilSymbolLoader())
+    $methods = id(new PhutilClassMapQuery())
       ->setAncestorClass('ConduitAPIMethod')
-      ->loadObjects();
+      ->execute();
 
     // We're just looking for a side effect of ConduitCall construction
     // here: it will throw if any methods define reserved parameter names.

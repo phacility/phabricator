@@ -7,11 +7,6 @@ final class PhabricatorMetaMTAMail
   extends PhabricatorMetaMTADAO
   implements PhabricatorPolicyInterface {
 
-  const STATUS_QUEUE = 'queued';
-  const STATUS_SENT  = 'sent';
-  const STATUS_FAIL  = 'fail';
-  const STATUS_VOID  = 'void';
-
   const RETRY_DELAY   = 5;
 
   protected $actorPHID;
@@ -24,7 +19,7 @@ final class PhabricatorMetaMTAMail
 
   public function __construct() {
 
-    $this->status     = self::STATUS_QUEUE;
+    $this->status     = PhabricatorMailOutboundStatus::STATUS_QUEUE;
     $this->parameters = array('sensitive' => true);
 
     parent::__construct();
@@ -430,12 +425,14 @@ final class PhabricatorMetaMTAMail
     }
 
     if (!$force_send) {
-      if ($this->getStatus() != self::STATUS_QUEUE) {
+      if ($this->getStatus() != PhabricatorMailOutboundStatus::STATUS_QUEUE) {
         throw new Exception(pht('Trying to send an already-sent mail!'));
       }
     }
 
     try {
+      $headers = $this->generateHeaders();
+
       $params = $this->parameters;
 
       $actors = $this->loadAllActors();
@@ -535,16 +532,6 @@ final class PhabricatorMetaMTAMail
               $add_cc,
               mpull($cc_actors, 'getEmailAddress'));
             break;
-          case 'headers':
-            foreach ($value as $pair) {
-              list($header_key, $header_value) = $pair;
-
-              // NOTE: If we have \n in a header, SES rejects the email.
-              $header_value = str_replace("\n", ' ', $header_value);
-
-              $mailer->addHeader($header_key, $header_value);
-            }
-            break;
           case 'attachments':
             $value = $this->getAttachments();
             foreach ($value as $attachment) {
@@ -593,11 +580,6 @@ final class PhabricatorMetaMTAMail
 
             $mailer->setSubject(implode(' ', array_filter($subject)));
             break;
-          case 'is-bulk':
-            if ($value) {
-              $mailer->addHeader('Precedence', 'bulk');
-            }
-            break;
           case 'thread-id':
 
             // NOTE: Gmail freaks out about In-Reply-To and References which
@@ -608,7 +590,7 @@ final class PhabricatorMetaMTAMail
             $value = '<'.$value.'@'.$domain.'>';
 
             if ($is_first && $mailer->supportsMessageIDHeader()) {
-              $mailer->addHeader('Message-ID',  $value);
+              $headers[] = array('Message-ID',  $value);
             } else {
               $in_reply_to = $value;
               $references = array($value);
@@ -620,21 +602,16 @@ final class PhabricatorMetaMTAMail
                 $references[] = $parent_id;
               }
               $references = implode(' ', $references);
-              $mailer->addHeader('In-Reply-To', $in_reply_to);
-              $mailer->addHeader('References',  $references);
+              $headers[] = array('In-Reply-To', $in_reply_to);
+              $headers[] = array('References',  $references);
             }
             $thread_index = $this->generateThreadIndex($value, $is_first);
-            $mailer->addHeader('Thread-Index', $thread_index);
-            break;
-          case 'mailtags':
-            // Handled below.
-            break;
-          case 'subject-prefix':
-          case 'vary-subject-prefix':
-            // Handled above.
+            $headers[] = array('Thread-Index', $thread_index);
             break;
           default:
-            // Just discard.
+            // Other parameters are handled elsewhere or are not relevant to
+            // constructing the message.
+            break;
         }
       }
 
@@ -660,8 +637,27 @@ final class PhabricatorMetaMTAMail
         $mailer->setHTMLBody($params['html-body']);
       }
 
+      // Pass the headers to the mailer, then save the state so we can show
+      // them in the web UI.
+      foreach ($headers as $header) {
+        list($header_key, $header_value) = $header;
+        $mailer->addHeader($header_key, $header_value);
+      }
+      $this->setParam('headers.sent', $headers);
+
+      // Save the final deliverability outcomes and reasoning so we can
+      // explain why things happened the way they did.
+      $actor_list = array();
+      foreach ($actors as $actor) {
+        $actor_list[$actor->getPHID()] = array(
+          'deliverable' => $actor->isDeliverable(),
+          'reasons' => $actor->getDeliverabilityReasons(),
+        );
+      }
+      $this->setParam('actors.sent', $actor_list);
+
       if (!$add_to && !$add_cc) {
-        $this->setStatus(self::STATUS_VOID);
+        $this->setStatus(PhabricatorMailOutboundStatus::STATUS_VOID);
         $this->setMessage(
           pht(
             'Message has no valid recipients: all To/Cc are disabled, '.
@@ -672,7 +668,7 @@ final class PhabricatorMetaMTAMail
       if ($this->getIsErrorEmail()) {
         $all_recipients = array_merge($add_to, $add_cc);
         if ($this->shouldRateLimitMail($all_recipients)) {
-          $this->setStatus(self::STATUS_VOID);
+          $this->setStatus(PhabricatorMailOutboundStatus::STATUS_VOID);
           $this->setMessage(
             pht(
               'This is an error email, but one or more recipients have '.
@@ -683,31 +679,13 @@ final class PhabricatorMetaMTAMail
       }
 
       if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
-        $this->setStatus(self::STATUS_VOID);
+        $this->setStatus(PhabricatorMailOutboundStatus::STATUS_VOID);
         $this->setMessage(
           pht(
             'Phabricator is running in silent mode. See `%s` '.
             'in the configuration to change this setting.',
             'phabricator.silent'));
         return $this->save();
-      }
-
-      $mailer->addHeader('X-Phabricator-Sent-This-Message', 'Yes');
-      $mailer->addHeader('X-Mail-Transport-Agent', 'MetaMTA');
-
-      // Some clients respect this to suppress OOF and other auto-responses.
-      $mailer->addHeader('X-Auto-Response-Suppress', 'All');
-
-      // If the message has mailtags, filter out any recipients who don't want
-      // to receive this type of mail.
-      $mailtags = $this->getParam('mailtags');
-      if ($mailtags) {
-        $tag_header = array();
-        foreach ($mailtags as $mailtag) {
-          $tag_header[] = '<'.$mailtag.'>';
-        }
-        $tag_header = implode(', ', $tag_header);
-        $mailer->addHeader('X-Phabricator-Mail-Tags', $tag_header);
       }
 
       // Some mailers require a valid "To:" in order to deliver mail. If we
@@ -733,7 +711,7 @@ final class PhabricatorMetaMTAMail
       }
     } catch (Exception $ex) {
       $this
-        ->setStatus(self::STATUS_FAIL)
+        ->setStatus(PhabricatorMailOutboundStatus::STATUS_FAIL)
         ->setMessage($ex->getMessage())
         ->save();
 
@@ -749,13 +727,13 @@ final class PhabricatorMetaMTAMail
           pht('Mail adapter encountered an unexpected, unspecified failure.'));
       }
 
-      $this->setStatus(self::STATUS_SENT);
+      $this->setStatus(PhabricatorMailOutboundStatus::STATUS_SENT);
       $this->save();
 
       return $this;
     } catch (PhabricatorMetaMTAPermanentFailureException $ex) {
       $this
-        ->setStatus(self::STATUS_FAIL)
+        ->setStatus(PhabricatorMailOutboundStatus::STATUS_FAIL)
         ->setMessage($ex->getMessage())
         ->save();
 
@@ -767,17 +745,6 @@ final class PhabricatorMetaMTAMail
 
       throw $ex;
     }
-  }
-
-  public static function getReadableStatus($status_code) {
-    $readable = array(
-      self::STATUS_QUEUE => pht('Queued for Delivery'),
-      self::STATUS_FAIL  => pht('Delivery Failed'),
-      self::STATUS_SENT  => pht('Sent'),
-      self::STATUS_VOID  => pht('Void'),
-    );
-    $status_code = coalesce($status_code, '?');
-    return idx($readable, $status_code, $status_code);
   }
 
   private function generateThreadIndex($seed, $is_first_mail) {
@@ -1050,6 +1017,52 @@ final class PhabricatorMetaMTAMail
     $this->saveTransaction();
 
     return $ret;
+  }
+
+  public function generateHeaders() {
+    $headers = array();
+
+    $headers[] = array('X-Phabricator-Sent-This-Message', 'Yes');
+    $headers[] = array('X-Mail-Transport-Agent', 'MetaMTA');
+
+    // Some clients respect this to suppress OOF and other auto-responses.
+    $headers[] = array('X-Auto-Response-Suppress', 'All');
+
+    // If the message has mailtags, filter out any recipients who don't want
+    // to receive this type of mail.
+    $mailtags = $this->getParam('mailtags');
+    if ($mailtags) {
+      $tag_header = array();
+      foreach ($mailtags as $mailtag) {
+        $tag_header[] = '<'.$mailtag.'>';
+      }
+      $tag_header = implode(', ', $tag_header);
+      $headers[] = array('X-Phabricator-Mail-Tags', $tag_header);
+    }
+
+    $value = $this->getParam('headers', array());
+    foreach ($value as $pair) {
+      list($header_key, $header_value) = $pair;
+
+      // NOTE: If we have \n in a header, SES rejects the email.
+      $header_value = str_replace("\n", ' ', $header_value);
+      $headers[] = array($header_key, $header_value);
+    }
+
+    $is_bulk = $this->getParam('is-bulk');
+    if ($is_bulk) {
+      $headers[] = array('Precedence', 'bulk');
+    }
+
+    return $headers;
+  }
+
+  public function getDeliveredHeaders() {
+    return $this->getParam('headers.sent');
+  }
+
+  public function getDeliveredActors() {
+    return $this->getParam('actors.sent');
   }
 
 

@@ -12,11 +12,11 @@ final class PhabricatorDashboardPanelSearchApplicationCustomField
   }
 
   public function renderEditControl(array $handles) {
-
-    $engines = id(new PhutilSymbolLoader())
+    $engines = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorApplicationSearchEngine')
-      ->loadObjects();
-    $engines = mfilter($engines, 'canUseInPanelContext');
+      ->setFilterMethod('canUseInPanelContext')
+      ->execute();
+
     $all_apps = id(new PhabricatorApplicationQuery())
       ->setViewer($this->getViewer())
       ->withUnlisted(false)

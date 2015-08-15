@@ -2,9 +2,8 @@
 
 final class DoorkeeperTagsController extends PhabricatorController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $tags = $request->getStr('tags');
     try {

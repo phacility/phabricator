@@ -204,9 +204,9 @@ final class PhabricatorSearchApplicationSearchEngine
     // TODO: This is inelegant and not very efficient, but gets us reasonable
     // results. It would be nice to do this more elegantly.
 
-    $indexers = id(new PhutilSymbolLoader())
+    $indexers = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorSearchDocumentIndexer')
-      ->loadObjects();
+      ->execute();
 
     if ($viewer) {
       $types = PhabricatorPHIDType::getAllInstalledTypes($viewer);

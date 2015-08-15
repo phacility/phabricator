@@ -120,9 +120,9 @@ final class PhabricatorAsanaConfigOptions
 
     $viewer = $request->getUser();
 
-    $publishers = id(new PhutilSymbolLoader())
+    $publishers = id(new PhutilClassMapQuery())
       ->setAncestorClass('DoorkeeperFeedStoryPublisher')
-      ->loadObjects();
+      ->execute();
 
     $out = array();
     $out[] = pht(
