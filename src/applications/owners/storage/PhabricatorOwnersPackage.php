@@ -13,6 +13,8 @@ final class PhabricatorOwnersPackage
   protected $primaryOwnerPHID;
   protected $mailKey;
 
+  private $paths = self::ATTACHABLE;
+
   public static function initializeNewPackage(PhabricatorUser $actor) {
     return id(new PhabricatorOwnersPackage())
       ->setAuditingEnabled(0)
@@ -225,7 +227,7 @@ final class PhabricatorOwnersPackage
     return $ids;
   }
 
-  private static function splitPath($path) {
+  public static function splitPath($path) {
     $result = array('/');
     $trailing_slash = preg_match('@/$@', $path) ? '/' : '';
     $path = trim($path, '/');
@@ -236,6 +238,16 @@ final class PhabricatorOwnersPackage
       array_pop($parts);
     }
     return $result;
+  }
+
+  public function attachPaths(array $paths) {
+    assert_instances_of($paths, 'PhabricatorOwnersPath');
+    $this->paths = $paths;
+    return $this;
+  }
+
+  public function getPaths() {
+    return $this->assertAttached($this->paths);
   }
 
 

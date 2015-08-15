@@ -43,8 +43,7 @@ final class PhabricatorOwnersPackageTransactionEditor
       case PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION:
         return $object->getDescription();
       case PhabricatorOwnersPackageTransaction::TYPE_PATHS:
-        // TODO: needPaths() this on the query
-        $paths = $object->loadPaths();
+        $paths = $object->getPaths();
         return mpull($paths, 'getRef');
     }
   }
@@ -152,8 +151,7 @@ final class PhabricatorOwnersPackageTransactionEditor
         $old = $xaction->getOldValue();
         $new = $xaction->getNewValue();
 
-        // TODO: needPaths this
-        $paths = $object->loadPaths();
+        $paths = $object->getPaths();
 
         $diffs = PhabricatorOwnersPath::getTransactionValueChanges($old, $new);
         list($rem, $add) = $diffs;

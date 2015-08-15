@@ -13,12 +13,13 @@ final class PhabricatorOwnersDetailController
     $package = id(new PhabricatorOwnersPackageQuery())
       ->setViewer($viewer)
       ->withIDs(array($request->getURIData('id')))
+      ->needPaths(true)
       ->executeOne();
     if (!$package) {
       return new Aphront404Response();
     }
 
-    $paths = $package->loadPaths();
+    $paths = $package->getPaths();
 
     $repository_phids = array();
     foreach ($paths as $path) {
