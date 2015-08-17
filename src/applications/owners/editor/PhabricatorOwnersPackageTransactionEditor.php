@@ -15,7 +15,6 @@ final class PhabricatorOwnersPackageTransactionEditor
     $types = parent::getTransactionTypes();
 
     $types[] = PhabricatorOwnersPackageTransaction::TYPE_NAME;
-    $types[] = PhabricatorOwnersPackageTransaction::TYPE_PRIMARY;
     $types[] = PhabricatorOwnersPackageTransaction::TYPE_OWNERS;
     $types[] = PhabricatorOwnersPackageTransaction::TYPE_AUDITING;
     $types[] = PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION;
@@ -31,8 +30,6 @@ final class PhabricatorOwnersPackageTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorOwnersPackageTransaction::TYPE_NAME:
         return $object->getName();
-      case PhabricatorOwnersPackageTransaction::TYPE_PRIMARY:
-        return $object->getPrimaryOwnerPHID();
       case PhabricatorOwnersPackageTransaction::TYPE_OWNERS:
         // TODO: needOwners() this on the Query.
         $phids = mpull($object->loadOwners(), 'getUserPHID');
@@ -54,7 +51,6 @@ final class PhabricatorOwnersPackageTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorOwnersPackageTransaction::TYPE_NAME:
-      case PhabricatorOwnersPackageTransaction::TYPE_PRIMARY:
       case PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION:
       case PhabricatorOwnersPackageTransaction::TYPE_PATHS:
         return $xaction->getNewValue();
@@ -94,9 +90,6 @@ final class PhabricatorOwnersPackageTransactionEditor
       case PhabricatorOwnersPackageTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
         return;
-      case PhabricatorOwnersPackageTransaction::TYPE_PRIMARY:
-        $object->setPrimaryOwnerPHID($xaction->getNewValue());
-        return;
       case PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION:
         $object->setDescription($xaction->getNewValue());
         return;
@@ -117,7 +110,6 @@ final class PhabricatorOwnersPackageTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorOwnersPackageTransaction::TYPE_NAME:
-      case PhabricatorOwnersPackageTransaction::TYPE_PRIMARY:
       case PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION:
       case PhabricatorOwnersPackageTransaction::TYPE_AUDITING:
         return;
@@ -200,22 +192,6 @@ final class PhabricatorOwnersPackageTransactionEditor
           $errors[] = $error;
         }
         break;
-      case PhabricatorOwnersPackageTransaction::TYPE_PRIMARY:
-        $missing = $this->validateIsEmptyTextField(
-          $object->getPrimaryOwnerPHID(),
-          $xactions);
-
-        if ($missing) {
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Required'),
-            pht('Packages must have a primary owner.'),
-            nonempty(last($xactions), null));
-
-          $error->setIsMissingFieldError(true);
-          $errors[] = $error;
-        }
-        break;
     }
 
     return $errors;
@@ -245,7 +221,6 @@ final class PhabricatorOwnersPackageTransactionEditor
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
     return array(
-      $object->getPrimaryOwnerPHID(),
       $this->requireActor()->getPHID(),
     );
   }

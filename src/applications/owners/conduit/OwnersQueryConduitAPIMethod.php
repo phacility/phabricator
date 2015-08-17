@@ -110,7 +110,6 @@ final class OwnersQueryConduitAPIMethod extends OwnersConduitAPIMethod {
         'phid' => $package->getPHID(),
         'name' => $package->getName(),
         'description' => $package->getDescription(),
-        'primaryOwner' => $package->getPrimaryOwnerPHID(),
         'owners' => $owners,
         'paths' => $paths,
       );

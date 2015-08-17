@@ -150,14 +150,6 @@ final class PhabricatorOwnersDetailController
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer);
 
-    $primary_phid = $package->getPrimaryOwnerPHID();
-    if ($primary_phid) {
-      $primary_owner = $viewer->renderHandle($primary_phid);
-    } else {
-      $primary_owner = phutil_tag('em', array(), pht('None'));
-    }
-    $view->addProperty(pht('Primary Owner'), $primary_owner);
-
     // TODO: needOwners() this on the Query.
     $owners = $package->loadOwners();
     if ($owners) {

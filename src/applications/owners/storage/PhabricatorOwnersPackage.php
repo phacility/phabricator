@@ -17,8 +17,7 @@ final class PhabricatorOwnersPackage
 
   public static function initializeNewPackage(PhabricatorUser $actor) {
     return id(new PhabricatorOwnersPackage())
-      ->setAuditingEnabled(0)
-      ->setPrimaryOwnerPHID($actor->getPHID());
+      ->setAuditingEnabled(0);
   }
 
   public function getCapabilities() {
