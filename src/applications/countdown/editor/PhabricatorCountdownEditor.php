@@ -147,12 +147,10 @@ final class PhabricatorCountdownEditor
 
   public function getMailTagsMap() {
     return array(
-      PhabricatorCountdownTransaction::MAILTAG_TITLE =>
-        pht('Someone changes the countdown title.'),
-      PhabricatorCountdownTransaction::MAILTAG_DESCRIPTION =>
-        pht('Someone changes the countdown description.'),
-      PhabricatorCountdownTransaction::MAILTAG_EPOCH =>
-        pht('Someone changes the countdown end date.'),
+      PhabricatorCountdownTransaction::MAILTAG_DETAILS =>
+        pht('Someone changes the countdown details.'),
+      PhabricatorCountdownTransaction::MAILTAG_COMMENT =>
+        pht('Someone comments on a countdown.'),
       PhabricatorCountdownTransaction::MAILTAG_OTHER =>
         pht('Other countdown activity not listed above occurs.'),
     );
