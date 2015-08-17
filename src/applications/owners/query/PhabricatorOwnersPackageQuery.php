@@ -42,6 +42,7 @@ final class PhabricatorOwnersPackageQuery
     }
 
     foreach ($paths as $path) {
+      $path = (string)$path;
       $this->controlMap[$repository_phid][$path] = $path;
     }
 
@@ -277,6 +278,8 @@ final class PhabricatorOwnersPackageQuery
    * @return list<PhabricatorOwnersPackage> List of controlling packages.
    */
   public function getControllingPackagesForPath($repository_phid, $path) {
+    $path = (string)$path;
+
     if (!isset($this->controlMap[$repository_phid][$path])) {
       throw new PhutilInvalidStateException('withControl');
     }

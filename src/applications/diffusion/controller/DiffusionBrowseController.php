@@ -183,8 +183,6 @@ abstract class DiffusionBrowseController extends DiffusionController {
         $ownership = id(new PHUIStatusListView())
           ->setUser($viewer);
 
-
-
         foreach ($packages as $package) {
           $icon = 'fa-list-alt';
           $color = 'grey';
