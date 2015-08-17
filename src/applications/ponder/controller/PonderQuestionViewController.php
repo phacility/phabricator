@@ -225,9 +225,10 @@ final class PonderQuestionViewController extends PonderController {
     $xaction_groups = mgroup($xactions, 'getObjectPHID');
     $author_phids = mpull($answers, 'getAuthorPHID');
     $handles = $this->loadViewerHandles($author_phids);
+    $answers_sort = array_reverse(msort($answers, 'getVoteCount'));
 
     $view = array();
-    foreach ($answers as $answer) {
+    foreach ($answers_sort as $answer) {
       $xactions = idx($xaction_groups, $answer->getPHID(), array());
       $id = $answer->getID();
       $handle = $handles[$answer->getAuthorPHID()];
