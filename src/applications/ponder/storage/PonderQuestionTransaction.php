@@ -336,23 +336,4 @@ final class PonderQuestionTransaction
     return reset($add);
   }
 
-  /**
-   * Generally, the answer object is only available if the transaction
-   * type is `self::TYPE_ANSWERS`.
-   *
-   * Some stories - notably ones made before D7027 - will be of the more
-   * generic @{class:PhabricatorApplicationTransactionFeedStory}. These
-   * poor stories won't have the PonderAnswer loaded, and thus will have
-   * less cool information.
-   */
-  private function getNewAnswerObject(PhabricatorFeedStory $story) {
-    if ($story instanceof PonderTransactionFeedStory) {
-      $answer_phid = $this->getNewAnswerPHID();
-      if ($answer_phid) {
-        return $story->getObject($answer_phid);
-      }
-    }
-    return null;
-  }
-
 }
