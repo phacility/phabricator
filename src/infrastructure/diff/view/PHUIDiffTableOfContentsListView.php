@@ -3,10 +3,21 @@
 final class PHUIDiffTableOfContentsListView extends AphrontView {
 
   private $items = array();
+  private $authorityPackages;
 
   public function addItem(PHUIDiffTableOfContentsItemView $item) {
     $this->items[] = $item;
     return $this;
+  }
+
+  public function setAuthorityPackages(array $authority_packages) {
+    assert_instances_of($authority_packages, 'PhabricatorOwnersPackage');
+    $this->authorityPackages = $authority_packages;
+    return $this;
+  }
+
+  public function getAuthorityPackages() {
+    return $this->authorityPackages;
   }
 
   public function render() {
@@ -16,12 +27,34 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
 
     Javelin::initBehavior('phabricator-tooltips');
 
+    if ($this->getAuthorityPackages()) {
+      $authority = mpull($this->getAuthorityPackages(), null, 'getPHID');
+    } else {
+      $authority = array();
+    }
+
     $items = $this->items;
 
     $rows = array();
+    $rowc = array();
     foreach ($items as $item) {
       $item->setUser($this->getUser());
       $rows[] = $item->render();
+
+      $have_authority = false;
+
+      $package = $item->getPackage();
+      if ($package) {
+        if (isset($authority[$package->getPHID()])) {
+          $have_authority = true;
+        }
+      }
+
+      if ($have_authority) {
+        $rowc[] = 'highlighted';
+      } else {
+        $rowc[] = null;
+      }
     }
 
     // Check if any item has content in these columns. If no item does, we'll
@@ -60,6 +93,7 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
       $reveal_link);
 
     $table = id(new AphrontTableView($rows))
+      ->setRowClasses($rowc)
       ->setHeaders(
         array(
           null,
@@ -69,7 +103,7 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
           pht('Path'),
           pht('Coverage (All)'),
           pht('Coverage (Touched)'),
-          null,
+          pht('Package'),
         ))
       ->setColumnClasses(
         array(
@@ -80,7 +114,7 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
           'differential-toc-file wide',
           'differential-toc-cov',
           'differential-toc-cov',
-          'center',
+          null,
         ))
       ->setColumnVisibility(
         array(

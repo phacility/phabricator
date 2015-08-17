@@ -1066,6 +1066,7 @@ final class DiffusionCommitController extends DiffusionController {
   }
 
   private function buildTableOfContents(array $changesets) {
+    $drequest = $this->getDiffusionRequest();
     $viewer = $this->getViewer();
 
     $toc_view = id(new PHUIDiffTableOfContentsListView())
@@ -1074,9 +1075,33 @@ final class DiffusionCommitController extends DiffusionController {
     // TODO: This is hacky, we just want access to the linkX() methods on
     // DiffusionView.
     $diffusion_view = id(new DiffusionEmptyResultView())
-      ->setDiffusionRequest($this->getDiffusionRequest());
+      ->setDiffusionRequest($drequest);
 
-    // TODO: Restore package stuff here.
+    $have_owners = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorOwnersApplication',
+      $viewer);
+
+    if (!$changesets) {
+      $have_owners = false;
+    }
+
+    if ($have_owners) {
+      if ($viewer->getPHID()) {
+        $packages = id(new PhabricatorOwnersPackageQuery())
+          ->setViewer($viewer)
+          ->withAuthorityPHIDs(array($viewer->getPHID()))
+          ->execute();
+        $toc_view->setAuthorityPackages($packages);
+      }
+
+      $repository = $drequest->getRepository();
+      $repository_phid = $repository->getPHID();
+
+      $control_query = id(new PhabricatorOwnersPackageQuery())
+        ->setViewer($viewer)
+        ->withControl($repository_phid, mpull($changesets, 'getFilename'));
+      $control_query->execute();
+    }
 
     foreach ($changesets as $changeset_id => $changeset) {
       $path = $changeset->getFilename();
@@ -1094,6 +1119,15 @@ final class DiffusionCommitController extends DiffusionController {
             ' ',
             $browse_link,
           ));
+
+      if ($have_owners) {
+        $package = $control_query->getControllingPackageForPath(
+          $repository_phid,
+          $changeset->getFilename());
+        if ($package) {
+          $item->setPackage($package);
+        }
+      }
 
       $toc_view->addItem($item);
     }

@@ -30,6 +30,39 @@ abstract class DifferentialController extends PhabricatorController {
     $toc_view = id(new PHUIDiffTableOfContentsListView())
       ->setUser($viewer);
 
+    $have_owners = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorOwnersApplication',
+      $viewer);
+    if ($have_owners) {
+      $repository_phid = null;
+      if ($changesets) {
+        $changeset = head($changesets);
+        $diff = $changeset->getDiff();
+        $repository_phid = $diff->getRepositoryPHID();
+      }
+
+      if (!$repository_phid) {
+        $have_owners = false;
+      } else {
+        if ($viewer->getPHID()) {
+          $packages = id(new PhabricatorOwnersPackageQuery())
+            ->setViewer($viewer)
+            ->withAuthorityPHIDs(array($viewer->getPHID()))
+            ->execute();
+          $toc_view->setAuthorityPackages($packages);
+        }
+
+        // TODO: For Subversion, we should adjust these paths to be relative to
+        // the repository root where possible.
+        $paths = mpull($changesets, 'getFilename');
+
+        $control_query = id(new PhabricatorOwnersPackageQuery())
+          ->setViewer($viewer)
+          ->withControl($repository_phid, $paths);
+        $control_query->execute();
+      }
+    }
+
     foreach ($changesets as $changeset_id => $changeset) {
       $is_visible = isset($visible_changesets[$changeset_id]);
       $anchor = $changeset->getAnchorName();
@@ -43,6 +76,15 @@ abstract class DifferentialController extends PhabricatorController {
         ->setAnchor($anchor)
         ->setCoverage(idx($coverage, $filename))
         ->setCoverageID($coverage_id);
+
+      if ($have_owners) {
+        $package = $control_query->getControllingPackageForPath(
+          $repository_phid,
+          $changeset->getFilename());
+        if ($package) {
+          $item->setPackage($package);
+        }
+      }
 
       $toc_view->addItem($item);
     }
