@@ -14,10 +14,13 @@ final class PhabricatorOwnersPackage
   protected $mailKey;
 
   private $paths = self::ATTACHABLE;
+  private $owners = self::ATTACHABLE;
 
   public static function initializeNewPackage(PhabricatorUser $actor) {
     return id(new PhabricatorOwnersPackage())
-      ->setAuditingEnabled(0);
+      ->setAuditingEnabled(0)
+      ->attachPaths(array())
+      ->attachOwners(array());
   }
 
   public function getCapabilities() {
@@ -247,6 +250,16 @@ final class PhabricatorOwnersPackage
 
   public function getPaths() {
     return $this->assertAttached($this->paths);
+  }
+
+  public function attachOwners(array $owners) {
+    assert_instances_of($owners, 'PhabricatorOwnersOwner');
+    $this->owners = $owners;
+    return $this;
+  }
+
+  public function getOwners() {
+    return $this->assertAttached($this->owners);
   }
 
 

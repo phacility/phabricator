@@ -14,6 +14,7 @@ final class PhabricatorOwnersDetailController
       ->setViewer($viewer)
       ->withIDs(array($request->getURIData('id')))
       ->needPaths(true)
+      ->needOwners(true)
       ->executeOne();
     if (!$package) {
       return new Aphront404Response();
@@ -150,8 +151,7 @@ final class PhabricatorOwnersDetailController
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer);
 
-    // TODO: needOwners() this on the Query.
-    $owners = $package->loadOwners();
+    $owners = $package->getOwners();
     if ($owners) {
       $owner_list = $viewer->renderHandleList(mpull($owners, 'getUserPHID'));
     } else {

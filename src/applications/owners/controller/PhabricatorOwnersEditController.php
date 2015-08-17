@@ -17,6 +17,7 @@ final class PhabricatorOwnersEditController
             // TODO: Support this capability.
             // PhabricatorPolicyCapability::CAN_EDIT,
           ))
+        ->needOwners(true)
         ->executeOne();
       if (!$package) {
         return new Aphront404Response();
@@ -30,8 +31,7 @@ final class PhabricatorOwnersEditController
     $e_name = true;
 
     $v_name = $package->getName();
-    // TODO: Pull these off needOwners() on the Query.
-    $v_owners = mpull($package->loadOwners(), 'getUserPHID');
+    $v_owners = mpull($package->getOwners(), 'getUserPHID');
     $v_auditing = $package->getAuditingEnabled();
     $v_description = $package->getDescription();
 

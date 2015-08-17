@@ -141,7 +141,7 @@ final class OwnersQueryConduitAPIMethod extends OwnersConduitAPIMethod {
       $query = id(new PhabricatorOwnersPackageQuery())
         ->setViewer($request->getUser());
 
-      $query->withOwnerPHIDs(array($request->getValue('userAffiliated')));
+      $query->withAuthorityPHIDs(array($request->getValue('userAffiliated')));
 
       $packages = $query->execute();
     } else if ($is_owner_query) {

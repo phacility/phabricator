@@ -18,27 +18,35 @@ final class PhabricatorOwnersPackageSearchEngine
   protected function buildCustomSearchFields() {
     return array(
       id(new PhabricatorSearchDatasourceField())
-        ->setLabel(pht('Owners'))
-        ->setKey('ownerPHIDs')
-        ->setAliases(array('owner', 'owners'))
+        ->setLabel(pht('Authority'))
+        ->setKey('authorityPHIDs')
+        ->setAliases(array('authority', 'authorities'))
         ->setDatasource(new PhabricatorProjectOrUserDatasource()),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Repositories'))
         ->setKey('repositoryPHIDs')
         ->setAliases(array('repository', 'repositories'))
         ->setDatasource(new DiffusionRepositoryDatasource()),
+      id(new PhabricatorSearchStringListField())
+        ->setLabel(pht('Paths'))
+        ->setKey('paths')
+        ->setAliases(array('path')),
     );
   }
 
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
-    if ($map['ownerPHIDs']) {
-      $query->withOwnerPHIDs($map['ownerPHIDs']);
+    if ($map['authorityPHIDs']) {
+      $query->withAuthorityPHIDs($map['authorityPHIDs']);
     }
 
     if ($map['repositoryPHIDs']) {
       $query->withRepositoryPHIDs($map['repositoryPHIDs']);
+    }
+
+    if ($map['paths']) {
+      $query->withPaths($map['paths']);
     }
 
     return $query;
@@ -52,7 +60,7 @@ final class PhabricatorOwnersPackageSearchEngine
     $names = array();
 
     if ($this->requireViewer()->isLoggedIn()) {
-      $names['owned'] = pht('Owned');
+      $names['authority'] = pht('Owned');
     }
 
     $names += array(
@@ -69,9 +77,9 @@ final class PhabricatorOwnersPackageSearchEngine
     switch ($query_key) {
       case 'all':
         return $query;
-      case 'owned':
+      case 'authority':
         return $query->setParameter(
-          'ownerPHIDs',
+          'authorityPHIDs',
           array($this->requireViewer()->getPHID()));
     }
 
