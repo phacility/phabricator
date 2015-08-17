@@ -267,7 +267,7 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
         }
       }
     } else if ($type == DifferentialChangeType::TYPE_COPY_HERE) {
-      $meta = pht('Copied from %s', $changeset->getOldFile());
+      $meta[] = pht('Copied from %s', $changeset->getOldFile());
     }
 
     if (!$meta) {
