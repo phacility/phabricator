@@ -39,13 +39,14 @@ final class HarbormasterCommandBuildStepImplementation
   public function execute(
     HarbormasterBuild $build,
     HarbormasterBuildTarget $build_target) {
+    $viewer = PhabricatorUser::getOmnipotentUser();
 
     $settings = $this->getSettings();
     $variables = $build_target->getVariables();
 
     $artifact = $build_target->loadArtifact($settings['hostartifact']);
     $impl = $artifact->getArtifactImplementation();
-    $lease = $impl->loadArtifactLease();
+    $lease = $impl->loadArtifactLease($viewer);
 
     $this->platform = $lease->getAttribute('platform');
 
