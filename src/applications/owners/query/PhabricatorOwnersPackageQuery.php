@@ -10,6 +10,7 @@ final class PhabricatorOwnersPackageQuery
   private $repositoryPHIDs;
   private $paths;
   private $namePrefix;
+  private $statuses;
 
   private $controlMap = array();
   private $controlResults;
@@ -54,6 +55,11 @@ final class PhabricatorOwnersPackageQuery
 
   public function withPaths(array $paths) {
     $this->paths = $paths;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -198,6 +204,13 @@ final class PhabricatorOwnersPackageQuery
         $conn,
         'rpath.path IN (%Ls)',
         $this->getFragmentsForPaths($this->paths));
+    }
+
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'p.status IN (%Ls)',
+        $this->statuses);
     }
 
     if (strlen($this->namePrefix)) {

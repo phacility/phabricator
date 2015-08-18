@@ -47,6 +47,7 @@ abstract class DifferentialController extends PhabricatorController {
         if ($viewer->getPHID()) {
           $packages = id(new PhabricatorOwnersPackageQuery())
             ->setViewer($viewer)
+            ->withStatuses(array(PhabricatorOwnersPackage::STATUS_ACTIVE))
             ->withAuthorityPHIDs(array($viewer->getPHID()))
             ->execute();
           $toc_view->setAuthorityPackages($packages);
@@ -58,6 +59,7 @@ abstract class DifferentialController extends PhabricatorController {
 
         $control_query = id(new PhabricatorOwnersPackageQuery())
           ->setViewer($viewer)
+          ->withStatuses(array(PhabricatorOwnersPackage::STATUS_ACTIVE))
           ->withControl($repository_phid, $paths);
         $control_query->execute();
       }

@@ -167,6 +167,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
     if (PhabricatorApplication::isClassInstalled($owners)) {
       $package_query = id(new PhabricatorOwnersPackageQuery())
         ->setViewer($viewer)
+        ->withStatuses(array(PhabricatorOwnersPackage::STATUS_ACTIVE))
         ->withControl(
           $repository->getPHID(),
           array(

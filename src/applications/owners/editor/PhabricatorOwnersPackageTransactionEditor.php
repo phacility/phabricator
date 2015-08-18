@@ -19,6 +19,7 @@ final class PhabricatorOwnersPackageTransactionEditor
     $types[] = PhabricatorOwnersPackageTransaction::TYPE_AUDITING;
     $types[] = PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION;
     $types[] = PhabricatorOwnersPackageTransaction::TYPE_PATHS;
+    $types[] = PhabricatorOwnersPackageTransaction::TYPE_STATUS;
 
     return $types;
   }
@@ -42,6 +43,8 @@ final class PhabricatorOwnersPackageTransactionEditor
       case PhabricatorOwnersPackageTransaction::TYPE_PATHS:
         $paths = $object->getPaths();
         return mpull($paths, 'getRef');
+      case PhabricatorOwnersPackageTransaction::TYPE_STATUS:
+        return $object->getStatus();
     }
   }
 
@@ -53,6 +56,7 @@ final class PhabricatorOwnersPackageTransactionEditor
       case PhabricatorOwnersPackageTransaction::TYPE_NAME:
       case PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION:
       case PhabricatorOwnersPackageTransaction::TYPE_PATHS:
+      case PhabricatorOwnersPackageTransaction::TYPE_STATUS:
         return $xaction->getNewValue();
       case PhabricatorOwnersPackageTransaction::TYPE_AUDITING:
         return (int)$xaction->getNewValue();
@@ -99,6 +103,9 @@ final class PhabricatorOwnersPackageTransactionEditor
       case PhabricatorOwnersPackageTransaction::TYPE_OWNERS:
       case PhabricatorOwnersPackageTransaction::TYPE_PATHS:
         return;
+      case PhabricatorOwnersPackageTransaction::TYPE_STATUS:
+        $object->setStatus($xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -112,6 +119,7 @@ final class PhabricatorOwnersPackageTransactionEditor
       case PhabricatorOwnersPackageTransaction::TYPE_NAME:
       case PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION:
       case PhabricatorOwnersPackageTransaction::TYPE_AUDITING:
+      case PhabricatorOwnersPackageTransaction::TYPE_STATUS:
         return;
       case PhabricatorOwnersPackageTransaction::TYPE_OWNERS:
         $old = $xaction->getOldValue();

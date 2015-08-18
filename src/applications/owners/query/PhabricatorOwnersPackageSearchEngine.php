@@ -31,6 +31,12 @@ final class PhabricatorOwnersPackageSearchEngine
         ->setLabel(pht('Paths'))
         ->setKey('paths')
         ->setAliases(array('path')),
+      id(new PhabricatorSearchCheckboxesField())
+        ->setKey('statuses')
+        ->setLabel(pht('Status'))
+        ->setOptions(
+          id(new PhabricatorOwnersPackage())
+            ->getStatusNameMap()),
     );
   }
 
@@ -49,6 +55,10 @@ final class PhabricatorOwnersPackageSearchEngine
       $query->withPaths($map['paths']);
     }
 
+    if ($map['statuses']) {
+      $query->withStatuses($map['statuses']);
+    }
+
     return $query;
   }
 
@@ -64,6 +74,7 @@ final class PhabricatorOwnersPackageSearchEngine
     }
 
     $names += array(
+      'active' => pht('Active Packages'),
       'all' => pht('All Packages'),
     );
 
@@ -77,6 +88,12 @@ final class PhabricatorOwnersPackageSearchEngine
     switch ($query_key) {
       case 'all':
         return $query;
+      case 'active':
+        return $query->setParameter(
+          'statuses',
+          array(
+            PhabricatorOwnersPackage::STATUS_ACTIVE,
+          ));
       case 'authority':
         return $query->setParameter(
           'authorityPHIDs',
@@ -104,6 +121,10 @@ final class PhabricatorOwnersPackageSearchEngine
         ->setObjectName(pht('Package %d', $id))
         ->setHeader($package->getName())
         ->setHref('/owners/package/'.$id.'/');
+
+      if ($package->isArchived()) {
+        $item->setDisabled(true);
+      }
 
       $list->addItem($item);
     }

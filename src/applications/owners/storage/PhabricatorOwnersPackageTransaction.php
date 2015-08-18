@@ -9,6 +9,7 @@ final class PhabricatorOwnersPackageTransaction
   const TYPE_AUDITING = 'owners.auditing';
   const TYPE_DESCRIPTION = 'owners.description';
   const TYPE_PATHS = 'owners.paths';
+  const TYPE_STATUS = 'owners.status';
 
   public function getApplicationName() {
     return 'owners';
@@ -115,6 +116,16 @@ final class PhabricatorOwnersPackageTransaction
         return pht(
           '%s updated paths for this package.',
           $this->renderHandleLink($author_phid));
+      case self::TYPE_STATUS:
+        if ($new == PhabricatorOwnersPackage::STATUS_ACTIVE) {
+          return pht(
+            '%s activated this package.',
+            $this->renderHandleLink($author_phid));
+        } else if ($new == PhabricatorOwnersPackage::STATUS_ARCHIVED) {
+          return pht(
+            '%s archived this package.',
+            $this->renderHandleLink($author_phid));
+        }
     }
 
     return parent::getTitle();

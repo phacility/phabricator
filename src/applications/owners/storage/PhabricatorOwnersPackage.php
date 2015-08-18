@@ -12,14 +12,19 @@ final class PhabricatorOwnersPackage
   protected $description;
   protected $primaryOwnerPHID;
   protected $mailKey;
+  protected $status;
 
   private $paths = self::ATTACHABLE;
   private $owners = self::ATTACHABLE;
+
+  const STATUS_ACTIVE = 'active';
+  const STATUS_ARCHIVED = 'archived';
 
   public static function initializeNewPackage(PhabricatorUser $actor) {
     return id(new PhabricatorOwnersPackage())
       ->setAuditingEnabled(0)
       ->attachPaths(array())
+      ->setStatus(self::STATUS_ACTIVE)
       ->attachOwners(array());
   }
 
@@ -41,6 +46,13 @@ final class PhabricatorOwnersPackage
     return null;
   }
 
+  public static function getStatusNameMap() {
+    return array(
+      self::STATUS_ACTIVE => pht('Active'),
+      self::STATUS_ARCHIVED => pht('Archived'),
+    );
+  }
+
   protected function getConfiguration() {
     return array(
       // This information is better available from the history table.
@@ -53,6 +65,7 @@ final class PhabricatorOwnersPackage
         'primaryOwnerPHID' => 'phid?',
         'auditingEnabled' => 'bool',
         'mailKey' => 'bytes20',
+        'status' => 'text32',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -79,6 +92,10 @@ final class PhabricatorOwnersPackage
     }
 
     return parent::save();
+  }
+
+  public function isArchived() {
+    return ($this->getStatus() == self::STATUS_ARCHIVED);
   }
 
   public function setName($name) {

@@ -41,9 +41,20 @@ final class PhabricatorOwnersDetailController
     $properties = $this->buildPackagePropertyView($package);
     $properties->setActionList($actions);
 
+    if ($package->isArchived()) {
+      $header_icon = 'fa-ban';
+      $header_name = pht('Archived');
+      $header_color = 'dark';
+    } else {
+      $header_icon = 'fa-check';
+      $header_name = pht('Active');
+      $header_color = 'bluegrey';
+    }
+
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($package->getName())
+      ->setStatus($header_icon, $header_color, $header_name)
       ->setPolicyObject($package);
 
     $panel = id(new PHUIObjectBoxView())

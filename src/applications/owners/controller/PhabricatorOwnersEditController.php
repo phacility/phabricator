@@ -34,6 +34,7 @@ final class PhabricatorOwnersEditController
     $v_owners = mpull($package->getOwners(), 'getUserPHID');
     $v_auditing = $package->getAuditingEnabled();
     $v_description = $package->getDescription();
+    $v_status = $package->getStatus();
 
 
     $errors = array();
@@ -44,11 +45,13 @@ final class PhabricatorOwnersEditController
       $v_owners = $request->getArr('owners');
       $v_auditing = ($request->getStr('auditing') == 'enabled');
       $v_description = $request->getStr('description');
+      $v_status = $request->getStr('status');
 
       $type_name = PhabricatorOwnersPackageTransaction::TYPE_NAME;
       $type_owners = PhabricatorOwnersPackageTransaction::TYPE_OWNERS;
       $type_auditing = PhabricatorOwnersPackageTransaction::TYPE_AUDITING;
       $type_description = PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION;
+      $type_status = PhabricatorOwnersPackageTransaction::TYPE_STATUS;
 
       $xactions[] = id(new PhabricatorOwnersPackageTransaction())
         ->setTransactionType($type_name)
@@ -65,6 +68,12 @@ final class PhabricatorOwnersEditController
       $xactions[] = id(new PhabricatorOwnersPackageTransaction())
         ->setTransactionType($type_description)
         ->setNewValue($v_description);
+
+      if (!$is_new) {
+        $xactions[] = id(new PhabricatorOwnersPackageTransaction())
+          ->setTransactionType($type_status)
+          ->setNewValue($v_status);
+      }
 
       $editor = id(new PhabricatorOwnersPackageTransactionEditor())
         ->setActor($viewer)
@@ -115,8 +124,18 @@ final class PhabricatorOwnersEditController
           ->setDatasource(new PhabricatorProjectOrUserDatasource())
           ->setLabel(pht('Owners'))
           ->setName('owners')
-          ->setValue($v_owners))
-      ->appendChild(
+          ->setValue($v_owners));
+
+      if (!$is_new) {
+        $form->appendChild(
+          id(new AphrontFormSelectControl())
+            ->setLabel(pht('Status'))
+            ->setName('status')
+            ->setValue($v_status)
+            ->setOptions($package->getStatusNameMap()));
+      }
+
+      $form->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('auditing')
           ->setLabel(pht('Auditing'))
