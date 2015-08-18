@@ -230,16 +230,19 @@ final class PhabricatorOwnersPackage
   }
 
   public static function splitPath($path) {
-    $result = array('/');
     $trailing_slash = preg_match('@/$@', $path) ? '/' : '';
     $path = trim($path, '/');
     $parts = explode('/', $path);
+
+    $result = array();
     while (count($parts)) {
       $result[] = '/'.implode('/', $parts).$trailing_slash;
       $trailing_slash = '/';
       array_pop($parts);
     }
-    return $result;
+    $result[] = '/';
+
+    return array_reverse($result);
   }
 
   public function attachPaths(array $paths) {
