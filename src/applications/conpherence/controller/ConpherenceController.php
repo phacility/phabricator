@@ -27,14 +27,6 @@ abstract class ConpherenceController extends PhabricatorController {
       ->addSigil('conpherence-widget-adder')
       ->setMetadata(array('widget' => 'widgets-people')));
 
-    $nav->addMenuItem(
-      id(new PHUIListItemView())
-      ->setName(pht('New Calendar Item'))
-      ->setType(PHUIListItemView::TYPE_LINK)
-      ->setHref('/calendar/event/create/')
-      ->addSigil('conpherence-widget-adder')
-      ->setMetadata(array('widget' => 'widgets-calendar')));
-
     return $nav;
   }
 
