@@ -25,6 +25,7 @@ final class HarbormasterUploadArtifactBuildStepImplementation
   public function execute(
     HarbormasterBuild $build,
     HarbormasterBuildTarget $build_target) {
+    $viewer = PhabricatorUser::getOmnipotentUser();
 
     $settings = $this->getSettings();
     $variables = $build_target->getVariables();
@@ -35,7 +36,8 @@ final class HarbormasterUploadArtifactBuildStepImplementation
       $variables);
 
     $artifact = $build_target->loadArtifact($settings['hostartifact']);
-    $lease = $artifact->loadDrydockLease();
+    $impl = $artifact->getArtifactImplementation();
+    $lease = $impl->loadArtifactLease($viewer);
 
     $interface = $lease->getInterface('filesystem');
 
@@ -44,7 +46,7 @@ final class HarbormasterUploadArtifactBuildStepImplementation
 
     // Insert the artifact record.
     $artifact = $build_target->createArtifact(
-      PhabricatorUser::getOmnipotentUser(),
+      $viewer,
       $settings['name'],
       HarbormasterFileArtifact::ARTIFACTCONST,
       array(
