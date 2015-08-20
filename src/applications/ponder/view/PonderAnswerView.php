@@ -79,7 +79,7 @@ final class PonderAnswerView extends AphrontTagView {
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setEpoch($answer->getDateCreated())
+      ->setEpoch($answer->getDateModified())
       ->setHeader($handle->getName())
       ->addActionLink($action_button)
       ->setImage($handle->getImageURI())
