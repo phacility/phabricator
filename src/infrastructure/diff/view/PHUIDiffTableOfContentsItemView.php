@@ -8,7 +8,7 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
   private $coverage;
   private $coverageID;
   private $context;
-  private $package;
+  private $packages;
 
   public function setChangeset(DifferentialChangeset $changeset) {
     $this->changeset = $changeset;
@@ -64,13 +64,14 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
     return $this->context;
   }
 
-  public function setPackage(PhabricatorOwnersPackage $package) {
-    $this->package = $package;
+  public function setPackages(array $packages) {
+    assert_instances_of($packages, 'PhabricatorOwnersPackage');
+    $this->packages = mpull($packages, null, 'getPHID');
     return $this;
   }
 
-  public function getPackage() {
-    return $this->package;
+  public function getPackages() {
+    return $this->packages;
   }
 
   public function render() {
@@ -97,7 +98,7 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
     $cells[] = $this->renderCoverage();
     $cells[] = $this->renderModifiedCoverage();
 
-    $cells[] = $this->renderPackage();
+    $cells[] = $this->renderPackages();
 
     return $cells;
   }
@@ -284,14 +285,16 @@ final class PHUIDiffTableOfContentsItemView extends AphrontView {
       $meta);
   }
 
-  private function renderPackage() {
-    $package = $this->getPackage();
-
-    if (!$package) {
+  private function renderPackages() {
+    $packages = $this->getPackages();
+    if (!$packages) {
       return null;
     }
 
-    return $this->getUser()->renderHandle($package->getPHID());
+    $viewer = $this->getUser();
+    $package_phids = mpull($packages, 'getPHID');
+
+    return $viewer->renderHandleList($package_phids);
   }
 
   private function renderRename($self, $other, $arrow) {

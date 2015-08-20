@@ -43,9 +43,9 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
 
       $have_authority = false;
 
-      $package = $item->getPackage();
-      if ($package) {
-        if (isset($authority[$package->getPHID()])) {
+      $packages = $item->getPackages();
+      if ($packages) {
+        if (array_intersect_key($packages, $authority)) {
           $have_authority = true;
         }
       }
@@ -61,7 +61,7 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
     // just hide them.
     $any_coverage = false;
     $any_context = false;
-    $any_package = false;
+    $any_packages = false;
     foreach ($items as $item) {
       if ($item->getContext() !== null) {
         $any_context = true;
@@ -71,8 +71,8 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
         $any_coverage = true;
       }
 
-      if ($item->getPackage() !== null) {
-        $any_package = true;
+      if ($item->getPackages() !== null) {
+        $any_packages = true;
       }
     }
 
@@ -103,7 +103,7 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
           pht('Path'),
           pht('Coverage (All)'),
           pht('Coverage (Touched)'),
-          pht('Package'),
+          pht('Packages'),
         ))
       ->setColumnClasses(
         array(
@@ -125,7 +125,7 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
           true,
           $any_coverage,
           $any_coverage,
-          $any_package,
+          $any_packages,
         ))
       ->setDeviceVisibility(
         array(

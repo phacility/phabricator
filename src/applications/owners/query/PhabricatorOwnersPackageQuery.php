@@ -343,27 +343,13 @@ final class PhabricatorOwnersPackageQuery
 
 
   /**
-   * Get the package which controls a path, if one exists.
-   *
-   * @return PhabricatorOwnersPackage|null Package, if one exists.
-   */
-  public function getControllingPackageForPath($repository_phid, $path) {
-    $packages = $this->getControllingPackagesForPath($repository_phid, $path);
-
-    if (!$packages) {
-      return null;
-    }
-
-    return head($packages);
-  }
-
-
-  /**
    * Get a list of all packages which control a path or its parent directories,
    * ordered from weakest to strongest.
    *
    * The first package has the most specific claim on the path; the last
-   * package has the most general claim.
+   * package has the most general claim. Multiple packages may have claims of
+   * equal strength, so this ordering is primarily one of usability and
+   * convenience.
    *
    * @return list<PhabricatorOwnersPackage> List of controlling packages.
    */

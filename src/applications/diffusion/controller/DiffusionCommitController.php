@@ -1123,12 +1123,10 @@ final class DiffusionCommitController extends DiffusionController {
           ));
 
       if ($have_owners) {
-        $package = $control_query->getControllingPackageForPath(
+        $packages = $control_query->getControllingPackagesForPath(
           $repository_phid,
           $changeset->getFilename());
-        if ($package) {
-          $item->setPackage($package);
-        }
+        $item->setPackages($packages);
       }
 
       $toc_view->addItem($item);
