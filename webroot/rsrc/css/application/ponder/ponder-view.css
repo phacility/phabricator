@@ -26,6 +26,10 @@
   margin-top: 16px;
 }
 
+.device-desktop .ponder-answer-view .phui-timeline-view {
+  margin-left: 32px;
+}
+
 .ponder-answer-view .phui-header-subheader {
   display: inline;
   margin-left: 12px;

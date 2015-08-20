@@ -4,7 +4,7 @@ final class PonderAnswerView extends AphrontTagView {
 
   private $answer;
   private $transactions;
-  private $engine;
+  private $timeline;
   private $handle;
 
   public function setAnswer($answer) {
@@ -17,8 +17,8 @@ final class PonderAnswerView extends AphrontTagView {
     return $this;
   }
 
-  public function setMarkupEngine(PhabricatorMarkupEngine $engine) {
-    $this->engine = $engine;
+  public function setTimeline($timeline) {
+    $this->timeline = $timeline;
     return $this;
   }
 
@@ -124,12 +124,6 @@ final class PonderAnswerView extends AphrontTagView {
       ->appendChild($content)
       ->appendChild($footer);
 
-    $transaction_view = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($answer->getPHID())
-      ->setTransactions($this->transactions)
-      ->setMarkupEngine($this->engine);
-
     $comment_view = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($viewer)
       ->setObjectPHID($answer->getPHID())
@@ -145,7 +139,7 @@ final class PonderAnswerView extends AphrontTagView {
         'style' => 'display: none;',
       ),
       array(
-        $transaction_view,
+        $this->timeline,
         $comment_view,
       ));
 
