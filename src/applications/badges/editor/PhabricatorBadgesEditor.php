@@ -201,7 +201,7 @@ final class PhabricatorBadgesEditor
 
     $body->addLinkSection(
       pht('BADGE DETAIL'),
-      PhabricatorEnv::getProductionURI('/badge/view/'.$object->getID().'/'));
+      PhabricatorEnv::getProductionURI('/badges/view/'.$object->getID().'/'));
     return $body;
   }
 
