@@ -191,16 +191,12 @@ final class PhabricatorEmailPreferencesSettingsPanel
   }
 
   private function getAllEditorsWithTags(PhabricatorUser $user) {
-    $editors = id(new PhutilSymbolLoader())
+    $editors = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorApplicationTransactionEditor')
-      ->loadObjects();
+      ->setFilterMethod('getMailTagsMap')
+      ->execute();
 
     foreach ($editors as $key => $editor) {
-      // Remove editors which do not support mail tags.
-      if (!$editor->getMailTagsMap()) {
-        unset($editors[$key]);
-      }
-
       // Remove editors for applications which are not installed.
       $app = $editor->getEditorApplicationClass();
       if ($app !== null) {

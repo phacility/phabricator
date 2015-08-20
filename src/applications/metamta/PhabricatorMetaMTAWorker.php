@@ -18,7 +18,7 @@ final class PhabricatorMetaMTAWorker
         pht('Unable to load message!'));
     }
 
-    if ($message->getStatus() != PhabricatorMetaMTAMail::STATUS_QUEUE) {
+    if ($message->getStatus() != PhabricatorMailOutboundStatus::STATUS_QUEUE) {
       return;
     }
 

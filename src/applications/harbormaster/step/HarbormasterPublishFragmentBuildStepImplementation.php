@@ -29,33 +29,34 @@ final class HarbormasterPublishFragmentBuildStepImplementation
 
     $settings = $this->getSettings();
     $variables = $build_target->getVariables();
+    $viewer = PhabricatorUser::getOmnipotentUser();
 
     $path = $this->mergeVariables(
       'vsprintf',
       $settings['path'],
       $variables);
 
-    $artifact = $build->loadArtifact($settings['artifact']);
-
-    $file = $artifact->loadPhabricatorFile();
+    $artifact = $build_target->loadArtifact($settings['artifact']);
+    $impl = $artifact->getArtifactImplementation();
+    $file = $impl->loadArtifactFile($viewer);
 
     $fragment = id(new PhragmentFragmentQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($viewer)
       ->withPaths(array($path))
       ->executeOne();
 
     if ($fragment === null) {
       PhragmentFragment::createFromFile(
-        PhabricatorUser::getOmnipotentUser(),
+        $viewer,
         $file,
         $path,
         PhabricatorPolicies::getMostOpenPolicy(),
         PhabricatorPolicies::POLICY_USER);
     } else {
       if ($file->getMimeType() === 'application/zip') {
-        $fragment->updateFromZIP(PhabricatorUser::getOmnipotentUser(), $file);
+        $fragment->updateFromZIP($viewer, $file);
       } else {
-        $fragment->updateFromFile(PhabricatorUser::getOmnipotentUser(), $file);
+        $fragment->updateFromFile($viewer, $file);
       }
     }
   }
@@ -65,7 +66,7 @@ final class HarbormasterPublishFragmentBuildStepImplementation
       array(
         'name' => pht('Publishes File'),
         'key' => $this->getSetting('artifact'),
-        'type' => HarbormasterBuildArtifact::TYPE_FILE,
+        'type' => HarbormasterFileArtifact::ARTIFACTCONST,
       ),
     );
   }

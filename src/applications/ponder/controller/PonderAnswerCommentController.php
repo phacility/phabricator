@@ -19,11 +19,12 @@ final class PonderAnswerCommentController extends PonderController {
     }
 
     $is_preview = $request->isPreviewRequest();
-//    $draft = PhabricatorDraft::buildFromRequest($request);
 
     $qid = $answer->getQuestion()->getID();
     $aid = $answer->getID();
-    $view_uri = "/Q{$qid}#A{$aid}";
+
+    // TODO, this behaves badly when redirecting to the answer
+    $view_uri = "/Q{$qid}";
 
     $xactions = array();
     $xactions[] = id(new PonderAnswerTransaction())
@@ -46,9 +47,6 @@ final class PonderAnswerCommentController extends PonderController {
         ->setException($ex);
     }
 
-//    if ($draft) {
-//      $draft->replaceOrDelete();
-//    }
 
     if ($request->isAjax() && $is_preview) {
       return id(new PhabricatorApplicationTransactionResponse())

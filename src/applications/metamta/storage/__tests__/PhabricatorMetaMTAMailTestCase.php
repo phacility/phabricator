@@ -20,7 +20,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     $mailer = new PhabricatorMailImplementationTestAdapter();
     $mail->sendNow($force = true, $mailer);
     $this->assertEqual(
-      PhabricatorMetaMTAMail::STATUS_SENT,
+      PhabricatorMailOutboundStatus::STATUS_SENT,
       $mail->getStatus());
 
 
@@ -36,7 +36,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
       // Ignore.
     }
     $this->assertEqual(
-      PhabricatorMetaMTAMail::STATUS_QUEUE,
+      PhabricatorMailOutboundStatus::STATUS_QUEUE,
       $mail->getStatus());
 
 
@@ -52,7 +52,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
       // Ignore.
     }
     $this->assertEqual(
-      PhabricatorMetaMTAMail::STATUS_FAIL,
+      PhabricatorMailOutboundStatus::STATUS_FAIL,
       $mail->getStatus());
   }
 

@@ -15,6 +15,7 @@ final class PhabricatorOwnersPathsController
           // TODO: Support this capability.
           // PhabricatorPolicyCapability::CAN_EDIT,
         ))
+      ->needPaths(true)
       ->executeOne();
     if (!$package) {
       return new Aphront404Response();
@@ -66,7 +67,7 @@ final class PhabricatorOwnersPathsController
       return id(new AphrontRedirectResponse())
         ->setURI('/owners/package/'.$package->getID().'/');
     } else {
-      $paths = $package->loadPaths();
+      $paths = $package->getPaths();
       $path_refs = mpull($paths, 'getRef');
     }
 

@@ -52,9 +52,10 @@
 }
 
 .phabricator-remarkup tt.remarkup-monospaced {
-  color: #333333;
-  background: #ebebeb;
-  padding: 0 4px;
+  color: #000;
+  background: rgba(71,87,120,0.1);
+  padding: 1px 4px;
+  border-radius: 3px;
   white-space: pre-wrap;
 }
 

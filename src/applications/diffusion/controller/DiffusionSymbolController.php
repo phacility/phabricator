@@ -64,9 +64,10 @@ final class DiffusionSymbolController extends DiffusionController {
       $external_query->withLanguages(array($request->getStr('lang')));
     }
 
-    $external_sources = id(new PhutilSymbolLoader())
+    $external_sources = id(new PhutilClassMapQuery())
       ->setAncestorClass('DiffusionExternalSymbolsSource')
-      ->loadObjects();
+      ->execute();
+
     $results = array($symbols);
     foreach ($external_sources as $source) {
       $results[] = $source->executeQuery($external_query);

@@ -31,3 +31,7 @@
   .phui-side-column .phui-object-box:first-child  {
     margin: 0 16px 16px 0;
 }
+
+.phui-two-column-view pre {
+  white-space: pre-wrap;
+}

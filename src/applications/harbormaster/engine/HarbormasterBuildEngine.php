@@ -483,7 +483,7 @@ final class HarbormasterBuildEngine extends Phobject {
       ->execute();
 
     foreach ($artifacts as $artifact) {
-      $artifact->release();
+      $artifact->releaseArtifact();
     }
 
   }

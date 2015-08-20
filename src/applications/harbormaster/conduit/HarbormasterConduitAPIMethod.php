@@ -15,4 +15,16 @@ abstract class HarbormasterConduitAPIMethod extends ConduitAPIMethod {
     return pht('All Harbormaster APIs are new and subject to change.');
   }
 
+  protected function returnArtifactList(array $artifacts) {
+    $list = array();
+
+    foreach ($artifacts as $artifact) {
+      $list[] = array(
+        'phid' => $artifact->getPHID(),
+      );
+    }
+
+    return $list;
+  }
+
 }

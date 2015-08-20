@@ -62,10 +62,6 @@ abstract class DarkConsolePlugin extends Phobject {
     return $this->getRequest()->getRequestURI();
   }
 
-  public function shouldStartup() {
-    return true;
-  }
-
   public function didStartup() {
     return null;
   }

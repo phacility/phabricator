@@ -19,10 +19,9 @@ final class ConduitQueryConduitAPIMethod extends ConduitAPIMethod {
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $classes = id(new PhutilSymbolLoader())
+    $classes = id(new PhutilClassMapQuery())
       ->setAncestorClass('ConduitAPIMethod')
-      ->setType('class')
-      ->loadObjects();
+      ->execute();
 
     $names_to_params = array();
     foreach ($classes as $class) {

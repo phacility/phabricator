@@ -8,6 +8,11 @@ final class PonderQuestionTransaction
   const TYPE_ANSWERS = 'ponder.question:answer';
   const TYPE_STATUS = 'ponder.question:status';
 
+  const MAILTAG_DETAILS = 'question:details';
+  const MAILTAG_COMMENT = 'question:comment';
+  const MAILTAG_ANSWERS = 'question:answer';
+  const MAILTAG_OTHER = 'question:other';
+
   public function getApplicationName() {
     return 'ponder';
   }
@@ -103,6 +108,28 @@ final class PonderQuestionTransaction
     }
 
     return parent::getTitle();
+  }
+
+  public function getMailTags() {
+    $tags = parent::getMailTags();
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $tags[] = self::MAILTAG_COMMENT;
+        break;
+      case self::TYPE_TITLE:
+      case self::TYPE_CONTENT:
+      case self::TYPE_STATUS:
+        $tags[] = self::MAILTAG_DETAILS;
+        break;
+      case self::TYPE_ANSWERS:
+        $tags[] = self::MAILTAG_ANSWERS;
+        break;
+      default:
+        $tags[] = self::MAILTAG_OTHER;
+        break;
+    }
+    return $tags;
   }
 
   public function getIcon() {
@@ -307,25 +334,6 @@ final class PonderQuestionTransaction
     }
 
     return reset($add);
-  }
-
-  /**
-   * Generally, the answer object is only available if the transaction
-   * type is `self::TYPE_ANSWERS`.
-   *
-   * Some stories - notably ones made before D7027 - will be of the more
-   * generic @{class:PhabricatorApplicationTransactionFeedStory}. These
-   * poor stories won't have the PonderAnswer loaded, and thus will have
-   * less cool information.
-   */
-  private function getNewAnswerObject(PhabricatorFeedStory $story) {
-    if ($story instanceof PonderTransactionFeedStory) {
-      $answer_phid = $this->getNewAnswerPHID();
-      if ($answer_phid) {
-        return $story->getObject($answer_phid);
-      }
-    }
-    return null;
   }
 
 }

@@ -1,0 +1,2 @@
+ALTER TABLE {$NAMESPACE}_owners.owners_package
+  ADD status VARCHAR(32) NOT NULL COLLATE {$COLLATE_TEXT};

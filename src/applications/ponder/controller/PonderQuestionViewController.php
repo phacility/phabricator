@@ -16,24 +16,12 @@ final class PonderQuestionViewController extends PonderController {
       return new Aphront404Response();
     }
 
-    $question_xactions = $this->buildQuestionTransactions($question);
     $answers = $this->buildAnswers($question->getAnswers());
 
-    $authors = mpull($question->getAnswers(), null, 'getAuthorPHID');
-    if (isset($authors[$viewer->getPHID()])) {
-      $answer_add_panel = id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
-        ->appendChild(
-          pht(
-            'You have already answered this question. You can not answer '.
-            'twice, but you can edit your existing answer.'));
-    } else {
-      $answer_add_panel = new PonderAddAnswerView();
-      $answer_add_panel
-        ->setQuestion($question)
-        ->setUser($viewer)
-        ->setActionURI('/ponder/answer/add/');
-    }
+    $answer_add_panel = id(new PonderAddAnswerView())
+      ->setQuestion($question)
+      ->setUser($viewer)
+      ->setActionURI('/ponder/answer/add/');
 
     $header = new PHUIHeaderView();
     $header->setHeader($question->getTitle());
@@ -54,9 +42,40 @@ final class PonderQuestionViewController extends PonderController {
     $properties = $this->buildPropertyListView($question, $actions);
     $sidebar = $this->buildSidebar($question);
 
+    $content_id = celerity_generate_unique_node_id();
+    $timeline = $this->buildTransactionTimeline(
+      $question,
+      id(new PonderQuestionTransactionQuery())
+      ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT)));
+    $xactions = $timeline->getTransactions();
+
+    $add_comment = id(new PhabricatorApplicationTransactionCommentView())
+      ->setUser($viewer)
+      ->setObjectPHID($question->getPHID())
+      ->setShowPreview(false)
+      ->setHeaderText(pht('Question Comment'))
+      ->setAction($this->getApplicationURI("/question/comment/{$id}/"))
+      ->setSubmitButtonName(pht('Comment'));
+
+    $comment_view = phutil_tag(
+      'div',
+      array(
+        'id' => $content_id,
+        'style' => 'display: none;',
+      ),
+      array(
+        $timeline,
+        $add_comment,
+      ));
+
+    $footer = id(new PonderFooterView())
+      ->setContentID($content_id)
+      ->setCount(count($xactions));
+
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addPropertyList($properties);
+      ->addPropertyList($properties)
+      ->appendChild($footer);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     $crumbs->addTextCrumb('Q'.$id, '/Q'.$id);
@@ -64,7 +83,7 @@ final class PonderQuestionViewController extends PonderController {
     $ponder_view = id(new PHUITwoColumnView())
       ->setMainColumn(array(
           $object_box,
-          $question_xactions,
+          $comment_view,
           $answers,
           $answer_add_panel,
         ))
@@ -152,48 +171,28 @@ final class PonderQuestionViewController extends PonderController {
 
     $view->invokeWillRenderEvent();
 
-    $view->addSectionHeader(pht('Question'));
-    $view->addTextContent(
-      array(
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'phabricator-remarkup',
-          ),
-          PhabricatorMarkupEngine::renderOneObject(
+    $details = PhabricatorMarkupEngine::renderOneObject(
             $question,
             $question->getMarkupField(),
-            $viewer)),
-      ));
+            $viewer);
 
+    if ($details) {
+      $view->addSectionHeader(
+        pht('Details'),
+        PHUIPropertyListView::ICON_SUMMARY);
+
+      $view->addTextContent(
+        array(
+          phutil_tag(
+            'div',
+            array(
+              'class' => 'phabricator-remarkup',
+            ),
+            $details),
+        ));
+    }
 
     return $view;
-  }
-
-  private function buildQuestionTransactions(PonderQuestion $question) {
-    $viewer = $this->getViewer();
-    $id = $question->getID();
-
-    $timeline = $this->buildTransactionTimeline(
-      $question,
-      id(new PonderQuestionTransactionQuery())
-      ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT)));
-    $xactions = $timeline->getTransactions();
-
-    $add_comment = id(new PhabricatorApplicationTransactionCommentView())
-      ->setUser($viewer)
-      ->setObjectPHID($question->getPHID())
-      ->setShowPreview(false)
-      ->setHeaderText(pht('Question Comment'))
-      ->setAction($this->getApplicationURI("/question/comment/{$id}/"))
-      ->setSubmitButtonName(pht('Comment'));
-
-    return $this->wrapComments(
-      count($xactions),
-      array(
-        $timeline,
-        $add_comment,
-      ));
   }
 
   /**
@@ -206,208 +205,32 @@ final class PonderQuestionViewController extends PonderController {
   private function buildAnswers(array $answers) {
     $viewer = $this->getViewer();
 
-    $out = array();
+    $author_phids = mpull($answers, 'getAuthorPHID');
+    $handles = $this->loadViewerHandles($author_phids);
+    $answers_sort = array_reverse(msort($answers, 'getVoteCount'));
 
-    $xactions = id(new PonderAnswerTransactionQuery())
-      ->setViewer($viewer)
-      ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT))
-      ->withObjectPHIDs(mpull($answers, 'getPHID'))
-      ->execute();
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-    foreach ($xactions as $xaction) {
-      if ($xaction->getComment()) {
-        $engine->addObject(
-          $xaction->getComment(),
-          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
-      }
-    }
-    $engine->process();
-
-    $xaction_groups = mgroup($xactions, 'getObjectPHID');
-
-    foreach ($answers as $answer) {
-      $author_phid = $answer->getAuthorPHID();
-      $xactions = idx($xaction_groups, $answer->getPHID(), array());
+    $view = array();
+    foreach ($answers_sort as $answer) {
       $id = $answer->getID();
+      $handle = $handles[$answer->getAuthorPHID()];
 
-      $out[] = phutil_tag('br');
-      $out[] = phutil_tag('br');
-      $out[] = id(new PhabricatorAnchorView())
-        ->setAnchorName("A$id");
-      $header = id(new PHUIHeaderView())
-        ->setHeader($viewer->renderHandle($author_phid));
+      $timeline = $this->buildTransactionTimeline(
+        $answer,
+        id(new PonderAnswerTransactionQuery())
+        ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT)));
+      $xactions = $timeline->getTransactions();
 
-      $actions = $this->buildAnswerActions($answer);
-      $properties = $this->buildAnswerProperties($answer, $actions);
 
-      $object_box = id(new PHUIObjectBoxView())
-        ->setHeader($header)
-        ->addPropertyList($properties);
-
-      $out[] = $object_box;
-      $details = array();
-
-      $details[] = id(new PhabricatorApplicationTransactionView())
+      $view[] = id(new PonderAnswerView())
         ->setUser($viewer)
-        ->setObjectPHID($answer->getPHID())
+        ->setAnswer($answer)
         ->setTransactions($xactions)
-        ->setMarkupEngine($engine);
+        ->setTimeline($timeline)
+        ->setHandle($handle);
 
-      $form = id(new PhabricatorApplicationTransactionCommentView())
-        ->setUser($viewer)
-        ->setObjectPHID($answer->getPHID())
-        ->setShowPreview(false)
-        ->setHeaderText(pht('Answer Comment'))
-        ->setAction($this->getApplicationURI("/answer/comment/{$id}/"))
-        ->setSubmitButtonName(pht('Comment'));
-
-      $details[] = $form;
-
-      $out[] = $this->wrapComments(
-        count($xactions),
-        $details);
     }
-
-    $out[] = phutil_tag('br');
-    $out[] = phutil_tag('br');
-
-    return $out;
-  }
-
-  private function buildAnswerActions(PonderAnswer $answer) {
-    $viewer = $this->getViewer();
-    $request = $this->getRequest();
-    $id = $answer->getID();
-
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $answer,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($answer)
-      ->setObjectURI($request->getRequestURI());
-
-    $user_marked = $answer->getUserVote();
-    $can_vote = $viewer->isLoggedIn();
-
-    if ($user_marked) {
-      $helpful_uri = "/answer/helpful/remove/{$id}/";
-      $helpful_icon = 'fa-times';
-      $helpful_text = pht('Remove Helpful');
-    } else {
-      $helpful_uri = "/answer/helpful/add/{$id}/";
-      $helpful_icon = 'fa-thumbs-up';
-      $helpful_text = pht('Mark as Helpful');
-    }
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon($helpful_icon)
-        ->setName($helpful_text)
-        ->setHref($this->getApplicationURI($helpful_uri))
-        ->setRenderAsForm(true)
-        ->setDisabled(!$can_vote)
-        ->setWorkflow($can_vote));
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-pencil')
-        ->setName(pht('Edit Answer'))
-        ->setHref($this->getApplicationURI("/answer/edit/{$id}/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-list')
-        ->setName(pht('View History'))
-        ->setHref($this->getApplicationURI("/answer/history/{$id}/")));
 
     return $view;
-  }
-
-  private function buildAnswerProperties(
-    PonderAnswer $answer,
-    PhabricatorActionListView $actions) {
-
-    $viewer = $this->getViewer();
-    $view = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($answer)
-      ->setActionList($actions);
-
-    $view->addProperty(
-      pht('Created'),
-      phabricator_datetime($answer->getDateCreated(), $viewer));
-
-    $view->addProperty(
-      pht('Helpfuls'),
-      $answer->getVoteCount());
-
-    $view->invokeWillRenderEvent();
-
-    $view->addSectionHeader(pht('Answer'));
-    $view->addTextContent(
-      array(
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'phabricator-remarkup',
-          ),
-          PhabricatorMarkupEngine::renderOneObject(
-            $answer,
-            $answer->getMarkupField(),
-            $viewer)),
-      ));
-
-    return $view;
-  }
-
-  private function wrapComments($n, $stuff) {
-    if ($n == 0) {
-      $text = pht('Add a Comment');
-    } else {
-      $text = pht('Show %s Comments', new PhutilNumber($n));
-    }
-
-    $show_id = celerity_generate_unique_node_id();
-    $hide_id = celerity_generate_unique_node_id();
-
-    Javelin::initBehavior('phabricator-reveal-content');
-    require_celerity_resource('ponder-view-css');
-
-    $show = phutil_tag(
-      'div',
-      array(
-        'id' => $show_id,
-        'class' => 'ponder-show-comments',
-      ),
-      javelin_tag(
-        'a',
-        array(
-          'href' => '#',
-          'sigil' => 'reveal-content',
-          'meta' => array(
-            'showIDs' => array($hide_id),
-            'hideIDs' => array($show_id),
-          ),
-        ),
-        $text));
-
-    $hide = phutil_tag(
-      'div',
-      array(
-        'class' => 'ponder-comments-view',
-        'id' => $hide_id,
-        'style' => 'display: none',
-      ),
-      $stuff);
-
-    return array($show, $hide);
   }
 
   private function buildSidebar(PonderQuestion $question) {

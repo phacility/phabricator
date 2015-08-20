@@ -48,6 +48,9 @@ final class HeraldTestConsoleController extends HeraldController {
           } else if ($object instanceof PonderQuestion) {
             $adapter = id(new HeraldPonderQuestionAdapter())
               ->setQuestion($object);
+          } else if ($object instanceof PhabricatorMetaMTAMail) {
+            $adapter = id(new PhabricatorMailOutboundMailHeraldAdapter())
+              ->setObject($object);
           } else {
             throw new Exception(pht('Can not build adapter for object!'));
           }

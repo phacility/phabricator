@@ -25,6 +25,7 @@ final class HarbormasterUploadArtifactBuildStepImplementation
   public function execute(
     HarbormasterBuild $build,
     HarbormasterBuildTarget $build_target) {
+    $viewer = PhabricatorUser::getOmnipotentUser();
 
     $settings = $this->getSettings();
     $variables = $build_target->getVariables();
@@ -34,9 +35,9 @@ final class HarbormasterUploadArtifactBuildStepImplementation
       $settings['path'],
       $variables);
 
-    $artifact = $build->loadArtifact($settings['hostartifact']);
-
-    $lease = $artifact->loadDrydockLease();
+    $artifact = $build_target->loadArtifact($settings['hostartifact']);
+    $impl = $artifact->getArtifactImplementation();
+    $lease = $impl->loadArtifactLease($viewer);
 
     $interface = $lease->getInterface('filesystem');
 
@@ -44,14 +45,13 @@ final class HarbormasterUploadArtifactBuildStepImplementation
     $file = $interface->saveFile($path, $settings['name']);
 
     // Insert the artifact record.
-    $artifact = $build->createArtifact(
-      $build_target,
+    $artifact = $build_target->createArtifact(
+      $viewer,
       $settings['name'],
-      HarbormasterBuildArtifact::TYPE_FILE);
-    $artifact->setArtifactData(array(
-      'filePHID' => $file->getPHID(),
-    ));
-    $artifact->save();
+      HarbormasterFileArtifact::ARTIFACTCONST,
+      array(
+        'filePHID' => $file->getPHID(),
+      ));
   }
 
   public function getArtifactInputs() {
@@ -59,7 +59,7 @@ final class HarbormasterUploadArtifactBuildStepImplementation
       array(
         'name' => pht('Upload From Host'),
         'key' => $this->getSetting('hostartifact'),
-        'type' => HarbormasterBuildArtifact::TYPE_HOST,
+        'type' => HarbormasterHostArtifact::ARTIFACTCONST,
       ),
     );
   }
@@ -69,7 +69,7 @@ final class HarbormasterUploadArtifactBuildStepImplementation
       array(
         'name' => pht('Uploaded File'),
         'key' => $this->getSetting('name'),
-        'type' => HarbormasterBuildArtifact::TYPE_FILE,
+        'type' => HarbormasterHostArtifact::ARTIFACTCONST,
       ),
     );
   }

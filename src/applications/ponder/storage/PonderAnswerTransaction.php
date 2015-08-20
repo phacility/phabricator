@@ -4,6 +4,7 @@ final class PonderAnswerTransaction
   extends PhabricatorApplicationTransaction {
 
   const TYPE_CONTENT = 'ponder.answer:content';
+  const TYPE_STATUS = 'ponder.answer:status';
   const TYPE_QUESTION_ID = 'ponder.answer:question-id';
 
   public function getApplicationName() {
@@ -27,6 +28,7 @@ final class PonderAnswerTransaction
 
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
+      case self::TYPE_STATUS:
         $phids[] = $this->getObjectPHID();
         break;
     }
@@ -75,6 +77,19 @@ final class PonderAnswerTransaction
             $this->renderHandleLink($object_phid));
         }
       break;
+      case self::TYPE_STATUS:
+        if ($new == PonderAnswerStatus::ANSWER_STATUS_VISIBLE) {
+          return pht(
+            '%s marked %s as visible.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        } else if ($new == PonderAnswerStatus::ANSWER_STATUS_HIDDEN) {
+          return pht(
+            '%s marked %s as hidden.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+      break;
     }
 
     return parent::getTitle();
@@ -97,6 +112,19 @@ final class PonderAnswerTransaction
         } else {
           return pht(
             '%s updated %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+      break;
+      case self::TYPE_STATUS:
+        if ($new == PonderAnswerStatus::ANSWER_STATUS_VISIBLE) {
+          return pht(
+            '%s marked %s as visible.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        } else if ($new == PonderAnswerStatus::ANSWER_STATUS_HIDDEN) {
+          return pht(
+            '%s marked %s as hidden.',
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($object_phid));
         }

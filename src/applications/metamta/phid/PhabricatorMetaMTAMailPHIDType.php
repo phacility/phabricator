@@ -37,7 +37,7 @@ final class PhabricatorMetaMTAMailPHIDType extends PhabricatorPHIDType {
 
       $handle
         ->setName($name)
-        ->setFullName($name);
+        ->setURI('/mail/detail/'.$id.'/');
     }
   }
 }

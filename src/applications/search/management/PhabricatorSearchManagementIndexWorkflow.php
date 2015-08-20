@@ -122,9 +122,9 @@ final class PhabricatorSearchManagementIndexWorkflow
   }
 
   private function loadPHIDsByTypes($type) {
-    $indexers = id(new PhutilSymbolLoader())
+    $indexers = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorSearchDocumentIndexer')
-      ->loadObjects();
+      ->execute();
 
     $phids = array();
     foreach ($indexers as $indexer) {

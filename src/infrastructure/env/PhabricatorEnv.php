@@ -200,10 +200,11 @@ final class PhabricatorEnv extends Phobject {
     $default_source->loadExternalOptions();
 
     // If this install has site config sources, load them now.
-    $site_sources = id(new PhutilSymbolLoader())
+    $site_sources = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorConfigSiteSource')
-      ->loadObjects();
-    $site_sources = msort($site_sources, 'getPriority');
+      ->setSortMethod('getPriority')
+      ->execute();
+
     foreach ($site_sources as $site_source) {
       $stack->pushSource($site_source);
     }

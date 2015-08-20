@@ -349,18 +349,10 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $other_view = $this->renderOtherRevisions($other_revisions);
     }
 
-    $toc_view = new DifferentialDiffTableOfContentsView();
-    $toc_view->setChangesets($changesets);
-    $toc_view->setVisibleChangesets($visible_changesets);
-    $toc_view->setRenderingReferences($rendering_references);
-    $toc_view->setCoverageMap($target->loadCoverageMap($user));
-    if ($repository) {
-      $toc_view->setRepository($repository);
-    }
-    $toc_view->setDiff($target);
-    $toc_view->setUser($user);
-    $toc_view->setRevisionID($revision->getID());
-    $toc_view->setWhitespace($whitespace);
+    $toc_view = $this->buildTableOfContents(
+      $changesets,
+      $visible_changesets,
+      $target->loadCoverageMap($user));
 
     $comment_form = null;
     if (!$viewer_is_anonymous) {
@@ -1043,6 +1035,5 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     return $view;
   }
-
 
 }

@@ -305,9 +305,9 @@ final class PhabricatorPolicyQuery
   }
 
   public static function getObjectPolicyRules($object) {
-    $rules = id(new PhutilSymbolLoader())
+    $rules = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorPolicyRule')
-      ->loadObjects();
+      ->execute();
 
     $results = array();
     foreach ($rules as $rule) {

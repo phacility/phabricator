@@ -524,13 +524,6 @@ final class ConpherenceUpdateController
             ->renderSingleThread($conpherence, $policy_objects);
           $nav_item = hsprintf('%s', $nav_item);
           break;
-        case ConpherenceUpdateActions::MESSAGE:
-          $file_widget = id(new ConpherenceFileWidgetView())
-            ->setUser($this->getRequest()->getUser())
-            ->setConpherence($conpherence)
-            ->setUpdateURI($widget_uri);
-          $file_widget = hsprintf('%s', $file_widget->render());
-          break;
         case ConpherenceUpdateActions::ADD_PERSON:
           $people_widget = id(new ConpherencePeopleWidgetView())
             ->setUser($user)

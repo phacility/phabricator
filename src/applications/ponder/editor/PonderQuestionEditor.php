@@ -177,30 +177,13 @@ final class PonderQuestionEditor
     return true;
   }
 
-  protected function getFeedStoryType() {
-    return 'PonderTransactionFeedStory';
-  }
-
-  protected function getFeedStoryData(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-
-    $data = parent::getFeedStoryData($object, $xactions);
-    $answer = $this->getAnswer();
-    if ($answer) {
-      $data['answerPHID'] = $answer->getPHID();
-    }
-
-    return $data;
- }
-
   protected function shouldImplyCC(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
       case PonderQuestionTransaction::TYPE_ANSWERS:
-        return true;
+        return false;
     }
 
     return parent::shouldImplyCC($object, $xaction);
@@ -209,7 +192,38 @@ final class PonderQuestionEditor
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return true;
+      foreach ($xactions as $xaction) {
+        switch ($xaction->getTransactionType()) {
+          case PonderQuestionTransaction::TYPE_ANSWERS:
+            return false;
+        }
+      }
+      return true;
+  }
+
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+      foreach ($xactions as $xaction) {
+        switch ($xaction->getTransactionType()) {
+          case PonderQuestionTransaction::TYPE_ANSWERS:
+            return false;
+        }
+      }
+      return true;
+  }
+
+  public function getMailTagsMap() {
+    return array(
+      PonderQuestionTransaction::MAILTAG_DETAILS =>
+        pht('Someone changes the questions details.'),
+      PonderQuestionTransaction::MAILTAG_ANSWERS =>
+        pht('Someone adds a new answer.'),
+      PonderQuestionTransaction::MAILTAG_COMMENT =>
+        pht('Someone comments on the question.'),
+      PonderQuestionTransaction::MAILTAG_OTHER =>
+        pht('Other question activity not listed above occurs.'),
+    );
   }
 
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {
@@ -234,14 +248,6 @@ final class PonderQuestionEditor
         if ($old === null) {
           $body->addRawSection($new);
         }
-      }
-      // If the user gave an answer, add the answer text. Also update
-      // the header and uri to be more answer-specific.
-      if ($type == PonderQuestionTransaction::TYPE_ANSWERS) {
-        $answer = $this->getAnswer();
-        $body->addRawSection($answer->getContent());
-        $header = pht('ANSWER DETAIL');
-        $uri = $answer->getURI();
       }
     }
 
