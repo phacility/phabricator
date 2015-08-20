@@ -30,12 +30,6 @@ final class ConpherenceWidgetConfigConstants extends ConpherenceConstants {
           'customHref' => null,
         ),
       ),
-      'widgets-files' => array(
-        'name' => pht('Files'),
-        'icon' => 'fa-files-o',
-        'deviceOnly' => false,
-        'hasCreate' => false,
-      ),
       'widgets-settings' => array(
         'name' => pht('Notifications'),
         'icon' => 'fa-wrench',

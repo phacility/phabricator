@@ -41,9 +41,6 @@ final class ConpherenceWidgetController extends ConpherenceController {
       case 'widgets-people':
         $content = $this->renderPeopleWidgetPaneContent();
         break;
-      case 'widgets-files':
-        $content = $this->renderFileWidgetPaneContent();
-        break;
       case 'widgets-settings':
         $content = $this->renderSettingsWidgetPaneContent();
         break;
@@ -90,15 +87,6 @@ final class ConpherenceWidgetController extends ConpherenceController {
         'sigil' => 'widgets-people',
       ),
       $this->renderPeopleWidgetPaneContent());
-   $widgets[] = javelin_tag(
-      'div',
-      array(
-        'class' => 'widgets-body',
-        'id' => 'widgets-files',
-        'sigil' => 'widgets-files',
-        'style' => 'display: none;',
-      ),
-      $this->renderFileWidgetPaneContent());
     $widgets[] = phutil_tag(
       'div',
       array(
@@ -127,12 +115,6 @@ final class ConpherenceWidgetController extends ConpherenceController {
       ->setUpdateURI($this->getWidgetURI());
   }
 
-  private function renderFileWidgetPaneContent() {
-    return  id(new ConpherenceFileWidgetView())
-      ->setUser($this->getViewer())
-      ->setConpherence($this->getConpherence())
-      ->setUpdateURI($this->getWidgetURI());
-  }
 
   private function renderSettingsWidgetPaneContent() {
     $viewer = $this->getViewer();
