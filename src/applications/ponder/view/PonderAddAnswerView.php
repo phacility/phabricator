@@ -34,11 +34,40 @@ final class PonderAddAnswerView extends AphrontView {
     $info_panel = null;
     if ($question->getStatus() != PonderQuestionStatus::STATUS_OPEN) {
       $info_panel = id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->appendChild(
           pht(
             'This question has been marked as closed,
              but you can still leave a new answer.'));
+    }
+
+    $box_style = null;
+    $own_question = null;
+    $hide_action_id = celerity_generate_unique_node_id();
+    $show_action_id = celerity_generate_unique_node_id();
+    if ($question->getAuthorPHID() == $viewer->getPHID()) {
+      $box_style = 'display: none;';
+      $open_link = javelin_tag(
+        'a',
+        array(
+          'sigil' => 'reveal-content',
+          'class' => 'mml',
+          'id' => $hide_action_id,
+          'href' => '#',
+          'meta' => array(
+            'showIDs' => array($show_action_id),
+            'hideIDs' => array($hide_action_id),
+          ),
+        ),
+        pht('Add an answer.'));
+      $own_question = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->setID($hide_action_id)
+        ->appendChild(
+          pht(
+            'This is your own question. You are welcome to provide
+            an answer if you have found a resolution.'))
+        ->appendChild($open_link);
     }
 
     $header = id(new PHUIHeaderView())
@@ -69,6 +98,15 @@ final class PonderAddAnswerView extends AphrontView {
       $box->setInfoView($info_panel);
     }
 
-    return $box;
+    $box = phutil_tag(
+      'div',
+      array(
+        'style' => $box_style,
+        'class' => 'mlt',
+        'id' => $show_action_id,
+      ),
+      $box);
+
+    return array($own_question, $box);
   }
 }
