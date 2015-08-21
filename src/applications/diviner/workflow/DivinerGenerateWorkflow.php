@@ -414,16 +414,16 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     $version['atom'] = DivinerAtom::getAtomSerializationVersion();
     $version['rules'] = $this->getRules();
 
-    $atomizers = id(new PhutilSymbolLoader())
+    $atomizers = id(new PhutilClassMapQuery())
       ->setAncestorClass('DivinerAtomizer')
-      ->setConcreteOnly(true)
-      ->selectAndLoadSymbols();
+      ->execute();
 
     $atomizer_versions = array();
     foreach ($atomizers as $atomizer) {
-      $atomizer_versions[$atomizer['name']] = call_user_func(
+      $name = get_class($atomizer);
+      $atomizer_versions[$name] = call_user_func(
         array(
-          $atomizer['name'],
+          $name,
           'getAtomizerVersion',
         ));
     }

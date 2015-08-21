@@ -160,9 +160,9 @@ try {
   exit(1);
 }
 
-$workflows = id(new PhutilSymbolLoader())
+$workflows = id(new PhutilClassMapQuery())
   ->setAncestorClass('PhabricatorStorageManagementWorkflow')
-  ->loadObjects();
+  ->execute();
 
 $patches = PhabricatorSQLPatchList::buildAllPatches();
 

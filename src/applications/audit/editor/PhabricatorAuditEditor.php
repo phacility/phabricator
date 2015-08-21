@@ -170,7 +170,7 @@ final class PhabricatorAuditEditor
             $audit_requested = PhabricatorAuditStatusConstants::AUDIT_REQUESTED;
             $audit_reason = $this->getAuditReasons($phid);
           }
-          $requests[] = id (new PhabricatorRepositoryAuditRequest())
+          $requests[] = id(new PhabricatorRepositoryAuditRequest())
             ->setCommitPHID($object->getPHID())
             ->setAuditorPHID($phid)
             ->setAuditStatus($audit_requested)

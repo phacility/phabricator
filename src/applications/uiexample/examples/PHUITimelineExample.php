@@ -196,6 +196,7 @@ final class PHUITimelineExample extends PhabricatorUIExample {
     }
 
     $timeline = id(new PHUITimelineView());
+    $timeline->setUser($user);
     foreach ($events as $event) {
       $timeline->addEvent($event);
     }

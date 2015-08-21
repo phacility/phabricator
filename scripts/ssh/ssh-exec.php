@@ -190,11 +190,10 @@ try {
         $user->getUsername()));
   }
 
-  $workflows = id(new PhutilSymbolLoader())
+  $workflows = id(new PhutilClassMapQuery())
     ->setAncestorClass('PhabricatorSSHWorkflow')
-    ->loadObjects();
-
-  $workflow_names = mpull($workflows, 'getName', 'getName');
+    ->setUniqueMethod('getName')
+    ->execute();
 
   if (!$original_argv) {
     throw new Exception(
@@ -210,7 +209,7 @@ try {
         $user->getUsername(),
         'git clone',
         'hg push',
-        implode(', ', $workflow_names)));
+        implode(', ', array_keys($workflows))));
   }
 
   $log_argv = implode(' ', $original_argv);
@@ -231,7 +230,7 @@ try {
 
   $parsed_args = new PhutilArgumentParser($parseable_argv);
 
-  if (empty($workflow_names[$command])) {
+  if (empty($workflows[$command])) {
     throw new Exception(pht('Invalid command.'));
   }
 

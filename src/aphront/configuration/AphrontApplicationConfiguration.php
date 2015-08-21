@@ -58,6 +58,7 @@ abstract class AphrontApplicationConfiguration extends Phobject {
    * @phutil-external-symbol class PhabricatorStartup
    */
   public static function runHTTPRequest(AphrontHTTPSink $sink) {
+    PhabricatorStartup::beginStartupPhase('multimeter');
     $multimeter = MultimeterControl::newInstance();
     $multimeter->setEventContext('<http-init>');
     $multimeter->setEventViewer('<none>');
@@ -67,6 +68,7 @@ abstract class AphrontApplicationConfiguration extends Phobject {
     // request object first.
     $write_guard = new AphrontWriteGuard('id');
 
+    PhabricatorStartup::beginStartupPhase('env.init');
     PhabricatorEnv::initializeWebEnvironment();
 
     $multimeter->setSampleRate(
@@ -78,6 +80,7 @@ abstract class AphrontApplicationConfiguration extends Phobject {
     }
 
     // This is the earliest we can get away with this, we need env config first.
+    PhabricatorStartup::beginStartupPhase('log.access');
     PhabricatorAccessLog::init();
     $access_log = PhabricatorAccessLog::getLog();
     PhabricatorStartup::setAccessLog($access_log);
@@ -89,6 +92,11 @@ abstract class AphrontApplicationConfiguration extends Phobject {
       ));
 
     DarkConsoleXHProfPluginAPI::hookProfiler();
+
+    // We just activated the profiler, so we don't need to keep track of
+    // startup phases anymore: it can take over from here.
+    PhabricatorStartup::beginStartupPhase('startup.done');
+
     DarkConsoleErrorLogPluginAPI::registerErrorHandler();
 
     $response = PhabricatorSetupCheck::willProcessRequest();
@@ -246,13 +254,14 @@ abstract class AphrontApplicationConfiguration extends Phobject {
         if ($response instanceof AphrontWebpageResponse) {
           echo phutil_tag(
             'div',
-            array('style' =>
-              'background: #eeddff;'.
-              'white-space: pre-wrap;'.
-              'z-index: 200000;'.
-              'position: relative;'.
-              'padding: 8px;'.
-              'font-family: monospace',
+            array(
+              'style' =>
+                'background: #eeddff;'.
+                'white-space: pre-wrap;'.
+                'z-index: 200000;'.
+                'position: relative;'.
+                'padding: 8px;'.
+                'font-family: monospace',
             ),
             $unexpected_output);
         }

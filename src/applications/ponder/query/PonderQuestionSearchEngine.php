@@ -27,16 +27,8 @@ final class PonderQuestionSearchEngine
       $query->withAnswererPHIDs($map['answerers']);
     }
 
-    $status = $map['status'];
-    if ($status != null) {
-      switch ($status) {
-        case 0:
-          $query->withStatus(PonderQuestionQuery::STATUS_OPEN);
-          break;
-        case 1:
-          $query->withStatus(PonderQuestionQuery::STATUS_CLOSED);
-          break;
-      }
+    if ($map['statuses']) {
+      $query->withStatuses($map['statuses']);
     }
 
     return $query;
@@ -52,9 +44,9 @@ final class PonderQuestionSearchEngine
         ->setKey('answerers')
         ->setAliases(array('answerers'))
         ->setLabel(pht('Answered By')),
-      id(new PhabricatorSearchSelectField())
+      id(new PhabricatorSearchCheckboxesField())
         ->setLabel(pht('Status'))
-        ->setKey('status')
+        ->setKey('statuses')
         ->setOptions(PonderQuestionStatus::getQuestionStatusMap()),
     );
   }
@@ -65,7 +57,9 @@ final class PonderQuestionSearchEngine
 
   protected function getBuiltinQueryNames() {
     $names = array(
+      'recent' => pht('Recent Questions'),
       'open' => pht('Open Questions'),
+      'resolved' => pht('Resolved Questions'),
       'all' => pht('All Questions'),
     );
 
@@ -85,14 +79,24 @@ final class PonderQuestionSearchEngine
       case 'all':
         return $query;
       case 'open':
-        return $query->setParameter('status', PonderQuestionQuery::STATUS_OPEN);
+        return $query->setParameter(
+          'statuses', array(PonderQuestionStatus::STATUS_OPEN));
+      case 'recent':
+        return $query->setParameter(
+          'statuses', array(
+            PonderQuestionStatus::STATUS_OPEN,
+            PonderQuestionStatus::STATUS_CLOSED_RESOLVED,
+          ));
+      case 'resolved':
+        return $query->setParameter(
+          'statuses', array(PonderQuestionStatus::STATUS_CLOSED_RESOLVED));
       case 'authored':
         return $query->setParameter(
           'authorPHIDs',
           array($this->requireViewer()->getPHID()));
       case 'answered':
         return $query->setParameter(
-          'answererPHIDs',
+          'answerers',
           array($this->requireViewer()->getPHID()));
     }
 

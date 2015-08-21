@@ -22,6 +22,15 @@ final class HarbormasterPlanRunController extends HarbormasterController {
       return new Aphront404Response();
     }
 
+    $cancel_uri = $this->getApplicationURI("plan/{$plan_id}/");
+
+    if (!$plan->canRunManually()) {
+      return $this->newDialog()
+        ->setTitle(pht('Can Not Run Plan'))
+        ->appendParagraph(pht('This plan can not be run manually.'))
+        ->addCancelButton($cancel_uri);
+    }
+
     $e_name = true;
     $v_name = null;
 
@@ -65,7 +74,6 @@ final class HarbormasterPlanRunController extends HarbormasterController {
     }
 
     $title = pht('Run Build Plan Manually');
-    $cancel_uri = $this->getApplicationURI("plan/{$plan_id}/");
     $save_button = pht('Run Plan Manually');
 
     $form = id(new PHUIFormLayoutView())

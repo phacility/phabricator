@@ -289,12 +289,14 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
           ->setIcon('fa-ban'));
     }
 
+    $can_run = ($has_manage && $plan->canRunManually());
+
     $list->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Run Plan Manually'))
         ->setHref($this->getApplicationURI("plan/run/{$id}/"))
         ->setWorkflow(true)
-        ->setDisabled(!$has_manage)
+        ->setDisabled(!$can_run)
         ->setIcon('fa-play-circle'));
 
     return $list;

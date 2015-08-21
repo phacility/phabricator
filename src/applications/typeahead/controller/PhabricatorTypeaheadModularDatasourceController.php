@@ -29,9 +29,10 @@ final class PhabricatorTypeaheadModularDatasourceController
     // This makes form submission easier in the debug view.
     $class = nonempty($request->getURIData('class'), $request->getStr('class'));
 
-    $sources = id(new PhutilSymbolLoader())
+    $sources = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorTypeaheadDatasource')
-      ->loadObjects();
+      ->execute();
+
     if (isset($sources[$class])) {
       $source = $sources[$class];
       $source->setParameters($request->getRequestData());

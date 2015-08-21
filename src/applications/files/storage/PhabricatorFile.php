@@ -882,18 +882,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
   public static function buildAllEngines() {
-    $engines = id(new PhutilSymbolLoader())
-      ->setType('class')
-      ->setConcreteOnly(true)
+    return id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorFileStorageEngine')
-      ->selectAndLoadSymbols();
-
-    $results = array();
-    foreach ($engines as $engine_class) {
-      $results[] = newv($engine_class['name'], array());
-    }
-
-    return $results;
+      ->execute();
   }
 
   public function getViewableMimeType() {

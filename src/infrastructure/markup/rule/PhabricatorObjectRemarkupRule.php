@@ -53,7 +53,7 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     return $uri;
   }
 
-  protected function renderObjectRefForAnyMedia (
+  protected function renderObjectRefForAnyMedia(
     $object,
     PhabricatorObjectHandle $handle,
     $anchor,

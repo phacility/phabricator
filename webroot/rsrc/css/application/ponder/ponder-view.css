@@ -2,45 +2,6 @@
  * @provides ponder-view-css
  */
 
-.ponder-votable {
-  float: right;
-  margin: 4px 0 4px 24px;
-}
-
-.ponder-votebox {
-  border-radius: 4px;
-  background: #f3f3f3;
-  border: 1px solid {$blueborder};
-  text-align: center;
-  width: 24px;
-}
-
-.ponder-votebox a {
-  font-size: 20px;
-  line-height: 24px;
-  display: block;
-
-  text-decoration: none;
-  color: #aaaaaa;
-  font-weight: normal;
-}
-
-.ponder-votebox a.ponder-vote-active {
-  color: {$blue};
-}
-
-.ponder-votebox a:hover {
-  color: #ffffff;
-  background: {$blue};
-}
-
-.ponder-vote-count {
-  color: {$darkbluetext};
-  font-size: {$biggerfontsize};
-  line-height: 20px;
-  font-weight: bold;
-}
-
 .ponder-show-comments {
   text-align: center;
   padding: 8px;
@@ -53,7 +14,70 @@
   border-right: 1px solid {$lightblueborder};
 }
 
-.device-desktop .ponder-comments-view {
-  width: 90%;
-  margin: 0 auto;
+.ponder-question-view .phui-property-list-properties-wrap {
+  width: 66%;
+}
+
+.ponder-question-view .phui-property-list-actions {
+  width: 30%;
+}
+
+.ponder-answer-view {
+  margin-top: 16px;
+}
+
+.device-desktop .ponder-answer-view .phui-timeline-view {
+  margin-left: 32px;
+}
+
+.ponder-answer-view .phui-header-subheader {
+  display: inline;
+  margin-left: 12px;
+}
+
+.ponder-answer-view .phui-header-shell {
+  padding-bottom: 8px;
+}
+
+.ponder-answer-view .phui-header-view .phui-header-header {
+  font-size: 16px;
+}
+
+.ponder-answer-view .phui-header-col1 {
+  width: 45px;
+}
+
+.ponder-answer-view .phui-header-image {
+  height: 35px;
+  width: 35px;
+  border-radius: 3px;
+}
+
+.ponder-footer-view {
+  margin: 0 4px -4px;
+  text-align: right;
+}
+
+.ponder-footer-view .ponder-footer-action {
+  padding: 4px 8px;
+  margin-left: 8px;
+  color: {$bluetext};
+  display: inline-block;
+  background-color: rgba(71, 87, 120, 0.06);
+  font-size: {$smallerfontsize};
+}
+
+.ponder-footer-view .ponder-footer-action.ponder-footer-action-helpful {
+  background-color: {$lightyellow};
+}
+
+.ponder-footer-view .ponder-footer-action .phui-icon-view {
+  color: {$bluetext};
+  font-size: {$smallerfontsize};
+}
+
+.ponder-footer-view a:hover {
+  text-decoration: none;
+  color: {$darkbluetext};
+  background-color: rgba(71, 87, 120, 0.10);
 }

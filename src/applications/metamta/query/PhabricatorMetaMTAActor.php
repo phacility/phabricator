@@ -5,6 +5,7 @@ final class PhabricatorMetaMTAActor extends Phobject {
   const STATUS_DELIVERABLE = 'deliverable';
   const STATUS_UNDELIVERABLE = 'undeliverable';
 
+  const REASON_NONE = 'none';
   const REASON_UNLOADABLE = 'unloadable';
   const REASON_UNMAILABLE = 'unmailable';
   const REASON_NO_ADDRESS = 'noaddress';
@@ -17,6 +18,8 @@ final class PhabricatorMetaMTAActor extends Phobject {
   const REASON_BOT = 'bot';
   const REASON_FORCE = 'force';
   const REASON_FORCE_HERALD = 'force-herald';
+  const REASON_ROUTE_AS_NOTIFICATION = 'route-as-notification';
+  const REASON_ROUTE_AS_MAIL = 'route-as-mail';
 
   private $phid;
   private $emailAddress;
@@ -71,8 +74,45 @@ final class PhabricatorMetaMTAActor extends Phobject {
     return $this->reasons;
   }
 
+  public static function isDeliveryReason($reason) {
+    switch ($reason) {
+      case self::REASON_NONE:
+      case self::REASON_FORCE:
+      case self::REASON_FORCE_HERALD:
+      case self::REASON_ROUTE_AS_MAIL:
+        return true;
+      default:
+        // All other reasons cause the message to not be delivered.
+        return false;
+    }
+  }
+
+  public static function getReasonName($reason) {
+    $names = array(
+      self::REASON_NONE => pht('None'),
+      self::REASON_DISABLED => pht('Disabled Recipient'),
+      self::REASON_BOT => pht('Bot Recipient'),
+      self::REASON_NO_ADDRESS => pht('No Address'),
+      self::REASON_EXTERNAL_TYPE => pht('External Recipient'),
+      self::REASON_UNMAILABLE => pht('Not Mailable'),
+      self::REASON_RESPONSE => pht('Similar Reply'),
+      self::REASON_SELF => pht('Self Mail'),
+      self::REASON_MAIL_DISABLED => pht('Mail Disabled'),
+      self::REASON_MAILTAGS => pht('Mail Tags'),
+      self::REASON_UNLOADABLE => pht('Bad Recipient'),
+      self::REASON_FORCE => pht('Forced Mail'),
+      self::REASON_FORCE_HERALD => pht('Forced by Herald'),
+      self::REASON_ROUTE_AS_NOTIFICATION => pht('Route as Notification'),
+      self::REASON_ROUTE_AS_MAIL => pht('Route as Mail'),
+    );
+
+    return idx($names, $reason, pht('Unknown ("%s")', $reason));
+  }
+
   public static function getReasonDescription($reason) {
     $descriptions = array(
+      self::REASON_NONE => pht(
+        'No special rules affected this mail.'),
       self::REASON_DISABLED => pht(
         'This user is disabled; disabled users do not receive mail.'),
       self::REASON_BOT => pht(
@@ -112,6 +152,12 @@ final class PhabricatorMetaMTAActor extends Phobject {
       self::REASON_FORCE_HERALD => pht(
         'This recipient was added by a "Send me an Email" rule in Herald, '.
         'which overrides some delivery settings.'),
+      self::REASON_ROUTE_AS_NOTIFICATION => pht(
+        'This message was downgraded to a notification by outbound mail '.
+        'rules in Herald.'),
+      self::REASON_ROUTE_AS_MAIL => pht(
+        'This message was upgraded to email by outbound mail rules '.
+        'in Herald.'),
     );
 
     return idx($descriptions, $reason, pht('Unknown Reason ("%s")', $reason));

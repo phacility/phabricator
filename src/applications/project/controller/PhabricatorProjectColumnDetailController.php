@@ -3,17 +3,10 @@
 final class PhabricatorProjectColumnDetailController
   extends PhabricatorProjectBoardController {
 
-  private $id;
-  private $projectID;
-
-  public function willProcessRequest(array $data) {
-    $this->projectID = $data['projectID'];
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $project_id = $request->getURIData('projectID');
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
@@ -21,7 +14,7 @@ final class PhabricatorProjectColumnDetailController
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
         ))
-      ->withIDs(array($this->projectID))
+      ->withIDs(array($project_id))
       ->needImages(true)
       ->executeOne();
 
@@ -32,7 +25,7 @@ final class PhabricatorProjectColumnDetailController
 
     $column = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,

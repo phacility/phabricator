@@ -603,9 +603,9 @@ final class DifferentialHunkParser extends Phobject {
         $start = $start - $add_context;
         $end = $end + $add_context;
         $hunk_content = array();
-        $hunk_pos = array( '-' => 0, '+' => 0 );
-        $hunk_offset = array( '-' => null, '+' => null );
-        $hunk_last = array( '-' => null, '+' => null );
+        $hunk_pos = array('-' => 0, '+' => 0);
+        $hunk_offset = array('-' => null, '+' => null);
+        $hunk_last = array('-' => null, '+' => null);
         foreach (explode("\n", $hunk->getChanges()) as $line) {
           $in_common = strncmp($line, ' ', 1) === 0;
           $in_old = strncmp($line, '-', 1) === 0 || $in_common;

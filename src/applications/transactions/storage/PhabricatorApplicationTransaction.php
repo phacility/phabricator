@@ -428,21 +428,6 @@ abstract class PhabricatorApplicationTransaction
             return 'red';
         }
         break;
-      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-        $old = $this->getOldValue();
-        $new = $this->getNewValue();
-        $add = array_diff($new, $old);
-        $rem = array_diff($old, $new);
-        if ($add && $rem) {
-          return 'green';
-        } else if ($add) {
-          return 'green';
-        } else if ($rem) {
-          return 'black';
-        } else {
-          return null;
-        }
-      break;
     }
     return null;
   }
@@ -657,23 +642,20 @@ abstract class PhabricatorApplicationTransaction
           $this->renderHandleLink($author_phid));
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
         return pht(
-          '%s changed the visibility of this %s from "%s" to "%s".',
+          '%s changed the visibility from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
-          $this->getApplicationObjectTypeName(),
           $this->renderPolicyName($old, 'old'),
           $this->renderPolicyName($new, 'new'));
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return pht(
-          '%s changed the edit policy of this %s from "%s" to "%s".',
+          '%s changed the edit policy from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
-          $this->getApplicationObjectTypeName(),
           $this->renderPolicyName($old, 'old'),
           $this->renderPolicyName($new, 'new'));
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
         return pht(
-          '%s changed the join policy of this %s from "%s" to "%s".',
+          '%s changed the join policy from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
-          $this->getApplicationObjectTypeName(),
           $this->renderPolicyName($old, 'old'),
           $this->renderPolicyName($new, 'new'));
       case PhabricatorTransactions::TYPE_SPACE:

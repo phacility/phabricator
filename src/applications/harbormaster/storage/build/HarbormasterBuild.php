@@ -235,36 +235,6 @@ final class HarbormasterBuild extends HarbormasterDAO
     return $log;
   }
 
-  public function createArtifact(
-    HarbormasterBuildTarget $build_target,
-    $artifact_key,
-    $artifact_type) {
-
-    $artifact =
-      HarbormasterBuildArtifact::initializeNewBuildArtifact($build_target);
-    $artifact->setArtifactKey(
-      $this->getPHID(),
-      $this->getBuildGeneration(),
-      $artifact_key);
-    $artifact->setArtifactType($artifact_type);
-    $artifact->save();
-    return $artifact;
-  }
-
-  public function loadArtifact($name) {
-    $artifact = id(new HarbormasterBuildArtifactQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withArtifactKeys(
-        $this->getPHID(),
-        $this->getBuildGeneration(),
-        array($name))
-      ->executeOne();
-    if ($artifact === null) {
-      throw new Exception(pht('Artifact not found!'));
-    }
-    return $artifact;
-  }
-
   public function retrieveVariablesFromBuild() {
     $results = array(
       'buildable.diff' => null,
@@ -291,9 +261,9 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
   public static function getAvailableBuildVariables() {
-    $objects = id(new PhutilSymbolLoader())
+    $objects = id(new PhutilClassMapQuery())
       ->setAncestorClass('HarbormasterBuildableInterface')
-      ->loadObjects();
+      ->execute();
 
     $variables = array();
     $variables[] = array(

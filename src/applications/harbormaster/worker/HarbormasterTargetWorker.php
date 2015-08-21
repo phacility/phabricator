@@ -11,6 +11,16 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
     return phutil_units('24 hours in seconds');
   }
 
+  public function renderForDisplay(PhabricatorUser $viewer) {
+    try {
+      $target = $this->loadBuildTarget();
+    } catch (Exception $ex) {
+      return null;
+    }
+
+    return $viewer->renderHandle($target->getPHID());
+  }
+
   private function loadBuildTarget() {
     $data = $this->getTaskData();
     $id = idx($data, 'targetID');

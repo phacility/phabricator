@@ -23,9 +23,9 @@ final class PhabricatorApplicationTransactionShowOlderController
     }
 
     $template = $object->getApplicationTransactionTemplate();
-    $queries = id(new PhutilSymbolLoader())
+    $queries = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorApplicationTransactionQuery')
-      ->loadObjects();
+      ->execute();
 
     $object_query = null;
     foreach ($queries as $query) {

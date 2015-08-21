@@ -201,6 +201,54 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
     );
   }
 
+  public function createArtifact(
+    PhabricatorUser $actor,
+    $artifact_key,
+    $artifact_type,
+    array $artifact_data) {
+
+    $impl = HarbormasterArtifact::getArtifactType($artifact_type);
+    if (!$impl) {
+      throw new Exception(
+        pht(
+          'There is no implementation available for artifacts of type "%s".',
+          $artifact_type));
+    }
+
+    $impl->validateArtifactData($artifact_data);
+
+    $artifact = HarbormasterBuildArtifact::initializeNewBuildArtifact($this)
+      ->setArtifactKey($artifact_key)
+      ->setArtifactType($artifact_type)
+      ->setArtifactData($artifact_data);
+
+    $impl = $artifact->getArtifactImplementation();
+    $impl->willCreateArtifact($actor);
+
+    return $artifact->save();
+  }
+
+  public function loadArtifact($artifact_key) {
+    $indexes = array();
+
+    $indexes[] = HarbormasterBuildArtifact::getArtifactIndex(
+      $this,
+      $artifact_key);
+
+    $artifact = id(new HarbormasterBuildArtifactQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withArtifactIndexes($indexes)
+      ->executeOne();
+    if ($artifact === null) {
+      throw new Exception(
+        pht(
+          'Artifact "%s" not found!',
+          $artifact_key));
+    }
+
+    return $artifact;
+  }
+
 
 /* -(  Status  )------------------------------------------------------------- */
 

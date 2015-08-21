@@ -1,0 +1,37 @@
+/**
+ * @provides phui-two-column-view-css
+ */
+
+.phui-two-column-view {
+  display: table;
+  width: 100%;
+}
+
+.phui-two-column-row {
+  display: table-row;
+}
+
+.device-desktop .phui-two-column-view .phui-main-column {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.device-desktop .phui-two-column-view .phui-side-column {
+  width: 320px;
+  display: table-cell;
+  vertical-align: top;
+}
+
+.device-desktop .phui-two-column-view
+  .phui-main-column .phui-object-box:first-child  {
+    margin: 0 16px 0 16px;
+}
+
+.device-desktop .phui-two-column-view
+  .phui-side-column .phui-object-box:first-child  {
+    margin: 0 16px 16px 0;
+}
+
+.phui-two-column-view pre {
+  white-space: pre-wrap;
+}

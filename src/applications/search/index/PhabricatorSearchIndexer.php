@@ -15,9 +15,9 @@ final class PhabricatorSearchIndexer extends Phobject {
   }
 
   public function indexDocumentByPHID($phid, $context) {
-    $indexers = id(new PhutilSymbolLoader())
+    $indexers = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorSearchDocumentIndexer')
-      ->loadObjects();
+      ->execute();
 
     foreach ($indexers as $indexer) {
       if ($indexer->shouldIndexDocumentByPHID($phid)) {

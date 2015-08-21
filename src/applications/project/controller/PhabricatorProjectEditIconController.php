@@ -3,20 +3,14 @@
 final class PhabricatorProjectEditIconController
   extends PhabricatorProjectController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    if ($this->id) {
+    if ($id) {
       $project = id(new PhabricatorProjectQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,

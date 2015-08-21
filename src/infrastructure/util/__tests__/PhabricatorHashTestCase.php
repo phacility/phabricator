@@ -19,9 +19,23 @@ final class PhabricatorHashTestCase extends PhabricatorTestCase {
 
     // Test that the encoding produces 6 bits of entropy per byte.
     $entropy = array(
-      'dog', 'cat', 'rat', 'bat', 'dig', 'fig', 'cot',
-      'cut', 'fog', 'rig', 'rug', 'dug', 'mat', 'pat',
-      'eat', 'tar', 'pot',
+      'dog',
+      'cat',
+      'rat',
+      'bat',
+      'dig',
+      'fig',
+      'cot',
+      'cut',
+      'fog',
+      'rig',
+      'rug',
+      'dug',
+      'mat',
+      'pat',
+      'eat',
+      'tar',
+      'pot',
     );
 
     $seen = array();

@@ -111,25 +111,6 @@ abstract class DiffusionBrowseController extends DiffusionController {
         ->setIcon('fa-home')
         ->setDisabled(!$behind_head));
 
-    // TODO: Ideally, this should live in Owners and be event-triggered, but
-    // there's no reasonable object for it to react to right now.
-
-    $owners = 'PhabricatorOwnersApplication';
-    if (PhabricatorApplication::isClassInstalled($owners)) {
-      $owners_uri = id(new PhutilURI('/owners/view/search/'))
-        ->setQueryParams(
-          array(
-            'repository' => $drequest->getCallsign(),
-            'path' => '/'.$drequest->getPath(),
-          ));
-
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Find Owners'))
-          ->setHref((string)$owners_uri)
-          ->setIcon('fa-users'));
-    }
-
     return $view;
   }
 
@@ -137,7 +118,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
     DiffusionRequest $drequest,
     PhabricatorActionListView $actions) {
 
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
@@ -178,6 +159,46 @@ abstract class DiffusionBrowseController extends DiffusionController {
         $view->addSectionHeader(pht('Tag Content'));
         $view->addTextContent($this->markupText($tag->getMessage()));
       }
+    }
+
+    $repository = $drequest->getRepository();
+
+    $owners = 'PhabricatorOwnersApplication';
+    if (PhabricatorApplication::isClassInstalled($owners)) {
+      $package_query = id(new PhabricatorOwnersPackageQuery())
+        ->setViewer($viewer)
+        ->withStatuses(array(PhabricatorOwnersPackage::STATUS_ACTIVE))
+        ->withControl(
+          $repository->getPHID(),
+          array(
+            $drequest->getPath(),
+          ));
+
+      $package_query->execute();
+
+      $packages = $package_query->getControllingPackagesForPath(
+        $repository->getPHID(),
+        $drequest->getPath());
+
+      if ($packages) {
+        $ownership = id(new PHUIStatusListView())
+          ->setUser($viewer);
+
+        foreach ($packages as $package) {
+          $icon = 'fa-list-alt';
+          $color = 'grey';
+
+          $item = id(new PHUIStatusItemView())
+            ->setIcon($icon, $color)
+            ->setTarget($viewer->renderHandle($package->getPHID()));
+
+          $ownership->addItem($item);
+        }
+      } else {
+        $ownership = phutil_tag('em', array(), pht('None'));
+      }
+
+      $view->addProperty(pht('Packages'), $ownership);
     }
 
     return $view;

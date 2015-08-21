@@ -29,6 +29,17 @@ final class DifferentialDiffViewController extends DifferentialController {
         ->setURI('/D'.$diff->getRevisionID().'?id='.$diff->getID());
     }
 
+    $diff_phid = $diff->getPHID();
+    $buildables = id(new HarbormasterBuildableQuery())
+      ->setViewer($viewer)
+      ->withBuildablePHIDs(array($diff_phid))
+      ->withManualBuildables(false)
+      ->needBuilds(true)
+      ->needTargets(true)
+      ->execute();
+    $buildables = mpull($buildables, null, 'getBuildablePHID');
+    $diff->attachBuildable(idx($buildables, $diff_phid));
+
     // TODO: implement optgroup support in AphrontFormSelectControl?
     $select = array();
     $select[] = hsprintf('<optgroup label="%s">', pht('Create New Revision'));
@@ -105,10 +116,10 @@ final class DifferentialDiffViewController extends DifferentialController {
     $changesets = $diff->loadChangesets();
     $changesets = msort($changesets, 'getSortKey');
 
-    $table_of_contents = id(new DifferentialDiffTableOfContentsView())
-      ->setChangesets($changesets)
-      ->setVisibleChangesets($changesets)
-      ->setUnitTestData(idx($props, 'arc:unit', array()));
+    $table_of_contents = $this->buildTableOfContents(
+      $changesets,
+      $changesets,
+      $diff->loadCoverageMap($viewer));
 
     $refs = array();
     foreach ($changesets as $changeset) {

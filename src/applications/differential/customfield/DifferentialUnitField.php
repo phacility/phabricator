@@ -56,8 +56,14 @@ final class DifferentialUnitField
 
   protected function newHarbormasterMessageView(array $messages) {
     foreach ($messages as $key => $message) {
-      if ($message->getResult() == ArcanistUnitTestResult::RESULT_PASS) {
-        unset($messages[$key]);
+      switch ($message->getResult()) {
+        case ArcanistUnitTestResult::RESULT_PASS:
+        case ArcanistUnitTestResult::RESULT_SKIP:
+          // Don't show "Pass" or "Skip" in the UI since they aren't very
+          // interesting. The user can click through to the full results if
+          // they want details.
+          unset($messages[$key]);
+          break;
       }
     }
 

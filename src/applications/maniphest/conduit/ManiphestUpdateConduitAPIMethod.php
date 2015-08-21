@@ -38,7 +38,7 @@ final class ManiphestUpdateConduitAPIMethod extends ManiphestConduitAPIMethod {
           'phid'));
     }
 
-    $query = id (new ManiphestTaskQuery())
+    $query = id(new ManiphestTaskQuery())
       ->setViewer($request->getUser())
       ->needSubscriberPHIDs(true)
       ->needProjectPHIDs(true);

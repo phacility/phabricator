@@ -3,7 +3,7 @@
 final class PhabricatorMetaMTAApplication extends PhabricatorApplication {
 
   public function getName() {
-    return pht('MetaMTA');
+    return pht('Mail');
   }
 
   public function getBaseURI() {
@@ -15,11 +15,11 @@ final class PhabricatorMetaMTAApplication extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Delivers Mail');
+    return pht('Send and Receive Mail');
   }
 
   public function getFlavorText() {
-    return pht('Yo dawg, we heard you like MTAs.');
+    return pht('Every program attempts to expand until it can read mail.');
   }
 
   public function getApplicationGroup() {
@@ -30,12 +30,8 @@ final class PhabricatorMetaMTAApplication extends PhabricatorApplication {
     return false;
   }
 
-  public function isLaunchable() {
-    return false;
-  }
-
   public function getTypeaheadURI() {
-    return null;
+    return '/mail/';
   }
 
   public function getRoutes() {

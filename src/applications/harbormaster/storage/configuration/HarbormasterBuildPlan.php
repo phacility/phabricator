@@ -85,6 +85,15 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
   }
 
 
+  public function canRunManually() {
+    if ($this->isAutoplan()) {
+      return false;
+    }
+
+    return true;
+  }
+
+
   public function getName() {
     $autoplan = $this->getAutoplan();
     if ($autoplan) {

@@ -38,7 +38,7 @@ final class PhameBlogListController extends PhameController {
     $blog_list = $this->renderBlogList($blogs, $user, $nodata);
     $blog_list->setPager($pager);
 
-    $box = id (new PHUIObjectBoxView())
+    $box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setObjectList($blog_list);
 

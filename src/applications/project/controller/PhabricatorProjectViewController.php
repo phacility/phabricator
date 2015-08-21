@@ -9,10 +9,10 @@ final class PhabricatorProjectViewController
 
   public function handleRequest(AphrontRequest $request) {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
 
     $query = id(new PhabricatorProjectQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->needMembers(true)
       ->needWatchers(true)
       ->needImages(true)
@@ -31,7 +31,7 @@ final class PhabricatorProjectViewController
 
 
     $columns = id(new PhabricatorProjectColumnQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withProjectPHIDs(array($project->getPHID()))
       ->execute();
     if ($columns) {

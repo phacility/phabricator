@@ -1,12 +1,12 @@
 <?php
 
-final class PonderQuestionDefaultViewCapability
+final class PonderDefaultViewCapability
   extends PhabricatorPolicyCapability {
 
-  const CAPABILITY = 'ponder.question.default.view';
+  const CAPABILITY = 'ponder.default.view';
 
   public function getCapabilityName() {
-    return pht('Default Question View Policy');
+    return pht('Default View Policy');
   }
 
   public function shouldAllowPublicPolicySetting() {

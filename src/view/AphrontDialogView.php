@@ -290,10 +290,11 @@ final class AphrontDialogView extends AphrontView {
     }
 
     if (!$this->renderAsForm) {
-      $buttons = array(phabricator_form(
-        $this->user,
-        $form_attributes,
-        array_merge($hidden_inputs, $buttons)),
+      $buttons = array(
+        phabricator_form(
+          $this->user,
+          $form_attributes,
+          array_merge($hidden_inputs, $buttons)),
       );
     }
 

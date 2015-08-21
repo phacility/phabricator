@@ -37,31 +37,15 @@ abstract class PhabricatorSQLPatchList extends Phobject {
   }
 
   final public static function buildAllPatches() {
-    $patch_lists = id(new PhutilSymbolLoader())
+    $patch_lists = id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
-      ->setConcreteOnly(true)
-      ->selectAndLoadSymbols();
+      ->setUniqueMethod('getNamespace')
+      ->execute();
 
     $specs = array();
     $seen_namespaces = array();
 
-    foreach ($patch_lists as $patch_class) {
-      $patch_class = $patch_class['name'];
-      $patch_list = newv($patch_class, array());
-
-      $namespace = $patch_list->getNamespace();
-      if (isset($seen_namespaces[$namespace])) {
-        $prior = $seen_namespaces[$namespace];
-        throw new Exception(
-          pht(
-            "%s '%s' has the same namespace, '%s', as another patch list ".
-            "class, '%s'. Each patch list MUST have a unique namespace.",
-            __CLASS__,
-            $patch_class,
-            $namespace,
-            $prior));
-      }
-
+    foreach ($patch_lists as $patch_list) {
       $last_key = null;
       foreach ($patch_list->getPatches() as $key => $patch) {
         if (!is_array($patch)) {
@@ -69,7 +53,7 @@ abstract class PhabricatorSQLPatchList extends Phobject {
             pht(
               "%s '%s' has a patch '%s' which is not an array.",
               __CLASS__,
-              $patch_class,
+              get_class($patch_list),
               $key));
         }
 
@@ -88,7 +72,7 @@ abstract class PhabricatorSQLPatchList extends Phobject {
                 "%s '%s' has a patch, '%s', with an unknown property, '%s'.".
                 "Patches must have only valid keys: %s.",
                 __CLASS__,
-                $patch_class,
+                get_class($patch_list),
                 $key,
                 $pkey,
                 implode(', ', array_keys($valid))));
@@ -101,7 +85,7 @@ abstract class PhabricatorSQLPatchList extends Phobject {
               "%s '%s' has a patch with a numeric key, '%s'. ".
               "Patches must use string keys.",
               __CLASS__,
-              $patch_class,
+              get_class($patch_list),
               $key));
         }
 
@@ -111,10 +95,11 @@ abstract class PhabricatorSQLPatchList extends Phobject {
               "%s '%s' has a patch with a colon in the key name, '%s'. ".
               "Patch keys may not contain colons.",
               __CLASS__,
-              $patch_class,
+              get_class($patch_list),
               $key));
         }
 
+        $namespace = $patch_list->getNamespace();
         $full_key = "{$namespace}:{$key}";
 
         if (isset($specs[$full_key])) {
@@ -123,7 +108,7 @@ abstract class PhabricatorSQLPatchList extends Phobject {
               "%s '%s' has a patch '%s' which duplicates an ".
               "existing patch key.",
               __CLASS__,
-              $patch_class,
+              get_class($patch_list),
               $key));
         }
 
@@ -152,7 +137,7 @@ abstract class PhabricatorSQLPatchList extends Phobject {
                 "determined implicitly. The first patch in a patch list must ".
                 "list the patch or patches it depends on explicitly.",
                 $full_key,
-                $patch_class));
+                get_class($patch_list)));
           } else {
             $patch['after'] = array($last_key);
           }

@@ -4,10 +4,10 @@ final class PolicyLockOptionType
   extends PhabricatorConfigJSONOptionType {
 
   public function validateOption(PhabricatorConfigOption $option, $value) {
-    $capabilities = id(new PhutilSymbolLoader())
+    $capabilities = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorPolicyCapability')
-      ->loadObjects();
-    $capabilities = mpull($capabilities, null, 'getCapabilityKey');
+      ->setUniqueMethod('getCapabilityKey')
+      ->execute();
 
     $policy_phids = array();
     foreach ($value as $capability_key => $policy) {

@@ -203,7 +203,7 @@ foreach ($input as $key => $line) {
     }
   }
 
-  if (count ($symbols) >= $args->getArg('max-transaction')) {
+  if (count($symbols) >= $args->getArg('max-transaction')) {
     try {
       echo pht(
         "Committing %s symbols...\n",
