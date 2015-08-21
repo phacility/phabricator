@@ -286,6 +286,7 @@ phutil_register_library_map(array(
     'DarkConsolePlugin' => 'applications/console/plugin/DarkConsolePlugin.php',
     'DarkConsoleRequestPlugin' => 'applications/console/plugin/DarkConsoleRequestPlugin.php',
     'DarkConsoleServicesPlugin' => 'applications/console/plugin/DarkConsoleServicesPlugin.php',
+    'DarkConsoleStartupPlugin' => 'applications/console/plugin/DarkConsoleStartupPlugin.php',
     'DarkConsoleXHProfPlugin' => 'applications/console/plugin/DarkConsoleXHProfPlugin.php',
     'DarkConsoleXHProfPluginAPI' => 'applications/console/plugin/xhprof/DarkConsoleXHProfPluginAPI.php',
     'DatabaseConfigurationProvider' => 'infrastructure/storage/configuration/DatabaseConfigurationProvider.php',
@@ -3912,6 +3913,7 @@ phutil_register_library_map(array(
     'DarkConsolePlugin' => 'Phobject',
     'DarkConsoleRequestPlugin' => 'DarkConsolePlugin',
     'DarkConsoleServicesPlugin' => 'DarkConsolePlugin',
+    'DarkConsoleStartupPlugin' => 'DarkConsolePlugin',
     'DarkConsoleXHProfPlugin' => 'DarkConsolePlugin',
     'DarkConsoleXHProfPluginAPI' => 'Phobject',
     'DefaultDatabaseConfigurationProvider' => array(
