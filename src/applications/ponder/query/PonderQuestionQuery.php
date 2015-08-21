@@ -129,7 +129,7 @@ final class PonderQuestionQuery
     return $questions;
   }
 
-  private function buildJoinsClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn_r) {
     $joins = array();
 
     if ($this->answererPHIDs) {
@@ -141,7 +141,7 @@ final class PonderQuestionQuery
         $this->answererPHIDs);
     }
 
-    return implode(' ', $joins);
+    return $joins;
   }
 
   protected function getPrimaryTableAlias() {
