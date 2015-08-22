@@ -4,7 +4,8 @@ final class PonderAnswerView extends AphrontTagView {
 
   private $answer;
   private $transactions;
-  private $engine;
+  private $timeline;
+  private $handle;
 
   public function setAnswer($answer) {
     $this->answer = $answer;
@@ -16,8 +17,13 @@ final class PonderAnswerView extends AphrontTagView {
     return $this;
   }
 
-  public function setMarkupEngine(PhabricatorMarkupEngine $engine) {
-    $this->engine = $engine;
+  public function setTimeline($timeline) {
+    $this->timeline = $timeline;
+    return $this;
+  }
+
+  public function setHandle($handle) {
+    $this->handle = $handle;
     return $this;
   }
 
@@ -34,6 +40,7 @@ final class PonderAnswerView extends AphrontTagView {
     $status = $answer->getStatus();
     $author_phid = $answer->getAuthorPHID();
     $actions = $this->buildAnswerActions();
+    $handle = $this->handle;
     $id = $answer->getID();
 
     if ($status == PonderAnswerStatus::ANSWER_STATUS_HIDDEN) {
@@ -72,9 +79,11 @@ final class PonderAnswerView extends AphrontTagView {
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setEpoch($answer->getDateCreated())
-      ->setHeader($viewer->renderHandle($author_phid))
-      ->addActionLink($action_button);
+      ->setEpoch($answer->getDateModified())
+      ->setHeader($handle->getName())
+      ->addActionLink($action_button)
+      ->setImage($handle->getImageURI())
+      ->setImageURL($handle->getURI());
 
     $content = phutil_tag(
       'div',
@@ -95,29 +104,25 @@ final class PonderAnswerView extends AphrontTagView {
       ->setCount(count($this->transactions));
 
     $votes = $answer->getVoteCount();
-    if ($votes) {
-      $icon = id(new PHUIIconView())
-        ->setIconFont('fa-thumbs-up');
-      $helpful = phutil_tag(
-        'span',
-        array(
-          'class' => 'ponder-footer-action',
-        ),
-        array($votes, $icon));
-      $footer->addAction($helpful);
+    $vote_class = null;
+    if ($votes > 0) {
+      $vote_class = 'ponder-footer-action-helpful';
     }
+    $icon = id(new PHUIIconView())
+      ->setIconFont('fa-thumbs-up msr');
+    $helpful = phutil_tag(
+      'span',
+      array(
+        'class' => 'ponder-footer-action '.$vote_class,
+      ),
+      array($icon, $votes));
+    $footer->addAction($helpful);
 
     $answer_view = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->appendChild($anchor)
       ->appendChild($content)
       ->appendChild($footer);
-
-    $transaction_view = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($answer->getPHID())
-      ->setTransactions($this->transactions)
-      ->setMarkupEngine($this->engine);
 
     $comment_view = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($viewer)
@@ -134,7 +139,7 @@ final class PonderAnswerView extends AphrontTagView {
         'style' => 'display: none;',
       ),
       array(
-        $transaction_view,
+        $this->timeline,
         $comment_view,
       ));
 

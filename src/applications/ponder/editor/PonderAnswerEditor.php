@@ -86,16 +86,17 @@ final class PonderAnswerEditor extends PonderEditor {
   }
 
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {
-    $question = $object->getQuestion();
-    return id(new PonderQuestionReplyHandler())
-      ->setMailReceiver($question);
+    return id(new PonderAnswerReplyHandler())
+      ->setMailReceiver($object);
   }
 
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
-    $question = $object->getQuestion();
-    return parent::buildMailTemplate($question);
-  }
+    $id = $object->getID();
 
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject("ANSR{$id}")
+      ->addHeader('Thread-Topic', "ANSR{$id}");
+  }
 
   protected function buildMailBody(
     PhabricatorLiskDAO $object,

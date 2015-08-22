@@ -66,18 +66,6 @@ JX.behavior('conpherence-menu', function(config) {
     var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
     var textarea = JX.DOM.find(form_root, 'textarea');
     if (!non_update) {
-      var fileWidget = null;
-      try {
-        fileWidget = JX.DOM.find(root, 'div', 'widgets-files');
-      } catch (ex) {
-        // Ignore; maybe no files widget
-      }
-      if (fileWidget) {
-        JX.DOM.setContent(
-          fileWidget,
-          JX.$H(r.file_widget));
-      }
-
       _scrollMessageWindow();
       textarea.value = '';
     }

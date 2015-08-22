@@ -16,6 +16,7 @@ final class PhabricatorMetaMTAMail
   protected $relatedPHID;
 
   private $recipientExpansionMap;
+  private $routingMap;
 
   public function __construct() {
 
@@ -656,6 +657,9 @@ final class PhabricatorMetaMTAMail
       }
       $this->setParam('actors.sent', $actor_list);
 
+      $this->setParam('routing.sent', $this->getParam('routing'));
+      $this->setParam('routingmap.sent', $this->getRoutingRuleMap());
+
       if (!$add_to && !$add_cc) {
         $this->setStatus(PhabricatorMailOutboundStatus::STATUS_VOID);
         $this->setMessage(
@@ -963,9 +967,25 @@ final class PhabricatorMetaMTAMail
       }
     }
 
+    foreach ($deliverable as $phid) {
+      switch ($this->getRoutingRule($phid)) {
+        case PhabricatorMailRoutingRule::ROUTE_AS_NOTIFICATION:
+          $actors[$phid]->setUndeliverable(
+            PhabricatorMetaMTAActor::REASON_ROUTE_AS_NOTIFICATION);
+          break;
+        case PhabricatorMailRoutingRule::ROUTE_AS_MAIL:
+          $actors[$phid]->setDeliverable(
+            PhabricatorMetaMTAActor::REASON_ROUTE_AS_MAIL);
+          break;
+        default:
+          // No change.
+          break;
+      }
+    }
+
     // If recipients were initially deliverable and were added by "Send me an
     // email" Herald rules, annotate them as such and make them deliverable
-    // again, overriding any changes made by the  "self mail" and "mail tags"
+    // again, overriding any changes made by the "self mail" and "mail tags"
     // settings.
     $force_recipients = $this->getForceHeraldMailRecipientPHIDs();
     $force_recipients = array_fuse($force_recipients);
@@ -1063,6 +1083,82 @@ final class PhabricatorMetaMTAMail
 
   public function getDeliveredActors() {
     return $this->getParam('actors.sent');
+  }
+
+  public function getDeliveredRoutingRules() {
+    return $this->getParam('routing.sent');
+  }
+
+  public function getDeliveredRoutingMap() {
+    return $this->getParam('routingmap.sent');
+  }
+
+
+/* -(  Routing  )------------------------------------------------------------ */
+
+
+  public function addRoutingRule($routing_rule, $phids, $reason_phid) {
+    $routing = $this->getParam('routing', array());
+    $routing[] = array(
+      'routingRule' => $routing_rule,
+      'phids' => $phids,
+      'reasonPHID' => $reason_phid,
+    );
+    $this->setParam('routing', $routing);
+
+    // Throw the routing map away so we rebuild it.
+    $this->routingMap = null;
+
+    return $this;
+  }
+
+  private function getRoutingRule($phid) {
+    $map = $this->getRoutingRuleMap();
+
+    $info = idx($map, $phid, idx($map, 'default'));
+    if ($info) {
+      return idx($info, 'rule');
+    }
+
+    return null;
+  }
+
+  private function getRoutingRuleMap() {
+    if ($this->routingMap === null) {
+      $map = array();
+
+      $routing = $this->getParam('routing', array());
+      foreach ($routing as $route) {
+        $phids = $route['phids'];
+        if ($phids === null) {
+          $phids = array('default');
+        }
+
+        foreach ($phids as $phid) {
+          $new_rule = $route['routingRule'];
+
+          $current_rule = idx($map, $phid);
+          if ($current_rule === null) {
+            $is_stronger = true;
+          } else {
+            $is_stronger = PhabricatorMailRoutingRule::isStrongerThan(
+              $new_rule,
+              $current_rule);
+          }
+
+          if ($is_stronger) {
+            $map[$phid] = array(
+              'rule' => $new_rule,
+              'reason' => $route['reasonPHID'],
+            );
+          }
+        }
+      }
+
+      $this->routingMap = $map;
+    }
+
+    return $this->routingMap;
   }
 
 

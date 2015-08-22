@@ -2,6 +2,10 @@
 
 final class PonderQuestionViewController extends PonderController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
@@ -205,35 +209,28 @@ final class PonderQuestionViewController extends PonderController {
   private function buildAnswers(array $answers) {
     $viewer = $this->getViewer();
 
-    $xactions = id(new PonderAnswerTransactionQuery())
-      ->setViewer($viewer)
-      ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT))
-      ->withObjectPHIDs(mpull($answers, 'getPHID'))
-      ->execute();
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-    foreach ($xactions as $xaction) {
-      if ($xaction->getComment()) {
-        $engine->addObject(
-          $xaction->getComment(),
-          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
-      }
-    }
-    $engine->process();
-
-    $xaction_groups = mgroup($xactions, 'getObjectPHID');
+    $author_phids = mpull($answers, 'getAuthorPHID');
+    $handles = $this->loadViewerHandles($author_phids);
+    $answers_sort = array_reverse(msort($answers, 'getVoteCount'));
 
     $view = array();
-    foreach ($answers as $answer) {
-      $xactions = idx($xaction_groups, $answer->getPHID(), array());
+    foreach ($answers_sort as $answer) {
       $id = $answer->getID();
+      $handle = $handles[$answer->getAuthorPHID()];
+
+      $timeline = $this->buildTransactionTimeline(
+        $answer,
+        id(new PonderAnswerTransactionQuery())
+        ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT)));
+      $xactions = $timeline->getTransactions();
+
 
       $view[] = id(new PonderAnswerView())
         ->setUser($viewer)
         ->setAnswer($answer)
         ->setTransactions($xactions)
-        ->setMarkupEngine($engine);
+        ->setTimeline($timeline)
+        ->setHandle($handle);
 
     }
 

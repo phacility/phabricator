@@ -96,7 +96,7 @@ final class PonderQuestionSearchEngine
           array($this->requireViewer()->getPHID()));
       case 'answered':
         return $query->setParameter(
-          'answererPHIDs',
+          'answerers',
           array($this->requireViewer()->getPHID()));
     }
 

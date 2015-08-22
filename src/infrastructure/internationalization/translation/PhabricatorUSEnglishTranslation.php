@@ -33,6 +33,7 @@ final class PhabricatorUSEnglishTranslation
       '%d diff(s)' => array('%d diff', '%d diffs'),
 
       '%d Answer(s)' => array('%d Answer', '%d Answers'),
+      'Show %d Comment(s)' => array('Show %d Comment', 'Show %d Comments'),
 
       '%s DIFF LINK(S)' => array('DIFF LINK', 'DIFF LINKS'),
       'You successfully created %d diff(s).' => array(

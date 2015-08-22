@@ -25,7 +25,7 @@ final class PhabricatorManiphestConfigOptions
       100 => array(
         'name'  => pht('Unbreak Now!'),
         'short' => pht('Unbreak!'),
-        'color' => 'indigo',
+        'color' => 'pink',
         'keywords' => array('unbreak'),
       ),
       90 => array(

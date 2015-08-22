@@ -86,6 +86,10 @@ final class PhabricatorMetaMTAMailViewController
       pht('Cc'),
       $cc_list);
 
+    $properties->addProperty(
+      pht('Sent'),
+      phabricator_datetime($mail->getDateCreated(), $viewer));
+
     $properties->addSectionHeader(
       pht('Message'),
       PHUIPropertyListView::ICON_SUMMARY);
@@ -144,23 +148,16 @@ final class PhabricatorMetaMTAMailViewController
     $actors = $mail->getDeliveredActors();
     $reasons = null;
     if (!$actors) {
-      // TODO: We can get rid of this special-cased message after these changes
-      // have been live for a while, but provide a more tailored message for
-      // now so things are a little less confusing for users.
-      if ($mail->getStatus() == PhabricatorMetaMTAMail::STATUS_SENT) {
-        $delivery = phutil_tag(
-          'em',
-          array(),
-          pht(
-            'This is an older message that predates recording delivery '.
-            'information, so none is available.'));
-      } else {
-        $delivery = phutil_tag(
-          'em',
-          array(),
+      if ($mail->getStatus() == PhabricatorMailOutboundStatus::STATUS_QUEUE) {
+        $delivery = $this->renderEmptyMessage(
           pht(
             'This message has not been delivered yet, so delivery information '.
             'is not available.'));
+      } else {
+        $delivery = $this->renderEmptyMessage(
+          pht(
+            'This is an older message that predates recording delivery '.
+            'information, so none is available.'));
       }
     } else {
       $actor = idx($actors, $viewer->getPHID());
@@ -214,6 +211,127 @@ final class PhabricatorMetaMTAMailViewController
     $properties->addProperty(pht('Delivery'), $delivery);
     if ($reasons) {
       $properties->addProperty(pht('Reasons'), $reasons);
+      $properties->addProperty(
+        null,
+        $this->renderEmptyMessage(
+          pht(
+            'Delivery reasons are listed from weakest to strongest.')));
+    }
+
+    $properties->addSectionHeader(pht('Routing Rules'));
+
+    $map = $mail->getDeliveredRoutingMap();
+    $routing_detail = null;
+    if ($map === null) {
+      if ($mail->getStatus() == PhabricatorMailOutboundStatus::STATUS_QUEUE) {
+        $routing_result = $this->renderEmptyMessage(
+          pht(
+            'This message has not been sent yet, so routing rules have '.
+            'not been computed.'));
+      } else {
+        $routing_result = $this->renderEmptyMessage(
+          pht(
+            'This is an older message which predates routing rules.'));
+      }
+    } else {
+      $rule = idx($map, $viewer->getPHID());
+      if ($rule === null) {
+        $rule = idx($map, 'default');
+      }
+
+      if ($rule === null) {
+        $routing_result = $this->renderEmptyMessage(
+          pht(
+            'No routing rules applied when delivering this message to you.'));
+      } else {
+        $rule_const = $rule['rule'];
+        $reason_phid = $rule['reason'];
+        switch ($rule_const) {
+          case PhabricatorMailRoutingRule::ROUTE_AS_NOTIFICATION:
+            $routing_result = pht(
+              'This message was routed as a notification because it '.
+              'matched %s.',
+              $viewer->renderHandle($reason_phid)->render());
+            break;
+          case PhabricatorMailRoutingRule::ROUTE_AS_MAIL:
+            $routing_result = pht(
+              'This message was routed as an email because it matched %s.',
+              $viewer->renderHandle($reason_phid)->render());
+            break;
+          default:
+            $routing_result = pht('Unknown routing rule "%s".', $rule_const);
+            break;
+        }
+      }
+
+      $routing_rules = $mail->getDeliveredRoutingRules();
+      if ($routing_rules) {
+        $rules = array();
+        foreach ($routing_rules as $rule) {
+          $phids = idx($rule, 'phids');
+          if ($phids === null) {
+            $rules[] = $rule;
+          } else if (in_array($viewer->getPHID(), $phids)) {
+            $rules[] = $rule;
+          }
+        }
+
+        // Reorder rules by strength.
+        foreach ($rules as $key => $rule) {
+          $const = $rule['routingRule'];
+          $phids = $rule['phids'];
+
+          if ($phids === null) {
+            $type = 'A';
+          } else {
+            $type = 'B';
+          }
+
+          $rules[$key]['strength'] = sprintf(
+            '~%s%08d',
+            $type,
+            PhabricatorMailRoutingRule::getRuleStrength($const));
+        }
+        $rules = isort($rules, 'strength');
+
+        $routing_detail = id(new PHUIStatusListView());
+        foreach ($rules as $rule) {
+          $const = $rule['routingRule'];
+          $phids = $rule['phids'];
+
+          $name = PhabricatorMailRoutingRule::getRuleName($const);
+
+          $icon = PhabricatorMailRoutingRule::getRuleIcon($const);
+          $color = PhabricatorMailRoutingRule::getRuleColor($const);
+
+          if ($phids === null) {
+            $kind = pht('Global');
+          } else {
+            $kind = pht('Personal');
+          }
+
+          $target = array($kind, ': ', $name);
+          $target = phutil_tag('strong', array(), $target);
+
+          $item = id(new PHUIStatusItemView())
+            ->setTarget($target)
+            ->setNote($viewer->renderHandle($rule['reasonPHID']))
+            ->setIcon($icon, $color);
+
+          $routing_detail->addItem($item);
+        }
+      }
+    }
+
+    $properties->addProperty(pht('Effective Rule'), $routing_result);
+
+    if ($routing_detail !== null) {
+      $properties->addProperty(pht('All Matching Rules'), $routing_detail);
+      $properties->addProperty(
+        null,
+        $this->renderEmptyMessage(
+          pht(
+            'Matching rules are listed from weakest to strongest.')));
     }
 
     return $properties;
@@ -250,6 +368,10 @@ final class PhabricatorMetaMTAMailViewController
     $properties->addProperty(pht('Related Object'), $related);
 
     return $properties;
+  }
+
+  private function renderEmptyMessage($message) {
+    return phutil_tag('em', array(), $message);
   }
 
 }

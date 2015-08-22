@@ -3,17 +3,11 @@
 final class HarbormasterBuildViewController
   extends HarbormasterController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $id = $this->id;
+    $id = $request->getURIData('id');
     $generation = $request->getInt('g');
 
     $build = id(new HarbormasterBuildQuery())
@@ -73,6 +67,18 @@ final class HarbormasterBuildViewController
       $messages = array();
     }
 
+    if ($build_targets) {
+      $artifacts = id(new HarbormasterBuildArtifactQuery())
+        ->setViewer($viewer)
+        ->withBuildTargetPHIDs(mpull($build_targets, 'getPHID'))
+        ->execute();
+      $artifacts = msort($artifacts, 'getArtifactKey');
+      $artifacts = mgroup($artifacts, 'getBuildTargetPHID');
+    } else {
+      $artifacts = array();
+    }
+
+
     $targets = array();
     foreach ($build_targets as $build_target) {
       $header = id(new PHUIHeaderView())
@@ -83,6 +89,27 @@ final class HarbormasterBuildViewController
         ->setHeader($header);
 
       $properties = new PHUIPropertyListView();
+
+      $target_artifacts = idx($artifacts, $build_target->getPHID(), array());
+
+      $links = array();
+      $type_uri = HarbormasterURIArtifact::ARTIFACTCONST;
+      foreach ($target_artifacts as $artifact) {
+        if ($artifact->getArtifactType() == $type_uri) {
+          $impl = $artifact->getArtifactImplementation();
+          if ($impl->isExternalLink()) {
+            $links[] = $impl->renderLink();
+          }
+        }
+      }
+
+      if ($links) {
+        $links = phutil_implode_html(phutil_tag('br'), $links);
+        $properties->addProperty(
+          pht('External Link'),
+          $links);
+      }
+
       $status_view = new PHUIStatusListView();
 
       $item = new PHUIStatusItemView();
@@ -183,9 +210,9 @@ final class HarbormasterBuildViewController
       $properties->addRawContent($this->buildProperties($variables));
       $target_box->addPropertyList($properties, pht('Variables'));
 
-      $artifacts = $this->buildArtifacts($build_target);
+      $artifacts_tab = $this->buildArtifacts($build_target, $target_artifacts);
       $properties = new PHUIPropertyListView();
-      $properties->addRawContent($artifacts);
+      $properties->addRawContent($artifacts_tab);
       $target_box->addPropertyList($properties, pht('Artifacts'));
 
       $build_messages = idx($messages, $build_target->getPHID(), array());
@@ -225,28 +252,45 @@ final class HarbormasterBuildViewController
   }
 
   private function buildArtifacts(
-    HarbormasterBuildTarget $build_target) {
+    HarbormasterBuildTarget $build_target,
+    array $artifacts) {
+    $viewer = $this->getViewer();
 
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $artifacts = id(new HarbormasterBuildArtifactQuery())
-      ->setViewer($viewer)
-      ->withBuildTargetPHIDs(array($build_target->getPHID()))
-      ->execute();
-
-    $list = id(new PHUIObjectItemListView())
-      ->setNoDataString(pht('This target has no associated artifacts.'))
-      ->setFlush(true);
-
+    $rows = array();
     foreach ($artifacts as $artifact) {
-      $item = $artifact->getObjectItemView($viewer);
-      if ($item !== null) {
-        $list->addItem($item);
+      $impl = $artifact->getArtifactImplementation();
+
+      if ($impl) {
+        $summary = $impl->renderArtifactSummary($viewer);
+        $type_name = $impl->getArtifactTypeName();
+      } else {
+        $summary = pht('<Unknown Artifact Type>');
+        $type_name = $artifact->getType();
       }
+
+      $rows[] = array(
+        $artifact->getArtifactKey(),
+        $type_name,
+        $summary,
+      );
     }
 
-    return $list;
+    $table = id(new AphrontTableView($rows))
+      ->setNoDataString(pht('This target has no associated artifacts.'))
+      ->setHeaders(
+        array(
+          pht('Key'),
+          pht('Type'),
+          pht('Summary'),
+        ))
+      ->setColumnClasses(
+        array(
+          'pri',
+          '',
+          'wide',
+        ));
+
+    return $table;
   }
 
   private function buildLog(

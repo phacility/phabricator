@@ -17,6 +17,7 @@ final class PhabricatorOwnersEditController
             // TODO: Support this capability.
             // PhabricatorPolicyCapability::CAN_EDIT,
           ))
+        ->needOwners(true)
         ->executeOne();
       if (!$package) {
         return new Aphront404Response();
@@ -28,14 +29,12 @@ final class PhabricatorOwnersEditController
     }
 
     $e_name = true;
-    $e_primary = true;
 
     $v_name = $package->getName();
-    $v_primary = $package->getPrimaryOwnerPHID();
-    // TODO: Pull these off needOwners() on the Query.
-    $v_owners = mpull($package->loadOwners(), 'getUserPHID');
+    $v_owners = mpull($package->getOwners(), 'getUserPHID');
     $v_auditing = $package->getAuditingEnabled();
     $v_description = $package->getDescription();
+    $v_status = $package->getStatus();
 
 
     $errors = array();
@@ -43,29 +42,20 @@ final class PhabricatorOwnersEditController
       $xactions = array();
 
       $v_name = $request->getStr('name');
-      $v_primary = head($request->getArr('primary'));
       $v_owners = $request->getArr('owners');
       $v_auditing = ($request->getStr('auditing') == 'enabled');
       $v_description = $request->getStr('description');
-
-      if ($v_primary) {
-        $v_owners[] = $v_primary;
-        $v_owners = array_unique($v_owners);
-      }
+      $v_status = $request->getStr('status');
 
       $type_name = PhabricatorOwnersPackageTransaction::TYPE_NAME;
-      $type_primary = PhabricatorOwnersPackageTransaction::TYPE_PRIMARY;
       $type_owners = PhabricatorOwnersPackageTransaction::TYPE_OWNERS;
       $type_auditing = PhabricatorOwnersPackageTransaction::TYPE_AUDITING;
       $type_description = PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION;
+      $type_status = PhabricatorOwnersPackageTransaction::TYPE_STATUS;
 
       $xactions[] = id(new PhabricatorOwnersPackageTransaction())
         ->setTransactionType($type_name)
         ->setNewValue($v_name);
-
-      $xactions[] = id(new PhabricatorOwnersPackageTransaction())
-        ->setTransactionType($type_primary)
-        ->setNewValue($v_primary);
 
       $xactions[] = id(new PhabricatorOwnersPackageTransaction())
         ->setTransactionType($type_owners)
@@ -78,6 +68,12 @@ final class PhabricatorOwnersEditController
       $xactions[] = id(new PhabricatorOwnersPackageTransaction())
         ->setTransactionType($type_description)
         ->setNewValue($v_description);
+
+      if (!$is_new) {
+        $xactions[] = id(new PhabricatorOwnersPackageTransaction())
+          ->setTransactionType($type_status)
+          ->setNewValue($v_status);
+      }
 
       $editor = id(new PhabricatorOwnersPackageTransactionEditor())
         ->setActor($viewer)
@@ -102,14 +98,7 @@ final class PhabricatorOwnersEditController
         $validation_exception = $ex;
 
         $e_name = $ex->getShortMessage($type_name);
-        $e_primary = $ex->getShortMessage($type_primary);
       }
-    }
-
-    if ($v_primary) {
-      $value_primary_owner = array($v_primary);
-    } else {
-      $value_primary_owner = array();
     }
 
     if ($is_new) {
@@ -133,18 +122,20 @@ final class PhabricatorOwnersEditController
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorProjectOrUserDatasource())
-          ->setLabel(pht('Primary Owner'))
-          ->setName('primary')
-          ->setLimit(1)
-          ->setValue($value_primary_owner)
-          ->setError($e_primary))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorProjectOrUserDatasource())
           ->setLabel(pht('Owners'))
           ->setName('owners')
-          ->setValue($v_owners))
-      ->appendChild(
+          ->setValue($v_owners));
+
+      if (!$is_new) {
+        $form->appendChild(
+          id(new AphrontFormSelectControl())
+            ->setLabel(pht('Status'))
+            ->setName('status')
+            ->setValue($v_status)
+            ->setOptions($package->getStatusNameMap()));
+      }
+
+      $form->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('auditing')
           ->setLabel(pht('Auditing'))

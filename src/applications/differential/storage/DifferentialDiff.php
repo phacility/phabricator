@@ -101,9 +101,15 @@ final class DifferentialDiff
     if (!$this->getID()) {
       return array();
     }
-    return id(new DifferentialChangeset())->loadAllWhere(
+    $changesets = id(new DifferentialChangeset())->loadAllWhere(
       'diffID = %d',
       $this->getID());
+
+    foreach ($changesets as $changeset) {
+      $changeset->attachDiff($this);
+    }
+
+    return $changesets;
   }
 
   public function save() {

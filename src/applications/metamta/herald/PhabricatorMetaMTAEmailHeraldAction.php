@@ -14,6 +14,10 @@ abstract class PhabricatorMetaMTAEmailHeraldAction
       return false;
     }
 
+    if ($object instanceof PhabricatorMetaMTAMail) {
+      return false;
+    }
+
     return true;
   }
 

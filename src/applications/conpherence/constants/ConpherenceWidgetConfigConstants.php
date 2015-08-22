@@ -30,23 +30,6 @@ final class ConpherenceWidgetConfigConstants extends ConpherenceConstants {
           'customHref' => null,
         ),
       ),
-      'widgets-files' => array(
-        'name' => pht('Files'),
-        'icon' => 'fa-files-o',
-        'deviceOnly' => false,
-        'hasCreate' => false,
-      ),
-      'widgets-calendar' => array(
-        'name' => pht('Calendar'),
-        'icon' => 'fa-calendar',
-        'deviceOnly' => false,
-        'hasCreate' => true,
-        'createData' => array(
-          'refreshFromResponse' => false,
-          'action' => ConpherenceUpdateActions::ADD_STATUS,
-          'customHref' => '/calendar/event/create/',
-        ),
-      ),
       'widgets-settings' => array(
         'name' => pht('Notifications'),
         'icon' => 'fa-wrench',

@@ -42,10 +42,6 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
     );
   }
 
-  public function isPrototype() {
-    return true;
-  }
-
   public function getRoutes() {
     return array(
       '/Q(?P<id>[1-9]\d*)'
