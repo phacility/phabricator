@@ -949,6 +949,12 @@ final class PhabricatorAuditEditor
     );
   }
 
+  protected function getCustomWorkerStateEncoding() {
+    return array(
+      'rawPatch' => self::STORAGE_ENCODING_BINARY,
+    );
+  }
+
   protected function loadCustomWorkerState(array $state) {
     $this->rawPatch = idx($state, 'rawPatch');
     $this->affectedFiles = idx($state, 'affectedFiles');

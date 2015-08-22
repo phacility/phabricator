@@ -26,8 +26,13 @@ final class PhabricatorApplicationTransactionPublishWorker
    * Load the object the transactions affect.
    */
   private function loadObject() {
-    $data = $this->getTaskData();
     $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $data = $this->getTaskData();
+    if (!is_array($data)) {
+      throw new PhabricatorWorkerPermanentFailureException(
+        pht('Task has invalid task data.'));
+    }
 
     $phid = idx($data, 'objectPHID');
     if (!$phid) {
