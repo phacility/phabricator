@@ -43,18 +43,8 @@ abstract class NuanceSourceDefinition extends Phobject {
     return $source;
   }
 
-  /**
-   * Gives a @{class:NuanceSourceDefinition} object for a given
-   * @{class:NuanceSource}. Note you still need to @{method:setActor}
-   * before the @{class:NuanceSourceDefinition} object will be useful.
-   */
-  public static function getDefinitionForSource(NuanceSource $source) {
-    $definitions = self::getAllDefinitions();
-    $map = mpull($definitions, null, 'getSourceTypeConstant');
-    $definition = $map[$source->getType()];
-    $definition->setSourceObject($source);
-
-    return $definition;
+  public function getSourceViewActions(AphrontRequest $request) {
+    return array();
   }
 
   public static function getAllDefinitions() {
@@ -284,6 +274,11 @@ abstract class NuanceSourceDefinition extends Phobject {
 
   public function handleActionRequest(AphrontRequest $request) {
     return new Aphront404Response();
+  }
+
+  public function getActionURI($path = null) {
+    $source_id = $this->getSourceObject()->getID();
+    return '/action/'.$source_id.'/'.ltrim($path, '/');
   }
 
 }

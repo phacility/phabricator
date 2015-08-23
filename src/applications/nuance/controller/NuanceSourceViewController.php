@@ -77,6 +77,13 @@ final class NuanceSourceViewController extends NuanceController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    $request = $this->getRequest();
+    $definition = $source->requireDefinition();
+    $source_actions = $definition->getSourceViewActions($request);
+    foreach ($source_actions as $source_action) {
+      $actions->addAction($source_action);
+    }
+
     return $actions;
   }
 
@@ -90,7 +97,7 @@ final class NuanceSourceViewController extends NuanceController {
       ->setObject($source)
       ->setActionList($actions);
 
-    $definition = NuanceSourceDefinition::getDefinitionForSource($source);
+    $definition = $source->requireDefinition();
     $properties->addProperty(
       pht('Source Type'),
       $definition->getName());

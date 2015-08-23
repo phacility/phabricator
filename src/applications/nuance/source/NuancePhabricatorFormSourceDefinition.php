@@ -15,6 +15,17 @@ final class NuancePhabricatorFormSourceDefinition
     return 'phabricator-form';
   }
 
+  public function getSourceViewActions(AphrontRequest $request) {
+    $actions = array();
+
+    $actions[] = id(new PhabricatorActionView())
+      ->setName(pht('View Form'))
+      ->setIcon('fa-align-justify')
+      ->setHref($this->getActionURI());
+
+    return $actions;
+  }
+
   public function updateItems() {
     return null;
   }

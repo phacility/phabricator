@@ -12,6 +12,8 @@ final class NuanceSource extends NuanceDAO
   protected $viewPolicy;
   protected $editPolicy;
 
+  private $definition;
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -60,6 +62,31 @@ final class NuanceSource extends NuanceDAO
     return id(new NuanceSource())
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy);
+  }
+
+  public function getDefinition() {
+    if ($this->definition === null) {
+      $definitions = NuanceSourceDefinition::getAllDefinitions();
+      if (isset($definitions[$this->getType()])) {
+        $definition = clone $definitions[$this->getType()];
+        $definition->setSourceObject($this);
+        $this->definition = $definition;
+      }
+    }
+
+    return $this->definition;
+  }
+
+  public function requireDefinition() {
+    $definition = $this->getDefinition();
+    if (!$definition) {
+      throw new Exception(
+        pht(
+          'Unable to load source definition implementation for source '.
+          'type "%s".',
+          $this->getType()));
+    }
+    return $definition;
   }
 
 
