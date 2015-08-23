@@ -61,7 +61,7 @@ final class NuancePhabricatorFormSourceDefinition
 
     if ($request->isFormPost()) {
       $properties = array(
-        'complaint' => (string)$request->getStr('text'),
+        'complaint' => (string)$request->getStr('complaint'),
       );
 
       $content_source = PhabricatorContentSource::newFromRequest($request);
@@ -98,6 +98,35 @@ final class NuancePhabricatorFormSourceDefinition
       ->appendChild($form);
 
     return $box;
+  }
+
+  public function renderItemViewProperties(
+    PhabricatorUser $viewer,
+    NuanceItem $item,
+    PHUIPropertyListView $view) {
+    $this->renderItemCommonProperties($viewer, $item, $view);
+  }
+
+  public function renderItemEditProperties(
+    PhabricatorUser $viewer,
+    NuanceItem $item,
+    PHUIPropertyListView $view) {
+    $this->renderItemCommonProperties($viewer, $item, $view);
+  }
+
+  private function renderItemCommonProperties(
+    PhabricatorUser $viewer,
+    NuanceItem $item,
+    PHUIPropertyListView $view) {
+
+    $complaint = $item->getNuanceProperty('complaint');
+    $complaint = PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())->setContent($complaint),
+      'default',
+      $viewer);
+
+    $view->addSectionHeader(pht('Complaint'));
+    $view->addTextContent($complaint);
   }
 
 }

@@ -19,6 +19,8 @@ final class NuanceItem
   protected $mailKey;
   protected $dateNuanced;
 
+  private $source = self::ATTACHABLE;
+
   public static function initializeNewItem() {
     return id(new NuanceItem())
       ->setDateNuanced(time())

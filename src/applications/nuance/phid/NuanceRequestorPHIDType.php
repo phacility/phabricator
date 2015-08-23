@@ -29,7 +29,9 @@ final class NuanceRequestorPHIDType extends PhabricatorPHIDType {
     foreach ($handles as $phid => $handle) {
       $requestor = $objects[$phid];
 
-      $handle->setName($requestor->getBestName());
+      // TODO: This is currently useless and should be far more informative.
+      $handle->setName(pht('Requestor %d', $requestor->getID()));
+
       $handle->setURI($requestor->getURI());
     }
   }
