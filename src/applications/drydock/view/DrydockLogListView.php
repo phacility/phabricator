@@ -35,7 +35,7 @@ final class DrydockLogListView extends AphrontView {
           ),
           $log->getLeaseID()),
         $log->getMessage(),
-        phabricator_date($log->getEpoch(), $viewer),
+        phabricator_datetime($log->getEpoch(), $viewer),
       );
     }
 
