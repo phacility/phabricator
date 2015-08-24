@@ -47,7 +47,7 @@ final class DrydockLeaseQuery extends DrydockQuery {
       $resources = id(new DrydockResourceQuery())
         ->setParentQuery($this)
         ->setViewer($this->getViewer())
-        ->withIDs($resource_ids)
+        ->withIDs(array_unique($resource_ids))
         ->execute();
     } else {
       $resources = array();
@@ -71,35 +71,35 @@ final class DrydockLeaseQuery extends DrydockQuery {
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->resourceIDs) {
+    if ($this->resourceIDs !== null) {
       $where[] = qsprintf(
         $conn,
         'resourceID IN (%Ld)',
         $this->resourceIDs);
     }
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->statuses) {
+    if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn,
         'status IN (%Ld)',
         $this->statuses);
     }
 
-    if ($this->datasourceQuery) {
+    if ($this->datasourceQuery !== null) {
       $where[] = qsprintf(
         $conn,
         'id = %d',

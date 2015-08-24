@@ -59,42 +59,42 @@ final class DrydockResourceQuery extends DrydockQuery {
   protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->types) {
+    if ($this->types !== null) {
       $where[] = qsprintf(
         $conn_r,
         'type IN (%Ls)',
         $this->types);
     }
 
-    if ($this->statuses) {
+    if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn_r,
         'status IN (%Ls)',
         $this->statuses);
     }
 
-    if ($this->blueprintPHIDs) {
+    if ($this->blueprintPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
         'blueprintPHID IN (%Ls)',
         $this->blueprintPHIDs);
     }
 
-    if ($this->datasourceQuery) {
+    if ($this->datasourceQuery !== null) {
       $where[] = qsprintf(
         $conn_r,
         'name LIKE %>',

@@ -51,21 +51,21 @@ final class DrydockBlueprintQuery extends DrydockQuery {
   protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->datasourceQuery) {
+    if ($this->datasourceQuery !== null) {
       $where[] = qsprintf(
         $conn_r,
         'blueprintName LIKE %>',
