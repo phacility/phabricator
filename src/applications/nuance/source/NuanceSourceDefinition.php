@@ -169,25 +169,39 @@ abstract class NuanceSourceDefinition extends Phobject {
 
     $form = $this->augmentEditForm($form, $ex);
 
+    $default_phid = $source->getDefaultQueuePHID();
+    if ($default_phid) {
+      $default_queues = array($default_phid);
+    } else {
+      $default_queues = array();
+    }
+
     $form
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('Default Queue'))
+          ->setName('defaultQueuePHIDs')
+          ->setLimit(1)
+          ->setDatasource(new NuanceQueueDatasource())
+          ->setValue($default_queues))
       ->appendChild(
         id(new AphrontFormPolicyControl())
-        ->setUser($user)
-        ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
-        ->setPolicyObject($source)
-        ->setPolicies($policies)
-        ->setName('viewPolicy'))
+          ->setUser($user)
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+          ->setPolicyObject($source)
+          ->setPolicies($policies)
+          ->setName('viewPolicy'))
       ->appendChild(
         id(new AphrontFormPolicyControl())
-        ->setUser($user)
-        ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
-        ->setPolicyObject($source)
-        ->setPolicies($policies)
-        ->setName('editPolicy'))
+          ->setUser($user)
+          ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
+          ->setPolicyObject($source)
+          ->setPolicies($policies)
+          ->setName('editPolicy'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-        ->addCancelButton($source->getURI())
-        ->setValue(pht('Save')));
+          ->addCancelButton($source->getURI())
+          ->setValue(pht('Save')));
 
     return $form;
   }
@@ -213,12 +227,18 @@ abstract class NuanceSourceDefinition extends Phobject {
     $transactions[] = id(new NuanceSourceTransaction())
       ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
       ->setNewValue($request->getStr('editPolicy'));
+
     $transactions[] = id(new NuanceSourceTransaction())
       ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
       ->setNewValue($request->getStr('viewPolicy'));
-   $transactions[] = id(new NuanceSourceTransaction())
+
+    $transactions[] = id(new NuanceSourceTransaction())
       ->setTransactionType(NuanceSourceTransaction::TYPE_NAME)
       ->setNewvalue($request->getStr('name'));
+
+    $transactions[] = id(new NuanceSourceTransaction())
+      ->setTransactionType(NuanceSourceTransaction::TYPE_DEFAULT_QUEUE)
+      ->setNewvalue(head($request->getArr('defaultQueuePHIDs')));
 
     return $transactions;
   }
@@ -250,6 +270,12 @@ abstract class NuanceSourceDefinition extends Phobject {
     $xactions[] = id(new NuanceItemTransaction())
       ->setTransactionType(NuanceItemTransaction::TYPE_REQUESTOR)
       ->setNewValue($requestor->getPHID());
+
+    // TODO: Eventually, apply real routing rules. For now, just put everything
+    // in the default queue for the source.
+    $xactions[] = id(new NuanceItemTransaction())
+      ->setTransactionType(NuanceItemTransaction::TYPE_QUEUE)
+      ->setNewValue($source->getDefaultQueuePHID());
 
     foreach ($properties as $key => $property) {
       $xactions[] = id(new NuanceItemTransaction())

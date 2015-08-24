@@ -13,7 +13,7 @@ final class NuanceSourceViewController extends NuanceController {
       return new Aphront404Response();
     }
 
-    $source_phid = $source->getPHID();
+    $source_id = $source->getID();
 
     $timeline = $this->buildTransactionTimeline(
       $source,
@@ -34,10 +34,29 @@ final class NuanceSourceViewController extends NuanceController {
 
     $crumbs->addTextCrumb($title);
 
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $source,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $routing_list = id(new PHUIPropertyListView())
+      ->addProperty(
+        pht('Default Queue'),
+        $viewer->renderHandle($source->getDefaultQueuePHID()));
+
+    $routing_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Routing Rules'));
+
+    $routing = id(new PHUIObjectBoxView())
+      ->setHeader($routing_header)
+      ->addPropertyList($routing_list);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $box,
+        $routing,
         $timeline,
       ),
       array(

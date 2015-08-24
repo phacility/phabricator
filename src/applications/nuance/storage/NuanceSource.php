@@ -11,6 +11,7 @@ final class NuanceSource extends NuanceDAO
   protected $mailKey;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $defaultQueuePHID;
 
   private $definition;
 

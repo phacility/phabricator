@@ -33,10 +33,17 @@ final class NuanceItemEditController extends NuanceController {
       ->setHeaderText($title)
       ->addPropertyList($properties);
 
+    $timeline = $this->buildTransactionTimeline(
+      $item,
+      new NuanceItemTransactionQuery());
+
+    $timeline->setShouldTerminate(true);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $box,
+        $timeline,
       ),
       array(
         'title' => $title,
@@ -61,6 +68,10 @@ final class NuanceItemEditController extends NuanceController {
     $properties->addProperty(
       pht('Source'),
       $viewer->renderHandle($item->getSourcePHID()));
+
+    $properties->addProperty(
+      pht('Queue'),
+      $viewer->renderHandle($item->getQueuePHID()));
 
     $source = $item->getSource();
     $definition = $source->requireDefinition();
