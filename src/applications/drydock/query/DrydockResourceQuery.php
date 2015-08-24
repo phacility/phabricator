@@ -7,6 +7,7 @@ final class DrydockResourceQuery extends DrydockQuery {
   private $statuses;
   private $types;
   private $blueprintPHIDs;
+  private $datasourceQuery;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -30,6 +31,11 @@ final class DrydockResourceQuery extends DrydockQuery {
 
   public function withBlueprintPHIDs(array $blueprint_phids) {
     $this->blueprintPHIDs = $blueprint_phids;
+    return $this;
+  }
+
+  public function withDatasourceQuery($query) {
+    $this->datasourceQuery = $query;
     return $this;
   }
 
@@ -86,6 +92,13 @@ final class DrydockResourceQuery extends DrydockQuery {
         $conn_r,
         'blueprintPHID IN (%Ls)',
         $this->blueprintPHIDs);
+    }
+
+    if ($this->datasourceQuery) {
+      $where[] = qsprintf(
+        $conn_r,
+        'name LIKE %>',
+        $this->datasourceQuery);
     }
 
     $where[] = $this->buildPagingClause($conn_r);
