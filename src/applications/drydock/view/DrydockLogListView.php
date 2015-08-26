@@ -21,13 +21,18 @@ final class DrydockLogListView extends AphrontView {
       $resource_uri = '/drydock/resource/'.$log->getResourceID().'/';
       $lease_uri = '/drydock/lease/'.$log->getLeaseID().'/';
 
+      $resource_name = $log->getResourceID();
+      if ($log->getResourceID() !== null) {
+        $resource_name = $log->getResource()->getName();
+      }
+
       $rows[] = array(
         phutil_tag(
           'a',
           array(
             'href' => $resource_uri,
           ),
-          $log->getResourceID()),
+          $resource_name),
         phutil_tag(
           'a',
           array(
@@ -35,7 +40,7 @@ final class DrydockLogListView extends AphrontView {
           ),
           $log->getLeaseID()),
         $log->getMessage(),
-        phabricator_date($log->getEpoch(), $viewer),
+        phabricator_datetime($log->getEpoch(), $viewer),
       );
     }
 

@@ -17,25 +17,42 @@ final class NuanceItemQuery
     return $this;
   }
 
-  public function withSourcePHIDs($source_phids) {
+  public function withSourcePHIDs(array $source_phids) {
     $this->sourcePHIDs = $source_phids;
     return $this;
   }
 
+  public function newResultObject() {
+    return new NuanceItem();
+  }
+
   protected function loadPage() {
-    $table = new NuanceItem();
-    $conn = $table->establishConnection('r');
+    return $this->loadStandardPage($this->newResultObject());
+  }
 
-    $data = queryfx_all(
-      $conn,
-      '%Q FROM %T %Q %Q %Q',
-      $this->buildSelectClause($conn),
-      $table->getTableName(),
-      $this->buildWhereClause($conn),
-      $this->buildOrderClause($conn),
-      $this->buildLimitClause($conn));
+  protected function willFilterPage(array $items) {
+    $source_phids = mpull($items, 'getSourcePHID');
 
-    return $table->loadAllFromArray($data);
+    // NOTE: We always load sources, even if the viewer can't formally see
+    // them. If they can see the item, they're allowed to be aware of the
+    // source in some sense.
+    $sources = id(new NuanceSourceQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs($source_phids)
+      ->execute();
+    $sources = mpull($sources, null, 'getPHID');
+
+    foreach ($items as $key => $item) {
+      $source = idx($sources, $item->getSourcePHID());
+      if (!$source) {
+        $this->didRejectResult($items[$key]);
+        unset($items[$key]);
+        continue;
+      }
+      $item->attachSource($source);
+    }
+
+    return $items;
   }
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {

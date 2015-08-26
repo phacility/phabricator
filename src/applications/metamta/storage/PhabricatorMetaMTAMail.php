@@ -10,7 +10,7 @@ final class PhabricatorMetaMTAMail
   const RETRY_DELAY   = 5;
 
   protected $actorPHID;
-  protected $parameters;
+  protected $parameters = array();
   protected $status;
   protected $message;
   protected $relatedPHID;
@@ -69,6 +69,13 @@ final class PhabricatorMetaMTAMail
   }
 
   protected function getParam($param, $default = null) {
+    // Some old mail was saved without parameters because no parameters were
+    // set or encoding failed. Recover in these cases so we can perform
+    // mail migrations, see T9251.
+    if (!is_array($this->parameters)) {
+      $this->parameters = array();
+    }
+
     return idx($this->parameters, $param, $default);
   }
 

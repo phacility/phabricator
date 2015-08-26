@@ -38,6 +38,7 @@ final class PhabricatorNuanceApplication extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/nuance/' => array(
+        '' => 'NuanceConsoleController',
         'item/' => array(
           'view/(?P<id>[1-9]\d*)/' => 'NuanceItemViewController',
           'edit/(?P<id>[1-9]\d*)/' => 'NuanceItemEditController',

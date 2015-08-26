@@ -40,7 +40,7 @@ final class DrydockBlueprint extends DrydockDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'className' => 'text255',
-        'blueprintName' => 'text255',
+        'blueprintName' => 'sort255',
       ),
     ) + parent::getConfiguration();
   }
