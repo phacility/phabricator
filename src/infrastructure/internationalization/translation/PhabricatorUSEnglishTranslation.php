@@ -1369,6 +1369,11 @@ final class PhabricatorUSEnglishTranslation
         'This action has no effect on targets: %2$s.',
       ),
 
+      'Mail sent in the last %s day(s).' => array(
+        'Mail sent in the last day.',
+        'Mail sent in the last %s days.',
+      ),
+
     );
   }
 
