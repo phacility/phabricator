@@ -58,7 +58,7 @@ JX.behavior('repository-crossreference', function(config, statics) {
             target = target.parentNode;
           }
         } else if (e.getType() === 'click') {
-          openSearch(highlighted, lang);
+          openSearch(e.getTarget(), lang);
         }
       });
   }
