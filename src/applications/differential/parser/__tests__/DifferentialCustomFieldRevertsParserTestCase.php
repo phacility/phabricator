@@ -76,6 +76,9 @@ final class DifferentialCustomFieldRevertsParserTestCase
         ),
       ),
 
+      // This tests a degenerate regex behavior, see T9268.
+      'Reverts aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaz' => array(),
+
       "This doesn't revert anything" => array(),
       'nonrevert of r11' => array(),
       'fixed a bug' => array(),

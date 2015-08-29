@@ -41,7 +41,7 @@ final class NuanceSourceEditController extends NuanceController {
       $cancel_uri = $source->getURI();
     }
 
-    $definition = NuanceSourceDefinition::getDefinitionForSource($source);
+    $definition = $source->requireDefinition();
     $definition->setActor($viewer);
 
     $response = $definition->buildEditLayout($request);

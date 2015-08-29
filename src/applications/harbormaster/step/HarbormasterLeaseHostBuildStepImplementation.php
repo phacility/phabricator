@@ -24,6 +24,7 @@ final class HarbormasterLeaseHostBuildStepImplementation
     // Create the lease.
     $lease = id(new DrydockLease())
       ->setResourceType('host')
+      ->setOwnerPHID($build_target->getPHID())
       ->setAttributes(
         array(
           'platform' => $settings['platform'],

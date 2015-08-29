@@ -44,6 +44,7 @@ final class PhabricatorMarkupEngine extends Phobject {
   private $contextObject;
   private $version = 15;
   private $engineCaches = array();
+  private $auxiliaryConfig = array();
 
 
 /* -(  Markup Pipeline  )---------------------------------------------------- */
@@ -122,6 +123,10 @@ final class PhabricatorMarkupEngine extends Phobject {
       $engines[$key] = $info['object']->newMarkupEngine($info['field']);
       $engines[$key]->setConfig('viewer', $this->viewer);
       $engines[$key]->setConfig('contextObject', $this->contextObject);
+
+      foreach ($this->auxiliaryConfig as $aux_key => $aux_value) {
+        $engines[$key]->setConfig($aux_key, $aux_value);
+      }
     }
 
     // Load or build the preprocessor caches.
@@ -307,6 +312,12 @@ final class PhabricatorMarkupEngine extends Phobject {
    */
   public function setContextObject($object) {
     $this->contextObject = $object;
+    return $this;
+  }
+
+  public function setAuxiliaryConfig($key, $value) {
+    // TODO: This is gross and should be removed. Avoid use.
+    $this->auxiliaryConfig[$key] = $value;
     return $this;
   }
 

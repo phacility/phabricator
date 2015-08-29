@@ -7,11 +7,18 @@ final class PhabricatorMailManagementVolumeWorkflow
     $this
       ->setName('volume')
       ->setSynopsis(
-        pht('Show how much mail users have received in the last 30 days.'))
+        pht('Show how much mail users have received recently.'))
       ->setExamples(
         '**volume**')
       ->setArguments(
         array(
+          array(
+            'name'    => 'days',
+            'param'   => 'days',
+            'default' => 30,
+            'help'    => pht(
+              'Number of days back (default 30).'),
+          ),
         ));
   }
 
@@ -19,7 +26,16 @@ final class PhabricatorMailManagementVolumeWorkflow
     $console = PhutilConsole::getConsole();
     $viewer = $this->getViewer();
 
-    $since = (PhabricatorTime::getNow() - phutil_units('30 days in seconds'));
+    $days = (int)$args->getArg('days');
+    if ($days < 1) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Period specified with --days must be at least 1.'));
+    }
+
+    $duration = phutil_units("{$days} days in seconds");
+
+    $since = (PhabricatorTime::getNow() - $duration);
     $until = PhabricatorTime::getNow();
 
     $mails = id(new PhabricatorMetaMTAMailQuery())
@@ -95,7 +111,9 @@ final class PhabricatorMailManagementVolumeWorkflow
     $table->draw();
 
     echo "\n";
-    echo pht('Mail sent in the last 30 days.')."\n";
+    echo pht(
+      'Mail sent in the last %s day(s).',
+      new PhutilNumber($days))."\n";
     echo pht(
       '"Unfiltered" is raw volume before rules applied.')."\n";
     echo pht(
