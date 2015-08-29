@@ -98,10 +98,20 @@ final class PonderQuestionViewController extends PonderController {
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     $crumbs->addTextCrumb('Q'.$id, '/Q'.$id);
 
+    $answer_wiki = null;
+    if ($question->getAnswerWiki()) {
+      $answer = phutil_tag_div('mlt mlb msr msl', $question->getAnswerWiki());
+      $answer_wiki = id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('Answer Summary'))
+        ->setColor(PHUIObjectBoxView::COLOR_BLUE)
+        ->appendChild($answer);
+    }
+
     $ponder_view = id(new PHUITwoColumnView())
       ->setMainColumn(array(
           $object_box,
           $comment_view,
+          $answer_wiki,
           $answers,
           $answer_add_panel,
         ))
