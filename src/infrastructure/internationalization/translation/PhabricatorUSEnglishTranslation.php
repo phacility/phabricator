@@ -386,10 +386,24 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
+      '%s added %s reviewer(s) for %s: %s.' => array(
+        array(
+          '%s added a reviewer for %3$s: %4$s.',
+          '%s added reviewers for %3$s: %4$s.',
+        ),
+      ),
+
       '%s removed %s reviewer(s): %s.' => array(
         array(
           '%s removed a reviewer: %3$s.',
           '%s removed reviewers: %3$s.',
+        ),
+      ),
+
+      '%s removed %s reviewer(s) for %s: %s.' => array(
+        array(
+          '%s removed a reviewer for %3$s: %4$s.',
+          '%s removed reviewers for %3$s: %4$s.',
         ),
       ),
 
