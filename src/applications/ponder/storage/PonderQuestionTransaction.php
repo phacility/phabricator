@@ -100,9 +100,9 @@ final class PonderQuestionTransaction
             return pht(
               '%s closed this question as obsolete.',
               $this->renderHandleLink($author_phid));
-          case PonderQuestionStatus::STATUS_CLOSED_DUPLICATE:
+          case PonderQuestionStatus::STATUS_CLOSED_INVALID:
             return pht(
-              '%s closed this question as a duplicate.',
+              '%s closed this question as invalid.',
               $this->renderHandleLink($author_phid));
         }
     }
@@ -272,9 +272,9 @@ final class PonderQuestionTransaction
               '%s closed %s as resolved.',
               $this->renderHandleLink($author_phid),
               $this->renderHandleLink($object_phid));
-          case PonderQuestionStatus::STATUS_CLOSED_DUPLICATE:
+          case PonderQuestionStatus::STATUS_CLOSED_INVALID:
             return pht(
-              '%s closed %s as duplicate.',
+              '%s closed %s as invalid.',
               $this->renderHandleLink($author_phid),
               $this->renderHandleLink($object_phid));
           case PonderQuestionStatus::STATUS_CLOSED_OBSOLETE:
