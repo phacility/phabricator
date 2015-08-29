@@ -73,9 +73,6 @@ final class DifferentialLintField
     if ($status == DifferentialLintStatus::LINT_SKIP) {
       $warnings[] = pht(
         'Lint was skipped when generating these changes.');
-    } else if ($status == DifferentialLintStatus::LINT_POSTPONED) {
-      $warnings[] = pht(
-        'Background linting has not finished executing on these changes.');
     } else {
       $warnings[] = pht('These changes have lint problems.');
     }
@@ -94,7 +91,6 @@ final class DifferentialLintField
       DifferentialLintStatus::LINT_FAIL => 'red',
       DifferentialLintStatus::LINT_SKIP => 'blue',
       DifferentialLintStatus::LINT_AUTO_SKIP => 'blue',
-      DifferentialLintStatus::LINT_POSTPONED => 'blue',
     );
     $icon_color = idx($colors, $diff->getLintStatus(), 'grey');
 
