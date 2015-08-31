@@ -17,7 +17,6 @@ final class PhabricatorProjectColumnDetailController
       ->withIDs(array($project_id))
       ->needImages(true)
       ->executeOne();
-
     if (!$project) {
       return new Aphront404Response();
     }
@@ -40,7 +39,7 @@ final class PhabricatorProjectColumnDetailController
       new PhabricatorProjectColumnTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    $title = pht('%s', $column->getDisplayName());
+    $title = $column->getDisplayName();
 
     $header = $this->buildHeaderView($column);
     $actions = $this->buildActionView($column);
@@ -112,15 +111,6 @@ final class PhabricatorProjectColumnDetailController
       ->setUser($viewer)
       ->setObject($column)
       ->setActionList($actions);
-
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $viewer,
-      $column);
-
-    $properties->addProperty(
-      pht('Editable By'),
-      $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
-
 
     $limit = $column->getPointLimit();
     $properties->addProperty(
