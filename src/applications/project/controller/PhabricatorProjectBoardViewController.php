@@ -624,8 +624,7 @@ final class PhabricatorProjectBoardViewController
       ->setMetadata(
         array(
           'columnPHID' => $column->getPHID(),
-        ))
-      ->setDisabled(!$can_edit);
+        ));
 
     $batch_edit_uri = $request->getRequestURI();
     $batch_edit_uri->setQueryParam('batch', $column->getID());
