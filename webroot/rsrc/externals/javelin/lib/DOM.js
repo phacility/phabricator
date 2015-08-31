@@ -310,7 +310,13 @@ JX.$N = function(tag, attr, content) {
     }
   }
 
-  JX.copy(node, attr);
+  for (var k in attr) {
+    if (attr[k] === null) {
+      continue;
+    }
+    node[k] = attr[k];
+  }
+
   if (content) {
     JX.DOM.setContent(node, content);
   }
