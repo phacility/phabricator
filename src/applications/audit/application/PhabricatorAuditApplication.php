@@ -70,9 +70,8 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
 
     $query = id(new DiffusionCommitQuery())
       ->setViewer($user)
-      ->withAuditorPHIDs($phids)
+      ->withNeedsAuditByPHIDs($phids)
       ->withAuditStatus(DiffusionCommitQuery::AUDIT_STATUS_OPEN)
-      ->withAuditAwaitingUser($user)
       ->setLimit(self::MAX_STATUS_ITEMS);
     $commits = $query->execute();
 

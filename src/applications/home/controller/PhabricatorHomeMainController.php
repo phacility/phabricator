@@ -349,9 +349,8 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     $query = id(new DiffusionCommitQuery())
       ->setViewer($user)
-      ->withAuditorPHIDs($phids)
+      ->withNeedsAuditByPHIDs($phids)
       ->withAuditStatus(DiffusionCommitQuery::AUDIT_STATUS_OPEN)
-      ->withAuditAwaitingUser($user)
       ->needAuditRequests(true)
       ->needCommitData(true)
       ->setLimit(10);
