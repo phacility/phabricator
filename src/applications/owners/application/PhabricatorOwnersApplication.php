@@ -26,7 +26,7 @@ final class PhabricatorOwnersApplication extends PhabricatorApplication {
     return array(
       array(
         'name' => pht('Owners User Guide'),
-        'href' => PhabricatorEnv::getDoclink('Owners Tool User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Owners User Guide'),
       ),
     );
   }
