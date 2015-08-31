@@ -26,6 +26,8 @@ final class AphrontRequest extends Phobject {
   private $requestData;
   private $user;
   private $applicationConfiguration;
+  private $site;
+  private $controller;
   private $uriData;
   private $cookiePrefix;
 
@@ -75,6 +77,24 @@ final class AphrontRequest extends Phobject {
     //  https://www.djangoproject.com/weblog/2012/oct/17/security/
     $uri = new PhutilURI('http://'.$this->host);
     return $uri->getDomain();
+  }
+
+  public function setSite(AphrontSite $site) {
+    $this->site = $site;
+    return $this;
+  }
+
+  public function getSite() {
+    return $this->site;
+  }
+
+  public function setController(AphrontController $controller) {
+    $this->controller = $controller;
+    return $this;
+  }
+
+  public function getController() {
+    return $this->controller;
   }
 
 
