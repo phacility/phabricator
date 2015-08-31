@@ -416,12 +416,30 @@ ul.phui-object-item-icons {
   border-left-color: {$violet};
 }
 
-.phui-object-item-bar-color-grey {
-  border-left-color: #bdc3c7;
+.phui-object-item-bar-color-pink {
+  border-left-color: {$pink};
 }
 
-.phui-object-item-bar-color-black {
-  border-left-color: #333333;
+.phui-object-item-bar-color-fire {
+  border-left-color: {$fire};
+}
+
+.phui-object-item-bar-color-bluegrey {
+  border-left-color: {$bluetext};
+}
+
+.phui-object-item-bar-color-lightbluetext {
+  border-left-color: {$lightbluetext};
+}
+
+.phui-object-item-bar-color-grey,
+.phui-object-item-bar-color-lightgreytext {
+  border-left-color: {$lightgreytext};
+}
+
+.phui-object-item-bar-color-black,
+.phui-object-item-bar-color-dark {
+  border-left-color: {$darkgreytext};
 }
 
 
