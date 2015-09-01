@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '928faf7e',
-    'core.pkg.js' => 'a590b451',
+    'core.pkg.js' => '47dc9ebb',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '2de124c9',
     'differential.pkg.js' => '813c1633',
@@ -210,7 +210,7 @@ return array(
     'rsrc/externals/javelin/ext/view/__tests__/ViewInterpreter.js' => '7a94d6a5',
     'rsrc/externals/javelin/ext/view/__tests__/ViewRenderer.js' => '6ea96ac9',
     'rsrc/externals/javelin/lib/Cookie.js' => '62dfea03',
-    'rsrc/externals/javelin/lib/DOM.js' => '147805fa',
+    'rsrc/externals/javelin/lib/DOM.js' => '805b806a',
     'rsrc/externals/javelin/lib/History.js' => 'd4505101',
     'rsrc/externals/javelin/lib/JSON.js' => '69adf288',
     'rsrc/externals/javelin/lib/Leader.js' => '331b1611',
@@ -659,7 +659,7 @@ return array(
     'javelin-color' => '7e41274a',
     'javelin-cookie' => '62dfea03',
     'javelin-diffusion-locate-file-source' => 'b42eddc7',
-    'javelin-dom' => '147805fa',
+    'javelin-dom' => '805b806a',
     'javelin-dynval' => 'f6555212',
     'javelin-event' => '85ea0626',
     'javelin-fx' => '54b612ba',
@@ -917,13 +917,6 @@ return array(
       'javelin-dom',
       'javelin-uri',
       'phabricator-textareautils',
-    ),
-    '147805fa' => array(
-      'javelin-magical-init',
-      'javelin-install',
-      'javelin-util',
-      'javelin-vector',
-      'javelin-stratcom',
     ),
     '1499a8cb' => array(
       'javelin-behavior',
@@ -1450,6 +1443,13 @@ return array(
     '7ee2b591' => array(
       'javelin-behavior',
       'javelin-history',
+    ),
+    '805b806a' => array(
+      'javelin-magical-init',
+      'javelin-install',
+      'javelin-util',
+      'javelin-vector',
+      'javelin-stratcom',
     ),
     82439934 => array(
       'javelin-behavior',

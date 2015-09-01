@@ -168,9 +168,7 @@ final class HeraldCommitAdapter
         'commitPHID = %s AND auditStatus IN (%Ls)',
         $this->commit->getPHID(),
         $status_arr);
-
-      $packages = mpull($requests, 'getAuditorPHID');
-      $this->auditNeededPackages = $packages;
+      $this->auditNeededPackages = $requests;
     }
     return $this->auditNeededPackages;
   }
