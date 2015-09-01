@@ -209,7 +209,7 @@ abstract class PhabricatorAuthController extends PhabricatorController {
 
     $actual = $account->getProperty('registrationKey');
     $expect = PhabricatorHash::digest($registration_key);
-    if ($actual !== $expect) {
+    if (!phutil_hashes_are_identical($actual, $expect)) {
       $response = $this->renderError(
         pht(
           'Your browser submitted a different registration key than the one '.

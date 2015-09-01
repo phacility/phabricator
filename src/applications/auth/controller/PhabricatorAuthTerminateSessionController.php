@@ -21,7 +21,10 @@ final class PhabricatorAuthTerminateSessionController
 
     $sessions = $query->execute();
     foreach ($sessions as $key => $session) {
-      if ($session->getSessionKey() == $current_key) {
+      $is_current = phutil_hashes_are_identical(
+        $session->getSessionKey(),
+        $current_key);
+      if ($is_current) {
         // Don't terminate the current login session.
         unset($sessions[$key]);
       }
