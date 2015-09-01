@@ -74,6 +74,7 @@ final class PonderQuestionEditor
     $types[] = PonderQuestionTransaction::TYPE_CONTENT;
     $types[] = PonderQuestionTransaction::TYPE_ANSWERS;
     $types[] = PonderQuestionTransaction::TYPE_STATUS;
+    $types[] = PonderQuestionTransaction::TYPE_ANSWERWIKI;
 
     return $types;
   }
@@ -91,6 +92,8 @@ final class PonderQuestionEditor
         return mpull($object->getAnswers(), 'getPHID');
       case PonderQuestionTransaction::TYPE_STATUS:
         return $object->getStatus();
+      case PonderQuestionTransaction::TYPE_ANSWERWIKI:
+        return $object->getAnswerWiki();
     }
   }
 
@@ -102,6 +105,7 @@ final class PonderQuestionEditor
       case PonderQuestionTransaction::TYPE_TITLE:
       case PonderQuestionTransaction::TYPE_CONTENT:
       case PonderQuestionTransaction::TYPE_STATUS:
+      case PonderQuestionTransaction::TYPE_ANSWERWIKI:
         return $xaction->getNewValue();
       case PonderQuestionTransaction::TYPE_ANSWERS:
         $raw_new_value = $xaction->getNewValue();
@@ -136,6 +140,9 @@ final class PonderQuestionEditor
       case PonderQuestionTransaction::TYPE_STATUS:
         $object->setStatus($xaction->getNewValue());
         break;
+      case PonderQuestionTransaction::TYPE_ANSWERWIKI:
+        $object->setAnswerWiki($xaction->getNewValue());
+        break;
       case PonderQuestionTransaction::TYPE_ANSWERS:
         $old = $xaction->getOldValue();
         $new = $xaction->getNewValue();
@@ -167,6 +174,7 @@ final class PonderQuestionEditor
       case PonderQuestionTransaction::TYPE_TITLE:
       case PonderQuestionTransaction::TYPE_CONTENT:
       case PonderQuestionTransaction::TYPE_STATUS:
+      case PonderQuestionTransaction::TYPE_ANSWERWIKI:
         return $v;
     }
 

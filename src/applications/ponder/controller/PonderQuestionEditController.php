@@ -32,6 +32,7 @@ final class PonderQuestionEditController extends PonderController {
 
     $v_title = $question->getTitle();
     $v_content = $question->getContent();
+    $v_wiki = $question->getAnswerWiki();
     $v_view = $question->getViewPolicy();
     $v_space = $question->getSpacePHID();
     $v_status = $question->getStatus();
@@ -42,6 +43,7 @@ final class PonderQuestionEditController extends PonderController {
     if ($request->isFormPost()) {
       $v_title = $request->getStr('title');
       $v_content = $request->getStr('content');
+      $v_wiki = $request->getStr('answerWiki');
       $v_projects = $request->getArr('projects');
       $v_view = $request->getStr('viewPolicy');
       $v_space = $request->getStr('spacePHID');
@@ -67,6 +69,10 @@ final class PonderQuestionEditController extends PonderController {
         $xactions[] = id(clone $template)
           ->setTransactionType(PonderQuestionTransaction::TYPE_CONTENT)
           ->setNewValue($v_content);
+
+        $xactions[] = id(clone $template)
+          ->setTransactionType(PonderQuestionTransaction::TYPE_ANSWERWIKI)
+          ->setNewValue($v_wiki);
 
         if (!$is_new) {
           $xactions[] = id(clone $template)
@@ -119,7 +125,15 @@ final class PonderQuestionEditController extends PonderController {
           ->setName('content')
           ->setID('content')
           ->setValue($v_content)
-          ->setLabel(pht('Description'))
+          ->setLabel(pht('Question Details'))
+          ->setUser($viewer))
+      ->appendChild(
+        id(new PhabricatorRemarkupControl())
+          ->setUser($viewer)
+          ->setName('answerWiki')
+          ->setID('answerWiki')
+          ->setValue($v_wiki)
+          ->setLabel(pht('Answer Summary'))
           ->setUser($viewer))
       ->appendControl(
         id(new AphrontFormPolicyControl())
@@ -157,6 +171,11 @@ final class PonderQuestionEditController extends PonderController {
       ->setControlID('content')
       ->setPreviewURI($this->getApplicationURI('preview/'));
 
+    $answer_preview = id(new PHUIRemarkupPreviewPanel())
+      ->setHeader(pht('Answer Summary Preview'))
+      ->setControlID('answerWiki')
+      ->setPreviewURI($this->getApplicationURI('preview/'));
+
     $crumbs = $this->buildApplicationCrumbs();
 
     $id = $question->getID();
@@ -179,6 +198,7 @@ final class PonderQuestionEditController extends PonderController {
         $crumbs,
         $form_box,
         $preview,
+        $answer_preview,
       ),
       array(
         'title'  => $title,

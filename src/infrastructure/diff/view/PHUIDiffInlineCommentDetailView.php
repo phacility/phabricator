@@ -211,14 +211,14 @@ final class PHUIDiffInlineCommentDetailView
         ->addSigil('differential-inline-next')
         ->setMustCapture(true);
 
-      $hide = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setTooltip(pht('Hide Comment'))
-        ->setIconFont('fa-times')
-        ->addSigil('hide-inline')
-        ->setMustCapture(true);
+      if ($this->canHide()) {
+        $hide = id(new PHUIButtonView())
+          ->setTag('a')
+          ->setTooltip(pht('Hide Comment'))
+          ->setIconFont('fa-times')
+          ->addSigil('hide-inline')
+          ->setMustCapture(true);
 
-      if ($viewer_phid && $inline->getID() && $inline->supportsHiding()) {
         $nextprev->addButton($hide);
       }
 
@@ -454,6 +454,29 @@ final class PHUIDiffInlineCommentDetailView
       ));
 
     return $markup;
+  }
+
+  private function canHide() {
+    $inline = $this->inlineComment;
+
+    if ($inline->isDraft()) {
+      return false;
+    }
+
+    if (!$inline->getID()) {
+      return false;
+    }
+
+    $viewer = $this->getUser();
+    if (!$viewer->isLoggedIn()) {
+      return false;
+    }
+
+    if (!$inline->supportsHiding()) {
+      return false;
+    }
+
+    return true;
   }
 
 }

@@ -7,6 +7,7 @@ final class PonderQuestionTransaction
   const TYPE_CONTENT = 'ponder.question:content';
   const TYPE_ANSWERS = 'ponder.question:answer';
   const TYPE_STATUS = 'ponder.question:status';
+  const TYPE_ANSWERWIKI = 'ponder.question:wiki';
 
   const MAILTAG_DETAILS = 'question:details';
   const MAILTAG_COMMENT = 'question:comment';
@@ -78,6 +79,10 @@ final class PonderQuestionTransaction
         return pht(
           '%s edited the question description.',
           $this->renderHandleLink($author_phid));
+      case self::TYPE_ANSWERWIKI:
+        return pht(
+          '%s edited the question answer wiki.',
+          $this->renderHandleLink($author_phid));
       case self::TYPE_ANSWERS:
         $answer_handle = $this->getHandle($this->getNewAnswerPHID());
         $question_handle = $this->getHandle($object_phid);
@@ -100,9 +105,9 @@ final class PonderQuestionTransaction
             return pht(
               '%s closed this question as obsolete.',
               $this->renderHandleLink($author_phid));
-          case PonderQuestionStatus::STATUS_CLOSED_DUPLICATE:
+          case PonderQuestionStatus::STATUS_CLOSED_INVALID:
             return pht(
-              '%s closed this question as a duplicate.',
+              '%s closed this question as invalid.',
               $this->renderHandleLink($author_phid));
         }
     }
@@ -120,6 +125,7 @@ final class PonderQuestionTransaction
       case self::TYPE_TITLE:
       case self::TYPE_CONTENT:
       case self::TYPE_STATUS:
+      case self::TYPE_ANSWERWIKI:
         $tags[] = self::MAILTAG_DETAILS;
         break;
       case self::TYPE_ANSWERS:
@@ -139,6 +145,7 @@ final class PonderQuestionTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
       case self::TYPE_CONTENT:
+      case self::TYPE_ANSWERWIKI:
         return 'fa-pencil';
       case self::TYPE_STATUS:
         return PonderQuestionStatus::getQuestionStatusIcon($new);
@@ -156,6 +163,7 @@ final class PonderQuestionTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
       case self::TYPE_CONTENT:
+      case self::TYPE_ANSWERWIKI:
         return PhabricatorTransactions::COLOR_BLUE;
       case self::TYPE_ANSWERS:
         return PhabricatorTransactions::COLOR_GREEN;
@@ -167,6 +175,7 @@ final class PonderQuestionTransaction
   public function hasChangeDetails() {
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
+      case self::TYPE_ANSWERWIKI:
         return true;
     }
     return parent::hasChangeDetails();
@@ -253,6 +262,11 @@ final class PonderQuestionTransaction
           '%s edited the description of %s',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
+      case self::TYPE_ANSWERWIKI:
+        return pht(
+          '%s edited the answer wiki for %s',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
       case self::TYPE_ANSWERS:
         $answer_handle = $this->getHandle($this->getNewAnswerPHID());
         $question_handle = $this->getHandle($object_phid);
@@ -272,9 +286,9 @@ final class PonderQuestionTransaction
               '%s closed %s as resolved.',
               $this->renderHandleLink($author_phid),
               $this->renderHandleLink($object_phid));
-          case PonderQuestionStatus::STATUS_CLOSED_DUPLICATE:
+          case PonderQuestionStatus::STATUS_CLOSED_INVALID:
             return pht(
-              '%s closed %s as duplicate.',
+              '%s closed %s as invalid.',
               $this->renderHandleLink($author_phid),
               $this->renderHandleLink($object_phid));
           case PonderQuestionStatus::STATUS_CLOSED_OBSOLETE:

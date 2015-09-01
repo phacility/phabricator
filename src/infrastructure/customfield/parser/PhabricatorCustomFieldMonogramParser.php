@@ -24,8 +24,8 @@ abstract class PhabricatorCustomFieldMonogramParser
       '(?:^|\b)'.
       $prefix_regex.
       $infix_regex.
-      '((?:'.$monogram_pattern.'[,\s]*)+)'.
-      '(?:\band\s+('.$monogram_pattern.'))?'.
+      '((?:'.$monogram_pattern.'(?:\b|$)[,\s]*)+)'.
+      '(?:\band\s+('.$monogram_pattern.'(?:\b|$)))?'.
       $suffix_regex.
       '(?:$|\b)'.
       '/';

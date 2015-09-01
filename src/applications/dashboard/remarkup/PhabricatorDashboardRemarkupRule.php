@@ -3,6 +3,8 @@
 final class PhabricatorDashboardRemarkupRule
   extends PhabricatorObjectRemarkupRule {
 
+  const KEY_PARENT_PANEL_PHIDS = 'dashboard.parentPanelPHIDs';
+
   protected function getObjectNamePrefix() {
     return 'W';
   }
@@ -21,12 +23,16 @@ final class PhabricatorDashboardRemarkupRule
     PhabricatorObjectHandle $handle,
     $options) {
 
-    $viewer = $this->getEngine()->getConfig('viewer');
+    $engine = $this->getEngine();
+    $viewer = $engine->getConfig('viewer');
+
+    $parent_key = self::KEY_PARENT_PANEL_PHIDS;
+    $parent_phids = $engine->getConfig($parent_key, array());
 
     return id(new PhabricatorDashboardPanelRenderingEngine())
       ->setViewer($viewer)
       ->setPanel($object)
-      ->setParentPanelPHIDs(array())
+      ->setParentPanelPHIDs($parent_phids)
       ->renderPanel();
 
   }

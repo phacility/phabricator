@@ -15,7 +15,7 @@ final class DiffusionCommitQuery
   private $needAuditRequests;
   private $auditIDs;
   private $auditorPHIDs;
-  private $auditAwaitingUser;
+  private $needsAuditByPHIDs;
   private $auditStatus;
   private $epochMin;
   private $epochMax;
@@ -103,27 +103,6 @@ final class DiffusionCommitQuery
     return $this;
   }
 
-  /**
-   * Returns true if we should join the audit table, either because we're
-   * interested in the information if it's available or because matching rows
-   * must always have it.
-   */
-  private function shouldJoinAudits() {
-    return $this->auditStatus ||
-           $this->rowsMustHaveAudits();
-  }
-
-  /**
-   * Return true if we should `JOIN` (vs `LEFT JOIN`) the audit table, because
-   * matching commits will always have audit rows.
-   */
-  private function rowsMustHaveAudits() {
-    return
-      $this->auditIDs ||
-      $this->auditorPHIDs ||
-      $this->auditAwaitingUser;
-  }
-
   public function withAuditIDs(array $ids) {
     $this->auditIDs = $ids;
     return $this;
@@ -134,8 +113,8 @@ final class DiffusionCommitQuery
     return $this;
   }
 
-  public function withAuditAwaitingUser(PhabricatorUser $user) {
-    $this->auditAwaitingUser = $user;
+  public function withNeedsAuditByPHIDs(array $needs_phids) {
+    $this->needsAuditByPHIDs = $needs_phids;
     return $this;
   }
 
@@ -175,21 +154,12 @@ final class DiffusionCommitQuery
     }
   }
 
+  public function newResultObject() {
+    return new PhabricatorRepositoryCommit();
+  }
+
   protected function loadPage() {
-    $table = new PhabricatorRepositoryCommit();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT commit.* FROM %T commit %Q %Q %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildJoinClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildGroupClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $commits) {
@@ -296,8 +266,8 @@ final class DiffusionCommitQuery
     return $commits;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->repositoryPHIDs !== null) {
       $map_repositories = id(new PhabricatorRepositoryQuery())
@@ -317,42 +287,42 @@ final class DiffusionCommitQuery
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'commit.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'commit.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->repositoryIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'commit.repositoryID IN (%Ld)',
         $this->repositoryIDs);
     }
 
     if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'commit.authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
     if ($this->epochMin !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'commit.epoch >= %d',
         $this->epochMin);
     }
 
     if ($this->epochMax !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'commit.epoch <= %d',
         $this->epochMax);
     }
@@ -360,13 +330,13 @@ final class DiffusionCommitQuery
     if ($this->importing !== null) {
       if ($this->importing) {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           '(commit.importStatus & %d) != %d',
           PhabricatorRepositoryCommit::IMPORTED_ALL,
           PhabricatorRepositoryCommit::IMPORTED_ALL);
       } else {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           '(commit.importStatus & %d) = %d',
           PhabricatorRepositoryCommit::IMPORTED_ALL,
           PhabricatorRepositoryCommit::IMPORTED_ALL);
@@ -409,7 +379,7 @@ final class DiffusionCommitQuery
 
       foreach ($bare as $identifier) {
         $sql[] = qsprintf(
-          $conn_r,
+          $conn,
           '(commit.commitIdentifier LIKE %> AND '.
           'LENGTH(commit.commitIdentifier) = 40)',
           $identifier);
@@ -437,7 +407,7 @@ final class DiffusionCommitQuery
               continue;
             }
             $sql[] = qsprintf(
-              $conn_r,
+              $conn,
               '(commit.repositoryID = %d AND commit.commitIdentifier = %s)',
               $repo->getID(),
               // NOTE: Because the 'commitIdentifier' column is a string, MySQL
@@ -449,7 +419,7 @@ final class DiffusionCommitQuery
               continue;
             }
             $sql[] = qsprintf(
-              $conn_r,
+              $conn,
               '(commit.repositoryID = %d AND commit.commitIdentifier LIKE %>)',
               $repo->getID(),
               $ref['identifier']);
@@ -470,28 +440,23 @@ final class DiffusionCommitQuery
 
     if ($this->auditIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'audit.id IN (%Ld)',
         $this->auditIDs);
     }
 
     if ($this->auditorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'audit.auditorPHID IN (%Ls)',
         $this->auditorPHIDs);
     }
 
-    if ($this->auditAwaitingUser) {
-      $awaiting_user_phid = $this->auditAwaitingUser->getPHID();
-      // Exclude package and project audits associated with commits where
-      // the user is the author.
+    if ($this->needsAuditByPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        '(commit.authorPHID IS NULL OR commit.authorPHID != %s)
-          OR (audit.auditorPHID = %s)',
-        $awaiting_user_phid,
-        $awaiting_user_phid);
+        $conn,
+        'needs.auditorPHID IN (%Ls)',
+        $this->needsAuditByPHIDs);
     }
 
     $status = $this->auditStatus;
@@ -499,33 +464,27 @@ final class DiffusionCommitQuery
       switch ($status) {
         case self::AUDIT_STATUS_PARTIAL:
           $where[] = qsprintf(
-            $conn_r,
+            $conn,
             'commit.auditStatus = %d',
             PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED);
           break;
         case self::AUDIT_STATUS_ACCEPTED:
           $where[] = qsprintf(
-            $conn_r,
+            $conn,
             'commit.auditStatus = %d',
             PhabricatorAuditCommitStatusConstants::FULLY_AUDITED);
           break;
         case self::AUDIT_STATUS_CONCERN:
           $where[] = qsprintf(
-            $conn_r,
-            'audit.auditStatus = %s',
+            $conn,
+            'status.auditStatus = %s',
             PhabricatorAuditStatusConstants::CONCERNED);
           break;
         case self::AUDIT_STATUS_OPEN:
           $where[] = qsprintf(
-            $conn_r,
-            'audit.auditStatus in (%Ls)',
+            $conn,
+            'status.auditStatus in (%Ls)',
             PhabricatorAuditStatusConstants::getOpenStatusConstants());
-          if ($this->auditAwaitingUser) {
-            $where[] = qsprintf(
-              $conn_r,
-              'awaiting.auditStatus IS NULL OR awaiting.auditStatus != %s',
-              PhabricatorAuditStatusConstants::RESIGNED);
-          }
           break;
         case self::AUDIT_STATUS_ANY:
           break;
@@ -545,9 +504,7 @@ final class DiffusionCommitQuery
       }
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   protected function didFilterResults(array $filtered) {
@@ -560,56 +517,113 @@ final class DiffusionCommitQuery
     }
   }
 
-  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
-    $joins = array();
+  private function shouldJoinStatus() {
+    return $this->auditStatus;
+  }
+
+  private function shouldJoinAudits() {
+    return $this->auditIDs || $this->auditorPHIDs;
+  }
+
+  private function shouldJoinNeeds() {
+    return $this->needsAuditByPHIDs;
+  }
+
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $join = parent::buildJoinClauseParts($conn);
     $audit_request = new PhabricatorRepositoryAuditRequest();
 
-    if ($this->shouldJoinAudits()) {
-      $joins[] = qsprintf(
-        $conn_r,
-        '%Q %T audit ON commit.phid = audit.commitPHID',
-        ($this->rowsMustHaveAudits() ? 'JOIN' : 'LEFT JOIN'),
+    if ($this->shouldJoinStatus()) {
+      $join[] = qsprintf(
+        $conn,
+        'LEFT JOIN %T status ON commit.phid = status.commitPHID',
         $audit_request->getTableName());
     }
 
-    if ($this->auditAwaitingUser) {
-      // Join the request table on the awaiting user's requests, so we can
-      // filter out package and project requests which the user has resigned
-      // from.
-      $joins[] = qsprintf(
-        $conn_r,
-        'LEFT JOIN %T awaiting ON audit.commitPHID = awaiting.commitPHID AND
-        awaiting.auditorPHID = %s',
-        $audit_request->getTableName(),
-        $this->auditAwaitingUser->getPHID());
+    if ($this->shouldJoinAudits()) {
+      $join[] = qsprintf(
+        $conn,
+        'JOIN %T audit ON commit.phid = audit.commitPHID',
+        $audit_request->getTableName());
     }
 
-    if ($joins) {
-      return implode(' ', $joins);
-    } else {
-      return '';
+    if ($this->shouldJoinNeeds()) {
+      $join[] = qsprintf(
+        $conn,
+        'JOIN %T needs ON commit.phid = needs.commitPHID
+          AND needs.auditStatus IN (%Ls)',
+        $audit_request->getTableName(),
+        array(
+          PhabricatorAuditStatusConstants::AUDIT_REQUESTED,
+          PhabricatorAuditStatusConstants::AUDIT_REQUIRED,
+        ));
     }
+
+    return $join;
   }
 
-  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
-    $should_group = $this->shouldJoinAudits();
-
-    // TODO: Currently, the audit table is missing a unique key, so we may
-    // require a GROUP BY if we perform this join. See T1768. This can be
-    // removed once the table has the key.
-    if ($this->auditAwaitingUser) {
-      $should_group = true;
+  protected function shouldGroupQueryResultRows() {
+    if ($this->shouldJoinStatus()) {
+      return true;
     }
 
-    if ($should_group) {
-      return 'GROUP BY commit.id';
-    } else {
-      return '';
+    if ($this->shouldJoinAudits()) {
+      return true;
     }
+
+    if ($this->shouldJoinNeeds()) {
+      return true;
+    }
+
+    return parent::shouldGroupQueryResultRows();
   }
 
   public function getQueryApplicationClass() {
     return 'PhabricatorDiffusionApplication';
   }
+
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'epoch' => array(
+        'table' => $this->getPrimaryTableAlias(),
+        'column' => 'epoch',
+        'type' => 'int',
+        'reverse' => false,
+      ),
+    );
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $commit = $this->loadCursorObject($cursor);
+    return array(
+      'id' => $commit->getID(),
+      'epoch' => $commit->getEpoch(),
+    );
+  }
+
+  public function getBuiltinOrders() {
+    $parent = parent::getBuiltinOrders();
+
+    // Rename the default ID-based orders.
+    $parent['importnew'] = array(
+      'name' => pht('Import Date (Newest First)'),
+    ) + $parent['newest'];
+
+    $parent['importold'] = array(
+      'name' => pht('Import Date (Oldest First)'),
+    ) + $parent['oldest'];
+
+    return array(
+      'newest' => array(
+        'vector' => array('epoch', 'id'),
+        'name' => pht('Commit Date (Newest First)'),
+      ),
+      'oldest' => array(
+        'vector' => array('-epoch', '-id'),
+        'name' => pht('Commit Date (Oldest First)'),
+      ),
+    ) + $parent;
+  }
+
 
 }

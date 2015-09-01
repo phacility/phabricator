@@ -2,19 +2,13 @@
 
 final class ReleephProductEditController extends ReleephProductController {
 
-  private $productID;
-
-  public function willProcessRequest(array $data) {
-    $this->productID = $data['projectID'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('projectID');
 
     $product = id(new ReleephProductQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->productID))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,

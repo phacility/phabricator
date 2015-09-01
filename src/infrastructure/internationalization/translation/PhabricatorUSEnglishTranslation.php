@@ -386,10 +386,24 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
+      '%s added %s reviewer(s) for %s: %s.' => array(
+        array(
+          '%s added a reviewer for %3$s: %4$s.',
+          '%s added reviewers for %3$s: %4$s.',
+        ),
+      ),
+
       '%s removed %s reviewer(s): %s.' => array(
         array(
           '%s removed a reviewer: %3$s.',
           '%s removed reviewers: %3$s.',
+        ),
+      ),
+
+      '%s removed %s reviewer(s) for %s: %s.' => array(
+        array(
+          '%s removed a reviewer for %3$s: %4$s.',
+          '%s removed reviewers for %3$s: %4$s.',
         ),
       ),
 
@@ -1367,6 +1381,11 @@ final class PhabricatorUSEnglishTranslation
       'This action has no effect on %s target(s): %s.' => array(
         'This action has no effect on a target: %2$s.',
         'This action has no effect on targets: %2$s.',
+      ),
+
+      'Mail sent in the last %s day(s).' => array(
+        'Mail sent in the last day.',
+        'Mail sent in the last %s days.',
       ),
 
     );

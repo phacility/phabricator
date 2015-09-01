@@ -39,9 +39,6 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
     return array(
      '/phame/' => array(
         '' => 'PhamePostListController',
-        'r/(?P<id>\d+)/(?P<hash>[^/]+)/(?P<name>.*)'
-          => 'PhameResourceController',
-
         'live/(?P<id>[^/]+)/(?P<more>.*)' => 'PhameBlogLiveController',
         'post/' => array(
           '(?:(?P<filter>draft|all)/)?' => 'PhamePostListController',
@@ -65,6 +62,34 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
           'feed/(?P<id>[^/]+)/' => 'PhameBlogFeedController',
           'new/' => 'PhameBlogEditController',
         ),
+      ) + $this->getResourceSubroutes(),
+    );
+  }
+
+  public function getResourceRoutes() {
+    return array(
+      '/phame/' => $this->getResourceSubroutes(),
+    );
+  }
+
+  private function getResourceSubroutes() {
+    return array(
+      'r/(?P<id>\d+)/(?P<hash>[^/]+)/(?P<name>.*)' =>
+        'PhameResourceController',
+    );
+  }
+
+  public function getBlogRoutes() {
+    return array(
+      '/(?P<more>.*)' => 'PhameBlogLiveController',
+    );
+  }
+
+  public function getBlogCDNRoutes() {
+    return array(
+      '/phame/' => array(
+        'r/(?P<id>\d+)/(?P<hash>[^/]+)/(?P<name>.*)' =>
+            'PhameResourceController',
       ),
     );
   }

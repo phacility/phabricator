@@ -210,7 +210,9 @@ abstract class AphrontApplicationConfiguration extends Phobject {
       ));
     $multimeter->setEventContext('web.'.$controller_class);
 
+    $request->setController($controller);
     $request->setURIMap($uri_data);
+
     $controller->setRequest($request);
 
     // If execution throws an exception and then trying to render that
@@ -283,35 +285,13 @@ abstract class AphrontApplicationConfiguration extends Phobject {
 
 
   /**
-   * Using builtin and application routes, build the appropriate
-   * @{class:AphrontController} class for the request. To route a request, we
-   * first test if the HTTP_HOST is configured as a valid Phabricator URI. If
-   * it isn't, we do a special check to see if it's a custom domain for a blog
-   * in the Phame application and if that fails we error. Otherwise, we test
-   * against all application routes from installed
-   * @{class:PhabricatorApplication}s.
-   *
-   * If we match a route, we construct the controller it points at, build it,
-   * and return it.
-   *
-   * If we fail to match a route, but the current path is missing a trailing
-   * "/", we try routing the same path with a trailing "/" and do a redirect
-   * if that has a valid route. The idea is to canoncalize URIs for consistency,
-   * but avoid breaking noncanonical URIs that we can easily salvage.
-   *
-   * NOTE: We only redirect on GET. On POST, we'd drop parameters and most
-   * likely mutate the request implicitly, and a bad POST usually indicates a
-   * programming error rather than a sloppy typist.
-   *
-   * If the failing path already has a trailing "/", or we can't route the
-   * version with a "/", we call @{method:build404Controller}, which build a
-   * fallback @{class:AphrontController}.
+   * Build a controller to respond to the request.
    *
    * @return pair<AphrontController,dict> Controller and dictionary of request
    *                                      parameters.
    * @task routing
    */
-  final public function buildController() {
+  final private function buildController() {
     $request = $this->getRequest();
 
     // If we're configured to operate in cluster mode, reject requests which
@@ -373,78 +353,48 @@ abstract class AphrontApplicationConfiguration extends Phobject {
       }
     }
 
-    // TODO: Really, the Site should get more control here and be able to
-    // do its own routing logic if it wants, but we don't need that for now.
-    $path = $site->getPathForRouting($request);
+    $maps = $site->getRoutingMaps();
+    $path = $request->getPath();
 
-    list($controller, $uri_data) = $this->buildControllerForPath($path);
-    if (!$controller) {
-      if (!preg_match('@/$@', $path)) {
-        // If we failed to match anything but don't have a trailing slash, try
-        // to add a trailing slash and issue a redirect if that resolves.
-        list($controller, $uri_data) = $this->buildControllerForPath($path.'/');
-
-        // NOTE: For POST, just 404 instead of redirecting, since the redirect
-        // will be a GET without parameters.
-
-        if ($controller && !$request->isHTTPPost()) {
-          $slash_uri = $request->getRequestURI()->setPath($path.'/');
-
-          $external = strlen($request->getRequestURI()->getDomain());
-          return $this->buildRedirectController($slash_uri, $external);
-        }
-      }
-      return $this->build404Controller();
+    $result = $this->routePath($maps, $path);
+    if ($result) {
+      return $result;
     }
 
-    return array($controller, $uri_data);
-  }
+    // If we failed to match anything but don't have a trailing slash, try
+    // to add a trailing slash and issue a redirect if that resolves.
 
+    // NOTE: We only do this for GET, since redirects switch to GET and drop
+    // data like POST parameters.
+    if (!preg_match('@/$@', $path) && $request->isHTTPGet()) {
+      $result = $this->routePath($maps, $path.'/');
+      if ($result) {
+        $slash_uri = $request->getRequestURI()->setPath($path.'/');
+        $external = strlen($request->getRequestURI()->getDomain());
+        return $this->buildRedirectController($slash_uri, $external);
+      }
+    }
+
+    return $this->build404Controller();
+  }
 
   /**
    * Map a specific path to the corresponding controller. For a description
    * of routing, see @{method:buildController}.
    *
+   * @param list<AphrontRoutingMap> List of routing maps.
+   * @param string Path to route.
    * @return pair<AphrontController,dict> Controller and dictionary of request
    *                                      parameters.
    * @task routing
    */
-  final public function buildControllerForPath($path) {
-    $maps = array();
-
-    $applications = PhabricatorApplication::getAllInstalledApplications();
-    foreach ($applications as $application) {
-      $maps[] = array($application, $application->getRoutes());
-    }
-
-    $current_application = null;
-    $controller_class = null;
-    foreach ($maps as $map_info) {
-      list($application, $map) = $map_info;
-
-      $mapper = new AphrontURIMapper($map);
-      list($controller_class, $uri_data) = $mapper->mapPath($path);
-
-      if ($controller_class) {
-        if ($application) {
-          $current_application = $application;
-        }
-        break;
+  private function routePath(array $maps, $path) {
+    foreach ($maps as $map) {
+      $result = $map->routePath($path);
+      if ($result) {
+        return array($result->getController(), $result->getURIData());
       }
     }
-
-    if (!$controller_class) {
-      return array(null, null);
-    }
-
-    $request = $this->getRequest();
-
-    $controller = newv($controller_class, array());
-    if ($current_application) {
-      $controller->setCurrentApplication($current_application);
-    }
-
-    return array($controller, $uri_data);
   }
 
   private function buildSiteForRequest(AphrontRequest $request) {
@@ -468,6 +418,8 @@ abstract class AphrontApplicationConfiguration extends Phobject {
           $path,
           $host));
     }
+
+    $request->setSite($site);
 
     return $site;
   }

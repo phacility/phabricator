@@ -65,7 +65,7 @@ write such a script, and run this command to see its output:
 To actually build the symbol index, pipe this data to the
 `import_repository_symbols.php` script, providing the repository callsign:
 
-  $ ./scripts/symbols/import_repository_symbols.php rREPO < symbols_data
+  $ ./scripts/symbols/import_repository_symbols.php REPO < symbols_data
 
 Then just set up a cronjob to run that however often you like.
 

@@ -24,7 +24,7 @@ final class PhameBlogSite extends PhameSite {
   }
 
   public function getPriority() {
-    return 4000;
+    return 3000;
   }
 
   public function newSiteForRequest(AphrontRequest $request) {
@@ -53,11 +53,14 @@ final class PhameBlogSite extends PhameSite {
     return id(new PhameBlogSite())->setBlog($blog);
   }
 
-  public function getPathForRouting(AphrontRequest $request) {
-    $path = $request->getPath();
-    $id = $this->getBlog()->getID();
+  public function getRoutingMaps() {
+    $app = PhabricatorApplication::getByClass('PhabricatorPhameApplication');
 
-    return "/phame/live/{$id}/{$path}";
+    $maps = array();
+    $maps[] = $this->newRoutingMap()
+      ->setApplication($app)
+      ->setRoutes($app->getBlogRoutes());
+    return $maps;
   }
 
 }
