@@ -273,10 +273,6 @@ class AphrontDefaultApplicationConfiguration
     return $response;
   }
 
-  public function willSendResponse(AphrontResponse $response) {
-    return $response;
-  }
-
   public function build404Controller() {
     return array(new Phabricator404Controller(), array());
   }

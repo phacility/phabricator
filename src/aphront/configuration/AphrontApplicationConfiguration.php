@@ -1,7 +1,8 @@
 <?php
 
 /**
- * @task  routing URI Routing
+ * @task routing URI Routing
+ * @task response Response Handling
  */
 abstract class AphrontApplicationConfiguration extends Phobject {
 
@@ -234,6 +235,7 @@ abstract class AphrontApplicationConfiguration extends Phobject {
       if (!$response) {
         $controller->willProcessRequest($uri_data);
         $response = $controller->handleRequest($request);
+        $this->validateControllerResponse($controller, $response);
       }
     } catch (Exception $ex) {
       $original_exception = $ex;
@@ -241,8 +243,8 @@ abstract class AphrontApplicationConfiguration extends Phobject {
     }
 
     try {
-      $response = $controller->didProcessRequest($response);
-      $response = $this->willSendResponse($response, $controller);
+      $response = $this->produceResponse($request, $response);
+      $response = $controller->willSendResponse($response);
       $response->setRequest($request);
 
       $unexpected_output = PhabricatorStartup::endOutputCapture();
@@ -423,5 +425,149 @@ abstract class AphrontApplicationConfiguration extends Phobject {
 
     return $site;
   }
+
+
+/* -(  Response Handling  )-------------------------------------------------- */
+
+
+  /**
+   * Tests if a response is of a valid type.
+   *
+   * @param wild Supposedly valid response.
+   * @return bool True if the object is of a valid type.
+   * @task response
+   */
+  private function isValidResponseObject($response) {
+    if ($response instanceof AphrontResponse) {
+      return true;
+    }
+
+    if ($response instanceof AphrontResponseProducerInterface) {
+      return true;
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Verifies that the return value from an @{class:AphrontController} is
+   * of an allowed type.
+   *
+   * @param AphrontController Controller which returned the response.
+   * @param wild Supposedly valid response.
+   * @return void
+   * @task response
+   */
+  private function validateControllerResponse(
+    AphrontController $controller,
+    $response) {
+
+    if ($this->isValidResponseObject($response)) {
+      return;
+    }
+
+    throw new Exception(
+      pht(
+        'Controller "%s" returned an invalid response from call to "%s". '.
+        'This method must return an object of class "%s", or an object '.
+        'which implements the "%s" interface.',
+        get_class($controller),
+        'handleRequest()',
+        'AphrontResponse',
+        'AphrontResponseProducerInterface'));
+  }
+
+
+  /**
+   * Verifies that the erturn value from an
+   * @{class:AphrontResponseProducerInterface} is of an allowed type.
+   *
+   * @param AphrontResponseProducerInterface Object which produced
+   *   this response.
+   * @param wild Supposedly valid response.
+   * @return void
+   * @task response
+   */
+  private function validateProducerResponse(
+    AphrontResponseProducerInterface $producer,
+    $response) {
+
+    if ($this->isValidResponseObject($response)) {
+      return;
+    }
+
+    throw new Exception(
+      pht(
+        'Producer "%s" returned an invalid response from call to "%s". '.
+        'This method must return an object of class "%s", or an object '.
+        'which implements the "%s" interface.',
+        get_class($producer),
+        'produceAphrontResponse()',
+        'AphrontResponse',
+        'AphrontResponseProducerInterface'));
+  }
+
+
+  /**
+   * Resolves a response object into an @{class:AphrontResponse}.
+   *
+   * Controllers are permitted to return actual responses of class
+   * @{class:AphrontResponse}, or other objects which implement
+   * @{interface:AphrontResponseProducerInterface} and can produce a response.
+   *
+   * If a controller returns a response producer, invoke it now and produce
+   * the real response.
+   *
+   * @param AphrontRequest Request being handled.
+   * @param AphrontResponse|AphrontResponseProducerInterface Response, or
+   *   response producer.
+   * @return AphrontResponse Response after any required production.
+   * @task response
+   */
+  private function produceResponse(AphrontRequest $request, $response) {
+    $original = $response;
+
+    // Detect cycles on the exact same objects. It's still possible to produce
+    // infinite responses as long as they're all unique, but we can only
+    // reasonably detect cycles, not guarantee that response production halts.
+
+    $seen = array();
+    while (true) {
+      // NOTE: It is permissible for an object to be both a response and a
+      // response producer. If so, being a producer is "stronger". This is
+      // used by AphrontProxyResponse.
+
+      // If this response is a valid response, hand over the request first.
+      if ($response instanceof AphrontResponse) {
+        $response->setRequest($request);
+      }
+
+      // If this isn't a producer, we're all done.
+      if (!($response instanceof AphrontResponseProducerInterface)) {
+        break;
+      }
+
+      $hash = spl_object_hash($response);
+      if (isset($seen[$hash])) {
+        throw new Exception(
+          pht(
+            'Failure while producing response for object of class "%s": '.
+            'encountered production cycle (identical object, of class "%s", '.
+            'was produced twice).',
+            get_class($original),
+            get_class($response)));
+      }
+
+      $seen[$hash] = true;
+
+      $new_response = $response->produceAphrontResponse();
+      $this->validateProducerResponse($response, $new_response);
+      $response = $new_response;
+    }
+
+    return $response;
+  }
+
 
 }
