@@ -39,7 +39,8 @@ return array(
 
   // Tell hipchat about phabricator reviews being created, and the like.
   'feed.http-hooks' => array(
-     'http://khan-webhooks.appspot.com/phabricator-feed',
+     'https://khan-webhooks.appspot.com/phabricator-feed',
+     'https://khan-webhooks-deprecated.appspot.com/phabricator-feed'
   ),
 
   // Custom Maniphest fields
