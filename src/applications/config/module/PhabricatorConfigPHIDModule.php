@@ -41,7 +41,7 @@ final class PhabricatorConfigPHIDModule extends PhabricatorConfigModule {
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('PHID Types'))
-      ->appendChild($table);
+      ->setTable($table);
   }
 
 }

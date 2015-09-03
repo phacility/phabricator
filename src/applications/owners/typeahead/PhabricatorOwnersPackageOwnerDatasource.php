@@ -62,19 +62,20 @@ final class PhabricatorOwnersPackageOwnerDatasource
     $phids = $this->resolvePHIDs($phids);
 
     $user_phids = array();
-    foreach ($phids as $phid) {
+    foreach ($phids as $key => $phid) {
       if (phid_get_type($phid) == PhabricatorPeopleUserPHIDType::TYPECONST) {
         $user_phids[] = $phid;
+        unset($phids[$key]);
       }
     }
 
     if ($user_phids) {
-      $projects = id(new PhabricatorProjectQuery())
+      $packages = id(new PhabricatorOwnersPackageQuery())
         ->setViewer($this->getViewer())
-        ->withMemberPHIDs($user_phids)
+        ->withOwnerPHIDs($user_phids)
         ->execute();
-      foreach ($projects as $project) {
-        $phids[] = $project->getPHID();
+      foreach ($packages as $package) {
+        $phids[] = $package->getPHID();
       }
     }
 

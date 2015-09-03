@@ -3,26 +3,13 @@
 final class PhabricatorOAuthServerTestController
   extends PhabricatorOAuthServerController {
 
-  private $id;
-
-  public function shouldRequireLogin() {
-    return true;
-  }
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $panels       = array();
-    $results      = array();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
 
     $client = id(new PhabricatorOAuthServerClientQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$client) {
       return new Aphront404Response();
@@ -37,16 +24,13 @@ final class PhabricatorOAuthServerTestController
       ->withClientPHIDs(array($client->getPHID()))
       ->executeOne();
     if ($authorization) {
-      $dialog = id(new AphrontDialogView())
-        ->setUser($viewer)
+      return $this->newDialog()
         ->setTitle(pht('Already Authorized'))
         ->appendParagraph(
           pht(
             'You have already authorized this application to access your '.
             'account.'))
         ->addCancelButton($view_uri, pht('Close'));
-
-      return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
     if ($request->isFormPost()) {
@@ -65,8 +49,7 @@ final class PhabricatorOAuthServerTestController
 
     // TODO: It would be nice to put scope options in this dialog, maybe?
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setTitle(pht('Authorize Application?'))
       ->appendParagraph(
         pht(
@@ -75,7 +58,5 @@ final class PhabricatorOAuthServerTestController
           phutil_tag('strong', array(), $client->getName())))
       ->addCancelButton($view_uri)
       ->addSubmitButton(pht('Authorize Application'));
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 }

@@ -1,26 +1,27 @@
 <?php
 
-final class PhabricatorConfigSiteModule extends PhabricatorConfigModule {
+final class PhabricatorConfigRequestExceptionHandlerModule
+  extends PhabricatorConfigModule {
 
   public function getModuleKey() {
-    return 'site';
+    return 'exception-handler';
   }
 
   public function getModuleName() {
-    return pht('Sites');
+    return pht('Exception Handlers');
   }
 
   public function renderModuleStatus(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
-    $sites = AphrontSite::getAllSites();
+    $handlers = AphrontRequestExceptionHandler::getAllHandlers();
 
     $rows = array();
-    foreach ($sites as $key => $site) {
+    foreach ($handlers as $key => $handler) {
       $rows[] = array(
-        $site->getPriority(),
+        $handler->getRequestExceptionHandlerPriority(),
         $key,
-        $site->getDescription(),
+        $handler->getRequestExceptionHandlerDescription(),
       );
     }
 
@@ -39,7 +40,7 @@ final class PhabricatorConfigSiteModule extends PhabricatorConfigModule {
         ));
 
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Sites'))
+      ->setHeaderText(pht('Exception Handlers'))
       ->setTable($table);
   }
 

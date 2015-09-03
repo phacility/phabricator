@@ -176,6 +176,10 @@
   border-left: 1px solid {$thinblueborder};
 }
 
+!print .phui-property-list-actions {
+  display: none;
+}
+
 .device .phui-property-list-actions {
   float: none;
   width: auto;

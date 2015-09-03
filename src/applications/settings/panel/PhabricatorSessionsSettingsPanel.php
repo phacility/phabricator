@@ -50,7 +50,10 @@ final class PhabricatorSessionsSettingsPanel extends PhabricatorSettingsPanel {
     $rows = array();
     $rowc = array();
     foreach ($sessions as $session) {
-      if ($session->getSessionKey() == $current_key) {
+      $is_current = phutil_hashes_are_identical(
+        $session->getSessionKey(),
+        $current_key);
+      if ($is_current) {
         $rowc[] = 'highlighted';
         $button = phutil_tag(
           'a',

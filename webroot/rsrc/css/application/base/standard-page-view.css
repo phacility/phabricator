@@ -25,6 +25,10 @@
   color: {$greytext};
 }
 
+!print .phabricator-standard-page-footer {
+  display: none;
+}
+
 .device-desktop .has-local-nav + .phabricator-standard-page-footer {
   margin-left: 221px;
 }

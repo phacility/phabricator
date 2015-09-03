@@ -1,6 +1,8 @@
 <?php
 
-final class AphrontDialogView extends AphrontView {
+final class AphrontDialogView
+  extends AphrontView
+  implements AphrontResponseProducerInterface {
 
   private $title;
   private $shortTitle;
@@ -369,6 +371,15 @@ final class AphrontDialogView extends AphrontView {
         $attributes,
         $content);
     }
+  }
+
+
+/* -(  AphrontResponseProducerInterface  )----------------------------------- */
+
+
+  public function produceAphrontResponse() {
+    return id(new AphrontDialogResponse())
+      ->setDialog($this);
   }
 
 }
