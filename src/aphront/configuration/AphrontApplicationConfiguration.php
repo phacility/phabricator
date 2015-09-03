@@ -3,6 +3,7 @@
 /**
  * @task routing URI Routing
  * @task response Response Handling
+ * @task exception Exception Handling
  */
 abstract class AphrontApplicationConfiguration extends Phobject {
 
@@ -11,7 +12,6 @@ abstract class AphrontApplicationConfiguration extends Phobject {
   private $path;
   private $console;
 
-  abstract public function getApplicationName();
   abstract public function buildRequest();
   abstract public function build404Controller();
   abstract public function buildRedirectController($uri, $external);
@@ -482,7 +482,7 @@ abstract class AphrontApplicationConfiguration extends Phobject {
 
 
   /**
-   * Verifies that the erturn value from an
+   * Verifies that the return value from an
    * @{class:AphrontResponseProducerInterface} is of an allowed type.
    *
    * @param AphrontResponseProducerInterface Object which produced
@@ -506,6 +506,36 @@ abstract class AphrontApplicationConfiguration extends Phobject {
         'which implements the "%s" interface.',
         get_class($producer),
         'produceAphrontResponse()',
+        'AphrontResponse',
+        'AphrontResponseProducerInterface'));
+  }
+
+
+  /**
+   * Verifies that the return value from an
+   * @{class:AphrontRequestExceptionHandler} is of an allowed type.
+   *
+   * @param AphrontRequestExceptionHandler Object which produced this
+   *  response.
+   * @param wild Supposedly valid response.
+   * @return void
+   * @task response
+   */
+  private function validateErrorHandlerResponse(
+    AphrontRequestExceptionHandler $handler,
+    $response) {
+
+    if ($this->isValidResponseObject($response)) {
+      return;
+    }
+
+    throw new Exception(
+      pht(
+        'Exception handler "%s" returned an invalid response from call to '.
+        '"%s". This method must return an object of class "%s", or an object '.
+        'which implements the "%s" interface.',
+        get_class($handler),
+        'handleRequestException()',
         'AphrontResponse',
         'AphrontResponseProducerInterface'));
   }
@@ -569,6 +599,36 @@ abstract class AphrontApplicationConfiguration extends Phobject {
     }
 
     return $response;
+  }
+
+
+/* -(  Error Handling  )----------------------------------------------------- */
+
+
+  /**
+   * Convert an exception which has escaped the controller into a response.
+   *
+   * This method delegates exception handling to available subclasses of
+   * @{class:AphrontRequestExceptionHandler}.
+   *
+   * @param Exception Exception which needs to be handled.
+   * @return wild Response or response producer, or null if no available
+   *   handler can produce a response.
+   * @task exception
+   */
+  private function handleException(Exception $ex) {
+    $handlers = AphrontRequestExceptionHandler::getAllHandlers();
+
+    $request = $this->getRequest();
+    foreach ($handlers as $handler) {
+      if ($handler->canHandleRequestException($request, $ex)) {
+        $response = $handler->handleRequestException($request, $ex);
+        $this->validateErrorHandlerResponse($handler, $response);
+        return $response;
+      }
+    }
+
+    throw $ex;
   }
 
 
