@@ -6376,7 +6376,7 @@ phutil_register_library_map(array(
     'PhabricatorOAuthServer' => 'Phobject',
     'PhabricatorOAuthServerAccessToken' => 'PhabricatorOAuthServerDAO',
     'PhabricatorOAuthServerApplication' => 'PhabricatorApplication',
-    'PhabricatorOAuthServerAuthController' => 'PhabricatorAuthController',
+    'PhabricatorOAuthServerAuthController' => 'PhabricatorOAuthServerController',
     'PhabricatorOAuthServerAuthorizationCode' => 'PhabricatorOAuthServerDAO',
     'PhabricatorOAuthServerAuthorizationsSettingsPanel' => 'PhabricatorSettingsPanel',
     'PhabricatorOAuthServerClient' => array(
@@ -6394,7 +6394,7 @@ phutil_register_library_map(array(
     'PhabricatorOAuthServerScope' => 'Phobject',
     'PhabricatorOAuthServerTestCase' => 'PhabricatorTestCase',
     'PhabricatorOAuthServerTestController' => 'PhabricatorOAuthServerController',
-    'PhabricatorOAuthServerTokenController' => 'PhabricatorAuthController',
+    'PhabricatorOAuthServerTokenController' => 'PhabricatorOAuthServerController',
     'PhabricatorObjectHandle' => array(
       'Phobject',
       'PhabricatorPolicyInterface',
