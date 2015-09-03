@@ -318,7 +318,7 @@ abstract class AphrontApplicationConfiguration extends Phobject {
           // This is a command line script (probably something like a unit
           // test) so it's fine that we don't have SERVER_ADDR defined.
         } else {
-          throw new AphrontUsageException(
+          throw new AphrontMalformedRequestException(
             pht('No %s', 'SERVER_ADDR'),
             pht(
               'Phabricator is configured to operate in cluster mode, but '.
@@ -330,7 +330,7 @@ abstract class AphrontApplicationConfiguration extends Phobject {
         }
       } else {
         if (!PhabricatorEnv::isClusterAddress($server_addr)) {
-          throw new AphrontUsageException(
+          throw new AphrontMalformedRequestException(
             pht('External Interface'),
             pht(
               'Phabricator is configured in cluster mode and the address '.
@@ -413,12 +413,14 @@ abstract class AphrontApplicationConfiguration extends Phobject {
     if (!$site) {
       $path = $request->getPath();
       $host = $request->getHost();
-      throw new Exception(
+      throw new AphrontMalformedRequestException(
+        pht('Site Not Found'),
         pht(
           'This request asked for "%s" on host "%s", but no site is '.
           'configured which can serve this request.',
           $path,
-          $host));
+          $host),
+        true);
     }
 
     $request->setSite($site);

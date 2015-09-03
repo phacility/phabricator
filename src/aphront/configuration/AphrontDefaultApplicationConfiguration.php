@@ -210,22 +210,6 @@ class AphrontDefaultApplicationConfiguration
       return $response;
     }
 
-    if ($ex instanceof AphrontUsageException) {
-      $error = new PHUIInfoView();
-      $error->setTitle($ex->getTitle());
-      $error->appendChild($ex->getMessage());
-
-      $view = new PhabricatorStandardPageView();
-      $view->setRequest($this->getRequest());
-      $view->appendChild($error);
-
-      $response = new AphrontWebpageResponse();
-      $response->setContent($view->render());
-      $response->setHTTPResponseCode(500);
-
-      return $response;
-    }
-
     // Always log the unhandled exception.
     phlog($ex);
 
