@@ -201,7 +201,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     // case the server or client has some clock skew.
     for ($offset = -2; $offset <= 2; $offset++) {
       $real = self::getTOTPCode($key, $now + $offset);
-      if ($real === $code) {
+      if (phutil_hashes_are_identical($real, $code)) {
         return true;
       }
     }

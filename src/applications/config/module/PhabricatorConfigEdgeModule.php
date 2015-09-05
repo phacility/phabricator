@@ -41,7 +41,7 @@ final class PhabricatorConfigEdgeModule extends PhabricatorConfigModule {
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Edge Types'))
-      ->appendChild($table);
+      ->setTable($table);
   }
 
 }

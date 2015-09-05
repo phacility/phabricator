@@ -2,25 +2,18 @@
 
 final class ReleephProductViewController extends ReleephProductController {
 
-  private $productID;
-  private $queryKey;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->productID = idx($data, 'projectID');
-    $this->queryKey = idx($data, 'queryKey');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $id = $request->getURIData('projectID');
+    $query_key = $request->getURIData('queryKey');
+    $viewer = $request->getViewer();
 
     $product = id(new ReleephProductQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->productID))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$product) {
       return new Aphront404Response();
@@ -28,7 +21,7 @@ final class ReleephProductViewController extends ReleephProductController {
     $this->setProduct($product);
 
     $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($this->queryKey)
+      ->setQueryKey($query_key)
       ->setPreface($this->renderPreface())
       ->setSearchEngine(
         id(new ReleephBranchSearchEngine())

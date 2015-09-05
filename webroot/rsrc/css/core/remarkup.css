@@ -4,6 +4,7 @@
 
 .phabricator-remarkup {
   line-height: 1.51em;
+  word-break: break-word;
 }
 
 .phabricator-remarkup p {

@@ -2,22 +2,16 @@
 
 final class ReleephRequestEditController extends ReleephBranchController {
 
-  private $requestID;
-  private $branchID;
+  public function handleRequest(AphrontRequest $request) {
+    $action = $request->getURIData('action');
+    $request_id = $request->getURIData('requestID');
+    $branch_id = $request->getURIData('branchID');
+    $viewer = $request->getViewer();
 
-  public function willProcessRequest(array $data) {
-    $this->requestID = idx($data, 'requestID');
-    $this->branchID = idx($data, 'branchID');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    if ($this->requestID) {
+    if ($request_id) {
       $pull = id(new ReleephRequestQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->requestID))
+        ->withIDs(array($request_id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -34,7 +28,7 @@ final class ReleephRequestEditController extends ReleephBranchController {
     } else {
       $branch = id(new ReleephBranchQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->branchID))
+        ->withIDs(array($branch_id))
         ->executeOne();
       if (!$branch) {
         return new Aphront404Response();
@@ -77,8 +71,8 @@ final class ReleephRequestEditController extends ReleephBranchController {
     $field_list->readFieldsFromStorage($pull);
 
 
-    if ($this->branchID) {
-      $cancel_uri = $this->getApplicationURI('branch/'.$this->branchID.'/');
+    if ($branch_id) {
+      $cancel_uri = $this->getApplicationURI('branch/'.$branch_id.'/');
     } else {
       $cancel_uri = '/'.$pull->getMonogram();
     }

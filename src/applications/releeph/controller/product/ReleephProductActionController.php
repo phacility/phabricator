@@ -2,20 +2,13 @@
 
 final class ReleephProductActionController extends ReleephProductController {
 
-  private $id;
-  private $action;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['projectID'];
-    $this->action = $data['action'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('projectID');
+    $action = $request->getURIData('action');
 
     $product = id(new ReleephProductQuery())
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -32,7 +25,6 @@ final class ReleephProductActionController extends ReleephProductController {
     $product_id = $product->getID();
     $product_uri = $this->getProductViewURI($product);
 
-    $action = $this->action;
     switch ($action) {
       case 'deactivate':
       case 'activate':

@@ -3,9 +3,7 @@
 final class ReleephRequestTypeaheadController
   extends PhabricatorTypeaheadDatasourceController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-
+  public function handleRequest(AphrontRequest $request) {
     $query    = $request->getStr('q');
     $repo_id  = $request->getInt('repo');
     $since    = $request->getInt('since');

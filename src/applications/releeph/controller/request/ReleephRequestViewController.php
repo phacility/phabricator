@@ -3,19 +3,13 @@
 final class ReleephRequestViewController
   extends ReleephBranchController {
 
-  private $requestID;
-
-  public function willProcessRequest(array $data) {
-    $this->requestID = $data['requestID'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $id = $request->getURIData('requestID');
+    $viewer = $request->getViewer();
 
     $pull = id(new ReleephRequestQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->requestID))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$pull) {
       return new Aphront404Response();
@@ -92,7 +86,6 @@ final class ReleephRequestViewController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

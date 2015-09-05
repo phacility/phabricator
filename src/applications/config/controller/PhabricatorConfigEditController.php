@@ -122,7 +122,7 @@ final class PhabricatorConfigEditController
         ->appendChild(phutil_tag('p', array(), $msg));
     }
 
-    if ($option->getHidden()) {
+    if ($option->getHidden() || $option->getLocked()) {
       $control = null;
     } else {
       $control = $this->renderControl(
@@ -164,14 +164,20 @@ final class PhabricatorConfigEditController
     $form
       ->appendChild($control);
 
-    $submit_control = id(new AphrontFormSubmitControl())
-      ->addCancelButton($done_uri);
 
     if (!$option->getLocked()) {
-      $submit_control->setValue(pht('Save Config Entry'));
+      $form->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->addCancelButton($done_uri)
+          ->setValue(pht('Save Config Entry')));
     }
 
-    $form->appendChild($submit_control);
+    if (!$option->getHidden()) {
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Current Configuration'))
+          ->setValue($this->renderDefaults($option, $config_entry)));
+    }
 
     $examples = $this->renderExamples($option);
     if ($examples) {
@@ -179,13 +185,6 @@ final class PhabricatorConfigEditController
         id(new AphrontFormMarkupControl())
           ->setLabel(pht('Examples'))
           ->setValue($examples));
-    }
-
-    if (!$option->getHidden()) {
-      $form->appendChild(
-        id(new AphrontFormMarkupControl())
-          ->setLabel(pht('Default'))
-          ->setValue($this->renderDefaults($option, $config_entry)));
     }
 
     $title = pht('Edit %s', $key);
@@ -438,14 +437,10 @@ final class PhabricatorConfigEditController
       }
 
       $control
-        ->setLabel(pht('Value'))
+        ->setLabel(pht('Database Value'))
         ->setError($e_value)
         ->setValue($display_value)
         ->setName('value');
-    }
-
-    if ($option->getLocked()) {
-      $control->setDisabled(true);
     }
 
     return $control;
@@ -501,25 +496,41 @@ final class PhabricatorConfigEditController
       phutil_tag('th', array(), pht('Source')),
       phutil_tag('th', array(), pht('Value')),
     ));
+
+    $is_effective_value = true;
     foreach ($stack as $key => $source) {
+      $row_classes = array(
+        'column-labels',
+      );
+
       $value = $source->getKeys(
         array(
           $option->getKey(),
         ));
 
       if (!array_key_exists($option->getKey(), $value)) {
-        $value = phutil_tag('em', array(), pht('(empty)'));
+        $value = phutil_tag('em', array(), pht('(No Value Configured)'));
       } else {
         $value = $this->getDisplayValue(
           $option,
           $entry,
           $value[$option->getKey()]);
+
+        if ($is_effective_value) {
+          $is_effective_value = false;
+          $row_classes[] = 'config-options-effective-value';
+        }
       }
 
-      $table[] = phutil_tag('tr', array('class' => 'column-labels'), array(
-        phutil_tag('th', array(), $source->getName()),
-        phutil_tag('td', array(), $value),
-      ));
+      $table[] = phutil_tag(
+        'tr',
+        array(
+          'class' => implode(' ', $row_classes),
+        ),
+        array(
+          phutil_tag('th', array(), $source->getName()),
+          phutil_tag('td', array(), $value),
+        ));
     }
 
     require_celerity_resource('config-options-css');

@@ -20,6 +20,7 @@ final class PonderQuestion extends PonderDAO
   protected $authorPHID;
   protected $status;
   protected $content;
+  protected $answerWiki;
   protected $contentSource;
   protected $viewPolicy;
   protected $spacePHID;
@@ -56,6 +57,7 @@ final class PonderQuestion extends PonderDAO
         'title' => 'text255',
         'status' => 'text32',
         'content' => 'text',
+        'answerWiki' => 'text',
         'answerCount' => 'uint32',
         'mailKey' => 'bytes20',
 

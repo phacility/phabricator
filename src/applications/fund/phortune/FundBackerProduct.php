@@ -21,10 +21,15 @@ final class FundBackerProduct extends PhortuneProductImplementation {
 
   public function getName(PhortuneProduct $product) {
     $initiative = $this->getInitiative();
-    return pht(
-      'Fund %s %s',
-      $initiative->getMonogram(),
-      $initiative->getName());
+
+    if (!$initiative) {
+      return pht('Fund <Unknown Initiative>');
+    } else {
+      return pht(
+        'Fund %s %s',
+        $initiative->getMonogram(),
+        $initiative->getName());
+    }
   }
 
   public function getPriceAsCurrency(PhortuneProduct $product) {

@@ -8,14 +8,20 @@ final class PhameBlogLiveController extends PhameController {
 
   public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
-    $id = $request->getURIData('id');
 
-    $blog = id(new PhameBlogQuery())
-      ->setViewer($user)
-      ->withIDs(array($id))
-      ->executeOne();
-    if (!$blog) {
-      return new Aphront404Response();
+    $site = $request->getSite();
+    if ($site instanceof PhameBlogSite) {
+      $blog = $site->getBlog();
+    } else {
+      $id = $request->getURIData('id');
+
+      $blog = id(new PhameBlogQuery())
+        ->setViewer($user)
+        ->withIDs(array($id))
+        ->executeOne();
+      if (!$blog) {
+        return new Aphront404Response();
+      }
     }
 
     if ($blog->getDomain() && ($request->getHost() != $blog->getDomain())) {

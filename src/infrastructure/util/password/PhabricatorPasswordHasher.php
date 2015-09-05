@@ -126,7 +126,7 @@ abstract class PhabricatorPasswordHasher extends Phobject {
     $actual_hash = $this->getPasswordHash($password)->openEnvelope();
     $expect_hash = $hash->openEnvelope();
 
-    return ($actual_hash === $expect_hash);
+    return phutil_hashes_are_identical($actual_hash, $expect_hash);
   }
 
 

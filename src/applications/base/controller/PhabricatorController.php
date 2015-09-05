@@ -370,28 +370,8 @@ abstract class PhabricatorController extends AphrontController {
     return $this->buildPageResponse($page);
   }
 
-  public function didProcessRequest($response) {
-    // If a bare DialogView is returned, wrap it in a DialogResponse.
-    if ($response instanceof AphrontDialogView) {
-      $response = id(new AphrontDialogResponse())->setDialog($response);
-    }
-
+  public function willSendResponse(AphrontResponse $response) {
     $request = $this->getRequest();
-    $response->setRequest($request);
-
-    $seen = array();
-    while ($response instanceof AphrontProxyResponse) {
-      $hash = spl_object_hash($response);
-      if (isset($seen[$hash])) {
-        $seen[] = get_class($response);
-        throw new Exception(
-          pht('Cycle while reducing proxy responses: %s',
-          implode(' -> ', $seen)));
-      }
-      $seen[$hash] = get_class($response);
-
-      $response = $response->reduceProxyResponse();
-    }
 
     if ($response instanceof AphrontDialogResponse) {
       if (!$request->isAjax() && !$request->isQuicksand()) {

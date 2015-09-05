@@ -78,25 +78,36 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
         'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorFileDeleteController',
         'edit/(?P<id>[1-9]\d*)/' => 'PhabricatorFileEditController',
         'info/(?P<phid>[^/]+)/' => 'PhabricatorFileInfoController',
-        'data/'.
-          '(?:@(?P<instance>[^/]+)/)?'.
-          '(?P<key>[^/]+)/'.
-          '(?P<phid>[^/]+)/'.
-          '(?:(?P<token>[^/]+)/)?'.
-          '.*'
-          => 'PhabricatorFileDataController',
         'proxy/' => 'PhabricatorFileProxyController',
-        'xform/'.
-          '(?:@(?P<instance>[^/]+)/)?'.
-          '(?P<transform>[^/]+)/'.
-          '(?P<phid>[^/]+)/'.
-          '(?P<key>[^/]+)/'
-          => 'PhabricatorFileTransformController',
         'transforms/(?P<id>[1-9]\d*)/' =>
           'PhabricatorFileTransformListController',
         'uploaddialog/' => 'PhabricatorFileUploadDialogController',
         'download/(?P<phid>[^/]+)/' => 'PhabricatorFileDialogController',
-      ),
+      ) + $this->getResourceSubroutes(),
+    );
+  }
+
+  public function getResourceRoutes() {
+    return array(
+      '/file/' => $this->getResourceSubroutes(),
+    );
+  }
+
+  private function getResourceSubroutes() {
+    return array(
+      'data/'.
+        '(?:@(?P<instance>[^/]+)/)?'.
+        '(?P<key>[^/]+)/'.
+        '(?P<phid>[^/]+)/'.
+        '(?:(?P<token>[^/]+)/)?'.
+        '.*'
+        => 'PhabricatorFileDataController',
+      'xform/'.
+        '(?:@(?P<instance>[^/]+)/)?'.
+        '(?P<transform>[^/]+)/'.
+        '(?P<phid>[^/]+)/'.
+        '(?P<key>[^/]+)/'
+        => 'PhabricatorFileTransformController',
     );
   }
 

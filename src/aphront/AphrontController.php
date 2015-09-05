@@ -24,10 +24,6 @@ abstract class AphrontController extends Phobject {
     return;
   }
 
-  public function didProcessRequest($response) {
-    return $response;
-  }
-
   public function handleRequest(AphrontRequest $request) {
     if (method_exists($this, 'processRequest')) {
       return $this->processRequest();

@@ -1,7 +1,9 @@
 <?php
 
 /**
- * @task  routing URI Routing
+ * @task routing URI Routing
+ * @task response Response Handling
+ * @task exception Exception Handling
  */
 abstract class AphrontApplicationConfiguration extends Phobject {
 
@@ -10,7 +12,6 @@ abstract class AphrontApplicationConfiguration extends Phobject {
   private $path;
   private $console;
 
-  abstract public function getApplicationName();
   abstract public function buildRequest();
   abstract public function build404Controller();
   abstract public function buildRedirectController($uri, $external);
@@ -210,7 +211,9 @@ abstract class AphrontApplicationConfiguration extends Phobject {
       ));
     $multimeter->setEventContext('web.'.$controller_class);
 
+    $request->setController($controller);
     $request->setURIMap($uri_data);
+
     $controller->setRequest($request);
 
     // If execution throws an exception and then trying to render that
@@ -232,6 +235,7 @@ abstract class AphrontApplicationConfiguration extends Phobject {
       if (!$response) {
         $controller->willProcessRequest($uri_data);
         $response = $controller->handleRequest($request);
+        $this->validateControllerResponse($controller, $response);
       }
     } catch (Exception $ex) {
       $original_exception = $ex;
@@ -239,8 +243,8 @@ abstract class AphrontApplicationConfiguration extends Phobject {
     }
 
     try {
-      $response = $controller->didProcessRequest($response);
-      $response = $this->willSendResponse($response, $controller);
+      $response = $this->produceResponse($request, $response);
+      $response = $controller->willSendResponse($response);
       $response->setRequest($request);
 
       $unexpected_output = PhabricatorStartup::endOutputCapture();
@@ -283,35 +287,13 @@ abstract class AphrontApplicationConfiguration extends Phobject {
 
 
   /**
-   * Using builtin and application routes, build the appropriate
-   * @{class:AphrontController} class for the request. To route a request, we
-   * first test if the HTTP_HOST is configured as a valid Phabricator URI. If
-   * it isn't, we do a special check to see if it's a custom domain for a blog
-   * in the Phame application and if that fails we error. Otherwise, we test
-   * against all application routes from installed
-   * @{class:PhabricatorApplication}s.
-   *
-   * If we match a route, we construct the controller it points at, build it,
-   * and return it.
-   *
-   * If we fail to match a route, but the current path is missing a trailing
-   * "/", we try routing the same path with a trailing "/" and do a redirect
-   * if that has a valid route. The idea is to canoncalize URIs for consistency,
-   * but avoid breaking noncanonical URIs that we can easily salvage.
-   *
-   * NOTE: We only redirect on GET. On POST, we'd drop parameters and most
-   * likely mutate the request implicitly, and a bad POST usually indicates a
-   * programming error rather than a sloppy typist.
-   *
-   * If the failing path already has a trailing "/", or we can't route the
-   * version with a "/", we call @{method:build404Controller}, which build a
-   * fallback @{class:AphrontController}.
+   * Build a controller to respond to the request.
    *
    * @return pair<AphrontController,dict> Controller and dictionary of request
    *                                      parameters.
    * @task routing
    */
-  final public function buildController() {
+  final private function buildController() {
     $request = $this->getRequest();
 
     // If we're configured to operate in cluster mode, reject requests which
@@ -336,7 +318,7 @@ abstract class AphrontApplicationConfiguration extends Phobject {
           // This is a command line script (probably something like a unit
           // test) so it's fine that we don't have SERVER_ADDR defined.
         } else {
-          throw new AphrontUsageException(
+          throw new AphrontMalformedRequestException(
             pht('No %s', 'SERVER_ADDR'),
             pht(
               'Phabricator is configured to operate in cluster mode, but '.
@@ -348,7 +330,7 @@ abstract class AphrontApplicationConfiguration extends Phobject {
         }
       } else {
         if (!PhabricatorEnv::isClusterAddress($server_addr)) {
-          throw new AphrontUsageException(
+          throw new AphrontMalformedRequestException(
             pht('External Interface'),
             pht(
               'Phabricator is configured in cluster mode and the address '.
@@ -373,78 +355,48 @@ abstract class AphrontApplicationConfiguration extends Phobject {
       }
     }
 
-    // TODO: Really, the Site should get more control here and be able to
-    // do its own routing logic if it wants, but we don't need that for now.
-    $path = $site->getPathForRouting($request);
+    $maps = $site->getRoutingMaps();
+    $path = $request->getPath();
 
-    list($controller, $uri_data) = $this->buildControllerForPath($path);
-    if (!$controller) {
-      if (!preg_match('@/$@', $path)) {
-        // If we failed to match anything but don't have a trailing slash, try
-        // to add a trailing slash and issue a redirect if that resolves.
-        list($controller, $uri_data) = $this->buildControllerForPath($path.'/');
-
-        // NOTE: For POST, just 404 instead of redirecting, since the redirect
-        // will be a GET without parameters.
-
-        if ($controller && !$request->isHTTPPost()) {
-          $slash_uri = $request->getRequestURI()->setPath($path.'/');
-
-          $external = strlen($request->getRequestURI()->getDomain());
-          return $this->buildRedirectController($slash_uri, $external);
-        }
-      }
-      return $this->build404Controller();
+    $result = $this->routePath($maps, $path);
+    if ($result) {
+      return $result;
     }
 
-    return array($controller, $uri_data);
-  }
+    // If we failed to match anything but don't have a trailing slash, try
+    // to add a trailing slash and issue a redirect if that resolves.
 
+    // NOTE: We only do this for GET, since redirects switch to GET and drop
+    // data like POST parameters.
+    if (!preg_match('@/$@', $path) && $request->isHTTPGet()) {
+      $result = $this->routePath($maps, $path.'/');
+      if ($result) {
+        $slash_uri = $request->getRequestURI()->setPath($path.'/');
+        $external = strlen($request->getRequestURI()->getDomain());
+        return $this->buildRedirectController($slash_uri, $external);
+      }
+    }
+
+    return $this->build404Controller();
+  }
 
   /**
    * Map a specific path to the corresponding controller. For a description
    * of routing, see @{method:buildController}.
    *
+   * @param list<AphrontRoutingMap> List of routing maps.
+   * @param string Path to route.
    * @return pair<AphrontController,dict> Controller and dictionary of request
    *                                      parameters.
    * @task routing
    */
-  final public function buildControllerForPath($path) {
-    $maps = array();
-
-    $applications = PhabricatorApplication::getAllInstalledApplications();
-    foreach ($applications as $application) {
-      $maps[] = array($application, $application->getRoutes());
-    }
-
-    $current_application = null;
-    $controller_class = null;
-    foreach ($maps as $map_info) {
-      list($application, $map) = $map_info;
-
-      $mapper = new AphrontURIMapper($map);
-      list($controller_class, $uri_data) = $mapper->mapPath($path);
-
-      if ($controller_class) {
-        if ($application) {
-          $current_application = $application;
-        }
-        break;
+  private function routePath(array $maps, $path) {
+    foreach ($maps as $map) {
+      $result = $map->routePath($path);
+      if ($result) {
+        return array($result->getController(), $result->getURIData());
       }
     }
-
-    if (!$controller_class) {
-      return array(null, null);
-    }
-
-    $request = $this->getRequest();
-
-    $controller = newv($controller_class, array());
-    if ($current_application) {
-      $controller->setCurrentApplication($current_application);
-    }
-
-    return array($controller, $uri_data);
   }
 
   private function buildSiteForRequest(AphrontRequest $request) {
@@ -461,15 +413,223 @@ abstract class AphrontApplicationConfiguration extends Phobject {
     if (!$site) {
       $path = $request->getPath();
       $host = $request->getHost();
-      throw new Exception(
+      throw new AphrontMalformedRequestException(
+        pht('Site Not Found'),
         pht(
           'This request asked for "%s" on host "%s", but no site is '.
           'configured which can serve this request.',
           $path,
-          $host));
+          $host),
+        true);
     }
+
+    $request->setSite($site);
 
     return $site;
   }
+
+
+/* -(  Response Handling  )-------------------------------------------------- */
+
+
+  /**
+   * Tests if a response is of a valid type.
+   *
+   * @param wild Supposedly valid response.
+   * @return bool True if the object is of a valid type.
+   * @task response
+   */
+  private function isValidResponseObject($response) {
+    if ($response instanceof AphrontResponse) {
+      return true;
+    }
+
+    if ($response instanceof AphrontResponseProducerInterface) {
+      return true;
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Verifies that the return value from an @{class:AphrontController} is
+   * of an allowed type.
+   *
+   * @param AphrontController Controller which returned the response.
+   * @param wild Supposedly valid response.
+   * @return void
+   * @task response
+   */
+  private function validateControllerResponse(
+    AphrontController $controller,
+    $response) {
+
+    if ($this->isValidResponseObject($response)) {
+      return;
+    }
+
+    throw new Exception(
+      pht(
+        'Controller "%s" returned an invalid response from call to "%s". '.
+        'This method must return an object of class "%s", or an object '.
+        'which implements the "%s" interface.',
+        get_class($controller),
+        'handleRequest()',
+        'AphrontResponse',
+        'AphrontResponseProducerInterface'));
+  }
+
+
+  /**
+   * Verifies that the return value from an
+   * @{class:AphrontResponseProducerInterface} is of an allowed type.
+   *
+   * @param AphrontResponseProducerInterface Object which produced
+   *   this response.
+   * @param wild Supposedly valid response.
+   * @return void
+   * @task response
+   */
+  private function validateProducerResponse(
+    AphrontResponseProducerInterface $producer,
+    $response) {
+
+    if ($this->isValidResponseObject($response)) {
+      return;
+    }
+
+    throw new Exception(
+      pht(
+        'Producer "%s" returned an invalid response from call to "%s". '.
+        'This method must return an object of class "%s", or an object '.
+        'which implements the "%s" interface.',
+        get_class($producer),
+        'produceAphrontResponse()',
+        'AphrontResponse',
+        'AphrontResponseProducerInterface'));
+  }
+
+
+  /**
+   * Verifies that the return value from an
+   * @{class:AphrontRequestExceptionHandler} is of an allowed type.
+   *
+   * @param AphrontRequestExceptionHandler Object which produced this
+   *  response.
+   * @param wild Supposedly valid response.
+   * @return void
+   * @task response
+   */
+  private function validateErrorHandlerResponse(
+    AphrontRequestExceptionHandler $handler,
+    $response) {
+
+    if ($this->isValidResponseObject($response)) {
+      return;
+    }
+
+    throw new Exception(
+      pht(
+        'Exception handler "%s" returned an invalid response from call to '.
+        '"%s". This method must return an object of class "%s", or an object '.
+        'which implements the "%s" interface.',
+        get_class($handler),
+        'handleRequestException()',
+        'AphrontResponse',
+        'AphrontResponseProducerInterface'));
+  }
+
+
+  /**
+   * Resolves a response object into an @{class:AphrontResponse}.
+   *
+   * Controllers are permitted to return actual responses of class
+   * @{class:AphrontResponse}, or other objects which implement
+   * @{interface:AphrontResponseProducerInterface} and can produce a response.
+   *
+   * If a controller returns a response producer, invoke it now and produce
+   * the real response.
+   *
+   * @param AphrontRequest Request being handled.
+   * @param AphrontResponse|AphrontResponseProducerInterface Response, or
+   *   response producer.
+   * @return AphrontResponse Response after any required production.
+   * @task response
+   */
+  private function produceResponse(AphrontRequest $request, $response) {
+    $original = $response;
+
+    // Detect cycles on the exact same objects. It's still possible to produce
+    // infinite responses as long as they're all unique, but we can only
+    // reasonably detect cycles, not guarantee that response production halts.
+
+    $seen = array();
+    while (true) {
+      // NOTE: It is permissible for an object to be both a response and a
+      // response producer. If so, being a producer is "stronger". This is
+      // used by AphrontProxyResponse.
+
+      // If this response is a valid response, hand over the request first.
+      if ($response instanceof AphrontResponse) {
+        $response->setRequest($request);
+      }
+
+      // If this isn't a producer, we're all done.
+      if (!($response instanceof AphrontResponseProducerInterface)) {
+        break;
+      }
+
+      $hash = spl_object_hash($response);
+      if (isset($seen[$hash])) {
+        throw new Exception(
+          pht(
+            'Failure while producing response for object of class "%s": '.
+            'encountered production cycle (identical object, of class "%s", '.
+            'was produced twice).',
+            get_class($original),
+            get_class($response)));
+      }
+
+      $seen[$hash] = true;
+
+      $new_response = $response->produceAphrontResponse();
+      $this->validateProducerResponse($response, $new_response);
+      $response = $new_response;
+    }
+
+    return $response;
+  }
+
+
+/* -(  Error Handling  )----------------------------------------------------- */
+
+
+  /**
+   * Convert an exception which has escaped the controller into a response.
+   *
+   * This method delegates exception handling to available subclasses of
+   * @{class:AphrontRequestExceptionHandler}.
+   *
+   * @param Exception Exception which needs to be handled.
+   * @return wild Response or response producer, or null if no available
+   *   handler can produce a response.
+   * @task exception
+   */
+  private function handleException(Exception $ex) {
+    $handlers = AphrontRequestExceptionHandler::getAllHandlers();
+
+    $request = $this->getRequest();
+    foreach ($handlers as $handler) {
+      if ($handler->canHandleRequestException($request, $ex)) {
+        $response = $handler->handleRequestException($request, $ex);
+        $this->validateErrorHandlerResponse($handler, $response);
+        return $response;
+      }
+    }
+
+    throw $ex;
+  }
+
 
 }

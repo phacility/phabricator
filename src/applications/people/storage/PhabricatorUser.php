@@ -365,18 +365,15 @@ final class PhabricatorUser
   }
 
   public function validateCSRFToken($token) {
-    $salt = null;
-    $version = 'plain';
-
-    // This is a BREACH-mitigating token. See T3684.
+    // We expect a BREACH-mitigating token. See T3684.
     $breach_prefix = self::CSRF_BREACH_PREFIX;
     $breach_prelen = strlen($breach_prefix);
-
-    if (!strncmp($token, $breach_prefix, $breach_prelen)) {
-      $version = 'breach';
-      $salt = substr($token, $breach_prelen, self::CSRF_SALT_LENGTH);
-      $token = substr($token, $breach_prelen + self::CSRF_SALT_LENGTH);
+    if (strncmp($token, $breach_prefix, $breach_prelen) !== 0) {
+      return false;
     }
+
+    $salt = substr($token, $breach_prelen, self::CSRF_SALT_LENGTH);
+    $token = substr($token, $breach_prelen + self::CSRF_SALT_LENGTH);
 
     // When the user posts a form, we check that it contains a valid CSRF token.
     // Tokens cycle each hour (every CSRF_CYLCE_FREQUENCY seconds) and we accept
@@ -407,22 +404,11 @@ final class PhabricatorUser
 
     for ($ii = -$csrf_window; $ii <= 1; $ii++) {
       $valid = $this->getRawCSRFToken($ii);
-      switch ($version) {
-        // TODO: We can remove this after the BREACH version has been in the
-        // wild for a while.
-        case 'plain':
-          if ($token == $valid) {
-            return true;
-          }
-          break;
-        case 'breach':
-          $digest = PhabricatorHash::digest($valid, $salt);
-          if (substr($digest, 0, self::CSRF_TOKEN_LENGTH) == $token) {
-            return true;
-          }
-          break;
-        default:
-          throw new Exception(pht('Unknown CSRF token format!'));
+
+      $digest = PhabricatorHash::digest($valid, $salt);
+      $digest = substr($digest, 0, self::CSRF_TOKEN_LENGTH);
+      if (phutil_hashes_are_identical($digest, $token)) {
+        return true;
       }
     }
 

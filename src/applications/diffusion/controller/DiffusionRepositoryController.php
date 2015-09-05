@@ -302,7 +302,16 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $info = null;
     $drequest = $this->getDiffusionRequest();
-    if ($drequest->getRefAlternatives()) {
+
+    // Try to load alternatives. This may fail for repositories which have not
+    // cloned yet. If it does, just ignore it and continue.
+    try {
+      $alternatives = $drequest->getRefAlternatives();
+    } catch (ConduitClientException $ex) {
+      $alternatives = array();
+    }
+
+    if ($alternatives) {
       $message = array(
         pht(
           'The ref "%s" is ambiguous in this repository.',

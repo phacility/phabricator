@@ -90,6 +90,11 @@ final class ConpherenceLayoutView extends AphrontView {
         'hasWidgets' => false,
       ));
 
+    $class = null;
+    if (!$this->getUser()->isLoggedIn()) {
+      $class = 'conpherence-logged-out';
+    }
+
     $this->initBehavior(
       'conpherence-widget-pane',
       ConpherenceWidgetConfigConstants::getWidgetPaneBehaviorConfig());
@@ -99,7 +104,9 @@ final class ConpherenceLayoutView extends AphrontView {
       array(
         'id'    => $layout_id,
         'sigil' => 'conpherence-layout',
-        'class' => 'conpherence-layout conpherence-role-'.$this->role,
+        'class' => 'conpherence-layout '.
+                    $class.
+                    ' conpherence-role-'.$this->role,
       ),
       array(
         javelin_tag(

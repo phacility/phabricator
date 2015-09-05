@@ -6,6 +6,9 @@ final class PhabricatorPolicyException extends Exception {
   private $rejection;
   private $capabilityName;
   private $moreInfo = array();
+  private $objectPHID;
+  private $context;
+  private $capability;
 
   public function setTitle($title) {
     $this->title = $title;
@@ -41,6 +44,33 @@ final class PhabricatorPolicyException extends Exception {
 
   public function getMoreInfo() {
     return $this->moreInfo;
+  }
+
+  public function setObjectPHID($object_phid) {
+    $this->objectPHID = $object_phid;
+    return $this;
+  }
+
+  public function getObjectPHID() {
+    return $this->objectPHID;
+  }
+
+  public function setContext($context) {
+    $this->context = $context;
+    return $this;
+  }
+
+  public function getContext() {
+    return $this->context;
+  }
+
+  public function setCapability($capability) {
+    $this->capability = $capability;
+    return $this;
+  }
+
+  public function getCapability() {
+    return $this->capability;
   }
 
 }

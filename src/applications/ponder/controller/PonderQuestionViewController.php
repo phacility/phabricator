@@ -20,7 +20,7 @@ final class PonderQuestionViewController extends PonderController {
       return new Aphront404Response();
     }
 
-    $answers = $this->buildAnswers($question->getAnswers());
+    $answers = $this->buildAnswers($question);
 
     $answer_add_panel = id(new PonderAddAnswerView())
       ->setQuestion($question)
@@ -81,13 +81,37 @@ final class PonderQuestionViewController extends PonderController {
       ->addPropertyList($properties)
       ->appendChild($footer);
 
+    if ($viewer->getPHID() == $question->getAuthorPHID()) {
+      $status = $question->getStatus();
+      $answers_list = $question->getAnswers();
+      if ($answers_list && ($status == PonderQuestionStatus::STATUS_OPEN)) {
+        $info_view = id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+          ->appendChild(
+            pht(
+              'If this question has been resolved, please consider closing
+              the question and marking the answer as helpful.'));
+        $object_box->setInfoView($info_view);
+      }
+    }
+
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     $crumbs->addTextCrumb('Q'.$id, '/Q'.$id);
+
+    $answer_wiki = null;
+    if ($question->getAnswerWiki()) {
+      $answer = phutil_tag_div('mlt mlb msr msl', $question->getAnswerWiki());
+      $answer_wiki = id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('Answer Summary'))
+        ->setColor(PHUIObjectBoxView::COLOR_BLUE)
+        ->appendChild($answer);
+    }
 
     $ponder_view = id(new PHUITwoColumnView())
       ->setMainColumn(array(
           $object_box,
           $comment_view,
+          $answer_wiki,
           $answers,
           $answer_add_panel,
         ))
@@ -206,8 +230,9 @@ final class PonderQuestionViewController extends PonderController {
    * TODO - re-factor this to ajax in one answer panel at a time in a more
    * standard fashion. This is necessary to scale this application.
    */
-  private function buildAnswers(array $answers) {
+  private function buildAnswers(PonderQuestion $question) {
     $viewer = $this->getViewer();
+    $answers = $question->getAnswers();
 
     $author_phids = mpull($answers, 'getAuthorPHID');
     $handles = $this->loadViewerHandles($author_phids);

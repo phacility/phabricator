@@ -434,7 +434,8 @@ final class PhabricatorConduitAPIController
       $token = idx($metadata, 'authToken');
       $signature = idx($metadata, 'authSignature');
       $certificate = $user->getConduitCertificate();
-      if (sha1($token.$certificate) !== $signature) {
+      $hash = sha1($token.$certificate);
+      if (!phutil_hashes_are_identical($hash, $signature)) {
         return array(
           'ERR-INVALID-AUTH',
           pht('Authentication is invalid.'),

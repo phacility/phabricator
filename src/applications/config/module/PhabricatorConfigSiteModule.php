@@ -40,7 +40,7 @@ final class PhabricatorConfigSiteModule extends PhabricatorConfigModule {
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Sites'))
-      ->appendChild($table);
+      ->setTable($table);
   }
 
 }

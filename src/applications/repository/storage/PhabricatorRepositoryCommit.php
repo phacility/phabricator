@@ -98,6 +98,12 @@ final class PhabricatorRepositoryCommit
           'columns' => array('commitIdentifier', 'repositoryID'),
           'unique' => true,
         ),
+        'key_epoch' => array(
+          'columns' => array('epoch'),
+        ),
+        'key_author' => array(
+          'columns' => array('authorPHID', 'epoch'),
+        ),
       ),
       self::CONFIG_NO_MUTATE => array(
         'importStatus',

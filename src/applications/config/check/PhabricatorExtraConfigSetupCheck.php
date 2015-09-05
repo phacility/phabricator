@@ -276,6 +276,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
         'Impersonating users over the API is no longer supported.'),
 
       'feed.public' => pht('The framable public feed is no longer supported.'),
+
+      'auth.login-message' => pht(
+        'This configuration option has been replaced with a modular '.
+        'handler. See T9346.'),
     );
 
     return $ancient_config;

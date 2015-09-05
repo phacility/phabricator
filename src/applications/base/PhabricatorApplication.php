@@ -243,6 +243,10 @@ abstract class PhabricatorApplication
     return array();
   }
 
+  public function getResourceRoutes() {
+    return array();
+  }
+
 
 /* -(  Email Integration  )-------------------------------------------------- */
 
