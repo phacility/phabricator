@@ -167,6 +167,7 @@
   width: auto;
   border: none;
   float: none;
+  overflow: auto;
 }
 
 .phui-property-list-actions {

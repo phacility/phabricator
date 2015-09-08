@@ -226,39 +226,36 @@ final class PhabricatorAppSearchEngine
           ),
           '');
 
-        $description = phutil_tag(
-          'div',
-          array(
-            'style' => 'white-space: nowrap; '.
-                       'overflow: hidden; '.
-                       'text-overflow: ellipsis;',
-          ),
-          $application->getShortDescription());
+        $description = $application->getShortDescription();
+
+        $configure = id(new PHUIButtonView())
+          ->setTag('a')
+          ->setHref('/applications/view/'.get_class($application).'/')
+          ->setText(pht('Configure'))
+          ->setColor(PHUIButtonView::GREY);
+
+        $name = $application->getName();
+        if ($application->isPrototype()) {
+          $name = $name.' '.pht('(Prototype)');
+        }
 
         $item = id(new PHUIObjectItemView())
-          ->setHeader($application->getName())
+          ->setHeader($name)
           ->setImageIcon($icon_view)
-          ->addAttribute($description)
-          ->addAction(
-            id(new PHUIListItemView())
-              ->setName(pht('Help/Options'))
-              ->setIcon('fa-cog')
-              ->setHref('/applications/view/'.get_class($application).'/'));
+          ->setSubhead($description)
+          ->setLaunchButton($configure);
 
         if ($application->getBaseURI() && $application->isInstalled()) {
           $item->setHref($application->getBaseURI());
         }
 
         if (!$application->isInstalled()) {
-          $item->addIcon('fa-times', pht('Uninstalled'));
-        }
-
-        if ($application->isPrototype()) {
-          $item->addIcon('fa-bomb grey', pht('Prototype'));
+          $item->addAttribute(pht('Uninstalled'));
+          $item->setDisabled(true);
         }
 
         if (!$application->isFirstParty()) {
-          $item->addIcon('fa-puzzle-piece', pht('Extension'));
+          $item->addAttribute(pht('Extension'));
         }
 
         $list->addItem($item);

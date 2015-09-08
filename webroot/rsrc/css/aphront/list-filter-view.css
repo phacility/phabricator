@@ -39,7 +39,7 @@
   padding: 0 0 4px 4px;
 }
 
-/* When a list filter view contains two consecuitive forms, lay them out
+/* When a list filter view contains two consecutive forms, lay them out
    without much white space in between them so they look more contiugous. At
    the time of writing, this is used only in the Diffusion repository search
    UI. */

@@ -4,6 +4,7 @@
 
 .phabricator-remarkup {
   line-height: 1.51em;
+  word-break: break-word;
 }
 
 .phabricator-remarkup p {
@@ -338,12 +339,13 @@
   border-spacing: 1px;
   background: {$lightblueborder};
   margin: 12px 0;
+  word-break: normal;
 }
 
 .phabricator-remarkup table.remarkup-table th {
   font-weight: bold;
   padding: 4px 6px;
-  background: #F8F9FC;
+  background: {$lightbluebackground};
 }
 
 .phabricator-remarkup table.remarkup-table td {

@@ -73,14 +73,6 @@ final class PhabricatorAuthenticationConfigOptions
         ->addExample(
           "yourcompany.com\nmail.yourcompany.com",
           pht('Valid Setting')),
-      $this->newOption('auth.login-message', 'string', null)
-        ->setLocked(true)
-        ->setSummary(pht('A block of HTML displayed on the login screen.'))
-        ->setDescription(
-          pht(
-            "You can provide an arbitrary block of HTML here, which will ".
-            "appear on the login screen. Normally, you'd use this to provide ".
-            "login or registration instructions to users.")),
       $this->newOption('account.editable', 'bool', true)
         ->setBoolOptions(
           array(

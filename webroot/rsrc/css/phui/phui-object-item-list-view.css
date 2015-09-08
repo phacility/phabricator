@@ -747,3 +747,16 @@ ul.phui-object-item-list-view .phui-object-item-selected
 .phui-object-item-with-image .phui-object-item-content-box {
   margin-left: 46px;
 }
+
+/* - Launcher Button -------------------------------------------------------- */
+
+.phui-object-item-col2.phui-object-item-launch-button {
+  text-align: right;
+  vertical-align: middle;
+  padding-right: 4px;
+}
+
+.device-phone .phui-object-item-col2.phui-object-item-launch-button {
+  padding: 0 8px 8px;
+  text-align: left;
+}
