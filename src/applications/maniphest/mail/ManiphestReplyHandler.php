@@ -19,17 +19,28 @@ final class ManiphestReplyHandler
 
     $object = $this->getMailReceiver();
     $is_new = !$object->getID();
+    $actor = $this->getActor();
 
     $xactions = array();
 
     if ($is_new) {
-      $xactions[] = $object->getApplicationTransactionTemplate()
+      $xactions[] = $this->newTransaction()
         ->setTransactionType(ManiphestTransaction::TYPE_TITLE)
         ->setNewValue(nonempty($mail->getSubject(), pht('Untitled Task')));
 
-      $xactions[] = $object->getApplicationTransactionTemplate()
+      $xactions[] = $this->newTransaction()
         ->setTransactionType(ManiphestTransaction::TYPE_DESCRIPTION)
         ->setNewValue($body);
+
+      $actor_phid = $actor->getPHID();
+      if ($actor_phid) {
+        $xactions[] = $this->newTransaction()
+          ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+          ->setNewValue(
+            array(
+              '+' => array($actor_phid),
+            ));
+      }
     }
 
     return $xactions;
