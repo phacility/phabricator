@@ -138,10 +138,20 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     'mousedown',
     ['differential-changeset', 'tag:th'],
     function(e) {
-      if (editor  ||
-          selecting ||
-          e.isRightButton() ||
+      if (e.isRightButton() ||
           getRowNumber(e.getTarget()) === undefined) {
+        return;
+      }
+
+      if (editor) {
+        new JX.DifferentialInlineCommentEditor(config.uri)
+          .setOperation('busy')
+          .setRow(editor.getRow().previousSibling)
+          .start();
+        return;
+      }
+
+      if (selecting) {
         return;
       }
 
