@@ -16,11 +16,12 @@ These applications currently support custom fields:
 
 | Application | Support |
 |-------------|---------|
-| Maniphest | Full Support |
-| Projects | Full Support |
-| People | Full Support |
 | Differential | Partial Support |
 | Diffusion | Limited Support |
+| Maniphest | Full Support |
+| Owners | Full Support |
+| People | Full Support |
+| Projects | Full Support |
 
 Custom fields can appear in many interfaces and support search, editing, and
 other features.
@@ -38,11 +39,12 @@ The relevant configuration settings are:
 
 | Application | Add Fields | Select Fields |
 |-------------|------------|---------------|
-| Maniphest | `maniphest.custom-field-definitions` | `maniphest.fields` |
-| Projects | `projects.custom-field-definitions` | `projects.fields` |
-| People | `user.custom-field-definitions` | `user.fields` |
 | Differential | Planned | `differential.fields` |
 | Diffusion | Planned | Planned |
+| Maniphest | `maniphest.custom-field-definitions` | `maniphest.fields` |
+| Owners | `owners.custom-field-definitions` | `owners.fields` |
+| People | `user.custom-field-definitions` | `user.fields` |
+| Projects | `projects.custom-field-definitions` | `projects.fields` |
 
 When adding fields, you'll specify a JSON blob like this (for example, as the
 value of `maniphest.custom-field-definitions`):
@@ -157,11 +159,12 @@ want to add a field to:
 
 | Application | Extend  |
 |-------------|---------|
-| Maniphest | @{class:ManiphestCustomField} |
-| Projects | @{class:PhabricatorProjectCustomField} |
-| People | @{class:PhabricatorUserCustomField} |
 | Differential | @{class:DifferentialCustomField} |
 | Diffusion | @{class:PhabricatorCommitCustomField} |
+| Maniphest | @{class:ManiphestCustomField} |
+| Owners | @{class:PhabricatorOwnersCustomField} |
+| People | @{class:PhabricatorUserCustomField} |
+| Projects | @{class:PhabricatorProjectCustomField} |
 
 The easiest way to get started is to drop your subclass into
 `phabricator/src/extensions/`, which should make it immediately available in the
