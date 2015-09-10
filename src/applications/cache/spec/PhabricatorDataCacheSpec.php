@@ -34,7 +34,9 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
       ->setVersion(phpversion('apc'));
 
     if (ini_get('apc.enabled')) {
-      $this->setIsEnabled(true);
+      $this
+        ->setIsEnabled(true)
+        ->setClearCacheCallback('apc_clear_cache');
       $this->initAPCCommonSpec();
     } else {
       $this->setIsEnabled(false);
@@ -48,7 +50,9 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
       ->setVersion(phpversion('apcu'));
 
     if (ini_get('apc.enabled')) {
-      $this->setIsEnabled(true);
+      $this
+        ->setIsEnabled(true)
+        ->setClearCacheCallback('apc_clear_cache');
       $this->initAPCCommonSpec();
     } else {
       $this->setIsEnabled(false);
@@ -118,5 +122,4 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
 
     return $key;
   }
-
 }
