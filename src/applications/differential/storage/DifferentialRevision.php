@@ -13,8 +13,7 @@ final class DifferentialRevision extends DifferentialDAO
     PhabricatorApplicationTransactionInterface,
     PhabricatorMentionableInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorProjectInterface,
-    PhabricatorSearchSnippetInterface {
+    PhabricatorProjectInterface {
 
   protected $title = '';
   protected $originalTitle;
@@ -628,20 +627,6 @@ final class DifferentialRevision extends DifferentialDAO
 
       $this->delete();
     $this->saveTransaction();
-  }
-
-
-/* -(  PhabricatorSearchSnippetInterface  )---------------------------------- */
-
-
-  public function renderSearchResultSnippet(PhabricatorUser $viewer) {
-    $content = $this->getSummary();
-    $content = PhabricatorMarkupEngine::summarize($content);
-    $content = PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())->setContent($content),
-      'default',
-      $viewer);
-    return $content;
   }
 
 }
