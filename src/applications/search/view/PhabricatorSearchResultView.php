@@ -21,7 +21,13 @@ final class PhabricatorSearchResultView extends AphrontView {
     return $this;
   }
 
+  public function getObject() {
+    return $this->object;
+  }
+
   public function render() {
+    $viewer = $this->getUser();
+
     $handle = $this->handle;
     if (!$handle->isComplete()) {
       return;
@@ -44,6 +50,18 @@ final class PhabricatorSearchResultView extends AphrontView {
     if ($handle->getStatus() == PhabricatorObjectHandle::STATUS_CLOSED) {
       $item->setDisabled(true);
       $item->addAttribute(pht('Closed'));
+    }
+
+    $object = $this->getObject();
+    if ($object instanceof PhabricatorSearchSnippetInterface) {
+      $snippet = $object->renderSearchResultSnippet($viewer);
+      $snippet = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-search-snippet',
+        ),
+        $snippet);
+      $item->appendChild($snippet);
     }
 
     return $item;

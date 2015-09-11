@@ -251,6 +251,7 @@ final class PhabricatorSearchApplicationSearchEngine
 
       foreach ($results as $phid => $handle) {
         $view = id(new PhabricatorSearchResultView())
+          ->setUser($viewer)
           ->setHandle($handle)
           ->setQuery($query)
           ->setObject(idx($objects, $phid))

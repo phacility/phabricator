@@ -7,7 +7,8 @@ final class PhrictionDocument extends PhrictionDAO
     PhabricatorFlaggableInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorSearchSnippetInterface {
 
   protected $slug;
   protected $depth;
@@ -251,5 +252,20 @@ final class PhrictionDocument extends PhrictionDAO
 
     $this->saveTransaction();
   }
+
+
+/* -(  PhabricatorSearchSnippetInterface  )---------------------------------- */
+
+
+  public function renderSearchResultSnippet(PhabricatorUser $viewer) {
+    $content = $this->getContent()->getContent();
+    $content = PhabricatorMarkupEngine::summarize($content);
+    $content = PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())->setContent($content),
+      'default',
+      $viewer);
+    return $content;
+  }
+
 
 }

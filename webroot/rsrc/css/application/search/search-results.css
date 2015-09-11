@@ -16,3 +16,8 @@
   font-weight: normal;
   color: #000;
 }
+
+.phui-search-snippet {
+  margin: 0 8px;
+  color: {$greytext};
+}

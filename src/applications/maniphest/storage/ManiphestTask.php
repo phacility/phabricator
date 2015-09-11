@@ -13,7 +13,8 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorDestructibleInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
-    PhabricatorSpacesInterface {
+    PhabricatorSpacesInterface,
+    PhabricatorSearchSnippetInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -388,6 +389,20 @@ final class ManiphestTask extends ManiphestDAO
 
   public function getSpacePHID() {
     return $this->spacePHID;
+  }
+
+
+/* -(  PhabricatorSearchSnippetInterface  )---------------------------------- */
+
+
+  public function renderSearchResultSnippet(PhabricatorUser $viewer) {
+    $content = $this->getDescription();
+    $content = PhabricatorMarkupEngine::summarize($content);
+    $content = PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())->setContent($content),
+      'default',
+      $viewer);
+    return $content;
   }
 
 }
