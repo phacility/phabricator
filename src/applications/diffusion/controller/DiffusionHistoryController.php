@@ -79,6 +79,10 @@ final class DiffusionHistoryController extends DiffusionController {
         'view'   => 'history',
       ));
 
+    $pager = id(new PHUIBoxView())
+      ->addClass('ml')
+      ->appendChild($pager);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
