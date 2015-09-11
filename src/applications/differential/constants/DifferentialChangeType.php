@@ -66,6 +66,21 @@ final class DifferentialChangeType extends Phobject {
     return idx($names, coalesce($type, '?'), '???');
   }
 
+  public static function getIconForFileType($type) {
+    static $icons = array(
+      self::FILE_TEXT => 'fa-file-text-o',
+      self::FILE_IMAGE => 'fa-file-image-o',
+      self::FILE_BINARY => 'fa-file',
+      self::FILE_DIRECTORY => 'fa-folder-open',
+      self::FILE_SYMLINK => 'fa-link',
+      self::FILE_DELETED => 'fa-file',
+      self::FILE_NORMAL => 'fa-file-text-o',
+      self::FILE_SUBMODULE => 'fa-folder-open-o',
+    );
+
+    return idx($icons, $type, 'fa-file');
+  }
+
   public static function isOldLocationChangeType($type) {
     static $types = array(
       self::TYPE_MOVE_AWAY  => true,
