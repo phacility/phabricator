@@ -40,8 +40,7 @@ JX.behavior('repository-crossreference', function(config, statics) {
       'tag:span',
       function(e) {
         if (e.getType() === 'mouseout') {
-          highlighted && JX.DOM.alterClass(highlighted, classHighlight, false);
-          highlighted = null;
+          unhighlight();
           return;
         }
         if (!isSignalkey(e)) {
@@ -59,9 +58,13 @@ JX.behavior('repository-crossreference', function(config, statics) {
             target = target.parentNode;
           }
         } else if (e.getType() === 'click') {
-          openSearch(highlighted, lang);
+          openSearch(e.getTarget(), lang);
         }
       });
+  }
+  function unhighlight() {
+    highlighted && JX.DOM.alterClass(highlighted, classHighlight, false);
+    highlighted = null;
   }
 
   function openSearch(target, lang) {
@@ -110,6 +113,7 @@ JX.behavior('repository-crossreference', function(config, statics) {
       linkAll(e.getData().container);
     });
 
+
   JX.Stratcom.listen(
     ['keydown', 'keyup'],
     null,
@@ -117,14 +121,28 @@ JX.behavior('repository-crossreference', function(config, statics) {
       if (e.getRawEvent().keyCode !== signalKey) {
         return;
       }
-      statics.active = (e.getType() === 'keydown');
-      linked.forEach(function(element) {
-        JX.DOM.alterClass(element, classMouseCursor, statics.active);
-      });
+      setCursorMode(e.getType() === 'keydown');
 
       if (!statics.active) {
-        highlighted && JX.DOM.alterClass(highlighted, classHighlight, false);
-        highlighted = null;
+        unhighlight();
       }
     });
+
+  JX.Stratcom.listen(
+    'blur',
+    null,
+    function(e) {
+      if (e.getTarget()) {
+        return;
+      }
+      unhighlight();
+      setCursorMode(false);
+    });
+
+  function setCursorMode(active) {
+    statics.active = active;
+    linked.forEach(function(element) {
+      JX.DOM.alterClass(element, classMouseCursor, statics.active);
+    });
+  }
 });

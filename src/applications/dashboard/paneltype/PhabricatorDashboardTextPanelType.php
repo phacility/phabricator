@@ -37,11 +37,25 @@ final class PhabricatorDashboardTextPanelType
     PhabricatorDashboardPanelRenderingEngine $engine) {
 
     $text = $panel->getProperty('text', '');
+    $oneoff = id(new PhabricatorMarkupOneOff())->setContent($text);
+    $field = 'default';
 
-    $text_content = PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())->setContent($text),
-      'default',
-      $viewer);
+    // NOTE: We're taking extra steps here to prevent creation of a text panel
+    // which embeds itself using `{Wnnn}`, recursing indefinitely.
+
+    $parent_key = PhabricatorDashboardRemarkupRule::KEY_PARENT_PANEL_PHIDS;
+    $parent_phids = $engine->getParentPanelPHIDs();
+    $parent_phids[] = $panel->getPHID();
+
+    $markup_engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($viewer)
+      ->setContextObject($panel)
+      ->setAuxiliaryConfig($parent_key, $parent_phids);
+
+    $text_content = $markup_engine
+      ->addObject($oneoff, $field)
+      ->process()
+      ->getOutput($oneoff, $field);
 
     return id(new PHUIPropertyListView())
       ->addTextContent($text_content);

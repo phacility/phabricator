@@ -856,6 +856,7 @@ final class DiffusionCommitController extends DiffusionController {
   }
 
   private function buildMergesTable(PhabricatorRepositoryCommit $commit) {
+    $viewer = $this->getViewer();
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
@@ -892,15 +893,12 @@ final class DiffusionCommitController extends DiffusionController {
           new PhutilNumber($limit)));
     }
 
-    $history_table = new DiffusionHistoryTableView();
-    $history_table->setUser($this->getRequest()->getUser());
-    $history_table->setDiffusionRequest($drequest);
-    $history_table->setHistory($merges);
-    $history_table->loadRevisions();
+    $history_table = id(new DiffusionHistoryTableView())
+      ->setUser($viewer)
+      ->setDiffusionRequest($drequest)
+      ->setHistory($merges);
 
-    $phids = $history_table->getRequiredHandlePHIDs();
-    $handles = $this->loadViewerHandles($phids);
-    $history_table->setHandles($handles);
+    $history_table->loadRevisions();
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText(pht('Merged Changes'));
@@ -1110,7 +1108,11 @@ final class DiffusionCommitController extends DiffusionController {
       $anchor = substr(md5($path), 0, 8);
 
       $history_link = $diffusion_view->linkHistory($path);
-      $browse_link = $diffusion_view->linkBrowse($path);
+      $browse_link = $diffusion_view->linkBrowse(
+        $path,
+        array(
+          'type' => $changeset->getFileType(),
+        ));
 
       $item = id(new PHUIDiffTableOfContentsItemView())
         ->setChangeset($changeset)

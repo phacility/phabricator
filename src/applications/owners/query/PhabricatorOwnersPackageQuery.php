@@ -372,6 +372,11 @@ final class PhabricatorOwnersPackageQuery
       $include = false;
 
       foreach ($package->getPaths() as $package_path) {
+        if ($package_path->getRepositoryPHID() != $repository_phid) {
+          // If this path is for some other repository, skip it.
+          continue;
+        }
+
         $strength = $package_path->getPathMatchStrength($path);
         if ($strength > $best_match) {
           $best_match = $strength;

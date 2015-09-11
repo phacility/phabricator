@@ -4,6 +4,7 @@ final class DrydockBlueprintQuery extends DrydockQuery {
 
   private $ids;
   private $phids;
+  private $datasourceQuery;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -12,6 +13,11 @@ final class DrydockBlueprintQuery extends DrydockQuery {
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function withDatasourceQuery($query) {
+    $this->datasourceQuery = $query;
     return $this;
   }
 
@@ -45,18 +51,25 @@ final class DrydockBlueprintQuery extends DrydockQuery {
   protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->datasourceQuery !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'blueprintName LIKE %>',
+        $this->datasourceQuery);
     }
 
     return $this->formatWhereClause($where);

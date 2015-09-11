@@ -76,9 +76,9 @@ final class PhabricatorConfigOption
     }
     return pht(
       'This configuration is locked and can not be edited from the web '.
-      'interface. Use `%s` in `%s` to edit it.',
-      './bin/config',
-      'phabricator/');
+      'interface. Use %s in %s to edit it.',
+      phutil_tag('tt', array(), './bin/config'),
+      phutil_tag('tt', array(), 'phabricator/'));
   }
 
   public function addExample($value, $description) {

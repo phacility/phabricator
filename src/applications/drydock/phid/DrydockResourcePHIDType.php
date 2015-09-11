@@ -29,6 +29,7 @@ final class DrydockResourcePHIDType extends PhabricatorPHIDType {
       $resource = $objects[$phid];
       $id = $resource->getID();
 
+      $handle->setName($resource->getName());
       $handle->setURI("/drydock/resource/{$id}/");
     }
   }

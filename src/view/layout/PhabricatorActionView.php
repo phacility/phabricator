@@ -14,6 +14,7 @@ final class PhabricatorActionView extends AphrontView {
   private $sigils = array();
   private $metadata;
   private $selected;
+  private $openInNewWindow;
 
   public function setSelected($selected) {
     $this->selected = $selected;
@@ -107,6 +108,15 @@ final class PhabricatorActionView extends AphrontView {
     return $this;
   }
 
+  public function setOpenInNewWindow($open_in_new_window) {
+    $this->openInNewWindow = $open_in_new_window;
+    return $this;
+  }
+
+  public function getOpenInNewWindow() {
+    return $this->openInNewWindow;
+  }
+
   public function render() {
 
     $icon = null;
@@ -161,11 +171,18 @@ final class PhabricatorActionView extends AphrontView {
           ),
           $item);
       } else {
+        if ($this->getOpenInNewWindow()) {
+          $target = '_blank';
+        } else {
+          $target = null;
+        }
+
         $item = javelin_tag(
           'a',
           array(
             'href'  => $this->getHref(),
             'class' => 'phabricator-action-view-item',
+            'target' => $target,
             'sigil' => $sigils,
             'meta' => $this->metadata,
           ),

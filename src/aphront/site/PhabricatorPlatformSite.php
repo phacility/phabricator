@@ -37,4 +37,17 @@ final class PhabricatorPlatformSite extends PhabricatorSite {
     return null;
   }
 
+  public function getRoutingMaps() {
+    $applications = PhabricatorApplication::getAllInstalledApplications();
+
+    $maps = array();
+    foreach ($applications as $application) {
+      $maps[] = $this->newRoutingMap()
+        ->setApplication($application)
+        ->setRoutes($application->getRoutes());
+    }
+
+    return $maps;
+  }
+
 }

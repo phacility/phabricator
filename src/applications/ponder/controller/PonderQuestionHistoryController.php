@@ -2,6 +2,10 @@
 
 final class PonderQuestionHistoryController extends PonderController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');

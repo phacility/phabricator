@@ -230,6 +230,8 @@ JX.install('PhabricatorDragAndDropFileUpload', {
         .setStatus('allocate')
         .update();
 
+      this.invoke('willUpload', file);
+
       var alloc_uri = this._getUploadURI(file)
         .setQueryParam('allocate', 1);
 

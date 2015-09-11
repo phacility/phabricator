@@ -2,23 +2,17 @@
 
 final class ReleephProductHistoryController extends ReleephProductController {
 
-  private $id;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['projectID'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('projectID');
 
     $product = id(new ReleephProductQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$product) {
       return new Aphront404Response();
@@ -32,6 +26,7 @@ final class ReleephProductHistoryController extends ReleephProductController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('History'));
+    $crumbs->setBorder(true);
 
     return $this->buildApplicationPage(
       array(

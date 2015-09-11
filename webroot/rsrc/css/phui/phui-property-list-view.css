@@ -167,6 +167,7 @@
   width: auto;
   border: none;
   float: none;
+  overflow: auto;
 }
 
 .phui-property-list-actions {
@@ -174,6 +175,10 @@
   float: right;
   margin-right: 12px;
   border-left: 1px solid {$thinblueborder};
+}
+
+!print .phui-property-list-actions {
+  display: none;
 }
 
 .device .phui-property-list-actions {

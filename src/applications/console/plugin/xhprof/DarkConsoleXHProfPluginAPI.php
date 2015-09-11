@@ -124,7 +124,13 @@ final class DarkConsoleXHProfPluginAPI extends Phobject {
     self::startProfiler();
   }
 
+
+  /**
+   * @phutil-external-symbol class PhabricatorStartup
+   */
   private static function startProfiler() {
+    PhabricatorStartup::beginStartupPhase('profiler.init');
+
     self::includeXHProfLib();
     xhprof_enable();
 
@@ -132,15 +138,23 @@ final class DarkConsoleXHProfPluginAPI extends Phobject {
     self::$profilerRunning = true;
   }
 
+
+  /**
+   * @phutil-external-symbol class PhabricatorStartup
+   */
   public static function getProfileFilePHID() {
+    if (!self::isProfilerRunning()) {
+      return;
+    }
+
+    PhabricatorStartup::beginStartupPhase('profiler.stop');
     self::stopProfiler();
+    PhabricatorStartup::beginStartupPhase('profiler.done');
+
     return self::$profileFilePHID;
   }
 
   private static function stopProfiler() {
-    if (!self::isProfilerRunning()) {
-      return;
-    }
 
     $data = xhprof_disable();
     $data = @json_encode($data);

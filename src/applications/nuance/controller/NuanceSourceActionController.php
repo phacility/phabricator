@@ -13,7 +13,7 @@ final class NuanceSourceActionController extends NuanceController {
       return new Aphront404Response();
     }
 
-    $def = NuanceSourceDefinition::getDefinitionForSource($source);
+    $def = $source->requireDefinition();
     $def->setActor($viewer);
 
     $response = $def->handleActionRequest($request);

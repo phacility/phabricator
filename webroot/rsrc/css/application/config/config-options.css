@@ -49,3 +49,8 @@
 .config-options-current-value span {
   color: {$greytext};
 }
+
+.config-options-effective-value,
+.config-option-table .config-options-effective-value th {
+  background: {$lightyellow};
+}

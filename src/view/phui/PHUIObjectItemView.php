@@ -26,6 +26,7 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $badge;
   private $countdownNum;
   private $countdownNoun;
+  private $launchButton;
 
   const AGE_FRESH = 'fresh';
   const AGE_STALE = 'stale';
@@ -257,6 +258,12 @@ final class PHUIObjectItemView extends AphrontTagView {
     if (!empty($attribute)) {
       $this->attributes[] = $attribute;
     }
+    return $this;
+  }
+
+  public function setLaunchButton(PHUIButtonView $button) {
+    $button->setSize(PHUIButtonView::SMALL);
+    $this->launchButton = $button;
     return $this;
   }
 
@@ -649,6 +656,17 @@ final class PHUIObjectItemView extends AphrontTagView {
         array(
           $icons,
           $bylines,
+        ));
+    }
+
+    if ($this->launchButton) {
+      $column2 = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-object-item-col2 phui-object-item-launch-button',
+        ),
+        array(
+          $this->launchButton,
         ));
     }
 

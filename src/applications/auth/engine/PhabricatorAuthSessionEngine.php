@@ -296,7 +296,10 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
     foreach ($sessions as $key => $session) {
       if ($except_session !== null) {
-        if ($except_session == $session->getSessionKey()) {
+        $is_except = phutil_hashes_are_identical(
+          $session->getSessionKey(),
+          $except_session);
+        if ($is_except) {
           continue;
         }
       }

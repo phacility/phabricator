@@ -177,8 +177,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $content[] = $this->buildHistoryTable(
       $history_results,
       $history,
-      $history_exception,
-      $handles);
+      $history_exception);
 
     try {
       $content[] = $this->buildTagListTable($drequest);
@@ -302,7 +301,16 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $info = null;
     $drequest = $this->getDiffusionRequest();
-    if ($drequest->getRefAlternatives()) {
+
+    // Try to load alternatives. This may fail for repositories which have not
+    // cloned yet. If it does, just ignore it and continue.
+    try {
+      $alternatives = $drequest->getRefAlternatives();
+    } catch (ConduitClientException $ex) {
+      $alternatives = array();
+    }
+
+    if ($alternatives) {
       $message = array(
         pht(
           'The ref "%s" is ambiguous in this repository.',
@@ -510,8 +518,7 @@ final class DiffusionRepositoryController extends DiffusionController {
   private function buildHistoryTable(
     $history_results,
     $history,
-    $history_exception,
-    array $handles) {
+    $history_exception) {
 
     $request = $this->getRequest();
     $viewer = $request->getUser();
@@ -535,7 +542,6 @@ final class DiffusionRepositoryController extends DiffusionController {
     $history_table = id(new DiffusionHistoryTableView())
       ->setUser($viewer)
       ->setDiffusionRequest($drequest)
-      ->setHandles($handles)
       ->setHistory($history);
 
     // TODO: Super sketchy.

@@ -1,30 +1,70 @@
-@title Owners Tool User Guide
+@title Owners User Guide
 @group userguide
 
-Use Owners to define and/or monitor code you care about.
+Group files in a codebase into packages and define ownership.
 
-= Packages =
+Overview
+========
 
-Owners tool allows you to define a code package by specifying a group of paths.
-The package can then be used to monitor the paths. For example, it can be used
-in Herald rules and in the "Related Commits" feature (see below).
+The Owners application allows you to group files in a codebase (or across
+codebases) into packages. This can make it easier to reference a module or
+subsystem in other applications, like Herald.
 
-= Related Commits =
 
-Once the package is defined, all future commits touching any path defined in
-the package will be recorded as "Related Commits" of the package.
+Creating a Package
+==================
 
-= Commits Needing Attention =
+To create a package, choose a name and add some files which belong to the
+package. For example, you might define an "iOS Application" package by
+including these paths:
 
-Owners tool enables the owners of the package to monitor the commits that might
-need attention. If "auditing" is enabled for a package, a related commit will
-be marked as "Needing Attention" if
+  /conf/ios/
+  /src/ios/
+  /shared/assets/mobile/
 
-  - it's neither authored nor reviewed by an owner of the package,
-  - no revision found for the commit,
-  - the commit author is not recognized, or
-  - the author or the reviewer specified in the commits don't match the ones in
-    the Differential revision
+Any files in those directories are considered to be part of the package, and
+you can now conveniently refer to them (for example, in a Herald rule) by
+refering to the package instead of copy/pasting a huge regular expression
+into a bunch of places.
 
-The owners of the package can accept or specify concern for such commits by
-clicking the "Audit Status" link.
+If new source files are later added, or the scope of the package otherwise
+expands or contracts, you can edit the package definition to keep things
+updated.
+
+You can use "exclude" paths to ignore subdirectories which would otherwise
+be considered part of the package. For example, you might exclude a path
+like this:
+
+  /conf/ios/generated/
+
+Perhaps that directory contains some generated configuration which frequently
+changes, and which you aren't concerned about.
+
+After creating a package, files the package contains will be identified as
+belonging to the package when you look at them in Diffusion, or look at changes
+which affect them in Diffusion or Differential.
+
+
+Files in Multiple Packages
+==========================
+
+Multiple packages may own the same file. For example, both the
+"Android Application" and the "iOS Application" packages might own a path
+like this, containing resources used by both:
+
+  /shared/assets/mobile/
+
+If both packages own this directory, files in the directory are considered to
+be part of both packages.
+
+Packages do not need to have claims of equal specificity to own files. For
+example, if you have a "Design Assets" package which owns this path:
+
+  /shared/assets/
+
+...it will //also// own all of the files in the `mobile/` subdirectory. In this
+configuration, these files are part of three packages: "iOS Application",
+"Android Application", and "Design Assets".
+
+(You can use an "exclude" rule if you want to make a different package with a
+more specific claim the owner of a file or subdirectory.)

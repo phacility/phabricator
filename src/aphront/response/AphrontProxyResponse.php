@@ -8,7 +8,9 @@
  * then constructing a real @{class:AphrontAjaxResponse} in
  * @{method:reduceProxyResponse}.
  */
-abstract class AphrontProxyResponse extends AphrontResponse {
+abstract class AphrontProxyResponse
+  extends AphrontResponse
+  implements AphrontResponseProducerInterface {
 
   private $proxy;
 
@@ -69,6 +71,14 @@ abstract class AphrontProxyResponse extends AphrontResponse {
         '%s must implement %s.',
         __CLASS__,
         'reduceProxyResponse()'));
+  }
+
+
+/* -(  AphrontResponseProducerInterface  )----------------------------------- */
+
+
+  public function produceAphrontResponse() {
+    return $this->reduceProxyResponse();
   }
 
 }

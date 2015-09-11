@@ -6,6 +6,7 @@ final class DrydockLeaseQuery extends DrydockQuery {
   private $phids;
   private $resourceIDs;
   private $statuses;
+  private $datasourceQuery;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -31,6 +32,11 @@ final class DrydockLeaseQuery extends DrydockQuery {
     return new DrydockLease();
   }
 
+  public function withDatasourceQuery($query) {
+    $this->datasourceQuery = $query;
+    return $this;
+  }
+
   protected function loadPage() {
     return $this->loadStandardPage($this->newResultObject());
   }
@@ -41,7 +47,7 @@ final class DrydockLeaseQuery extends DrydockQuery {
       $resources = id(new DrydockResourceQuery())
         ->setParentQuery($this)
         ->setViewer($this->getViewer())
-        ->withIDs($resource_ids)
+        ->withIDs(array_unique($resource_ids))
         ->execute();
     } else {
       $resources = array();
@@ -91,6 +97,13 @@ final class DrydockLeaseQuery extends DrydockQuery {
         $conn,
         'status IN (%Ld)',
         $this->statuses);
+    }
+
+    if ($this->datasourceQuery !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'id = %d',
+        (int)$this->datasourceQuery);
     }
 
     return $where;

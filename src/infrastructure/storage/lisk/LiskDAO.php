@@ -1651,7 +1651,7 @@ abstract class LiskDAO extends Phobject {
             if ($deserialize) {
               $data[$col] = json_decode($data[$col], true);
             } else {
-              $data[$col] = json_encode($data[$col]);
+              $data[$col] = phutil_json_encode($data[$col]);
             }
             break;
           default:

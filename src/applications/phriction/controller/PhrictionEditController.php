@@ -109,6 +109,8 @@ final class PhrictionEditController
     $notes = null;
     $title = $content->getTitle();
     $overwrite = false;
+    $v_cc = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $document->getPHID());
 
     if ($request->isFormPost()) {
 
@@ -118,6 +120,7 @@ final class PhrictionEditController
       $current_version = $request->getInt('contentVersion');
       $v_view = $request->getStr('viewPolicy');
       $v_edit = $request->getStr('editPolicy');
+      $v_cc   = $request->getArr('cc');
 
       $xactions = array();
       $xactions[] = id(new PhrictionTransaction())
@@ -132,6 +135,9 @@ final class PhrictionEditController
       $xactions[] = id(new PhrictionTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
         ->setNewValue($v_edit);
+      $xactions[] = id(new PhrictionTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+        ->setNewValue(array('=' => $v_cc));
 
       $editor = id(new PhrictionTransactionEditor())
         ->setActor($viewer)
@@ -222,6 +228,13 @@ final class PhrictionEditController
           ->setName('content')
           ->setID('document-textarea')
           ->setUser($viewer))
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('Subscribers'))
+          ->setName('cc')
+          ->setValue($v_cc)
+          ->setUser($viewer)
+          ->setDatasource(new PhabricatorMetaMTAMailableDatasource()))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setName('viewPolicy')

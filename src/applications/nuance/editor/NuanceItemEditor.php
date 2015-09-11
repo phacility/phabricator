@@ -18,6 +18,7 @@ final class NuanceItemEditor
     $types[] = NuanceItemTransaction::TYPE_SOURCE;
     $types[] = NuanceItemTransaction::TYPE_REQUESTOR;
     $types[] = NuanceItemTransaction::TYPE_PROPERTY;
+    $types[] = NuanceItemTransaction::TYPE_QUEUE;
 
     $types[] = PhabricatorTransactions::TYPE_EDGE;
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
@@ -38,6 +39,8 @@ final class NuanceItemEditor
         return $object->getSourcePHID();
       case NuanceItemTransaction::TYPE_OWNER:
         return $object->getOwnerPHID();
+      case NuanceItemTransaction::TYPE_QUEUE:
+        return $object->getQueuePHID();
       case NuanceItemTransaction::TYPE_PROPERTY:
         $key = $xaction->getMetadataValue(
           NuanceItemTransaction::PROPERTY_KEY);
@@ -56,6 +59,7 @@ final class NuanceItemEditor
       case NuanceItemTransaction::TYPE_SOURCE:
       case NuanceItemTransaction::TYPE_OWNER:
       case NuanceItemTransaction::TYPE_PROPERTY:
+      case NuanceItemTransaction::TYPE_QUEUE:
         return $xaction->getNewValue();
     }
 
@@ -76,6 +80,9 @@ final class NuanceItemEditor
       case NuanceItemTransaction::TYPE_OWNER:
         $object->setOwnerPHID($xaction->getNewValue());
         break;
+      case NuanceItemTransaction::TYPE_QUEUE:
+        $object->setQueuePHID($xaction->getNewValue());
+        break;
       case NuanceItemTransaction::TYPE_PROPERTY:
         $key = $xaction->getMetadataValue(
           NuanceItemTransaction::PROPERTY_KEY);
@@ -93,6 +100,7 @@ final class NuanceItemEditor
       case NuanceItemTransaction::TYPE_SOURCE:
       case NuanceItemTransaction::TYPE_OWNER:
       case NuanceItemTransaction::TYPE_PROPERTY:
+      case NuanceItemTransaction::TYPE_QUEUE:
         return;
     }
 

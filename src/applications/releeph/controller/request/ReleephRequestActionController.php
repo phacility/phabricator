@@ -3,23 +3,16 @@
 final class ReleephRequestActionController
   extends ReleephRequestController {
 
-  private $action;
-  private $requestID;
-
-  public function willProcessRequest(array $data) {
-    $this->action = $data['action'];
-    $this->requestID = $data['requestID'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $action = $request->getURIData('action');
+    $id = $request->getURIData('requestID');
+    $viewer = $request->getViewer();
 
     $request->validateCSRF();
 
     $pull = id(new ReleephRequestQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->requestID))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$pull) {
       return new Aphront404Response();
@@ -27,9 +20,6 @@ final class ReleephRequestActionController
 
     $branch = $pull->getBranch();
     $product = $branch->getProduct();
-
-    $action = $this->action;
-
     $origin_uri = '/'.$pull->getMonogram();
 
     $editor = id(new ReleephRequestTransactionalEditor())

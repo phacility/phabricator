@@ -138,6 +138,25 @@ If the services tab looks fine, and particularly if a page is slow but the
 tool to understand problems in PHP is XHProf.
 
 
+Plugin: Startup
+===============
+
+The "Startup" plugin shows information about startup phases. This information
+can provide insight about performance problems which occur before the profiler
+can start.
+
+Normally, the profiler is the best tool for understanding runtime performance,
+but some work is performed before the profiler starts (for example, loading
+libraries and configuration). If there is a substantial difference between the
+wall time reported by the profiler and the "Entire Page" cost reported by the
+Services tab, the Startup tab can help account for that time.
+
+It is normal for starting the profiler to increase the cost of the page
+somewhat: the profiler itself adds overhead while it is running, and the page
+must do some work after the profiler is stopped to save the profile and
+complete other shutdown operations.
+
+
 Plugin: XHProf
 ==============
 

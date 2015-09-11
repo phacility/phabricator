@@ -2,19 +2,14 @@
 
 final class ReleephProductListController extends ReleephController {
 
-  private $queryKey;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey');
-  }
-
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
+    $query_key = $request->getURIData('queryKey');
     $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($this->queryKey)
+      ->setQueryKey($query_key)
       ->setSearchEngine(new ReleephProductSearchEngine())
       ->setNavigation($this->buildSideNavView());
 

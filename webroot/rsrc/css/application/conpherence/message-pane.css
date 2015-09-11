@@ -54,11 +54,15 @@
   position: fixed;
   left: 241px;
   right: 241px;
-  top: 76px;
+  top: 78px;
   bottom: 172px;
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+.conpherence-logged-out .conpherence-message-pane .conpherence-messages {
+  bottom: 42px;
 }
 
 .page-has-warning .conpherence-message-pane .conpherence-messages {
@@ -114,7 +118,7 @@
 }
 
 .conpherence-message-pane .phui-form-view.login-to-participate {
-  height: 28px;
+  height: 26px;
 }
 
 .conpherence-message-pane .login-to-participate a.button {

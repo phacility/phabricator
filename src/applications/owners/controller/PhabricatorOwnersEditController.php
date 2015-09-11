@@ -36,6 +36,11 @@ final class PhabricatorOwnersEditController
     $v_description = $package->getDescription();
     $v_status = $package->getStatus();
 
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $package,
+      PhabricatorCustomField::ROLE_EDIT);
+    $field_list->setViewer($viewer);
+    $field_list->readFieldsFromStorage($package);
 
     $errors = array();
     if ($request->isFormPost()) {
@@ -74,6 +79,12 @@ final class PhabricatorOwnersEditController
           ->setTransactionType($type_status)
           ->setNewValue($v_status);
       }
+
+      $field_xactions = $field_list->buildFieldTransactionsFromRequest(
+        new PhabricatorOwnersPackageTransaction(),
+        $request);
+
+      $xactions = array_merge($xactions, $field_xactions);
 
       $editor = id(new PhabricatorOwnersPackageTransactionEditor())
         ->setActor($viewer)
@@ -126,41 +137,44 @@ final class PhabricatorOwnersEditController
           ->setName('owners')
           ->setValue($v_owners));
 
-      if (!$is_new) {
-        $form->appendChild(
-          id(new AphrontFormSelectControl())
-            ->setLabel(pht('Status'))
-            ->setName('status')
-            ->setValue($v_status)
-            ->setOptions($package->getStatusNameMap()));
-      }
-
+    if (!$is_new) {
       $form->appendChild(
         id(new AphrontFormSelectControl())
-          ->setName('auditing')
-          ->setLabel(pht('Auditing'))
-          ->setCaption(
-            pht(
-              'With auditing enabled, all future commits that touch '.
-              'this package will be reviewed to make sure an owner '.
-              'of the package is involved and the commit message has '.
-              'a valid revision, reviewed by, and author.'))
-          ->setOptions(
-            array(
-              'disabled'  => pht('Disabled'),
-              'enabled'   => pht('Enabled'),
-            ))
-          ->setValue(($v_auditing ? 'enabled' : 'disabled')))
+          ->setLabel(pht('Status'))
+          ->setName('status')
+          ->setValue($v_status)
+          ->setOptions($package->getStatusNameMap()));
+    }
+
+    $form->appendChild(
+      id(new AphrontFormSelectControl())
+        ->setName('auditing')
+        ->setLabel(pht('Auditing'))
+        ->setCaption(
+          pht(
+            'With auditing enabled, all future commits that touch '.
+            'this package will be reviewed to make sure an owner '.
+            'of the package is involved and the commit message has '.
+            'a valid revision, reviewed by, and author.'))
+        ->setOptions(
+          array(
+            'disabled'  => pht('Disabled'),
+            'enabled'   => pht('Enabled'),
+          ))
+        ->setValue(($v_auditing ? 'enabled' : 'disabled')))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setUser($viewer)
           ->setLabel(pht('Description'))
           ->setName('description')
-          ->setValue($v_description))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->addCancelButton($cancel_uri)
-          ->setValue($button_text));
+          ->setValue($v_description));
+
+    $field_list->appendFieldsToForm($form);
+
+    $form->appendChild(
+      id(new AphrontFormSubmitControl())
+        ->addCancelButton($cancel_uri)
+        ->setValue($button_text));
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)

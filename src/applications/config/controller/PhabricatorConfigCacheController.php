@@ -39,8 +39,22 @@ final class PhabricatorConfigCacheController
 
     $this->renderCommonProperties($properties, $cache);
 
+    $purge_icon = id(new PHUIIconView())
+      ->setIconFont('fa-exclamation-triangle');
+
+    $purge_button = id(new PHUIButtonView())
+      ->setText(pht('Purge Caches'))
+      ->setHref('/config/cache/purge/')
+      ->setTag('a')
+      ->setWorkflow(true)
+      ->setIcon($purge_icon);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Opcode Cache'))
+      ->addActionLink($purge_button);
+
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Opcode Cache'))
+      ->setHeader($header)
       ->addPropertyList($properties);
   }
 

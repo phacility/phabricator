@@ -7,14 +7,7 @@ abstract class AphrontSite extends Phobject {
 
   abstract public function shouldRequireHTTPS();
   abstract public function newSiteForRequest(AphrontRequest $request);
-
-  /**
-   * NOTE: This is temporary glue; eventually, sites will return an entire
-   * route map.
-   */
-  public function getPathForRouting(AphrontRequest $request) {
-    return $request->getPath();
-  }
+  abstract public function getRoutingMaps();
 
   protected function isHostMatch($host, array $uris) {
     foreach ($uris as $uri) {
@@ -32,14 +25,9 @@ abstract class AphrontSite extends Phobject {
     return false;
   }
 
-  protected function isPathPrefixMatch($path, array $paths) {
-    foreach ($paths as $candidate) {
-      if (strncmp($path, $candidate, strlen($candidate)) === 0) {
-        return true;
-      }
-    }
-
-    return false;
+  protected function newRoutingMap() {
+    return id(new AphrontRoutingMap())
+      ->setSite($this);
   }
 
   final public static function getAllSites() {
