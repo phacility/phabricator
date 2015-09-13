@@ -1,0 +1,325 @@
+tlf2a 3 3 8 -1 18 0 0 0
+===============================================================================
+  This is emboss.tlf, or “Emboss”, by Sam Hocevar <sam@hocevar.net>. It was
+created on September 30th, 2006.
+
+  This font is free software. It comes without any warranty, to the extent
+permitted by applicable law. You can redistribute it and/or modify it under
+the terms of the Do What The Fuck You Want To Public License, Version 2,
+as published by Sam Hocevar. See http://sam.zoy.org/wtfpl/COPYING for more
+details.
+
+  Missing characters: # $ % , ; < >
+
+  To create emboss2.tlf, use the following command:
+  $ sed '/@@/,$y/━┃┏┓┗┛/═║╔╗╚╝/' < emboss.tlf > emboss2.tlf
+
+  This font is part of TOIlet’s official distribution. More information
+on the TOIlet website at http://caca.zoy.org/wiki/toilet
+===============================================================================
+ @
+ @
+ @@
+┃!
+┛!
+┛!!
+┛┛"
+  "
+  ""
+ @
+ @
+#@@
+ @
+ @
+$@@
+ @
+ @
+%@@
+┏┛┃ &
+┃━┏┛&
+━━┛ &&
+┛'
+ '
+ ''
+ ┛(
+┃ (
+ ┛((
+━ )
+ ┃)
+━ ))
+┛ ┛*
+━┏┛*
+┛ ┛**
+ ┃ +
+━┏┛+
+ ┛ ++
+ @
+ @
+,@@
+  -
+━┛-
+  --
+ .
+ .
+┛..
+  ┛/
+ ┛ /
+┛  //
+┏━┃0
+┃┛┃0
+━━┛00
+━┃ 1
+ ┃ 1
+━━┛11
+━━┃2
+┏━┛2
+━━┛22
+━━┃3
+━━┃3
+━━┛33
+┃ ┃4
+━━┃4
+  ┛44
+┏━┛5
+━━┃5
+━━┛55
+┏━┛6
+┏━┃6
+━━┛66
+┏━┃7
+  ┃7
+  ┛77
+┏━┃8
+┏━┃8
+━━┛88
+┏━┃9
+━━┃9
+━━┛99
+ :
+┛:
+┛::
+ @
+ @
+;@@
+ @
+ @
+<@@
+   =
+━━┛=
+━━┛==
+ @
+ @
+>@@
+┏━┃?
+  ┛?
+ ┛ ??
+┏━┃@
+┃┛┛@
+━━┛@@
+┏━┃A
+┏━┃A
+┛ ┛AA
+┏━ B
+┏━┃B
+━━ BB
+┏━┛C
+┃  C
+━━┛CC
+┏━ D
+┃ ┃D
+━━ DD
+┏━┛E
+┏━┛E
+━━┛EE
+┏━┛F
+┏━┛F
+┛  FF
+┏━┛G
+┃ ┃G
+━━┛GG
+┃ ┃H
+┏━┃H
+┛ ┛HH
+┛I
+┃I
+┛II
+ ┛J
+ ┃J
+━┛JJ
+┃ ┃K
+┏┛ K
+┛ ┛KK
+┃  L
+┃  L
+━━┛LL
+┏┏ M
+┃┃┃M
+┛┛┛MM
+┏━ N
+┃ ┃N
+┛ ┛NN
+┏━┃O
+┃ ┃O
+━━┛OO
+┏━┃p
+┏━┛P
+┛  PP
+┏━┃ Q
+┃ ┃ Q
+━━━┛QQ
+┏━┃R
+┏┏┛R
+┛ ┛RR
+┏━┛S
+━━┃S
+━━┛SS
+━┏┛T
+ ┃ T
+ ┛ TT
+┃ ┃U
+┃ ┃U
+━━┛UU
+┃ ┃V
+┃ ┃V
+ ┛ VV
+┃┃┃W
+┃┃┃W
+━━┛WW
+┃ ┃X
+ ┛ X
+┛ ┛XX
+┃ ┃Y
+━┏┛Y
+ ┛ YY
+━━┃Z
+┏┛ Z
+━━┛ZZ
+┏┛[
+┃ [
+━┛[[
+┛  \
+ ┛ \
+  ┛\\
+━┃]
+ ┃]
+━┛]]
+ ┛ ^
+┛ ┛^
+   ^^
+   _
+   _
+━━┛__
+┛ `
+ ┛`
+  ``
+┏━┃a
+┏━┃a
+┛ ┛aa
+┏━ b
+┏━┃b
+━━ bb
+┏━┛c
+┃  c
+━━┛cc
+┏━ d
+┃ ┃d
+━━ dd
+┏━┛e
+┏━┛e
+━━┛ee
+┏━┛f
+┏━┛f
+┛  ff
+┏━┛g
+┃ ┃g
+━━┛gg
+┃ ┃h
+┏━┃h
+┛ ┛hh
+┛i
+┃i
+┛ii
+ ┛j
+ ┃j
+━┛jj
+┃ ┃k
+┏┛ k
+┛ ┛kk
+┃  l
+┃  l
+━━┛ll
+┏┏ m
+┃┃┃m
+┛┛┛mm
+┏━ n
+┃ ┃n
+┛ ┛nn
+┏━┃o
+┃ ┃o
+━━┛oo
+┏━┃p
+┏━┛p
+┛  pp
+┏━┃ q
+┃ ┃ q
+━━━┛qq
+┏━┃r
+┏┏┛r
+┛ ┛rr
+┏━┛s
+━━┃s
+━━┛ss
+━┏┛t
+ ┃ t
+ ┛ tt
+┃ ┃u
+┃ ┃u
+━━┛uu
+┃ ┃v
+┃ ┃v
+ ┛ vv
+┃┃┃w
+┃┃┃w
+━━┛ww
+┃ ┃x
+ ┛ x
+┛ ┛xx
+┃ ┃y
+━┏┛y
+ ┛ yy
+━━┃z
+┏┛ z
+━━┛zz
+ ┏┛{
+━┃ {
+ ━┛{{
+┃|
+┃|
+┛||
+━┃ }
+ ┏┛}
+━┛ }}
+ ┛ ┛~
+┛ ┛ ~
+    ~~
+┏━┃┏━┛Ä
+┏━┃┏━┛Ä
+┛ ┛━━┛ÄÄ
+┏━┃┏━┛Ö
+┃ ┃┏━┛Ö
+━━┛━━┛ÖÖ
+┃ ┃┏━┛Ü
+┃ ┃┏━┛Ü
+━━┛━━┛ÜÜ
+┏━┃┏━┛ä
+┏━┃┏━┛ä
+┛ ┛━━┛ää
+┏━┃┏━┛ö
+┃ ┃┏━┛ö
+━━┛━━┛öö
+┃ ┃┏━┛ü
+┃ ┃┏━┛ü
+━━┛━━┛üü
+┏━┛┏━┛ß
+━━┃━━┃ß
+━━┛━━┛ßß
