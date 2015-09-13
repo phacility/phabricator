@@ -15,7 +15,6 @@
 * @version  CVS: $Id$
 * @link     http://pear.php.net/package/Text_Figlet
 */
-require_once 'PEAR.php';
 
 /**
 * ASCII art text creation
@@ -113,22 +112,9 @@ class Text_Figlet
     {
         $this->font = array();
         if (!file_exists($filename)) {
-            //if it does not exist, try the Text_Figlet data directory
-            include_once 'PEAR/Config.php';
-
-            $config  = PEAR_Config::singleton();
-            $fontdir = $config->get('data_dir') . '/Text_Figlet/fonts/';
-
-            //only for filenames without path separators
-            if (strpos($filename, '/') === false
-                && file_exists($fontdir . $filename)
-            ) {
-                $filename = $fontdir . $filename;
-            } else {
-                return PEAR::raiseError('Figlet font file "'
-                                        . $filename
-                                        . '" cannot be found', 1);
-            }
+          return self::raiseError('Figlet font file "'
+                                  . $filename
+                                  . '" cannot be found', 1);
         }
 
         $this->font_comment = '';
@@ -139,7 +125,7 @@ class Text_Figlet
             $compressed = true;
 
             if (!function_exists('gzcompress')) {
-                return PEAR::raiseError('Cannot load gzip compressed fonts since'
+                return self::raiseError('Cannot load gzip compressed fonts since'
                                         . ' gzcompress() is not available.',
                                         3);
             }
@@ -148,14 +134,14 @@ class Text_Figlet
         }
 
         if (!($fp = fopen($filename, 'rb'))) {
-            return PEAR::raiseError('Cannot open figlet font file ' . $filename, 2);
+            return self::raiseError('Cannot open figlet font file ' . $filename, 2);
         }
 
         if (!$compressed) {
             /* ZIPed font */
             if (fread($fp, 2) == 'PK') {
                 if (!function_exists('zip_open')) {
-                    return PEAR::raiseError('Cannot load ZIP compressed fonts since'
+                    return self::raiseError('Cannot load ZIP compressed fonts since'
                                             . ' ZIP PHP extension is not available.',
                                             5);
                 }
@@ -163,14 +149,14 @@ class Text_Figlet
                 fclose($fp);
 
                 if (!($fp = zip_open($filename))) {
-                    return PEAR::raiseError('Cannot open figlet font file ' . $filename, 2);
+                    return self::raiseError('Cannot open figlet font file ' . $filename, 2);
                 }
 
                 $name = zip_entry_name(zip_read($fp));
                 zip_close($fp);
 
                 if (!($fp = fopen('zip://' . realpath($filename) . '#' . $name, 'rb'))) {
-                    return PEAR::raiseError('Cannot open figlet font file ' . $filename, 2);
+                    return self::raiseError('Cannot open figlet font file ' . $filename, 2);
                 }
 
                 $compressed = true;
@@ -193,7 +179,7 @@ class Text_Figlet
         $header = explode(' ', fgets($fp, 2048));
 
         if (substr($header[0], 0, 5) <> 'flf2a') {
-            return PEAR::raiseError('Unknown FIGlet font format.', 4);
+            return self::raiseError('Unknown FIGlet font format.', 4);
         }
 
         @list ($this->hardblank, $this->height,,,
@@ -381,9 +367,9 @@ class Text_Figlet
         $str   = strtr(implode("\n", $out), $trans);
 
         if ($inhtml) {
-            return '<nobr>'.
-                   nl2br(str_replace(' ', '&nbsp;', htmlspecialchars($str))).
-                   '</nobr>';
+          self::raiseError(
+            'Do not use the HTML escaping provided by this class in '.
+            'a Phabricator context.');
         }
 
         return $str;
@@ -506,5 +492,9 @@ class Text_Figlet
 
         return true;
     }
+
+
+  private static function raiseError($message, $code = 1) {
+    throw new Exception($message);
+  }
 }
-?>
