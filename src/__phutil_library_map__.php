@@ -2694,7 +2694,6 @@ phutil_register_library_map(array(
     'PhabricatorRemarkupCustomBlockRule' => 'infrastructure/markup/rule/PhabricatorRemarkupCustomBlockRule.php',
     'PhabricatorRemarkupCustomInlineRule' => 'infrastructure/markup/rule/PhabricatorRemarkupCustomInlineRule.php',
     'PhabricatorRemarkupFigletBlockInterpreter' => 'infrastructure/markup/interpreter/PhabricatorRemarkupFigletBlockInterpreter.php',
-    'PhabricatorRemarkupGraphvizBlockInterpreter' => 'infrastructure/markup/interpreter/PhabricatorRemarkupGraphvizBlockInterpreter.php',
     'PhabricatorRemarkupUIExample' => 'applications/uiexample/examples/PhabricatorRemarkupUIExample.php',
     'PhabricatorRepositoriesSetupCheck' => 'applications/config/check/PhabricatorRepositoriesSetupCheck.php',
     'PhabricatorRepository' => 'applications/repository/storage/PhabricatorRepository.php',
@@ -6749,7 +6748,6 @@ phutil_register_library_map(array(
     'PhabricatorRemarkupCustomBlockRule' => 'PhutilRemarkupBlockRule',
     'PhabricatorRemarkupCustomInlineRule' => 'PhutilRemarkupRule',
     'PhabricatorRemarkupFigletBlockInterpreter' => 'PhutilRemarkupBlockInterpreter',
-    'PhabricatorRemarkupGraphvizBlockInterpreter' => 'PhutilRemarkupBlockInterpreter',
     'PhabricatorRemarkupUIExample' => 'PhabricatorUIExample',
     'PhabricatorRepositoriesSetupCheck' => 'PhabricatorSetupCheck',
     'PhabricatorRepository' => array(
