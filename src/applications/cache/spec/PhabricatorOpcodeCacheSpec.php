@@ -23,7 +23,9 @@ final class PhabricatorOpcodeCacheSpec extends PhabricatorCacheSpec {
       ->setVersion(phpversion('apc'));
 
     if (ini_get('apc.enabled')) {
-      $this->setIsEnabled(true);
+      $this
+        ->setIsEnabled(true)
+        ->setClearCacheCallback('apc_clear_cache');
 
       $mem = apc_sma_info();
       $this->setTotalMemory($mem['num_seg'] * $mem['seg_size']);
@@ -109,7 +111,9 @@ final class PhabricatorOpcodeCacheSpec extends PhabricatorCacheSpec {
       ->setVersion(phpversion('Zend OPcache'));
 
     if (ini_get('opcache.enable')) {
-      $this->setIsEnabled(true);
+      $this
+        ->setIsEnabled(true)
+        ->setClearCacheCallback('opcache_reset');
 
       $status = opcache_get_status();
       $memory = $status['memory_usage'];
@@ -199,5 +203,4 @@ final class PhabricatorOpcodeCacheSpec extends PhabricatorCacheSpec {
       $this->raiseInstallAPCIssue();
     }
   }
-
 }

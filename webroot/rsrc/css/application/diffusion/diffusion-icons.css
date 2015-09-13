@@ -2,31 +2,6 @@
  * @provides diffusion-icons-css
  */
 
-.diffusion-path-icon {
-  display: block;
-  padding-left: 28px;
-  background-repeat: no-repeat;
-  background-position: 1px 1px;
-  height: 18px;
-  padding-top: 1px;
-}
-
-.diffusion-path-icon-ext {
-  background-image: url(/rsrc/image/icon/fatcow/folder_go.png);
-}
-
-.diffusion-path-icon-dir {
-  background-image: url(/rsrc/image/icon/fatcow/folder.png);
-}
-
-.diffusion-path-icon-file {
-  background-image: url(/rsrc/image/icon/fatcow/page_white_text.png);
-}
-
-.diffusion-path-icon-link {
-  background-image: url(/rsrc/image/icon/fatcow/page_white_link.png);
-}
-
 input.diffusion-clone-uri {
   display: block;
   width: 100%;
@@ -36,4 +11,12 @@ input.diffusion-clone-uri {
   font-size: 11px;
   text-align: right;
   color: {$lightgreytext};
+}
+
+.diffusion-browse-name {
+  margin-left: 8px;
+}
+
+.diffusion-link-icon + .diffusion-link-icon {
+  margin-left: 6px;
 }

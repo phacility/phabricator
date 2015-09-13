@@ -17,11 +17,11 @@ final class DiffusionEmptyResultView extends DiffusionView {
 
   public function render() {
     $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
 
     $commit = $drequest->getCommit();
-    $callsign = $drequest->getRepository()->getCallsign();
     if ($commit) {
-      $commit = "r{$callsign}{$commit}";
+      $commit = $repository->formatCommitName($commit);
     } else {
       $commit = 'HEAD';
     }
@@ -37,29 +37,38 @@ final class DiffusionEmptyResultView extends DiffusionView {
         break;
       case DiffusionBrowseResultSet::REASON_IS_EMPTY:
         $title = pht('Empty Directory');
-        $body = pht("This path was an empty directory at %s.\n", $commit);
+        $body = pht('This path was an empty directory at %s.', $commit);
         $severity = PHUIInfoView::SEVERITY_NOTICE;
         break;
       case DiffusionBrowseResultSet::REASON_IS_DELETED:
         $deleted = $this->browseResultSet->getDeletedAtCommit();
         $existed = $this->browseResultSet->getExistedAtCommit();
 
-        $browse = $this->linkBrowse(
-          $drequest->getPath(),
+        $existed_text = $repository->formatCommitName($existed);
+        $existed_href = $drequest->generateURI(
           array(
-            'text' => 'existed',
+            'action' => 'browse',
+            'path' => $drequest->getPath(),
             'commit' => $existed,
-            'params' => array('view' => $this->view),
+            'params' => array(
+              'view' => $this->view,
+            ),
           ));
+
+        $existed_link = phutil_tag(
+          'a',
+          array(
+            'href' => $existed_href,
+          ),
+          $existed_text);
 
         $title = pht('Path Was Deleted');
         $body = pht(
-          'This path does not exist at %s. It was deleted in %s and last %s '.
-          'at %s.',
+          'This path does not exist at %s. It was deleted in %s and last '.
+          'existed at %s.',
           $commit,
           self::linkCommit($drequest->getRepository(), $deleted),
-          $browse,
-          "r{$callsign}{$existed}");
+          $existed_link);
         $severity = PHUIInfoView::SEVERITY_WARNING;
         break;
       case DiffusionBrowseResultSet::REASON_IS_UNTRACKED_PARENT:

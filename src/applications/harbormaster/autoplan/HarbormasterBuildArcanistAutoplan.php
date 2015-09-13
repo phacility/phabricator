@@ -10,7 +10,7 @@ final class HarbormasterBuildArcanistAutoplan
   }
 
   public function getAutoplanName() {
-    return pht('Arcanist Client Results');
+    return pht('arc lint + arc unit');
   }
 
 }

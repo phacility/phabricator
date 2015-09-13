@@ -36,7 +36,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
     return $this;
   }
 
-  public function getRequiredHandlePHIDs() {
+  private function getRequiredHandlePHIDs() {
     $phids = array();
     foreach ($this->history as $item) {
       $data = $item->getCommitData();
@@ -87,7 +87,8 @@ final class DiffusionHistoryTableView extends DiffusionView {
   public function render() {
     $drequest = $this->getDiffusionRequest();
 
-    $handles = $this->handles;
+    $viewer = $this->getUser();
+    $handles = $viewer->loadHandles($this->getRequiredHandlePHIDs());
 
     $graph = null;
     if ($this->parents) {
@@ -188,8 +189,17 @@ final class DiffusionHistoryTableView extends DiffusionView {
         }
       }
 
+      $browse = $this->linkBrowse(
+        $history->getPath(),
+        array(
+          'commit' => $history->getCommitIdentifier(),
+          'branch' => $drequest->getBranch(),
+          'type' => $history->getFileType(),
+        ));
+
       $rows[] = array(
         $graph ? $graph[$ii++] : null,
+        $browse,
         self::linkCommit(
           $drequest->getRepository(),
           $history->getCommitIdentifier()),
@@ -207,9 +217,10 @@ final class DiffusionHistoryTableView extends DiffusionView {
     $view = new AphrontTableView($rows);
     $view->setHeaders(
       array(
-        '',
+        null,
+        null,
         pht('Commit'),
-        '',
+        null,
         pht('Revision'),
         pht('Author/Committer'),
         pht('Details'),
@@ -219,6 +230,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
     $view->setColumnClasses(
       array(
         'threads',
+        'nudgeright',
         'n',
         'icon',
         'n',
@@ -234,6 +246,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
     $view->setDeviceVisibility(
       array(
         $graph ? true : false,
+        true,
         true,
         true,
         true,

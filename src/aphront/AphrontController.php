@@ -37,6 +37,10 @@ abstract class AphrontController extends Phobject {
         'processRequest()'));
   }
 
+  public function willSendResponse(AphrontResponse $response) {
+    return $response;
+  }
+
   final public function setRequest(AphrontRequest $request) {
     $this->request = $request;
     return $this;

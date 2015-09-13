@@ -4,7 +4,8 @@ final class PhabricatorOwnersPackage
   extends PhabricatorOwnersDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorCustomFieldInterface {
 
   protected $name;
   protected $originalName;
@@ -16,6 +17,7 @@ final class PhabricatorOwnersPackage
 
   private $paths = self::ATTACHABLE;
   private $owners = self::ATTACHABLE;
+  private $customFields = self::ATTACHABLE;
 
   const STATUS_ACTIVE = 'active';
   const STATUS_ARCHIVED = 'archived';
@@ -302,6 +304,27 @@ final class PhabricatorOwnersPackage
     PhabricatorApplicationTransactionView $timeline,
     AphrontRequest $request) {
     return $timeline;
+  }
+
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    return PhabricatorEnv::getEnvConfig('owners.fields');
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'PhabricatorOwnersCustomField';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
   }
 
 }

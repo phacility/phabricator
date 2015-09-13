@@ -56,7 +56,7 @@ final class ConpherenceCreateThreadMailReceiver
       ->setMailReceiver(ConpherenceThread::initializeNewRoom($sender))
       ->setMailAddedParticipantPHIDs($phids)
       ->setActor($sender)
-      ->setExcludeMailRecipientPHIDs($mail->loadExcludeMailRecipientPHIDs())
+      ->setExcludeMailRecipientPHIDs($mail->loadAllRecipientPHIDs())
       ->processEmail($mail);
 
     if ($conpherence) {

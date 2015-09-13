@@ -49,7 +49,7 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
       return $handler
         ->setMailReceiver($object)
         ->setActor($sender)
-        ->setExcludeMailRecipientPHIDs($mail->loadExcludeMailRecipientPHIDs())
+        ->setExcludeMailRecipientPHIDs($mail->loadAllRecipientPHIDs())
         ->processEmail($mail);
     }
 
