@@ -1,0 +1,14 @@
+##
+## A cowering cow
+##
+$the_cow = <<EOC;
+     $thoughts
+      $thoughts
+        ,__, |    | 
+        (oo)\\|    |___
+        (__)\\|    |   )\\_
+             |    |_w |  \\
+             |    |  ||   *
+
+             Cower....
+EOC

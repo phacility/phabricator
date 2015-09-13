@@ -1,0 +1,47 @@
+*** Wrap.pm.in	Thu May 22 00:21:42 1997
+--- Wrap.pm	Fri Nov 12 10:00:15 1999
+***************
+*** 3,9 ****
+  require Exporter;
+  
+  @ISA = (Exporter);
+! @EXPORT = qw(wrap);
+  @EXPORT_OK = qw($columns);
+  
+  $VERSION = 97.011701;
+--- 3,9 ----
+  require Exporter;
+  
+  @ISA = (Exporter);
+! @EXPORT = qw(wrap fill);
+  @EXPORT_OK = qw($columns);
+  
+  $VERSION = 97.011701;
+***************
+*** 66,71 ****
+--- 66,90 ----
+  
+  	print "-----------$r---------\n" if $debug;;
+  	return $r;
++ }
++ 
++ ## Copied up from below.
++ sub fill 
++ {
++ 	my ($ip, $xp, @raw) = @_;
++ 	my @para;
++ 	my $pp;
++ 
++ 	for $pp (split(/\n\s+/, join("\n",@raw))) {
++ 		$pp =~ s/\s+/ /g;
++ 		my $x = wrap($ip, $xp, $pp);
++ 		push(@para, $x);
++ 	}
++ 
++ 	# if paragraph_indent is the same as line_indent, 
++ 	# separate paragraphs with blank lines
++ 
++ 	return join ($ip eq $xp ? "\n\n" : "\n", @para);
+  }
+  
+  1;
