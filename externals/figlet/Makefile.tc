@@ -1,0 +1,42 @@
+# Turbo C makefile for figlet
+# adapted from Makefile for figlet version 2.3.0 (11 Jan 2011) 
+# adapted from Makefile for figlet version 2.2.2 (05 July 2005) 
+# adapted from Makefile for figlet version 2.2 (15 Oct 1996)
+# Copyright 1993, 1994,1995 Glenn Chappell and Ian Chai
+# Copyright 1996, 1997, 1998, 1999, 2000, 2001 John Cowan
+# Copyright 2002 Christiaan Keet
+# Copyright 2011 Claudio Matsuoka
+
+# The C compiler and linker to use
+CC	= tcc
+CFLAGS	= -mc -I\tc\include
+LD	= tcc
+LDFLAGS = -mc -L\tc\lib
+
+# Use this definition if you can't put things in /usr/local/share/figlet
+DEFAULTFONTDIR = fonts
+
+# The filename of the font to be used if no other is specified
+#   (standard.flf is recommended, but any other can be used).
+#   This font file should reside in the directory specified by
+#   DEFAULTFONTDIR.
+DEFAULTFONTFILE = standard.flf
+
+##
+##  END OF CONFIGURATION SECTION
+##
+
+OBJS	= figlet.obj zipio.obj crc.obj inflate.obj getopt.obj
+BINS	= figlet.exe chkfont.exe
+
+.c.obj:
+	$(CC) -c $(CFLAGS) -DDEFAULTFONTDIR="$(DEFAULTFONTDIR)" \
+		-DDEFAULTFONTFILE="$(DEFAULTFONTFILE)" -o$*.obj $<
+
+all: $(BINS)
+
+figlet.exe: $(OBJS)
+	$(LD) $(LDFLAGS) -o$@ $(OBJS)
+
+chkfont.exe: chkfont.obj
+	$(LD) $(LDFLAGS) -o$@ chkfont.obj

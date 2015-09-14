@@ -1,0 +1,64 @@
+#!/bin/sh -
+# figlist by Glenn Chappell <ggc@uiuc.edu>
+# figlet release 2.1.1 -- 25 Aug 1994
+#
+# Lists all fonts and control files in figlet's default font directory.
+# Replaces "figlet -F", which was removed from figlet version 2.1.
+#
+# Usage: figlist [ -d directory ]
+
+DIR=`dirname $0`
+FIGLET=$DIR/figlet
+
+# Get figlet version
+FIGLETVERSION=`$FIGLET -I1 2>/dev/null`
+if [ -z "$FIGLETVERSION" ]; then
+  FIGLETVERSION=20000
+fi
+
+USAGE="Usage: `basename $0` [ -d directory ]"
+
+if [ "$1" = "-d" ]; then
+  FONTDIROPT="-d $2"
+  if [ $# -ne 2 ]; then
+    echo "$USAGE"
+    exit 1
+  fi
+else
+  FONTDIROPT=""
+  if [ $# -ne 0 ]; then
+    echo "$USAGE"
+    exit 1
+  fi
+fi
+
+if [ "$FIGLETVERSION" -lt 20100 ]; then
+  # figlet 2.0
+  $FIGLET $FONTDIROPT -F
+  exit
+fi
+
+# From here on we may assume figlet 2.1 or later
+
+FONTDIR=`$FIGLET $FONTDIROPT -I2`
+FONT=`$FIGLET -I3`
+echo "Default font: $FONT"
+echo "Font directory: $FONTDIR"
+
+if [ -d "$FONTDIR" ] && [ -r "$FONTDIR" ]; then
+  cd "$FONTDIR"
+  if ls *.flf >/dev/null 2>&1 ; then
+    echo "Figlet fonts in this directory:"
+    ls *.flf 2>/dev/null | sed s/\.flf$//
+  else
+    echo 'No figlet fonts in this directory'
+  fi
+  if ls *.flc >/dev/null 2>&1 ; then
+    echo "Figlet control files in this directory:"
+    ls *.flc 2>/dev/null | sed s/\.flc$//
+  else
+    echo 'No figlet control files in this directory'
+  fi
+else
+  echo 'Unable to open directory'
+fi

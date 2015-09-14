@@ -1,0 +1,11 @@
+ChangeLog		Changes to recent versions.
+INSTALL			Instructions for installing cowsay.
+LICENSE			The license for use and redistribution of cowsay.
+MANIFEST		This file.
+README			Read this first.  Really.
+Wrap.pm.diff		Diff for Text/Wrap.pm.
+cows/*			Support files used by cowsay.
+cowsay			Main cowsay executable.
+cowsay.1		Main cowsay manual page.
+install.sh		cowsay installation script.
+pgp_public_key.txt	Verify the signature file with this key.

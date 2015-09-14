@@ -1,0 +1,52 @@
+.\" chkfont
+.\" By Glenn Chappell <ggc@uiuc.edu>
+.\"
+.\" This program checks figlet 2.0/2.1 font files for format errors.
+.\" It also looks for signs of common problems and gives warnings.
+.\" chkfont does not modify font files.
+.\"
+.\" Usage: chkfont fontfile ...
+.\"
+.\" Note: This is very much a spare-time project. It's probably
+.\" full o' bugs.
+.\"
+.\" Manual page by Jonathon Abbott, for the Debian Project
+.\" slightly modified by Francesco Tapparo, for the Debian Project
+.TH CHKFONT 6 "31 May 2012" "v2.2.5"
+
+.SH NAME
+chkfont \- checks figlet 2.0 and up font files for format errors
+
+.SH SYNOPSIS
+.B chkfont
+[
+.I fontfile
+]
+
+.SH DESCRIPTION
+This program checks figlet 2.0 and up font files for format errors.
+It also looks for signs of common problems and gives warnings.
+chkfont does not modify font files.
+
+.SH EXAMPLES
+To use
+.B chkfont
+on the "big" font
+.RS
+
+.B example% chkfont /usr/share/figlet/big.flf
+
+.RE
+
+.SH BUGS
+Doesn't work on compressed font files.
+
+.SH AUTHORS
+chkfont was written by Glenn Chappell <ggc@uiuc.edu>
+
+This manual page was written by Jonathon Abbott for the Debian Project.
+
+.SH "SEE ALSO"
+.BR figlet (6),
+.BR showfigfonts (6),
+.BR figlist (6)
