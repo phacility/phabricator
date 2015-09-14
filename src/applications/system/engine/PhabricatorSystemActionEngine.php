@@ -167,4 +167,35 @@ final class PhabricatorSystemActionEngine extends Phobject {
     return phutil_units('1 hour in seconds');
   }
 
+
+  /**
+   * Reset all action counts for actions taken by some set of actors in the
+   * previous action window.
+   *
+   * @param list<string> Actors to reset counts for.
+   * @return int Number of actions cleared.
+   */
+  public static function resetActions(array $actors) {
+    $log = new PhabricatorSystemActionLog();
+    $conn_w = $log->establishConnection('w');
+
+    $now = PhabricatorTime::getNow();
+
+    $hashes = array();
+    foreach ($actors as $actor) {
+      $hashes[] = PhabricatorHash::digestForIndex($actor);
+    }
+
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T
+        WHERE actorHash IN (%Ls) AND epoch BETWEEN %d AND %d',
+      $log->getTableName(),
+      $hashes,
+      $now - self::getWindow(),
+      $now);
+
+    return $conn_w->getAffectedRows();
+  }
+
 }
