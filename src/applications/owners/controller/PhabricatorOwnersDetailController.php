@@ -37,8 +37,15 @@ final class PhabricatorOwnersDetailController
       $repositories = array();
     }
 
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $package,
+      PhabricatorCustomField::ROLE_VIEW);
+    $field_list
+      ->setViewer($viewer)
+      ->readFieldsFromStorage($package);
+
     $actions = $this->buildPackageActionView($package);
-    $properties = $this->buildPackagePropertyView($package);
+    $properties = $this->buildPackagePropertyView($package, $field_list);
     $properties->setActionList($actions);
 
     if ($package->isArchived()) {
@@ -156,7 +163,10 @@ final class PhabricatorOwnersDetailController
   }
 
 
-  private function buildPackagePropertyView(PhabricatorOwnersPackage $package) {
+  private function buildPackagePropertyView(
+    PhabricatorOwnersPackage $package,
+    PhabricatorCustomFieldList $field_list) {
+
     $viewer = $this->getViewer();
 
     $view = id(new PHUIPropertyListView())
@@ -186,6 +196,13 @@ final class PhabricatorOwnersDetailController
           'default',
           $viewer));
     }
+
+    $view->invokeWillRenderEvent();
+
+    $field_list->appendFieldsToPropertyList(
+      $package,
+      $viewer,
+      $view);
 
     return $view;
   }

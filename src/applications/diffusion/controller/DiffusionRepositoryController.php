@@ -177,8 +177,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $content[] = $this->buildHistoryTable(
       $history_results,
       $history,
-      $history_exception,
-      $handles);
+      $history_exception);
 
     try {
       $content[] = $this->buildTagListTable($drequest);
@@ -519,8 +518,7 @@ final class DiffusionRepositoryController extends DiffusionController {
   private function buildHistoryTable(
     $history_results,
     $history,
-    $history_exception,
-    array $handles) {
+    $history_exception) {
 
     $request = $this->getRequest();
     $viewer = $request->getUser();
@@ -544,7 +542,6 @@ final class DiffusionRepositoryController extends DiffusionController {
     $history_table = id(new DiffusionHistoryTableView())
       ->setUser($viewer)
       ->setDiffusionRequest($drequest)
-      ->setHandles($handles)
       ->setHistory($history);
 
     // TODO: Super sketchy.

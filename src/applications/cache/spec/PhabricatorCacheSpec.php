@@ -5,6 +5,7 @@ abstract class PhabricatorCacheSpec extends Phobject {
   private $name;
   private $isEnabled = false;
   private $version;
+  private $clearCacheCallback = null;
   private $issues = array();
 
   private $usedMemory = 0;
@@ -108,4 +109,12 @@ abstract class PhabricatorCacheSpec extends Phobject {
       ->addPHPConfig('apc.enabled');
   }
 
+  public function setClearCacheCallback($callback) {
+    $this->clearCacheCallback = $callback;
+    return $this;
+  }
+
+  public function getClearCacheCallback() {
+    return $this->clearCacheCallback;
+  }
 }

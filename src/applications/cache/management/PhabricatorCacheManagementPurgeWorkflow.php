@@ -6,7 +6,8 @@ final class PhabricatorCacheManagementPurgeWorkflow
   protected function didConstruct() {
     $this
       ->setName('purge')
-      ->setSynopsis(pht('Drop data from caches.'))
+      ->setSynopsis(pht('Drop data from caches. APC-based caches can be '.
+                        'purged from the web interface.'))
       ->setArguments(
         array(
           array(

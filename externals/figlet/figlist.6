@@ -1,0 +1,52 @@
+.\" figlist by Glenn Chappell <ggc@uiuc.edu>
+.\" figlet release 2.1.1 -- 25 Aug 1994
+.\"
+.\" Lists all fonts and control files in figlet's default font directory.
+.\" Replaces "figlet -F", which was removed from figlet version 2.1.
+.\"
+.\" Usage: figlist [ -d directory ]
+.\"
+.\" Manual page by Jonathon Abbott, for the Debian Project
+.\" slightly modified by Francesco Tapparo, for the Debian Project
+.TH FIGLIST 6 "31 May 2012" "v2.2.5"
+
+.SH NAME
+figlist \- lists figlet fonts and control files
+
+.SH SYNOPSIS
+.B figlist
+[
+.B \-d
+.I directory
+]
+
+.SH DESCRIPTION
+Lists all fonts and control files in figlet's default font directory.
+Replaces "figlet \-F", which was removed from figlet version 2.1.
+
+.SH EXAMPLES
+To use
+.B figlist
+with its default settings, simply type
+.RS
+
+.B example% figlist
+
+.RE
+
+To list all the font and control files in /usr/share/fonts/figlet
+.RS
+
+.B example% figlist \-d /usr/share/fonts/figlet
+
+.RE
+
+.SH AUTHORS
+figlist was written by Glenn Chappell <ggc@uiuc.edu>
+
+This manual page was written by Jonathon Abbott for the Debian Project.
+
+.SH "SEE ALSO"
+.BR figlet (6),
+.BR chkfont (6),
+.BR showfigfonts (6)

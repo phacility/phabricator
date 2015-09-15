@@ -1,0 +1,4 @@
+flc2a
+# Set HZ input mode (a 7-bit encoding of GB Chinese text)
+# Meaningful only to FIGlet 2.2 beta 4 or better
+h

@@ -107,7 +107,7 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
         ))
       ->setColumnClasses(
         array(
-          'center',
+          null,
           'differential-toc-char center',
           'differential-toc-prop center',
           'differential-toc-ftype center',

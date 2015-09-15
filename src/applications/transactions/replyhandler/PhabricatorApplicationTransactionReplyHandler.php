@@ -39,7 +39,7 @@ abstract class PhabricatorApplicationTransactionReplyHandler
     return $editor;
   }
 
-  private function newTransaction() {
+  protected function newTransaction() {
     return $this->getMailReceiver()->getApplicationTransactionTemplate();
   }
 
@@ -80,15 +80,15 @@ abstract class PhabricatorApplicationTransactionReplyHandler
     $xactions = $this->didReceiveMail($mail, $body);
 
     // If this object is subscribable, subscribe all the users who were
-    // CC'd on the message.
+    // recipients on the message.
     if ($object instanceof PhabricatorSubscribableInterface) {
-      $subscriber_phids = $mail->loadCCPHIDs();
+      $subscriber_phids = $mail->loadAllRecipientPHIDs();
       if ($subscriber_phids) {
         $xactions[] = $this->newTransaction()
           ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
           ->setNewValue(
             array(
-              '+' => array($viewer->getPHID()),
+              '+' => $subscriber_phids,
             ));
       }
     }

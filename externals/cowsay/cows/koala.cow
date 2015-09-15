@@ -1,0 +1,12 @@
+##
+## From the canonical koala collection
+##
+$the_cow = <<EOC;
+  $thoughts
+   $thoughts
+       ___  
+     {~._.~}
+      ( Y )
+     ()~*~()   
+     (_)-(_)   
+EOC
