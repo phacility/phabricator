@@ -21,7 +21,7 @@ final class PHUIActionPanelExample extends PhabricatorUIExample {
       ->setHeader(pht('Read Documentation'))
       ->setHref('#')
       ->setSubHeader(pht('Reading is a common way to learn about things.'))
-      ->setState(PHUIActionPanelView::STATE_INFO);
+      ->setState(PHUIActionPanelView::COLOR_BLUE);
     $view->addColumn($panel1);
 
     $panel2 = id(new PHUIActionPanelView())
@@ -29,7 +29,7 @@ final class PHUIActionPanelExample extends PhabricatorUIExample {
       ->setHeader(pht('Launch Instance'))
       ->setHref('#')
       ->setSubHeader(pht("Maybe this is what you're likely here for."))
-      ->setState(PHUIActionPanelView::STATE_ERROR);
+      ->setState(PHUIActionPanelView::COLOR_RED);
     $view->addColumn($panel2);
 
     $panel3 = id(new PHUIActionPanelView())
@@ -37,7 +37,7 @@ final class PHUIActionPanelExample extends PhabricatorUIExample {
       ->setHeader(pht('Code with Friends'))
       ->setHref('#')
       ->setSubHeader(pht('Writing code is much more fun with friends!'))
-      ->setState(PHUIActionPanelView::STATE_WARN);
+      ->setState(PHUIActionPanelView::COLOR_YELLOW);
     $view->addColumn($panel3);
 
     $panel4 = id(new PHUIActionPanelView())
@@ -45,7 +45,7 @@ final class PHUIActionPanelExample extends PhabricatorUIExample {
       ->setHeader(pht('Download Data'))
       ->setHref('#')
       ->setSubHeader(pht('Need a backup of all your kitten memes?'))
-      ->setState(PHUIActionPanelView::STATE_PROGRESS);
+      ->setState(PHUIActionPanelView::COLOR_PINK);
     $view->addColumn($panel4);
 
     $view2 = id(new AphrontMultiColumnView())
@@ -57,7 +57,7 @@ final class PHUIActionPanelExample extends PhabricatorUIExample {
       ->setHeader(pht('Account Balance'))
       ->setHref('#')
       ->setSubHeader(pht('You were last billed $2,245.12 on Dec 12, 2014.'))
-      ->setState(PHUIActionPanelView::STATE_SUCCESS);
+      ->setState(PHUIActionPanelView::COLOR_GREEN);
     $view2->addColumn($panel1);
 
     $panel2 = id(new PHUIActionPanelView())
@@ -74,14 +74,15 @@ final class PHUIActionPanelExample extends PhabricatorUIExample {
       ->setHref('#')
       ->setSubHeader(
         pht('March 12'))
-      ->setState(PHUIActionPanelView::STATE_ERROR);
+      ->setState(PHUIActionPanelView::COLOR_ORANGE);
     $view2->addColumn($panel3);
 
     $panel4 = id(new PHUIActionPanelView())
       ->setBigText(true)
       ->setHeader(pht('Lines of Code'))
       ->setHref('#')
-      ->setSubHeader(pht('1,113,377'));
+      ->setSubHeader(pht('1,113,377'))
+      ->setState(PHUIActionPanelView::COLOR_INDIGO);
     $view2->addColumn($panel4);
 
     $view = phutil_tag_div('mlb', $view);
