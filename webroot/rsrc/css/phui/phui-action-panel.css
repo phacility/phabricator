@@ -4,23 +4,39 @@
 
 .phui-action-panel {
   position: relative;
+  background-color: {$lightbluebackground};
+  border: 1px solid {$lightgreyborder};
+  border-radius: 3px;
+  margin: 0 8px;
+  min-height: 108px;
 }
 
-.phui-action-panel-has-status.phui-action-panel {
-  padding-bottom: 44px;
+.phui-action-panel-hitarea {
+  display: block;
+}
+
+.phui-action-panel-table {
+  display: table;
+  height: 80px;
+  width: 100%;
+}
+
+.phui-action-panel-row {
+  display: table-row;
 }
 
 .phui-action-panel-icon {
-  height: 128px;
-  line-height: 160px;
+  width: 64px;
   text-align: center;
-  vertical-align: bottom;
+  vertical-align: middle;
+  display: table-cell;
 }
 
-.phui-action-panel-bigtext {
-  font-size: 40px;
-  color: {$lightgreytext};
-  line-height: 96px;
+.phui-action-panel-bigtext .phui-action-panel-subheader {
+  font-size: 28px;
+  color: {$darkbluetext};
+  text-align: center;
+  padding: 0 8px;
 }
 
 .phui-action-panel-icon a {
@@ -37,25 +53,28 @@
 }
 
 .phui-action-panel-icon .phui-icon-view {
-  font-size: 64px;
-  color: {$lightgreytext};
+  font-size: 36px;
+  color: {$lightbluetext};
 }
 
 .phui-action-panel-header {
-  padding: 0 8px 4px 8px;
-  font-weight: bold;
-  font-size: {$biggerfontsize};
-  color: {$darkbluetext};
+  padding: 8px;
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 .phui-action-panel-header a {
-  color: {$blue};
+  color: {$darkbluetext};
 }
 
 .phui-action-panel-subheader {
-  padding: 0 8px 4px 8px;
-  font-size: {$normalfontsize};
-  color: {$bluetext};
+  display: table-cell;
+  vertical-align: middle;
+  color: {$darkbluetext};
+  padding: 0 8px 0 0;
+}
+
+.phui-action-panel-subheader a {
+  text-decoraction: none;
 }
 
 .phui-action-panel-status {
@@ -80,52 +99,67 @@
   color: {$greytext};
 }
 
-.phui-action-panel-warn .phui-action-panel-status {
-  background-color: {$lightyellow};
-  border-left: 4px solid #bc7837;
-  color: #bc7837;
+.phui-action-panel-warn {
+  background-color: {$sh-yellowbackground};
+  border-color: {$sh-yellowborder};
 }
 
-.phui-action-panel-warn .phui-action-panel-status .phui-icon-view {
-  color: #bc7837;
+.phui-action-panel-warn .phui-action-panel-icon .phui-icon-view {
+  color: {$sh-yellowicon};
 }
 
-.phui-action-panel-error .phui-action-panel-status {
-  background-color: {$lightred};
-  border-left: 4px solid {$red};
-  color: {$red};
+.phui-action-panel-warn .phui-action-panel-header {
+  border-color: {$sh-lightyellowborder};
 }
 
-.phui-action-panel-error .phui-action-panel-status .phui-icon-view {
-  color: {$red};
+.phui-action-panel-error {
+  background-color: {$sh-redbackground};
+  border-color: {$sh-redborder};
 }
 
-.phui-action-panel-info .phui-action-panel-status {
-  background-color: {$lightblue};
-  border-left: 4px solid {$blue};
-  color: {$blue};
+.phui-action-panel-error .phui-action-panel-icon .phui-icon-view {
+  color: {$sh-redicon};
 }
 
-.phui-action-panel-info .phui-action-panel-status .phui-icon-view {
-  color: {$blue};
+.phui-action-panel-error .phui-action-panel-header {
+  border-color: {$sh-lightredborder};
 }
 
-.phui-action-panel-success .phui-action-panel-status {
-  background-color: {$lightgreen};
-  color: {$green};
-  border-left: 4px solid {$green};
+.phui-action-panel-info {
+  background-color: {$sh-bluebackground};
+  border-color: {$sh-blueborder};
 }
 
-.phui-action-panel-success .phui-action-panel-status .phui-icon-view {
-  color: {$green};
+.phui-action-panel-info .phui-action-panel-icon .phui-icon-view {
+  color: {$sh-blueicon};
 }
 
-.phui-action-panel-progress .phui-action-panel-status {
-  background-color: {$lightblue};
-  color: {$blue};
-  border-left: 4px solid {$blue};
+.phui-action-panel-info .phui-action-panel-header {
+  border-color: {$sh-lightblueborder};
 }
 
-.phui-action-panel-progress .phui-action-panel-status .phui-icon-view {
-  color: {$blue};
+.phui-action-panel-success {
+  background-color: {$sh-greenbackground};
+  border-color: {$sh-greenborder};
+}
+
+.phui-action-panel-success .phui-action-panel-icon .phui-icon-view {
+  color: {$sh-greenicon};
+}
+
+.phui-action-panel-success .phui-action-panel-header {
+  border-color: {$sh-lightgreenborder};
+}
+
+.phui-action-panel-progress {
+  background-color: {$sh-violetbackground};
+  border-color: {$sh-violetborder};
+}
+
+.phui-action-panel-progress .phui-action-panel-icon .phui-icon-view {
+  color: {$sh-violeticon};
+}
+
+.phui-action-panel-progress .phui-action-panel-header {
+  border-color: {$sh-lightvioletborder};
 }
