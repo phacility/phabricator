@@ -91,21 +91,12 @@ final class PHUIActionPanelView extends AphrontTagView {
 
     $header = null;
     if ($this->header) {
-      $header = $this->header;
-      if ($this->href) {
-        $header = phutil_tag(
-          'a',
-          array(
-            'href' => $this->href,
-          ),
-          $this->header);
-      }
       $header = phutil_tag(
-        'div',
+        'span',
         array(
           'class' => 'phui-action-panel-header',
         ),
-        $header);
+        $this->header);
     }
 
     $subheader = null;
@@ -135,15 +126,13 @@ final class PHUIActionPanelView extends AphrontTagView {
       ),
       $row);
 
-    $content = phutil_tag(
+    return phutil_tag(
       'a',
       array(
         'href' => $this->href,
         'class' => 'phui-action-panel-hitarea',
       ),
-      $table);
-
-    return array($header, $content);
+      array($header, $table));
 
   }
 

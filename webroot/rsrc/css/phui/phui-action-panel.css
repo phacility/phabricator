@@ -20,6 +20,16 @@
   display: block;
 }
 
+.device-desktop .phui-action-panel-hitarea:hover {
+  text-decoration: none;
+  background-color: rgba(255,255,255,.25);
+}
+
+.device-desktop .phui-action-panel-hitarea:hover .phui-icon-view {
+  margin-top: -4px;
+  transition-duration: .2s;
+}
+
 .phui-action-panel-table {
   display: table;
   height: 80px;
@@ -35,13 +45,6 @@
   text-align: center;
   vertical-align: middle;
   display: table-cell;
-}
-
-.phui-action-panel-bigtext .phui-action-panel-subheader {
-  font-size: 28px;
-  color: {$darkbluetext};
-  text-align: center;
-  padding: 0 8px;
 }
 
 .phui-action-panel-icon a {
@@ -68,10 +71,15 @@
   font-weight: bold;
   white-space: nowrap;
   overflow: hidden;
+  color: {$darkbluetext};
+  display: block;
 }
 
-.phui-action-panel-header a {
+.phui-action-panel-bigtext .phui-action-panel-subheader {
+  font-size: 28px;
   color: {$darkbluetext};
+  text-align: center;
+  padding: 0 8px;
 }
 
 .phui-action-panel-subheader {
