@@ -1,0 +1,7 @@
+<joshk> joshk@influx:/etc/logrotate.d> sh -n *
+<joshk> apache: line 14: syntax error near unexpected token `}'
+<joshk> apache: line 14: `}'
+<joshk> the plot thickens
+<asuffield> those aren't shell scripts
+<erich> this wasn't chicken.
+                -- in #debian-devel

@@ -3,12 +3,11 @@
  */
 
 .phabricator-source-code-container {
-  background: #fff;
   overflow-x: auto;
   overflow-y: hidden;
   border: 1px solid {$sh-lightyellowborder};
   border-radius: 3px;
-  background-color: #FCFBF7;
+  background-color: #FFFEF5;
 }
 
 .phui-object-item .phabricator-source-code-container {
@@ -44,6 +43,7 @@
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  white-space: nowrap;
 }
 
 th.phabricator-source-line a {

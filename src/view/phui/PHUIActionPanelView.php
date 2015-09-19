@@ -10,12 +10,14 @@ final class PHUIActionPanelView extends AphrontTagView {
   private $state;
   private $status;
 
-  const STATE_WARN = 'phui-action-panel-warn';
-  const STATE_INFO = 'phui-action-panel-info';
-  const STATE_ERROR = 'phui-action-panel-error';
-  const STATE_SUCCESS = 'phui-action-panel-success';
-  const STATE_PROGRESS = 'phui-action-panel-progress';
-  const STATE_NONE = 'phui-action-panel-none';
+  const COLOR_RED = 'phui-action-panel-red';
+  const COLOR_ORANGE = 'phui-action-panel-orange';
+  const COLOR_YELLOW = 'phui-action-panel-yellow';
+  const COLOR_GREEN = 'phui-action-panel-green';
+  const COLOR_BLUE = 'phui-action-panel-blue';
+  const COLOR_INDIGO = 'phui-action-panel-indigo';
+  const COLOR_VIOLET = 'phui-action-panel-violet';
+  const COLOR_PINK = 'phui-action-panel-pink';
 
   public function setHref($href) {
     $this->href = $href;
@@ -52,29 +54,8 @@ final class PHUIActionPanelView extends AphrontTagView {
     return $this;
   }
 
-  protected function getStateIcon() {
-    $icon = new PHUIIconView();
-    switch ($this->state) {
-      case self::STATE_WARN:
-        $icon->setIconFont('fa-exclamation-circle msr');
-      break;
-      case self::STATE_INFO:
-        $icon->setIconFont('fa-info-circle msr');
-      break;
-      case self::STATE_ERROR:
-        $icon->setIconFont('fa-exclamation-triangle msr');
-      break;
-      case self::STATE_PROGRESS:
-        $icon->setIconFont('fa-refresh ph-spin msr');
-      break;
-      case self::STATE_SUCCESS:
-        $icon->setIconFont('fa-check msr');
-      break;
-      case self::STATE_NONE:
-        return null;
-      break;
-    }
-    return $icon;
+  protected function getTagName() {
+    return 'div';
   }
 
   protected function getTagAttributes() {
@@ -82,43 +63,26 @@ final class PHUIActionPanelView extends AphrontTagView {
 
     $classes = array();
     $classes[] = 'phui-action-panel';
-    if ($this->status) {
-      $classes[] = 'phui-action-panel-has-status';
+    if ($this->state) {
       $classes[] = $this->state;
-
+    }
+    if ($this->bigText) {
+      $classes[] = 'phui-action-panel-bigtext';
     }
 
     return array(
       'class' => implode(' ', $classes),
     );
-
   }
 
   protected function getTagContent() {
 
     $icon = null;
-    if ($this->fontIcon || $this->bigText) {
-      if ($this->fontIcon) {
-        $fonticon = id(new PHUIIconView())
-          ->setIconFont($this->fontIcon);
-      } else {
-        $fonticon = phutil_tag(
-          'span',
-          array(
-            'class' => 'phui-action-panel-bigtext',
-          ),
-          $this->bigText);
-      }
-      if ($this->href) {
-        $fonticon = phutil_tag(
-          'a',
-          array(
-            'href' => $this->href,
-          ),
-          $fonticon);
-      }
+    if ($this->fontIcon) {
+      $fonticon = id(new PHUIIconView())
+        ->setIconFont($this->fontIcon);
       $icon = phutil_tag(
-        'div',
+        'span',
         array(
           'class' => 'phui-action-panel-icon',
         ),
@@ -127,46 +91,48 @@ final class PHUIActionPanelView extends AphrontTagView {
 
     $header = null;
     if ($this->header) {
-      $header = $this->header;
-      if ($this->href) {
-        $header = phutil_tag(
-          'a',
-          array(
-            'href' => $this->href,
-          ),
-          $this->header);
-      }
       $header = phutil_tag(
-        'div',
+        'span',
         array(
           'class' => 'phui-action-panel-header',
         ),
-        $header);
+        $this->header);
     }
 
     $subheader = null;
     if ($this->subHeader) {
       $subheader = phutil_tag(
-        'div',
+        'span',
         array(
           'class' => 'phui-action-panel-subheader',
         ),
         $this->subHeader);
     }
 
-    $status = null;
-    if ($this->status && $this->state) {
-      $state_icon = $this->getStateIcon();
-      $status = phutil_tag(
-        ($this->href) ? 'a' : 'div',
-        array(
-          'class' => 'phui-action-panel-status',
-          'href' => ($this->href) ? $this->href : null,
-        ),
-        array($state_icon, $this->status));
-    }
+    $row = phutil_tag(
+      'span',
+      array(
+        'class' => 'phui-action-panel-row',
+      ),
+      array(
+        $icon,
+        $subheader,
+      ));
 
-    return array($icon, $header, $subheader, $status);
+    $table = phutil_tag(
+      'span',
+      array(
+        'class' => 'phui-action-panel-table',
+      ),
+      $row);
+
+    return phutil_tag(
+      'a',
+      array(
+        'href' => $this->href,
+        'class' => 'phui-action-panel-hitarea',
+      ),
+      array($header, $table));
 
   }
 

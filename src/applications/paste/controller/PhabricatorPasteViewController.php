@@ -69,11 +69,13 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       null,
       $this->highlightMap);
 
-    $source_code = id(new PHUIBoxView())
-      ->appendChild($source_code)
-      ->addMargin(PHUI::MARGIN_LARGE_LEFT)
-      ->addMargin(PHUI::MARGIN_LARGE_RIGHT)
-      ->addMargin(PHUI::MARGIN_LARGE_TOP);
+    require_celerity_resource('paste-css');
+    $source_code = phutil_tag(
+      'div',
+      array(
+        'class' => 'container-of-paste',
+      ),
+      $source_code);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView())
       ->addTextCrumb('P'.$paste->getID(), '/P'.$paste->getID());
