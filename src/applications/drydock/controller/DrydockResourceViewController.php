@@ -117,7 +117,8 @@ final class DrydockResourceViewController extends DrydockResourceController {
 
     $attributes = $resource->getAttributes();
     if ($attributes) {
-      $view->addSectionHeader(pht('Attributes'));
+      $view->addSectionHeader(
+        pht('Attributes'), 'fa-list-ul');
       foreach ($attributes as $key => $value) {
         $view->addProperty($key, $value);
       }

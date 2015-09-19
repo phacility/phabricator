@@ -103,7 +103,8 @@ final class FundInitiativeViewController
         'default',
         $viewer);
 
-      $view->addSectionHeader(pht('Description'));
+      $view->addSectionHeader(
+        pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
       $view->addTextContent($description);
     }
 
@@ -114,7 +115,8 @@ final class FundInitiativeViewController
         'default',
         $viewer);
 
-      $view->addSectionHeader(pht('Risks/Challenges'));
+      $view->addSectionHeader(
+        pht('Risks/Challenges'), 'fa-ambulance');
       $view->addTextContent($risks);
     }
 
