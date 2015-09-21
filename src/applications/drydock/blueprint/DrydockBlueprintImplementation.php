@@ -69,40 +69,25 @@ abstract class DrydockBlueprintImplementation extends Phobject {
 
 
   /**
-   * @task lease
-   */
-  final public function filterResource(
-    DrydockResource $resource,
-    DrydockLease $lease) {
-
-    $scope = $this->pushActiveScope($resource, $lease);
-
-    return $this->canAllocateLease($resource, $lease);
-  }
-
-
-  /**
    * Enforce basic checks on lease/resource compatibility. Allows resources to
    * reject leases if they are incompatible, even if the resource types match.
    *
    * For example, if a resource represents a 32-bit host, this method might
-   * reject leases that need a 64-bit host. If a resource represents a working
-   * copy of repository "X", this method might reject leases which need a
-   * working copy of repository "Y". Generally, although the main types of
-   * a lease and resource may match (e.g., both "host"), it may not actually be
-   * possible to satisfy the lease with a specific resource.
+   * reject leases that need a 64-bit host. The blueprint might also reject
+   * a resource if the lease needs 8GB of RAM and the resource only has 6GB
+   * free.
    *
-   * This method generally should not enforce limits or perform capacity
-   * checks. Perform those in @{method:shouldAllocateLease} instead. It also
-   * should not perform actual acquisition of the lease; perform that in
-   * @{method:executeAcquireLease} instead.
+   * This method should not acquire locks or expect anything to be locked. This
+   * is a coarse compatibility check between a lease and a resource.
    *
-   * @param   DrydockResource   Candidiate resource to allocate the lease on.
-   * @param   DrydockLease      Pending lease that wants to allocate here.
-   * @return  bool              True if the resource and lease are compatible.
+   * @param DrydockBlueprint Concrete blueprint to allocate for.
+   * @param DrydockResource Candidiate resource to allocate the lease on.
+   * @param DrydockLease Pending lease that wants to allocate here.
+   * @return bool True if the resource and lease are compatible.
    * @task lease
    */
-  abstract protected function canAllocateLease(
+  abstract public function canAllocateLeaseOnResource(
+    DrydockBlueprint $blueprint,
     DrydockResource $resource,
     DrydockLease $lease);
 
@@ -297,14 +282,102 @@ abstract class DrydockBlueprintImplementation extends Phobject {
 /* -(  Resource Allocation  )------------------------------------------------ */
 
 
-  public function canAllocateMoreResources(array $pool) {
-    return true;
-  }
+  /**
+   * Enforce fundamental implementation/lease checks. Allows implementations to
+   * reject a lease which no concrete blueprint can ever satisfy.
+   *
+   * For example, if a lease only builds ARM hosts and the lease needs a
+   * PowerPC host, it may be rejected here.
+   *
+   * This is the earliest rejection phase, and followed by
+   * @{method:canEverAllocateResourceForLease}.
+   *
+   * This method should not actually check if a resource can be allocated
+   * right now, or even if a blueprint which can allocate a suitable resource
+   * really exists, only if some blueprint may conceivably exist which could
+   * plausibly be able to build a suitable resource.
+   *
+   * @param DrydockLease Requested lease.
+   * @return bool True if some concrete blueprint of this implementation's
+   *   type might ever be able to build a resource for the lease.
+   * @task resource
+   */
+  abstract public function canAnyBlueprintEverAllocateResourceForLease(
+    DrydockLease $lease);
 
-  abstract protected function executeAllocateResource(DrydockLease $lease);
+
+  /**
+   * Enforce basic blueprint/lease checks. Allows blueprints to reject a lease
+   * which they can not build a resource for.
+   *
+   * This is the second rejection phase. It follows
+   * @{method:canAnyBlueprintEverAllocateResourceForLease} and is followed by
+   * @{method:canAllocateResourceForLease}.
+   *
+   * This method should not check if a resource can be built right now, only
+   * if the blueprint as configured may, at some time, be able to build a
+   * suitable resource.
+   *
+   * @param DrydockBlueprint Blueprint which may be asked to allocate a
+   *   resource.
+   * @param DrydockLease Requested lease.
+   * @return bool True if this blueprint can eventually build a suitable
+   *   resource for the lease, as currently configured.
+   * @task resource
+   */
+  abstract public function canEverAllocateResourceForLease(
+    DrydockBlueprint $blueprint,
+    DrydockLease $lease);
 
 
-  final public function allocateResource(DrydockLease $lease) {
+  /**
+   * Enforce basic availability limits. Allows blueprints to reject resource
+   * allocation if they are currently overallocated.
+   *
+   * This method should perform basic capacity/limit checks. For example, if
+   * it has a limit of 6 resources and currently has 6 resources allocated,
+   * it might reject new leases.
+   *
+   * This method should not acquire locks or expect locks to be acquired. This
+   * is a coarse check to determine if the operation is likely to succeed
+   * right now without needing to acquire locks.
+   *
+   * It is expected that this method will sometimes return `true` (indicating
+   * that a resource can be allocated) but find that another allocator has
+   * eaten up free capacity by the time it actually tries to build a resource.
+   * This is normal and the allocator will recover from it.
+   *
+   * @param DrydockBlueprint The blueprint which may be asked to allocate a
+   *   resource.
+   * @param DrydockLease Requested lease.
+   * @return bool True if this blueprint appears likely to be able to allocate
+   *   a suitable resource.
+   */
+  abstract public function canAllocateResourceForLease(
+    DrydockBlueprint $blueprint,
+    DrydockLease $lease);
+
+
+  /**
+   * Allocate a suitable resource for a lease.
+   *
+   * This method MUST acquire, hold, and manage locks to prevent multiple
+   * allocations from racing. World state is not locked before this method is
+   * called. Blueprints are entirely responsible for any lock handling they
+   * need to perform.
+   *
+   * @param DrydockBlueprint The blueprint which should allocate a resource.
+   * @param DrydockLease Requested lease.
+   * @return DrydockResource Allocated resource.
+   */
+  abstract protected function executeAllocateResource(
+    DrydockBlueprint $blueprint,
+    DrydockLease $lease);
+
+  final public function allocateResource(
+    DrydockBlueprint $blueprint,
+    DrydockLease $lease) {
+
     $scope = $this->pushActiveScope(null, $lease);
 
     $this->log(
@@ -314,7 +387,7 @@ abstract class DrydockBlueprintImplementation extends Phobject {
         $lease->getLeaseName()));
 
     try {
-      $resource = $this->executeAllocateResource($lease);
+      $resource = $this->executeAllocateResource($blueprint, $lease);
       $this->validateAllocatedResource($resource);
     } catch (Exception $ex) {
       $this->logException($ex);
@@ -375,14 +448,6 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
       ->execute();
-  }
-
-  public static function getAllBlueprintImplementationsForResource($type) {
-    static $groups = null;
-    if ($groups === null) {
-      $groups = mgroup(self::getAllBlueprintImplementations(), 'getType');
-    }
-    return idx($groups, $type, array());
   }
 
   public static function getNamedImplementation($class) {

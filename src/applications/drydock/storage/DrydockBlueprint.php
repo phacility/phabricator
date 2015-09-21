@@ -51,16 +51,7 @@ final class DrydockBlueprint extends DrydockDAO
   }
 
   public function getImplementation() {
-    $class = $this->className;
-    $implementations =
-      DrydockBlueprintImplementation::getAllBlueprintImplementations();
-    if (!isset($implementations[$class])) {
-      throw new Exception(
-        pht(
-          "Invalid class name for blueprint (got '%s')",
-          $class));
-    }
-    return id(new $class())->attachInstance($this);
+    return $this->assertAttached($this->implementation);
   }
 
   public function attachImplementation(DrydockBlueprintImplementation $impl) {
@@ -77,6 +68,26 @@ final class DrydockBlueprint extends DrydockDAO
     return $this;
   }
 
+  public function canEverAllocateResourceForLease(DrydockLease $lease) {
+    return $this->getImplementation()->canEverAllocateResourceForLease(
+      $this,
+      $lease);
+  }
+
+  public function canAllocateResourceForLease(DrydockLease $lease) {
+    return $this->getImplementation()->canAllocateResourceForLease(
+      $this,
+      $lease);
+  }
+
+  public function canAllocateLeaseOnResource(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    return $this->getImplementation()->canAllocateLeaseOnResource(
+      $this,
+      $resource,
+      $lease);
+  }
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

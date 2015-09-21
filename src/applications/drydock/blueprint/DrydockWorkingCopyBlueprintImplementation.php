@@ -15,9 +15,31 @@ final class DrydockWorkingCopyBlueprintImplementation
     return pht('Allows Drydock to check out working copies of repositories.');
   }
 
-  protected function canAllocateLease(
+  public function canAnyBlueprintEverAllocateResourceForLease(
+    DrydockLease $lease) {
+    // TODO: These checks are out of date.
+    return true;
+  }
+
+  public function canEverAllocateResourceForLease(
+    DrydockBlueprint $blueprint,
+    DrydockLease $lease) {
+    // TODO: These checks are out of date.
+    return true;
+  }
+
+  public function canAllocateResourceForLease(
+    DrydockBlueprint $blueprint,
+    DrydockLease $lease) {
+    // TODO: These checks are out of date.
+    return true;
+  }
+
+  public function canAllocateLeaseOnResource(
+    DrydockBlueprint $blueprint,
     DrydockResource $resource,
     DrydockLease $lease) {
+    // TODO: These checks are out of date.
 
     $resource_repo = $resource->getAttribute('repositoryID');
     $lease_repo = $lease->getAttribute('repositoryID');
@@ -29,11 +51,14 @@ final class DrydockWorkingCopyBlueprintImplementation
     DrydockResource $resource,
     DrydockLease $lease,
     array $other_leases) {
-
+    // TODO: These checks are out of date.
     return !$other_leases;
   }
 
-  protected function executeAllocateResource(DrydockLease $lease) {
+  protected function executeAllocateResource(
+    DrydockBlueprint $blueprint,
+    DrydockLease $lease) {
+
     $repository_id = $lease->getAttribute('repositoryID');
     if (!$repository_id) {
       throw new Exception(
