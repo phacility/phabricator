@@ -44,6 +44,7 @@ phutil_register_library_map(array(
     'AlmanacDeviceTransaction' => 'applications/almanac/storage/AlmanacDeviceTransaction.php',
     'AlmanacDeviceTransactionQuery' => 'applications/almanac/query/AlmanacDeviceTransactionQuery.php',
     'AlmanacDeviceViewController' => 'applications/almanac/controller/AlmanacDeviceViewController.php',
+    'AlmanacDrydockPoolServiceType' => 'applications/almanac/servicetype/AlmanacDrydockPoolServiceType.php',
     'AlmanacInterface' => 'applications/almanac/storage/AlmanacInterface.php',
     'AlmanacInterfaceDatasource' => 'applications/almanac/typeahead/AlmanacInterfaceDatasource.php',
     'AlmanacInterfaceEditController' => 'applications/almanac/controller/AlmanacInterfaceEditController.php',
@@ -3666,6 +3667,7 @@ phutil_register_library_map(array(
     'AlmanacDeviceTransaction' => 'PhabricatorApplicationTransaction',
     'AlmanacDeviceTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'AlmanacDeviceViewController' => 'AlmanacDeviceController',
+    'AlmanacDrydockPoolServiceType' => 'AlmanacServiceType',
     'AlmanacInterface' => array(
       'AlmanacDAO',
       'PhabricatorPolicyInterface',
