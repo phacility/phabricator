@@ -54,16 +54,27 @@ final class DrydockResourceViewController extends DrydockResourceController {
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Resource %d', $resource->getID()));
 
+    $locks = $this->buildLocksTab($resource->getPHID());
+
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addPropertyList($properties);
+      ->addPropertyList($properties, pht('Properties'))
+      ->addPropertyList($locks, pht('Slot Locks'));
+
+    $lease_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Leases'))
+      ->setObjectList($lease_list);
+
+    $log_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Resource Logs'))
+      ->setTable($log_table);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $object_box,
-        $lease_list,
-        $log_table,
+        $lease_box,
+        $log_box,
       ),
       array(
         'title'   => $title,
@@ -95,6 +106,7 @@ final class DrydockResourceViewController extends DrydockResourceController {
   private function buildPropertyListView(
     DrydockResource $resource,
     PhabricatorActionListView $actions) {
+    $viewer = $this->getViewer();
 
     $view = new PHUIPropertyListView();
     $view->setActionList($actions);
@@ -110,14 +122,14 @@ final class DrydockResourceViewController extends DrydockResourceController {
       pht('Resource Type'),
       $resource->getType());
 
-    // TODO: Load handle.
     $view->addProperty(
       pht('Blueprint'),
-      $resource->getBlueprintPHID());
+      $viewer->renderHandle($resource->getBlueprintPHID()));
 
     $attributes = $resource->getAttributes();
     if ($attributes) {
-      $view->addSectionHeader(pht('Attributes'));
+      $view->addSectionHeader(
+        pht('Attributes'), 'fa-list-ul');
       foreach ($attributes as $key => $value) {
         $view->addProperty($key, $value);
       }

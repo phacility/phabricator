@@ -13,6 +13,10 @@ final class DrydockLease extends DrydockDAO
 
   private $resource = self::ATTACHABLE;
   private $releaseOnDestruction;
+  private $isAcquired = false;
+  private $isActivated = false;
+  private $activateWhenAcquired = false;
+  private $slotLocks = array();
 
   /**
    * Flag this lease to be released when its destructor is called. This is
@@ -108,7 +112,12 @@ final class DrydockLease extends DrydockDAO
 
     $task = PhabricatorWorker::scheduleTask(
       'DrydockAllocatorWorker',
-      $this->getID());
+      array(
+        'leasePHID' => $this->getPHID(),
+      ),
+      array(
+        'objectPHID' => $this->getPHID(),
+      ));
 
     // NOTE: Scheduling the task might execute it in-process, if we're running
     // from a CLI script. Reload the lease to make sure we have the most
@@ -126,6 +135,8 @@ final class DrydockLease extends DrydockDAO
     $this->setStatus(DrydockLeaseStatus::STATUS_RELEASED);
     $this->save();
 
+    DrydockSlotLock::releaseLocks($this->getPHID());
+
     $this->resource = null;
 
     return $this;
@@ -133,8 +144,8 @@ final class DrydockLease extends DrydockDAO
 
   public function isActive() {
     switch ($this->status) {
+      case DrydockLeaseStatus::STATUS_ACQUIRED:
       case DrydockLeaseStatus::STATUS_ACTIVE:
-      case DrydockLeaseStatus::STATUS_ACQUIRING:
         return true;
     }
     return false;
@@ -171,7 +182,7 @@ final class DrydockLease extends DrydockDAO
           case DrydockLeaseStatus::STATUS_BROKEN:
             throw new Exception(pht('Lease has been broken!'));
           case DrydockLeaseStatus::STATUS_PENDING:
-          case DrydockLeaseStatus::STATUS_ACQUIRING:
+          case DrydockLeaseStatus::STATUS_ACQUIRED:
             break;
           default:
             throw new Exception(pht('Unknown status??'));
@@ -197,6 +208,104 @@ final class DrydockLease extends DrydockDAO
 
     self::waitForLeases(array($this));
     return $this;
+  }
+
+  public function setActivateWhenAcquired($activate) {
+    $this->activateWhenAcquired = true;
+    return $this;
+  }
+
+  public function needSlotLock($key) {
+    $this->slotLocks[] = $key;
+    return $this;
+  }
+
+  public function acquireOnResource(DrydockResource $resource) {
+    $expect_status = DrydockLeaseStatus::STATUS_PENDING;
+    $actual_status = $this->getStatus();
+    if ($actual_status != $expect_status) {
+      throw new Exception(
+        pht(
+          'Trying to acquire a lease on a resource which is in the wrong '.
+          'state: status must be "%s", actually "%s".',
+          $expect_status,
+          $actual_status));
+    }
+
+    if ($this->activateWhenAcquired) {
+      $new_status = DrydockLeaseStatus::STATUS_ACTIVE;
+    } else {
+      $new_status = DrydockLeaseStatus::STATUS_ACQUIRED;
+    }
+
+    if ($new_status == DrydockLeaseStatus::STATUS_ACTIVE) {
+      if ($resource->getStatus() == DrydockResourceStatus::STATUS_PENDING) {
+        throw new Exception(
+          pht(
+            'Trying to acquire an active lease on a pending resource. '.
+            'You can not immediately activate leases on resources which '.
+            'need time to start up.'));
+      }
+    }
+
+    $this->openTransaction();
+
+      $this
+        ->setResourceID($resource->getID())
+        ->setStatus($new_status)
+        ->save();
+
+      DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
+      $this->slotLocks = array();
+
+    $this->saveTransaction();
+
+    $this->isAcquired = true;
+
+    return $this;
+  }
+
+  public function isAcquiredLease() {
+    return $this->isAcquired;
+  }
+
+  public function activateOnResource(DrydockResource $resource) {
+    $expect_status = DrydockLeaseStatus::STATUS_ACQUIRED;
+    $actual_status = $this->getStatus();
+    if ($actual_status != $expect_status) {
+      throw new Exception(
+        pht(
+          'Trying to activate a lease which has the wrong status: status '.
+          'must be "%s", actually "%s".',
+          $expect_status,
+          $actual_status));
+    }
+
+    if ($resource->getStatus() == DrydockResourceStatus::STATUS_PENDING) {
+      // TODO: Be stricter about this?
+      throw new Exception(
+        pht(
+          'Trying to activate a lease on a pending resource.'));
+    }
+
+    $this->openTransaction();
+
+      $this
+        ->setStatus(DrydockLeaseStatus::STATUS_ACTIVE)
+        ->save();
+
+      DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
+      $this->slotLocks = array();
+
+    $this->saveTransaction();
+
+    $this->isActivated = true;
+
+    return $this;
+  }
+
+  public function isActivatedLease() {
+    return $this->isActivated;
   }
 
 

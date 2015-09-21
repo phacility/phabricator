@@ -125,7 +125,8 @@ final class NuancePhabricatorFormSourceDefinition
       'default',
       $viewer);
 
-    $view->addSectionHeader(pht('Complaint'));
+    $view->addSectionHeader(
+      pht('Complaint'), 'fa-exclamation-circle');
     $view->addTextContent($complaint);
   }
 

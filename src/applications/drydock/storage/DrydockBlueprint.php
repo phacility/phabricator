@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @task resource Allocating Resources
+ * @task lease Acquiring Leases
+ */
 final class DrydockBlueprint extends DrydockDAO
   implements
     PhabricatorApplicationTransactionInterface,
@@ -14,6 +18,7 @@ final class DrydockBlueprint extends DrydockDAO
 
   private $implementation = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
+  private $fields = null;
 
   public static function initializeNewBlueprint(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -51,16 +56,7 @@ final class DrydockBlueprint extends DrydockDAO
   }
 
   public function getImplementation() {
-    $class = $this->className;
-    $implementations =
-      DrydockBlueprintImplementation::getAllBlueprintImplementations();
-    if (!isset($implementations[$class])) {
-      throw new Exception(
-        pht(
-          "Invalid class name for blueprint (got '%s')",
-          $class));
-    }
-    return id(new $class())->attachInstance($this);
+    return $this->assertAttached($this->implementation);
   }
 
   public function attachImplementation(DrydockBlueprintImplementation $impl) {
@@ -75,6 +71,146 @@ final class DrydockBlueprint extends DrydockDAO
   public function setDetail($key, $value) {
     $this->details[$key] = $value;
     return $this;
+  }
+
+  public function getFieldValue($key) {
+    $key = "std:drydock:core:{$key}";
+    $fields = $this->loadCustomFields();
+
+    $field = idx($fields, $key);
+    if (!$field) {
+      throw new Exception(
+        pht(
+          'Unknown blueprint field "%s"!',
+          $key));
+    }
+
+    return $field->getBlueprintFieldValue();
+  }
+
+  private function loadCustomFields() {
+    if ($this->fields === null) {
+      $field_list = PhabricatorCustomField::getObjectFields(
+        $this,
+        PhabricatorCustomField::ROLE_VIEW);
+      $field_list->readFieldsFromStorage($this);
+
+      $this->fields = $field_list->getFields();
+    }
+    return $this->fields;
+  }
+
+
+/* -(  Allocating Resources  )----------------------------------------------- */
+
+
+  /**
+   * @task resource
+   */
+  public function canEverAllocateResourceForLease(DrydockLease $lease) {
+    return $this->getImplementation()->canEverAllocateResourceForLease(
+      $this,
+      $lease);
+  }
+
+
+  /**
+   * @task resource
+   */
+  public function canAllocateResourceForLease(DrydockLease $lease) {
+    return $this->getImplementation()->canAllocateResourceForLease(
+      $this,
+      $lease);
+  }
+
+
+  /**
+   * @task resource
+   */
+  public function allocateResource(DrydockLease $lease) {
+    return $this->getImplementation()->allocateResource(
+      $this,
+      $lease);
+  }
+
+
+  /**
+   * @task resource
+   */
+  public function activateResource(DrydockResource $resource) {
+    return $this->getImplementation()->activateResource(
+      $this,
+      $resource);
+  }
+
+/* -(  Acquiring Leases  )--------------------------------------------------- */
+
+
+  /**
+   * @task lease
+   */
+  public function canAcquireLeaseOnResource(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    return $this->getImplementation()->canAcquireLeaseOnResource(
+      $this,
+      $resource,
+      $lease);
+  }
+
+
+  /**
+   * @task lease
+   */
+  public function acquireLease(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    return $this->getImplementation()->acquireLease(
+      $this,
+      $resource,
+      $lease);
+  }
+
+
+  /**
+   * @task lease
+   */
+  public function activateLease(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    return $this->getImplementation()->activateLease(
+      $this,
+      $resource,
+      $lease);
+  }
+
+
+  /**
+   * @task lease
+   */
+  public function releaseLease(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    $this->getImplementation()->releaseLease($this, $resource, $lease);
+    return $this;
+  }
+
+  public function getInterface(
+    DrydockResource $resource,
+    DrydockLease $lease,
+    $type) {
+
+    $interface = $this->getImplementation()
+      ->getInterface($this, $resource, $lease, $type);
+
+    if (!$interface) {
+      throw new Exception(
+        pht(
+          'Unable to build resource interface of type "%s".',
+          $type));
+    }
+
+    return $interface;
   }
 
 

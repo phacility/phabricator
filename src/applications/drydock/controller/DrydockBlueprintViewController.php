@@ -61,6 +61,10 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       $viewer,
       $properties);
 
+    $resource_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Resources'))
+      ->setObjectList($resource_list);
+
     $timeline = $this->buildTransactionTimeline(
       $blueprint,
       new DrydockBlueprintTransactionQuery());
@@ -70,7 +74,7 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       array(
         $crumbs,
         $object_box,
-        $resource_list,
+        $resource_box,
         $timeline,
       ),
       array(

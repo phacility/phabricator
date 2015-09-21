@@ -14,7 +14,11 @@ final class DrydockResource extends DrydockDAO
   protected $capabilities = array();
   protected $ownerPHID;
 
-  private $blueprint;
+  private $blueprint = self::ATTACHABLE;
+  private $isAllocated = false;
+  private $isActivated = false;
+  private $activateWhenAllocated = false;
+  private $slotLocks = array();
 
   protected function getConfiguration() {
     return array(
@@ -65,16 +69,111 @@ final class DrydockResource extends DrydockDAO
   }
 
   public function getBlueprint() {
-    // TODO: Policy stuff.
-    if (empty($this->blueprint)) {
-      $blueprint = id(new DrydockBlueprint())
-        ->loadOneWhere('phid = %s', $this->blueprintPHID);
-      $this->blueprint = $blueprint->getImplementation();
+    return $this->assertAttached($this->blueprint);
+  }
+
+  public function attachBlueprint(DrydockBlueprint $blueprint) {
+    $this->blueprint = $blueprint;
+    return $this;
+  }
+
+  public function setActivateWhenAllocated($activate) {
+    $this->activateWhenAllocated = $activate;
+    return $this;
+  }
+
+  public function needSlotLock($key) {
+    $this->slotLocks[] = $key;
+    return $this;
+  }
+
+  public function allocateResource() {
+    if ($this->getID()) {
+      throw new Exception(
+        pht(
+          'Trying to allocate a resource which has already been persisted. '.
+          'Only new resources may be allocated.'));
     }
-    return $this->blueprint;
+
+    $expect_status = DrydockResourceStatus::STATUS_PENDING;
+    $actual_status = $this->getStatus();
+    if ($actual_status != $expect_status) {
+      throw new Exception(
+        pht(
+          'Trying to allocate a resource from the wrong status. Status must '.
+          'be "%s", actually "%s".',
+          $expect_status,
+          $actual_status));
+    }
+
+    if ($this->activateWhenAllocated) {
+      $new_status = DrydockResourceStatus::STATUS_OPEN;
+    } else {
+      $new_status = DrydockResourceStatus::STATUS_PENDING;
+    }
+
+    $this->openTransaction();
+
+      $this
+        ->setStatus($new_status)
+        ->save();
+
+      DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
+      $this->slotLocks = array();
+
+    $this->saveTransaction();
+
+    $this->isAllocated = true;
+
+    return $this;
+  }
+
+  public function isAllocatedResource() {
+    return $this->isAllocated;
+  }
+
+  public function activateResource() {
+    if (!$this->getID()) {
+      throw new Exception(
+        pht(
+          'Trying to activate a resource which has not yet been persisted.'));
+    }
+
+    $expect_status = DrydockResourceStatus::STATUS_PENDING;
+    $actual_status = $this->getStatus();
+    if ($actual_status != $expect_status) {
+      throw new Exception(
+        pht(
+          'Trying to activate a resource from the wrong status. Status must '.
+          'be "%s", actually "%s".',
+          $expect_status,
+          $actual_status));
+    }
+
+    $this->openTransaction();
+
+      $this
+        ->setStatus(DrydockResourceStatus::STATUS_OPEN)
+        ->save();
+
+      DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
+      $this->slotLocks = array();
+
+    $this->saveTransaction();
+
+    $this->isActivated = true;
+
+    return $this;
+  }
+
+  public function isActivatedResource() {
+    return $this->isActivated;
   }
 
   public function closeResource() {
+
+    // TODO: This is super broken and will race other lease writers!
+
     $this->openTransaction();
       $statuses = array(
         DrydockLeaseStatus::STATUS_PENDING,
@@ -104,6 +203,9 @@ final class DrydockResource extends DrydockDAO
 
       $this->setStatus(DrydockResourceStatus::STATUS_CLOSED);
       $this->save();
+
+      DrydockSlotLock::releaseLocks($this->getPHID());
+
     $this->saveTransaction();
   }
 

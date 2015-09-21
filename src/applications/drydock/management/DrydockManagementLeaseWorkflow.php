@@ -40,8 +40,6 @@ final class DrydockManagementLeaseWorkflow
       $attributes = $options->parse($attributes);
     }
 
-    PhabricatorWorker::setRunAllTasksInProcess(true);
-
     $lease = id(new DrydockLease())
       ->setResourceType($resource_type);
     if ($attributes) {

@@ -23,6 +23,16 @@ final class AlmanacServiceDatasource
       ->withNamePrefix($raw_query)
       ->setOrder('name');
 
+    // TODO: When service classes are restricted, it might be nice to customize
+    // the title and placeholder text to show which service types can be
+    // selected, or show all services but mark the invalid ones disabled and
+    // prevent their selection.
+
+    $service_classes = $this->getParameter('serviceClasses');
+    if ($service_classes) {
+      $services->withServiceClasses($service_classes);
+    }
+
     $services = $this->executeQuery($services);
 
     if ($services) {

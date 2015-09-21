@@ -42,18 +42,25 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title, $lease_uri);
 
+    $locks = $this->buildLocksTab($lease->getPHID());
+
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addPropertyList($properties);
+      ->addPropertyList($properties, pht('Properties'))
+      ->addPropertyList($locks, pht('Slot Locks'));
+
+    $log_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Lease Logs'))
+      ->setTable($log_table);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $object_box,
-        $log_table,
+        $log_box,
       ),
       array(
-        'title'   => $title,
+        'title' => $title,
       ));
 
   }
@@ -121,7 +128,8 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
 
     $attributes = $lease->getAttributes();
     if ($attributes) {
-      $view->addSectionHeader(pht('Attributes'));
+      $view->addSectionHeader(
+        pht('Attributes'), 'fa-list-ul');
       foreach ($attributes as $key => $value) {
         $view->addProperty($key, $value);
       }

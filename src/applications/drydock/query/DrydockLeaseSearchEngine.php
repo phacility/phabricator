@@ -74,7 +74,7 @@ final class DrydockLeaseSearchEngine
           'statuses',
           array(
             DrydockLeaseStatus::STATUS_PENDING,
-            DrydockLeaseStatus::STATUS_ACQUIRING,
+            DrydockLeaseStatus::STATUS_ACQUIRED,
             DrydockLeaseStatus::STATUS_ACTIVE,
           ));
       case 'all':

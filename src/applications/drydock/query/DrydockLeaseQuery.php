@@ -28,13 +28,13 @@ final class DrydockLeaseQuery extends DrydockQuery {
     return $this;
   }
 
-  public function newResultObject() {
-    return new DrydockLease();
-  }
-
   public function withDatasourceQuery($query) {
     $this->datasourceQuery = $query;
     return $this;
+  }
+
+  public function newResultObject() {
+    return new DrydockLease();
   }
 
   protected function loadPage() {

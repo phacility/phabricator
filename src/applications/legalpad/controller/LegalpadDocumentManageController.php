@@ -84,7 +84,8 @@ final class LegalpadDocumentManageController extends LegalpadController {
 
     $view = new PHUIPropertyListView();
     $view->addClass('legalpad');
-    $view->addSectionHeader(pht('Document'));
+    $view->addSectionHeader(
+      pht('Document'), 'fa-file-text-o');
     $view->addTextContent(
       $engine->getOutput($body, LegalpadDocumentBody::MARKUP_FIELD_TEXT));
 

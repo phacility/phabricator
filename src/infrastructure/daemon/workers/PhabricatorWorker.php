@@ -87,6 +87,15 @@ abstract class PhabricatorWorker extends Phobject {
     return $this->data;
   }
 
+  final protected function getTaskDataValue($key, $default = null) {
+    $data = $this->getTaskData();
+    if (!is_array($data)) {
+      throw new PhabricatorWorkerPermanentFailureException(
+        pht('Expected task data to be a dictionary.'));
+    }
+    return idx($data, $key, $default);
+  }
+
   final public function executeTask() {
     $this->doWork();
   }
@@ -149,8 +158,7 @@ abstract class PhabricatorWorker extends Phobject {
 
 
   /**
-   * Wait for tasks to complete. If tasks are not leased by other workers, they
-   * will be executed in this process while waiting.
+   * Wait for tasks to complete.
    *
    * @param list<int>   List of queued task IDs to wait for.
    * @return void
@@ -178,24 +186,9 @@ abstract class PhabricatorWorker extends Phobject {
         break;
       }
 
-      $tasks = id(new PhabricatorWorkerLeaseQuery())
-        ->withIDs($waiting)
-        ->setLimit(1)
-        ->execute();
-
-      if (!$tasks) {
-        // We were not successful in leasing anything. Sleep for a bit and
-        // see if we have better luck later.
-        sleep(1);
-        continue;
-      }
-
-      $task = head($tasks)->executeTask();
-
-      $ex = $task->getExecutionException();
-      if ($ex) {
-        throw $ex;
-      }
+      // We were not successful in leasing anything. Sleep for a bit and
+      // see if we have better luck later.
+      sleep(1);
     }
 
     $tasks = id(new PhabricatorWorkerArchiveTaskQuery())

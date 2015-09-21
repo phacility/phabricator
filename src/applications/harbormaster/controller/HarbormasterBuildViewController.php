@@ -186,7 +186,8 @@ final class HarbormasterBuildViewController
             'default',
             $viewer);
 
-          $properties->addSectionHeader(pht('Description'));
+          $properties->addSectionHeader(
+            pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
           $properties->addTextContent($rendered);
         }
       } else {

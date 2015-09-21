@@ -40,4 +40,8 @@ final class DrydockBlueprintCoreCustomField
     return;
   }
 
+  public function getBlueprintFieldValue() {
+    return $this->getProxy()->getFieldValue();
+  }
+
 }

@@ -156,7 +156,8 @@ abstract class DiffusionBrowseController extends DiffusionController {
       $tag = idx($tags, $symbolic);
 
       if ($tag && strlen($tag->getMessage())) {
-        $view->addSectionHeader(pht('Tag Content'));
+        $view->addSectionHeader(
+          pht('Tag Content'), 'fa-tag');
         $view->addTextContent($this->markupText($tag->getMessage()));
       }
     }
