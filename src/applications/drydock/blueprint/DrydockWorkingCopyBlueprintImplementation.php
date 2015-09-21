@@ -17,21 +17,18 @@ final class DrydockWorkingCopyBlueprintImplementation
 
   public function canAnyBlueprintEverAllocateResourceForLease(
     DrydockLease $lease) {
-    // TODO: These checks are out of date.
     return true;
   }
 
   public function canEverAllocateResourceForLease(
     DrydockBlueprint $blueprint,
     DrydockLease $lease) {
-    // TODO: These checks are out of date.
     return true;
   }
 
   public function canAllocateResourceForLease(
     DrydockBlueprint $blueprint,
     DrydockLease $lease) {
-    // TODO: These checks are out of date.
     return true;
   }
 
@@ -39,82 +36,130 @@ final class DrydockWorkingCopyBlueprintImplementation
     DrydockBlueprint $blueprint,
     DrydockResource $resource,
     DrydockLease $lease) {
-    // TODO: These checks are out of date.
 
-    $resource_repo = $resource->getAttribute('repositoryID');
-    $lease_repo = $lease->getAttribute('repositoryID');
+    $have_phid = $resource->getAttribute('repositoryPHID');
+    $need_phid = $lease->getAttribute('repositoryPHID');
 
-    return ($resource_repo && $lease_repo && ($resource_repo == $lease_repo));
-  }
-
-  public function allocateResource(
-    DrydockBlueprint $blueprint,
-    DrydockLease $lease) {
-
-    $repository_id = $lease->getAttribute('repositoryID');
-    if (!$repository_id) {
-      throw new Exception(
-        pht(
-          "Lease is missing required '%s' attribute.",
-          'repositoryID'));
+    if ($need_phid !== $have_phid) {
+      return false;
     }
 
-    $repository = id(new PhabricatorRepositoryQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withIDs(array($repository_id))
-      ->executeOne();
-
-    if (!$repository) {
-      throw new Exception(
-        pht(
-          "Repository '%s' does not exist!",
-          $repository_id));
+    if (!DrydockSlotLock::isLockFree($this->getLeaseSlotLock($resource))) {
+      return false;
     }
 
-    switch ($repository->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        break;
-      default:
-        throw new Exception(pht('Unsupported VCS!'));
-    }
-
-    // TODO: Policy stuff here too.
-    $host_lease = id(new DrydockLease())
-      ->setResourceType('host')
-      ->waitUntilActive();
-
-    $path = $host_lease->getAttribute('path').$repository->getCallsign();
-
-    $this->log(
-      pht('Cloning %s into %s....', $repository->getCallsign(), $path));
-
-    $cmd = $host_lease->getInterface('command');
-    $cmd->execx(
-      'git clone --origin origin %P %s',
-      $repository->getRemoteURIEnvelope(),
-      $path);
-
-    $this->log(pht('Complete.'));
-
-    $resource = $this->newResourceTemplate(
-      $blueprint,
-      pht(
-        'Working Copy (%s)',
-        $repository->getCallsign()));
-    $resource->setStatus(DrydockResourceStatus::STATUS_OPEN);
-    $resource->setAttribute('lease.host', $host_lease->getID());
-    $resource->setAttribute('path', $path);
-    $resource->setAttribute('repositoryID', $repository->getID());
-    $resource->save();
-
-    return $resource;
+    return true;
   }
 
   public function acquireLease(
     DrydockBlueprint $blueprint,
     DrydockResource $resource,
     DrydockLease $lease) {
-    return;
+
+    $lease
+      ->needSlotLock($this->getLeaseSlotLock($resource))
+      ->acquireOnResource($resource);
+  }
+
+  private function getLeaseSlotLock(DrydockResource $resource) {
+    $resource_phid = $resource->getPHID();
+    return "workingcopy.lease({$resource_phid})";
+  }
+
+  public function allocateResource(
+    DrydockBlueprint $blueprint,
+    DrydockLease $lease) {
+
+    $repository_phid = $lease->getAttribute('repositoryPHID');
+    $repository = $this->loadRepository($repository_phid);
+
+    $resource = $this->newResourceTemplate(
+      $blueprint,
+      pht(
+        'Working Copy (%s)',
+        $repository->getCallsign()));
+
+    $resource_phid = $resource->getPHID();
+
+    $host_lease = $this->newLease($blueprint)
+      ->setResourceType('host')
+      ->setOwnerPHID($resource_phid)
+      ->setAttribute('workingcopy.resourcePHID', $resource_phid)
+      ->queueForActivation();
+
+    // TODO: Add some limits to the number of working copies we can have at
+    // once?
+
+    return $resource
+      ->setAttribute('repositoryPHID', $repository->getPHID())
+      ->setAttribute('host.leasePHID', $host_lease->getPHID())
+      ->allocateResource();
+  }
+
+  public function activateResource(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource) {
+
+    $lease = $this->loadHostLease($resource);
+    $this->requireActiveLease($lease);
+
+    $repository_phid = $resource->getAttribute('repositoryPHID');
+    $repository = $this->loadRepository($repository_phid);
+    $repository_id = $repository->getID();
+
+    $command_type = DrydockCommandInterface::INTERFACE_TYPE;
+    $interface = $lease->getInterface($command_type);
+
+    // TODO: Make this configurable.
+    $resource_id = $resource->getID();
+    $root = "/var/drydock/workingcopy-{$resource_id}";
+    $path = "{$root}/repo/{$repository_id}/";
+
+    $interface->execx(
+      'git clone -- %s %s',
+      (string)$repository->getCloneURIObject(),
+      $path);
+
+    $resource
+      ->setAttribute('workingcopy.root', $root)
+      ->setAttribute('workingcopy.path', $path)
+      ->activateResource();
+  }
+
+  public function activateLease(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource,
+    DrydockLease $lease) {
+
+    $command_type = DrydockCommandInterface::INTERFACE_TYPE;
+    $interface = $lease->getInterface($command_type);
+
+    $cmd = array();
+    $arg = array();
+
+    $cmd[] = 'git clean -d --force';
+    $cmd[] = 'git reset --hard HEAD';
+    $cmd[] = 'git fetch';
+
+    $commit = $lease->getAttribute('commit');
+    $branch = $lease->getAttribute('branch');
+
+    if ($commit !== null) {
+      $cmd[] = 'git reset --hard %s';
+      $arg[] = $commit;
+    } else if ($branch !== null) {
+      $cmd[] = 'git reset --hard %s';
+      $arg[] = $branch;
+    }
+
+    $cmd = implode(' && ', $cmd);
+    $argv = array_merge(array($cmd), $arg);
+
+    $result = call_user_func_array(
+      array($interface, 'execx'),
+      $argv);
+
+    $lease->activateOnResource($resource);
   }
 
   public function getType() {
@@ -126,7 +171,59 @@ final class DrydockWorkingCopyBlueprintImplementation
     DrydockResource $resource,
     DrydockLease $lease,
     $type) {
-    // TODO: This blueprint doesn't work at all.
+
+    switch ($type) {
+      case DrydockCommandInterface::INTERFACE_TYPE:
+        $host_lease = $this->loadHostLease($resource);
+        $command_interface = $host_lease->getInterface($type);
+
+        $path = $resource->getAttribute('workingcopy.path');
+        $command_interface->setWorkingDirectory($path);
+
+        return $command_interface;
+    }
   }
+
+  private function loadRepository($repository_phid) {
+    $repository = id(new PhabricatorRepositoryQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($repository_phid))
+      ->executeOne();
+    if (!$repository) {
+      // TODO: Permanent failure.
+      throw new Exception(
+        pht(
+          'Repository PHID "%s" does not exist.',
+          $repository_phid));
+    }
+
+    switch ($repository->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        break;
+      default:
+        // TODO: Permanent failure.
+        throw new Exception(pht('Unsupported VCS!'));
+    }
+
+    return $repository;
+  }
+
+  private function loadHostLease(DrydockResource $resource) {
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $lease_phid = $resource->getAttribute('host.leasePHID');
+
+    $lease = id(new DrydockLeaseQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($lease_phid))
+      ->executeOne();
+    if (!$lease) {
+      // TODO: Permanent failure.
+      throw new Exception(pht('Unable to load lease "%s".', $lease_phid));
+    }
+
+    return $lease;
+  }
+
 
 }

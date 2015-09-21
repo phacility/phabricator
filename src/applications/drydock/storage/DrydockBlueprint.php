@@ -134,6 +134,15 @@ final class DrydockBlueprint extends DrydockDAO
   }
 
 
+  /**
+   * @task resource
+   */
+  public function activateResource(DrydockResource $resource) {
+    return $this->getImplementation()->activateResource(
+      $this,
+      $resource);
+  }
+
 /* -(  Acquiring Leases  )--------------------------------------------------- */
 
 
@@ -157,6 +166,19 @@ final class DrydockBlueprint extends DrydockDAO
     DrydockResource $resource,
     DrydockLease $lease) {
     return $this->getImplementation()->acquireLease(
+      $this,
+      $resource,
+      $lease);
+  }
+
+
+  /**
+   * @task lease
+   */
+  public function activateLease(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    return $this->getImplementation()->activateLease(
       $this,
       $resource,
       $lease);

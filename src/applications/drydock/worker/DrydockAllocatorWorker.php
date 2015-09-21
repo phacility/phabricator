@@ -5,33 +5,12 @@
  * @task resource Managing Resources
  * @task lease Managing Leases
  */
-final class DrydockAllocatorWorker extends PhabricatorWorker {
-
-  private function getViewer() {
-    return PhabricatorUser::getOmnipotentUser();
-  }
-
-  private function loadLease() {
-    $viewer = $this->getViewer();
-
-    // TODO: Make the task data a dictionary like every other worker, and
-    // probably make this a PHID.
-    $lease_id = $this->getTaskData();
-
-    $lease = id(new DrydockLeaseQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($lease_id))
-      ->executeOne();
-    if (!$lease) {
-      throw new PhabricatorWorkerPermanentFailureException(
-        pht('No such lease "%s"!', $lease_id));
-    }
-
-    return $lease;
-  }
+final class DrydockAllocatorWorker extends DrydockWorker {
 
   protected function doWork() {
-    $lease = $this->loadLease();
+    $lease_phid = $this->getTaskDataValue('leasePHID');
+    $lease = $this->loadLease($lease_phid);
+
     $this->allocateAndAcquireLease($lease);
   }
 
@@ -351,6 +330,20 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
     DrydockLease $lease) {
     $resource = $blueprint->allocateResource($lease);
     $this->validateAllocatedResource($blueprint, $resource, $lease);
+
+    // If this resource was allocated as a pending resource, queue a task to
+    // activate it.
+    if ($resource->getStatus() == DrydockResourceStatus::STATUS_PENDING) {
+      PhabricatorWorker::scheduleTask(
+        'DrydockResourceWorker',
+        array(
+          'resourcePHID' => $resource->getPHID(),
+        ),
+        array(
+          'objectPHID' => $resource->getPHID(),
+        ));
+    }
+
     return $resource;
   }
 
@@ -429,6 +422,19 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
     $blueprint->acquireLease($resource, $lease);
 
     $this->validateAcquiredLease($blueprint, $resource, $lease);
+
+    // If this lease has been acquired but not activated, queue a task to
+    // activate it.
+    if ($lease->getStatus() == DrydockLeaseStatus::STATUS_ACQUIRED) {
+      PhabricatorWorker::scheduleTask(
+        'DrydockLeaseWorker',
+        array(
+          'leasePHID' => $lease->getPHID(),
+        ),
+        array(
+          'objectPHID' => $lease->getPHID(),
+        ));
+    }
   }
 
 

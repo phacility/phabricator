@@ -67,6 +67,12 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     DrydockResource $resource,
     DrydockLease $lease);
 
+  public function activateLease(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    throw new PhutilMethodNotImplementedException();
+  }
 
   final public function releaseLease(
     DrydockBlueprint $blueprint,
@@ -198,6 +204,11 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     DrydockBlueprint $blueprint,
     DrydockLease $lease);
 
+  public function activateResource(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource) {
+    throw new PhutilMethodNotImplementedException();
+  }
 
 /* -(  Resource Interfaces  )------------------------------------------------ */
 
@@ -276,6 +287,9 @@ abstract class DrydockBlueprintImplementation extends Phobject {
       ->setStatus(DrydockResourceStatus::STATUS_PENDING)
       ->setName($name);
 
+    // Pre-allocate the resource PHID.
+    $resource->setPHID($resource->generatePHID());
+
     $this->activeResource = $resource;
 
     $this->log(
@@ -284,6 +298,25 @@ abstract class DrydockBlueprintImplementation extends Phobject {
         get_class($this)));
 
     return $resource;
+  }
+
+  protected function newLease(DrydockBlueprint $blueprint) {
+    return id(new DrydockLease());
+  }
+
+  protected function requireActiveLease(DrydockLease $lease) {
+    $lease_status = $lease->getStatus();
+
+    switch ($lease_status) {
+      case DrydockLeaseStatus::STATUS_ACQUIRED:
+        // TODO: Temporary failure.
+        throw new Exception(pht('Lease still activating.'));
+      case DrydockLeaseStatus::STATUS_ACTIVE:
+        return;
+      default:
+        // TODO: Permanent failure.
+        throw new Exception(pht('Lease in bad state.'));
+    }
   }
 
   private function pushActiveScope(

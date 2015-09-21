@@ -16,6 +16,7 @@ final class DrydockResource extends DrydockDAO
 
   private $blueprint = self::ATTACHABLE;
   private $isAllocated = false;
+  private $isActivated = false;
   private $activateWhenAllocated = false;
   private $slotLocks = array();
 
@@ -86,7 +87,7 @@ final class DrydockResource extends DrydockDAO
     return $this;
   }
 
-  public function allocateResource($status) {
+  public function allocateResource() {
     if ($this->getID()) {
       throw new Exception(
         pht(
@@ -129,6 +130,44 @@ final class DrydockResource extends DrydockDAO
 
   public function isAllocatedResource() {
     return $this->isAllocated;
+  }
+
+  public function activateResource() {
+    if (!$this->getID()) {
+      throw new Exception(
+        pht(
+          'Trying to activate a resource which has not yet been persisted.'));
+    }
+
+    $expect_status = DrydockResourceStatus::STATUS_PENDING;
+    $actual_status = $this->getStatus();
+    if ($actual_status != $expect_status) {
+      throw new Exception(
+        pht(
+          'Trying to activate a resource from the wrong status. Status must '.
+          'be "%s", actually "%s".',
+          $expect_status,
+          $actual_status));
+    }
+
+    $this->openTransaction();
+
+      $this
+        ->setStatus(DrydockResourceStatus::STATUS_OPEN)
+        ->save();
+
+      DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
+      $this->slotLocks = array();
+
+    $this->saveTransaction();
+
+    $this->isActivated = true;
+
+    return $this;
+  }
+
+  public function isActivatedResource() {
+    return $this->isActivated;
   }
 
   public function closeResource() {

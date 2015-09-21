@@ -76,7 +76,7 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
         ->needSlotLock("almanac.host.binding({$binding_phid})");
 
       try {
-        return $resource->allocateResource(DrydockResourceStatus::STATUS_OPEN);
+        return $resource->allocateResource();
       } catch (Exception $ex) {
         $exceptions[] = $ex;
       }
@@ -92,11 +92,9 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
     DrydockResource $resource,
     DrydockLease $lease) {
 
-    // TODO: The current rule is one lease per resource, and there's no way to
-    // make that cheaper here than by just trying to acquire the lease below,
-    // so don't do any special checks for now. When we eventually permit
-    // multiple leases per host, we'll need to load leases anyway, so we can
-    // reject fully leased hosts cheaply here.
+    if (!DrydockSlotLock::isLockFree($this->getLeaseSlotLock($resource))) {
+      return false;
+    }
 
     return true;
   }
@@ -106,12 +104,15 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
     DrydockResource $resource,
     DrydockLease $lease) {
 
-    $resource_phid = $resource->getPHID();
-
     $lease
       ->setActivateWhenAcquired(true)
-      ->needSlotLock("almanac.host.lease({$resource_phid})")
+      ->needSlotLock($this->getLeaseSlotLock($resource))
       ->acquireOnResource($resource);
+  }
+
+  private function getLeaseSlotLock(DrydockResource $resource) {
+    $resource_phid = $resource->getPHID();
+    return "almanac.host.lease({$resource_phid})";
   }
 
   public function getType() {

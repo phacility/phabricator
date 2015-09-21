@@ -8,6 +8,7 @@
  * machine. These optimistic "slot locks" provide a flexible way to do this
  * sort of simple locking.
  *
+ * @task info Getting Lock Information
  * @task lock Acquiring and Releasing Locks
  */
 final class DrydockSlotLock extends DrydockDAO {
@@ -35,10 +36,72 @@ final class DrydockSlotLock extends DrydockDAO {
     ) + parent::getConfiguration();
   }
 
+
+/* -(  Getting Lock Information  )------------------------------------------- */
+
+
+  /**
+   * Load all locks held by a particular owner.
+   *
+   * @param phid Owner PHID.
+   * @return list<DrydockSlotLock> All held locks.
+   * @task info
+   */
   public static function loadLocks($owner_phid) {
     return id(new DrydockSlotLock())->loadAllWhere(
       'ownerPHID = %s',
       $owner_phid);
+  }
+
+
+  /**
+   * Test if a lock is currently free.
+   *
+   * @param string Lock key to test.
+   * @return bool True if the lock is currently free.
+   * @task info
+   */
+  public static function isLockFree($lock) {
+    return self::areLocksFree(array($lock));
+  }
+
+
+  /**
+   * Test if a list of locks are all currently free.
+   *
+   * @param list<string> List of lock keys to test.
+   * @return bool True if all locks are currently free.
+   * @task info
+   */
+  public static function areLocksFree(array $locks) {
+    $lock_map = self::loadHeldLocks($locks);
+    return !$lock_map;
+  }
+
+
+  /**
+   * Load named locks.
+   *
+   * @param list<string> List of lock keys to load.
+   * @return list<DrydockSlotLock> List of held locks.
+   * @task info
+   */
+  public static function loadHeldLocks(array $locks) {
+    if (!$locks) {
+      return array();
+    }
+
+    $table = new DrydockSlotLock();
+    $conn_r = $table->establishConnection('r');
+
+    $indexes = array();
+    foreach ($locks as $lock) {
+      $indexes[] = PhabricatorHash::digestForIndex($lock);
+    }
+
+    return id(new DrydockSlotLock())->loadAllWhere(
+      'lockIndex IN (%Ls)',
+      $indexes);
   }
 
 
@@ -74,15 +137,20 @@ final class DrydockSlotLock extends DrydockDAO {
         $lock);
     }
 
-    // TODO: These exceptions are pretty tricky to read. It would be good to
-    // figure out which locks could not be acquired and try to improve the
-    // exception to make debugging easier.
-
-    queryfx(
-      $conn_w,
-      'INSERT INTO %T (ownerPHID, lockIndex, lockKey) VALUES %Q',
-      $table->getTableName(),
-      implode(', ', $sql));
+    try {
+      queryfx(
+        $conn_w,
+        'INSERT INTO %T (ownerPHID, lockIndex, lockKey) VALUES %Q',
+        $table->getTableName(),
+        implode(', ', $sql));
+    } catch (AphrontDuplicateKeyQueryException $ex) {
+      // Try to improve the readability of the exception. We might miss on
+      // this query if the lock has already been released, but most of the
+      // time we should be able to figure out which locks are already held.
+      $held = self::loadHeldLocks($locks);
+      $held = mpull($held, 'getOwnerPHID', 'getLockKey');
+      throw new DrydockSlotLockException($held);
+    }
   }
 
 
