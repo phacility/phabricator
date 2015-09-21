@@ -15,6 +15,8 @@ final class DrydockResource extends DrydockDAO
   protected $ownerPHID;
 
   private $blueprint = self::ATTACHABLE;
+  private $isAllocated = false;
+  private $activateWhenAllocated = false;
 
   protected function getConfiguration() {
     return array(
@@ -73,10 +75,47 @@ final class DrydockResource extends DrydockDAO
     return $this;
   }
 
-  public function canAllocateLease(DrydockLease $lease) {
-    return $this->getBlueprint()->canAllocateLeaseOnResource(
-      $this,
-      $lease);
+  public function setActivateWhenAllocated($activate) {
+    $this->activateWhenAllocated = $activate;
+    return $this;
+  }
+
+  public function allocateResource($status) {
+    if ($this->getID()) {
+      throw new Exception(
+        pht(
+          'Trying to allocate a resource which has already been persisted. '.
+          'Only new resources may be allocated.'));
+    }
+
+    $expect_status = DrydockResourceStatus::STATUS_PENDING;
+    $actual_status = $this->getStatus();
+    if ($actual_status != $expect_status) {
+      throw new Exception(
+        pht(
+          'Trying to allocate a resource from the wrong status. Status must '.
+          'be "%s", actually "%s".',
+          $expect_status,
+          $actual_status));
+    }
+
+    if ($this->activateWhenAllocated) {
+      $new_status = DrydockResourceStatus::STATUS_OPEN;
+    } else {
+      $new_status = DrydockResourceStatus::STATUS_PENDING;
+    }
+
+    $this
+      ->setStatus($new_status)
+      ->save();
+
+    $this->didAllocate = true;
+
+    return $this;
+  }
+
+  public function isAllocatedResource() {
+    return $this->isAllocated;
   }
 
   public function closeResource() {

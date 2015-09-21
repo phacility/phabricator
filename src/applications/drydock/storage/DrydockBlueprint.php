@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @task resource Allocating Resources
+ * @task lease Acquiring Leases
+ */
 final class DrydockBlueprint extends DrydockDAO
   implements
     PhabricatorApplicationTransactionInterface,
@@ -14,6 +18,7 @@ final class DrydockBlueprint extends DrydockDAO
 
   private $implementation = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
+  private $fields = null;
 
   public static function initializeNewBlueprint(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -68,26 +73,95 @@ final class DrydockBlueprint extends DrydockDAO
     return $this;
   }
 
+  public function getFieldValue($key) {
+    $key = "std:drydock:core:{$key}";
+    $fields = $this->loadCustomFields();
+
+    $field = idx($fields, $key);
+    if (!$field) {
+      throw new Exception(
+        pht(
+          'Unknown blueprint field "%s"!',
+          $key));
+    }
+
+    return $field->getBlueprintFieldValue();
+  }
+
+  private function loadCustomFields() {
+    if ($this->fields === null) {
+      $field_list = PhabricatorCustomField::getObjectFields(
+        $this,
+        PhabricatorCustomField::ROLE_VIEW);
+      $field_list->readFieldsFromStorage($this);
+
+      $this->fields = $field_list->getFields();
+    }
+    return $this->fields;
+  }
+
+
+/* -(  Allocating Resources  )----------------------------------------------- */
+
+
+  /**
+   * @task resource
+   */
   public function canEverAllocateResourceForLease(DrydockLease $lease) {
     return $this->getImplementation()->canEverAllocateResourceForLease(
       $this,
       $lease);
   }
 
+
+  /**
+   * @task resource
+   */
   public function canAllocateResourceForLease(DrydockLease $lease) {
     return $this->getImplementation()->canAllocateResourceForLease(
       $this,
       $lease);
   }
 
-  public function canAllocateLeaseOnResource(
+
+  /**
+   * @task resource
+   */
+  public function allocateResource(DrydockLease $lease) {
+    return $this->getImplementation()->allocateResource(
+      $this,
+      $lease);
+  }
+
+
+/* -(  Acquiring Leases  )--------------------------------------------------- */
+
+
+  /**
+   * @task lease
+   */
+  public function canAcquireLeaseOnResource(
     DrydockResource $resource,
     DrydockLease $lease) {
-    return $this->getImplementation()->canAllocateLeaseOnResource(
+    return $this->getImplementation()->canAcquireLeaseOnResource(
       $this,
       $resource,
       $lease);
   }
+
+
+  /**
+   * @task lease
+   */
+  public function acquireLease(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    return $this->getImplementation()->acquireLease(
+      $this,
+      $resource,
+      $lease);
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

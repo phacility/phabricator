@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @task allocate Allocator
+ * @task resource Managing Resources
+ * @task lease Managing Leases
+ */
 final class DrydockAllocatorWorker extends PhabricatorWorker {
 
   private function getViewer() {
@@ -27,10 +32,22 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
 
   protected function doWork() {
     $lease = $this->loadLease();
-    $this->allocateLease($lease);
+    $this->allocateAndAcquireLease($lease);
   }
 
-  private function allocateLease(DrydockLease $lease) {
+
+/* -(  Allocator  )---------------------------------------------------------- */
+
+
+  /**
+   * Find or build a resource which can satisfy a given lease request, then
+   * acquire the lease.
+   *
+   * @param DrydockLease Requested lease.
+   * @return void
+   * @task allocator
+   */
+  private function allocateAndAcquireLease(DrydockLease $lease) {
     $blueprints = $this->loadBlueprintsForAllocatingLease($lease);
 
     // If we get nothing back, that means no blueprint is defined which can
@@ -72,7 +89,8 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
       $exceptions = array();
       foreach ($usable_blueprints as $blueprint) {
         try {
-          $resources[] = $blueprint->allocateResource($lease);
+          $resources[] = $this->allocateResource($blueprint, $lease);
+
           // Bail after allocating one resource, we don't need any more than
           // this.
           break;
@@ -106,7 +124,7 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
     $allocated = false;
     foreach ($resources as $resource) {
       try {
-        $blueprint->allocateLease($resource, $lease);
+        $this->acquireLease($resource, $lease);
         $allocated = true;
         break;
       } catch (Exception $ex) {
@@ -129,79 +147,44 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
 
 
   /**
-   * Load a list of all resources which a given lease can possibly be
-   * allocated against.
+   * Get all the @{class:DrydockBlueprintImplementation}s which can possibly
+   * build a resource to satisfy a lease.
    *
-   * @param list<DrydockBlueprint> Blueprints which may produce suitable
-   *   resources.
+   * This method returns blueprints which might, at some time, be able to
+   * build a resource which can satisfy the lease. They may not be able to
+   * build that resource right now.
+   *
    * @param DrydockLease Requested lease.
-   * @return list<DrydockResource> Resources which may be able to allocate
-   *   the lease.
+   * @return list<DrydockBlueprintImplementation> List of qualifying blueprint
+   *   implementations.
+   * @task allocator
    */
-  private function loadResourcesForAllocatingLease(
-    array $blueprints,
+  private function loadBlueprintImplementationsForAllocatingLease(
     DrydockLease $lease) {
-    assert_instances_of($blueprints, 'DrydockBlueprint');
-    $viewer = $this->getViewer();
 
-    $resources = id(new DrydockResourceQuery())
-      ->setViewer($viewer)
-      ->withBlueprintPHIDs(mpull($blueprints, 'getPHID'))
-      ->withTypes(array($lease->getResourceType()))
-      ->withStatuses(
-        array(
-          DrydockResourceStatus::STATUS_PENDING,
-          DrydockResourceStatus::STATUS_OPEN,
-        ))
-      ->execute();
+    $impls = DrydockBlueprintImplementation::getAllBlueprintImplementations();
 
     $keep = array();
-    foreach ($resources as $key => $resource) {
-      if (!$resource->canAllocateLease($lease)) {
+    foreach ($impls as $key => $impl) {
+      // Don't use disabled blueprint types.
+      if (!$impl->isEnabled()) {
         continue;
       }
 
-      $keep[$key] = $resource;
+      // Don't use blueprint types which can't allocate the correct kind of
+      // resource.
+      if ($impl->getType() != $lease->getResourceType()) {
+        continue;
+      }
+
+      if (!$impl->canAnyBlueprintEverAllocateResourceForLease($lease)) {
+        continue;
+      }
+
+      $keep[$key] = $impl;
     }
 
     return $keep;
-  }
-
-
-  /**
-   * Rank blueprints by suitability for building a new resource for a
-   * particular lease.
-   *
-   * @param list<DrydockBlueprint> List of blueprints.
-   * @param DrydockLease Requested lease.
-   * @return list<DrydockBlueprint> Ranked list of blueprints.
-   */
-  private function rankBlueprints(array $blueprints, DrydockLease $lease) {
-    assert_instances_of($blueprints, 'DrydockBlueprint');
-
-    // TODO: Implement improvements to this ranking algorithm if they become
-    // available.
-    shuffle($blueprints);
-
-    return $blueprints;
-  }
-
-
-  /**
-   * Rank resources by suitability for allocating a particular lease.
-   *
-   * @param list<DrydockResource> List of resources.
-   * @param DrydockLease Requested lease.
-   * @return list<DrydockResource> Ranked list of resources.
-   */
-  private function rankResources(array $resources, DrydockLease $lease) {
-    assert_instances_of($resources, 'DrydockResource');
-
-    // TODO: Implement improvements to this ranking algorithm if they become
-    // available.
-    shuffle($resources);
-
-    return $resources;
   }
 
 
@@ -211,6 +194,7 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
    *
    * @param DrydockLease Requested lease.
    * @return list<DrydockBlueprint> List of qualifying blueprints.
+   * @task allocator
    */
   private function loadBlueprintsForAllocatingLease(
     DrydockLease $lease) {
@@ -243,40 +227,42 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
 
 
   /**
-   * Get all the @{class:DrydockBlueprintImplementation}s which can possibly
-   * build a resource to satisfy a lease.
+   * Load a list of all resources which a given lease can possibly be
+   * allocated against.
    *
-   * This method returns blueprints which might, at some time, be able to
-   * build a resource which can satisfy the lease. They may not be able to
-   * build that resource right now.
-   *
+   * @param list<DrydockBlueprint> Blueprints which may produce suitable
+   *   resources.
    * @param DrydockLease Requested lease.
-   * @return list<DrydockBlueprintImplementation> List of qualifying blueprint
-   *   implementations.
+   * @return list<DrydockResource> Resources which may be able to allocate
+   *   the lease.
+   * @task allocator
    */
-  private function loadBlueprintImplementationsForAllocatingLease(
+  private function loadResourcesForAllocatingLease(
+    array $blueprints,
     DrydockLease $lease) {
+    assert_instances_of($blueprints, 'DrydockBlueprint');
+    $viewer = $this->getViewer();
 
-    $impls = DrydockBlueprintImplementation::getAllBlueprintImplementations();
+    $resources = id(new DrydockResourceQuery())
+      ->setViewer($viewer)
+      ->withBlueprintPHIDs(mpull($blueprints, 'getPHID'))
+      ->withTypes(array($lease->getResourceType()))
+      ->withStatuses(
+        array(
+          DrydockResourceStatus::STATUS_PENDING,
+          DrydockResourceStatus::STATUS_OPEN,
+        ))
+      ->execute();
 
     $keep = array();
-    foreach ($impls as $key => $impl) {
-      // Don't use disabled blueprint types.
-      if (!$impl->isEnabled()) {
+    foreach ($resources as $key => $resource) {
+      $blueprint = $resource->getBlueprint();
+
+      if (!$blueprint->canAcquireLeaseOnResource($resource, $lease)) {
         continue;
       }
 
-      // Don't use blueprint types which can't allocate the correct kind of
-      // resource.
-      if ($impl->getType() != $lease->getResourceType()) {
-        continue;
-      }
-
-      if (!$impl->canAnyBlueprintEverAllocateResourceForLease($lease)) {
-        continue;
-      }
-
-      $keep[$key] = $impl;
+      $keep[$key] = $resource;
     }
 
     return $keep;
@@ -288,8 +274,9 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
    * a lease from a list of blueprints.
    *
    * @param list<DrydockBlueprint> List of blueprints.
-   * @param list<DrydockBlueprint> List with fully allocated blueprints
-   *   removed.
+   * @return list<DrydockBlueprint> List with blueprints that can not allocate
+   *   a resource for the lease right now removed.
+   * @task allocator
    */
   private function removeOverallocatedBlueprints(
     array $blueprints,
@@ -307,5 +294,183 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
 
     return $keep;
   }
+
+
+  /**
+   * Rank blueprints by suitability for building a new resource for a
+   * particular lease.
+   *
+   * @param list<DrydockBlueprint> List of blueprints.
+   * @param DrydockLease Requested lease.
+   * @return list<DrydockBlueprint> Ranked list of blueprints.
+   * @task allocator
+   */
+  private function rankBlueprints(array $blueprints, DrydockLease $lease) {
+    assert_instances_of($blueprints, 'DrydockBlueprint');
+
+    // TODO: Implement improvements to this ranking algorithm if they become
+    // available.
+    shuffle($blueprints);
+
+    return $blueprints;
+  }
+
+
+  /**
+   * Rank resources by suitability for allocating a particular lease.
+   *
+   * @param list<DrydockResource> List of resources.
+   * @param DrydockLease Requested lease.
+   * @return list<DrydockResource> Ranked list of resources.
+   * @task allocator
+   */
+  private function rankResources(array $resources, DrydockLease $lease) {
+    assert_instances_of($resources, 'DrydockResource');
+
+    // TODO: Implement improvements to this ranking algorithm if they become
+    // available.
+    shuffle($resources);
+
+    return $resources;
+  }
+
+
+/* -(  Managing Resources  )------------------------------------------------- */
+
+
+  /**
+   * Perform an actual resource allocation with a particular blueprint.
+   *
+   * @param DrydockBlueprint The blueprint to allocate a resource from.
+   * @param DrydockLease Requested lease.
+   * @return DrydockResource Allocated resource.
+   * @task resource
+   */
+  private function allocateResource(
+    DrydockBlueprint $blueprint,
+    DrydockLease $lease) {
+    $resource = $blueprint->allocateResource($lease);
+    $this->validateAllocatedResource($resource);
+    return $resource;
+  }
+
+
+  /**
+   * Check that the resource a blueprint allocated is roughly the sort of
+   * object we expect.
+   *
+   * @param DrydockBlueprint Blueprint which built the resource.
+   * @param wild Thing which the blueprint claims is a valid resource.
+   * @param DrydockLease Lease the resource was allocated for.
+   * @return void
+   * @task resource
+   */
+  private function validateAllocatedResource(
+    DrydockBlueprint $blueprint,
+    $resource,
+    DrydockLease $lease) {
+    $blueprint = $this->getBlueprintClass();
+
+    if (!($resource instanceof DrydockResource)) {
+      throw new Exception(
+        pht(
+          'Blueprint "%s" (of type "%s") is not properly implemented: %s must '.
+          'return an object of type %s or throw, but returned something else.',
+          $blueprint->getBlueprintName(),
+          $blueprint->getClassName(),
+          'allocateResource()',
+          'DrydockResource'));
+    }
+
+    if (!$resource->isAllocatedResource()) {
+      throw new Exception(
+        pht(
+          'Blueprint "%s" (of type "%s") is not properly implemented: %s '.
+          'must actually allocate the resource it returns.',
+          $blueprint->getBlueprintName(),
+          $blueprint->getClassName(),
+          'allocateResource()'));
+    }
+
+    $resource_type = $resource->getType();
+    $lease_type = $lease->getResourceType();
+
+    if ($resource_type !== $lease_type) {
+      // TODO: Destroy the resource here?
+
+      throw new Exception(
+        pht(
+          'Blueprint "%s" (of type "%s") is not properly implemented: it '.
+          'built a resource of type "%s" to satisfy a lease requesting a '.
+          'resource of type "%s".',
+          $blueprint->getBlueprintName(),
+          $blueprint->getClassName(),
+          $resource_type,
+          $lease_type));
+    }
+  }
+
+
+/* -(  Managing Leases  )---------------------------------------------------- */
+
+
+  /**
+   * Perform an actual lease acquisition on a particular resource.
+   *
+   * @param DrydockResource Resource to acquire a lease on.
+   * @param DrydockLease Lease to acquire.
+   * @return void
+   * @task lease
+   */
+  private function acquireLease(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+
+    $blueprint = $resource->getBlueprint();
+    $blueprint->acquireLease($resource, $lease);
+
+    $this->validateAcquiredLease($blueprint, $resource, $lease);
+  }
+
+
+  /**
+   * Make sure that a lease was really acquired properly.
+   *
+   * @param DrydockBlueprint Blueprint which created the resource.
+   * @param DrydockResource Resource which was acquired.
+   * @param DrydockLease The lease which was supposedly acquired.
+   * @return void
+   * @task lease
+   */
+  private function validateAcquiredLease(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource,
+    DrydockLease $lease) {
+
+    if (!$lease->isAcquiredLease()) {
+      throw new Exception(
+        pht(
+          'Blueprint "%s" (of type "%s") is not properly implemented: it '.
+          'returned from "%s" without acquiring a lease.',
+          $blueprint->getBlueprintName(),
+          $blueprint->getClassName(),
+          'acquireLease()'));
+    }
+
+    $lease_id = $lease->getResourceID();
+    $resource_id = $resource->getID();
+
+    if ($lease_id !== $resource_id) {
+      // TODO: Destroy the lease?
+      throw new Exception(
+        pht(
+          'Blueprint "%s" (of type "%s") is not properly implemented: it '.
+          'returned from "%s" with a lease acquired on the wrong resource.',
+          $blueprint->getBlueprintName(),
+          $blueprint->getClassName(),
+          'acquireLease()'));
+    }
+  }
+
 
 }

@@ -35,7 +35,7 @@ final class DrydockWorkingCopyBlueprintImplementation
     return true;
   }
 
-  public function canAllocateLeaseOnResource(
+  public function canAcquireLeaseOnResource(
     DrydockBlueprint $blueprint,
     DrydockResource $resource,
     DrydockLease $lease) {
@@ -47,15 +47,7 @@ final class DrydockWorkingCopyBlueprintImplementation
     return ($resource_repo && $lease_repo && ($resource_repo == $lease_repo));
   }
 
-  protected function shouldAllocateLease(
-    DrydockResource $resource,
-    DrydockLease $lease,
-    array $other_leases) {
-    // TODO: These checks are out of date.
-    return !$other_leases;
-  }
-
-  protected function executeAllocateResource(
+  public function allocateResource(
     DrydockBlueprint $blueprint,
     DrydockLease $lease) {
 
@@ -105,6 +97,7 @@ final class DrydockWorkingCopyBlueprintImplementation
     $this->log(pht('Complete.'));
 
     $resource = $this->newResourceTemplate(
+      $blueprint,
       pht(
         'Working Copy (%s)',
         $repository->getCallsign()));
@@ -117,7 +110,8 @@ final class DrydockWorkingCopyBlueprintImplementation
     return $resource;
   }
 
-  protected function executeAcquireLease(
+  public function acquireLease(
+    DrydockBlueprint $blueprint,
     DrydockResource $resource,
     DrydockLease $lease) {
     return;

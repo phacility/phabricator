@@ -13,6 +13,8 @@ final class DrydockLease extends DrydockDAO
 
   private $resource = self::ATTACHABLE;
   private $releaseOnDestruction;
+  private $isAcquired = false;
+  private $activateWhenAcquired = false;
 
   /**
    * Flag this lease to be released when its destructor is called. This is
@@ -133,8 +135,8 @@ final class DrydockLease extends DrydockDAO
 
   public function isActive() {
     switch ($this->status) {
+      case DrydockLeaseStatus::STATUS_ACQUIRED:
       case DrydockLeaseStatus::STATUS_ACTIVE:
-      case DrydockLeaseStatus::STATUS_ACQUIRING:
         return true;
     }
     return false;
@@ -171,7 +173,7 @@ final class DrydockLease extends DrydockDAO
           case DrydockLeaseStatus::STATUS_BROKEN:
             throw new Exception(pht('Lease has been broken!'));
           case DrydockLeaseStatus::STATUS_PENDING:
-          case DrydockLeaseStatus::STATUS_ACQUIRING:
+          case DrydockLeaseStatus::STATUS_ACQUIRED:
             break;
           default:
             throw new Exception(pht('Unknown status??'));
@@ -197,6 +199,53 @@ final class DrydockLease extends DrydockDAO
 
     self::waitForLeases(array($this));
     return $this;
+  }
+
+  public function setActivateWhenAcquired($activate) {
+    $this->activateWhenAcquired = true;
+    return $this;
+  }
+
+  public function acquireOnResource(DrydockResource $resource) {
+    $expect_status = DrydockLeaseStatus::STATUS_PENDING;
+    $actual_status = $this->getStatus();
+    if ($actual_status != $expect_status) {
+      throw new Exception(
+        pht(
+          'Trying to acquire a lease on a resource which is in the wrong '.
+          'state: status must be "%s", actually "%s".',
+          $expect_status,
+          $actual_status));
+    }
+
+    if ($this->activateWhenAcquired) {
+      $new_status = DrydockLeaseStatus::STATUS_ACTIVE;
+    } else {
+      $new_status = DrydockLeaseStatus::STATUS_PENDING;
+    }
+
+    if ($new_status === DrydockLeaseStatus::STATUS_ACTIVE) {
+      if ($resource->getStatus() === DrydockResourceStatus::STATUS_PENDING) {
+        throw new Exception(
+          pht(
+            'Trying to acquire an active lease on a pending resource. '.
+            'You can not immediately activate leases on resources which '.
+            'need time to start up.'));
+      }
+    }
+
+    $this
+      ->setResourceID($resource->getID())
+      ->setStatus($new_status)
+      ->save();
+
+    $this->isAcquired = true;
+
+    return $this;
+  }
+
+  public function isAcquiredLease() {
+    return $this->isAcquired;
   }
 
 
