@@ -849,7 +849,6 @@ phutil_register_library_map(array(
     'DrydockManagementLeaseWorkflow' => 'applications/drydock/management/DrydockManagementLeaseWorkflow.php',
     'DrydockManagementReleaseWorkflow' => 'applications/drydock/management/DrydockManagementReleaseWorkflow.php',
     'DrydockManagementWorkflow' => 'applications/drydock/management/DrydockManagementWorkflow.php',
-    'DrydockPreallocatedHostBlueprintImplementation' => 'applications/drydock/blueprint/DrydockPreallocatedHostBlueprintImplementation.php',
     'DrydockQuery' => 'applications/drydock/query/DrydockQuery.php',
     'DrydockResource' => 'applications/drydock/storage/DrydockResource.php',
     'DrydockResourceCloseController' => 'applications/drydock/controller/DrydockResourceCloseController.php',
@@ -4567,7 +4566,6 @@ phutil_register_library_map(array(
     'DrydockManagementLeaseWorkflow' => 'DrydockManagementWorkflow',
     'DrydockManagementReleaseWorkflow' => 'DrydockManagementWorkflow',
     'DrydockManagementWorkflow' => 'PhabricatorManagementWorkflow',
-    'DrydockPreallocatedHostBlueprintImplementation' => 'DrydockBlueprintImplementation',
     'DrydockQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'DrydockResource' => array(
       'DrydockDAO',
