@@ -14,7 +14,7 @@ final class DrydockResource extends DrydockDAO
   protected $capabilities = array();
   protected $ownerPHID;
 
-  private $blueprint;
+  private $blueprint = self::ATTACHABLE;
 
   protected function getConfiguration() {
     return array(
@@ -65,16 +65,24 @@ final class DrydockResource extends DrydockDAO
   }
 
   public function getBlueprint() {
-    // TODO: Policy stuff.
-    if (empty($this->blueprint)) {
-      $blueprint = id(new DrydockBlueprint())
-        ->loadOneWhere('phid = %s', $this->blueprintPHID);
-      $this->blueprint = $blueprint->getImplementation();
-    }
-    return $this->blueprint;
+    return $this->assertAttached($this->blueprint);
+  }
+
+  public function attachBlueprint(DrydockBlueprint $blueprint) {
+    $this->blueprint = $blueprint;
+    return $this;
+  }
+
+  public function canAllocateLease(DrydockLease $lease) {
+    return $this->getBlueprint()->canAllocateLeaseOnResource(
+      $this,
+      $lease);
   }
 
   public function closeResource() {
+
+    // TODO: This is super broken and will race other lease writers!
+
     $this->openTransaction();
       $statuses = array(
         DrydockLeaseStatus::STATUS_PENDING,
