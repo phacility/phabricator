@@ -67,14 +67,13 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
       $device = $binding->getDevice();
       $device_name = $device->getName();
 
+      $binding_phid = $binding->getPHID();
+
       $resource = $this->newResourceTemplate($blueprint, $device_name)
         ->setActivateWhenAllocated(true)
         ->setAttribute('almanacServicePHID', $binding->getServicePHID())
-        ->setAttribute('almanacBindingPHID', $binding->getPHID());
-
-      // TODO: This algorithm can race, and the "free" binding may not be
-      // free by the time we acquire it. Do slot-locking here if that works
-      // out, or some other kind of locking if it does not.
+        ->setAttribute('almanacBindingPHID', $binding_phid)
+        ->needSlotLock("almanac.host.binding({$binding_phid})");
 
       try {
         return $resource->allocateResource(DrydockResourceStatus::STATUS_OPEN);
@@ -93,8 +92,11 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
     DrydockResource $resource,
     DrydockLease $lease) {
 
-    // TODO: We'll currently lease each resource an unlimited number of times,
-    // but should stop doing that.
+    // TODO: The current rule is one lease per resource, and there's no way to
+    // make that cheaper here than by just trying to acquire the lease below,
+    // so don't do any special checks for now. When we eventually permit
+    // multiple leases per host, we'll need to load leases anyway, so we can
+    // reject fully leased hosts cheaply here.
 
     return true;
   }
@@ -104,11 +106,11 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
     DrydockResource $resource,
     DrydockLease $lease) {
 
-    // TODO: Once we have limit rules, we should perform slot locking (or other
-    // kinds of locking) here.
+    $resource_phid = $resource->getPHID();
 
     $lease
       ->setActivateWhenAcquired(true)
+      ->needSlotLock("almanac.host.lease({$resource_phid})")
       ->acquireOnResource($resource);
   }
 

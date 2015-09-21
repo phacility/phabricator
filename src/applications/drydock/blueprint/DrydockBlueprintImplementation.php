@@ -106,8 +106,12 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     DrydockLease $lease);
 
   final public function releaseLease(
+    DrydockBlueprint $blueprint,
     DrydockResource $resource,
     DrydockLease $lease) {
+
+    // TODO: This is all broken nonsense.
+
     $scope = $this->pushActiveScope(null, $lease);
 
     $released = false;
@@ -117,6 +121,7 @@ abstract class DrydockBlueprintImplementation extends Phobject {
         $lease->reload();
 
         if ($lease->getStatus() == DrydockLeaseStatus::STATUS_ACTIVE) {
+          $lease->release();
           $lease->setStatus(DrydockLeaseStatus::STATUS_RELEASED);
           $lease->save();
           $released = true;
@@ -293,6 +298,7 @@ abstract class DrydockBlueprintImplementation extends Phobject {
 
     $resource = id(new DrydockResource())
       ->setBlueprintPHID($blueprint->getPHID())
+      ->attachBlueprint($blueprint)
       ->setType($this->getType())
       ->setStatus(DrydockResourceStatus::STATUS_PENDING)
       ->setName($name);

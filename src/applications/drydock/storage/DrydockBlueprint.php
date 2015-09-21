@@ -163,6 +163,17 @@ final class DrydockBlueprint extends DrydockDAO
   }
 
 
+  /**
+   * @task lease
+   */
+  public function releaseLease(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    $this->getImplementation()->releaseLease($this, $resource, $lease);
+    return $this;
+  }
+
+
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
 

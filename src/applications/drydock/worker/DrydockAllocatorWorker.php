@@ -350,7 +350,7 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
     DrydockBlueprint $blueprint,
     DrydockLease $lease) {
     $resource = $blueprint->allocateResource($lease);
-    $this->validateAllocatedResource($resource);
+    $this->validateAllocatedResource($blueprint, $resource, $lease);
     return $resource;
   }
 
@@ -369,7 +369,6 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
     DrydockBlueprint $blueprint,
     $resource,
     DrydockLease $lease) {
-    $blueprint = $this->getBlueprintClass();
 
     if (!($resource instanceof DrydockResource)) {
       throw new Exception(

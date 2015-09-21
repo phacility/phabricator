@@ -17,6 +17,7 @@ final class DrydockResource extends DrydockDAO
   private $blueprint = self::ATTACHABLE;
   private $isAllocated = false;
   private $activateWhenAllocated = false;
+  private $slotLocks = array();
 
   protected function getConfiguration() {
     return array(
@@ -80,6 +81,11 @@ final class DrydockResource extends DrydockDAO
     return $this;
   }
 
+  public function needSlotLock($key) {
+    $this->slotLocks[] = $key;
+    return $this;
+  }
+
   public function allocateResource($status) {
     if ($this->getID()) {
       throw new Exception(
@@ -105,11 +111,18 @@ final class DrydockResource extends DrydockDAO
       $new_status = DrydockResourceStatus::STATUS_PENDING;
     }
 
-    $this
-      ->setStatus($new_status)
-      ->save();
+    $this->openTransaction();
 
-    $this->didAllocate = true;
+      $this
+        ->setStatus($new_status)
+        ->save();
+
+      DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
+      $this->slotLocks = array();
+
+    $this->saveTransaction();
+
+    $this->isAllocated = true;
 
     return $this;
   }
@@ -151,6 +164,9 @@ final class DrydockResource extends DrydockDAO
 
       $this->setStatus(DrydockResourceStatus::STATUS_CLOSED);
       $this->save();
+
+      DrydockSlotLock::releaseLocks($this->getPHID());
+
     $this->saveTransaction();
   }
 

@@ -15,6 +15,7 @@ final class DrydockLease extends DrydockDAO
   private $releaseOnDestruction;
   private $isAcquired = false;
   private $activateWhenAcquired = false;
+  private $slotLocks = array();
 
   /**
    * Flag this lease to be released when its destructor is called. This is
@@ -128,6 +129,8 @@ final class DrydockLease extends DrydockDAO
     $this->setStatus(DrydockLeaseStatus::STATUS_RELEASED);
     $this->save();
 
+    DrydockSlotLock::releaseLocks($this->getPHID());
+
     $this->resource = null;
 
     return $this;
@@ -206,6 +209,11 @@ final class DrydockLease extends DrydockDAO
     return $this;
   }
 
+  public function needSlotLock($key) {
+    $this->slotLocks[] = $key;
+    return $this;
+  }
+
   public function acquireOnResource(DrydockResource $resource) {
     $expect_status = DrydockLeaseStatus::STATUS_PENDING;
     $actual_status = $this->getStatus();
@@ -234,10 +242,17 @@ final class DrydockLease extends DrydockDAO
       }
     }
 
-    $this
-      ->setResourceID($resource->getID())
-      ->setStatus($new_status)
-      ->save();
+    $this->openTransaction();
+
+      $this
+        ->setResourceID($resource->getID())
+        ->setStatus($new_status)
+        ->save();
+
+      DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
+      $this->slotLocks = array();
+
+    $this->saveTransaction();
 
     $this->isAcquired = true;
 
