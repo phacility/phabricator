@@ -116,11 +116,11 @@ final class PhabricatorFileTransformListController
 
     $dst_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('File Sources'))
-      ->appendChild($dst_table);
+      ->setTable($dst_table);
 
     $src_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Available Transforms'))
-      ->appendChild($src_table);
+      ->setTable($src_table);
 
     return $this->buildApplicationPage(
       array(
