@@ -29,10 +29,12 @@ final class HarbormasterBuildViewController
 
     if ($build->isRestarting()) {
       $header->setStatus('fa-exclamation-triangle', 'red', pht('Restarting'));
-    } else if ($build->isStopping()) {
+    } else if ($build->isPausing()) {
       $header->setStatus('fa-exclamation-triangle', 'red', pht('Pausing'));
     } else if ($build->isResuming()) {
       $header->setStatus('fa-exclamation-triangle', 'red', pht('Resuming'));
+    } else if ($build->isAborting()) {
+      $header->setStatus('fa-exclamation-triangle', 'red', pht('Aborting'));
     }
 
     $box = id(new PHUIObjectBoxView())
@@ -447,8 +449,9 @@ final class HarbormasterBuildViewController
       ->setObjectURI("/build/{$id}");
 
     $can_restart = $build->canRestartBuild();
-    $can_stop = $build->canStopBuild();
+    $can_pause = $build->canPauseBuild();
     $can_resume = $build->canResumeBuild();
+    $can_abort = $build->canAbortBuild();
 
     $list->addAction(
       id(new PhabricatorActionView())
@@ -471,10 +474,18 @@ final class HarbormasterBuildViewController
         id(new PhabricatorActionView())
           ->setName(pht('Pause Build'))
           ->setIcon('fa-pause')
-          ->setHref($this->getApplicationURI('/build/stop/'.$id.'/'))
-          ->setDisabled(!$can_stop)
+          ->setHref($this->getApplicationURI('/build/pause/'.$id.'/'))
+          ->setDisabled(!$can_pause)
           ->setWorkflow(true));
     }
+
+    $list->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Abort Build'))
+        ->setIcon('fa-exclamation-triangle')
+        ->setHref($this->getApplicationURI('/build/abort/'.$id.'/'))
+        ->setDisabled(!$can_abort)
+        ->setWorkflow(true));
 
     return $list;
   }
@@ -522,7 +533,7 @@ final class HarbormasterBuildViewController
 
     $item = new PHUIStatusItemView();
 
-    if ($build->isStopping()) {
+    if ($build->isPausing()) {
       $status_name = pht('Pausing');
       $icon = PHUIStatusItemView::ICON_RIGHT;
       $color = 'dark';

@@ -98,6 +98,12 @@ final class HarbormasterBuildEngine extends Phobject {
   }
 
   private function updateBuild(HarbormasterBuild $build) {
+    if ($build->isAborting()) {
+      $this->releaseAllArtifacts($build);
+      $build->setBuildStatus(HarbormasterBuild::STATUS_ABORTED);
+      $build->save();
+    }
+
     if (($build->getBuildStatus() == HarbormasterBuild::STATUS_PENDING) ||
         ($build->isRestarting())) {
       $this->restartBuild($build);
@@ -110,8 +116,8 @@ final class HarbormasterBuildEngine extends Phobject {
       $build->save();
     }
 
-    if ($build->isStopping() && !$build->isComplete()) {
-      $build->setBuildStatus(HarbormasterBuild::STATUS_STOPPED);
+    if ($build->isPausing() && !$build->isComplete()) {
+      $build->setBuildStatus(HarbormasterBuild::STATUS_PAUSED);
       $build->save();
     }
 
