@@ -1,60 +1,22 @@
 <?php
 
 /**
- * @task lease      Lease Acquisition
- * @task resource   Resource Allocation
- * @task log        Logging
+ * @task lease Lease Acquisition
+ * @task resource Resource Allocation
+ * @task interface Resource Interfaces
+ * @task log Logging
  */
 abstract class DrydockBlueprintImplementation extends Phobject {
 
   private $activeResource;
   private $activeLease;
-  private $instance;
 
   abstract public function getType();
-  abstract public function getInterface(
-    DrydockResource $resource,
-    DrydockLease $lease,
-    $type);
 
   abstract public function isEnabled();
 
   abstract public function getBlueprintName();
   abstract public function getDescription();
-
-  public function getBlueprintClass() {
-    return get_class($this);
-  }
-
-  protected function loadLease($lease_id) {
-    // TODO: Get rid of this?
-    $query = id(new DrydockLeaseQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withIDs(array($lease_id))
-      ->execute();
-
-    $lease = idx($query, $lease_id);
-
-    if (!$lease) {
-      throw new Exception(pht("No such lease '%d'!", $lease_id));
-    }
-
-    return $lease;
-  }
-
-  protected function getInstance() {
-    if (!$this->instance) {
-      throw new Exception(
-        pht('Attach the blueprint instance to the implementation.'));
-    }
-
-    return $this->instance;
-  }
-
-  public function attachInstance(DrydockBlueprint $instance) {
-    $this->instance = $instance;
-    return $this;
-  }
 
   public function getFieldSpecifications() {
     return array();
@@ -104,6 +66,7 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     DrydockBlueprint $blueprint,
     DrydockResource $resource,
     DrydockLease $lease);
+
 
   final public function releaseLease(
     DrydockBlueprint $blueprint,
@@ -236,6 +199,16 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     DrydockLease $lease);
 
 
+/* -(  Resource Interfaces  )------------------------------------------------ */
+
+
+  abstract public function getInterface(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource,
+    DrydockLease $lease,
+    $type);
+
+
 /* -(  Logging  )------------------------------------------------------------ */
 
 
@@ -308,7 +281,7 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     $this->log(
       pht(
         "Blueprint '%s': Created New Template",
-        $this->getBlueprintClass()));
+        get_class($this)));
 
     return $resource;
   }

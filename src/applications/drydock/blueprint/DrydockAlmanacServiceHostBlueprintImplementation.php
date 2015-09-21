@@ -119,11 +119,37 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
   }
 
   public function getInterface(
+    DrydockBlueprint $blueprint,
     DrydockResource $resource,
     DrydockLease $lease,
     $type) {
-    // TODO: Actually do stuff here, this needs work and currently makes this
-    // entire exercise pointless.
+
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    switch ($type) {
+      case DrydockCommandInterface::INTERFACE_TYPE:
+        $credential_phid = $blueprint->getFieldValue('credentialPHID');
+        $binding_phid = $resource->getAttribute('almanacBindingPHID');
+
+        $binding = id(new AlmanacBindingQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($binding_phid))
+          ->executeOne();
+        if (!$binding) {
+          // TODO: This is probably a permanent failure, destroy this resource?
+          throw new Exception(
+            pht(
+              'Unable to load binding "%s" to create command interface.',
+              $binding_phid));
+        }
+
+        $interface = $binding->getInterface();
+
+        return id(new DrydockSSHCommandInterface())
+          ->setConfig('credentialPHID', $credential_phid)
+          ->setConfig('host', $interface->getAddress())
+          ->setConfig('port', $interface->getPort());
+    }
   }
 
   public function getFieldSpecifications() {

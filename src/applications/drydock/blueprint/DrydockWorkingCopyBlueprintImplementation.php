@@ -122,18 +122,11 @@ final class DrydockWorkingCopyBlueprintImplementation
   }
 
   public function getInterface(
+    DrydockBlueprint $blueprint,
     DrydockResource $resource,
     DrydockLease $lease,
     $type) {
-
-    switch ($type) {
-      case 'command':
-        return $this
-          ->loadLease($resource->getAttribute('lease.host'))
-          ->getInterface($type);
-    }
-
-    throw new Exception(pht("No interface of type '%s'.", $type));
+    // TODO: This blueprint doesn't work at all.
   }
 
 }

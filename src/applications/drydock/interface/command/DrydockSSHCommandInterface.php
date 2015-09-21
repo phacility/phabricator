@@ -2,35 +2,19 @@
 
 final class DrydockSSHCommandInterface extends DrydockCommandInterface {
 
-  private $passphraseSSHKey;
+  private $credential;
   private $connectTimeout;
 
-  private function openCredentialsIfNotOpen() {
-    if ($this->passphraseSSHKey !== null) {
-      return;
+  private function loadCredential() {
+    if ($this->credential === null) {
+      $credential_phid = $this->getConfig('credentialPHID');
+
+      $this->credential = PassphraseSSHKey::loadFromPHID(
+        $credential_phid,
+        PhabricatorUser::getOmnipotentUser());
     }
 
-    $credential = id(new PassphraseCredentialQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withIDs(array($this->getConfig('credential')))
-      ->needSecrets(true)
-      ->executeOne();
-
-    if ($credential === null) {
-      throw new Exception(
-        pht(
-          'There is no credential with ID %d.',
-          $this->getConfig('credential')));
-    }
-
-    if ($credential->getProvidesType() !==
-      PassphraseSSHPrivateKeyCredentialType::PROVIDES_TYPE) {
-      throw new Exception(pht('Only private key credentials are supported.'));
-    }
-
-    $this->passphraseSSHKey = PassphraseSSHKey::loadFromPHID(
-      $credential->getPHID(),
-      PhabricatorUser::getOmnipotentUser());
+    return $this->credential;
   }
 
   public function setConnectTimeout($timeout) {
@@ -39,30 +23,36 @@ final class DrydockSSHCommandInterface extends DrydockCommandInterface {
   }
 
   public function getExecFuture($command) {
-    $this->openCredentialsIfNotOpen();
+    $credential = $this->loadCredential();
 
     $argv = func_get_args();
     $argv = $this->applyWorkingDirectoryToArgv($argv);
     $full_command = call_user_func_array('csprintf', $argv);
 
-    $command_timeout = '';
-    if ($this->connectTimeout !== null) {
-      $command_timeout = csprintf(
-        '-o %s',
-        'ConnectTimeout='.$this->connectTimeout);
+    $flags = array();
+    $flags[] = '-o';
+    $flags[] = 'LogLevel=quiet';
+
+    $flags[] = '-o';
+    $flags[] = 'StrictHostKeyChecking=no';
+
+    $flags[] = '-o';
+    $flags[] = 'UserKnownHostsFile=/dev/null';
+
+    $flags[] = '-o';
+    $flags[] = 'BatchMode=yes';
+
+    if ($this->connectTimeout) {
+      $flags[] = '-o';
+      $flags[] = 'ConnectTimeout='.$this->connectTimeout;
     }
 
     return new ExecFuture(
-      'ssh '.
-      '-o LogLevel=quiet '.
-      '-o StrictHostKeyChecking=no '.
-      '-o UserKnownHostsFile=/dev/null '.
-      '-o BatchMode=yes '.
-      '%C -p %s -i %P %P@%s -- %s',
-      $command_timeout,
+      'ssh %Ls -l %P -p %s -i %P %s -- %s',
+      $flags,
+      $credential->getUsernameEnvelope(),
       $this->getConfig('port'),
-      $this->passphraseSSHKey->getKeyfileEnvelope(),
-      $this->passphraseSSHKey->getUsernameEnvelope(),
+      $credential->getKeyfileEnvelope(),
       $this->getConfig('host'),
       $full_command);
   }

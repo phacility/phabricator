@@ -2,6 +2,8 @@
 
 abstract class DrydockCommandInterface extends DrydockInterface {
 
+  const INTERFACE_TYPE = 'command';
+
   private $workingDirectory;
 
   public function setWorkingDirectory($working_directory) {
@@ -14,7 +16,7 @@ abstract class DrydockCommandInterface extends DrydockInterface {
   }
 
   final public function getInterfaceType() {
-    return 'command';
+    return self::INTERFACE_TYPE;
   }
 
   final public function exec($command) {
@@ -38,7 +40,7 @@ abstract class DrydockCommandInterface extends DrydockInterface {
   protected function applyWorkingDirectoryToArgv(array $argv) {
     if ($this->getWorkingDirectory() !== null) {
       $cmd = $argv[0];
-      $cmd = "(cd %s; {$cmd})";
+      $cmd = "(cd %s && {$cmd})";
       $argv = array_merge(
         array($cmd),
         array($this->getWorkingDirectory()),

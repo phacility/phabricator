@@ -173,6 +173,24 @@ final class DrydockBlueprint extends DrydockDAO
     return $this;
   }
 
+  public function getInterface(
+    DrydockResource $resource,
+    DrydockLease $lease,
+    $type) {
+
+    $interface = $this->getImplementation()
+      ->getInterface($this, $resource, $lease, $type);
+
+    if (!$interface) {
+      throw new Exception(
+        pht(
+          'Unable to build resource interface of type "%s".',
+          $type));
+    }
+
+    return $interface;
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
