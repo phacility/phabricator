@@ -268,6 +268,7 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
   public function isFailed() {
     switch ($this->getTargetStatus()) {
       case self::STATUS_FAILED:
+      case self::STATUS_ABORTED:
         return true;
     }
 

@@ -35,9 +35,9 @@ final class HarbormasterBuildableTransaction
             return pht(
               '%s resumed this buildable.',
               $this->renderHandleLink($author_phid));
-          case HarbormasterBuildCommand::COMMAND_STOP:
+          case HarbormasterBuildCommand::COMMAND_PAUSE:
             return pht(
-              '%s stopped this buildable.',
+              '%s paused this buildable.',
               $this->renderHandleLink($author_phid));
         }
     }
@@ -59,8 +59,8 @@ final class HarbormasterBuildableTransaction
             return 'fa-backward';
           case HarbormasterBuildCommand::COMMAND_RESUME:
             return 'fa-play';
-          case HarbormasterBuildCommand::COMMAND_STOP:
-            return 'fa-stop';
+          case HarbormasterBuildCommand::COMMAND_PAUSE:
+            return 'fa-pause';
         }
     }
 
@@ -78,7 +78,7 @@ final class HarbormasterBuildableTransaction
         return 'green';
       case self::TYPE_COMMAND:
         switch ($new) {
-          case HarbormasterBuildCommand::COMMAND_STOP:
+          case HarbormasterBuildCommand::COMMAND_PAUSE:
             return 'red';
         }
     }

@@ -42,14 +42,19 @@ final class HarbormasterBuild extends HarbormasterDAO
   const STATUS_FAILED = 'failed';
 
   /**
+   * The build has aborted.
+   */
+  const STATUS_ABORTED = 'aborted';
+
+  /**
    * The build encountered an unexpected error.
    */
   const STATUS_ERROR = 'error';
 
   /**
-   * The build has been stopped.
+   * The build has been paused.
    */
-  const STATUS_STOPPED = 'stopped';
+  const STATUS_PAUSED = 'paused';
 
   /**
    * The build has been deadlocked.
@@ -75,9 +80,11 @@ final class HarbormasterBuild extends HarbormasterDAO
         return pht('Passed');
       case self::STATUS_FAILED:
         return pht('Failed');
+      case self::STATUS_ABORTED:
+        return pht('Aborted');
       case self::STATUS_ERROR:
         return pht('Unexpected Error');
-      case self::STATUS_STOPPED:
+      case self::STATUS_PAUSED:
         return pht('Paused');
       case self::STATUS_DEADLOCKED:
         return pht('Deadlocked');
@@ -97,9 +104,11 @@ final class HarbormasterBuild extends HarbormasterDAO
         return PHUIStatusItemView::ICON_ACCEPT;
       case self::STATUS_FAILED:
         return PHUIStatusItemView::ICON_REJECT;
+      case self::STATUS_ABORTED:
+        return PHUIStatusItemView::ICON_MINUS;
       case self::STATUS_ERROR:
         return PHUIStatusItemView::ICON_MINUS;
-      case self::STATUS_STOPPED:
+      case self::STATUS_PAUSED:
         return PHUIStatusItemView::ICON_MINUS;
       case self::STATUS_DEADLOCKED:
         return PHUIStatusItemView::ICON_WARNING;
@@ -118,10 +127,11 @@ final class HarbormasterBuild extends HarbormasterDAO
       case self::STATUS_PASSED:
         return 'green';
       case self::STATUS_FAILED:
+      case self::STATUS_ABORTED:
       case self::STATUS_ERROR:
       case self::STATUS_DEADLOCKED:
         return 'red';
-      case self::STATUS_STOPPED:
+      case self::STATUS_PAUSED:
         return 'dark';
       default:
         return 'bluegrey';
@@ -284,16 +294,17 @@ final class HarbormasterBuild extends HarbormasterDAO
     switch ($this->getBuildStatus()) {
       case self::STATUS_PASSED:
       case self::STATUS_FAILED:
+      case self::STATUS_ABORTED:
       case self::STATUS_ERROR:
-      case self::STATUS_STOPPED:
+      case self::STATUS_PAUSED:
         return true;
     }
 
     return false;
   }
 
-  public function isStopped() {
-    return ($this->getBuildStatus() == self::STATUS_STOPPED);
+  public function isPaused() {
+    return ($this->getBuildStatus() == self::STATUS_PAUSED);
   }
 
 
@@ -317,14 +328,22 @@ final class HarbormasterBuild extends HarbormasterDAO
     return !$this->isRestarting();
   }
 
-  public function canStopBuild() {
+  public function canPauseBuild() {
     if ($this->isAutobuild()) {
       return false;
     }
 
     return !$this->isComplete() &&
-           !$this->isStopped() &&
-           !$this->isStopping();
+           !$this->isPaused() &&
+           !$this->isPausing();
+  }
+
+  public function canAbortBuild() {
+    if ($this->isAutobuild()) {
+      return false;
+    }
+
+    return !$this->isComplete();
   }
 
   public function canResumeBuild() {
@@ -332,26 +351,29 @@ final class HarbormasterBuild extends HarbormasterDAO
       return false;
     }
 
-    return $this->isStopped() &&
+    return $this->isPaused() &&
            !$this->isResuming();
   }
 
-  public function isStopping() {
-    $is_stopping = false;
+  public function isPausing() {
+    $is_pausing = false;
     foreach ($this->getUnprocessedCommands() as $command_object) {
       $command = $command_object->getCommand();
       switch ($command) {
-        case HarbormasterBuildCommand::COMMAND_STOP:
-          $is_stopping = true;
+        case HarbormasterBuildCommand::COMMAND_PAUSE:
+          $is_pausing = true;
           break;
         case HarbormasterBuildCommand::COMMAND_RESUME:
         case HarbormasterBuildCommand::COMMAND_RESTART:
-          $is_stopping = false;
+          $is_pausing = false;
+          break;
+        case HarbormasterBuildCommand::COMMAND_ABORT:
+          $is_pausing = true;
           break;
       }
     }
 
-    return $is_stopping;
+    return $is_pausing;
   }
 
   public function isResuming() {
@@ -363,7 +385,10 @@ final class HarbormasterBuild extends HarbormasterDAO
         case HarbormasterBuildCommand::COMMAND_RESUME:
           $is_resuming = true;
           break;
-        case HarbormasterBuildCommand::COMMAND_STOP:
+        case HarbormasterBuildCommand::COMMAND_PAUSE:
+          $is_resuming = false;
+          break;
+        case HarbormasterBuildCommand::COMMAND_ABORT:
           $is_resuming = false;
           break;
       }
@@ -384,6 +409,20 @@ final class HarbormasterBuild extends HarbormasterDAO
     }
 
     return $is_restarting;
+  }
+
+  public function isAborting() {
+    $is_aborting = false;
+    foreach ($this->getUnprocessedCommands() as $command_object) {
+      $command = $command_object->getCommand();
+      switch ($command) {
+        case HarbormasterBuildCommand::COMMAND_ABORT:
+          $is_aborting = true;
+          break;
+      }
+    }
+
+    return $is_aborting;
   }
 
   public function deleteUnprocessedCommands() {

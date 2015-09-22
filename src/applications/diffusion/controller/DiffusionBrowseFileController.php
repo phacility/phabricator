@@ -337,7 +337,8 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     $corpus = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($corpus);
+      ->appendChild($corpus)
+      ->setCollapsed(true);
 
     return $corpus;
   }
