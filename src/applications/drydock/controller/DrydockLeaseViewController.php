@@ -130,9 +130,20 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
       pht('Resource Type'),
       $lease->getResourceType());
 
-    $view->addProperty(
-      pht('Resource'),
-      $lease->getResourceID());
+    $resource = id(new DrydockResourceQuery())
+      ->setViewer($this->getViewer())
+      ->withIDs(array($lease->getResourceID()))
+      ->executeOne();
+
+    if ($resource !== null) {
+      $view->addProperty(
+        pht('Resource'),
+        $this->getViewer()->renderHandle($resource->getPHID()));
+    } else {
+      $view->addProperty(
+        pht('Resource'),
+        pht('No Resource'));
+    }
 
     $attributes = $lease->getAttributes();
     if ($attributes) {
