@@ -53,8 +53,19 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
       DrydockSlotLock::releaseLocks($lease->getPHID());
     $lease->saveTransaction();
 
-    // TODO: Hook for resource release behaviors.
-    // TODO: Schedule lease destruction.
+    PhabricatorWorker::scheduleTask(
+      'DrydockLeaseDestroyWorker',
+      array(
+        'leasePHID' => $lease->getPHID(),
+      ),
+      array(
+        'objectPHID' => $lease->getPHID(),
+      ));
+
+    $resource = $lease->getResource();
+    $blueprint = $resource->getBlueprint();
+
+    $blueprint->didReleaseLease($resource, $lease);
   }
 
 }

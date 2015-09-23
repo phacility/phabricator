@@ -45,11 +45,18 @@ final class DrydockManagementLeaseWorkflow
     if ($attributes) {
       $lease->setAttributes($attributes);
     }
-    $lease
-      ->queueForActivation()
-      ->waitUntilActive();
+    $lease->queueForActivation();
 
-    $console->writeOut("%s\n", pht('Acquired Lease %s', $lease->getID()));
+    echo tsprintf(
+      "%s\n",
+      pht('Waiting for daemons to activate lease...'));
+
+    $lease->waitUntilActive();
+
+    echo tsprintf(
+      "%s\n",
+      pht('Activated lease "%s".', $lease->getID()));
+
     return 0;
   }
 

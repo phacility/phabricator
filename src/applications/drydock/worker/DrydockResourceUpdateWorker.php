@@ -86,7 +86,14 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
       $lease->scheduleUpdate();
     }
 
-    // TODO: Schedule resource destruction.
+    PhabricatorWorker::scheduleTask(
+      'DrydockResourceDestroyWorker',
+      array(
+        'resourcePHID' => $resource->getPHID(),
+      ),
+      array(
+        'objectPHID' => $resource->getPHID(),
+      ));
   }
 
 }

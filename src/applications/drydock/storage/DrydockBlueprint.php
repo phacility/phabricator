@@ -143,6 +143,18 @@ final class DrydockBlueprint extends DrydockDAO
       $resource);
   }
 
+
+  /**
+   * @task resource
+   */
+  public function destroyResource(DrydockResource $resource) {
+    $this->getImplementation()->destroyResource(
+      $this,
+      $resource);
+    return $this;
+  }
+
+
 /* -(  Acquiring Leases  )--------------------------------------------------- */
 
 
@@ -188,10 +200,27 @@ final class DrydockBlueprint extends DrydockDAO
   /**
    * @task lease
    */
-  public function releaseLease(
+  public function didReleaseLease(
     DrydockResource $resource,
     DrydockLease $lease) {
-    $this->getImplementation()->releaseLease($this, $resource, $lease);
+    $this->getImplementation()->didReleaseLease(
+      $this,
+      $resource,
+      $lease);
+    return $this;
+  }
+
+
+  /**
+   * @task lease
+   */
+  public function destroyLease(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    $this->getImplementation()->destroyLease(
+      $this,
+      $resource,
+      $lease);
     return $this;
   }
 

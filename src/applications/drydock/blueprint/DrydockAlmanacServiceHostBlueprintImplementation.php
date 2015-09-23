@@ -87,6 +87,14 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
       $exceptions);
   }
 
+  public function destroyResource(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource) {
+    // We don't create anything when allocating hosts, so we don't need to do
+    // any cleanup here.
+    return;
+  }
+
   public function canAcquireLeaseOnResource(
     DrydockBlueprint $blueprint,
     DrydockResource $resource,
@@ -108,6 +116,24 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
       ->setActivateWhenAcquired(true)
       ->needSlotLock($this->getLeaseSlotLock($resource))
       ->acquireOnResource($resource);
+  }
+
+  public function didReleaseLease(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    // Almanac hosts stick around indefinitely so we don't need to recycle them
+    // if they don't have any leases.
+    return;
+  }
+
+  public function destroyLease(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    // We don't create anything when activating a lease, so we don't need to
+    // throw anything away.
+    return;
   }
 
   private function getLeaseSlotLock(DrydockResource $resource) {
