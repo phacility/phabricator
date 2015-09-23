@@ -7,6 +7,7 @@ final class DrydockLeaseQuery extends DrydockQuery {
   private $resourceIDs;
   private $statuses;
   private $datasourceQuery;
+  private $needCommands;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;

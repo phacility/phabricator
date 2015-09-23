@@ -36,4 +36,18 @@ abstract class DrydockWorker extends PhabricatorWorker {
     return $resource;
   }
 
+  protected function loadCommands($target_phid) {
+    $viewer = $this->getViewer();
+
+    $commands = id(new DrydockCommandQuery())
+      ->setViewer($viewer)
+      ->withTargetPHIDs(array($target_phid))
+      ->withConsumed(false)
+      ->execute();
+
+    $commands = msort($commands, 'getID');
+
+    return $commands;
+  }
+
 }

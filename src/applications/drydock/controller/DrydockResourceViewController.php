@@ -55,11 +55,13 @@ final class DrydockResourceViewController extends DrydockResourceController {
     $crumbs->addTextCrumb(pht('Resource %d', $resource->getID()));
 
     $locks = $this->buildLocksTab($resource->getPHID());
+    $commands = $this->buildCommandsTab($resource->getPHID());
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties, pht('Properties'))
-      ->addPropertyList($locks, pht('Slot Locks'));
+      ->addPropertyList($locks, pht('Slot Locks'))
+      ->addPropertyList($commands, pht('Commands'));
 
     $lease_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Leases'))
@@ -83,22 +85,29 @@ final class DrydockResourceViewController extends DrydockResourceController {
   }
 
   private function buildActionListView(DrydockResource $resource) {
+    $viewer = $this->getViewer();
+
     $view = id(new PhabricatorActionListView())
-      ->setUser($this->getRequest()->getUser())
+      ->setUser($viewer)
       ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($resource);
 
-    $can_close = ($resource->getStatus() == DrydockResourceStatus::STATUS_OPEN);
-    $uri = '/resource/'.$resource->getID().'/close/';
+    $can_release = $resource->canRelease();
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $resource,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $uri = '/resource/'.$resource->getID().'/release/';
     $uri = $this->getApplicationURI($uri);
 
     $view->addAction(
       id(new PhabricatorActionView())
         ->setHref($uri)
-        ->setName(pht('Close Resource'))
+        ->setName(pht('Release Resource'))
         ->setIcon('fa-times')
         ->setWorkflow(true)
-        ->setDisabled(!$can_close));
+        ->setDisabled(!$can_release || !$can_edit));
 
     return $view;
   }

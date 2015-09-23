@@ -9,6 +9,11 @@ final class DrydockLeaseReleaseController extends DrydockLeaseController {
     $lease = id(new DrydockLeaseQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->executeOne();
     if (!$lease) {
       return new Aphront404Response();
@@ -17,43 +22,35 @@ final class DrydockLeaseReleaseController extends DrydockLeaseController {
     $lease_uri = '/lease/'.$lease->getID().'/';
     $lease_uri = $this->getApplicationURI($lease_uri);
 
-    if ($lease->getStatus() != DrydockLeaseStatus::STATUS_ACTIVE) {
-      $dialog = id(new AphrontDialogView())
-        ->setUser($viewer)
-        ->setTitle(pht('Lease Not Active'))
-        ->appendChild(
-          phutil_tag(
-            'p',
-            array(),
-            pht('You can only release "active" leases.')))
+    if (!$lease->canRelease()) {
+      return $this->newDialog()
+        ->setTitle(pht('Lease Not Releasable'))
+        ->appendParagraph(
+          pht(
+            'Leases can not be released after they are destroyed.'))
         ->addCancelButton($lease_uri);
-
-      return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
-    if (!$request->isDialogFormPost()) {
-      $dialog = id(new AphrontDialogView())
-        ->setUser($viewer)
-        ->setTitle(pht('Really release lease?'))
-        ->appendChild(
-          phutil_tag(
-            'p',
-            array(),
-            pht(
-              'Releasing a lease may cause trouble for the lease holder and '.
-              'trigger cleanup of the underlying resource. It can not be '.
-              'undone. Continue?')))
-        ->addSubmitButton(pht('Release Lease'))
-        ->addCancelButton($lease_uri);
+    if ($request->isFormPost()) {
+      $command = DrydockCommand::initializeNewCommand($viewer)
+        ->setTargetPHID($lease->getPHID())
+        ->setCommand(DrydockCommand::COMMAND_RELEASE)
+        ->save();
 
-      return id(new AphrontDialogResponse())->setDialog($dialog);
+      $lease->scheduleUpdate();
+
+      return id(new AphrontRedirectResponse())->setURI($lease_uri);
     }
 
-    $resource = $lease->getResource();
-    $blueprint = $resource->getBlueprint();
-    $blueprint->releaseLease($resource, $lease);
-
-    return id(new AphrontReloadResponse())->setURI($lease_uri);
+    return $this->newDialog()
+      ->setTitle(pht('Release Lease?'))
+      ->appendParagraph(
+        pht(
+          'Forcefully releasing a lease may interfere with the operation '.
+          'of the lease holder and trigger destruction of the underlying '.
+          'resource. It can not be undone.'))
+      ->addSubmitButton(pht('Release Lease'))
+      ->addCancelButton($lease_uri);
   }
 
 }

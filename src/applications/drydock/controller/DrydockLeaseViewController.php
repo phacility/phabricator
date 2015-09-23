@@ -43,11 +43,13 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
     $crumbs->addTextCrumb($title, $lease_uri);
 
     $locks = $this->buildLocksTab($lease->getPHID());
+    $commands = $this->buildCommandsTab($lease->getPHID());
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties, pht('Properties'))
-      ->addPropertyList($locks, pht('Slot Locks'));
+      ->addPropertyList($locks, pht('Slot Locks'))
+      ->addPropertyList($commands, pht('Commands'));
 
     $log_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Lease Logs'))
@@ -66,14 +68,20 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
   }
 
   private function buildActionListView(DrydockLease $lease) {
+    $viewer = $this->getViewer();
+
     $view = id(new PhabricatorActionListView())
-      ->setUser($this->getRequest()->getUser())
+      ->setUser($viewer)
       ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($lease);
 
     $id = $lease->getID();
 
-    $can_release = ($lease->getStatus() == DrydockLeaseStatus::STATUS_ACTIVE);
+    $can_release = $lease->canRelease();
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $lease,
+      PhabricatorPolicyCapability::CAN_EDIT);
 
     $view->addAction(
       id(new PhabricatorActionView())
@@ -81,7 +89,7 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
         ->setIcon('fa-times')
         ->setHref($this->getApplicationURI("/lease/{$id}/release/"))
         ->setWorkflow(true)
-        ->setDisabled(!$can_release));
+        ->setDisabled(!$can_release || !$can_edit));
 
     return $view;
   }

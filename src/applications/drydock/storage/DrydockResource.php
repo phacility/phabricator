@@ -170,43 +170,44 @@ final class DrydockResource extends DrydockDAO
     return $this->isActivated;
   }
 
-  public function closeResource() {
+  public function canRelease() {
+    switch ($this->getStatus()) {
+      case DrydockResourceStatus::STATUS_CLOSED:
+      case DrydockResourceStatus::STATUS_DESTROYED:
+        return false;
+      default:
+        return true;
+    }
+  }
 
-    // TODO: This is super broken and will race other lease writers!
+  public function scheduleUpdate() {
+    PhabricatorWorker::scheduleTask(
+      'DrydockResourceUpdateWorker',
+      array(
+        'resourcePHID' => $this->getPHID(),
+      ),
+      array(
+        'objectPHID' => $this->getPHID(),
+      ));
+  }
 
-    $this->openTransaction();
-      $statuses = array(
-        DrydockLeaseStatus::STATUS_PENDING,
-        DrydockLeaseStatus::STATUS_ACTIVE,
-      );
+  private function didActivate() {
+    $viewer = PhabricatorUser::getOmnipotentUser();
 
-      $leases = id(new DrydockLeaseQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withResourceIDs(array($this->getID()))
-        ->withStatuses($statuses)
-        ->execute();
+    $need_update = false;
 
-      foreach ($leases as $lease) {
-        switch ($lease->getStatus()) {
-          case DrydockLeaseStatus::STATUS_PENDING:
-            $message = pht('Breaking pending lease (resource closing).');
-            $lease->setStatus(DrydockLeaseStatus::STATUS_BROKEN);
-            break;
-          case DrydockLeaseStatus::STATUS_ACTIVE:
-            $message = pht('Releasing active lease (resource closing).');
-            $lease->setStatus(DrydockLeaseStatus::STATUS_RELEASED);
-            break;
-        }
-        DrydockBlueprintImplementation::writeLog($this, $lease, $message);
-        $lease->save();
-      }
+    $commands = id(new DrydockCommandQuery())
+      ->setViewer($viewer)
+      ->withTargetPHIDs(array($this->getPHID()))
+      ->withConsumed(false)
+      ->execute();
+    if ($commands) {
+      $need_update = true;
+    }
 
-      $this->setStatus(DrydockResourceStatus::STATUS_CLOSED);
-      $this->save();
-
-      DrydockSlotLock::releaseLocks($this->getPHID());
-
-    $this->saveTransaction();
+    if ($need_update) {
+      $this->scheduleUpdate();
+    }
   }
 
 
@@ -216,12 +217,15 @@ final class DrydockResource extends DrydockDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
   public function getPolicy($capability) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        // TODO: Implement reasonable policies.
         return PhabricatorPolicies::getMostOpenPolicy();
     }
   }

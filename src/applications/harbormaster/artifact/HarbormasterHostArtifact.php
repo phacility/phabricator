@@ -62,13 +62,16 @@ final class HarbormasterHostArtifact extends HarbormasterArtifact {
 
   public function releaseArtifact(PhabricatorUser $actor) {
     $lease = $this->loadArtifactLease($actor);
-    $resource = $lease->getResource();
-    $blueprint = $resource->getBlueprint();
-
-    if ($lease->isActive()) {
-      $blueprint->releaseLease($resource, $lease);
+    if (!$lease->canRelease()) {
+      return;
     }
-  }
 
+    $command = DrydockCommand::initializeNewCommand($actor)
+      ->setTargetPHID($lease->getPHID())
+      ->setCommand(DrydockCommand::COMMAND_RELEASE)
+      ->save();
+
+    $lease->scheduleUpdate();
+  }
 
 }

@@ -30,11 +30,24 @@ final class DrydockLease extends DrydockDAO
   }
 
   public function __destruct() {
-    if ($this->releaseOnDestruction) {
-      if ($this->isActive()) {
-        $this->release();
-      }
+    if (!$this->releaseOnDestruction) {
+      return;
     }
+
+    if (!$this->canRelease()) {
+      return;
+    }
+
+    $actor = PhabricatorUser::getOmnipotentUser();
+    $drydock_phid = id(new PhabricatorDrydockApplication())->getPHID();
+
+    $command = DrydockCommand::initializeNewCommand($actor)
+      ->setTargetPHID($this->getPHID())
+      ->setAuthorPHID($drydock_phid)
+      ->setCommand(DrydockCommand::COMMAND_RELEASE)
+      ->save();
+
+    $this->scheduleUpdate();
   }
 
   public function getLeaseName() {
@@ -126,18 +139,6 @@ final class DrydockLease extends DrydockDAO
 
     $this->setTaskID($task->getID());
     $this->save();
-
-    return $this;
-  }
-
-  public function release() {
-    $this->assertActive();
-    $this->setStatus(DrydockLeaseStatus::STATUS_RELEASED);
-    $this->save();
-
-    DrydockSlotLock::releaseLocks($this->getPHID());
-
-    $this->resource = null;
 
     return $this;
   }
@@ -262,6 +263,10 @@ final class DrydockLease extends DrydockDAO
 
     $this->isAcquired = true;
 
+    if ($new_status == DrydockLeaseStatus::STATUS_ACTIVE) {
+      $this->didActivate();
+    }
+
     return $this;
   }
 
@@ -301,11 +306,55 @@ final class DrydockLease extends DrydockDAO
 
     $this->isActivated = true;
 
+    $this->didActivate();
+
     return $this;
   }
 
   public function isActivatedLease() {
     return $this->isActivated;
+  }
+
+  public function canRelease() {
+    if (!$this->getID()) {
+      return false;
+    }
+
+    switch ($this->getStatus()) {
+      case DrydockLeaseStatus::STATUS_RELEASED:
+        return false;
+      default:
+        return true;
+    }
+  }
+
+  public function scheduleUpdate() {
+    PhabricatorWorker::scheduleTask(
+      'DrydockLeaseUpdateWorker',
+      array(
+        'leasePHID' => $this->getPHID(),
+      ),
+      array(
+        'objectPHID' => $this->getPHID(),
+      ));
+  }
+
+  private function didActivate() {
+    $viewer = PhabricatorUser::getOmnipotentUser();
+    $need_update = false;
+
+    $commands = id(new DrydockCommandQuery())
+      ->setViewer($viewer)
+      ->withTargetPHIDs(array($this->getPHID()))
+      ->withConsumed(false)
+      ->execute();
+    if ($commands) {
+      $need_update = true;
+    }
+
+    if ($need_update) {
+      $this->scheduleUpdate();
+    }
   }
 
 
@@ -315,6 +364,7 @@ final class DrydockLease extends DrydockDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
@@ -322,6 +372,9 @@ final class DrydockLease extends DrydockDAO
     if ($this->getResource()) {
       return $this->getResource()->getPolicy($capability);
     }
+
+    // TODO: Implement reasonable policies.
+
     return PhabricatorPolicies::getMostOpenPolicy();
   }
 
