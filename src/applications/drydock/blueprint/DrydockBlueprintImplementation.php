@@ -8,9 +8,6 @@
  */
 abstract class DrydockBlueprintImplementation extends Phobject {
 
-  private $activeResource;
-  private $activeLease;
-
   abstract public function getType();
 
   abstract public function isEnabled();
@@ -265,10 +262,7 @@ abstract class DrydockBlueprintImplementation extends Phobject {
    * @task log
    */
   protected function log($message) {
-    self::writeLog(
-      $this->activeResource,
-      $this->activeLease,
-      $message);
+    self::writeLog(null, null, $message);
   }
 
 
@@ -320,13 +314,6 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     // Pre-allocate the resource PHID.
     $resource->setPHID($resource->generatePHID());
 
-    $this->activeResource = $resource;
-
-    $this->log(
-      pht(
-        "Blueprint '%s': Created New Template",
-        get_class($this)));
-
     return $resource;
   }
 
@@ -347,26 +334,6 @@ abstract class DrydockBlueprintImplementation extends Phobject {
         // TODO: Permanent failure.
         throw new Exception(pht('Lease in bad state.'));
     }
-  }
-
-  private function pushActiveScope(
-    DrydockResource $resource = null,
-    DrydockLease $lease = null) {
-
-    if (($this->activeResource !== null) ||
-        ($this->activeLease !== null)) {
-      throw new Exception(pht('There is already an active resource or lease!'));
-    }
-
-    $this->activeResource = $resource;
-    $this->activeLease = $lease;
-
-    return new DrydockBlueprintScopeGuard($this);
-  }
-
-  public function popActiveScope() {
-    $this->activeResource = null;
-    $this->activeLease = null;
   }
 
 }
