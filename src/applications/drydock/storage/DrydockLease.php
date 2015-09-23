@@ -295,14 +295,16 @@ final class DrydockLease extends DrydockDAO
     }
   }
 
-  public function scheduleUpdate() {
+  public function scheduleUpdate($epoch = null) {
     PhabricatorWorker::scheduleTask(
       'DrydockLeaseUpdateWorker',
       array(
         'leasePHID' => $this->getPHID(),
+        'isExpireTask' => ($epoch !== null),
       ),
       array(
         'objectPHID' => $this->getPHID(),
+        'delayUntil' => $epoch,
       ));
   }
 
@@ -321,6 +323,11 @@ final class DrydockLease extends DrydockDAO
 
     if ($need_update) {
       $this->scheduleUpdate();
+    }
+
+    $expires = $this->getUntil();
+    if ($expires) {
+      $this->scheduleUpdate($expires);
     }
   }
 

@@ -117,6 +117,11 @@ abstract class PhabricatorWorker extends Phobject {
       ->setPriority($priority)
       ->setObjectPHID($object_phid);
 
+    $delay = idx($options, 'delayUntil');
+    if ($delay) {
+      $task->setLeaseExpires($delay);
+    }
+
     if (self::$runAllTasksInProcess) {
       // Do the work in-process.
       $worker = newv($task_class, array($data));

@@ -11,13 +11,38 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
     $lock = PhabricatorGlobalLock::newLock($lock_key)
       ->lock(1);
 
-    $lease = $this->loadLease($lease_phid);
-    $this->updateLease($lease);
+    try {
+      $lease = $this->loadLease($lease_phid);
+      $this->updateLease($lease);
+    } catch (Exception $ex) {
+      $lock->unlock();
+      throw $ex;
+    }
 
     $lock->unlock();
   }
 
   private function updateLease(DrydockLease $lease) {
+    if ($lease->getStatus() != DrydockLeaseStatus::STATUS_ACTIVE) {
+      return;
+    }
+
+    $viewer = $this->getViewer();
+    $drydock_phid = id(new PhabricatorDrydockApplication())->getPHID();
+
+    // Check if the lease has expired. If it is, we're going to send it a
+    // release command. This command will be handled immediately below, it
+    // just generates a command log and improves consistency.
+    $now = PhabricatorTime::getNow();
+    $expires = $lease->getUntil();
+    if ($expires && ($expires <= $now)) {
+      $command = DrydockCommand::initializeNewCommand($viewer)
+        ->setTargetPHID($lease->getPHID())
+        ->setAuthorPHID($drydock_phid)
+        ->setCommand(DrydockCommand::COMMAND_RELEASE)
+        ->save();
+    }
+
     $commands = $this->loadCommands($lease->getPHID());
     foreach ($commands as $command) {
       if ($lease->getStatus() != DrydockLeaseStatus::STATUS_ACTIVE) {
@@ -27,9 +52,20 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
       }
 
       $this->processCommand($lease, $command);
+
       $command
         ->setIsConsumed(true)
         ->save();
+    }
+
+    // If this is the task which will eventually release the lease after it
+    // expires but it is still active, reschedule the task to run after the
+    // lease expires. This can happen if the lease's expiration was pushed
+    // forward.
+    if ($lease->getStatus() == DrydockLeaseStatus::STATUS_ACTIVE) {
+      if ($this->getTaskDataValue('isExpireTask') && $expires) {
+        throw new PhabricatorWorkerYieldException($expires - $now);
+      }
     }
   }
 

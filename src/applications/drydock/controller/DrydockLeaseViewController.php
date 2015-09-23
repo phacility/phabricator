@@ -97,6 +97,7 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
   private function buildPropertyListView(
     DrydockLease $lease,
     PhabricatorActionListView $actions) {
+    $viewer = $this->getViewer();
 
     $view = new PHUIPropertyListView();
     $view->setActionList($actions);
@@ -144,6 +145,14 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
         pht('Resource'),
         pht('No Resource'));
     }
+
+    $until = $lease->getUntil();
+    if ($until) {
+      $until_display = phabricator_datetime($until, $viewer);
+    } else {
+      $until_display = phutil_tag('em', array(), pht('Never'));
+    }
+    $view->addProperty(pht('Expires'), $until_display);
 
     $attributes = $lease->getAttributes();
     if ($attributes) {

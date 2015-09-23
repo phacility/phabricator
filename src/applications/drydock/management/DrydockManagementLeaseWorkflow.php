@@ -15,6 +15,11 @@ final class DrydockManagementLeaseWorkflow
             'help'      => pht('Resource type.'),
           ),
           array(
+            'name' => 'until',
+            'param' => 'time',
+            'help' => pht('Set lease expiration time.'),
+          ),
+          array(
             'name'      => 'attributes',
             'param'     => 'name=value,...',
             'help'      => pht('Resource specficiation.'),
@@ -33,6 +38,17 @@ final class DrydockManagementLeaseWorkflow
           '--type'));
     }
 
+    $until = $args->getArg('until');
+    if (strlen($until)) {
+      $until = strtotime($until);
+      if ($until <= 0) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Unable to parse argument to "%s".',
+            '--until'));
+      }
+    }
+
     $attributes = $args->getArg('attributes');
     if ($attributes) {
       $options = new PhutilSimpleOptions();
@@ -42,9 +58,15 @@ final class DrydockManagementLeaseWorkflow
 
     $lease = id(new DrydockLease())
       ->setResourceType($resource_type);
+
     if ($attributes) {
       $lease->setAttributes($attributes);
     }
+
+    if ($until) {
+      $lease->setUntil($until);
+    }
+
     $lease->queueForActivation();
 
     echo tsprintf(
