@@ -34,7 +34,7 @@ final class DrydockLeaseWorker extends DrydockWorker {
       throw new Exception(pht('Resource still activating.'));
     }
 
-    if ($resource_status != DrydockResourceStatus::STATUS_OPEN) {
+    if ($resource_status != DrydockResourceStatus::STATUS_ACTIVE) {
       throw new PhabricatorWorkerPermanentFailureException(
         pht(
           'Trying to activate lease on a dead resource (in status "%s").',

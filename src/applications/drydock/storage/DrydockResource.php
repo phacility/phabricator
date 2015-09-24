@@ -30,14 +30,15 @@ final class DrydockResource extends DrydockDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text255',
         'ownerPHID' => 'phid?',
-        'status' => 'uint32',
+        'status' => 'text32',
         'type' => 'text64',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_phid' => null,
-        'phid' => array(
-          'columns' => array('phid'),
-          'unique' => true,
+        'key_type' => array(
+          'columns' => array('type', 'status'),
+        ),
+        'key_blueprint' => array(
+          'columns' => array('blueprintPHID', 'status'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -107,7 +108,7 @@ final class DrydockResource extends DrydockDAO
     }
 
     if ($this->activateWhenAllocated) {
-      $new_status = DrydockResourceStatus::STATUS_OPEN;
+      $new_status = DrydockResourceStatus::STATUS_ACTIVE;
     } else {
       $new_status = DrydockResourceStatus::STATUS_PENDING;
     }
@@ -153,7 +154,7 @@ final class DrydockResource extends DrydockDAO
     $this->openTransaction();
 
       $this
-        ->setStatus(DrydockResourceStatus::STATUS_OPEN)
+        ->setStatus(DrydockResourceStatus::STATUS_ACTIVE)
         ->save();
 
       DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
@@ -172,7 +173,7 @@ final class DrydockResource extends DrydockDAO
 
   public function canRelease() {
     switch ($this->getStatus()) {
-      case DrydockResourceStatus::STATUS_CLOSED:
+      case DrydockResourceStatus::STATUS_RELEASED:
       case DrydockResourceStatus::STATUS_DESTROYED:
         return false;
       default:

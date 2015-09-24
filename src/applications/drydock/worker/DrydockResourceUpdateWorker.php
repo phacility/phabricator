@@ -20,7 +20,7 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
   private function updateResource(DrydockResource $resource) {
     $commands = $this->loadCommands($resource->getPHID());
     foreach ($commands as $command) {
-      if ($resource->getStatus() != DrydockResourceStatus::STATUS_OPEN) {
+      if ($resource->getStatus() != DrydockResourceStatus::STATUS_ACTIVE) {
         // Resources can't receive commands before they activate or after they
         // release.
         break;
@@ -46,7 +46,7 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
   }
 
   private function releaseResource(DrydockResource $resource) {
-    if ($resource->getStatus() != DrydockResourceStatus::STATUS_OPEN) {
+    if ($resource->getStatus() != DrydockResourceStatus::STATUS_ACTIVE) {
       // If we had multiple release commands
       // This command is only meaningful to resources in the "Open" state.
       return;
@@ -57,7 +57,7 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
 
     $resource->openTransaction();
       $resource
-        ->setStatus(DrydockResourceStatus::STATUS_CLOSED)
+        ->setStatus(DrydockResourceStatus::STATUS_RELEASED)
         ->save();
 
       // TODO: Hold slot locks until destruction?

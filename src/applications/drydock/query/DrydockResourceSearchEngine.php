@@ -73,7 +73,7 @@ final class DrydockResourceSearchEngine
           'statuses',
           array(
             DrydockResourceStatus::STATUS_PENDING,
-            DrydockResourceStatus::STATUS_OPEN,
+            DrydockResourceStatus::STATUS_ACTIVE,
           ));
       case 'all':
         return $query;

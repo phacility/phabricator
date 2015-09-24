@@ -12,7 +12,7 @@ final class DrydockResourceDestroyWorker extends DrydockWorker {
     $status = $resource->getStatus();
 
     switch ($status) {
-      case DrydockResourceStatus::STATUS_CLOSED:
+      case DrydockResourceStatus::STATUS_RELEASED:
       case DrydockResourceStatus::STATUS_BROKEN:
         break;
       default:

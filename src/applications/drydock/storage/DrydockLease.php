@@ -60,7 +60,7 @@ final class DrydockLease extends DrydockDAO
         'attributes'    => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'status' => 'uint32',
+        'status' => 'text32',
         'until' => 'epoch?',
         'resourceType' => 'text128',
         'ownerPHID' => 'phid?',

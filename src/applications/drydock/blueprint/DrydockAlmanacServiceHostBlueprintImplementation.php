@@ -252,8 +252,8 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
         ->withStatuses(
           array(
             DrydockResourceStatus::STATUS_PENDING,
-            DrydockResourceStatus::STATUS_OPEN,
-            DrydockResourceStatus::STATUS_CLOSED,
+            DrydockResourceStatus::STATUS_ACTIVE,
+            DrydockResourceStatus::STATUS_RELEASED,
           ))
         ->execute();
 

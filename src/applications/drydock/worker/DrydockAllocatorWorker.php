@@ -229,7 +229,7 @@ final class DrydockAllocatorWorker extends DrydockWorker {
       ->withStatuses(
         array(
           DrydockResourceStatus::STATUS_PENDING,
-          DrydockResourceStatus::STATUS_OPEN,
+          DrydockResourceStatus::STATUS_ACTIVE,
         ))
       ->execute();
 

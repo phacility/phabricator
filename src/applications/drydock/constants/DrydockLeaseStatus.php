@@ -2,12 +2,12 @@
 
 final class DrydockLeaseStatus extends DrydockConstants {
 
-  const STATUS_PENDING = 0;
-  const STATUS_ACQUIRED = 5;
-  const STATUS_ACTIVE = 1;
-  const STATUS_RELEASED = 2;
-  const STATUS_BROKEN = 3;
-  const STATUS_DESTROYED = 4;
+  const STATUS_PENDING = 'pending';
+  const STATUS_ACQUIRED = 'acquired';
+  const STATUS_ACTIVE = 'active';
+  const STATUS_RELEASED = 'released';
+  const STATUS_BROKEN = 'broken';
+  const STATUS_DESTROYED = 'destroyed';
 
   public static function getNameForStatus($status) {
     $map = array(

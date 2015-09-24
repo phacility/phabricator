@@ -98,7 +98,7 @@ final class DrydockLeaseQuery extends DrydockQuery {
     if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn,
-        'status IN (%Ld)',
+        'status IN (%Ls)',
         $this->statuses);
     }
 
