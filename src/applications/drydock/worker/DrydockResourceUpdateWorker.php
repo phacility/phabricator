@@ -72,7 +72,7 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
 
     $leases = id(new DrydockLeaseQuery())
       ->setViewer($viewer)
-      ->withResourceIDs(array($resource->getID()))
+      ->withResourcePHIDs(array($resource->getPHID()))
       ->withStatuses($statuses)
       ->execute();
 

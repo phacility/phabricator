@@ -3,7 +3,7 @@
 final class DrydockLease extends DrydockDAO
   implements PhabricatorPolicyInterface {
 
-  protected $resourceID;
+  protected $resourcePHID;
   protected $resourceType;
   protected $until;
   protected $ownerPHID;
@@ -64,13 +64,11 @@ final class DrydockLease extends DrydockDAO
         'until' => 'epoch?',
         'resourceType' => 'text128',
         'ownerPHID' => 'phid?',
-        'resourceID' => 'id?',
+        'resourcePHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_phid' => null,
-        'phid' => array(
-          'columns' => array('phid'),
-          'unique' => true,
+        'key_resource' => array(
+          'columns' => array('resourcePHID', 'status'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -219,7 +217,7 @@ final class DrydockLease extends DrydockDAO
     $this->openTransaction();
 
       $this
-        ->setResourceID($resource->getID())
+        ->setResourcePHID($resource->getPHID())
         ->setStatus($new_status)
         ->save();
 

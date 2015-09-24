@@ -27,7 +27,7 @@ final class DrydockResourceViewController extends DrydockResourceController {
 
     $leases = id(new DrydockLeaseQuery())
       ->setViewer($viewer)
-      ->withResourceIDs(array($resource->getID()))
+      ->withResourcePHIDs(array($resource->getPHID()))
       ->execute();
 
     $lease_list = id(new DrydockLeaseListView())

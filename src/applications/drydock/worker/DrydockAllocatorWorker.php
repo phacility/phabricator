@@ -462,10 +462,10 @@ final class DrydockAllocatorWorker extends DrydockWorker {
           'acquireLease()'));
     }
 
-    $lease_id = $lease->getResourceID();
-    $resource_id = $resource->getID();
+    $lease_phid = $lease->getResourcePHID();
+    $resource_phid = $resource->getPHID();
 
-    if ($lease_id !== $resource_id) {
+    if ($lease_phid !== $resource_phid) {
       // TODO: Destroy the lease?
       throw new Exception(
         pht(

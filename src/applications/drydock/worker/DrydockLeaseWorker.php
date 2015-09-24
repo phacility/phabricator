@@ -20,17 +20,10 @@ final class DrydockLeaseWorker extends DrydockWorker {
           $actual_status));
     }
 
-    $resource_id = $lease->getResourceID();
-
-    $resource = id(new DrydockResourceQuery())
-      ->setViewer($this->getViewer())
-      ->withIDs(array($resource_id))
-      ->executeOne();
+    $resource = $lease->getResource();
     if (!$resource) {
       throw new PhabricatorWorkerPermanentFailureException(
-        pht(
-          'Trying to activate lease on invalid resource ("%s").',
-          $resource_id));
+        pht('Trying to activate lease with no resource.'));
     }
 
     $resource_status = $resource->getStatus();
