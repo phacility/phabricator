@@ -223,19 +223,16 @@ final class DrydockResource extends DrydockDAO
   }
 
   public function getPolicy($capability) {
-    switch ($capability) {
-      case PhabricatorPolicyCapability::CAN_VIEW:
-      case PhabricatorPolicyCapability::CAN_EDIT:
-        // TODO: Implement reasonable policies.
-        return PhabricatorPolicies::getMostOpenPolicy();
-    }
+    return $this->getBlueprint()->getPolicy($capability);
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return false;
+    return $this->getBlueprint()->hasAutomaticCapability(
+      $capability,
+      $viewer);
   }
 
   public function describeAutomaticCapability($capability) {
-    return null;
+    return pht('Resources inherit the policies of their blueprints.');
   }
 }

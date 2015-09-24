@@ -17,6 +17,8 @@ final class DrydockResourceViewController extends DrydockResourceController {
     $title = pht('Resource %s %s', $resource->getID(), $resource->getName());
 
     $header = id(new PHUIHeaderView())
+      ->setUser($viewer)
+      ->setPolicyObject($resource)
       ->setHeader($title);
 
     $actions = $this->buildActionListView($resource);
@@ -117,8 +119,8 @@ final class DrydockResourceViewController extends DrydockResourceController {
     PhabricatorActionListView $actions) {
     $viewer = $this->getViewer();
 
-    $view = new PHUIPropertyListView();
-    $view->setActionList($actions);
+    $view = id(new PHUIPropertyListView())
+      ->setActionList($actions);
 
     $status = $resource->getStatus();
     $status = DrydockResourceStatus::getNameForStatus($status);
