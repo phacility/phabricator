@@ -64,6 +64,10 @@ final class DrydockBlueprint extends DrydockDAO
     return $this;
   }
 
+  public function hasImplementation() {
+    return ($this->implementation !== self::ATTACHABLE);
+  }
+
   public function getDetail($key, $default = null) {
     return idx($this->details, $key, $default);
   }

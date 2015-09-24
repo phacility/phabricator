@@ -11,17 +11,19 @@ final class DrydockBlueprintSearchEngine
     return 'PhabricatorDrydockApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    return new PhabricatorSavedQuery();
+  public function newQuery() {
+    return id(new DrydockBlueprintQuery());
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    return new DrydockBlueprintQuery();
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
+
+    return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved) {}
+  protected function buildCustomSearchFields() {
+    return array();
+  }
 
   protected function getURI($path) {
     return '/drydock/blueprint/'.$path;

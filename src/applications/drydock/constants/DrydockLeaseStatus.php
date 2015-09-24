@@ -9,8 +9,8 @@ final class DrydockLeaseStatus extends DrydockConstants {
   const STATUS_BROKEN = 'broken';
   const STATUS_DESTROYED = 'destroyed';
 
-  public static function getNameForStatus($status) {
-    $map = array(
+  public static function getStatusMap() {
+    return array(
       self::STATUS_PENDING => pht('Pending'),
       self::STATUS_ACQUIRED => pht('Acquired'),
       self::STATUS_ACTIVE => pht('Active'),
@@ -18,19 +18,15 @@ final class DrydockLeaseStatus extends DrydockConstants {
       self::STATUS_BROKEN => pht('Broken'),
       self::STATUS_DESTROYED => pht('Destroyed'),
     );
+  }
 
+  public static function getNameForStatus($status) {
+    $map = self::getStatusMap();
     return idx($map, $status, pht('Unknown'));
   }
 
   public static function getAllStatuses() {
-    return array(
-      self::STATUS_PENDING,
-      self::STATUS_ACQUIRED,
-      self::STATUS_ACTIVE,
-      self::STATUS_RELEASED,
-      self::STATUS_BROKEN,
-      self::STATUS_DESTROYED,
-    );
+    return array_keys(self::getStatusMap());
   }
 
 }
