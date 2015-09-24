@@ -21,6 +21,12 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       ->setUser($viewer)
       ->setPolicyObject($blueprint);
 
+    if ($blueprint->getIsDisabled()) {
+      $header->setStatus('fa-ban', 'red', pht('Disabled'));
+    } else {
+      $header->setStatus('fa-check', 'bluegrey', pht('Active'));
+    }
+
     $actions = $this->buildActionListView($blueprint);
     $properties = $this->buildPropertyListView($blueprint, $actions);
 
@@ -84,15 +90,15 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
   }
 
   private function buildActionListView(DrydockBlueprint $blueprint) {
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
+    $id = $blueprint->getID();
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
       ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($blueprint);
 
-    $uri = '/blueprint/edit/'.$blueprint->getID().'/';
-    $uri = $this->getApplicationURI($uri);
+    $edit_uri = $this->getApplicationURI("blueprint/edit/{$id}/");
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -101,10 +107,28 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
 
     $view->addAction(
       id(new PhabricatorActionView())
-        ->setHref($uri)
+        ->setHref($edit_uri)
         ->setName(pht('Edit Blueprint'))
         ->setIcon('fa-pencil')
         ->setWorkflow(!$can_edit)
+        ->setDisabled(!$can_edit));
+
+    if (!$blueprint->getIsDisabled()) {
+      $disable_name = pht('Disable Blueprint');
+      $disable_icon = 'fa-ban';
+      $disable_uri = $this->getApplicationURI("blueprint/{$id}/disable/");
+    } else {
+      $disable_name = pht('Enable Blueprint');
+      $disable_icon = 'fa-check';
+      $disable_uri = $this->getApplicationURI("blueprint/{$id}/enable/");
+    }
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setHref($disable_uri)
+        ->setName($disable_name)
+        ->setIcon($disable_icon)
+        ->setWorkflow(true)
         ->setDisabled(!$can_edit));
 
     return $view;

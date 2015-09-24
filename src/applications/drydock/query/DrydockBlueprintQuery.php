@@ -6,6 +6,7 @@ final class DrydockBlueprintQuery extends DrydockQuery {
   private $phids;
   private $blueprintClasses;
   private $datasourceQuery;
+  private $disabled;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -24,6 +25,11 @@ final class DrydockBlueprintQuery extends DrydockQuery {
 
   public function withDatasourceQuery($query) {
     $this->datasourceQuery = $query;
+    return $this;
+  }
+
+  public function withDisabled($disabled) {
+    $this->disabled = $disabled;
     return $this;
   }
 
@@ -80,6 +86,13 @@ final class DrydockBlueprintQuery extends DrydockQuery {
         $conn,
         'className IN (%Ls)',
         $this->blueprintClasses);
+    }
+
+    if ($this->disabled !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'isDisabled = %d',
+        (int)$this->disabled);
     }
 
     return $where;

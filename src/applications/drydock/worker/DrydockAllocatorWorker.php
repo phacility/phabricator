@@ -184,12 +184,10 @@ final class DrydockAllocatorWorker extends DrydockWorker {
       return array();
     }
 
-    // TODO: When blueprints can be disabled, this query should ignore disabled
-    // blueprints.
-
     $blueprints = id(new DrydockBlueprintQuery())
       ->setViewer($viewer)
       ->withBlueprintClasses(array_keys($impls))
+      ->withDisabled(false)
       ->execute();
 
     $keep = array();

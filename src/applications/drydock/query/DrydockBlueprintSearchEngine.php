@@ -18,11 +18,23 @@ final class DrydockBlueprintSearchEngine
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
+    if ($map['isDisabled'] !== null) {
+      $query->withDisabled($map['isDisabled']);
+    }
+
     return $query;
   }
 
   protected function buildCustomSearchFields() {
-    return array();
+    return array(
+      id(new PhabricatorSearchThreeStateField())
+        ->setLabel(pht('Disabled'))
+        ->setKey('isDisabled')
+        ->setOptions(
+          pht('(Show All)'),
+          pht('Show Only Disabled Blueprints'),
+          pht('Hide Disabled Blueprints')),
+    );
   }
 
   protected function getURI($path) {
@@ -31,6 +43,7 @@ final class DrydockBlueprintSearchEngine
 
   protected function getBuiltinQueryNames() {
     return array(
+      'active' => pht('Active Blueprints'),
       'all' => pht('All Blueprints'),
     );
   }
@@ -40,6 +53,8 @@ final class DrydockBlueprintSearchEngine
     $query->setQueryKey($query_key);
 
     switch ($query_key) {
+      case 'active':
+        return $query->setParameter('isDisabled', false);
       case 'all':
         return $query;
     }
@@ -64,6 +79,12 @@ final class DrydockBlueprintSearchEngine
 
       if (!$blueprint->getImplementation()->isEnabled()) {
         $item->setDisabled(true);
+        $item->addIcon('fa-chain-broken grey', pht('Implementation'));
+      }
+
+      if ($blueprint->getIsDisabled()) {
+        $item->setDisabled(true);
+        $item->addIcon('fa-ban grey', pht('Disabled'));
       }
 
       $item->addAttribute($blueprint->getImplementation()->getBlueprintName());

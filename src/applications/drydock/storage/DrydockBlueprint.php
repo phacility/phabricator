@@ -15,6 +15,7 @@ final class DrydockBlueprint extends DrydockDAO
   protected $viewPolicy;
   protected $editPolicy;
   protected $details = array();
+  protected $isDisabled;
 
   private $implementation = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
@@ -34,7 +35,8 @@ final class DrydockBlueprint extends DrydockDAO
     return id(new DrydockBlueprint())
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
-      ->setBlueprintName('');
+      ->setBlueprintName('')
+      ->setIsDisabled(0);
   }
 
   protected function getConfiguration() {
@@ -46,6 +48,7 @@ final class DrydockBlueprint extends DrydockDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'className' => 'text255',
         'blueprintName' => 'sort255',
+        'isDisabled' => 'bool',
       ),
     ) + parent::getConfiguration();
   }

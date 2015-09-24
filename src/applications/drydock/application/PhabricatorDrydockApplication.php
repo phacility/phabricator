@@ -49,7 +49,11 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
         '' => 'DrydockConsoleController',
         'blueprint/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'DrydockBlueprintListController',
-          '(?P<id>[1-9]\d*)/' => 'DrydockBlueprintViewController',
+          '(?P<id>[1-9]\d*)/' => array(
+            '' => 'DrydockBlueprintViewController',
+            '(?P<action>disable|enable)/' =>
+              'DrydockBlueprintDisableController',
+          ),
           'create/' => 'DrydockBlueprintCreateController',
           'edit/(?:(?P<id>[1-9]\d*)/)?' => 'DrydockBlueprintEditController',
         ),
@@ -62,8 +66,10 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
         ),
         'lease/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'DrydockLeaseListController',
-          '(?P<id>[1-9]\d*)/' => 'DrydockLeaseViewController',
-          '(?P<id>[1-9]\d*)/release/' => 'DrydockLeaseReleaseController',
+          '(?P<id>[1-9]\d*)/' => array(
+            '' => 'DrydockLeaseViewController',
+            'release/' => 'DrydockLeaseReleaseController',
+          ),
         ),
         'log/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'DrydockLogListController',
