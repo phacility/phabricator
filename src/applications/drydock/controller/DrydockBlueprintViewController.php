@@ -30,24 +30,6 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
     $actions = $this->buildActionListView($blueprint);
     $properties = $this->buildPropertyListView($blueprint, $actions);
 
-    $blueprint_uri = 'blueprint/'.$blueprint->getID().'/';
-    $blueprint_uri = $this->getApplicationURI($blueprint_uri);
-
-    $resources = id(new DrydockResourceQuery())
-      ->withBlueprintPHIDs(array($blueprint->getPHID()))
-      ->setViewer($viewer)
-      ->execute();
-
-    $resource_list = id(new DrydockResourceListView())
-      ->setUser($viewer)
-      ->setResources($resources)
-      ->render();
-    $resource_list->setNoDataString(pht('This blueprint has no resources.'));
-
-    $pager = new PHUIPagerView();
-    $pager->setURI(new PhutilURI($blueprint_uri), 'offset');
-    $pager->setOffset($request->getInt('offset'));
-
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Blueprint %d', $blueprint->getID()));
 
@@ -67,9 +49,7 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       $viewer,
       $properties);
 
-    $resource_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Resources'))
-      ->setObjectList($resource_list);
+    $resource_box = $this->buildResourceBox($blueprint);
 
     $timeline = $this->buildTransactionTimeline(
       $blueprint,
@@ -147,5 +127,44 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
 
     return $view;
   }
+
+  private function buildResourceBox(DrydockBlueprint $blueprint) {
+    $viewer = $this->getViewer();
+
+    $resources = id(new DrydockResourceQuery())
+      ->setViewer($viewer)
+      ->withBlueprintPHIDs(array($blueprint->getPHID()))
+      ->withStatuses(
+        array(
+          DrydockResourceStatus::STATUS_PENDING,
+          DrydockResourceStatus::STATUS_ACTIVE,
+        ))
+      ->setLimit(100)
+      ->execute();
+
+    $resource_list = id(new DrydockResourceListView())
+      ->setUser($viewer)
+      ->setResources($resources)
+      ->render()
+      ->setNoDataString(pht('This blueprint has no active resources.'));
+
+    $id = $blueprint->getID();
+    $resources_uri = "blueprint/{$id}/resources/query/all/";
+    $resources_uri = $this->getApplicationURI($resources_uri);
+
+    $resource_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Active Resources'))
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setHref($resources_uri)
+          ->setIconFont('fa-search')
+          ->setText(pht('View All Resources')));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($resource_header)
+      ->setObjectList($resource_list);
+  }
+
 
 }

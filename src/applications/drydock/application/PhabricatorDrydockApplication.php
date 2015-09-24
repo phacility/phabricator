@@ -53,6 +53,8 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
             '' => 'DrydockBlueprintViewController',
             '(?P<action>disable|enable)/' =>
               'DrydockBlueprintDisableController',
+            'resources/(?:query/(?P<queryKey>[^/]+)/)?' =>
+              'DrydockResourceListController',
           ),
           'create/' => 'DrydockBlueprintCreateController',
           'edit/(?:(?P<id>[1-9]\d*)/)?' => 'DrydockBlueprintEditController',

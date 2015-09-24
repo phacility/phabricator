@@ -3,6 +3,17 @@
 final class DrydockResourceSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  private $blueprint;
+
+  public function setBlueprint(DrydockBlueprint $blueprint) {
+    $this->blueprint = $blueprint;
+    return $this;
+  }
+
+  public function getBlueprint() {
+    return $this->blueprint;
+  }
+
   public function getResultTypeDescription() {
     return pht('Drydock Resources');
   }
@@ -12,7 +23,14 @@ final class DrydockResourceSearchEngine
   }
 
   public function newQuery() {
-    return new DrydockResourceQuery();
+    $query = new DrydockResourceQuery();
+
+    $blueprint = $this->getBlueprint();
+    if ($blueprint) {
+      $query->withBlueprintPHIDs(array($blueprint->getPHID()));
+    }
+
+    return $query;
   }
 
   protected function buildQueryFromParameters(array $map) {
@@ -35,7 +53,13 @@ final class DrydockResourceSearchEngine
   }
 
   protected function getURI($path) {
-    return '/drydock/resource/'.$path;
+    $blueprint = $this->getBlueprint();
+    if ($blueprint) {
+      $id = $blueprint->getID();
+      return "/drydock/blueprint/{$id}/resources/".$path;
+    } else {
+      return '/drydock/resource/'.$path;
+    }
   }
 
   protected function getBuiltinQueryNames() {
