@@ -18,9 +18,14 @@ abstract class DrydockResourceController
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    id(new DrydockResourceSearchEngine())
-      ->setViewer($this->getViewer())
-      ->addNavigationItems($nav->getMenu());
+    $engine = id(new DrydockResourceSearchEngine())
+      ->setViewer($this->getViewer());
+
+    if ($this->getBlueprint()) {
+      $engine->setBlueprint($this->getBlueprint());
+    }
+
+    $engine->addNavigationItems($nav->getMenu());
 
     $nav->selectFilter(null);
 

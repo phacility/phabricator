@@ -3,6 +3,17 @@
 final class DrydockLeaseSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  private $resource;
+
+  public function setResource($resource) {
+    $this->resource = $resource;
+    return $this;
+  }
+
+  public function getResource() {
+    return $this->resource;
+  }
+
   public function getResultTypeDescription() {
     return pht('Drydock Leases');
   }
@@ -12,7 +23,14 @@ final class DrydockLeaseSearchEngine
   }
 
   public function newQuery() {
-    return new DrydockLeaseQuery();
+    $query = new DrydockLeaseQuery();
+
+    $resource = $this->getResource();
+    if ($resource) {
+      $query->withResourcePHIDs(array($resource->getPHID()));
+    }
+
+    return $query;
   }
 
   protected function buildQueryFromParameters(array $map) {
@@ -35,7 +53,13 @@ final class DrydockLeaseSearchEngine
   }
 
   protected function getURI($path) {
-    return '/drydock/lease/'.$path;
+    $resource = $this->getResource();
+    if ($resource) {
+      $id = $resource->getID();
+      return "/drydock/resource/{$id}/leases/".$path;
+    } else {
+      return '/drydock/lease/'.$path;
+    }
   }
 
   protected function getBuiltinQueryNames() {

@@ -27,17 +27,6 @@ final class DrydockResourceViewController extends DrydockResourceController {
     $resource_uri = 'resource/'.$resource->getID().'/';
     $resource_uri = $this->getApplicationURI($resource_uri);
 
-    $leases = id(new DrydockLeaseQuery())
-      ->setViewer($viewer)
-      ->withResourcePHIDs(array($resource->getPHID()))
-      ->execute();
-
-    $lease_list = id(new DrydockLeaseListView())
-      ->setUser($viewer)
-      ->setLeases($leases)
-      ->render();
-    $lease_list->setNoDataString(pht('This resource has no leases.'));
-
     $pager = new PHUIPagerView();
     $pager->setURI(new PhutilURI($resource_uri), 'offset');
     $pager->setOffset($request->getInt('offset'));
@@ -65,9 +54,7 @@ final class DrydockResourceViewController extends DrydockResourceController {
       ->addPropertyList($locks, pht('Slot Locks'))
       ->addPropertyList($commands, pht('Commands'));
 
-    $lease_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Leases'))
-      ->setObjectList($lease_list);
+    $lease_box = $this->buildLeaseBox($resource);
 
     $log_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Resource Logs'))
@@ -147,6 +134,45 @@ final class DrydockResourceViewController extends DrydockResourceController {
     }
 
     return $view;
+  }
+
+  private function buildLeaseBox(DrydockResource $resource) {
+    $viewer = $this->getViewer();
+
+    $leases = id(new DrydockLeaseQuery())
+      ->setViewer($viewer)
+      ->withResourcePHIDs(array($resource->getPHID()))
+      ->withStatuses(
+        array(
+          DrydockLeaseStatus::STATUS_PENDING,
+          DrydockLeaseStatus::STATUS_ACQUIRED,
+          DrydockLeaseStatus::STATUS_ACTIVE,
+        ))
+      ->setLimit(100)
+      ->execute();
+
+    $id = $resource->getID();
+    $leases_uri = "resource/{$id}/leases/query/all/";
+    $leases_uri = $this->getApplicationURI($leases_uri);
+
+    $lease_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Active Leases'))
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setHref($leases_uri)
+          ->setIconFont('fa-search')
+          ->setText(pht('View All Leases')));
+
+    $lease_list = id(new DrydockLeaseListView())
+      ->setUser($viewer)
+      ->setLeases($leases)
+      ->render()
+      ->setNoDataString(pht('This resource has no active leases.'));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($lease_header)
+      ->setObjectList($lease_list);
   }
 
 }
