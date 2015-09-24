@@ -102,30 +102,9 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
     $view = new PHUIPropertyListView();
     $view->setActionList($actions);
 
-    switch ($lease->getStatus()) {
-      case DrydockLeaseStatus::STATUS_ACTIVE:
-        $status = pht('Active');
-        break;
-      case DrydockLeaseStatus::STATUS_RELEASED:
-        $status = pht('Released');
-        break;
-      case DrydockLeaseStatus::STATUS_EXPIRED:
-        $status = pht('Expired');
-        break;
-      case DrydockLeaseStatus::STATUS_PENDING:
-        $status = pht('Pending');
-        break;
-      case DrydockLeaseStatus::STATUS_BROKEN:
-        $status = pht('Broken');
-        break;
-      default:
-        $status = pht('Unknown');
-        break;
-    }
-
     $view->addProperty(
       pht('Status'),
-      $status);
+      DrydockLeaseStatus::getNameForStatus($lease->getStatus()));
 
     $view->addProperty(
       pht('Resource Type'),

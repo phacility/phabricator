@@ -29,10 +29,8 @@ final class DrydockLeaseDestroyWorker extends DrydockWorker {
 
     $blueprint->destroyLease($resource, $lease);
 
-    // TODO: Rename DrydockLeaseStatus::STATUS_EXPIRED to STATUS_DESTROYED.
-
     $lease
-      ->setStatus(DrydockLeaseStatus::STATUS_EXPIRED)
+      ->setStatus(DrydockLeaseStatus::STATUS_DESTROYED)
       ->save();
   }
 

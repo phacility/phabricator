@@ -160,8 +160,8 @@ final class DrydockLease extends DrydockDAO
           return;
         case DrydockLeaseStatus::STATUS_RELEASED:
           throw new Exception(pht('Lease has already been released!'));
-        case DrydockLeaseStatus::STATUS_EXPIRED:
-          throw new Exception(pht('Lease has already expired!'));
+        case DrydockLeaseStatus::STATUS_DESTROYED:
+          throw new Exception(pht('Lease has already been destroyed!'));
         case DrydockLeaseStatus::STATUS_BROKEN:
           throw new Exception(pht('Lease has been broken!'));
         case DrydockLeaseStatus::STATUS_PENDING:
@@ -289,6 +289,7 @@ final class DrydockLease extends DrydockDAO
 
     switch ($this->getStatus()) {
       case DrydockLeaseStatus::STATUS_RELEASED:
+      case DrydockLeaseStatus::STATUS_DESTROYED:
         return false;
       default:
         return true;
