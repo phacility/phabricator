@@ -88,7 +88,7 @@ final class HarbormasterLeaseWorkingCopyBuildStepImplementation
       array(
         'name' => pht('Working Copy'),
         'key' => $this->getSetting('name'),
-        'type' => HarbormasterHostArtifact::ARTIFACTCONST,
+        'type' => HarbormasterWorkingCopyArtifact::ARTIFACTCONST,
       ),
     );
   }

@@ -10,6 +10,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
   protected $live;
 
   private $buildTarget = self::ATTACHABLE;
+  private $start;
 
   const CHUNK_BYTE_LIMIT = 102400;
 
@@ -17,6 +18,12 @@ final class HarbormasterBuildLog extends HarbormasterDAO
    * The log is encoded as plain text.
    */
   const ENCODING_TEXT = 'text';
+
+  public function __destruct() {
+    if ($this->live) {
+      $this->finalize($this->start);
+    }
+  }
 
   public static function initializeNewBuildLog(
     HarbormasterBuildTarget $build_target) {
@@ -74,6 +81,8 @@ final class HarbormasterBuildLog extends HarbormasterDAO
 
     $this->setLive(1);
     $this->save();
+
+    $this->start = PhabricatorTime::getNow();
 
     return time();
   }

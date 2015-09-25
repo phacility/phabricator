@@ -51,9 +51,6 @@ final class HarbormasterHTTPRequestBuildStepImplementation
       $settings['uri'],
       $variables);
 
-    $log_body = $build->createLog($build_target, $uri, 'http-body');
-    $start = $log_body->start();
-
     $method = nonempty(idx($settings, 'method'), 'POST');
 
     $future = id(new HTTPSFuture($uri))
@@ -70,16 +67,30 @@ final class HarbormasterHTTPRequestBuildStepImplementation
         $key->getPasswordEnvelope());
     }
 
-    list($status, $body, $headers) = $this->resolveFuture(
+    $this->resolveFutures(
       $build,
       $build_target,
-      $future);
+      array($future));
 
-    $log_body->append($body);
-    $log_body->finalize($start);
+    list($status, $body, $headers) = $future->resolve();
+
+    $header_lines = array();
+    foreach ($headers as $header) {
+      list($head, $tail) = $header;
+      $header_lines[] = "{$head}: {$tail}";
+    }
+    $header_lines = implode("\n", $header_lines);
+
+    $build_target
+      ->newLog($uri, 'http.head')
+      ->append($header_lines);
+
+    $build_target
+      ->newLog($uri, 'http.body')
+      ->append($body);
 
     if ($status->getStatusCode() != 200) {
-      $build->setBuildStatus(HarbormasterBuild::STATUS_FAILED);
+      throw new HarbormasterBuildFailureException();
     }
   }
 
