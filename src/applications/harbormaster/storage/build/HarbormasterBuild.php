@@ -251,6 +251,7 @@ final class HarbormasterBuild extends HarbormasterDAO
       'buildable.revision' => null,
       'buildable.commit' => null,
       'repository.callsign' => null,
+      'repository.phid' => null,
       'repository.vcs' => null,
       'repository.uri' => null,
       'step.timestamp' => null,

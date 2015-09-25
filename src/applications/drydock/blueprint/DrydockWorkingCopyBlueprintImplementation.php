@@ -126,6 +126,26 @@ final class DrydockWorkingCopyBlueprintImplementation
       ->activateResource();
   }
 
+  public function destroyResource(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource) {
+
+    $lease = $this->loadHostLease($resource);
+
+    // Destroy the lease on the host.
+    $lease->releaseOnDestruction();
+
+    // Destroy the working copy on disk.
+    $command_type = DrydockCommandInterface::INTERFACE_TYPE;
+    $interface = $lease->getInterface($command_type);
+
+    $root_key = 'workingcopy.root';
+    $root = $resource->getAttribute($root_key);
+    if (strlen($root)) {
+      $interface->execx('rm -rf -- %s', $root);
+    }
+  }
+
   public function activateLease(
     DrydockBlueprint $blueprint,
     DrydockResource $resource,
@@ -160,6 +180,26 @@ final class DrydockWorkingCopyBlueprintImplementation
       $argv);
 
     $lease->activateOnResource($resource);
+  }
+
+  public function didReleaseLease(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    // We leave working copies around even if there are no leases on them,
+    // since the cost to maintain them is nearly zero but rebuilding them is
+    // moderately expensive and it's likely that they'll be reused.
+    return;
+  }
+
+  public function destroyLease(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    // When we activate a lease we just reset the working copy state and do
+    // not create any new state, so we don't need to do anything special when
+    // destroying a lease.
+    return;
   }
 
   public function getType() {

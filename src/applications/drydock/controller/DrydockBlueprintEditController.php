@@ -33,8 +33,10 @@ final class DrydockBlueprintEditController extends DrydockBlueprintController {
         return new Aphront400Response();
       }
 
-      $blueprint = DrydockBlueprint::initializeNewBlueprint($viewer);
-      $blueprint->setClassName($class);
+      $blueprint = DrydockBlueprint::initializeNewBlueprint($viewer)
+        ->setClassName($class)
+        ->attachImplementation($impl);
+
       $cancel_uri = $this->getApplicationURI('blueprint/');
     }
 

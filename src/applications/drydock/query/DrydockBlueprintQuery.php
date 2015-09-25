@@ -6,6 +6,7 @@ final class DrydockBlueprintQuery extends DrydockQuery {
   private $phids;
   private $blueprintClasses;
   private $datasourceQuery;
+  private $disabled;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -24,6 +25,11 @@ final class DrydockBlueprintQuery extends DrydockQuery {
 
   public function withDatasourceQuery($query) {
     $this->datasourceQuery = $query;
+    return $this;
+  }
+
+  public function withDisabled($disabled) {
+    $this->disabled = $disabled;
     return $this;
   }
 
@@ -82,24 +88,14 @@ final class DrydockBlueprintQuery extends DrydockQuery {
         $this->blueprintClasses);
     }
 
+    if ($this->disabled !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'isDisabled = %d',
+        (int)$this->disabled);
+    }
+
     return $where;
-  }
-
-  public function getOrderableColumns() {
-    // TODO: Blueprints implement CustomFields, but can not be ordered by
-    // custom field classes because the custom fields are not global. There
-    // is no graceful way to handle this in ApplicationSearch at the moment.
-    // Just brute force around it until we can clean this up.
-
-    return array(
-      'id' => array(
-        'table' => $this->getPrimaryTableAlias(),
-        'column' => 'id',
-        'reverse' => false,
-        'type' => 'int',
-        'unique' => true,
-      ),
-    );
   }
 
 }

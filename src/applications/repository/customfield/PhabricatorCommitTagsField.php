@@ -29,18 +29,23 @@ final class PhabricatorCommitTagsField
       'callsign' => $this->getObject()->getRepository()->getCallsign(),
     );
 
-    $tags_raw = id(new ConduitCall('diffusion.tagsquery', $params))
-      ->setUser($this->getViewer())
-      ->execute();
+    try {
+      $tags_raw = id(new ConduitCall('diffusion.tagsquery', $params))
+        ->setUser($this->getViewer())
+        ->execute();
 
-    $tags = DiffusionRepositoryTag::newFromConduit($tags_raw);
-    if (!$tags) {
-      return;
+      $tags = DiffusionRepositoryTag::newFromConduit($tags_raw);
+      if (!$tags) {
+        return;
+      }
+      $tag_names = mpull($tags, 'getName');
+      sort($tag_names);
+      $tag_names = implode(', ', $tag_names);
+    } catch (Exception $ex) {
+      $tag_names = pht('<%s: %s>', get_class($ex), $ex->getMessage());
     }
-    $tag_names = mpull($tags, 'getName');
-    sort($tag_names);
 
-    $body->addTextSection(pht('TAGS'), implode(', ', $tag_names));
+    $body->addTextSection(pht('TAGS'), $tag_names);
   }
 
 }

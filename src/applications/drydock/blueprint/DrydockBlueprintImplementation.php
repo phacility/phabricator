@@ -8,9 +8,6 @@
  */
 abstract class DrydockBlueprintImplementation extends Phobject {
 
-  private $activeResource;
-  private $activeLease;
-
   abstract public function getType();
 
   abstract public function isEnabled();
@@ -67,6 +64,11 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     DrydockResource $resource,
     DrydockLease $lease);
 
+
+  /**
+   * @return void
+   * @task lease
+   */
   public function activateLease(
     DrydockBlueprint $blueprint,
     DrydockResource $resource,
@@ -74,37 +76,40 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     throw new PhutilMethodNotImplementedException();
   }
 
-  final public function releaseLease(
+
+  /**
+   * React to a lease being released.
+   *
+   * This callback is primarily useful for automatically releasing resources
+   * once all leases are released.
+   *
+   * @param DrydockBlueprint Blueprint which built the resource.
+   * @param DrydockResource Resource a lease was released on.
+   * @param DrydockLease Recently released lease.
+   * @return void
+   * @task lease
+   */
+  abstract public function didReleaseLease(
     DrydockBlueprint $blueprint,
     DrydockResource $resource,
-    DrydockLease $lease) {
+    DrydockLease $lease);
 
-    // TODO: This is all broken nonsense.
 
-    $scope = $this->pushActiveScope(null, $lease);
-
-    $released = false;
-
-    $lease->openTransaction();
-      $lease->beginReadLocking();
-        $lease->reload();
-
-        if ($lease->getStatus() == DrydockLeaseStatus::STATUS_ACTIVE) {
-          $lease->release();
-          $lease->setStatus(DrydockLeaseStatus::STATUS_RELEASED);
-          $lease->save();
-          $released = true;
-        }
-
-      $lease->endReadLocking();
-    $lease->saveTransaction();
-
-    if (!$released) {
-      throw new Exception(pht('Unable to release lease: lease not active!'));
-    }
-
-  }
-
+  /**
+   * Destroy any temporary data associated with a lease.
+   *
+   * If a lease creates temporary state while held, destroy it here.
+   *
+   * @param DrydockBlueprint Blueprint which built the resource.
+   * @param DrydockResource Resource the lease is acquired on.
+   * @param DrydockLease The lease being destroyed.
+   * @return void
+   * @task lease
+   */
+  abstract public function destroyLease(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource,
+    DrydockLease $lease);
 
 
 /* -(  Resource Allocation  )------------------------------------------------ */
@@ -204,11 +209,33 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     DrydockBlueprint $blueprint,
     DrydockLease $lease);
 
+
+  /**
+   * @task resource
+   */
   public function activateResource(
     DrydockBlueprint $blueprint,
     DrydockResource $resource) {
     throw new PhutilMethodNotImplementedException();
   }
+
+
+  /**
+   * Destroy any temporary data associated with a resource.
+   *
+   * If a resource creates temporary state when allocated, destroy that state
+   * here. For example, you might shut down a virtual host or destroy a working
+   * copy on disk.
+   *
+   * @param DrydockBlueprint Blueprint which built the resource.
+   * @param DrydockResource Resource being destroyed.
+   * @return void
+   * @task resource
+   */
+  abstract public function destroyResource(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource);
+
 
 /* -(  Resource Interfaces  )------------------------------------------------ */
 
@@ -235,10 +262,7 @@ abstract class DrydockBlueprintImplementation extends Phobject {
    * @task log
    */
   protected function log($message) {
-    self::writeLog(
-      $this->activeResource,
-      $this->activeLease,
-      $message);
+    self::writeLog(null, null, $message);
   }
 
 
@@ -290,13 +314,6 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     // Pre-allocate the resource PHID.
     $resource->setPHID($resource->generatePHID());
 
-    $this->activeResource = $resource;
-
-    $this->log(
-      pht(
-        "Blueprint '%s': Created New Template",
-        get_class($this)));
-
     return $resource;
   }
 
@@ -317,26 +334,6 @@ abstract class DrydockBlueprintImplementation extends Phobject {
         // TODO: Permanent failure.
         throw new Exception(pht('Lease in bad state.'));
     }
-  }
-
-  private function pushActiveScope(
-    DrydockResource $resource = null,
-    DrydockLease $lease = null) {
-
-    if (($this->activeResource !== null) ||
-        ($this->activeLease !== null)) {
-      throw new Exception(pht('There is already an active resource or lease!'));
-    }
-
-    $this->activeResource = $resource;
-    $this->activeLease = $lease;
-
-    return new DrydockBlueprintScopeGuard($this);
-  }
-
-  public function popActiveScope() {
-    $this->activeResource = null;
-    $this->activeLease = null;
   }
 
 }

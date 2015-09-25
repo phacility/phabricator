@@ -184,12 +184,10 @@ final class DrydockAllocatorWorker extends DrydockWorker {
       return array();
     }
 
-    // TODO: When blueprints can be disabled, this query should ignore disabled
-    // blueprints.
-
     $blueprints = id(new DrydockBlueprintQuery())
       ->setViewer($viewer)
       ->withBlueprintClasses(array_keys($impls))
+      ->withDisabled(false)
       ->execute();
 
     $keep = array();
@@ -229,7 +227,7 @@ final class DrydockAllocatorWorker extends DrydockWorker {
       ->withStatuses(
         array(
           DrydockResourceStatus::STATUS_PENDING,
-          DrydockResourceStatus::STATUS_OPEN,
+          DrydockResourceStatus::STATUS_ACTIVE,
         ))
       ->execute();
 
@@ -462,10 +460,10 @@ final class DrydockAllocatorWorker extends DrydockWorker {
           'acquireLease()'));
     }
 
-    $lease_id = $lease->getResourceID();
-    $resource_id = $resource->getID();
+    $lease_phid = $lease->getResourcePHID();
+    $resource_phid = $resource->getPHID();
 
-    if ($lease_id !== $resource_id) {
+    if ($lease_phid !== $resource_phid) {
       // TODO: Destroy the lease?
       throw new Exception(
         pht(

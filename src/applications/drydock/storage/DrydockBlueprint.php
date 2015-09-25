@@ -15,6 +15,7 @@ final class DrydockBlueprint extends DrydockDAO
   protected $viewPolicy;
   protected $editPolicy;
   protected $details = array();
+  protected $isDisabled;
 
   private $implementation = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
@@ -34,7 +35,8 @@ final class DrydockBlueprint extends DrydockDAO
     return id(new DrydockBlueprint())
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
-      ->setBlueprintName('');
+      ->setBlueprintName('')
+      ->setIsDisabled(0);
   }
 
   protected function getConfiguration() {
@@ -46,6 +48,7 @@ final class DrydockBlueprint extends DrydockDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'className' => 'text255',
         'blueprintName' => 'sort255',
+        'isDisabled' => 'bool',
       ),
     ) + parent::getConfiguration();
   }
@@ -62,6 +65,10 @@ final class DrydockBlueprint extends DrydockDAO
   public function attachImplementation(DrydockBlueprintImplementation $impl) {
     $this->implementation = $impl;
     return $this;
+  }
+
+  public function hasImplementation() {
+    return ($this->implementation !== self::ATTACHABLE);
   }
 
   public function getDetail($key, $default = null) {
@@ -143,6 +150,18 @@ final class DrydockBlueprint extends DrydockDAO
       $resource);
   }
 
+
+  /**
+   * @task resource
+   */
+  public function destroyResource(DrydockResource $resource) {
+    $this->getImplementation()->destroyResource(
+      $this,
+      $resource);
+    return $this;
+  }
+
+
 /* -(  Acquiring Leases  )--------------------------------------------------- */
 
 
@@ -188,10 +207,27 @@ final class DrydockBlueprint extends DrydockDAO
   /**
    * @task lease
    */
-  public function releaseLease(
+  public function didReleaseLease(
     DrydockResource $resource,
     DrydockLease $lease) {
-    $this->getImplementation()->releaseLease($this, $resource, $lease);
+    $this->getImplementation()->didReleaseLease(
+      $this,
+      $resource,
+      $lease);
+    return $this;
+  }
+
+
+  /**
+   * @task lease
+   */
+  public function destroyLease(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    $this->getImplementation()->destroyLease(
+      $this,
+      $resource,
+      $lease);
     return $this;
   }
 
