@@ -13,9 +13,7 @@ final class PhabricatorAuditReplyHandler
   }
 
   public function getObjectPrefix() {
-    // TODO: This conflicts with Countdown and will probably need to be
-    // changed eventually.
-    return 'C';
+    return 'COMMIT';
   }
 
 }
