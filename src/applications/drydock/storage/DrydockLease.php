@@ -126,22 +126,23 @@ final class DrydockLease extends DrydockDAO
     return $this;
   }
 
-  public function isActive() {
-    switch ($this->status) {
+  public function isActivating() {
+    switch ($this->getStatus()) {
+      case DrydockLeaseStatus::STATUS_PENDING:
       case DrydockLeaseStatus::STATUS_ACQUIRED:
-      case DrydockLeaseStatus::STATUS_ACTIVE:
         return true;
     }
+
     return false;
   }
 
-  private function assertActive() {
-    if (!$this->isActive()) {
-      throw new Exception(
-        pht(
-          'Lease is not active! You can not interact with resources through '.
-          'an inactive lease.'));
+  public function isActive() {
+    switch ($this->getStatus()) {
+      case DrydockLeaseStatus::STATUS_ACTIVE:
+        return true;
     }
+
+    return false;
   }
 
   public function waitUntilActive() {

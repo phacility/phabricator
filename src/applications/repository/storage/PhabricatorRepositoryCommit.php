@@ -332,6 +332,7 @@ final class PhabricatorRepositoryCommit
     $repo = $this->getRepository();
 
     $results['repository.callsign'] = $repo->getCallsign();
+    $results['repository.phid'] = $repo->getPHID();
     $results['repository.vcs'] = $repo->getVersionControlSystem();
     $results['repository.uri'] = $repo->getPublicCloneURI();
 
@@ -343,6 +344,8 @@ final class PhabricatorRepositoryCommit
       'buildable.commit' => pht('The commit identifier, if applicable.'),
       'repository.callsign' =>
         pht('The callsign of the repository in Phabricator.'),
+      'repository.phid' =>
+        pht('The PHID of the repository in Phabricator.'),
       'repository.vcs' =>
         pht('The version control system, either "svn", "hg" or "git".'),
       'repository.uri' =>
