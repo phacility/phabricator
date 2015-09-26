@@ -29,6 +29,7 @@ final class PhamePostSearchEngine
     return array(
       id(new PhabricatorSearchSelectField())
         ->setKey('visibility')
+        ->setLabel(pht('Visibility'))
         ->setOptions(array(
           '' => pht('All'),
           PhamePost::VISIBILITY_PUBLISHED => pht('Live'),

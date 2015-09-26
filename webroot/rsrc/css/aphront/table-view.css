@@ -102,7 +102,7 @@ th.aphront-table-view-sortable-selected {
 */
 
 .aphront-table-view th {
-  padding: 10px 10px;
+  padding: 8px 10px;
   font-size: {$normalfontsize};
 }
 

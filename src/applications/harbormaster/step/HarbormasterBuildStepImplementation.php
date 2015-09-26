@@ -238,22 +238,21 @@ abstract class HarbormasterBuildStepImplementation extends Phobject {
     return $build->getBuildGeneration() !== $target->getBuildGeneration();
   }
 
-  protected function resolveFuture(
+  protected function resolveFutures(
     HarbormasterBuild $build,
     HarbormasterBuildTarget $target,
-    Future $future) {
+    array $futures) {
 
-    $futures = new FutureIterator(array($future));
+    $futures = new FutureIterator($futures);
     foreach ($futures->setUpdateInterval(5) as $key => $future) {
       if ($future === null) {
         $build->reload();
         if ($this->shouldAbort($build, $target)) {
           throw new HarbormasterBuildAbortedException();
         }
-      } else {
-        return $future->resolve();
       }
     }
+
   }
 
 

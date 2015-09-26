@@ -3,6 +3,17 @@
 final class DrydockLeaseSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  private $resource;
+
+  public function setResource($resource) {
+    $this->resource = $resource;
+    return $this;
+  }
+
+  public function getResource() {
+    return $this->resource;
+  }
+
   public function getResultTypeDescription() {
     return pht('Drydock Leases');
   }
@@ -11,50 +22,44 @@ final class DrydockLeaseSearchEngine
     return 'PhabricatorDrydockApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
+  public function newQuery() {
+    $query = new DrydockLeaseQuery();
 
-    $saved->setParameter(
-      'statuses',
-      $this->readListFromRequest($request, 'statuses'));
-
-    return $saved;
-  }
-
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new DrydockLeaseQuery());
-
-    $statuses = $saved->getParameter('statuses', array());
-    if ($statuses) {
-      $query->withStatuses($statuses);
+    $resource = $this->getResource();
+    if ($resource) {
+      $query->withResourcePHIDs(array($resource->getPHID()));
     }
 
     return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved) {
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
 
-    $statuses = $saved->getParameter('statuses', array());
-
-    $status_control = id(new AphrontFormCheckboxControl())
-      ->setLabel(pht('Status'));
-    foreach (DrydockLeaseStatus::getAllStatuses() as $status) {
-      $status_control->addCheckbox(
-        'statuses[]',
-        $status,
-        DrydockLeaseStatus::getNameForStatus($status),
-        in_array($status, $statuses));
+    if ($map['statuses']) {
+      $query->withStatuses($map['statuses']);
     }
 
-    $form
-      ->appendChild($status_control);
+    return $query;
+  }
 
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchCheckboxesField())
+        ->setLabel(pht('Statuses'))
+        ->setKey('statuses')
+        ->setOptions(DrydockLeaseStatus::getStatusMap()),
+    );
   }
 
   protected function getURI($path) {
-    return '/drydock/lease/'.$path;
+    $resource = $this->getResource();
+    if ($resource) {
+      $id = $resource->getID();
+      return "/drydock/resource/{$id}/leases/".$path;
+    } else {
+      return '/drydock/lease/'.$path;
+    }
   }
 
   protected function getBuiltinQueryNames() {
@@ -74,7 +79,7 @@ final class DrydockLeaseSearchEngine
           'statuses',
           array(
             DrydockLeaseStatus::STATUS_PENDING,
-            DrydockLeaseStatus::STATUS_ACQUIRING,
+            DrydockLeaseStatus::STATUS_ACQUIRED,
             DrydockLeaseStatus::STATUS_ACTIVE,
           ));
       case 'all':

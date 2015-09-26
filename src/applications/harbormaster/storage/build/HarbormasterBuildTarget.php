@@ -249,6 +249,20 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
     return $artifact;
   }
 
+  public function newLog($log_source, $log_type) {
+    $log_source = id(new PhutilUTF8StringTruncator())
+      ->setMaximumBytes(250)
+      ->truncateString($log_source);
+
+    $log = HarbormasterBuildLog::initializeNewBuildLog($this)
+      ->setLogSource($log_source)
+      ->setLogType($log_type);
+
+    $log->start();
+
+    return $log;
+  }
+
 
 /* -(  Status  )------------------------------------------------------------- */
 
@@ -268,6 +282,7 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
   public function isFailed() {
     switch ($this->getTargetStatus()) {
       case self::STATUS_FAILED:
+      case self::STATUS_ABORTED:
         return true;
     }
 

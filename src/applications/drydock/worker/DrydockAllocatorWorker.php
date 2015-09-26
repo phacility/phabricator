@@ -1,187 +1,479 @@
 <?php
 
-final class DrydockAllocatorWorker extends PhabricatorWorker {
-
-  private $lease;
-
-  public function getRequiredLeaseTime() {
-    return 3600 * 24;
-  }
-
-  public function getMaximumRetryCount() {
-    // TODO: Allow Drydock allocations to retry. For now, every failure is
-    // permanent and most of them are because I am bad at programming, so fail
-    // fast rather than ending up in limbo.
-    return 0;
-  }
-
-  private function loadLease() {
-    if (empty($this->lease)) {
-      $lease = id(new DrydockLeaseQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withIDs(array($this->getTaskData()))
-        ->executeOne();
-      if (!$lease) {
-        throw new PhabricatorWorkerPermanentFailureException(
-          pht('No such lease %d!', $this->getTaskData()));
-      }
-      $this->lease = $lease;
-    }
-    return $this->lease;
-  }
-
-  private function logToDrydock($message) {
-    DrydockBlueprintImplementation::writeLog(
-      null,
-      $this->loadLease(),
-      $message);
-  }
+/**
+ * @task allocate Allocator
+ * @task resource Managing Resources
+ * @task lease Managing Leases
+ */
+final class DrydockAllocatorWorker extends DrydockWorker {
 
   protected function doWork() {
-    $lease = $this->loadLease();
-    $this->logToDrydock(pht('Allocating Lease'));
+    $lease_phid = $this->getTaskDataValue('leasePHID');
+    $lease = $this->loadLease($lease_phid);
 
-    try {
-      $this->allocateLease($lease);
-    } catch (Exception $ex) {
+    $this->allocateAndAcquireLease($lease);
+  }
 
-      // TODO: We should really do this when archiving the task, if we've
-      // suffered a permanent failure. But we don't have hooks for that yet
-      // and always fail after the first retry right now, so this is
-      // functionally equivalent.
-      $lease->reload();
-      if ($lease->getStatus() == DrydockLeaseStatus::STATUS_PENDING) {
-        $lease->setStatus(DrydockLeaseStatus::STATUS_BROKEN);
-        $lease->save();
+
+/* -(  Allocator  )---------------------------------------------------------- */
+
+
+  /**
+   * Find or build a resource which can satisfy a given lease request, then
+   * acquire the lease.
+   *
+   * @param DrydockLease Requested lease.
+   * @return void
+   * @task allocator
+   */
+  private function allocateAndAcquireLease(DrydockLease $lease) {
+    $blueprints = $this->loadBlueprintsForAllocatingLease($lease);
+
+    // If we get nothing back, that means no blueprint is defined which can
+    // ever build the requested resource. This is a permanent failure, since
+    // we don't expect to succeed no matter how many times we try.
+    if (!$blueprints) {
+      $lease
+        ->setStatus(DrydockLeaseStatus::STATUS_BROKEN)
+        ->save();
+      throw new PhabricatorWorkerPermanentFailureException(
+        pht(
+          'No active Drydock blueprint exists which can ever allocate a '.
+          'resource for lease "%s".',
+          $lease->getPHID()));
+    }
+
+    // First, try to find a suitable open resource which we can acquire a new
+    // lease on.
+    $resources = $this->loadResourcesForAllocatingLease($blueprints, $lease);
+
+    // If no resources exist yet, see if we can build one.
+    if (!$resources) {
+      $usable_blueprints = $this->removeOverallocatedBlueprints(
+        $blueprints,
+        $lease);
+
+      // If we get nothing back here, some blueprint claims it can eventually
+      // satisfy the lease, just not right now. This is a temporary failure,
+      // and we expect allocation to succeed eventually.
+      if (!$blueprints) {
+        // TODO: More formal temporary failure here. We should retry this
+        // "soon" but not "immediately".
+        throw new Exception(
+          pht('No blueprints have space to allocate a resource right now.'));
       }
 
-      throw $ex;
+      $usable_blueprints = $this->rankBlueprints($blueprints, $lease);
+
+      $exceptions = array();
+      foreach ($usable_blueprints as $blueprint) {
+        try {
+          $resources[] = $this->allocateResource($blueprint, $lease);
+
+          // Bail after allocating one resource, we don't need any more than
+          // this.
+          break;
+        } catch (Exception $ex) {
+          $exceptions[] = $ex;
+        }
+      }
+
+      if (!$resources) {
+        // TODO: We should distinguish between temporary and permament failures
+        // here. If any blueprint failed temporarily, retry "soon". If none
+        // of these failures were temporary, maybe this should be a permanent
+        // failure?
+        throw new PhutilAggregateException(
+          pht(
+            'All blueprints failed to allocate a suitable new resource when '.
+            'trying to allocate lease "%s".',
+            $lease->getPHID()),
+          $exceptions);
+      }
+
+      // NOTE: We have not acquired the lease yet, so it is possible that the
+      // resource we just built will be snatched up by some other lease before
+      // we can. This is not problematic: we'll retry a little later and should
+      // suceed eventually.
+    }
+
+    $resources = $this->rankResources($resources, $lease);
+
+    $exceptions = array();
+    $allocated = false;
+    foreach ($resources as $resource) {
+      try {
+        $this->acquireLease($resource, $lease);
+        $allocated = true;
+        break;
+      } catch (Exception $ex) {
+        $exceptions[] = $ex;
+      }
+    }
+
+    if (!$allocated) {
+      // TODO: We should distinguish between temporary and permanent failures
+      // here. If any failures were temporary (specifically, failed to acquire
+      // locks)
+
+      throw new PhutilAggregateException(
+        pht(
+          'Unable to acquire lease "%s" on any resouce.',
+          $lease->getPHID()),
+        $exceptions);
     }
   }
 
-  private function loadAllBlueprints() {
-    $viewer = PhabricatorUser::getOmnipotentUser();
-    $instances = id(new DrydockBlueprintQuery())
-      ->setViewer($viewer)
-      ->execute();
-    $blueprints = array();
-    foreach ($instances as $instance) {
-      $blueprints[$instance->getPHID()] = $instance;
-    }
-    return $blueprints;
-  }
 
-  private function allocateLease(DrydockLease $lease) {
-    $type = $lease->getResourceType();
+  /**
+   * Get all the @{class:DrydockBlueprintImplementation}s which can possibly
+   * build a resource to satisfy a lease.
+   *
+   * This method returns blueprints which might, at some time, be able to
+   * build a resource which can satisfy the lease. They may not be able to
+   * build that resource right now.
+   *
+   * @param DrydockLease Requested lease.
+   * @return list<DrydockBlueprintImplementation> List of qualifying blueprint
+   *   implementations.
+   * @task allocator
+   */
+  private function loadBlueprintImplementationsForAllocatingLease(
+    DrydockLease $lease) {
 
-    $blueprints = $this->loadAllBlueprints();
+    $impls = DrydockBlueprintImplementation::getAllBlueprintImplementations();
 
-    // TODO: Policy stuff.
-    $pool = id(new DrydockResource())->loadAllWhere(
-      'type = %s AND status = %s',
-      $lease->getResourceType(),
-      DrydockResourceStatus::STATUS_OPEN);
-
-    $this->logToDrydock(
-      pht('Found %d Open Resource(s)', count($pool)));
-
-    $candidates = array();
-    foreach ($pool as $key => $candidate) {
-      if (!isset($blueprints[$candidate->getBlueprintPHID()])) {
-        unset($pool[$key]);
+    $keep = array();
+    foreach ($impls as $key => $impl) {
+      // Don't use disabled blueprint types.
+      if (!$impl->isEnabled()) {
         continue;
       }
 
-      $blueprint = $blueprints[$candidate->getBlueprintPHID()];
-      $implementation = $blueprint->getImplementation();
-
-      if ($implementation->filterResource($candidate, $lease)) {
-        $candidates[] = $candidate;
+      // Don't use blueprint types which can't allocate the correct kind of
+      // resource.
+      if ($impl->getType() != $lease->getResourceType()) {
+        continue;
       }
+
+      if (!$impl->canAnyBlueprintEverAllocateResourceForLease($lease)) {
+        continue;
+      }
+
+      $keep[$key] = $impl;
     }
 
-    $this->logToDrydock(pht('%d Open Resource(s) Remain', count($candidates)));
+    return $keep;
+  }
 
-    $resource = null;
-    if ($candidates) {
-      shuffle($candidates);
-      foreach ($candidates as $candidate_resource) {
-        $blueprint = $blueprints[$candidate_resource->getBlueprintPHID()]
-          ->getImplementation();
-        if ($blueprint->allocateLease($candidate_resource, $lease)) {
-          $resource = $candidate_resource;
-          break;
-        }
-      }
+
+  /**
+   * Get all the concrete @{class:DrydockBlueprint}s which can possibly
+   * build a resource to satisfy a lease.
+   *
+   * @param DrydockLease Requested lease.
+   * @return list<DrydockBlueprint> List of qualifying blueprints.
+   * @task allocator
+   */
+  private function loadBlueprintsForAllocatingLease(
+    DrydockLease $lease) {
+    $viewer = $this->getViewer();
+
+    $impls = $this->loadBlueprintImplementationsForAllocatingLease($lease);
+    if (!$impls) {
+      return array();
     }
 
-    if (!$resource) {
-      $blueprints = DrydockBlueprintImplementation
-        ::getAllBlueprintImplementationsForResource($type);
+    $blueprints = id(new DrydockBlueprintQuery())
+      ->setViewer($viewer)
+      ->withBlueprintClasses(array_keys($impls))
+      ->withDisabled(false)
+      ->execute();
 
-      $this->logToDrydock(
-        pht('Found %d Blueprints', count($blueprints)));
-
-      foreach ($blueprints as $key => $candidate_blueprint) {
-        if (!$candidate_blueprint->isEnabled()) {
-          unset($blueprints[$key]);
-          continue;
-        }
+    $keep = array();
+    foreach ($blueprints as $key => $blueprint) {
+      if (!$blueprint->canEverAllocateResourceForLease($lease)) {
+        continue;
       }
 
-      $this->logToDrydock(
-        pht('%d Blueprints Enabled', count($blueprints)));
-
-      foreach ($blueprints as $key => $candidate_blueprint) {
-        if (!$candidate_blueprint->canAllocateMoreResources($pool)) {
-          unset($blueprints[$key]);
-          continue;
-        }
-      }
-
-      $this->logToDrydock(
-        pht('%d Blueprints Can Allocate', count($blueprints)));
-
-      if (!$blueprints) {
-        $lease->setStatus(DrydockLeaseStatus::STATUS_BROKEN);
-        $lease->save();
-
-        $this->logToDrydock(
-          pht(
-            "There are no resources of type '%s' available, and no ".
-            "blueprints which can allocate new ones.",
-            $type));
-
-        return;
-      }
-
-      // TODO: Rank intelligently.
-      shuffle($blueprints);
-
-      $blueprint = head($blueprints);
-      $resource = $blueprint->allocateResource($lease);
-
-      if (!$blueprint->allocateLease($resource, $lease)) {
-        // TODO: This "should" happen only if we lost a race with another lease,
-        // which happened to acquire this resource immediately after we
-        // allocated it. In this case, the right behavior is to retry
-        // immediately. However, other things like a blueprint allocating a
-        // resource it can't actually allocate the lease on might be happening
-        // too, in which case we'd just allocate infinite resources. Probably
-        // what we should do is test for an active or allocated lease and retry
-        // if we find one (although it might have already been released by now)
-        // and fail really hard ("your configuration is a huge broken mess")
-        // otherwise. But just throw for now since this stuff is all edge-casey.
-        // Alternatively we could bring resources up in a "BESPOKE" status
-        // and then switch them to "OPEN" only after the allocating lease gets
-        // its grubby mitts on the resource. This might make more sense but
-        // is a bit messy.
-        throw new Exception(pht('Lost an allocation race?'));
-      }
+      $keep[$key] = $blueprint;
     }
+
+    return $keep;
+  }
+
+
+  /**
+   * Load a list of all resources which a given lease can possibly be
+   * allocated against.
+   *
+   * @param list<DrydockBlueprint> Blueprints which may produce suitable
+   *   resources.
+   * @param DrydockLease Requested lease.
+   * @return list<DrydockResource> Resources which may be able to allocate
+   *   the lease.
+   * @task allocator
+   */
+  private function loadResourcesForAllocatingLease(
+    array $blueprints,
+    DrydockLease $lease) {
+    assert_instances_of($blueprints, 'DrydockBlueprint');
+    $viewer = $this->getViewer();
+
+    $resources = id(new DrydockResourceQuery())
+      ->setViewer($viewer)
+      ->withBlueprintPHIDs(mpull($blueprints, 'getPHID'))
+      ->withTypes(array($lease->getResourceType()))
+      ->withStatuses(
+        array(
+          DrydockResourceStatus::STATUS_PENDING,
+          DrydockResourceStatus::STATUS_ACTIVE,
+        ))
+      ->execute();
+
+    $keep = array();
+    foreach ($resources as $key => $resource) {
+      $blueprint = $resource->getBlueprint();
+
+      if (!$blueprint->canAcquireLeaseOnResource($resource, $lease)) {
+        continue;
+      }
+
+      $keep[$key] = $resource;
+    }
+
+    return $keep;
+  }
+
+
+  /**
+   * Remove blueprints which are too heavily allocated to build a resource for
+   * a lease from a list of blueprints.
+   *
+   * @param list<DrydockBlueprint> List of blueprints.
+   * @return list<DrydockBlueprint> List with blueprints that can not allocate
+   *   a resource for the lease right now removed.
+   * @task allocator
+   */
+  private function removeOverallocatedBlueprints(
+    array $blueprints,
+    DrydockLease $lease) {
+    assert_instances_of($blueprints, 'DrydockBlueprint');
+
+    $keep = array();
+    foreach ($blueprints as $key => $blueprint) {
+      if (!$blueprint->canAllocateResourceForLease($lease)) {
+        continue;
+      }
+
+      $keep[$key] = $blueprint;
+    }
+
+    return $keep;
+  }
+
+
+  /**
+   * Rank blueprints by suitability for building a new resource for a
+   * particular lease.
+   *
+   * @param list<DrydockBlueprint> List of blueprints.
+   * @param DrydockLease Requested lease.
+   * @return list<DrydockBlueprint> Ranked list of blueprints.
+   * @task allocator
+   */
+  private function rankBlueprints(array $blueprints, DrydockLease $lease) {
+    assert_instances_of($blueprints, 'DrydockBlueprint');
+
+    // TODO: Implement improvements to this ranking algorithm if they become
+    // available.
+    shuffle($blueprints);
+
+    return $blueprints;
+  }
+
+
+  /**
+   * Rank resources by suitability for allocating a particular lease.
+   *
+   * @param list<DrydockResource> List of resources.
+   * @param DrydockLease Requested lease.
+   * @return list<DrydockResource> Ranked list of resources.
+   * @task allocator
+   */
+  private function rankResources(array $resources, DrydockLease $lease) {
+    assert_instances_of($resources, 'DrydockResource');
+
+    // TODO: Implement improvements to this ranking algorithm if they become
+    // available.
+    shuffle($resources);
+
+    return $resources;
+  }
+
+
+/* -(  Managing Resources  )------------------------------------------------- */
+
+
+  /**
+   * Perform an actual resource allocation with a particular blueprint.
+   *
+   * @param DrydockBlueprint The blueprint to allocate a resource from.
+   * @param DrydockLease Requested lease.
+   * @return DrydockResource Allocated resource.
+   * @task resource
+   */
+  private function allocateResource(
+    DrydockBlueprint $blueprint,
+    DrydockLease $lease) {
+    $resource = $blueprint->allocateResource($lease);
+    $this->validateAllocatedResource($blueprint, $resource, $lease);
+
+    // If this resource was allocated as a pending resource, queue a task to
+    // activate it.
+    if ($resource->getStatus() == DrydockResourceStatus::STATUS_PENDING) {
+      PhabricatorWorker::scheduleTask(
+        'DrydockResourceWorker',
+        array(
+          'resourcePHID' => $resource->getPHID(),
+        ),
+        array(
+          'objectPHID' => $resource->getPHID(),
+        ));
+    }
+
+    return $resource;
+  }
+
+
+  /**
+   * Check that the resource a blueprint allocated is roughly the sort of
+   * object we expect.
+   *
+   * @param DrydockBlueprint Blueprint which built the resource.
+   * @param wild Thing which the blueprint claims is a valid resource.
+   * @param DrydockLease Lease the resource was allocated for.
+   * @return void
+   * @task resource
+   */
+  private function validateAllocatedResource(
+    DrydockBlueprint $blueprint,
+    $resource,
+    DrydockLease $lease) {
+
+    if (!($resource instanceof DrydockResource)) {
+      throw new Exception(
+        pht(
+          'Blueprint "%s" (of type "%s") is not properly implemented: %s must '.
+          'return an object of type %s or throw, but returned something else.',
+          $blueprint->getBlueprintName(),
+          $blueprint->getClassName(),
+          'allocateResource()',
+          'DrydockResource'));
+    }
+
+    if (!$resource->isAllocatedResource()) {
+      throw new Exception(
+        pht(
+          'Blueprint "%s" (of type "%s") is not properly implemented: %s '.
+          'must actually allocate the resource it returns.',
+          $blueprint->getBlueprintName(),
+          $blueprint->getClassName(),
+          'allocateResource()'));
+    }
+
+    $resource_type = $resource->getType();
+    $lease_type = $lease->getResourceType();
+
+    if ($resource_type !== $lease_type) {
+      // TODO: Destroy the resource here?
+
+      throw new Exception(
+        pht(
+          'Blueprint "%s" (of type "%s") is not properly implemented: it '.
+          'built a resource of type "%s" to satisfy a lease requesting a '.
+          'resource of type "%s".',
+          $blueprint->getBlueprintName(),
+          $blueprint->getClassName(),
+          $resource_type,
+          $lease_type));
+    }
+  }
+
+
+/* -(  Managing Leases  )---------------------------------------------------- */
+
+
+  /**
+   * Perform an actual lease acquisition on a particular resource.
+   *
+   * @param DrydockResource Resource to acquire a lease on.
+   * @param DrydockLease Lease to acquire.
+   * @return void
+   * @task lease
+   */
+  private function acquireLease(
+    DrydockResource $resource,
+    DrydockLease $lease) {
 
     $blueprint = $resource->getBlueprint();
     $blueprint->acquireLease($resource, $lease);
+
+    $this->validateAcquiredLease($blueprint, $resource, $lease);
+
+    // If this lease has been acquired but not activated, queue a task to
+    // activate it.
+    if ($lease->getStatus() == DrydockLeaseStatus::STATUS_ACQUIRED) {
+      PhabricatorWorker::scheduleTask(
+        'DrydockLeaseWorker',
+        array(
+          'leasePHID' => $lease->getPHID(),
+        ),
+        array(
+          'objectPHID' => $lease->getPHID(),
+        ));
+    }
   }
+
+
+  /**
+   * Make sure that a lease was really acquired properly.
+   *
+   * @param DrydockBlueprint Blueprint which created the resource.
+   * @param DrydockResource Resource which was acquired.
+   * @param DrydockLease The lease which was supposedly acquired.
+   * @return void
+   * @task lease
+   */
+  private function validateAcquiredLease(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource,
+    DrydockLease $lease) {
+
+    if (!$lease->isAcquiredLease()) {
+      throw new Exception(
+        pht(
+          'Blueprint "%s" (of type "%s") is not properly implemented: it '.
+          'returned from "%s" without acquiring a lease.',
+          $blueprint->getBlueprintName(),
+          $blueprint->getClassName(),
+          'acquireLease()'));
+    }
+
+    $lease_phid = $lease->getResourcePHID();
+    $resource_phid = $resource->getPHID();
+
+    if ($lease_phid !== $resource_phid) {
+      // TODO: Destroy the lease?
+      throw new Exception(
+        pht(
+          'Blueprint "%s" (of type "%s") is not properly implemented: it '.
+          'returned from "%s" with a lease acquired on the wrong resource.',
+          $blueprint->getBlueprintName(),
+          $blueprint->getClassName(),
+          'acquireLease()'));
+    }
+  }
+
 
 }

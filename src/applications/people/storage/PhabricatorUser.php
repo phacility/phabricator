@@ -587,6 +587,13 @@ final class PhabricatorUser
   }
 
   public function sendWelcomeEmail(PhabricatorUser $admin) {
+    if (!$this->canEstablishWebSessions()) {
+      throw new Exception(
+        pht(
+          'Can not send welcome mail to users who can not establish '.
+          'web sessions!'));
+    }
+
     $admin_username = $admin->getUserName();
     $admin_realname = $admin->getRealName();
     $user_username = $this->getUserName();

@@ -289,7 +289,8 @@ final class DiffusionRepositoryController extends DiffusionController {
         $repository,
         'description',
         $user);
-      $view->addSectionHeader(pht('Description'));
+      $view->addSectionHeader(
+        pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
       $view->addTextContent($description);
     }
 

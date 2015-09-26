@@ -87,6 +87,15 @@ abstract class PhabricatorWorker extends Phobject {
     return $this->data;
   }
 
+  final protected function getTaskDataValue($key, $default = null) {
+    $data = $this->getTaskData();
+    if (!is_array($data)) {
+      throw new PhabricatorWorkerPermanentFailureException(
+        pht('Expected task data to be a dictionary.'));
+    }
+    return idx($data, $key, $default);
+  }
+
   final public function executeTask() {
     $this->doWork();
   }
@@ -107,6 +116,11 @@ abstract class PhabricatorWorker extends Phobject {
       ->setData($data)
       ->setPriority($priority)
       ->setObjectPHID($object_phid);
+
+    $delay = idx($options, 'delayUntil');
+    if ($delay) {
+      $task->setLeaseExpires($delay);
+    }
 
     if (self::$runAllTasksInProcess) {
       // Do the work in-process.
@@ -147,67 +161,6 @@ abstract class PhabricatorWorker extends Phobject {
     }
   }
 
-
-  /**
-   * Wait for tasks to complete. If tasks are not leased by other workers, they
-   * will be executed in this process while waiting.
-   *
-   * @param list<int>   List of queued task IDs to wait for.
-   * @return void
-   */
-  final public static function waitForTasks(array $task_ids) {
-    if (!$task_ids) {
-      return;
-    }
-
-    $task_table = new PhabricatorWorkerActiveTask();
-
-    $waiting = array_fuse($task_ids);
-    while ($waiting) {
-      $conn_w = $task_table->establishConnection('w');
-
-      // Check if any of the tasks we're waiting on are still queued. If they
-      // are not, we're done waiting.
-      $row = queryfx_one(
-        $conn_w,
-        'SELECT COUNT(*) N FROM %T WHERE id IN (%Ld)',
-        $task_table->getTableName(),
-        $waiting);
-      if (!$row['N']) {
-        // Nothing is queued anymore. Stop waiting.
-        break;
-      }
-
-      $tasks = id(new PhabricatorWorkerLeaseQuery())
-        ->withIDs($waiting)
-        ->setLimit(1)
-        ->execute();
-
-      if (!$tasks) {
-        // We were not successful in leasing anything. Sleep for a bit and
-        // see if we have better luck later.
-        sleep(1);
-        continue;
-      }
-
-      $task = head($tasks)->executeTask();
-
-      $ex = $task->getExecutionException();
-      if ($ex) {
-        throw $ex;
-      }
-    }
-
-    $tasks = id(new PhabricatorWorkerArchiveTaskQuery())
-      ->withIDs($task_ids)
-      ->execute();
-
-    foreach ($tasks as $task) {
-      if ($task->getResult() != PhabricatorWorkerArchiveTask::RESULT_SUCCESS) {
-        throw new Exception(pht('Task %d failed!', $task->getID()));
-      }
-    }
-  }
 
   public function renderForDisplay(PhabricatorUser $viewer) {
     return null;

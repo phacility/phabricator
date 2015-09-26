@@ -104,7 +104,7 @@ final class HarbormasterBuildLintMessage
         'path' => 'text',
         'line' => 'uint32?',
         'characterOffset' => 'uint32?',
-        'code' => 'text32',
+        'code' => 'text128',
         'severity' => 'text32',
         'name' => 'text255',
       ),

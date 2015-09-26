@@ -10,8 +10,8 @@ final class PHUIPropertyListView extends AphrontView {
   private $classes = array();
   private $stacked;
 
-  const ICON_SUMMARY = 'fa-align-left bluegrey';
-  const ICON_TESTPLAN = 'fa-file-text-o bluegrey';
+  const ICON_SUMMARY = 'fa-align-left';
+  const ICON_TESTPLAN = 'fa-file-text-o';
 
   protected function canAppendChild() {
     return false;
@@ -247,7 +247,7 @@ final class PHUIPropertyListView extends AphrontView {
     $name = $part['name'];
     if ($part['icon']) {
       $icon = id(new PHUIIconView())
-        ->setIconFont($part['icon']);
+        ->setIconFont($part['icon'].' bluegrey');
       $name = phutil_tag(
         'span',
         array(

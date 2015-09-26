@@ -22,6 +22,9 @@ final class PhabricatorBadgesEditController
       }
       $is_new = false;
     } else {
+      $this->requireApplicationCapability(
+        PhabricatorBadgesCreateCapability::CAPABILITY);
+
       $badge = PhabricatorBadgesBadge::initializeNewBadge($viewer);
       $is_new = true;
     }

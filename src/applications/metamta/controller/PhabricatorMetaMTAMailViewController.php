@@ -218,7 +218,8 @@ final class PhabricatorMetaMTAMailViewController
             'Delivery reasons are listed from weakest to strongest.')));
     }
 
-    $properties->addSectionHeader(pht('Routing Rules'));
+    $properties->addSectionHeader(
+      pht('Routing Rules'), 'fa-paper-plane-o');
 
     $map = $mail->getDeliveredRoutingMap();
     $routing_detail = null;

@@ -166,4 +166,14 @@ abstract class PhabricatorStandardCustomFieldPHIDs
     );
   }
 
+  public function getHeraldFieldValue() {
+    // If the field has a `null` value, make sure we hand an `array()` to
+    // Herald.
+    $value = parent::getHeraldFieldValue();
+    if ($value) {
+      return $value;
+    }
+    return array();
+  }
+
 }

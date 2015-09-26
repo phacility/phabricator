@@ -42,31 +42,46 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title, $lease_uri);
 
+    $locks = $this->buildLocksTab($lease->getPHID());
+    $commands = $this->buildCommandsTab($lease->getPHID());
+
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addPropertyList($properties);
+      ->addPropertyList($properties, pht('Properties'))
+      ->addPropertyList($locks, pht('Slot Locks'))
+      ->addPropertyList($commands, pht('Commands'));
+
+    $log_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Lease Logs'))
+      ->setTable($log_table);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $object_box,
-        $log_table,
+        $log_box,
       ),
       array(
-        'title'   => $title,
+        'title' => $title,
       ));
 
   }
 
   private function buildActionListView(DrydockLease $lease) {
+    $viewer = $this->getViewer();
+
     $view = id(new PhabricatorActionListView())
-      ->setUser($this->getRequest()->getUser())
+      ->setUser($viewer)
       ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($lease);
 
     $id = $lease->getID();
 
-    $can_release = ($lease->getStatus() == DrydockLeaseStatus::STATUS_ACTIVE);
+    $can_release = $lease->canRelease();
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $lease,
+      PhabricatorPolicyCapability::CAN_EDIT);
 
     $view->addAction(
       id(new PhabricatorActionView())
@@ -74,7 +89,7 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
         ->setIcon('fa-times')
         ->setHref($this->getApplicationURI("/lease/{$id}/release/"))
         ->setWorkflow(true)
-        ->setDisabled(!$can_release));
+        ->setDisabled(!$can_release || !$can_edit));
 
     return $view;
   }
@@ -82,46 +97,39 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
   private function buildPropertyListView(
     DrydockLease $lease,
     PhabricatorActionListView $actions) {
+    $viewer = $this->getViewer();
 
     $view = new PHUIPropertyListView();
     $view->setActionList($actions);
 
-    switch ($lease->getStatus()) {
-      case DrydockLeaseStatus::STATUS_ACTIVE:
-        $status = pht('Active');
-        break;
-      case DrydockLeaseStatus::STATUS_RELEASED:
-        $status = pht('Released');
-        break;
-      case DrydockLeaseStatus::STATUS_EXPIRED:
-        $status = pht('Expired');
-        break;
-      case DrydockLeaseStatus::STATUS_PENDING:
-        $status = pht('Pending');
-        break;
-      case DrydockLeaseStatus::STATUS_BROKEN:
-        $status = pht('Broken');
-        break;
-      default:
-        $status = pht('Unknown');
-        break;
-    }
-
     $view->addProperty(
       pht('Status'),
-      $status);
+      DrydockLeaseStatus::getNameForStatus($lease->getStatus()));
 
     $view->addProperty(
       pht('Resource Type'),
       $lease->getResourceType());
 
-    $view->addProperty(
-      pht('Resource'),
-      $lease->getResourceID());
+    $resource_phid = $lease->getResourcePHID();
+    if ($resource_phid) {
+      $resource_display = $viewer->renderHandle($resource_phid);
+    } else {
+      $resource_display = phutil_tag('em', array(), pht('No Resource'));
+    }
+    $view->addProperty(pht('Resource'), $resource_display);
+
+    $until = $lease->getUntil();
+    if ($until) {
+      $until_display = phabricator_datetime($until, $viewer);
+    } else {
+      $until_display = phutil_tag('em', array(), pht('Never'));
+    }
+    $view->addProperty(pht('Expires'), $until_display);
 
     $attributes = $lease->getAttributes();
     if ($attributes) {
-      $view->addSectionHeader(pht('Attributes'));
+      $view->addSectionHeader(
+        pht('Attributes'), 'fa-list-ul');
       foreach ($attributes as $key => $value) {
         $view->addProperty($key, $value);
       }
