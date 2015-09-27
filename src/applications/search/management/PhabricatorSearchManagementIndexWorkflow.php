@@ -93,13 +93,26 @@ final class PhabricatorSearchManagementIndexWorkflow
     $bar = id(new PhutilConsoleProgressBar())
       ->setTotal(count($phids));
 
+    $any_success = false;
     $indexer = new PhabricatorSearchIndexer();
     foreach ($phids as $phid) {
-      $indexer->queueDocumentForIndexing($phid);
+      try {
+        $indexer->queueDocumentForIndexing($phid);
+        $any_success = true;
+      } catch (Exception $ex) {
+        phlog($ex);
+      }
+
       $bar->update(1);
     }
 
     $bar->done();
+
+    if (!$any_success) {
+      throw new Exception(
+        pht('Failed to rebuild search index for any documents.'));
+    }
+
   }
 
   private function loadPHIDsByNames(array $names) {

@@ -42,54 +42,36 @@ abstract class PhabricatorSearchDocumentIndexer extends Phobject {
   }
 
   public function indexDocumentByPHID($phid, $context) {
-    try {
-      $this->setContext($context);
+    $this->setContext($context);
 
-      $document = $this->buildAbstractDocumentByPHID($phid);
-      if ($document === null) {
-        // This indexer doesn't build a document index, so we're done.
-        return $this;
-      }
-
-      $object = $this->loadDocumentByPHID($phid);
-
-      // Automatically rebuild CustomField indexes if the object uses custom
-      // fields.
-      if ($object instanceof PhabricatorCustomFieldInterface) {
-        $this->indexCustomFields($document, $object);
-      }
-
-      // Automatically rebuild subscriber indexes if the object is subscribable.
-      if ($object instanceof PhabricatorSubscribableInterface) {
-        $this->indexSubscribers($document);
-      }
-
-      // Automatically build project relationships
-      if ($object instanceof PhabricatorProjectInterface) {
-        $this->indexProjects($document, $object);
-      }
-
-      $engine = PhabricatorSearchEngine::loadEngine();
-      try {
-        $engine->reindexAbstractDocument($document);
-      } catch (Exception $ex) {
-        phlog(
-          pht(
-            'Unable to index document %s with engine %s.',
-            $document->getPHID(),
-            get_class($engine)));
-        phlog($ex);
-      }
-
-      $this->dispatchDidUpdateIndexEvent($phid, $document);
-    } catch (Exception $ex) {
-      phlog(
-        pht(
-          'Unable to build document %s with indexer %s.',
-          $phid,
-          get_class($this)));
-      phlog($ex);
+    $document = $this->buildAbstractDocumentByPHID($phid);
+    if ($document === null) {
+      // This indexer doesn't build a document index, so we're done.
+      return $this;
     }
+
+    $object = $this->loadDocumentByPHID($phid);
+
+    // Automatically rebuild CustomField indexes if the object uses custom
+    // fields.
+    if ($object instanceof PhabricatorCustomFieldInterface) {
+      $this->indexCustomFields($document, $object);
+    }
+
+    // Automatically rebuild subscriber indexes if the object is subscribable.
+    if ($object instanceof PhabricatorSubscribableInterface) {
+      $this->indexSubscribers($document);
+    }
+
+    // Automatically build project relationships
+    if ($object instanceof PhabricatorProjectInterface) {
+      $this->indexProjects($document, $object);
+    }
+
+    $engine = PhabricatorSearchEngine::loadEngine();
+    $engine->reindexAbstractDocument($document);
+
+    $this->dispatchDidUpdateIndexEvent($phid, $document);
 
     return $this;
   }
