@@ -151,7 +151,7 @@ command-line tools, and much easier to react to exit codes. This is sometimes
 used as an argument for communicating application status in exit codes.
 
 We reject this because we don't think you should be writing `bash` scripts if
-you're doing real operations. Funadmentally, `bash` shell scripts are not a
+you're doing real operations. Fundamentally, `bash` shell scripts are not a
 robust building block for creating correct, reliable operational processes.
 
 Here is one problem with using `bash` scripts to perform operational tasks.
