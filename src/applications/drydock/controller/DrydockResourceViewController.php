@@ -9,6 +9,7 @@ final class DrydockResourceViewController extends DrydockResourceController {
     $resource = id(new DrydockResourceQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->needUnconsumedCommands(true)
       ->executeOne();
     if (!$resource) {
       return new Aphront404Response();
@@ -20,6 +21,10 @@ final class DrydockResourceViewController extends DrydockResourceController {
       ->setUser($viewer)
       ->setPolicyObject($resource)
       ->setHeader($title);
+
+    if ($resource->isReleasing()) {
+      $header->setStatus('fa-exclamation-triangle', 'red', pht('Releasing'));
+    }
 
     $actions = $this->buildActionListView($resource);
     $properties = $this->buildPropertyListView($resource, $actions);
@@ -82,6 +87,10 @@ final class DrydockResourceViewController extends DrydockResourceController {
       ->setObject($resource);
 
     $can_release = $resource->canRelease();
+    if ($resource->isReleasing()) {
+      $can_release = false;
+    }
+
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $resource,

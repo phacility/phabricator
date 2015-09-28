@@ -9,6 +9,7 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
     $lease = id(new DrydockLeaseQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->needUnconsumedCommands(true)
       ->executeOne();
     if (!$lease) {
       return new Aphront404Response();
@@ -20,6 +21,10 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title);
+
+    if ($lease->isReleasing()) {
+      $header->setStatus('fa-exclamation-triangle', 'red', pht('Releasing'));
+    }
 
     $actions = $this->buildActionListView($lease);
     $properties = $this->buildPropertyListView($lease, $actions);
@@ -78,6 +83,10 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
     $id = $lease->getID();
 
     $can_release = $lease->canRelease();
+    if ($lease->isReleasing()) {
+      $can_release = false;
+    }
+
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $lease,

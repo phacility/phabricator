@@ -11,6 +11,8 @@ final class DrydockLease extends DrydockDAO
   protected $status = DrydockLeaseStatus::STATUS_PENDING;
 
   private $resource = self::ATTACHABLE;
+  private $unconsumedCommands = self::ATTACHABLE;
+
   private $releaseOnDestruction;
   private $isAcquired = false;
   private $isActivated = false;
@@ -102,6 +104,25 @@ final class DrydockLease extends DrydockDAO
 
   public function hasAttachedResource() {
     return ($this->resource !== null);
+  }
+
+  public function getUnconsumedCommands() {
+    return $this->assertAttached($this->unconsumedCommands);
+  }
+
+  public function attachUnconsumedCommands(array $commands) {
+    $this->unconsumedCommands = $commands;
+    return $this;
+  }
+
+  public function isReleasing() {
+    foreach ($this->getUnconsumedCommands() as $command) {
+      if ($command->getCommand() == DrydockCommand::COMMAND_RELEASE) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public function queueForActivation() {

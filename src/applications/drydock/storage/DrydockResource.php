@@ -8,7 +8,6 @@ final class DrydockResource extends DrydockDAO
   protected $blueprintPHID;
   protected $status;
   protected $until;
-
   protected $type;
   protected $name;
   protected $attributes   = array();
@@ -16,6 +15,8 @@ final class DrydockResource extends DrydockDAO
   protected $ownerPHID;
 
   private $blueprint = self::ATTACHABLE;
+  private $unconsumedCommands = self::ATTACHABLE;
+
   private $isAllocated = false;
   private $isActivated = false;
   private $activateWhenAllocated = false;
@@ -78,6 +79,25 @@ final class DrydockResource extends DrydockDAO
   public function attachBlueprint(DrydockBlueprint $blueprint) {
     $this->blueprint = $blueprint;
     return $this;
+  }
+
+  public function getUnconsumedCommands() {
+    return $this->assertAttached($this->unconsumedCommands);
+  }
+
+  public function attachUnconsumedCommands(array $commands) {
+    $this->unconsumedCommands = $commands;
+    return $this;
+  }
+
+  public function isReleasing() {
+    foreach ($this->getUnconsumedCommands() as $command) {
+      if ($command->getCommand() == DrydockCommand::COMMAND_RELEASE) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public function setActivateWhenAllocated($activate) {
