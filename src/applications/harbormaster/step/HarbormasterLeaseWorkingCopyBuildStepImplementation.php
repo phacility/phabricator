@@ -54,6 +54,11 @@ final class HarbormasterLeaseWorkingCopyBuildStepImplementation
         ->setAttribute('repositoryPHID', $repository_phid)
         ->setAttribute('commit', $commit);
 
+      $task_id = $this->getCurrentWorkerTaskID();
+      if ($task_id) {
+        $lease->setAwakenTaskIDs(array($task_id));
+      }
+
       $lease->queueForActivation();
 
       $build_target

@@ -334,8 +334,13 @@ final class DrydockLease extends DrydockDAO
       ),
       array(
         'objectPHID' => $this->getPHID(),
-        'delayUntil' => $epoch,
+        'delayUntil' => ($epoch ? (int)$epoch : null),
       ));
+  }
+
+  public function setAwakenTaskIDs(array $ids) {
+    $this->setAttribute('internal.awakenTaskIDs', $ids);
+    return $this;
   }
 
   private function didActivate() {
@@ -358,6 +363,11 @@ final class DrydockLease extends DrydockDAO
     $expires = $this->getUntil();
     if ($expires) {
       $this->scheduleUpdate($expires);
+    }
+
+    $awaken_ids = $this->getAttribute('internal.awakenTaskIDs');
+    if (is_array($awaken_ids) && $awaken_ids) {
+      PhabricatorWorker::awakenTaskIDs($awaken_ids);
     }
   }
 

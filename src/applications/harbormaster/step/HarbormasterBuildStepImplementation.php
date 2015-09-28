@@ -6,6 +6,16 @@
 abstract class HarbormasterBuildStepImplementation extends Phobject {
 
   private $settings;
+  private $currentWorkerTaskID;
+
+  public function setCurrentWorkerTaskID($id) {
+    $this->currentWorkerTaskID = $id;
+    return $this;
+  }
+
+  public function getCurrentWorkerTaskID() {
+    return $this->currentWorkerTaskID;
+  }
 
   public static function getImplementations() {
     return id(new PhutilClassMapQuery())

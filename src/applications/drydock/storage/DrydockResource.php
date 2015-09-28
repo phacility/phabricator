@@ -218,7 +218,7 @@ final class DrydockResource extends DrydockDAO
       ),
       array(
         'objectPHID' => $this->getPHID(),
-        'delayUntil' => $epoch,
+        'delayUntil' => ($epoch ? (int)$epoch : null),
       ));
   }
 

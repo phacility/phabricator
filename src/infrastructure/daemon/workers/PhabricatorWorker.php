@@ -8,6 +8,7 @@ abstract class PhabricatorWorker extends Phobject {
   private $data;
   private static $runAllTasksInProcess = false;
   private $queuedTasks = array();
+  private $currentWorkerTask;
 
   // NOTE: Lower priority numbers execute first. The priority numbers have to
   // have the same ordering that IDs do (lowest first) so MySQL can use a
@@ -18,6 +19,10 @@ abstract class PhabricatorWorker extends Phobject {
   const PRIORITY_BULK    = 3000;
   const PRIORITY_IMPORT  = 4000;
 
+  /**
+   * Special owner indicating that the task has yielded.
+   */
+  const YIELD_OWNER = '(yield)';
 
 /* -(  Configuring Retries and Failures  )----------------------------------- */
 
@@ -77,6 +82,23 @@ abstract class PhabricatorWorker extends Phobject {
     return null;
   }
 
+  public function setCurrentWorkerTask(PhabricatorWorkerTask $task) {
+    $this->currentWorkerTask = $task;
+    return $this;
+  }
+
+  public function getCurrentWorkerTask() {
+    return $this->currentWorkerTask;
+  }
+
+  public function getCurrentWorkerTaskID() {
+    $task = $this->getCurrentWorkerTask();
+    if (!$task) {
+      return null;
+    }
+    return $task->getID();
+  }
+
   abstract protected function doWork();
 
   final public function __construct($data) {
@@ -104,6 +126,14 @@ abstract class PhabricatorWorker extends Phobject {
     $task_class,
     $data,
     $options = array()) {
+
+    PhutilTypeSpec::checkMap(
+      $options,
+      array(
+        'priority' => 'optional int|null',
+        'objectPHID' => 'optional string|null',
+        'delayUntil' => 'optional int|null',
+      ));
 
     $priority = idx($options, 'priority');
     if ($priority === null) {
@@ -206,6 +236,51 @@ abstract class PhabricatorWorker extends Phobject {
    */
   final public function getQueuedTasks() {
     return $this->queuedTasks;
+  }
+
+
+  /**
+   * Awaken tasks that have yielded.
+   *
+   * Reschedules the specified tasks if they are currently queued in a yielded,
+   * unleased, unretried state so they'll execute sooner. This can let the
+   * queue avoid unnecessary waits.
+   *
+   * This method does not provide any assurances about when these tasks will
+   * execute, or even guarantee that it will have any effect at all.
+   *
+   * @param list<id> List of task IDs to try to awaken.
+   * @return void
+   */
+  final public static function awakenTaskIDs(array $ids) {
+    if (!$ids) {
+      return;
+    }
+
+    $table = new PhabricatorWorkerActiveTask();
+    $conn_w = $table->establishConnection('w');
+
+    // NOTE: At least for now, we're keeping these tasks yielded, just
+    // pretending that they threw a shorter yield than they really did.
+
+    // Overlap the windows here to handle minor client/server time differences
+    // and because it's likely correct to push these tasks to the head of their
+    // respective priorities. There is a good chance they are ready to execute.
+    $window = phutil_units('1 hour in seconds');
+    $epoch_ago = (PhabricatorTime::getNow() - $window);
+
+    queryfx(
+      $conn_w,
+      'UPDATE %T SET leaseExpires = %d
+        WHERE id IN (%Ld)
+          AND leaseOwner = %s
+          AND leaseExpires > %d
+          AND failureCount = 0',
+      $table->getTableName(),
+      $epoch_ago,
+      $ids,
+      self::YIELD_OWNER,
+      $epoch_ago);
   }
 
 }

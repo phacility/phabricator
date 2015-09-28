@@ -59,6 +59,7 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
       }
 
       $implementation = $target->getImplementation();
+      $implementation->setCurrentWorkerTaskID($this->getCurrentWorkerTaskID());
       $implementation->execute($build, $target);
 
       $next_status = HarbormasterBuildTarget::STATUS_PASSED;

@@ -141,6 +141,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
     $worker = null;
     try {
       $worker = $this->getWorkerInstance();
+      $worker->setCurrentWorkerTask($this);
 
       $maximum_failures = $worker->getMaximumRetryCount();
       if ($maximum_failures !== null) {
@@ -174,6 +175,8 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
       $result->setExecutionException($ex);
     } catch (PhabricatorWorkerYieldException $ex) {
       $this->setExecutionException($ex);
+
+      $this->setLeaseOwner(PhabricatorWorker::YIELD_OWNER);
 
       $retry = $ex->getDuration();
       $retry = max($retry, 5);
