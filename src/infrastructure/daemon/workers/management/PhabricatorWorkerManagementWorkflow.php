@@ -39,6 +39,13 @@ abstract class PhabricatorWorkerManagementWorkflow
       }
     }
 
+    // When we lock tasks properly, this gets populated as a side effect. Just
+    // fake it when doing manual CLI stuff. This makes sure CLI yields have
+    // their expires times set properly.
+    foreach ($tasks as $task) {
+      $task->setServerTime(PhabricatorTime::getNow());
+    }
+
     return $tasks;
   }
 

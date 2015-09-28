@@ -7,6 +7,7 @@ final class DrydockResource extends DrydockDAO
   protected $phid;
   protected $blueprintPHID;
   protected $status;
+  protected $until;
 
   protected $type;
   protected $name;
@@ -32,6 +33,7 @@ final class DrydockResource extends DrydockDAO
         'ownerPHID' => 'phid?',
         'status' => 'text32',
         'type' => 'text64',
+        'until' => 'epoch?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_type' => array(
@@ -126,6 +128,10 @@ final class DrydockResource extends DrydockDAO
 
     $this->isAllocated = true;
 
+    if ($new_status == DrydockResourceStatus::STATUS_ACTIVE) {
+      $this->didActivate();
+    }
+
     return $this;
   }
 
@@ -164,6 +170,8 @@ final class DrydockResource extends DrydockDAO
 
     $this->isActivated = true;
 
+    $this->didActivate();
+
     return $this;
   }
 
@@ -181,14 +189,16 @@ final class DrydockResource extends DrydockDAO
     }
   }
 
-  public function scheduleUpdate() {
+  public function scheduleUpdate($epoch = null) {
     PhabricatorWorker::scheduleTask(
       'DrydockResourceUpdateWorker',
       array(
         'resourcePHID' => $this->getPHID(),
+        'isExpireTask' => ($epoch !== null),
       ),
       array(
         'objectPHID' => $this->getPHID(),
+        'delayUntil' => $epoch,
       ));
   }
 
@@ -208,6 +218,20 @@ final class DrydockResource extends DrydockDAO
 
     if ($need_update) {
       $this->scheduleUpdate();
+    }
+
+    $expires = $this->getUntil();
+    if ($expires) {
+      $this->scheduleUpdate($expires);
+    }
+  }
+
+  public function canUpdate() {
+    switch ($this->getStatus()) {
+      case DrydockResourceStatus::STATUS_ACTIVE:
+        return true;
+      default:
+        return false;
     }
   }
 

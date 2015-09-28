@@ -11,18 +11,27 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
     $lock = PhabricatorGlobalLock::newLock($lock_key)
       ->lock(1);
 
-    $resource = $this->loadResource($resource_phid);
-    $this->updateResource($resource);
+    try {
+      $resource = $this->loadResource($resource_phid);
+      $this->updateResource($resource);
+    } catch (Exception $ex) {
+      $lock->unlock();
+      throw $ex;
+    }
 
     $lock->unlock();
   }
 
   private function updateResource(DrydockResource $resource) {
+    if (!$resource->canUpdate()) {
+      return;
+    }
+
+    $this->checkResourceExpiration($resource);
+
     $commands = $this->loadCommands($resource->getPHID());
     foreach ($commands as $command) {
-      if ($resource->getStatus() != DrydockResourceStatus::STATUS_ACTIVE) {
-        // Resources can't receive commands before they activate or after they
-        // release.
+      if (!$resource->canUpdate()) {
         break;
       }
 
@@ -32,6 +41,8 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
         ->setIsConsumed(true)
         ->save();
     }
+
+    $this->yieldIfExpiringResource($resource);
   }
 
   private function processCommand(

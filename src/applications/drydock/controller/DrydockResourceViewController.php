@@ -116,6 +116,14 @@ final class DrydockResourceViewController extends DrydockResourceController {
       pht('Status'),
       $status);
 
+    $until = $resource->getUntil();
+    if ($until) {
+      $until_display = phabricator_datetime($until, $viewer);
+    } else {
+      $until_display = phutil_tag('em', array(), pht('Never'));
+    }
+    $view->addProperty(pht('Expires'), $until_display);
+
     $view->addProperty(
       pht('Resource Type'),
       $resource->getType());

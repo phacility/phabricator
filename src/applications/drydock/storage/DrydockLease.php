@@ -295,6 +295,15 @@ final class DrydockLease extends DrydockDAO
     }
   }
 
+  public function canUpdate() {
+    switch ($this->getStatus()) {
+      case DrydockLeaseStatus::STATUS_ACTIVE:
+        return true;
+      default:
+        return false;
+    }
+  }
+
   public function scheduleUpdate($epoch = null) {
     PhabricatorWorker::scheduleTask(
       'DrydockLeaseUpdateWorker',
