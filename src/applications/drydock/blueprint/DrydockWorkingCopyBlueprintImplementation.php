@@ -37,10 +37,37 @@ final class DrydockWorkingCopyBlueprintImplementation
     DrydockResource $resource,
     DrydockLease $lease) {
 
-    $have_phid = $resource->getAttribute('repositoryPHID');
-    $need_phid = $lease->getAttribute('repositoryPHID');
+    $need_map = $lease->getAttribute('repositories.map');
+    if (!is_array($need_map)) {
+      return false;
+    }
 
-    if ($need_phid !== $have_phid) {
+    $have_map = $resource->getAttribute('repositories.map');
+    if (!is_array($have_map)) {
+      return false;
+    }
+
+    $have_as = ipull($have_map, 'phid');
+    $need_as = ipull($need_map, 'phid');
+
+    foreach ($need_as as $need_directory => $need_phid) {
+      if (empty($have_as[$need_directory])) {
+        // This resource is missing a required working copy.
+        return false;
+      }
+
+      if ($have_as[$need_directory] != $need_phid) {
+        // This resource has a required working copy, but it contains
+        // the wrong repository.
+        return false;
+      }
+
+      unset($have_as[$need_directory]);
+    }
+
+    if ($have_as && $lease->getAttribute('repositories.strict')) {
+      // This resource has extra repositories, but the lease is strict about
+      // which repositories are allowed to exist.
       return false;
     }
 
@@ -70,14 +97,9 @@ final class DrydockWorkingCopyBlueprintImplementation
     DrydockBlueprint $blueprint,
     DrydockLease $lease) {
 
-    $repository_phid = $lease->getAttribute('repositoryPHID');
-    $repository = $this->loadRepository($repository_phid);
-
     $resource = $this->newResourceTemplate(
       $blueprint,
-      pht(
-        'Working Copy (%s)',
-        $repository->getCallsign()));
+      pht('Working Copy'));
 
     $resource_phid = $resource->getPHID();
 
@@ -90,8 +112,17 @@ final class DrydockWorkingCopyBlueprintImplementation
     // TODO: Add some limits to the number of working copies we can have at
     // once?
 
+    $map = $lease->getAttribute('repositories.map');
+    foreach ($map as $key => $value) {
+      $map[$key] = array_select_keys(
+        $value,
+        array(
+          'phid',
+        ));
+    }
+
     return $resource
-      ->setAttribute('repositoryPHID', $repository->getPHID())
+      ->setAttribute('repositories.map', $map)
       ->setAttribute('host.leasePHID', $host_lease->getPHID())
       ->allocateResource();
   }
@@ -103,26 +134,32 @@ final class DrydockWorkingCopyBlueprintImplementation
     $lease = $this->loadHostLease($resource);
     $this->requireActiveLease($lease);
 
-    $repository_phid = $resource->getAttribute('repositoryPHID');
-    $repository = $this->loadRepository($repository_phid);
-    $repository_id = $repository->getID();
-
     $command_type = DrydockCommandInterface::INTERFACE_TYPE;
     $interface = $lease->getInterface($command_type);
 
     // TODO: Make this configurable.
     $resource_id = $resource->getID();
     $root = "/var/drydock/workingcopy-{$resource_id}";
-    $path = "{$root}/repo/{$repository_id}/";
 
-    $interface->execx(
-      'git clone -- %s %s',
-      (string)$repository->getCloneURIObject(),
-      $path);
+    $map = $resource->getAttribute('repositories.map');
+
+    $repositories = $this->loadRepositories(ipull($map, 'phid'));
+    foreach ($map as $directory => $spec) {
+      // TODO: Validate directory isn't goofy like "/etc" or "../../lol"
+      // somewhere?
+
+      $repository = $repositories[$spec['phid']];
+      $path = "{$root}/repo/{$directory}/";
+
+      // TODO: Run these in parallel?
+      $interface->execx(
+        'git clone -- %s %s',
+        (string)$repository->getCloneURIObject(),
+        $path);
+    }
 
     $resource
       ->setAttribute('workingcopy.root', $root)
-      ->setAttribute('workingcopy.path', $path)
       ->activateResource();
   }
 
@@ -151,33 +188,55 @@ final class DrydockWorkingCopyBlueprintImplementation
     DrydockResource $resource,
     DrydockLease $lease) {
 
+    $host_lease = $this->loadHostLease($resource);
     $command_type = DrydockCommandInterface::INTERFACE_TYPE;
-    $interface = $lease->getInterface($command_type);
+    $interface = $host_lease->getInterface($command_type);
 
-    $cmd = array();
-    $arg = array();
+    $map = $lease->getAttribute('repositories.map');
+    $root = $resource->getAttribute('workingcopy.root');
 
-    $cmd[] = 'git clean -d --force';
-    $cmd[] = 'git reset --hard HEAD';
-    $cmd[] = 'git fetch';
+    $default = null;
+    foreach ($map as $directory => $spec) {
+      $cmd = array();
+      $arg = array();
 
-    $commit = $lease->getAttribute('commit');
-    $branch = $lease->getAttribute('branch');
+      $cmd[] = 'cd %s';
+      $arg[] = "{$root}/repo/{$directory}/";
 
-    if ($commit !== null) {
-      $cmd[] = 'git reset --hard %s';
-      $arg[] = $commit;
-    } else if ($branch !== null) {
-      $cmd[] = 'git reset --hard %s';
-      $arg[] = $branch;
+      $cmd[] = 'git clean -d --force';
+      $cmd[] = 'git fetch';
+
+      $commit = idx($spec, 'commit');
+      $branch = idx($spec, 'branch');
+
+      if ($commit !== null) {
+        $cmd[] = 'git reset --hard %s';
+        $arg[] = $commit;
+      } else if ($branch !== null) {
+        $cmd[] = 'git reset --hard %s';
+        $arg[] = $branch;
+      } else {
+        $cmd[] = 'git reset --hard HEAD';
+      }
+
+      $cmd = implode(' && ', $cmd);
+      $argv = array_merge(array($cmd), $arg);
+
+      $result = call_user_func_array(
+        array($interface, 'execx'),
+        $argv);
+
+      if (idx($spec, 'default')) {
+        $default = $directory;
+      }
     }
 
-    $cmd = implode(' && ', $cmd);
-    $argv = array_merge(array($cmd), $arg);
+    if ($default === null) {
+      $default = head_key($map);
+    }
 
-    $result = call_user_func_array(
-      array($interface, 'execx'),
-      $argv);
+    // TODO: Use working storage?
+    $lease->setAttribute('workingcopy.default', "{$root}/repo/{$default}/");
 
     $lease->activateOnResource($resource);
   }
@@ -217,35 +276,41 @@ final class DrydockWorkingCopyBlueprintImplementation
         $host_lease = $this->loadHostLease($resource);
         $command_interface = $host_lease->getInterface($type);
 
-        $path = $resource->getAttribute('workingcopy.path');
+        $path = $lease->getAttribute('workingcopy.default');
         $command_interface->setWorkingDirectory($path);
 
         return $command_interface;
     }
   }
 
-  private function loadRepository($repository_phid) {
-    $repository = id(new PhabricatorRepositoryQuery())
+  private function loadRepositories(array $phids) {
+    $repositories = id(new PhabricatorRepositoryQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPHIDs(array($repository_phid))
-      ->executeOne();
-    if (!$repository) {
-      // TODO: Permanent failure.
-      throw new Exception(
-        pht(
-          'Repository PHID "%s" does not exist.',
-          $repository_phid));
-    }
+      ->withPHIDs($phids)
+      ->execute();
+    $repositories = mpull($repositories, null, 'getPHID');
 
-    switch ($repository->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        break;
-      default:
+    foreach ($phids as $phid) {
+      if (empty($repositories[$phid])) {
         // TODO: Permanent failure.
-        throw new Exception(pht('Unsupported VCS!'));
+        throw new Exception(
+          pht(
+            'Repository PHID "%s" does not exist.',
+            $phid));
+      }
     }
 
-    return $repository;
+    foreach ($repositories as $repository) {
+      switch ($repository->getVersionControlSystem()) {
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+          break;
+        default:
+          // TODO: Permanent failure.
+          throw new Exception(pht('Unsupported VCS!'));
+      }
+    }
+
+    return $repositories;
   }
 
   private function loadHostLease(DrydockResource $resource) {
