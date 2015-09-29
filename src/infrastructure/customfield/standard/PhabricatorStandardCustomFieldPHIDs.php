@@ -93,15 +93,8 @@ abstract class PhabricatorStandardCustomFieldPHIDs
   public function getApplicationTransactionRequiredHandlePHIDs(
     PhabricatorApplicationTransaction $xaction) {
 
-    $old = json_decode($xaction->getOldValue());
-    if (!is_array($old)) {
-      $old = array();
-    }
-
-    $new = json_decode($xaction->getNewValue());
-    if (!is_array($new)) {
-      $new = array();
-    }
+    $old = $this->decodeValue($xaction->getOldValue());
+    $new = $this->decodeValue($xaction->getNewValue());
 
     $add = array_diff($new, $old);
     $rem = array_diff($old, $new);
@@ -113,15 +106,8 @@ abstract class PhabricatorStandardCustomFieldPHIDs
     PhabricatorApplicationTransaction $xaction) {
     $author_phid = $xaction->getAuthorPHID();
 
-    $old = json_decode($xaction->getOldValue());
-    if (!is_array($old)) {
-      $old = array();
-    }
-
-    $new = json_decode($xaction->getNewValue());
-    if (!is_array($new)) {
-      $new = array();
-    }
+    $old = $this->decodeValue($xaction->getOldValue());
+    $new = $this->decodeValue($xaction->getNewValue());
 
     $add = array_diff($new, $old);
     $rem = array_diff($old, $new);
@@ -167,8 +153,8 @@ abstract class PhabricatorStandardCustomFieldPHIDs
     // some invalid or restricted values, but they can't add new ones.
 
     foreach ($xactions as $xaction) {
-      $old = phutil_json_decode($xaction->getOldValue());
-      $new = phutil_json_decode($xaction->getNewValue());
+      $old = $this->decodeValue($xaction->getOldValue());
+      $new = $this->decodeValue($xaction->getNewValue());
 
       $add = array_diff($new, $old);
 
@@ -229,6 +215,15 @@ abstract class PhabricatorStandardCustomFieldPHIDs
       return $value;
     }
     return array();
+  }
+
+  private function decodeValue($value) {
+    $value = json_decode($value);
+    if (!is_array($value)) {
+      $value = array();
+    }
+
+    return $value;
   }
 
 }
