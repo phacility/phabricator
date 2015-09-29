@@ -20,7 +20,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
   const ENCODING_TEXT = 'text';
 
   public function __destruct() {
-    if ($this->live) {
+    if ($this->start) {
       $this->finalize($this->start);
     }
   }
