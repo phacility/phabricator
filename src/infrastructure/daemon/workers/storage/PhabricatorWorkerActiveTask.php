@@ -214,7 +214,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
           $class,
           $data,
           array(
-            'priority' => $this->getPriority(),
+            'priority' => (int)$this->getPriority(),
           ));
       }
     }
