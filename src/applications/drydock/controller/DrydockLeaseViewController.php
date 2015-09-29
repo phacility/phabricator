@@ -119,6 +119,14 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
       pht('Resource Type'),
       $lease->getResourceType());
 
+    $owner_phid = $lease->getOwnerPHID();
+    if ($owner_phid) {
+      $owner_display = $viewer->renderHandle($owner_phid);
+    } else {
+      $owner_display = phutil_tag('em', array(), pht('No Owner'));
+    }
+    $view->addProperty(pht('Owner'), $owner_display);
+
     $resource_phid = $lease->getResourcePHID();
     if ($resource_phid) {
       $resource_display = $viewer->renderHandle($resource_phid);
