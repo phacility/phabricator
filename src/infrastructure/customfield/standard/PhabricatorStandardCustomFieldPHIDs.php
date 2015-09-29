@@ -152,6 +152,61 @@ abstract class PhabricatorStandardCustomFieldPHIDs
     }
   }
 
+  public function validateApplicationTransactions(
+    PhabricatorApplicationTransactionEditor $editor,
+    $type,
+    array $xactions) {
+
+    $errors = parent::validateApplicationTransactions(
+      $editor,
+      $type,
+      $xactions);
+
+    // If the user is adding PHIDs, make sure the new PHIDs are valid and
+    // visible to the actor. It's OK for a user to edit a field which includes
+    // some invalid or restricted values, but they can't add new ones.
+
+    foreach ($xactions as $xaction) {
+      $old = phutil_json_decode($xaction->getOldValue());
+      $new = phutil_json_decode($xaction->getNewValue());
+
+      $add = array_diff($new, $old);
+
+      if (!$add) {
+        continue;
+      }
+
+      $objects = id(new PhabricatorObjectQuery())
+        ->setViewer($editor->getActor())
+        ->withPHIDs($add)
+        ->execute();
+      $objects = mpull($objects, null, 'getPHID');
+
+      $invalid = array();
+      foreach ($add as $phid) {
+        if (empty($objects[$phid])) {
+          $invalid[] = $phid;
+        }
+      }
+
+      if ($invalid) {
+        $error = new PhabricatorApplicationTransactionValidationError(
+          $type,
+          pht('Invalid'),
+          pht(
+            'Some of the selected PHIDs in field "%s" are invalid or '.
+            'restricted: %s.',
+            $this->getFieldName(),
+            implode(', ', $invalid)),
+          $xaction);
+        $errors[] = $error;
+        $this->setFieldError(pht('Invalid'));
+      }
+    }
+
+    return $errors;
+  }
+
   public function shouldAppearInHerald() {
     return true;
   }

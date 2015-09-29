@@ -28,6 +28,7 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
     $target = id(new HarbormasterBuildTargetQuery())
       ->withIDs(array($id))
       ->setViewer($this->getViewer())
+      ->needBuildSteps(true)
       ->executeOne();
 
     if (!$target) {

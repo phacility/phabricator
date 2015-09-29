@@ -43,7 +43,9 @@ abstract class PhabricatorWorkerManagementWorkflow
     // fake it when doing manual CLI stuff. This makes sure CLI yields have
     // their expires times set properly.
     foreach ($tasks as $task) {
-      $task->setServerTime(PhabricatorTime::getNow());
+      if ($task instanceof PhabricatorWorkerActiveTask) {
+        $task->setServerTime(PhabricatorTime::getNow());
+      }
     }
 
     return $tasks;
