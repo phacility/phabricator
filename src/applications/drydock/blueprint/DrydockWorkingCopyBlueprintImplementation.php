@@ -213,7 +213,10 @@ final class DrydockWorkingCopyBlueprintImplementation
         $cmd[] = 'git reset --hard %s';
         $arg[] = $commit;
       } else if ($branch !== null) {
-        $cmd[] = 'git reset --hard %s';
+        $cmd[] = 'git checkout %s';
+        $arg[] = $branch;
+
+        $cmd[] = 'git reset --hard origin/%s';
         $arg[] = $branch;
       } else {
         $cmd[] = 'git reset --hard HEAD';
