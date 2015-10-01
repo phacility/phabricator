@@ -43,35 +43,7 @@ abstract class HarbormasterArtifact extends Phobject {
   }
 
   final public function getArtifactConstant() {
-    $class = new ReflectionClass($this);
-
-    $const = $class->getConstant('ARTIFACTCONST');
-    if ($const === false) {
-      throw new Exception(
-        pht(
-          '"%s" class "%s" must define a "%s" property.',
-          __CLASS__,
-          get_class($this),
-          'ARTIFACTCONST'));
-    }
-
-    $limit = self::getArtifactConstantByteLimit();
-    if (!is_string($const) || (strlen($const) > $limit)) {
-      throw new Exception(
-        pht(
-          '"%s" class "%s" has an invalid "%s" property. Action constants '.
-          'must be strings and no more than %s bytes in length.',
-          __CLASS__,
-          get_class($this),
-          'ARTIFACTCONST',
-          new PhutilNumber($limit)));
-    }
-
-    return $const;
-  }
-
-  final public static function getArtifactConstantByteLimit() {
-    return 32;
+    return $this->getPhobjectClassConstant('ARTIFACTCONST', 32);
   }
 
   final public static function getAllArtifactTypes() {

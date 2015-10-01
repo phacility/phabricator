@@ -122,35 +122,7 @@ abstract class HeraldAction extends Phobject {
   }
 
   final public function getActionConstant() {
-    $class = new ReflectionClass($this);
-
-    $const = $class->getConstant('ACTIONCONST');
-    if ($const === false) {
-      throw new Exception(
-        pht(
-          '"%s" class "%s" must define a "%s" property.',
-          __CLASS__,
-          get_class($this),
-          'ACTIONCONST'));
-    }
-
-    $limit = self::getActionConstantByteLimit();
-    if (!is_string($const) || (strlen($const) > $limit)) {
-      throw new Exception(
-        pht(
-          '"%s" class "%s" has an invalid "%s" property. Action constants '.
-          'must be strings and no more than %s bytes in length.',
-          __CLASS__,
-          get_class($this),
-          'ACTIONCONST',
-          new PhutilNumber($limit)));
-    }
-
-    return $const;
-  }
-
-  final public static function getActionConstantByteLimit() {
-    return 64;
+    return $this->getPhobjectClassConstant('ACTIONCONST', 64);
   }
 
   final public static function getAllActions() {

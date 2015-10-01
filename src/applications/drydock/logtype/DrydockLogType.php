@@ -28,35 +28,7 @@ abstract class DrydockLogType extends Phobject {
   }
 
   final public function getLogTypeConstant() {
-    $class = new ReflectionClass($this);
-
-    $const = $class->getConstant('LOGCONST');
-    if ($const === false) {
-      throw new Exception(
-        pht(
-          '"%s" class "%s" must define a "%s" property.',
-          __CLASS__,
-          get_class($this),
-          'LOGCONST'));
-    }
-
-    $limit = self::getLogTypeConstantByteLimit();
-    if (!is_string($const) || (strlen($const) > $limit)) {
-      throw new Exception(
-        pht(
-          '"%s" class "%s" has an invalid "%s" property. Field constants '.
-          'must be strings and no more than %s bytes in length.',
-          __CLASS__,
-          get_class($this),
-          'LOGCONST',
-          new PhutilNumber($limit)));
-    }
-
-    return $const;
-  }
-
-  final private static function getLogTypeConstantByteLimit() {
-    return 64;
+    return $this->getPhobjectClassConstant('LOGCONST', 64);
   }
 
   final public static function getAllLogTypes() {
