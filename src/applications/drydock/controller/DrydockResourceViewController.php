@@ -15,7 +15,10 @@ final class DrydockResourceViewController extends DrydockResourceController {
       return new Aphront404Response();
     }
 
-    $title = pht('Resource %s %s', $resource->getID(), $resource->getName());
+    $title = pht(
+      'Resource %s %s',
+      $resource->getID(),
+      $resource->getResourceName());
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)

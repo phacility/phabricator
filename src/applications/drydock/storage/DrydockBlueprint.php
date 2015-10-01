@@ -162,6 +162,16 @@ final class DrydockBlueprint extends DrydockDAO
   }
 
 
+  /**
+   * @task resource
+   */
+  public function getResourceName(DrydockResource $resource) {
+    return $this->getImplementation()->getResourceName(
+      $this,
+      $resource);
+  }
+
+
 /* -(  Acquiring Leases  )--------------------------------------------------- */
 
 

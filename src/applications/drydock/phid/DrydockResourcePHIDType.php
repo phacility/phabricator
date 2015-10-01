@@ -33,7 +33,7 @@ final class DrydockResourcePHIDType extends PhabricatorPHIDType {
         pht(
           'Resource %d: %s',
           $id,
-          $resource->getName()));
+          $resource->getResourceName()));
 
       $handle->setURI("/drydock/resource/{$id}/");
     }

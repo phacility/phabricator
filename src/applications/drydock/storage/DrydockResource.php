@@ -9,7 +9,6 @@ final class DrydockResource extends DrydockDAO
   protected $status;
   protected $until;
   protected $type;
-  protected $name;
   protected $attributes   = array();
   protected $capabilities = array();
   protected $ownerPHID;
@@ -30,7 +29,6 @@ final class DrydockResource extends DrydockDAO
         'capabilities'  => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
         'ownerPHID' => 'phid?',
         'status' => 'text32',
         'type' => 'text64',
@@ -49,6 +47,10 @@ final class DrydockResource extends DrydockDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(DrydockResourcePHIDType::TYPECONST);
+  }
+
+  public function getResourceName() {
+    return $this->getBlueprint()->getResourceName($this);
   }
 
   public function getAttribute($key, $default = null) {
@@ -118,6 +120,16 @@ final class DrydockResource extends DrydockDAO
           'Only new resources may be allocated.'));
     }
 
+    // We expect resources to have a pregenerated PHID, as they should have
+    // been created by a call to DrydockBlueprint->newResourceTemplate().
+    if (!$this->getPHID()) {
+      throw new Exception(
+        pht(
+          'Trying to allocate a resource with no generated PHID. Use "%s" to '.
+          'create new resource templates.',
+          'newResourceTemplate()'));
+    }
+
     $expect_status = DrydockResourceStatus::STATUS_PENDING;
     $actual_status = $this->getStatus();
     if ($actual_status != $expect_status) {
@@ -135,12 +147,10 @@ final class DrydockResource extends DrydockDAO
       $new_status = DrydockResourceStatus::STATUS_PENDING;
     }
 
-    $phid = $this->generatePHID();
-
     $this->openTransaction();
     try {
       try {
-        DrydockSlotLock::acquireLocks($phid, $this->slotLocks);
+        DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
         $this->slotLocks = array();
       } catch (DrydockSlotLockException $ex) {
         $this->logEvent(
@@ -152,7 +162,6 @@ final class DrydockResource extends DrydockDAO
       }
 
       $this
-        ->setPHID($phid)
         ->setStatus($new_status)
         ->save();
     } catch (Exception $ex) {

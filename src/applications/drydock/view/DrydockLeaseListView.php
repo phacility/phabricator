@@ -22,19 +22,10 @@ final class DrydockLeaseListView extends AphrontView {
         ->setHeader($lease->getLeaseName())
         ->setHref('/drydock/lease/'.$lease->getID().'/');
 
-      if ($lease->hasAttachedResource()) {
-        $resource = $lease->getResource();
-
-        $resource_href = '/drydock/resource/'.$resource->getID().'/';
-        $resource_name = $resource->getName();
-
+      $resource_phid = $lease->getResourcePHID();
+      if ($resource_phid) {
         $item->addAttribute(
-          phutil_tag(
-            'a',
-            array(
-              'href' => $resource_href,
-            ),
-            $resource_name));
+          $viewer->renderHandle($resource_phid));
       }
 
       $status = DrydockLeaseStatus::getNameForStatus($lease->getStatus());

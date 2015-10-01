@@ -237,6 +237,19 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     DrydockResource $resource);
 
 
+  /**
+   * Get a human readable name for a resource.
+   *
+   * @param DrydockBlueprint Blueprint which built the resource.
+   * @param DrydockResource Resource to get the name of.
+   * @return string Human-readable resource name.
+   * @task resource
+   */
+  abstract public function getResourceName(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource);
+
+
 /* -(  Resource Interfaces  )------------------------------------------------ */
 
 
@@ -260,16 +273,13 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     return idx(self::getAllBlueprintImplementations(), $class);
   }
 
-  protected function newResourceTemplate(
-    DrydockBlueprint $blueprint,
-    $name) {
+  protected function newResourceTemplate(DrydockBlueprint $blueprint) {
 
     $resource = id(new DrydockResource())
       ->setBlueprintPHID($blueprint->getPHID())
       ->attachBlueprint($blueprint)
       ->setType($this->getType())
-      ->setStatus(DrydockResourceStatus::STATUS_PENDING)
-      ->setName($name);
+      ->setStatus(DrydockResourceStatus::STATUS_PENDING);
 
     // Pre-allocate the resource PHID.
     $resource->setPHID($resource->generatePHID());

@@ -97,9 +97,7 @@ final class DrydockWorkingCopyBlueprintImplementation
     DrydockBlueprint $blueprint,
     DrydockLease $lease) {
 
-    $resource = $this->newResourceTemplate(
-      $blueprint,
-      pht('Working Copy'));
+    $resource = $this->newResourceTemplate($blueprint);
 
     $resource_phid = $resource->getPHID();
 
@@ -184,6 +182,13 @@ final class DrydockWorkingCopyBlueprintImplementation
       }
     }
   }
+
+  public function getResourceName(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource) {
+    return pht('Working Copy');
+  }
+
 
   public function activateLease(
     DrydockBlueprint $blueprint,

@@ -690,7 +690,7 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
       ->setStatus(DrydockLeaseStatus::STATUS_BROKEN)
       ->save();
 
-    $lease->scheduleDestruction();
+    $lease->scheduleUpdate();
 
     $lease->logEvent(
       DrydockLeaseActivationFailureLogType::LOGCONST,
@@ -715,9 +715,11 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
    */
   private function destroyLease(DrydockLease $lease) {
     $resource = $lease->getResource();
-    $blueprint = $resource->getBlueprint();
 
-    $blueprint->destroyLease($resource, $lease);
+    if ($resource) {
+      $blueprint = $resource->getBlueprint();
+      $blueprint->destroyLease($resource, $lease);
+    }
 
     DrydockSlotLock::releaseLocks($lease->getPHID());
 
