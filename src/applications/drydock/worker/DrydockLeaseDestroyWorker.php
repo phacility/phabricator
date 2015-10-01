@@ -32,6 +32,8 @@ final class DrydockLeaseDestroyWorker extends DrydockWorker {
     $lease
       ->setStatus(DrydockLeaseStatus::STATUS_DESTROYED)
       ->save();
+
+    $lease->logEvent(DrydockLeaseDestroyedLogType::LOGCONST);
   }
 
 }

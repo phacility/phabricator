@@ -74,6 +74,8 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
         'objectPHID' => $lease->getPHID(),
       ));
 
+    $lease->logEvent(DrydockLeaseReleasedLogType::LOGCONST);
+
     $resource = $lease->getResource();
     $blueprint = $resource->getBlueprint();
 

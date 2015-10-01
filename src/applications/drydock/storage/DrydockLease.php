@@ -144,6 +144,8 @@ final class DrydockLease extends DrydockDAO
         'objectPHID' => $this->getPHID(),
       ));
 
+    $this->logEvent(DrydockLeaseQueuedLogType::LOGCONST);
+
     return $this;
   }
 
@@ -240,6 +242,7 @@ final class DrydockLease extends DrydockDAO
 
       $this
         ->setResourcePHID($resource->getPHID())
+        ->attachResource($resource)
         ->setStatus($new_status)
         ->save();
 
@@ -249,6 +252,8 @@ final class DrydockLease extends DrydockDAO
     $this->saveTransaction();
 
     $this->isAcquired = true;
+
+    $this->logEvent(DrydockLeaseAcquiredLogType::LOGCONST);
 
     if ($new_status == DrydockLeaseStatus::STATUS_ACTIVE) {
       $this->didActivate();
@@ -347,8 +352,7 @@ final class DrydockLease extends DrydockDAO
     $viewer = PhabricatorUser::getOmnipotentUser();
     $need_update = false;
 
-    // TODO: This is just a placeholder to get some data in the table.
-    $this->logEvent('activated');
+    $this->logEvent(DrydockLeaseActivatedLogType::LOGCONST);
 
     $commands = id(new DrydockCommandQuery())
       ->setViewer($viewer)
@@ -382,8 +386,10 @@ final class DrydockLease extends DrydockDAO
 
     $log->setLeasePHID($this->getPHID());
 
-    $resource = $this->getResource();
-    if ($resource) {
+    $resource_phid = $this->getResourcePHID();
+    if ($resource_phid) {
+      $resource = $this->getResource();
+
       $log->setResourcePHID($resource->getPHID());
       $log->setBlueprintPHID($resource->getBlueprintPHID());
     }
