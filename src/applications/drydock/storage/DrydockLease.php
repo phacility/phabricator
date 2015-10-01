@@ -135,14 +135,7 @@ final class DrydockLease extends DrydockDAO
       ->setStatus(DrydockLeaseStatus::STATUS_PENDING)
       ->save();
 
-    $task = PhabricatorWorker::scheduleTask(
-      'DrydockAllocatorWorker',
-      array(
-        'leasePHID' => $this->getPHID(),
-      ),
-      array(
-        'objectPHID' => $this->getPHID(),
-      ));
+    $this->scheduleUpdate();
 
     $this->logEvent(DrydockLeaseQueuedLogType::LOGCONST);
 
@@ -321,12 +314,13 @@ final class DrydockLease extends DrydockDAO
     }
   }
 
-  public function canUpdate() {
+  public function canReceiveCommands() {
     switch ($this->getStatus()) {
-      case DrydockLeaseStatus::STATUS_ACTIVE:
-        return true;
-      default:
+      case DrydockLeaseStatus::STATUS_RELEASED:
+      case DrydockLeaseStatus::STATUS_DESTROYED:
         return false;
+      default:
+        return true;
     }
   }
 

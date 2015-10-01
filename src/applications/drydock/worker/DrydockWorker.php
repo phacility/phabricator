@@ -86,7 +86,7 @@ abstract class DrydockWorker extends PhabricatorWorker {
   }
 
   protected function yieldIfExpiringLease(DrydockLease $lease) {
-    if (!$lease->canUpdate()) {
+    if (!$lease->canReceiveCommands()) {
       return;
     }
 
