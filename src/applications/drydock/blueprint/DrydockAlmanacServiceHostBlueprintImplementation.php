@@ -163,7 +163,6 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
           ->withPHIDs(array($binding_phid))
           ->executeOne();
         if (!$binding) {
-          // TODO: This is probably a permanent failure, destroy this resource?
           throw new Exception(
             pht(
               'Unable to load binding "%s" to create command interface.',

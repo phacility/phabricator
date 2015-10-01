@@ -297,7 +297,6 @@ final class DrydockWorkingCopyBlueprintImplementation
 
     foreach ($phids as $phid) {
       if (empty($repositories[$phid])) {
-        // TODO: Permanent failure.
         throw new Exception(
           pht(
             'Repository PHID "%s" does not exist.',
@@ -306,12 +305,16 @@ final class DrydockWorkingCopyBlueprintImplementation
     }
 
     foreach ($repositories as $repository) {
-      switch ($repository->getVersionControlSystem()) {
+      $repository_vcs = $repository->getVersionControlSystem();
+      switch ($repository_vcs) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
           break;
         default:
-          // TODO: Permanent failure.
-          throw new Exception(pht('Unsupported VCS!'));
+          throw new Exception(
+            pht(
+              'Repository ("%s") has unsupported VCS ("%s").',
+              $repository->getPHID(),
+              $repository_vcs));
       }
     }
 
@@ -328,8 +331,10 @@ final class DrydockWorkingCopyBlueprintImplementation
       ->withPHIDs(array($lease_phid))
       ->executeOne();
     if (!$lease) {
-      // TODO: Permanent failure.
-      throw new Exception(pht('Unable to load lease "%s".', $lease_phid));
+      throw new Exception(
+        pht(
+          'Unable to load lease ("%s").',
+          $lease_phid));
     }
 
     return $lease;

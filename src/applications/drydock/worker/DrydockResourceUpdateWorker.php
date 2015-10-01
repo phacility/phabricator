@@ -1,9 +1,11 @@
 <?php
 
 /**
+ * @task update Updating Resources
  * @task command Processing Commands
  * @task activate Activating Resources
  * @task release Releasing Resources
+ * @task break Breaking Resources
  * @task destroy Destroying Resources
  */
 final class DrydockResourceUpdateWorker extends DrydockWorker {
@@ -19,7 +21,7 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
 
     try {
       $resource = $this->loadResource($resource_phid);
-      $this->updateResource($resource);
+      $this->handleUpdate($resource);
     } catch (Exception $ex) {
       $lock->unlock();
       throw $ex;
@@ -28,6 +30,37 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
     $lock->unlock();
   }
 
+
+/* -(  Updating Resources  )------------------------------------------------- */
+
+
+  /**
+   * Update a resource, handling exceptions thrown during the update.
+   *
+   * @param DrydockReosource Resource to update.
+   * @return void
+   * @task update
+   */
+  private function handleUpdate(DrydockResource $resource) {
+    try {
+      $this->updateResource($resource);
+    } catch (Exception $ex) {
+      if ($this->isTemporaryException($ex)) {
+        $this->yieldResource($resource, $ex);
+      } else {
+        $this->breakResource($resource, $ex);
+      }
+    }
+  }
+
+
+  /**
+   * Update a resource.
+   *
+   * @param DrydockResource Resource to update.
+   * @return void
+   * @task update
+   */
   private function updateResource(DrydockResource $resource) {
     $this->processResourceCommands($resource);
 
@@ -49,6 +82,26 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
     }
 
     $this->yieldIfExpiringResource($resource);
+  }
+
+
+  /**
+   * Convert a temporary exception into a yield.
+   *
+   * @param DrydockResource Resource to yield.
+   * @param Exception Temporary exception worker encountered.
+   * @task update
+   */
+  private function yieldResource(DrydockResource $resource, Exception $ex) {
+    $duration = $this->getYieldDurationFromException($ex);
+
+    $resource->logEvent(
+      DrydockResourceActivationYieldLogType::LOGCONST,
+      array(
+        'duration' => $duration,
+      ));
+
+    throw new PhabricatorWorkerYieldException($duration);
   }
 
 
@@ -138,14 +191,9 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
     $viewer = $this->getViewer();
     $drydock_phid = id(new PhabricatorDrydockApplication())->getPHID();
 
-    $resource->openTransaction();
-      $resource
-        ->setStatus(DrydockResourceStatus::STATUS_RELEASED)
-        ->save();
-
-      // TODO: Hold slot locks until destruction?
-      DrydockSlotLock::releaseLocks($resource->getPHID());
-    $resource->saveTransaction();
+    $resource
+      ->setStatus(DrydockResourceStatus::STATUS_RELEASED)
+      ->save();
 
     $statuses = array(
       DrydockLeaseStatus::STATUS_PENDING,
@@ -173,6 +221,47 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
   }
 
 
+/* -(  Breaking Resources  )------------------------------------------------- */
+
+
+  /**
+   * @task break
+   */
+  private function breakResource(DrydockResource $resource, Exception $ex) {
+    switch ($resource->getStatus()) {
+      case DrydockResourceStatus::STATUS_BROKEN:
+      case DrydockResourceStatus::STATUS_RELEASED:
+      case DrydockResourceStatus::STATUS_DESTROYED:
+        // If the resource was already broken, just throw a normal exception.
+        // This will retry the task eventually.
+        throw new PhutilProxyException(
+          pht(
+            'Unexpected failure while destroying resource ("%s").',
+            $resource->getPHID()),
+          $ex);
+    }
+
+    $resource
+      ->setStatus(DrydockResourceStatus::STATUS_BROKEN)
+      ->save();
+
+    $resource->scheduleUpdate();
+
+    $resource->logEvent(
+      DrydockResourceActivationFailureLogType::LOGCONST,
+      array(
+        'class' => get_class($ex),
+        'message' => $ex->getMessage(),
+      ));
+
+    throw new PhabricatorWorkerPermanentFailureException(
+      pht(
+        'Permanent failure while activating resource ("%s"): %s',
+        $resource->getPHID(),
+        $ex->getMessage()));
+  }
+
+
 /* -(  Destroying Resources  )----------------------------------------------- */
 
 
@@ -182,6 +271,8 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
   private function destroyResource(DrydockResource $resource) {
     $blueprint = $resource->getBlueprint();
     $blueprint->destroyResource($resource);
+
+    DrydockSlotLock::releaseLocks($resource->getPHID());
 
     $resource
       ->setStatus(DrydockResourceStatus::STATUS_DESTROYED)

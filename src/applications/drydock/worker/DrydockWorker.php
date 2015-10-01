@@ -114,4 +114,45 @@ abstract class DrydockWorker extends PhabricatorWorker {
     throw new PhabricatorWorkerYieldException($expires - $now);
   }
 
+  protected function isTemporaryException(Exception $ex) {
+    if ($ex instanceof PhabricatorWorkerYieldException) {
+      return true;
+    }
+
+    if ($ex instanceof DrydockSlotLockException) {
+      return true;
+    }
+
+    if ($ex instanceof PhutilAggregateException) {
+      $any_temporary = false;
+      foreach ($ex->getExceptions() as $sub) {
+        if ($this->isTemporaryException($sub)) {
+          $any_temporary = true;
+          break;
+        }
+      }
+      if ($any_temporary) {
+        return true;
+      }
+    }
+
+    if ($ex instanceof PhutilProxyException) {
+      return $this->isTemporaryException($ex->getPreviousException());
+    }
+
+    return false;
+  }
+
+  protected function getYieldDurationFromException(Exception $ex) {
+    if ($ex instanceof PhabricatorWorkerYieldException) {
+      return $ex->getDuration();
+    }
+
+    if ($ex instanceof DrydockSlotLockException) {
+      return 5;
+    }
+
+    return 15;
+  }
+
 }
