@@ -7,6 +7,7 @@
  * @task acquire Acquiring Leases
  * @task activate Activating Leases
  * @task release Releasing Leases
+ * @task break Breaking Leases
  * @task destroy Destroying Leases
  */
 final class DrydockLeaseUpdateWorker extends DrydockWorker {
@@ -22,7 +23,7 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
 
     try {
       $lease = $this->loadLease($lease_phid);
-      $this->updateLease($lease);
+      $this->handleUpdate($lease);
     } catch (Exception $ex) {
       $lock->unlock();
       throw $ex;
@@ -33,6 +34,22 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
 
 
 /* -(  Updating Leases  )---------------------------------------------------- */
+
+
+  /**
+   * @task update
+   */
+  private function handleUpdate(DrydockLease $lease) {
+    try {
+      $this->updateLease($lease);
+    } catch (Exception $ex) {
+      if ($this->isTemporaryException($ex)) {
+        $this->yieldLease($lease, $ex);
+      } else {
+        $this->breakLease($lease, $ex);
+      }
+    }
+  }
 
 
   /**
@@ -61,6 +78,22 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
     }
 
     $this->yieldIfExpiringLease($lease);
+  }
+
+
+  /**
+   * @task update
+   */
+  private function yieldLease(DrydockLease $lease, Exception $ex) {
+    $duration = $this->getYieldDurationFromException($ex);
+
+    $lease->logEvent(
+      DrydockLeaseActivationYieldLogType::LOGCONST,
+      array(
+        'duration' => $duration,
+      ));
+
+    throw new PhabricatorWorkerYieldException($duration);
   }
 
 
@@ -145,10 +178,13 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
       // satisfy the lease, just not right now. This is a temporary failure,
       // and we expect allocation to succeed eventually.
       if (!$usable_blueprints) {
-        // TODO: More formal temporary failure here. We should retry this
-        // "soon" but not "immediately".
-        throw new Exception(
-          pht('No blueprints have space to allocate a resource right now.'));
+        $lease->logEvent(
+          DrydockLeaseWaitingForResourcesLogType::LOGCONST,
+          array(
+            'blueprintPHIDs' => mpull($blueprints, 'getPHID'),
+          ));
+
+        throw new PhabricatorWorkerYieldException(15);
       }
 
       $usable_blueprints = $this->rankBlueprints($usable_blueprints, $lease);
@@ -167,10 +203,6 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
       }
 
       if (!$resources) {
-        // TODO: We should distinguish between temporary and permament failures
-        // here. If any blueprint failed temporarily, retry "soon". If none
-        // of these failures were temporary, maybe this should be a permanent
-        // failure?
         throw new PhutilAggregateException(
           pht(
             'All blueprints failed to allocate a suitable new resource when '.
@@ -200,10 +232,6 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
     }
 
     if (!$allocated) {
-      // TODO: We should distinguish between temporary and permanent failures
-      // here. If any failures were temporary (specifically, failed to acquire
-      // locks)
-
       throw new PhutilAggregateException(
         pht(
           'Unable to acquire lease "%s" on any resouce.',
@@ -471,8 +499,6 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
     $lease_type = $lease->getResourceType();
 
     if ($resource_type !== $lease_type) {
-      // TODO: Destroy the resource here?
-
       throw new Exception(
         pht(
           'Blueprint "%s" (of type "%s") is not properly implemented: it '.
@@ -549,7 +575,6 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
     $resource_phid = $resource->getPHID();
 
     if ($lease_phid !== $resource_phid) {
-      // TODO: Destroy the lease?
       throw new Exception(
         pht(
           'Blueprint "%s" (of type "%s") is not properly implemented: it '.
@@ -570,20 +595,18 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
   private function activateLease(DrydockLease $lease) {
     $resource = $lease->getResource();
     if (!$resource) {
-      throw new PhabricatorWorkerPermanentFailureException(
+      throw new Exception(
         pht('Trying to activate lease with no resource.'));
     }
 
     $resource_status = $resource->getStatus();
 
     if ($resource_status == DrydockResourceStatus::STATUS_PENDING) {
-      // TODO: This is explicitly a temporary failure -- we are waiting for
-      // the resource to come up.
-      throw new Exception(pht('Resource still activating.'));
+      throw new PhabricatorWorkerYieldException(15);
     }
 
     if ($resource_status != DrydockResourceStatus::STATUS_ACTIVE) {
-      throw new PhabricatorWorkerPermanentFailureException(
+      throw new Exception(
         pht(
           'Trying to activate lease on a dead resource (in status "%s").',
           $resource_status));
@@ -630,14 +653,9 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
    * @task release
    */
   private function releaseLease(DrydockLease $lease) {
-    $lease->openTransaction();
-      $lease
-        ->setStatus(DrydockLeaseStatus::STATUS_RELEASED)
-        ->save();
-
-      // TODO: Hold slot locks until destruction?
-      DrydockSlotLock::releaseLocks($lease->getPHID());
-    $lease->saveTransaction();
+    $lease
+      ->setStatus(DrydockLeaseStatus::STATUS_RELEASED)
+      ->save();
 
     $lease->logEvent(DrydockLeaseReleasedLogType::LOGCONST);
 
@@ -647,6 +665,45 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
     $blueprint->didReleaseLease($resource, $lease);
 
     $this->destroyLease($lease);
+  }
+
+
+/* -(  Breaking Leases  )---------------------------------------------------- */
+
+
+  /**
+   * @task break
+   */
+  protected function breakLease(DrydockLease $lease, Exception $ex) {
+    switch ($lease->getStatus()) {
+      case DrydockLeaseStatus::STATUS_BROKEN:
+      case DrydockLeaseStatus::STATUS_RELEASED:
+      case DrydockLeaseStatus::STATUS_DESTROYED:
+        throw new PhutilProxyException(
+          pht(
+            'Unexpected failure while destroying lease ("%s").',
+            $lease->getPHID()),
+          $ex);
+    }
+
+    $lease
+      ->setStatus(DrydockLeaseStatus::STATUS_BROKEN)
+      ->save();
+
+    $lease->scheduleDestruction();
+
+    $lease->logEvent(
+      DrydockLeaseActivationFailureLogType::LOGCONST,
+      array(
+        'class' => get_class($ex),
+        'message' => $ex->getMessage(),
+      ));
+
+    throw new PhabricatorWorkerPermanentFailureException(
+      pht(
+        'Permanent failure while activating lease ("%s"): %s',
+        $lease->getPHID(),
+        $ex->getMessage()));
   }
 
 
@@ -661,6 +718,8 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
     $blueprint = $resource->getBlueprint();
 
     $blueprint->destroyLease($resource, $lease);
+
+    DrydockSlotLock::releaseLocks($lease->getPHID());
 
     $lease
       ->setStatus(DrydockLeaseStatus::STATUS_DESTROYED)
