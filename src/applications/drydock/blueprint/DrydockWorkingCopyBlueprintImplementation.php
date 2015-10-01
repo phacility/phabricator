@@ -216,6 +216,8 @@ final class DrydockWorkingCopyBlueprintImplementation
       $commit = idx($spec, 'commit');
       $branch = idx($spec, 'branch');
 
+      $ref = idx($spec, 'ref');
+
       if ($commit !== null) {
         $cmd[] = 'git reset --hard %s';
         $arg[] = $commit;
@@ -225,6 +227,20 @@ final class DrydockWorkingCopyBlueprintImplementation
 
         $cmd[] = 'git reset --hard origin/%s';
         $arg[] = $branch;
+      } else if ($ref) {
+        $ref_uri = $ref['uri'];
+        $ref_ref = $ref['ref'];
+
+        $cmd[] = 'git fetch --no-tags -- %s +%s:%s';
+        $arg[] = $ref_uri;
+        $arg[] = $ref_ref;
+        $arg[] = $ref_ref;
+
+        $cmd[] = 'git checkout %s';
+        $arg[] = $ref_ref;
+
+        $cmd[] = 'git reset --hard %s';
+        $arg[] = $ref_ref;
       } else {
         $cmd[] = 'git reset --hard HEAD';
       }

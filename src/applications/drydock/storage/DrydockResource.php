@@ -148,19 +148,25 @@ final class DrydockResource extends DrydockDAO
     }
 
     $this->openTransaction();
-    try {
-      try {
-        DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
-        $this->slotLocks = array();
-      } catch (DrydockSlotLockException $ex) {
-        $this->logEvent(
-          DrydockSlotLockFailureLogType::LOGCONST,
-          array(
-            'locks' => $ex->getLockMap(),
-          ));
-        throw $ex;
-      }
 
+    try {
+      DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
+      $this->slotLocks = array();
+    } catch (DrydockSlotLockException $ex) {
+      $this->killTransaction();
+
+      // NOTE: We have to log this on the blueprint, as the resource is not
+      // going to be saved so the PHID will vanish.
+      $this->getBlueprint()->logEvent(
+        DrydockSlotLockFailureLogType::LOGCONST,
+        array(
+          'locks' => $ex->getLockMap(),
+        ));
+
+      throw $ex;
+    }
+
+    try {
       $this
         ->setStatus($new_status)
         ->save();
@@ -168,6 +174,7 @@ final class DrydockResource extends DrydockDAO
       $this->killTransaction();
       throw $ex;
     }
+
     $this->saveTransaction();
 
     $this->isAllocated = true;

@@ -86,15 +86,23 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
   }
 
   protected function checkLease() {
-    if ($this->leaseOwner) {
-      $current_server_time = $this->serverTime + (time() - $this->localTime);
-      if ($current_server_time >= $this->leaseExpires) {
-        throw new Exception(
-          pht(
-            'Trying to update Task %d (%s) after lease expiration!',
-            $this->getID(),
-            $this->getTaskClass()));
-      }
+    $owner = $this->leaseOwner;
+
+    if (!$owner) {
+      return;
+    }
+
+    if ($owner == PhabricatorWorker::YIELD_OWNER) {
+      return;
+    }
+
+    $current_server_time = $this->serverTime + (time() - $this->localTime);
+    if ($current_server_time >= $this->leaseExpires) {
+      throw new Exception(
+        pht(
+          'Trying to update Task %d (%s) after lease expiration!',
+          $this->getID(),
+          $this->getTaskClass()));
     }
   }
 

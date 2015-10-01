@@ -295,14 +295,18 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     $lease_status = $lease->getStatus();
 
     switch ($lease_status) {
+      case DrydockLeaseStatus::STATUS_PENDING:
       case DrydockLeaseStatus::STATUS_ACQUIRED:
-        // TODO: Temporary failure.
-        throw new Exception(pht('Lease still activating.'));
+        throw new PhabricatorWorkerYieldException(15);
       case DrydockLeaseStatus::STATUS_ACTIVE:
         return;
       default:
-        // TODO: Permanent failure.
-        throw new Exception(pht('Lease in bad state.'));
+        throw new Exception(
+          pht(
+            'Lease ("%s") is in bad state ("%s"), expected "%s".',
+            $lease->getPHID(),
+            $lease_status,
+            DrydockLeaseStatus::STATUS_ACTIVE));
     }
   }
 

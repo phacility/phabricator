@@ -107,6 +107,17 @@ final class DrydockBlueprint extends DrydockDAO
     return $this->fields;
   }
 
+  public function logEvent($type, array $data = array()) {
+    $log = id(new DrydockLog())
+      ->setEpoch(PhabricatorTime::getNow())
+      ->setType($type)
+      ->setData($data);
+
+    $log->setBlueprintPHID($this->getPHID());
+
+    return $log->save();
+  }
+
 
 /* -(  Allocating Resources  )----------------------------------------------- */
 

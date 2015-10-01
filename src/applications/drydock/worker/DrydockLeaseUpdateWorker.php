@@ -660,9 +660,10 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
     $lease->logEvent(DrydockLeaseReleasedLogType::LOGCONST);
 
     $resource = $lease->getResource();
-    $blueprint = $resource->getBlueprint();
-
-    $blueprint->didReleaseLease($resource, $lease);
+    if ($resource) {
+      $blueprint = $resource->getBlueprint();
+      $blueprint->didReleaseLease($resource, $lease);
+    }
 
     $this->destroyLease($lease);
   }

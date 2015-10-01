@@ -113,6 +113,13 @@ final class HarbormasterLeaseWorkingCopyBuildStepImplementation
     $variables = $build_target->getVariables();
 
     $repository_phid = idx($variables, 'repository.phid');
+    if (!$repository_phid) {
+      throw new Exception(
+        pht(
+          'Unable to determine how to clone the repository for this '.
+          'buildable: it is not associated with a tracked repository.'));
+    }
+
     $also_phids = $build_target->getFieldValue('repositoryPHIDs');
 
     $all_phids = $also_phids;
@@ -133,8 +140,6 @@ final class HarbormasterLeaseWorkingCopyBuildStepImplementation
       }
     }
 
-    $commit = idx($variables, 'repository.commit');
-
     $map = array();
 
     foreach ($also_phids as $also_phid) {
@@ -147,12 +152,33 @@ final class HarbormasterLeaseWorkingCopyBuildStepImplementation
 
     $repository = $repositories[$repository_phid];
 
+    $commit = idx($variables, 'repository.commit');
+    $ref_uri = idx($variables, 'repository.staging.uri');
+    $ref_ref = idx($variables, 'repository.staging.ref');
+    if ($commit) {
+      $spec = array(
+        'commit' => $commit,
+      );
+    } else if ($ref_uri && $ref_ref) {
+      $spec = array(
+        'ref' => array(
+          'uri' => $ref_uri,
+          'ref' => $ref_ref,
+        ),
+      );
+    } else {
+      throw new Exception(
+        pht(
+          'Unable to determine how to fetch changes: this buildable does not '.
+          'identify a commit or a staging ref. You may need to configure a '.
+          'repository staging area.'));
+    }
+
     $directory = $repository->getCloneName();
     $map[$directory] = array(
       'phid' => $repository->getPHID(),
-      'commit' => $commit,
       'default' => true,
-    );
+    ) + $spec;
 
     return $map;
   }
