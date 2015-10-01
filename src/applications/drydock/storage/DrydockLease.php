@@ -232,16 +232,28 @@ final class DrydockLease extends DrydockDAO
     }
 
     $this->openTransaction();
+    try {
+      try {
+        DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
+        $this->slotLocks = array();
+      } catch (DrydockSlotLockException $ex) {
+        $this->logEvent(
+          DrydockSlotLockFailureLogType::LOGCONST,
+          array(
+            'locks' => $ex->getLockMap(),
+          ));
+        throw $ex;
+      }
 
       $this
         ->setResourcePHID($resource->getPHID())
         ->attachResource($resource)
         ->setStatus($new_status)
         ->save();
-
-      DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
-      $this->slotLocks = array();
-
+    } catch (Exception $ex) {
+      $this->killTransaction();
+      throw $ex;
+    }
     $this->saveTransaction();
 
     $this->isAcquired = true;

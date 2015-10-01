@@ -135,15 +135,30 @@ final class DrydockResource extends DrydockDAO
       $new_status = DrydockResourceStatus::STATUS_PENDING;
     }
 
+    $phid = $this->generatePHID();
+
     $this->openTransaction();
+    try {
+      try {
+        DrydockSlotLock::acquireLocks($phid, $this->slotLocks);
+        $this->slotLocks = array();
+      } catch (DrydockSlotLockException $ex) {
+        $this->logEvent(
+          DrydockSlotLockFailureLogType::LOGCONST,
+          array(
+            'locks' => $ex->getLockMap(),
+          ));
+        throw $ex;
+      }
 
       $this
+        ->setPHID($phid)
         ->setStatus($new_status)
         ->save();
-
-      DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
-      $this->slotLocks = array();
-
+    } catch (Exception $ex) {
+      $this->killTransaction();
+      throw $ex;
+    }
     $this->saveTransaction();
 
     $this->isAllocated = true;
@@ -255,6 +270,18 @@ final class DrydockResource extends DrydockDAO
       default:
         return true;
     }
+  }
+
+  public function logEvent($type, array $data = array()) {
+    $log = id(new DrydockLog())
+      ->setEpoch(PhabricatorTime::getNow())
+      ->setType($type)
+      ->setData($data);
+
+    $log->setResourcePHID($this->getPHID());
+    $log->setBlueprintPHID($this->getBlueprintPHID());
+
+    return $log->save();
   }
 
 

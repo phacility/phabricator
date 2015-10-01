@@ -172,14 +172,16 @@ final class DrydockWorkingCopyBlueprintImplementation
     // Destroy the lease on the host.
     $lease->releaseOnDestruction();
 
-    // Destroy the working copy on disk.
-    $command_type = DrydockCommandInterface::INTERFACE_TYPE;
-    $interface = $lease->getInterface($command_type);
+    if ($lease->isActive()) {
+      // Destroy the working copy on disk.
+      $command_type = DrydockCommandInterface::INTERFACE_TYPE;
+      $interface = $lease->getInterface($command_type);
 
-    $root_key = 'workingcopy.root';
-    $root = $resource->getAttribute($root_key);
-    if (strlen($root)) {
-      $interface->execx('rm -rf -- %s', $root);
+      $root_key = 'workingcopy.root';
+      $root = $resource->getAttribute($root_key);
+      if (strlen($root)) {
+        $interface->execx('rm -rf -- %s', $root);
+      }
     }
   }
 
