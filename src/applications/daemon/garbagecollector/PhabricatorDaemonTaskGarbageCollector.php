@@ -3,6 +3,16 @@
 final class PhabricatorDaemonTaskGarbageCollector
   extends PhabricatorGarbageCollector {
 
+  const COLLECTORCONST = 'worker.tasks';
+
+  public function getCollectorName() {
+    return pht('Archived Tasks');
+  }
+
+  public function getDefaultRetentionPolicy() {
+    return phutil_units('14 days in seconds');
+  }
+
   public function collectGarbage() {
     $key = 'gcdaemon.ttl.task-archive';
     $ttl = PhabricatorEnv::getEnvConfig($key);

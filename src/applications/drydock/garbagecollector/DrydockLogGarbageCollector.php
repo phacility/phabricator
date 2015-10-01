@@ -3,6 +3,16 @@
 final class DrydockLogGarbageCollector
   extends PhabricatorGarbageCollector {
 
+  const COLLECTORCONST = 'drydock.logs';
+
+  public function getCollectorName() {
+    return pht('Drydock Logs');
+  }
+
+  public function getDefaultRetentionPolicy() {
+    return phutil_units('30 days in seconds');
+  }
+
   public function collectGarbage() {
     $log_table = new DrydockLog();
     $conn_w = $log_table->establishConnection('w');

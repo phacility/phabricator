@@ -3,6 +3,16 @@
 final class PhabricatorSystemDestructionGarbageCollector
   extends PhabricatorGarbageCollector {
 
+  const COLLECTORCONST = 'system.destruction.logs';
+
+  public function getCollectorName() {
+    return pht('Destruction Logs');
+  }
+
+  public function getDefaultRetentionPolicy() {
+    return phutil_units('90 days in seconds');
+  }
+
   public function collectGarbage() {
     $ttl = phutil_units('90 days in seconds');
 

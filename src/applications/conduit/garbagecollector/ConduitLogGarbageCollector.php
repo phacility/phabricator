@@ -3,6 +3,16 @@
 final class ConduitLogGarbageCollector
   extends PhabricatorGarbageCollector {
 
+  const COLLECTORCONST = 'conduit.logs';
+
+  public function getCollectorName() {
+    return pht('Conduit Logs');
+  }
+
+  public function getDefaultRetentionPolicy() {
+    return phutil_units('180 days in seconds');
+  }
+
   public function collectGarbage() {
     $key = 'gcdaemon.ttl.conduit-logs';
     $ttl = PhabricatorEnv::getEnvConfig($key);

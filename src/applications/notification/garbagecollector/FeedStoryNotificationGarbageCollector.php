@@ -3,6 +3,16 @@
 final class FeedStoryNotificationGarbageCollector
   extends PhabricatorGarbageCollector {
 
+  const COLLECTORCONST = 'feed.notifications';
+
+  public function getCollectorName() {
+    return pht('Notifications');
+  }
+
+  public function getDefaultRetentionPolicy() {
+    return phutil_units('90 days in seconds');
+  }
+
   public function collectGarbage() {
     $ttl = 90 * 24 * 60 * 60;
 

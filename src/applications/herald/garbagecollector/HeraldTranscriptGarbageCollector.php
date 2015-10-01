@@ -3,6 +3,16 @@
 final class HeraldTranscriptGarbageCollector
   extends PhabricatorGarbageCollector {
 
+  const COLLECTORCONST = 'herald.transcripts';
+
+  public function getCollectorName() {
+    return pht('Herald Transcripts');
+  }
+
+  public function getDefaultRetentionPolicy() {
+    return phutil_units('30 days in seconds');
+  }
+
   public function collectGarbage() {
     $ttl = PhabricatorEnv::getEnvConfig('gcdaemon.ttl.herald-transcripts');
     if ($ttl <= 0) {

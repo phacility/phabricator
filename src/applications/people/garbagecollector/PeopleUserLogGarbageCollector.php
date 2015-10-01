@@ -3,6 +3,16 @@
 final class PeopleUserLogGarbageCollector
   extends PhabricatorGarbageCollector {
 
+  const COLLECTORCONST = 'user.logs';
+
+  public function getCollectorName() {
+    return pht('User Activity Logs');
+  }
+
+  public function getDefaultRetentionPolicy() {
+    return phutil_units('180 days in seconds');
+  }
+
   public function collectGarbage() {
     $ttl = phutil_units('180 days in seconds');
 

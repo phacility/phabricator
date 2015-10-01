@@ -3,6 +3,16 @@
 final class PhabricatorAuthTemporaryTokenGarbageCollector
   extends PhabricatorGarbageCollector {
 
+  const COLLECTORCONST = 'auth.tokens';
+
+  public function getCollectorName() {
+    return pht('Auth Tokens');
+  }
+
+  public function hasAutomaticPolicy() {
+    return true;
+  }
+
   public function collectGarbage() {
     $session_table = new PhabricatorAuthTemporaryToken();
     $conn_w = $session_table->establishConnection('w');

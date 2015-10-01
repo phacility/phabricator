@@ -1388,6 +1388,11 @@ final class PhabricatorUSEnglishTranslation
         'Mail sent in the last %s days.',
       ),
 
+      '%s Day(s)' => array(
+        '%s Day',
+        '%s Days',
+      ),
+
     );
   }
 

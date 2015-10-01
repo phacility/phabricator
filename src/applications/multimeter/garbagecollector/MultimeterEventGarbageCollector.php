@@ -3,6 +3,16 @@
 final class MultimeterEventGarbageCollector
   extends PhabricatorGarbageCollector {
 
+  const COLLECTORCONST = 'multimeter.events';
+
+  public function getCollectorName() {
+    return pht('Multimeter Events');
+  }
+
+  public function getDefaultRetentionPolicy() {
+    return phutil_units('90 days in seconds');
+  }
+
   public function collectGarbage() {
     $ttl = phutil_units('90 days in seconds');
 

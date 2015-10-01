@@ -3,6 +3,16 @@
 final class ConduitTokenGarbageCollector
   extends PhabricatorGarbageCollector {
 
+  const COLLECTORCONST = 'conduit.tokens';
+
+  public function getCollectorName() {
+    return pht('Conduit Tokens');
+  }
+
+  public function hasAutomaticPolicy() {
+    return true;
+  }
+
   public function collectGarbage() {
     $table = new PhabricatorConduitToken();
     $conn_w = $table->establishConnection('w');

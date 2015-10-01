@@ -3,6 +3,16 @@
 final class MetaMTAMailSentGarbageCollector
   extends PhabricatorGarbageCollector {
 
+  const COLLECTORCONST = 'metamta.sent';
+
+  public function getCollectorName() {
+    return pht('Mail (Sent)');
+  }
+
+  public function getDefaultRetentionPolicy() {
+    return phutil_units('90 days in seconds');
+  }
+
   public function collectGarbage() {
     $ttl = phutil_units('90 days in seconds');
 

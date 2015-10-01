@@ -3,6 +3,16 @@
 final class PhabricatorCacheMarkupGarbageCollector
   extends PhabricatorGarbageCollector {
 
+  const COLLECTORCONST = 'cache.markup';
+
+  public function getCollectorName() {
+    return pht('Markup Cache');
+  }
+
+  public function getDefaultRetentionPolicy() {
+    return phutil_units('30 days in seconds');
+  }
+
   public function collectGarbage() {
     $key = 'gcdaemon.ttl.markup-cache';
     $ttl = PhabricatorEnv::getEnvConfig($key);

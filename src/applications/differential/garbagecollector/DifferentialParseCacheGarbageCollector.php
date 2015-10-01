@@ -3,6 +3,16 @@
 final class DifferentialParseCacheGarbageCollector
   extends PhabricatorGarbageCollector {
 
+  const COLLECTORCONST = 'differential.parse';
+
+  public function getCollectorName() {
+    return pht('Differential Parse Cache');
+  }
+
+  public function getDefaultRetentionPolicy() {
+    return phutil_units('14 days in seconds');
+  }
+
   public function collectGarbage() {
     $key = 'gcdaemon.ttl.differential-parse-cache';
     $ttl = PhabricatorEnv::getEnvConfig($key);
