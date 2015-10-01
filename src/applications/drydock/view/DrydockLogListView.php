@@ -18,28 +18,45 @@ final class DrydockLogListView extends AphrontView {
 
     $rows = array();
     foreach ($logs as $log) {
-      $resource_uri = '/drydock/resource/'.$log->getResourceID().'/';
-      $lease_uri = '/drydock/lease/'.$log->getLeaseID().'/';
+      $blueprint_phid = $log->getBlueprintPHID();
+      if ($blueprint_phid) {
+        $blueprint = $viewer->renderHandle($blueprint_phid);
+      } else {
+        $blueprint = null;
+      }
 
-      $resource_name = $log->getResourceID();
-      if ($log->getResourceID() !== null) {
-        $resource_name = $log->getResource()->getName();
+      $resource_phid = $log->getResourcePHID();
+      if ($resource_phid) {
+        $resource = $viewer->renderHandle($resource_phid);
+      } else {
+        $resource = null;
+      }
+
+      $lease_phid = $log->getLeasePHID();
+      if ($lease_phid) {
+        $lease = $viewer->renderHandle($lease_phid);
+      } else {
+        $lease = null;
+      }
+
+      if ($log->isComplete()) {
+        // TODO: This is a placeholder.
+        $type = $log->getType();
+        $data = print_r($log->getData(), true);
+      } else {
+        $type = phutil_tag('em', array(), pht('Restricted'));
+        $data = phutil_tag(
+          'em',
+          array(),
+          pht('You do not have permission to view this log event.'));
       }
 
       $rows[] = array(
-        phutil_tag(
-          'a',
-          array(
-            'href' => $resource_uri,
-          ),
-          $resource_name),
-        phutil_tag(
-          'a',
-          array(
-            'href' => $lease_uri,
-          ),
-          $log->getLeaseID()),
-        $log->getMessage(),
+        $blueprint,
+        $resource,
+        $lease,
+        $type,
+        $data,
         phabricator_datetime($log->getEpoch(), $viewer),
       );
     }
@@ -48,20 +65,17 @@ final class DrydockLogListView extends AphrontView {
     $table->setDeviceReadyTable(true);
     $table->setHeaders(
       array(
+        pht('Blueprint'),
         pht('Resource'),
         pht('Lease'),
-        pht('Message'),
+        pht('Type'),
+        pht('Data'),
         pht('Date'),
-      ));
-    $table->setShortHeaders(
-      array(
-        pht('R'),
-        pht('L'),
-        pht('Message'),
-        '',
       ));
     $table->setColumnClasses(
       array(
+        '',
+        '',
         '',
         '',
         'wide',

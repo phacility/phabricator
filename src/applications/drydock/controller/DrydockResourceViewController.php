@@ -29,23 +29,15 @@ final class DrydockResourceViewController extends DrydockResourceController {
     $actions = $this->buildActionListView($resource);
     $properties = $this->buildPropertyListView($resource, $actions);
 
-    $resource_uri = 'resource/'.$resource->getID().'/';
-    $resource_uri = $this->getApplicationURI($resource_uri);
+    $id = $resource->getID();
+    $resource_uri = $this->getApplicationURI("resource/{$id}/");
 
-    $pager = new PHUIPagerView();
-    $pager->setURI(new PhutilURI($resource_uri), 'offset');
-    $pager->setOffset($request->getInt('offset'));
+    $log_query = id(new DrydockLogQuery())
+      ->withResourcePHIDs(array($resource->getPHID()));
 
-    $logs = id(new DrydockLogQuery())
-      ->setViewer($viewer)
-      ->withResourceIDs(array($resource->getID()))
-      ->executeWithOffsetPager($pager);
-
-    $log_table = id(new DrydockLogListView())
-      ->setUser($viewer)
-      ->setLogs($logs)
-      ->render();
-    $log_table->appendChild($pager);
+    $log_box = $this->buildLogBox(
+      $log_query,
+      $this->getApplicationURI("resource/{$id}/logs/query/all/"));
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Resource %d', $resource->getID()));
@@ -60,10 +52,6 @@ final class DrydockResourceViewController extends DrydockResourceController {
       ->addPropertyList($commands, pht('Commands'));
 
     $lease_box = $this->buildLeaseBox($resource);
-
-    $log_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Resource Logs'))
-      ->setTable($log_table);
 
     return $this->buildApplicationPage(
       array(

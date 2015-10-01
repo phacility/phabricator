@@ -15,7 +15,8 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
       return new Aphront404Response();
     }
 
-    $lease_uri = $this->getApplicationURI('lease/'.$lease->getID().'/');
+    $id = $lease->getID();
+    $lease_uri = $this->getApplicationURI("lease/{$id}/");
 
     $title = pht('Lease %d', $lease->getID());
 
@@ -29,20 +30,12 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
     $actions = $this->buildActionListView($lease);
     $properties = $this->buildPropertyListView($lease, $actions);
 
-    $pager = new PHUIPagerView();
-    $pager->setURI(new PhutilURI($lease_uri), 'offset');
-    $pager->setOffset($request->getInt('offset'));
+    $log_query = id(new DrydockLogQuery())
+      ->withLeasePHIDs(array($lease->getPHID()));
 
-    $logs = id(new DrydockLogQuery())
-      ->setViewer($viewer)
-      ->withLeaseIDs(array($lease->getID()))
-      ->executeWithOffsetPager($pager);
-
-    $log_table = id(new DrydockLogListView())
-      ->setUser($viewer)
-      ->setLogs($logs)
-      ->render();
-    $log_table->appendChild($pager);
+    $log_box = $this->buildLogBox(
+      $log_query,
+      $this->getApplicationURI("lease/{$id}/logs/query/all/"));
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title, $lease_uri);
@@ -55,10 +48,6 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
       ->addPropertyList($properties, pht('Properties'))
       ->addPropertyList($locks, pht('Slot Locks'))
       ->addPropertyList($commands, pht('Commands'));
-
-    $log_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Lease Logs'))
-      ->setTable($log_table);
 
     return $this->buildApplicationPage(
       array(

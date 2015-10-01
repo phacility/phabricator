@@ -47,7 +47,7 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
     return array(
       '/drydock/' => array(
         '' => 'DrydockConsoleController',
-        'blueprint/' => array(
+        '(?P<type>blueprint)/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'DrydockBlueprintListController',
           '(?P<id>[1-9]\d*)/' => array(
             '' => 'DrydockBlueprintViewController',
@@ -55,28 +55,31 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
               'DrydockBlueprintDisableController',
             'resources/(?:query/(?P<queryKey>[^/]+)/)?' =>
               'DrydockResourceListController',
+            'logs/(?:query/(?P<queryKey>[^/]+)/)?' =>
+              'DrydockLogListController',
           ),
           'create/' => 'DrydockBlueprintCreateController',
           'edit/(?:(?P<id>[1-9]\d*)/)?' => 'DrydockBlueprintEditController',
         ),
-        'resource/' => array(
+        '(?P<type>resource)/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'DrydockResourceListController',
           '(?P<id>[1-9]\d*)/' => array(
             '' => 'DrydockResourceViewController',
             'release/' => 'DrydockResourceReleaseController',
             'leases/(?:query/(?P<queryKey>[^/]+)/)?' =>
               'DrydockLeaseListController',
+            'logs/(?:query/(?P<queryKey>[^/]+)/)?' =>
+              'DrydockLogListController',
           ),
         ),
-        'lease/' => array(
+        '(?P<type>lease)/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'DrydockLeaseListController',
           '(?P<id>[1-9]\d*)/' => array(
             '' => 'DrydockLeaseViewController',
             'release/' => 'DrydockLeaseReleaseController',
+            'logs/(?:query/(?P<queryKey>[^/]+)/)?' =>
+              'DrydockLogListController',
           ),
-        ),
-        'log/' => array(
-          '(?:query/(?P<queryKey>[^/]+)/)?' => 'DrydockLogListController',
         ),
       ),
     );

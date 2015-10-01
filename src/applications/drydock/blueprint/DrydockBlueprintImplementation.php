@@ -250,46 +250,6 @@ abstract class DrydockBlueprintImplementation extends Phobject {
 /* -(  Logging  )------------------------------------------------------------ */
 
 
-  /**
-   * @task log
-   */
-  protected function logException(Exception $ex) {
-    $this->log($ex->getMessage());
-  }
-
-
-  /**
-   * @task log
-   */
-  protected function log($message) {
-    self::writeLog(null, null, $message);
-  }
-
-
-  /**
-   * @task log
-   */
-  public static function writeLog(
-    DrydockResource $resource = null,
-    DrydockLease $lease = null,
-    $message = null) {
-
-    $log = id(new DrydockLog())
-      ->setEpoch(time())
-      ->setMessage($message);
-
-    if ($resource) {
-      $log->setResourceID($resource->getID());
-    }
-
-    if ($lease) {
-      $log->setLeaseID($lease->getID());
-    }
-
-    $log->save();
-  }
-
-
   public static function getAllBlueprintImplementations() {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)

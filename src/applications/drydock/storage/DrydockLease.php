@@ -347,6 +347,9 @@ final class DrydockLease extends DrydockDAO
     $viewer = PhabricatorUser::getOmnipotentUser();
     $need_update = false;
 
+    // TODO: This is just a placeholder to get some data in the table.
+    $this->logEvent('activated');
+
     $commands = id(new DrydockCommandQuery())
       ->setViewer($viewer)
       ->withTargetPHIDs(array($this->getPHID()))
@@ -370,6 +373,24 @@ final class DrydockLease extends DrydockDAO
       PhabricatorWorker::awakenTaskIDs($awaken_ids);
     }
   }
+
+  public function logEvent($type, array $data = array()) {
+    $log = id(new DrydockLog())
+      ->setEpoch(PhabricatorTime::getNow())
+      ->setType($type)
+      ->setData($data);
+
+    $log->setLeasePHID($this->getPHID());
+
+    $resource = $this->getResource();
+    if ($resource) {
+      $log->setResourcePHID($resource->getPHID());
+      $log->setBlueprintPHID($resource->getBlueprintPHID());
+    }
+
+    return $log->save();
+  }
+
 
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
