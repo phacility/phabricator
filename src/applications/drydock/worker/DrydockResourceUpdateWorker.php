@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @task command Processing Commands
+ * @task activate Activating Resources
+ * @task release Releasing Resources
+ * @task destroy Destroying Resources
+ */
 final class DrydockResourceUpdateWorker extends DrydockWorker {
 
   protected function doWork() {
@@ -23,7 +29,37 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
   }
 
   private function updateResource(DrydockResource $resource) {
-    if (!$resource->canUpdate()) {
+    $this->processResourceCommands($resource);
+
+    $resource_status = $resource->getStatus();
+    switch ($resource_status) {
+      case DrydockResourceStatus::STATUS_PENDING:
+        $this->activateResource($resource);
+        break;
+      case DrydockResourceStatus::STATUS_ACTIVE:
+        // Nothing to do.
+        break;
+      case DrydockResourceStatus::STATUS_RELEASED:
+      case DrydockResourceStatus::STATUS_BROKEN:
+        $this->destroyResource($resource);
+        break;
+      case DrydockResourceStatus::STATUS_DESTROYED:
+        // Nothing to do.
+        break;
+    }
+
+    $this->yieldIfExpiringResource($resource);
+  }
+
+
+/* -(  Processing Commands  )------------------------------------------------ */
+
+
+  /**
+   * @task command
+   */
+  private function processResourceCommands(DrydockResource $resource) {
+    if (!$resource->canReceiveCommands()) {
       return;
     }
 
@@ -31,21 +67,23 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
 
     $commands = $this->loadCommands($resource->getPHID());
     foreach ($commands as $command) {
-      if (!$resource->canUpdate()) {
+      if (!$resource->canReceiveCommands()) {
         break;
       }
 
-      $this->processCommand($resource, $command);
+      $this->processResourceCommand($resource, $command);
 
       $command
         ->setIsConsumed(true)
         ->save();
     }
-
-    $this->yieldIfExpiringResource($resource);
   }
 
-  private function processCommand(
+
+  /**
+   * @task command
+   */
+  private function processResourceCommand(
     DrydockResource $resource,
     DrydockCommand $command) {
 
@@ -56,13 +94,47 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
     }
   }
 
-  private function releaseResource(DrydockResource $resource) {
-    if ($resource->getStatus() != DrydockResourceStatus::STATUS_ACTIVE) {
-      // If we had multiple release commands
-      // This command is only meaningful to resources in the "Open" state.
-      return;
+
+/* -(  Activating Resources  )----------------------------------------------- */
+
+
+  /**
+   * @task activate
+   */
+  private function activateResource(DrydockResource $resource) {
+    $blueprint = $resource->getBlueprint();
+    $blueprint->activateResource($resource);
+    $this->validateActivatedResource($blueprint, $resource);
+  }
+
+
+  /**
+   * @task activate
+   */
+  private function validateActivatedResource(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource) {
+
+    if (!$resource->isActivatedResource()) {
+      throw new Exception(
+        pht(
+          'Blueprint "%s" (of type "%s") is not properly implemented: %s '.
+          'must actually allocate the resource it returns.',
+          $blueprint->getBlueprintName(),
+          $blueprint->getClassName(),
+          'allocateResource()'));
     }
 
+  }
+
+
+/* -(  Releasing Resources  )------------------------------------------------ */
+
+
+  /**
+   * @task release
+   */
+  private function releaseResource(DrydockResource $resource) {
     $viewer = $this->getViewer();
     $drydock_phid = id(new PhabricatorDrydockApplication())->getPHID();
 
@@ -97,14 +169,22 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
       $lease->scheduleUpdate();
     }
 
-    PhabricatorWorker::scheduleTask(
-      'DrydockResourceDestroyWorker',
-      array(
-        'resourcePHID' => $resource->getPHID(),
-      ),
-      array(
-        'objectPHID' => $resource->getPHID(),
-      ));
+    $this->destroyResource($resource);
   }
 
+
+/* -(  Destroying Resources  )----------------------------------------------- */
+
+
+  /**
+   * @task destroy
+   */
+  private function destroyResource(DrydockResource $resource) {
+    $blueprint = $resource->getBlueprint();
+    $blueprint->destroyResource($resource);
+
+    $resource
+      ->setStatus(DrydockResourceStatus::STATUS_DESTROYED)
+      ->save();
+  }
 }

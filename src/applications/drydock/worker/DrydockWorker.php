@@ -94,7 +94,7 @@ abstract class DrydockWorker extends PhabricatorWorker {
   }
 
   protected function yieldIfExpiringResource(DrydockResource $resource) {
-    if (!$resource->canUpdate()) {
+    if (!$resource->canReceiveCommands()) {
       return;
     }
 

@@ -333,7 +333,7 @@ final class DrydockAllocatorWorker extends DrydockWorker {
     // activate it.
     if ($resource->getStatus() == DrydockResourceStatus::STATUS_PENDING) {
       PhabricatorWorker::scheduleTask(
-        'DrydockResourceWorker',
+        'DrydockResourceUpdateWorker',
         array(
           'resourcePHID' => $resource->getPHID(),
         ),

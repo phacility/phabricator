@@ -246,12 +246,14 @@ final class DrydockResource extends DrydockDAO
     }
   }
 
-  public function canUpdate() {
+  public function canReceiveCommands() {
     switch ($this->getStatus()) {
-      case DrydockResourceStatus::STATUS_ACTIVE:
-        return true;
-      default:
+      case DrydockResourceStatus::STATUS_RELEASED:
+      case DrydockResourceStatus::STATUS_BROKEN:
+      case DrydockResourceStatus::STATUS_DESTROYED:
         return false;
+      default:
+        return true;
     }
   }
 
