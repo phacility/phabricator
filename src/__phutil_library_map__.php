@@ -972,6 +972,7 @@ phutil_register_library_map(array(
     'HarbormasterBuildPlanTransaction' => 'applications/harbormaster/storage/configuration/HarbormasterBuildPlanTransaction.php',
     'HarbormasterBuildPlanTransactionQuery' => 'applications/harbormaster/query/HarbormasterBuildPlanTransactionQuery.php',
     'HarbormasterBuildQuery' => 'applications/harbormaster/query/HarbormasterBuildQuery.php',
+    'HarbormasterBuildRequest' => 'applications/harbormaster/engine/HarbormasterBuildRequest.php',
     'HarbormasterBuildStep' => 'applications/harbormaster/storage/configuration/HarbormasterBuildStep.php',
     'HarbormasterBuildStepCoreCustomField' => 'applications/harbormaster/customfield/HarbormasterBuildStepCoreCustomField.php',
     'HarbormasterBuildStepCustomField' => 'applications/harbormaster/customfield/HarbormasterBuildStepCustomField.php',
@@ -4757,6 +4758,7 @@ phutil_register_library_map(array(
     'HarbormasterBuildPlanTransaction' => 'PhabricatorApplicationTransaction',
     'HarbormasterBuildPlanTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'HarbormasterBuildQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'HarbormasterBuildRequest' => 'Phobject',
     'HarbormasterBuildStep' => array(
       'HarbormasterDAO',
       'PhabricatorApplicationTransactionInterface',

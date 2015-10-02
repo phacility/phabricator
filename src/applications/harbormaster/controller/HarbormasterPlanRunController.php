@@ -62,7 +62,7 @@ final class HarbormasterPlanRunController extends HarbormasterController {
 
       if (!$errors) {
         $buildable->save();
-        $buildable->applyPlan($plan);
+        $buildable->applyPlan($plan, array());
 
         $buildable_uri = '/B'.$buildable->getID();
         return id(new AphrontRedirectResponse())->setURI($buildable_uri);

@@ -206,7 +206,7 @@ final class HarbormasterTargetEngine extends Phobject {
         // resource and "own" it, so we don't try to handle this, but may need
         // to be more careful here if use of autotargets expands.
 
-        $build = $buildable->applyPlan($plan);
+        $build = $buildable->applyPlan($plan, array());
         PhabricatorWorker::setRunAllTasksInProcess(false);
       } catch (Exception $ex) {
         PhabricatorWorker::setRunAllTasksInProcess(false);

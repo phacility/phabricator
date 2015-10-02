@@ -194,7 +194,7 @@ abstract class HarbormasterBuildStepImplementation extends Phobject {
    * @return string String with variables replaced safely into it.
    */
   protected function mergeVariables($function, $pattern, array $variables) {
-    $regexp = '/\\$\\{(?P<name>[a-z\\.]+)\\}/';
+    $regexp = '@\\$\\{(?P<name>[a-z\\./-]+)\\}@';
 
     $matches = null;
     preg_match_all($regexp, $pattern, $matches);
