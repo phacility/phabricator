@@ -13,12 +13,10 @@ final class MetaMTAMailSentGarbageCollector
     return phutil_units('90 days in seconds');
   }
 
-  public function collectGarbage() {
-    $ttl = phutil_units('90 days in seconds');
-
+  protected function collectGarbage() {
     $mails = id(new PhabricatorMetaMTAMail())->loadAllWhere(
       'dateCreated < %d LIMIT 100',
-      PhabricatorTime::getNow() - $ttl);
+      $this->getGarbageEpoch());
 
     foreach ($mails as $mail) {
       $mail->delete();

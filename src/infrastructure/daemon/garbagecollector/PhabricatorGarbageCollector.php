@@ -47,6 +47,28 @@ abstract class PhabricatorGarbageCollector extends Phobject {
 
 
   /**
+   * Get the effective retention policy.
+   *
+   * @return int|null Lifetime, or `null` for indefinite retention.
+   * @task info
+   */
+  public function getRetentionPolicy() {
+    if ($this->hasAutomaticPolicy()) {
+      throw new Exception(
+        pht(
+          'Can not get retention policy of collector with automatic '.
+          'policy.'));
+    }
+
+    $config = PhabricatorEnv::getEnvConfig('phd.garbage-collection');
+    $const = $this->getCollectorConstant();
+
+    return idx($config, $const, $this->getDefaultRetentionPolicy());
+  }
+
+
+
+  /**
    * Get a unique string constant identifying this collector.
    *
    * @return string Collector constant.
@@ -61,12 +83,60 @@ abstract class PhabricatorGarbageCollector extends Phobject {
 
 
   /**
+   * Run the collector.
+   *
+   * @return bool True if there is more garbage to collect.
+   * @task collect
+   */
+  final public function runCollector() {
+    // Don't do anything if this collector is configured with an indefinite
+    // retention policy.
+    if (!$this->hasAutomaticPolicy()) {
+      $policy = $this->getRetentionPolicy();
+      if (!$policy) {
+        return false;
+      }
+    }
+
+    return $this->collectGarbage();
+  }
+
+
+  /**
    * Collect garbage from whatever source this GC handles.
    *
    * @return bool True if there is more garbage to collect.
    * @task collect
    */
-  abstract public function collectGarbage();
+  abstract protected function collectGarbage();
+
+
+  /**
+   * Get the most recent epoch timestamp that is considered garbage.
+   *
+   * Records older than this should be collected.
+   *
+   * @return int Most recent garbage timestamp.
+   * @task collect
+   */
+  final protected function getGarbageEpoch() {
+    if ($this->hasAutomaticPolicy()) {
+      throw new Exception(
+        pht(
+          'Can not get garbage epoch for a collector with an automatic '.
+          'collection policy.'));
+    }
+
+    $ttl = $this->getRetentionPolicy();
+    if (!$ttl) {
+      throw new Exception(
+        pht(
+          'Can not get garbage epoch for a collector with an indefinite '.
+          'retention policy.'));
+    }
+
+    return (PhabricatorTime::getNow() - $ttl);
+  }
 
 
   /**

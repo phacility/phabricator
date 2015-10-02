@@ -17,11 +17,13 @@ final class PhabricatorConfigCollectorsModule extends PhabricatorConfigModule {
     $collectors = msort($collectors, 'getCollectorConstant');
 
     $rows = array();
+    $rowc = array();
     foreach ($collectors as $key => $collector) {
+      $class = null;
       if ($collector->hasAutomaticPolicy()) {
         $policy_view = phutil_tag('em', array(), pht('Automatic'));
       } else {
-        $policy = $collector->getDefaultRetentionPolicy();
+        $policy = $collector->getRetentionPolicy();
         if ($policy === null) {
           $policy_view = pht('Indefinite');
         } else {
@@ -30,8 +32,15 @@ final class PhabricatorConfigCollectorsModule extends PhabricatorConfigModule {
             '%s Day(s)',
             new PhutilNumber($days));
         }
+
+        $default = $collector->getDefaultRetentionPolicy();
+        if ($policy !== $default) {
+          $class = 'highlighted';
+          $policy_view = phutil_tag('strong', array(), $policy_view);
+        }
       }
 
+      $rowc[] = $class;
       $rows[] = array(
         $collector->getCollectorConstant(),
         $collector->getCollectorName(),
@@ -40,6 +49,7 @@ final class PhabricatorConfigCollectorsModule extends PhabricatorConfigModule {
     }
 
     $table = id(new AphrontTableView($rows))
+      ->setRowClasses($rowc)
       ->setHeaders(
         array(
           pht('Constant'),
@@ -53,8 +63,16 @@ final class PhabricatorConfigCollectorsModule extends PhabricatorConfigModule {
           null,
         ));
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Garbage Collectors'))
+      ->setSubheader(
+        pht(
+          'Collectors with custom policies are highlighted. Use '.
+          '%s to change retention policies.',
+          phutil_tag('tt', array(), 'bin/garbage set-policy')));
+
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Garbage Collectors'))
+      ->setHeader($header)
       ->setTable($table);
   }
 

@@ -13,9 +13,7 @@ final class PeopleUserLogGarbageCollector
     return phutil_units('180 days in seconds');
   }
 
-  public function collectGarbage() {
-    $ttl = phutil_units('180 days in seconds');
-
+  protected function collectGarbage() {
     $table = new PhabricatorUserLog();
     $conn_w = $table->establishConnection('w');
 
@@ -23,7 +21,7 @@ final class PeopleUserLogGarbageCollector
       $conn_w,
       'DELETE FROM %T WHERE dateCreated < %d LIMIT 100',
       $table->getTableName(),
-      time() - $ttl);
+      $this->getGarbageEpoch());
 
     return ($conn_w->getAffectedRows() == 100);
   }

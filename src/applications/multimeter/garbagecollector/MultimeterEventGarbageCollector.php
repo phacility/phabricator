@@ -13,9 +13,7 @@ final class MultimeterEventGarbageCollector
     return phutil_units('90 days in seconds');
   }
 
-  public function collectGarbage() {
-    $ttl = phutil_units('90 days in seconds');
-
+  protected function collectGarbage() {
     $table = new MultimeterEvent();
     $conn_w = $table->establishConnection('w');
 
@@ -23,7 +21,7 @@ final class MultimeterEventGarbageCollector
       $conn_w,
       'DELETE FROM %T WHERE epoch < %d LIMIT 100',
       $table->getTableName(),
-      PhabricatorTime::getNow() - $ttl);
+      $this->getGarbageEpoch());
 
     return ($conn_w->getAffectedRows() == 100);
   }

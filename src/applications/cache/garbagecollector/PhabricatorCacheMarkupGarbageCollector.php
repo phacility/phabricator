@@ -13,13 +13,7 @@ final class PhabricatorCacheMarkupGarbageCollector
     return phutil_units('30 days in seconds');
   }
 
-  public function collectGarbage() {
-    $key = 'gcdaemon.ttl.markup-cache';
-    $ttl = PhabricatorEnv::getEnvConfig($key);
-    if ($ttl <= 0) {
-      return false;
-    }
-
+  protected function collectGarbage() {
     $table = new PhabricatorMarkupCache();
     $conn_w = $table->establishConnection('w');
 
@@ -27,7 +21,7 @@ final class PhabricatorCacheMarkupGarbageCollector
       $conn_w,
       'DELETE FROM %T WHERE dateCreated < %d LIMIT 100',
       $table->getTableName(),
-      time() - $ttl);
+      $this->getGarbageEpoch());
 
     return ($conn_w->getAffectedRows() == 100);
   }

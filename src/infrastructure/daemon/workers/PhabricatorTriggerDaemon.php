@@ -356,7 +356,7 @@ final class PhabricatorTriggerDaemon
     // If we're in a collection cycle, continue collection.
     if ($this->garbageCollectors) {
       foreach ($this->garbageCollectors as $key => $collector) {
-        $more_garbage = $collector->collectGarbage();
+        $more_garbage = $collector->runCollector();
         if (!$more_garbage) {
           unset($this->garbageCollectors[$key]);
         }

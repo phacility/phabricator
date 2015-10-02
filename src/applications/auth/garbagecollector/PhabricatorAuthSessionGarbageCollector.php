@@ -6,14 +6,14 @@ final class PhabricatorAuthSessionGarbageCollector
   const COLLECTORCONST = 'auth.sessions';
 
   public function getCollectorName() {
-    return pht('Auth Sessions');
+    return pht('Authentication Sessions');
   }
 
   public function hasAutomaticPolicy() {
     return true;
   }
 
-  public function collectGarbage() {
+  protected function collectGarbage() {
     $session_table = new PhabricatorAuthSession();
     $conn_w = $session_table->establishConnection('w');
 

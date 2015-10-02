@@ -13,10 +13,10 @@ final class PhabricatorFileTemporaryGarbageCollector
     return true;
   }
 
-  public function collectGarbage() {
+  protected function collectGarbage() {
     $files = id(new PhabricatorFile())->loadAllWhere(
       'ttl < %d LIMIT 100',
-      time());
+      PhabricatorTime::getNow());
 
     foreach ($files as $file) {
       $file->delete();

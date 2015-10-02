@@ -13,13 +13,7 @@ final class PhabricatorCacheGeneralGarbageCollector
     return phutil_units('30 days in seconds');
   }
 
-  public function collectGarbage() {
-    $key = 'gcdaemon.ttl.general-cache';
-    $ttl = PhabricatorEnv::getEnvConfig($key);
-    if ($ttl <= 0) {
-      return false;
-    }
-
+  protected function collectGarbage() {
     $cache = new PhabricatorKeyValueDatabaseCache();
     $conn_w = $cache->establishConnection('w');
 
@@ -28,7 +22,7 @@ final class PhabricatorCacheGeneralGarbageCollector
       'DELETE FROM %T WHERE cacheCreated < %d
         ORDER BY cacheCreated ASC LIMIT 100',
       $cache->getTableName(),
-      time() - $ttl);
+      $this->getGarbageEpoch());
 
     return ($conn_w->getAffectedRows() == 100);
   }

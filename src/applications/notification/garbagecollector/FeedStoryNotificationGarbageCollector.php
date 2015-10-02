@@ -13,9 +13,7 @@ final class FeedStoryNotificationGarbageCollector
     return phutil_units('90 days in seconds');
   }
 
-  public function collectGarbage() {
-    $ttl = 90 * 24 * 60 * 60;
-
+  protected function collectGarbage() {
     $table = new PhabricatorFeedStoryNotification();
     $conn_w = $table->establishConnection('w');
 
@@ -24,7 +22,7 @@ final class FeedStoryNotificationGarbageCollector
       'DELETE FROM %T WHERE chronologicalKey < (%d << 32)
         ORDER BY chronologicalKey ASC LIMIT 100',
       $table->getTableName(),
-      time() - $ttl);
+      $this->getGarbageEpoch());
 
     return ($conn_w->getAffectedRows() == 100);
   }

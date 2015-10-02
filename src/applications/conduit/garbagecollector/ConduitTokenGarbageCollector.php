@@ -13,9 +13,10 @@ final class ConduitTokenGarbageCollector
     return true;
   }
 
-  public function collectGarbage() {
+  protected function collectGarbage() {
     $table = new PhabricatorConduitToken();
     $conn_w = $table->establishConnection('w');
+
     queryfx(
       $conn_w,
       'DELETE FROM %T WHERE expires <= %d

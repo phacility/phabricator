@@ -1393,6 +1393,11 @@ final class PhabricatorUSEnglishTranslation
         '%s Days',
       ),
 
+      'Setting retention policy for "%s" to %s day(s).' => array(
+        'Setting retention policy for "%s" to one day.',
+        'Setting retention policy for "%s" to %s days.',
+      ),
+
     );
   }
 
