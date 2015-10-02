@@ -152,7 +152,7 @@ final class HarbormasterLeaseWorkingCopyBuildStepImplementation
 
     $repository = $repositories[$repository_phid];
 
-    $commit = idx($variables, 'repository.commit');
+    $commit = idx($variables, 'buildable.commit');
     $ref_uri = idx($variables, 'repository.staging.uri');
     $ref_ref = idx($variables, 'repository.staging.ref');
     if ($commit) {
