@@ -2,6 +2,14 @@
  * @provides paste-css
  */
 
+.container-of-paste {
+  margin: 16px;
+}
+
+.device .container-of-paste {
+  margin: 8px;
+}
+
 .paste-embed {
   background: {$sh-yellowbackground};
   border: 1px solid {$sh-lightyellowborder};

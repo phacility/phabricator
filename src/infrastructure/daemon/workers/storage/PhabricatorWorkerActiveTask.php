@@ -86,15 +86,23 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
   }
 
   protected function checkLease() {
-    if ($this->leaseOwner) {
-      $current_server_time = $this->serverTime + (time() - $this->localTime);
-      if ($current_server_time >= $this->leaseExpires) {
-        throw new Exception(
-          pht(
-            'Trying to update Task %d (%s) after lease expiration!',
-            $this->getID(),
-            $this->getTaskClass()));
-      }
+    $owner = $this->leaseOwner;
+
+    if (!$owner) {
+      return;
+    }
+
+    if ($owner == PhabricatorWorker::YIELD_OWNER) {
+      return;
+    }
+
+    $current_server_time = $this->serverTime + (time() - $this->localTime);
+    if ($current_server_time >= $this->leaseExpires) {
+      throw new Exception(
+        pht(
+          'Trying to update Task %d (%s) after lease expiration!',
+          $this->getID(),
+          $this->getTaskClass()));
     }
   }
 
@@ -141,6 +149,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
     $worker = null;
     try {
       $worker = $this->getWorkerInstance();
+      $worker->setCurrentWorkerTask($this);
 
       $maximum_failures = $worker->getMaximumRetryCount();
       if ($maximum_failures !== null) {
@@ -174,6 +183,8 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
       $result->setExecutionException($ex);
     } catch (PhabricatorWorkerYieldException $ex) {
       $this->setExecutionException($ex);
+
+      $this->setLeaseOwner(PhabricatorWorker::YIELD_OWNER);
 
       $retry = $ex->getDuration();
       $retry = max($retry, 5);
@@ -211,7 +222,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
           $class,
           $data,
           array(
-            'priority' => $this->getPriority(),
+            'priority' => (int)$this->getPriority(),
           ));
       }
     }

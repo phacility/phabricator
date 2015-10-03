@@ -294,7 +294,8 @@ final class DiffusionRepositoryEditMainController
       $this->buildRepositoryUpdateInterval($repository));
 
     $description = $repository->getDetail('description');
-    $view->addSectionHeader(pht('Description'));
+    $view->addSectionHeader(
+      pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
     if (!strlen($description)) {
       $description = phutil_tag('em', array(), pht('No description provided.'));
     } else {

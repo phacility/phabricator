@@ -192,9 +192,6 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     PhutilOpaqueEnvelope $key,
     $code) {
 
-    // TODO: This should use rate limiting to prevent multiple attempts in a
-    // short period of time.
-
     $now = (int)(time() / 30);
 
     // Allow the user to enter a code a few minutes away on either side, in

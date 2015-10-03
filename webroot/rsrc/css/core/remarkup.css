@@ -39,12 +39,12 @@
 }
 
 .phabricator-remarkup .remarkup-code-block pre {
-  background: {$sh-yellowbackground};
+  background: #FEF9ED;
   border: 1px solid {$sh-lightyellowborder};
   display: block;
-  color: #000000;
+  color: #000;
   overflow: auto;
-  padding: 12px 8px;
+  padding: 8px;
 }
 
 .phabricator-remarkup pre.remarkup-counterexample {

@@ -109,7 +109,8 @@ final class PhabricatorBadgesViewController
         'default',
         $viewer);
 
-      $view->addSectionHeader(pht('Description'));
+      $view->addSectionHeader(
+        pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
       $view->addTextContent($description);
     }
 

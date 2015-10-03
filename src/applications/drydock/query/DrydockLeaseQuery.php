@@ -4,9 +4,10 @@ final class DrydockLeaseQuery extends DrydockQuery {
 
   private $ids;
   private $phids;
-  private $resourceIDs;
+  private $resourcePHIDs;
   private $statuses;
   private $datasourceQuery;
+  private $needUnconsumedCommands;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -18,8 +19,8 @@ final class DrydockLeaseQuery extends DrydockQuery {
     return $this;
   }
 
-  public function withResourceIDs(array $ids) {
-    $this->resourceIDs = $ids;
+  public function withResourcePHIDs(array $phids) {
+    $this->resourcePHIDs = $phids;
     return $this;
   }
 
@@ -28,13 +29,18 @@ final class DrydockLeaseQuery extends DrydockQuery {
     return $this;
   }
 
-  public function newResultObject() {
-    return new DrydockLease();
-  }
-
   public function withDatasourceQuery($query) {
     $this->datasourceQuery = $query;
     return $this;
+  }
+
+  public function needUnconsumedCommands($need) {
+    $this->needUnconsumedCommands = $need;
+    return $this;
+  }
+
+  public function newResultObject() {
+    return new DrydockLease();
   }
 
   protected function loadPage() {
@@ -42,22 +48,24 @@ final class DrydockLeaseQuery extends DrydockQuery {
   }
 
   protected function willFilterPage(array $leases) {
-    $resource_ids = array_filter(mpull($leases, 'getResourceID'));
-    if ($resource_ids) {
+    $resource_phids = array_filter(mpull($leases, 'getResourcePHID'));
+    if ($resource_phids) {
       $resources = id(new DrydockResourceQuery())
         ->setParentQuery($this)
         ->setViewer($this->getViewer())
-        ->withIDs(array_unique($resource_ids))
+        ->withPHIDs(array_unique($resource_phids))
         ->execute();
+      $resources = mpull($resources, null, 'getPHID');
     } else {
       $resources = array();
     }
 
     foreach ($leases as $key => $lease) {
       $resource = null;
-      if ($lease->getResourceID()) {
-        $resource = idx($resources, $lease->getResourceID());
+      if ($lease->getResourcePHID()) {
+        $resource = idx($resources, $lease->getResourcePHID());
         if (!$resource) {
+          $this->didRejectResult($lease);
           unset($leases[$key]);
           continue;
         }
@@ -68,14 +76,33 @@ final class DrydockLeaseQuery extends DrydockQuery {
     return $leases;
   }
 
+  protected function didFilterPage(array $leases) {
+    if ($this->needUnconsumedCommands) {
+      $commands = id(new DrydockCommandQuery())
+        ->setViewer($this->getViewer())
+        ->setParentQuery($this)
+        ->withTargetPHIDs(mpull($leases, 'getPHID'))
+        ->withConsumed(false)
+        ->execute();
+      $commands = mgroup($commands, 'getTargetPHID');
+
+      foreach ($leases as $lease) {
+        $list = idx($commands, $lease->getPHID(), array());
+        $lease->attachUnconsumedCommands($list);
+      }
+    }
+
+    return $leases;
+  }
+
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->resourceIDs !== null) {
+    if ($this->resourcePHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'resourceID IN (%Ld)',
-        $this->resourceIDs);
+        'resourcePHID IN (%Ls)',
+        $this->resourcePHIDs);
     }
 
     if ($this->ids !== null) {
@@ -95,7 +122,7 @@ final class DrydockLeaseQuery extends DrydockQuery {
     if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn,
-        'status IN (%Ld)',
+        'status IN (%Ls)',
         $this->statuses);
     }
 

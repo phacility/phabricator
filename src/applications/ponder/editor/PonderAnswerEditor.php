@@ -85,6 +85,27 @@ final class PonderAnswerEditor extends PonderEditor {
     return true;
   }
 
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    $phids = array();
+    $phids[] = $object->getAuthorPHID();
+    $phids[] = $this->requireActor()->getPHID();
+
+    $question = id(new PonderQuestionQuery())
+      ->setViewer($this->requireActor())
+      ->withIDs(array($object->getQuestionID()))
+      ->executeOne();
+
+    $phids[] = $question->getAuthorPHID();
+
+    return $phids;
+  }
+
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+      return true;
+  }
+
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {
     return id(new PonderAnswerReplyHandler())
       ->setMailReceiver($object);

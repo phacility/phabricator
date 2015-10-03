@@ -2,6 +2,43 @@
 
 final class DrydockLogSearchEngine extends PhabricatorApplicationSearchEngine {
 
+  private $blueprint;
+  private $resource;
+  private $lease;
+
+  public function setBlueprint(DrydockBlueprint $blueprint) {
+    $this->blueprint = $blueprint;
+    return $this;
+  }
+
+  public function getBlueprint() {
+    return $this->blueprint;
+  }
+
+  public function setResource(DrydockResource $resource) {
+    $this->resource = $resource;
+    return $this;
+  }
+
+  public function getResource() {
+    return $this->resource;
+  }
+
+  public function setLease(DrydockLease $lease) {
+    $this->lease = $lease;
+    return $this;
+  }
+
+  public function getLease() {
+    return $this->lease;
+  }
+
+  public function canUseInPanelContext() {
+    // Prevent use on Dashboard panels since all log queries currently need a
+    // parent object and these don't seem particularly useful in any case.
+    return false;
+  }
+
   public function getResultTypeDescription() {
     return pht('Drydock Logs');
   }
@@ -10,75 +47,59 @@ final class DrydockLogSearchEngine extends PhabricatorApplicationSearchEngine {
     return 'PhabricatorDrydockApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $query = new PhabricatorSavedQuery();
-
-    $query->setParameter(
-      'resourcePHIDs',
-      $this->readListFromRequest($request, 'resources'));
-    $query->setParameter(
-      'leasePHIDs',
-      $this->readListFromRequest($request, 'leases'));
-
-    return $query;
-  }
-
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $resource_phids = $saved->getParameter('resourcePHIDs', array());
-    $lease_phids = $saved->getParameter('leasePHIDs', array());
-
-     // TODO: Change logs to use PHIDs instead of IDs.
-    $resource_ids = array();
-    $lease_ids = array();
-
-    if ($resource_phids) {
-      $resource_ids = id(new DrydockResourceQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withPHIDs($resource_phids)
-        ->execute();
-      $resource_ids = mpull($resource_ids, 'getID');
-    }
-
-    if ($lease_phids) {
-      $lease_ids = id(new DrydockLeaseQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withPHIDs($lease_phids)
-        ->execute();
-      $lease_ids = mpull($lease_ids, 'getID');
-    }
-
+  public function newQuery() {
     $query = new DrydockLogQuery();
-    if ($resource_ids) {
-      $query->withResourceIDs($resource_ids);
+
+    $blueprint = $this->getBlueprint();
+    if ($blueprint) {
+      $query->withBlueprintPHIDs(array($blueprint->getPHID()));
     }
-    if ($lease_ids) {
-      $query->withLeaseIDs($lease_ids);
+
+    $resource = $this->getResource();
+    if ($resource) {
+      $query->withResourcePHIDs(array($resource->getPHID()));
+    }
+
+    $lease = $this->getLease();
+    if ($lease) {
+      $query->withLeasePHIDs(array($lease->getPHID()));
     }
 
     return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved) {
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
 
-    $form
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new DrydockResourceDatasource())
-          ->setName('resources')
-          ->setLabel(pht('Resources'))
-          ->setValue($saved->getParameter('resourcePHIDs', array())))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new DrydockLeaseDatasource())
-          ->setName('leases')
-          ->setLabel(pht('Leases'))
-          ->setValue($saved->getParameter('leasePHIDs', array())));
+    return $query;
+  }
+
+  protected function buildCustomSearchFields() {
+    return array();
   }
 
   protected function getURI($path) {
-    return '/drydock/log/'.$path;
+    $blueprint = $this->getBlueprint();
+    if ($blueprint) {
+      $id = $blueprint->getID();
+      return "/drydock/blueprint/{$id}/logs/{$path}";
+    }
+
+    $resource = $this->getResource();
+    if ($resource) {
+      $id = $resource->getID();
+      return "/drydock/resource/{$id}/logs/{$path}";
+    }
+
+    $lease = $this->getLease();
+    if ($lease) {
+      $id = $lease->getID();
+      return "/drydock/lease/{$id}/logs/{$path}";
+    }
+
+    throw new Exception(
+      pht(
+        'Search engine has no blueprint, resource, or lease.'));
   }
 
   protected function getBuiltinQueryNames() {

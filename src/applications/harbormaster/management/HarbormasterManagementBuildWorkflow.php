@@ -89,7 +89,7 @@ final class HarbormasterManagementBuildWorkflow
       PhabricatorEnv::getProductionURI('/B'.$buildable->getID()));
 
     PhabricatorWorker::setRunAllTasksInProcess(true);
-    $buildable->applyPlan($plan);
+    $buildable->applyPlan($plan, array());
 
     $console->writeOut("%s\n", pht('Done.'));
 

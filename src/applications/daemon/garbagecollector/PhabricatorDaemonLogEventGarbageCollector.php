@@ -3,12 +3,17 @@
 final class PhabricatorDaemonLogEventGarbageCollector
   extends PhabricatorGarbageCollector {
 
-  public function collectGarbage() {
-    $ttl = PhabricatorEnv::getEnvConfig('gcdaemon.ttl.daemon-logs');
-    if ($ttl <= 0) {
-      return false;
-    }
+  const COLLECTORCONST = 'daemon.processes';
 
+  public function getCollectorName() {
+    return pht('Daemon Processes');
+  }
+
+  public function getDefaultRetentionPolicy() {
+    return phutil_units('7 days in seconds');
+  }
+
+  protected function collectGarbage() {
     $table = new PhabricatorDaemonLogEvent();
     $conn_w = $table->establishConnection('w');
 
@@ -16,7 +21,7 @@ final class PhabricatorDaemonLogEventGarbageCollector
       $conn_w,
       'DELETE FROM %T WHERE epoch < %d LIMIT 100',
       $table->getTableName(),
-      time() - $ttl);
+      $this->getGarbageEpoch());
 
     return ($conn_w->getAffectedRows() == 100);
   }

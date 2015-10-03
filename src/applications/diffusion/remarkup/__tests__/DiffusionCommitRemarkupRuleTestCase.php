@@ -121,6 +121,25 @@ final class DiffusionCommitRemarkupRuleTestCase extends PhabricatorTestCase {
           ),
         ),
       ),
+
+      // After an "@", we should not be recognizing references because these
+      // are username mentions.
+      'deadbeef' => array(
+        'embed' => array(
+        ),
+        'ref' => array(
+          array(
+            'offset' => 0,
+            'id' => 'deadbeef',
+          ),
+        ),
+      ),
+      '@deadbeef' => array(
+        'embed' => array(
+        ),
+        'ref' => array(
+        ),
+      ),
     );
 
     foreach ($cases as $input => $expect) {

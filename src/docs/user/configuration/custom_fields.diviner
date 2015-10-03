@@ -144,6 +144,9 @@ change, but are documented here for completeness:
   - **Credentials**: Controls with type `credential` allow selection of a
     Passphrase credential which provides `credential.provides`, and creation
     of credentials of `credential.type`.
+  - **Datasource**: Controls with type `datasource` allow selection of tokens
+    from an arbitrary datasource, controlled with `datasource.class` and
+    `datasource.parameters`.
 
 = Advanced Custom Fields =
 
@@ -210,5 +213,5 @@ integrations, see the base class for your application and
 Continue by:
 
   - learning more about extending Phabricator with custom code in
-    @{article@contributor:Adding New Classes};
+    @{article@phabcontrib:Adding New Classes};
   - or returning to the @{article: Configuration Guide}.

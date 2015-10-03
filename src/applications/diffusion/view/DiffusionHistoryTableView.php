@@ -88,6 +88,11 @@ final class DiffusionHistoryTableView extends DiffusionView {
     $drequest = $this->getDiffusionRequest();
 
     $viewer = $this->getUser();
+
+    $show_revisions = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorDifferentialApplication',
+      $viewer);
+
     $handles = $viewer->loadHandles($this->getRequiredHandlePHIDs());
 
     $graph = null;
@@ -242,6 +247,10 @@ final class DiffusionHistoryTableView extends DiffusionView {
     $view->setColumnVisibility(
       array(
         $graph ? true : false,
+        true,
+        true,
+        true,
+        $show_revisions,
       ));
     $view->setDeviceVisibility(
       array(

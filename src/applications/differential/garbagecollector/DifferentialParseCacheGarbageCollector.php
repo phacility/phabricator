@@ -3,13 +3,17 @@
 final class DifferentialParseCacheGarbageCollector
   extends PhabricatorGarbageCollector {
 
-  public function collectGarbage() {
-    $key = 'gcdaemon.ttl.differential-parse-cache';
-    $ttl = PhabricatorEnv::getEnvConfig($key);
-    if ($ttl <= 0) {
-      return false;
-    }
+  const COLLECTORCONST = 'differential.parse';
 
+  public function getCollectorName() {
+    return pht('Differential Parse Cache');
+  }
+
+  public function getDefaultRetentionPolicy() {
+    return phutil_units('14 days in seconds');
+  }
+
+  protected function collectGarbage() {
     $table = new DifferentialChangeset();
     $conn_w = $table->establishConnection('w');
 
@@ -17,7 +21,7 @@ final class DifferentialParseCacheGarbageCollector
       $conn_w,
       'DELETE FROM %T WHERE dateCreated < %d LIMIT 100',
       DifferentialChangeset::TABLE_CACHE,
-      time() - $ttl);
+      $this->getGarbageEpoch());
 
     return ($conn_w->getAffectedRows() == 100);
   }

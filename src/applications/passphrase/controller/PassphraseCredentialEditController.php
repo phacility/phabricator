@@ -31,7 +31,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
         throw new Exception(
           pht(
             'Credential has noncreateable type "%s"!',
-            $credential->getCredentialType()));
+            $type_const));
       }
 
       $credential = PassphraseCredential::initializeNewCredential($viewer)

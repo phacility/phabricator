@@ -72,4 +72,8 @@ final class HarbormasterBuildStepCoreCustomField
     return;
   }
 
+  public function getBuildTargetFieldValue() {
+    return $this->getProxy()->getFieldValue();
+  }
+
 }

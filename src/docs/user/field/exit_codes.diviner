@@ -1,0 +1,243 @@
+@title Command Line Exit Codes
+@group fieldmanual
+
+Explains the use of exit codes in Phabricator command line scripts.
+
+Overview
+========
+
+When you run a command from the command line, it exits with an //exit code//.
+This code is normally not shown on the CLI, but you can examine the exit code
+of the last command you ran by looking at `$?` in your shell:
+
+  $ ls
+  ...
+  $ echo $?
+  0
+
+Programs which run commands can operate on exit codes, and shell constructs
+like `cmdx && cmdy` operate on exit codes.
+
+The code `0` means success. Other codes signal some sort of error or status
+condition, depending on the system and command.
+
+With rare exception, Phabricator uses //all other codes// to signal
+**catastrophic failure**.
+
+This is an explicit architectural decision and one we are unlikely to deviate
+from: generally, we will not accept patches which give a command a nonzero exit
+code to indicate an expected state, an application status, or a minor abnormal
+condition.
+
+Generally, this decision reflects a philosophical belief that attaching
+application semantics to exit codes is a relic of a simpler time, and that
+they are not appropriate for communicating application state in a modern
+operational environment. This document explains the reasoning behind our use of
+exit codes in more detail.
+
+In particular, this approach is informed by a focus on operating Phabricator
+clusters at scale. This is not a common deployment scenario, but we consider it
+the most important one. Our use of exit codes makes it easier to deploy and
+operate a Phabricator cluster at larger scales. It makes it slightly harder to
+deploy and operate a small cluster or single host by gluing together `bash`
+scripts. We are willingly trading the small scale away for advantages at larger
+scales.
+
+
+Problems With Exit Codes
+========================
+
+We do not use exit codes to communicate application state because doing so
+makes it harder to write correct scripts, and the primary benefit is that it
+makes it easier to write incorrect ones.
+
+This is somewhat at odds with the philosophy of "worse is better", but a modern
+operations environment faces different forces than the interactive shell did
+in the 1970s, particularly at scale.
+
+We consider correctness to be very important to modern operations environments.
+In particular, we manage a Phabricator cluster (Phacility) and believe that
+having reliable, repeatable processes for provisioning, configuration and
+deployment is critical to maintaining and scaling our operations. Our use of
+exit codes makes it easier to implement processes that are correct and reliable
+on top of Phabricator management scripts.
+
+Exit codes as signals for application state are problematic because they are
+ambiguous: you can't use them to distinguish between dissimilar failure states
+which should prompt very different operational responses.
+
+Exit codes primarily make writing things like `bash` scripts easier, but we
+think you shouldn't be writing `bash` scripts in a modern operational
+environment if you care very much about your software working.
+
+Software environments which are powerful enough to handle errors properly are
+also powerful enough to parse command output to unambiguously read and react to
+complex state. Communicating application state through exit codes almost
+exclusively makes it easier to handle errors in a haphazard way which is often
+incorrect.
+
+
+Exit Codes are Ambiguous
+========================
+
+In many cases, exit codes carry very little information and many different
+conditions can produce the same exit code, including conditions which should
+prompt very different responses.
+
+The command line tool `grep` searches for text. For example, you might run
+a command like this:
+
+  $ grep zebra corpus.txt
+
+This searches for the text `zebra` in the file `corpus.txt`. If the text is
+not found, `grep` exits with a nonzero exit code (specifically, `1`).
+
+Suppose you run `grep zebra corpus.txt` and observe a nonzero exit code. What
+does that mean? These are //some// of the possible conditions which are
+consistent with your observation:
+
+  - The text `zebra` was not found in `corpus.txt`.
+  - `corpus.txt` does not exist.
+  - You do not have permission to read `corpus.txt`.
+  - `grep` is not installed.
+  - You do not have permission to run `grep`.
+  - There is a bug in `grep`.
+  - Your `grep` binary is corrupt.
+  - `grep` was killed by a signal.
+
+If you're running this command interactively on a single machine, it's probably
+OK for all of these conditions to be conflated. You aren't going to examine the
+exit code anyway (it isn't even visible to you by default), and `grep` likely
+printed useful information to `stderr` if you hit one of the less common issues.
+
+If you're running this command from operational software (like deployment,
+configuration or monitoring scripts) and you care about the correctness and
+repeatability of your process, we believe conflating these conditions is not
+OK. The operational response to text not being present in a file should almost
+always differ substantially from the response to the file not being present or
+`grep` being broken.
+
+In a particularly bad case, a broken `grep` might cause a careless deployment
+script to continue down an inappropriate path and cascade into a more serious
+failure.
+
+Even in a less severe case, unexpected conditions should be detected and raised
+to operations staff. `grep` being broken or a file that is expected to exist
+not existing are both detectable, unexpected, and likely severe conditions, but
+they can not be differentiated and handled by examining the exit code of
+`grep`. It is much better to detect and raise these problems immediately than
+discover them after a lengthy root cause analysis.
+
+Some of these conditions can be differentiated by examining the specific exit
+code of the command instead of acting on all nonzero exit codes. However, many
+failure conditions produce the same exit codes (particularly code `1`) and
+there is no way to guarantee that a particular code signals a particular
+condition, especially across systems.
+
+Realistically, it is also relatively rare for scripts to even make an effort to
+distinguish between exit codes, and all nonzero exit codes are often treated
+the same way.
+
+
+Bash Scripts are not Robust
+============================
+
+Exit codes that indicate application status make writing `bash` scripts (or
+scripts in other tools which provide a thin layer on top of what is essentially
+`bash`) a lot easier and more convenient.
+
+For example, it is pretty tricky to parse JSON in `bash` or with standard
+command-line tools, and much easier to react to exit codes. This is sometimes
+used as an argument for communicating application status in exit codes.
+
+We reject this because we don't think you should be writing `bash` scripts if
+you're doing real operations. Fundamentally, `bash` shell scripts are not a
+robust building block for creating correct, reliable operational processes.
+
+Here is one problem with using `bash` scripts to perform operational tasks.
+Consider this command:
+
+  $ mysqldump | gzip > backup.sql.gz
+
+Now, consider this command:
+
+  $ mysqldermp | gzip > backup.sql.gz
+
+These commands represent a fairly standard way to accomplish a task (dumping
+a compressed database backup to disk) in a `bash` script.
+
+Note that the second command contains a typo (`dermp` instead of `dump`) which
+will cause the command to exit abruptly with a nonzero exit code.
+
+However, both these statements run successfully and exit with exit code `0`
+(indicating success). Both will create a `backup.sql.gz` file. One backs up
+your data; the other never backs up your data. This second command will never
+work and never do what the author intended, but will appear successful under
+casual inspection.
+
+These behaviors are the same under `set -e`.
+
+This fragile attitude toward error handling is endemic to `bash` scripts. The
+default behavior is to continue on errors, and it isn't easy to change this
+default. Options like `set -e` are unreliable and it is difficult to detect and
+react to errors in fundamental constructs like pipes. The tools that `bash`
+scripts employ (like `grep`) emit ambiguous error codes. Scripts can not help
+but propagate this ambiguity no matter how careful they are with error handling.
+
+It is likely //possible// to implement these things safely and correctly in
+`bash`, but it is not easy or straightforward. More importantly, it is not the
+default: the default behavior of `bash` is to ignore errors and continue.
+
+Gluing commands together in `bash` or something that sits on top of `bash`
+makes it easy and convenient to get a process that works fairly well most of
+the time at small scales, but we are not satisfied that it represents a robust
+foundation for operations at larger scales.
+
+
+Reacting to State
+=================
+
+Instead of communicating application state through exit codes, we generally
+communicate application state through machine-parseable output with a success
+(`0`) exit code. All nonzero exit codes indicate catastrophic failure which
+requires operational intervention.
+
+Callers are expected to request machine-parseable output if necessary (for
+example, by passing a `--json` flag or other similar flags), verify the command
+exits with a `0` exit code, parse the output, then react to the state it
+communicates as appropriate.
+
+In a sufficiently powerful scripting environment (e.g., one with data
+structures and a JSON parser), this is straightforward and makes it easy to
+react precisely and correctly. It also allows scripts to communicate
+arbitrarily complex state. Provided your environment gives you an appropriate
+toolset, it is much more powerful and not significantly more complex than using
+error codes.
+
+Most importantly, it allows the calling environment to treat nonzero exit
+statuses as catastrophic failure by default.
+
+
+Moving Forward
+==============
+
+Given these concerns, we are generally unwilling to bring changes which use
+exit codes to communicate application state (other than catastrophic failure)
+into the upstream. There are some exceptions, but these are rare. In
+particular, ease of use in a `bash` environment is not a compelling motivation.
+
+We are broadly willing to make output machine parseable or provide an explicit
+machine output mode (often a `--json` flag) if there is a reasonable use case
+for it. However, we operate a large production cluster of Phabricator instances
+with the tools available in the upstream, so the lack of machine parseable
+output is not sufficient to motivate adding such output on its own: we also
+need to understand the problem you're facing, and why it isn't a problem we
+face. A simpler or cleaner approach to the problem may already exist.
+
+If you just want to write `bash` scripts on top of Phabricator scripts and you
+are unswayed by these concerns, you can often just build a composite command to
+get roughly the same effect that you'd get out of an exit code.
+
+For example, you can pipe things to `grep` to convert output into exit codes.
+This should generally have failure rates that are comparable to the background
+failure level of relying on `bash` as a scripting environment.

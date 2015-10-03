@@ -14,19 +14,7 @@ abstract class HarbormasterBuildStepGroup extends Phobject {
   }
 
   final public function getGroupKey() {
-    $class = new ReflectionClass($this);
-
-    $const = $class->getConstant('GROUPKEY');
-    if ($const === false) {
-      throw new Exception(
-        pht(
-          '"%s" class "%s" must define a "%s" property.',
-          __CLASS__,
-          get_class($this),
-          'GROUPKEY'));
-    }
-
-    return $const;
+    return $this->getPhobjectClassConstant('GROUPKEY');
   }
 
   final public static function getAllGroups() {

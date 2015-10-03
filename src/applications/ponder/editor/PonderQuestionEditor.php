@@ -209,6 +209,13 @@ final class PonderQuestionEditor
       return true;
   }
 
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    return array(
+      $object->getAuthorPHID(),
+      $this->requireActor()->getPHID(),
+    );
+  }
+
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {

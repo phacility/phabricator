@@ -76,27 +76,28 @@ final class PhabricatorOwnersDetailController
           'auditorPHIDs' => $package->getPHID(),
         ));
 
+    $status_concern = DiffusionCommitQuery::AUDIT_STATUS_CONCERN;
+
     $attention_commits = id(new DiffusionCommitQuery())
       ->setViewer($request->getUser())
       ->withAuditorPHIDs(array($package->getPHID()))
-      ->withAuditStatus(DiffusionCommitQuery::AUDIT_STATUS_CONCERN)
+      ->withAuditStatus($status_concern)
       ->needCommitData(true)
       ->setLimit(10)
       ->execute();
-    if ($attention_commits) {
-      $view = id(new PhabricatorAuditListView())
-        ->setUser($viewer)
-        ->setCommits($attention_commits);
+    $view = id(new PhabricatorAuditListView())
+      ->setUser($viewer)
+      ->setNoDataString(pht('This package has no open problem commits.'))
+      ->setCommits($attention_commits);
 
-      $commit_views[] = array(
-        'view'    => $view,
-        'header'  => pht('Commits in this Package that Need Attention'),
-        'button'  => id(new PHUIButtonView())
-          ->setTag('a')
-          ->setHref($commit_uri->alter('status', 'open'))
-          ->setText(pht('View All Problem Commits')),
-      );
-    }
+    $commit_views[] = array(
+      'view'    => $view,
+      'header'  => pht('Commits in this Package that Need Attention'),
+      'button'  => id(new PHUIButtonView())
+        ->setTag('a')
+        ->setHref($commit_uri->alter('status', $status_concern))
+        ->setText(pht('View All Problem Commits')),
+    );
 
     $all_commits = id(new DiffusionCommitQuery())
       ->setViewer($request->getUser())
@@ -189,7 +190,8 @@ final class PhabricatorOwnersDetailController
 
     $description = $package->getDescription();
     if (strlen($description)) {
-      $view->addSectionHeader(pht('Description'));
+      $view->addSectionHeader(
+        pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
       $view->addTextContent(
         $output = PhabricatorMarkupEngine::renderOneObject(
           id(new PhabricatorMarkupOneOff())->setContent($description),

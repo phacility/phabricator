@@ -249,6 +249,42 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
     return $artifact;
   }
 
+  public function newLog($log_source, $log_type) {
+    $log_source = id(new PhutilUTF8StringTruncator())
+      ->setMaximumBytes(250)
+      ->truncateString($log_source);
+
+    $log = HarbormasterBuildLog::initializeNewBuildLog($this)
+      ->setLogSource($log_source)
+      ->setLogType($log_type);
+
+    $log->start();
+
+    return $log;
+  }
+
+  public function getFieldValue($key) {
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $this->getBuildStep(),
+      PhabricatorCustomField::ROLE_VIEW);
+
+    $fields = $field_list->getFields();
+    $full_key = "std:harbormaster:core:{$key}";
+
+    $field = idx($fields, $full_key);
+    if (!$field) {
+      throw new Exception(
+        pht(
+          'Unknown build step field "%s"!',
+          $key));
+    }
+
+    $field = clone $field;
+    $field->setValueFromStorage($this->getDetail($key));
+    return $field->getBuildTargetFieldValue();
+  }
+
+
 
 /* -(  Status  )------------------------------------------------------------- */
 
@@ -268,6 +304,7 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
   public function isFailed() {
     switch ($this->getTargetStatus()) {
       case self::STATUS_FAILED:
+      case self::STATUS_ABORTED:
         return true;
     }
 

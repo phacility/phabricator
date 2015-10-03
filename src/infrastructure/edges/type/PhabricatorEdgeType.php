@@ -12,17 +12,7 @@
 abstract class PhabricatorEdgeType extends Phobject {
 
   final public function getEdgeConstant() {
-    $class = new ReflectionClass($this);
-
-    $const = $class->getConstant('EDGECONST');
-    if ($const === false) {
-      throw new Exception(
-        pht(
-          '%s class "%s" must define an %s property.',
-          __CLASS__,
-          get_class($this),
-          'EDGECONST'));
-    }
+    $const = $this->getPhobjectClassConstant('EDGECONST');
 
     if (!is_int($const) || ($const <= 0)) {
       throw new Exception(

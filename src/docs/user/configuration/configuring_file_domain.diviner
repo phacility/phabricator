@@ -65,7 +65,7 @@ Continue to "Configuring Phabricator", below.
 Approach: CloudFlare
 ========
 
-[[ https://cloudflare.net | CloudFlare ]] is a general-purpose CDN service.
+[[ https://cloudflare.com | CloudFlare ]] is a general-purpose CDN service.
 
 To set up CloudFlare, you'll need to register a second domain and go through
 their enrollment process to host the alternate domain on their servers. Use a

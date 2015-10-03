@@ -136,11 +136,14 @@ final class PhabricatorPeopleProfileController
           ->setWorkflow(true)
           ->setHref($this->getApplicationURI('delete/'.$user->getID().'/')));
 
+      $can_welcome = $user->canEstablishWebSessions();
+
       $actions->addAction(
         id(new PhabricatorActionView())
           ->setIcon('fa-envelope')
           ->setName(pht('Send Welcome Email'))
           ->setWorkflow(true)
+          ->setDisabled(!$can_welcome)
           ->setHref($this->getApplicationURI('welcome/'.$user->getID().'/')));
     }
 
