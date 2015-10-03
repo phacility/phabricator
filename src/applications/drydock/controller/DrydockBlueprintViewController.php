@@ -56,11 +56,19 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       new DrydockBlueprintTransactionQuery());
     $timeline->setShouldTerminate(true);
 
+    $log_query = id(new DrydockLogQuery())
+      ->withBlueprintPHIDs(array($blueprint->getPHID()));
+
+    $log_box = $this->buildLogBox(
+      $log_query,
+      $this->getApplicationURI("blueprint/{$id}/logs/query/all/"));
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $object_box,
         $resource_box,
+        $log_box,
         $timeline,
       ),
       array(

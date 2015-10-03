@@ -3,34 +3,53 @@
 final class DrydockLog extends DrydockDAO
   implements PhabricatorPolicyInterface {
 
-  protected $resourceID;
-  protected $leaseID;
+  protected $blueprintPHID;
+  protected $resourcePHID;
+  protected $leasePHID;
   protected $epoch;
-  protected $message;
+  protected $type;
+  protected $data = array();
 
+  private $blueprint = self::ATTACHABLE;
   private $resource = self::ATTACHABLE;
   private $lease = self::ATTACHABLE;
 
   protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_SERIALIZATION => array(
+        'data' => self::SERIALIZATION_JSON,
+      ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'resourceID' => 'id?',
-        'leaseID' => 'id?',
-        'message' => 'text',
+        'blueprintPHID' => 'phid?',
+        'resourcePHID' => 'phid?',
+        'leasePHID' => 'phid?',
+        'type' => 'text64',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'resourceID' => array(
-          'columns' => array('resourceID', 'epoch'),
+        'key_blueprint' => array(
+          'columns' => array('blueprintPHID', 'type'),
         ),
-        'leaseID' => array(
-          'columns' => array('leaseID', 'epoch'),
+        'key_resource' => array(
+          'columns' => array('resourcePHID', 'type'),
+        ),
+        'key_lease' => array(
+          'columns' => array('leasePHID', 'type'),
         ),
         'epoch' => array(
           'columns' => array('epoch'),
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function attachBlueprint(DrydockBlueprint $blueprint = null) {
+    $this->blueprint = $blueprint;
+    return $this;
+  }
+
+  public function getBlueprint() {
+    return $this->assertAttached($this->blueprint);
   }
 
   public function attachResource(DrydockResource $resource = null) {
@@ -51,6 +70,22 @@ final class DrydockLog extends DrydockDAO
     return $this->assertAttached($this->lease);
   }
 
+  public function isComplete() {
+    if ($this->getBlueprintPHID() && !$this->getBlueprint()) {
+      return false;
+    }
+
+    if ($this->getResourcePHID() && !$this->getResource()) {
+      return false;
+    }
+
+    if ($this->getLeasePHID() && !$this->getLease()) {
+      return false;
+    }
+
+    return true;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -62,21 +97,19 @@ final class DrydockLog extends DrydockDAO
   }
 
   public function getPolicy($capability) {
-    if ($this->getResource()) {
-      return $this->getResource()->getPolicy($capability);
-    }
-    return $this->getLease()->getPolicy($capability);
+    // NOTE: We let you see that logs exist no matter what, but don't actually
+    // show you log content unless you can see all of the associated objects.
+    return PhabricatorPolicies::getMostOpenPolicy();
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    if ($this->getResource()) {
-      return $this->getResource()->hasAutomaticCapability($capability, $viewer);
-    }
-    return $this->getLease()->hasAutomaticCapability($capability, $viewer);
+    return false;
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht('Logs inherit the policy of their resources.');
+    return pht(
+      'To view log details, you must be able to view the associated '.
+      'blueprint, resource and lease.');
   }
 
 }

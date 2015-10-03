@@ -31,7 +31,9 @@ final class HarbormasterRunBuildPlansHeraldAction
     $phids = array_fuse(array_keys($targets));
 
     foreach ($phids as $phid) {
-      $adapter->queueHarbormasterBuildPlanPHID($phid);
+      $request = id(new HarbormasterBuildRequest())
+        ->setBuildPlanPHID($phid);
+      $adapter->queueHarbormasterBuildRequest($request);
     }
 
     $this->logEffect(self::DO_BUILD, $phids);

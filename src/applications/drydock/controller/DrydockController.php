@@ -85,4 +85,31 @@ abstract class DrydockController extends PhabricatorController {
       ->addRawContent($table);
   }
 
+  protected function buildLogBox(DrydockLogQuery $query, $all_uri) {
+    $viewer = $this->getViewer();
+
+    $logs = $query
+      ->setViewer($viewer)
+      ->setLimit(100)
+      ->execute();
+
+    $log_table = id(new DrydockLogListView())
+      ->setUser($viewer)
+      ->setLogs($logs)
+      ->render();
+
+    $log_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Logs'))
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setHref($all_uri)
+          ->setIconFont('fa-search')
+          ->setText(pht('View All Logs')));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($log_header)
+      ->setTable($log_table);
+  }
+
 }

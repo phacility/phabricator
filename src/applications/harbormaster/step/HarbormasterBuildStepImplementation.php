@@ -6,6 +6,16 @@
 abstract class HarbormasterBuildStepImplementation extends Phobject {
 
   private $settings;
+  private $currentWorkerTaskID;
+
+  public function setCurrentWorkerTaskID($id) {
+    $this->currentWorkerTaskID = $id;
+    return $this;
+  }
+
+  public function getCurrentWorkerTaskID() {
+    return $this->currentWorkerTaskID;
+  }
 
   public static function getImplementations() {
     return id(new PhutilClassMapQuery())
@@ -184,7 +194,7 @@ abstract class HarbormasterBuildStepImplementation extends Phobject {
    * @return string String with variables replaced safely into it.
    */
   protected function mergeVariables($function, $pattern, array $variables) {
-    $regexp = '/\\$\\{(?P<name>[a-z\\.]+)\\}/';
+    $regexp = '@\\$\\{(?P<name>[a-z\\./-]+)\\}@';
 
     $matches = null;
     preg_match_all($regexp, $pattern, $matches);

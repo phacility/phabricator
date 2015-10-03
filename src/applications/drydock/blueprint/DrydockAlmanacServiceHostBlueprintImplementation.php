@@ -69,8 +69,9 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
 
       $binding_phid = $binding->getPHID();
 
-      $resource = $this->newResourceTemplate($blueprint, $device_name)
+      $resource = $this->newResourceTemplate($blueprint)
         ->setActivateWhenAllocated(true)
+        ->setAttribute('almanacDeviceName', $device_name)
         ->setAttribute('almanacServicePHID', $binding->getServicePHID())
         ->setAttribute('almanacBindingPHID', $binding_phid)
         ->needSlotLock("almanac.host.binding({$binding_phid})");
@@ -93,6 +94,15 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
     // We don't create anything when allocating hosts, so we don't need to do
     // any cleanup here.
     return;
+  }
+
+  public function getResourceName(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource) {
+    $device_name = $resource->getAttribute(
+      'almanacDeviceName',
+      pht('<Unknown>'));
+    return pht('Host (%s)', $device_name);
   }
 
   public function canAcquireLeaseOnResource(
@@ -163,7 +173,6 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
           ->withPHIDs(array($binding_phid))
           ->executeOne();
         if (!$binding) {
-          // TODO: This is probably a permanent failure, destroy this resource?
           throw new Exception(
             pht(
               'Unable to load binding "%s" to create command interface.',

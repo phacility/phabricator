@@ -28,6 +28,7 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
     $target = id(new HarbormasterBuildTargetQuery())
       ->withIDs(array($id))
       ->setViewer($this->getViewer())
+      ->needBuildSteps(true)
       ->executeOne();
 
     if (!$target) {
@@ -59,6 +60,7 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
       }
 
       $implementation = $target->getImplementation();
+      $implementation->setCurrentWorkerTaskID($this->getCurrentWorkerTaskID());
       $implementation->execute($build, $target);
 
       $next_status = HarbormasterBuildTarget::STATUS_PASSED;

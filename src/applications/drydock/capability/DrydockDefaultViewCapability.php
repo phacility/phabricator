@@ -8,4 +8,8 @@ final class DrydockDefaultViewCapability extends PhabricatorPolicyCapability {
     return pht('Default Blueprint View Policy');
   }
 
+  public function shouldAllowPublicPolicySetting() {
+    return true;
+  }
+
 }

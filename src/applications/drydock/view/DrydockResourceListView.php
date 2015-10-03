@@ -16,11 +16,12 @@ final class DrydockResourceListView extends AphrontView {
 
     $view = new PHUIObjectItemListView();
     foreach ($resources as $resource) {
-      $name = pht('Resource %d', $resource->getID()).': '.$resource->getName();
+      $id = $resource->getID();
 
       $item = id(new PHUIObjectItemView())
-        ->setHref('/drydock/resource/'.$resource->getID().'/')
-        ->setHeader($name);
+        ->setHref("/drydock/resource/{$id}/")
+        ->setObjectName(pht('Resource %d', $id))
+        ->setHeader($resource->getResourceName());
 
       $status = DrydockResourceStatus::getNameForStatus($resource->getStatus());
       $item->addAttribute($status);

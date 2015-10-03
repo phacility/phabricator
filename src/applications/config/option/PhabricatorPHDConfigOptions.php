@@ -80,6 +80,17 @@ final class PhabricatorPHDConfigOptions
             'and the daemons. Primarily, this is a way to suppress the '.
             '"Daemons and Web Have Different Config" setup issue on a per '.
             'config key basis.')),
+      $this->newOption('phd.garbage-collection', 'wild', array())
+        ->setLocked(true)
+        ->setLockedMessage(
+          pht(
+            'This option can not be edited from the web UI. Use %s to adjust '.
+            'garbage collector policies.',
+            phutil_tag('tt', array(), 'bin/garbage set-policy')))
+        ->setSummary(pht('Retention policies for garbage collection.'))
+        ->setDescription(
+          pht(
+            'Customizes retention policies for garbage collectors.')),
     );
   }
 

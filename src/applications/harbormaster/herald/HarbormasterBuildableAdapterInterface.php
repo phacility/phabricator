@@ -4,8 +4,9 @@ interface HarbormasterBuildableAdapterInterface {
 
   public function getHarbormasterBuildablePHID();
   public function getHarbormasterContainerPHID();
-  public function getQueuedHarbormasterBuildPlanPHIDs();
-  public function queueHarbormasterBuildPlanPHID($phid);
+  public function getQueuedHarbormasterBuildRequests();
+  public function queueHarbormasterBuildRequest(
+    HarbormasterBuildRequest $request);
 
 }
 

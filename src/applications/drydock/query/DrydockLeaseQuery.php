@@ -7,7 +7,7 @@ final class DrydockLeaseQuery extends DrydockQuery {
   private $resourcePHIDs;
   private $statuses;
   private $datasourceQuery;
-  private $needCommands;
+  private $needUnconsumedCommands;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -31,6 +31,11 @@ final class DrydockLeaseQuery extends DrydockQuery {
 
   public function withDatasourceQuery($query) {
     $this->datasourceQuery = $query;
+    return $this;
+  }
+
+  public function needUnconsumedCommands($need) {
+    $this->needUnconsumedCommands = $need;
     return $this;
   }
 
@@ -66,6 +71,25 @@ final class DrydockLeaseQuery extends DrydockQuery {
         }
       }
       $lease->attachResource($resource);
+    }
+
+    return $leases;
+  }
+
+  protected function didFilterPage(array $leases) {
+    if ($this->needUnconsumedCommands) {
+      $commands = id(new DrydockCommandQuery())
+        ->setViewer($this->getViewer())
+        ->setParentQuery($this)
+        ->withTargetPHIDs(mpull($leases, 'getPHID'))
+        ->withConsumed(false)
+        ->execute();
+      $commands = mgroup($commands, 'getTargetPHID');
+
+      foreach ($leases as $lease) {
+        $list = idx($commands, $lease->getPHID(), array());
+        $lease->attachUnconsumedCommands($list);
+      }
     }
 
     return $leases;

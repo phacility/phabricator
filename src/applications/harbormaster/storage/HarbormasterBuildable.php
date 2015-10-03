@@ -96,15 +96,21 @@ final class HarbormasterBuildable extends HarbormasterDAO
   }
 
   /**
-   * Looks up the plan PHIDs and applies the plans to the specified
-   * object identified by it's PHID.
+   * Start builds for a given buildable.
+   *
+   * @param phid PHID of the object to build.
+   * @param phid Container PHID for the buildable.
+   * @param list<HarbormasterBuildRequest> List of builds to perform.
+   * @return void
    */
   public static function applyBuildPlans(
     $phid,
     $container_phid,
-    array $plan_phids) {
+    array $requests) {
 
-    if (!$plan_phids) {
+    assert_instances_of($requests, 'HarbormasterBuildRequest');
+
+    if (!$requests) {
       return;
     }
 
@@ -116,31 +122,49 @@ final class HarbormasterBuildable extends HarbormasterDAO
       return;
     }
 
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
     $buildable = self::createOrLoadExisting(
-      PhabricatorUser::getOmnipotentUser(),
+      $viewer,
       $phid,
       $container_phid);
 
+    $plan_phids = mpull($requests, 'getBuildPlanPHID');
     $plans = id(new HarbormasterBuildPlanQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($viewer)
       ->withPHIDs($plan_phids)
       ->execute();
-    foreach ($plans as $plan) {
+    $plans = mpull($plans, null, 'getPHID');
+
+    foreach ($requests as $request) {
+      $plan_phid = $request->getBuildPlanPHID();
+      $plan = idx($plans, $plan_phid);
+
+      if (!$plan) {
+        throw new Exception(
+          pht(
+            'Failed to load build plan ("%s").',
+            $plan_phid));
+      }
+
       if ($plan->isDisabled()) {
         // TODO: This should be communicated more clearly -- maybe we should
         // create the build but set the status to "disabled" or "derelict".
         continue;
       }
 
-      $buildable->applyPlan($plan);
+      $parameters = $request->getBuildParameters();
+      $buildable->applyPlan($plan, $parameters);
     }
   }
 
-  public function applyPlan(HarbormasterBuildPlan $plan) {
+  public function applyPlan(HarbormasterBuildPlan $plan, array $parameters) {
+
     $viewer = PhabricatorUser::getOmnipotentUser();
     $build = HarbormasterBuild::initializeNewBuild($viewer)
       ->setBuildablePHID($this->getPHID())
       ->setBuildPlanPHID($plan->getPHID())
+      ->setBuildParameters($parameters)
       ->setBuildStatus(HarbormasterBuild::STATUS_PENDING);
 
     $auto_key = $plan->getPlanAutoKey();

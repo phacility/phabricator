@@ -237,6 +237,19 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     DrydockResource $resource);
 
 
+  /**
+   * Get a human readable name for a resource.
+   *
+   * @param DrydockBlueprint Blueprint which built the resource.
+   * @param DrydockResource Resource to get the name of.
+   * @return string Human-readable resource name.
+   * @task resource
+   */
+  abstract public function getResourceName(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource);
+
+
 /* -(  Resource Interfaces  )------------------------------------------------ */
 
 
@@ -250,46 +263,6 @@ abstract class DrydockBlueprintImplementation extends Phobject {
 /* -(  Logging  )------------------------------------------------------------ */
 
 
-  /**
-   * @task log
-   */
-  protected function logException(Exception $ex) {
-    $this->log($ex->getMessage());
-  }
-
-
-  /**
-   * @task log
-   */
-  protected function log($message) {
-    self::writeLog(null, null, $message);
-  }
-
-
-  /**
-   * @task log
-   */
-  public static function writeLog(
-    DrydockResource $resource = null,
-    DrydockLease $lease = null,
-    $message = null) {
-
-    $log = id(new DrydockLog())
-      ->setEpoch(time())
-      ->setMessage($message);
-
-    if ($resource) {
-      $log->setResourceID($resource->getID());
-    }
-
-    if ($lease) {
-      $log->setLeaseID($lease->getID());
-    }
-
-    $log->save();
-  }
-
-
   public static function getAllBlueprintImplementations() {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
@@ -300,16 +273,13 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     return idx(self::getAllBlueprintImplementations(), $class);
   }
 
-  protected function newResourceTemplate(
-    DrydockBlueprint $blueprint,
-    $name) {
+  protected function newResourceTemplate(DrydockBlueprint $blueprint) {
 
     $resource = id(new DrydockResource())
       ->setBlueprintPHID($blueprint->getPHID())
       ->attachBlueprint($blueprint)
       ->setType($this->getType())
-      ->setStatus(DrydockResourceStatus::STATUS_PENDING)
-      ->setName($name);
+      ->setStatus(DrydockResourceStatus::STATUS_PENDING);
 
     // Pre-allocate the resource PHID.
     $resource->setPHID($resource->generatePHID());
@@ -325,14 +295,18 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     $lease_status = $lease->getStatus();
 
     switch ($lease_status) {
+      case DrydockLeaseStatus::STATUS_PENDING:
       case DrydockLeaseStatus::STATUS_ACQUIRED:
-        // TODO: Temporary failure.
-        throw new Exception(pht('Lease still activating.'));
+        throw new PhabricatorWorkerYieldException(15);
       case DrydockLeaseStatus::STATUS_ACTIVE:
         return;
       default:
-        // TODO: Permanent failure.
-        throw new Exception(pht('Lease in bad state.'));
+        throw new Exception(
+          pht(
+            'Lease ("%s") is in bad state ("%s"), expected "%s".',
+            $lease->getPHID(),
+            $lease_status,
+            DrydockLeaseStatus::STATUS_ACTIVE));
     }
   }
 

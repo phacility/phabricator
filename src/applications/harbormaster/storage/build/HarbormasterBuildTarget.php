@@ -263,6 +263,28 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
     return $log;
   }
 
+  public function getFieldValue($key) {
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $this->getBuildStep(),
+      PhabricatorCustomField::ROLE_VIEW);
+
+    $fields = $field_list->getFields();
+    $full_key = "std:harbormaster:core:{$key}";
+
+    $field = idx($fields, $full_key);
+    if (!$field) {
+      throw new Exception(
+        pht(
+          'Unknown build step field "%s"!',
+          $key));
+    }
+
+    $field = clone $field;
+    $field->setValueFromStorage($this->getDetail($key));
+    return $field->getBuildTargetFieldValue();
+  }
+
+
 
 /* -(  Status  )------------------------------------------------------------- */
 

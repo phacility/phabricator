@@ -44,7 +44,7 @@ abstract class DrydockLeaseController
         $this->getApplicationURI('resource/'));
 
       $crumbs->addTextCrumb(
-        $resource->getName(),
+        $resource->getResourceName(),
         $this->getApplicationURI("resource/{$id}/"));
 
       $crumbs->addTextCrumb(

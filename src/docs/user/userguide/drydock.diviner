@@ -1,8 +1,60 @@
 @title Drydock User Guide
 @group userguide
 
-Configuring Drydock for machine resource management.
+Drydock, a software and hardware resource manager.
 
-= Overview =
+Overview
+========
 
-NOTE: Drydock is extremely new and not very useful yet.
+WARNING: Drydock is very new and has many sharp edges. Prepare yourself for
+a challenging adventure in unmapped territory, not a streamlined experience
+where things work properly or make sense.
+
+Drydock is an infrastructure application that primarily helps other
+applications coordinate during complex build and deployment tasks. Typically,
+you will configure Drydock to enable capabilities in other applications:
+
+  - Harbormaster can use Drydock to host builds.
+  - In the future, Differential will be able to use Drydock to perform
+    server-side merges.
+
+Users will not normally interact with Drydock directly.
+
+
+What Drydock Does
+=================
+
+Drydock manages working copies, build hosts, and other software and hardware
+resources that build and deployment processes may require in order to perform
+useful work.
+
+Many useful processes need a working copy of a repository (or some similar sort
+of resource) so they can read files, perform version control operations, or
+execute code.
+
+For example, you might want to be able to automatically run unit tests, build a
+binary, or generate documentation every time a new commit is pushed. Or you
+might want to automatically merge a revision or cherry-pick a commit from a
+development branch to a release branch. Any of these tasks need a working copy
+of the repository before they can get underway.
+
+These processes could just clone a new working copy when they started and
+delete it when they finished. This works reasonably well at a small scale, but
+will eventually hit limitations if you want to do things like: expand the build
+tier to multiple machines; or automatically scale the tier up and down based on
+usage; or reuse working copies to improve performance; or make sure things get
+cleaned up after a process fails; or have jobs wait if the tier is too busy.
+Solving these problems effectively requires coordination between the processes
+doing the actual work.
+
+Drydock solves these scaling problems by providing a central allocation
+framework for //resources//, which are physical or virtual resources like a
+build host or a working copy. Processes which need to share hardware or
+software can use Drydock to coordinate creation, access, and destruction of
+those resources.
+
+Applications ask Drydock for resources matching a description, and it allocates
+a corresponding resource by either finding a suitable unused resource or
+creating a new resource. When work completes, the resource is returned to the
+resource pool or destroyed.
+

@@ -20,7 +20,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
   const ENCODING_TEXT = 'text';
 
   public function __destruct() {
-    if ($this->live) {
+    if ($this->start) {
       $this->finalize($this->start);
     }
   }
@@ -154,7 +154,8 @@ final class HarbormasterBuildLog extends HarbormasterDAO
 
   public function finalize($start = 0) {
     if (!$this->getLive()) {
-      throw new Exception(pht('Start logging before finalizing it.'));
+      // TODO: Clean up this API.
+      return;
     }
 
     // TODO: Encode the log contents in a gzipped format.

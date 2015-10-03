@@ -3,9 +3,17 @@
 final class FeedStoryNotificationGarbageCollector
   extends PhabricatorGarbageCollector {
 
-  public function collectGarbage() {
-    $ttl = 90 * 24 * 60 * 60;
+  const COLLECTORCONST = 'feed.notifications';
 
+  public function getCollectorName() {
+    return pht('Notifications');
+  }
+
+  public function getDefaultRetentionPolicy() {
+    return phutil_units('90 days in seconds');
+  }
+
+  protected function collectGarbage() {
     $table = new PhabricatorFeedStoryNotification();
     $conn_w = $table->establishConnection('w');
 
@@ -14,7 +22,7 @@ final class FeedStoryNotificationGarbageCollector
       'DELETE FROM %T WHERE chronologicalKey < (%d << 32)
         ORDER BY chronologicalKey ASC LIMIT 100',
       $table->getTableName(),
-      time() - $ttl);
+      $this->getGarbageEpoch());
 
     return ($conn_w->getAffectedRows() == 100);
   }

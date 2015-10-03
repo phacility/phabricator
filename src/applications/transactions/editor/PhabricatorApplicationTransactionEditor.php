@@ -2837,7 +2837,7 @@ abstract class PhabricatorApplicationTransactionEditor
       HarbormasterBuildable::applyBuildPlans(
         $adapter->getHarbormasterBuildablePHID(),
         $adapter->getHarbormasterContainerPHID(),
-        $adapter->getQueuedHarbormasterBuildPlanPHIDs());
+        $adapter->getQueuedHarbormasterBuildRequests());
     }
 
     return array_merge(
