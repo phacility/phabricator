@@ -12,7 +12,7 @@ final class HarbormasterLeaseWorkingCopyBuildStepImplementation
   }
 
   public function getBuildStepGroupKey() {
-    return HarbormasterPrototypeBuildStepGroup::GROUPKEY;
+    return HarbormasterDrydockBuildStepGroup::GROUPKEY;
   }
 
   public function execute(
