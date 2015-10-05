@@ -217,13 +217,14 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
     // so execute it out here and just let the exception escape.
     if ($did_succeed) {
       foreach ($worker->getQueuedTasks() as $task) {
-        list($class, $data) = $task;
-        PhabricatorWorker::scheduleTask(
-          $class,
-          $data,
-          array(
-            'priority' => (int)$this->getPriority(),
-          ));
+        list($class, $data, $options) = $task;
+
+        // Default the new task priority to our own priority.
+        $options = $options + array(
+          'priority' => (int)$this->getPriority(),
+        );
+
+        PhabricatorWorker::scheduleTask($class, $data, $options);
       }
     }
 
