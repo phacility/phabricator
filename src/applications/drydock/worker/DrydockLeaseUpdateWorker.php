@@ -535,7 +535,7 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
     // If this lease has been acquired but not activated, queue a task to
     // activate it.
     if ($lease->getStatus() == DrydockLeaseStatus::STATUS_ACQUIRED) {
-      PhabricatorWorker::scheduleTask(
+      $this->queueTask(
         __CLASS__,
         array(
           'leasePHID' => $lease->getPHID(),
@@ -691,7 +691,14 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
       ->setStatus(DrydockLeaseStatus::STATUS_BROKEN)
       ->save();
 
-    $lease->scheduleUpdate();
+    $this->queueTask(
+      __CLASS__,
+      array(
+        'leasePHID' => $lease->getPHID(),
+      ),
+      array(
+        'objectPHID' => $lease->getPHID(),
+      ));
 
     $lease->logEvent(
       DrydockLeaseActivationFailureLogType::LOGCONST,

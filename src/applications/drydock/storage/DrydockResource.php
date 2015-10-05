@@ -293,6 +293,15 @@ final class DrydockResource extends DrydockDAO
     }
   }
 
+  public function isActive() {
+    switch ($this->getStatus()) {
+      case DrydockResourceStatus::STATUS_ACTIVE:
+        return true;
+    }
+
+    return false;
+  }
+
   public function logEvent($type, array $data = array()) {
     $log = id(new DrydockLog())
       ->setEpoch(PhabricatorTime::getNow())
