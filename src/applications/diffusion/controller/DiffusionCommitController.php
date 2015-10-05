@@ -1136,14 +1136,17 @@ final class DiffusionCommitController extends DiffusionController {
     $merge_limit = $this->getMergeDisplayLimit();
 
     try {
-      $merges = $this->callConduitWithDiffusionRequest(
-        'diffusion.mergedcommitsquery',
-        array(
-          'commit' => $commit,
-          'limit' => $merge_limit + 1,
-        ));
-
-      $this->commitMerges = DiffusionPathChange::newFromConduit($merges);
+      if ($repository->isSVN()) {
+        $this->commitMerges = array();
+      } else {
+        $merges = $this->callConduitWithDiffusionRequest(
+          'diffusion.mergedcommitsquery',
+          array(
+            'commit' => $commit,
+            'limit' => $merge_limit + 1,
+          ));
+        $this->commitMerges = DiffusionPathChange::newFromConduit($merges);
+      }
     } catch (Exception $ex) {
       $this->commitMerges = false;
       $exceptions[] = $ex;
