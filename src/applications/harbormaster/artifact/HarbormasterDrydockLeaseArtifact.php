@@ -29,7 +29,9 @@ abstract class HarbormasterDrydockLeaseArtifact
   }
 
   public function willCreateArtifact(PhabricatorUser $actor) {
-    $this->loadArtifactLease($actor);
+    // We don't load the lease here because it's expected that artifacts are
+    // created before leases actually exist. This guarantees that the leases
+    // will be cleaned up.
   }
 
   public function loadArtifactLease(PhabricatorUser $viewer) {
@@ -51,7 +53,15 @@ abstract class HarbormasterDrydockLeaseArtifact
   }
 
   public function releaseArtifact(PhabricatorUser $actor) {
-    $lease = $this->loadArtifactLease($actor);
+    try {
+      $lease = $this->loadArtifactLease($actor);
+    } catch (Exception $ex) {
+      // If we can't load the lease, treat it as already released. Artifacts
+      // are generated before leases are queued, so it's possible to arrive
+      // here under normal conditions.
+      return;
+    }
+
     if (!$lease->canRelease()) {
       return;
     }

@@ -1398,6 +1398,11 @@ final class PhabricatorUSEnglishTranslation
         'Setting retention policy for "%s" to %s days.',
       ),
 
+      'Waiting %s second(s) for lease to activate.' => array(
+        'Waiting a second for lease to activate.',
+        'Waiting %s seconds for lease to activate.',
+      ),
+
     );
   }
 

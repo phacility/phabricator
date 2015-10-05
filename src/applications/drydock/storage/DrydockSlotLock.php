@@ -149,6 +149,7 @@ final class DrydockSlotLock extends DrydockDAO {
       // time we should be able to figure out which locks are already held.
       $held = self::loadHeldLocks($locks);
       $held = mpull($held, 'getOwnerPHID', 'getLockKey');
+
       throw new DrydockSlotLockException($held);
     }
   }

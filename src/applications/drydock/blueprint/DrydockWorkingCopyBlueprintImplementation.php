@@ -104,8 +104,13 @@ final class DrydockWorkingCopyBlueprintImplementation
     $host_lease = $this->newLease($blueprint)
       ->setResourceType('host')
       ->setOwnerPHID($resource_phid)
-      ->setAttribute('workingcopy.resourcePHID', $resource_phid)
-      ->queueForActivation();
+      ->setAttribute('workingcopy.resourcePHID', $resource_phid);
+
+    $resource
+      ->setAttribute('host.leasePHID', $host_lease->getPHID())
+      ->save();
+
+    $host_lease->queueForActivation();
 
     // TODO: Add some limits to the number of working copies we can have at
     // once?
@@ -121,7 +126,6 @@ final class DrydockWorkingCopyBlueprintImplementation
 
     return $resource
       ->setAttribute('repositories.map', $map)
-      ->setAttribute('host.leasePHID', $host_lease->getPHID())
       ->allocateResource();
   }
 
@@ -165,7 +169,13 @@ final class DrydockWorkingCopyBlueprintImplementation
     DrydockBlueprint $blueprint,
     DrydockResource $resource) {
 
-    $lease = $this->loadHostLease($resource);
+    try {
+      $lease = $this->loadHostLease($resource);
+    } catch (Exception $ex) {
+      // If we can't load the lease, assume we don't need to take any actions
+      // to destroy it.
+      return;
+    }
 
     // Destroy the lease on the host.
     $lease->releaseOnDestruction();
