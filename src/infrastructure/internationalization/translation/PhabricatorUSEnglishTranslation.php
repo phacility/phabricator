@@ -1388,6 +1388,21 @@ final class PhabricatorUSEnglishTranslation
         'Mail sent in the last %s days.',
       ),
 
+      '%s Day(s)' => array(
+        '%s Day',
+        '%s Days',
+      ),
+
+      'Setting retention policy for "%s" to %s day(s).' => array(
+        'Setting retention policy for "%s" to one day.',
+        'Setting retention policy for "%s" to %s days.',
+      ),
+
+      'Waiting %s second(s) for lease to activate.' => array(
+        'Waiting a second for lease to activate.',
+        'Waiting %s seconds for lease to activate.',
+      ),
+
     );
   }
 

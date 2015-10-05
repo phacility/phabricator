@@ -88,7 +88,7 @@ You can configure some more options by going to {nav Diffusion > (Select
 
 == External Symbols ==
 
-By @{article:Adding New Classes}, you can teach Phabricator
+By @{article@phabcontrib:Adding New Classes}, you can teach Phabricator
 about symbols from the outside world.
 Extend @{class:DiffusionExternalSymbolsSource}; Once loaded, your new
 implementation will be used any time a symbol is queried.

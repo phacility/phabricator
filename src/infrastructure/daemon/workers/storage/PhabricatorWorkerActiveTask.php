@@ -86,15 +86,23 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
   }
 
   protected function checkLease() {
-    if ($this->leaseOwner) {
-      $current_server_time = $this->serverTime + (time() - $this->localTime);
-      if ($current_server_time >= $this->leaseExpires) {
-        throw new Exception(
-          pht(
-            'Trying to update Task %d (%s) after lease expiration!',
-            $this->getID(),
-            $this->getTaskClass()));
-      }
+    $owner = $this->leaseOwner;
+
+    if (!$owner) {
+      return;
+    }
+
+    if ($owner == PhabricatorWorker::YIELD_OWNER) {
+      return;
+    }
+
+    $current_server_time = $this->serverTime + (time() - $this->localTime);
+    if ($current_server_time >= $this->leaseExpires) {
+      throw new Exception(
+        pht(
+          'Trying to update Task %d (%s) after lease expiration!',
+          $this->getID(),
+          $this->getTaskClass()));
     }
   }
 
@@ -141,6 +149,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
     $worker = null;
     try {
       $worker = $this->getWorkerInstance();
+      $worker->setCurrentWorkerTask($this);
 
       $maximum_failures = $worker->getMaximumRetryCount();
       if ($maximum_failures !== null) {
@@ -175,6 +184,8 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
     } catch (PhabricatorWorkerYieldException $ex) {
       $this->setExecutionException($ex);
 
+      $this->setLeaseOwner(PhabricatorWorker::YIELD_OWNER);
+
       $retry = $ex->getDuration();
       $retry = max($retry, 5);
 
@@ -206,13 +217,14 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
     // so execute it out here and just let the exception escape.
     if ($did_succeed) {
       foreach ($worker->getQueuedTasks() as $task) {
-        list($class, $data) = $task;
-        PhabricatorWorker::scheduleTask(
-          $class,
-          $data,
-          array(
-            'priority' => $this->getPriority(),
-          ));
+        list($class, $data, $options) = $task;
+
+        // Default the new task priority to our own priority.
+        $options = $options + array(
+          'priority' => (int)$this->getPriority(),
+        );
+
+        PhabricatorWorker::scheduleTask($class, $data, $options);
       }
     }
 

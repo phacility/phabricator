@@ -8,6 +8,7 @@ final class DrydockResourceQuery extends DrydockQuery {
   private $types;
   private $blueprintPHIDs;
   private $datasourceQuery;
+  private $needUnconsumedCommands;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -39,6 +40,11 @@ final class DrydockResourceQuery extends DrydockQuery {
     return $this;
   }
 
+  public function needUnconsumedCommands($need) {
+    $this->needUnconsumedCommands = $need;
+    return $this;
+  }
+
   public function newResultObject() {
     return new DrydockResource();
   }
@@ -64,6 +70,25 @@ final class DrydockResourceQuery extends DrydockQuery {
         continue;
       }
       $resource->attachBlueprint($blueprint);
+    }
+
+    return $resources;
+  }
+
+  protected function didFilterPage(array $resources) {
+    if ($this->needUnconsumedCommands) {
+      $commands = id(new DrydockCommandQuery())
+        ->setViewer($this->getViewer())
+        ->setParentQuery($this)
+        ->withTargetPHIDs(mpull($resources, 'getPHID'))
+        ->withConsumed(false)
+        ->execute();
+      $commands = mgroup($commands, 'getTargetPHID');
+
+      foreach ($resources as $resource) {
+        $list = idx($commands, $resource->getPHID(), array());
+        $resource->attachUnconsumedCommands($list);
+      }
     }
 
     return $resources;

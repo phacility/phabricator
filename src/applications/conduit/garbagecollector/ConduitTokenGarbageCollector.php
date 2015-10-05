@@ -3,9 +3,20 @@
 final class ConduitTokenGarbageCollector
   extends PhabricatorGarbageCollector {
 
-  public function collectGarbage() {
+  const COLLECTORCONST = 'conduit.tokens';
+
+  public function getCollectorName() {
+    return pht('Conduit Tokens');
+  }
+
+  public function hasAutomaticPolicy() {
+    return true;
+  }
+
+  protected function collectGarbage() {
     $table = new PhabricatorConduitToken();
     $conn_w = $table->establishConnection('w');
+
     queryfx(
       $conn_w,
       'DELETE FROM %T WHERE expires <= %d

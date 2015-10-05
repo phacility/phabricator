@@ -22,4 +22,8 @@ final class DrydockSlotLockException extends Exception {
     parent::__construct($message);
   }
 
+  public function getLockMap() {
+    return $this->lockMap;
+  }
+
 }

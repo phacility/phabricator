@@ -72,9 +72,9 @@ final class HarbormasterStepEditController extends HarbormasterController {
 
     $e_name = true;
     $v_name = $step->getName();
-    $e_description = true;
+    $e_description = null;
     $v_description = $step->getDescription();
-    $e_depends_on = true;
+    $e_depends_on = null;
     $v_depends_on = $step->getDetail('dependsOn', array());
 
     $errors = array();
@@ -82,9 +82,7 @@ final class HarbormasterStepEditController extends HarbormasterController {
     if ($request->isFormPost()) {
       $e_name = null;
       $v_name = $request->getStr('name');
-      $e_description = null;
       $v_description = $request->getStr('description');
-      $e_depends_on = null;
       $v_depends_on = $request->getArr('dependsOn');
 
       $xactions = $field_list->buildFieldTransactionsFromRequest(
@@ -139,6 +137,12 @@ final class HarbormasterStepEditController extends HarbormasterController {
           ->setError($e_name)
           ->setValue($v_name));
 
+    $form->appendChild(id(new AphrontFormDividerControl()));
+
+    $field_list->appendFieldsToForm($form);
+
+    $form->appendChild(id(new AphrontFormDividerControl()));
+
     $form
       ->appendControl(
         id(new AphrontFormTokenizerControl())
@@ -151,8 +155,6 @@ final class HarbormasterStepEditController extends HarbormasterController {
           ->setLabel(pht('Depends On'))
           ->setError($e_depends_on)
           ->setValue($v_depends_on));
-
-    $field_list->appendFieldsToForm($form);
 
     $form
       ->appendChild(

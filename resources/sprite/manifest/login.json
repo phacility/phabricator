@@ -9,7 +9,7 @@
     "login-Asana": {
       "name": "login-Asana",
       "rule": ".login-Asana",
-      "hash": "f8d322843355da1abce614983044c0f8"
+      "hash": "cfc35b62afb103c5d484a715071e3cc3"
     },
     "login-Bitbucket": {
       "name": "login-Bitbucket",
@@ -131,6 +131,6 @@
     1,
     2
   ],
-  "header": "\/**\n * @provides sprite-login-css\n * @generated\n *\/\n\n.sprite-login {\n  background-image: url(\/rsrc\/image\/sprite-login.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5),\nonly screen and (min-resolution: 1.5dppx) {\n  .sprite-login {\n    background-image: url(\/rsrc\/image\/sprite-login-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}\n",
+  "header": "/**\n * @provides sprite-login-css\n * @generated\n */\n\n.sprite-login {\n  background-image: url(/rsrc/image/sprite-login.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5),\nonly screen and (min-resolution: 1.5dppx) {\n  .sprite-login {\n    background-image: url(/rsrc/image/sprite-login-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}\n",
   "type": "standard"
 }

@@ -9,6 +9,7 @@ final class HarbormasterBuild extends HarbormasterDAO
   protected $buildPlanPHID;
   protected $buildStatus;
   protected $buildGeneration;
+  protected $buildParameters = array();
   protected $planAutoKey;
 
   private $buildable = self::ATTACHABLE;
@@ -156,6 +157,9 @@ final class HarbormasterBuild extends HarbormasterDAO
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'buildParameters' => self::SERIALIZATION_JSON,
+      ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'buildStatus' => 'text32',
         'buildGeneration' => 'uint32',
@@ -257,6 +261,10 @@ final class HarbormasterBuild extends HarbormasterDAO
       'step.timestamp' => null,
       'build.id' => null,
     );
+
+    foreach ($this->getBuildParameters() as $key => $value) {
+      $results['build/'.$key] = $value;
+    }
 
     $buildable = $this->getBuildable();
     $object = $buildable->getBuildableObject();

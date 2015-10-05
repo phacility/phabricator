@@ -715,7 +715,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return false;
     }
 
-    if ($this->getDetail('disable-herald')) {
+    if ($this->getDetail('herald-disabled')) {
       return false;
     }
 

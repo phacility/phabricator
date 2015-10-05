@@ -3,17 +3,7 @@
 abstract class PhabricatorPHIDType extends Phobject {
 
   final public function getTypeConstant() {
-    $class = new ReflectionClass($this);
-
-    $const = $class->getConstant('TYPECONST');
-    if ($const === false) {
-      throw new Exception(
-        pht(
-          '%s class "%s" must define a %s property.',
-          __CLASS__,
-          get_class($this),
-          'TYPECONST'));
-    }
+    $const = $this->getPhobjectClassConstant('TYPECONST');
 
     if (!is_string($const) || !preg_match('/^[A-Z]{4}$/', $const)) {
       throw new Exception(

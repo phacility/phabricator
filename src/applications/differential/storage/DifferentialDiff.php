@@ -446,6 +446,13 @@ final class DifferentialDiff
         $results['repository.phid'] = $repo->getPHID();
         $results['repository.vcs'] = $repo->getVersionControlSystem();
         $results['repository.uri'] = $repo->getPublicCloneURI();
+
+        // TODO: We're just hoping to get lucky. Instead, `arc` should store
+        // where it sent changes and we should only provide staging details
+        // if we reasonably believe they are accurate.
+        $staging_ref = 'refs/tags/phabricator/diff/'.$this->getID();
+        $results['repository.staging.uri'] = $repo->getStagingURI();
+        $results['repository.staging.ref'] = $staging_ref;
       }
     }
 
@@ -466,6 +473,10 @@ final class DifferentialDiff
         pht('The version control system, either "svn", "hg" or "git".'),
       'repository.uri' =>
         pht('The URI to clone or checkout the repository from.'),
+      'repository.staging.uri' =>
+        pht('The URI of the staging repository.'),
+      'repository.staging.ref' =>
+        pht('The ref name for this change in the staging repository.'),
     );
   }
 
