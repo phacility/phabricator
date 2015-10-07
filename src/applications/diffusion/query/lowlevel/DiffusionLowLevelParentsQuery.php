@@ -70,7 +70,21 @@ final class DiffusionLowLevelParentsQuery
   }
 
   private function loadSubversionParents() {
-    $n = (int)$this->identifier;
+    $repository = $this->getRepository();
+    $identifier = $this->identifier;
+
+    $refs = id(new DiffusionCachedResolveRefsQuery())
+      ->setRepository($repository)
+      ->withRefs(array($identifier))
+      ->execute();
+    if (!$refs) {
+      throw new Exception(
+        pht(
+          'No commit "%s" in this repository.',
+          $identifier));
+    }
+
+    $n = (int)$identifier;
     if ($n > 1) {
       $ids = array($n - 1);
     } else {

@@ -77,10 +77,17 @@ final class PonderAnswerView extends AphrontTagView {
       ->setIconFont('fa-bars')
       ->setDropdownMenu($actions);
 
+    $header_name = phutil_tag(
+      'a',
+      array(
+        'href' => $handle->getURI(),
+      ),
+      $handle->getName());
+
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setEpoch($answer->getDateModified())
-      ->setHeader($handle->getName())
+      ->setHeader($header_name)
       ->addActionLink($action_button)
       ->setImage($handle->getImageURI())
       ->setImageURL($handle->getURI());

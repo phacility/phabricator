@@ -42,7 +42,8 @@ final class PhabricatorWorkerManagementExecuteWorkflow
         $task->getDataID());
       $task->setData($task_data->getData());
 
-      $console->writeOut(
+      echo tsprintf(
+        "%s\n",
         pht(
           'Executing task %d (%s)...',
           $task->getID(),

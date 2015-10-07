@@ -160,8 +160,7 @@ abstract class PhabricatorWorker extends Phobject {
         try {
           $worker->doWork();
           foreach ($worker->getQueuedTasks() as $queued_task) {
-            list($queued_class, $queued_data, $queued_priority) = $queued_task;
-            $queued_options = array('priority' => $queued_priority);
+            list($queued_class, $queued_data, $queued_options) = $queued_task;
             self::scheduleTask($queued_class, $queued_data, $queued_options);
           }
           break;
@@ -220,11 +219,14 @@ abstract class PhabricatorWorker extends Phobject {
    *
    * @param string    Task class to queue.
    * @param array     Data for the followup task.
-   * @param int|null  Priority for the followup task.
+   * @param array Options for the followup task.
    * @return this
    */
-  final protected function queueTask($class, array $data, $priority = null) {
-    $this->queuedTasks[] = array($class, $data, $priority);
+  final protected function queueTask(
+    $class,
+    array $data,
+    array $options = array()) {
+    $this->queuedTasks[] = array($class, $data, $options);
     return $this;
   }
 
