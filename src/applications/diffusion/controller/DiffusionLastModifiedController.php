@@ -98,12 +98,10 @@ final class DiffusionLastModifiedController extends DiffusionController {
       $modified = DiffusionView::linkCommit(
         $drequest->getRepository(),
         $commit->getCommitIdentifier());
-      $date = phabricator_date($epoch, $viewer);
-      $time = phabricator_time($epoch, $viewer);
+      $date = phabricator_datetime($epoch, $viewer);
     } else {
       $modified = '';
       $date = '';
-      $time = '';
     }
 
     $data = $commit->getCommitData();
@@ -137,7 +135,6 @@ final class DiffusionLastModifiedController extends DiffusionController {
     $return = array(
       'commit'    => $modified,
       'date'      => $date,
-      'time'      => $time,
       'author'    => $author,
       'details'   => $details,
     );

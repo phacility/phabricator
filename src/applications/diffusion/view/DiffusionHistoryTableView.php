@@ -7,12 +7,10 @@ final class DiffusionHistoryTableView extends DiffusionView {
   private $handles = array();
   private $isHead;
   private $parents;
-  private $buildCache;
 
   public function setHistory(array $history) {
     assert_instances_of($history, 'DiffusionPathChange');
     $this->history = $history;
-    $this->buildCache = null;
     return $this;
   }
 
@@ -62,32 +60,13 @@ final class DiffusionHistoryTableView extends DiffusionView {
     return $this;
   }
 
-  public function loadBuildablesOnDemand() {
-    if ($this->buildCache !== null) {
-      return $this->buildCache;
-    }
-
-    $commits_to_builds = array();
-
-    $commits = mpull($this->history, 'getCommit');
-
-    $commit_phids = mpull($commits, 'getPHID');
-
-    $buildables = id(new HarbormasterBuildableQuery())
-      ->setViewer($this->getUser())
-      ->withBuildablePHIDs($commit_phids)
-      ->withManualBuildables(false)
-      ->execute();
-
-    $this->buildCache = mpull($buildables, null, 'getBuildablePHID');
-
-    return $this->buildCache;
-  }
-
   public function render() {
     $drequest = $this->getDiffusionRequest();
 
     $viewer = $this->getUser();
+
+    $buildables = $this->loadBuildables(mpull($this->history, 'getCommit'));
+    $has_any_build = false;
 
     $show_revisions = PhabricatorApplication::isClassInstalledForViewer(
       'PhabricatorDifferentialApplication',
@@ -110,11 +89,9 @@ final class DiffusionHistoryTableView extends DiffusionView {
       $epoch = $history->getEpoch();
 
       if ($epoch) {
-        $date = phabricator_date($epoch, $this->user);
-        $time = phabricator_time($epoch, $this->user);
+        $committed = phabricator_datetime($epoch, $viewer);
       } else {
-        $date = null;
-        $time = null;
+        $committed = null;
       }
 
       $data = $history->getCommitData();
@@ -160,36 +137,9 @@ final class DiffusionHistoryTableView extends DiffusionView {
 
       $build = null;
       if ($show_builds) {
-        $buildable_lookup = $this->loadBuildablesOnDemand();
-        $buildable = idx($buildable_lookup, $commit->getPHID());
+        $buildable = idx($buildables, $commit->getPHID());
         if ($buildable !== null) {
-          $icon = HarbormasterBuildable::getBuildableStatusIcon(
-            $buildable->getBuildableStatus());
-          $color = HarbormasterBuildable::getBuildableStatusColor(
-            $buildable->getBuildableStatus());
-          $name = HarbormasterBuildable::getBuildableStatusName(
-            $buildable->getBuildableStatus());
-
-          $icon_view = id(new PHUIIconView())
-            ->setIconFont($icon.' '.$color);
-
-          $tooltip_view = javelin_tag(
-            'span',
-            array(
-              'sigil' => 'has-tooltip',
-              'meta' => array('tip' => $name),
-            ),
-            $icon_view);
-
-          Javelin::initBehavior('phabricator-tooltips');
-
-          $href_view = phutil_tag(
-            'a',
-            array('href' => '/'.$buildable->getMonogram()),
-            $tooltip_view);
-
-          $build = $href_view;
-
+          $build = $this->renderBuildable($buildable);
           $has_any_build = true;
         }
       }
@@ -214,8 +164,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
           null),
         $author,
         $summary,
-        $date,
-        $time,
+        $committed,
       );
     }
 
@@ -226,30 +175,28 @@ final class DiffusionHistoryTableView extends DiffusionView {
         null,
         pht('Commit'),
         null,
-        pht('Revision'),
+        null,
         pht('Author/Committer'),
         pht('Details'),
-        pht('Date'),
-        pht('Time'),
+        pht('Committed'),
       ));
     $view->setColumnClasses(
       array(
         'threads',
         'nudgeright',
-        'n',
+        '',
         'icon',
-        'n',
+        '',
         '',
         'wide',
         '',
-        'right',
       ));
     $view->setColumnVisibility(
       array(
         $graph ? true : false,
         true,
         true,
-        true,
+        $has_any_build,
         $show_revisions,
       ));
     $view->setDeviceVisibility(
@@ -261,7 +208,6 @@ final class DiffusionHistoryTableView extends DiffusionView {
         true,
         false,
         true,
-        false,
         false,
       ));
     return $view->render();

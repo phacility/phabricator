@@ -29,6 +29,8 @@ final class DiffusionTagListView extends DiffusionView {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
+    $buildables = $this->loadBuildables($this->commits);
+    $has_builds = false;
 
     $rows = array();
     foreach ($this->tags as $tag) {
@@ -80,30 +82,56 @@ final class DiffusionTagListView extends DiffusionView {
         }
       }
 
+      $build = null;
+      if ($commit) {
+        $buildable = idx($buildables, $commit->getPHID());
+        if ($buildable) {
+          $build = $this->renderBuildable($buildable);
+          $has_builds = true;
+        }
+      }
+
+      $history = $this->linkTagHistory($tag->getName());
+
       $rows[] = array(
+        $history,
         $tag_link,
         $commit_link,
-        $description,
+        $build,
         $author,
+        $description,
         phabricator_datetime($tag->getEpoch(), $this->user),
       );
     }
 
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        pht('Tag'),
-        pht('Commit'),
-        pht('Description'),
-        pht('Author'),
-        pht('Created'),
-      ));
-    $table->setColumnClasses(
-      array(
-        'pri',
-        '',
-        'wide',
-      ));
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          null,
+          pht('Tag'),
+          pht('Commit'),
+          null,
+          pht('Author'),
+          pht('Description'),
+          pht('Created'),
+        ))
+      ->setColumnClasses(
+        array(
+          'nudgeright',
+          'pri',
+          '',
+          '',
+          '',
+          'wide',
+        ))
+      ->setColumnVisibility(
+        array(
+          true,
+          true,
+          true,
+          $has_builds,
+        ));
+
     return $table->render();
   }
 

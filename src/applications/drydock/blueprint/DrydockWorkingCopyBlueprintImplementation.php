@@ -29,6 +29,17 @@ final class DrydockWorkingCopyBlueprintImplementation
   public function canAllocateResourceForLease(
     DrydockBlueprint $blueprint,
     DrydockLease $lease) {
+    $viewer = $this->getViewer();
+
+    if ($this->shouldLimitAllocatingPoolSize($blueprint)) {
+      return false;
+    }
+
+    // TODO: If we have a pending resource which is compatible with the
+    // configuration for this lease, prevent a new allocation? Otherwise the
+    // queue can fill up with copies of requests from the same lease. But
+    // maybe we can deal with this with "pre-leasing"?
+
     return true;
   }
 
@@ -36,6 +47,12 @@ final class DrydockWorkingCopyBlueprintImplementation
     DrydockBlueprint $blueprint,
     DrydockResource $resource,
     DrydockLease $lease) {
+
+    // Don't hand out leases on working copies which have not activated, since
+    // it may take an arbitrarily long time for them to acquire a host.
+    if (!$resource->isActive()) {
+      return false;
+    }
 
     $need_map = $lease->getAttribute('repositories.map');
     if (!is_array($need_map)) {
@@ -320,8 +337,10 @@ final class DrydockWorkingCopyBlueprintImplementation
   }
 
   private function loadRepositories(array $phids) {
+    $viewer = $this->getViewer();
+
     $repositories = id(new PhabricatorRepositoryQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($viewer)
       ->withPHIDs($phids)
       ->execute();
     $repositories = mpull($repositories, null, 'getPHID');
@@ -353,7 +372,7 @@ final class DrydockWorkingCopyBlueprintImplementation
   }
 
   private function loadHostLease(DrydockResource $resource) {
-    $viewer = PhabricatorUser::getOmnipotentUser();
+    $viewer = $this->getViewer();
 
     $lease_phid = $resource->getAttribute('host.leasePHID');
 

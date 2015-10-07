@@ -16,7 +16,16 @@ JX.behavior('diffusion-pull-lastmodified', function(config) {
           if (!config.map[k][l]) {
             continue;
           }
-          JX.DOM.setContent(JX.$(config.map[k][l]), JX.$H(r[k][l]));
+          try {
+            JX.DOM.setContent(JX.$(config.map[k][l]), JX.$H(r[k][l]));
+          } catch (ex) {
+            // The way this works is weird and sometimes the components get
+            // out of sync. Fail gently until we can eventually improve the
+            // underlying mechanism.
+
+            // In particular, we currently may generate lint information
+            // without generating a lint column. See T9524.
+          }
         }
       }
     })
