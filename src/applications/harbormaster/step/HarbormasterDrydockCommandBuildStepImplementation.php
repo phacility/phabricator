@@ -12,7 +12,7 @@ final class HarbormasterDrydockCommandBuildStepImplementation
   }
 
   public function getBuildStepGroupKey() {
-    return HarbormasterPrototypeBuildStepGroup::GROUPKEY;
+    return HarbormasterDrydockBuildStepGroup::GROUPKEY;
   }
 
   public function getDescription() {

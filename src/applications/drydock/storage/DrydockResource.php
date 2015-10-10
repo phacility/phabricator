@@ -113,13 +113,6 @@ final class DrydockResource extends DrydockDAO
   }
 
   public function allocateResource() {
-    if ($this->getID()) {
-      throw new Exception(
-        pht(
-          'Trying to allocate a resource which has already been persisted. '.
-          'Only new resources may be allocated.'));
-    }
-
     // We expect resources to have a pregenerated PHID, as they should have
     // been created by a call to DrydockBlueprint->newResourceTemplate().
     if (!$this->getPHID()) {
@@ -155,9 +148,14 @@ final class DrydockResource extends DrydockDAO
     } catch (DrydockSlotLockException $ex) {
       $this->killTransaction();
 
-      // NOTE: We have to log this on the blueprint, as the resource is not
-      // going to be saved so the PHID will vanish.
-      $this->getBlueprint()->logEvent(
+      if ($this->getID()) {
+        $log_target = $this;
+      } else {
+        // If we don't have an ID, we have to log this on the blueprint, as the
+        // resource is not going to be saved so the PHID will vanish.
+        $log_target = $this->getBlueprint();
+      }
+      $log_target->logEvent(
         DrydockSlotLockFailureLogType::LOGCONST,
         array(
           'locks' => $ex->getLockMap(),
@@ -166,14 +164,9 @@ final class DrydockResource extends DrydockDAO
       throw $ex;
     }
 
-    try {
-      $this
-        ->setStatus($new_status)
-        ->save();
-    } catch (Exception $ex) {
-      $this->killTransaction();
-      throw $ex;
-    }
+    $this
+      ->setStatus($new_status)
+      ->save();
 
     $this->saveTransaction();
 
@@ -210,12 +203,24 @@ final class DrydockResource extends DrydockDAO
 
     $this->openTransaction();
 
-      $this
-        ->setStatus(DrydockResourceStatus::STATUS_ACTIVE)
-        ->save();
-
+    try {
       DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
       $this->slotLocks = array();
+    } catch (DrydockSlotLockException $ex) {
+      $this->killTransaction();
+
+      $this->logEvent(
+        DrydockSlotLockFailureLogType::LOGCONST,
+        array(
+          'locks' => $ex->getLockMap(),
+        ));
+
+      throw $ex;
+    }
+
+    $this
+      ->setStatus(DrydockResourceStatus::STATUS_ACTIVE)
+      ->save();
 
     $this->saveTransaction();
 
@@ -286,6 +291,15 @@ final class DrydockResource extends DrydockDAO
       default:
         return true;
     }
+  }
+
+  public function isActive() {
+    switch ($this->getStatus()) {
+      case DrydockResourceStatus::STATUS_ACTIVE:
+        return true;
+    }
+
+    return false;
   }
 
   public function logEvent($type, array $data = array()) {

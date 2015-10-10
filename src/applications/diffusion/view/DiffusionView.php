@@ -20,6 +20,30 @@ abstract class DiffusionView extends AphrontView {
         'path'   => $path,
       ));
 
+    return $this->renderHistoryLink($href);
+  }
+
+  final public function linkBranchHistory($branch) {
+    $href = $this->getDiffusionRequest()->generateURI(
+      array(
+        'action' => 'history',
+        'branch' => $branch,
+      ));
+
+    return $this->renderHistoryLink($href);
+  }
+
+  final public function linkTagHistory($tag) {
+    $href = $this->getDiffusionRequest()->generateURI(
+      array(
+        'action' => 'history',
+        'commit' => $tag,
+      ));
+
+    return $this->renderHistoryLink($href);
+  }
+
+  private function renderHistoryLink($href) {
     return javelin_tag(
       'a',
       array(
@@ -31,7 +55,7 @@ abstract class DiffusionView extends AphrontView {
           'align' => 'E',
         ),
       ),
-      id(new PHUIIconView())->setIconFont('fa-list-ul blue'));
+      id(new PHUIIconView())->setIconFont('fa-history bluegrey'));
   }
 
   final public function linkBrowse($path, array $details = array()) {
@@ -168,6 +192,60 @@ abstract class DiffusionView extends AphrontView {
         $email->getDisplayName());
     }
     return hsprintf('%s', $name);
+  }
+
+  final protected function renderBuildable(HarbormasterBuildable $buildable) {
+    $status = $buildable->getBuildableStatus();
+
+    $icon = HarbormasterBuildable::getBuildableStatusIcon($status);
+    $color = HarbormasterBuildable::getBuildableStatusColor($status);
+    $name = HarbormasterBuildable::getBuildableStatusName($status);
+
+    $icon_view = id(new PHUIIconView())
+      ->setIconFont($icon.' '.$color);
+
+    $tooltip_view = javelin_tag(
+      'span',
+      array(
+        'sigil' => 'has-tooltip',
+        'meta' => array('tip' => $name),
+      ),
+      $icon_view);
+
+    Javelin::initBehavior('phabricator-tooltips');
+
+    return phutil_tag(
+      'a',
+      array('href' => '/'.$buildable->getMonogram()),
+      $tooltip_view);
+  }
+
+  final protected function loadBuildables(array $commits) {
+    assert_instances_of($commits, 'PhabricatorRepositoryCommit');
+
+    if (!$commits) {
+      return array();
+    }
+
+    $viewer = $this->getUser();
+
+    $harbormaster_app = 'PhabricatorHarbormasterApplication';
+    $have_harbormaster = PhabricatorApplication::isClassInstalledForViewer(
+      $harbormaster_app,
+      $viewer);
+
+    if ($have_harbormaster) {
+      $buildables = id(new HarbormasterBuildableQuery())
+        ->setViewer($viewer)
+        ->withBuildablePHIDs(mpull($commits, 'getPHID'))
+        ->withManualBuildables(false)
+        ->execute();
+      $buildables = mpull($buildables, null, 'getBuildablePHID');
+    } else {
+      $buildables = array();
+    }
+
+    return $buildables;
   }
 
 }

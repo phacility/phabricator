@@ -61,7 +61,7 @@ final class HarbormasterPlanEditController extends HarbormasterPlanController {
     $is_new = (!$plan->getID());
     if ($is_new) {
       $title = pht('New Build Plan');
-      $cancel_uri = $this->getApplicationURI();
+      $cancel_uri = $this->getApplicationURI('plan/');
       $save_button = pht('Create Build Plan');
     } else {
       $id = $plan->getID();

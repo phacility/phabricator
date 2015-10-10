@@ -262,13 +262,14 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
           array(
             DrydockResourceStatus::STATUS_PENDING,
             DrydockResourceStatus::STATUS_ACTIVE,
+            DrydockResourceStatus::STATUS_BROKEN,
             DrydockResourceStatus::STATUS_RELEASED,
           ))
         ->execute();
 
       $allocated_phids = array();
       foreach ($pool as $resource) {
-        $allocated_phids[] = $resource->getAttribute('almanacDevicePHID');
+        $allocated_phids[] = $resource->getAttribute('almanacBindingPHID');
       }
       $allocated_phids = array_fuse($allocated_phids);
 

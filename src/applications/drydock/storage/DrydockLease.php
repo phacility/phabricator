@@ -19,6 +19,16 @@ final class DrydockLease extends DrydockDAO
   private $activateWhenAcquired = false;
   private $slotLocks = array();
 
+  public static function initializeNewLease() {
+    $lease = new DrydockLease();
+
+    // Pregenerate a PHID so that the caller can set something up to release
+    // this lease before queueing it for activation.
+    $lease->setPHID($lease->generatePHID());
+
+    return $lease;
+  }
+
   /**
    * Flag this lease to be released when its destructor is called. This is
    * mostly useful if you have a script which acquires, uses, and then releases
@@ -232,6 +242,7 @@ final class DrydockLease extends DrydockDAO
     }
 
     $this->openTransaction();
+
     try {
       DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
       $this->slotLocks = array();
@@ -247,16 +258,12 @@ final class DrydockLease extends DrydockDAO
       throw $ex;
     }
 
-    try {
-      $this
-        ->setResourcePHID($resource->getPHID())
-        ->attachResource($resource)
-        ->setStatus($new_status)
-        ->save();
-    } catch (Exception $ex) {
-      $this->killTransaction();
-      throw $ex;
-    }
+    $this
+      ->setResourcePHID($resource->getPHID())
+      ->attachResource($resource)
+      ->setStatus($new_status)
+      ->save();
+
     $this->saveTransaction();
 
     $this->isAcquired = true;
@@ -295,12 +302,24 @@ final class DrydockLease extends DrydockDAO
 
     $this->openTransaction();
 
-      $this
-        ->setStatus(DrydockLeaseStatus::STATUS_ACTIVE)
-        ->save();
-
+    try {
       DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
       $this->slotLocks = array();
+    } catch (DrydockSlotLockException $ex) {
+      $this->killTransaction();
+
+      $this->logEvent(
+        DrydockSlotLockFailureLogType::LOGCONST,
+        array(
+          'locks' => $ex->getLockMap(),
+        ));
+
+      throw $ex;
+    }
+
+    $this
+      ->setStatus(DrydockLeaseStatus::STATUS_ACTIVE)
+      ->save();
 
     $this->saveTransaction();
 

@@ -60,9 +60,9 @@ final class PhabricatorStorageManagementProbeWorkflow
         $overall);
 
       $table->addRow(array(
-        'name' => phutil_console_format('**%s**', $db),
-        'size' => phutil_console_format('**%s**', $database_size),
-        'percentage' => phutil_console_format('**%s**', $database_percentage),
+        'name' => tsprintf('**%s**', $db),
+        'size' => tsprintf('**%s**', $database_size),
+        'percentage' => tsprintf('**%s**', $database_percentage),
       ));
       $data[$db] = isort($data[$db], '_totalSize');
       foreach ($data[$db] as $table_name => $info) {
@@ -82,9 +82,9 @@ final class PhabricatorStorageManagementProbeWorkflow
       $overall,
       $overall);
     $table->addRow(array(
-      'name' => phutil_console_format('**%s**', pht('TOTAL')),
-      'size' => phutil_console_format('**%s**', $overall_size),
-      'percentage' => phutil_console_format('**%s**', $overall_percentage),
+      'name' => tsprintf('**%s**', pht('TOTAL')),
+      'size' => tsprintf('**%s**', $overall_size),
+      'percentage' => tsprintf('**%s**', $overall_percentage),
     ));
 
     $table->draw();

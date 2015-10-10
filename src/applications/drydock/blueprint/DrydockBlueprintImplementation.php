@@ -19,6 +19,10 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     return array();
   }
 
+  public function getViewer() {
+    return PhabricatorUser::getOmnipotentUser();
+  }
+
 
 /* -(  Lease Acquisition  )-------------------------------------------------- */
 
@@ -288,7 +292,7 @@ abstract class DrydockBlueprintImplementation extends Phobject {
   }
 
   protected function newLease(DrydockBlueprint $blueprint) {
-    return id(new DrydockLease());
+    return DrydockLease::initializeNewLease();
   }
 
   protected function requireActiveLease(DrydockLease $lease) {
@@ -308,6 +312,69 @@ abstract class DrydockBlueprintImplementation extends Phobject {
             $lease_status,
             DrydockLeaseStatus::STATUS_ACTIVE));
     }
+  }
+
+
+  /**
+   * Apply standard limits on resource allocation rate.
+   *
+   * @param DrydockBlueprint The blueprint requesting an allocation.
+   * @return bool True if further allocations should be limited.
+   */
+  protected function shouldLimitAllocatingPoolSize(
+    DrydockBlueprint $blueprint) {
+
+    // TODO: If this mechanism sticks around, these values should be
+    // configurable by the blueprint implementation.
+
+    // Limit on total number of active resources.
+    $total_limit = 1;
+
+    // Always allow at least this many allocations to be in flight at once.
+    $min_allowed = 1;
+
+    // Allow this fraction of allocating resources as a fraction of active
+    // resources.
+    $growth_factor = 0.25;
+
+    $resource = new DrydockResource();
+    $conn_r = $resource->establishConnection('r');
+
+    $counts = queryfx_all(
+      $conn_r,
+      'SELECT status, COUNT(*) N FROM %T WHERE blueprintPHID = %s',
+      $resource->getTableName(),
+      $blueprint->getPHID());
+    $counts = ipull($counts, 'N', 'status');
+
+    $n_alloc = idx($counts, DrydockResourceStatus::STATUS_PENDING, 0);
+    $n_active = idx($counts, DrydockResourceStatus::STATUS_ACTIVE, 0);
+    $n_broken = idx($counts, DrydockResourceStatus::STATUS_BROKEN, 0);
+    $n_released = idx($counts, DrydockResourceStatus::STATUS_RELEASED, 0);
+
+    // If we're at the limit on total active resources, limit additional
+    // allocations.
+    $n_total = ($n_alloc + $n_active + $n_broken + $n_released);
+    if ($n_total >= $total_limit) {
+      return true;
+    }
+
+    // If the number of in-flight allocations is fewer than the minimum number
+    // of allowed allocations, don't impose a limit.
+    if ($n_alloc < $min_allowed) {
+      return false;
+    }
+
+    $allowed_alloc = (int)ceil($n_active * $growth_factor);
+
+    // If the number of in-flight allocation is fewer than the number of
+    // allowed allocations according to the pool growth factor, don't impose
+    // a limit.
+    if ($n_alloc < $allowed_alloc) {
+      return false;
+    }
+
+    return true;
   }
 
 }

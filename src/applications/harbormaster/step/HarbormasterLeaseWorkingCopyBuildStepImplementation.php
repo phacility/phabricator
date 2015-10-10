@@ -12,7 +12,7 @@ final class HarbormasterLeaseWorkingCopyBuildStepImplementation
   }
 
   public function getBuildStepGroupKey() {
-    return HarbormasterPrototypeBuildStepGroup::GROUPKEY;
+    return HarbormasterDrydockBuildStepGroup::GROUPKEY;
   }
 
   public function execute(
@@ -41,7 +41,7 @@ final class HarbormasterLeaseWorkingCopyBuildStepImplementation
       $working_copy_type = id(new DrydockWorkingCopyBlueprintImplementation())
         ->getType();
 
-      $lease = id(new DrydockLease())
+      $lease = DrydockLease::initializeNewLease()
         ->setResourceType($working_copy_type)
         ->setOwnerPHID($build_target->getPHID());
 
@@ -53,6 +53,18 @@ final class HarbormasterLeaseWorkingCopyBuildStepImplementation
       if ($task_id) {
         $lease->setAwakenTaskIDs(array($task_id));
       }
+
+      // TODO: Maybe add a method to mark artifacts like this as pending?
+
+      // Create the artifact now so that the lease is always disposed of, even
+      // if this target is aborted.
+      $build_target->createArtifact(
+        $viewer,
+        $settings['name'],
+        HarbormasterWorkingCopyArtifact::ARTIFACTCONST,
+        array(
+          'drydockLeasePHID' => $lease->getPHID(),
+        ));
 
       $lease->queueForActivation();
 
@@ -73,14 +85,6 @@ final class HarbormasterLeaseWorkingCopyBuildStepImplementation
           'Lease "%s" never activated.',
           $lease->getPHID()));
     }
-
-    $artifact = $build_target->createArtifact(
-      $viewer,
-      $settings['name'],
-      HarbormasterWorkingCopyArtifact::ARTIFACTCONST,
-      array(
-        'drydockLeasePHID' => $lease->getPHID(),
-      ));
   }
 
   public function getArtifactOutputs() {
