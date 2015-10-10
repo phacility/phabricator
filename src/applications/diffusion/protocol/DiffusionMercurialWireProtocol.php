@@ -99,4 +99,34 @@ final class DiffusionMercurialWireProtocol extends Phobject {
     return true;
   }
 
+  /** If the server version is running 3.4+ it will respond
+   * with 'bundle2' capability in the format of "bundle2=(url-encoding)".
+   * Until we maange to properly package up bundles to send back we
+   * disallow the client from knowing we speak bundle2 by removing it
+   * from the capabilities listing.
+   *
+   * The format of the capabilties string is: "a space separated list
+   * of strings representing what commands the server supports"
+   * @link https://www.mercurial-scm.org/wiki/CommandServer#Protocol
+   *
+   * @param string  $capabilities - The string of capabilities to
+   *   strip the bundle2 capability from. This is expected to be
+   *   the space-separated list of strings resulting from the
+   *   querying the 'capabilties' command.
+   *
+   * @return string  The resulting space-separated list of capabilities
+   *   which no longer contains the 'bundle2' capability. This is meant
+   *   to replace the original $body to send back to client.
+   */
+  public static function filterBundle2Capability($capabilities) {
+    $parts = explode(' ', $capabilities);
+    foreach ($parts as $key => $part) {
+      if (preg_match('/^bundle2=/', $part)) {
+        unset($parts[$key]);
+        break;
+      }
+    }
+    return implode(' ', $parts);
+  }
+
 }
