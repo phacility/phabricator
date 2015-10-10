@@ -390,5 +390,15 @@ final class DrydockWorkingCopyBlueprintImplementation
     return $lease;
   }
 
+  public function getFieldSpecifications() {
+    return array(
+      'blueprintPHIDs' => array(
+        'name' => pht('Use Blueprints'),
+        'type' => 'blueprints',
+        'required' => true,
+      ),
+    ) + parent::getFieldSpecifications();
+  }
+
 
 }

@@ -28,9 +28,12 @@ final class DrydockBlueprintPHIDType extends PhabricatorPHIDType {
     foreach ($handles as $phid => $handle) {
       $blueprint = $objects[$phid];
       $id = $blueprint->getID();
+      $name = $blueprint->getBlueprintName();
 
-      $handle->setName($blueprint->getBlueprintName());
-      $handle->setURI("/drydock/blueprint/{$id}/");
+      $handle
+        ->setName($name)
+        ->setFullName(pht('Blueprint %d: %s', $id, $name))
+        ->setURI("/drydock/blueprint/{$id}/");
     }
   }
 

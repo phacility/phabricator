@@ -217,7 +217,7 @@ abstract class PhabricatorStandardCustomFieldPHIDs
     return array();
   }
 
-  private function decodeValue($value) {
+  protected function decodeValue($value) {
     $value = json_decode($value);
     if (!is_array($value)) {
       $value = array();
