@@ -1799,7 +1799,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
 
-/* -(  Staging  )-------------------------------------------------------------*/
+/* -(  Staging  )------------------------------------------------------------ */
 
 
   public function supportsStaging() {
@@ -1812,6 +1812,22 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return null;
     }
     return $this->getDetail('staging-uri', null);
+  }
+
+
+/* -(  Automation  )--------------------------------------------------------- */
+
+
+  public function supportsAutomation() {
+    return $this->isGit();
+  }
+
+
+  public function getAutomationBlueprintPHIDs() {
+    if (!$this->supportsAutomation()) {
+      return array();
+    }
+    return $this->getDetail('automation.blueprintPHIDs', array());
   }
 
 

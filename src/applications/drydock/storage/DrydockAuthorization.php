@@ -93,6 +93,86 @@ final class DrydockAuthorization extends DrydockDAO
     return idx($map, $state, pht('<Unknown: %s>', $state));
   }
 
+  /**
+   * Apply external authorization effects after a user chagnes the value of a
+   * blueprint selector control an object.
+   *
+   * @param PhabricatorUser User applying the change.
+   * @param phid Object PHID change is being applied to.
+   * @param list<phid> Old blueprint PHIDs.
+   * @param list<phid> New blueprint PHIDs.
+   * @return void
+   */
+  public static function applyAuthorizationChanges(
+    PhabricatorUser $viewer,
+    $object_phid,
+    array $old,
+    array $new) {
+
+    $old_phids = array_fuse($old);
+    $new_phids = array_fuse($new);
+
+    $rem_phids = array_diff_key($old_phids, $new_phids);
+    $add_phids = array_diff_key($new_phids, $old_phids);
+
+    $altered_phids = $rem_phids + $add_phids;
+
+    if (!$altered_phids) {
+      return;
+    }
+
+    $authorizations = id(new DrydockAuthorizationQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withObjectPHIDs(array($object_phid))
+      ->withBlueprintPHIDs($altered_phids)
+      ->execute();
+    $authorizations = mpull($authorizations, null, 'getBlueprintPHID');
+
+    $state_active = self::OBJECTAUTH_ACTIVE;
+    $state_inactive = self::OBJECTAUTH_INACTIVE;
+
+    $state_requested = self::BLUEPRINTAUTH_REQUESTED;
+
+    // Disable the object side of the authorization for any existing
+    // authorizations.
+    foreach ($rem_phids as $rem_phid) {
+      $authorization = idx($authorizations, $rem_phid);
+      if (!$authorization) {
+        continue;
+      }
+
+      $authorization
+        ->setObjectAuthorizationState($state_inactive)
+        ->save();
+    }
+
+    // For new authorizations, either add them or reactivate them depending
+    // on the current state.
+    foreach ($add_phids as $add_phid) {
+      $needs_update = false;
+
+      $authorization = idx($authorizations, $add_phid);
+      if (!$authorization) {
+        $authorization = id(new DrydockAuthorization())
+          ->setObjectPHID($object_phid)
+          ->setObjectAuthorizationState($state_active)
+          ->setBlueprintPHID($add_phid)
+          ->setBlueprintAuthorizationState($state_requested);
+
+        $needs_update = true;
+      } else {
+        $current_state = $authorization->getObjectAuthorizationState();
+        if ($current_state != $state_active) {
+          $authorization->setObjectAuthorizationState($state_active);
+          $needs_update = true;
+        }
+      }
+
+      if ($needs_update) {
+        $authorization->save();
+      }
+    }
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

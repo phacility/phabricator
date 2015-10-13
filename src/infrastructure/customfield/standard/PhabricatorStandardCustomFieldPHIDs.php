@@ -158,22 +158,9 @@ abstract class PhabricatorStandardCustomFieldPHIDs
 
       $add = array_diff($new, $old);
 
-      if (!$add) {
-        continue;
-      }
-
-      $objects = id(new PhabricatorObjectQuery())
-        ->setViewer($editor->getActor())
-        ->withPHIDs($add)
-        ->execute();
-      $objects = mpull($objects, null, 'getPHID');
-
-      $invalid = array();
-      foreach ($add as $phid) {
-        if (empty($objects[$phid])) {
-          $invalid[] = $phid;
-        }
-      }
+      $invalid = PhabricatorObjectQuery::loadInvalidPHIDsForViewer(
+        $editor->getActor(),
+        $add);
 
       if ($invalid) {
         $error = new PhabricatorApplicationTransactionValidationError(
