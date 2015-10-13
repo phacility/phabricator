@@ -8,6 +8,14 @@ final class DrydockBlueprintPHIDType extends PhabricatorPHIDType {
     return pht('Blueprint');
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorDrydockApplication';
+  }
+
+  public function getTypeIcon() {
+    return 'fa-map-o';
+  }
+
   public function newObject() {
     return new DrydockBlueprint();
   }

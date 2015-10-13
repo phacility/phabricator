@@ -7,6 +7,7 @@ final class DrydockBlueprintQuery extends DrydockQuery {
   private $blueprintClasses;
   private $datasourceQuery;
   private $disabled;
+  private $authorizedPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -33,8 +34,17 @@ final class DrydockBlueprintQuery extends DrydockQuery {
     return $this;
   }
 
+  public function withAuthorizedPHIDs(array $phids) {
+    $this->authorizedPHIDs = $phids;
+    return $this;
+  }
+
   public function newResultObject() {
     return new DrydockBlueprint();
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'blueprint';
   }
 
   protected function loadPage() {
@@ -63,39 +73,66 @@ final class DrydockBlueprintQuery extends DrydockQuery {
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'blueprint.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'blueprint.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->datasourceQuery !== null) {
       $where[] = qsprintf(
         $conn,
-        'blueprintName LIKE %>',
+        'blueprint.blueprintName LIKE %>',
         $this->datasourceQuery);
     }
 
     if ($this->blueprintClasses !== null) {
       $where[] = qsprintf(
         $conn,
-        'className IN (%Ls)',
+        'blueprint.className IN (%Ls)',
         $this->blueprintClasses);
     }
 
     if ($this->disabled !== null) {
       $where[] = qsprintf(
         $conn,
-        'isDisabled = %d',
+        'blueprint.isDisabled = %d',
         (int)$this->disabled);
     }
 
     return $where;
+  }
+
+  protected function shouldGroupQueryResultRows() {
+    if ($this->authorizedPHIDs !== null) {
+      return true;
+    }
+    return parent::shouldGroupQueryResultRows();
+  }
+
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
+
+    if ($this->authorizedPHIDs !== null) {
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %T authorization
+          ON authorization.blueprintPHID = blueprint.phid
+          AND authorization.objectPHID IN (%Ls)
+          AND authorization.objectAuthorizationState = %s
+          AND authorization.blueprintAuthorizationState = %s',
+        id(new DrydockAuthorization())->getTableName(),
+        $this->authorizedPHIDs,
+        DrydockAuthorization::OBJECTAUTH_ACTIVE,
+        DrydockAuthorization::BLUEPRINTAUTH_AUTHORIZED);
+    }
+
+    return $joins;
   }
 
 }

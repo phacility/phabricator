@@ -41,9 +41,14 @@ final class HarbormasterLeaseWorkingCopyBuildStepImplementation
       $working_copy_type = id(new DrydockWorkingCopyBlueprintImplementation())
         ->getType();
 
+      $allowed_phids = $build_target->getFieldValue('repositoryPHIDs');
+      $authorizing_phid = $build_target->getBuildStep()->getPHID();
+
       $lease = DrydockLease::initializeNewLease()
         ->setResourceType($working_copy_type)
-        ->setOwnerPHID($build_target->getPHID());
+        ->setOwnerPHID($build_target->getPHID())
+        ->setAuthorizingPHID($authorizing_phid)
+        ->setAllowedBlueprintPHIDs($allowed_phids);
 
       $map = $this->buildRepositoryMap($build_target);
 
@@ -102,6 +107,11 @@ final class HarbormasterLeaseWorkingCopyBuildStepImplementation
       'name' => array(
         'name' => pht('Artifact Name'),
         'type' => 'text',
+        'required' => true,
+      ),
+      'blueprintPHIDs' => array(
+        'name' => pht('Use Blueprints'),
+        'type' => 'blueprints',
         'required' => true,
       ),
       'repositoryPHIDs' => array(

@@ -292,7 +292,8 @@ abstract class DrydockBlueprintImplementation extends Phobject {
   }
 
   protected function newLease(DrydockBlueprint $blueprint) {
-    return DrydockLease::initializeNewLease();
+    return DrydockLease::initializeNewLease()
+      ->setAuthorizingPHID($blueprint->getPHID());
   }
 
   protected function requireActiveLease(DrydockLease $lease) {
