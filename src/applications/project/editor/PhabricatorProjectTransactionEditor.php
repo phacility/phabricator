@@ -498,9 +498,7 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorLiskDAO $object,
     $name) {
 
-    $object = (clone $object);
-    $object->setPhrictionSlug($name);
-    $slug = $object->getPrimarySlug();
+    $slug = PhabricatorSlug::normalizeProjectSlug($name);
 
     $slug_object = id(new PhabricatorProjectSlug())->loadOneWhere(
       'slug = %s',

@@ -2,6 +2,12 @@
 
 final class PhabricatorSlug extends Phobject {
 
+  public static function normalizeProjectSlug($slug) {
+    $slug = str_replace('/', ' ', $slug);
+    $slug = self::normalize($slug);
+    return rtrim($slug, '/');
+  }
+
   public static function normalize($slug) {
     $slug = preg_replace('@/+@', '/', $slug);
     $slug = trim($slug, '/');
