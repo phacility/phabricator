@@ -265,6 +265,7 @@ final class MultimeterControl extends Phobject {
         'init' => true,
         'diff' => true,
         'cat' => true,
+        'files' => true,
       ),
       'svnadmin' => array(
         'create' => true,
