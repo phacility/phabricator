@@ -37,6 +37,18 @@ final class DifferentialLandingActionMenuEventListener
       return null;
     }
 
+    if ($repository->canPerformAutomation()) {
+      $revision_id = $revision->getID();
+
+      $action = id(new PhabricatorActionView())
+        ->setWorkflow(true)
+        ->setName(pht('Land Revision'))
+        ->setIcon('fa-fighter-jet')
+        ->setHref("/differential/revision/operation/{$revision_id}/");
+
+      $this->addActionMenuItems($event, $action);
+    }
+
     $strategies = id(new PhutilClassMapQuery())
       ->setAncestorClass('DifferentialLandingStrategy')
       ->execute();

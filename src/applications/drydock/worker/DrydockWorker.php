@@ -36,6 +36,21 @@ abstract class DrydockWorker extends PhabricatorWorker {
     return $resource;
   }
 
+  protected function loadOperation($operation_phid) {
+    $viewer = $this->getViewer();
+
+    $operation = id(new DrydockRepositoryOperationQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($operation_phid))
+      ->executeOne();
+    if (!$operation) {
+      throw new PhabricatorWorkerPermanentFailureException(
+        pht('No such operation "%s"!', $operation_phid));
+    }
+
+    return $operation;
+  }
+
   protected function loadCommands($target_phid) {
     $viewer = $this->getViewer();
 

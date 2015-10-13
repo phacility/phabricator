@@ -90,6 +90,11 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
               'DrydockAuthorizationAuthorizeController',
           ),
         ),
+        '(?P<type>operation)/' => array(
+          '(?P<id>[1-9]\d*)/' => array(
+            '' => 'DrydockRepositoryOperationViewController',
+          ),
+        ),
       ),
     );
   }

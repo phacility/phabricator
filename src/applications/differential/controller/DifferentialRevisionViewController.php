@@ -463,7 +463,10 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $object_id = 'D'.$revision->getID();
 
+    $operations_box = $this->buildOperationsBox($revision);
+
     $content = array(
+      $operations_box,
       $revision_detail_box,
       $diff_detail_box,
       $page_pane,
@@ -1030,6 +1033,57 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     return $view;
+  }
+
+  private function buildOperationsBox(DifferentialRevision $revision) {
+    $viewer = $this->getViewer();
+
+    // Save a query if we can't possibly have pending operations.
+    $repository = $revision->getRepository();
+    if (!$repository || !$repository->canPerformAutomation()) {
+      return null;
+    }
+
+    $operations = id(new DrydockRepositoryOperationQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($revision->getPHID()))
+      ->withOperationStates(
+        array(
+          DrydockRepositoryOperation::STATE_WAIT,
+          DrydockRepositoryOperation::STATE_WORK,
+          DrydockRepositoryOperation::STATE_FAIL,
+        ))
+      ->execute();
+    if (!$operations) {
+      return null;
+    }
+
+    $operation = head(msort($operations, 'getID'));
+
+    // TODO: This is completely made up for now, give it useful information and
+    // a sweet progress bar.
+
+    switch ($operation->getOperationState()) {
+      case DrydockRepositoryOperation::STATE_WAIT:
+      case DrydockRepositoryOperation::STATE_WORK:
+        $severity = PHUIInfoView::SEVERITY_NOTICE;
+        $text = pht(
+          'Some sort of repository operation is currently running.');
+        break;
+      default:
+        $severity = PHUIInfoView::SEVERITY_ERROR;
+        $text = pht(
+          'Some sort of repository operation failed.');
+        break;
+    }
+
+    $info_view = id(new PHUIInfoView())
+      ->setSeverity($severity)
+      ->appendChild($text);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Active Operations (EXPERIMENTAL!)'))
+      ->setInfoView($info_view);
   }
 
 }
