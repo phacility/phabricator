@@ -10,6 +10,7 @@ final class DifferentialRevisionOperationController
     $revision = id(new DifferentialRevisionQuery())
       ->withIDs(array($id))
       ->setViewer($viewer)
+      ->needActiveDiffs(true)
       ->executeOne();
     if (!$revision) {
       return new Aphront404Response();
@@ -58,13 +59,20 @@ final class DifferentialRevisionOperationController
     }
 
     if ($request->isFormPost()) {
+      // NOTE: The operation is locked to the current active diff, so if the
+      // revision is updated before the operation applies nothing sneaky
+      // occurs.
+
+      $diff = $revision->getActiveDiff();
+
       $op = new DrydockLandRepositoryOperation();
 
       $operation = DrydockRepositoryOperation::initializeNewOperation($op)
         ->setAuthorPHID($viewer->getPHID())
         ->setObjectPHID($revision->getPHID())
         ->setRepositoryPHID($repository->getPHID())
-        ->setRepositoryTarget('branch:master');
+        ->setRepositoryTarget('branch:master')
+        ->setProperty('differential.diffPHID', $diff->getPHID());
 
       $operation->save();
       $operation->scheduleUpdate();

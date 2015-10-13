@@ -25,6 +25,8 @@ final class DrydockRepositoryOperationUpdateWorker
 
 
   private function handleUpdate(DrydockRepositoryOperation $operation) {
+    $viewer = $this->getViewer();
+
     $operation_state = $operation->getOperationState();
 
     switch ($operation_state) {
@@ -59,9 +61,11 @@ final class DrydockRepositoryOperationUpdateWorker
       // No matter what happens here, destroy the lease away once we're done.
       $lease->releaseOnDestruction(true);
 
-      // TODO: Some day, do useful things instead of running `git show`.
-      list($stdout) = $interface->execx('git show');
-      phlog($stdout);
+      $operation->getImplementation()
+        ->setViewer($viewer);
+
+      $operation->applyOperation($interface);
+
     } catch (PhabricatorWorkerYieldException $ex) {
       throw $ex;
     } catch (Exception $ex) {

@@ -42,6 +42,19 @@ final class DrydockRepositoryOperationQuery extends DrydockQuery {
   }
 
   protected function willFilterPage(array $operations) {
+    $implementations = DrydockRepositoryOperationType::getAllOperationTypes();
+
+    foreach ($operations as $key => $operation) {
+      $impl = idx($implementations, $operation->getOperationType());
+      if (!$impl) {
+        $this->didRejectResult($operation);
+        unset($operations[$key]);
+        continue;
+      }
+      $impl = clone $impl;
+      $operation->attachImplementation($impl);
+    }
+
     $repository_phids = mpull($operations, 'getRepositoryPHID');
     if ($repository_phids) {
       $repositories = id(new PhabricatorRepositoryQuery())
@@ -75,7 +88,7 @@ final class DrydockRepositoryOperationQuery extends DrydockQuery {
         ->setParentQuery($this)
         ->withPHIDs($object_phids)
         ->execute();
-      $objects = mpull($objects, 'getPHID');
+      $objects = mpull($objects, null, 'getPHID');
     } else {
       $objects = array();
     }

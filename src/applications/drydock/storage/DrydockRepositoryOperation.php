@@ -23,6 +23,7 @@ final class DrydockRepositoryOperation extends DrydockDAO
 
   private $repository = self::ATTACHABLE;
   private $object = self::ATTACHABLE;
+  private $implementation = self::ATTACHABLE;
 
   public static function initializeNewOperation(
     DrydockRepositoryOperationType $op) {
@@ -77,6 +78,15 @@ final class DrydockRepositoryOperation extends DrydockDAO
     return $this->assertAttached($this->object);
   }
 
+  public function attachImplementation(DrydockRepositoryOperationType $impl) {
+    $this->implementation = $impl;
+    return $this;
+  }
+
+  public function getImplementation() {
+    return $this->implementation;
+  }
+
   public function getProperty($key, $default = null) {
     return idx($this->properties, $key, $default);
   }
@@ -118,6 +128,12 @@ final class DrydockRepositoryOperation extends DrydockDAO
         'objectPHID' => $this->getPHID(),
         'priority' => PhabricatorWorker::PRIORITY_ALERTS,
       ));
+  }
+
+  public function applyOperation(DrydockInterface $interface) {
+    return $this->getImplementation()->applyOperation(
+      $this,
+      $interface);
   }
 
 
