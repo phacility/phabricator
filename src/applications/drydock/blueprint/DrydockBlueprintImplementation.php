@@ -343,9 +343,12 @@ abstract class DrydockBlueprintImplementation extends Phobject {
 
     $counts = queryfx_all(
       $conn_r,
-      'SELECT status, COUNT(*) N FROM %T WHERE blueprintPHID = %s',
+      'SELECT status, COUNT(*) N FROM %T
+        WHERE blueprintPHID = %s AND status != %s
+        GROUP BY status',
       $resource->getTableName(),
-      $blueprint->getPHID());
+      $blueprint->getPHID(),
+      DrydockResourceStatus::STATUS_DESTROYED);
     $counts = ipull($counts, 'N', 'status');
 
     $n_alloc = idx($counts, DrydockResourceStatus::STATUS_PENDING, 0);
