@@ -249,6 +249,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
         id(new AphrontFormPolicyControl())
           ->setName('viewPolicy')
           ->setPolicyObject($credential)
+          ->setSpacePHID($v_space)
           ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
           ->setPolicies($policies))
       ->appendControl(
