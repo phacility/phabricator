@@ -211,10 +211,19 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
           $exceptions);
       }
 
+      $resources = $this->removeUnacquirableResources($resources, $lease);
+      if (!$resources) {
+        // If we make it here, we just built a resource but aren't allowed
+        // to acquire it. We expect this during routine operation if the
+        // resource prevents acquisition until it activates. Yield and wait
+        // for activation.
+        throw new PhabricatorWorkerYieldException(15);
+      }
+
       // NOTE: We have not acquired the lease yet, so it is possible that the
       // resource we just built will be snatched up by some other lease before
-      // we can. This is not problematic: we'll retry a little later and should
-      // suceed eventually.
+      // we can acquire it. This is not problematic: we'll retry a little later
+      // and should suceed eventually.
     }
 
     $resources = $this->rankResources($resources, $lease);
@@ -382,6 +391,22 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
         ))
       ->execute();
 
+    return $this->removeUnacquirableResources($resources, $lease);
+  }
+
+
+  /**
+   * Remove resources which can not be acquired by a given lease from a list.
+   *
+   * @param list<DrydockResource> Candidate resources.
+   * @param DrydockLease Acquiring lease.
+   * @return list<DrydockResource> Resources which the lease may be able to
+   *   acquire.
+   * @task allocator
+   */
+  private function removeUnacquirableResources(
+    array $resources,
+    DrydockLease $lease) {
     $keep = array();
     foreach ($resources as $key => $resource) {
       $blueprint = $resource->getBlueprint();
