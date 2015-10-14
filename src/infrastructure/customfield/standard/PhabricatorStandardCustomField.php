@@ -186,7 +186,12 @@ abstract class PhabricatorStandardCustomField
   }
 
   public function shouldUseStorage() {
-    return true;
+    try {
+      $object = $this->newStorageObject();
+      return true;
+    } catch (PhabricatorCustomFieldImplementationIncompleteException $ex) {
+      return false;
+    }
   }
 
   public function getValueForStorage() {
