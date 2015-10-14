@@ -48,6 +48,19 @@ final class DrydockLandRepositoryOperation
       $arg[] = $diff->getStagingRef();
 
       $merge_src = $diff->getStagingRef();
+
+      $dict = $diff->getDiffAuthorshipDict();
+      $author_name = idx($dict, 'authorName');
+      $author_email = idx($dict, 'authorEmail');
+
+      $api_method = 'differential.getcommitmessage';
+      $api_params = array(
+        'revision_id' => $revision->getID(),
+      );
+
+      $commit_message = id(new ConduitCall($api_method, $api_params))
+        ->setUser($viewer)
+        ->execute();
     } else {
       throw new Exception(
         pht(
@@ -71,6 +84,8 @@ final class DrydockLandRepositoryOperation
             $target));
     }
 
+    $committer_info = $this->getCommitterInfo($operation);
+
     $cmd[] = 'git checkout %s';
     $arg[] = $merge_dst;
 
@@ -78,10 +93,12 @@ final class DrydockLandRepositoryOperation
     $arg[] = $merge_src;
 
     $cmd[] = 'git -c user.name=%s -c user.email=%s commit --author %s -m %s';
-    $arg[] = 'autocommitter';
-    $arg[] = 'autocommitter@example.com';
-    $arg[] = 'autoauthor <autoauthor@example.com>';
-    $arg[] = pht('(Automerge!)');
+
+    $arg[] = $committer_info['name'];
+    $arg[] = $committer_info['email'];
+
+    $arg[] = "{$author_name} <{$author_email}>";
+    $arg[] = $commit_message;
 
     $cmd[] = 'git push origin -- %s:%s';
     $arg[] = 'HEAD';
@@ -93,6 +110,36 @@ final class DrydockLandRepositoryOperation
     $result = call_user_func_array(
       array($interface, 'execx'),
       $argv);
+  }
+
+  private function getCommitterInfo(DrydockRepositoryOperation $operation) {
+    $viewer = $this->getViewer();
+
+    $committer_name = null;
+
+    $author_phid = $operation->getAuthorPHID();
+    $object = id(new PhabricatorObjectQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($author_phid))
+      ->executeOne();
+
+    if ($object) {
+      if ($object instanceof PhabricatorUser) {
+        $committer_name = $object->getUsername();
+      }
+    }
+
+    if (!strlen($committer_name)) {
+      $committer_name = pht('autocommitter');
+    }
+
+    // TODO: Probably let users choose a VCS email address in settings. For
+    // now just make something up so we don't leak anyone's stuff.
+
+    return array(
+      'name' => $committer_name,
+      'email' => 'autocommitter@example.com',
+    );
   }
 
 }

@@ -251,6 +251,12 @@ final class DifferentialDiff
 
     $dict['changes'] = $this->buildChangesList();
 
+    return $dict + $this->getDiffAuthorshipDict();
+  }
+
+  public function getDiffAuthorshipDict() {
+    $dict = array();
+
     $properties = id(new DifferentialDiffProperty())->loadAllWhere(
       'diffID = %d',
       $this->getID());
