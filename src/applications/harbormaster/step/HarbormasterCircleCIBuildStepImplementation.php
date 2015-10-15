@@ -20,6 +20,9 @@ final class HarbormasterCircleCIBuildStepImplementation
   }
 
   public function getEditInstructions() {
+    $hook_uri = '/harbormaster/hook/circleci/';
+    $hook_uri = PhabricatorEnv::getProductionURI($hook_uri);
+
     return pht(<<<EOTEXT
 WARNING: This build step is new and experimental!
 
@@ -38,7 +41,15 @@ To build **commits** with CircleCI, they must:
 Webhook Configuration
 =====================
 
-IMPORTANT: This has not been implemented yet.
+Add this webhook to your `circle.yml` file to make CircleCI report results
+to Harbormaster. Until you install this hook, builds will hang waiting for
+a response from CircleCI.
+
+```lang=yml
+notify:
+  webhooks:
+    - url: %s
+```
 
 Environment
 ===========
@@ -50,7 +61,8 @@ These variables will be available in the build environment:
 | `HARBORMASTER_BUILD_TARGET_PHID` | PHID of the Build Target.
 
 EOTEXT
-    );
+    ,
+    $hook_uri);
   }
 
   public static function getGitHubPath($uri) {
