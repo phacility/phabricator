@@ -18,7 +18,7 @@ final class PhabricatorMetaMTAMailgunReceiveController
     return phutil_hashes_are_identical($sig, $hash);
   }
 
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
 
     // No CSRF for Mailgun.
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
@@ -28,7 +28,6 @@ final class PhabricatorMetaMTAMailgunReceiveController
         pht('Mail signature is not valid. Check your Mailgun API key.'));
     }
 
-    $request = $this->getRequest();
     $user = $request->getUser();
 
     $raw_headers = $request->getStr('headers');

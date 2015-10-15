@@ -105,7 +105,7 @@ abstract class DrydockController extends PhabricatorController {
           ->setTag('a')
           ->setHref($all_uri)
           ->setIconFont('fa-search')
-          ->setText(pht('View All Logs')));
+          ->setText(pht('View All')));
 
     return id(new PHUIObjectBoxView())
       ->setHeader($log_header)

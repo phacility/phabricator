@@ -374,10 +374,11 @@ final class PHUITimelineEventView extends AphrontView {
     $badges = null;
     if ($image_uri) {
       $image = phutil_tag(
-        'div',
+        ($this->userHandle->getURI()) ? 'a' : 'div',
         array(
           'style' => 'background-image: url('.$image_uri.')',
           'class' => 'phui-timeline-image',
+          'href' => $this->userHandle->getURI(),
         ),
         '');
       if ($this->badges) {

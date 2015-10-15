@@ -28,8 +28,14 @@ final class PhabricatorRemarkupCowsayBlockInterpreter
       ->setText($content)
       ->renderCow();
 
-    if ($this->getEngine()->isTextMode()) {
+    $engine = $this->getEngine();
+
+    if ($engine->isTextMode()) {
       return $result;
+    }
+
+    if ($engine->isHTMLMailMode()) {
+      return phutil_tag('pre', array(), $result);
     }
 
     return phutil_tag(

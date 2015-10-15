@@ -178,4 +178,40 @@ final class PhabricatorObjectQuery
     return null;
   }
 
+
+  /**
+   * Select invalid or restricted PHIDs from a list.
+   *
+   * PHIDs are invalid if their objects do not exist or can not be seen by the
+   * viewer. This method is generally used to validate that PHIDs affected by
+   * a transaction are valid.
+   *
+   * @param PhabricatorUser Viewer.
+   * @param list<phid> List of ostensibly valid PHIDs.
+   * @return list<phid> List of invalid or restricted PHIDs.
+   */
+  public static function loadInvalidPHIDsForViewer(
+    PhabricatorUser $viewer,
+    array $phids) {
+
+    if (!$phids) {
+      return array();
+    }
+
+    $objects = id(new PhabricatorObjectQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($phids)
+      ->execute();
+    $objects = mpull($objects, null, 'getPHID');
+
+    $invalid = array();
+    foreach ($phids as $phid) {
+      if (empty($objects[$phid])) {
+        $invalid[] = $phid;
+      }
+    }
+
+    return $invalid;
+  }
+
 }

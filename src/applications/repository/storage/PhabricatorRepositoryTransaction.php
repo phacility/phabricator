@@ -28,6 +28,7 @@ final class PhabricatorRepositoryTransaction
   const TYPE_SYMBOLS_SOURCES = 'repo:symbol-source';
   const TYPE_SYMBOLS_LANGUAGE = 'repo:symbol-language';
   const TYPE_STAGING_URI = 'repo:staging-uri';
+  const TYPE_AUTOMATION_BLUEPRINTS = 'repo:automation-blueprints';
 
   // TODO: Clean up these legacy transaction types.
   const TYPE_SSH_LOGIN = 'repo:ssh-login';
@@ -65,6 +66,7 @@ final class PhabricatorRepositoryTransaction
         }
         break;
       case self::TYPE_SYMBOLS_SOURCES:
+      case self::TYPE_AUTOMATION_BLUEPRINTS:
         if ($old) {
           $phids = array_merge($phids, $old);
         }
@@ -435,6 +437,34 @@ final class PhabricatorRepositoryTransaction
             $this->renderHandleLink($author_phid),
             $old,
             $new);
+        }
+
+      case self::TYPE_AUTOMATION_BLUEPRINTS:
+        $add = array_diff($new, $old);
+        $rem = array_diff($old, $new);
+
+        if ($add && $rem) {
+          return pht(
+            '%s changed %s automation blueprint(s), '.
+            'added %s: %s; removed %s: %s.',
+            $this->renderHandleLink($author_phid),
+            new PhutilNumber(count($add) + count($rem)),
+            new PhutilNumber(count($add)),
+            $this->renderHandleList($add),
+            new PhutilNumber(count($rem)),
+            $this->renderHandleList($rem));
+        } else if ($add) {
+          return pht(
+            '%s added %s automation blueprint(s): %s.',
+            $this->renderHandleLink($author_phid),
+            new PhutilNumber(count($add)),
+            $this->renderHandleList($add));
+        } else {
+          return pht(
+            '%s removed %s automation blueprint(s): %s.',
+            $this->renderHandleLink($author_phid),
+            new PhutilNumber(count($rem)),
+            $this->renderHandleList($rem));
         }
     }
 

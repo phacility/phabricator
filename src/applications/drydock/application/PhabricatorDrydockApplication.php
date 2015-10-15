@@ -57,6 +57,8 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
               'DrydockResourceListController',
             'logs/(?:query/(?P<queryKey>[^/]+)/)?' =>
               'DrydockLogListController',
+            'authorizations/(?:query/(?P<queryKey>[^/]+)/)?' =>
+              'DrydockAuthorizationListController',
           ),
           'create/' => 'DrydockBlueprintCreateController',
           'edit/(?:(?P<id>[1-9]\d*)/)?' => 'DrydockBlueprintEditController',
@@ -79,6 +81,18 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
             'release/' => 'DrydockLeaseReleaseController',
             'logs/(?:query/(?P<queryKey>[^/]+)/)?' =>
               'DrydockLogListController',
+          ),
+        ),
+        '(?P<type>authorization)/' => array(
+          '(?P<id>[1-9]\d*)/' => array(
+            '' => 'DrydockAuthorizationViewController',
+            '(?P<action>authorize|decline)/' =>
+              'DrydockAuthorizationAuthorizeController',
+          ),
+        ),
+        '(?P<type>operation)/' => array(
+          '(?P<id>[1-9]\d*)/' => array(
+            '' => 'DrydockRepositoryOperationViewController',
           ),
         ),
       ),

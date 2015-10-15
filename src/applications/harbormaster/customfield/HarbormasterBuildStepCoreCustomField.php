@@ -67,11 +67,6 @@ final class HarbormasterBuildStepCoreCustomField
     $object->setDetail($key, $value);
   }
 
-  public function applyApplicationTransactionExternalEffects(
-    PhabricatorApplicationTransaction $xaction) {
-    return;
-  }
-
   public function getBuildTargetFieldValue() {
     return $this->getProxy()->getFieldValue();
   }

@@ -3,24 +3,15 @@
 final class HarbormasterBuildActionController
   extends HarbormasterController {
 
-  private $id;
-  private $action;
-  private $via;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-    $this->action = $data['action'];
-    $this->via = idx($data, 'via');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-    $command = $this->action;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
+    $action = $request->getURIData('action');
+    $via = $request->getURIData('via');
 
     $build = id(new HarbormasterBuildQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -31,7 +22,7 @@ final class HarbormasterBuildActionController
       return new Aphront404Response();
     }
 
-    switch ($command) {
+    switch ($action) {
       case HarbormasterBuildCommand::COMMAND_RESTART:
         $can_issue = $build->canRestartBuild();
         break;
@@ -48,7 +39,7 @@ final class HarbormasterBuildActionController
         return new Aphront400Response();
     }
 
-    switch ($this->via) {
+    switch ($via) {
       case 'buildable':
         $return_uri = '/'.$build->getBuildable()->getMonogram();
         break;
@@ -66,14 +57,14 @@ final class HarbormasterBuildActionController
 
       $xaction = id(new HarbormasterBuildTransaction())
         ->setTransactionType(HarbormasterBuildTransaction::TYPE_COMMAND)
-        ->setNewValue($command);
+        ->setNewValue($action);
 
       $editor->applyTransactions($build, array($xaction));
 
       return id(new AphrontRedirectResponse())->setURI($return_uri);
     }
 
-    switch ($command) {
+    switch ($action) {
       case HarbormasterBuildCommand::COMMAND_RESTART:
         if ($can_issue) {
           $title = pht('Really restart build?');

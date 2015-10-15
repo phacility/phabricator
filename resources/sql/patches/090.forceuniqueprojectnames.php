@@ -10,13 +10,14 @@ $projects = $table->loadAll();
 $slug_map = array();
 
 foreach ($projects as $project) {
-  $project->setPhrictionSlug($project->getName());
-  $slug = $project->getPhrictionSlug();
-  if ($slug == '/') {
+  $slug = PhabricatorSlug::normalizeProjectSlug($project->getName());
+
+  if (!strlen($slug)) {
     $project_id = $project->getID();
     echo pht("Project #%d doesn't have a meaningful name...", $project_id)."\n";
     $project->setName(trim(pht('Unnamed Project %s', $project->getName())));
   }
+
   $slug_map[$slug][] = $project->getID();
 }
 
@@ -47,8 +48,8 @@ while ($update) {
   foreach ($update as $key => $project) {
     $id = $project->getID();
     $name = $project->getName();
-    $project->setPhrictionSlug($name);
-    $slug = $project->getPhrictionSlug();
+
+    $slug = PhabricatorSlug::normalizeProjectSlug($name).'/';
 
     echo pht("Updating project #%d '%s' (%s)... ", $id, $name, $slug);
     try {
@@ -87,8 +88,8 @@ function rename_project($project, $projects) {
   $suffix = 2;
   while (true) {
     $new_name = $project->getName().' ('.$suffix.')';
-    $project->setPhrictionSlug($new_name);
-    $new_slug = $project->getPhrictionSlug();
+
+    $new_slug = PhabricatorSlug::normalizeProjectSlug($new_name).'/';
 
     $okay = true;
     foreach ($projects as $other) {

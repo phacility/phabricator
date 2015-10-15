@@ -112,7 +112,7 @@ final class ProjectQueryConduitAPIMethod extends ProjectConduitAPIMethod {
     $slug_map = array();
     if ($slugs) {
       foreach ($slugs as $slug) {
-        $normal = rtrim(PhabricatorSlug::normalize($slug), '/');
+        $normal = PhabricatorSlug::normalizeProjectSlug($slug);
         foreach ($projects as $project) {
           if (in_array($normal, $project['slugs'])) {
             $slug_map[$slug] = $project['phid'];

@@ -3,22 +3,14 @@
 final class HarbormasterBuildableActionController
   extends HarbormasterController {
 
-  private $id;
-  private $action;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-    $this->action = $data['action'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-    $command = $this->action;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
+    $action = $request->getURIData('action');
 
     $buildable = id(new HarbormasterBuildableQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->needBuilds(true)
       ->requireCapabilities(
         array(
@@ -33,7 +25,7 @@ final class HarbormasterBuildableActionController
     $issuable = array();
 
     foreach ($buildable->getBuilds() as $build) {
-      switch ($command) {
+      switch ($action) {
         case HarbormasterBuildCommand::COMMAND_RESTART:
           if ($build->canRestartBuild()) {
             $issuable[] = $build;
@@ -69,7 +61,7 @@ final class HarbormasterBuildableActionController
 
       $xaction = id(new HarbormasterBuildableTransaction())
         ->setTransactionType(HarbormasterBuildableTransaction::TYPE_COMMAND)
-        ->setNewValue($command);
+        ->setNewValue($action);
 
       $editor->applyTransactions($buildable, array($xaction));
 
@@ -82,14 +74,14 @@ final class HarbormasterBuildableActionController
       foreach ($issuable as $build) {
         $xaction = id(new HarbormasterBuildTransaction())
           ->setTransactionType(HarbormasterBuildTransaction::TYPE_COMMAND)
-          ->setNewValue($command);
+          ->setNewValue($action);
         $build_editor->applyTransactions($build, array($xaction));
       }
 
       return id(new AphrontRedirectResponse())->setURI($return_uri);
     }
 
-    switch ($command) {
+    switch ($action) {
       case HarbormasterBuildCommand::COMMAND_RESTART:
         if ($issuable) {
           $title = pht('Really restart all builds?');

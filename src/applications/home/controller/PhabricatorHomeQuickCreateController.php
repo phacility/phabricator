@@ -3,8 +3,8 @@
 final class PhabricatorHomeQuickCreateController
   extends PhabricatorHomeController {
 
-  public function processRequest() {
-    $viewer = $this->getRequest()->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $items = $this->getCurrentApplication()->loadAllQuickCreateItems($viewer);
 
