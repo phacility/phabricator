@@ -1,16 +1,7 @@
 <?php
 
 /**
- * Concrete object for accessing the markup engine with arbitrary blobs of
- * text, like form instructions. Usage:
- *
- *   $output = PhabricatorMarkupEngine::renderOneObject(
- *     id(new PhabricatorMarkupOneOff())->setContent($some_content),
- *     'default',
- *     $viewer);
- *
- * This is less efficient than batching rendering, but appropriate for small
- * amounts of one-off text in form instructions.
+ * DEPRECATED. Use @{class:PHUIRemarkupView}.
  */
 final class PhabricatorMarkupOneOff
   extends Phobject
