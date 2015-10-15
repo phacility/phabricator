@@ -136,13 +136,19 @@ final class HarbormasterStepEditController
     }
 
     $form = id(new AphrontFormView())
-      ->setUser($viewer)
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setName('name')
-          ->setLabel(pht('Name'))
-          ->setError($e_name)
-          ->setValue($v_name));
+      ->setUser($viewer);
+
+    $instructions = $implementation->getEditInstructions();
+    if (strlen($instructions)) {
+      $form->appendRemarkupInstructions($instructions);
+    }
+
+    $form->appendChild(
+      id(new AphrontFormTextControl())
+        ->setName('name')
+        ->setLabel(pht('Name'))
+        ->setError($e_name)
+        ->setValue($v_name));
 
     $form->appendChild(id(new AphrontFormDividerControl()));
 
