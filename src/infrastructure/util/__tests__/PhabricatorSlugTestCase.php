@@ -34,7 +34,7 @@ final class PhabricatorSlugTestCase extends PhabricatorTestCase {
       'a/??/c'            => 'a/_/c/',
       'a/?b/c'            => 'a/b/c/',
       'a/b?/c'            => 'a/b/c/',
-      'a - b'             => 'a-b/',
+      'a - b'             => 'a_-_b/',
       'a[b]'              => 'a_b/',
       'ab!'               => 'ab!/',
     );
@@ -51,7 +51,7 @@ final class PhabricatorSlugTestCase extends PhabricatorTestCase {
     $slugs = array(
       'a:b' => 'a_b',
       'a!b' => 'a_b',
-      'a - b' => 'a-b',
+      'a - b' => 'a_-_b',
       '' => '',
       'Demonology: HSA (Hexes, Signs, Alchemy)' =>
         'demonology_hsa_hexes_signs_alchemy',

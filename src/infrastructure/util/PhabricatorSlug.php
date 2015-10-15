@@ -42,13 +42,6 @@ final class PhabricatorSlug extends Phobject {
 
     $parts = explode('/', $slug);
 
-    // Convert "_-_" into "-". This is a little nicer for inputs with
-    // hyphens used as internal separators, and turns an input like "A - B"
-    // into "a-b" instead of "a_-_b";
-    foreach ($parts as $key => $part) {
-      $parts[$key] = str_replace('_-_', '-', $part);
-    }
-
     // Remove leading and trailing underscores from each component, if the
     // component has not been reduced to a single underscore. For example, "a?"
     // converts to "a", but "??" converts to "_".
