@@ -136,6 +136,12 @@ final class DrydockRepositoryOperation extends DrydockDAO
       $interface);
   }
 
+  public function getOperationDescription(PhabricatorUser $viewer) {
+    return $this->getImplementation()->getOperationDescription(
+      $this,
+      $viewer);
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

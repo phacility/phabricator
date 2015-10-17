@@ -8,6 +8,10 @@ abstract class DrydockRepositoryOperationType extends Phobject {
     DrydockRepositoryOperation $operation,
     DrydockInterface $interface);
 
+  abstract public function getOperationDescription(
+    DrydockRepositoryOperation $operation,
+    PhabricatorUser $viewer);
+
   final public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
     return $this;

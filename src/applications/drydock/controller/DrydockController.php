@@ -2,12 +2,6 @@
 
 abstract class DrydockController extends PhabricatorController {
 
-  abstract public function buildSideNavView();
-
-  public function buildApplicationMenu() {
-    return $this->buildSideNavView()->getMenu();
-  }
-
   protected function buildLocksTab($owner_phid) {
     $locks = DrydockSlotLock::loadLocks($owner_phid);
 
