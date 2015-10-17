@@ -118,10 +118,13 @@ final class DrydockWorkingCopyBlueprintImplementation
 
     $resource_phid = $resource->getPHID();
 
+    $blueprint_phids = $blueprint->getFieldValue('blueprintPHIDs');
+
     $host_lease = $this->newLease($blueprint)
       ->setResourceType('host')
       ->setOwnerPHID($resource_phid)
-      ->setAttribute('workingcopy.resourcePHID', $resource_phid);
+      ->setAttribute('workingcopy.resourcePHID', $resource_phid)
+      ->setAllowedBlueprintPHIDs($blueprint_phids);
 
     $resource
       ->setAttribute('host.leasePHID', $host_lease->getPHID())
@@ -388,6 +391,16 @@ final class DrydockWorkingCopyBlueprintImplementation
     }
 
     return $lease;
+  }
+
+  public function getFieldSpecifications() {
+    return array(
+      'blueprintPHIDs' => array(
+        'name' => pht('Use Blueprints'),
+        'type' => 'blueprints',
+        'required' => true,
+      ),
+    ) + parent::getFieldSpecifications();
   }
 
 

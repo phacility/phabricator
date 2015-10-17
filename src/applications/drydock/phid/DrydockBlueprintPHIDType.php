@@ -8,6 +8,14 @@ final class DrydockBlueprintPHIDType extends PhabricatorPHIDType {
     return pht('Blueprint');
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorDrydockApplication';
+  }
+
+  public function getTypeIcon() {
+    return 'fa-map-o';
+  }
+
   public function newObject() {
     return new DrydockBlueprint();
   }
@@ -28,9 +36,12 @@ final class DrydockBlueprintPHIDType extends PhabricatorPHIDType {
     foreach ($handles as $phid => $handle) {
       $blueprint = $objects[$phid];
       $id = $blueprint->getID();
+      $name = $blueprint->getBlueprintName();
 
-      $handle->setName($blueprint->getBlueprintName());
-      $handle->setURI("/drydock/blueprint/{$id}/");
+      $handle
+        ->setName($name)
+        ->setFullName(pht('Blueprint %d: %s', $id, $name))
+        ->setURI("/drydock/blueprint/{$id}/");
     }
   }
 

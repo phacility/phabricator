@@ -24,10 +24,17 @@ final class DiffusionLowLevelMercurialPathsQuery
     $path = $this->path;
     $commit = $this->commit;
 
+    $hg_paths_command = 'locate --print0 --rev %s -I %s';
+    $hg_version = PhabricatorRepositoryVersion::getMercurialVersion();
+    if (PhabricatorRepositoryVersion::isMercurialFilesCommandAvailable(
+      $hg_version)) {
+      $hg_paths_command = 'files --print0 --rev %s -I %s';
+    }
+
     $match_against = trim($path, '/');
     $prefix = trim('./'.$match_against, '/');
     list($entire_manifest) = $repository->execxLocalCommand(
-      'locate --print0 --rev %s -I %s',
+      $hg_paths_command,
       hgsprintf('%s', $commit),
       $prefix);
     return explode("\0", $entire_manifest);

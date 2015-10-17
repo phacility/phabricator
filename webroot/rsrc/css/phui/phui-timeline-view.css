@@ -102,6 +102,7 @@
   border-radius: 3px;
   box-shadow: {$borderinset};
   background-size: 100%;
+  display: block;
 }
 
 .device-desktop .phui-timeline-major-event .phui-timeline-image {

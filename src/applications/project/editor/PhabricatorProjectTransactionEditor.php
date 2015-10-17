@@ -81,9 +81,9 @@ final class PhabricatorProjectTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorProjectTransaction::TYPE_NAME:
-        $object->setName($xaction->getNewValue());
-        // TODO - this is really "setPrimarySlug"
-        $object->setPhrictionSlug($xaction->getNewValue());
+        $name = $xaction->getNewValue();
+        $object->setName($name);
+        $object->setPrimarySlug(PhabricatorSlug::normalizeProjectSlug($name));
         return;
       case PhabricatorProjectTransaction::TYPE_SLUGS:
         return;
@@ -265,9 +265,8 @@ final class PhabricatorProjectTransactionEditor
           $errors[] = $error;
         }
 
-        $slug_builder = clone $object;
-        $slug_builder->setPhrictionSlug($name);
-        $slug = $slug_builder->getPrimarySlug();
+        $slug = PhabricatorSlug::normalizeProjectSlug($name);
+
         $slug_used_already = id(new PhabricatorProjectSlug())
           ->loadOneWhere('slug = %s', $slug);
         if ($slug_used_already &&
@@ -498,9 +497,7 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorLiskDAO $object,
     $name) {
 
-    $object = (clone $object);
-    $object->setPhrictionSlug($name);
-    $slug = $object->getPrimarySlug();
+    $slug = PhabricatorSlug::normalizeProjectSlug($name);
 
     $slug_object = id(new PhabricatorProjectSlug())->loadOneWhere(
       'slug = %s',

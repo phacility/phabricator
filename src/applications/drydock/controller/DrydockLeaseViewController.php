@@ -116,6 +116,14 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
     }
     $view->addProperty(pht('Owner'), $owner_display);
 
+    $authorizing_phid = $lease->getAuthorizingPHID();
+    if ($authorizing_phid) {
+      $authorizing_display = $viewer->renderHandle($authorizing_phid);
+    } else {
+      $authorizing_display = phutil_tag('em', array(), pht('None'));
+    }
+    $view->addProperty(pht('Authorized By'), $authorizing_display);
+
     $resource_phid = $lease->getResourcePHID();
     if ($resource_phid) {
       $resource_display = $viewer->renderHandle($resource_phid);

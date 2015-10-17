@@ -4,7 +4,6 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getviewer();
-
     $id = $request->getURIData('id');
 
     $plan = id(new HarbormasterBuildPlanQuery())

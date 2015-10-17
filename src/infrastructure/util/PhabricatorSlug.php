@@ -2,17 +2,49 @@
 
 final class PhabricatorSlug extends Phobject {
 
-  public static function normalize($slug) {
+  public static function normalizeProjectSlug($slug) {
+    $slug = str_replace('/', ' ', $slug);
+    $slug = self::normalize($slug, $hashtag = true);
+    return rtrim($slug, '/');
+  }
+
+  public static function normalize($slug, $hashtag = false) {
     $slug = preg_replace('@/+@', '/', $slug);
     $slug = trim($slug, '/');
     $slug = phutil_utf8_strtolower($slug);
-    $slug = preg_replace("@[\\x00-\\x19#%&+=\\\\?<> ]+@", '_', $slug);
+
+    $ban =
+      // Ban control characters since users can't type them and they create
+      // various other problems with parsing and rendering.
+      "\\x00-\\x19".
+
+      // Ban characters with special meanings in URIs (and spaces), since we
+      // want slugs to produce nice URIs.
+      "#%&+=?".
+      " ".
+
+      // Ban backslashes and various brackets for parsing and URI quality.
+      "\\\\".
+      "<>{}\\[\\]".
+
+      // Ban single and double quotes since they can mess up URIs.
+      "'".
+      '"';
+
+    // In hashtag mode (used for Project hashtags), ban additional characters
+    // which cause parsing problems.
+    if ($hashtag) {
+      $ban .= '`~!@$^*,:;(|)';
+    }
+
+    $slug = preg_replace('(['.$ban.']+)', '_', $slug);
     $slug = preg_replace('@_+@', '_', $slug);
+
+    $parts = explode('/', $slug);
 
     // Remove leading and trailing underscores from each component, if the
     // component has not been reduced to a single underscore. For example, "a?"
     // converts to "a", but "??" converts to "_".
-    $parts = explode('/', $slug);
     foreach ($parts as $key => $part) {
       if ($part != '_') {
         $parts[$key] = trim($part, '_');

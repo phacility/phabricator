@@ -58,3 +58,12 @@ a corresponding resource by either finding a suitable unused resource or
 creating a new resource. When work completes, the resource is returned to the
 resource pool or destroyed.
 
+Next Steps
+==========
+
+Continue by:
+
+  - understanding Drydock security concerns with
+    @{article:Drydock User Guide: Security}; or
+  - allowing Phabricator to write to repositories with
+    @{article:Drydock User Guide: Repository Automation}.

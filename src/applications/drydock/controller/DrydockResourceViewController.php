@@ -170,7 +170,7 @@ final class DrydockResourceViewController extends DrydockResourceController {
           ->setTag('a')
           ->setHref($leases_uri)
           ->setIconFont('fa-search')
-          ->setText(pht('View All Leases')));
+          ->setText(pht('View All')));
 
     $lease_list = id(new DrydockLeaseListView())
       ->setUser($viewer)

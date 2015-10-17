@@ -41,11 +41,6 @@ final class DrydockBlueprintCoreCustomField
     $object->setDetail($key, $value);
   }
 
-  public function applyApplicationTransactionExternalEffects(
-    PhabricatorApplicationTransaction $xaction) {
-    return;
-  }
-
   public function getBlueprintFieldValue() {
     return $this->getProxy()->getFieldValue();
   }

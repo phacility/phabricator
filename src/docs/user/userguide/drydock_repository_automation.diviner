@@ -1,0 +1,39 @@
+@title Drydock User Guide: Repository Automation
+@group userguide
+
+Configuring repository automation so Phabricator can push commits.
+
+
+Overview
+========
+
+IMPORTANT: This feature is very new and most of the capabilities described
+in this document are not yet available. This feature as a whole is a prototype.
+
+By configuring Drydock and Diffusion appropriately, you can enable **Repository
+Automation** for a repository. Once automation is set up, Phabricator will be
+able to make changes to the repository.
+
+
+Security
+========
+
+Configuring repository automation amounts to telling Phabricator where it
+should perform working copy operations (like merges, cherry-picks and pushes)
+when doing writes.
+
+Depending on how stringent you are about change control, you may want to
+make sure these processes are isolated and can not be tampered with. If you
+run tests and automation on the same hardware, tests may be able to interfere
+with automation. You can read more about this in
+@{article:Drydock User Guide: Security}.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - understanding Drydock security concerns with
+    @{article:Drydock User Guide: Security}; or
+  - returning to the @{article:Drydock User Guide}.

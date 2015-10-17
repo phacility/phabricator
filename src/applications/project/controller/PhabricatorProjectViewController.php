@@ -26,9 +26,16 @@ final class PhabricatorProjectViewController
     }
     $project = $query->executeOne();
     if (!$project) {
+
+      // If this request corresponds to a project but just doesn't have the
+      // slug quite right, redirect to the proper URI.
+      $uri = $this->getNormalizedURI($slug);
+      if ($uri !== null) {
+        return id(new AphrontRedirectResponse())->setURI($uri);
+      }
+
       return new Aphront404Response();
     }
-
 
     $columns = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
@@ -51,6 +58,33 @@ final class PhabricatorProjectViewController
     }
 
     return $this->delegateToController($controller_object);
+  }
+
+  private function getNormalizedURI($slug) {
+    if (!strlen($slug)) {
+      return null;
+    }
+
+    $normal = PhabricatorSlug::normalizeProjectSlug($slug);
+    if ($normal === $slug) {
+      return null;
+    }
+
+    $viewer = $this->getViewer();
+
+    // Do execute() instead of executeOne() here so we canonicalize before
+    // raising a policy exception. This is a little more polished than letting
+    // the user hit the error on any variant of the slug.
+
+    $projects = id(new PhabricatorProjectQuery())
+      ->setViewer($viewer)
+      ->withSlugs(array($normal))
+      ->execute();
+    if (!$projects) {
+      return null;
+    }
+
+    return "/tag/{$normal}/";
   }
 
 }

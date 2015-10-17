@@ -536,11 +536,13 @@ final class DiffusionServeController extends DiffusionController {
       $body = strlen($stderr)."\n".$stderr;
     } else {
       list($length, $body) = explode("\n", $stdout, 2);
+      if ($cmd == 'capabilities') {
+        $body = DiffusionMercurialWireProtocol::filterBundle2Capability($body);
+      }
     }
 
     return id(new DiffusionMercurialResponse())->setContent($body);
   }
-
 
   private function getMercurialArguments() {
     // Mercurial sends arguments in HTTP headers. "Why?", you might wonder,
