@@ -2,14 +2,13 @@
 
 final class PhluxListController extends PhluxController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $pager = new AphrontCursorPagerView();
     $pager->readFromRequest($request);
     $query = id(new PhluxVariableQuery())
-      ->setViewer($user);
+      ->setViewer($viewer);
 
     $vars = $query->executeWithCursorPager($pager);
 
@@ -22,7 +21,7 @@ final class PhluxListController extends PhluxController {
       $item->setHref($this->getApplicationURI('/view/'.$key.'/'));
       $item->addIcon(
         'none',
-        phabricator_datetime($var->getDateModified(), $user));
+        phabricator_datetime($var->getDateModified(), $viewer));
 
       $view->addItem($item);
     }
