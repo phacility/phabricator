@@ -3,11 +3,11 @@
 final class PhabricatorConduitTokenController
   extends PhabricatorConduitController {
 
-  public function processRequest() {
-    $user = $this->getRequest()->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
-      $user,
+      $viewer,
       $this->getRequest(),
       '/');
 
@@ -19,13 +19,13 @@ final class PhabricatorConduitTokenController
     $old_token = id(new PhabricatorConduitCertificateToken())
       ->loadOneWhere(
         'userPHID = %s',
-        $user->getPHID());
+        $viewer->getPHID());
     if ($old_token) {
       $old_token->delete();
     }
 
     $token = id(new PhabricatorConduitCertificateToken())
-      ->setUserPHID($user->getPHID())
+      ->setUserPHID($viewer->getPHID())
       ->setToken(Filesystem::readRandomCharacters(40))
       ->save();
 
@@ -42,7 +42,7 @@ final class PhabricatorConduitTokenController
     Javelin::initBehavior('select-on-click');
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendRemarkupInstructions($pre_instructions)
       ->appendChild(
         id(new AphrontFormTextAreaControl())
