@@ -418,9 +418,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
       id(new PhabricatorActionView())
         ->setName(pht('Create Subtask'))
         ->setHref($this->getApplicationURI("/task/create/?parent={$id}"))
-        ->setIcon('fa-level-down'))
+        ->setIcon('fa-level-down')
         ->setDisabled(!$can_create)
-        ->setWorkflow(!$can_create);
+        ->setWorkflow(!$can_create));
 
     $view->addAction(
       id(new PhabricatorActionView())
