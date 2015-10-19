@@ -67,6 +67,9 @@ final class PhabricatorProjectBoardViewController
     // TODO: Expand the checks here if we add the ability
     // to hide the Backlog column
     if (!$columns) {
+      if (!$viewer->isLoggedIn()) {
+        return $this->noAccessDialog($project);
+      }
       switch ($request->getStr('initialize-type')) {
         case 'backlog-only':
           $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
@@ -708,6 +711,20 @@ final class PhabricatorProjectBoardViewController
       ->addCancelButton($this->getApplicationURI('view/'.$project->getID().'/'))
       ->appendParagraph($instructions)
       ->appendChild($new_selector);
+
+    return id(new AphrontDialogResponse())
+      ->setDialog($dialog);
+  }
+
+  private function noAccessDialog(PhabricatorProject $project) {
+
+    $instructions = pht('This workboard has not been setup yet.');
+
+    $dialog = id(new AphrontDialogView())
+      ->setUser($this->getRequest()->getUser())
+      ->setTitle(pht('No Workboard'))
+      ->addCancelButton($this->getApplicationURI('view/'.$project->getID().'/'))
+      ->appendParagraph($instructions);
 
     return id(new AphrontDialogResponse())
       ->setDialog($dialog);
