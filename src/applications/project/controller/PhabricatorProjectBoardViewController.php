@@ -67,7 +67,11 @@ final class PhabricatorProjectBoardViewController
     // TODO: Expand the checks here if we add the ability
     // to hide the Backlog column
     if (!$columns) {
-      if (!$viewer->isLoggedIn()) {
+      $can_edit = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $project,
+        PhabricatorPolicyCapability::CAN_EDIT);
+      if (!$can_edit) {
         return $this->noAccessDialog($project);
       }
       switch ($request->getStr('initialize-type')) {
