@@ -12,9 +12,6 @@ Phabricator supports two code review workflows, "review" (pre-push) and
 This document summarizes the post-push "audit" workflow implemented by the
 creatively-named //Audit// tool.
 
-NOTE: The audit workflow is new, give us feedback about it! See
-@{article:Give Feedback! Get Support!}.
-
 = How Audit Works =
 
 Using auditing allows you to push and deploy code without waiting for code
@@ -104,5 +101,4 @@ only changes that are relevant to them.
 
 = Next Steps =
 
-  - Learn more about Herald at @{article:Herald User Guide}; or
-  - give us feedback at @{article:Give Feedback! Get Support!}.
+  - Learn more about Herald at @{article:Herald User Guide}.

@@ -5,6 +5,8 @@ Journal about your thoughts and feelings. Share with others. Profit.
 
 = Overview =
 
+IMPORTANT: Phame is a prototype application.
+
 Phame is a simple blogging platform. You can write drafts which only you can
 see. Later, you can publish these drafts as posts which anyone who can access
 the Phabricator instance can see. You can also add posts to blogs to increase
@@ -55,9 +57,3 @@ this functionality.
 A given comment widget is tied 1:1 with a given post. This means the same
 instance of a given comment widget will appear for a given post regardless
 of whether that post is being viewed in the context of a blog.
-
-= Next Steps =
-
- - Phame is extremely new and very basic for now. Give us feedback on
-   what you'd like to see improve! See @{article:Give Feedback! Get
-   Support!}.
