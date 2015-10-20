@@ -3,6 +3,10 @@
 final class DrydockRepositoryOperationViewController
   extends DrydockController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
@@ -33,6 +37,9 @@ final class DrydockRepositoryOperationViewController
     $properties->setActionList($actions);
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(
+      pht('Operations'),
+      $this->getApplicationURI('operation/'));
     $crumbs->addTextCrumb($title);
 
     $object_box = id(new PHUIObjectBoxView())
@@ -77,16 +84,6 @@ final class DrydockRepositoryOperationViewController
       $viewer->renderHandle($operation->getObjectPHID()));
 
     return $view;
-  }
-
-  public function buildSideNavView() {
-    // TODO: Get rid of this, but it's currently required by DrydockController.
-    return null;
-  }
-
-  public function buildApplicationMenu() {
-    // TODO: As above.
-    return null;
   }
 
 }

@@ -5,9 +5,9 @@ final class PhabricatorConduitTokenTerminateController
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-
     $object_phid = $request->getStr('objectPHID');
     $id = $request->getURIData('id');
+
     if ($id) {
       $token = id(new PhabricatorConduitTokenQuery())
         ->setViewer($viewer)

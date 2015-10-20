@@ -34,6 +34,7 @@ final class ManiphestAssignEmailCommand
     array $argv) {
     $xactions = array();
 
+    $assign_phid = null;
 
     $assign_to = head($argv);
     if ($assign_to) {

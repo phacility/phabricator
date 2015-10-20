@@ -288,7 +288,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
       $repo = $drequest->getRepository();
       $symbol_repos = nonempty($repo->getSymbolSources(), array());
-      $symbol_repos[] = $repo;
+      $symbol_repos[] = $repo->getPHID();
 
       $lang = last(explode('.', $drequest->getPath()));
       $repo_languages = $repo->getSymbolLanguages();

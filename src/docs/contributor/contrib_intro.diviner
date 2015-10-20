@@ -23,8 +23,7 @@ contribute to Phabricator:
 
   - Send us an email or drop by IRC just to say "thanks". A big part of the
     reason we build this software is to help people solve problems, and knowing
-    that our efforts are appreciated is really rewarding. You can find ways to
-    get in touch in @{article:Give Feedback! Get Support!}
+    that our efforts are appreciated is really rewarding.
   - Recommend Phabricator to people who you think might find it useful. Our
     most powerful growth channel is word of mouth, and mentioning or tweeting
     about Phabricator helps the project grow. If writing a tweet sounds like
@@ -40,7 +39,6 @@ contribute to Phabricator:
   - Report bugs and request features. We may not always be able to fix or build
     things right away, but knowing about issues users are encountering or
     features they'd like to see improves our ability to plan and prioritize.
-    For ways to do this, see @{article:Give Feedback! Get Support!}
     - For details on reporting bugs, see @{article:Contributing Bug Reports}.
     - For details on requesting features, see @{article:Contributing Feature
       Requests}.
@@ -48,16 +46,11 @@ contribute to Phabricator:
     6-12 months currently exists on the [[ Roadmap ]] or in Maniphest. Telling
     us about use cases you have can help us build better products when the time
     comes to write the code.
-  - Hang out in IRC, and maybe answer a question or two. IRC is a completely
-    legit place for serious hackers to hang out anyway, but while you're there
-    you might see someone ask a question that you know the answer to. Helping
-    them out (or pointing them to the right documentation) is a big help to us.
-    You can find details about the IRC channel in
-    @{article:Give Feedback! Get Support!}
 
-If all of this sounds nice but you really just want to write some code, that's
-awesome too. To get started with contributing code, see
-@{article:Contributing Code}.
+If all of this sounds nice but you really just want to write some code, be
+aware that this project often presents a high barrier to entry for new
+contributors. To continue, see @{article:Contributing Code}.
+
 
 Next Steps
 ==========
@@ -65,6 +58,6 @@ Next Steps
 Continue by:
 
   - learning about bug reports in @{article:Contributing Bug Reports};
-  - learning about feature requests in @{article:Contributing Feature Requests};
-  - learning about code contributions in @{article:Contributing Code}; or
-  - getting in touch with @{article:Give Feedback! Get Support!}
+  - learning about feature requests in
+    @{article:Contributing Feature Requests}; or
+  - learning about code contributions in @{article:Contributing Code}.

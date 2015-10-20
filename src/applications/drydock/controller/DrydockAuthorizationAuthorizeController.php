@@ -82,14 +82,4 @@ final class DrydockAuthorizationAuthorizeController
       ->addCancelButton($authorization_uri);
   }
 
-  public function buildSideNavView() {
-    // TODO: Get rid of this, but it's currently required by DrydockController.
-    return null;
-  }
-
-  public function buildApplicationMenu() {
-    // TODO: As above.
-    return null;
-  }
-
 }

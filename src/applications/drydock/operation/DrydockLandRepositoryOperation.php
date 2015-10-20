@@ -5,6 +5,12 @@ final class DrydockLandRepositoryOperation
 
   const OPCONST = 'land';
 
+  public function getOperationDescription(
+    DrydockRepositoryOperation $operation,
+    PhabricatorUser $viewer) {
+    return pht('Land Revision');
+  }
+
   public function applyOperation(
     DrydockRepositoryOperation $operation,
     DrydockInterface $interface) {

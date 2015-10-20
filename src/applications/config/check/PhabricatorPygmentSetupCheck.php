@@ -45,8 +45,8 @@ final class PhabricatorPygmentSetupCheck extends PhabricatorSetupCheck {
             'Phabricator has %s available in %s, but the binary '.
             'exited with an error code when run as %s. Check that it is '.
             'installed correctly.',
-            phutil_tag('tt', array(), '$PATH'),
             phutil_tag('tt', array(), 'pygmentize'),
+            phutil_tag('tt', array(), '$PATH'),
             phutil_tag('tt', array(), 'pygmentize -h'));
 
           $this

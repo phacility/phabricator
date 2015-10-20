@@ -15,6 +15,7 @@ final class DrydockConsoleController extends DrydockController {
     $nav->addFilter('blueprint', pht('Blueprints'));
     $nav->addFilter('resource', pht('Resources'));
     $nav->addFilter('lease', pht('Leases'));
+    $nav->addFilter('operation', pht('Repository Operations'));
 
     $nav->selectFilter(null);
 
@@ -51,6 +52,13 @@ final class DrydockConsoleController extends DrydockController {
         ->setFontIcon('fa-link')
         ->setHref($this->getApplicationURI('lease/'))
         ->addAttribute(pht('Manage leases on resources.')));
+
+    $menu->addItem(
+      id(new PHUIObjectItemView())
+        ->setHeader(pht('Repository Operations'))
+        ->setFontIcon('fa-fighter-jet')
+        ->setHref($this->getApplicationURI('operation/'))
+        ->addAttribute(pht('Review the repository operation queue.')));
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Console'));

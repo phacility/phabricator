@@ -50,7 +50,7 @@ final class PHUIInfoView extends AphrontView {
     require_celerity_resource('phui-info-view-css');
 
     $errors = $this->errors;
-    if ($errors) {
+    if (count($errors) > 1) {
       $list = array();
       foreach ($errors as $error) {
         $list[] = phutil_tag(
@@ -64,6 +64,8 @@ final class PHUIInfoView extends AphrontView {
           'class' => 'phui-info-view-list',
         ),
         $list);
+    } else if (count($errors) == 1) {
+      $list = $this->errors[0];
     } else {
       $list = null;
     }

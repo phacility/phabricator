@@ -195,15 +195,10 @@ final class PhabricatorConduitConsoleController
       pht('Errors'),
       $error_description);
 
-
-    $description = $method->getMethodDescription();
-    $description = PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())->setContent($description),
-      'default',
-      $viewer);
     $view->addSectionHeader(
       pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
-    $view->addTextContent($description);
+    $view->addTextContent(
+      new PHUIRemarkupView($viewer, $method->getMethodDescription()));
 
     return $view;
   }

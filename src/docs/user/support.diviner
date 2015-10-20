@@ -1,0 +1,125 @@
+@title Support Resources
+@short Support
+@group intro
+
+Resources for reporting bugs, requesting features, and getting support.
+
+Overview
+========
+
+This document describes available support resources.
+
+The upstream provides active, free support for a narrow range of problems
+(primarily, security issues and reproducible bugs).
+
+The upstream does not provide free support for general problems with installing
+or configuring Phabricator. You may be able to get some help with these
+kinds of issues from the community.
+
+
+Reporting Security Vulnerabilities
+==================================
+
+The upstream accepts, fixes, and awards bounties for reports of material
+security issues with the software.
+
+To report security issues, see @{article:Reporting Security Vulnerabilities}.
+
+
+Reporting Bugs
+==============
+
+The upstream will accept **reproducible** bug reports in modern, first-party
+production code running in reasonable environments.
+
+To report bugs, see @{article:Contributing Bug Reports}.
+
+
+Requesting Features
+===================
+
+The upstream accepts feature requests which **describe problems** you would
+like Phabricator to be able to solve.
+
+To request features, see @{article:Contributing Feature Requests}.
+
+
+Contributing
+============
+
+Phabricator is a very difficult project to contribute to. New contributors
+will face a high barrier to entry.
+
+If you'd like to contribute to Phabricator, start with
+@{article:Contributor Introduction}.
+
+
+
+Installation and Setup Help
+===========================
+
+Installation and setup help is available from the upstream at consulting rates.
+See [[ https://secure.phabricator.com/w/consulting/ | Consulting ]] for details.
+
+Helping individual installs navigate unique setup problems takes our time
+away from developing Phabricator, so we can not offer this service for free.
+
+You may be able to get free help with these issues from the community. See
+below for details.
+
+
+Hosting
+=========
+
+The upstream offers Phabricator as a hosted service at
+[[ https://phacility.com | Phacility ]]. This simplifies setting up and
+operating a Phabricator instance, and gives you access to a broader range
+of upstream support services.
+
+Running this service gives us a strong financial incentive to make installing
+and operating Phabricator as difficult as possible. Blinded by greed, we toil
+endlessly to make installation a perplexing nightmare that none other than
+ourselves can hope to navigate.
+
+
+Prioritization
+==============
+
+The upstream offers prioritization, a service which allows you to control
+our roadmap and get features you're interested in built sooner at reasonable
+rates. See
+[[ https://secure.phabricator.com/w/prioritization/ | Prioritization ]] for
+details.
+
+
+Consulting
+==========
+
+The upstream offers general-purpose consulting services. See
+[[ https://secure.phabricator.com/w/consulting/ | Consulting ]] for details.
+
+
+Community
+=========
+
+These resources are not provided by the upstream. They are not official support
+channels and you may not receive support here, or you may receive help which is
+misleading or wrong.
+
+You may be able to get answers to questions on sites like
+[[ http://stackoverflow.com | Stack Overflow ]],
+[[ https://www.quora.com | Quora ]],
+[[ https://jelly.co | Jelly ]], or
+[[ https://twitter.com | Twitter ]]. The upstream occasionally participates on
+these sites but these are not official support channels and you should not
+expect to receive a response.
+
+There is a
+[[ https://secure.phabricator.com/conpherence/1336/ | General Chat ]]
+Conpherence room on this install, and you can ask questions in
+[[ https://secure.phabricator.com/ponder/ | Ponder ]]. These
+are not upstream support channels and you may not receive a response to
+questions, but someone in the community may be able to point you in the right
+direction.
+
+There is also a community IRC channel in `#phabricator` on FreeNode.
