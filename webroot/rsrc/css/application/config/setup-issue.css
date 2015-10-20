@@ -76,7 +76,7 @@
 }
 
 .setup-issue-name {
-  color: #464C5C;
+  color: {$darkbluetext};
   padding: 4px 8px 12px;
   border-bottom: 1px solid #BFCFDA;
   font-size: 15px;

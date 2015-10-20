@@ -31,6 +31,7 @@ div.phabricator-application-launch-container {
   width: 100%;
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
+  background: {$bg-menu};
   padding: 4px 0;
 }
 

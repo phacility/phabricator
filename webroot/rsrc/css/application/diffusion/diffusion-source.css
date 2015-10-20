@@ -5,7 +5,8 @@
 .diffusion-source {
   width: 100%;
   font: 10px/13px "Menlo", "Consolas", "Monaco", monospace;
-  background: #fff;
+  background: {$bg-menu};
+  color: {$defaulttext};
 }
 
 .diffusion-source tr.phabricator-source-highlight {

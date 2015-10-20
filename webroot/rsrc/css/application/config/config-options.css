@@ -6,7 +6,7 @@
   width: 100%;
   border-collapse: collapse;
   border: 1px solid {$lightgreyborder};
-  background: #fff;
+  background: {$bg-dark-grey};
 }
 
 .config-option-table th,

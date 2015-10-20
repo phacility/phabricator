@@ -68,7 +68,7 @@
 .phui-sidenav-view .phui-document-inner {
   margin-right: 200px;
   border-right: 1px solid {$thinblueborder};
-  background: #fff;
+  background: {$bg-dark-grey};
 }
 
 .phui-document-content .phui-header-shell {
@@ -101,7 +101,7 @@
 }
 
 .phui-document-content {
-  background: #fff;
+  background: {$bg-dark-grey};
   overflow: hidden;
 }
 
