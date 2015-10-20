@@ -3,14 +3,12 @@
 final class CelerityDefaultPostprocessor
   extends CelerityPostprocessor {
 
-  const POSTPROCESSOR_KEY = 'default';
-
   public function getPostprocessorKey() {
-    return self::POSTPROCESSOR_KEY;
+    return 'DarkWingDuck';
   }
 
   public function getPostprocessorName() {
-    return pht('Use Default Colors');
+    return pht('Dark Background with white letters');
   }
 
   public function buildDefaultPostprocessor() {
@@ -42,11 +40,12 @@ final class CelerityDefaultPostprocessor
       'smallerfontsize' => '12px',
       'smallestfontsize' => '11px',
       
-      //Theme phacility
-       'bg-dark-grey'       => '#fff',
-       'bg-menu'            => '#F8F9FC',
-       'defaulttext'          => 'none',
-
+      //Theme phacility   bcc3d5 none
+       'bg-dark-grey'       => '#363737',
+       'bg-menu'            => 'none',
+       'defaulttext'          => '#bcc3d5',  
+      
+      
       // Base Colors
       'red'           => '#c0392b',
       'lightred'      => '#f4dddb',
@@ -94,10 +93,12 @@ final class CelerityDefaultPostprocessor
       'blueborder'          => '#8C98B8',
       'darkblueborder'      => '#626E82',
       'lightbluebackground' => '#F8F9FC',
-      'bluebackground'      => '#ECEEF4',
+      'bluebackground'      => '#777C8a',
       'lightbluetext'       => '#8C98B8',
       'bluetext'            => '#6B748C',
-      'darkbluetext'        => '#464C5C',
+      'darkbluetext'        => '#184ed9',
+//      'darkbluetext'         '#464C5C' 8eabff 133eab,
+     
 
       // Base Greens
       'lightgreenborder'      => '#bfdac1',
@@ -152,7 +153,8 @@ final class CelerityDefaultPostprocessor
       'sh-lightblueborder'    => '#cfdbe3',
       'sh-blueborder'         => '#a7b5bf',
       'sh-blueicon'           => '#6b748c',
-      'sh-bluetext'           => '#464c5c',
+//      'sh-bluetext'           '#464c5c',
+	'sh-bluetext'           => '#8eabff',
       'sh-bluebackground'     => '#dee7f8',
 
       // Shade Indigo
@@ -191,10 +193,10 @@ final class CelerityDefaultPostprocessor
       'sh-disabledbackground'   => '#f3f3f3',
 
       // Background color for "light" themes.
-      'page.background.light' => '#f7f7f7',
+      'page.background.light' => '#e0e4ed',
 
       // Background color for "dark" themes.
-      'page.background.dark' => '#ebecee',
+      'page.background.dark' => '#212c46',
 
     );
   }

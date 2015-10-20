@@ -17,6 +17,12 @@ final class CelerityHighContrastPostprocessor
       'sky' => '#226B9B',
       'anchor' => '#226B9B',
 
+       //Theme phacility
+       'bg-dark-grey'       => '#fff',
+       'bg-menu'            => '#FFF',
+       'defaulttext'          => '#000',
+
+      
       'thinblueborder' => '#BFCFDA',
       'lightblueborder' => '#8C98B8',
       'blueborder' => '#626E82',
