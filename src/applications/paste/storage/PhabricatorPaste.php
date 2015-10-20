@@ -28,6 +28,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
   private $content = self::ATTACHABLE;
   private $rawContent = self::ATTACHABLE;
+  private $snippet = self::ATTACHABLE;
 
   public static function initializeNewPaste(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -132,6 +133,15 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
   public function attachRawContent($raw_content) {
     $this->rawContent = $raw_content;
+    return $this;
+  }
+
+  public function getSnippet() {
+    return $this->assertAttached($this->snippet);
+  }
+
+  public function attachSnippet(PhabricatorPasteSnippet $snippet) {
+    $this->snippet = $snippet;
     return $this;
   }
 

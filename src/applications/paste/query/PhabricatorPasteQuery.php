@@ -10,6 +10,7 @@ final class PhabricatorPasteQuery
 
   private $needContent;
   private $needRawContent;
+  private $needSnippets;
   private $languages;
   private $includeNoLanguage;
   private $dateCreatedAfter;
@@ -44,6 +45,11 @@ final class PhabricatorPasteQuery
 
   public function needRawContent($need_raw_content) {
     $this->needRawContent = $need_raw_content;
+    return $this;
+  }
+
+  public function needSnippets($need_snippets) {
+    $this->needSnippets = $need_snippets;
     return $this;
   }
 
@@ -89,6 +95,10 @@ final class PhabricatorPasteQuery
 
     if ($this->needContent) {
       $pastes = $this->loadContent($pastes);
+    }
+
+    if ($this->needSnippets) {
+      $pastes = $this->loadSnippets($pastes);
     }
 
     return $pastes;
@@ -163,6 +173,17 @@ final class PhabricatorPasteQuery
         'P'.$paste->getID(),
         $paste->getFilePHID(),
         $paste->getLanguage(),
+      ));
+  }
+
+  private function getSnippetCacheKey(PhabricatorPaste $paste) {
+    return implode(
+      ':',
+      array(
+        'P'.$paste->getID(),
+        $paste->getFilePHID(),
+        $paste->getLanguage(),
+        'snippet',
       ));
   }
 
@@ -250,19 +271,114 @@ final class PhabricatorPasteQuery
     return $pastes;
   }
 
-  private function buildContent(PhabricatorPaste $paste) {
-    $language = $paste->getLanguage();
-    $source = $paste->getRawContent();
+  private function loadSnippets(array $pastes) {
+    $cache = new PhabricatorKeyValueDatabaseCache();
 
-    if (empty($language)) {
-      return PhabricatorSyntaxHighlighter::highlightWithFilename(
-        $paste->getTitle(),
-        $source);
-    } else {
-      return PhabricatorSyntaxHighlighter::highlightWithLanguage(
-        $language,
-        $source);
+    $cache = new PhutilKeyValueCacheProfiler($cache);
+    $cache->setProfiler(PhutilServiceProfiler::getInstance());
+
+    $keys = array();
+    foreach ($pastes as $paste) {
+      $keys[] = $this->getSnippetCacheKey($paste);
     }
+
+    $caches = $cache->getKeys($keys);
+
+    $need_raw = array();
+    $have_cache = array();
+    foreach ($pastes as $paste) {
+      $key = $this->getSnippetCacheKey($paste);
+      if (isset($caches[$key])) {
+        $snippet_data = phutil_json_decode($caches[$key], true);
+        $snippet = new PhabricatorPasteSnippet(
+          phutil_safe_html($snippet_data['content']),
+          $snippet_data['type']);
+        $paste->attachSnippet($snippet);
+        $have_cache[$paste->getPHID()] = true;
+      } else {
+        $need_raw[$key] = $paste;
+      }
+    }
+
+    if (!$need_raw) {
+      return $pastes;
+    }
+
+    $write_data = array();
+
+    $have_raw = $this->loadRawContent($need_raw);
+    $have_raw = mpull($have_raw, null, 'getPHID');
+    foreach ($pastes as $key => $paste) {
+      $paste_phid = $paste->getPHID();
+      if (isset($have_cache[$paste_phid])) {
+        continue;
+      }
+
+      if (empty($have_raw[$paste_phid])) {
+        unset($pastes[$key]);
+        continue;
+      }
+
+      $snippet = $this->buildSnippet($paste);
+      $paste->attachSnippet($snippet);
+      $snippet_data = array(
+        'content' => (string)$snippet->getContent(),
+        'type' => (string)$snippet->getType(),
+      );
+      $write_data[$this->getSnippetCacheKey($paste)] = phutil_json_encode(
+        $snippet_data);
+    }
+
+    if ($write_data) {
+      $cache->setKeys($write_data);
+    }
+
+    return $pastes;
+  }
+
+  private function buildContent(PhabricatorPaste $paste) {
+    return $this->highlightSource(
+      $paste->getRawContent(),
+      $paste->getTitle(),
+      $paste->getLanguage());
+  }
+
+  private function buildSnippet(PhabricatorPaste $paste) {
+    $snippet_type = PhabricatorPasteSnippet::FULL;
+    $snippet = $paste->getRawContent();
+
+    if (strlen($snippet) > 1024) {
+      $snippet_type = PhabricatorPasteSnippet::FIRST_BYTES;
+      $snippet = id(new PhutilUTF8StringTruncator())
+        ->setMaximumBytes(1024)
+        ->setTerminator('')
+        ->truncateString($snippet);
+    }
+
+    $lines = phutil_split_lines($snippet);
+    if (count($lines) > 5) {
+      $snippet_type = PhabricatorPasteSnippet::FIRST_LINES;
+      $snippet = implode('', array_slice($lines, 0, 5));
+    }
+
+    return new PhabricatorPasteSnippet(
+      $this->highlightSource(
+        $snippet,
+        $paste->getTitle(),
+        $paste->getLanguage()),
+      $snippet_type);
+  }
+
+  private function highlightSource($source, $title, $language) {
+      if (empty($language)) {
+        return PhabricatorSyntaxHighlighter::highlightWithFilename(
+          $title,
+          $source);
+      } else {
+        return PhabricatorSyntaxHighlighter::highlightWithLanguage(
+          $language,
+          $source);
+      }
   }
 
   public function getQueryApplicationClass() {

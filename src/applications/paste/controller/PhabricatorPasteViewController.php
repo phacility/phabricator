@@ -56,10 +56,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    $source_code = $this->buildSourceCodeView(
-      $paste,
-      null,
-      $this->highlightMap);
+    $source_code = $this->buildSourceCodeView($paste, $this->highlightMap);
 
     require_celerity_resource('paste-css');
     $source_code = phutil_tag(
