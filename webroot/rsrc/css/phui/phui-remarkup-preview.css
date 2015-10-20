@@ -12,7 +12,10 @@
   color: {$bluetext};
   text-transform: uppercase;
   padding: 8px;
-  background-color: {$lightgreybackground};
+background-color: {$darkgreybackground};
+
+/**  background-color: {$lightgreybackground}; 
+*/
   border-bottom: 1px solid {$thinblueborder};
   display: block;
   border-top-left-radius: 3px;

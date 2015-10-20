@@ -70,6 +70,7 @@ ul.phui-object-item-list-view {
 
 .phui-object-box .phui-object-item-list-view {
   margin: 0;
+
 }
 
 .phui-object-item-status-icon {
@@ -107,7 +108,7 @@ ul.phui-object-item-list-view {
 }
 
 .phui-object-item-objname {
-  color: #000;
+  color: {$defaulttext};
   cursor: text;
   font-weight: bold;
 }
@@ -155,6 +156,7 @@ ul.phui-object-item-list-view {
   display: table;
   table-layout: fixed;
   width: 100%;
+  background: {$bg-dark-grey};
 }
 
 .phui-object-item-table-row {
@@ -264,6 +266,7 @@ ul.phui-object-item-list-view {
 .phui-object-box .phui-object-item-list-view {
   padding: 0;
   border: none;
+  
 }
 
 .phui-object-box .phui-object-item-frame {
@@ -664,6 +667,7 @@ ul.phui-object-item-list-view .phui-object-item-selected
 .phui-object-box .phui-object-item-list-view .phui-object-item-frame {
   border: none;
   border-bottom: 1px solid {$thinblueborder};
+  background: {$bg-dark-grey};
 }
 
 .phui-object-box .phui-object-item-list-header {

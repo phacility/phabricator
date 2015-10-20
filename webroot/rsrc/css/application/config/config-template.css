@@ -3,7 +3,7 @@
  */
 body {
   overflow-y: scroll;
-  background: #f9f9f9;
+  background: {$bg-dark-grey};
   margin: 0;
   padding: 0;
   font: 13px/1.231 'Segoe UI', 'Segoe UI Web Regular', 'Segoe UI Symbol',

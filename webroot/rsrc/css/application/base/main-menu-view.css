@@ -436,7 +436,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
   padding: 6px 0 6px 12px;
   display: block;
   font-weight: bold;
-  color: #000;
+  color: {$defaulttext};
 }
 
 .device .phabricator-dark-menu .phui-list-item-href {

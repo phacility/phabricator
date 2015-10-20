@@ -42,7 +42,7 @@
   background: #FEF9ED;
   border: 1px solid {$sh-lightyellowborder};
   display: block;
-  color: #000;
+  color: {$defaulttext};
   overflow: auto;
   padding: 8px;
 }
@@ -53,7 +53,7 @@
 }
 
 .phabricator-remarkup tt.remarkup-monospaced {
-  color: #000;
+  color: {$defaulttext};
   background: rgba(71,87,120,0.1);
   padding: 1px 4px;
   border-radius: 3px;
@@ -257,7 +257,7 @@
 .phabricator-remarkup-toc {
   float: right;
   border-left: 1px solid {$lightblueborder};
-  background: #fff;
+  background: {$bg-menu};
   width: 160px;
   padding-left: 8px;
   margin: 0 0 4px 8px;
@@ -349,7 +349,7 @@
 }
 
 .phabricator-remarkup table.remarkup-table td {
-  background: #ffffff;
+  background: {$bg-menu};
   padding: 3px 6px;
 }
 

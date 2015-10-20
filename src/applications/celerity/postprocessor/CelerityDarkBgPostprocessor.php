@@ -1,16 +1,14 @@
 <?php
 
-final class CelerityDefaultPostprocessor
+final class CelerityDarkBgPostprocessor
   extends CelerityPostprocessor {
 
-  const POSTPROCESSOR_KEY = 'default';
-
   public function getPostprocessorKey() {
-    return self::POSTPROCESSOR_KEY;
+    return 'DarkBg';
   }
 
   public function getPostprocessorName() {
-    return pht('Use Default Colors');
+    return pht('Dark-Grey Background');
   }
 
   public function buildDefaultPostprocessor() {
@@ -41,11 +39,12 @@ final class CelerityDefaultPostprocessor
       'normalfontsize' => '13px',
       'smallerfontsize' => '12px',
       'smallestfontsize' => '11px',
-      
-      //Theme phacility
-       'bg-dark-grey'       => '#fff',
-       'bg-menu'            => '#F8F9FC',
-       'defaulttext'          => 'none',
+
+//Theme phacility   9fa4b0  434f68
+       'bg-dark-grey'       => '#1c1d1d',
+       'bg-menu'            => '#1a1d25',
+       'defaulttext'          => '#2660f6',     
+
 
       // Base Colors
       'red'           => '#c0392b',
@@ -94,12 +93,13 @@ final class CelerityDefaultPostprocessor
       'blueborder'          => '#8C98B8',
       'darkblueborder'      => '#626E82',
       'lightbluebackground' => '#F8F9FC',
-      'bluebackground'      => '#ECEEF4',
+      'bluebackground'      => '#777C8a',
       'lightbluetext'       => '#8C98B8',
       'bluetext'            => '#6B748C',
-      'darkbluetext'        => '#464C5C',
-
-      // Base Greens
+      'darkbluetext'        => '#8eabff',
+//      'darkbluetext'         '#464C5C' 8eabff,
+  
+ // Base Greens
       'lightgreenborder'      => '#bfdac1',
       'greenborder'           => '#8cb89c',
       'greentext'             => '#3e6d35',
@@ -152,7 +152,8 @@ final class CelerityDefaultPostprocessor
       'sh-lightblueborder'    => '#cfdbe3',
       'sh-blueborder'         => '#a7b5bf',
       'sh-blueicon'           => '#6b748c',
-      'sh-bluetext'           => '#464c5c',
+//      'sh-bluetext'           '#464c5c',
+	'sh-bluetext'           => '#8eabff',
       'sh-bluebackground'     => '#dee7f8',
 
       // Shade Indigo
@@ -191,10 +192,10 @@ final class CelerityDefaultPostprocessor
       'sh-disabledbackground'   => '#f3f3f3',
 
       // Background color for "light" themes.
-      'page.background.light' => '#f7f7f7',
+      'page.background.light' => '#666768',
 
       // Background color for "dark" themes.
-      'page.background.dark' => '#ebecee',
+      'page.background.dark' => '#606268',
 
     );
   }

@@ -16,6 +16,9 @@ final class CelerityHighContrastPostprocessor
       'blue' => '#226B9B',
       'sky' => '#226B9B',
       'anchor' => '#226B9B',
+      'bg-dark-grey' => '#fff',
+      'bg-menu' => '#fff',
+      'defaulttext' => '#000',
 
       'thinblueborder' => '#BFCFDA',
       'lightblueborder' => '#8C98B8',
