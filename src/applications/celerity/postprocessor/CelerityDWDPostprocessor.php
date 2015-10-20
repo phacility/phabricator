@@ -1,6 +1,6 @@
 <?php
 
-final class CelerityDefaultPostprocessor
+final class CelerityDWDPostprocessor
   extends CelerityPostprocessor {
 
   public function getPostprocessorKey() {
@@ -8,11 +8,11 @@ final class CelerityDefaultPostprocessor
   }
 
   public function getPostprocessorName() {
-    return pht('Dark Background with white letters');
+    return pht('DarkWingDuck');
   }
 
   public function buildDefaultPostprocessor() {
-    return null;
+  return null;
   }
 
   public function buildVariables() {
@@ -42,7 +42,7 @@ final class CelerityDefaultPostprocessor
       
       //Theme phacility   bcc3d5 none
        'bg-dark-grey'       => '#363737',
-       'bg-menu'            => 'none',
+       'bg-menu'            => '3e3e3e',
        'defaulttext'          => '#bcc3d5',  
       
       

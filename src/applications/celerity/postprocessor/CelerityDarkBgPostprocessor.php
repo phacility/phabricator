@@ -39,12 +39,12 @@ final class CelerityDarkBgPostprocessor
       'normalfontsize' => '13px',
       'smallerfontsize' => '12px',
       'smallestfontsize' => '11px',
-      
-       //Theme phacility   9fa4b0  434f68
+
+//Theme phacility   9fa4b0  434f68
        'bg-dark-grey'       => '#1c1d1d',
        'bg-menu'            => '#1a1d25',
-       'defaulttext'          => '#2660f6',  
-      
+       'defaulttext'          => '#2660f6',     
+
 
       // Base Colors
       'red'           => '#c0392b',
@@ -98,9 +98,7 @@ final class CelerityDarkBgPostprocessor
       'bluetext'            => '#6B748C',
       'darkbluetext'        => '#8eabff',
 //      'darkbluetext'         '#464C5C' 8eabff,
-     
-   
-
+  
  // Base Greens
       'lightgreenborder'      => '#bfdac1',
       'greenborder'           => '#8cb89c',

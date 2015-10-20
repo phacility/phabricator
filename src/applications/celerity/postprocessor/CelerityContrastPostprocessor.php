@@ -1,14 +1,14 @@
 <?php
 
-final class CelerityHighContrastPostprocessor
+final class CelerityContrastPostprocessor
   extends CelerityPostprocessor {
 
   public function getPostprocessorKey() {
-    return 'contrast';
+    return 'icontrast';
   }
 
   public function getPostprocessorName() {
-    return pht('Use High Contrast Colors');
+    return pht('Inverted Contrast Colors');
   }
 
   public function buildVariables() {
