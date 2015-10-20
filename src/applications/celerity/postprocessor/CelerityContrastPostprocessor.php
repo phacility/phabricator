@@ -21,6 +21,8 @@ final class CelerityContrastPostprocessor
        'bg-dark-grey'       => '#000',
        'bg-menu'            => '#000',
        'defaulttext'          => '#fff',
+       'page.background.light' => '#363737',
+       'page.background.dark'  => '#000',
       
       'thinblueborder' => '#3f4447',
       'lightblueborder' => '#444a5a',
