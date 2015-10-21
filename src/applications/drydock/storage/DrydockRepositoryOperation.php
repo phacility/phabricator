@@ -142,6 +142,22 @@ final class DrydockRepositoryOperation extends DrydockDAO
       $viewer);
   }
 
+  public function getOperationCurrentStatus(PhabricatorUser $viewer) {
+    return $this->getImplementation()->getOperationCurrentStatus(
+      $this,
+      $viewer);
+  }
+
+  public function isUnderway() {
+    switch ($this->getOperationState()) {
+      case self::STATE_WAIT:
+      case self::STATE_WORK:
+        return true;
+    }
+
+    return false;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

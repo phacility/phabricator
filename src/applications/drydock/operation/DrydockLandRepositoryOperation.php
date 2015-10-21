@@ -11,6 +11,30 @@ final class DrydockLandRepositoryOperation
     return pht('Land Revision');
   }
 
+  public function getOperationCurrentStatus(
+    DrydockRepositoryOperation $operation,
+    PhabricatorUser $viewer) {
+
+    $target = $operation->getRepositoryTarget();
+    $repository = $operation->getRepository();
+    switch ($operation->getOperationState()) {
+      case DrydockRepositoryOperation::STATE_WAIT:
+        return pht(
+          'Waiting to land revision into %s on %s...',
+          $repository->getMonogram(),
+          $target);
+      case DrydockRepositoryOperation::STATE_WORK:
+        return pht(
+          'Landing revision into %s on %s...',
+          $repository->getMonogram(),
+          $target);
+      case DrydockRepositoryOperation::STATE_DONE:
+        return pht(
+          'Revision landed into %s.',
+          $repository->getMonogram());
+    }
+  }
+
   public function applyOperation(
     DrydockRepositoryOperation $operation,
     DrydockInterface $interface) {
