@@ -124,10 +124,6 @@ final class HarbormasterTeamCityBuildStepImplementation
         'name' => pht('Content-Type'),
         'type' => 'select',
         'options' => array_fuse(array('application/xml', 'application/json'))
-      ),
-      'body' => array(
-        'name' => pht('HTTP Body'),
-        'type' => 'text'
       )
     );
   }
