@@ -53,7 +53,12 @@ final class HarbormasterTeamCityBuildStepImplementation
 
     $method = nonempty(idx($settings, 'method'), 'POST');
     $contentType = nonempty(idx($settings, 'contentType'), 'application/xml');
-    $payload = nonempty(idx($settings, 'payload'), '');
+
+    $payload = $this->mergeVariables(
+        'vurisprintf',
+        $settings['payload'],
+        $variables
+    );
 
     $future = id(new HTTPSFuture($uri))
       ->setMethod($method)
