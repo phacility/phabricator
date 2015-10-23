@@ -124,7 +124,15 @@ final class HarbormasterTeamCityBuildStepImplementation
         'name' => pht('Content-Type'),
         'type' => 'select',
         'options' => array_fuse(array('application/xml', 'application/json'))
-      )
+      ),
+      'credential' => array(
+          'name' => pht('Credentials'),
+          'type' => 'credential',
+          'credential.type'
+          => PassphrasePasswordCredentialType::CREDENTIAL_TYPE,
+          'credential.provides'
+          => PassphrasePasswordCredentialType::PROVIDES_TYPE,
+      ),
     );
   }
 
