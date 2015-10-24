@@ -3,15 +3,11 @@
 final class PhabricatorSourceCodeView extends AphrontView {
 
   private $lines;
-  private $limit;
   private $uri;
   private $highlights = array();
   private $canClickHighlight = true;
-
-  public function setLimit($limit) {
-    $this->limit = $limit;
-    return $this;
-  }
+  private $truncatedFirstBytes = false;
+  private $truncatedFirstLines = false;
 
   public function setLines(array $lines) {
     $this->lines = $lines;
@@ -33,6 +29,16 @@ final class PhabricatorSourceCodeView extends AphrontView {
     return $this;
   }
 
+  public function setTruncatedFirstBytes($truncated_first_bytes) {
+    $this->truncatedFirstBytes = $truncated_first_bytes;
+    return $this;
+  }
+
+  public function setTruncatedFirstLines($truncated_first_lines) {
+    $this->truncatedFirstLines = $truncated_first_lines;
+    return $this;
+  }
+
   public function render() {
     require_celerity_resource('phabricator-source-code-view-css');
     require_celerity_resource('syntax-highlighting-css');
@@ -46,24 +52,31 @@ final class PhabricatorSourceCodeView extends AphrontView {
 
     $rows = array();
 
-    foreach ($this->lines as $line) {
-      $hit_limit = $this->limit &&
-                   ($line_number == $this->limit) &&
-                   (count($this->lines) != $this->limit);
-
-      if ($hit_limit) {
-        $content_number = '';
-        $content_line = phutil_tag(
+    $lines = $this->lines;
+    if ($this->truncatedFirstLines) {
+      $lines[] = phutil_tag(
           'span',
           array(
             'class' => 'c',
           ),
           pht('...'));
-      } else {
-        $content_number = $line_number;
-        // NOTE: See phabricator-oncopy behavior.
-        $content_line = hsprintf("\xE2\x80\x8B%s", $line);
-      }
+    } else if ($this->truncatedFirstBytes) {
+      $last_key = last_key($lines);
+      $lines[$last_key] = hsprintf(
+        '%s%s',
+        $lines[$last_key],
+        phutil_tag(
+          'span',
+          array(
+            'class' => 'c',
+          ),
+          pht('...')));
+    }
+
+    foreach ($lines as $line) {
+
+      // NOTE: See phabricator-oncopy behavior.
+      $content_line = hsprintf("\xE2\x80\x8B%s", $line);
 
       $row_attributes = array();
       if (isset($this->highlights[$line_number])) {
@@ -105,10 +118,6 @@ final class PhabricatorSourceCodeView extends AphrontView {
             ),
             $content_line),
           ));
-
-      if ($hit_limit) {
-        break;
-      }
 
       $line_number++;
     }

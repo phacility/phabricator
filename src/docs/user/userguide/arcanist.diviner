@@ -129,11 +129,6 @@ able to use:
   - Another common approach is to write an install script as an action into
     existing build scripts, so users can run `make install-arc` or
     `ant install-arc` or similar.
-  - In general, if this sucks and is causing you pain, let us know (see
-    @{article:Give Feedback! Get Support!}). We're planning to improve this at
-    some point, but it's somewhat complicated to get right. While it can take a
-    little time to set up, we aren't getting feedback that it's a persistent
-    pain point, so it hasn't been a priority.
 
 == Installing Tab Completion ==
 

@@ -3,25 +3,19 @@
 final class PhabricatorSearchOrderController
   extends PhabricatorSearchBaseController {
 
-  private $engineClass;
-
-  public function willProcessRequest(array $data) {
-    $this->engineClass = idx($data, 'engine');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $engine_class = $request->getURIData('engine');
 
     $request->validateCSRF();
 
     $base_class = 'PhabricatorApplicationSearchEngine';
-    if (!is_subclass_of($this->engineClass, $base_class)) {
+    if (!is_subclass_of($engine_class, $base_class)) {
       return new Aphront400Response();
     }
 
-    $engine = newv($this->engineClass, array());
-    $engine->setViewer($user);
+    $engine = newv($engine_class, array());
+    $engine->setViewer($viewer);
 
     $queries = $engine->loadAllNamedQueries();
     $queries = mpull($queries, null, 'getQueryKey');

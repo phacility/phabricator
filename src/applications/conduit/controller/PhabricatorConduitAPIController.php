@@ -7,18 +7,9 @@ final class PhabricatorConduitAPIController
     return false;
   }
 
-  private $method;
-
-  public function willProcessRequest(array $data) {
-    $this->method = $data['method'];
-    return $this;
-  }
-
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
+    $method = $request->getURIData('method');
     $time_start = microtime(true);
-    $request = $this->getRequest();
-
-    $method = $this->method;
 
     $api_request = null;
     $method_implementation = null;
@@ -55,7 +46,7 @@ final class PhabricatorConduitAPIController
       $conduit_username = '-';
       if ($call->shouldRequireAuthentication()) {
         $metadata['scope'] = $call->getRequiredScope();
-        $auth_error = $this->authenticateUser($api_request, $metadata);
+        $auth_error = $this->authenticateUser($api_request, $metadata, $method);
         // If we've explicitly authenticated the user here and either done
         // CSRF validation or are using a non-web authentication mechanism.
         $allow_unguarded_writes = true;
@@ -169,7 +160,8 @@ final class PhabricatorConduitAPIController
    */
   private function authenticateUser(
     ConduitAPIRequest $api_request,
-    array $metadata) {
+    array $metadata,
+    $method) {
 
     $request = $this->getRequest();
 
@@ -207,7 +199,7 @@ final class PhabricatorConduitAPIController
         unset($protocol_data['scope']);
 
         ConduitClient::verifySignature(
-          $this->method,
+          $method,
           $api_request->getAllParameters(),
           $protocol_data,
           $ssl_public_key);

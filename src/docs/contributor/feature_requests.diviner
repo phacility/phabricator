@@ -3,6 +3,13 @@
 
 Describes how to file an effective Phabricator feature request.
 
+Describe Your Problem!
+======================
+
+IMPORTANT: When filing a feature request, you **MUST** describe the root
+problem you are facing. We will not accept feature requests which do not
+include a problem description. See below for details.
+
 Overview
 ========
 
@@ -138,8 +145,9 @@ upstream.
 Describe Problems
 =================
 
-When you file a feature request, it is really helpful to describe the problem
-you're facing first, not just your desired solution.
+When you file a feature request, we need you to describe the problem you're
+facing first, not just your desired solution. Describing the problem you are
+facing is the **most important part** of a feature request.
 
 Often, your problem may have a lot in common with other similar problems. If we
 understand your use case we can compare it to other use cases and sometimes find
@@ -158,6 +166,10 @@ which has approximately the same effect and does fit into the product direction.
 
 If you only describe the solution and not the problem, we can't generalize,
 contextualize, merge, reframe, or offer alternative solutions or workarounds.
+
+You must describe the problem you are facing when filing a feature request. We
+will not accept feature requests which do not contextualize the request by
+describing the root problem.
 
 
 Hypotheticals
@@ -206,13 +218,13 @@ Create a Task in Maniphest
 
 If you think your feature might be a good fit for the upstream, have reasonable
 expectations about it, and have a good description of the problem you're trying
-to solve, you're ready to file a feature request:
+to solve, you're ready to file a feature request.
 
-https://secure.phabricator.com/maniphest/task/create/
+It is **particularly critical** that you describe the problem you are facing,
+not just the feature you want. We will not accept feature requests which do
+not describe the root problem the feature is intended to resolve.
 
-If you have a quick question or want to discuss something before filing a
-request, IRC is the best way to get a quick answer. You can find information
-about IRC and other support channels in @{article: Give Feedback! Get Support!}.
+(NOTE) https://secure.phabricator.com/maniphest/task/create/
 
 
 Next Steps
@@ -221,6 +233,5 @@ Next Steps
 Continue by:
 
   - learning about @{article: Contributing Bug Reports}; or
-  - reading general support information in
-    @{article: Give Feedback! Get Support!}; or
+  - reading general support information in @{article:Support Resources}; or
   - returning to the @{article:Contributor Introduction}.

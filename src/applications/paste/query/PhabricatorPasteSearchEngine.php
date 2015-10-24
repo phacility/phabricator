@@ -13,7 +13,7 @@ final class PhabricatorPasteSearchEngine
 
   public function newQuery() {
     return id(new PhabricatorPasteQuery())
-      ->needContent(true);
+      ->needSnippets(true);
   }
 
   protected function buildQueryFromParameters(array $map) {
@@ -136,11 +136,15 @@ final class PhabricatorPasteSearchEngine
       $created = phabricator_date($paste->getDateCreated(), $viewer);
       $author = $handles[$paste->getAuthorPHID()]->renderLink();
 
-      $lines = phutil_split_lines($paste->getContent());
+      $snippet_type = $paste->getSnippet()->getType();
+      $lines = phutil_split_lines($paste->getSnippet()->getContent());
 
       $preview = id(new PhabricatorSourceCodeView())
-        ->setLimit(5)
         ->setLines($lines)
+        ->setTruncatedFirstBytes(
+          $snippet_type == PhabricatorPasteSnippet::FIRST_BYTES)
+        ->setTruncatedFirstLines(
+          $snippet_type == PhabricatorPasteSnippet::FIRST_LINES)
         ->setURI(new PhutilURI($paste->getURI()));
 
       $source_code = phutil_tag(

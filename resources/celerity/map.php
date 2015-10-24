@@ -373,6 +373,7 @@ return array(
     'rsrc/js/application/diffusion/behavior-locate-file.js' => '6d3e1947',
     'rsrc/js/application/diffusion/behavior-pull-lastmodified.js' => 'f01586dc',
     'rsrc/js/application/doorkeeper/behavior-doorkeeper-tag.js' => 'e5822781',
+    'rsrc/js/application/drydock/drydock-live-operation-status.js' => '901935ef',
     'rsrc/js/application/files/behavior-icon-composer.js' => '8ef9ab58',
     'rsrc/js/application/files/behavior-launch-icon-composer.js' => '48086888',
     'rsrc/js/application/herald/HeraldRuleEditor.js' => '91a6031b',
@@ -576,6 +577,7 @@ return array(
     'javelin-behavior-diffusion-locate-file' => '6d3e1947',
     'javelin-behavior-diffusion-pull-lastmodified' => 'f01586dc',
     'javelin-behavior-doorkeeper-tag' => 'e5822781',
+    'javelin-behavior-drydock-live-operation-status' => '901935ef',
     'javelin-behavior-durable-column' => 'c72aa091',
     'javelin-behavior-error-log' => '6882e80a',
     'javelin-behavior-event-all-day' => '38dcf3c8',
@@ -1517,6 +1519,11 @@ return array(
       'javelin-behavior',
       'javelin-dom',
       'javelin-stratcom',
+    ),
+    '901935ef' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-request',
     ),
     '91a6031b' => array(
       'multirow-row-manager',

@@ -9,7 +9,6 @@ final class PhabricatorSearchHovercardController
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-
     $phids = $request->getArr('phids');
 
     $handles = id(new PhabricatorHandleQuery())

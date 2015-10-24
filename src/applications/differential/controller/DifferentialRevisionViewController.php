@@ -1060,30 +1060,13 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $operation = head(msort($operations, 'getID'));
 
-    // TODO: This is completely made up for now, give it useful information and
-    // a sweet progress bar.
+    $box_view = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Active Operations'));
 
-    switch ($operation->getOperationState()) {
-      case DrydockRepositoryOperation::STATE_WAIT:
-      case DrydockRepositoryOperation::STATE_WORK:
-        $severity = PHUIInfoView::SEVERITY_NOTICE;
-        $text = pht(
-          'Some sort of repository operation is currently running.');
-        break;
-      default:
-        $severity = PHUIInfoView::SEVERITY_ERROR;
-        $text = pht(
-          'Some sort of repository operation failed.');
-        break;
-    }
-
-    $info_view = id(new PHUIInfoView())
-      ->setSeverity($severity)
-      ->appendChild($text);
-
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Active Operations (EXPERIMENTAL!)'))
-      ->setInfoView($info_view);
+    return id(new DrydockRepositoryOperationStatusView())
+      ->setUser($viewer)
+      ->setBoxView($box_view)
+      ->setOperation($operation);
   }
 
 }
