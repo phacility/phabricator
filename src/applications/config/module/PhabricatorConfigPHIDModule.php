@@ -18,9 +18,35 @@ final class PhabricatorConfigPHIDModule extends PhabricatorConfigModule {
 
     $rows = array();
     foreach ($types as $key => $type) {
+      $class_name = $type->getPHIDTypeApplicationClass();
+      if ($class_name !== null) {
+        $app = PhabricatorApplication::getByClass($class_name);
+        $app_name = $app->getName();
+
+        $icon = $app->getFontIcon();
+        if ($icon) {
+          $app_icon = id(new PHUIIconView())->setIconFont($icon);
+        } else {
+          $app_icon = null;
+        }
+      } else {
+        $app_name = null;
+        $app_icon = null;
+      }
+
+      $icon = $type->getTypeIcon();
+      if ($icon) {
+        $type_icon = id(new PHUIIconView())->setIconFont($icon);
+      } else {
+        $type_icon = null;
+      }
+
       $rows[] = array(
         $type->getTypeConstant(),
         get_class($type),
+        $app_icon,
+        $app_name,
+        $type_icon,
         $type->getTypeName(),
       );
     }
@@ -30,12 +56,18 @@ final class PhabricatorConfigPHIDModule extends PhabricatorConfigModule {
         array(
           pht('Constant'),
           pht('Class'),
+          null,
+          pht('Application'),
+          null,
           pht('Name'),
         ))
       ->setColumnClasses(
         array(
           null,
           'pri',
+          'icon',
+          null,
+          'icon',
           'wide',
         ));
 
