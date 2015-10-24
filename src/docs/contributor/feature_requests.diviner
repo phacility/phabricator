@@ -114,7 +114,8 @@ We have a lot of users and a small team. Even if your feature is something we're
 interested in and a good fit for where we want the product to go, it may take
 us a long time to get around to building it.
 
-We work full time on Phabricator, and our long-term roadmap has many years worth
+We work full time on Phabricator, and our long-term roadmap (which we call our
+[[ https://secure.phabricator.com/w/starmap/ | Starmap ]]) has many years worth
 of work. Your feature request is competing against thousands of other requests
 for priority.
 
@@ -127,7 +128,8 @@ Even if your feature request is simple and has substantial impact for a large
 number of users, the size of the request queue means that it is mathematically
 unlikely to be near the top.
 
-You can find some information about how we prioritize in T4778. In particular,
+You can find some information about how we prioritize in
+[[ https://secure.phabricator.com/w/planning/ | Planning ]]. In particular,
 we reprioritize frequently and can not accurately predict when we'll build a
 feature which isn't very near to top of the queue.
 
@@ -137,9 +139,9 @@ give you any updates or predictions about timelines. One day, out of nowhere,
 your feature will materialize. That day may be a decade from now. You should
 have realistic expectations about this when filing a feature request.
 
-If you want a concrete timeline, you can build the feature yourself. See
-@{article:Contributing Code} for details and alternatives to working with the
-upstream.
+If you want a concrete timeline, you can work with us to pay for some control
+over our roadmap. For details, see
+[[ https://secure.phabricator.com/w/prioritization/ | Prioritization ]].
 
 
 Describe Problems
