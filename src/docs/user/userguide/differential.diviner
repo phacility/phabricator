@@ -50,19 +50,24 @@ just some intern who you don't trust) you can write a Herald rule to
 automatically CC you on any revisions which match rules (like content, author,
 files affected, etc.)
 
-= Differential Tips =
+Inline Comments
+===============
 
-  - You can leave inline comments by clicking the line numbers in the diff.
-  - You can leave a comment across multiple lines by dragging across the line
-    numbers.
-  - Inline comments are initially saved as drafts. They are not submitted until
-    you submit a comment at the bottom of the page.
-  - Press "?" to view keyboard shortcuts.
+You can leave inline comments by clicking the line number next to a line. For
+an in-depth look at inline comments, see
+@{article:Differential User Guide: Inline Comments}.
 
-= Next Steps =
 
-  - Read the FAQ at @{article:Differential User Guide: FAQ}; or
-  - learn about handling large changesets at
+Next Steps
+==========
+
+Continue by:
+
+  - diving into the details of inline comments in
+    @{article:Differential User Guide: Inline Comments}; or
+  - reading the FAQ at @{article:Differential User Guide: FAQ}; or
+  - learning about handling large changesets in
     @{article:Differential User Guide: Large Changes}; or
-  - learn about test plans at @{article:Differential User Guide: Test Plans}; or
-  - learn more about Herald at @{article:Herald User Guide}.
+  - learning about test plans in
+    @{article:Differential User Guide: Test Plans}; or
+  - learning more about Herald in @{article:Herald User Guide}.
