@@ -84,6 +84,22 @@ final class PhabricatorAuthOneTimeLoginController
         ->addCancelButton('/login/email/', pht('Send Another Email'));
     }
 
+    if (!$target_user->canEstablishWebSessions()) {
+      return $this->newDialog()
+        ->setTitle(pht('Unable to Establish Web Session'))
+        ->setShortTitle(pht('Login Failure'))
+        ->appendParagraph(
+          pht(
+            'You are trying to gain access to an account ("%s") that can not '.
+            'establish a web session.',
+            $target_user->getUsername()))
+        ->appendParagraph(
+          pht(
+            'Special users like daemons and mailing lists are not permitted '.
+            'to log in via the web. Log in as a normal user instead.'))
+        ->addCancelButton('/');
+    }
+
     if ($request->isFormPost()) {
       // If we have an email bound into this URI, verify email so that clicking
       // the link in the "Welcome" email is good enough, without requiring users
