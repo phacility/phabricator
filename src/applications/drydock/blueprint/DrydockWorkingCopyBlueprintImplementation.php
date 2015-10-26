@@ -432,7 +432,7 @@ final class DrydockWorkingCopyBlueprintImplementation
       $src_ref);
 
     $command = csprintf(
-      'git merge --no-stat --squash --ff-only -- %R',
+      'git merge --no-stat --squash -- %R',
       $src_ref);
 
     try {
