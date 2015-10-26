@@ -431,17 +431,28 @@ final class DrydockWorkingCopyBlueprintImplementation
       $src_ref,
       $src_ref);
 
-    $command = csprintf(
-      'git merge --no-stat --squash -- %R',
+    // NOTE: This can never actually generate a commit because we pass
+    // "--squash", but git sometimes runs code to check that a username and
+    // email are configured anyway.
+    $real_command = csprintf(
+      'git -c user.name=%s -c user.email=%s merge --no-stat --squash -- %R',
+      'drydock',
+      'drydock@phabricator',
+      $src_ref);
+
+    // Show the user a simplified command if the operation fails and we need to
+    // report an error.
+    $show_command = csprintf(
+      'git merge --squash -- %R',
       $src_ref);
 
     try {
-      $interface->execx('%C', $command);
+      $interface->execx('%C', $real_command);
     } catch (CommandException $ex) {
       $this->setWorkingCopyVCSErrorFromCommandException(
         $lease,
         self::PHASE_SQUASHMERGE,
-        $command,
+        $show_command,
         $ex);
 
       throw $ex;
