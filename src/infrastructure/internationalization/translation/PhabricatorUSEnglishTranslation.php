@@ -1420,6 +1420,11 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
+      'WARNING: There are %s unapproved authorization(s)!' => array(
+        'WARNING: There is an unapproved authorization!',
+        'WARNING: There are unapproved authorizations!',
+      ),
+
     );
   }
 

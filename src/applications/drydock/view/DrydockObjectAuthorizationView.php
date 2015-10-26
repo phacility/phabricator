@@ -47,6 +47,7 @@ final class DrydockObjectAuthorizationView extends AphrontView {
       $authorizations = array();
     }
 
+    $warnings = array();
     $items = array();
     foreach ($blueprint_phids as $phid) {
       $authorization = idx($authorizations, $phid);
@@ -65,10 +66,28 @@ final class DrydockObjectAuthorizationView extends AphrontView {
         null,
         DrydockAuthorization::getBlueprintStateName($state));
 
+      switch ($state) {
+        case DrydockAuthorization::BLUEPRINTAUTH_REQUESTED:
+        case DrydockAuthorization::BLUEPRINTAUTH_DECLINED:
+          $warnings[] = $authorization;
+          break;
+      }
+
       $items[] = $item;
     }
 
     $status = new PHUIStatusListView();
+
+    if ($warnings) {
+      $status->addItem(
+        id(new PHUIStatusItemView())
+          ->setIcon('fa-exclamation-triangle', 'pink')
+          ->setTarget(
+            pht(
+              'WARNING: There are %s unapproved authorization(s)!',
+              new PhutilNumber(count($warnings)))));
+    }
+
     foreach ($items as $item) {
       $status->addItem($item);
     }

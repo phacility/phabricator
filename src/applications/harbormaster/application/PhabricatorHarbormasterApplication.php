@@ -61,6 +61,7 @@ final class PhabricatorHarbormasterApplication extends PhabricatorApplication {
           'add/(?:(?P<id>\d+)/)?' => 'HarbormasterStepAddController',
           'new/(?P<plan>\d+)/(?P<class>[^/]+)/'
             => 'HarbormasterStepEditController',
+          'view/(?P<id>\d+)/' => 'HarbormasterStepViewController',
           'edit/(?:(?P<id>\d+)/)?' => 'HarbormasterStepEditController',
           'delete/(?:(?P<id>\d+)/)?' => 'HarbormasterStepDeleteController',
         ),

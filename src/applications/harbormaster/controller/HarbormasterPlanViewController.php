@@ -117,16 +117,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
           ->setStatusIcon('fa-warning red')
           ->addAttribute(pht(
             'This step has an invalid implementation (%s).',
-            $step->getClassName()))
-          ->addAction(
-            id(new PHUIListItemView())
-              ->setIcon('fa-times')
-              ->addSigil('harbormaster-build-step-delete')
-              ->setWorkflow(true)
-              ->setRenderNameAsTooltip(true)
-              ->setName(pht('Delete'))
-              ->setHref(
-                $this->getApplicationURI('step/delete/'.$step->getID().'/')));
+            $step->getClassName()));
         $step_list->addItem($item);
         continue;
       }
@@ -137,23 +128,9 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
       $item->addAttribute($implementation->getDescription());
 
       $step_id = $step->getID();
-      $edit_uri = $this->getApplicationURI("step/edit/{$step_id}/");
-      $delete_uri = $this->getApplicationURI("step/delete/{$step_id}/");
 
-      if ($can_edit) {
-        $item->setHref($edit_uri);
-      }
-
-      $item
-        ->setHref($edit_uri)
-        ->addAction(
-          id(new PHUIListItemView())
-            ->setIcon('fa-times')
-            ->addSigil('harbormaster-build-step-delete')
-            ->setWorkflow(true)
-            ->setDisabled(!$can_edit)
-            ->setHref(
-              $this->getApplicationURI('step/delete/'.$step->getID().'/')));
+      $view_uri = $this->getApplicationURI("step/view/{$step_id}/");
+      $item->setHref($view_uri);
 
       $depends = $step->getStepImplementation()->getDependencies($step);
       $inputs = $step->getStepImplementation()->getArtifactInputs();
