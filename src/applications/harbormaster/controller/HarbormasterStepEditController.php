@@ -6,9 +6,6 @@ final class HarbormasterStepEditController extends HarbormasterController {
     $viewer = $this->getViewer();
     $id = $request->getURIData('id');
 
-    $this->requireApplicationCapability(
-      HarbormasterManagePlansCapability::CAPABILITY);
-
     if ($id) {
       $step = id(new HarbormasterBuildStepQuery())
         ->setViewer($viewer)

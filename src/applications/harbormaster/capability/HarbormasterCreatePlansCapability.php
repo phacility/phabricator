@@ -1,17 +1,17 @@
 <?php
 
-final class HarbormasterManagePlansCapability
+final class HarbormasterCreatePlansCapability
   extends PhabricatorPolicyCapability {
 
   const CAPABILITY = 'harbormaster.plans';
 
   public function getCapabilityName() {
-    return pht('Can Manage Build Plans');
+    return pht('Can Create Build Plans');
   }
 
   public function describeCapabilityRejection() {
     return pht(
-      'You do not have permission to manage Harbormaster build plans.');
+      'You do not have permission to create Harbormaster build plans.');
   }
 
 }

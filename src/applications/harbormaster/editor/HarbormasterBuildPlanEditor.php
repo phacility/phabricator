@@ -15,7 +15,8 @@ final class HarbormasterBuildPlanEditor
     $types = parent::getTransactionTypes();
     $types[] = HarbormasterBuildPlanTransaction::TYPE_NAME;
     $types[] = HarbormasterBuildPlanTransaction::TYPE_STATUS;
-    $types[] = PhabricatorTransactions::TYPE_COMMENT;
+    $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     return $types;
   }
 

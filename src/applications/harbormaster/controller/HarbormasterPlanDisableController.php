@@ -6,9 +6,6 @@ final class HarbormasterPlanDisableController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
-    $this->requireApplicationCapability(
-      HarbormasterManagePlansCapability::CAPABILITY);
-
     $plan = id(new HarbormasterBuildPlanQuery())
       ->setViewer($viewer)
       ->withIDs(array($request->getURIData('id')))

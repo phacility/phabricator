@@ -3,7 +3,7 @@
 final class HarbormasterPlanViewController extends HarbormasterPlanController {
 
   public function handleRequest(AphrontRequest $request) {
-    $viewer = $this->getviewer();
+    $viewer = $this->getViewer();
     $id = $request->getURIData('id');
 
     $plan = id(new HarbormasterBuildPlanQuery())
@@ -81,15 +81,10 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
       ->execute();
     $steps = mpull($steps, null, 'getPHID');
 
-    $has_manage = $this->hasApplicationCapability(
-      HarbormasterManagePlansCapability::CAPABILITY);
-
-    $has_edit = PhabricatorPolicyFilter::hasCapability(
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $plan,
       PhabricatorPolicyCapability::CAN_EDIT);
-
-    $can_edit = ($has_manage && $has_edit);
 
     $step_list = id(new PHUIObjectItemListView())
       ->setUser($viewer)
@@ -252,15 +247,10 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
       ->setObject($plan)
       ->setObjectURI($this->getApplicationURI("plan/{$id}/"));
 
-    $has_manage = $this->hasApplicationCapability(
-      HarbormasterManagePlansCapability::CAPABILITY);
-
-    $has_edit = PhabricatorPolicyFilter::hasCapability(
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $plan,
       PhabricatorPolicyCapability::CAN_EDIT);
-
-    $can_edit = ($has_manage && $has_edit);
 
     $list->addAction(
       id(new PhabricatorActionView())
@@ -288,7 +278,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
           ->setIcon('fa-ban'));
     }
 
-    $can_run = ($has_manage && $plan->canRunManually());
+    $can_run = ($can_edit && $plan->canRunManually());
 
     $list->addAction(
       id(new PhabricatorActionView())
