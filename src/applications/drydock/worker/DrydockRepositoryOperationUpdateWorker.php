@@ -90,6 +90,9 @@ final class DrydockRepositoryOperationUpdateWorker
     // TODO: This is very similar to leasing in Harbormaster, maybe we can
     // share some of the logic?
 
+    $working_copy = new DrydockWorkingCopyBlueprintImplementation();
+    $working_copy_type = $working_copy->getType();
+
     $lease_phid = $operation->getProperty('exec.leasePHID');
     if ($lease_phid) {
       $lease = id(new DrydockLeaseQuery())
@@ -103,9 +106,6 @@ final class DrydockRepositoryOperationUpdateWorker
             $lease_phid));
       }
     } else {
-      $working_copy_type = id(new DrydockWorkingCopyBlueprintImplementation())
-        ->getType();
-
       $repository = $operation->getRepository();
 
       $allowed_phids = $repository->getAutomationBlueprintPHIDs();
@@ -138,6 +138,13 @@ final class DrydockRepositoryOperationUpdateWorker
     }
 
     if (!$lease->isActive()) {
+      $vcs_error = $working_copy->getWorkingCopyVCSError($lease);
+      if ($vcs_error) {
+        $operation
+          ->setWorkingCopyVCSError($vcs_error)
+          ->save();
+      }
+
       throw new PhabricatorWorkerPermanentFailureException(
         pht(
           'Lease "%s" never activated.',

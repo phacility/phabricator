@@ -3,6 +3,8 @@
 final class DrydockWorkingCopyBlueprintImplementation
   extends DrydockBlueprintImplementation {
 
+  const PHASE_SQUASHMERGE = 'squashmerge';
+
   public function isEnabled() {
     return true;
   }
@@ -288,7 +290,7 @@ final class DrydockWorkingCopyBlueprintImplementation
       $merges = idx($spec, 'merges');
       if ($merges) {
         foreach ($merges as $merge) {
-          $this->applyMerge($interface, $merge);
+          $this->applyMerge($lease, $interface, $merge);
         }
       }
 
@@ -416,6 +418,7 @@ final class DrydockWorkingCopyBlueprintImplementation
   }
 
   private function applyMerge(
+    DrydockLease $lease,
     DrydockCommandInterface $interface,
     array $merge) {
 
@@ -428,15 +431,48 @@ final class DrydockWorkingCopyBlueprintImplementation
       $src_ref,
       $src_ref);
 
+    $command = csprintf(
+      'git merge --no-stat --squash --ff-only -- %R',
+      $src_ref);
+
     try {
-      $interface->execx(
-        'git merge --no-stat --squash --ff-only -- %s',
-        $src_ref);
+      $interface->execx('%C', $command);
     } catch (CommandException $ex) {
-      // TODO: Specifically note this as a merge conflict.
+      $this->setWorkingCopyVCSErrorFromCommandException(
+        $lease,
+        self::PHASE_SQUASHMERGE,
+        $command,
+        $ex);
+
       throw $ex;
     }
   }
 
+  protected function setWorkingCopyVCSErrorFromCommandException(
+    DrydockLease $lease,
+    $phase,
+    $command,
+    CommandException $ex) {
+
+    $error = array(
+      'phase' => $phase,
+      'command' => (string)$command,
+      'raw' => (string)$ex->getCommand(),
+      'err' => $ex->getError(),
+      'stdout' => $ex->getStdout(),
+      'stderr' => $ex->getStderr(),
+    );
+
+    $lease->setAttribute('workingcopy.vcs.error', $error);
+  }
+
+  public function getWorkingCopyVCSError(DrydockLease $lease) {
+    $error = $lease->getAttribute('workingcopy.vcs.error');
+    if (!$error) {
+      return null;
+    } else {
+      return $error;
+    }
+  }
 
 }
