@@ -158,6 +158,11 @@ final class DrydockRepositoryOperation extends DrydockDAO
     return false;
   }
 
+  public function getWorkingCopyMerges() {
+    return $this->getImplementation()->getWorkingCopyMerges(
+      $this);
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

@@ -53,6 +53,9 @@ final class DrydockRepositoryOperationUpdateWorker
     // waiting for a lease we're holding.
 
     try {
+      $operation->getImplementation()
+        ->setViewer($viewer);
+
       $lease = $this->loadWorkingCopyLease($operation);
 
       $interface = $lease->getInterface(
@@ -60,9 +63,6 @@ final class DrydockRepositoryOperationUpdateWorker
 
       // No matter what happens here, destroy the lease away once we're done.
       $lease->releaseOnDestruction(true);
-
-      $operation->getImplementation()
-        ->setViewer($viewer);
 
       $operation->applyOperation($interface);
 
@@ -165,6 +165,8 @@ final class DrydockRepositoryOperationUpdateWorker
             $type,
             $target));
     }
+
+    $spec['merges'] = $operation->getWorkingCopyMerges();
 
     $map = array();
     $map[$repository->getCloneName()] = array(

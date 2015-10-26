@@ -237,8 +237,7 @@ final class DrydockWorkingCopyBlueprintImplementation
       $cmd = array();
       $arg = array();
 
-      $cmd[] = 'cd %s';
-      $arg[] = "{$root}/repo/{$directory}/";
+      $interface->pushWorkingDirectory("{$root}/repo/{$directory}/");
 
       $cmd[] = 'git clean -d --force';
       $cmd[] = 'git fetch';
@@ -285,6 +284,15 @@ final class DrydockWorkingCopyBlueprintImplementation
       if (idx($spec, 'default')) {
         $default = $directory;
       }
+
+      $merges = idx($spec, 'merges');
+      if ($merges) {
+        foreach ($merges as $merge) {
+          $this->applyMerge($interface, $merge);
+        }
+      }
+
+      $interface->popWorkingDirectory();
     }
 
     if ($default === null) {
@@ -333,7 +341,7 @@ final class DrydockWorkingCopyBlueprintImplementation
         $command_interface = $host_lease->getInterface($type);
 
         $path = $lease->getAttribute('workingcopy.default');
-        $command_interface->setWorkingDirectory($path);
+        $command_interface->pushWorkingDirectory($path);
 
         return $command_interface;
     }
@@ -405,6 +413,29 @@ final class DrydockWorkingCopyBlueprintImplementation
 
   protected function shouldUseConcurrentResourceLimit() {
     return true;
+  }
+
+  private function applyMerge(
+    DrydockCommandInterface $interface,
+    array $merge) {
+
+    $src_uri = $merge['src.uri'];
+    $src_ref = $merge['src.ref'];
+
+    $interface->execx(
+      'git fetch --no-tags -- %s +%s:%s',
+      $src_uri,
+      $src_ref,
+      $src_ref);
+
+    try {
+      $interface->execx(
+        'git merge --no-stat --squash --ff-only -- %s',
+        $src_ref);
+    } catch (CommandException $ex) {
+      // TODO: Specifically note this as a merge conflict.
+      throw $ex;
+    }
   }
 
 
