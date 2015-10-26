@@ -1047,6 +1047,10 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $operations = id(new DrydockRepositoryOperationQuery())
       ->setViewer($viewer)
       ->withObjectPHIDs(array($revision->getPHID()))
+      ->withOperationTypes(
+        array(
+          DrydockLandRepositoryOperation::OPCONST,
+        ))
       ->withOperationStates(
         array(
           DrydockRepositoryOperation::STATE_WAIT,
@@ -1058,7 +1062,16 @@ final class DifferentialRevisionViewController extends DifferentialController {
       return null;
     }
 
-    $operation = head(msort($operations, 'getID'));
+    $state_fail = DrydockRepositoryOperation::STATE_FAIL;
+
+    // We're going to show the oldest operation which hasn't failed, or the
+    // most recent failure if they're all failures.
+    $operations = msort($operations, 'getID');
+    foreach ($operations as $operation) {
+      if ($operation->getOperationState() != $state_fail) {
+        break;
+      }
+    }
 
     $box_view = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Active Operations'));

@@ -58,14 +58,54 @@ final class DifferentialRevisionOperationController
           $repository->getMonogram()));
     }
 
+    $op = new DrydockLandRepositoryOperation();
+
+    // Check for other operations. Eventually this should probably be more
+    // general (e.g., it's OK to land to multiple different branches
+    // simultaneously) but just put this in as a sanity check for now.
+    $other_operations = id(new DrydockRepositoryOperationQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($revision->getPHID()))
+      ->withOperationTypes(
+        array(
+          $op->getOperationConstant(),
+        ))
+      ->withOperationStates(
+        array(
+          DrydockRepositoryOperation::STATE_WAIT,
+          DrydockRepositoryOperation::STATE_WORK,
+          DrydockRepositoryOperation::STATE_DONE,
+        ))
+      ->execute();
+
+    if ($other_operations) {
+      $any_done = false;
+      foreach ($other_operations as $operation) {
+        if ($operation->isDone()) {
+          $any_done = true;
+          break;
+        }
+      }
+
+      if ($any_done) {
+        return $this->rejectOperation(
+          $revision,
+          pht('Already Complete'),
+          pht('This revision has already landed.'));
+      } else {
+        return $this->rejectOperation(
+          $revision,
+          pht('Already In Flight'),
+          pht('This revision is already landing.'));
+      }
+    }
+
     if ($request->isFormPost()) {
       // NOTE: The operation is locked to the current active diff, so if the
       // revision is updated before the operation applies nothing sneaky
       // occurs.
 
       $diff = $revision->getActiveDiff();
-
-      $op = new DrydockLandRepositoryOperation();
 
       $operation = DrydockRepositoryOperation::initializeNewOperation($op)
         ->setAuthorPHID($viewer->getPHID())

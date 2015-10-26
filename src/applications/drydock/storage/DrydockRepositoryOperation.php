@@ -158,6 +158,10 @@ final class DrydockRepositoryOperation extends DrydockDAO
     return false;
   }
 
+  public function isDone() {
+    return ($this->getOperationState() === self::STATE_DONE);
+  }
+
   public function getWorkingCopyMerges() {
     return $this->getImplementation()->getWorkingCopyMerges(
       $this);
