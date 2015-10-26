@@ -115,7 +115,7 @@ final class DrydockRepositoryOperationStatusView
       ->setColumnClasses(
         array(
           'header',
-          'wide',
+          'wide prewrap',
         ));
 
     return $table;

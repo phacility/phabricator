@@ -1051,12 +1051,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
         array(
           DrydockLandRepositoryOperation::OPCONST,
         ))
-      ->withOperationStates(
-        array(
-          DrydockRepositoryOperation::STATE_WAIT,
-          DrydockRepositoryOperation::STATE_WORK,
-          DrydockRepositoryOperation::STATE_FAIL,
-        ))
       ->execute();
     if (!$operations) {
       return null;
@@ -1071,6 +1065,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
       if ($operation->getOperationState() != $state_fail) {
         break;
       }
+    }
+
+    // If we found a completed operation, don't render anything. We don't want
+    // to show an older error after the thing worked properly.
+    if ($operation->isDone()) {
+      return null;
     }
 
     $box_view = id(new PHUIObjectBoxView())

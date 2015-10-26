@@ -61,6 +61,7 @@ th.aphront-table-view-sortable-selected {
   text-align: right;
   color: {$bluetext};
   font-weight: bold;
+  vertical-align: top;
 }
 
 .aphront-table-view td {
