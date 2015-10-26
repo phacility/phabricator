@@ -125,15 +125,7 @@ final class DrydockWorkingCopyBlueprintImplementation
       ->setOwnerPHID($resource_phid)
       ->setAttribute('workingcopy.resourcePHID', $resource_phid)
       ->setAllowedBlueprintPHIDs($blueprint_phids);
-
-    $resource
-      ->setAttribute('host.leasePHID', $host_lease->getPHID())
-      ->save();
-
-    $host_lease->queueForActivation();
-
-    // TODO: Add some limits to the number of working copies we can have at
-    // once?
+    $resource->setAttribute('host.leasePHID', $host_lease->getPHID());
 
     $map = $lease->getAttribute('repositories.map');
     foreach ($map as $key => $value) {
@@ -143,10 +135,18 @@ final class DrydockWorkingCopyBlueprintImplementation
           'phid',
         ));
     }
+    $resource->setAttribute('repositories.map', $map);
 
-    return $resource
-      ->setAttribute('repositories.map', $map)
-      ->allocateResource();
+    $slot_lock = $this->getConcurrentResourceLimitSlotLock($blueprint);
+    if ($slot_lock !== null) {
+      $resource->needSlotLock($slot_lock);
+    }
+
+    $resource->allocateResource();
+
+    $host_lease->queueForActivation();
+
+    return $resource;
   }
 
   public function activateResource(
@@ -393,14 +393,18 @@ final class DrydockWorkingCopyBlueprintImplementation
     return $lease;
   }
 
-  public function getFieldSpecifications() {
+  protected function getCustomFieldSpecifications() {
     return array(
       'blueprintPHIDs' => array(
         'name' => pht('Use Blueprints'),
         'type' => 'blueprints',
         'required' => true,
       ),
-    ) + parent::getFieldSpecifications();
+    );
+  }
+
+  protected function shouldUseConcurrentResourceLimit() {
+    return true;
   }
 
 
