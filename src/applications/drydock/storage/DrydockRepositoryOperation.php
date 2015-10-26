@@ -167,6 +167,15 @@ final class DrydockRepositoryOperation extends DrydockDAO
       $this);
   }
 
+  public function setWorkingCopyLeasePHID($lease_phid) {
+    return $this->setProperty('exec.leasePHID', $lease_phid);
+  }
+
+  public function getWorkingCopyLeasePHID() {
+    return $this->getProperty('exec.leasePHID');
+  }
+
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

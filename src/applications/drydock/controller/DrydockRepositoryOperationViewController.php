@@ -83,6 +83,15 @@ final class DrydockRepositoryOperationViewController
       pht('Object'),
       $viewer->renderHandle($operation->getObjectPHID()));
 
+    $lease_phid = $operation->getWorkingCopyLeasePHID();
+    if ($lease_phid) {
+      $lease_display = $viewer->renderHandle($lease_phid);
+    } else {
+      $lease_display = phutil_tag('em', array(), pht('None'));
+    }
+
+    $view->addProperty(pht('Working Copy'), $lease_display);
+
     return $view;
   }
 

@@ -751,6 +751,15 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
       ->setStatus(DrydockLeaseStatus::STATUS_BROKEN)
       ->save();
 
+    $lease->logEvent(
+      DrydockLeaseActivationFailureLogType::LOGCONST,
+      array(
+        'class' => get_class($ex),
+        'message' => $ex->getMessage(),
+      ));
+
+    $lease->awakenTasks();
+
     $this->queueTask(
       __CLASS__,
       array(
@@ -758,13 +767,6 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
       ),
       array(
         'objectPHID' => $lease->getPHID(),
-      ));
-
-    $lease->logEvent(
-      DrydockLeaseActivationFailureLogType::LOGCONST,
-      array(
-        'class' => get_class($ex),
-        'message' => $ex->getMessage(),
       ));
 
     throw new PhabricatorWorkerPermanentFailureException(
@@ -796,6 +798,8 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
       ->save();
 
     $lease->logEvent(DrydockLeaseDestroyedLogType::LOGCONST);
+
+    $lease->awakenTasks();
   }
 
 }

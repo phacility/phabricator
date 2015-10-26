@@ -127,7 +127,7 @@ final class DrydockRepositoryOperationUpdateWorker
       }
 
       $operation
-        ->setProperty('exec.leasePHID', $lease->getPHID())
+        ->setWorkingCopyLeasePHID($lease->getPHID())
         ->save();
 
       $lease->queueForActivation();
