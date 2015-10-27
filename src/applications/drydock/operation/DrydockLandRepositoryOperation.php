@@ -234,7 +234,7 @@ final class DrydockLandRepositoryOperation
     }
 
     $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
-    if ($revision->getStatus() !== $status_accepted) {
+    if ($revision->getStatus() != $status_accepted) {
       return array(
         'title' => pht('Revision Not Accepted'),
         'body' => pht(
