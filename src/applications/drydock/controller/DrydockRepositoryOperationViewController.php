@@ -46,10 +46,15 @@ final class DrydockRepositoryOperationViewController
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    $status_view = id(new DrydockRepositoryOperationStatusView())
+      ->setUser($viewer)
+      ->setOperation($operation);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $object_box,
+        $status_view,
       ),
       array(
         'title' => $title,

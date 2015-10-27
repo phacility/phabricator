@@ -15,16 +15,19 @@ applications coordinate during complex build and deployment tasks. Typically,
 you will configure Drydock to enable capabilities in other applications:
 
   - Harbormaster can use Drydock to host builds.
-  - In the future, Differential will be able to use Drydock to perform
-    server-side merges.
+  - Differential can use Drydock to perform server-side merges.
 
 Users will not normally interact with Drydock directly.
+
+If you want to get started with Drydock right away, see
+@{article:Drydock User Guide: Quick Start} for specific instructions on
+configuring integrations.
 
 
 What Drydock Does
 =================
 
-Drydock manages working copies, build hosts, and other software and hardware
+Drydock manages working copies, hosts, and other software and hardware
 resources that build and deployment processes may require in order to perform
 useful work.
 
@@ -49,14 +52,201 @@ doing the actual work.
 
 Drydock solves these scaling problems by providing a central allocation
 framework for //resources//, which are physical or virtual resources like a
-build host or a working copy. Processes which need to share hardware or
-software can use Drydock to coordinate creation, access, and destruction of
-those resources.
+host or a working copy. Processes which need to share hardware or software can
+use Drydock to coordinate creation, access, and destruction of those resources.
 
 Applications ask Drydock for resources matching a description, and it allocates
 a corresponding resource by either finding a suitable unused resource or
 creating a new resource. When work completes, the resource is returned to the
 resource pool or destroyed.
+
+
+Getting Started with Drydock
+============================
+
+In general, you will interact with Drydock by configuring blueprints, which
+tell Drydock how to build resources. You can jump into this topic directly
+in @{article:Drydock Blueprints}.
+
+For help on configuring specific application features:
+
+  - to configure server-side merges from Differential, see
+    @{article:Differential User Guide: Automated Landing}.
+
+You should also understand the Drydock security model before deploying it
+in a production environment. See @{article:Drydock User Guide: Security}.
+
+The remainder of this document has some additional high-level discussion about
+how Drydock works and why it works that way, which may be helpful in
+understanding the application as a whole.
+
+
+Drydock Concepts
+================
+
+The major concepts in Drydock are **Blueprints**, **Resources**, **Leases**,
+and the **Allocator**.
+
+**Blueprints** are configuration that tells Drydock how to create resources:
+where it can put them, how to access them, how many it can make at once, who is
+allowed to ask for access to them, how to actually build them, how to clean
+them up when they are no longer in use, and so on.
+
+Drydock starts without any blueprints. You'll add blueprints to configure
+Drydock and enable it to satisfy requests for resources. You can learn more
+about blueprints in @{article:Drydock Blueprints}.
+
+**Resources** represent things (like hosts or working copies) that Drydock has
+created, is managing the lifecycle for, and can give other applications access
+to.
+
+**Leases** are requests for resources with certain qualities by other
+applications. For example, Harbormaster may request a working copy of a
+particular repository so it can run unit tests.
+
+The **Allocator** is where Drydock actually does work. It works roughly like
+this:
+
+  - An application creates a lease describing a resource it needs, and
+    uses this lease to ask Drydock for an appropriate resource.
+  - Drydock looks at free resources to try to find one it can use to satisfy
+    the request. If it finds one, it marks the resource as in use and gives
+    the application details about how to access it.
+  - If it can't find an appropriate resource that already exists, it looks at
+    the blueprints it has configured to try to build one. If it can, it creates
+    a new resource, then gives the application access to it.
+  - Once the application finishes using the resource, it frees it. Depending
+    on configuration, Drydock may reuse it, destroy it, or hold onto it and
+    make a decision later.
+
+Some minor concepts in Drydock are **Slot Locks** and **Repository Operations**.
+
+**Slot Locks** are simple optimistic locks that most Drydock blueprints use to
+avoid race conditions. Their design is not particularly interesting or novel,
+they're just a fairly good fit for most of the locking problems that Drydock
+blueprints tend to encounter and Drydock provides APIs to make them easy to
+work with.
+
+**Repository Operations** help other applications coordinate writes to
+repositories. Multiple applications perform similar kinds of writes, and these
+writes require more sequencing/coordination and user feedback than other
+operations.
+
+
+Architecture Overview
+=====================
+
+This section describes some of Drydock's design goals and architectural
+choices, so you can understand its strengths and weaknesses and which problem
+domains it is well or poorly suited for.
+
+A typical use case for Drydock is giving another application access to a
+working copy in order to run a build or unit test operation. Drydock can
+satisfy the request and resume execution of application code in 1-2 seconds
+under reasonable conditions and with moderate tradeoffs, and can satisfy a
+large number of these requests in parallel.
+
+**Scalable**: Drydock is designed to scale easily to something in the realm of
+thousands of hosts in hundreds of pools, and far beyond that with a little
+work.
+
+Drydock is intended to solve resource management problems at very large scales
+and minimzes blocking operations, locks, and artificial sequencing. Drydock is
+designed to fully utilize an almost arbitrarily large pool of resources and
+improve performance roughly linearly with available hardware.
+
+Because the application assumes that deployment at this scale and complexity
+level is typical, you may need to configure more things and do more work than
+you would under the simplifying assumptions of small scale.
+
+**Heavy Resources**: Drydock assumes that resources are relatively
+heavyweight and and require a meaningful amount (a second or more) of work to
+build, maintain and tear down. It also assumes that leases will often have
+substantial lifespans (seconds or minutes) while performing operations.
+
+Resources like working copies (which typically take several seconds to create
+with a command like `git clone`) and VMs (which typically take several seconds
+to spin up) are good fits for Drydock and for the problems it is intended to
+solve.
+
+Lease operations like running unit tests, performing builds, executing merges,
+generating documentation and running temporary services (which typically last
+at least a few seconds) are also good fits for Drydock.
+
+In both cases, the general concern with lightweight resources and operations is
+that Drydock operation overhead is roughly on the order of a second for many
+tasks, so overhead from Drydock will be substantial if resources are built and
+torn down in a few milliseconds or lease operations require only a fraction of
+a second to execute.
+
+As a rule of thumb, Drydock may be a poor fit for a problem if operations
+typically take less than a second to build, execute, and destroy.
+
+**Focus on Resource Construction**: Drydock is primarily solving a resource
+construction problem: something needs a resource matching some description, so
+Drydock finds or builds that resource as quickly as possible.
+
+Drydock generally prioritizes responding to requests quickly over other
+concerns, like minimizing waste or performing complex scheduling. Although you
+can make adjustments to some of these behaviors, it generally assumes that
+resources are cheap compared to the cost of waiting for resource construction.
+
+This isn't to say that Drydock is grossly wasteful or has a terrible scheduler,
+just that efficient utilization and efficient scheduling aren't the primary
+problems the design focuses on.
+
+This prioritization corresponds to scenarios where resources are something like
+hosts or working copies, and operations are something like builds, and the cost
+of hosts and storage is small compared to the cost of engineer time spent
+waiting on jobs to get scheduled.
+
+Drydock may be a weak fit for a problem if it is bounded by resource
+availability and using resources as efficiently as possible is very important.
+Drydock generally assumes you will respond to a resource deficit by making more
+resources available (usually very cheap), rather than by paying engineers to
+wait for operations to complete (usually very expensive).
+
+**Isolation Tradeoffs**: Drydock assumes that multiple operations running at
+similar levels of trust may be interested in reducing isolation to improve
+performance, reduce complexity, or satisfy some other similar goal. It does not
+guarantee isolation and assumes most operations will not run in total isolation.
+
+If this isn't true for your use case, you'll need to be careful in configuring
+Drydock to make sure that operations are fully isolated and can not interact.
+Complete isolation will reduce the performance of the allocator as it will
+generally prevent it from reusing resources, which is one of the major ways it
+can improve performance.
+
+You can find more discussion of these tradeoffs in
+@{article:Drydock User Guide: Security}.
+
+**Agentless**: Drydock does not require an agent or daemon to be installed on
+hosts. It interacts with hosts over SSH.
+
+**Very Abstract**: Drydock's design is //extremely// abstract. Resources have
+very little hardcoded behavior. The allocator has essentially zero specialized
+knowledge about what it is actually doing.
+
+One aspect of this abstractness is that Drydock is composable, and solves
+complex allocation problems by //asking itself// to build the pieces it needs.
+To build a working copy, Drydock first asks itself for a suitable host. It
+solves this allocation sub-problem, then resolves the original request.
+
+This allows new types of resources to build on Drydock's existing knowledge of
+resource construction by just saying "build one of these other things you
+already know how to build, then apply a few adjustments". This also means that
+you can tell Drydock about a new way to build hosts (say, bring up VMs from a
+different service provider) and the rest of the pipeline can use these new
+hosts interchangeably with the old hosts.
+
+While this design theoretically makes Drydock more powerful and more flexible
+than a less abstract approach, abstraction is frequently a double-edged sword.
+
+Drydock is almost certainly at the extreme upper end of abstraction for tools
+in this space, and the level of abstraction may ultimately match poorly with a
+particular problem domain. Alternative approaches may give you more specialized
+and useful tools for approaching a given problem.
+
 
 Next Steps
 ==========
@@ -65,5 +255,6 @@ Continue by:
 
   - understanding Drydock security concerns with
     @{article:Drydock User Guide: Security}; or
+  - learning about blueprints in @{article:Drydock Blueprints}; or
   - allowing Phabricator to write to repositories with
     @{article:Drydock User Guide: Repository Automation}.

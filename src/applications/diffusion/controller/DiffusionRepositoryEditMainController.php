@@ -688,6 +688,19 @@ final class DiffusionRepositoryEditMainController
         $this->getRepositoryControllerURI($repository, 'edit/automation/'));
     $view->addAction($edit);
 
+    $can_test = $repository->canPerformAutomation();
+
+    $test = id(new PhabricatorActionView())
+      ->setIcon('fa-gamepad')
+      ->setName(pht('Test Configuration'))
+      ->setWorkflow(true)
+      ->setDisabled(!$can_test)
+      ->setHref(
+        $this->getRepositoryControllerURI(
+          $repository,
+          'edit/testautomation/'));
+    $view->addAction($test);
+
     return $view;
   }
 
