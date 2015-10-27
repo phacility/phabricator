@@ -3,6 +3,8 @@
 final class DrydockWorkingCopyBlueprintImplementation
   extends DrydockBlueprintImplementation {
 
+  const PHASE_SQUASHMERGE = 'squashmerge';
+
   public function isEnabled() {
     return true;
   }
@@ -125,15 +127,7 @@ final class DrydockWorkingCopyBlueprintImplementation
       ->setOwnerPHID($resource_phid)
       ->setAttribute('workingcopy.resourcePHID', $resource_phid)
       ->setAllowedBlueprintPHIDs($blueprint_phids);
-
-    $resource
-      ->setAttribute('host.leasePHID', $host_lease->getPHID())
-      ->save();
-
-    $host_lease->queueForActivation();
-
-    // TODO: Add some limits to the number of working copies we can have at
-    // once?
+    $resource->setAttribute('host.leasePHID', $host_lease->getPHID());
 
     $map = $lease->getAttribute('repositories.map');
     foreach ($map as $key => $value) {
@@ -143,10 +137,18 @@ final class DrydockWorkingCopyBlueprintImplementation
           'phid',
         ));
     }
+    $resource->setAttribute('repositories.map', $map);
 
-    return $resource
-      ->setAttribute('repositories.map', $map)
-      ->allocateResource();
+    $slot_lock = $this->getConcurrentResourceLimitSlotLock($blueprint);
+    if ($slot_lock !== null) {
+      $resource->needSlotLock($slot_lock);
+    }
+
+    $resource->allocateResource();
+
+    $host_lease->queueForActivation();
+
+    return $resource;
   }
 
   public function activateResource(
@@ -237,8 +239,7 @@ final class DrydockWorkingCopyBlueprintImplementation
       $cmd = array();
       $arg = array();
 
-      $cmd[] = 'cd %s';
-      $arg[] = "{$root}/repo/{$directory}/";
+      $interface->pushWorkingDirectory("{$root}/repo/{$directory}/");
 
       $cmd[] = 'git clean -d --force';
       $cmd[] = 'git fetch';
@@ -285,6 +286,15 @@ final class DrydockWorkingCopyBlueprintImplementation
       if (idx($spec, 'default')) {
         $default = $directory;
       }
+
+      $merges = idx($spec, 'merges');
+      if ($merges) {
+        foreach ($merges as $merge) {
+          $this->applyMerge($lease, $interface, $merge);
+        }
+      }
+
+      $interface->popWorkingDirectory();
     }
 
     if ($default === null) {
@@ -333,7 +343,7 @@ final class DrydockWorkingCopyBlueprintImplementation
         $command_interface = $host_lease->getInterface($type);
 
         $path = $lease->getAttribute('workingcopy.default');
-        $command_interface->setWorkingDirectory($path);
+        $command_interface->pushWorkingDirectory($path);
 
         return $command_interface;
     }
@@ -393,15 +403,87 @@ final class DrydockWorkingCopyBlueprintImplementation
     return $lease;
   }
 
-  public function getFieldSpecifications() {
+  protected function getCustomFieldSpecifications() {
     return array(
       'blueprintPHIDs' => array(
         'name' => pht('Use Blueprints'),
         'type' => 'blueprints',
         'required' => true,
       ),
-    ) + parent::getFieldSpecifications();
+    );
   }
 
+  protected function shouldUseConcurrentResourceLimit() {
+    return true;
+  }
+
+  private function applyMerge(
+    DrydockLease $lease,
+    DrydockCommandInterface $interface,
+    array $merge) {
+
+    $src_uri = $merge['src.uri'];
+    $src_ref = $merge['src.ref'];
+
+    $interface->execx(
+      'git fetch --no-tags -- %s +%s:%s',
+      $src_uri,
+      $src_ref,
+      $src_ref);
+
+    // NOTE: This can never actually generate a commit because we pass
+    // "--squash", but git sometimes runs code to check that a username and
+    // email are configured anyway.
+    $real_command = csprintf(
+      'git -c user.name=%s -c user.email=%s merge --no-stat --squash -- %R',
+      'drydock',
+      'drydock@phabricator',
+      $src_ref);
+
+    // Show the user a simplified command if the operation fails and we need to
+    // report an error.
+    $show_command = csprintf(
+      'git merge --squash -- %R',
+      $src_ref);
+
+    try {
+      $interface->execx('%C', $real_command);
+    } catch (CommandException $ex) {
+      $this->setWorkingCopyVCSErrorFromCommandException(
+        $lease,
+        self::PHASE_SQUASHMERGE,
+        $show_command,
+        $ex);
+
+      throw $ex;
+    }
+  }
+
+  protected function setWorkingCopyVCSErrorFromCommandException(
+    DrydockLease $lease,
+    $phase,
+    $command,
+    CommandException $ex) {
+
+    $error = array(
+      'phase' => $phase,
+      'command' => (string)$command,
+      'raw' => (string)$ex->getCommand(),
+      'err' => $ex->getError(),
+      'stdout' => $ex->getStdout(),
+      'stderr' => $ex->getStderr(),
+    );
+
+    $lease->setAttribute('workingcopy.vcs.error', $error);
+  }
+
+  public function getWorkingCopyVCSError(DrydockLease $lease) {
+    $error = $lease->getAttribute('workingcopy.vcs.error');
+    if (!$error) {
+      return null;
+    } else {
+      return $error;
+    }
+  }
 
 }

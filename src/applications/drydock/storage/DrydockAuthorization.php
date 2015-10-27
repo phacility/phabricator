@@ -66,7 +66,7 @@ final class DrydockAuthorization extends DrydockDAO
 
   public static function getBlueprintStateIcon($state) {
     $map = array(
-      self::BLUEPRINTAUTH_REQUESTED => 'fa-exclamation-circle indigo',
+      self::BLUEPRINTAUTH_REQUESTED => 'fa-exclamation-circle pink',
       self::BLUEPRINTAUTH_AUTHORIZED => 'fa-check-circle green',
       self::BLUEPRINTAUTH_DECLINED => 'fa-times red',
     );

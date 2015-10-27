@@ -11,6 +11,52 @@ final class DrydockLandRepositoryOperation
     return pht('Land Revision');
   }
 
+  public function getOperationCurrentStatus(
+    DrydockRepositoryOperation $operation,
+    PhabricatorUser $viewer) {
+
+    $target = $operation->getRepositoryTarget();
+    $repository = $operation->getRepository();
+    switch ($operation->getOperationState()) {
+      case DrydockRepositoryOperation::STATE_WAIT:
+        return pht(
+          'Waiting to land revision into %s on %s...',
+          $repository->getMonogram(),
+          $target);
+      case DrydockRepositoryOperation::STATE_WORK:
+        return pht(
+          'Landing revision into %s on %s...',
+          $repository->getMonogram(),
+          $target);
+      case DrydockRepositoryOperation::STATE_DONE:
+        return pht(
+          'Revision landed into %s.',
+          $repository->getMonogram());
+    }
+  }
+
+  public function getWorkingCopyMerges(DrydockRepositoryOperation $operation) {
+    $repository = $operation->getRepository();
+    $merges = array();
+
+    $object = $operation->getObject();
+    if ($object instanceof DifferentialRevision) {
+      $diff = $this->loadDiff($operation);
+      $merges[] = array(
+        'src.uri' => $repository->getStagingURI(),
+        'src.ref' => $diff->getStagingRef(),
+      );
+    } else {
+      throw new Exception(
+        pht(
+          'Invalid or unknown object ("%s") for land operation, expected '.
+          'Differential Revision.',
+          $operation->getObjectPHID()));
+    }
+
+    return $merges;
+  }
+
   public function applyOperation(
     DrydockRepositoryOperation $operation,
     DrydockInterface $interface) {
@@ -24,36 +70,7 @@ final class DrydockLandRepositoryOperation
     if ($object instanceof DifferentialRevision) {
       $revision = $object;
 
-      $diff_phid = $operation->getProperty('differential.diffPHID');
-
-      $diff = id(new DifferentialDiffQuery())
-        ->setViewer($viewer)
-        ->withPHIDs(array($diff_phid))
-        ->executeOne();
-      if (!$diff) {
-        throw new Exception(
-          pht(
-            'Unable to load diff "%s".',
-            $diff_phid));
-      }
-
-      $diff_revid = $diff->getRevisionID();
-      $revision_id = $revision->getID();
-      if ($diff_revid != $revision_id) {
-        throw new Exception(
-          pht(
-            'Diff ("%s") has wrong revision ID ("%s", expected "%s").',
-            $diff_phid,
-            $diff_revid,
-            $revision_id));
-      }
-
-      $cmd[] = 'git fetch --no-tags -- %s +%s:%s';
-      $arg[] = $repository->getStagingURI();
-      $arg[] = $diff->getStagingRef();
-      $arg[] = $diff->getStagingRef();
-
-      $merge_src = $diff->getStagingRef();
+      $diff = $this->loadDiff($operation);
 
       $dict = $diff->getDiffAuthorshipDict();
       $author_name = idx($dict, 'authorName');
@@ -80,7 +97,6 @@ final class DrydockLandRepositoryOperation
     switch ($type) {
       case 'branch':
         $push_dst = 'refs/heads/'.$name;
-        $merge_dst = 'refs/remotes/origin/'.$name;
         break;
       default:
         throw new Exception(
@@ -92,30 +108,24 @@ final class DrydockLandRepositoryOperation
 
     $committer_info = $this->getCommitterInfo($operation);
 
-    $cmd[] = 'git checkout %s';
-    $arg[] = $merge_dst;
+    // NOTE: We're doing this commit with "-F -" so we don't run into trouble
+    // with enormous commit messages which might otherwise exceed the maximum
+    // size of a command.
 
-    $cmd[] = 'git merge --no-stat --squash --ff-only -- %s';
-    $arg[] = $merge_src;
+    $future = $interface->getExecFuture(
+      'git -c user.name=%s -c user.email=%s commit --author %s -F - --',
+      $committer_info['name'],
+      $committer_info['email'],
+      "{$author_name} <{$author_email}>");
 
-    $cmd[] = 'git -c user.name=%s -c user.email=%s commit --author %s -m %s';
+    $future
+      ->write($commit_message)
+      ->resolvex();
 
-    $arg[] = $committer_info['name'];
-    $arg[] = $committer_info['email'];
-
-    $arg[] = "{$author_name} <{$author_email}>";
-    $arg[] = $commit_message;
-
-    $cmd[] = 'git push origin -- %s:%s';
-    $arg[] = 'HEAD';
-    $arg[] = $push_dst;
-
-    $cmd = implode(' && ', $cmd);
-    $argv = array_merge(array($cmd), $arg);
-
-    $result = call_user_func_array(
-      array($interface, 'execx'),
-      $argv);
+    $interface->execx(
+      'git push origin -- %s:%s',
+      'HEAD',
+      $push_dst);
   }
 
   private function getCommitterInfo(DrydockRepositoryOperation $operation) {
@@ -146,6 +156,37 @@ final class DrydockLandRepositoryOperation
       'name' => $committer_name,
       'email' => 'autocommitter@example.com',
     );
+  }
+
+  private function loadDiff(DrydockRepositoryOperation $operation) {
+    $viewer = $this->getViewer();
+    $revision = $operation->getObject();
+
+    $diff_phid = $operation->getProperty('differential.diffPHID');
+
+    $diff = id(new DifferentialDiffQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($diff_phid))
+      ->executeOne();
+    if (!$diff) {
+      throw new Exception(
+        pht(
+          'Unable to load diff "%s".',
+          $diff_phid));
+    }
+
+    $diff_revid = $diff->getRevisionID();
+    $revision_id = $revision->getID();
+    if ($diff_revid != $revision_id) {
+      throw new Exception(
+        pht(
+          'Diff ("%s") has wrong revision ID ("%s", expected "%s").',
+          $diff_phid,
+          $diff_revid,
+          $revision_id));
+    }
+
+    return $diff;
   }
 
 }

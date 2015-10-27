@@ -187,9 +187,13 @@ final class PhabricatorStorageManagementUpgradeWorkflow
           echo pht("DRYRUN: Would apply patch '%s'.", $key)."\n";
         } else {
           echo pht("Applying patch '%s'...", $key)."\n";
+
+          $t_begin = microtime(true);
           $api->applyPatch($patch);
+          $t_end = microtime(true);
+
           if (!$skip_mark) {
-            $api->markPatchApplied($key);
+            $api->markPatchApplied($key, ($t_end - $t_begin));
           }
         }
 

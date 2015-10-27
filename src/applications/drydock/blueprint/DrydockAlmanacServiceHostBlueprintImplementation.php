@@ -109,11 +109,6 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
     DrydockBlueprint $blueprint,
     DrydockResource $resource,
     DrydockLease $lease) {
-
-    if (!DrydockSlotLock::isLockFree($this->getLeaseSlotLock($resource))) {
-      return false;
-    }
-
     return true;
   }
 
@@ -124,7 +119,6 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
 
     $lease
       ->setActivateWhenAcquired(true)
-      ->needSlotLock($this->getLeaseSlotLock($resource))
       ->acquireOnResource($resource);
   }
 
@@ -144,11 +138,6 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
     // We don't create anything when activating a lease, so we don't need to
     // throw anything away.
     return;
-  }
-
-  private function getLeaseSlotLock(DrydockResource $resource) {
-    $resource_phid = $resource->getPHID();
-    return "almanac.host.lease({$resource_phid})";
   }
 
   public function getType() {
@@ -188,7 +177,7 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
     }
   }
 
-  public function getFieldSpecifications() {
+  protected function getCustomFieldSpecifications() {
     return array(
       'almanacServicePHIDs' => array(
         'name' => pht('Almanac Services'),
@@ -207,7 +196,7 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
         'credential.type' =>
           PassphraseSSHPrivateKeyTextCredentialType::CREDENTIAL_TYPE,
       ),
-    ) + parent::getFieldSpecifications();
+    );
   }
 
   private function loadServices(DrydockBlueprint $blueprint) {

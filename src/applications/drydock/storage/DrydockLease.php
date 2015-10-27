@@ -429,10 +429,7 @@ final class DrydockLease extends DrydockDAO
       $this->scheduleUpdate($expires);
     }
 
-    $awaken_ids = $this->getAttribute('internal.awakenTaskIDs');
-    if (is_array($awaken_ids) && $awaken_ids) {
-      PhabricatorWorker::awakenTaskIDs($awaken_ids);
-    }
+    $this->awakenTasks();
   }
 
   public function logEvent($type, array $data = array()) {
@@ -454,6 +451,19 @@ final class DrydockLease extends DrydockDAO
     return $log->save();
   }
 
+  /**
+   * Awaken yielded tasks after a state change.
+   *
+   * @return this
+   */
+  public function awakenTasks() {
+    $awaken_ids = $this->getAttribute('internal.awakenTaskIDs');
+    if (is_array($awaken_ids) && $awaken_ids) {
+      PhabricatorWorker::awakenTaskIDs($awaken_ids);
+    }
+
+    return $this;
+  }
 
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */

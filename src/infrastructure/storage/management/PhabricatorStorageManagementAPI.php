@@ -17,6 +17,8 @@ final class PhabricatorStorageManagementAPI extends Phobject {
   const COLLATE_SORT = 'COLLATE_SORT';
   const COLLATE_FULLTEXT = 'COLLATE_FULLTEXT';
 
+  const TABLE_STATUS = 'patch_status';
+
   public function setDisableUTF8MB4($disable_utf8_mb4) {
     $this->disableUTF8MB4 = $disable_utf8_mb4;
     return $this;
@@ -118,10 +120,23 @@ final class PhabricatorStorageManagementAPI extends Phobject {
     try {
       $applied = queryfx_all(
         $this->getConn('meta_data'),
-        'SELECT patch FROM patch_status');
+        'SELECT patch FROM %T',
+        self::TABLE_STATUS);
       return ipull($applied, 'patch');
     } catch (AphrontQueryException $ex) {
       return null;
+    }
+  }
+
+  public function getPatchDurations() {
+    try {
+      $rows = queryfx_all(
+        $this->getConn('meta_data'),
+        'SELECT patch, duration FROM %T WHERE duration IS NOT NULL',
+        self::TABLE_STATUS);
+      return ipull($rows, 'duration', 'patch');
+    } catch (AphrontQueryException $ex) {
+      return array();
     }
   }
 
@@ -168,13 +183,30 @@ final class PhabricatorStorageManagementAPI extends Phobject {
     return $legacy;
   }
 
-  public function markPatchApplied($patch) {
+  public function markPatchApplied($patch, $duration = null) {
+    $conn = $this->getConn('meta_data');
+
     queryfx(
-      $this->getConn('meta_data'),
+      $conn,
       'INSERT INTO %T (patch, applied) VALUES (%s, %d)',
-      'patch_status',
+      self::TABLE_STATUS,
       $patch,
       time());
+
+    // We didn't add this column for a long time, so it may not exist yet.
+    if ($duration !== null) {
+      try {
+        queryfx(
+          $conn,
+          'UPDATE %T SET duration = %d WHERE patch = %s',
+          self::TABLE_STATUS,
+          (int)floor($duration * 1000000),
+          $patch);
+      } catch (AphrontQueryException $ex) {
+        // Just ignore this, as it almost certainly indicates that we just
+        // don't have the column yet.
+      }
+    }
   }
 
   public function applyPatch(PhabricatorStoragePatch $patch) {

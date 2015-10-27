@@ -54,9 +54,7 @@ final class PhabricatorContentSource extends Phobject {
   public static function newFromRequest(AphrontRequest $request) {
     return self::newForSource(
       self::SOURCE_WEB,
-      array(
-        'ip' => $request->getRemoteAddr(),
-      ));
+      array());
   }
 
   public static function newFromConduitRequest(ConduitAPIRequest $request) {

@@ -1047,43 +1047,39 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $operations = id(new DrydockRepositoryOperationQuery())
       ->setViewer($viewer)
       ->withObjectPHIDs(array($revision->getPHID()))
-      ->withOperationStates(
+      ->withOperationTypes(
         array(
-          DrydockRepositoryOperation::STATE_WAIT,
-          DrydockRepositoryOperation::STATE_WORK,
-          DrydockRepositoryOperation::STATE_FAIL,
+          DrydockLandRepositoryOperation::OPCONST,
         ))
       ->execute();
     if (!$operations) {
       return null;
     }
 
-    $operation = head(msort($operations, 'getID'));
+    $state_fail = DrydockRepositoryOperation::STATE_FAIL;
 
-    // TODO: This is completely made up for now, give it useful information and
-    // a sweet progress bar.
-
-    switch ($operation->getOperationState()) {
-      case DrydockRepositoryOperation::STATE_WAIT:
-      case DrydockRepositoryOperation::STATE_WORK:
-        $severity = PHUIInfoView::SEVERITY_NOTICE;
-        $text = pht(
-          'Some sort of repository operation is currently running.');
+    // We're going to show the oldest operation which hasn't failed, or the
+    // most recent failure if they're all failures.
+    $operations = msort($operations, 'getID');
+    foreach ($operations as $operation) {
+      if ($operation->getOperationState() != $state_fail) {
         break;
-      default:
-        $severity = PHUIInfoView::SEVERITY_ERROR;
-        $text = pht(
-          'Some sort of repository operation failed.');
-        break;
+      }
     }
 
-    $info_view = id(new PHUIInfoView())
-      ->setSeverity($severity)
-      ->appendChild($text);
+    // If we found a completed operation, don't render anything. We don't want
+    // to show an older error after the thing worked properly.
+    if ($operation->isDone()) {
+      return null;
+    }
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Active Operations (EXPERIMENTAL!)'))
-      ->setInfoView($info_view);
+    $box_view = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Active Operations'));
+
+    return id(new DrydockRepositoryOperationStatusView())
+      ->setUser($viewer)
+      ->setBoxView($box_view)
+      ->setOperation($operation);
   }
 
 }
