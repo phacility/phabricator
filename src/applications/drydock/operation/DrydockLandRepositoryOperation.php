@@ -189,4 +189,101 @@ final class DrydockLandRepositoryOperation
     return $diff;
   }
 
+  public function getBarrierToLanding(
+    PhabricatorUser $viewer,
+    DifferentialRevision $revision) {
+
+    $repository = $revision->getRepository();
+    if (!$repository) {
+      return array(
+        'title' => pht('No Repository'),
+        'body' => pht(
+          'This revision is not associated with a known repository. Only '.
+          'revisions associated with a tracked repository can be landed '.
+          'automatically.'),
+      );
+    }
+
+    if (!$repository->canPerformAutomation()) {
+      return array(
+        'title' => pht('No Repository Automation'),
+        'body' => pht(
+          'The repository this revision is associated with ("%s") is not '.
+          'configured to support automation. Configure automation for the '.
+          'repository to enable revisions to be landed automatically.',
+          $repository->getMonogram()),
+      );
+    }
+
+    // TODO: At some point we should allow installs to give "land reviewed
+    // code" permission to more users than "push any commit", because it is
+    // a much less powerful operation. For now, just require push so this
+    // doesn't do anything users can't do on their own.
+    $can_push = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $repository,
+      DiffusionPushCapability::CAPABILITY);
+    if (!$can_push) {
+      return array(
+        'title' => pht('Unable to Push'),
+        'body' => pht(
+          'You do not have permission to push to the repository this '.
+          'revision is associated with ("%s"), so you can not land it.',
+          $repository->getMonogram()),
+      );
+    }
+
+    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
+    if ($revision->getStatus() !== $status_accepted) {
+      return array(
+        'title' => pht('Revision Not Accepted'),
+        'body' => pht(
+          'This revision is still under review. Only revisions which have '.
+          'been accepted may land.'),
+      );
+    }
+
+    // Check for other operations. Eventually this should probably be more
+    // general (e.g., it's OK to land to multiple different branches
+    // simultaneously) but just put this in as a sanity check for now.
+    $other_operations = id(new DrydockRepositoryOperationQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($revision->getPHID()))
+      ->withOperationTypes(
+        array(
+          $this->getOperationConstant(),
+        ))
+      ->withOperationStates(
+        array(
+          DrydockRepositoryOperation::STATE_WAIT,
+          DrydockRepositoryOperation::STATE_WORK,
+          DrydockRepositoryOperation::STATE_DONE,
+        ))
+      ->execute();
+
+    if ($other_operations) {
+      $any_done = false;
+      foreach ($other_operations as $operation) {
+        if ($operation->isDone()) {
+          $any_done = true;
+          break;
+        }
+      }
+
+      if ($any_done) {
+        return array(
+          'title' => pht('Already Complete'),
+          'body' => pht('This revision has already landed.'),
+        );
+      } else {
+        return array(
+          'title' => pht('Already In Flight'),
+          'body' => pht('This revision is already landing.'),
+        );
+      }
+    }
+
+    return null;
+  }
+
 }
