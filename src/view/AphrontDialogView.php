@@ -23,6 +23,7 @@ final class AphrontDialogView
   private $errors = array();
   private $flush;
   private $validationException;
+  private $objectList;
 
 
   const WIDTH_DEFAULT = 'default';
@@ -132,6 +133,13 @@ final class AphrontDialogView
     return $this;
   }
 
+  public function setObjectList(PHUIObjectItemListView $list) {
+    $this->objectList = true;
+    $box = id(new PHUIObjectBoxView())
+      ->setObjectList($list);
+    return $this->appendChild($box);
+  }
+
   public function appendParagraph($paragraph) {
     return $this->appendChild(
       phutil_tag(
@@ -236,15 +244,17 @@ final class AphrontDialogView
           __CLASS__));
     }
 
-    $more = $this->class;
+    $classes = array();
+    $classes[] = 'aphront-dialog-view';
+    $classes[] = $this->class;
     if ($this->flush) {
-      $more .= ' aphront-dialog-flush';
+      $classes[] = 'aphront-dialog-flush';
     }
 
     switch ($this->width) {
       case self::WIDTH_FORM:
       case self::WIDTH_FULL:
-        $more .= ' aphront-dialog-view-width-'.$this->width;
+        $classes[] = 'aphront-dialog-view-width-'.$this->width;
         break;
       case self::WIDTH_DEFAULT:
         break;
@@ -256,11 +266,15 @@ final class AphrontDialogView
     }
 
     if ($this->isStandalone) {
-      $more .= ' aphront-dialog-view-standalone';
+      $classes[] = 'aphront-dialog-view-standalone';
+    }
+
+    if ($this->objectList) {
+      $classes[] = 'aphront-dialog-object-list';
     }
 
     $attributes = array(
-      'class'   => 'aphront-dialog-view '.$more,
+      'class'   => implode(' ', $classes),
       'sigil'   => 'jx-dialog',
     );
 
