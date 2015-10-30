@@ -41,6 +41,7 @@ final class PhabricatorIconRemarkupRule extends PhutilRemarkupRule {
 
     $defaults = array(
       'color' => null,
+      'spin' => false,
     );
 
     $options = idx($extra, 1, '');
@@ -70,8 +71,16 @@ final class PhabricatorIconRemarkupRule extends PhutilRemarkupRule {
       $color = null;
     }
 
+    $classes = array();
+    $classes[] = $color;
+
+    $spin = $options['spin'];
+    if ($spin) {
+      $classes[] = 'ph-spin';
+    }
+
     $icon_view = id(new PHUIIconView())
-      ->setIconFont('fa-'.$icon, $color);
+      ->setIconFont('fa-'.$icon, implode(' ', $classes));
 
     return $this->getEngine()->storeText($icon_view);
   }
