@@ -46,10 +46,15 @@ final class DrydockRepositoryOperationViewController
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    $status_view = id(new DrydockRepositoryOperationStatusView())
+      ->setUser($viewer)
+      ->setOperation($operation);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $object_box,
+        $status_view,
       ),
       array(
         'title' => $title,
@@ -82,6 +87,15 @@ final class DrydockRepositoryOperationViewController
     $view->addProperty(
       pht('Object'),
       $viewer->renderHandle($operation->getObjectPHID()));
+
+    $lease_phid = $operation->getWorkingCopyLeasePHID();
+    if ($lease_phid) {
+      $lease_display = $viewer->renderHandle($lease_phid);
+    } else {
+      $lease_display = phutil_tag('em', array(), pht('None'));
+    }
+
+    $view->addProperty(pht('Working Copy'), $lease_display);
 
     return $view;
   }

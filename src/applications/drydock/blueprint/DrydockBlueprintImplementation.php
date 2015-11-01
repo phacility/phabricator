@@ -16,6 +16,26 @@ abstract class DrydockBlueprintImplementation extends Phobject {
   abstract public function getDescription();
 
   public function getFieldSpecifications() {
+    $fields = array();
+
+    $fields += $this->getCustomFieldSpecifications();
+
+    if ($this->shouldUseConcurrentResourceLimit()) {
+      $fields += array(
+        'allocator.limit' => array(
+          'name' => pht('Limit'),
+          'caption' => pht(
+            'Maximum number of resources this blueprint can have active '.
+            'concurrently.'),
+          'type' => 'int',
+        ),
+      );
+    }
+
+    return $fields;
+  }
+
+  protected function getCustomFieldSpecifications() {
     return array();
   }
 
@@ -317,6 +337,85 @@ abstract class DrydockBlueprintImplementation extends Phobject {
 
 
   /**
+   * Does this implementation use concurrent resource limits?
+   *
+   * Implementations can override this method to opt into standard limit
+   * behavior, which provides a simple concurrent resource limit.
+   *
+   * @return bool True to use limits.
+   */
+  protected function shouldUseConcurrentResourceLimit() {
+    return false;
+  }
+
+
+  /**
+   * Get the effective concurrent resource limit for this blueprint.
+   *
+   * @param DrydockBlueprint Blueprint to get the limit for.
+   * @return int|null Limit, or `null` for no limit.
+   */
+  protected function getConcurrentResourceLimit(DrydockBlueprint $blueprint) {
+    if ($this->shouldUseConcurrentResourceLimit()) {
+      $limit = $blueprint->getFieldValue('allocator.limit');
+      $limit = (int)$limit;
+      if ($limit > 0) {
+        return $limit;
+      } else {
+        return null;
+      }
+    }
+
+    return null;
+  }
+
+
+  protected function getConcurrentResourceLimitSlotLock(
+    DrydockBlueprint $blueprint) {
+
+    $limit = $this->getConcurrentResourceLimit($blueprint);
+    if ($limit === null) {
+      return;
+    }
+
+    $blueprint_phid = $blueprint->getPHID();
+
+    // TODO: This logic shouldn't do anything awful, but is a little silly. It
+    // would be nice to unify the "huge limit" and "small limit" cases
+    // eventually but it's a little tricky.
+
+    // If the limit is huge, just pick a random slot. This is just stopping
+    // us from exploding if someone types a billion zillion into the box.
+    if ($limit > 1024) {
+      $slot = mt_rand(0, $limit - 1);
+      return "allocator({$blueprint_phid}).limit({$slot})";
+    }
+
+    // For reasonable limits, actually check for an available slot.
+    $locks = DrydockSlotLock::loadLocks($blueprint_phid);
+    $locks = mpull($locks, null, 'getLockKey');
+
+    $slots = range(0, $limit - 1);
+    shuffle($slots);
+
+    foreach ($slots as $slot) {
+      $slot_lock = "allocator({$blueprint_phid}).limit({$slot})";
+      if (empty($locks[$slot_lock])) {
+        return $slot_lock;
+      }
+    }
+
+    // If we found no free slot, just return whatever we checked last (which
+    // is just a random slot). There's a small chance we'll get lucky and the
+    // lock will be free by the time we try to take it, but usually we'll just
+    // fail to grab the lock, throw an appropriate lock exception, and get back
+    // on the right path to retry later.
+    return $slot_lock;
+  }
+
+
+
+  /**
    * Apply standard limits on resource allocation rate.
    *
    * @param DrydockBlueprint The blueprint requesting an allocation.
@@ -329,7 +428,7 @@ abstract class DrydockBlueprintImplementation extends Phobject {
     // configurable by the blueprint implementation.
 
     // Limit on total number of active resources.
-    $total_limit = 1;
+    $total_limit = $this->getConcurrentResourceLimit($blueprint);
 
     // Always allow at least this many allocations to be in flight at once.
     $min_allowed = 1;
@@ -358,9 +457,11 @@ abstract class DrydockBlueprintImplementation extends Phobject {
 
     // If we're at the limit on total active resources, limit additional
     // allocations.
-    $n_total = ($n_alloc + $n_active + $n_broken + $n_released);
-    if ($n_total >= $total_limit) {
-      return true;
+    if ($total_limit !== null) {
+      $n_total = ($n_alloc + $n_active + $n_broken + $n_released);
+      if ($n_total >= $total_limit) {
+        return true;
+      }
     }
 
     // If the number of in-flight allocations is fewer than the minimum number

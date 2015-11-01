@@ -72,11 +72,14 @@ final class PhabricatorPeopleProfileController
       $href = id(new PhutilURI('/conpherence/new/'))
         ->setQueryParam('participant', $user->getPHID());
 
+      $can_send = $viewer->isLoggedIn();
+
       $actions->addAction(
         id(new PhabricatorActionView())
           ->setIcon('fa-comments')
           ->setName(pht('Send Message'))
           ->setWorkflow(true)
+          ->setDisabled(!$can_send)
           ->setHref($href));
     }
 

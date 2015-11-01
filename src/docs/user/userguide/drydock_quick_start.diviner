@@ -1,0 +1,74 @@
+@title Drydock User Guide: Quick Start
+@group userguide
+
+Guide to getting Drydock
+
+Quick Start: Land Revisions
+===========================
+
+Quick start guide to getting "Land Revision" working in Differential. For
+a more detailed guide, see @{article:Drydock User Guide: Repository Automation}.
+
+Choose a repository you want to enable "Land Revision" for. We'll call this
+**Repository X**.
+
+You need to configure a staging area for this repository if you haven't
+already. You can do this in Diffusion in {nav Edit Repository > Edit Staging}.
+We'll call this **Staging Area Y**.
+
+Choose or create a host you want to run merges on. We'll call this
+`automation001`. For example, you might bring up a new host in EC2 and
+label it `automation001.mycompany.com`. You can use an existing host if you
+prefer.
+
+Create a user account on the host, or choose an existing user account. This is
+the user that merges will execute under: Drydock will connect to it and run a
+bunch of `git` commands, then ultimately run `git push`. We'll call this user
+`builder`.
+
+Install `git`, `hg` or `svn` if you haven't already and set up private keys
+for `builder` so it can pull and push any repositories you want to operate
+on.
+
+If your repository and/or staging area are hosted in Phabricator, you may want
+to create a corresponding bot account so you can add keys and give it
+permissions.
+
+At this point you should be able to `ssh builder@automation001` to connect to
+the host, and get a normal shell. You should be able to `git clone ...` from
+**Repository X** and from **Staging Area Y**, and `git push` to **Repository
+X**. If you can't, configure things so you can.
+
+Now, create a host blueprint for the host. You can find a more detailed
+walkthrough in @{article:Drydock Blueprints: Hosts}. Briefly:
+
+  - Create an Almanac device for the host. This should have the IP address and
+    port for your host.
+  - Create an Almanac service bound to the device. This should be a Drydock
+    resource pool service and have a binding to the IP from the previous step.
+  - Create a Drydock host blueprint which uses the service from the previous
+    step. It should be configured with an SSH private key that can be used
+    to connect to `builder@automation001`.
+
+Then, create a new working copy blueprint which uses the host blueprint you
+just made. You can find a more detailed walkthrough in @{article:Drydock
+Blueprints: Working Copies}. Authorize the working copy blueprint to use the
+host blueprint.
+
+Finally, configure repository automation for **Repository X**:
+{nav Edit Repository > Edit Automation}. Provide the working copy blueprint
+from the previous step. Authorize the repository to use the working copy
+blueprint.
+
+After you save changes, click {nav Test Configuration} to test that things
+are working properly.
+
+The "Land Revision" action should now be available on revisions for this
+repository.
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to @{article:Drydock User Guide}.

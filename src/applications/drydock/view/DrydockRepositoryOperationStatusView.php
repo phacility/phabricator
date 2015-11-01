@@ -73,12 +73,104 @@ final class DrydockRepositoryOperationStatusView
     if ($state != DrydockRepositoryOperation::STATE_FAIL) {
       $item->addAttribute($operation->getOperationCurrentStatus($viewer));
     } else {
-      // TODO: Make this more useful.
-      $item->addAttribute(pht('Operation encountered an error.'));
+      $vcs_error = $operation->getWorkingCopyVCSError();
+      if ($vcs_error) {
+        switch ($vcs_error['phase']) {
+          case DrydockWorkingCopyBlueprintImplementation::PHASE_SQUASHMERGE:
+            $message = pht(
+              'This change did not merge cleanly. This usually indicates '.
+              'that the change is out of date and needs to be updated.');
+            break;
+          default:
+            $message = pht(
+              'Operation encountered an error while performing repository '.
+              'operations.');
+            break;
+        }
+
+        $item->addAttribute($message);
+
+        $table = $this->renderVCSErrorTable($vcs_error);
+        list($links, $info) = $this->renderDetailToggles($table);
+
+        $item->addAttribute($links);
+        $item->appendChild($info);
+      } else {
+        $item->addAttribute(pht('Operation encountered an error.'));
+      }
     }
 
     return id(new PHUIObjectItemListView())
       ->addItem($item);
+  }
+
+  private function renderVCSErrorTable(array $vcs_error) {
+    $rows = array();
+    $rows[] = array(pht('Command'), $vcs_error['command']);
+    $rows[] = array(pht('Error'), $vcs_error['err']);
+    $rows[] = array(pht('Stdout'), $vcs_error['stdout']);
+    $rows[] = array(pht('Stderr'), $vcs_error['stderr']);
+
+    $table = id(new AphrontTableView($rows))
+      ->setColumnClasses(
+        array(
+          'header',
+          'wide prewrap',
+        ));
+
+    return $table;
+  }
+
+  private function renderDetailToggles(AphrontTableView $table) {
+    $show_id = celerity_generate_unique_node_id();
+    $hide_id = celerity_generate_unique_node_id();
+    $info_id = celerity_generate_unique_node_id();
+
+    Javelin::initBehavior('phabricator-reveal-content');
+
+    $show_details = javelin_tag(
+      'a',
+      array(
+        'id' => $show_id,
+        'href' => '#',
+        'sigil' => 'reveal-content',
+        'mustcapture' => true,
+        'meta' => array(
+          'hideIDs' => array($show_id),
+          'showIDs' => array($hide_id, $info_id),
+        ),
+      ),
+      pht('Show Details'));
+
+    $hide_details = javelin_tag(
+      'a',
+      array(
+        'id' => $hide_id,
+        'href' => '#',
+        'sigil' => 'reveal-content',
+        'mustcapture' => true,
+        'style' => 'display: none',
+        'meta' => array(
+          'hideIDs' => array($hide_id, $info_id),
+          'showIDs' => array($show_id),
+        ),
+      ),
+      pht('Hide Details'));
+
+    $info = javelin_tag(
+      'div',
+      array(
+        'id' => $info_id,
+        'style' => 'display: none',
+      ),
+      $table);
+
+    $links = array(
+      $show_details,
+      $hide_details,
+    );
+
+    return array($links, $info);
   }
 
 }

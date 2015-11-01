@@ -5,9 +5,6 @@ final class HarbormasterPlanEditController extends HarbormasterPlanController {
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
-    $this->requireApplicationCapability(
-      HarbormasterManagePlansCapability::CAPABILITY);
-
     $id = $request->getURIData('id');
     if ($id) {
       $plan = id(new HarbormasterBuildPlanQuery())
@@ -23,22 +20,41 @@ final class HarbormasterPlanEditController extends HarbormasterPlanController {
         return new Aphront404Response();
       }
     } else {
+      $this->requireApplicationCapability(
+        HarbormasterCreatePlansCapability::CAPABILITY);
+
       $plan = HarbormasterBuildPlan::initializeNewBuildPlan($viewer);
     }
 
     $e_name = true;
     $v_name = $plan->getName();
+    $v_view = $plan->getViewPolicy();
+    $v_edit = $plan->getEditPolicy();
     $validation_exception = null;
     if ($request->isFormPost()) {
       $xactions = array();
 
       $v_name = $request->getStr('name');
+      $v_view = $request->getStr('viewPolicy');
+      $v_edit = $request->getStr('editPolicy');
+
       $e_name = null;
+
       $type_name = HarbormasterBuildPlanTransaction::TYPE_NAME;
+      $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
+      $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
       $xactions[] = id(new HarbormasterBuildPlanTransaction())
         ->setTransactionType($type_name)
         ->setNewValue($v_name);
+
+      $xactions[] = id(new HarbormasterBuildPlanTransaction())
+        ->setTransactionType($type_view)
+        ->setNewValue($v_view);
+
+      $xactions[] = id(new HarbormasterBuildPlanTransaction())
+        ->setTransactionType($type_edit)
+        ->setNewValue($v_edit);
 
       $editor = id(new HarbormasterBuildPlanEditor())
         ->setActor($viewer)
@@ -71,19 +87,37 @@ final class HarbormasterPlanEditController extends HarbormasterPlanController {
       $save_button = pht('Save Build Plan');
     }
 
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($viewer)
+      ->setObject($plan)
+      ->execute();
+
     $form = id(new AphrontFormView())
       ->setUser($viewer)
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Plan Name'))
           ->setName('name')
           ->setError($e_name)
-          ->setValue($v_name));
-
-    $form->appendChild(
-      id(new AphrontFormSubmitControl())
-        ->setValue($save_button)
-        ->addCancelButton($cancel_uri));
+          ->setValue($v_name))
+      ->appendControl(
+        id(new AphrontFormPolicyControl())
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+          ->setPolicyObject($plan)
+          ->setPolicies($policies)
+          ->setValue($v_view)
+          ->setName('viewPolicy'))
+      ->appendControl(
+        id(new AphrontFormPolicyControl())
+          ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
+          ->setPolicyObject($plan)
+          ->setPolicies($policies)
+          ->setValue($v_edit)
+          ->setName('editPolicy'))
+      ->appendControl(
+        id(new AphrontFormSubmitControl())
+          ->setValue($save_button)
+          ->addCancelButton($cancel_uri));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)

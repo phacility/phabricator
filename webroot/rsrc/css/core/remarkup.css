@@ -334,6 +334,10 @@
   max-width: 100%;
 }
 
+.phabricator-remarkup .remarkup-table-wrap {
+  overflow-x: auto;
+}
+
 .phabricator-remarkup table.remarkup-table {
   border-collapse: separate;
   border-spacing: 1px;

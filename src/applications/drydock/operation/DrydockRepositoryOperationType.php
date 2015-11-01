@@ -16,6 +16,10 @@ abstract class DrydockRepositoryOperationType extends Phobject {
     DrydockRepositoryOperation $operation,
     PhabricatorUser $viewer);
 
+  public function getWorkingCopyMerges(DrydockRepositoryOperation $operation) {
+    return array();
+  }
+
   final public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
     return $this;

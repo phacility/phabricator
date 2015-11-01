@@ -53,6 +53,9 @@ final class DrydockRepositoryOperationUpdateWorker
     // waiting for a lease we're holding.
 
     try {
+      $operation->getImplementation()
+        ->setViewer($viewer);
+
       $lease = $this->loadWorkingCopyLease($operation);
 
       $interface = $lease->getInterface(
@@ -60,9 +63,6 @@ final class DrydockRepositoryOperationUpdateWorker
 
       // No matter what happens here, destroy the lease away once we're done.
       $lease->releaseOnDestruction(true);
-
-      $operation->getImplementation()
-        ->setViewer($viewer);
 
       $operation->applyOperation($interface);
 
@@ -90,6 +90,9 @@ final class DrydockRepositoryOperationUpdateWorker
     // TODO: This is very similar to leasing in Harbormaster, maybe we can
     // share some of the logic?
 
+    $working_copy = new DrydockWorkingCopyBlueprintImplementation();
+    $working_copy_type = $working_copy->getType();
+
     $lease_phid = $operation->getProperty('exec.leasePHID');
     if ($lease_phid) {
       $lease = id(new DrydockLeaseQuery())
@@ -103,9 +106,6 @@ final class DrydockRepositoryOperationUpdateWorker
             $lease_phid));
       }
     } else {
-      $working_copy_type = id(new DrydockWorkingCopyBlueprintImplementation())
-        ->getType();
-
       $repository = $operation->getRepository();
 
       $allowed_phids = $repository->getAutomationBlueprintPHIDs();
@@ -127,7 +127,7 @@ final class DrydockRepositoryOperationUpdateWorker
       }
 
       $operation
-        ->setProperty('exec.leasePHID', $lease->getPHID())
+        ->setWorkingCopyLeasePHID($lease->getPHID())
         ->save();
 
       $lease->queueForActivation();
@@ -138,6 +138,13 @@ final class DrydockRepositoryOperationUpdateWorker
     }
 
     if (!$lease->isActive()) {
+      $vcs_error = $working_copy->getWorkingCopyVCSError($lease);
+      if ($vcs_error) {
+        $operation
+          ->setWorkingCopyVCSError($vcs_error)
+          ->save();
+      }
+
       throw new PhabricatorWorkerPermanentFailureException(
         pht(
           'Lease "%s" never activated.',
@@ -158,6 +165,9 @@ final class DrydockRepositoryOperationUpdateWorker
           'branch' => $name,
         );
         break;
+      case 'none':
+        $spec = array();
+        break;
       default:
         throw new Exception(
           pht(
@@ -165,6 +175,8 @@ final class DrydockRepositoryOperationUpdateWorker
             $type,
             $target));
     }
+
+    $spec['merges'] = $operation->getWorkingCopyMerges();
 
     $map = array();
     $map[$repository->getCloneName()] = array(

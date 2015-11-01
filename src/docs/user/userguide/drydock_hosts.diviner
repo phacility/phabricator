@@ -1,0 +1,126 @@
+@title Drydock Blueprints: Hosts
+@group userguide
+
+Guide to configuring Drydock host blueprints.
+
+
+Overview
+========
+
+IMPORTANT: Drydock is not a mature application and may be difficult to
+configure and use for now.
+
+To give Drydock access to machines so it can perform work, you'll configure
+**host blueprints**. These blueprints tell Drydock where to find machines (or
+how to build machines) and how to connect to them.
+
+Once Drydock has access to hosts it can use them to build more interesting and
+complex types of resources, like repository working copies.
+
+Drydock currently supports these kinds of host blueprints:
+
+  - **Almanac Hosts**: Gives Drydock access to a predefined list of hosts.
+
+Drydock may support additional blueprints in the future.
+
+
+Security
+========
+
+Drydock can be used to run semi-trusted and untrusted code, and you may want
+to isolate specific processes or classes of processes from one another. See
+@{article:Drydock User Guide: Security} for discussion of security
+concerns and guidance on how to make isolation tradeoffs.
+
+
+General Considerations
+======================
+
+**You must install software on hosts.** Drydock does not currently handle
+installing software on hosts. You'll need to make sure any hosts are configured
+properly with any software you need, and have tools like `git`, `hg` or `svn`
+that may be required to interact with working copies.
+
+You do **not** need to install PHP, arcanist, libphutil or Phabricator on the
+hosts unless you are specifically running `arc` commands.
+
+**You must configure authentication.** Drydock also does not handle credentials
+for VCS operations. If you're interacting with repositories hosted on
+Phabricator, the simplest way to set this up is something like this:
+
+  - Create a new bot user in Phabricator.
+  - In {nav Settings > SSH Public Keys}, add a public key or generate a
+    keypair.
+  - Put the private key on your build hosts as `~/.ssh/id_rsa` for whatever
+    user you're connecting with.
+
+This will let processes on the host access Phabricator as the bot user, and
+use the bot user's permissions to pull and push changes.
+
+If you're using hosted repositories from an external service, you can follow
+similar steps for that service.
+
+Note that any processes running under the given user account will have access
+to the private key, so you should give the bot the smallest acceptable level of
+permissions if you're running semi-trusted or untrusted code like unit tests.
+
+**You must create a `/var/drydock` directory.** This is hard-coded in Drydock
+for now, so you need to create it on the hosts. This can be a symlink to
+a different location if you prefer.
+
+
+Almanac Hosts
+=============
+
+The **Almanac Hosts** blueprint type gives Drydock access to a predefined list
+of hosts which you configure in the Almanac application. This is the simplest
+type of blueprint to set up.
+
+For more information about Almanac, see @{article:Almanac User Guide}.
+
+For example, suppose you have `build001.mycompany.com` and
+`build002.mycompany.com`, and want to configure Drydock to be able to use these
+hosts. To do this:
+
+**Create Almanac Devices**: Create a device record in Almanac for each your
+hosts.
+
+{nav Almanac > Devices > Create Device}
+
+Enter the device names (like `build001.mycompany.com`). After creating the
+devices, use {nav Add Interface} to configure the ports and IP addresses that
+Drydock should connect to over SSH (normally, this is port `22`).
+
+**Create an Almanac Service**: In the Almanac application, create a new service
+to define the pool of devices you want to use.
+
+{nav Almanac > Services > Create Service}
+
+Choose the service type **Drydock: Resource Pool**. This will allow Drydock
+to use the devices that are bound to the service.
+
+Now, use {nav Add Binding} to bind all of the devices to the service.
+
+You can add more hosts to the pool later by binding additional devices, and
+Drydock will automatically start using them. Likewise, you can remove bindings
+to take hosts out of service.
+
+**Create a Drydock Blueprint**: Now, create a new blueprint in Drydock.
+
+{nav Drydock > Blueprints > New Blueprint}
+
+Choose the **Almanac Hosts** blueprint type.
+
+In **Almanac Services**, select the service you previously created. For
+**Credentials**, select an SSH private key you want Drydock to use to connect
+to the hosts.
+
+Drydock should now be able to build resources from these hosts.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to @{article:Drydock Blueprints}.

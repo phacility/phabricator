@@ -127,6 +127,7 @@ final class PHUIPropertyListView extends AphrontView {
     // If we have an action list, make sure we render a property part, even
     // if there are no properties. Otherwise, the action list won't render.
     if ($this->actionList) {
+      $this->classes[] = 'phui-property-list-has-actions';
       $have_property_part = false;
       foreach ($this->parts as $part) {
         if ($part['type'] == 'property') {

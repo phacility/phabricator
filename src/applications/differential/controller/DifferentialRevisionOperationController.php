@@ -18,44 +18,13 @@ final class DifferentialRevisionOperationController
 
     $detail_uri = "/D{$id}";
 
-    $repository = $revision->getRepository();
-    if (!$repository) {
-      return $this->rejectOperation(
-        $revision,
-        pht('No Repository'),
-        pht(
-          'This revision is not associated with a known repository. Only '.
-          'revisions associated with a tracked repository can be landed '.
-          'automatically.'));
-    }
-
-    if (!$repository->canPerformAutomation()) {
-      return $this->rejectOperation(
-        $revision,
-        pht('No Repository Automation'),
-        pht(
-          'The repository this revision is associated with ("%s") is not '.
-          'configured to support automation. Configure automation for the '.
-          'repository to enable revisions to be landed automatically.',
-          $repository->getMonogram()));
-    }
-
-    // TODO: At some point we should allow installs to give "land reviewed
-    // code" permission to more users than "push any commit", because it is
-    // a much less powerful operation. For now, just require push so this
-    // doesn't do anything users can't do on their own.
-    $can_push = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $repository,
-      DiffusionPushCapability::CAPABILITY);
-    if (!$can_push) {
-      return $this->rejectOperation(
-        $revision,
-        pht('Unable to Push'),
-        pht(
-          'You do not have permission to push to the repository this '.
-          'revision is associated with ("%s"), so you can not land it.',
-          $repository->getMonogram()));
+    $op = new DrydockLandRepositoryOperation();
+    $barrier = $op->getBarrierToLanding($viewer, $revision);
+    if ($barrier) {
+      return $this->newDialog()
+        ->setTitle($barrier['title'])
+        ->appendParagraph($barrier['body'])
+        ->addCancelButton($detail_uri);
     }
 
     if ($request->isFormPost()) {
@@ -64,8 +33,7 @@ final class DifferentialRevisionOperationController
       // occurs.
 
       $diff = $revision->getActiveDiff();
-
-      $op = new DrydockLandRepositoryOperation();
+      $repository = $revision->getRepository();
 
       $operation = DrydockRepositoryOperation::initializeNewOperation($op)
         ->setAuthorPHID($viewer->getPHID())
@@ -94,20 +62,6 @@ final class DifferentialRevisionOperationController
           'OWN RISK!'))
       ->addCancelButton($detail_uri)
       ->addSubmitButton(pht('Mutate Repository Unpredictably'));
-  }
-
-  private function rejectOperation(
-    DifferentialRevision $revision,
-    $title,
-    $body) {
-
-    $id = $revision->getID();
-    $detail_uri = "/D{$id}";
-
-    return $this->newDialog()
-      ->setTitle($title)
-      ->appendParagraph($body)
-      ->addCancelButton($detail_uri);
   }
 
 }

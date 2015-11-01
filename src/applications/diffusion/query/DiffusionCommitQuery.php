@@ -72,6 +72,7 @@ final class DiffusionCommitQuery
    */
   public function withRepositoryPHIDs(array $phids) {
     $this->repositoryPHIDs = $phids;
+    return $this;
   }
 
   /**

@@ -69,11 +69,12 @@ To update Phabricator, use a script like the one described in
 @{article:Upgrading Phabricator}.
 
 **If you can not update** for some reason, please include the version of
-Phabricator you are running in your report. The version is just the Git hash
-of your local HEAD. You can find the version by running `git show` in
-`phabricator/` and copy/pasting the first line of output, or by browsing to
-{nav Config > All Settings} in the web UI and copy/pasting the information
-at the top.
+Phabricator you are running when you file a report. You can find the version in
+{nav Config > Versions} in the web UI.
+
+(The version is just the Git hash of your local HEAD, so you can also find it
+by running `git show` in `phabricator/` and looking at the first line of
+output.)
 
 
 Supported Issues
