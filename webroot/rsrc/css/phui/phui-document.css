@@ -92,11 +92,11 @@
   border-color: {$thinblueborder};
 }
 
-.phui-document-content .phui-property-list-view {
+.legalpad .phui-document-content .phui-property-list-view {
   border: none;
   box-shadow: none;
-  margin: 0;
-  background-color: {$lightgreybackground};
+  margin: 16px 0 0  0;
+  background-color: {$lightbluebackground};
 }
 
 .phui-document-content {
@@ -134,10 +134,6 @@
   padding-right: 120px;
 }
 
-.phui-document-view .phui-property-list-view {
-  border-bottom: 1px solid {$thinblueborder};
-}
-
 .phui-document-view .phui-info-severity-nodata {
   background-color: {$lightgreybackground};
 }
@@ -172,10 +168,11 @@ body .phui-document-view .phui-header-shell.phui-bleed-header {
 
 .phui-document-view .phui-property-list-section-header {
   padding: 12px 16px 0px;
+  border-top: none;
 }
 
 .phui-document-view .phui-property-list-text-content {
-  padding: 0;
+  padding: 0 16px;
 }
 
 .phui-document-view .PhabricatorMonospaced,

@@ -2,7 +2,8 @@
  * @provides phui-document-view-pro-css
  */
 
-.phui-document-view.phui-document-view-pro {
+.phui-document-view.phui-document-view-pro,
+.phui-document-view-pro-box {
   max-width: 800px;
   padding: 0 16px;
   position: relative;
