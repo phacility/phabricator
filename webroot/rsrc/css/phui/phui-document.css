@@ -86,7 +86,6 @@
   .phui-header-shell.phui-header-no-backgound
   .phui-header-view {
   padding: 8px 0 4px;
-  font-size: {$biggestfontsize};
 }
 
 .phui-document-content .phui-property-list-container {
@@ -181,11 +180,11 @@ body .phui-document-view .phui-header-shell.phui-bleed-header {
 
 .phui-document-view .PhabricatorMonospaced,
 .phui-document-view .phabricator-remarkup .remarkup-code-block .remarkup-code {
-  font: 11px/14px "Menlo", "Consolas", "Monaco", monospace;
+  font: 11px/16px "Menlo", "Consolas", "Monaco", monospace;
 }
 
 .platform-windows .phui-document-view .PhabricatorMonospaced,
 .platform-windows .phui-document-view .phabricator-remarkup .remarkup-code-block
   .remarkup-code {
-  font: 12px/14px "Menlo", "Consolas", "Monaco", monospace;
+  font: 12px/16px "Menlo", "Consolas", "Monaco", monospace;
 }
