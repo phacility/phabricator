@@ -9,12 +9,12 @@ final class PhabricatorSpacesNamespacePHIDType
     return pht('Space');
   }
 
-  public function getPHIDTypeApplicationClass() {
-    return 'PhabricatorSpacesApplication';
-  }
-
   public function newObject() {
     return new PhabricatorSpacesNamespace();
+  }
+
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorSpacesApplication';
   }
 
   protected function buildQueryForObjects(

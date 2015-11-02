@@ -8,12 +8,12 @@ final class DifferentialRevisionPHIDType extends PhabricatorPHIDType {
     return pht('Differential Revision');
   }
 
-  public function getPHIDTypeApplicationClass() {
-    return 'PhabricatorDifferentialApplication';
-  }
-
   public function newObject() {
     return new DifferentialRevision();
+  }
+
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorDifferentialApplication';
   }
 
   protected function buildQueryForObjects(

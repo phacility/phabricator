@@ -16,6 +16,10 @@ final class PhabricatorOwnersPackagePHIDType extends PhabricatorPHIDType {
     return new PhabricatorOwnersPackage();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorOwnersApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

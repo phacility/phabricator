@@ -12,6 +12,10 @@ final class PhortuneChargePHIDType extends PhabricatorPHIDType {
     return new PhortuneCharge();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorPhortuneApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

@@ -12,6 +12,10 @@ final class DrydockRepositoryOperationPHIDType extends PhabricatorPHIDType {
     return new DrydockRepositoryOperation();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorDrydockApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

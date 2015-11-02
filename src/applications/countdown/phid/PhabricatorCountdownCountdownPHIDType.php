@@ -12,6 +12,10 @@ final class PhabricatorCountdownCountdownPHIDType extends PhabricatorPHIDType {
     return new PhabricatorCountdown();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorCountdownApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

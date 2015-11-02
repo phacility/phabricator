@@ -8,12 +8,16 @@ final class PhabricatorProjectColumnPHIDType extends PhabricatorPHIDType {
     return pht('Project Column');
   }
 
+  public function getTypeIcon() {
+    return 'fa-columns bluegrey';
+  }
+
   public function newObject() {
     return new PhabricatorProjectColumn();
   }
 
-  public function getTypeIcon() {
-    return 'fa-columns bluegrey';
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorProjectApplication';
   }
 
   protected function buildQueryForObjects(

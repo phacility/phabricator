@@ -8,16 +8,16 @@ final class PhabricatorProjectProjectPHIDType extends PhabricatorPHIDType {
     return pht('Project');
   }
 
-  public function getPHIDTypeApplicationClass() {
-    return 'PhabricatorProjectApplication';
-  }
-
   public function getTypeIcon() {
     return 'fa-briefcase bluegrey';
   }
 
   public function newObject() {
     return new PhabricatorProject();
+  }
+
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorProjectApplication';
   }
 
   protected function buildQueryForObjects(

@@ -8,12 +8,12 @@ final class PhabricatorMetaMTAMailPHIDType extends PhabricatorPHIDType {
     return pht('MetaMTA Mail');
   }
 
-  public function getPHIDTypeApplicationClass() {
-    return 'PhabricatorMetaMTAApplication';
-  }
-
   public function newObject() {
     return new PhabricatorMetaMTAMail();
+  }
+
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorMetaMTAApplication';
   }
 
   protected function buildQueryForObjects(
