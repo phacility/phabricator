@@ -520,3 +520,7 @@ var.remarkup-assist-textarea {
   background: {$thinblueborder};
   margin: 24px 0;
 }
+
+.phabricator-remarkup .remarkup-highlight {
+  background-color: {$lightviolet};
+}
