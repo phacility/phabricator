@@ -72,6 +72,13 @@ final class PhabricatorPhurlURL extends PhabricatorPhurlDAO
     return $uri;
   }
 
+  public function isValid() {
+    $allowed_protocols = PhabricatorEnv::getEnvConfig('uri.allowed-protocols');
+    $uri = new PhutilURI($this->getLongURL());
+
+    return isset($allowed_protocols[$uri->getProtocol()]);
+  }
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 

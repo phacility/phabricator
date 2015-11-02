@@ -96,18 +96,6 @@ final class PhabricatorPhurlURLViewController
       $url,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $allowed_protocols = PhabricatorEnv::getEnvConfig('uri.allowed-protocols');
-    $uri = new PhutilURI($url->getLongURL());
-    $url_protocol = $uri->getProtocol();
-
-    $can_access = false;
-    $redirect_uri = $url->getMonogram();
-
-    if (strlen($url_protocol)) {
-      $can_access = in_array($url_protocol, $allowed_protocols);
-      $redirect_uri = $uri;
-    }
-
     $actions
       ->addAction(
         id(new PhabricatorActionView())
@@ -120,9 +108,8 @@ final class PhabricatorPhurlURLViewController
         id(new PhabricatorActionView())
           ->setName(pht('Visit URL'))
           ->setIcon('fa-external-link')
-          ->setHref($redirect_uri)
-          ->setDisabled(!$can_edit || !$can_access)
-          ->setWorkflow(!$can_edit));
+          ->setHref("u/{$id}")
+          ->setDisabled(!$url->isValid()));
 
     return $actions;
   }
