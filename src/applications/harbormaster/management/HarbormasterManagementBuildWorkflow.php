@@ -16,6 +16,12 @@ final class HarbormasterManagementBuildWorkflow
             'help'        => pht('ID of build plan to run.'),
           ),
           array(
+            'name' => 'background',
+            'help' => pht(
+              'Submit builds into the build queue normally instead of '.
+              'running them in the foreground.'),
+          ),
+          array(
             'name'        => 'buildable',
             'wildcard'    => true,
           ),
@@ -64,6 +70,11 @@ final class HarbormasterManagementBuildWorkflow
         pht('Build plan "%s" does not exist.', $plan_id));
     }
 
+    if (!$plan->canRunManually()) {
+      throw new PhutilArgumentUsageException(
+        pht('This build plan can not be run manually.'));
+    }
+
     $console = PhutilConsole::getConsole();
 
     $buildable = HarbormasterBuildable::initializeNewBuildable($viewer)
@@ -83,8 +94,11 @@ final class HarbormasterManagementBuildWorkflow
       "\n    %s\n\n",
       PhabricatorEnv::getProductionURI('/B'.$buildable->getID()));
 
-    PhabricatorWorker::setRunAllTasksInProcess(true);
-    $buildable->applyPlan($plan);
+    if (!$args->getArg('background')) {
+      PhabricatorWorker::setRunAllTasksInProcess(true);
+    }
+
+    $buildable->applyPlan($plan, array());
 
     $console->writeOut("%s\n", pht('Done.'));
 

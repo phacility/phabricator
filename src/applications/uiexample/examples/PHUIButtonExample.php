@@ -68,7 +68,8 @@ final class PHUIButtonExample extends PhabricatorUIExample {
 
    // PHUIButtonView
 
-   $colors = array(null,
+   $colors = array(
+     null,
      PHUIButtonView::GREEN,
      PHUIButtonView::GREY,
      PHUIButtonView::DISABLED,

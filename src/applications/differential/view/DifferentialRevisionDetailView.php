@@ -73,36 +73,6 @@ final class DifferentialRevisionDetailView extends AphrontView {
       ->setUser($user)
       ->setObject($revision);
 
-    $status = $revision->getStatus();
-    $local_vcs = $this->getDiff()->getSourceControlSystem();
-
-    $next_step = null;
-    if ($status == ArcanistDifferentialRevisionStatus::ACCEPTED) {
-      switch ($local_vcs) {
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-          $bookmark = $this->getDiff()->getBookmark();
-          $next_step = ($bookmark != ''
-            ? csprintf('arc land %s', $bookmark)
-            : 'arc land');
-          break;
-
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-          $branch = $this->getDiff()->getBranch();
-          $next_step = ($branch != ''
-            ? csprintf('arc land %s', $branch)
-            : 'arc land');
-          break;
-
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-          $next_step = 'arc commit';
-          break;
-      }
-    }
-    if ($next_step) {
-      $next_step = phutil_tag('tt', array(), $next_step);
-      $properties->addProperty(pht('Next Step'), $next_step);
-    }
-
     $properties->setHasKeyboardShortcuts(true);
     $properties->setActionList($actions);
     $this->setActionList($actions);

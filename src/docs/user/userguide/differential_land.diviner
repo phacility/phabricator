@@ -1,0 +1,53 @@
+@title Differential User Guide: Automated Landing
+@group userguide
+
+Configuring Phabricator so you can "Land Revision" from the web UI.
+
+
+Overview
+========
+
+IMPORTANT: This feature is a prototype and has substantial limitations.
+
+Phabricator can be configured so that approved revisions may be published
+directly from the web interface. This can make publishing changes more
+convenient, particularly for open source projects where authors may not have
+commit access to the repository. This document explains the workflow and how to
+configure it.
+
+When properly configured, a {nav Land Revision} action will appear in
+Differential. This action works like `arc land` on the command line, and
+merges and publishes the revision.
+
+This feature has significant limitations:
+
+  - This feature is a prototype.
+  - This feature is only supported in Git.
+  - This feature always lands changes onto `master`.
+  - This feature does not currently provide chain of custody, and what lands
+    may be arbitrarily different than what is shown in Differential.
+
+To be landable, a revision must satisfy these requirements:
+
+  - It must belong to a repository which is tracked in Diffusion
+    (both hosted and imported repositories will work).
+  - The repository must have a **Staging Area** configured.
+  - The repository must have **Repository Automation** configured. For
+    details, see @{article:Drydock User Guide: Repository Automation}.
+  - The revision must have been created with `arc diff` and pushed to the
+    configured staging area at creation time.
+  - The user clicking the "Land Revision" button must have permission to push
+    to the repository.
+
+If these requirements are met, the {nav Land Revision} action should be
+available in the UI.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - configuring repository automation with
+    @{article:Drydock User Guide: Repository Automation}; or
+  - returning to the @{article:Differential User Guide}.

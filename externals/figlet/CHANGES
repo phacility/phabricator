@@ -1,0 +1,205 @@
+Changes in FIGlet 2.2.5
+-----------------------
+
+FIGlet 2.2.5 is a revision of FIGlet 2.2.4 containing updated andproperly
+licensed ISO8859 map files.  The full list of changes is:
+
+o	Add regression tests for uskata and jis0201 control files
+
+o	Properly escape minus signs in figlist(6) man page (Jonathan
+	McCrohan)
+
+o	Fix chkfont coredump on invalid input (Kenneth Davies and
+	Jonathan McCrohan)
+
+o	Update ISO8859 map files to fix licensing issue raised in Debian
+	bugs 673096 and 674844
+
+o	Re-add missing figmagic and getopt.c files which were left out
+	of releases 2.2.3 and 2.2.4
+
+o	Fix output of test script in MacOS X
+
+These changes were made by Claudio Matsuoka <cmatsuoka@gmail.com>
+31 May 2012
+
+Changes in FIGlet 2.2.4
+-----------------------
+
+FIGlet 2.2.4 is a revision of FIGlet 2.2.3 featuring bugfixes and support
+to tlf2 fonts.  The full list of changes is:
+
+o	Add support to Sam Hocevar's TOIlet TLF fonts containing UTF-8
+	encoded Unicode characters.
+
+o	Add infocode 5 to list supported font formats
+
+o	Fix rendering error caused by the previous attempt to fix invalid
+	memory accesses when smushing at start of line
+
+o	New environment variable FIGLET_FONTDIR can be used to specify
+	the path to search for fonts
+
+o	Add regression tests
+
+These changes were made by Claudio Matsuoka <cmatsuoka@gmail.com>
+26 January 2011
+
+Changes in FIGlet 2.2.3
+-----------------------
+
+FIGlet 2.2.3 is a revision of FIGlet 2.2.2 featuring minor bugfixes and
+important licensing changes in the zipio files.  The full list of
+changes is:
+
+o	License changed from "Academic Free License" to "New BSD License"
+	(3-clause) as agreed by FIGlet authors
+
+o	New JIS X 0201 control file (Micah Cowan)
+
+o	Fix behavior of JIS0201 SHIFT-OUT and SHIFT-IN that were previouly
+	inverted (Micah Cowan)
+
+o	Fix memory violation when smushing at line start
+
+o	Fix handling of memory allocation errors
+
+o	Relicense Ed Hamrick zipio under the MIT license. This should
+	eliminate any concerns about redistribution of FIGlet as libre
+	software.
+
+o	Update Makefile to meet modern standards in variable naming, using
+	BINDIR as the pathname for binary files and reservind DESTDIR
+	as the extra prefix commonly used in package building.
+
+o	Add a Turbo C makefile, just because I had the compiler. (this
+	also tests portability to old compilers and foreign platforms)
+
+o	Add Jonathon Abbott's man pages for figlist, showfigfonts and
+	chkfont originally contributed to the Debian Project
+
+These changes were made by Claudio Matsuoka <cmatsuoka@gmail.com>
+12 January 2011
+
+Changes in FIGlet 2.2.2
+-----------------------
+
+License changed from "Artistic License" to "Academic Free 
+License" as agreed by FIGlet authors. 05 July 2005 
+
+Changes in FIGlet 2.2.1
+-----------------------
+
+FIGlet 2.2.1 is a minor revision of FIGlet 2.2.  The files
+README, Makefile, figfont.txt, figlet.c and figlet.6 have been 
+changed to reflect changes in documentation, official contact 
+details etc. FTP-NOTE merged into README. FAQ and CHANGES 
+added to the distribution.
+
+All other files are identical with the 2.2 release.
+
+These changes were made by Christiaan Keet <keet@plig.net>
+
+Changes in FIGlet 2.2
+---------------------
+
+FIGlet 2.2 is a moderate revision of FIGlet 2.1.2.  The new features are:
+
+o	font files and control files can be compressed using ``zip'', and
+	will be automatically decompressed
+
+o	new commands in controlfiles provide support for
+	single-byte (default), double-byte, HZ, Shift-JIS, and Unicode
+	UTF-8 encodings of the input
+
+o	ISO 2022 escape sequences are decoded and interpreted
+
+o	control files can now have the format of Unicode Consortium
+	mapping tables (two columns of numbers representing
+	input character and output character, no ranges, # comments)
+
+o	new options -s (smush, same as -m-2), -k (kern, same as -m0),
+	-S (forced smushing), and -W (full width, same as -m-1) make
+	-m option unnecessary except for font designers.  The -S option
+	works even if the font's smushmode is 0 or -1, in which case
+	the smushmode is read from a new parameter in the
+	font's first line, or does universal overlapping if no such parameter
+	exists
+
+o	universal smushing (-o option to force it, but -S will use it
+	if no smush rules are available) makes FIGcharacters overlap by
+	one place independent of how they are constructed
+	more fonts smushable.
+
+o	file "figmagic" can be appended to your system magic number
+	file to make the "file" command recognize FIGlet files
+
+o	file "figfont.txt" is an implementation-independent specification
+	for FIGlet fonts and control files
+
+o	integrated support for extended characters (extended Latin in
+	"standard", Greek in "big", katakana in "banner", Hebrew in new
+	"ivrit" fonts) with appropriate controlfiles
+
+o	smushing rule 16 has changed slightly: "/\" now smushes
+	into "|" and "\/" smushes into "Y"; "><" still smushes
+	into "X" and "<>" is still not smushed at all.
+
+o	-A option introduced in FIGlet 2.1.2 is now optional;
+	if any words appear on the command line after the options,
+	they are formatted, and the standard input is not read.
+
+These changes were made by John Cowan <cowan@ccil.org>.
+
+Changes in FIGlet 2.1.2
+------------------------
+
+FIGlet 2.1.2 is a minor revision of FIGlet 2.1.1.  The files
+README, FTP-NOTE, figlet.c and figlet.6 have been changed.  All other
+files are identical with the 2.1.1 release.
+
+o	The only new option is -A, which causes FIGlet to read input
+	from the command line.
+
+These changes were made by Gilbert Healton <ghealton@nmia.com> as Glenn
+Chappell is now busy as a new professor of Mathematics.
+
+Changes in FIGlet 2.1
+----------------------
+
+A number of minor bugs and major incompatibility problems have been
+fixed.  FIGlet 2.1 should compile correctly on many operating systems for
+which FIGlet 2.0 did not.
+
+o	The "-F" command line option, which used to list all the available
+	fonts, has been removed, since it made FIGlet incompatible with some
+	operating systems.  It has been replaced by the "figlist" script.  The
+	"showfigfonts" script has been updated so that it no longer requires
+	the "-F" option to be available.
+
+o	The FIGlet font file format has been extended to allow an arbitrarily
+	large number of characters.  The ISO Latin-1 character set, which
+	includes many accented letters and special symbols, has been added to
+	most standard fonts.
+
+o	FIGlet can now print right-to-left.  This can be specified on the
+	command line ("-R") or in the font file.  Thus, for example, Hebrew and
+	Arabic fonts can be handled more easily.
+
+o	FIGlet can now right justify its output.  This is the default when
+	right-to-left printing is selected.  It can also be specified on the
+	command line ("-r").
+
+o	FIGlet now supports "control files".  These can be used to change which
+	character FIGlet will print when it sees a certain input character --
+	sort of an expanded version of the "-D" option.  For example, a control
+	file could convert lower-case letters to upper-case or map certain
+	ASCII characters to accented letters.  Control file names end with the
+	suffix ".flc".  Select a control file by using "-C controlfile" on the
+	command line.  Several controlfiles can be used at once by giving
+	muliple "-C" options.
+
+o	There is now a way for programs that use FIGlet to get various
+	information from FIGlet, for example, what version of FIGlet is being
+	used or the name of the default font directory.  This information is
+	gotten through the "-I" option.  See the man page for details.

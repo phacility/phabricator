@@ -12,6 +12,10 @@ final class PhluxVariablePHIDType extends PhabricatorPHIDType {
     return new PhluxVariable();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorPhluxApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

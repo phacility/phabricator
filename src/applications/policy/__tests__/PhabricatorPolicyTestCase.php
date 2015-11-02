@@ -307,9 +307,9 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
   }
 
   public function testAllQueriesBelongToActualApplications() {
-    $queries = id(new PhutilSymbolLoader())
+    $queries = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorPolicyAwareQuery')
-      ->loadObjects();
+      ->execute();
 
     foreach ($queries as $qclass => $query) {
       $class = $query->getQueryApplicationClass();

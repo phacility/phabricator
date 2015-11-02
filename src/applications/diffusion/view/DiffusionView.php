@@ -13,36 +13,6 @@ abstract class DiffusionView extends AphrontView {
     return $this->diffusionRequest;
   }
 
-  final public function linkChange(
-    $change_type,
-    $file_type,
-    $path = null,
-    $commit_identifier = null) {
-
-    $text = DifferentialChangeType::getFullNameForChangeType($change_type);
-    if ($change_type == DifferentialChangeType::TYPE_CHILD) {
-      // TODO: Don't link COPY_AWAY without a direct change.
-      return $text;
-    }
-    if ($file_type == DifferentialChangeType::FILE_DIRECTORY) {
-      return $text;
-    }
-
-    $href = $this->getDiffusionRequest()->generateURI(
-      array(
-        'action'  => 'change',
-        'path'    => $path,
-        'commit'  => $commit_identifier,
-      ));
-
-    return phutil_tag(
-      'a',
-      array(
-        'href' => $href,
-      ),
-      $text);
-  }
-
   final public function linkHistory($path) {
     $href = $this->getDiffusionRequest()->generateURI(
       array(
@@ -50,50 +20,107 @@ abstract class DiffusionView extends AphrontView {
         'path'   => $path,
       ));
 
-    return phutil_tag(
+    return $this->renderHistoryLink($href);
+  }
+
+  final public function linkBranchHistory($branch) {
+    $href = $this->getDiffusionRequest()->generateURI(
+      array(
+        'action' => 'history',
+        'branch' => $branch,
+      ));
+
+    return $this->renderHistoryLink($href);
+  }
+
+  final public function linkTagHistory($tag) {
+    $href = $this->getDiffusionRequest()->generateURI(
+      array(
+        'action' => 'history',
+        'commit' => $tag,
+      ));
+
+    return $this->renderHistoryLink($href);
+  }
+
+  private function renderHistoryLink($href) {
+    return javelin_tag(
       'a',
       array(
         'href' => $href,
+        'class' => 'diffusion-link-icon',
+        'sigil' => 'has-tooltip',
+        'meta' => array(
+          'tip' => pht('History'),
+          'align' => 'E',
+        ),
       ),
-      pht('History'));
+      id(new PHUIIconView())->setIconFont('fa-history bluegrey'));
   }
 
   final public function linkBrowse($path, array $details = array()) {
+    require_celerity_resource('diffusion-icons-css');
+    Javelin::initBehavior('phabricator-tooltips');
 
-    $href = $this->getDiffusionRequest()->generateURI(
-      $details + array(
-        'action' => 'browse',
-        'path'   => $path,
-      ));
+    $file_type = idx($details, 'type');
+    unset($details['type']);
 
-    if (isset($details['text'])) {
-      $text = $details['text'];
-    } else {
-      $text = pht('Browse');
+    $display_name = idx($details, 'name');
+    unset($details['name']);
+
+    if (strlen($display_name)) {
+      $display_name = phutil_tag(
+        'span',
+        array(
+          'class' => 'diffusion-browse-name',
+        ),
+        $display_name);
     }
 
-    return phutil_tag(
-      'a',
-      array(
-        'href' => $href,
-      ),
-      $text);
-  }
-
-  final public function linkExternal($hash, $uri, $text) {
-    $href = id(new PhutilURI('/diffusion/external/'))
-      ->setQueryParams(
-        array(
-          'uri' => $uri,
-          'id'  => $hash,
+    if (isset($details['external'])) {
+      $href = id(new PhutilURI('/diffusion/external/'))
+        ->setQueryParams(
+          array(
+            'uri' => idx($details, 'external'),
+            'id'  => idx($details, 'hash'),
+          ));
+      $tip = pht('Browse External');
+    } else {
+      $href = $this->getDiffusionRequest()->generateURI(
+        $details + array(
+          'action' => 'browse',
+          'path'   => $path,
         ));
+      $tip = pht('Browse');
+    }
 
-    return phutil_tag(
+    $icon = DifferentialChangeType::getIconForFileType($file_type);
+    $icon_view = id(new PHUIIconView())->setIconFont("{$icon} blue");
+
+    // If we're rendering a file or directory name, don't show the tooltip.
+    if ($display_name !== null) {
+      $sigil = null;
+      $meta = null;
+    } else {
+      $sigil = 'has-tooltip';
+      $meta = array(
+        'tip' => $tip,
+        'align' => 'E',
+      );
+    }
+
+    return javelin_tag(
       'a',
       array(
         'href' => $href,
+        'class' => 'diffusion-link-icon',
+        'sigil' => $sigil,
+        'meta' => $meta,
       ),
-      $text);
+      array(
+        $icon_view,
+        $display_name,
+      ));
   }
 
   final public static function nameCommit(
@@ -165,6 +192,60 @@ abstract class DiffusionView extends AphrontView {
         $email->getDisplayName());
     }
     return hsprintf('%s', $name);
+  }
+
+  final protected function renderBuildable(HarbormasterBuildable $buildable) {
+    $status = $buildable->getBuildableStatus();
+
+    $icon = HarbormasterBuildable::getBuildableStatusIcon($status);
+    $color = HarbormasterBuildable::getBuildableStatusColor($status);
+    $name = HarbormasterBuildable::getBuildableStatusName($status);
+
+    $icon_view = id(new PHUIIconView())
+      ->setIconFont($icon.' '.$color);
+
+    $tooltip_view = javelin_tag(
+      'span',
+      array(
+        'sigil' => 'has-tooltip',
+        'meta' => array('tip' => $name),
+      ),
+      $icon_view);
+
+    Javelin::initBehavior('phabricator-tooltips');
+
+    return phutil_tag(
+      'a',
+      array('href' => '/'.$buildable->getMonogram()),
+      $tooltip_view);
+  }
+
+  final protected function loadBuildables(array $commits) {
+    assert_instances_of($commits, 'PhabricatorRepositoryCommit');
+
+    if (!$commits) {
+      return array();
+    }
+
+    $viewer = $this->getUser();
+
+    $harbormaster_app = 'PhabricatorHarbormasterApplication';
+    $have_harbormaster = PhabricatorApplication::isClassInstalledForViewer(
+      $harbormaster_app,
+      $viewer);
+
+    if ($have_harbormaster) {
+      $buildables = id(new HarbormasterBuildableQuery())
+        ->setViewer($viewer)
+        ->withBuildablePHIDs(mpull($commits, 'getPHID'))
+        ->withManualBuildables(false)
+        ->execute();
+      $buildables = mpull($buildables, null, 'getBuildablePHID');
+    } else {
+      $buildables = array();
+    }
+
+    return $buildables;
   }
 
 }

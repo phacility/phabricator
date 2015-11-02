@@ -10,7 +10,7 @@ final class HeraldDifferentialRevisionAdapter
   protected $changesets;
   private $haveHunks;
 
-  private $buildPlanPHIDs = array();
+  private $buildRequests = array();
 
   public function getAdapterApplicationClass() {
     return 'PhabricatorDifferentialApplication';
@@ -139,12 +139,13 @@ final class HeraldDifferentialRevisionAdapter
     return $this->getObject()->getPHID();
   }
 
-  public function getQueuedHarbormasterBuildPlanPHIDs() {
-    return $this->buildPlanPHIDs;
+  public function getQueuedHarbormasterBuildRequests() {
+    return $this->buildRequests;
   }
 
-  public function queueHarbormasterBuildPlanPHID($phid) {
-    $this->buildPlanPHIDs[] = $phid;
+  public function queueHarbormasterBuildRequest(
+    HarbormasterBuildRequest $request) {
+    $this->buildRequests[] = $request;
   }
 
 }

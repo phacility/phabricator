@@ -3,24 +3,15 @@
 final class HarbormasterBuildActionController
   extends HarbormasterController {
 
-  private $id;
-  private $action;
-  private $via;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-    $this->action = $data['action'];
-    $this->via = idx($data, 'via');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-    $command = $this->action;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
+    $action = $request->getURIData('action');
+    $via = $request->getURIData('via');
 
     $build = id(new HarbormasterBuildQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -31,21 +22,24 @@ final class HarbormasterBuildActionController
       return new Aphront404Response();
     }
 
-    switch ($command) {
+    switch ($action) {
       case HarbormasterBuildCommand::COMMAND_RESTART:
         $can_issue = $build->canRestartBuild();
         break;
-      case HarbormasterBuildCommand::COMMAND_STOP:
-        $can_issue = $build->canStopBuild();
+      case HarbormasterBuildCommand::COMMAND_PAUSE:
+        $can_issue = $build->canPauseBuild();
         break;
       case HarbormasterBuildCommand::COMMAND_RESUME:
         $can_issue = $build->canResumeBuild();
+        break;
+      case HarbormasterBuildCommand::COMMAND_ABORT:
+        $can_issue = $build->canAbortBuild();
         break;
       default:
         return new Aphront400Response();
     }
 
-    switch ($this->via) {
+    switch ($via) {
       case 'buildable':
         $return_uri = '/'.$build->getBuildable()->getMonogram();
         break;
@@ -63,14 +57,14 @@ final class HarbormasterBuildActionController
 
       $xaction = id(new HarbormasterBuildTransaction())
         ->setTransactionType(HarbormasterBuildTransaction::TYPE_COMMAND)
-        ->setNewValue($command);
+        ->setNewValue($action);
 
       $editor->applyTransactions($build, array($xaction));
 
       return id(new AphrontRedirectResponse())->setURI($return_uri);
     }
 
-    switch ($command) {
+    switch ($action) {
       case HarbormasterBuildCommand::COMMAND_RESTART:
         if ($can_issue) {
           $title = pht('Really restart build?');
@@ -90,7 +84,19 @@ final class HarbormasterBuildActionController
           }
         }
         break;
-      case HarbormasterBuildCommand::COMMAND_STOP:
+      case HarbormasterBuildCommand::COMMAND_ABORT:
+        if ($can_issue) {
+          $title = pht('Really abort build?');
+          $body = pht(
+            'Progress on this build will be discarded. Really '.
+            'abort build?');
+          $submit = pht('Abort Build');
+        } else {
+          $title = pht('Unable to Abort Build');
+          $body = pht('You can not abort this build.');
+        }
+        break;
+      case HarbormasterBuildCommand::COMMAND_PAUSE:
         if ($can_issue) {
           $title = pht('Really pause build?');
           $body = pht(
@@ -103,11 +109,11 @@ final class HarbormasterBuildActionController
             $body = pht(
               'This build is already complete. You can not pause a completed '.
               'build.');
-          } else if ($build->isStopped()) {
+          } else if ($build->isPaused()) {
             $body = pht(
               'This build is already paused. You can not pause a build which '.
               'has already been paused.');
-          } else if ($build->isStopping()) {
+          } else if ($build->isPausing()) {
             $body = pht(
               'This build is already pausing. You can not reissue a pause '.
               'command to a pausing build.');
@@ -129,9 +135,9 @@ final class HarbormasterBuildActionController
             $body = pht(
               'This build is already resuming. You can not reissue a resume '.
               'command to a resuming build.');
-          } else if (!$build->isStopped()) {
+          } else if (!$build->isPaused()) {
             $body = pht(
-              'This build is not stopped. You can only resume a stopped '.
+              'This build is not paused. You can only resume a paused '.
               'build.');
           }
         }

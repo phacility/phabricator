@@ -2,6 +2,10 @@
 
 final class PonderQuestionHistoryController extends PonderController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
@@ -22,6 +26,7 @@ final class PonderQuestionHistoryController extends PonderController {
     $qid = $question->getID();
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb("Q{$qid}", "/Q{$qid}");
     $crumbs->addTextCrumb(pht('History'));
 

@@ -56,8 +56,14 @@ final class DifferentialUnitField
 
   protected function newHarbormasterMessageView(array $messages) {
     foreach ($messages as $key => $message) {
-      if ($message->getResult() == ArcanistUnitTestResult::RESULT_PASS) {
-        unset($messages[$key]);
+      switch ($message->getResult()) {
+        case ArcanistUnitTestResult::RESULT_PASS:
+        case ArcanistUnitTestResult::RESULT_SKIP:
+          // Don't show "Pass" or "Skip" in the UI since they aren't very
+          // interesting. The user can click through to the full results if
+          // they want details.
+          unset($messages[$key]);
+          break;
       }
     }
 
@@ -78,9 +84,6 @@ final class DifferentialUnitField
       // Don't show any warnings.
     } else if ($status == DifferentialUnitStatus::UNIT_AUTO_SKIP) {
       // Don't show any warnings.
-    } else if ($status == DifferentialUnitStatus::UNIT_POSTPONED) {
-      $warnings[] = pht(
-        'Background tests have not finished executing on these changes.');
     } else if ($status == DifferentialUnitStatus::UNIT_SKIP) {
       $warnings[] = pht(
         'Unit tests were skipped when generating these changes.');
@@ -102,7 +105,6 @@ final class DifferentialUnitField
       DifferentialUnitStatus::UNIT_FAIL => 'red',
       DifferentialUnitStatus::UNIT_SKIP => 'blue',
       DifferentialUnitStatus::UNIT_AUTO_SKIP => 'blue',
-      DifferentialUnitStatus::UNIT_POSTPONED => 'blue',
     );
     $icon_color = idx($colors, $diff->getUnitStatus(), 'grey');
 

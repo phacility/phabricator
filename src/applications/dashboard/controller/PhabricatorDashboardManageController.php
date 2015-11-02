@@ -3,16 +3,10 @@
 final class PhabricatorDashboardManageController
   extends PhabricatorDashboardController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-    $id = $this->id;
     $dashboard_uri = $this->getApplicationURI('view/'.$id.'/');
 
     // TODO: This UI should drop a lot of capabilities if the user can't
@@ -21,7 +15,7 @@ final class PhabricatorDashboardManageController
 
     $dashboard = id(new PhabricatorDashboardQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->needPanels(true)
       ->executeOne();
     if (!$dashboard) {

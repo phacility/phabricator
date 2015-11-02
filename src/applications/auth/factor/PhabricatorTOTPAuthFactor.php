@@ -192,16 +192,13 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     PhutilOpaqueEnvelope $key,
     $code) {
 
-    // TODO: This should use rate limiting to prevent multiple attempts in a
-    // short period of time.
-
     $now = (int)(time() / 30);
 
     // Allow the user to enter a code a few minutes away on either side, in
     // case the server or client has some clock skew.
     for ($offset = -2; $offset <= 2; $offset++) {
       $real = self::getTOTPCode($key, $now + $offset);
-      if ($real === $code) {
+      if (phutil_hashes_are_identical($real, $code)) {
         return true;
       }
     }

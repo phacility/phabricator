@@ -88,7 +88,6 @@ final class HarbormasterUnitPropertyView extends AphrontView {
       ArcanistUnitTestResult::RESULT_FAIL       => pht('Failed'),
       ArcanistUnitTestResult::RESULT_UNSOUND    => pht('Unsound'),
       ArcanistUnitTestResult::RESULT_SKIP       => pht('Skipped'),
-      ArcanistUnitTestResult::RESULT_POSTPONED  => pht('Postponed'),
       ArcanistUnitTestResult::RESULT_PASS       => pht('Passed'),
     );
     $result = idx($names, $result, $result);

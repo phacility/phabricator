@@ -2,9 +2,10 @@
 
 final class HarbormasterBuildCommand extends HarbormasterDAO {
 
-  const COMMAND_STOP = 'stop';
+  const COMMAND_PAUSE = 'pause';
   const COMMAND_RESUME = 'resume';
   const COMMAND_RESTART = 'restart';
+  const COMMAND_ABORT = 'abort';
 
   protected $authorPHID;
   protected $targetPHID;

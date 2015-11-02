@@ -8,12 +8,12 @@ final class ManiphestTaskPHIDType extends PhabricatorPHIDType {
     return pht('Maniphest Task');
   }
 
-  public function getPHIDTypeApplicationClass() {
-    return 'PhabricatorManiphestApplication';
-  }
-
   public function newObject() {
     return new ManiphestTask();
+  }
+
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorManiphestApplication';
   }
 
   protected function buildQueryForObjects(

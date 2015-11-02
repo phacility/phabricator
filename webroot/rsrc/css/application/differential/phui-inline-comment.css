@@ -83,15 +83,11 @@
 }
 
 .device-phone .differential-inline-comment .inline-head-right {
-  float: none;
+  margin: 12px 0 4px 4px;
 }
 
 .device-phone .differential-inline-comment .inline-head-right .mml {
   margin: 0 4px 0 0;
-}
-
-.device-phone .differential-inline-comment .differential-inline-comment-head {
-  padding: 0px 0px 4px 8px;
 }
 
 

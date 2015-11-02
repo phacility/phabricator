@@ -22,7 +22,8 @@ introduce a new locale, like "German" or "Klingon".
 Once you've created a locale, applications can add translations for that
 locale.
 
-For instructions on adding new classes, see @{article:Adding New Classes}.
+For instructions on adding new classes, see
+@{article@phabcontrib:Adding New Classes}.
 
 
 Adding Translations to Locale
@@ -36,7 +37,8 @@ Translations are separated from locales so that third-party applications can
 provide translations into different locales without needing to define those
 locales themselves.
 
-For instructions on adding new classes, see @{article:Adding New Classes}.
+For instructions on adding new classes, see
+@{article@phabcontrib:Adding New Classes}.
 
 
 Writing Translatable Code
@@ -375,4 +377,5 @@ Next Steps
 
 Continue by:
 
-  - adding a new locale or translation file with @{article:Adding New Classes}.
+  - adding a new locale or translation file with
+    @{article@phabcontrib:Adding New Classes}.

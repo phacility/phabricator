@@ -29,20 +29,11 @@ abstract class DifferentialHarbormasterField
       $diff->attachProperty($key, idx($properties, $key));
     }
 
-    $messages = array();
-
-    $buildable = $diff->getBuildable();
-    if ($buildable) {
-      $target_phids = array();
-      foreach ($buildable->getBuilds() as $build) {
-        foreach ($build->getBuildTargets() as $target) {
-          $target_phids[] = $target->getPHID();
-        }
-      }
-
-      if ($target_phids) {
-        $messages = $this->loadHarbormasterTargetMessages($target_phids);
-      }
+    $target_phids = $diff->getBuildTargetPHIDs();
+    if ($target_phids) {
+      $messages = $this->loadHarbormasterTargetMessages($target_phids);
+    } else {
+      $messages = array();
     }
 
     if (!$messages) {

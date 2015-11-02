@@ -29,15 +29,26 @@ final class PhabricatorStorageManagementStatusWorkflow
       ->setShowHeader(false)
       ->addColumn('id',     array('title' => pht('ID')))
       ->addColumn('status', array('title' => pht('Status')))
+      ->addColumn('duration', array('title' => pht('Duration')))
       ->addColumn('type',   array('title' => pht('Type')))
       ->addColumn('name',   array('title' => pht('Name')));
 
+    $durations = $api->getPatchDurations();
+
     foreach ($patches as $patch) {
+      $duration = idx($durations, $patch->getFullKey());
+      if ($duration === null) {
+        $duration = '-';
+      } else {
+        $duration = pht('%s us', new PhutilNumber($duration));
+      }
+
       $table->addRow(array(
         'id' => $patch->getFullKey(),
         'status' => in_array($patch->getFullKey(), $applied)
           ? pht('Applied')
           : pht('Not Applied'),
+        'duration' => $duration,
         'type' => $patch->getType(),
         'name' => $patch->getName(),
       ));

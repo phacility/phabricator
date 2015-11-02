@@ -3,20 +3,13 @@
 final class PhabricatorProjectMembersEditController
   extends PhabricatorProjectController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
     $project = id(new PhabricatorProjectQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->needMembers(true)
       ->needImages(true)
       ->requireCapabilities(
@@ -53,7 +46,7 @@ final class PhabricatorProjectMembersEditController
         ->setNewValue($member_spec);
 
       $editor = id(new PhabricatorProjectTransactionEditor($project))
-        ->setActor($user)
+        ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true)
         ->setContinueOnMissingFields(true)
@@ -75,7 +68,7 @@ final class PhabricatorProjectMembersEditController
     }
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $user,
+      $viewer,
       $project,
       PhabricatorPolicyCapability::CAN_EDIT);
 
@@ -87,7 +80,7 @@ final class PhabricatorProjectMembersEditController
 
       $form = new AphrontFormView();
       $form
-        ->setUser($user)
+        ->setUser($viewer)
         ->appendControl(
           id(new AphrontFormTokenizerControl())
             ->setName('phids')

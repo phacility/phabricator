@@ -4,6 +4,7 @@
 
 .phabricator-remarkup {
   line-height: 1.51em;
+  word-break: break-word;
 }
 
 .phabricator-remarkup p {
@@ -38,12 +39,12 @@
 }
 
 .phabricator-remarkup .remarkup-code-block pre {
-  background: {$sh-yellowbackground};
+  background: #FEF9ED;
   border: 1px solid {$sh-lightyellowborder};
   display: block;
-  color: #000000;
+  color: #000;
   overflow: auto;
-  padding: 12px 8px;
+  padding: 8px;
 }
 
 .phabricator-remarkup pre.remarkup-counterexample {
@@ -52,9 +53,10 @@
 }
 
 .phabricator-remarkup tt.remarkup-monospaced {
-  color: #333333;
-  background: #ebebeb;
-  padding: 0 4px;
+  color: #000;
+  background: rgba(71,87,120,0.1);
+  padding: 1px 4px;
+  border-radius: 3px;
   white-space: pre-wrap;
 }
 
@@ -332,17 +334,22 @@
   max-width: 100%;
 }
 
+.phabricator-remarkup .remarkup-table-wrap {
+  overflow-x: auto;
+}
+
 .phabricator-remarkup table.remarkup-table {
   border-collapse: separate;
   border-spacing: 1px;
   background: {$lightblueborder};
   margin: 12px 0;
+  word-break: normal;
 }
 
 .phabricator-remarkup table.remarkup-table th {
   font-weight: bold;
   padding: 4px 6px;
-  background: #F8F9FC;
+  background: {$lightbluebackground};
 }
 
 .phabricator-remarkup table.remarkup-table td {
@@ -356,35 +363,12 @@ body div.phabricator-remarkup.remarkup-has-toc
   padding-top: 0;
 }
 
-body .phabricator-remarkup p:first-child,
-body .phabricator-remarkup ul.remarkup-list:first-child,
-body .phabricator-remarkup ol.remarkup-list:first-child,
-body .phabricator-remarkup .remarkup-code-block:first-child,
-body .phabricator-remarkup h1.remarkup-header:first-child,
-body .phabricator-remarkup h2.remarkup-header:first-child,
-body .phabricator-remarkup h3.remarkup-header:first-child,
-body .phabricator-remarkup h4.remarkup-header:first-child,
-body .phabricator-remarkup h5.remarkup-header:first-child,
-body .phabricator-remarkup h6.remarkup-header:first-child,
-body .phabricator-remarkup blockquote:first-child,
-body .phabricator-remarkup table.remarkup-table:first-child,
-body .phabricator-remarkup .remarkup-note:first-child {
+body .phabricator-remarkup *:first-child,
+body .phabricator-remarkup .remarkup-header + * {
   margin-top: 0;
 }
 
-body .phabricator-remarkup p:last-child,
-body .phabricator-remarkup ul.remarkup-list:last-child,
-body .phabricator-remarkup ol.remarkup-list:last-child,
-body .phabricator-remarkup .remarkup-code-block:last-child,
-body .phabricator-remarkup h1.remarkup-header:last-child,
-body .phabricator-remarkup h2.remarkup-header:last-child,
-body .phabricator-remarkup h3.remarkup-header:last-child,
-body .phabricator-remarkup h4.remarkup-header:last-child,
-body .phabricator-remarkup h5.remarkup-header:last-child,
-body .phabricator-remarkup h6.remarkup-header:last-child,
-body .phabricator-remarkup blockquote:last-child,
-body .phabricator-remarkup table.remarkup-table:last-child,
-body .phabricator-remarkup .remarkup-note:last-child {
+body .phabricator-remarkup *:last-child {
   margin-bottom: 0;
 }
 

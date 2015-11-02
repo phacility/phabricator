@@ -1,0 +1,15 @@
+##
+## An elephant out and about
+##
+$the_cow = <<EOC;
+ $thoughts     /\\  ___  /\\
+  $thoughts   // \\/   \\/ \\\\
+     ((    O O    ))
+      \\\\ /     \\ //
+       \\/  | |  \\/ 
+        |  | |  |  
+        |  | |  |  
+        |   o   |  
+        | |   | |  
+        |m|   |m|  
+EOC

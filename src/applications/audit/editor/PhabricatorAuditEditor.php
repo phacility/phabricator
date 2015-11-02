@@ -170,7 +170,7 @@ final class PhabricatorAuditEditor
             $audit_requested = PhabricatorAuditStatusConstants::AUDIT_REQUESTED;
             $audit_reason = $this->getAuditReasons($phid);
           }
-          $requests[] = id (new PhabricatorRepositoryAuditRequest())
+          $requests[] = id(new PhabricatorRepositoryAuditRequest())
             ->setCommitPHID($object->getPHID())
             ->setAuditorPHID($phid)
             ->setAuditStatus($audit_requested)
@@ -946,6 +946,12 @@ final class PhabricatorAuditEditor
       'rawPatch' => $this->rawPatch,
       'affectedFiles' => $this->affectedFiles,
       'auditorPHIDs' => $this->auditorPHIDs,
+    );
+  }
+
+  protected function getCustomWorkerStateEncoding() {
+    return array(
+      'rawPatch' => self::STORAGE_ENCODING_BINARY,
     );
   }
 

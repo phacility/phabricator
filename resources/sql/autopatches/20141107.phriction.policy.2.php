@@ -24,12 +24,14 @@ foreach (new LiskMigrationIterator($table) as $doc) {
   $prefix = 'projects/';
   if (($slug != $prefix) && (strncmp($slug, $prefix, strlen($prefix)) === 0)) {
     $parts = explode('/', $slug);
-    $project_slug = $parts[1].'/';
+
+    $project_slug = $parts[1];
+    $project_slug = PhabricatorSlug::normalizeProjectSlug($project_slug);
 
     $project_slugs = array($project_slug);
     $project = id(new PhabricatorProjectQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPhrictionSlugs($project_slugs)
+      ->withSlugs($project_slugs)
       ->executeOne();
 
     if ($project) {

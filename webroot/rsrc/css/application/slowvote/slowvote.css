@@ -52,6 +52,10 @@
   background-color: {$sh-bluebackground};
 }
 
+.device-phone .slowvote-bar {
+  display: none;
+}
+
 .slowvote-control-offset {
   white-space: nowrap;
   position: absolute;
@@ -60,6 +64,12 @@
   width: 100%;
   color: {$darkbluetext};
   text-shadow: {$whitetextshadow};
+}
+
+.device-phone .slowvote-control-offset {
+  white-space: normal;
+  position: static;
+  padding: 0 4px 8px;
 }
 
 .slowvote-option-label-group {

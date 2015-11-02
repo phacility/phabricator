@@ -4,11 +4,8 @@ final class HarbormasterStepEditController extends HarbormasterController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-
-    $this->requireApplicationCapability(
-      HarbormasterManagePlansCapability::CAPABILITY);
-
     $id = $request->getURIData('id');
+
     if ($id) {
       $step = id(new HarbormasterBuildStepQuery())
         ->setViewer($viewer)
@@ -61,6 +58,12 @@ final class HarbormasterStepEditController extends HarbormasterController {
 
     $plan_uri = $this->getApplicationURI('plan/'.$plan->getID().'/');
 
+    if ($is_new) {
+      $cancel_uri = $plan_uri;
+    } else {
+      $cancel_uri = $this->getApplicationURI('step/view/'.$step->getID().'/');
+    }
+
     $implementation = $step->getStepImplementation();
 
     $field_list = PhabricatorCustomField::getObjectFields(
@@ -72,9 +75,9 @@ final class HarbormasterStepEditController extends HarbormasterController {
 
     $e_name = true;
     $v_name = $step->getName();
-    $e_description = true;
+    $e_description = null;
     $v_description = $step->getDescription();
-    $e_depends_on = true;
+    $e_depends_on = null;
     $v_depends_on = $step->getDetail('dependsOn', array());
 
     $errors = array();
@@ -82,9 +85,7 @@ final class HarbormasterStepEditController extends HarbormasterController {
     if ($request->isFormPost()) {
       $e_name = null;
       $v_name = $request->getStr('name');
-      $e_description = null;
       $v_description = $request->getStr('description');
-      $e_depends_on = null;
       $v_depends_on = $request->getArr('dependsOn');
 
       $xactions = $field_list->buildFieldTransactionsFromRequest(
@@ -124,7 +125,10 @@ final class HarbormasterStepEditController extends HarbormasterController {
 
       try {
         $editor->applyTransactions($step, $xactions);
-        return id(new AphrontRedirectResponse())->setURI($plan_uri);
+
+        $step_uri = $this->getApplicationURI('step/view/'.$step->getID().'/');
+
+        return id(new AphrontRedirectResponse())->setURI($step_uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
       }
@@ -139,6 +143,12 @@ final class HarbormasterStepEditController extends HarbormasterController {
           ->setError($e_name)
           ->setValue($v_name));
 
+    $form->appendChild(id(new AphrontFormDividerControl()));
+
+    $field_list->appendFieldsToForm($form);
+
+    $form->appendChild(id(new AphrontFormDividerControl()));
+
     $form
       ->appendControl(
         id(new AphrontFormTokenizerControl())
@@ -152,8 +162,6 @@ final class HarbormasterStepEditController extends HarbormasterController {
           ->setError($e_depends_on)
           ->setValue($v_depends_on));
 
-    $field_list->appendFieldsToForm($form);
-
     $form
       ->appendChild(
         id(new PhabricatorRemarkupControl())
@@ -163,30 +171,30 @@ final class HarbormasterStepEditController extends HarbormasterController {
           ->setError($e_description)
           ->setValue($v_description));
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $id = $plan->getID();
+    $crumbs->addTextCrumb(pht('Plan %d', $id), $plan_uri);
+
     if ($is_new) {
       $submit = pht('Create Build Step');
       $header = pht('New Step: %s', $implementation->getName());
-      $crumb = pht('Add Step');
+      $crumbs->addTextCrumb(pht('Add Step'));
     } else {
       $submit = pht('Save Build Step');
       $header = pht('Edit Step: %s', $implementation->getName());
-      $crumb = pht('Edit Step');
+      $crumbs->addTextCrumb(pht('Step %d', $step->getID()), $cancel_uri);
+      $crumbs->addTextCrumb(pht('Edit Step'));
     }
 
     $form->appendChild(
       id(new AphrontFormSubmitControl())
         ->setValue($submit)
-        ->addCancelButton($plan_uri));
+        ->addCancelButton($cancel_uri));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($header)
       ->setValidationException($validation_exception)
       ->setForm($form);
-
-    $crumbs = $this->buildApplicationCrumbs();
-    $id = $plan->getID();
-    $crumbs->addTextCrumb(pht('Plan %d', $id), $plan_uri);
-    $crumbs->addTextCrumb($crumb);
 
     $variables = $this->renderBuildVariablesTable();
 

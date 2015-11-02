@@ -3,22 +3,14 @@
 final class HarbormasterBuildableActionController
   extends HarbormasterController {
 
-  private $id;
-  private $action;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-    $this->action = $data['action'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-    $command = $this->action;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
+    $action = $request->getURIData('action');
 
     $buildable = id(new HarbormasterBuildableQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->needBuilds(true)
       ->requireCapabilities(
         array(
@@ -33,19 +25,24 @@ final class HarbormasterBuildableActionController
     $issuable = array();
 
     foreach ($buildable->getBuilds() as $build) {
-      switch ($command) {
+      switch ($action) {
         case HarbormasterBuildCommand::COMMAND_RESTART:
           if ($build->canRestartBuild()) {
             $issuable[] = $build;
           }
           break;
-        case HarbormasterBuildCommand::COMMAND_STOP:
-          if ($build->canStopBuild()) {
+        case HarbormasterBuildCommand::COMMAND_PAUSE:
+          if ($build->canPauseBuild()) {
             $issuable[] = $build;
           }
           break;
         case HarbormasterBuildCommand::COMMAND_RESUME:
           if ($build->canResumeBuild()) {
+            $issuable[] = $build;
+          }
+          break;
+        case HarbormasterBuildCommand::COMMAND_ABORT:
+          if ($build->canAbortBuild()) {
             $issuable[] = $build;
           }
           break;
@@ -64,7 +61,7 @@ final class HarbormasterBuildableActionController
 
       $xaction = id(new HarbormasterBuildableTransaction())
         ->setTransactionType(HarbormasterBuildableTransaction::TYPE_COMMAND)
-        ->setNewValue($command);
+        ->setNewValue($action);
 
       $editor->applyTransactions($buildable, array($xaction));
 
@@ -77,14 +74,14 @@ final class HarbormasterBuildableActionController
       foreach ($issuable as $build) {
         $xaction = id(new HarbormasterBuildTransaction())
           ->setTransactionType(HarbormasterBuildTransaction::TYPE_COMMAND)
-          ->setNewValue($command);
+          ->setNewValue($action);
         $build_editor->applyTransactions($build, array($xaction));
       }
 
       return id(new AphrontRedirectResponse())->setURI($return_uri);
     }
 
-    switch ($command) {
+    switch ($action) {
       case HarbormasterBuildCommand::COMMAND_RESTART:
         if ($issuable) {
           $title = pht('Really restart all builds?');
@@ -94,20 +91,32 @@ final class HarbormasterBuildableActionController
             'restart all builds?');
           $submit = pht('Restart All Builds');
         } else {
-          $title = pht('Unable to Restart Build');
+          $title = pht('Unable to Restart Builds');
           $body = pht('No builds can be restarted.');
         }
         break;
-      case HarbormasterBuildCommand::COMMAND_STOP:
+      case HarbormasterBuildCommand::COMMAND_PAUSE:
         if ($issuable) {
-          $title = pht('Really stop all builds?');
+          $title = pht('Really pause all builds?');
           $body = pht(
-            'If you stop all build, work will halt once the current steps '.
+            'If you pause all builds, work will halt once the current steps '.
             'complete. You can resume the builds later.');
-          $submit = pht('Stop All Builds');
+          $submit = pht('Pause All Builds');
         } else {
-          $title = pht('Unable to Stop Build');
-          $body = pht('No builds can be stopped.');
+          $title = pht('Unable to Pause Builds');
+          $body = pht('No builds can be paused.');
+        }
+        break;
+      case HarbormasterBuildCommand::COMMAND_ABORT:
+        if ($issuable) {
+          $title = pht('Really abort all builds?');
+          $body = pht(
+            'If you abort all builds, work will halt immediately. Work '.
+            'will be discarded, and builds must be completely restarted.');
+          $submit = pht('Abort All Builds');
+        } else {
+          $title = pht('Unable to Abort Builds');
+          $body = pht('No builds can be aborted.');
         }
         break;
       case HarbormasterBuildCommand::COMMAND_RESUME:
@@ -116,7 +125,7 @@ final class HarbormasterBuildableActionController
           $body = pht('Work will continue on all builds. Really resume?');
           $submit = pht('Resume All Builds');
         } else {
-          $title = pht('Unable to Resume Build');
+          $title = pht('Unable to Resume Builds');
           $body = pht('No builds can be resumed.');
         }
         break;

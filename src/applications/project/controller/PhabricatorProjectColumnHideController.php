@@ -3,17 +3,11 @@
 final class PhabricatorProjectColumnHideController
   extends PhabricatorProjectBoardController {
 
-  private $id;
-  private $projectID;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $project_id = $request->getURIData('projectID');
 
-  public function willProcessRequest(array $data) {
-    $this->projectID = $data['projectID'];
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
       ->requireCapabilities(
@@ -21,7 +15,7 @@ final class PhabricatorProjectColumnHideController
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
-      ->withIDs(array($this->projectID))
+      ->withIDs(array($project_id))
       ->executeOne();
 
     if (!$project) {
@@ -31,7 +25,7 @@ final class PhabricatorProjectColumnHideController
 
     $column = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -44,7 +38,7 @@ final class PhabricatorProjectColumnHideController
 
     $column_phid = $column->getPHID();
 
-    $view_uri = $this->getApplicationURI('/board/'.$this->projectID.'/');
+    $view_uri = $this->getApplicationURI('/board/'.$project_id.'/');
     $view_uri = new PhutilURI($view_uri);
     foreach ($request->getPassthroughRequestData() as $key => $value) {
       $view_uri->setQueryParam($key, $value);
@@ -66,9 +60,10 @@ final class PhabricatorProjectColumnHideController
       }
 
       $type_status = PhabricatorProjectColumnTransaction::TYPE_STATUS;
-      $xactions = array(id(new PhabricatorProjectColumnTransaction())
-        ->setTransactionType($type_status)
-        ->setNewValue($new_status),
+      $xactions = array(
+        id(new PhabricatorProjectColumnTransaction())
+          ->setTransactionType($type_status)
+          ->setNewValue($new_status),
       );
 
       $editor = id(new PhabricatorProjectColumnTransactionEditor())

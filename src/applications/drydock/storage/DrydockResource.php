@@ -7,14 +7,19 @@ final class DrydockResource extends DrydockDAO
   protected $phid;
   protected $blueprintPHID;
   protected $status;
-
+  protected $until;
   protected $type;
-  protected $name;
   protected $attributes   = array();
   protected $capabilities = array();
   protected $ownerPHID;
 
-  private $blueprint;
+  private $blueprint = self::ATTACHABLE;
+  private $unconsumedCommands = self::ATTACHABLE;
+
+  private $isAllocated = false;
+  private $isActivated = false;
+  private $activateWhenAllocated = false;
+  private $slotLocks = array();
 
   protected function getConfiguration() {
     return array(
@@ -24,16 +29,17 @@ final class DrydockResource extends DrydockDAO
         'capabilities'  => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
         'ownerPHID' => 'phid?',
-        'status' => 'uint32',
+        'status' => 'text32',
         'type' => 'text64',
+        'until' => 'epoch?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_phid' => null,
-        'phid' => array(
-          'columns' => array('phid'),
-          'unique' => true,
+        'key_type' => array(
+          'columns' => array('type', 'status'),
+        ),
+        'key_blueprint' => array(
+          'columns' => array('blueprintPHID', 'status'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -41,6 +47,10 @@ final class DrydockResource extends DrydockDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(DrydockResourcePHIDType::TYPECONST);
+  }
+
+  public function getResourceName() {
+    return $this->getBlueprint()->getResourceName($this);
   }
 
   public function getAttribute($key, $default = null) {
@@ -65,46 +75,243 @@ final class DrydockResource extends DrydockDAO
   }
 
   public function getBlueprint() {
-    // TODO: Policy stuff.
-    if (empty($this->blueprint)) {
-      $blueprint = id(new DrydockBlueprint())
-        ->loadOneWhere('phid = %s', $this->blueprintPHID);
-      $this->blueprint = $blueprint->getImplementation();
-    }
-    return $this->blueprint;
+    return $this->assertAttached($this->blueprint);
   }
 
-  public function closeResource() {
-    $this->openTransaction();
-      $statuses = array(
-        DrydockLeaseStatus::STATUS_PENDING,
-        DrydockLeaseStatus::STATUS_ACTIVE,
-      );
+  public function attachBlueprint(DrydockBlueprint $blueprint) {
+    $this->blueprint = $blueprint;
+    return $this;
+  }
 
-      $leases = id(new DrydockLeaseQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withResourceIDs(array($this->getID()))
-        ->withStatuses($statuses)
-        ->execute();
+  public function getUnconsumedCommands() {
+    return $this->assertAttached($this->unconsumedCommands);
+  }
 
-      foreach ($leases as $lease) {
-        switch ($lease->getStatus()) {
-          case DrydockLeaseStatus::STATUS_PENDING:
-            $message = pht('Breaking pending lease (resource closing).');
-            $lease->setStatus(DrydockLeaseStatus::STATUS_BROKEN);
-            break;
-          case DrydockLeaseStatus::STATUS_ACTIVE:
-            $message = pht('Releasing active lease (resource closing).');
-            $lease->setStatus(DrydockLeaseStatus::STATUS_RELEASED);
-            break;
-        }
-        DrydockBlueprintImplementation::writeLog($this, $lease, $message);
-        $lease->save();
+  public function attachUnconsumedCommands(array $commands) {
+    $this->unconsumedCommands = $commands;
+    return $this;
+  }
+
+  public function isReleasing() {
+    foreach ($this->getUnconsumedCommands() as $command) {
+      if ($command->getCommand() == DrydockCommand::COMMAND_RELEASE) {
+        return true;
       }
+    }
 
-      $this->setStatus(DrydockResourceStatus::STATUS_CLOSED);
-      $this->save();
+    return false;
+  }
+
+  public function setActivateWhenAllocated($activate) {
+    $this->activateWhenAllocated = $activate;
+    return $this;
+  }
+
+  public function needSlotLock($key) {
+    $this->slotLocks[] = $key;
+    return $this;
+  }
+
+  public function allocateResource() {
+    // We expect resources to have a pregenerated PHID, as they should have
+    // been created by a call to DrydockBlueprint->newResourceTemplate().
+    if (!$this->getPHID()) {
+      throw new Exception(
+        pht(
+          'Trying to allocate a resource with no generated PHID. Use "%s" to '.
+          'create new resource templates.',
+          'newResourceTemplate()'));
+    }
+
+    $expect_status = DrydockResourceStatus::STATUS_PENDING;
+    $actual_status = $this->getStatus();
+    if ($actual_status != $expect_status) {
+      throw new Exception(
+        pht(
+          'Trying to allocate a resource from the wrong status. Status must '.
+          'be "%s", actually "%s".',
+          $expect_status,
+          $actual_status));
+    }
+
+    if ($this->activateWhenAllocated) {
+      $new_status = DrydockResourceStatus::STATUS_ACTIVE;
+    } else {
+      $new_status = DrydockResourceStatus::STATUS_PENDING;
+    }
+
+    $this->openTransaction();
+
+    try {
+      DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
+      $this->slotLocks = array();
+    } catch (DrydockSlotLockException $ex) {
+      $this->killTransaction();
+
+      if ($this->getID()) {
+        $log_target = $this;
+      } else {
+        // If we don't have an ID, we have to log this on the blueprint, as the
+        // resource is not going to be saved so the PHID will vanish.
+        $log_target = $this->getBlueprint();
+      }
+      $log_target->logEvent(
+        DrydockSlotLockFailureLogType::LOGCONST,
+        array(
+          'locks' => $ex->getLockMap(),
+        ));
+
+      throw $ex;
+    }
+
+    $this
+      ->setStatus($new_status)
+      ->save();
+
     $this->saveTransaction();
+
+    $this->isAllocated = true;
+
+    if ($new_status == DrydockResourceStatus::STATUS_ACTIVE) {
+      $this->didActivate();
+    }
+
+    return $this;
+  }
+
+  public function isAllocatedResource() {
+    return $this->isAllocated;
+  }
+
+  public function activateResource() {
+    if (!$this->getID()) {
+      throw new Exception(
+        pht(
+          'Trying to activate a resource which has not yet been persisted.'));
+    }
+
+    $expect_status = DrydockResourceStatus::STATUS_PENDING;
+    $actual_status = $this->getStatus();
+    if ($actual_status != $expect_status) {
+      throw new Exception(
+        pht(
+          'Trying to activate a resource from the wrong status. Status must '.
+          'be "%s", actually "%s".',
+          $expect_status,
+          $actual_status));
+    }
+
+    $this->openTransaction();
+
+    try {
+      DrydockSlotLock::acquireLocks($this->getPHID(), $this->slotLocks);
+      $this->slotLocks = array();
+    } catch (DrydockSlotLockException $ex) {
+      $this->killTransaction();
+
+      $this->logEvent(
+        DrydockSlotLockFailureLogType::LOGCONST,
+        array(
+          'locks' => $ex->getLockMap(),
+        ));
+
+      throw $ex;
+    }
+
+    $this
+      ->setStatus(DrydockResourceStatus::STATUS_ACTIVE)
+      ->save();
+
+    $this->saveTransaction();
+
+    $this->isActivated = true;
+
+    $this->didActivate();
+
+    return $this;
+  }
+
+  public function isActivatedResource() {
+    return $this->isActivated;
+  }
+
+  public function canRelease() {
+    switch ($this->getStatus()) {
+      case DrydockResourceStatus::STATUS_RELEASED:
+      case DrydockResourceStatus::STATUS_DESTROYED:
+        return false;
+      default:
+        return true;
+    }
+  }
+
+  public function scheduleUpdate($epoch = null) {
+    PhabricatorWorker::scheduleTask(
+      'DrydockResourceUpdateWorker',
+      array(
+        'resourcePHID' => $this->getPHID(),
+        'isExpireTask' => ($epoch !== null),
+      ),
+      array(
+        'objectPHID' => $this->getPHID(),
+        'delayUntil' => ($epoch ? (int)$epoch : null),
+      ));
+  }
+
+  private function didActivate() {
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $need_update = false;
+
+    $commands = id(new DrydockCommandQuery())
+      ->setViewer($viewer)
+      ->withTargetPHIDs(array($this->getPHID()))
+      ->withConsumed(false)
+      ->execute();
+    if ($commands) {
+      $need_update = true;
+    }
+
+    if ($need_update) {
+      $this->scheduleUpdate();
+    }
+
+    $expires = $this->getUntil();
+    if ($expires) {
+      $this->scheduleUpdate($expires);
+    }
+  }
+
+  public function canReceiveCommands() {
+    switch ($this->getStatus()) {
+      case DrydockResourceStatus::STATUS_RELEASED:
+      case DrydockResourceStatus::STATUS_BROKEN:
+      case DrydockResourceStatus::STATUS_DESTROYED:
+        return false;
+      default:
+        return true;
+    }
+  }
+
+  public function isActive() {
+    switch ($this->getStatus()) {
+      case DrydockResourceStatus::STATUS_ACTIVE:
+        return true;
+    }
+
+    return false;
+  }
+
+  public function logEvent($type, array $data = array()) {
+    $log = id(new DrydockLog())
+      ->setEpoch(PhabricatorTime::getNow())
+      ->setType($type)
+      ->setData($data);
+
+    $log->setResourcePHID($this->getPHID());
+    $log->setBlueprintPHID($this->getBlueprintPHID());
+
+    return $log->save();
   }
 
 
@@ -114,21 +321,21 @@ final class DrydockResource extends DrydockDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
   public function getPolicy($capability) {
-    switch ($capability) {
-      case PhabricatorPolicyCapability::CAN_VIEW:
-        return PhabricatorPolicies::getMostOpenPolicy();
-    }
+    return $this->getBlueprint()->getPolicy($capability);
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return false;
+    return $this->getBlueprint()->hasAutomaticCapability(
+      $capability,
+      $viewer);
   }
 
   public function describeAutomaticCapability($capability) {
-    return null;
+    return pht('Resources inherit the policies of their blueprints.');
   }
 }

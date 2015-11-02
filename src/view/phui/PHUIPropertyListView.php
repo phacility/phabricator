@@ -10,8 +10,8 @@ final class PHUIPropertyListView extends AphrontView {
   private $classes = array();
   private $stacked;
 
-  const ICON_SUMMARY = 'fa-align-left bluegrey';
-  const ICON_TESTPLAN = 'fa-file-text-o bluegrey';
+  const ICON_SUMMARY = 'fa-align-left';
+  const ICON_TESTPLAN = 'fa-file-text-o';
 
   protected function canAppendChild() {
     return false;
@@ -127,6 +127,7 @@ final class PHUIPropertyListView extends AphrontView {
     // If we have an action list, make sure we render a property part, even
     // if there are no properties. Otherwise, the action list won't render.
     if ($this->actionList) {
+      $this->classes[] = 'phui-property-list-has-actions';
       $have_property_part = false;
       foreach ($this->parts as $part) {
         if ($part['type'] == 'property') {
@@ -247,7 +248,7 @@ final class PHUIPropertyListView extends AphrontView {
     $name = $part['name'];
     if ($part['icon']) {
       $icon = id(new PHUIIconView())
-        ->setIconFont($part['icon']);
+        ->setIconFont($part['icon'].' bluegrey');
       $name = phutil_tag(
         'span',
         array(

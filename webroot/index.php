@@ -1,23 +1,19 @@
 <?php
 
-$phabricator_root = dirname(dirname(__FILE__));
-require_once $phabricator_root.'/support/PhabricatorStartup.php';
-
-// If the preamble script exists, load it.
-$preamble_path = $phabricator_root.'/support/preamble.php';
-if (file_exists($preamble_path)) {
-  require_once $preamble_path;
-}
-
-PhabricatorStartup::didStartup();
+phabricator_startup();
 
 try {
+  PhabricatorStartup::beginStartupPhase('libraries');
   PhabricatorStartup::loadCoreLibraries();
+
+  PhabricatorStartup::beginStartupPhase('purge');
   PhabricatorCaches::destroyRequestCache();
 
+  PhabricatorStartup::beginStartupPhase('sink');
   $sink = new AphrontPHPHTTPSink();
 
   try {
+    PhabricatorStartup::beginStartupPhase('run');
     AphrontApplicationConfiguration::runHTTPRequest($sink);
   } catch (Exception $ex) {
     try {
@@ -35,4 +31,25 @@ try {
   }
 } catch (Exception $ex) {
   PhabricatorStartup::didEncounterFatalException('Core Exception', $ex, false);
+}
+
+function phabricator_startup() {
+  // Load the PhabricatorStartup class itself.
+  $t_startup = microtime(true);
+  $root = dirname(dirname(__FILE__));
+  require_once $root.'/support/PhabricatorStartup.php';
+
+  // If the preamble script exists, load it.
+  $t_preamble = microtime(true);
+  $preamble_path = $root.'/support/preamble.php';
+  if (file_exists($preamble_path)) {
+    require_once $preamble_path;
+  }
+
+  $t_hook = microtime(true);
+  PhabricatorStartup::didStartup($t_startup);
+
+  PhabricatorStartup::recordStartupPhase('startup.init', $t_startup);
+  PhabricatorStartup::recordStartupPhase('preamble', $t_preamble);
+  PhabricatorStartup::recordStartupPhase('hook', $t_hook);
 }

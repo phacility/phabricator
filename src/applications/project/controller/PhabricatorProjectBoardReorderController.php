@@ -3,15 +3,9 @@
 final class PhabricatorProjectBoardReorderController
   extends PhabricatorProjectBoardController {
 
-  private $projectID;
-
-  public function willProcessRequest(array $data) {
-    $this->projectID = $data['projectID'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $projectid = $request->getURIData('projectID');
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
@@ -20,15 +14,13 @@ final class PhabricatorProjectBoardReorderController
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
-      ->withIDs(array($this->projectID))
+      ->withIDs(array($projectid))
       ->executeOne();
     if (!$project) {
       return new Aphront404Response();
     }
 
     $this->setProject($project);
-
-
     $project_id = $project->getID();
 
     $board_uri = $this->getApplicationURI("board/{$project_id}/");

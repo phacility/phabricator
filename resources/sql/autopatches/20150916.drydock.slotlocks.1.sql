@@ -1,0 +1,8 @@
+CREATE TABLE {$NAMESPACE}_drydock.drydock_slotlock (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  ownerPHID VARBINARY(64) NOT NULL,
+  lockIndex BINARY(12) NOT NULL,
+  lockKey LONGTEXT NOT NULL COLLATE {$COLLATE_TEXT},
+  UNIQUE KEY `key_lock` (lockIndex),
+  KEY `key_owner` (ownerPHID)
+) ENGINE=InnoDB, COLLATE {$COLLATE_TEXT};

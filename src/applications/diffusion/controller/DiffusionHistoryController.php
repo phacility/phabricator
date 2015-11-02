@@ -42,15 +42,12 @@ final class DiffusionHistoryController extends DiffusionController {
     $show_graph = !strlen($drequest->getPath());
     $content = array();
 
-    $history_table = new DiffusionHistoryTableView();
-    $history_table->setUser($request->getUser());
-    $history_table->setDiffusionRequest($drequest);
-    $history_table->setHistory($history);
-    $history_table->loadRevisions();
+    $history_table = id(new DiffusionHistoryTableView())
+      ->setUser($request->getUser())
+      ->setDiffusionRequest($drequest)
+      ->setHistory($history);
 
-    $phids = $history_table->getRequiredHandlePHIDs();
-    $handles = $this->loadViewerHandles($phids);
-    $history_table->setHandles($handles);
+    $history_table->loadRevisions();
 
     if ($show_graph) {
       $history_table->setParents($history_results['parents']);
@@ -81,6 +78,10 @@ final class DiffusionHistoryController extends DiffusionController {
         'path'   => true,
         'view'   => 'history',
       ));
+
+    $pager = id(new PHUIBoxView())
+      ->addClass('ml')
+      ->appendChild($pager);
 
     return $this->buildApplicationPage(
       array(

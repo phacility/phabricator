@@ -5,20 +5,15 @@
 final class ReleephRequestDifferentialCreateController
   extends ReleephController {
 
-  private $revisionID;
   private $revision;
 
-  public function willProcessRequest(array $data) {
-    $this->revisionID = $data['diffRevID'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $revision_id = $request->getURIData('diffRevID');
+    $viewer = $request->getViewer();
 
     $diff_rev = id(new DifferentialRevisionQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->revisionID))
+      ->setViewer($viewer)
+      ->withIDs(array($revision_id))
       ->executeOne();
     if (!$diff_rev) {
       return new Aphront404Response();
@@ -63,7 +58,7 @@ final class ReleephRequestDifferentialCreateController
 
     require_celerity_resource('releeph-request-differential-create-dialog');
     $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setTitle(pht('Choose Releeph Branch'))
       ->setClass('releeph-request-differential-create-dialog')
       ->addCancelButton('/D'.$request->getStr('D'));

@@ -67,9 +67,10 @@ final class PassphraseCredentialRevealController
         ->addCancelButton($view_uri, pht('Done'));
 
       $type_secret = PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET;
-      $xactions = array(id(new PassphraseCredentialTransaction())
-        ->setTransactionType($type_secret)
-        ->setNewValue(true),
+      $xactions = array(
+        id(new PassphraseCredentialTransaction())
+          ->setTransactionType($type_secret)
+          ->setNewValue(true),
       );
 
       $editor = id(new PassphraseCredentialTransactionEditor())

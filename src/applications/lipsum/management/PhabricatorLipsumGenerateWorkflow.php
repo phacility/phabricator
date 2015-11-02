@@ -20,9 +20,9 @@ final class PhabricatorLipsumGenerateWorkflow
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
 
-    $supported_types = id(new PhutilSymbolLoader())
+    $supported_types = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorTestDataGenerator')
-      ->loadObjects();
+      ->execute();
 
     $console->writeOut(
       "%s:\n\t%s\n",

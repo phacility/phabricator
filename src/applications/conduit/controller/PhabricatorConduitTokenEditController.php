@@ -5,8 +5,8 @@ final class PhabricatorConduitTokenEditController
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-
     $id = $request->getURIData('id');
+
     if ($id) {
       $token = id(new PhabricatorConduitTokenQuery())
         ->setViewer($viewer)

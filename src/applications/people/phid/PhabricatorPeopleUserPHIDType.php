@@ -8,16 +8,16 @@ final class PhabricatorPeopleUserPHIDType extends PhabricatorPHIDType {
     return pht('User');
   }
 
-  public function getPHIDTypeApplicationClass() {
-    return 'PhabricatorPeopleApplication';
-  }
-
   public function getTypeIcon() {
     return 'fa-user bluegrey';
   }
 
   public function newObject() {
     return new PhabricatorUser();
+  }
+
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorPeopleApplication';
   }
 
   protected function buildQueryForObjects(

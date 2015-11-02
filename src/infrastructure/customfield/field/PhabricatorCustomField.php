@@ -540,9 +540,7 @@ abstract class PhabricatorCustomField extends Phobject {
    * @task storage
    */
   public function newStorageObject() {
-    if ($this->proxy) {
-      return $this->proxy->newStorageObject();
-    }
+    // NOTE: This intentionally isn't proxied, to avoid call cycles.
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 

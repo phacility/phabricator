@@ -142,7 +142,7 @@ final class ConduitConnectConduitAPIMethod extends ConduitAPIMethod {
               $threshold));
       }
       $valid = sha1($token.$user->getConduitCertificate());
-      if ($valid != $signature) {
+      if (!phutil_hashes_are_identical($valid, $signature)) {
         throw new ConduitException('ERR-INVALID-CERTIFICATE');
       }
       $session_key = id(new PhabricatorAuthSessionEngine())->establishSession(

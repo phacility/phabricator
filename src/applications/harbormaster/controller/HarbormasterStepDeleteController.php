@@ -5,9 +5,6 @@ final class HarbormasterStepDeleteController extends HarbormasterController {
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
-    $this->requireApplicationCapability(
-      HarbormasterManagePlansCapability::CAPABILITY);
-
     $id = $request->getURIData('id');
 
     $step = id(new HarbormasterBuildStepQuery())

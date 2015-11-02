@@ -43,12 +43,16 @@
 }
 
 .device-desktop .phui-property-list-key {
-  width: 18%;
+  width: 12%;
   margin-left: 1%;
   text-align: right;
   float: left;
   clear: left;
   margin-bottom: 4px;
+}
+
+.device-desktop .phui-property-list-has-actions .phui-property-list-key {
+  width: 18%;
 }
 
 .phui-property-list-properties-wrap.phui-property-list-stacked {
@@ -68,14 +72,17 @@
 
 .phui-property-list-value {
   color: {$darkgreytext};
-  line-height: 17px;
 }
 
 .device-desktop .phui-property-list-value {
-  width: 78%;
+  width: 84%;
   margin-left: 1%;
   float: left;
   margin-bottom: 4px;
+}
+
+.device-desktop .phui-property-list-has-actions .phui-property-list-value {
+  width: 78%;
 }
 
 .device .phui-property-list-value,
@@ -159,7 +166,7 @@
   margin: 2px 0;
 }
 
-.phui-property-list-properties-wrap {
+.phui-property-list-has-actions .phui-property-list-properties-wrap {
   float: left;
   width: 78%;
 }
@@ -168,6 +175,7 @@
   width: auto;
   border: none;
   float: none;
+  overflow: auto;
 }
 
 .phui-property-list-actions {
@@ -175,6 +183,10 @@
   float: right;
   margin-right: 12px;
   border-left: 1px solid {$thinblueborder};
+}
+
+!print .phui-property-list-actions {
+  display: none;
 }
 
 .device .phui-property-list-actions {

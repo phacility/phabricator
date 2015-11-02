@@ -5,17 +5,13 @@ final class PonderQuestionQuery
 
   private $ids;
   private $phids;
+  private $status;
   private $authorPHIDs;
   private $answererPHIDs;
 
-  private $status = 'status-any';
-
-  const STATUS_ANY      = 'status-any';
-  const STATUS_OPEN     = 'status-open';
-  const STATUS_CLOSED   = 'status-closed';
+  private $needProjectPHIDs;
 
   private $needAnswers;
-  private $needViewerVotes;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -32,7 +28,7 @@ final class PonderQuestionQuery
     return $this;
   }
 
-  public function withStatus($status) {
+  public function withStatuses($status) {
     $this->status = $status;
     return $this;
   }
@@ -47,8 +43,8 @@ final class PonderQuestionQuery
     return $this;
   }
 
-  public function needViewerVotes($need_viewer_votes) {
-    $this->needViewerVotes = $need_viewer_votes;
+  public function needProjectPHIDs($need_projects) {
+    $this->needProjectPHIDs = $need_projects;
     return $this;
   }
 
@@ -77,24 +73,10 @@ final class PonderQuestionQuery
     }
 
     if ($this->status !== null) {
-      switch ($this->status) {
-        case self::STATUS_ANY:
-          break;
-        case self::STATUS_OPEN:
-          $where[] = qsprintf(
-            $conn,
-            'q.status = %d',
-            PonderQuestionStatus::STATUS_OPEN);
-          break;
-        case self::STATUS_CLOSED:
-          $where[] = qsprintf(
-            $conn,
-            'q.status = %d',
-            PonderQuestionStatus::STATUS_CLOSED);
-          break;
-        default:
-          throw new Exception(pht("Unknown status query '%s'!", $this->status));
-      }
+      $where[] = qsprintf(
+        $conn,
+        'q.status IN (%Ls)',
+        $this->status);
     }
 
     return $where;
@@ -109,15 +91,15 @@ final class PonderQuestionQuery
   }
 
   protected function willFilterPage(array $questions) {
+
+    $phids = mpull($questions, 'getPHID');
+
     if ($this->needAnswers) {
       $aquery = id(new PonderAnswerQuery())
         ->setViewer($this->getViewer())
         ->setOrderVector(array('-id'))
+        ->needViewerVotes(true)
         ->withQuestionIDs(mpull($questions, 'getID'));
-
-      if ($this->needViewerVotes) {
-        $aquery->needViewerVotes($this->needViewerVotes);
-      }
 
       $answers = $aquery->execute();
       $answers = mgroup($answers, 'getQuestionID');
@@ -128,30 +110,26 @@ final class PonderQuestionQuery
       }
     }
 
-    if ($this->needViewerVotes) {
-      $viewer_phid = $this->getViewer()->getPHID();
+    if ($this->needProjectPHIDs) {
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs($phids)
+        ->withEdgeTypes(
+          array(
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+          ));
+      $edge_query->execute();
 
-      $etype = PonderQuestionHasVotingUserEdgeType::EDGECONST;
-      $edges = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs(mpull($questions, 'getPHID'))
-        ->withDestinationPHIDs(array($viewer_phid))
-        ->withEdgeTypes(array($etype))
-        ->needEdgeData(true)
-        ->execute();
       foreach ($questions as $question) {
-        $user_edge = idx(
-          $edges[$question->getPHID()][$etype],
-          $viewer_phid,
-          array());
-
-        $question->attachUserVote($viewer_phid, idx($user_edge, 'data', 0));
+        $project_phids = $edge_query->getDestinationPHIDs(
+          array($question->getPHID()));
+        $question->attachProjectPHIDs($project_phids);
       }
     }
 
     return $questions;
   }
 
-  private function buildJoinsClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn_r) {
     $joins = array();
 
     if ($this->answererPHIDs) {
@@ -163,7 +141,7 @@ final class PonderQuestionQuery
         $this->answererPHIDs);
     }
 
-    return implode(' ', $joins);
+    return $joins;
   }
 
   protected function getPrimaryTableAlias() {

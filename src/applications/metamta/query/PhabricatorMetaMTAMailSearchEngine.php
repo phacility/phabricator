@@ -101,7 +101,7 @@ final class PhabricatorMetaMTAMailSearchEngine
 
     foreach ($mails as $mail) {
       if ($mail->hasSensitiveContent()) {
-        $header = pht('< content redacted >');
+        $header = phutil_tag('em', array(), pht('Content Redacted'));
       } else {
         $header = $mail->getSubject();
       }
@@ -110,9 +110,16 @@ final class PhabricatorMetaMTAMailSearchEngine
         ->setUser($viewer)
         ->setObject($mail)
         ->setEpoch($mail->getDateCreated())
-        ->setObjectName('Mail '.$mail->getID())
+        ->setObjectName(pht('Mail %d', $mail->getID()))
         ->setHeader($header)
-        ->setHref($this->getURI('detail/'.$mail->getID()));
+        ->setHref($this->getURI('detail/'.$mail->getID().'/'));
+
+      $status = $mail->getStatus();
+      $status_name = PhabricatorMailOutboundStatus::getStatusName($status);
+      $status_icon = PhabricatorMailOutboundStatus::getStatusIcon($status);
+      $status_color = PhabricatorMailOutboundStatus::getStatusColor($status);
+      $item->setStatusIcon($status_icon.' '.$status_color, $status_name);
+
       $list->addItem($item);
     }
 

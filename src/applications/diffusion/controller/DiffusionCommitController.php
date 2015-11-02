@@ -7,6 +7,12 @@ final class DiffusionCommitController extends DiffusionController {
   private $auditAuthorityPHIDs;
   private $highlightedAudits;
 
+  private $commitParents;
+  private $commitRefs;
+  private $commitMerges;
+  private $commitErrors;
+  private $commitExists;
+
   public function shouldAllowPublic() {
     return true;
   }
@@ -17,6 +23,7 @@ final class DiffusionCommitController extends DiffusionController {
 
   protected function processDiffusionRequest(AphrontRequest $request) {
     $user = $request->getUser();
+
     // This controller doesn't use blob/path stuff, just pass the dictionary
     // in directly instead of using the AphrontRequest parsing mechanism.
     $data = $request->getURIMap();
@@ -45,10 +52,7 @@ final class DiffusionCommitController extends DiffusionController {
     ));
 
     if (!$commit) {
-      $exists = $this->callConduitWithDiffusionRequest(
-        'diffusion.existsquery',
-        array('commit' => $drequest->getCommit()));
-      if (!$exists) {
+      if (!$this->getCommitExists()) {
         return new Aphront404Response();
       }
 
@@ -75,7 +79,6 @@ final class DiffusionCommitController extends DiffusionController {
 
     $commit_data = $commit->getCommitData();
     $is_foreign = $commit_data->getCommitDetail('foreign-svn-stub');
-    $changesets = null;
     if ($is_foreign) {
       $subpath = $commit_data->getCommitDetail('svn-subpath');
 
@@ -96,18 +99,6 @@ final class DiffusionCommitController extends DiffusionController {
 
       require_celerity_resource('phabricator-remarkup-css');
 
-      $parents = $this->callConduitWithDiffusionRequest(
-        'diffusion.commitparentsquery',
-        array('commit' => $drequest->getCommit()));
-
-      if ($parents) {
-        $parents = id(new DiffusionCommitQuery())
-          ->setViewer($user)
-          ->withRepository($repository)
-          ->withIdentifiers($parents)
-          ->execute();
-      }
-
       $headsup_view = id(new PHUIHeaderView())
         ->setHeader(nonempty($commit->getSummary(), pht('Commit Detail')));
 
@@ -116,7 +107,6 @@ final class DiffusionCommitController extends DiffusionController {
       $commit_properties = $this->loadCommitProperties(
         $commit,
         $commit_data,
-        $parents,
         $audit_requests);
       $property_list = id(new PHUIPropertyListView())
         ->setHasKeyboardShortcuts(true)
@@ -149,8 +139,10 @@ final class DiffusionCommitController extends DiffusionController {
           $message));
 
       $headsup_view->setTall(true);
+
       $object_box = id(new PHUIObjectBoxView())
         ->setHeader($headsup_view)
+        ->setFormErrors($this->getCommitErrors())
         ->addPropertyList($property_list)
         ->addPropertyList($detail_list);
 
@@ -181,24 +173,6 @@ final class DiffusionCommitController extends DiffusionController {
       $user,
       $this->auditAuthorityPHIDs);
 
-    $owners_paths = array();
-    if ($highlighted_audits) {
-      $packages = id(new PhabricatorOwnersPackage())->loadAllWhere(
-        'phid IN (%Ls)',
-        mpull($highlighted_audits, 'getAuditorPHID'));
-      if ($packages) {
-        $owners_paths = id(new PhabricatorOwnersPath())->loadAllWhere(
-          'repositoryPHID = %s AND packageID IN (%Ld)',
-          $repository->getPHID(),
-          mpull($packages, 'getID'));
-      }
-    }
-
-    $change_table = new DiffusionCommitChangeTableView();
-    $change_table->setDiffusionRequest($drequest);
-    $change_table->setPathChanges($changes);
-    $change_table->setOwnersPaths($owners_paths);
-
     $count = count($changes);
 
     $bad_commit = null;
@@ -210,6 +184,7 @@ final class DiffusionCommitController extends DiffusionController {
         'r'.$callsign.$commit->getCommitIdentifier());
     }
 
+    $show_changesets = false;
     if ($bad_commit) {
       $content[] = $this->renderStatusMessage(
         pht('Bad Commit'),
@@ -234,7 +209,13 @@ final class DiffusionCommitController extends DiffusionController {
           'This commit is enormous, and affects more than %d files. '.
           'Changes are not shown.',
           $hard_limit));
+    } else if (!$this->getCommitExists()) {
+      $content[] = $this->renderStatusMessage(
+        pht('Commit No Longer Exists'),
+        pht('This commit no longer exists in the repository.'));
     } else {
+      $show_changesets = true;
+
       // The user has clicked "Show All Changes", and we should show all the
       // changes inline even if there are more than the soft limit.
       $show_all_details = $request->getBool('show_all');
@@ -264,14 +245,19 @@ final class DiffusionCommitController extends DiffusionController {
         $header->addActionLink($button);
       }
 
+      $changesets = DiffusionPathChange::convertToDifferentialChangesets(
+        $user,
+        $changes);
+
+      // TODO: This table and panel shouldn't really be separate, but we need
+      // to clean up the "Load All Files" interaction first.
+      $change_table = $this->buildTableOfContents(
+        $changesets);
+
       $change_panel->setTable($change_table);
       $change_panel->setHeader($header);
 
       $content[] = $change_panel;
-
-      $changesets = DiffusionPathChange::convertToDifferentialChangesets(
-        $user,
-        $changes);
 
       $vcs = $repository->getVersionControlSystem();
       switch ($vcs) {
@@ -353,12 +339,6 @@ final class DiffusionCommitController extends DiffusionController {
       $change_list->setInlineCommentControllerURI(
         '/diffusion/inline/edit/'.phutil_escape_uri($commit->getPHID()).'/');
 
-      $change_references = array();
-      foreach ($changesets as $key => $changeset) {
-        $change_references[$changeset->getID()] = $references[$key];
-      }
-      $change_table->setRenderingReferences($change_references);
-
       $content[] = $change_list->render();
     }
 
@@ -375,7 +355,7 @@ final class DiffusionCommitController extends DiffusionController {
     $show_filetree = $prefs->getPreference($pref_filetree);
     $collapsed = $prefs->getPreference($pref_collapse);
 
-    if ($changesets && $show_filetree) {
+    if ($show_changesets && $show_filetree) {
       $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
         ->setTitle($short_name)
         ->setBaseURI(new PhutilURI('/'.$commit_id))
@@ -399,10 +379,8 @@ final class DiffusionCommitController extends DiffusionController {
   private function loadCommitProperties(
     PhabricatorRepositoryCommit $commit,
     PhabricatorRepositoryCommitData $data,
-    array $parents,
     array $audit_requests) {
 
-    assert_instances_of($parents, 'PhabricatorRepositoryCommit');
     $viewer = $this->getRequest()->getUser();
     $commit_phid = $commit->getPHID();
     $drequest = $this->getDiffusionRequest();
@@ -439,11 +417,6 @@ final class DiffusionCommitController extends DiffusionController {
     }
     if ($data->getCommitDetail('committerPHID')) {
       $phids[] = $data->getCommitDetail('committerPHID');
-    }
-    if ($parents) {
-      foreach ($parents as $parent) {
-        $phids[] = $parent->getPHID();
-      }
     }
 
     // NOTE: We should never normally have more than a single push log, but
@@ -581,39 +554,47 @@ final class DiffusionCommitController extends DiffusionController {
       $props['Differential Revision'] = $handles[$revision_phid]->renderLink();
     }
 
+    $parents = $this->getCommitParents();
     if ($parents) {
-      $parent_links = array();
-      foreach ($parents as $parent) {
-        $parent_links[] = $handles[$parent->getPHID()]->renderLink();
-      }
-      $props['Parents'] = phutil_implode_html(" \xC2\xB7 ", $parent_links);
+      $props['Parents'] = $viewer->renderHandleList(mpull($parents, 'getPHID'));
     }
 
-    $props['Branches'] = phutil_tag(
-      'span',
-      array(
-        'id' => 'commit-branches',
-      ),
-      pht('Unknown'));
-    $props['Tags'] = phutil_tag(
-      'span',
-      array(
-        'id' => 'commit-tags',
-      ),
-      pht('Unknown'));
+    if ($this->getCommitExists()) {
+      $props['Branches'] = phutil_tag(
+        'span',
+        array(
+          'id' => 'commit-branches',
+        ),
+        pht('Unknown'));
+      $props['Tags'] = phutil_tag(
+        'span',
+        array(
+          'id' => 'commit-tags',
+        ),
+        pht('Unknown'));
 
-    $callsign = $repository->getCallsign();
-    $root = '/diffusion/'.$callsign.'/commit/'.$commit->getCommitIdentifier();
-    Javelin::initBehavior(
-      'diffusion-commit-branches',
-      array(
-        $root.'/branches/' => 'commit-branches',
-        $root.'/tags/' => 'commit-tags',
-      ));
+      $callsign = $repository->getCallsign();
+      $root = '/diffusion/'.$callsign.'/commit/'.$commit->getCommitIdentifier();
+      Javelin::initBehavior(
+        'diffusion-commit-branches',
+        array(
+          $root.'/branches/' => 'commit-branches',
+          $root.'/tags/' => 'commit-tags',
+        ));
+    }
 
-    $refs = $this->buildRefs($drequest);
+    $refs = $this->getCommitRefs();
     if ($refs) {
-      $props['References'] = $refs;
+      $ref_links = array();
+      foreach ($refs as $ref_data) {
+        $ref_links[] = phutil_tag(
+          'a',
+          array(
+            'href' => $ref_data['href'],
+          ),
+          $ref_data['ref']);
+      }
+      $props['References'] = phutil_implode_html(', ', $ref_links);
     }
 
     if ($reverts_phids) {
@@ -873,29 +854,16 @@ final class DiffusionCommitController extends DiffusionController {
   }
 
   private function buildMergesTable(PhabricatorRepositoryCommit $commit) {
+    $viewer = $this->getViewer();
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $vcs = $repository->getVersionControlSystem();
-    switch ($vcs) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        // These aren't supported under SVN.
-        return null;
-    }
-
-    $limit = 50;
-
-    $merges = $this->callConduitWithDiffusionRequest(
-      'diffusion.mergedcommitsquery',
-      array(
-        'commit' => $drequest->getCommit(),
-        'limit' => $limit + 1,
-      ));
-
+    $merges = $this->getCommitMerges();
     if (!$merges) {
       return null;
     }
-    $merges = DiffusionPathChange::newFromConduit($merges);
+
+    $limit = $this->getMergeDisplayLimit();
 
     $caption = null;
     if (count($merges) > $limit) {
@@ -909,15 +877,12 @@ final class DiffusionCommitController extends DiffusionController {
           new PhutilNumber($limit)));
     }
 
-    $history_table = new DiffusionHistoryTableView();
-    $history_table->setUser($this->getRequest()->getUser());
-    $history_table->setDiffusionRequest($drequest);
-    $history_table->setHistory($merges);
-    $history_table->loadRevisions();
+    $history_table = id(new DiffusionHistoryTableView())
+      ->setUser($viewer)
+      ->setDiffusionRequest($drequest)
+      ->setHistory($merges);
 
-    $phids = $history_table->getRequiredHandlePHIDs();
-    $handles = $this->loadViewerHandles($phids);
-    $history_table->setHandles($handles);
+    $history_table->loadRevisions();
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText(pht('Merged Changes'));
@@ -978,27 +943,6 @@ final class DiffusionCommitController extends DiffusionController {
     $actions->addAction($action);
 
     return $actions;
-  }
-
-  private function buildRefs(DiffusionRequest $request) {
-    // this is git-only, so save a conduit round trip and just get out of
-    // here if the repository isn't git
-    $type_git = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
-    $repository = $request->getRepository();
-    if ($repository->getVersionControlSystem() != $type_git) {
-      return null;
-    }
-
-    $results = $this->callConduitWithDiffusionRequest(
-      'diffusion.refsquery',
-      array('commit' => $request->getCommit()));
-    $ref_links = array();
-    foreach ($results as $ref_data) {
-      $ref_links[] = phutil_tag('a',
-        array('href' => $ref_data['href']),
-        $ref_data['ref']);
-    }
-    return phutil_implode_html(', ', $ref_links);
   }
 
   private function buildRawDiffResponse(DiffusionRequest $drequest) {
@@ -1081,5 +1025,218 @@ final class DiffusionCommitController extends DiffusionController {
 
     return $parser->processCorpus($corpus);
   }
+
+  private function buildTableOfContents(array $changesets) {
+    $drequest = $this->getDiffusionRequest();
+    $viewer = $this->getViewer();
+
+    $toc_view = id(new PHUIDiffTableOfContentsListView())
+      ->setUser($viewer);
+
+    // TODO: This is hacky, we just want access to the linkX() methods on
+    // DiffusionView.
+    $diffusion_view = id(new DiffusionEmptyResultView())
+      ->setDiffusionRequest($drequest);
+
+    $have_owners = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorOwnersApplication',
+      $viewer);
+
+    if (!$changesets) {
+      $have_owners = false;
+    }
+
+    if ($have_owners) {
+      if ($viewer->getPHID()) {
+        $packages = id(new PhabricatorOwnersPackageQuery())
+          ->setViewer($viewer)
+          ->withStatuses(array(PhabricatorOwnersPackage::STATUS_ACTIVE))
+          ->withAuthorityPHIDs(array($viewer->getPHID()))
+          ->execute();
+        $toc_view->setAuthorityPackages($packages);
+      }
+
+      $repository = $drequest->getRepository();
+      $repository_phid = $repository->getPHID();
+
+      $control_query = id(new PhabricatorOwnersPackageQuery())
+        ->setViewer($viewer)
+        ->withStatuses(array(PhabricatorOwnersPackage::STATUS_ACTIVE))
+        ->withControl($repository_phid, mpull($changesets, 'getFilename'));
+      $control_query->execute();
+    }
+
+    foreach ($changesets as $changeset_id => $changeset) {
+      $path = $changeset->getFilename();
+      $anchor = substr(md5($path), 0, 8);
+
+      $history_link = $diffusion_view->linkHistory($path);
+      $browse_link = $diffusion_view->linkBrowse(
+        $path,
+        array(
+          'type' => $changeset->getFileType(),
+        ));
+
+      $item = id(new PHUIDiffTableOfContentsItemView())
+        ->setChangeset($changeset)
+        ->setAnchor($anchor)
+        ->setContext(
+          array(
+            $history_link,
+            ' ',
+            $browse_link,
+          ));
+
+      if ($have_owners) {
+        $packages = $control_query->getControllingPackagesForPath(
+          $repository_phid,
+          $changeset->getFilename());
+        $item->setPackages($packages);
+      }
+
+      $toc_view->addItem($item);
+    }
+
+    return $toc_view;
+  }
+
+  private function loadCommitState() {
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+    $commit = $drequest->getCommit();
+
+    // TODO: We could use futures here and resolve these calls in parallel.
+
+    $exceptions = array();
+
+    try {
+      $parent_refs = $this->callConduitWithDiffusionRequest(
+        'diffusion.commitparentsquery',
+        array(
+          'commit' => $commit,
+        ));
+
+      if ($parent_refs) {
+        $parents = id(new DiffusionCommitQuery())
+          ->setViewer($viewer)
+          ->withRepository($repository)
+          ->withIdentifiers($parent_refs)
+          ->execute();
+      } else {
+        $parents = array();
+      }
+
+      $this->commitParents = $parents;
+    } catch (Exception $ex) {
+      $this->commitParents = false;
+      $exceptions[] = $ex;
+    }
+
+    $merge_limit = $this->getMergeDisplayLimit();
+
+    try {
+      if ($repository->isSVN()) {
+        $this->commitMerges = array();
+      } else {
+        $merges = $this->callConduitWithDiffusionRequest(
+          'diffusion.mergedcommitsquery',
+          array(
+            'commit' => $commit,
+            'limit' => $merge_limit + 1,
+          ));
+        $this->commitMerges = DiffusionPathChange::newFromConduit($merges);
+      }
+    } catch (Exception $ex) {
+      $this->commitMerges = false;
+      $exceptions[] = $ex;
+    }
+
+
+    try {
+      if ($repository->isGit()) {
+        $refs = $this->callConduitWithDiffusionRequest(
+          'diffusion.refsquery',
+          array(
+            'commit' => $commit,
+          ));
+      } else {
+        $refs = array();
+      }
+
+      $this->commitRefs = $refs;
+    } catch (Exception $ex) {
+      $this->commitRefs = false;
+      $exceptions[] = $ex;
+    }
+
+    if ($exceptions) {
+      $exists = $this->callConduitWithDiffusionRequest(
+        'diffusion.existsquery',
+        array(
+          'commit' => $commit,
+        ));
+
+      if ($exists) {
+        $this->commitExists = true;
+        foreach ($exceptions as $exception) {
+          $this->commitErrors[] = $exception->getMessage();
+        }
+      } else {
+        $this->commitExists = false;
+        $this->commitErrors[] = pht(
+          'This commit no longer exists in the repository. It may have '.
+          'been part of a branch which was deleted.');
+      }
+    } else {
+      $this->commitExists = true;
+      $this->commitErrors = array();
+    }
+  }
+
+  private function getMergeDisplayLimit() {
+    return 50;
+  }
+
+  private function getCommitExists() {
+    if ($this->commitExists === null) {
+      $this->loadCommitState();
+    }
+
+    return $this->commitExists;
+  }
+
+  private function getCommitParents() {
+    if ($this->commitParents === null) {
+      $this->loadCommitState();
+    }
+
+    return $this->commitParents;
+  }
+
+  private function getCommitRefs() {
+    if ($this->commitRefs === null) {
+      $this->loadCommitState();
+    }
+
+    return $this->commitRefs;
+  }
+
+  private function getCommitMerges() {
+    if ($this->commitMerges === null) {
+      $this->loadCommitState();
+    }
+
+    return $this->commitMerges;
+  }
+
+  private function getCommitErrors() {
+    if ($this->commitErrors === null) {
+      $this->loadCommitState();
+    }
+
+    return $this->commitErrors;
+  }
+
 
 }

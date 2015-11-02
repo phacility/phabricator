@@ -5,19 +5,12 @@ final class PhabricatorSearchController
 
   const SCOPE_CURRENT_APPLICATION = 'application';
 
-  private $queryKey;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     if ($request->getStr('jump') != 'no') {
       $pref_jump = PhabricatorUserPreferences::PREFERENCE_SEARCHBAR_JUMP;
@@ -97,7 +90,7 @@ final class PhabricatorSearchController
     }
 
     $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($this->queryKey)
+      ->setQueryKey($request->getURIData('queryKey'))
       ->setSearchEngine($engine)
       ->setNavigation($this->buildSideNavView());
 
@@ -105,7 +98,7 @@ final class PhabricatorSearchController
   }
 
   public function buildSideNavView($for_app = false) {
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));

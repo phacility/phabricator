@@ -715,7 +715,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return false;
     }
 
-    if ($this->getDetail('disable-herald')) {
+    if ($this->getDetail('herald-disabled')) {
       return false;
     }
 
@@ -1799,7 +1799,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
 
-/* -(  Staging  )-------------------------------------------------------------*/
+/* -(  Staging  )------------------------------------------------------------ */
 
 
   public function supportsStaging() {
@@ -1812,6 +1812,33 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return null;
     }
     return $this->getDetail('staging-uri', null);
+  }
+
+
+/* -(  Automation  )--------------------------------------------------------- */
+
+
+  public function supportsAutomation() {
+    return $this->isGit();
+  }
+
+  public function canPerformAutomation() {
+    if (!$this->supportsAutomation()) {
+      return false;
+    }
+
+    if (!$this->getAutomationBlueprintPHIDs()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function getAutomationBlueprintPHIDs() {
+    if (!$this->supportsAutomation()) {
+      return array();
+    }
+    return $this->getDetail('automation.blueprintPHIDs', array());
   }
 
 

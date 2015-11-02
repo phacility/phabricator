@@ -111,7 +111,9 @@ final class PhabricatorMacroSearchEngine
 
     switch ($query_key) {
       case 'active':
-        return $query;
+        return $query->setParameter(
+          'status',
+          PhabricatorMacroQuery::STATUS_ACTIVE);
       case 'all':
         return $query->setParameter(
           'status',

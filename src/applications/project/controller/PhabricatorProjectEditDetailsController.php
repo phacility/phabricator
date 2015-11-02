@@ -3,23 +3,17 @@
 final class PhabricatorProjectEditDetailsController
   extends PhabricatorProjectController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    if ($this->id) {
+    if ($id) {
      $id = $request->getURIData('id');
      $is_new = false;
 
       $project = id(new PhabricatorProjectQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->needSlugs(true)
         ->needImages(true)
         ->requireCapabilities(

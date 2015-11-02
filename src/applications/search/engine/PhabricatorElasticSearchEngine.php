@@ -79,7 +79,7 @@ final class PhabricatorElasticSearchEngine extends PhabricatorSearchEngine {
       $spec['relationship'][$rtype][] = array(
         'phid'      => $to_phid,
         'phidType'  => $to_type,
-        'when'      => $time,
+        'when'      => (int)$time,
       );
     }
 
@@ -325,7 +325,7 @@ final class PhabricatorElasticSearchEngine extends PhabricatorSearchEngine {
     foreach ($types as $type) {
       // Use the custom trigram analyzer for the corpus of text
       $data['mappings'][$type]['properties']['field']['properties']['corpus'] =
-        array( 'type' => 'string', 'analyzer' => 'custom_trigrams' );
+        array('type' => 'string', 'analyzer' => 'custom_trigrams');
 
       // Ensure we have dateCreated since the default query requires it
       $data['mappings'][$type]['properties']['dateCreated']['type'] = 'string';

@@ -8,45 +8,34 @@ final class PhabricatorRemarkupCowsayBlockInterpreter
   }
 
   public function markupContent($content, array $argv) {
-    if (!Filesystem::binaryExists('cowsay')) {
-      return $this->markupError(
-        pht(
-          'Unable to locate the `%s` binary. Install cowsay.',
-          'cowsay'));
-    }
-
-    $bin = idx($argv, 'think') ? 'cowthink' : 'cowsay';
+    $action = idx($argv, 'think') ? 'think' : 'say';
     $eyes = idx($argv, 'eyes', 'oo');
     $tongue = idx($argv, 'tongue', '  ');
-    $cow = idx($argv, 'cow', 'default');
 
-    // NOTE: Strip this aggressively to prevent nonsense like
-    // `cow=/etc/passwd`. We could build a whiltelist with `cowsay -l`.
-    $cow = preg_replace('/[^a-z.-]+/', '', $cow);
+    $map = self::getCowMap();
 
-    $future = new ExecFuture(
-      '%s -e %s -T %s -f %s ',
-      $bin,
-      $eyes,
-      $tongue,
-      $cow);
-
-    $future->setTimeout(15);
-    $future->write($content);
-
-    list($err, $stdout, $stderr) = $future->resolve();
-
-    if ($err) {
-      return $this->markupError(
-        pht(
-          'Execution of `%s` failed: %s',
-          'cowsay',
-          $stderr));
+    $cow = idx($argv, 'cow');
+    $cow = phutil_utf8_strtolower($cow);
+    if (empty($map[$cow])) {
+      $cow = 'default';
     }
 
+    $result = id(new PhutilCowsay())
+      ->setTemplate($map[$cow])
+      ->setAction($action)
+      ->setEyes($eyes)
+      ->setTongue($tongue)
+      ->setText($content)
+      ->renderCow();
 
-    if ($this->getEngine()->isTextMode()) {
-      return $stdout;
+    $engine = $this->getEngine();
+
+    if ($engine->isTextMode()) {
+      return $result;
+    }
+
+    if ($engine->isHTMLMailMode()) {
+      return phutil_tag('pre', array(), $result);
     }
 
     return phutil_tag(
@@ -54,7 +43,32 @@ final class PhabricatorRemarkupCowsayBlockInterpreter
       array(
         'class' => 'PhabricatorMonospaced remarkup-cowsay',
       ),
-      $stdout);
+      $result);
+  }
+
+  private static function getCowMap() {
+    $root = dirname(phutil_get_library_root('phabricator'));
+
+    $directories = array(
+      $root.'/externals/cowsay/cows/',
+      $root.'/resources/cows/builtin/',
+      $root.'/resources/cows/custom/',
+    );
+
+    $map = array();
+    foreach ($directories as $directory) {
+      foreach (Filesystem::listDirectory($directory, false) as $cow_file) {
+        $matches = null;
+        if (!preg_match('/^(.*)\.cow\z/', $cow_file, $matches)) {
+          continue;
+        }
+        $cow_name = $matches[1];
+        $cow_name = phutil_utf8_strtolower($cow_name);
+        $map[$cow_name] = Filesystem::readFile($directory.$cow_file);
+      }
+    }
+
+    return $map;
   }
 
 }

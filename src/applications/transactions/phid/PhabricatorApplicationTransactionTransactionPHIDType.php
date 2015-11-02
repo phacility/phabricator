@@ -16,6 +16,10 @@ final class PhabricatorApplicationTransactionTransactionPHIDType
     return null;
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorTransactionsApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $object_query,
     array $phids) {
@@ -28,9 +32,9 @@ final class PhabricatorApplicationTransactionTransactionPHIDType
 
     static $queries;
     if ($queries === null) {
-      $objects = id(new PhutilSymbolLoader())
+      $objects = id(new PhutilClassMapQuery())
         ->setAncestorClass('PhabricatorApplicationTransactionQuery')
-        ->loadObjects();
+        ->execute();
 
       $queries = array();
       foreach ($objects as $object) {

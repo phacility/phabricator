@@ -6,8 +6,7 @@ abstract class PhabricatorDaemonManagementWorkflow
   private $runDaemonsAsUser = null;
 
   final protected function loadAvailableDaemonClasses() {
-    $loader = new PhutilSymbolLoader();
-    return $loader
+    return id(new PhutilSymbolLoader())
       ->setAncestorClass('PhutilDaemon')
       ->setConcreteOnly(true)
       ->selectSymbolsWithoutLoading();

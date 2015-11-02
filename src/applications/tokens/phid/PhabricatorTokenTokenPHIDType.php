@@ -12,6 +12,10 @@ final class PhabricatorTokenTokenPHIDType extends PhabricatorPHIDType {
     return new PhabricatorToken();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorTokensApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

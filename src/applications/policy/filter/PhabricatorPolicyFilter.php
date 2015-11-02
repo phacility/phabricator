@@ -589,7 +589,9 @@ final class PhabricatorPolicyFilter extends Phobject {
 
     $exception = id(new PhabricatorPolicyException($full_message))
       ->setTitle($access_denied)
+      ->setObjectPHID($object->getPHID())
       ->setRejection($rejection)
+      ->setCapability($capability)
       ->setCapabilityName($capability_name)
       ->setMoreInfo($details);
 
@@ -710,6 +712,11 @@ final class PhabricatorPolicyFilter extends Phobject {
     $objects = $policy->getRuleObjects();
     $action = null;
     foreach ($policy->getRules() as $rule) {
+      if (!is_array($rule)) {
+        // Reject, this policy rule is invalid.
+        return false;
+      }
+
       $rule_object = idx($objects, idx($rule, 'rule'));
       if (!$rule_object) {
         // Reject, this policy has a bogus rule.
@@ -831,7 +838,9 @@ final class PhabricatorPolicyFilter extends Phobject {
 
     $exception = id(new PhabricatorPolicyException($full_message))
       ->setTitle($access_denied)
-      ->setRejection($rejection);
+      ->setObjectPHID($object->getPHID())
+      ->setRejection($rejection)
+      ->setCapability(PhabricatorPolicyCapability::CAN_VIEW);
 
     throw $exception;
   }

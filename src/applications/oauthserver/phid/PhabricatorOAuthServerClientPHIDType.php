@@ -12,6 +12,10 @@ final class PhabricatorOAuthServerClientPHIDType extends PhabricatorPHIDType {
     return new PhabricatorOAuthServerClient();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorOAuthServerApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

@@ -18,27 +18,45 @@ final class PhabricatorOwnersPackageSearchEngine
   protected function buildCustomSearchFields() {
     return array(
       id(new PhabricatorSearchDatasourceField())
-        ->setLabel(pht('Owners'))
-        ->setKey('ownerPHIDs')
-        ->setAliases(array('owner', 'owners'))
+        ->setLabel(pht('Authority'))
+        ->setKey('authorityPHIDs')
+        ->setAliases(array('authority', 'authorities'))
         ->setDatasource(new PhabricatorProjectOrUserDatasource()),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Repositories'))
         ->setKey('repositoryPHIDs')
         ->setAliases(array('repository', 'repositories'))
         ->setDatasource(new DiffusionRepositoryDatasource()),
+      id(new PhabricatorSearchStringListField())
+        ->setLabel(pht('Paths'))
+        ->setKey('paths')
+        ->setAliases(array('path')),
+      id(new PhabricatorSearchCheckboxesField())
+        ->setKey('statuses')
+        ->setLabel(pht('Status'))
+        ->setOptions(
+          id(new PhabricatorOwnersPackage())
+            ->getStatusNameMap()),
     );
   }
 
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
-    if ($map['ownerPHIDs']) {
-      $query->withOwnerPHIDs($map['ownerPHIDs']);
+    if ($map['authorityPHIDs']) {
+      $query->withAuthorityPHIDs($map['authorityPHIDs']);
     }
 
     if ($map['repositoryPHIDs']) {
       $query->withRepositoryPHIDs($map['repositoryPHIDs']);
+    }
+
+    if ($map['paths']) {
+      $query->withPaths($map['paths']);
+    }
+
+    if ($map['statuses']) {
+      $query->withStatuses($map['statuses']);
     }
 
     return $query;
@@ -52,10 +70,11 @@ final class PhabricatorOwnersPackageSearchEngine
     $names = array();
 
     if ($this->requireViewer()->isLoggedIn()) {
-      $names['owned'] = pht('Owned');
+      $names['authority'] = pht('Owned');
     }
 
     $names += array(
+      'active' => pht('Active Packages'),
       'all' => pht('All Packages'),
     );
 
@@ -69,9 +88,15 @@ final class PhabricatorOwnersPackageSearchEngine
     switch ($query_key) {
       case 'all':
         return $query;
-      case 'owned':
+      case 'active':
         return $query->setParameter(
-          'ownerPHIDs',
+          'statuses',
+          array(
+            PhabricatorOwnersPackage::STATUS_ACTIVE,
+          ));
+      case 'authority':
+        return $query->setParameter(
+          'authorityPHIDs',
           array($this->requireViewer()->getPHID()));
     }
 
@@ -96,6 +121,10 @@ final class PhabricatorOwnersPackageSearchEngine
         ->setObjectName(pht('Package %d', $id))
         ->setHeader($package->getName())
         ->setHref('/owners/package/'.$id.'/');
+
+      if ($package->isArchived()) {
+        $item->setDisabled(true);
+      }
 
       $list->addItem($item);
     }

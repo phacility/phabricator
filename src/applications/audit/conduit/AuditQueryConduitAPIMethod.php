@@ -37,7 +37,8 @@ final class AuditQueryConduitAPIMethod extends AuditConduitAPIMethod {
   protected function execute(ConduitAPIRequest $request) {
 
     $query = id(new DiffusionCommitQuery())
-      ->setViewer($request->getUser());
+      ->setViewer($request->getUser())
+      ->needAuditRequests(true);
 
     $auditor_phids = $request->getValue('auditorPHIDs', array());
     if ($auditor_phids) {

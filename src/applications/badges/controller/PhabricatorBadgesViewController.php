@@ -104,13 +104,10 @@ final class PhabricatorBadgesViewController
 
     $description = $badge->getDescription();
     if (strlen($description)) {
-      $description = PhabricatorMarkupEngine::renderOneObject(
-        id(new PhabricatorMarkupOneOff())->setContent($description),
-        'default',
-        $viewer);
-
-      $view->addSectionHeader(pht('Description'));
-      $view->addTextContent($description);
+      $view->addSectionHeader(
+        pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
+      $view->addTextContent(
+        new PHUIRemarkupView($viewer, $description));
     }
 
     $badge = id(new PHUIBadgeView())

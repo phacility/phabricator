@@ -9,9 +9,9 @@ final class PhabricatorEventEngine extends Phobject {
     // be able to run `bin/config` in order to remove an invalid listener.
 
     // Load automatic listeners.
-    $listeners = id(new PhutilSymbolLoader())
+    $listeners = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorAutoEventListener')
-      ->loadObjects();
+      ->execute();
 
     // Load configured listeners.
     $config_listeners = PhabricatorEnv::getEnvConfig('events.listeners');

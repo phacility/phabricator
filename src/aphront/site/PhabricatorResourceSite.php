@@ -22,20 +22,20 @@ final class PhabricatorResourceSite extends PhabricatorSite {
       return new PhabricatorResourceSite();
     }
 
-    // These are CDN routes, so we let them through even if the "Host" header
-    // doesn't match anything we recognize. The
-    $whitelist = array(
-      '/res/',
-      '/file/data/',
-      '/file/xform/',
-    );
+    return null;
+  }
 
-    $path = $request->getPath();
-    if ($this->isPathPrefixMatch($path, $whitelist)) {
-      return new PhabricatorResourceSite();
+  public function getRoutingMaps() {
+    $applications = PhabricatorApplication::getAllInstalledApplications();
+
+    $maps = array();
+    foreach ($applications as $application) {
+      $maps[] = $this->newRoutingMap()
+        ->setApplication($application)
+        ->setRoutes($application->getResourceRoutes());
     }
 
-    return null;
+    return $maps;
   }
 
 }

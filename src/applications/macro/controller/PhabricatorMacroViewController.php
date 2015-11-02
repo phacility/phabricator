@@ -92,6 +92,7 @@ final class PhabricatorMacroViewController
       ),
       array(
         'title' => $title_short,
+        'pageObjects' => array($macro->getPHID()),
       ));
   }
 

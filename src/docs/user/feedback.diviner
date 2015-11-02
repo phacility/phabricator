@@ -1,44 +1,7 @@
 @title Give Feedback! Get Support!
 @short Feedback/Support
-@group intro
+@group cellar
 
-How to give us feedback, report bugs, and request features, and get support for
-problems with Phabricator.
+Deprecated.
 
-Overview
-========
-
-We'd love to hear your feedback about Phabricator, whether it's good or bad. The
-best ways to provide feedback and get support are:
-
-  - For bug reports and feature requests, file a task in our task tracker,
-    Maniphest.
-  - For questions and real-time chat, join the IRC channel.
-  - If you just want to provide some quick feedback, you can tweet at
-    us ([[ http://twitter.com/phabricator | @phabricator ]]).
-
-Bugs and Requests
-=====================
-
-The best way to report bugs and request features is through
-[[http://secure.phabricator.com/maniphest/task/create/ | Maniphest]]. For
-information on filing good bug reports and feature requests, see:
-
-  - @{article:Contributing Bug Reports}
-  - @{article:Contributing Feature Requests}
-
-IRC
-==========
-
-We're active in `#phabricator` on FreeNode, and it's the best place to ask
-questions and get support.
-
-Next Steps
-==========
-
-Continue by:
-
-  - learning more about bug reports with @{article:Contributing Bug Reports}; or
-  - learning more about feature requests with
-    @{article:Contributing Feature Requests}; or
-  - contributing to Phabricator with @{article:Contributor Introduction}.
+This article has moved to @{article:Support Resources}.

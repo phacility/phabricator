@@ -67,6 +67,13 @@ final class PhabricatorProjectBoardViewController
     // TODO: Expand the checks here if we add the ability
     // to hide the Backlog column
     if (!$columns) {
+      $can_edit = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $project,
+        PhabricatorPolicyCapability::CAN_EDIT);
+      if (!$can_edit) {
+        return $this->noAccessDialog($project);
+      }
       switch ($request->getStr('initialize-type')) {
         case 'backlog-only':
           $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
@@ -624,8 +631,7 @@ final class PhabricatorProjectBoardViewController
       ->setMetadata(
         array(
           'columnPHID' => $column->getPHID(),
-        ))
-      ->setDisabled(!$can_edit);
+        ));
 
     $batch_edit_uri = $request->getRequestURI();
     $batch_edit_uri->setQueryParam('batch', $column->getID());
@@ -640,15 +646,13 @@ final class PhabricatorProjectBoardViewController
       ->setHref($batch_edit_uri)
       ->setDisabled(!$can_batch_edit);
 
-    $edit_uri = $this->getApplicationURI(
+    $detail_uri = $this->getApplicationURI(
       'board/'.$this->id.'/column/'.$column->getID().'/');
 
     $column_items[] = id(new PhabricatorActionView())
-      ->setIcon('fa-pencil')
-      ->setName(pht('Edit Column'))
-      ->setHref($edit_uri)
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(!$can_edit);
+      ->setIcon('fa-columns')
+      ->setName(pht('Column Details'))
+      ->setHref($detail_uri);
 
     $can_hide = ($can_edit && !$column->isDefaultColumn());
     $hide_uri = 'board/'.$this->id.'/hide/'.$column->getID().'/';
@@ -711,6 +715,20 @@ final class PhabricatorProjectBoardViewController
       ->addCancelButton($this->getApplicationURI('view/'.$project->getID().'/'))
       ->appendParagraph($instructions)
       ->appendChild($new_selector);
+
+    return id(new AphrontDialogResponse())
+      ->setDialog($dialog);
+  }
+
+  private function noAccessDialog(PhabricatorProject $project) {
+
+    $instructions = pht('This workboard has not been setup yet.');
+
+    $dialog = id(new AphrontDialogView())
+      ->setUser($this->getRequest()->getUser())
+      ->setTitle(pht('No Workboard'))
+      ->addCancelButton($this->getApplicationURI('view/'.$project->getID().'/'))
+      ->appendParagraph($instructions);
 
     return id(new AphrontDialogResponse())
       ->setDialog($dialog);

@@ -70,4 +70,36 @@ final class PhabricatorOwnersPath extends PhabricatorOwnersDAO {
     return isset($set[$ref['repositoryPHID']][$ref['path']][$ref['excluded']]);
   }
 
+  /**
+   * Get the number of directory matches between this path specification and
+   * some real path.
+   */
+  public function getPathMatchStrength($path) {
+    $this_path = $this->getPath();
+
+    if ($this_path === '/') {
+      // The root path "/" just matches everything with strength 1.
+      return 1;
+    }
+
+    $self_fragments = PhabricatorOwnersPackage::splitPath($this_path);
+    $path_fragments = PhabricatorOwnersPackage::splitPath($path);
+
+    $self_count = count($self_fragments);
+    $path_count = count($path_fragments);
+    if ($self_count > $path_count) {
+      // If this path is longer (and therefor more specific) than the target
+      // path, we don't match it at all.
+      return 0;
+    }
+
+    for ($ii = 0; $ii < $self_count; $ii++) {
+      if ($self_fragments[$ii] != $path_fragments[$ii]) {
+        return 0;
+      }
+    }
+
+    return $self_count;
+  }
+
 }

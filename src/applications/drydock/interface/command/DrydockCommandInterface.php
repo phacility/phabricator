@@ -2,19 +2,33 @@
 
 abstract class DrydockCommandInterface extends DrydockInterface {
 
-  private $workingDirectory;
+  const INTERFACE_TYPE = 'command';
 
-  public function setWorkingDirectory($working_directory) {
-    $this->workingDirectory = $working_directory;
+  private $workingDirectoryStack = array();
+
+  public function pushWorkingDirectory($working_directory) {
+    $this->workingDirectoryStack[] = $working_directory;
     return $this;
   }
 
-  public function getWorkingDirectory() {
-    return $this->workingDirectory;
+  public function popWorkingDirectory() {
+    if (!$this->workingDirectoryStack) {
+      throw new Exception(
+        pht(
+          'Unable to pop working directory, directory stack is empty.'));
+    }
+    return array_pop($this->workingDirectoryStack);
+  }
+
+  public function peekWorkingDirectory() {
+    if ($this->workingDirectoryStack) {
+      return last($this->workingDirectoryStack);
+    }
+    return null;
   }
 
   final public function getInterfaceType() {
-    return 'command';
+    return self::INTERFACE_TYPE;
   }
 
   final public function exec($command) {
@@ -36,12 +50,14 @@ abstract class DrydockCommandInterface extends DrydockInterface {
   abstract public function getExecFuture($command);
 
   protected function applyWorkingDirectoryToArgv(array $argv) {
-    if ($this->getWorkingDirectory() !== null) {
+    $directory = $this->peekWorkingDirectory();
+
+    if ($directory !== null) {
       $cmd = $argv[0];
-      $cmd = "(cd %s; {$cmd})";
+      $cmd = "(cd %s && {$cmd})";
       $argv = array_merge(
         array($cmd),
-        array($this->getWorkingDirectory()),
+        array($directory),
         array_slice($argv, 1));
     }
 

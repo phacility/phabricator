@@ -1,0 +1,85 @@
+@title Drydock User Guide: Repository Automation
+@group userguide
+
+Configuring repository automation so Phabricator can push commits.
+
+
+Overview
+========
+
+IMPORTANT: This feature is very new and some of the capabilities described
+in this document are not yet available. This feature as a whole is a prototype.
+
+By configuring Drydock and Diffusion appropriately, you can enable **Repository
+Automation** for a repository. This will allow Phabricator to make changes
+to the repository.
+
+
+Limitations
+===========
+
+  - This feature is a prototype.
+  - Only Git is supported.
+
+
+Security
+========
+
+Configuring repository automation amounts to telling Phabricator where it
+should perform working copy operations (like merges, cherry-picks and pushes)
+when doing writes.
+
+Depending on how stringent you are about change control, you may want to
+make sure these processes are isolated and can not be tampered with. If you
+run tests and automation on the same hardware, tests may be able to interfere
+with automation. You can read more about this in
+@{article:Drydock User Guide: Security}.
+
+
+Configuring Automation
+======================
+
+To configure automation, use {nav Edit Repository > Edit Automation} from
+Diffusion.
+
+On the configuration screen, specify one or more working copy blueprints in
+Drydock (usually, you'll just use one). Repository automation will use working
+copies built by these blueprints to perform merges and push changes.
+
+For more details on configuring these blueprints, see
+@{article:Drydock Blueprints: Working Copies}.
+
+After selecting one or more blueprints, make sure you authorize the repository
+to use them. Automation operations won't be able to proceed until you do. The
+UI will remind you if you have unauthorized blueprints selected.
+
+
+Testing Configuration
+=====================
+
+Once the blueprints are configured and authorized, use {nav Test Configuration}
+to check that things are configured correctly. This will build a working copy
+in Drydock, connect to it, and run a trivial command (like `git status`) to
+make sure things work.
+
+If it's the first time you're doing this, it may take a few moments since it
+will need to clone a fresh working copy.
+
+If the test is successful, your configuration is generally in good shape. If
+not, it should give you more details about what went wrong.
+
+Since the test doesn't actually do a push, it's possible that you may have
+everything configured properly //except// write access. In this case, you'll
+run into a permission error when you try to actually perform a merge or other
+similar write. If you do, adjust permissions or credentials appropriately so
+the working copy can be pushed from.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - understanding Drydock security concerns with
+    @{article:Drydock User Guide: Security}; or
+  - returning to the @{article:Drydock User Guide}.

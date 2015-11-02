@@ -6,19 +6,13 @@ final class DarkConsoleCore extends Phobject {
   const STORAGE_VERSION = 1;
 
   public function __construct() {
-    $symbols = id(new PhutilSymbolLoader())
-      ->setType('class')
+    $this->plugins = id(new PhutilClassMapQuery())
       ->setAncestorClass('DarkConsolePlugin')
-      ->selectAndLoadSymbols();
+      ->execute();
 
-    foreach ($symbols as $symbol) {
-      $plugin = newv($symbol['name'], array());
-      if (!$plugin->shouldStartup()) {
-        continue;
-      }
+    foreach ($this->plugins as $plugin) {
       $plugin->setConsoleCore($this);
       $plugin->didStartup();
-      $this->plugins[$symbol['name']] = $plugin;
     }
   }
 

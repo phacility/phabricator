@@ -1,0 +1,67 @@
+.\" showfigfonts by Glenn Chappell <ggc@uiuc.edu>
+.\" figlet release 2.1.1 -- 25 Aug 1994
+.\" Based on showfigfonts by Greg Galperin <grg@ai.mit.edu>, Nov 1993.
+.\"
+.\" Prints a list of available figlet fonts, along with a sample of each
+.\" font.  If directory is given, lists fonts in that directory; otherwise
+.\" uses the default font directory.  If word is given, prints that word
+.\" in each font; otherwise prints the font name.
+.\"
+.\" Usage: showfigfonts [ -d directory ] [ word ]
+.\"
+.\" Manual page by Jonathon Abbott, for the Debian Project
+.\" slightly modified by Francesco Tapparo, for the Debian Project
+.TH SHOWFIGFONTS 6 "31 May 2012" "v2.2.5"
+
+.SH NAME
+showfigfonts \- prints a list of available figlet fonts
+
+.SH SYNOPSIS
+.B showfigfonts
+[
+.B \-d
+.I directory
+]
+[
+.I word
+]
+
+.SH "DESCRIPTION"
+Prints a list of available figlet fonts, along with a sample of each
+font.  If directory is given, lists fonts in that directory; otherwise
+uses the default font directory.  If word is given, prints that word
+in each font; otherwise prints the font name.
+
+.SH EXAMPLES
+To use
+.B showfigfonts
+with its default settings, simply type
+.RS
+
+.B example% showfigfonts
+
+.RE
+
+To print all the fonts in /usr/share/fonts/figlet
+.RS
+
+.B example% showfigfonts -d /usr/share/fonts/figlet
+
+.RE
+
+To print the word foo using all available fonts
+.RS
+
+.B example% showfigfonts foo
+
+.RE
+
+.SH "AUTHORS"
+showfigfonts was written by Glenn Chappell <ggc@uiuc.edu>
+
+This manual page was written by Jonathon Abbott for the Debian Project.
+
+.SH "SEE ALSO"
+.BR figlet (6),
+.BR chkfont (6),
+.BR figlist (6)

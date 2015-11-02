@@ -3,20 +3,11 @@
 final class DifferentialRevisionCloseDetailsController
   extends DifferentialController {
 
-  private $phid;
-
-  public function willProcessRequest(array $data) {
-    $this->phid = idx($data, 'phid');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-
-    $viewer = $request->getUser();
-    $xaction_phid = $this->phid;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $xaction = id(new PhabricatorObjectQuery())
-      ->withPHIDs(array($xaction_phid))
+      ->withPHIDs(array($request->getURIData('phid')))
       ->setViewer($viewer)
       ->executeOne();
     if (!$xaction) {

@@ -15,6 +15,7 @@ final class NuanceSourceEditor
     $types = parent::getTransactionTypes();
 
     $types[] = NuanceSourceTransaction::TYPE_NAME;
+    $types[] = NuanceSourceTransaction::TYPE_DEFAULT_QUEUE;
 
     $types[] = PhabricatorTransactions::TYPE_EDGE;
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
@@ -31,6 +32,8 @@ final class NuanceSourceEditor
     switch ($xaction->getTransactionType()) {
       case NuanceSourceTransaction::TYPE_NAME:
         return $object->getName();
+      case NuanceSourceTransaction::TYPE_DEFAULT_QUEUE:
+        return $object->getDefaultQueuePHID();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -42,6 +45,7 @@ final class NuanceSourceEditor
 
     switch ($xaction->getTransactionType()) {
       case NuanceSourceTransaction::TYPE_NAME:
+      case NuanceSourceTransaction::TYPE_DEFAULT_QUEUE:
         return $xaction->getNewValue();
     }
 
@@ -56,6 +60,9 @@ final class NuanceSourceEditor
       case NuanceSourceTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
         break;
+      case NuanceSourceTransaction::TYPE_DEFAULT_QUEUE:
+        $object->setDefaultQueuePHID($xaction->getNewValue());
+        break;
     }
   }
 
@@ -65,6 +72,7 @@ final class NuanceSourceEditor
 
     switch ($xaction->getTransactionType()) {
       case NuanceSourceTransaction::TYPE_NAME:
+      case NuanceSourceTransaction::TYPE_DEFAULT_QUEUE:
         return;
     }
 
@@ -93,6 +101,19 @@ final class NuanceSourceEditor
 
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
+        }
+        break;
+      case NuanceSourceTransaction::TYPE_DEFAULT_QUEUE:
+        foreach ($xactions as $xaction) {
+          if (!$xaction->getNewValue()) {
+            $error = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Required'),
+              pht('Sources must have a default queue.'),
+              $xaction);
+            $error->setIsMissingFieldError(true);
+            $errors[] = $error;
+          }
         }
         break;
     }

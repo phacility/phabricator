@@ -250,11 +250,29 @@ JX.install('DifferentialInlineCommentEditor', {
       JX.DifferentialInlineCommentEditor._undoRows = rows;
     },
 
-    start : function() {
-      this._registerUndoListener();
+    _onBusyWorkflow: function() {
+      // If the user clicks the "Jump to Inline" button, scroll to the row
+      // being edited.
+      JX.DOM.scrollTo(this.getRow());
+    },
 
-      var data = this._buildRequestData();
+    start : function() {
       var op = this.getOperation();
+
+      // The user is already editing a comment, we're going to give them an
+      // error message.
+      if (op == 'busy') {
+        var onbusy = JX.bind(this, this._onBusyWorkflow);
+
+        new JX.Workflow(this._uri, {op: op})
+          .setHandler(onbusy)
+          .start();
+
+        return this;
+      }
+
+      this._registerUndoListener();
+      var data = this._buildRequestData();
 
       if (op == 'delete' || op == 'refdelete' || op == 'undelete') {
         this._setRowState('loading');

@@ -3,15 +3,9 @@
 final class DifferentialCommentSaveController
   extends DifferentialController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
 
     if (!$request->isFormPost()) {
       return new Aphront400Response();
@@ -19,7 +13,7 @@ final class DifferentialCommentSaveController
 
     $revision = id(new DifferentialRevisionQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->needReviewerStatus(true)
       ->needReviewerAuthority(true)
       ->executeOne();

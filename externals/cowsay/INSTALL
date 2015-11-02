@@ -1,0 +1,15 @@
+=================
+Installing cowsay
+=================
+
+If you really want to get things installed a nice and pretty way,
+
+	sh install.sh
+
+It will ask approximately one question.  If you can't answer it,
+you need serious help.
+
+If the install goes well, you can start cowing immediately!  Just
+be sure to read the manual page first...
+
+$Id: INSTALL,v 1.1 1999/08/14 08:03:17 tony Exp $

@@ -193,17 +193,15 @@ final class PassphraseCredentialViewController extends PassphraseController {
         $viewer->renderHandleList($used_by_phids));
     }
 
+    $properties->invokeWillRenderEvent();
+
     $description = $credential->getDescription();
     if (strlen($description)) {
       $properties->addSectionHeader(
         pht('Description'),
         PHUIPropertyListView::ICON_SUMMARY);
       $properties->addTextContent(
-        PhabricatorMarkupEngine::renderOneObject(
-          id(new PhabricatorMarkupOneOff())
-            ->setContent($description),
-          'default',
-          $viewer));
+        new PHUIRemarkupView($viewer, $description));
     }
 
     return $properties;

@@ -1,0 +1,1102 @@
+.\"  FIGlet
+.\"  Copyright (C) 1991, 1993, 1994 Glenn Chappell and Ian Chai
+.\"  Internet: <info@figlet.org>
+.\"  Portions Copyright 1996, 1997, 1998, 1999, 2000, 2001 by John Cowan <cowan@ccil.org>
+.\"  Portions Copyright 2002 by Christiaan Keet
+.\"  Portions Copyright 2011, 2012 by Claudio Matsuoka
+.\"  FIGlet, along with the various FIGlet fonts and documentation, may
+.\"  be freely copied and distributed.
+.\"  If you use FIGlet, please send an e-mail message to
+.\"  <info@figlet.org>
+.\"
+.TH FIGLET 6 "31 May 2012" "v2.2.5"
+
+.SH NAME
+FIGlet \- display large characters made up of ordinary screen characters
+
+.SH SYNOPSIS
+.B figlet
+[
+.B \-cklnoprstvxDELNRSWX
+]
+[
+.B \-d
+.I fontdirectory
+]
+.PD 0
+.IP
+.PD
+[
+.B \-f
+.I fontfile
+]
+[
+.B \-m
+.I layoutmode
+]
+.PD 0
+.IP
+.PD
+[
+.B \-w
+.IR outputwidth
+]
+[
+.B \-C
+.I controlfile
+]
+.PD 0
+.IP
+.PD
+[
+.B \-I
+.I infocode
+]
+[
+.I message
+]
+
+.SH DESCRIPTION
+.B FIGlet
+prints its input using large characters
+(called ``FIGcharacters'')made up of ordinary
+screen characters
+(called ``sub-characters'').
+.B FIGlet
+output is generally reminiscent of the
+sort of ``signatures'' many people like to put at the end of e-mail
+and UseNet messages.  It is also reminiscent of the output of some banner
+programs, although it is oriented normally, not sideways.
+
+.B FIGlet
+can print in a variety of fonts, both left-to-right and right-to-left,
+with adjacent FIGcharacters kerned and ``smushed'' together in various ways.
+.B FIGlet
+fonts are stored in
+separate files, which can be identified by the suffix
+.RB `` .flf ''.
+In systems with UTF-8 support
+.B FIGlet
+may also support TOIlet
+.RB `` .tlf ''
+fonts.  Most
+.B FIGlet
+font files will be stored in
+.B FIGlet's
+default font directory.
+
+.B FIGlet
+can also use ``control files'', which tell it to map certain input
+characters to certain other characters, similar to the Unix
+.B tr
+command.  Control files can be identified by the suffix
+.RB `` .flc ''.
+Most
+.B FIGlet
+control files will be stored in
+.B FIGlet's
+default font directory.
+
+You can store
+.B FIGlet
+fonts and control files
+in compressed form.
+See
+.BR "COMPRESSED FONTS" .
+
+.SH USAGE
+Just start up
+.B FIGlet
+(type
+.RB `` figlet '')
+and then type whatever you want.
+Alternatively, pipe a file or the output of another command through
+.BR FIGlet ,
+or put input on the command line
+after the options.
+See
+.B EXAMPLES
+for other things to do.
+
+.SH OPTIONS
+.B FIGlet
+reads command line options from left to right, and only the last
+option that affects a parameter has any effect.  Almost every option
+has an inverse, so that, for example, if
+.B FIGlet
+is customized with a shell
+.BR alias ,
+all the options are usually still available.
+
+Commonly-used options are
+.BR \-f ,
+.BR \-c ,
+.BR \-k ,
+.BR \-t ,
+.B \-p
+and
+.BR \-v .
+
+.TP
+.BI \-f \ fontfile
+Select the font.  The
+.B .flf
+suffix may be left off of
+.IR fontfile ,
+in which case
+.B FIGlet
+automatically appends it.
+.B FIGlet
+looks for the file first in the default font directory and then
+in the current directory, or, if
+.I fontfile
+was given as a full pathname, in the given directory.
+If the
+.B \-f
+option is not specified,
+.B FIGlet
+uses the font that was specified
+when it was compiled.  To find out which font this is, use the
+.B \-I3
+option.
+
+.TP
+.BI \-d \ fontdirectory
+Change the default font directory.
+.B FIGlet
+looks for fonts first in the
+default directory and then in the current directory.
+If the
+.B \-d
+option is not specified,
+.B FIGlet
+uses the directory that was specified
+when it was compiled.  To find out which directory this is, use the
+.B \-I2
+option.
+
+.TP
+.B \-c
+.PD 0
+.TP
+.B \-l
+.PD 0
+.TP
+.B \-r
+.PD 0
+.TP
+.B \-x
+.PD
+These options handle the justification of
+.B FIGlet
+output.
+.B \-c
+centers the output horizontally.
+.B \-l
+makes the output flush-left.
+.B \-r
+makes it flush-right.
+.B \-x
+(default) sets the justification according to whether left-to-right or
+right-to-left text is selected.  Left-to-right text will be flush-left,
+while right-to-left text will be flush-right.  (Left-to-right versus
+right-to-left text is controlled by
+.BR \-L ,
+.B \-R
+and
+.BR \-X .)
+
+.TP
+.B \-t
+.PD 0
+.TP
+.BI \-w \ outputwidth
+.PD
+These options control the
+.IR outputwidth ,
+or the screen width
+.B FIGlet
+assumes when formatting its output.
+.B FIGlet
+uses the
+.I outputwidth
+to determine when to break lines and how to center
+the output.  Normally,
+.B FIGlet
+assumes 80 columns so that people with wide terminals
+won't annoy the people they e-mail
+.B FIGlet
+output to.
+.B \-t
+sets the
+.I outputwidth
+to the terminal width.  If the terminal width cannot be determined,
+the previous
+.I outputwidth
+is retained.
+.B \-w
+sets the
+.I outputwidth
+to the given integer.  An
+.I outputwidth
+of 1 is a special value that tells
+.B FIGlet
+to print each non-space FIGcharacter, in its entirety, on a separate line,
+no matter how wide it is.
+
+.TP
+.B \-p
+.PD 0
+.TP
+.B \-n
+.PD
+These options control how
+.B FIGlet
+handles newlines.
+.B \-p
+puts
+.B FIGlet
+into ``paragraph mode'', which eliminates some unnecessary line
+breaks when piping a multi-line file through
+.BR FIGlet .
+In paragraph mode,
+.B FIGlet
+treats line breaks within a paragraph as if they were merely blanks
+between words.  (Specifically,
+.B \-p
+causes
+.B FIGlet
+to convert any newline which is not preceded by a newline and not
+followed by a space character into a blank.)
+.B \-n
+(default) puts
+.B FIGlet
+back to normal, in which every newline
+.B FIGlet
+reads causes it to produce a line break.
+
+.TP
+.B \-D
+.PD 0
+.TP
+.B \-E
+.PD
+.B \-D
+switches to the German (ISO 646-DE) character set.  Turns `[', `\e'
+and `]' into umlauted A, O and U, respectively.  `{', `|' and `}' turn
+into the respective lower case versions of these.  `~' turns into s-z.
+.B \-E
+turns off
+.B \-D
+processing.
+These options are deprecated,
+which means they probably will not appear
+in the next version of
+.BR FIGlet .
+
+.TP
+.BI \-C \ controlfile
+.PD 0
+.TP
+.B \-N
+.PD
+These options deal with
+.B FIGlet
+.IR controlfiles .
+A 
+.I controlfile
+is a file containing a list of commands that
+.B FIGlet
+executes each time it reads a character.  These commands can map certain
+input characters to other characters, similar to the Unix
+.B tr
+command or the
+.B FIGlet
+.B \-D
+option.
+.B FIGlet
+maintains a list of
+.IR controlfiles ,
+which is empty when
+.B FIGlet
+starts up.
+.B \-C
+adds the given
+.I controlfile
+to the list.
+.B \-N
+clears the
+.I controlfile
+list, cancelling the effect of any previous
+.BR \-C .
+.B FIGlet
+executes the commands in all
+.I controlfiles
+in the list.  See
+the file
+.IR figfont.txt ,
+provided with FIGlet,
+for details on how to write a
+.IR controlfile .
+
+.TP
+.B \-s
+.PD 0
+.TP
+.B \-S
+.PD 0
+.TP
+.B \-k
+.PD 0
+.TP
+.B \-W
+.PD
+.TP
+.B \-o
+.PD
+These options control how
+.B FIGlet
+spaces the FIGcharacters that it outputs.
+.B \-s
+(default) and
+.B \-S
+cause ``smushing''.
+The FIGcharacters are displayed
+as close together as possible,
+and overlapping sub-characters are removed.
+Exactly which sub-characters count as ``overlapping''
+depends on the font's
+.IR layoutmode ,
+which is defined by the font's author.
+.B \-k
+causes ``kerning''.  As many blanks as possible are
+removed between FIGcharacters, so that they
+touch, but the FIGcharacters are not smushed.
+.B \-W
+makes
+.B FIGlet
+display all FIGcharacters at their full width,
+which may be fixed or variable, depending on the font.
+
+The difference between
+.B \-s
+and
+.B \-S
+is that
+.B \-s
+will not smush a font whose author specified
+kerning or full width as the default
+.IR layoutmode ,
+whereas
+.B \-S
+will attempt to do so.
+
+If there is no information in the font
+about how to smush,
+or if the
+.B \-o
+option is specified,
+then the FIGcharacters are ``overlapped''.
+This means that after kerning,
+the first subcharacter of
+each FIGcharacter is removed.
+(This is not done if a FIGcharacter
+contains only one subcharacter.)
+
+.TP
+.BI \-m \ layoutmode
+Specifies an explicit
+.I layoutmode
+between
+.B 1
+and
+.BR 63 .
+.I Smushmodes
+are explained in
+.IR figfont.txt ,
+which also provides complete information
+on the format of a
+.B FIGlet
+font.
+For the sake of backward compatibility
+with versions of
+.B FIGlet
+before 2.2,
+.B \-m0
+is equivalent to
+.BR \-k ,
+.B \-m-1
+is equivalent to
+.BR \-W ,
+and
+.B \-m-2
+is equivalent to
+.BR \-s .
+The
+.B \-m
+switch is normally
+used only by font designers testing the various
+.I layoutmodes
+with a new font.
+
+.TP
+.B \-v
+.PD 0
+.TP
+.BI \-I \ infocode
+.PD
+These options print various information about
+.BR FIGlet ,
+then exit.  If several of these options are given on the command line, only
+the last is executed, and only after
+all other command-line options have been dealt with.
+
+.B \-v
+prints version and copyright information, as well as a ``Usage: ...''
+line.
+.B \-I
+prints the information corresponding to the given
+.I infocode
+in a consistent, reliable (i.e., guaranteed to be the same in
+future releases) format.
+.B \-I
+is primarily intended to be used by programs that use
+.BR FIGlet .
+.I infocode
+can be any of the following.
+.RS
+.TP
+.BR -1 " Normal operation (default)."
+This
+.I infocode
+indicates that
+.B FIGlet
+should operate normally, not giving any informational printout,
+printing its input in the selected font.
+.TP
+.BR 0 " Version and copyright."
+This is identical to
+.BR \-v .
+.TP
+.BR 1 " Version (integer)."
+This will print the version of your copy of
+.B FIGlet
+as a decimal integer.  The main version number is multiplied by 10000,
+the sub-version number is multiplied by 100, and the sub-sub-version
+number is multiplied by 1.  These are added together, and the result is
+printed out.  For example,
+.B FIGlet
+2.2 will print
+.RB `` 20200 ''
+, version 2.2.1 will print
+.RB `` 20201 ''.
+Similarly, version 3.7.2 would print
+.RB `` 30702 ''.
+These numbers are guaranteed to be
+ascending, with later versions having higher numbers.  Note that
+the first major release of
+.BR FIGlet ,
+version 2.0, did not have the
+.B \-I
+option.
+.TP
+.BR 2 " Default font directory."
+This will print the default font directory.  It is affected by the
+.B \-d
+option.
+.TP
+.BR 3 " Font."
+This will print the name of the font
+.B FIGlet
+would use.  It is affected by
+the
+.B \-f
+option.
+This is not a filename; the
+.RB `` .flf ''
+suffix is not printed.
+.TP
+.BR 4 " Output width."
+This will print the value
+.B FIGlet
+would use for
+.IR outputwidth ,
+the number of columns wide
+.B FIGlet
+assumes the screen is.
+It is affected by the
+.B \-w
+and
+.B \-t
+options.
+.TP
+.BR 5 " Supported font formats."
+This will list font formats supported by
+.B FIGlet .
+Possible formats are
+.RB `` flf2 ''
+for FIGfont Version 2
+.B .flf
+files and
+.RB `` tlf2 ''
+for TOIlet
+.B .tlf
+files.
+.RE
+.IP
+If
+.I infocode
+is any other positive value,
+.B FIGlet
+will simply exit without printing anything.
+
+.TP
+.B \-L
+.PD 0
+.TP
+.B \-R
+.PD 0
+.TP
+.B \-X
+.PD
+These options control whether
+.B FIGlet
+prints left-to-right or right-to-left.
+.B \-L
+selects left-to-right printing.
+.B \-R
+selects right-to-left printing.
+.B \-X
+(default) makes
+.B FIGlet
+use whichever is specified in the font file.
+
+Once the options are read,
+if there are any remaining words on the command line,
+they are used instead
+of standard input as the source of text.
+This feature
+allows shell scripts to generate large letters without having to dummy
+up standard input files.
+
+An empty argument, obtained by two sequential quotes,
+results in a line break.
+
+.SH EXAMPLES
+To use
+.B FIGlet
+with its default settings, simply type
+.RS
+.nf
+.ft B
+
+example% figlet
+
+.ft R
+.fi
+.RE
+and then type whatever you like.
+
+To change the font, use the
+.B \-f
+option, for example,
+.RS
+.nf
+.ft B
+
+example% figlet \-f script
+
+.ft R
+.fi
+.RE
+
+Use the
+.B \-c
+option if you would prefer centered output:
+.RS
+.nf
+.ft B
+
+example% figlet \-c
+
+.ft R
+.fi
+.RE
+
+We have found that the most common use of
+.B FIGlet
+is making up large text to be placed in e-mail messages.  For this
+reason,
+.B FIGlet
+defaults to 80 column output.  If you are using a wider terminal, and
+would like
+.B FIGlet
+to use the full width of your terminal, use the
+.B \-t
+option:
+.RS
+.nf
+.ft B
+
+example% figlet \-t
+
+.ft R
+.fi
+.RE
+
+If you don't want
+.B FIGlet
+to smush FIGcharacters into each other, use the
+.B \-k
+option:
+.RS
+.nf
+.ft B
+
+example% figlet \-k
+
+.ft R
+.fi
+.RE
+
+If
+.B figlet
+gets its input from a file, it is often a good idea to use
+.BR \-p :
+.RS
+.nf
+.ft B
+
+example% figlet \-p < myfile
+
+.ft R
+.fi
+.RE
+
+Of course, the above can be combined:
+.RS
+.nf
+.ft B
+
+example% figlet \-ptk \-f shadow < anotherfile
+example% figlet \-cf slant
+
+.ft R
+.fi
+.RE
+
+Finally, if you want to have
+.B FIGlet
+take the input from the command
+line instead of a file:
+.RS
+.nf
+.ft B
+
+example% figlet Hello world
+
+.ft R
+.fi
+.RE
+
+.SS Other Things to Try
+On many systems nice effects can be obtained from the
+.B lean
+font by piping it through
+.BR tr .
+Some you might want to try are the following:
+
+.RS
+.nf
+.ft B
+example% figlet \-f lean | tr ' _/' ' ()'
+example% figlet \-f lean | tr ' _/' './\e\e'
+example% figlet \-f lean | tr ' _/' ' //'
+example% figlet \-f lean | tr ' _/' '/  '
+.ft R
+.fi
+.RE
+
+Similar things can be done with the
+.B block
+font and many of the other
+.B FIGlet
+fonts.
+
+.SH COMPRESSED FONTS
+You can compress the fonts and controlfiles
+using the
+.B zip
+archiving program.
+Place only one font or controlfile in each archive,
+and rename the archive file (which will have a name
+ending in
+.BR .zip )
+back to
+.B .flf
+or
+.B .flc
+as the case may be.
+If you don't rename the file appropriately,
+.B FIGlet
+won't be able to find it.
+
+.B FIGlet
+does not care what the filename within the
+.B .zip
+archive is, and will process only the first file.
+
+The
+.B .zip
+format was chosen because tools to create and manipulate it
+are widely available for free
+on many platforms.
+
+.SH THE STANDARD FONTS
+
+Here are a few notes about some of the fonts provided with
+.IR FIGlet .
+You can get many other font from the Web site
+.br
+http://www.figlet.org/   This location 
+should also contain the latest version of
+.B FIGlet
+and other related utilities.
+
+The font
+.I standard
+is the basic
+.B FIGlet
+font, used when no other font is specified.
+(This default can be changed when
+.B FIGlet
+is compiled on your system.)
+The
+.I controlfiles
+.IR 8859-2 ,
+.IR 8859-3 ,
+.IR 8859-4 ,
+and
+.I 8859-9
+are provided for interpreting those character sets,
+also known as ISO Latin-2 through Latin-5 respectively.
+The character set 8859-1 (ISO Latin-1) is
+.B FIGlet's
+default and requires no special
+.IR controlfile .
+
+Closely related are the fonts
+.IR slant ,
+.IR shadow ,
+.IR small ,
+.I smslant
+(both small and slanted),
+.IR smshadow ,
+(both small and shadowed),
+and
+.IR big .
+These fonts support only Latin-1, except that
+.I big
+supports Greek FIGcharacters as well;
+the
+.I controlfiles
+.I frango
+(for Greek text written in Latin characters, so-called
+.RI `` frangovlakhika ''),
+and
+.I 8859-7
+(for mixed Latin/Greek text)
+are provided.
+
+The
+.I ivrit
+font is a right-to-left font
+including both Latin and Hebrew FIGcharacters;
+the Latin characters are those of the
+.I standard
+font.
+The available
+.I controlfiles
+are
+.IR ilhebrew ,
+which maps the letters you get
+by typing on a U.S. keyboard
+as if it were a Hebrew keyboard;
+.IR ushebrew ,
+which makes a reasonable mapping from
+Latin letters to Hebrew ones;
+and
+.IR 8859-8 ,
+which supports mixed Latin/Hebrew text.
+.B Warning:
+.B FIGlet
+doesn't support bidirectional text,
+so everything will come out right-to-left,
+even Latin letters.
+
+The fonts
+.IR terminal ,
+.IR digital ,
+and
+.I bubble
+output the input character with some decoration around it
+(or no decoration,
+in the case of
+.IR terminal ).
+The characters coded 128 to 159,
+which have varying interpretations, are output as-is.
+You can use the appropriate
+.I controlfiles
+to process Latin-2, Latin-3, or Latin-4 (but not Latin-5) text,
+provided your output device
+has screen or printer fonts that
+are appropriate for these character sets.
+
+Two script fonts are available:
+.IR script ,
+which is larger than
+.IR standard ,
+and
+.IR smscript ,
+which is smaller.
+
+The font 
+.I lean
+is made up solely of `/' and `_' sub-characters;
+.I block
+is a straight (non-leaning) version of it.
+
+The font
+.I mini
+is very small, and especially suitable for e-mail signatures.
+
+The font
+.I banner
+looks like the output of the
+.B banner
+program;
+it is a capitals and small capitals font
+that doesn't support the ISO Latin-1 extensions
+to plain ASCII.
+It does, however, support the Japanese
+.I katakana
+syllabary;
+the
+.I controlfile
+.I uskata
+maps the upper-case and lower-case Latin letters
+into the 48 basic
+.I katakana
+characters,
+and the
+.I controlfile
+.I jis0201
+handles JIS 0201X (JIS-Roman)
+mixed Latin and
+.I katakana
+text.
+Furthermore, the
+.I banner
+font also supports Cyrillic (Russian)
+FIGcharacters; the
+.I controlfile
+.I 8859-5
+supports mixed Latin and Cyrillic text,
+the
+.I controlfile
+.I koi8r
+supports the popular KOI8-R mapping of mixed text,
+and the
+.I controlfile
+.I moscow
+supports a
+sensible mapping from Latin to Cyrillic,
+compatible with the
+.I moscow
+font (not supplied).
+
+The fonts
+.I mnemonic
+and
+.I safemnem
+support the mnemonic character set
+documented in RFC 1345.
+They implement a large subset of Unicode
+(over 1800 characters) very crudely,
+using ASCII-based mnemonic sequences,
+and are good for getting a quick look
+at UTF-8 unicode files,
+using the controlfile
+.IR utf8 .
+
+.SH ENVIRONMENT
+.TP
+.B FIGLET_FONTDIR
+If
+.RB $ FIGLET_FONTDIR
+is set, its value is used as a path to search for font files.
+
+.SH FILES
+.PD 0
+.TP 20
+.IB file .flf
+.B FIGlet
+font file
+.TP 20
+.IB file .flc
+.B FIGlet
+control file
+.PD
+
+.SH DIAGNOSTICS
+.B FIGlet's
+diagnostics are intended to be self-explanatory.  Possible
+messages are
+
+.RS
+.nf
+.ft B
+Usage: ...
+Out of memory
+Unable to open font file
+Not a FIGlet 2 font file
+Unable to open control file
+Not a FIGlet 2 control file
+"\-t" is disabled, since ioctl is not fully implemented.
+.ft R
+.fi
+.RE
+
+This last message is printed when the
+.B \-t
+option is given, but the operating system in use does not include
+the system call
+.B FIGlet
+uses to determine the terminal width.
+
+.B FIGlet
+also prints an explanatory message if the
+.B \-F
+option is given on the command line.
+The earlier version of
+.BR FIGlet ,
+version 2.0, listed the available fonts when the
+.B \-F
+option was given.  This option has been removed from
+.B FIGlet
+2.1.  It has been replaced by the
+.B figlist
+script, which is part of the standard
+.B FIGlet
+package.
+
+.SH ORIGIN
+.RB `` FIGlet ''
+stands for ``Frank, Ian and Glenn's LETters''.  Inspired by Frank's .sig,
+Glenn wrote (most of) it, and Ian helped.
+
+Most of the standard
+.B FIGlet
+fonts were inspired by signatures on various UseNet
+articles.  Since typically hundreds of people use the same style of
+letters in their signatures, it was often not deemed necessary to give
+credit to any one font designer.
+
+.SH BUGS
+Very little error checking is done on font and control files.  While
+.B FIGlet
+tries to be forgiving of errors, and should (hopefully) never actually
+crash, using an improperly-formatted file with
+.B FIGlet
+will produce unpredictable output.
+
+.B FIGlet
+does not handle format characters in a very intelligent way.
+A tab character is converted to a blank, and vertical-tab, form-feed and
+carriage-return are each converted to a newline.  On many systems, tabs
+can be handled better by piping files through
+.B expand
+before piping through
+.BR FIGlet .
+
+.B FIGlet
+output is quite ugly if it is displayed in a proportionally-spaced font.
+I suppose this is to be expected.
+
+Please report any errors you find in this man page or the program to
+<info@figlet.org>
+.SH WEBSITE AND MAILING LIST
+You can get many fonts which are not in the basic
+.B FIGlet
+package from the Web site
+http://www.figlet.org/   It 
+should also contain the latest version of
+.B FIGlet
+and other utilities related to
+.BR FIGlet .
+
+There is a mailing list for 
+.B FIGlet 
+for general discussions about 
+.B FIGlet 
+and a place where you can ask questions or share ideas 
+with other 
+.B FIGlet 
+users. It is also the place where we will publish 
+news about new fonts, new software updates etc.
+
+To subscribe or unsubscribe from the 
+.B FIGlet 
+mailing list,
+please send email to figlet-subscribe@figlet.org or figlet-unsubscribe@figlet.org or visit the 
+following web page: http://www.figlet.org/mailman/listinfo/figlet
+
+.SH AUTHORS
+Glenn Chappell did most of the work. 
+You can e-mail him but he is not an e-mail fanatic; people who e-mail
+Glenn will probably get answers, but if you e-mail his best friend:
+
+Ian Chai, who
+.I is
+an e-mail fanatic, you'll get answers, endless conversation about the
+mysteries of life, invitations to join some 473 mailing lists and a
+free toaster.  (Well, ok, maybe not the free toaster.) 
+
+Frank inspired this whole project with his .sig, but don't e-mail
+him; he's decidedly an un-e-mail-fanatic.
+
+Gilbert "The Mad Programmer" Healton added the
+.B \-A
+option for version 2.1.1.  This option specified input from
+the command line; it is still allowed,
+but has no effect.
+
+John Cowan added the
+.BR \-o ,
+.BR \-s ,
+.BR \-k ,
+.BR \-S ,
+and
+.B \-W
+options, and
+the support for Unicode mapping tables,
+ISO 2022/HZ/Shift-JIS/UTF-8 input,
+and compressed fonts
+and control files.
+He also revised this documentation,
+with a lot of input from
+Paul Burton.
+
+Claudio Matsuoka added the support for
+.B .tlf
+files for version 2.2.4 and performs random hacks and bugfixes.
+
+As a fan of FIGlet, Christiaan Keet revised the official FIGlet documentation 
+and set up the new FIGlet website at http://www.figlet.org/ (and the 
+corresponding ftp://ftp.figlet.org/pub/figlet/)
+
+.SH SEE ALSO
+.BR figlist (6),
+.BR chkfont (6),
+.BR showfigfonts (6),
+.BR toilet (1)

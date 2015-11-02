@@ -82,7 +82,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     return $this->getRawEmailAddresses(idx($this->headers, 'to'));
   }
 
-  public function loadExcludeMailRecipientPHIDs() {
+  public function loadAllRecipientPHIDs() {
     $addresses = array_merge(
       $this->getToAddresses(),
       $this->getCCAddresses());
@@ -265,15 +265,13 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
    * accepts this mail, if one exists.
    */
   private function loadReceiver() {
-    $receivers = id(new PhutilSymbolLoader())
+    $receivers = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorMailReceiver')
-      ->loadObjects();
+      ->setFilterMethod('isEnabled')
+      ->execute();
 
     $accept = array();
     foreach ($receivers as $key => $receiver) {
-      if (!$receiver->isEnabled()) {
-        continue;
-      }
       if ($receiver->canAcceptMail($this)) {
         $accept[$key] = $receiver;
       }

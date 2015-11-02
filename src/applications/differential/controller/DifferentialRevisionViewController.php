@@ -8,15 +8,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->revisionID = $data['id'];
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $this->revisionID = $request->getURIData('id');
 
-  public function processRequest() {
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
-    $viewer_is_anonymous = !$user->isLoggedIn();
+    $viewer_is_anonymous = !$viewer->isLoggedIn();
 
     $revision = id(new DifferentialRevisionQuery())
       ->withIDs(array($this->revisionID))
@@ -68,7 +64,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
         $repository = $revision->getRepository();
       } else {
         $repository = id(new PhabricatorRepositoryQuery())
-          ->setViewer($user)
+          ->setViewer($viewer)
           ->withPHIDs(array($repository_phid))
           ->executeOne();
       }
@@ -117,7 +113,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $revision->loadCommitPHIDs(),
       array(
         $revision->getAuthorPHID(),
-        $user->getPHID(),
+        $viewer->getPHID(),
       ));
 
     foreach ($revision->getAttached() as $type => $phids) {
@@ -130,7 +126,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $revision,
       PhabricatorCustomField::ROLE_VIEW);
 
-    $field_list->setViewer($user);
+    $field_list->setViewer($viewer);
     $field_list->readFieldsFromStorage($revision);
 
     $warning_handle_map = array();
@@ -174,7 +170,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $new = array_select_keys($changesets, $new_ids);
 
       $query = id(new DifferentialInlineCommentQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->needHidden(true)
         ->withRevisionPHIDs(array($revision->getPHID()));
       $inlines = $query->execute();
@@ -191,16 +187,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
           $visible_changesets[$changeset_id] = $changesets[$changeset_id];
         }
       }
-
-      if (!empty($props['arc:lint'])) {
-        $changeset_paths = mpull($changesets, null, 'getFilename');
-        foreach ($props['arc:lint'] as $lint) {
-          $changeset = idx($changeset_paths, $lint['path']);
-          if ($changeset) {
-            $visible_changesets[$changeset->getID()] = $changeset;
-          }
-        }
-      }
     } else {
       $warning = null;
       $visible_changesets = $changesets;
@@ -215,7 +201,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $commit_hashes = array_unique(array_filter($commit_hashes));
     if ($commit_hashes) {
       $commits_for_links = id(new DiffusionCommitQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withIdentifiers($commit_hashes)
         ->execute();
       $commits_for_links = mpull(
@@ -227,7 +213,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $revision_detail = id(new DifferentialRevisionDetailView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setRevision($revision)
       ->setDiff(end($diffs))
       ->setCustomFields($field_list)
@@ -249,7 +235,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $revision_detail->setActions($actions);
-    $revision_detail->setUser($user);
+    $revision_detail->setUser($viewer);
 
     $revision_detail_box = $revision_detail->render();
 
@@ -271,7 +257,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $detail_diffs = mpull($detail_diffs, null, 'getPHID');
 
     $buildables = id(new HarbormasterBuildableQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withBuildablePHIDs(array_keys($detail_diffs))
       ->withManualBuildables(false)
       ->needBuilds(true)
@@ -321,7 +307,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       '/differential/changeset/?view=old',
       '/differential/changeset/?view=new');
 
-    $changeset_view->setUser($user);
+    $changeset_view->setUser($viewer);
     $changeset_view->setDiff($target);
     $changeset_view->setRenderingReferences($rendering_references);
     $changeset_view->setVsMap($vs_map);
@@ -333,7 +319,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $changeset_view->setTitle(pht('Diff %s', $target->getID()));
 
     $diff_history = id(new DifferentialRevisionUpdateHistoryView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setDiffs($diffs)
       ->setSelectedVersusDiffID($diff_vs)
       ->setSelectedDiffID($target->getID())
@@ -341,7 +327,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setCommitsForLinks($commits_for_links);
 
     $local_view = id(new DifferentialLocalCommitsView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setLocalCommits(idx($props, 'local:commits'))
       ->setCommitsForLinks($commits_for_links);
 
@@ -359,24 +345,16 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $other_view = $this->renderOtherRevisions($other_revisions);
     }
 
-    $toc_view = new DifferentialDiffTableOfContentsView();
-    $toc_view->setChangesets($changesets);
-    $toc_view->setVisibleChangesets($visible_changesets);
-    $toc_view->setRenderingReferences($rendering_references);
-    $toc_view->setUnitTestData(idx($props, 'arc:unit', array()));
-    if ($repository) {
-      $toc_view->setRepository($repository);
-    }
-    $toc_view->setDiff($target);
-    $toc_view->setUser($user);
-    $toc_view->setRevisionID($revision->getID());
-    $toc_view->setWhitespace($whitespace);
+    $toc_view = $this->buildTableOfContents(
+      $changesets,
+      $visible_changesets,
+      $target->loadCoverageMap($viewer));
 
     $comment_form = null;
     if (!$viewer_is_anonymous) {
       $draft = id(new PhabricatorDraft())->loadOneWhere(
         'authorPHID = %s AND draftKey = %s',
-        $user->getPHID(),
+        $viewer->getPHID(),
         'differential-comment-'.$revision->getID());
 
       $reviewers = array();
@@ -412,7 +390,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
         'comment/save/'.$revision->getID().'/');
 
       $comment_form->setActionURI($action_uri);
-      $comment_form->setUser($user);
+      $comment_form->setUser($viewer);
       $comment_form->setDraft($draft);
       $comment_form->setReviewers(mpull($reviewers, 'getFullName', 'getPHID'));
       $comment_form->setCCs(mpull($ccs, 'getFullName', 'getPHID'));
@@ -479,13 +457,16 @@ final class DifferentialRevisionViewController extends DifferentialController {
       // TODO: For now, just use this to get "Login to Comment".
       $page_pane->appendChild(
         id(new PhabricatorApplicationTransactionCommentView())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setRequestURI($request->getRequestURI()));
     }
 
     $object_id = 'D'.$revision->getID();
 
+    $operations_box = $this->buildOperationsBox($revision);
+
     $content = array(
+      $operations_box,
       $revision_detail_box,
       $diff_detail_box,
       $page_pane,
@@ -494,7 +475,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($object_id, '/'.$object_id);
 
-    $prefs = $user->loadPreferences();
+    $prefs = $viewer->loadPreferences();
 
     $pref_filetree = PhabricatorUserPreferences::PREFERENCE_DIFF_FILETREE;
     if ($prefs->getPreference($pref_filetree)) {
@@ -1054,5 +1035,51 @@ final class DifferentialRevisionViewController extends DifferentialController {
     return $view;
   }
 
+  private function buildOperationsBox(DifferentialRevision $revision) {
+    $viewer = $this->getViewer();
+
+    // Save a query if we can't possibly have pending operations.
+    $repository = $revision->getRepository();
+    if (!$repository || !$repository->canPerformAutomation()) {
+      return null;
+    }
+
+    $operations = id(new DrydockRepositoryOperationQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($revision->getPHID()))
+      ->withOperationTypes(
+        array(
+          DrydockLandRepositoryOperation::OPCONST,
+        ))
+      ->execute();
+    if (!$operations) {
+      return null;
+    }
+
+    $state_fail = DrydockRepositoryOperation::STATE_FAIL;
+
+    // We're going to show the oldest operation which hasn't failed, or the
+    // most recent failure if they're all failures.
+    $operations = msort($operations, 'getID');
+    foreach ($operations as $operation) {
+      if ($operation->getOperationState() != $state_fail) {
+        break;
+      }
+    }
+
+    // If we found a completed operation, don't render anything. We don't want
+    // to show an older error after the thing worked properly.
+    if ($operation->isDone()) {
+      return null;
+    }
+
+    $box_view = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Active Operations'));
+
+    return id(new DrydockRepositoryOperationStatusView())
+      ->setUser($viewer)
+      ->setBoxView($box_view)
+      ->setOperation($operation);
+  }
 
 }

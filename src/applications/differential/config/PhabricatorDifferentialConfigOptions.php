@@ -25,6 +25,8 @@ final class PhabricatorDifferentialConfigOptions
     $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
 
     $fields = array(
+      new DifferentialNextStepField(),
+
       new DifferentialTitleField(),
       new DifferentialSummaryField(),
       new DifferentialTestPlanField(),
@@ -133,7 +135,7 @@ final class PhabricatorDifferentialConfigOptions
             'to affect existing revisions. For instructions, see '.
             '**[[ %s | Managing Caches ]]** in the documentation.',
             $caches_href))
-        ->addExample("/config\.h$/\n#/autobuilt/#", pht('Valid Setting')),
+        ->addExample("/config\.h$/\n#(^|/)autobuilt/#", pht('Valid Setting')),
       $this->newOption('differential.sticky-accept', 'bool', true)
         ->setBoolOptions(
           array(

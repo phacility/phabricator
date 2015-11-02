@@ -34,7 +34,9 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
       ->setVersion(phpversion('apc'));
 
     if (ini_get('apc.enabled')) {
-      $this->setIsEnabled(true);
+      $this
+        ->setIsEnabled(true)
+        ->setClearCacheCallback('apc_clear_cache');
       $this->initAPCCommonSpec();
     } else {
       $this->setIsEnabled(false);
@@ -48,7 +50,9 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
       ->setVersion(phpversion('apcu'));
 
     if (ini_get('apc.enabled')) {
-      $this->setIsEnabled(true);
+      $this
+        ->setIsEnabled(true)
+        ->setClearCacheCallback('apc_clear_cache');
       $this->initAPCCommonSpec();
     } else {
       $this->setIsEnabled(false);
@@ -59,7 +63,9 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
   private function initNoneSpec() {
     if (version_compare(phpversion(), '5.5', '>=')) {
       $message = pht(
-        'Installing the "APCu" PHP extension will improve performance.');
+        'Installing the "APCu" PHP extension will improve performance. '.
+        'This extension is strongly recommended. Without it, Phabricator '.
+        'must rely on a very inefficient disk-based cache.');
 
       $this
         ->newIssue('extension.apcu')
@@ -118,5 +124,4 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
 
     return $key;
   }
-
 }

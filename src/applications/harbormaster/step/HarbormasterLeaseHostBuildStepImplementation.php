@@ -11,6 +11,10 @@ final class HarbormasterLeaseHostBuildStepImplementation
     return pht('Obtain a lease on a Drydock host for performing builds.');
   }
 
+  public function getBuildStepGroupKey() {
+    return HarbormasterPrototypeBuildStepGroup::GROUPKEY;
+  }
+
   public function execute(
     HarbormasterBuild $build,
     HarbormasterBuildTarget $build_target) {
@@ -20,6 +24,7 @@ final class HarbormasterLeaseHostBuildStepImplementation
     // Create the lease.
     $lease = id(new DrydockLease())
       ->setResourceType('host')
+      ->setOwnerPHID($build_target->getPHID())
       ->setAttributes(
         array(
           'platform' => $settings['platform'],
@@ -32,14 +37,13 @@ final class HarbormasterLeaseHostBuildStepImplementation
     $lease->waitUntilActive();
 
     // Create the associated artifact.
-    $artifact = $build->createArtifact(
-      $build_target,
+    $artifact = $build_target->createArtifact(
+      PhabricatorUser::getOmnipotentUser(),
       $settings['name'],
-      HarbormasterBuildArtifact::TYPE_HOST);
-    $artifact->setArtifactData(array(
-      'drydock-lease' => $lease->getID(),
-    ));
-    $artifact->save();
+      HarbormasterHostArtifact::ARTIFACTCONST,
+      array(
+        'drydockLeasePHID' => $lease->getPHID(),
+      ));
   }
 
   public function getArtifactOutputs() {
@@ -47,7 +51,7 @@ final class HarbormasterLeaseHostBuildStepImplementation
       array(
         'name' => pht('Leased Host'),
         'key' => $this->getSetting('name'),
-        'type' => HarbormasterBuildArtifact::TYPE_HOST,
+        'type' => HarbormasterHostArtifact::ARTIFACTCONST,
       ),
     );
   }

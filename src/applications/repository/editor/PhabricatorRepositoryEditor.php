@@ -44,6 +44,7 @@ final class PhabricatorRepositoryEditor
     $types[] = PhabricatorRepositoryTransaction::TYPE_SYMBOLS_LANGUAGE;
     $types[] = PhabricatorRepositoryTransaction::TYPE_SYMBOLS_SOURCES;
     $types[] = PhabricatorRepositoryTransaction::TYPE_STAGING_URI;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_AUTOMATION_BLUEPRINTS;
 
     $types[] = PhabricatorTransactions::TYPE_EDGE;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
@@ -107,6 +108,8 @@ final class PhabricatorRepositoryEditor
         return $object->getSymbolSources();
       case PhabricatorRepositoryTransaction::TYPE_STAGING_URI:
         return $object->getDetail('staging-uri');
+      case PhabricatorRepositoryTransaction::TYPE_AUTOMATION_BLUEPRINTS:
+        return $object->getDetail('automation.blueprintPHIDs', array());
     }
   }
 
@@ -143,6 +146,7 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_SYMBOLS_LANGUAGE:
       case PhabricatorRepositoryTransaction::TYPE_SYMBOLS_SOURCES:
       case PhabricatorRepositoryTransaction::TYPE_STAGING_URI:
+      case PhabricatorRepositoryTransaction::TYPE_AUTOMATION_BLUEPRINTS:
         return $xaction->getNewValue();
       case PhabricatorRepositoryTransaction::TYPE_NOTIFY:
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
@@ -226,6 +230,11 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_STAGING_URI:
         $object->setDetail('staging-uri', $xaction->getNewValue());
         return;
+      case PhabricatorRepositoryTransaction::TYPE_AUTOMATION_BLUEPRINTS:
+        $object->setDetail(
+          'automation.blueprintPHIDs',
+          $xaction->getNewValue());
+        return;
       case PhabricatorRepositoryTransaction::TYPE_ENCODING:
         // Make sure the encoding is valid by converting to UTF-8. This tests
         // that the user has mbstring installed, and also that they didn't type
@@ -276,31 +285,15 @@ final class PhabricatorRepositoryEditor
 
         $editor->save();
         break;
+      case PhabricatorRepositoryTransaction::TYPE_AUTOMATION_BLUEPRINTS:
+        DrydockAuthorization::applyAuthorizationChanges(
+          $this->getActor(),
+          $object->getPHID(),
+          $xaction->getOldValue(),
+          $xaction->getNewValue());
+        break;
     }
 
-  }
-
-  protected function mergeTransactions(
-    PhabricatorApplicationTransaction $u,
-    PhabricatorApplicationTransaction $v) {
-
-    $type = $u->getTransactionType();
-    switch ($type) {}
-
-    return parent::mergeTransactions($u, $v);
-  }
-
-  protected function transactionHasEffect(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    $old = $xaction->getOldValue();
-    $new = $xaction->getNewValue();
-
-    $type = $xaction->getTransactionType();
-    switch ($type) {}
-
-    return parent::transactionHasEffect($object, $xaction);
   }
 
   protected function requireCapabilities(
@@ -338,6 +331,7 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_SYMBOLS_SOURCES:
       case PhabricatorRepositoryTransaction::TYPE_SYMBOLS_LANGUAGE:
       case PhabricatorRepositoryTransaction::TYPE_STAGING_URI:
+      case PhabricatorRepositoryTransaction::TYPE_AUTOMATION_BLUEPRINTS:
         PhabricatorPolicyFilter::requireCapability(
           $this->requireActor(),
           $object,
@@ -427,6 +421,29 @@ final class PhabricatorRepositoryEditor
               pht(
                 'The selected credential does not exist, or you do not have '.
                 'permission to use it.'),
+              $xaction);
+          }
+        }
+        break;
+
+      case PhabricatorRepositoryTransaction::TYPE_AUTOMATION_BLUEPRINTS:
+        foreach ($xactions as $xaction) {
+          $old = nonempty($xaction->getOldValue(), array());
+          $new = nonempty($xaction->getNewValue(), array());
+
+          $add = array_diff($new, $old);
+
+          $invalid = PhabricatorObjectQuery::loadInvalidPHIDsForViewer(
+            $this->getActor(),
+            $add);
+          if ($invalid) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'Some of the selected automation blueprints are invalid '.
+                'or restricted: %s.',
+                implode(', ', $invalid)),
               $xaction);
           }
         }

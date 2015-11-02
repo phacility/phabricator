@@ -3,6 +3,17 @@
 final class DrydockResourceSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  private $blueprint;
+
+  public function setBlueprint(DrydockBlueprint $blueprint) {
+    $this->blueprint = $blueprint;
+    return $this;
+  }
+
+  public function getBlueprint() {
+    return $this->blueprint;
+  }
+
   public function getResultTypeDescription() {
     return pht('Drydock Resources');
   }
@@ -11,49 +22,44 @@ final class DrydockResourceSearchEngine
     return 'PhabricatorDrydockApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
+  public function newQuery() {
+    $query = new DrydockResourceQuery();
 
-    $saved->setParameter(
-      'statuses',
-      $this->readListFromRequest($request, 'statuses'));
-
-    return $saved;
-  }
-
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new DrydockResourceQuery());
-
-    $statuses = $saved->getParameter('statuses', array());
-    if ($statuses) {
-      $query->withStatuses($statuses);
+    $blueprint = $this->getBlueprint();
+    if ($blueprint) {
+      $query->withBlueprintPHIDs(array($blueprint->getPHID()));
     }
 
     return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved) {
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
 
-    $statuses = $saved->getParameter('statuses', array());
-
-    $status_control = id(new AphrontFormCheckboxControl())
-      ->setLabel(pht('Status'));
-    foreach (DrydockResourceStatus::getAllStatuses() as $status) {
-      $status_control->addCheckbox(
-        'statuses[]',
-        $status,
-        DrydockResourceStatus::getNameForStatus($status),
-        in_array($status, $statuses));
+    if ($map['statuses']) {
+      $query->withStatuses($map['statuses']);
     }
 
-    $form
-      ->appendChild($status_control);
+    return $query;
+  }
+
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchCheckboxesField())
+        ->setLabel(pht('Statuses'))
+        ->setKey('statuses')
+        ->setOptions(DrydockResourceStatus::getStatusMap()),
+    );
   }
 
   protected function getURI($path) {
-    return '/drydock/resource/'.$path;
+    $blueprint = $this->getBlueprint();
+    if ($blueprint) {
+      $id = $blueprint->getID();
+      return "/drydock/blueprint/{$id}/resources/".$path;
+    } else {
+      return '/drydock/resource/'.$path;
+    }
   }
 
   protected function getBuiltinQueryNames() {
@@ -73,7 +79,7 @@ final class DrydockResourceSearchEngine
           'statuses',
           array(
             DrydockResourceStatus::STATUS_PENDING,
-            DrydockResourceStatus::STATUS_OPEN,
+            DrydockResourceStatus::STATUS_ACTIVE,
           ));
       case 'all':
         return $query;

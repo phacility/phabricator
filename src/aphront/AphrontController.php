@@ -24,10 +24,6 @@ abstract class AphrontController extends Phobject {
     return;
   }
 
-  public function didProcessRequest($response) {
-    return $response;
-  }
-
   public function handleRequest(AphrontRequest $request) {
     if (method_exists($this, 'processRequest')) {
       return $this->processRequest();
@@ -39,6 +35,10 @@ abstract class AphrontController extends Phobject {
         'or %s (deprecated).',
         'handleRequest()',
         'processRequest()'));
+  }
+
+  public function willSendResponse(AphrontResponse $response) {
+    return $response;
   }
 
   final public function setRequest(AphrontRequest $request) {

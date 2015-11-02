@@ -20,10 +20,15 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   protected $viewPolicy;
   protected $editPolicy;
   protected $mailKey;
+  protected $status;
   protected $spacePHID;
+
+  const STATUS_ACTIVE = 'active';
+  const STATUS_ARCHIVED = 'archived';
 
   private $content = self::ATTACHABLE;
   private $rawContent = self::ATTACHABLE;
+  private $snippet = self::ATTACHABLE;
 
   public static function initializeNewPaste(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -36,10 +41,18 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
     return id(new PhabricatorPaste())
       ->setTitle('')
+      ->setStatus(self::STATUS_ACTIVE)
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
       ->setSpacePHID($actor->getDefaultSpacePHID());
+  }
+
+  public static function getStatusNameMap() {
+    return array(
+      self::STATUS_ACTIVE => pht('Active'),
+      self::STATUS_ARCHIVED => pht('Archived'),
+    );
   }
 
   public function getURI() {
@@ -54,6 +67,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
+        'status' => 'text32',
         'title' => 'text255',
         'language' => 'text64',
         'mailKey' => 'bytes20',
@@ -83,6 +97,10 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorPastePastePHIDType::TYPECONST);
+  }
+
+  public function isArchived() {
+    return ($this->getStatus() == self::STATUS_ARCHIVED);
   }
 
   public function save() {
@@ -115,6 +133,15 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
   public function attachRawContent($raw_content) {
     $this->rawContent = $raw_content;
+    return $this;
+  }
+
+  public function getSnippet() {
+    return $this->assertAttached($this->snippet);
+  }
+
+  public function attachSnippet(PhabricatorPasteSnippet $snippet) {
+    $this->snippet = $snippet;
     return $this;
   }
 

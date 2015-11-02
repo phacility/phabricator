@@ -1,6 +1,8 @@
 <?php
 
-final class AphrontDialogView extends AphrontView {
+final class AphrontDialogView
+  extends AphrontView
+  implements AphrontResponseProducerInterface {
 
   private $title;
   private $shortTitle;
@@ -21,6 +23,7 @@ final class AphrontDialogView extends AphrontView {
   private $errors = array();
   private $flush;
   private $validationException;
+  private $objectList;
 
 
   const WIDTH_DEFAULT = 'default';
@@ -130,6 +133,13 @@ final class AphrontDialogView extends AphrontView {
     return $this;
   }
 
+  public function setObjectList(PHUIObjectItemListView $list) {
+    $this->objectList = true;
+    $box = id(new PHUIObjectBoxView())
+      ->setObjectList($list);
+    return $this->appendChild($box);
+  }
+
   public function appendParagraph($paragraph) {
     return $this->appendChild(
       phutil_tag(
@@ -234,15 +244,17 @@ final class AphrontDialogView extends AphrontView {
           __CLASS__));
     }
 
-    $more = $this->class;
+    $classes = array();
+    $classes[] = 'aphront-dialog-view';
+    $classes[] = $this->class;
     if ($this->flush) {
-      $more .= ' aphront-dialog-flush';
+      $classes[] = 'aphront-dialog-flush';
     }
 
     switch ($this->width) {
       case self::WIDTH_FORM:
       case self::WIDTH_FULL:
-        $more .= ' aphront-dialog-view-width-'.$this->width;
+        $classes[] = 'aphront-dialog-view-width-'.$this->width;
         break;
       case self::WIDTH_DEFAULT:
         break;
@@ -254,11 +266,15 @@ final class AphrontDialogView extends AphrontView {
     }
 
     if ($this->isStandalone) {
-      $more .= ' aphront-dialog-view-standalone';
+      $classes[] = 'aphront-dialog-view-standalone';
+    }
+
+    if ($this->objectList) {
+      $classes[] = 'aphront-dialog-object-list';
     }
 
     $attributes = array(
-      'class'   => 'aphront-dialog-view '.$more,
+      'class'   => implode(' ', $classes),
       'sigil'   => 'jx-dialog',
     );
 
@@ -290,10 +306,11 @@ final class AphrontDialogView extends AphrontView {
     }
 
     if (!$this->renderAsForm) {
-      $buttons = array(phabricator_form(
-        $this->user,
-        $form_attributes,
-        array_merge($hidden_inputs, $buttons)),
+      $buttons = array(
+        phabricator_form(
+          $this->user,
+          $form_attributes,
+          array_merge($hidden_inputs, $buttons)),
       );
     }
 
@@ -368,6 +385,15 @@ final class AphrontDialogView extends AphrontView {
         $attributes,
         $content);
     }
+  }
+
+
+/* -(  AphrontResponseProducerInterface  )----------------------------------- */
+
+
+  public function produceAphrontResponse() {
+    return id(new AphrontDialogResponse())
+      ->setDialog($this);
   }
 
 }

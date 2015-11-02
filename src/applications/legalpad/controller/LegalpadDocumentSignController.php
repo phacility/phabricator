@@ -234,18 +234,26 @@ final class LegalpadDocumentSignController extends LegalpadController {
       $document,
       PhabricatorPolicyCapability::CAN_EDIT);
 
+    // Use the last content update as the modified date. We don't want to
+    // show that a document like a TOS was "updated" by an incidental change
+    // to a field like the preamble or privacy settings which does not acutally
+    // affect the content of the agreement.
+    $content_updated = $document_body->getDateCreated();
+
+    // NOTE: We're avoiding `setPolicyObject()` here so we don't pick up
+    // extra UI elements that are unnecessary and clutter the signature page.
+    // These details are available on the "Manage" page.
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
       ->setUser($viewer)
-      ->setPolicyObject($document)
-      ->setEpoch($document->getDateModified())
+      ->setEpoch($content_updated)
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')
           ->setIcon(
             id(new PHUIIconView())
               ->setIconFont('fa-pencil'))
-          ->setText(pht('Manage Document'))
+          ->setText(pht('Manage'))
           ->setHref($manage_uri)
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit));
@@ -258,18 +266,19 @@ final class LegalpadDocumentSignController extends LegalpadController {
         'default',
         $viewer);
 
+      // NOTE: We're avoiding `setObject()` here so we don't pick up extra UI
+      // elements like "Subscribers". This information is available on the
+      // "Manage" page, but just clutters up the "Signature" page.
       $preamble = id(new PHUIPropertyListView())
         ->setUser($viewer)
-        ->setObject($document)
         ->addSectionHeader(pht('Preamble'))
         ->addTextContent($preamble_text);
 
       $preamble_box = new PHUIPropertyGroupView();
       $preamble_box->addPropertyList($preamble);
-
     }
 
-    $content = id(new PHUIDocumentView())
+    $content = id(new PHUIDocumentViewPro())
       ->addClass('legalpad')
       ->setHeader($header)
       ->appendChild(
@@ -279,6 +288,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
           $document_markup,
         ));
 
+    $signature_box = null;
     if (!$has_signed) {
       $error_view = null;
       if ($errors) {
@@ -292,23 +302,21 @@ final class LegalpadDocumentSignController extends LegalpadController {
         $field_errors);
 
       switch ($document->getSignatureType()) {
-        case LegalpadDocument::SIGNATURE_TYPE_NONE:
-          $subheader = null;
+        default:
           break;
         case LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL:
         case LegalpadDocument::SIGNATURE_TYPE_CORPORATION:
-          $subheader = id(new PHUIHeaderView())
-            ->setHeader(pht('Agree and Sign Document'))
-            ->setBleedHeader(true);
+          $box = id(new PHUIObjectBoxView())
+            ->setHeaderText(pht('Agree and Sign Document'))
+            ->setForm($signature_form);
+          if ($error_view) {
+            $box->setInfoView($error_view);
+          }
+          $signature_box = phutil_tag_div('phui-document-view-pro-box', $box);
           break;
       }
 
-      $content->appendChild(
-        array(
-          $subheader,
-          $error_view,
-          $signature_form,
-        ));
+
     }
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -319,9 +327,11 @@ final class LegalpadDocumentSignController extends LegalpadController {
       array(
         $crumbs,
         $content,
+        $signature_box,
       ),
       array(
         'title' => $title,
+        'class' => 'pro-white-background',
         'pageObjects' => array($document->getPHID()),
       ));
   }

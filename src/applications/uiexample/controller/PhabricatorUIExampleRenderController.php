@@ -9,10 +9,10 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
   public function handleRequest(AphrontRequest $request) {
     $id = $request->getURIData('class');
 
-    $classes = id(new PhutilSymbolLoader())
+    $classes = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorUIExample')
-      ->loadObjects();
-    $classes = msort($classes, 'getName');
+      ->setSortMethod('getName')
+      ->execute();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI('view/')));

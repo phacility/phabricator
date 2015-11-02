@@ -16,7 +16,9 @@ final class DrydockBlueprintEditor
 
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
+
     $types[] = DrydockBlueprintTransaction::TYPE_NAME;
+    $types[] = DrydockBlueprintTransaction::TYPE_DISABLED;
 
     return $types;
   }
@@ -28,7 +30,11 @@ final class DrydockBlueprintEditor
     switch ($xaction->getTransactionType()) {
       case DrydockBlueprintTransaction::TYPE_NAME:
         return $object->getBlueprintName();
+      case DrydockBlueprintTransaction::TYPE_DISABLED:
+        return (int)$object->getIsDisabled();
     }
+
+    return parent::getCustomTransactionOldValue($object, $xaction);
   }
 
   protected function getCustomTransactionNewValue(
@@ -38,7 +44,11 @@ final class DrydockBlueprintEditor
     switch ($xaction->getTransactionType()) {
       case DrydockBlueprintTransaction::TYPE_NAME:
         return $xaction->getNewValue();
+      case DrydockBlueprintTransaction::TYPE_DISABLED:
+        return (int)$xaction->getNewValue();
     }
+
+    return parent::getCustomTransactionNewValue($object, $xaction);
   }
 
   protected function applyCustomInternalTransaction(
@@ -48,26 +58,26 @@ final class DrydockBlueprintEditor
     switch ($xaction->getTransactionType()) {
       case DrydockBlueprintTransaction::TYPE_NAME:
         $object->setBlueprintName($xaction->getNewValue());
-        break;
+        return;
+      case DrydockBlueprintTransaction::TYPE_DISABLED:
+        $object->setIsDisabled((int)$xaction->getNewValue());
+        return;
     }
+
+    return parent::applyCustomInternalTransaction($object, $xaction);
   }
 
   protected function applyCustomExternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
-    return;
-  }
 
-  protected function extractFilePHIDsFromCustomTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    return array();
-  }
+    switch ($xaction->getTransactionType()) {
+      case DrydockBlueprintTransaction::TYPE_NAME:
+      case DrydockBlueprintTransaction::TYPE_DISABLED:
+        return;
+    }
 
-  protected function shouldSendMail(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-    return false;
+    return parent::applyCustomExternalTransaction($object, $xaction);
   }
 
 }

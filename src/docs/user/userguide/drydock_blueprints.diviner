@@ -1,0 +1,80 @@
+@title Drydock Blueprints
+@group userguide
+
+Overview of Drydock blueprint types.
+
+
+Overview
+========
+
+IMPORTANT: Drydock is not a mature application and may be difficult to
+configure and use for now.
+
+Drydock builds and manages various hardware and software resources, like
+hosts and repository working copies. Other applications can use these resources
+to perform useful work (like running tests or builds).
+
+For additional disussion of Drydock, see @{article:Drydock User Guide}.
+
+Drydock can't create any resources until you configure it. You'll configure
+Drydock by creating **Blueprints**. Each blueprint tells Drydock how to build
+a specific kind of resource, how many it is allowed to build, where it should
+build them, who is authorized to request them, and so on.
+
+You can create a new blueprint in Drydock from the web UI:
+
+{nav Drydock > Blueprints > New Blueprint}
+
+Each blueprint builds resources of a specific type, like hosts or repository
+working copies. Detailed topic guides are available for each resource type:
+
+**Hosts**: Hosts are the building block for most other resources. For details,
+see @{article:Drydock Blueprints: Hosts}.
+
+**Working Copies**: Working copies allow Drydock to perform repository
+operations like running tests, performing builds, and handling merges.
+
+
+Authorizing Access
+==================
+
+Before objects in other applications can use a blueprint, the blueprint must
+authorize them.
+
+This mostly serves to prevent users with limited access from executing
+operations on trusted hosts. For additional discussion, see
+@{article:Drydock User Guide: Security}.
+
+This also broadly prevents Drydock from surprising you by coming up with a
+valid but unintended solution to an allocation problem which runs some
+operation on resources that are techincally suitable but not desirable. For
+example, you may not want your Android builds running on your iPhone build
+tier, even if there's no technical reason they can't.
+
+You can review active authorizations and pending authorization requests in
+the "Active Authorizations" section of the blueprint detail screen.
+
+To approve an authorization, click it and select {nav Approve Authorization}.
+Until you do, the requesting object won't be able to access resources from
+the blueprint.
+
+You can also decline an authorization. This prevents use of resources and
+removes it from the authorization approval queue.
+
+
+Disabling Blueprints
+====================
+
+You can disable a blueprint by selecting {nav Disable Blueprint} from the
+blueprint detail screen.
+
+Disabled blueprints will no longer be used for new allocations. However,
+existing resources will continue to function.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to the @{article:Drydock User Guide}.

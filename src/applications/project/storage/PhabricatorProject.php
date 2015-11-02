@@ -189,22 +189,9 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return $this->assertAttached($this->memberPHIDs);
   }
 
-  public function setPhrictionSlug($slug) {
-
-    // NOTE: We're doing a little magic here and stripping out '/' so that
-    // project pages always appear at top level under projects/ even if the
-    // display name is "Hack / Slash" or similar (it will become
-    // 'hack_slash' instead of 'hack/slash').
-
-    $slug = str_replace('/', ' ', $slug);
-    $slug = PhabricatorSlug::normalize($slug);
-    $this->phrictionSlug = $slug;
+  public function setPrimarySlug($slug) {
+    $this->phrictionSlug = $slug.'/';
     return $this;
-  }
-
-  public function getFullPhrictionSlug() {
-    $slug = $this->getPhrictionSlug();
-    return 'projects/'.$slug;
   }
 
   // TODO - once we sever project => phriction automagicalness,

@@ -17,7 +17,7 @@ final class HeraldCommitAdapter
   protected $affectedPackages;
   protected $auditNeededPackages;
 
-  private $buildPlanPHIDs = array();
+  private $buildRequests = array();
 
   public function getAdapterApplicationClass() {
     return 'PhabricatorDiffusionApplication';
@@ -168,9 +168,7 @@ final class HeraldCommitAdapter
         'commitPHID = %s AND auditStatus IN (%Ls)',
         $this->commit->getPHID(),
         $status_arr);
-
-      $packages = mpull($requests, 'getAuditorPHID');
-      $this->auditNeededPackages = $packages;
+      $this->auditNeededPackages = $requests;
     }
     return $this->auditNeededPackages;
   }
@@ -310,12 +308,13 @@ final class HeraldCommitAdapter
     return $this->getObject()->getRepository()->getPHID();
   }
 
-  public function getQueuedHarbormasterBuildPlanPHIDs() {
-    return $this->buildPlanPHIDs;
+  public function getQueuedHarbormasterBuildRequests() {
+    return $this->buildRequests;
   }
 
-  public function queueHarbormasterBuildPlanPHID($phid) {
-    $this->buildPlanPHIDs[] = $phid;
+  public function queueHarbormasterBuildRequest(
+    HarbormasterBuildRequest $request) {
+    $this->buildRequests[] = $request;
   }
 
 }

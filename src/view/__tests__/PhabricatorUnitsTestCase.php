@@ -55,7 +55,7 @@ final class PhabricatorUnitsTestCase extends PhabricatorTestCase {
   public function testDetailedDurationFormatting() {
     $expected_zero = 'now';
 
-    $tests = array (
+    $tests = array(
        12095939 => '19 w, 6 d',
       -12095939 => '19 w, 6 d ago',
 

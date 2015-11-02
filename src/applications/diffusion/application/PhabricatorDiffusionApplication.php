@@ -102,6 +102,8 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
             'update/' => 'DiffusionRepositoryEditUpdateController',
             'symbol/' => 'DiffusionRepositorySymbolsController',
             'staging/' => 'DiffusionRepositoryEditStagingController',
+            'automation/' => 'DiffusionRepositoryEditAutomationController',
+            'testautomation/' => 'DiffusionRepositoryTestAutomationController',
           ),
           'pathtree/(?P<dblob>.*)' => 'DiffusionPathTreeController',
           'mirror/' => array(

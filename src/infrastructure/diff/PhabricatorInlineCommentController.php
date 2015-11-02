@@ -94,6 +94,19 @@ abstract class PhabricatorInlineCommentController
 
     $op = $this->getOperation();
     switch ($op) {
+      case 'busy':
+        if ($request->isFormPost()) {
+          return new AphrontAjaxResponse();
+        }
+
+        return $this->newDialog()
+          ->setTitle(pht('Already Editing'))
+          ->appendParagraph(
+            pht(
+              'You are already editing an inline comment. Finish editing '.
+              'your current comment before adding new comments.'))
+          ->addCancelButton('/')
+          ->addSubmitButton(pht('Jump to Inline'));
       case 'hide':
       case 'show':
         if (!$request->validateCSRF()) {

@@ -26,7 +26,6 @@ final class DifferentialCreateDiffConduitAPIMethod
         'okay',
         'warn',
         'fail',
-        'postponed',
       ));
 
     return array(
@@ -95,9 +94,6 @@ final class DifferentialCreateDiffConduitAPIMethod
       case 'fail':
         $lint_status = DifferentialLintStatus::LINT_FAIL;
         break;
-      case 'postponed':
-        $lint_status = DifferentialLintStatus::LINT_POSTPONED;
-        break;
       case 'none':
       default:
         $lint_status = DifferentialLintStatus::LINT_NONE;
@@ -116,9 +112,6 @@ final class DifferentialCreateDiffConduitAPIMethod
         break;
       case 'fail':
         $unit_status = DifferentialUnitStatus::UNIT_FAIL;
-        break;
-      case 'postponed':
-        $unit_status = DifferentialUnitStatus::UNIT_POSTPONED;
         break;
       case 'none':
       default:
@@ -143,9 +136,10 @@ final class DifferentialCreateDiffConduitAPIMethod
       'unitStatus' => $unit_status,
     );
 
-    $xactions = array(id(new DifferentialTransaction())
-      ->setTransactionType(DifferentialDiffTransaction::TYPE_DIFF_CREATE)
-      ->setNewValue($diff_data_dict),
+    $xactions = array(
+      id(new DifferentialTransaction())
+        ->setTransactionType(DifferentialDiffTransaction::TYPE_DIFF_CREATE)
+        ->setNewValue($diff_data_dict),
     );
 
     id(new DifferentialDiffEditor())

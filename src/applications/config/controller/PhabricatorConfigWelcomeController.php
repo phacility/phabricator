@@ -225,18 +225,8 @@ final class PhabricatorConfigWelcomeController
       'fa-globe',
       $content);
 
-    $support_href = PhabricatorEnv::getDoclink('Give Feedback! Get Support!');
-    $content = pht(
-      "=== Need Help with Setup? ===\n\n".
-      'Having trouble getting something set up? See '.
-      '**[[ %s | Give Feedback! Get Support! ]]** for ways to get in touch '.
-      'to get answers to questions, report bugs, and request features.',
-      $support_href);
-
-    $explore[] = $this->newItem(
-      $request,
-      'fa-life-ring',
-      $content);
+    // TODO: Restore some sort of "Support" link here, but just nuke it for
+    // now as we figure stuff out.
 
     $differential_uri = PhabricatorEnv::getURI('/differential/');
     $differential_create_uri = PhabricatorEnv::getURI(

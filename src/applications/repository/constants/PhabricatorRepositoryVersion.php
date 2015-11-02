@@ -19,4 +19,22 @@ final class PhabricatorRepositoryVersion extends Phobject {
     return null;
   }
 
+  /**
+   * The `locate` command is deprecated as of Mercurial 3.2, to be
+   * replaced with `files` command, which supports most of the same
+   * arguments. This determines whether the new `files` command should
+   * be used instead of the `locate` command.
+   *
+   * @param string  $mercurial_version - The current version of mercurial
+   *   which can be retrieved by calling:
+   *   PhabricatorRepositoryVersion::getMercurialVersion()
+   *
+   * @return boolean  True if the version of Mercurial is new enough to support
+   *   the `files` command, or false if otherwise.
+   */
+  public static function isMercurialFilesCommandAvailable($mercurial_version) {
+    $min_version_for_files = '3.2';
+    return version_compare($mercurial_version, $min_version_for_files, '>=');
+  }
+
 }

@@ -61,6 +61,7 @@ th.aphront-table-view-sortable-selected {
   text-align: right;
   color: {$bluetext};
   font-weight: bold;
+  vertical-align: top;
 }
 
 .aphront-table-view td {
@@ -102,7 +103,7 @@ th.aphront-table-view-sortable-selected {
 */
 
 .aphront-table-view th {
-  padding: 10px 10px;
+  padding: 8px 10px;
   font-size: {$normalfontsize};
 }
 
@@ -175,6 +176,10 @@ th.aphront-table-view-sortable-selected {
   text-align: right;
 }
 
+.aphront-table-view td.nudgeright, .aphront-table-view th.nudgeright {
+  padding-right: 0;
+}
+
 .aphront-table-view td.wrap {
   white-space:      normal;
 }
@@ -193,6 +198,8 @@ th.aphront-table-view-sortable-selected {
   width: 1px;
   padding: 0px;
 }
+
+
 
 div.single-display-line-bounds {
   width: 100%;

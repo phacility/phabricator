@@ -13,7 +13,7 @@ final class NuanceSourceViewController extends NuanceController {
       return new Aphront404Response();
     }
 
-    $source_phid = $source->getPHID();
+    $source_id = $source->getID();
 
     $timeline = $this->buildTransactionTimeline(
       $source,
@@ -34,10 +34,29 @@ final class NuanceSourceViewController extends NuanceController {
 
     $crumbs->addTextCrumb($title);
 
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $source,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $routing_list = id(new PHUIPropertyListView())
+      ->addProperty(
+        pht('Default Queue'),
+        $viewer->renderHandle($source->getDefaultQueuePHID()));
+
+    $routing_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Routing Rules'));
+
+    $routing = id(new PHUIObjectBoxView())
+      ->setHeader($routing_header)
+      ->addPropertyList($routing_list);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $box,
+        $routing,
         $timeline,
       ),
       array(
@@ -77,6 +96,13 @@ final class NuanceSourceViewController extends NuanceController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    $request = $this->getRequest();
+    $definition = $source->requireDefinition();
+    $source_actions = $definition->getSourceViewActions($request);
+    foreach ($source_actions as $source_action) {
+      $actions->addAction($source_action);
+    }
+
     return $actions;
   }
 
@@ -90,7 +116,7 @@ final class NuanceSourceViewController extends NuanceController {
       ->setObject($source)
       ->setActionList($actions);
 
-    $definition = NuanceSourceDefinition::getDefinitionForSource($source);
+    $definition = $source->requireDefinition();
     $properties->addProperty(
       pht('Source Type'),
       $definition->getName());

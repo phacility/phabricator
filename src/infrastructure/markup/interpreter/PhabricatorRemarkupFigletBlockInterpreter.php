@@ -7,33 +7,34 @@ final class PhabricatorRemarkupFigletBlockInterpreter
     return 'figlet';
   }
 
+  /**
+   * @phutil-external-symbol class Text_Figlet
+   */
   public function markupContent($content, array $argv) {
-    if (!Filesystem::binaryExists('figlet')) {
-      return $this->markupError(
-        pht(
-          'Unable to locate the `%s` binary. Install figlet.',
-          'figlet'));
+    $map = self::getFigletMap();
+
+    $font = idx($argv, 'font');
+    $font = phutil_utf8_strtolower($font);
+    if (empty($map[$font])) {
+      $font = 'standard';
     }
 
-    $font = idx($argv, 'font', 'standard');
-    $safe_font = preg_replace('/[^0-9a-zA-Z-_.]/', '', $font);
-    $future = id(new ExecFuture('figlet -f %s', $safe_font))
-      ->setTimeout(15)
-      ->write(trim($content, "\n"));
+    $root = dirname(phutil_get_library_root('phabricator'));
+    require_once $root.'/externals/pear-figlet/Text/Figlet.php';
 
-    list($err, $stdout, $stderr) = $future->resolve();
+    $figlet = new Text_Figlet();
+    $figlet->loadFont($map[$font]);
 
-    if ($err) {
-      return $this->markupError(
-        pht(
-          'Execution of `%s` failed: %s',
-          'figlet',
-          $stderr));
+    $result = $figlet->lineEcho($content);
+
+    $engine = $this->getEngine();
+
+    if ($engine->isTextMode()) {
+      return $result;
     }
 
-
-    if ($this->getEngine()->isTextMode()) {
-      return $stdout;
+    if ($engine->isHTMLMailMode()) {
+      return phutil_tag('pre', array(), $result);
     }
 
     return phutil_tag(
@@ -41,7 +42,30 @@ final class PhabricatorRemarkupFigletBlockInterpreter
       array(
         'class' => 'PhabricatorMonospaced remarkup-figlet',
       ),
-      $stdout);
+      $result);
+  }
+
+  private static function getFigletMap() {
+    $root = dirname(phutil_get_library_root('phabricator'));
+
+    $dirs = array(
+      $root.'/externals/figlet/fonts/',
+      $root.'/externals/pear-figlet/fonts/',
+      $root.'/resources/figlet/custom/',
+    );
+
+    $map = array();
+    foreach ($dirs as $dir) {
+      foreach (Filesystem::listDirectory($dir, false) as $file) {
+        if (preg_match('/\.flf\z/', $file)) {
+          $name = phutil_utf8_strtolower($file);
+          $name = preg_replace('/\.flf\z/', '', $name);
+          $map[$name] = $dir.$file;
+        }
+      }
+    }
+
+    return $map;
   }
 
 }

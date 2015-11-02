@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorOAuthServerTokenController
-  extends PhabricatorAuthController {
+  extends PhabricatorOAuthServerController {
 
   public function shouldRequireLogin() {
     return false;
@@ -14,15 +14,15 @@ final class PhabricatorOAuthServerTokenController
     return parent::shouldAllowRestrictedParameter($parameter_name);
   }
 
-  public function processRequest() {
-    $request       = $this->getRequest();
-    $grant_type    = $request->getStr('grant_type');
-    $code          = $request->getStr('code');
-    $redirect_uri  = $request->getStr('redirect_uri');
-    $client_phid   = $request->getStr('client_id');
+  public function handleRequest(AphrontRequest $request) {
+    $grant_type = $request->getStr('grant_type');
+    $code = $request->getStr('code');
+    $redirect_uri = $request->getStr('redirect_uri');
+    $client_phid = $request->getStr('client_id');
     $client_secret = $request->getStr('client_secret');
-    $response      = new PhabricatorOAuthResponse();
-    $server        = new PhabricatorOAuthServer();
+    $response = new PhabricatorOAuthResponse();
+    $server = new PhabricatorOAuthServer();
+
     if ($grant_type != 'authorization_code') {
       $response->setError('unsupported_grant_type');
       $response->setErrorDescription(
@@ -32,11 +32,13 @@ final class PhabricatorOAuthServerTokenController
           'authorization_code'));
       return $response;
     }
+
     if (!$code) {
       $response->setError('invalid_request');
       $response->setErrorDescription(pht('Required parameter code missing.'));
       return $response;
     }
+
     if (!$client_phid) {
       $response->setError('invalid_request');
       $response->setErrorDescription(
@@ -45,6 +47,7 @@ final class PhabricatorOAuthServerTokenController
           'client_id'));
       return $response;
     }
+
     if (!$client_secret) {
       $response->setError('invalid_request');
       $response->setErrorDescription(
@@ -53,6 +56,7 @@ final class PhabricatorOAuthServerTokenController
           'client_secret'));
       return $response;
     }
+
     // one giant try / catch around all the exciting database stuff so we
     // can return a 'server_error' response if something goes wrong!
     try {

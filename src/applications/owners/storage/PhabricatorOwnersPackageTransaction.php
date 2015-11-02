@@ -9,6 +9,7 @@ final class PhabricatorOwnersPackageTransaction
   const TYPE_AUDITING = 'owners.auditing';
   const TYPE_DESCRIPTION = 'owners.description';
   const TYPE_PATHS = 'owners.paths';
+  const TYPE_STATUS = 'owners.status';
 
   public function getApplicationName() {
     return 'owners';
@@ -25,14 +26,6 @@ final class PhabricatorOwnersPackageTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_PRIMARY:
-        if ($old) {
-          $phids[] = $old;
-        }
-        if ($new) {
-          $phids[] = $new;
-        }
-        break;
       case self::TYPE_OWNERS:
         $add = array_diff($new, $old);
         foreach ($add as $phid) {
@@ -55,6 +48,9 @@ final class PhabricatorOwnersPackageTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_DESCRIPTION:
         return ($old === null);
+      case self::TYPE_PRIMARY:
+        // TODO: Eventually, remove these transactions entirely.
+        return true;
     }
   }
 
@@ -76,12 +72,6 @@ final class PhabricatorOwnersPackageTransaction
             $old,
             $new);
         }
-      case self::TYPE_PRIMARY:
-        return pht(
-          '%s changed the primary owner for this package from %s to %s.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($old),
-          $this->renderHandleLink($new));
       case self::TYPE_OWNERS:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
@@ -126,6 +116,16 @@ final class PhabricatorOwnersPackageTransaction
         return pht(
           '%s updated paths for this package.',
           $this->renderHandleLink($author_phid));
+      case self::TYPE_STATUS:
+        if ($new == PhabricatorOwnersPackage::STATUS_ACTIVE) {
+          return pht(
+            '%s activated this package.',
+            $this->renderHandleLink($author_phid));
+        } else if ($new == PhabricatorOwnersPackage::STATUS_ARCHIVED) {
+          return pht(
+            '%s archived this package.',
+            $this->renderHandleLink($author_phid));
+        }
     }
 
     return parent::getTitle();

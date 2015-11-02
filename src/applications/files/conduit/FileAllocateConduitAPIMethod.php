@@ -17,6 +17,7 @@ final class FileAllocateConduitAPIMethod
       'contentLength' => 'int',
       'contentHash' => 'optional string',
       'viewPolicy' => 'optional string',
+      'deleteAfterEpoch' => 'optional int',
     );
   }
 
@@ -38,6 +39,11 @@ final class FileAllocateConduitAPIMethod
       'viewPolicy' => $view_policy,
       'isExplicitUpload' => true,
     );
+
+    $ttl = $request->getValue('deleteAfterEpoch');
+    if ($ttl) {
+      $properties['ttl'] = $ttl;
+    }
 
     $file = null;
     if ($hash) {

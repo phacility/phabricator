@@ -15,6 +15,17 @@ final class NuancePhabricatorFormSourceDefinition
     return 'phabricator-form';
   }
 
+  public function getSourceViewActions(AphrontRequest $request) {
+    $actions = array();
+
+    $actions[] = id(new PhabricatorActionView())
+      ->setName(pht('View Form'))
+      ->setIcon('fa-align-justify')
+      ->setHref($this->getActionURI());
+
+    return $actions;
+  }
+
   public function updateItems() {
     return null;
   }
@@ -50,7 +61,7 @@ final class NuancePhabricatorFormSourceDefinition
 
     if ($request->isFormPost()) {
       $properties = array(
-        'complaint' => (string)$request->getStr('text'),
+        'complaint' => (string)$request->getStr('complaint'),
       );
 
       $content_source = PhabricatorContentSource::newFromRequest($request);
@@ -87,6 +98,36 @@ final class NuancePhabricatorFormSourceDefinition
       ->appendChild($form);
 
     return $box;
+  }
+
+  public function renderItemViewProperties(
+    PhabricatorUser $viewer,
+    NuanceItem $item,
+    PHUIPropertyListView $view) {
+    $this->renderItemCommonProperties($viewer, $item, $view);
+  }
+
+  public function renderItemEditProperties(
+    PhabricatorUser $viewer,
+    NuanceItem $item,
+    PHUIPropertyListView $view) {
+    $this->renderItemCommonProperties($viewer, $item, $view);
+  }
+
+  private function renderItemCommonProperties(
+    PhabricatorUser $viewer,
+    NuanceItem $item,
+    PHUIPropertyListView $view) {
+
+    $complaint = $item->getNuanceProperty('complaint');
+    $complaint = PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())->setContent($complaint),
+      'default',
+      $viewer);
+
+    $view->addSectionHeader(
+      pht('Complaint'), 'fa-exclamation-circle');
+    $view->addTextContent($complaint);
   }
 
 }

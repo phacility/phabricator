@@ -53,7 +53,7 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     return $uri;
   }
 
-  protected function renderObjectRefForAnyMedia (
+  protected function renderObjectRefForAnyMedia(
     $object,
     PhabricatorObjectHandle $handle,
     $anchor,
@@ -209,13 +209,14 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
       $boundary = '\\B';
     }
 
-    // The "(?<![#-])" prevents us from linking "#abcdef" or similar, and
-    // "ABC-T1" (see T5714).
+    // The "(?<![#@-])" prevents us from linking "#abcdef" or similar, and
+    // "ABC-T1" (see T5714), and from matching "@T1" as a task (it is a user)
+    // (see T9479).
 
     // The "\b" allows us to link "(abcdef)" or similar without linking things
     // in the middle of words.
 
-    return '((?<![#-])'.$boundary.$prefix.'('.$id.')(?:#([-\w\d]+))?(?!\w))u';
+    return '((?<![#@-])'.$boundary.$prefix.'('.$id.')(?:#([-\w\d]+))?(?!\w))u';
   }
 
 

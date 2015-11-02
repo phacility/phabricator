@@ -22,10 +22,10 @@ abstract class PhabricatorStandardCustomField
     PhabricatorCustomField $template,
     array $config) {
 
-    $types = id(new PhutilSymbolLoader())
+    $types = id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
-      ->loadObjects();
-    $types = mpull($types, null, 'getFieldType');
+      ->setUniqueMethod('getFieldType')
+      ->execute();
 
     $fields = array();
     foreach ($config as $key => $value) {
@@ -186,7 +186,12 @@ abstract class PhabricatorStandardCustomField
   }
 
   public function shouldUseStorage() {
-    return true;
+    try {
+      $object = $this->newStorageObject();
+      return true;
+    } catch (PhabricatorCustomFieldImplementationIncompleteException $ex) {
+      return false;
+    }
   }
 
   public function getValueForStorage() {

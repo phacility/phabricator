@@ -31,7 +31,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
         throw new Exception(
           pht(
             'Credential has noncreateable type "%s"!',
-            $credential->getCredentialType()));
+            $type_const));
       }
 
       $credential = PassphraseCredential::initializeNewCredential($viewer)
@@ -249,6 +249,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
         id(new AphrontFormPolicyControl())
           ->setName('viewPolicy')
           ->setPolicyObject($credential)
+          ->setSpacePHID($v_space)
           ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
           ->setPolicies($policies))
       ->appendControl(

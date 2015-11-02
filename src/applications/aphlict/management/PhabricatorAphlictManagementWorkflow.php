@@ -132,10 +132,7 @@ abstract class PhabricatorAphlictManagementWorkflow
 
     if (posix_getuid() == 0) {
       throw new PhutilArgumentUsageException(
-        pht(
-          // TODO: Update this message after a while.
-          'The notification server should not be run as root. It no '.
-          'longer requires access to privileged ports.'));
+        pht('The notification server should not be run as root.'));
     }
 
     // Make sure we can write to the PID file.

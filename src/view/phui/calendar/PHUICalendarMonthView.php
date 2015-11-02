@@ -253,7 +253,7 @@ final class PHUICalendarMonthView extends AphrontView {
       $today_class .= ' last-weekday';
     }
 
-    $today_slot = phutil_tag (
+    $today_slot = phutil_tag(
       'div',
       array(
         'class' => $today_class,

@@ -2,8 +2,7 @@
 
 final class ReleephProductCreateController extends ReleephProductController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $name = trim($request->getStr('name'));
     $trunk_branch = trim($request->getStr('trunkBranch'));
     $repository_phid = $request->getStr('repositoryPHID');

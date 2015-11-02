@@ -12,6 +12,10 @@ final class PhabricatorPastePastePHIDType extends PhabricatorPHIDType {
     return new PhabricatorPaste();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorPasteApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

@@ -7,6 +7,8 @@ final class DrydockResourceQuery extends DrydockQuery {
   private $statuses;
   private $types;
   private $blueprintPHIDs;
+  private $datasourceQuery;
+  private $needUnconsumedCommands;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -33,64 +35,111 @@ final class DrydockResourceQuery extends DrydockQuery {
     return $this;
   }
 
+  public function withDatasourceQuery($query) {
+    $this->datasourceQuery = $query;
+    return $this;
+  }
+
+  public function needUnconsumedCommands($need) {
+    $this->needUnconsumedCommands = $need;
+    return $this;
+  }
+
+  public function newResultObject() {
+    return new DrydockResource();
+  }
+
   protected function loadPage() {
-    $table = new DrydockResource();
-    $conn_r = $table->establishConnection('r');
+    return $this->loadStandardPage($this->newResultObject());
+  }
 
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT resource.* FROM %T resource %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
+  protected function willFilterPage(array $resources) {
+    $blueprint_phids = mpull($resources, 'getBlueprintPHID');
 
-    $resources = $table->loadAllFromArray($data);
+    $blueprints = id(new DrydockBlueprintQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs($blueprint_phids)
+      ->execute();
+    $blueprints = mpull($blueprints, null, 'getPHID');
+
+    foreach ($resources as $key => $resource) {
+      $blueprint = idx($blueprints, $resource->getBlueprintPHID());
+      if (!$blueprint) {
+        $this->didRejectResult($resource);
+        unset($resources[$key]);
+        continue;
+      }
+      $resource->attachBlueprint($blueprint);
+    }
 
     return $resources;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function didFilterPage(array $resources) {
+    if ($this->needUnconsumedCommands) {
+      $commands = id(new DrydockCommandQuery())
+        ->setViewer($this->getViewer())
+        ->setParentQuery($this)
+        ->withTargetPHIDs(mpull($resources, 'getPHID'))
+        ->withConsumed(false)
+        ->execute();
+      $commands = mgroup($commands, 'getTargetPHID');
 
-    if ($this->ids) {
+      foreach ($resources as $resource) {
+        $list = idx($commands, $resource->getPHID(), array());
+        $resource->attachUnconsumedCommands($list);
+      }
+    }
+
+    return $resources;
+  }
+
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->types) {
+    if ($this->types !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'type IN (%Ls)',
         $this->types);
     }
 
-    if ($this->statuses) {
+    if ($this->statuses !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'status IN (%Ls)',
         $this->statuses);
     }
 
-    if ($this->blueprintPHIDs) {
+    if ($this->blueprintPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'blueprintPHID IN (%Ls)',
         $this->blueprintPHIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    if ($this->datasourceQuery !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'name LIKE %>',
+        $this->datasourceQuery);
+    }
 
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
 }

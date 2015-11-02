@@ -3,19 +3,13 @@
 final class PhabricatorConduitListController
   extends PhabricatorConduitController {
 
-  private $queryKey;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey');
-  }
-
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
     $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($this->queryKey)
+      ->setQueryKey($request->getURIData('queryKey'))
       ->setSearchEngine(new PhabricatorConduitSearchEngine())
       ->setNavigation($this->buildSideNavView());
     return $this->delegateToController($controller);

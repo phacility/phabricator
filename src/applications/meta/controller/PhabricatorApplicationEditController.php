@@ -145,7 +145,12 @@ final class PhabricatorApplicationEditController
                 ->setViewer($user)
                 ->setObject($template_object)
                 ->execute();
-              $control->setPolicies($template_policies);
+
+              // NOTE: We want to expose both any object template policies
+              // (like "Subscribers") and any custom policy.
+              $all_policies = $template_policies + $policies;
+
+              $control->setPolicies($all_policies);
               $control->setTemplateObject($template_object);
             }
           }

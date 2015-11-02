@@ -93,15 +93,8 @@ abstract class PhabricatorStandardCustomFieldPHIDs
   public function getApplicationTransactionRequiredHandlePHIDs(
     PhabricatorApplicationTransaction $xaction) {
 
-    $old = json_decode($xaction->getOldValue());
-    if (!is_array($old)) {
-      $old = array();
-    }
-
-    $new = json_decode($xaction->getNewValue());
-    if (!is_array($new)) {
-      $new = array();
-    }
+    $old = $this->decodeValue($xaction->getOldValue());
+    $new = $this->decodeValue($xaction->getNewValue());
 
     $add = array_diff($new, $old);
     $rem = array_diff($old, $new);
@@ -113,15 +106,8 @@ abstract class PhabricatorStandardCustomFieldPHIDs
     PhabricatorApplicationTransaction $xaction) {
     $author_phid = $xaction->getAuthorPHID();
 
-    $old = json_decode($xaction->getOldValue());
-    if (!is_array($old)) {
-      $old = array();
-    }
-
-    $new = json_decode($xaction->getNewValue());
-    if (!is_array($new)) {
-      $new = array();
-    }
+    $old = $this->decodeValue($xaction->getOldValue());
+    $new = $this->decodeValue($xaction->getNewValue());
 
     $add = array_diff($new, $old);
     $rem = array_diff($old, $new);
@@ -152,6 +138,48 @@ abstract class PhabricatorStandardCustomFieldPHIDs
     }
   }
 
+  public function validateApplicationTransactions(
+    PhabricatorApplicationTransactionEditor $editor,
+    $type,
+    array $xactions) {
+
+    $errors = parent::validateApplicationTransactions(
+      $editor,
+      $type,
+      $xactions);
+
+    // If the user is adding PHIDs, make sure the new PHIDs are valid and
+    // visible to the actor. It's OK for a user to edit a field which includes
+    // some invalid or restricted values, but they can't add new ones.
+
+    foreach ($xactions as $xaction) {
+      $old = $this->decodeValue($xaction->getOldValue());
+      $new = $this->decodeValue($xaction->getNewValue());
+
+      $add = array_diff($new, $old);
+
+      $invalid = PhabricatorObjectQuery::loadInvalidPHIDsForViewer(
+        $editor->getActor(),
+        $add);
+
+      if ($invalid) {
+        $error = new PhabricatorApplicationTransactionValidationError(
+          $type,
+          pht('Invalid'),
+          pht(
+            'Some of the selected PHIDs in field "%s" are invalid or '.
+            'restricted: %s.',
+            $this->getFieldName(),
+            implode(', ', $invalid)),
+          $xaction);
+        $errors[] = $error;
+        $this->setFieldError(pht('Invalid'));
+      }
+    }
+
+    return $errors;
+  }
+
   public function shouldAppearInHerald() {
     return true;
   }
@@ -164,6 +192,25 @@ abstract class PhabricatorStandardCustomFieldPHIDs
       HeraldAdapter::CONDITION_EXISTS,
       HeraldAdapter::CONDITION_NOT_EXISTS,
     );
+  }
+
+  public function getHeraldFieldValue() {
+    // If the field has a `null` value, make sure we hand an `array()` to
+    // Herald.
+    $value = parent::getHeraldFieldValue();
+    if ($value) {
+      return $value;
+    }
+    return array();
+  }
+
+  protected function decodeValue($value) {
+    $value = json_decode($value);
+    if (!is_array($value)) {
+      $value = array();
+    }
+
+    return $value;
   }
 
 }
