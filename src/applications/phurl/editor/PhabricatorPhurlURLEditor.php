@@ -125,6 +125,21 @@ final class PhabricatorPhurlURLEditor
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
         }
+
+        foreach ($xactions as $xaction) {
+          if ($xaction->getOldValue() != $xaction->getNewValue()) {
+            $protocols = PhabricatorEnv::getEnvConfig('uri.allowed-protocols');
+            $uri = new PhutilURI($xaction->getNewValue());
+            if (!isset($protocols[$uri->getProtocol()])) {
+              $errors[] = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Invalid URL'),
+                pht('The protocol of the URL is invalid.'),
+                null);
+            }
+          }
+        }
+
         break;
     }
 
