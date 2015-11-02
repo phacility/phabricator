@@ -30,12 +30,10 @@ final class DivinerSectionView extends AphrontTagView {
 
     $header = id(new PHUIHeaderView())
       ->setBleedHeader(true)
+      ->addClass('diviner-section-header')
       ->setHeader($this->header);
 
-    $content = id(new PHUIBoxView())
-      ->addPadding(PHUI::PADDING_LARGE_LEFT)
-      ->addPadding(PHUI::PADDING_LARGE_RIGHT)
-      ->appendChild($this->content);
+    $content = phutil_tag_div('diviner-section-content', $this->content);
 
     return array($header, $content);
   }

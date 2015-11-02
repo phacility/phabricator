@@ -128,3 +128,13 @@
   border: 0;
   border-top: 1px solid {$thinblueborder};
 }
+
+.aphront-dialog-object-list .phui-object-box {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.aphront-dialog-object-list .aphront-dialog-body {
+  padding: 0 12px;
+}

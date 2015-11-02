@@ -97,7 +97,10 @@ final class HarbormasterStepViewController extends HarbormasterController {
       ->setUser($viewer)
       ->setObject($step);
 
-    $can_edit = true;
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $step,
+      PhabricatorPolicyCapability::CAN_EDIT);
 
     $list->addAction(
       id(new PhabricatorActionView())

@@ -4,7 +4,7 @@ final class DiffusionRepositoryEditAutomationController
   extends DiffusionRepositoryEditController {
 
   protected function processDiffusionRequest(AphrontRequest $request) {
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
     $drequest = $this->diffusionRequest;
     $repository = $drequest->getRepository();
 

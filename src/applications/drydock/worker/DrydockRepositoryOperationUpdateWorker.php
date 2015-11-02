@@ -165,6 +165,9 @@ final class DrydockRepositoryOperationUpdateWorker
           'branch' => $name,
         );
         break;
+      case 'none':
+        $spec = array();
+        break;
       default:
         throw new Exception(
           pht(

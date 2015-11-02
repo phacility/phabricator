@@ -8,7 +8,7 @@
 }
 
 .diviner-table-view {
-  margin: 0 16px 24px;
+  margin: 0 0 24px;
 }
 
 .device-phone .diviner-table-view {
@@ -65,38 +65,64 @@
   padding: 0 8px 16px 0;
 }
 
-body .diviner-document-section .phui-header-header {
-  width: 100%;
+.phui-header-shell.diviner-section-header .phui-header-header {
+  color: #000;
   font-size: 20px;
-  font-weight: bold;
-  margin: 0;
-  padding: 0;
+}
+
+body .diviner-view .diviner-document-section
+  .phui-header-shell.diviner-section-header {
+  padding: 0 24px 8px 0;
+  border-bottom: 1px solid {$thinblueborder};
+  margin: 32px 0 16px;
 }
 
 body .diviner-document-section .phui-header-shell.phui-bleed-header {
-  padding: 0;
+  padding: 16px 0 0 0;
+  border-bottom: none;
 }
 
-.phui-property-list-view + .diviner-document-section {
-  margin-top: -1px;
+body .diviner-view .diviner-section-content .phui-header-shell {
+  margin: 24px 0 8px;
+  padding: 0;
+  border: none;
 }
 
 .diviner-message-not-documented {
   color: {$lightgreytext};
   font-style: italic;
-  margin: 16px;
+  margin: 12px 0 32px;
+  font-size: {$biggerfontsize};
 }
 
-.diviner-atom-signature {
-  font-weight: normal;
+.diviner-document-section .diviner-message-not-documented {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.phui-document-content .phabricator-remarkup.diviner-remarkup-section {
+  padding: 16px 0 32px 0;
 }
 
 .diviner-atom-signature-name {
   font-weight: bold;
+  color: {$violet};
+}
+
+.diviner-atom-signature {
+  font-weight: normal;
+  color: #000;
+}
+
+.phui-header-view .phui-header-header a.diviner-atom-signature-name {
+  color: {$violet};
+}
+
+.phui-header-view .phui-header-header a.diviner-atom-signature-name:hover {
+  text-decoration: underline !important;
 }
 
 .diviner-list .diviner-atom-signature {
-  color: {$violet};
   margin-left: -16px;
 }
 
@@ -126,7 +152,7 @@ body .diviner-document-section .phui-header-shell.phui-bleed-header {
 }
 
 .diviner-list {
-  padding-left: 12px;
+  padding-left: 17px;
 }
 
 .diviner-list li {
@@ -150,8 +176,8 @@ body .diviner-document-section .phui-header-shell.phui-bleed-header {
   text-decoration: none;
 }
 
-.device-desktop .diviner-book-item:hover {
-  background-color: #F5EEFF;
+.device-desktop .diviner-book-item:hover .diviner-book-item-title {
+  color: {$violet};
 }
 
 .diviner-book-item-title {

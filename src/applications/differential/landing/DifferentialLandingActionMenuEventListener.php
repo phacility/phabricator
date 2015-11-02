@@ -26,7 +26,9 @@ final class DifferentialLandingActionMenuEventListener
   }
 
   private function renderRevisionAction(PhutilEvent $event) {
-    if (!$this->canUseApplication($event->getUser())) {
+    $viewer = $event->getUser();
+
+    if (!$this->canUseApplication($viewer)) {
       return null;
     }
 
@@ -40,11 +42,22 @@ final class DifferentialLandingActionMenuEventListener
     if ($repository->canPerformAutomation()) {
       $revision_id = $revision->getID();
 
+      $op = new DrydockLandRepositoryOperation();
+      $barrier = $op->getBarrierToLanding($viewer, $revision);
+
+      if ($barrier) {
+        $can_land = false;
+      } else {
+        $can_land = true;
+      }
+
       $action = id(new PhabricatorActionView())
-        ->setWorkflow(true)
         ->setName(pht('Land Revision'))
         ->setIcon('fa-fighter-jet')
-        ->setHref("/differential/revision/operation/{$revision_id}/");
+        ->setHref("/differential/revision/operation/{$revision_id}/")
+        ->setWorkflow(true)
+        ->setDisabled(!$can_land);
+
 
       $this->addActionMenuItems($event, $action);
     }
@@ -54,7 +67,6 @@ final class DifferentialLandingActionMenuEventListener
       ->execute();
 
     foreach ($strategies as $strategy) {
-      $viewer = $event->getUser();
       $action = $strategy->createMenuItem($viewer, $revision, $repository);
       if ($action == null) {
         continue;

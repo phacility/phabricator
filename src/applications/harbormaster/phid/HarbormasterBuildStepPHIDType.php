@@ -34,7 +34,7 @@ final class HarbormasterBuildStepPHIDType extends PhabricatorPHIDType {
       $handle
         ->setName($name)
         ->setFullName(pht('Build Step %d: %s', $id, $name))
-        ->setURI("/harbormaster/step/{$id}/edit/");
+        ->setURI("/harbormaster/step/view/{$id}/");
     }
   }
 

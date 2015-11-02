@@ -1,0 +1,39 @@
+@title Drydock Blueprints: Working Copies
+@group userguide
+
+Guide to configuring Drydock working copy blueprints.
+
+
+Overview
+========
+
+IMPORTANT: Drydock is not a mature application and may be difficult to
+configure and use for now.
+
+To let Drydock build repository working copies in order to run unit tests and
+other similar operations, you'll configure **working copy blueprints**.
+
+Working Copies
+==============
+
+Working copy blueprints rely on host blueprints, so you'll need to configure
+a suitable host blueprint first. See @{article:Drydock Blueprints: Hosts}.
+
+To configure a working copy blueprint, choose the host blueprints it should
+use in **Use Blueprints**.
+
+You can optionally specify a **Limit**. If you do, the blueprint won't be
+allowed to create more than this many simultaneous resources. If you leave
+it empty, the blueprint will be able to create an unlimited number of
+resources.
+
+After you save the blueprint, make sure you authorize it to use the selected
+host blueprints. It won't be able to acquire host resources until you do.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to @{article:Drydock Blueprints}.

@@ -11,6 +11,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   private $glyph;
   private $menuContent;
   private $showChrome = true;
+  private $classes = array();
   private $disableConsole;
   private $pageObjects = array();
   private $applicationMenu;
@@ -65,6 +66,11 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
   public function getShowChrome() {
     return $this->showChrome;
+  }
+
+  public function addClass($class) {
+    $this->classes[] = $class;
+    return $this;
   }
 
   public function appendPageObjects(array $objs) {
@@ -511,7 +517,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     }
 
     $classes[] = 'phui-theme-'.PhabricatorEnv::getEnvConfig('ui.header-color');
-
+    foreach ($this->classes as $class) {
+      $classes[] = $class;
+    }
 
     return implode(' ', $classes);
   }

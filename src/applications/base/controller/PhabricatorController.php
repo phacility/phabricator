@@ -334,6 +334,10 @@ abstract class PhabricatorController extends AphrontController {
       }
     }
 
+    if (idx($options, 'class')) {
+      $page->addClass($options['class']);
+    }
+
     if (!($view instanceof AphrontSideNavFilterView)) {
       $nav = new AphrontSideNavFilterView();
       $nav->appendChild($view);

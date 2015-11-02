@@ -30,7 +30,7 @@ final class DivinerMainController extends DivinerController {
       ->setHeader(pht('Documentation Books'))
       ->addActionLink($query_button);
 
-    $document = new PHUIDocumentView();
+    $document = new PHUIDocumentViewPro();
     $document->setHeader($header);
     $document->addClass('diviner-view');
 
@@ -45,10 +45,7 @@ final class DivinerMainController extends DivinerController {
         $list[] = $item;
       }
       $list = id(new PHUIBoxView())
-        ->addPadding(PHUI::PADDING_LARGE_LEFT)
-        ->addPadding(PHUI::PADDING_LARGE_RIGHT)
-        ->addPadding(PHUI::PADDING_SMALL_TOP)
-        ->addPadding(PHUI::PADDING_SMALL_BOTTOM)
+        ->addPadding(PHUI::PADDING_MEDIUM_TOP)
         ->appendChild($list);
 
       $document->appendChild($list);
@@ -82,7 +79,7 @@ final class DivinerMainController extends DivinerController {
       ),
       array(
         'title' => pht('Documentation Books'),
-        'fonts' => true,
+        'class' => 'pro-white-background',
       ));
   }
 }
