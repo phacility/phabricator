@@ -54,7 +54,7 @@ final class HarbormasterRunBuildPlansHeraldAction
       case self::DO_BUILD:
         return pht(
           'Started %s build(s): %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
     }
   }

@@ -325,8 +325,7 @@ final class ConpherenceUpdateController
     $remove_person = $request->getStr('remove_person');
     $participants = $conpherence->getParticipants();
 
-    $message = pht(
-      'Are you sure you want to leave this room?');
+    $message = pht('Are you sure you want to leave this room?');
     $test_conpherence = clone $conpherence;
     $test_conpherence->attachParticipants(array());
     if (!PhabricatorPolicyFilter::hasCapability(
@@ -334,17 +333,14 @@ final class ConpherenceUpdateController
       $test_conpherence,
       PhabricatorPolicyCapability::CAN_VIEW)) {
       if (count($participants) == 1) {
-        $message .= pht(
-          ' The room will be inaccessible forever and ever.');
+        $message .= ' '.pht('The room will be inaccessible forever and ever.');
       } else {
-        $message .= pht(
-          ' Someone else in the room can add you back later.');
+        $message .= ' '.pht('Someone else in the room can add you back later.');
       }
     }
     $body = phutil_tag(
       'p',
-      array(
-      ),
+      array(),
       $message);
 
     require_celerity_resource('conpherence-update-css');

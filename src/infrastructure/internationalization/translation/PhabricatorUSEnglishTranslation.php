@@ -32,7 +32,7 @@ final class PhabricatorUSEnglishTranslation
       '%d path(s)' => array('%d path', '%d paths'),
       '%d diff(s)' => array('%d diff', '%d diffs'),
 
-      '%d Answer(s)' => array('%d Answer', '%d Answers'),
+      '%s Answer(s)' => array('%s Answer', '%s Answers'),
       'Show %d Comment(s)' => array('Show %d Comment', 'Show %d Comments'),
 
       '%s DIFF LINK(S)' => array('DIFF LINK', 'DIFF LINKS'),
@@ -114,17 +114,17 @@ final class PhabricatorUSEnglishTranslation
         'This is a binary file. It is %s bytes in length.',
       ),
 
-      '%d Action(s) Have No Effect' => array(
+      '%s Action(s) Have No Effect' => array(
         'Action Has No Effect',
         'Actions Have No Effect',
       ),
 
-      '%d Action(s) With No Effect' => array(
+      '%s Action(s) With No Effect' => array(
         'Action With No Effect',
         'Actions With No Effect',
       ),
 
-      'Some of your %d action(s) have no effect:' => array(
+      'Some of your %s action(s) have no effect:' => array(
         'One of your actions has no effect:',
         'Some of your actions have no effect:',
       ),
@@ -139,7 +139,7 @@ final class PhabricatorUSEnglishTranslation
         'Apply Remaining Actions',
       ),
 
-      'The %d action(s) you are taking have no effect:' => array(
+      'The %s action(s) you are taking have no effect:' => array(
         'The action you are taking has no effect:',
         'The actions you are taking have no effect:',
       ),
@@ -550,9 +550,9 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
-      '%d comment(s)' => array('%d comment', '%d comments'),
-      '%d rejection(s)' => array('%d rejection', '%d rejections'),
-      '%d update(s)' => array('%d update', '%d updates'),
+      '%s comment(s)' => array('%s comment', '%s comments'),
+      '%s rejection(s)' => array('%s rejection', '%s rejections'),
+      '%s update(s)' => array('%s update', '%s updates'),
 
       'This configuration value is defined in these %d '.
       'configuration source(s): %s.' => array(
@@ -562,9 +562,9 @@ final class PhabricatorUSEnglishTranslation
         'configuration sources: %s.',
       ),
 
-      '%d Open Pull Request(s)' => array(
-        '%d Open Pull Request',
-        '%d Open Pull Requests',
+      '%s Open Pull Request(s)' => array(
+        '%s Open Pull Request',
+        '%s Open Pull Requests',
       ),
 
       'Stale (%s day(s))' => array(
@@ -1153,6 +1153,10 @@ final class PhabricatorUSEnglishTranslation
         'Found %s book.',
         'Found %s books.',
       ),
+      'Found %s file(s)...' => array(
+        'Found %s file...',
+        'Found %s files...',
+      ),
       'Found %s file(s) in project.' => array(
         'Found %s file in project.',
         'Found %s files in project.',
@@ -1392,6 +1396,10 @@ final class PhabricatorUSEnglishTranslation
         '%s Day',
         '%s Days',
       ),
+      '%s Day(s) Ago' => array(
+        '%s Day Ago',
+        '%s Days Ago',
+      ),
 
       'Setting retention policy for "%s" to %s day(s).' => array(
         'Setting retention policy for "%s" to one day.',
@@ -1423,6 +1431,59 @@ final class PhabricatorUSEnglishTranslation
       'WARNING: There are %s unapproved authorization(s)!' => array(
         'WARNING: There is an unapproved authorization!',
         'WARNING: There are unapproved authorizations!',
+      ),
+
+      'Found %s Open Resource(s)' => array(
+        'Found %s Open Resource',
+        'Found %s Open Resources',
+      ),
+
+      '%s Open Resource(s) Remain' => array(
+        '%s Open Resource Remain',
+        '%s Open Resources Remain',
+      ),
+
+      'Found %s Blueprint(s)' => array(
+        'Found %s Blueprint',
+        'Found %s Blueprints',
+      ),
+
+      '%s Blueprint(s) Can Allocate' => array(
+        '%s Blueprint Can Allocate',
+        '%s Blueprints Can Allocate',
+      ),
+
+      '%s Blueprint(s) Enabled' => array(
+        '%s Blueprint Enabled',
+        '%s Blueprints Enabled',
+      ),
+
+      '%s Event(s)' => array(
+        '%s Event',
+        '%s Events',
+      ),
+
+      '%s Unit(s)' => array(
+        '%s Unit',
+        '%s Units',
+      ),
+
+      'QUEUEING TASKS (%s Commit(s)):' => array(
+        'QUEUEING TASKS (%s Commit):',
+        'QUEUEING TASKS (%s Commits):',
+      ),
+
+      'Found %s total commit(s); updating...' => array(
+        'Found %s total commit; updating...',
+        'Found %s total commits; updating...',
+      ),
+
+      'Not enough process slots to schedule the other %s '.
+      'repository(s) for updates yet.' => array(
+        'Not enough process slots to schedule the other '.'
+        repository for update yet.',
+        'Not enough process slots to schedule the other %s '.
+        'repositories for updates yet.',
       ),
 
     );

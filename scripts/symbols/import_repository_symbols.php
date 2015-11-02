@@ -102,7 +102,7 @@ function commit_symbols(
       $repository->getPHID());
   }
 
-  echo pht('Loading %s symbols...',  new PhutilNumber(count($sql))), "\n";
+  echo pht('Loading %s symbols...',  phutil_count($sql)), "\n";
   foreach (array_chunk($sql, 128) as $chunk) {
     queryfx(
       $conn_w,

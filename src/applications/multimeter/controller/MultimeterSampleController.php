@@ -90,7 +90,7 @@ final class MultimeterSampleController extends MultimeterController {
         $events_col = $this->renderGroupingLink(
           $group,
           'id',
-          pht('%s Events', new PhutilNumber($row['N'])));
+          pht('%s Event(s)', new PhutilNumber($row['N'])));
       }
 
       if (isset($group['request'])) {

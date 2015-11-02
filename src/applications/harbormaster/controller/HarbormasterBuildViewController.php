@@ -377,7 +377,7 @@ final class HarbormasterBuildViewController
         array(
           pht(
             '%s empty logs are hidden.',
-            new PhutilNumber(count($empty_logs))),
+            phutil_count($empty_logs)),
           ' ',
           javelin_tag(
             'a',

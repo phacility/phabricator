@@ -96,8 +96,11 @@ final class PhabricatorAsanaConfigOptions
     }
 
     $out = array();
-    $out[] = pht('| Workspace ID | Workspace Name |');
-    $out[] =     '| ------------ | -------------- |';
+    $out[] = sprintf(
+      '| %s | %s |',
+      pht('Workspace ID'),
+      pht('Workspace Name'));
+    $out[] = '| ------------ | -------------- |';
     foreach ($workspaces as $workspace) {
       $out[] = sprintf('| `%s` | `%s` |', $workspace['id'], $workspace['name']);
     }

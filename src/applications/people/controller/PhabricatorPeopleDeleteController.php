@@ -49,9 +49,9 @@ final class PhabricatorPeopleDeleteController
     $form = id(new AphrontFormView())
       ->setUser($admin)
       ->appendRemarkupInstructions(
-        pht(
-          "  phabricator/ $ ./bin/remove destroy %s\n",
-          csprintf('%R', '@'.$user->getUsername())));
+        csprintf(
+          "  phabricator/ $ ./bin/remove destroy %R\n",
+          '@'.$user->getUsername()));
 
     return $this->newDialog()
       ->setWidth(AphrontDialogView::WIDTH_FORM)

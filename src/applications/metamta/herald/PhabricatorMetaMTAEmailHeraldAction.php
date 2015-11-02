@@ -75,13 +75,13 @@ abstract class PhabricatorMetaMTAEmailHeraldAction
       case self::DO_SEND:
         return pht(
           'Queued email to be delivered to %s target(s): %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
       case self::DO_FORCE:
         return pht(
           'Queued email to be delivered to %s target(s), ignoring their '.
           'notification preferences: %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
     }
   }
