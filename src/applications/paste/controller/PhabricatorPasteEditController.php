@@ -231,7 +231,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       $form_box->setValidationException($validation_exception);
     }
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+    $crumbs = $this->buildApplicationCrumbs();
     if (!$is_create) {
       $crumbs->addTextCrumb('P'.$paste->getID(), '/P'.$paste->getID());
     }

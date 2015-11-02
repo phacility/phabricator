@@ -4,7 +4,8 @@
  * This is a standard Phabricator page with menus, Javelin, DarkConsole, and
  * basic styles.
  */
-final class PhabricatorStandardPageView extends PhabricatorBarePageView {
+final class PhabricatorStandardPageView extends PhabricatorBarePageView
+  implements AphrontResponseProducerInterface {
 
   private $baseURI;
   private $applicationName;
@@ -17,6 +18,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   private $applicationMenu;
   private $showFooter = true;
   private $showDurableColumn = true;
+  private $quicksandConfig = array();
+  private $crumbs;
+  private $navigation;
 
   public function setShowFooter($show_footer) {
     $this->showFooter = $show_footer;
@@ -27,7 +31,10 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     return $this->showFooter;
   }
 
-  public function setApplicationMenu(PHUIListView $application_menu) {
+  public function setApplicationMenu($application_menu) {
+    // NOTE: For now, this can either be a PHUIListView or a
+    // PHUIApplicationMenuView.
+
     $this->applicationMenu = $application_menu;
     return $this;
   }
@@ -73,10 +80,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     return $this;
   }
 
-  public function appendPageObjects(array $objs) {
-    foreach ($objs as $obj) {
-      $this->pageObjects[] = $obj;
-    }
+  public function setPageObjectPHIDs(array $phids) {
+    $this->pageObjects = $phids;
+    return $this;
   }
 
   public function setShowDurableColumn($show) {
@@ -130,6 +136,32 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     return (bool)$this->getUserPreference($column_key, 0);
   }
 
+  public function addQuicksandConfig(array $config) {
+    $this->quicksandConfig = $config + $this->quicksandConfig;
+    return $this;
+  }
+
+  public function getQuicksandConfig() {
+    return $this->quicksandConfig;
+  }
+
+  public function setCrumbs(PHUICrumbsView $crumbs) {
+    $this->crumbs = $crumbs;
+    return $this;
+  }
+
+  public function getCrumbs() {
+    return $this->crumbs;
+  }
+
+  public function setNavigation(AphrontSideNavFilterView $navigation) {
+    $this->navigation = $navigation;
+    return $this;
+  }
+
+  public function getNavigation() {
+    return $this->navigation;
+  }
 
   public function getTitle() {
     $glyph_key = PhabricatorUserPreferences::PREFERENCE_TITLES;
@@ -271,8 +303,18 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $menu->setController($this->getController());
     }
 
-    if ($this->getApplicationMenu()) {
-      $menu->setApplicationMenu($this->getApplicationMenu());
+    $application_menu = $this->getApplicationMenu();
+    if ($application_menu) {
+      if ($application_menu instanceof PHUIApplicationMenuView) {
+        $crumbs = $this->getCrumbs();
+        if ($crumbs) {
+          $application_menu->setCrumbs($crumbs);
+        }
+
+        $application_menu = $application_menu->buildListView();
+      }
+
+      $menu->setApplicationMenu($application_menu);
     }
 
     $this->menuContent = $menu->render();
@@ -433,9 +475,26 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   private function renderPageBodyContent() {
     $console = $this->getConsole();
 
+    $body = parent::getBody();
+
+    $nav = $this->getNavigation();
+    if ($nav) {
+      $crumbs = $this->getCrumbs();
+      if ($crumbs) {
+        $nav->setCrumbs($crumbs);
+      }
+      $nav->appendChild($body);
+      $body = phutil_implode_html('', array($nav->render()));
+    } else {
+      $crumbs = $this->getCrumbs();
+      if ($crumbs) {
+        $body = phutil_implode_html('', array($crumbs, $body));
+      }
+    }
+
     return array(
       ($console ? hsprintf('<darkconsole />') : null),
-      parent::getBody(),
+      $body,
       $this->renderFooter(),
     );
   }
@@ -619,10 +678,12 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $foot);
   }
 
-  public function renderForQuicksand(array $extra_config) {
+  public function renderForQuicksand() {
     parent::willRenderPage();
     $response = $this->renderPageBodyContent();
     $response = $this->willSendResponse($response);
+
+    $extra_config = $this->getQuicksandConfig();
 
     return array(
       'content' => hsprintf('%s', $response),
@@ -730,6 +791,39 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     }
 
     return $user->loadPreferences()->getPreference($key, $default);
+  }
+
+  public function produceAphrontResponse() {
+    $controller = $this->getController();
+
+    if (!$this->getApplicationMenu()) {
+      $application_menu = $controller->buildApplicationMenu();
+      if ($application_menu) {
+        $this->setApplicationMenu($application_menu);
+      }
+    }
+
+    $viewer = $this->getUser();
+    if ($viewer && $viewer->getPHID()) {
+      $object_phids = $this->pageObjects;
+      foreach ($object_phids as $object_phid) {
+        PhabricatorFeedStoryNotification::updateObjectNotificationViews(
+          $viewer,
+          $object_phid);
+      }
+    }
+
+    if ($this->getRequest()->isQuicksand()) {
+      $content = $this->renderForQuicksand();
+      $response = id(new AphrontAjaxResponse())
+        ->setContent($content);
+    } else {
+      $content = $this->render();
+      $response = id(new AphrontWebpageResponse())
+        ->setContent($content);
+    }
+
+    return $response;
   }
 
 }

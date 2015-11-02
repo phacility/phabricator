@@ -58,11 +58,6 @@ final class PhabricatorApplicationSearchController
       throw new PhutilInvalidStateException('setEngine');
     }
 
-    $nav = $this->getNavigation();
-    if (!$nav) {
-      throw new PhutilInvalidStateException('setNavigation');
-    }
-
     $engine->setViewer($this->getRequest()->getUser());
 
     $parent = $this->getDelegatingController();
@@ -85,6 +80,9 @@ final class PhabricatorApplicationSearchController
     $user = $request->getUser();
     $engine = $this->getSearchEngine();
     $nav = $this->getNavigation();
+    if (!$nav) {
+      $nav = $this->buildNavigation();
+    }
 
     if ($request->isFormPost()) {
       $saved_query = $engine->buildSavedQueryFromRequest($request);
@@ -174,9 +172,10 @@ final class PhabricatorApplicationSearchController
     // we sort out T5307.
 
     $form->appendChild($submit);
+    $body = array();
 
     if ($this->getPreface()) {
-      $nav->appendChild($this->getPreface());
+      $body[] = $this->getPreface();
     }
 
     if ($named_query) {
@@ -202,7 +201,7 @@ final class PhabricatorApplicationSearchController
       $box->setForm($form);
     }
 
-    $nav->appendChild($box);
+    $body[] = $box;
 
     if ($run_query) {
       $box->setAnchor(
@@ -257,7 +256,7 @@ final class PhabricatorApplicationSearchController
             ->addMargin(PHUI::MARGIN_LARGE)
             ->setBorder(true)
             ->appendChild($pager);
-          $nav->appendChild($pager_box);
+          $body[] = $pager_box;
         }
 
       } catch (PhabricatorTypeaheadInvalidTokenException $ex) {
@@ -275,13 +274,12 @@ final class PhabricatorApplicationSearchController
       ->buildApplicationCrumbs()
       ->addTextCrumb($title);
 
-    $nav->setCrumbs($crumbs);
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => pht('Query: %s', $title),
-      ));
+    return $this->newPage()
+      ->setApplicationMenu($this->buildApplicationMenu())
+      ->setTitle(pht('Query: %s', $title))
+      ->setCrumbs($crumbs)
+      ->setNavigation($nav)
+      ->appendChild($body);
   }
 
   private function processEditRequest() {
@@ -289,7 +287,11 @@ final class PhabricatorApplicationSearchController
     $request = $this->getRequest();
     $user = $request->getUser();
     $engine = $this->getSearchEngine();
+
     $nav = $this->getNavigation();
+    if (!$nav) {
+      $nav = $this->buildNavigation();
+    }
 
     $named_queries = $engine->loadAllNamedQueries();
 
@@ -357,23 +359,41 @@ final class PhabricatorApplicationSearchController
       ->addTextCrumb(pht('Saved Queries'), $engine->getQueryManagementURI());
 
     $nav->selectFilter('query/edit');
-    $nav->setCrumbs($crumbs);
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Saved Queries'))
       ->setObjectList($list);
 
-    $nav->appendChild($box);
-
-    return $parent->buildApplicationPage(
-      $nav,
-      array(
-        'title' => pht('Saved Queries'),
-      ));
+    return $this->newPage()
+      ->setApplicationMenu($this->buildApplicationMenu())
+      ->setTitle(pht('Saved Queries'))
+      ->setCrumbs($crumbs)
+      ->setNavigation($nav)
+      ->appendChild($box);
   }
 
   public function buildApplicationMenu() {
-    return $this->getDelegatingController()->buildApplicationMenu();
+    $menu = $this->getDelegatingController()
+      ->buildApplicationMenu();
+
+    if ($menu instanceof PHUIApplicationMenuView) {
+      $menu->setSearchEngine($this->getSearchEngine());
+    }
+
+    return $menu;
+  }
+
+  private function buildNavigation() {
+    $viewer = $this->getViewer();
+    $engine = $this->getSearchEngine();
+
+    $nav = id(new AphrontSideNavFilterView())
+      ->setUser($viewer)
+      ->setBaseURI(new PhutilURI($this->getApplicationURI()));
+
+    $engine->addNavigationItems($nav->getMenu());
+
+    return $nav;
   }
 
 }

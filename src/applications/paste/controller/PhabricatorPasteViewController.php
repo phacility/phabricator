@@ -66,7 +66,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ),
       $source_code);
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView())
+    $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb('P'.$paste->getID(), '/P'.$paste->getID());
 
     $timeline = $this->buildTransactionTimeline(
@@ -89,18 +89,20 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ->setAction($this->getApplicationURI('/comment/'.$paste->getID().'/'))
       ->setSubmitButtonName(pht('Add Comment'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-        $source_code,
-        $timeline,
-        $add_comment_form,
-      ),
-      array(
-        'title' => $paste->getFullName(),
-        'pageObjects' => array($paste->getPHID()),
-      ));
+    return $this->newPage()
+      ->setTitle($paste->getFullName())
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(
+        array(
+          $paste->getPHID(),
+        ))
+      ->appendChild(
+        array(
+          $object_box,
+          $source_code,
+          $timeline,
+          $add_comment_form,
+        ));
   }
 
   private function buildHeaderView(PhabricatorPaste $paste) {
