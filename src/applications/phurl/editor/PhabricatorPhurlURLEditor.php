@@ -16,6 +16,7 @@ final class PhabricatorPhurlURLEditor
 
     $types[] = PhabricatorPhurlURLTransaction::TYPE_NAME;
     $types[] = PhabricatorPhurlURLTransaction::TYPE_URL;
+    $types[] = PhabricatorPhurlURLTransaction::TYPE_ALIAS;
     $types[] = PhabricatorPhurlURLTransaction::TYPE_DESCRIPTION;
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
@@ -33,6 +34,8 @@ final class PhabricatorPhurlURLEditor
         return $object->getName();
       case PhabricatorPhurlURLTransaction::TYPE_URL:
         return $object->getLongURL();
+      case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
+        return $object->getAlias();
       case PhabricatorPhurlURLTransaction::TYPE_DESCRIPTION:
         return $object->getDescription();
     }
@@ -46,6 +49,7 @@ final class PhabricatorPhurlURLEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorPhurlURLTransaction::TYPE_NAME:
       case PhabricatorPhurlURLTransaction::TYPE_URL:
+      case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
       case PhabricatorPhurlURLTransaction::TYPE_DESCRIPTION:
         return $xaction->getNewValue();
     }
@@ -64,6 +68,9 @@ final class PhabricatorPhurlURLEditor
       case PhabricatorPhurlURLTransaction::TYPE_URL:
         $object->setLongURL($xaction->getNewValue());
         return;
+      case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
+        $object->setAlias($xaction->getNewValue());
+        return;
       case PhabricatorPhurlURLTransaction::TYPE_DESCRIPTION:
         $object->setDescription($xaction->getNewValue());
         return;
@@ -79,6 +86,7 @@ final class PhabricatorPhurlURLEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorPhurlURLTransaction::TYPE_NAME:
       case PhabricatorPhurlURLTransaction::TYPE_URL:
+      case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
       case PhabricatorPhurlURLTransaction::TYPE_DESCRIPTION:
         return;
     }
@@ -109,6 +117,28 @@ final class PhabricatorPhurlURLEditor
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
         }
+        break;
+      case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
+        foreach ($xactions as $xaction) {
+          if ($xaction->getOldValue() != $xaction->getNewValue()) {
+            $new_alias = $xaction->getNewValue();
+            if (!preg_match('/[a-zA-Z]/', $new_alias)) {
+              $errors[] = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Invalid Alias'),
+                pht('The alias must contain at least one letter.'),
+                $xaction);
+            }
+            if (preg_match('/[^a-z0-9]/i', $new_alias)) {
+              $errors[] = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Invalid Alias'),
+                pht('The alias may only contain letters and numbers.'),
+                $xaction);
+            }
+          }
+        }
+
         break;
       case PhabricatorPhurlURLTransaction::TYPE_URL:
         $missing = $this->validateIsEmptyTextField(

@@ -129,6 +129,10 @@ final class PhabricatorPhurlURLViewController
       pht('Original URL'),
       $url->getLongURL());
 
+    $properties->addProperty(
+      pht('Alias'),
+      $url->getAlias());
+
     $properties->invokeWillRenderEvent();
 
     if (strlen($url->getDescription())) {

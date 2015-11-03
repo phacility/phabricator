@@ -6,11 +6,19 @@ final class PhabricatorPhurlURLAccessController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
     $id = $request->getURIData('id');
+    $alias = $request->getURIData('alias');
 
-    $url = id(new PhabricatorPhurlURLQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($id))
-      ->executeOne();
+    if ($id) {
+      $url = id(new PhabricatorPhurlURLQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($id))
+        ->executeOne();
+    } else if ($alias) {
+      $url = id(new PhabricatorPhurlURLQuery())
+        ->setViewer($viewer)
+        ->withAliases(array($alias))
+        ->executeOne();
+    }
 
     if (!$url) {
       return new Aphront404Response();
