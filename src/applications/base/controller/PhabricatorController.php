@@ -447,7 +447,8 @@ abstract class PhabricatorController extends AphrontController {
   public function newPage() {
     $page = id(new PhabricatorStandardPageView())
       ->setRequest($this->getRequest())
-      ->setController($this);
+      ->setController($this)
+      ->setDeviceReady(true);
 
     $application = $this->getCurrentApplication();
     if ($application) {
@@ -595,8 +596,8 @@ abstract class PhabricatorController extends AphrontController {
       $page->setPageObjectPHIDs($object_phids);
     }
 
-    if (idx($options, 'device', true)) {
-      $page->setDeviceReady(true);
+    if (!idx($options, 'device', true)) {
+      $page->setDeviceReady(false);
     }
 
     $page->setShowFooter(idx($options, 'showFooter', true));
