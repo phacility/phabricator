@@ -306,31 +306,19 @@ EOTEXT
 
     return array(
       $this->renderInstructions($intro),
-      $this->renderTable($main_table),
+      $main_table,
       $this->renderInstructions($aliases_text),
-      $this->renderTable($alias_table),
+      $alias_table,
       $this->renderInstructions($select_text),
-      $this->renderTable($select_table),
+      $select_table,
       $this->renderInstructions($types_text),
-      $this->renderTable($types_table),
+      $types_table,
     );
-  }
-
-  protected function renderTable(AphrontTableView $table) {
-    return id(new PHUIBoxView())
-      ->addMargin(PHUI::MARGIN_LARGE_LEFT)
-      ->addMargin(PHUI::MARGIN_LARGE_RIGHT)
-      ->addMargin(PHUI::MARGIN_LARGE_BOTTOM)
-      ->appendChild($table);
   }
 
   protected function renderInstructions($corpus) {
     $viewer = $this->getUser();
-
-    return id(new PHUIBoxView())
-      ->addMargin(PHUI::MARGIN_SMALL_TOP)
-      ->addMargin(PHUI::MARGIN_SMALL_BOTTOM)
-      ->appendChild(new PHUIRemarkupView($viewer, $corpus));
+    return new PHUIRemarkupView($viewer, $corpus);
   }
 
 }

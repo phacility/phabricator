@@ -370,6 +370,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
 
     $crumbs = $this->buildCrumbs($object);
     $crumbs->addTextCrumb(pht('HTTP Parameters'));
+    $crumbs->setBorder(true);
 
     $header = id(new PHUIHeaderView())
       ->setHeader(
@@ -377,9 +378,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
           'HTTP Parameters: %s',
           $this->getObjectCreateShortText($object)));
 
-    // TODO: Upgrade to DocumentViewPro.
-
-    $document = id(new PHUIDocumentView())
+    $document = id(new PHUIDocumentViewPro())
       ->setUser($viewer)
       ->setHeader($header);
 
@@ -391,6 +390,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
     return $controller->newPage()
       ->setTitle(pht('HTTP Parameters'))
       ->setCrumbs($crumbs)
+      ->addClass('pro-white-background')
       ->appendChild($document);
   }
 
