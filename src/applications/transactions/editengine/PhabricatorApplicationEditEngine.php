@@ -2,7 +2,13 @@
 
 
 /**
+ * @task fields Managing Fields
+ * @task text Display Text
+ * @task uri Managing URIs
+ * @task load Creating and Loading Objects
  * @task web Responding to Web Requests
+ * @task edit Responding to Edit Requests
+ * @task http Responding to HTTP Parameter Requests
  * @task conduit Responding to Conduit Requests
  */
 abstract class PhabricatorApplicationEditEngine extends Phobject {
@@ -29,6 +35,12 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
   final public function getController() {
     return $this->controller;
   }
+
+
+/* -(  Managing Fields  )---------------------------------------------------- */
+
+
+  abstract protected function buildCustomEditFields($object);
 
   final protected function buildEditFields($object) {
     $viewer = $this->getViewer();
@@ -176,39 +188,95 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
       }
     }
 
+    foreach ($fields as $field) {
+      $field
+        ->setViewer($viewer)
+        ->setObject($object);
+    }
+
     return $fields;
   }
 
-  abstract protected function newEditableObject();
-  abstract protected function newObjectQuery();
-  abstract protected function buildCustomEditFields($object);
 
+/* -(  Display Text  )------------------------------------------------------- */
+
+
+  /**
+   * @task text
+   */
   abstract protected function getObjectCreateTitleText($object);
+
+
+  /**
+   * @task text
+   */
   abstract protected function getObjectEditTitleText($object);
+
+
+  /**
+   * @task text
+   */
   abstract protected function getObjectCreateShortText($object);
+
+
+  /**
+   * @task text
+   */
   abstract protected function getObjectEditShortText($object);
-  abstract protected function getObjectViewURI($object);
 
-  protected function getObjectEditURI($object) {
-    return $this->getController()->getApplicationURI('edit/');
-  }
 
-  protected function getObjectCreateCancelURI($object) {
-    return $this->getController()->getApplicationURI();
-  }
-
-  protected function getObjectEditCancelURI($object) {
-    return $this->getObjectViewURI($object);
-  }
-
+  /**
+   * @task text
+   */
   protected function getObjectCreateButtonText($object) {
     return $this->getObjectCreateTitleText($object);
   }
 
+
+  /**
+   * @task text
+   */
   protected function getObjectEditButtonText($object) {
     return pht('Save Changes');
   }
 
+
+/* -(  Managing URIs  )------------------------------------------------------ */
+
+
+  /**
+   * @task uri
+   */
+  abstract protected function getObjectViewURI($object);
+
+
+  /**
+   * @task uri
+   */
+  protected function getObjectEditURI($object) {
+    return $this->getController()->getApplicationURI('edit/');
+  }
+
+
+  /**
+   * @task uri
+   */
+  protected function getObjectCreateCancelURI($object) {
+    return $this->getController()->getApplicationURI();
+  }
+
+
+  /**
+   * @task uri
+   */
+  protected function getObjectEditCancelURI($object) {
+    return $this->getObjectViewURI($object);
+  }
+
+
+  /**
+   * @task uri
+   */
   protected function getEditURI($object, $path = null) {
     $parts = array(
       $this->getObjectEditURI($object),
@@ -225,173 +293,135 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
     return implode('', $parts);
   }
 
-  final protected function setIsCreate($is_create) {
-    $this->isCreate = $is_create;
-    return $this;
-  }
 
+/* -(  Creating and Loading Objects  )--------------------------------------- */
+
+
+  /**
+   * Initialize a new object for creation.
+   *
+   * @return object Newly initialized object.
+   * @task load
+   */
+  abstract protected function newEditableObject();
+
+
+  /**
+   * Build an empty query for objects.
+   *
+   * @return PhabricatorPolicyAwareQuery Query.
+   * @task load
+   */
+  abstract protected function newObjectQuery();
+
+
+  /**
+   * Test if this workflow is creating a new object or editing an existing one.
+   *
+   * @return bool True if a new object is being created.
+   * @task load
+   */
   final protected function getIsCreate() {
     return $this->isCreate;
   }
 
-  final public function buildResponse() {
-    $controller = $this->getController();
+
+  /**
+   * Flag this workflow as a create or edit.
+   *
+   * @param bool True if this is a create workflow.
+   * @return this
+   * @task load
+   */
+  private function setIsCreate($is_create) {
+    $this->isCreate = $is_create;
+    return $this;
+  }
+
+
+  /**
+   * Load an object by ID.
+   *
+   * @param int Object ID.
+   * @return object|null Object, or null if no such object exists.
+   * @task load
+   */
+  private function newObjectFromID($id) {
+    $query = $this->newObjectQuery()
+      ->withIDs(array($id));
+
+    return $this->newObjectFromQuery($query);
+  }
+
+
+  /**
+   * Load an object by PHID.
+   *
+   * @param phid Object PHID.
+   * @return object|null Object, or null if no such object exists.
+   * @task load
+   */
+  private function newObjectFromPHID($phid) {
+    $query = $this->newObjectQuery()
+      ->withPHIDs(array($phid));
+
+    return $this->newObjectFromQuery($query);
+  }
+
+
+  /**
+   * Load an object given a configured query.
+   *
+   * @param PhabricatorPolicyAwareQuery Configured query.
+   * @return object|null Object, or null if no such object exists.
+   * @task load
+   */
+  private function newObjectFromQuery(PhabricatorPolicyAwareQuery $query) {
     $viewer = $this->getViewer();
+
+    $object = $query
+      ->setViewer($viewer)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
+    if (!$object) {
+      return null;
+    }
+
+    return $object;
+  }
+
+
+/* -(  Responding to Web Requests  )----------------------------------------- */
+
+
+  final public function buildResponse() {
+    $viewer = $this->getViewer();
+    $controller = $this->getController();
     $request = $controller->getRequest();
 
     $id = $request->getURIData('id');
     if ($id) {
-      $object = $this->newObjectQuery()
-        ->setViewer($viewer)
-        ->withIDs(array($id))
-        ->requireCapabilities(
-          array(
-            PhabricatorPolicyCapability::CAN_VIEW,
-            PhabricatorPolicyCapability::CAN_EDIT,
-          ))
-        ->executeOne();
+      $this->setIsCreate(false);
+      $object = $this->newObjectFromID($id);
       if (!$object) {
         return new Aphront404Response();
       }
-      $this->setIsCreate(false);
     } else {
-      $object = $this->newEditableObject();
       $this->setIsCreate(true);
-    }
-
-    $fields = $this->buildEditFields($object);
-
-    foreach ($fields as $field) {
-      $field
-        ->setViewer($viewer)
-        ->setObject($object);
+      $object = $this->newEditableObject();
     }
 
     $action = $request->getURIData('editAction');
     switch ($action) {
       case 'parameters':
-        return $this->buildParametersResponse($object, $fields);
+        return $this->buildParametersResponse($object);
+      default:
+        return $this->buildEditResponse($object);
     }
-
-    $validation_exception = null;
-    if ($request->isFormPost()) {
-      foreach ($fields as $field) {
-        $field->readValueFromSubmit($request);
-      }
-
-      $template = $object->getApplicationTransactionTemplate();
-
-      $xactions = array();
-      foreach ($fields as $field) {
-        $xactions[] = $field->generateTransaction(clone $template);
-      }
-
-      $editor = $object->getApplicationTransactionEditor()
-        ->setActor($viewer)
-        ->setContentSourceFromRequest($request)
-        ->setContinueOnNoEffect(true)
-        ->setContinueOnMissingFields(false);
-
-      try {
-
-        $editor->applyTransactions($object, $xactions);
-
-        return id(new AphrontRedirectResponse())
-          ->setURI($this->getObjectViewURI($object));
-      } catch (PhabricatorApplicationTransactionValidationException $ex) {
-        $validation_exception = $ex;
-      }
-    } else {
-      if ($this->getIsCreate()) {
-        foreach ($fields as $field) {
-          $field->readValueFromRequest($request);
-        }
-      } else {
-        foreach ($fields as $field) {
-          $field->readValueFromObject($object);
-        }
-      }
-    }
-
-    $box = id(new PHUIObjectBoxView())
-      ->setUser($viewer);
-
-    $crumbs = $this->buildCrumbs($object, $final = true);
-
-    if ($this->getIsCreate()) {
-      $header_text = $this->getObjectCreateTitleText($object);
-
-      $cancel_uri = $this->getObjectCreateCancelURI($object);
-      $submit_button = $this->getObjectCreateButtonText($object);
-    } else {
-      $header_text = $this->getObjectEditTitleText($object);
-
-      $cancel_uri = $this->getObjectEditCancelURI($object);
-      $submit_button = $this->getObjectEditButtonText($object);
-    }
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($header_text);
-
-    $action_button = $this->buildEditFormActionButton($object);
-
-    $header->addActionLink($action_button);
-
-    $box->setHeader($header);
-
-    $form = id(new AphrontFormView())
-      ->setUser($viewer);
-
-    foreach ($fields as $field) {
-      $field->appendToForm($form);
-    }
-
-    $form->appendControl(
-      id(new AphrontFormSubmitControl())
-        ->addCancelButton($cancel_uri)
-        ->setValue($submit_button));
-
-    $box->appendChild($form);
-
-    if ($validation_exception) {
-      $box->setValidationException($validation_exception);
-    }
-
-    return $controller->newPage()
-      ->setTitle($header_text)
-      ->setCrumbs($crumbs)
-      ->appendChild($box);
-  }
-
-  private function buildParametersResponse($object, array $fields) {
-    $controller = $this->getController();
-    $viewer = $this->getViewer();
-    $request = $controller->getRequest();
-
-    $crumbs = $this->buildCrumbs($object);
-    $crumbs->addTextCrumb(pht('HTTP Parameters'));
-    $crumbs->setBorder(true);
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader(
-        pht(
-          'HTTP Parameters: %s',
-          $this->getObjectCreateShortText($object)));
-
-    $document = id(new PHUIDocumentViewPro())
-      ->setUser($viewer)
-      ->setHeader($header);
-
-    $document->appendChild(
-      id(new PhabricatorApplicationEditHTTPParameterHelpView())
-        ->setUser($viewer)
-        ->setFields($fields));
-
-    return $controller->newPage()
-      ->setTitle(pht('HTTP Parameters'))
-      ->setCrumbs($crumbs)
-      ->addClass('pro-white-background')
-      ->appendChild($document);
   }
 
   private function buildCrumbs($object, $final = false) {
@@ -421,6 +451,104 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
     }
 
     return $crumbs;
+  }
+
+  private function buildEditResponse($object) {
+    $viewer = $this->getViewer();
+    $controller = $this->getController();
+    $request = $controller->getRequest();
+
+    $fields = $this->buildEditFields($object);
+    $template = $object->getApplicationTransactionTemplate();
+
+    $validation_exception = null;
+    if ($request->isFormPost()) {
+      foreach ($fields as $field) {
+        $field->readValueFromSubmit($request);
+      }
+
+      $xactions = array();
+      foreach ($fields as $field) {
+        $xactions[] = $field->generateTransaction(clone $template);
+      }
+
+      $editor = $object->getApplicationTransactionEditor()
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true);
+
+      try {
+
+        $editor->applyTransactions($object, $xactions);
+
+        return id(new AphrontRedirectResponse())
+          ->setURI($this->getObjectViewURI($object));
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
+      }
+    } else {
+      if ($this->getIsCreate()) {
+        foreach ($fields as $field) {
+          $field->readValueFromRequest($request);
+        }
+      } else {
+        foreach ($fields as $field) {
+          $field->readValueFromObject($object);
+        }
+      }
+    }
+
+    $action_button = $this->buildEditFormActionButton($object);
+
+    if ($this->getIsCreate()) {
+      $header_text = $this->getObjectCreateTitleText($object);
+    } else {
+      $header_text = $this->getObjectEditTitleText($object);
+    }
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($header_text)
+      ->addActionLink($action_button);
+
+    $crumbs = $this->buildCrumbs($object, $final = true);
+    $form = $this->buildEditForm($object, $fields);
+
+    $box = id(new PHUIObjectBoxView())
+      ->setUser($viewer)
+      ->setHeader($header)
+      ->setValidationException($validation_exception)
+      ->appendChild($form);
+
+    return $controller->newPage()
+      ->setTitle($header_text)
+      ->setCrumbs($crumbs)
+      ->appendChild($box);
+  }
+
+  private function buildEditForm($object, array $fields) {
+    $viewer = $this->getViewer();
+
+    $form = id(new AphrontFormView())
+      ->setUser($viewer);
+
+    foreach ($fields as $field) {
+      $field->appendToForm($form);
+    }
+
+    if ($this->getIsCreate()) {
+      $cancel_uri = $this->getObjectCreateCancelURI($object);
+      $submit_button = $this->getObjectCreateButtonText($object);
+    } else {
+      $cancel_uri = $this->getObjectEditCancelURI($object);
+      $submit_button = $this->getObjectEditButtonText($object);
+    }
+
+    $form->appendControl(
+      id(new AphrontFormSubmitControl())
+        ->addCancelButton($cancel_uri)
+        ->setValue($submit_button));
+
+    return $form;
   }
 
   private function buildEditFormActionButton($object) {
@@ -455,6 +583,50 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
   }
 
 
+/* -(  Responding to HTTP Parameter Requests  )------------------------------ */
+
+
+  /**
+   * Respond to a request for documentation on HTTP parameters.
+   *
+   * @param object Editable object.
+   * @return AphrontResponse Response object.
+   * @task http
+   */
+  private function buildParametersResponse($object) {
+    $controller = $this->getController();
+    $viewer = $this->getViewer();
+    $request = $controller->getRequest();
+    $fields = $this->buildEditFields($object);
+
+    $crumbs = $this->buildCrumbs($object);
+    $crumbs->addTextCrumb(pht('HTTP Parameters'));
+    $crumbs->setBorder(true);
+
+    $header_text = pht(
+      'HTTP Parameters: %s',
+      $this->getObjectCreateShortText($object));
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($header_text);
+
+    $help_view = id(new PhabricatorApplicationEditHTTPParameterHelpView())
+      ->setUser($viewer)
+      ->setFields($fields);
+
+    $document = id(new PHUIDocumentViewPro())
+      ->setUser($viewer)
+      ->setHeader($header)
+      ->appendChild($help_view);
+
+    return $controller->newPage()
+      ->setTitle(pht('HTTP Parameters'))
+      ->setCrumbs($crumbs)
+      ->addClass('pro-white-background')
+      ->appendChild($document);
+  }
+
+
 /* -(  Conduit  )------------------------------------------------------------ */
 
 
@@ -471,31 +643,17 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
 
     $phid = $request->getValue('objectPHID');
     if ($phid) {
-      $object = $this->newObjectQuery()
-        ->setViewer($viewer)
-        ->withPHIDs(array($phid))
-        ->requireCapabilities(
-          array(
-            PhabricatorPolicyCapability::CAN_VIEW,
-            PhabricatorPolicyCapability::CAN_EDIT,
-          ))
-        ->executeOne();
+      $this->setIsCreate(false);
+      $object = $this->newObjectFromPHID($phid);
       if (!$object) {
         throw new Exception(pht('No such object with PHID "%s".', $phid));
       }
-      $this->setIsCreate(false);
     } else {
-      $object = $this->newEditableObject();
       $this->setIsCreate(true);
+      $object = $this->newEditableObject();
     }
 
     $fields = $this->buildEditFields($object);
-
-    foreach ($fields as $field) {
-      $field
-        ->setViewer($viewer)
-        ->setObject($object);
-    }
 
     $types = $this->getAllEditTypesFromFields($fields);
     $template = $object->getApplicationTransactionTemplate();
@@ -617,8 +775,6 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
     $fields = $this->buildEditFields($object);
     return $this->getAllEditTypesFromFields($fields);
   }
-
-
 
 
 }
