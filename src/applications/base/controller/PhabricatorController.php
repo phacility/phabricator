@@ -521,6 +521,14 @@ abstract class PhabricatorController extends AphrontController {
   }
 
 
+  public function buildApplicationCrumbsForEditEngine() {
+    // TODO: This is kind of gross, I'm bascially just making this public so
+    // I can use it in EditEngine. We could do this without making it public
+    // by using controller delegation, or make it properly public.
+    return $this->buildApplicationCrumbs();
+  }
+
+
 /* -(  Deprecated  )--------------------------------------------------------- */
 
 

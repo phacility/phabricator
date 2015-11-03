@@ -44,16 +44,11 @@ final class PasteCreateConduitAPIMethod extends PasteConduitAPIMethod {
 
     $paste = PhabricatorPaste::initializeNewPaste($viewer);
 
-    $file = PhabricatorPasteEditor::initializeFileForPaste(
-      $viewer,
-      $title,
-      $content);
-
     $xactions = array();
 
     $xactions[] = id(new PhabricatorPasteTransaction())
       ->setTransactionType(PhabricatorPasteTransaction::TYPE_CONTENT)
-      ->setNewValue($file->getPHID());
+      ->setNewValue($content);
 
     $xactions[] = id(new PhabricatorPasteTransaction())
       ->setTransactionType(PhabricatorPasteTransaction::TYPE_TITLE)

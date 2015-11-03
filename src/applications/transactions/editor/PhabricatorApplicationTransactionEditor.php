@@ -242,6 +242,19 @@ abstract class PhabricatorApplicationTransactionEditor
     return $this->applicationEmail;
   }
 
+  public function getTransactionTypesForObject($object) {
+    $old = $this->object;
+    try {
+      $this->object = $object;
+      $result = $this->getTransactionTypes();
+      $this->object = $old;
+    } catch (Exception $ex) {
+      $this->object = $old;
+      throw $ex;
+    }
+    return $result;
+  }
+
   public function getTransactionTypes() {
     $types = array();
 
@@ -1650,7 +1663,7 @@ abstract class PhabricatorApplicationTransactionEditor
       throw new Exception(
         pht(
           "Invalid '%s' value for PHID transaction. Value should contain only ".
-          "keys '%s' (add PHIDs), '%' (remove PHIDs) and '%s' (set PHIDS).",
+          "keys '%s' (add PHIDs), '%s' (remove PHIDs) and '%s' (set PHIDS).",
           'new',
           '+',
           '-',

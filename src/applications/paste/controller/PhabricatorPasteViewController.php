@@ -137,9 +137,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       $paste,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $can_fork = $viewer->isLoggedIn();
     $id = $paste->getID();
-    $fork_uri = $this->getApplicationURI('/create/?parent='.$id);
 
     return id(new PhabricatorActionListView())
       ->setUser($viewer)
@@ -152,13 +150,6 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit)
           ->setHref($this->getApplicationURI("edit/{$id}/")))
-      ->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Fork This Paste'))
-          ->setIcon('fa-code-fork')
-          ->setDisabled(!$can_fork)
-          ->setWorkflow(!$can_fork)
-          ->setHref($fork_uri))
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('View Raw File'))

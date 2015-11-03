@@ -1,0 +1,25 @@
+<?php
+
+final class PhabricatorSelectEditField
+  extends PhabricatorEditField {
+
+  private $options;
+
+  public function setOptions(array $options) {
+    $this->options = $options;
+    return $this;
+  }
+
+  public function getOptions() {
+    if ($this->options === null) {
+      throw new PhutilInvalidStateException('setOptions');
+    }
+    return $this->options;
+  }
+
+  protected function newControl() {
+    return id(new AphrontFormSelectControl())
+      ->setOptions($this->getOptions());
+  }
+
+}
