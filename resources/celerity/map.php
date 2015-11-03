@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => 'bbeb85d2',
+    'core.pkg.css' => 'a9b47b99',
     'core.pkg.js' => '47dc9ebb',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '2de124c9',
@@ -36,7 +36,7 @@ return array(
     'rsrc/css/application/base/notification-menu.css' => 'f31c0bde',
     'rsrc/css/application/base/phabricator-application-launch-view.css' => '95351601',
     'rsrc/css/application/base/phui-theme.css' => '6b451f24',
-    'rsrc/css/application/base/standard-page-view.css' => '1f53d056',
+    'rsrc/css/application/base/standard-page-view.css' => 'a1096ed4',
     'rsrc/css/application/calendar/calendar-icon.css' => 'c69aa59f',
     'rsrc/css/application/chatlog/chatlog.css' => 'd295b020',
     'rsrc/css/application/conduit/conduit-api.css' => '7bc725c4',
@@ -746,7 +746,7 @@ return array(
     'phabricator-side-menu-view-css' => 'bec2458e',
     'phabricator-slowvote-css' => '475b4bd2',
     'phabricator-source-code-view-css' => 'cbeef983',
-    'phabricator-standard-page-view' => '1f53d056',
+    'phabricator-standard-page-view' => 'a1096ed4',
     'phabricator-textareautils' => '5c93c52c',
     'phabricator-title' => 'df5e11d2',
     'phabricator-tooltip' => '1d298e3a',
