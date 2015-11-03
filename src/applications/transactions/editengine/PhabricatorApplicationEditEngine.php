@@ -1,5 +1,10 @@
 <?php
 
+
+/**
+ * @task web Responding to Web Requests
+ * @task conduit Responding to Conduit Requests
+ */
 abstract class PhabricatorApplicationEditEngine extends Phobject {
 
   private $viewer;
@@ -47,6 +52,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
           'capability' => PhabricatorPolicyCapability::CAN_VIEW,
           'label' => pht('View Policy'),
           'description' => pht('Controls who can view the object.'),
+          'edit' => 'view',
         ),
         PhabricatorTransactions::TYPE_EDIT_POLICY => array(
           'key' => 'policy.edit',
@@ -54,6 +60,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
           'capability' => PhabricatorPolicyCapability::CAN_EDIT,
           'label' => pht('Edit Policy'),
           'description' => pht('Controls who can edit the object.'),
+          'edit' => 'edit',
         ),
         PhabricatorTransactions::TYPE_JOIN_POLICY => array(
           'key' => 'policy.join',
@@ -61,6 +68,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
           'capability' => PhabricatorPolicyCapability::CAN_JOIN,
           'label' => pht('Join Policy'),
           'description' => pht('Controls who can join the object.'),
+          'edit' => 'join',
         ),
       );
 
@@ -74,6 +82,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
         $aliases = $spec['aliases'];
         $label = $spec['label'];
         $description = $spec['description'];
+        $edit = $spec['edit'];
 
         $policy_field = id(new PhabricatorPolicyEditField())
           ->setKey($key)
@@ -83,6 +92,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
           ->setCapability($capability)
           ->setPolicies($policies)
           ->setTransactionType($type)
+          ->setEditTypeKey($edit)
           ->setValue($object->getPolicy($capability));
         $fields[] = $policy_field;
 
@@ -93,6 +103,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
               $space_field = id(new PhabricatorSpaceEditField())
                 ->setKey('spacePHID')
                 ->setLabel(pht('Space'))
+                ->setEditTypeKey('space')
                 ->setDescription(
                   pht('Shifts the object in the Spaces application.'))
                 ->setAliases(array('space', 'policy.space'))
@@ -126,6 +137,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
         $edge_field = id(new PhabricatorDatasourceEditField())
           ->setKey('projectPHIDs')
           ->setLabel(pht('Projects'))
+          ->setEditTypeKey('projects')
           ->setDescription(
             pht(
               'Add or remove associated projects.'))
@@ -154,6 +166,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
         $subscribers_field = id(new PhabricatorDatasourceEditField())
           ->setKey('subscriberPHIDs')
           ->setLabel(pht('Subscribers'))
+          ->setEditTypeKey('subscribers')
           ->setDescription(pht('Manage subscribers.'))
           ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
           ->setAliases(array('subscriber', 'subscribers'))
@@ -240,11 +253,9 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
       if (!$object) {
         return new Aphront404Response();
       }
-
       $this->setIsCreate(false);
     } else {
       $object = $this->newEditableObject();
-
       $this->setIsCreate(true);
     }
 
@@ -442,5 +453,172 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
 
     return $actions;
   }
+
+
+/* -(  Conduit  )------------------------------------------------------------ */
+
+
+  /**
+   * Respond to a Conduit edit request.
+   *
+   * This method accepts a list of transactions to apply to an object, and
+   * either edits an existing object or creates a new one.
+   *
+   * @task conduit
+   */
+  final public function buildConduitResponse(ConduitAPIRequest $request) {
+    $viewer = $this->getViewer();
+
+    $phid = $request->getValue('objectPHID');
+    if ($phid) {
+      $object = $this->newObjectQuery()
+        ->setViewer($viewer)
+        ->withPHIDs(array($phid))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+      if (!$object) {
+        throw new Exception(pht('No such object with PHID "%s".', $phid));
+      }
+      $this->setIsCreate(false);
+    } else {
+      $object = $this->newEditableObject();
+      $this->setIsCreate(true);
+    }
+
+    $fields = $this->buildEditFields($object);
+
+    foreach ($fields as $field) {
+      $field
+        ->setViewer($viewer)
+        ->setObject($object);
+    }
+
+    $types = $this->getAllEditTypesFromFields($fields);
+    $template = $object->getApplicationTransactionTemplate();
+
+    $xactions = $this->getConduitTransactions($request, $types, $template);
+
+    $editor = $object->getApplicationTransactionEditor()
+      ->setActor($viewer)
+      ->setContentSourceFromConduitRequest($request)
+      ->setContinueOnNoEffect(true);
+
+    $xactions = $editor->applyTransactions($object, $xactions);
+
+    $xactions_struct = array();
+    foreach ($xactions as $xaction) {
+      $xactions_struct[] = array(
+        'phid' => $xaction->getPHID(),
+      );
+    }
+
+    return array(
+      'object' => array(
+        'id' => $object->getID(),
+        'phid' => $object->getPHID(),
+      ),
+      'transactions' => $xactions_struct,
+    );
+  }
+
+
+  /**
+   * Generate transactions which can be applied from edit actions in a Conduit
+   * request.
+   *
+   * @param ConduitAPIRequest The request.
+   * @param list<PhabricatorEditType> Supported edit types.
+   * @param PhabricatorApplicationTransaction Template transaction.
+   * @return list<PhabricatorApplicationTransaction> Generated transactions.
+   * @task conduit
+   */
+  private function getConduitTransactions(
+    ConduitAPIRequest $request,
+    array $types,
+    PhabricatorApplicationTransaction $template) {
+
+    $transactions_key = 'transactions';
+
+    $xactions = $request->getValue($transactions_key);
+    if (!is_array($xactions)) {
+      throw new Exception(
+        pht(
+          'Parameter "%s" is not a list of transactions.',
+          $transactions_key));
+    }
+
+    foreach ($xactions as $key => $xaction) {
+      if (!is_array($xaction)) {
+        throw new Exception(
+          pht(
+            'Parameter "%s" must contain a list of transaction descriptions, '.
+            'but item with key "%s" is not a dictionary.',
+            $transactions_key,
+            $key));
+      }
+
+      if (!array_key_exists('type', $xaction)) {
+        throw new Exception(
+          pht(
+            'Parameter "%s" must contain a list of transaction descriptions, '.
+            'but item with key "%s" is missing a "type" field. Each '.
+            'transaction must have a type field.',
+            $transactions_key,
+            $key));
+      }
+
+      $type = $xaction['type'];
+      if (empty($types[$type])) {
+        throw new Exception(
+          pht(
+            'Transaction with key "%s" has invalid type "%s". This type is '.
+            'not recognized. Valid types are: %s.',
+            $key,
+            $type,
+            implode(', ', array_keys($types))));
+      }
+    }
+
+    $results = array();
+    foreach ($xactions as $xaction) {
+      $type = $types[$xaction['type']];
+
+      $results[] = $type->generateTransaction(
+        clone $template,
+        $xaction);
+    }
+
+    return $results;
+  }
+
+
+  /**
+   * @return map<string, PhabricatorEditType>
+   * @task conduit
+   */
+  private function getAllEditTypesFromFields(array $fields) {
+    $types = array();
+    foreach ($fields as $field) {
+      $field_types = $field->getEditTransactionTypes();
+      foreach ($field_types as $field_type) {
+        $field_type->setField($field);
+        $types[$field_type->getEditType()] = $field_type;
+      }
+    }
+    return $types;
+  }
+
+  public function getAllEditTypes() {
+    $object = $this->newEditableObject();
+    $fields = $this->buildEditFields($object);
+    return $this->getAllEditTypesFromFields($fields);
+  }
+
+
+
 
 }

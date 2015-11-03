@@ -12,6 +12,8 @@ abstract class PhabricatorEditField extends Phobject {
   private $transactionType;
   private $metadata = array();
   private $description;
+  private $editTypeKey;
+
 
   public function setKey($key) {
     $this->key = $key;
@@ -221,6 +223,77 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function getHTTPParameterType() {
     return 'string';
+  }
+
+  public function setEditTypeKey($edit_type_key) {
+    $this->editTypeKey = $edit_type_key;
+    return $this;
+  }
+
+  public function getEditTypeKey() {
+    if ($this->editTypeKey === null) {
+      return $this->getKey();
+    }
+    return $this->editTypeKey;
+  }
+
+  public function getEditTransactionTypes() {
+    $transaction_type = $this->getTransactionType();
+    $type_key = $this->getEditTypeKey();
+
+    // TODO: This is a pretty big pile of hard-coded hacks for now.
+
+    $edge_types = array(
+      PhabricatorTransactions::TYPE_EDGE => array(
+        '+' => pht('Add projects.'),
+        '-' => pht('Remove projects.'),
+        '=' => pht('Set associated projects, overwriting current value.'),
+      ),
+      PhabricatorTransactions::TYPE_SUBSCRIBERS => array(
+        '+' => pht('Add subscribers.'),
+        '-' => pht('Remove subscribers.'),
+        '=' => pht('Set subscribers, overwriting current value.'),
+      ),
+    );
+
+    if (isset($edge_types[$transaction_type])) {
+      $base = id(new PhabricatorEdgeEditType())
+        ->setTransactionType($transaction_type)
+        ->setMetadata($this->metadata);
+
+      $strings = $edge_types[$transaction_type];
+
+      $add = id(clone $base)
+        ->setEditType($type_key.'.add')
+        ->setEdgeOperation('+')
+        ->setDescription($strings['+'])
+        ->setValueDescription(pht('List of PHIDs to add.'));
+      $rem = id(clone $base)
+        ->setEditType($type_key.'.remove')
+        ->setEdgeOperation('-')
+        ->setDescription($strings['-'])
+        ->setValueDescription(pht('List of PHIDs to remove.'));
+      $set = id(clone $base)
+        ->setEditType($type_key.'.set')
+        ->setEdgeOperation('=')
+        ->setDescription($strings['='])
+        ->setValueDescription(pht('List of PHIDs to set.'));
+
+      return array(
+        $add,
+        $rem,
+        $set,
+      );
+    }
+
+    return array(
+      id(new PhabricatorSimpleEditType())
+        ->setEditType($type_key)
+        ->setTransactionType($transaction_type)
+        ->setValueType($this->getHTTPParameterType())
+        ->setDescription($this->getDescription())
+        ->setMetadata($this->metadata),
+    );
   }
 
 }

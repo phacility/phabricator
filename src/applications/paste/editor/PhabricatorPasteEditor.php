@@ -72,6 +72,30 @@ final class PhabricatorPasteEditor
     $this->fileName = $name;
   }
 
+  protected function validateTransaction(
+    PhabricatorLiskDAO $object,
+    $type,
+    array $xactions) {
+
+    $errors = parent::validateTransaction($object, $type, $xactions);
+    switch ($type) {
+      case PhabricatorPasteTransaction::TYPE_CONTENT:
+        if (!$object->getFilePHID() && !$xactions) {
+          $error = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Required'),
+            pht('You must provide content to create a paste.'),
+            null);
+
+          $error->setIsMissingFieldError(true);
+          $errors[] = $error;
+        }
+        break;
+    }
+
+    return $errors;
+  }
+
   protected function getCustomTransactionOldValue(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
