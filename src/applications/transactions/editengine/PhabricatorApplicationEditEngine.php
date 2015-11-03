@@ -4,6 +4,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
 
   private $viewer;
   private $controller;
+  private $isCreate;
 
   final public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -44,16 +45,22 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
           'key' => 'policy.view',
           'aliases' => array('view'),
           'capability' => PhabricatorPolicyCapability::CAN_VIEW,
+          'label' => pht('View Policy'),
+          'description' => pht('Controls who can view the object.'),
         ),
         PhabricatorTransactions::TYPE_EDIT_POLICY => array(
           'key' => 'policy.edit',
           'aliases' => array('edit'),
           'capability' => PhabricatorPolicyCapability::CAN_EDIT,
+          'label' => pht('Edit Policy'),
+          'description' => pht('Controls who can edit the object.'),
         ),
         PhabricatorTransactions::TYPE_JOIN_POLICY => array(
           'key' => 'policy.join',
           'aliases' => array('join'),
           'capability' => PhabricatorPolicyCapability::CAN_JOIN,
+          'label' => pht('Join Policy'),
+          'description' => pht('Controls who can join the object.'),
         ),
       );
 
@@ -65,9 +72,13 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
         $capability = $spec['capability'];
         $key = $spec['key'];
         $aliases = $spec['aliases'];
+        $label = $spec['label'];
+        $description = $spec['description'];
 
         $policy_field = id(new PhabricatorPolicyEditField())
           ->setKey($key)
+          ->setLabel($label)
+          ->setDescription($description)
           ->setAliases($aliases)
           ->setCapability($capability)
           ->setPolicies($policies)
@@ -81,6 +92,9 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
             if (isset($types[$type_space])) {
               $space_field = id(new PhabricatorSpaceEditField())
                 ->setKey('spacePHID')
+                ->setLabel(pht('Space'))
+                ->setDescription(
+                  pht('Shifts the object in the Spaces application.'))
                 ->setAliases(array('space', 'policy.space'))
                 ->setTransactionType($type_space)
                 ->setValue($object->getSpacePHID());
@@ -112,6 +126,9 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
         $edge_field = id(new PhabricatorDatasourceEditField())
           ->setKey('projectPHIDs')
           ->setLabel(pht('Projects'))
+          ->setDescription(
+            pht(
+              'Add or remove associated projects.'))
           ->setDatasource(new PhabricatorProjectDatasource())
           ->setAliases(array('project', 'projects'))
           ->setTransactionType($edge_type)
@@ -137,6 +154,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
         $subscribers_field = id(new PhabricatorDatasourceEditField())
           ->setKey('subscriberPHIDs')
           ->setLabel(pht('Subscribers'))
+          ->setDescription(pht('Manage subscribers.'))
           ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
           ->setAliases(array('subscriber', 'subscribers'))
           ->setTransactionType($subscribers_type)
@@ -158,6 +176,10 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
   abstract protected function getObjectEditShortText($object);
   abstract protected function getObjectViewURI($object);
 
+  protected function getObjectEditURI($object) {
+    return $this->getController()->getApplicationURI('edit/');
+  }
+
   protected function getObjectCreateCancelURI($object) {
     return $this->getController()->getApplicationURI();
   }
@@ -172,6 +194,31 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
 
   protected function getObjectEditButtonText($object) {
     return pht('Save Changes');
+  }
+
+  protected function getEditURI($object, $path = null) {
+    $parts = array(
+      $this->getObjectEditURI($object),
+    );
+
+    if (!$this->getIsCreate()) {
+      $parts[] = $object->getID().'/';
+    }
+
+    if ($path !== null) {
+      $parts[] = $path;
+    }
+
+    return implode('', $parts);
+  }
+
+  final protected function setIsCreate($is_create) {
+    $this->isCreate = $is_create;
+    return $this;
+  }
+
+  final protected function getIsCreate() {
+    return $this->isCreate;
   }
 
   final public function buildResponse() {
@@ -194,11 +241,11 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
         return new Aphront404Response();
       }
 
-      $is_create = false;
+      $this->setIsCreate(false);
     } else {
       $object = $this->newEditableObject();
 
-      $is_create = true;
+      $this->setIsCreate(true);
     }
 
     $fields = $this->buildEditFields($object);
@@ -207,6 +254,12 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
       $field
         ->setViewer($viewer)
         ->setObject($object);
+    }
+
+    $action = $request->getURIData('editAction');
+    switch ($action) {
+      case 'parameters':
+        return $this->buildParametersResponse($object, $fields);
     }
 
     $validation_exception = null;
@@ -238,7 +291,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
         $validation_exception = $ex;
       }
     } else {
-      if ($is_create) {
+      if ($this->getIsCreate()) {
         foreach ($fields as $field) {
           $field->readValueFromRequest($request);
         }
@@ -252,28 +305,28 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
     $box = id(new PHUIObjectBoxView())
       ->setUser($viewer);
 
-    $crumbs = $controller->buildApplicationCrumbsForEditEngine();
+    $crumbs = $this->buildCrumbs($object, $final = true);
 
-    if ($is_create) {
+    if ($this->getIsCreate()) {
       $header_text = $this->getObjectCreateTitleText($object);
-
-      $crumbs->addTextCrumb(
-        $this->getObjectCreateShortText($object));
 
       $cancel_uri = $this->getObjectCreateCancelURI($object);
       $submit_button = $this->getObjectCreateButtonText($object);
     } else {
       $header_text = $this->getObjectEditTitleText($object);
 
-      $crumbs->addTextCrumb(
-        $this->getObjectEditShortText($object),
-        $this->getObjectViewURI($object));
-
       $cancel_uri = $this->getObjectEditCancelURI($object);
       $submit_button = $this->getObjectEditButtonText($object);
     }
 
-    $box->setHeaderText($header_text);
+    $header = id(new PHUIHeaderView())
+      ->setHeader($header_text);
+
+    $action_button = $this->buildEditFormActionButton($object);
+
+    $header->addActionLink($action_button);
+
+    $box->setHeader($header);
 
     $form = id(new AphrontFormView())
       ->setUser($viewer);
@@ -299,5 +352,95 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
       ->appendChild($box);
   }
 
+  private function buildParametersResponse($object, array $fields) {
+    $controller = $this->getController();
+    $viewer = $this->getViewer();
+    $request = $controller->getRequest();
+
+    $crumbs = $this->buildCrumbs($object);
+    $crumbs->addTextCrumb(pht('HTTP Parameters'));
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(
+        pht(
+          'HTTP Parameters: %s',
+          $this->getObjectCreateShortText($object)));
+
+    // TODO: Upgrade to DocumentViewPro.
+
+    $document = id(new PHUIDocumentView())
+      ->setUser($viewer)
+      ->setHeader($header);
+
+    $document->appendChild(
+      id(new PhabricatorApplicationEditHTTPParameterHelpView())
+        ->setUser($viewer)
+        ->setFields($fields));
+
+    return $controller->newPage()
+      ->setTitle(pht('HTTP Parameters'))
+      ->setCrumbs($crumbs)
+      ->appendChild($document);
+  }
+
+  private function buildCrumbs($object, $final = false) {
+    $controller = $this->getcontroller();
+
+    $crumbs = $controller->buildApplicationCrumbsForEditEngine();
+    if ($this->getIsCreate()) {
+      $create_text = $this->getObjectCreateShortText($object);
+      if ($final) {
+        $crumbs->addTextCrumb($create_text);
+      } else {
+        $edit_uri = $this->getEditURI($object);
+        $crumbs->addTextCrumb($create_text, $edit_uri);
+      }
+    } else {
+      $crumbs->addTextCrumb(
+        $this->getObjectEditShortText($object),
+        $this->getObjectViewURI($object));
+
+      $edit_text = pht('Edit');
+      if ($final) {
+        $crumbs->addTextCrumb($edit_text);
+      } else {
+        $edit_uri = $this->getEditURI($object);
+        $crumbs->addTextCrumb($edit_text, $edit_uri);
+      }
+    }
+
+    return $crumbs;
+  }
+
+  private function buildEditFormActionButton($object) {
+    $viewer = $this->getViewer();
+
+    $action_view = id(new PhabricatorActionListView())
+      ->setUser($viewer);
+
+    foreach ($this->buildEditFormActions($object) as $action) {
+      $action_view->addAction($action);
+    }
+
+    $action_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Actions'))
+      ->setHref('#')
+      ->setIconFont('fa-bars')
+      ->setDropdownMenu($action_view);
+
+    return $action_button;
+  }
+
+  private function buildEditFormActions($object) {
+    $actions = array();
+
+    $actions[] = id(new PhabricatorActionView())
+      ->setName(pht('Show HTTP Parameters'))
+      ->setIcon('fa-crosshairs')
+      ->setHref($this->getEditURI($object, 'parameters/'));
+
+    return $actions;
+  }
 
 }

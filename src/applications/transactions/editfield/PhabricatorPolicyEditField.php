@@ -51,4 +51,8 @@ final class PhabricatorPolicyEditField
     return $control;
   }
 
+  public function getHTTPParameterType() {
+    return 'phid';
+  }
+
 }

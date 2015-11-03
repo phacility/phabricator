@@ -11,6 +11,7 @@ abstract class PhabricatorEditField extends Phobject {
   private $object;
   private $transactionType;
   private $metadata = array();
+  private $description;
 
   public function setKey($key) {
     $this->key = $key;
@@ -55,6 +56,15 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function getObject() {
     return $this->object;
+  }
+
+  public function setDescription($description) {
+    $this->description = $description;
+    return $this;
+  }
+
+  public function getDescription() {
+    return $this->description;
   }
 
   abstract protected function newControl();
@@ -207,6 +217,10 @@ abstract class PhabricatorEditField extends Phobject {
     }
 
     return $list;
+  }
+
+  public function getHTTPParameterType() {
+    return 'string';
   }
 
 }

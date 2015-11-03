@@ -87,4 +87,8 @@ abstract class PhabricatorTokenizerEditField
     return $new;
   }
 
+  public function getHTTPParameterType() {
+    return 'list<phid>';
+  }
+
 }

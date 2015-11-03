@@ -41,11 +41,17 @@ final class PhabricatorPasteEditEngine
       id(new PhabricatorTextEditField())
         ->setKey('title')
         ->setLabel(pht('Title'))
+        ->setDescription(pht('Name of the paste.'))
         ->setTransactionType(PhabricatorPasteTransaction::TYPE_TITLE)
         ->setValue($object->getTitle()),
       id(new PhabricatorSelectEditField())
         ->setKey('language')
         ->setLabel(pht('Language'))
+        ->setDescription(
+          pht(
+            'Programming language to interpret the paste as for syntax '.
+            'highlighting. By default, the language is inferred from the '.
+            'title.'))
         ->setAliases(array('lang'))
         ->setTransactionType(PhabricatorPasteTransaction::TYPE_LANGUAGE)
         ->setValue($object->getLanguage())
@@ -53,12 +59,14 @@ final class PhabricatorPasteEditEngine
       id(new PhabricatorSelectEditField())
         ->setKey('status')
         ->setLabel(pht('Status'))
+        ->setDescription(pht('Archive the paste.'))
         ->setTransactionType(PhabricatorPasteTransaction::TYPE_STATUS)
         ->setValue($object->getStatus())
         ->setOptions(PhabricatorPaste::getStatusNameMap()),
       id(new PhabricatorTextAreaEditField())
         ->setKey('text')
         ->setLabel(pht('Text'))
+        ->setDescription(pht('The main body text of the paste.'))
         ->setTransactionType(PhabricatorPasteTransaction::TYPE_CONTENT)
         ->setMonospaced(true)
         ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)

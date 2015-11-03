@@ -22,4 +22,8 @@ final class PhabricatorSelectEditField
       ->setOptions($this->getOptions());
   }
 
+  public function getHTTPParameterType() {
+    return 'select';
+  }
+
 }

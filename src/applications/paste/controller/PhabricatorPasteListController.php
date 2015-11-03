@@ -18,7 +18,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $crumbs->addAction(
       id(new PHUIListItemView())
         ->setName(pht('Create Paste'))
-        ->setHref($this->getApplicationURI('create/'))
+        ->setHref($this->getApplicationURI('edit/'))
         ->setIcon('fa-plus-square'));
 
     return $crumbs;

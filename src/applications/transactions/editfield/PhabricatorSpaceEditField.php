@@ -9,4 +9,8 @@ final class PhabricatorSpaceEditField
     return null;
   }
 
+  public function getHTTPParameterType() {
+    return 'phid';
+  }
+
 }
