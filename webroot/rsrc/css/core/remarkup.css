@@ -523,4 +523,5 @@ var.remarkup-assist-textarea {
 
 .phabricator-remarkup .remarkup-highlight {
   background-color: {$lightviolet};
+  padding: 0 4px;
 }
