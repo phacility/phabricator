@@ -18,11 +18,6 @@ abstract class PhabricatorTokenizerEditField
     return $control;
   }
 
-  public function setOriginalValue(array $value) {
-    $this->originalValue = $value;
-    return $this;
-  }
-
   public function setValue($value) {
     $this->originalValue = $value;
     return parent::setValue($value);
@@ -33,11 +28,7 @@ abstract class PhabricatorTokenizerEditField
     // correctly is easier?
     $this->originalValue = $request->getArr($key.'.original');
 
-    return $this->getListFromRequest($request, $key);
-  }
-
-  protected function getDefaultValue() {
-    return array();
+    return parent::getValueFromSubmit($request, $key);
   }
 
   protected function getValueForTransaction() {
@@ -87,8 +78,8 @@ abstract class PhabricatorTokenizerEditField
     return $new;
   }
 
-  public function getHTTPParameterType() {
-    return 'list<phid>';
+  protected function newHTTPParameterType() {
+    return new AphrontPHIDListHTTPParameterType();
   }
 
 }

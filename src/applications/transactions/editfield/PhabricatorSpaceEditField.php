@@ -9,8 +9,8 @@ final class PhabricatorSpaceEditField
     return null;
   }
 
-  public function getHTTPParameterType() {
-    return 'phid';
+  protected function newHTTPParameterType() {
+    return new AphrontPHIDHTTPParameterType();
   }
 
 }

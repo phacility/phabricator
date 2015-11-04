@@ -43,7 +43,7 @@ final class PhabricatorApplicationEditHTTPParameterHelpView
       if ($type === null) {
         unset($fields[$key]);
       }
-      $types[$type][] = $field;
+      $types[$type->getTypeName()] = $type;
     }
 
     $intro = pht(<<<EOTEXT
@@ -95,7 +95,7 @@ EOTEXT
       $rows[] = array(
         $field->getLabel(),
         $field->getKey(),
-        $field->getHTTPParameterType(),
+        $field->getHTTPParameterType()->getTypeName(),
         $field->getDescription(),
       );
     }
@@ -234,75 +234,8 @@ shows how to format values for each field type.
 EOTEXT
       );
 
-    // TODO: This should be formalized and modularized.
-    $type_spec = array(
-      'string' => array(
-        'format' => pht('URL encoded text.'),
-        'examples' => array(
-          'v=simple',
-          'v=properly%20escaped%20text',
-        ),
-      ),
-      'select' => array(
-        'format' => pht('Value from allowed set.'),
-        'examples' => array(
-          'v=value',
-        ),
-      ),
-      'list<phid>' => array(
-        'format' => array(
-          pht('Comma-separated list of PHIDs.'),
-          pht('List of PHIDs, as array.'),
-        ),
-        'examples' => array(
-          'v=PHID-XXXX-1111,PHID-XXXX-2222',
-          'v[]=PHID-XXXX-1111&v[]=PHID-XXXX-2222',
-        ),
-      ),
-      'phid' => array(
-        'format' => pht('Single PHID.'),
-        'examples' => pht('v=PHID-XXX-1111'),
-      ),
-    );
-
-    $rows = array();
-    $br = phutil_tag('br');
-    foreach ($types as $type => $fields) {
-      $spec = idx($type_spec, $type, array());
-
-      $field_list = mpull($fields, 'getKey');
-      $field_list = phutil_implode_html($br, $field_list);
-
-      $format_list = idx($spec, 'format', array());
-      $format_list = phutil_implode_html($br, (array)$format_list);
-
-      $example_list = idx($spec, 'examples', array());
-      $example_list = phutil_implode_html($br, (array)$example_list);
-
-      $rows[] = array(
-        $type,
-        $field_list,
-        $format_list,
-        $example_list,
-      );
-    }
-
-    $types_table = id(new AphrontTableView($rows))
-      ->setNoDataString(pht('This object has no fields with types.'))
-      ->setHeaders(
-        array(
-          pht('Type'),
-          pht('Fields'),
-          pht('Formats'),
-          pht('Examples'),
-        ))
-      ->setColumnClasses(
-        array(
-          'pri top',
-          'top',
-          'top',
-          'wide top prewrap',
-        ));
+    $types_table = id(new PhabricatorHTTPParameterTypeTableView())
+      ->setHTTPParameterTypes($types);
 
     return array(
       $this->renderInstructions($intro),

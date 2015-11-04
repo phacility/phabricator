@@ -194,35 +194,29 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   protected function getValueExistsInSubmit(AphrontRequest $request, $key) {
-    return $request->getExists($key);
+    return $this->getHTTPParameterType()->getExists($request, $key);
   }
 
   protected function getValueFromSubmit(AphrontRequest $request, $key) {
-    return $request->getStr($key);
+    return $this->getHTTPParameterType()->getValue($request, $key);
   }
 
   protected function getDefaultValue() {
-    return null;
+    return $this->getHTTPParameterType()->getDefaultValue();
   }
 
-  protected function getListFromRequest(
-    AphrontRequest $request,
-    $key) {
+  final public function getHTTPParameterType() {
+    $type = $this->newHTTPParameterType();
 
-    $list = $request->getArr($key, null);
-    if ($list === null) {
-      $list = $request->getStrList($key);
+    if ($type) {
+      $type->setViewer($this->getViewer());
     }
 
-    if (!$list) {
-      return array();
-    }
-
-    return $list;
+    return $type;
   }
 
-  public function getHTTPParameterType() {
-    return 'string';
+  protected function newHTTPParameterType() {
+    return new AphrontStringHTTPParameterType();
   }
 
   public function setEditTypeKey($edit_type_key) {
@@ -290,7 +284,7 @@ abstract class PhabricatorEditField extends Phobject {
       id(new PhabricatorSimpleEditType())
         ->setEditType($type_key)
         ->setTransactionType($transaction_type)
-        ->setValueType($this->getHTTPParameterType())
+        ->setValueType($this->getHTTPParameterType()->getTypeName())
         ->setDescription($this->getDescription())
         ->setMetadata($this->metadata),
     );
