@@ -248,5 +248,19 @@ final class PhabricatorPhurlURLEditor
     return $body;
   }
 
+  protected function didCatchDuplicateKeyException(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    Exception $ex) {
+
+    $errors = array();
+    $errors[] = new PhabricatorApplicationTransactionValidationError(
+      PhabricatorPhurlURLTransaction::TYPE_ALIAS,
+      pht('Duplicate'),
+      pht('This alias is already in use.'),
+      null);
+
+    throw new PhabricatorApplicationTransactionValidationException($errors);
+  }
 
 }
