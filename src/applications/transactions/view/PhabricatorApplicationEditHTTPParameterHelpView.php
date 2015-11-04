@@ -4,7 +4,7 @@
  * Renders the "HTTP Parameters" help page for edit engines.
  *
  * This page has a ton of text and specialized rendering on it, this class
- * just pulls it out of the main @{class:PhabricatorApplicationEditEngine}.
+ * just pulls it out of the main @{class:PhabricatorEditEngine}.
  */
 final class PhabricatorApplicationEditHTTPParameterHelpView
   extends AphrontView {

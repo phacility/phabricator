@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorApplicationEditEngineAPIMethod
+abstract class PhabricatorEditEngineAPIMethod
   extends ConduitAPIMethod {
 
   abstract public function newEditEngine();

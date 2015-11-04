@@ -1,7 +1,13 @@
 <?php
 
 final class PhabricatorPasteEditEngine
-  extends PhabricatorApplicationEditEngine {
+  extends PhabricatorEditEngine {
+
+  const ENGINECONST = 'paste.paste';
+
+  public function getEngineName() {
+    return pht('Pastes');
+  }
 
   protected function newEditableObject() {
     return PhabricatorPaste::initializeNewPaste($this->getViewer());
@@ -24,7 +30,7 @@ final class PhabricatorPasteEditEngine
     return $object->getMonogram();
   }
 
-  protected function getObjectCreateShortText($object) {
+  protected function getObjectCreateShortText() {
     return pht('Create Paste');
   }
 
