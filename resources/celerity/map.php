@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => 'a79276eb',
+    'core.pkg.css' => '80728a82',
     'core.pkg.js' => '47dc9ebb',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '2de124c9',
@@ -104,7 +104,7 @@ return array(
     'rsrc/css/application/tokens/tokens.css' => '3d0f239e',
     'rsrc/css/application/uiexample/example.css' => '528b19de',
     'rsrc/css/core/core.css' => '78e8d7ea',
-    'rsrc/css/core/remarkup.css' => '82f4e4c5',
+    'rsrc/css/core/remarkup.css' => '2cdbf272',
     'rsrc/css/core/syntax.css' => '9fd11da8',
     'rsrc/css/core/z-index.css' => '57ddcaa2',
     'rsrc/css/diviner/diviner-shared.css' => 'aa3656aa',
@@ -740,7 +740,7 @@ return array(
     'phabricator-object-selector-css' => '85ee8ce6',
     'phabricator-phtize' => 'd254d646',
     'phabricator-prefab' => '6920d200',
-    'phabricator-remarkup-css' => '82f4e4c5',
+    'phabricator-remarkup-css' => '2cdbf272',
     'phabricator-search-results-css' => '7dea472c',
     'phabricator-shaped-request' => '7cbe244b',
     'phabricator-side-menu-view-css' => 'bec2458e',

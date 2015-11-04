@@ -363,7 +363,7 @@ body div.phabricator-remarkup.remarkup-has-toc
   padding-top: 0;
 }
 
-body .phabricator-remarkup *:first-child,
+body .phabricator-remarkup > *:first-child,
 body .phabricator-remarkup .remarkup-header + * {
   margin-top: 0;
 }
