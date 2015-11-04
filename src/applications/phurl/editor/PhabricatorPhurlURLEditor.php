@@ -119,6 +119,19 @@ final class PhabricatorPhurlURLEditor
         }
         break;
       case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
+        $overdrawn = $this->validateIsTextFieldTooLong(
+          $object->getName(),
+          $xactions,
+          64);
+
+        if ($overdrawn) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Alias Too Long'),
+            pht('The alias can be no longer than 64 characters.'),
+            nonempty(last($xactions), null));
+        }
+
         foreach ($xactions as $xaction) {
           if ($xaction->getOldValue() != $xaction->getNewValue()) {
             $new_alias = $xaction->getNewValue();
