@@ -146,14 +146,11 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
           $project_phids = array();
         }
 
-        $edge_field = id(new PhabricatorDatasourceEditField())
+        $edge_field = id(new PhabricatorProjectsEditField())
           ->setKey('projectPHIDs')
           ->setLabel(pht('Projects'))
           ->setEditTypeKey('projects')
-          ->setDescription(
-            pht(
-              'Add or remove associated projects.'))
-          ->setDatasource(new PhabricatorProjectDatasource())
+          ->setDescription(pht('Add or remove associated projects.'))
           ->setAliases(array('project', 'projects'))
           ->setTransactionType($edge_type)
           ->setMetadataValue('edge:type', $project_edge_type)
@@ -175,12 +172,11 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
           $sub_phids = array();
         }
 
-        $subscribers_field = id(new PhabricatorDatasourceEditField())
+        $subscribers_field = id(new PhabricatorSubscribersEditField())
           ->setKey('subscriberPHIDs')
           ->setLabel(pht('Subscribers'))
           ->setEditTypeKey('subscribers')
           ->setDescription(pht('Manage subscribers.'))
-          ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
           ->setAliases(array('subscriber', 'subscribers'))
           ->setTransactionType($subscribers_type)
           ->setValue($sub_phids);
