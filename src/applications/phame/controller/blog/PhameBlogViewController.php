@@ -1,13 +1,13 @@
 <?php
 
-final class PhameBlogViewController extends PhameController {
+final class PhameBlogViewController extends PhameBlogController {
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
     $blog = id(new PhameBlogQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withIDs(array($id))
       ->executeOne();
     if (!$blog) {
@@ -18,20 +18,20 @@ final class PhameBlogViewController extends PhameController {
       ->readFromRequest($request);
 
     $posts = id(new PhamePostQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withBlogPHIDs(array($blog->getPHID()))
       ->executeWithCursorPager($pager);
 
     $header = id(new PHUIHeaderView())
       ->setHeader($blog->getName())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setPolicyObject($blog);
 
-    $actions = $this->renderActions($blog, $user);
-    $properties = $this->renderProperties($blog, $user, $actions);
+    $actions = $this->renderActions($blog, $viewer);
+    $properties = $this->renderProperties($blog, $viewer, $actions);
     $post_list = $this->renderPostList(
       $posts,
-      $user,
+      $viewer,
       pht('This blog has no visible posts.'));
 
     $post_list = id(new PHUIObjectBoxView())
@@ -46,27 +46,26 @@ final class PhameBlogViewController extends PhameController {
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-        $post_list,
-      ),
-      array(
-        'title' => $blog->getName(),
+    return $this->newPage()
+      ->setTitle($blog->getName())
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $object_box,
+          $post_list,
       ));
   }
 
   private function renderProperties(
     PhameBlog $blog,
-    PhabricatorUser $user,
+    PhabricatorUser $viewer,
     PhabricatorActionListView $actions) {
 
     require_celerity_resource('aphront-tooltip-css');
     Javelin::initBehavior('phabricator-tooltips');
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setObject($blog)
       ->setActionList($actions);
 
@@ -94,7 +93,7 @@ final class PhameBlogViewController extends PhameController {
         $feed_uri));
 
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $user,
+      $viewer,
       $blog);
 
     $properties->addProperty(
@@ -106,7 +105,7 @@ final class PhameBlogViewController extends PhameController {
       $descriptions[PhabricatorPolicyCapability::CAN_JOIN]);
 
     $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->addObject($blog, PhameBlog::MARKUP_FIELD_DESCRIPTION)
       ->process();
 
@@ -116,7 +115,7 @@ final class PhameBlogViewController extends PhameController {
       $description = PhabricatorMarkupEngine::renderOneObject(
         id(new PhabricatorMarkupOneOff())->setContent($blog->getDescription()),
         'default',
-        $user);
+        $viewer);
       $properties->addSectionHeader(
         pht('Description'),
         PHUIPropertyListView::ICON_SUMMARY);
@@ -126,19 +125,19 @@ final class PhameBlogViewController extends PhameController {
     return $properties;
   }
 
-  private function renderActions(PhameBlog $blog, PhabricatorUser $user) {
+  private function renderActions(PhameBlog $blog, PhabricatorUser $viewer) {
     $actions = id(new PhabricatorActionListView())
       ->setObject($blog)
       ->setObjectURI($this->getRequest()->getRequestURI())
-      ->setUser($user);
+      ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $user,
+      $viewer,
       $blog,
       PhabricatorPolicyCapability::CAN_EDIT);
 
     $can_join = PhabricatorPolicyFilter::hasCapability(
-      $user,
+      $viewer,
       $blog,
       PhabricatorPolicyCapability::CAN_JOIN);
 
@@ -152,7 +151,7 @@ final class PhameBlogViewController extends PhameController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setIcon('fa-globe')
         ->setHref($blog->getLiveURI())
         ->setName(pht('View Live')));

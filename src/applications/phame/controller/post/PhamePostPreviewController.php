@@ -1,6 +1,6 @@
 <?php
 
-final class PhamePostPreviewController extends PhameController {
+final class PhamePostPreviewController extends PhamePostController {
 
   protected function getSideNavFilter() {
     return null;

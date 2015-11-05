@@ -1,13 +1,13 @@
 <?php
 
-final class PhamePostFramedController extends PhameController {
+final class PhamePostFramedController extends PhamePostController {
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getViewer();
+    $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
     $post = id(new PhamePostQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withIDs(array($id))
       ->requireCapabilities(
         array(

@@ -1,6 +1,6 @@
 <?php
 
-final class PhamePostEditController extends PhameController {
+final class PhamePostEditController extends PhamePostController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();

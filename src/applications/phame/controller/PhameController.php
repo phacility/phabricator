@@ -2,27 +2,6 @@
 
 abstract class PhameController extends PhabricatorController {
 
-  protected function renderSideNavFilterView() {
-
-    $base_uri = new PhutilURI($this->getApplicationURI());
-
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI($base_uri);
-
-    $nav->addLabel(pht('Posts'));
-    $nav->addFilter('post/all', pht('Latest Posts'));
-    $nav->addFilter('post/draft', pht('My Drafts'));
-    $nav->addFilter('post', pht('My Posts'));
-
-    $nav->addLabel(pht('Blogs'));
-    $nav->addFilter('blog/user', pht('Joinable Blogs'));
-    $nav->addFilter('blog/all', pht('All Blogs'));
-
-    $nav->selectFilter(null);
-
-    return $nav;
-  }
-
   protected function renderPostList(
     array $posts,
     PhabricatorUser $viewer,
@@ -109,10 +88,6 @@ abstract class PhameController extends PhabricatorController {
     }
 
     return $stories;
-  }
-
-  public function buildApplicationMenu() {
-    return $this->renderSideNavFilterView()->getMenu();
   }
 
   protected function buildApplicationCrumbs() {

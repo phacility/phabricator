@@ -1,13 +1,13 @@
 <?php
 
-final class PhameBlogLiveController extends PhameController {
+final class PhameBlogLiveController extends PhameBlogController {
 
   public function shouldAllowPublic() {
     return true;
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
 
     $site = $request->getSite();
     if ($site instanceof PhameBlogSite) {
@@ -16,7 +16,7 @@ final class PhameBlogLiveController extends PhameController {
       $id = $request->getURIData('id');
 
       $blog = id(new PhameBlogQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withIDs(array($id))
         ->executeOne();
       if (!$blog) {
@@ -38,7 +38,7 @@ final class PhameBlogLiveController extends PhameController {
 
       $dialog = id(new AphrontDialogView())
         ->setTitle(pht('Blog Moved'))
-        ->setUser($user)
+        ->setUser($viewer)
         ->appendParagraph(pht('This blog is now hosted here:'))
         ->appendParagraph(
           phutil_tag(
