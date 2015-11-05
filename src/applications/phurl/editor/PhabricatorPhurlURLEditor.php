@@ -49,8 +49,12 @@ final class PhabricatorPhurlURLEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorPhurlURLTransaction::TYPE_NAME:
       case PhabricatorPhurlURLTransaction::TYPE_URL:
-      case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
       case PhabricatorPhurlURLTransaction::TYPE_DESCRIPTION:
+        return $xaction->getNewValue();
+      case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
+        if (!strlen($xaction->getNewValue())) {
+          return null;
+        }
         return $xaction->getNewValue();
     }
 
