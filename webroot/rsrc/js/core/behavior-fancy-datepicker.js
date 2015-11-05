@@ -300,10 +300,10 @@ JX.behavior('fancy-datepicker', function(config, statics) {
     // Render the calendar itself. NOTE: Javascript uses 0-based month indexes
     // while we use 1-based month indexes, so we have to adjust for that.
     var days = [];
-    var start = new Date(
+    var start = (new Date(
       valid_date.getYear() + 1900,
       valid_date.getMonth(),
-      1).getDay() - week_start;
+      1).getDay() - week_start + 7) % 7;
 
     while (start--) {
       days.push(cell('', null, false, 'day-placeholder'));

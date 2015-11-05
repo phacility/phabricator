@@ -453,7 +453,7 @@ return array(
     'rsrc/js/core/behavior-device.js' => 'a205cf28',
     'rsrc/js/core/behavior-drag-and-drop-textarea.js' => '6d49590e',
     'rsrc/js/core/behavior-error-log.js' => '6882e80a',
-    'rsrc/js/core/behavior-fancy-datepicker.js' => '665cf6ac',
+    'rsrc/js/core/behavior-fancy-datepicker.js' => '8ae55229',
     'rsrc/js/core/behavior-file-tree.js' => '88236f00',
     'rsrc/js/core/behavior-form.js' => '5c54cbf3',
     'rsrc/js/core/behavior-gesture.js' => '3ab51e2c',
@@ -586,7 +586,7 @@ return array(
     'javelin-behavior-durable-column' => 'c72aa091',
     'javelin-behavior-error-log' => '6882e80a',
     'javelin-behavior-event-all-day' => '38dcf3c8',
-    'javelin-behavior-fancy-datepicker' => '665cf6ac',
+    'javelin-behavior-fancy-datepicker' => '8ae55229',
     'javelin-behavior-global-drag-and-drop' => 'c8e57404',
     'javelin-behavior-herald-rule-editor' => '7ebaeed3',
     'javelin-behavior-high-security-warning' => 'a464fe03',
@@ -1294,13 +1294,6 @@ return array(
       'javelin-vector',
       'differential-inline-comment-editor',
     ),
-    '665cf6ac' => array(
-      'javelin-behavior',
-      'javelin-util',
-      'javelin-dom',
-      'javelin-stratcom',
-      'javelin-vector',
-    ),
     '6882e80a' => array(
       'javelin-dom',
     ),
@@ -1499,6 +1492,13 @@ return array(
     '8a41885b' => array(
       'javelin-install',
       'javelin-dom',
+    ),
+    '8ae55229' => array(
+      'javelin-behavior',
+      'javelin-util',
+      'javelin-dom',
+      'javelin-stratcom',
+      'javelin-vector',
     ),
     '8b3fd187' => array(
       'javelin-install',
