@@ -635,4 +635,8 @@ abstract class PhabricatorApplication
     return array();
   }
 
+  protected function getEditRoutePattern($base) {
+    return $base.'(?:(?P<id>[0-9]\d*)/)?(?:(?P<editAction>parameters)/)?';
+  }
+
 }

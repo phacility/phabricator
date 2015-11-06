@@ -115,6 +115,7 @@ final class PhabricatorApplicationEmailCommandsController
     $crumbs = $this->buildApplicationCrumbs();
     $this->addApplicationCrumb($crumbs, $selected);
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
 
     $content_box = PhabricatorMarkupEngine::renderOneObject(
       id(new PhabricatorMarkupOneOff())->setContent($content),
@@ -134,7 +135,7 @@ final class PhabricatorApplicationEmailCommandsController
     $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
-    $document = id(new PHUIDocumentView())
+    $document = id(new PHUIDocumentViewPro())
       ->setHeader($header)
       ->appendChild($info_view)
       ->appendChild($content_box);
@@ -146,6 +147,7 @@ final class PhabricatorApplicationEmailCommandsController
       ),
       array(
         'title' => $title,
+        'class' => 'pro-white-background',
       ));
 
   }

@@ -363,7 +363,7 @@ body div.phabricator-remarkup.remarkup-has-toc
   padding-top: 0;
 }
 
-body .phabricator-remarkup *:first-child,
+body .phabricator-remarkup > *:first-child,
 body .phabricator-remarkup .remarkup-header + * {
   margin-top: 0;
 }
@@ -519,4 +519,9 @@ var.remarkup-assist-textarea {
 .phabricator-remarkup hr {
   background: {$thinblueborder};
   margin: 24px 0;
+}
+
+.phabricator-remarkup .remarkup-highlight {
+  background-color: {$lightviolet};
+  padding: 0 4px;
 }

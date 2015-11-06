@@ -7,6 +7,7 @@ final class PhabricatorPhurlURLQuery
   private $phids;
   private $names;
   private $longURLs;
+  private $aliases;
   private $authorPHIDs;
 
   public function newResultObject() {
@@ -30,6 +31,11 @@ final class PhabricatorPhurlURLQuery
 
   public function withLongURLs(array $long_urls) {
     $this->longURLs = $long_urls;
+    return $this;
+  }
+
+  public function withAliases(array $aliases) {
+    $this->aliases = $aliases;
     return $this;
   }
 
@@ -85,6 +91,13 @@ final class PhabricatorPhurlURLQuery
         $conn,
         'url.longURL IN (%Ls)',
         $this->longURLs);
+    }
+
+    if ($this->aliases !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'url.alias IN (%Ls)',
+        $this->aliases);
     }
 
     return $where;

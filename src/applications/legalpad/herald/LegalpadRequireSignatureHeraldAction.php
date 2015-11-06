@@ -95,12 +95,12 @@ final class LegalpadRequireSignatureHeraldAction
       case self::DO_SIGNED:
         return pht(
           '%s document(s) are already signed: %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
       case self::DO_REQUIRED:
         return pht(
           'Required %s signature(s): %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
     }
   }

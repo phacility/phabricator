@@ -128,7 +128,7 @@ final class PHUIHeaderView extends AphrontTagView {
     } else if ($age == 1) {
       $when = pht('Yesterday');
     } else {
-      $when = pht('%d Days Ago', $age);
+      $when = pht('%s Day(s) Ago', new PhutilNumber($age));
     }
 
     $this->setStatus('fa-clock-o bluegrey', null, pht('Updated %s', $when));

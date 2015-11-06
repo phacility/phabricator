@@ -12,6 +12,10 @@ final class PhabricatorAuthAuthFactorPHIDType extends PhabricatorPHIDType {
     return new PhabricatorAuthFactorConfig();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorAuthApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

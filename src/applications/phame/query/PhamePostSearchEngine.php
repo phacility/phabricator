@@ -44,9 +44,9 @@ final class PhamePostSearchEngine
 
   protected function getBuiltinQueryNames() {
     $names = array(
-      'all' => pht('All'),
-      'live' => pht('Live'),
-      'draft' => pht('Draft'),
+      'all' => pht('All Posts'),
+      'live' => pht('Live Posts'),
+      'draft' => pht('Draft Posts'),
     );
     return $names;
   }

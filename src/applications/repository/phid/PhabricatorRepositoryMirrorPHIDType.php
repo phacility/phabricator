@@ -12,6 +12,10 @@ final class PhabricatorRepositoryMirrorPHIDType extends PhabricatorPHIDType {
     return new PhabricatorRepositoryMirror();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorDiffusionApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

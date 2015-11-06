@@ -41,6 +41,10 @@ final class PHUICrumbsView extends AphrontView {
     return $this;
   }
 
+  public function getActions() {
+    return $this->actions;
+  }
+
   public function render() {
     require_celerity_resource('phui-crumbs-view-css');
 

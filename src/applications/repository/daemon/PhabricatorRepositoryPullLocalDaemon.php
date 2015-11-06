@@ -172,7 +172,7 @@ final class PhabricatorRepositoryPullLocalDaemon
           pht(
             'Not enough process slots to schedule the other %s '.
             'repository(s) for updates yet.',
-            new PhutilNumber(count($queue))));
+            phutil_count($queue)));
       }
 
       if ($futures) {

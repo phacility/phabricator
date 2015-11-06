@@ -20,10 +20,6 @@ abstract class PhabricatorPHIDType extends Phobject {
 
   abstract public function getTypeName();
 
-  public function newObject() {
-    return null;
-  }
-
   public function getTypeIcon() {
     // Default to the application icon if the type doesn't specify one.
     $application_class = $this->getPHIDTypeApplicationClass();
@@ -35,6 +31,10 @@ abstract class PhabricatorPHIDType extends Phobject {
     return null;
   }
 
+  public function newObject() {
+    return null;
+  }
+
 
   /**
    * Get the class name for the application this type belongs to.
@@ -42,12 +42,7 @@ abstract class PhabricatorPHIDType extends Phobject {
    * @return string|null Class name of the corresponding application, or null
    *   if the type is not bound to an application.
    */
-  public function getPHIDTypeApplicationClass() {
-    // TODO: Some day this should probably be abstract, but for now it only
-    // affects global search and there's no real burning need to go classify
-    // every PHID type.
-    return null;
-  }
+  abstract public function getPHIDTypeApplicationClass();
 
   /**
    * Build a @{class:PhabricatorPolicyAwareQuery} to load objects of this type

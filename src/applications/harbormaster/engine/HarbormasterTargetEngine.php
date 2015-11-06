@@ -6,7 +6,7 @@ final class HarbormasterTargetEngine extends Phobject {
   private $object;
   private $autoTargetKeys;
 
-  public function setViewer($viewer) {
+  public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
     return $this;
   }
@@ -163,6 +163,10 @@ final class HarbormasterTargetEngine extends Phobject {
     array $step_map) {
 
     $viewer = $this->getViewer();
+    $initiator_phid = null;
+    if (!$viewer->isOmnipotent()) {
+      $initiator_phid = $viewer->getPHID();
+    }
     $plan_map = mgroup($step_map, 'getBuildPlanPHID');
 
     $builds = id(new HarbormasterBuildQuery())
@@ -206,7 +210,7 @@ final class HarbormasterTargetEngine extends Phobject {
         // resource and "own" it, so we don't try to handle this, but may need
         // to be more careful here if use of autotargets expands.
 
-        $build = $buildable->applyPlan($plan, array());
+        $build = $buildable->applyPlan($plan, array(), $initiator_phid);
         PhabricatorWorker::setRunAllTasksInProcess(false);
       } catch (Exception $ex) {
         PhabricatorWorker::setRunAllTasksInProcess(false);

@@ -37,7 +37,7 @@ final class PhabricatorInternationalizationManagementExtractWorkflow
 
     $console->writeOut(
       "%s\n",
-      pht('Found %s file(s)...', new PhutilNumber(count($futures))));
+      pht('Found %s file(s)...', phutil_count($futures)));
 
     $results = array();
 

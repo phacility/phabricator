@@ -126,7 +126,7 @@ abstract class PhabricatorStorageManagementWorkflow
           "documentation.\n\n".
           "MySQL needs to copy table data to make some adjustments, so these ".
           "migrations may take some time.",
-          new PhutilNumber(count($adjustments))));
+          phutil_count($adjustments)));
 
       $prompt = pht('Fix these schema issues?');
       if (!phutil_console_confirm($prompt, $default_no = true)) {

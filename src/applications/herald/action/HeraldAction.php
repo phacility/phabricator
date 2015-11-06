@@ -346,22 +346,22 @@ abstract class HeraldAction extends Phobject {
       case self::DO_STANDARD_NO_EFFECT:
         return pht(
           'This action has no effect on %s target(s): %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
       case self::DO_STANDARD_INVALID:
         return pht(
           '%s target(s) are invalid or of the wrong type: %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
       case self::DO_STANDARD_UNLOADABLE:
         return pht(
           '%s target(s) could not be loaded: %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
       case self::DO_STANDARD_PERMISSION:
         return pht(
           '%s target(s) do not have permission to see this object: %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
       case self::DO_STANDARD_INVALID_ACTION:
         return pht(

@@ -7,10 +7,11 @@ final class PhabricatorPhurlURLEditController
     $id = $request->getURIData('id');
     $is_create = !$id;
 
-    $viewer = $request->getViewer();
+    $viewer = $this->getViewer();
     $user_phid = $viewer->getPHID();
     $error_name = true;
     $error_long_url = true;
+    $error_alias = null;
     $validation_exception = null;
 
     $next_workflow = $request->getStr('next');
@@ -58,6 +59,7 @@ final class PhabricatorPhurlURLEditController
 
     $name = $url->getName();
     $long_url = $url->getLongURL();
+    $alias = $url->getAlias();
     $description = $url->getDescription();
     $edit_policy = $url->getEditPolicy();
     $view_policy = $url->getViewPolicy();
@@ -67,6 +69,7 @@ final class PhabricatorPhurlURLEditController
       $xactions = array();
       $name = $request->getStr('name');
       $long_url = $request->getStr('longURL');
+      $alias = $request->getStr('alias');
       $projects = $request->getArr('projects');
       $description = $request->getStr('description');
       $subscribers = $request->getArr('subscribers');
@@ -83,6 +86,11 @@ final class PhabricatorPhurlURLEditController
         ->setTransactionType(
           PhabricatorPhurlURLTransaction::TYPE_URL)
         ->setNewValue($long_url);
+
+      $xactions[] = id(new PhabricatorPhurlURLTransaction())
+        ->setTransactionType(
+          PhabricatorPhurlURLTransaction::TYPE_ALIAS)
+        ->setNewValue($alias);
 
       $xactions[] = id(new PhabricatorPhurlURLTransaction())
         ->setTransactionType(
@@ -127,6 +135,8 @@ final class PhabricatorPhurlURLEditController
           PhabricatorPhurlURLTransaction::TYPE_NAME);
         $error_long_url = $ex->getShortMessage(
           PhabricatorPhurlURLTransaction::TYPE_URL);
+        $error_alias = $ex->getShortMessage(
+          PhabricatorPhurlURLTransaction::TYPE_ALIAS);
       }
     }
 
@@ -146,6 +156,12 @@ final class PhabricatorPhurlURLEditController
       ->setName('longURL')
       ->setValue($long_url)
       ->setError($error_long_url);
+
+    $alias = id(new AphrontFormTextControl())
+      ->setLabel(pht('Alias'))
+      ->setName('alias')
+      ->setValue($alias)
+      ->setError($error_alias);
 
     $projects = id(new AphrontFormTokenizerControl())
       ->setLabel(pht('Projects'))
@@ -187,6 +203,7 @@ final class PhabricatorPhurlURLEditController
       ->setUser($viewer)
       ->appendChild($name)
       ->appendChild($long_url)
+      ->appendChild($alias)
       ->appendControl($view_policies)
       ->appendControl($edit_policies)
       ->appendControl($subscribers)

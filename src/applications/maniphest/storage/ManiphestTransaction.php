@@ -546,23 +546,23 @@ final class ManiphestTransaction
         $removed = array_diff($old, $new);
         if ($added && !$removed) {
           return pht(
-            '%s attached %d file(s): %s.',
+            '%s attached %s file(s): %s.',
             $this->renderHandleLink($author_phid),
-            count($added),
+            phutil_count($added),
             $this->renderHandleList($added));
         } else if ($removed && !$added) {
           return pht(
-            '%s detached %d file(s): %s.',
+            '%s detached %s file(s): %s.',
             $this->renderHandleLink($author_phid),
-            count($removed),
+            phutil_count($removed),
             $this->renderHandleList($removed));
         } else {
           return pht(
-            '%s changed file(s), attached %d: %s; detached %d: %s.',
+            '%s changed file(s), attached %s: %s; detached %s: %s.',
             $this->renderHandleLink($author_phid),
-            count($added),
+            phutil_count($added),
             $this->renderHandleList($added),
-            count($removed),
+            phutil_count($removed),
             $this->renderHandleList($removed));
         }
 
@@ -585,9 +585,9 @@ final class ManiphestTransaction
 
       case self::TYPE_MERGED_FROM:
         return pht(
-          '%s merged %d task(s): %s.',
+          '%s merged %s task(s): %s.',
           $this->renderHandleLink($author_phid),
-          count($new),
+          phutil_count($new),
           $this->renderHandleList($new));
         break;
 

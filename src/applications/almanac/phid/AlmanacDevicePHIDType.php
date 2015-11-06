@@ -12,6 +12,10 @@ final class AlmanacDevicePHIDType extends PhabricatorPHIDType {
     return new AlmanacDevice();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorAlmanacApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

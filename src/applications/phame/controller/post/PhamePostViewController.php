@@ -1,12 +1,12 @@
 <?php
 
-final class PhamePostViewController extends PhameController {
+final class PhamePostViewController extends PhamePostController {
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
 
     $post = id(new PhamePostQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withIDs(array($request->getURIData('id')))
       ->executeOne();
 
@@ -14,29 +14,35 @@ final class PhamePostViewController extends PhameController {
       return new Aphront404Response();
     }
 
-    $nav = $this->renderSideNavFilterView();
-
-    $actions = $this->renderActions($post, $user);
-    $properties = $this->renderProperties($post, $user, $actions);
-
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
       $post->getTitle(),
       $this->getApplicationURI('post/view/'.$post->getID().'/'));
+    $crumbs->setBorder(true);
 
-    $nav->appendChild($crumbs);
+    $actions = $this->renderActions($post, $viewer);
+    $properties = $this->renderProperties($post, $viewer);
+
+    $action_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Actions'))
+      ->setHref('#')
+      ->setIconFont('fa-bars')
+      ->addClass('phui-mobile-menu')
+      ->setDropdownMenu($actions);
 
     $header = id(new PHUIHeaderView())
-        ->setHeader($post->getTitle())
-        ->setUser($user)
-        ->setPolicyObject($post);
+      ->setHeader($post->getTitle())
+      ->setUser($viewer)
+      ->setPolicyObject($post)
+      ->addActionLink($action_button);
 
-    $object_box = id(new PHUIObjectBoxView())
+    $document = id(new PHUIDocumentViewPro())
       ->setHeader($header)
-      ->addPropertyList($properties);
+      ->setPropertyList($properties);
 
     if ($post->isDraft()) {
-      $object_box->appendChild(
+      $document->appendChild(
         id(new PHUIInfoView())
           ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
           ->setTitle(pht('Draft Post'))
@@ -47,7 +53,7 @@ final class PhamePostViewController extends PhameController {
     }
 
     if (!$post->getBlog()) {
-      $object_box->appendChild(
+      $document->appendChild(
         id(new PHUIInfoView())
           ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
           ->setTitle(pht('Not On A Blog'))
@@ -57,32 +63,40 @@ final class PhamePostViewController extends PhameController {
               'been deleted). Use "Move Post" to move it to a new blog.')));
     }
 
-    $nav->appendChild(
-      array(
-        $object_box,
-        $this->buildTransactionTimeline(
-          $post,
-          new PhamePostTransactionQuery()),
-        ));
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($viewer)
+      ->addObject($post, PhamePost::MARKUP_FIELD_BODY)
+      ->process();
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $post->getTitle(),
+    $document->appendChild(
+      phutil_tag(
+         'div',
+        array(
+          'class' => 'phabricator-remarkup',
+        ),
+        $engine->getOutput($post, PhamePost::MARKUP_FIELD_BODY)));
+
+    return $this->newPage()
+      ->setTitle($post->getTitle())
+      ->addClass('pro-white-background')
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $document,
       ));
   }
 
   private function renderActions(
     PhamePost $post,
-    PhabricatorUser $user) {
+    PhabricatorUser $viewer) {
 
       $actions = id(new PhabricatorActionListView())
         ->setObject($post)
         ->setObjectURI($this->getRequest()->getRequestURI())
-        ->setUser($user);
+        ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $user,
+      $viewer,
       $post,
       PhabricatorPolicyCapability::CAN_EDIT);
 
@@ -139,7 +153,7 @@ final class PhamePostViewController extends PhameController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setIcon('fa-globe')
         ->setHref($live_uri)
         ->setName(pht('View Live'))
@@ -151,42 +165,27 @@ final class PhamePostViewController extends PhameController {
 
   private function renderProperties(
     PhamePost $post,
-    PhabricatorUser $user,
-    PhabricatorActionListView $actions) {
+    PhabricatorUser $viewer) {
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($user)
-      ->setObject($post)
-      ->setActionList($actions);
+      ->setUser($viewer)
+      ->setObject($post);
 
     $properties->addProperty(
       pht('Blog'),
-      $user->renderHandle($post->getBlogPHID()));
+      $viewer->renderHandle($post->getBlogPHID()));
 
     $properties->addProperty(
       pht('Blogger'),
-      $user->renderHandle($post->getBloggerPHID()));
+      $viewer->renderHandle($post->getBloggerPHID()));
 
     $properties->addProperty(
       pht('Published'),
       $post->isDraft()
         ? pht('Draft')
-        : phabricator_datetime($post->getDatePublished(), $user));
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($user)
-      ->addObject($post, PhamePost::MARKUP_FIELD_BODY)
-      ->process();
+        : phabricator_datetime($post->getDatePublished(), $viewer));
 
     $properties->invokeWillRenderEvent();
-
-    $properties->addTextContent(
-      phutil_tag(
-         'div',
-        array(
-          'class' => 'phabricator-remarkup',
-        ),
-        $engine->getOutput($post, PhamePost::MARKUP_FIELD_BODY)));
 
     return $properties;
   }

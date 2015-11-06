@@ -14,6 +14,7 @@
 final class HarbormasterBuildRequest extends Phobject {
 
   private $buildPlanPHID;
+  private $initiatorPHID;
   private $buildParameters = array();
 
   public function setBuildPlanPHID($build_plan_phid) {
@@ -32,6 +33,15 @@ final class HarbormasterBuildRequest extends Phobject {
 
   public function getBuildParameters() {
     return $this->buildParameters;
+  }
+
+  public function setInitiatorPHID($phid) {
+    $this->initiatorPHID = $phid;
+    return $this;
+  }
+
+  public function getInitiatorPHID() {
+    return $this->initiatorPHID;
   }
 
 }

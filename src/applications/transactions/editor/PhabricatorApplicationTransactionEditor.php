@@ -242,6 +242,19 @@ abstract class PhabricatorApplicationTransactionEditor
     return $this->applicationEmail;
   }
 
+  public function getTransactionTypesForObject($object) {
+    $old = $this->object;
+    try {
+      $this->object = $object;
+      $result = $this->getTransactionTypes();
+      $this->object = $old;
+    } catch (Exception $ex) {
+      $this->object = $old;
+      throw $ex;
+    }
+    return $result;
+  }
+
   public function getTransactionTypes() {
     $types = array();
 
@@ -1650,7 +1663,7 @@ abstract class PhabricatorApplicationTransactionEditor
       throw new Exception(
         pht(
           "Invalid '%s' value for PHID transaction. Value should contain only ".
-          "keys '%s' (add PHIDs), '%' (remove PHIDs) and '%s' (set PHIDS).",
+          "keys '%s' (add PHIDs), '%s' (remove PHIDs) and '%s' (set PHIDS).",
           'new',
           '+',
           '-',
@@ -2158,6 +2171,51 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if ($xactions && strlen(last($xactions)->getNewValue())) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Check that text field input isn't longer than a specified length.
+   *
+   * A text field input is invalid if the length of the input is longer than a
+   * specified length. This length can be determined by the space allotted in
+   * the database, or given arbitrarily.
+   * This method is intended to make implementing @{method:validateTransaction}
+   * more convenient:
+   *
+   *   $overdrawn = $this->validateIsTextFieldTooLong(
+   *     $object->getName(),
+   *     $xactions,
+   *     $field_length);
+   *
+   * This will return `true` if the net effect of the object and transactions
+   * is a field that is too long.
+   *
+   * @param wild Current field value.
+   * @param list<PhabricatorApplicationTransaction> Transactions editing the
+   *          field.
+   * @param integer for maximum field length.
+   * @return bool True if the field will be too long after edits.
+   */
+  protected function validateIsTextFieldTooLong(
+    $field_value,
+    array $xactions,
+    $length) {
+
+    if ($xactions) {
+      $new_value_length = phutil_utf8_strlen(last($xactions)->getNewValue());
+      if ($new_value_length <= $length) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+
+    $old_value_length = phutil_utf8_strlen($field_value);
+    if ($old_value_length <= $length) {
       return false;
     }
 
