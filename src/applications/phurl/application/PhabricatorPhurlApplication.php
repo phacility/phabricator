@@ -26,6 +26,13 @@ final class PhabricatorPhurlApplication extends PhabricatorApplication {
     return true;
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new PhabricatorPhurlRemarkupRule(),
+      new PhabricatorPhurlLinkRemarkupRule(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/U(?P<id>[1-9]\d*)' => 'PhabricatorPhurlURLViewController',

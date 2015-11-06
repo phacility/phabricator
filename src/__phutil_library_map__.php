@@ -2643,6 +2643,8 @@ phutil_register_library_map(array(
     'PhabricatorPhurlApplication' => 'applications/phurl/application/PhabricatorPhurlApplication.php',
     'PhabricatorPhurlController' => 'applications/phurl/controller/PhabricatorPhurlController.php',
     'PhabricatorPhurlDAO' => 'applications/phurl/storage/PhabricatorPhurlDAO.php',
+    'PhabricatorPhurlLinkRemarkupRule' => 'applications/phurl/remarkup/PhabricatorPhurlLinkRemarkupRule.php',
+    'PhabricatorPhurlRemarkupRule' => 'applications/phurl/remarkup/PhabricatorPhurlRemarkupRule.php',
     'PhabricatorPhurlSchemaSpec' => 'applications/phurl/storage/PhabricatorPhurlSchemaSpec.php',
     'PhabricatorPhurlURL' => 'applications/phurl/storage/PhabricatorPhurlURL.php',
     'PhabricatorPhurlURLAccessController' => 'applications/phurl/controller/PhabricatorPhurlURLAccessController.php',
@@ -6770,6 +6772,8 @@ phutil_register_library_map(array(
     'PhabricatorPhurlApplication' => 'PhabricatorApplication',
     'PhabricatorPhurlController' => 'PhabricatorController',
     'PhabricatorPhurlDAO' => 'PhabricatorLiskDAO',
+    'PhabricatorPhurlLinkRemarkupRule' => 'PhutilRemarkupRule',
+    'PhabricatorPhurlRemarkupRule' => 'PhabricatorObjectRemarkupRule',
     'PhabricatorPhurlSchemaSpec' => 'PhabricatorConfigSchemaSpec',
     'PhabricatorPhurlURL' => array(
       'PhabricatorPhurlDAO',
