@@ -816,8 +816,10 @@ final class PhabricatorUSEnglishTranslation
       ),
 
       '%s, %s line(s)' => array(
-        '%s, %s line',
-        '%s, %s lines',
+        array(
+          '%s, %s line',
+          '%s, %s lines',
+        ),
       ),
 
       '%s pushed %d commit(s) to %s.' => array(
