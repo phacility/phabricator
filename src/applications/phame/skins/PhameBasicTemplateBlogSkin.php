@@ -79,6 +79,12 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
     return $this->cssResources;
   }
 
+  public function remarkup($corpus) {
+    $view = id(new PHUIRemarkupView($this->getViewer(), $corpus));
+
+    return hsprintf('%s', $view);
+  }
+
   public function getName() {
     return $this->getSpecification()->getName();
   }
@@ -107,13 +113,16 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
 
   private function getDefaultScope() {
     return array(
-      'skin'        => $this,
-      'blog'        => $this->getBlog(),
-      'uri'         => $this->getURI($this->getURIPath()),
-      'home_uri'    => $this->getURI(''),
-      'title'       => $this->getTitle(),
+      'skin' => $this,
+      'blog' => $this->getBlog(),
+      'uri' => $this->getURI($this->getURIPath()),
+      'home_uri' => $this->getURI(''),
+
+      // TODO: This is wrong for detail pages, which should show the post
+      // title, but getting it right is a pain and this is better than nothing.
+      'title' => $this->getBlog()->getName(),
       'description' => $this->getDescription(),
-      'og_type'     => $this->getOGType(),
+      'og_type' => $this->getOGType(),
     );
   }
 
@@ -135,7 +144,7 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
     return $this->renderTemplate(
       'post-detail.php',
       array(
-        'post'  => $post,
+        'post' => $post,
       ));
   }
 
