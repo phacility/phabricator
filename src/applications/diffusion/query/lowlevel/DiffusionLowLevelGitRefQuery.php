@@ -31,7 +31,9 @@ final class DiffusionLowLevelGitRefQuery extends DiffusionLowLevelQuery {
 
     if ($this->isOriginBranch) {
       if ($repository->isWorkingCopyBare()) {
+        $prefix = 'refs/changes/';
         $prefix = 'refs/heads/';
+        $prefix = 'refs/meta/';
       } else {
         $remote = DiffusionGitBranch::DEFAULT_GIT_REMOTE;
         $prefix = 'refs/remotes/'.$remote.'/';
