@@ -87,7 +87,7 @@ final class PhamePostView extends AphrontView {
     return phutil_tag(
       'div',
       array(
-        'class' => 'phame-post-body',
+        'class' => 'phame-post-body phabricator-remarkup',
       ),
       $this->getBody());
   }
@@ -96,7 +96,7 @@ final class PhamePostView extends AphrontView {
     return phutil_tag(
       'div',
       array(
-        'class' => 'phame-post-body',
+        'class' => 'phame-post-body phabricator-remarkup',
       ),
       $this->getSummary());
   }

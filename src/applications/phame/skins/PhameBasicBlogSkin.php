@@ -16,6 +16,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
     $this->uriPath = $uri_path;
     return $this;
   }
+
   public function getURIPath() {
     return $this->uriPath;
   }
@@ -24,6 +25,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
     $this->oGType = $og_type;
     return $this;
   }
+
   protected function getOGType() {
     return $this->oGType;
   }
@@ -32,6 +34,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
     $this->description = $description;
     return $this;
   }
+
   protected function getDescription() {
     return $this->description;
   }
@@ -40,13 +43,12 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
     $this->title = $title;
     return $this;
   }
+
   protected function getTitle() {
     return $this->title;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-
+  public function handleRequest(AphrontRequest $request) {
     $content = $this->renderContent($request);
 
     if (!$content) {
@@ -68,7 +70,6 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
     if ($this->getPreview()) {
       $view->setFrameable(true);
     }
-
 
     $view->appendChild($content);
 
@@ -222,7 +223,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
    * @task internal
    */
   protected function renderContent(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
 
     $matches = null;
     $path = $request->getPath();
@@ -233,7 +234,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
     $this->setURIPath('');
     if (preg_match('@^/post/(?P<name>.*)$@', $path, $matches)) {
       $post = id(new PhamePostQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withBlogPHIDs(array($this->getBlog()->getPHID()))
         ->withPhameTitles(array($matches['name']))
         ->executeOne();
@@ -263,7 +264,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
       $pager->setPageSize($this->getPageSize());
 
       $posts = id(new PhamePostQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withBlogPHIDs(array($this->getBlog()->getPHID()))
         ->executeWithCursorPager($pager);
 
@@ -280,10 +281,10 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
 
   private function buildPostViews(array $posts) {
     assert_instances_of($posts, 'PhamePost');
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($user);
+      ->setViewer($viewer);
 
     $phids = array();
     foreach ($posts as $post) {
@@ -294,7 +295,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
     }
 
     $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withPHIDs($phids)
       ->execute();
 
@@ -303,7 +304,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
     $views = array();
     foreach ($posts as $post) {
       $view = id(new PhamePostView())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setSkin($this)
         ->setPost($post)
         ->setBody($engine->getOutput($post, PhamePost::MARKUP_FIELD_BODY))

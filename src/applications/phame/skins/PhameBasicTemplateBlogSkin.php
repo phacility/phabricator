@@ -27,15 +27,26 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
     }
 
     $map = CelerityResourceMap::getNamedInstance('phabricator');
-    $resource_symbol = 'syntax-highlighting-css';
-    $resource_uri = $map->getURIForSymbol($resource_symbol);
+    $highlight_symbol = 'syntax-highlighting-css';
+    $highlight_uri = $map->getURIForSymbol($highlight_symbol);
 
     $this->cssResources[] = phutil_tag(
       'link',
       array(
         'rel'   => 'stylesheet',
         'type'  => 'text/css',
-        'href'  => PhabricatorEnv::getCDNURI($resource_uri),
+        'href'  => PhabricatorEnv::getCDNURI($highlight_uri),
+      ));
+
+    $remarkup_symbol = 'phabricator-remarkup-css';
+    $remarkup_uri = $map->getURIForSymbol($remarkup_symbol);
+
+    $this->cssResources[] = phutil_tag(
+      'link',
+      array(
+        'rel'   => 'stylesheet',
+        'type'  => 'text/css',
+        'href'  => PhabricatorEnv::getCDNURI($remarkup_uri),
       ));
 
     $this->cssResources = phutil_implode_html("\n", $this->cssResources);
