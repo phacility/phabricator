@@ -13,9 +13,6 @@ final class PhamePost extends PhameDAO
   const MARKUP_FIELD_BODY    = 'markup:body';
   const MARKUP_FIELD_SUMMARY = 'markup:summary';
 
-  const VISIBILITY_DRAFT     = 0;
-  const VISIBILITY_PUBLISHED = 1;
-
   protected $bloggerPHID;
   protected $title;
   protected $phameTitle;
@@ -37,7 +34,7 @@ final class PhamePost extends PhameDAO
       ->setBlogPHID($blog->getPHID())
       ->setBlog($blog)
       ->setDatePublished(0)
-      ->setVisibility(self::VISIBILITY_DRAFT);
+      ->setVisibility(PhameConstants::VISIBILITY_PUBLISHED);
     return $post;
   }
 
@@ -66,7 +63,7 @@ final class PhamePost extends PhameDAO
   }
 
   public function isDraft() {
-    return $this->getVisibility() == self::VISIBILITY_DRAFT;
+    return $this->getVisibility() == PhameConstants::VISIBILITY_DRAFT;
   }
 
   public function getHumanName() {
@@ -162,14 +159,6 @@ final class PhamePost extends PhameDAO
       'summary'       => PhabricatorMarkupEngine::summarize($this->getBody()),
       'datePublished' => $this->getDatePublished(),
       'published'     => !$this->isDraft(),
-    );
-  }
-
-  public static function getVisibilityOptionsForSelect() {
-    return array(
-      self::VISIBILITY_DRAFT     => pht('Draft: visible only to me.'),
-      self::VISIBILITY_PUBLISHED => pht(
-        'Published: visible to the whole world.'),
     );
   }
 

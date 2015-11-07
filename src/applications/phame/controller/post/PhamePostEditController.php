@@ -45,25 +45,27 @@ final class PhamePostEditController extends PhamePostController {
       $post = PhamePost::initializePost($viewer, $blog);
       $cancel_uri = $this->getApplicationURI('/blog/view/'.$blog->getID().'/');
 
-      $submit_button = pht('Save Draft');
-      $page_title    = pht('Create Post');
+      $submit_button = pht('Create Post');
+      $page_title = pht('Create Post');
     }
 
-    $title           = $post->getTitle();
-    $phame_title     = $post->getPhameTitle();
-    $body            = $post->getBody();
+    $title = $post->getTitle();
+    $phame_title = $post->getPhameTitle();
+    $body = $post->getBody();
     $comments_widget = $post->getCommentsWidget();
+    $visibility = $post->getVisibility();
 
     $e_title       = true;
     $e_phame_title = true;
     $validation_exception = null;
     if ($request->isFormPost()) {
-      $title           = $request->getStr('title');
-      $phame_title     = $request->getStr('phame_title');
-      $phame_title     = PhabricatorSlug::normalize($phame_title);
-      $body            = $request->getStr('body');
+      $title = $request->getStr('title');
+      $phame_title = $request->getStr('phame_title');
+      $phame_title = PhabricatorSlug::normalize($phame_title);
+      $body = $request->getStr('body');
       $comments_widget = $request->getStr('comments_widget');
-      $v_projects      = $request->getArr('projects');
+      $v_projects = $request->getArr('projects');
+      $visibility = $request->getInt('visibility');
 
       $xactions = array(
         id(new PhamePostTransaction())
@@ -75,6 +77,9 @@ final class PhamePostEditController extends PhamePostController {
         id(new PhamePostTransaction())
           ->setTransactionType(PhamePostTransaction::TYPE_BODY)
           ->setNewValue($body),
+        id(new PhamePostTransaction())
+          ->setTransactionType(PhamePostTransaction::TYPE_VISIBILITY)
+          ->setNewValue($visibility),
         id(new PhamePostTransaction())
           ->setTransactionType(PhamePostTransaction::TYPE_COMMENTS_WIDGET)
           ->setNewValue($comments_widget),
@@ -134,6 +139,12 @@ final class PhamePostEditController extends PhamePostController {
                      'with underscores for spaces. '.
                      'Formatting is enforced.'))
         ->setError($e_phame_title))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+        ->setLabel(pht('Visibility'))
+        ->setName('visibility')
+        ->setvalue($visibility)
+        ->setOptions(PhameConstants::getPhamePostStatusMap()))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
         ->setLabel(pht('Body'))

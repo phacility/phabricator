@@ -17,6 +17,7 @@ final class PhamePostEditor
     $types[] = PhamePostTransaction::TYPE_TITLE;
     $types[] = PhamePostTransaction::TYPE_PHAME_TITLE;
     $types[] = PhamePostTransaction::TYPE_BODY;
+    $types[] = PhamePostTransaction::TYPE_VISIBILITY;
     $types[] = PhamePostTransaction::TYPE_COMMENTS_WIDGET;
 
     return $types;
@@ -33,6 +34,8 @@ final class PhamePostEditor
         return $object->getPhameTitle();
       case PhamePostTransaction::TYPE_BODY:
         return $object->getBody();
+      case PhamePostTransaction::TYPE_VISIBILITY:
+        return $object->getVisibility();
       case PhamePostTransaction::TYPE_COMMENTS_WIDGET:
         return $object->getCommentsWidget();
     }
@@ -46,6 +49,7 @@ final class PhamePostEditor
       case PhamePostTransaction::TYPE_TITLE:
       case PhamePostTransaction::TYPE_PHAME_TITLE:
       case PhamePostTransaction::TYPE_BODY:
+      case PhamePostTransaction::TYPE_VISIBILITY:
       case PhamePostTransaction::TYPE_COMMENTS_WIDGET:
         return $xaction->getNewValue();
     }
@@ -62,6 +66,13 @@ final class PhamePostEditor
         return $object->setPhameTitle($xaction->getNewValue());
       case PhamePostTransaction::TYPE_BODY:
         return $object->setBody($xaction->getNewValue());
+      case PhamePostTransaction::TYPE_VISIBILITY:
+        if ($xaction->getNewValue() == PhameConstants::VISIBILITY_DRAFT) {
+          $object->setDatePublished(time());
+        } else {
+          $object->setDatePublished(0);
+        }
+        return $object->setVisibility($xaction->getNewValue());
       case PhamePostTransaction::TYPE_COMMENTS_WIDGET:
         return $object->setCommentsWidget($xaction->getNewValue());
     }
@@ -77,6 +88,7 @@ final class PhamePostEditor
       case PhamePostTransaction::TYPE_TITLE:
       case PhamePostTransaction::TYPE_PHAME_TITLE:
       case PhamePostTransaction::TYPE_BODY:
+      case PhamePostTransaction::TYPE_VISIBILITY:
       case PhamePostTransaction::TYPE_COMMENTS_WIDGET:
         return;
     }

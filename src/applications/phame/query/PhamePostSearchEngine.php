@@ -32,8 +32,8 @@ final class PhamePostSearchEngine
         ->setLabel(pht('Visibility'))
         ->setOptions(array(
           '' => pht('All'),
-          PhamePost::VISIBILITY_PUBLISHED => pht('Live'),
-          PhamePost::VISIBILITY_DRAFT => pht('Draft'),
+          PhameConstants::VISIBILITY_PUBLISHED => pht('Published'),
+          PhameConstants::VISIBILITY_DRAFT => pht('Draft'),
           )),
     );
   }
@@ -45,7 +45,7 @@ final class PhamePostSearchEngine
   protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All Posts'),
-      'live' => pht('Live Posts'),
+      'live' => pht('Published Posts'),
       'draft' => pht('Draft Posts'),
     );
     return $names;
@@ -60,10 +60,10 @@ final class PhamePostSearchEngine
         return $query;
       case 'live':
         return $query->setParameter(
-          'visibility', PhamePost::VISIBILITY_PUBLISHED);
+          'visibility', PhameConstants::VISIBILITY_PUBLISHED);
       case 'draft':
         return $query->setParameter(
-          'visibility', PhamePost::VISIBILITY_DRAFT);
+          'visibility', PhameConstants::VISIBILITY_DRAFT);
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
