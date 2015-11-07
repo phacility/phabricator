@@ -163,22 +163,22 @@ abstract class PhabricatorSubscriptionsHeraldAction
         return pht(
           'Declined to resubscribe %s target(s) because they previously '.
           'unsubscribed: %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
       case self::DO_AUTOSUBSCRIBED:
         return pht(
           '%s automatically subscribed target(s) were not affected: %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
       case self::DO_SUBSCRIBED:
         return pht(
           'Added %s subscriber(s): %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
       case self::DO_UNSUBSCRIBED:
         return pht(
           'Removed %s subscriber(s): %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
     }
   }

@@ -1,13 +1,13 @@
 <?php
 
-final class PhamePostUnpublishController extends PhameController {
+final class PhamePostUnpublishController extends PhamePostController {
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
     $post = id(new PhamePostQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withIDs(array($id))
       ->requireCapabilities(
         array(
@@ -30,7 +30,7 @@ final class PhamePostUnpublishController extends PhameController {
     $cancel_uri = $this->getApplicationURI('/post/view/'.$post->getID().'/');
 
     $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setTitle(pht('Unpublish Post?'))
       ->appendChild(
         pht(

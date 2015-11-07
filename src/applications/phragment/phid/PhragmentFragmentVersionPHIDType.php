@@ -12,6 +12,10 @@ final class PhragmentFragmentVersionPHIDType extends PhabricatorPHIDType {
     return new PhragmentFragmentVersion();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorPhragmentApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

@@ -82,7 +82,7 @@ final class ManiphestTaskResultListView extends ManiphestView {
       $header = id(new PHUIHeaderView())
         ->addSigil('task-group')
         ->setMetadata(array('priority' => head($list)->getPriority()))
-        ->setHeader(pht('%s (%s)', $group, new PhutilNumber(count($list))));
+        ->setHeader(pht('%s (%s)', $group, phutil_count($list)));
 
       $lists[] = id(new PHUIObjectBoxView())
         ->setHeader($header)

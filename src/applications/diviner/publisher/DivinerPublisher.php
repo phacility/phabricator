@@ -140,14 +140,14 @@ abstract class DivinerPublisher extends Phobject {
       "%s\n",
       pht(
         'Deleting %s document(s).',
-        new PhutilNumber(count($deleted))));
+        phutil_count($deleted)));
     $this->deleteDocumentsByHash($deleted);
 
     $console->writeOut(
       "%s\n",
       pht(
         'Creating %s document(s).',
-        new PhutilNumber(count($created))));
+        phutil_count($created)));
     $this->createDocumentsByHash($created);
   }
 

@@ -199,7 +199,9 @@ abstract class PhragmentController extends PhabricatorController {
     $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
     if ($alt === null) {
       return id(new PHUIInfoView())
-        ->setTitle(pht('security.alternate-file-domain must be configured!'))
+        ->setTitle(pht(
+          '%s must be configured!',
+          'security.alternate-file-domain'))
         ->setSeverity(PHUIInfoView::SEVERITY_ERROR)
         ->appendChild(
           phutil_tag(

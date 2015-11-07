@@ -12,6 +12,10 @@ final class PhabricatorPhamePostPHIDType extends PhabricatorPHIDType {
     return new PhamePost();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorPhameApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

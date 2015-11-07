@@ -115,7 +115,7 @@ final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
             $list_section = array(
               pht(
                 'The configurations differ in the following %s way(s):',
-                new PhutilNumber(count($issues))),
+                phutil_count($issues)),
               phutil_tag(
                 'ul',
                 array(),

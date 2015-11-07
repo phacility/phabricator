@@ -8,7 +8,7 @@ final class PhameBlogEditor
   }
 
   public function getEditorObjectsDescription() {
-    return pht('Blogs');
+    return pht('Phame Blogs');
   }
 
   public function getTransactionTypes() {

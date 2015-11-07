@@ -3,7 +3,6 @@
 abstract class PhabricatorController extends AphrontController {
 
   private $handles;
-  private $extraQuicksandConfig = array();
 
   public function shouldRequireLogin() {
     return true;
@@ -60,15 +59,6 @@ abstract class PhabricatorController extends AphrontController {
 
   public function isGlobalDragAndDropUploadEnabled() {
     return false;
-  }
-
-  public function addExtraQuicksandConfig($config) {
-    $this->extraQuicksandConfig += $config;
-    return $this;
-  }
-
-  private function getExtraQuicksandConfig() {
-    return $this->extraQuicksandConfig;
   }
 
   public function willBeginExecution() {
@@ -285,89 +275,11 @@ abstract class PhabricatorController extends AphrontController {
     }
   }
 
-  public function buildStandardPageView() {
-    $view = new PhabricatorStandardPageView();
-    $view->setRequest($this->getRequest());
-    $view->setController($this);
-    return $view;
-  }
-
-  public function buildStandardPageResponse($view, array $data) {
-    $page = $this->buildStandardPageView();
-    $page->appendChild($view);
-    return $this->buildPageResponse($page);
-  }
-
-  private function buildPageResponse($page) {
-    if ($this->getRequest()->isQuicksand()) {
-      $response = id(new AphrontAjaxResponse())
-        ->setContent($page->renderForQuicksand(
-          $this->getExtraQuicksandConfig()));
-    } else {
-      $response = id(new AphrontWebpageResponse())
-        ->setContent($page->render());
-    }
-
-    return $response;
-  }
-
   public function getApplicationURI($path = '') {
     if (!$this->getCurrentApplication()) {
       throw new Exception(pht('No application!'));
     }
     return $this->getCurrentApplication()->getApplicationURI($path);
-  }
-
-  public function buildApplicationPage($view, array $options) {
-    $page = $this->buildStandardPageView();
-
-    $title = PhabricatorEnv::getEnvConfig('phabricator.serious-business') ?
-      'Phabricator' :
-      pht('Bacon Ice Cream for Breakfast');
-
-    $application = $this->getCurrentApplication();
-    $page->setTitle(idx($options, 'title', $title));
-    if ($application) {
-      $page->setApplicationName($application->getName());
-      if ($application->getTitleGlyph()) {
-        $page->setGlyph($application->getTitleGlyph());
-      }
-    }
-
-    if (!($view instanceof AphrontSideNavFilterView)) {
-      $nav = new AphrontSideNavFilterView();
-      $nav->appendChild($view);
-      $view = $nav;
-    }
-
-    $user = $this->getRequest()->getUser();
-    $view->setUser($user);
-
-    $page->appendChild($view);
-
-    $object_phids = idx($options, 'pageObjects', array());
-    if ($object_phids) {
-      $page->appendPageObjects($object_phids);
-      foreach ($object_phids as $object_phid) {
-        PhabricatorFeedStoryNotification::updateObjectNotificationViews(
-          $user,
-          $object_phid);
-      }
-    }
-
-    if (idx($options, 'device', true)) {
-      $page->setDeviceReady(true);
-    }
-
-    $page->setShowFooter(idx($options, 'showFooter', true));
-    $page->setShowChrome(idx($options, 'chrome', true));
-
-    $application_menu = $this->buildApplicationMenu();
-    if ($application_menu) {
-      $page->setApplicationMenu($application_menu);
-    }
-
-    return $this->buildPageResponse($page);
   }
 
   public function willSendResponse(AphrontResponse $response) {
@@ -532,6 +444,36 @@ abstract class PhabricatorController extends AphrontController {
       ->setSubmitURI($submit_uri);
   }
 
+  public function newPage() {
+    $page = id(new PhabricatorStandardPageView())
+      ->setRequest($this->getRequest())
+      ->setController($this)
+      ->setDeviceReady(true);
+
+    $application = $this->getCurrentApplication();
+    if ($application) {
+      $page->setApplicationName($application->getName());
+      if ($application->getTitleGlyph()) {
+        $page->setGlyph($application->getTitleGlyph());
+      }
+    }
+
+    $viewer = $this->getRequest()->getUser();
+    if ($viewer) {
+      $page->setUser($viewer);
+    }
+
+    // TODO: Remove after removing callsites to addExtraQuicksandConfig().
+    $page->addQuicksandConfig($this->extraQuicksandConfig);
+
+    return $page;
+  }
+
+  public function newApplicationMenu() {
+    return id(new PHUIApplicationMenuView())
+      ->setViewer($this->getRequest()->getUser());
+  }
+
   protected function buildTransactionTimeline(
     PhabricatorApplicationTransactionInterface $object,
     PhabricatorApplicationTransactionQuery $query,
@@ -577,6 +519,91 @@ abstract class PhabricatorController extends AphrontController {
     $object->willRenderTimeline($timeline, $this->getRequest());
 
     return $timeline;
+  }
+
+
+  public function buildApplicationCrumbsForEditEngine() {
+    // TODO: This is kind of gross, I'm bascially just making this public so
+    // I can use it in EditEngine. We could do this without making it public
+    // by using controller delegation, or make it properly public.
+    return $this->buildApplicationCrumbs();
+  }
+
+
+/* -(  Deprecated  )--------------------------------------------------------- */
+
+
+  /**
+   * DEPRECATED.
+   */
+  private $extraQuicksandConfig = array();
+
+
+  /**
+   * DEPRECATED. Use @{method:newPage} and call addQuicksandConfig().
+   */
+  public function addExtraQuicksandConfig($config) {
+    // TODO: When this method is removed,
+    $this->extraQuicksandConfig += $config;
+    return $this;
+  }
+
+
+  /**
+   * DEPRECATED. Use @{method:newPage}.
+   */
+  public function buildStandardPageView() {
+    return $this->newPage();
+  }
+
+
+  /**
+   * DEPRECATED. Use @{method:newPage}.
+   */
+  public function buildStandardPageResponse($view, array $data) {
+    $page = $this->buildStandardPageView();
+    $page->appendChild($view);
+    return $page->produceAphrontResponse();
+  }
+
+
+  /**
+   * DEPRECATED. Use @{method:newPage}.
+   */
+  public function buildApplicationPage($view, array $options) {
+    $page = $this->newPage();
+
+    $title = PhabricatorEnv::getEnvConfig('phabricator.serious-business') ?
+      'Phabricator' :
+      pht('Bacon Ice Cream for Breakfast');
+
+    $page->setTitle(idx($options, 'title', $title));
+
+    if (idx($options, 'class')) {
+      $page->addClass($options['class']);
+    }
+
+    if (!($view instanceof AphrontSideNavFilterView)) {
+      $nav = new AphrontSideNavFilterView();
+      $nav->appendChild($view);
+      $view = $nav;
+    }
+
+    $page->appendChild($view);
+
+    $object_phids = idx($options, 'pageObjects', array());
+    if ($object_phids) {
+      $page->setPageObjectPHIDs($object_phids);
+    }
+
+    if (!idx($options, 'device', true)) {
+      $page->setDeviceReady(false);
+    }
+
+    $page->setShowFooter(idx($options, 'showFooter', true));
+    $page->setShowChrome(idx($options, 'chrome', true));
+
+    return $page->produceAphrontResponse();
   }
 
 }

@@ -79,7 +79,7 @@ final class PhabricatorElasticSearchEngine extends PhabricatorSearchEngine {
       $spec['relationship'][$rtype][] = array(
         'phid'      => $to_phid,
         'phidType'  => $to_type,
-        'when'      => $time,
+        'when'      => (int)$time,
       );
     }
 

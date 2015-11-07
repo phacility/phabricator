@@ -1,14 +1,14 @@
 <?php
 
-final class PhamePostEditController extends PhameController {
+final class PhamePostEditController extends PhamePostController {
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
     if ($id) {
       $post = id(new PhamePostQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withIDs(array($id))
         ->requireCapabilities(
           array(
@@ -29,7 +29,7 @@ final class PhamePostEditController extends PhameController {
       $v_projects = array_reverse($v_projects);
     } else {
       $blog = id(new PhameBlogQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withIDs(array($request->getInt('blog')))
         ->requireCapabilities(
           array(
@@ -42,7 +42,7 @@ final class PhamePostEditController extends PhameController {
       }
       $v_projects = array();
 
-      $post = PhamePost::initializePost($user, $blog);
+      $post = PhamePost::initializePost($viewer, $blog);
       $cancel_uri = $this->getApplicationURI('/blog/view/'.$blog->getID().'/');
 
       $submit_button = pht('Save Draft');
@@ -87,7 +87,7 @@ final class PhamePostEditController extends PhameController {
         ->setNewValue(array('=' => array_fuse($v_projects)));
 
       $editor = id(new PhamePostEditor())
-        ->setActor($user)
+        ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true);
 
@@ -106,12 +106,12 @@ final class PhamePostEditController extends PhameController {
     }
 
     $handle = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withPHIDs(array($post->getBlogPHID()))
       ->executeOne();
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->addHiddenInput('blog', $request->getInt('blog'))
       ->appendChild(
         id(new AphrontFormMarkupControl())
@@ -141,7 +141,7 @@ final class PhamePostEditController extends PhameController {
         ->setValue($body)
         ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
         ->setID('post-body')
-        ->setUser($user)
+        ->setUser($viewer)
         ->setDisableMacros(true))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
@@ -160,14 +160,18 @@ final class PhamePostEditController extends PhameController {
         ->addCancelButton($cancel_uri)
         ->setValue($submit_button));
 
-    $loading = phutil_tag_div(
-      'aphront-panel-preview-loading-text',
-      pht('Loading preview...'));
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('%s (Post Preview)', $title));
 
-    $preview_panel = phutil_tag_div('aphront-panel-preview', array(
-      phutil_tag_div('phame-post-preview-header', pht('Post Preview')),
-      phutil_tag('div', array('id' => 'post-preview'), $loading),
-    ));
+    $container = id(new PHUIBoxView())
+      ->setID('post-preview');
+
+    $document = id(new PHUIDocumentViewPro())
+      ->setHeader($header)
+      ->appendChild($container);
+
+    $preview_panel = id(new PHUIObjectBoxView())
+      ->appendChild($document);
 
     Javelin::initBehavior(
       'phame-post-preview',
@@ -189,14 +193,13 @@ final class PhamePostEditController extends PhameController {
       $page_title,
       $this->getApplicationURI('/post/view/'.$id.'/'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-        $preview_panel,
-      ),
-      array(
-        'title' => $page_title,
+    return $this->newPage()
+      ->setTitle($page_title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $form_box,
+          $preview_panel,
       ));
   }
 

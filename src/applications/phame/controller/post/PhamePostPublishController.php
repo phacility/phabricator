@@ -1,13 +1,13 @@
 <?php
 
-final class PhamePostPublishController extends PhameController {
+final class PhamePostPublishController extends PhamePostController {
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
     $post = id(new PhamePostQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withIDs(array($id))
       ->requireCapabilities(
         array(
@@ -29,7 +29,7 @@ final class PhamePostPublishController extends PhameController {
     }
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Publish Post'))
@@ -44,35 +44,30 @@ final class PhamePostPublishController extends PhameController {
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Preview'), $view_uri);
 
-    $nav = $this->renderSideNavFilterView(null);
-    $nav->appendChild(
-      array(
-        $crumbs,
-        $form_box,
-        $frame,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title'   => pht('Preview Post'),
+    return $this->newPage()
+      ->setTitle(pht('Preview Post'))
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $form_box,
+          $frame,
       ));
   }
 
   private function renderPreviewFrame(PhamePost $post) {
 
-    // TODO: Clean up this CSS.
-
     return phutil_tag(
       'div',
       array(
-        'style' => 'text-align: center; padding: 1em;',
+        'style' => 'text-align: center; padding: 16px;',
       ),
       phutil_tag(
         'iframe',
         array(
           'style' => 'width: 100%; height: 600px; '.
-                     'border: 1px solid #303030;',
+                     'border: 1px solid #BFCFDA; '.
+                     'background-color: #fff; '.
+                     'border-radius: 3px; ',
           'src' => $this->getApplicationURI('/post/framed/'.$post->getID().'/'),
         ),
         ''));

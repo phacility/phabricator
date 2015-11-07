@@ -12,6 +12,10 @@ final class PhabricatorWorkerTriggerPHIDType extends PhabricatorPHIDType {
     return new PhabricatorWorkerTrigger();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorDaemonsApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

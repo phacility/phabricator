@@ -41,11 +41,13 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
     return id(new PhabricatorPaste())
       ->setTitle('')
+      ->setLanguage('')
       ->setStatus(self::STATUS_ACTIVE)
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
-      ->setSpacePHID($actor->getDefaultSpacePHID());
+      ->setSpacePHID($actor->getDefaultSpacePHID())
+      ->attachRawContent(null);
   }
 
   public static function getStatusNameMap() {

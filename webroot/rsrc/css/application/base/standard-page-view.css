@@ -25,6 +25,10 @@
   color: {$greytext};
 }
 
+.device .phabricator-standard-page-footer {
+  margin: 4px 8px;
+}
+
 !print .phabricator-standard-page-footer {
   display: none;
 }

@@ -7,15 +7,21 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $querykey = $request->getURIData('queryKey');
-
-    $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($querykey)
-      ->setSearchEngine(new PhabricatorPasteSearchEngine())
-      ->setNavigation($this->buildSideNavView());
-
-    return $this->delegateToController($controller);
+    return id(new PhabricatorPasteSearchEngine())
+      ->setController($this)
+      ->buildResponse();
   }
 
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setName(pht('Create Paste'))
+        ->setHref($this->getApplicationURI('edit/'))
+        ->setIcon('fa-plus-square'));
+
+    return $crumbs;
+  }
 
 }

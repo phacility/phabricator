@@ -98,7 +98,12 @@ final class HarbormasterManagementBuildWorkflow
       PhabricatorWorker::setRunAllTasksInProcess(true);
     }
 
-    $buildable->applyPlan($plan, array());
+    if ($viewer->isOmnipotent()) {
+      $initiator = id(new PhabricatorHarbormasterApplication())->getPHID();
+    } else {
+      $initiator =  $viewer->getPHID();
+    }
+    $buildable->applyPlan($plan, array(), $initiator);
 
     $console->writeOut("%s\n", pht('Done.'));
 

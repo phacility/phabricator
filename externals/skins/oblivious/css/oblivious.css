@@ -29,18 +29,17 @@ html {
 .oblivious-content {
   padding-top: 3%;
   margin-left: 22%;
-  max-width: 600px;
+  max-width: 800px;
 }
 
 a {
-  color: #222222;
+  color: #2980b9;
   text-decoration: none;
 }
 
 a:hover {
-  color: #a00000;
+  text-decoration: underline;
 }
-
 
 h1 {
   font-size: 24px;
@@ -50,37 +49,24 @@ h1 {
 h2 {
   font-size: 22px;
   font-weight: bold;
+  margin-bottom: 8px;
 }
 
 .phame-post {
   margin: 0 0 2em;
 }
 
+.phame-post-title {
+  font-size: 28px;
+}
+
 .phame-post-date {
   font-size: 12px;
-  margin: .25em 0 1em;
+  margin: .25em 0 2em;
 }
 
-.phame-post {
-  line-height: 1.6em;
-}
-
-.phame-post p {
-  margin: 0 0 1em;
-}
-
-.phame-post tt {
-  color: #333333;
-  background: #ebebeb;
-  padding: 0 .25em;
-  white-space: pre-wrap;
-}
-
-.phame-post .remarkup-code-block pre {
-  overflow: auto;
-  padding: 10px 10px;
-  border: 1px solid #dfdfdf;
-  background-color: #f8f8f8;
+.oblivious-content .phabricator-remarkup ul.remarkup-list {
+  margin-left: 0;
 }
 
 .fb-comments,

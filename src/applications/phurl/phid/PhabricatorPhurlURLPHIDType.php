@@ -8,12 +8,12 @@ final class PhabricatorPhurlURLPHIDType extends PhabricatorPHIDType {
     return pht('URL');
   }
 
-  public function getPHIDTypeApplicationClass() {
-    return 'PhabricatorPhurlApplication';
-  }
-
   public function newObject() {
     return new PhabricatorPhurlURL();
+  }
+
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorPhurlApplication';
   }
 
   protected function buildQueryForObjects(

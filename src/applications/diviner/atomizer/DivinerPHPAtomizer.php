@@ -152,8 +152,8 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
         $atom->addWarning(
           pht(
             'This call takes %s parameter(s), but only %s are documented.',
-            new PhutilNumber(count($params)),
-            new PhutilNumber(count($docs))));
+            phutil_count($params),
+            phutil_count($docs)));
       }
     }
 

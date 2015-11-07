@@ -77,14 +77,14 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
             count($rem));
         } else if ($add) {
           $title = pht(
-            '%s added %d files(s).',
+            '%s added %s files(s).',
             $this->renderHandleLink($author_phid),
-            count($add));
+            phutil_count($add));
         } else {
           $title = pht(
-            '%s removed %d file(s).',
+            '%s removed %s file(s).',
             $this->renderHandleLink($author_phid),
-            count($rem));
+            phutil_count($rem));
         }
         return $title;
         break;

@@ -24,6 +24,7 @@ final class PhamePost extends PhameDAO
   protected $configData;
   protected $datePublished;
   protected $blogPHID;
+  protected $mailKey;
 
   private $blog;
 
@@ -102,6 +103,7 @@ final class PhamePost extends PhameDAO
         'title' => 'text255',
         'phameTitle' => 'sort64',
         'visibility' => 'uint32',
+        'mailKey' => 'bytes20',
 
         // T6203/NULLABILITY
         // These seem like they should always be non-null?
@@ -133,6 +135,13 @@ final class PhamePost extends PhameDAO
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
   }
 
   public function generatePHID() {

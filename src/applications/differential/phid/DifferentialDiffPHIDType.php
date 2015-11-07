@@ -12,6 +12,10 @@ final class DifferentialDiffPHIDType extends PhabricatorPHIDType {
     return new DifferentialDiff();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorDifferentialApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

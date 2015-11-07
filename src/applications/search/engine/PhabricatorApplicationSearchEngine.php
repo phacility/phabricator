@@ -22,9 +22,31 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   private $customFields = false;
   private $request;
   private $context;
+  private $controller;
+  private $namedQueries;
 
   const CONTEXT_LIST  = 'list';
   const CONTEXT_PANEL = 'panel';
+
+  public function setController(PhabricatorController $controller) {
+    $this->controller = $controller;
+    return $this;
+  }
+
+  public function getController() {
+    return $this->controller;
+  }
+
+  public function buildResponse() {
+    $controller = $this->getController();
+    $request = $controller->getRequest();
+
+    $search = id(new PhabricatorApplicationSearchController())
+      ->setQueryKey($request->getURIData('queryKey'))
+      ->setSearchEngine($this);
+
+    return $controller->delegateToController($search);
+  }
 
   public function newResultObject() {
     // We may be able to get this automatically if newQuery() is implemented.
@@ -459,33 +481,36 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
   public function loadAllNamedQueries() {
     $viewer = $this->requireViewer();
-
-    $named_queries = id(new PhabricatorNamedQueryQuery())
-      ->setViewer($viewer)
-      ->withUserPHIDs(array($viewer->getPHID()))
-      ->withEngineClassNames(array(get_class($this)))
-      ->execute();
-    $named_queries = mpull($named_queries, null, 'getQueryKey');
-
     $builtin = $this->getBuiltinQueries($viewer);
-    $builtin = mpull($builtin, null, 'getQueryKey');
 
-    foreach ($named_queries as $key => $named_query) {
-      if ($named_query->getIsBuiltin()) {
-        if (isset($builtin[$key])) {
-          $named_queries[$key]->setQueryName($builtin[$key]->getQueryName());
-          unset($builtin[$key]);
-        } else {
-          unset($named_queries[$key]);
+    if ($this->namedQueries === null) {
+      $named_queries = id(new PhabricatorNamedQueryQuery())
+        ->setViewer($viewer)
+        ->withUserPHIDs(array($viewer->getPHID()))
+        ->withEngineClassNames(array(get_class($this)))
+        ->execute();
+      $named_queries = mpull($named_queries, null, 'getQueryKey');
+
+      $builtin = mpull($builtin, null, 'getQueryKey');
+
+      foreach ($named_queries as $key => $named_query) {
+        if ($named_query->getIsBuiltin()) {
+          if (isset($builtin[$key])) {
+            $named_queries[$key]->setQueryName($builtin[$key]->getQueryName());
+            unset($builtin[$key]);
+          } else {
+            unset($named_queries[$key]);
+          }
         }
+
+        unset($builtin[$key]);
       }
 
-      unset($builtin[$key]);
+      $named_queries = msort($named_queries, 'getSortKey');
+      $this->namedQueries = $named_queries;
     }
 
-    $named_queries = msort($named_queries, 'getSortKey');
-
-    return $named_queries + $builtin;
+    return $this->namedQueries + $builtin;
   }
 
   public function loadEnabledNamedQueries() {

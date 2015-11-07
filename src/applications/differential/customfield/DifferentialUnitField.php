@@ -125,7 +125,7 @@ final class DifferentialUnitField
       )) + $groups;
 
     foreach ($groups as $result => $group) {
-      $count = new PhutilNumber(count($group));
+      $count = phutil_count($group);
       switch ($result) {
         case ArcanistUnitTestResult::RESULT_PASS:
           $note[] = pht('%s Passed Test(s)', $count);

@@ -12,6 +12,10 @@ final class HarbormasterBuildArtifactPHIDType extends PhabricatorPHIDType {
     return new HarbormasterBuildArtifact();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorHarbormasterApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

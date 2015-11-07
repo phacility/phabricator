@@ -9,13 +9,12 @@
 */
 
 .diviner-document-section .phui-header-header {
-  font-family: 'Roboto Slab', {$fontfamily};
-  font-size: 20px;
+  font-family: 'Aleo', {$fontfamily};
   color: #000;
 }
 
 .phui-document-view .phui-header-tall .phui-header-header {
-  font-family: 'Roboto Slab', {$fontfamily};
+  font-family: 'Aleo', {$fontfamily};
 }
 
 .phui-document-view .phabricator-remarkup h1.remarkup-header,
@@ -24,11 +23,11 @@
 .phui-document-view .phabricator-remarkup h4.remarkup-header,
 .phui-document-view .phabricator-remarkup h5.remarkup-header,
 .phui-document-view .phabricator-remarkup h6.remarkup-header {
-  font-family: 'Roboto Slab', {$fontfamily};
+  font-family: 'Aleo', {$fontfamily};
 }
 
 .phui-document-view .phabricator-remarkup h2.remarkup-header {
   padding: 0 24px 8px 0;
   border-bottom: 1px solid {$thinblueborder};
-  margin: 24px 0 16px;
+  margin: 32px 0 16px;
 }

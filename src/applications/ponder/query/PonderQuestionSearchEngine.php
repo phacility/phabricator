@@ -134,11 +134,11 @@ final class PonderQuestionSearchEngine
 
     foreach ($questions as $question) {
       $color = PonderQuestionStatus::getQuestionStatusTagColor(
-          $question->getStatus());
+        $question->getStatus());
       $icon = PonderQuestionStatus::getQuestionStatusIcon(
-          $question->getStatus());
+        $question->getStatus());
       $full_status = PonderQuestionStatus::getQuestionStatusFullName(
-          $question->getStatus());
+        $question->getStatus());
       $item = new PHUIObjectItemView();
       $item->setObjectName('Q'.$question->getID());
       $item->setHeader($question->getTitle());
@@ -158,7 +158,9 @@ final class PonderQuestionSearchEngine
           $handles[$question->getAuthorPHID()]->renderLink()));
 
       $item->addAttribute(
-        pht('%d Answer(s)', $question->getAnswerCount()));
+        pht(
+          '%s Answer(s)',
+          new PhutilNumber($question->getAnswerCount())));
 
       if ($project_handles) {
         $item->addAttribute(

@@ -58,13 +58,7 @@ final class DivinerAtomController extends DivinerController {
     $crumbs->addTextCrumb($atom_short_title);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($this->renderFullSignature($symbol))
-      ->addTag(
-        id(new PHUITagView())
-          ->setType(PHUITagView::TYPE_STATE)
-          ->setBackgroundColor(PHUITagView::COLOR_BLUE)
-          ->setName(DivinerAtom::getAtomTypeNameString(
-            $atom ? $atom->getType() : $symbol->getType())));
+      ->setHeader($this->renderFullSignature($symbol));
 
     $properties = new PHUIPropertyListView();
 
@@ -78,11 +72,11 @@ final class DivinerAtomController extends DivinerController {
     $prop_list = new PHUIPropertyGroupView();
     $prop_list->addPropertyList($properties);
 
-    $document = id(new PHUIDocumentView())
+    $document = id(new PHUIDocumentViewPro())
       ->setBook($book->getTitle(), $group_name)
       ->setHeader($header)
       ->addClass('diviner-view')
-      ->appendChild($prop_list);
+      ->setPropertyList($prop_list);
 
     if ($atom) {
       $this->buildDefined($properties, $symbol);
@@ -163,10 +157,6 @@ final class DivinerAtomController extends DivinerController {
               ->setHeader($spec['title']));
 
           $task_methods = idx($methods_by_task, $spec['name'], array());
-          $inner_box = id(new PHUIBoxView())
-            ->addPadding(PHUI::PADDING_LARGE_LEFT)
-            ->addPadding(PHUI::PADDING_LARGE_RIGHT)
-            ->addPadding(PHUI::PADDING_LARGE_BOTTOM);
 
           $box_content = array();
           if ($task_methods) {
@@ -198,7 +188,7 @@ final class DivinerAtomController extends DivinerController {
             $box_content = phutil_tag('em', array(), $no_methods);
           }
 
-          $inner_box->appendChild($box_content);
+          $inner_box = phutil_tag_div('diviner-task-items', $box_content);
           $section->addContent($inner_box);
         }
         $document->appendChild($section);
@@ -246,7 +236,7 @@ final class DivinerAtomController extends DivinerController {
             ->setHref('#'.$key));
       }
 
-      $document->setSideNav($side, PHUIDocumentView::NAV_TOP);
+      $document->setToc($side);
     }
 
     return $this->buildApplicationPage(
@@ -256,6 +246,7 @@ final class DivinerAtomController extends DivinerController {
       ),
       array(
         'title' => $symbol->getTitle(),
+        'class' => 'pro-white-background',
       ));
   }
 
@@ -629,7 +620,7 @@ final class DivinerAtomController extends DivinerController {
       $content = phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-remarkup',
+          'class' => 'phabricator-remarkup diviner-remarkup-section',
         ),
         $content);
     } else {
@@ -668,8 +659,6 @@ final class DivinerAtomController extends DivinerController {
 
       if (($impl !== $parent) || $out) {
         $where = id(new PHUIBoxView())
-          ->addPadding(PHUI::PADDING_MEDIUM_LEFT)
-          ->addPadding(PHUI::PADDING_MEDIUM_RIGHT)
           ->addClass('diviner-method-implementation-header')
           ->appendChild($impl->getName());
         $doc = array($where, $doc);

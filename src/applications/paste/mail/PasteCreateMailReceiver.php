@@ -21,16 +21,11 @@ final class PasteCreateMailReceiver extends PhabricatorMailReceiver {
       $title = pht('Email Paste');
     }
 
-    $file = PhabricatorPasteEditor::initializeFileForPaste(
-      $sender,
-      $title,
-      $mail->getCleanTextBody());
-
     $xactions = array();
 
     $xactions[] = id(new PhabricatorPasteTransaction())
       ->setTransactionType(PhabricatorPasteTransaction::TYPE_CONTENT)
-      ->setNewValue($file->getPHID());
+      ->setNewValue($mail->getCleanTextBody());
 
     $xactions[] = id(new PhabricatorPasteTransaction())
       ->setTransactionType(PhabricatorPasteTransaction::TYPE_TITLE)

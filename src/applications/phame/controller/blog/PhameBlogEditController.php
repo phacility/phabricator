@@ -1,15 +1,15 @@
 <?php
 
 final class PhameBlogEditController
-  extends PhameController {
+  extends PhameBlogController {
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
     if ($id) {
       $blog = id(new PhameBlogQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withIDs(array($id))
         ->requireCapabilities(
           array(
@@ -30,7 +30,7 @@ final class PhameBlogEditController
       $v_projects = array_reverse($v_projects);
 
     } else {
-      $blog = PhameBlog::initializeNewBlog($user);
+      $blog = PhameBlog::initializeNewBlog($viewer);
 
       $submit_button = pht('Create Blog');
       $page_title = pht('Create Blog');
@@ -90,7 +90,7 @@ final class PhameBlogEditController
         ->setNewValue(array('=' => array_fuse($v_projects)));
 
       $editor = id(new PhameBlogEditor())
-        ->setActor($user)
+        ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true);
 
@@ -111,7 +111,7 @@ final class PhameBlogEditController
     }
 
     $policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->setObject($blog)
       ->execute();
 
@@ -119,7 +119,7 @@ final class PhameBlogEditController
     $skins = mpull($skins, 'getName');
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel(pht('Name'))
@@ -129,16 +129,16 @@ final class PhameBlogEditController
         ->setError($e_name))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setLabel(pht('Description'))
           ->setName('description')
           ->setValue($description)
           ->setID('blog-description')
-          ->setUser($user)
+          ->setUser($viewer)
           ->setDisableMacros(true))
       ->appendChild(
         id(new AphrontFormPolicyControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
           ->setPolicyObject($blog)
           ->setPolicies($policies)
@@ -147,7 +147,7 @@ final class PhameBlogEditController
           ->setName('can_view'))
       ->appendChild(
         id(new AphrontFormPolicyControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
           ->setPolicyObject($blog)
           ->setPolicies($policies)
@@ -155,7 +155,7 @@ final class PhameBlogEditController
           ->setName('can_edit'))
       ->appendChild(
         id(new AphrontFormPolicyControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setCapability(PhabricatorPolicyCapability::CAN_JOIN)
           ->setPolicyObject($blog)
           ->setPolicies($policies)
@@ -195,13 +195,12 @@ final class PhameBlogEditController
     $crumbs->addTextCrumb(pht('Blogs'), $this->getApplicationURI('blog/'));
     $crumbs->addTextCrumb($page_title, $this->getApplicationURI('blog/new'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
-      array(
-        'title' => $page_title,
+    return $this->newPage()
+      ->setTitle($page_title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $form_box,
       ));
   }
 }

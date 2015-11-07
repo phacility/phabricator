@@ -155,6 +155,10 @@ th.aphront-table-view-sortable-selected {
   color: {$darkbluetext};
 }
 
+.aphront-table-view td.top {
+  vertical-align: top;
+}
+
 .aphront-table-view td.wide {
   white-space: normal;
   width: 100%;

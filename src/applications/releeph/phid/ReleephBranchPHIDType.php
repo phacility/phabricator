@@ -12,6 +12,10 @@ final class ReleephBranchPHIDType extends PhabricatorPHIDType {
     return new ReleephBranch();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorReleephApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

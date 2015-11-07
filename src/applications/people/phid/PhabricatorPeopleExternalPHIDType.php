@@ -12,6 +12,10 @@ final class PhabricatorPeopleExternalPHIDType extends PhabricatorPHIDType {
     return new PhabricatorExternalAccount();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorPeopleApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
