@@ -102,4 +102,13 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
     );
   }
 
+  protected function getCustomCapabilities() {
+    return array(
+      PhameBlogCreateCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_USER,
+        'caption' => pht('Default create policy for blogs.'),
+      ),
+    );
+  }
+
 }

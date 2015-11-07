@@ -30,6 +30,9 @@ final class PhameBlogEditController
       $v_projects = array_reverse($v_projects);
 
     } else {
+      $this->requireApplicationCapability(
+        PhameBlogCreateCapability::CAPABILITY);
+
       $blog = PhameBlog::initializeNewBlog($viewer);
 
       $submit_button = pht('Create Blog');
