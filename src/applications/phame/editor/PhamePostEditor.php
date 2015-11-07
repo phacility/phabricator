@@ -209,6 +209,7 @@ final class PhamePostEditor
 
     $body = parent::buildMailBody($object, $xactions);
 
+    $body->addRemarkupSection(null, $object->getBody());
     $body->addLinkSection(
       pht('POST DETAIL'),
       PhabricatorEnv::getProductionURI($object->getViewURI()));
