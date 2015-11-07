@@ -94,6 +94,7 @@ final class PhameBlogEditor
 
     $errors = parent::validateTransaction($object, $type, $xactions);
 
+
     switch ($type) {
       case PhameBlogTransaction::TYPE_NAME:
         $missing = $this->validateIsEmptyTextField(
@@ -112,6 +113,9 @@ final class PhameBlogEditor
         }
         break;
       case PhameBlogTransaction::TYPE_DOMAIN:
+        if (!$xactions) {
+          continue;
+        }
         $custom_domain = last($xactions)->getNewValue();
         if (empty($custom_domain)) {
           continue;

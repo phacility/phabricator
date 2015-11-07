@@ -27,6 +27,8 @@ final class PhamePostEditController extends PhamePostController {
         $post->getPHID(),
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
       $v_projects = array_reverse($v_projects);
+      $v_cc = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+          $post->getPHID());
     } else {
       $blog = id(new PhameBlogQuery())
         ->setViewer($viewer)
@@ -41,6 +43,7 @@ final class PhamePostEditController extends PhamePostController {
         return new Aphront404Response();
       }
       $v_projects = array();
+      $v_cc = array();
 
       $post = PhamePost::initializePost($viewer, $blog);
       $cancel_uri = $this->getApplicationURI('/blog/view/'.$blog->getID().'/');
@@ -65,6 +68,7 @@ final class PhamePostEditController extends PhamePostController {
       $body = $request->getStr('body');
       $comments_widget = $request->getStr('comments_widget');
       $v_projects = $request->getArr('projects');
+      $v_cc = $request->getArr('cc');
       $visibility = $request->getInt('visibility');
 
       $xactions = array(
@@ -83,6 +87,10 @@ final class PhamePostEditController extends PhamePostController {
         id(new PhamePostTransaction())
           ->setTransactionType(PhamePostTransaction::TYPE_COMMENTS_WIDGET)
           ->setNewValue($comments_widget),
+        id(new PhamePostTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+          ->setNewValue(array('=' => $v_cc)),
+
       );
 
       $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
@@ -154,6 +162,13 @@ final class PhamePostEditController extends PhamePostController {
         ->setID('post-body')
         ->setUser($viewer)
         ->setDisableMacros(true))
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('Subscribers'))
+          ->setName('cc')
+          ->setValue($v_cc)
+          ->setUser($viewer)
+          ->setDatasource(new PhabricatorMetaMTAMailableDatasource()))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Projects'))

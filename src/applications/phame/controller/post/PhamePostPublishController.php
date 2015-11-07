@@ -23,12 +23,6 @@ final class PhamePostPublishController extends PhamePostController {
     if ($request->isFormPost()) {
       $xactions = array();
       $xactions[] = id(new PhamePostTransaction())
-        ->setTransactionType(PhamePostTransaction::TYPE_TITLE)
-        ->setNewValue($post->getTitle());
-      $xactions[] = id(new PhamePostTransaction())
-        ->setTransactionType(PhamePostTransaction::TYPE_PHAME_TITLE)
-        ->setNewValue($post->getPhameTitle());
-      $xactions[] = id(new PhamePostTransaction())
         ->setTransactionType(PhamePostTransaction::TYPE_VISIBILITY)
         ->setNewValue(PhameConstants::VISIBILITY_PUBLISHED);
 

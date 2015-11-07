@@ -121,6 +121,9 @@ final class PhamePostEditor
         }
         break;
       case PhamePostTransaction::TYPE_PHAME_TITLE:
+        if (!$xactions) {
+          continue;
+        }
         $missing = $this->validateIsEmptyTextField(
           $object->getPhameTitle(),
           $xactions);
@@ -183,8 +186,11 @@ final class PhamePostEditor
 
     $blog_phid = $object->getBlogPHID();
     if ($blog_phid) {
-      $phids[] = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $cc_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID(
         $blog_phid);
+      foreach ($cc_phids as $cc) {
+        $phids[] = $cc;
+      }
     }
     return $phids;
   }
