@@ -8,7 +8,7 @@ final class PhamePostEditor
   }
 
   public function getEditorObjectsDescription() {
-    return pht('Blog Posts');
+    return pht('Phame Posts');
   }
 
   public function getTransactionTypes() {
@@ -149,13 +149,74 @@ final class PhamePostEditor
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return false;
+    if ($object->isDraft()) {
+      return false;
+    }
+    return true;
   }
 
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return false;
+    if ($object->isDraft()) {
+      return false;
+    }
+    return true;
+  }
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    $phids = array();
+    $phids[] = $object->getBloggerPHID();
+    $phids[] = $this->requireActor()->getPHID();
+
+    $blog_phid = $object->getBlogPHID();
+    if ($blog_phid) {
+      $phids[] = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+        $blog_phid);
+    }
+    return $phids;
+  }
+
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $phid = $object->getPHID();
+    $title = $object->getTitle();
+
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject($title)
+      ->addHeader('Thread-Topic', $phid);
+  }
+
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new PhamePostReplyHandler())
+      ->setMailReceiver($object);
+  }
+
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $body = parent::buildMailBody($object, $xactions);
+
+    $body->addLinkSection(
+      pht('POST DETAIL'),
+      PhabricatorEnv::getProductionURI($object->getViewURI()));
+
+    return $body;
+  }
+
+  public function getMailTagsMap() {
+    return array(
+      PhamePostTransaction::MAILTAG_CONTENT =>
+        pht("A post's content changes."),
+      PhamePostTransaction::MAILTAG_COMMENT =>
+        pht('Someone comments on a post.'),
+      PhamePostTransaction::MAILTAG_OTHER =>
+        pht('Other post activity not listed above occurs.'),
+    );
+  }
+
+  protected function getMailSubjectPrefix() {
+    return '[Phame]';
   }
 
   protected function supportsSearch() {

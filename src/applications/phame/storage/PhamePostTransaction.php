@@ -3,10 +3,14 @@
 final class PhamePostTransaction
   extends PhabricatorApplicationTransaction {
 
-  const TYPE_TITLE           = 'phame.post.title';
-  const TYPE_PHAME_TITLE     = 'phame.post.phame.title';
-  const TYPE_BODY            = 'phame.post.body';
-  const TYPE_COMMENTS_WIDGET = 'phame.post.comments.widget';
+  const TYPE_TITLE            = 'phame.post.title';
+  const TYPE_PHAME_TITLE      = 'phame.post.phame.title';
+  const TYPE_BODY             = 'phame.post.body';
+  const TYPE_COMMENTS_WIDGET  = 'phame.post.comments.widget';
+
+  const MAILTAG_CONTENT       = 'phame-post-content';
+  const MAILTAG_COMMENT       = 'phame-post-comment';
+  const MAILTAG_OTHER         = 'phame-post-other';
 
   public function getApplicationName() {
     return 'phame';
@@ -57,6 +61,27 @@ final class PhamePostTransaction
     return parent::getIcon();
   }
 
+  public function getMailTags() {
+    $tags = parent::getMailTags();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_COMMENTS_WIDGET:
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $tags[] = self::MAILTAG_COMMENT;
+        break;
+      case self::TYPE_TITLE:
+      case self::TYPE_PHAME_TITLE:
+      case self::TYPE_BODY:
+        $tags[] = self::MAILTAG_CONTENT;
+        break;
+      default:
+        $tags[] = self::MAILTAG_OTHER;
+        break;
+    }
+    return $tags;
+  }
+
+
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
@@ -69,7 +94,7 @@ final class PhamePostTransaction
       case self::TYPE_TITLE:
         if ($old === null) {
           return pht(
-            '%s created this post.',
+            '%s authored this post.',
             $this->renderHandleLink($author_phid));
         } else {
           return pht(
@@ -80,12 +105,12 @@ final class PhamePostTransaction
         break;
       case self::TYPE_BODY:
         return pht(
-          '%s updated the post\'s body.',
+          '%s updated the blog post.',
           $this->renderHandleLink($author_phid));
         break;
       case self::TYPE_PHAME_TITLE:
         return pht(
-          '%s updated the post\'s phame title to "%s".',
+          '%s updated the post\'s Phame title to "%s".',
           $this->renderHandleLink($author_phid),
           rtrim($new, '/'));
         break;
@@ -112,7 +137,7 @@ final class PhamePostTransaction
       case self::TYPE_TITLE:
         if ($old === null) {
           return pht(
-            '%s created %s.',
+            '%s authored %s.',
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($object_phid));
         } else {
@@ -124,13 +149,13 @@ final class PhamePostTransaction
         break;
       case self::TYPE_BODY:
         return pht(
-          '%s updated the body for %s.',
+          '%s updated the blog post %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
       case self::TYPE_PHAME_TITLE:
         return pht(
-          '%s updated the phame title for %s.',
+          '%s updated the Phame title for %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
@@ -143,6 +168,23 @@ final class PhamePostTransaction
     }
 
     return parent::getTitleForFeed();
+  }
+
+  public function getBodyForFeed(PhabricatorFeedStory $story) {
+    $new = $this->getNewValue();
+
+    $body = null;
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_TITLE:
+      case self::TYPE_BODY:
+        return phutil_escape_html_newlines(
+          id(new PhutilUTF8StringTruncator())
+          ->setMaximumGlyphs(128)
+          ->truncateString($new));
+        break;
+    }
+    return parent::getBodyForFeed($story);
   }
 
   public function getColor() {
