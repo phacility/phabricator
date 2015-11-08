@@ -162,14 +162,65 @@ final class PhameBlogEditor
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return false;
+    return true;
   }
 
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return false;
+    return true;
   }
+
+   protected function getMailTo(PhabricatorLiskDAO $object) {
+    $phids = array();
+    $phids[] = $this->requireActor()->getPHID();
+    $phids[] = $object->getCreatorPHID();
+
+    return $phids;
+  }
+
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $phid = $object->getPHID();
+    $name = $object->getName();
+
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject($name)
+      ->addHeader('Thread-Topic', $phid);
+  }
+
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new PhameBlogReplyHandler())
+      ->setMailReceiver($object);
+  }
+
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $body = parent::buildMailBody($object, $xactions);
+
+    $body->addLinkSection(
+      pht('BLOG DETAIL'),
+      PhabricatorEnv::getProductionURI($object->getViewURI()));
+
+    return $body;
+  }
+
+  public function getMailTagsMap() {
+    return array(
+      PhameBlogTransaction::MAILTAG_DETAILS =>
+        pht("A blog's details change."),
+      PhameBlogTransaction::MAILTAG_SUBSCRIBERS =>
+        pht("A blog's subscribers change."),
+      PhameBlogTransaction::MAILTAG_OTHER =>
+        pht('Other blog activity not listed above occurs.'),
+    );
+  }
+
+  protected function getMailSubjectPrefix() {
+    return '[Phame]';
+  }
+
 
   protected function supportsSearch() {
     return false;

@@ -21,6 +21,7 @@ final class PhameBlog extends PhameDAO
   protected $viewPolicy;
   protected $editPolicy;
   protected $joinPolicy;
+  protected $mailKey;
 
   private static $requestBlog;
 
@@ -34,6 +35,7 @@ final class PhameBlog extends PhameDAO
         'name' => 'text64',
         'description' => 'text',
         'domain' => 'text128?',
+        'mailKey' => 'bytes20',
 
         // T6203/NULLABILITY
         // These policies should always be non-null.
@@ -53,6 +55,13 @@ final class PhameBlog extends PhameDAO
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
   }
 
   public function generatePHID() {
@@ -212,6 +221,11 @@ final class PhameBlog extends PhameDAO
     }
 
     return $base;
+  }
+
+  public function getViewURI() {
+    $uri = '/phame/blog/view/'.$this->getID().'/';
+    return PhabricatorEnv::getProductionURI($uri);
   }
 
 
