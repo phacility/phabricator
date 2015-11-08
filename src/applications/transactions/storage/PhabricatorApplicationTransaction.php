@@ -626,7 +626,9 @@ abstract class PhabricatorApplicationTransaction
         return pht('Edges already exist; transaction has no effect.');
     }
 
-    return pht('Transaction has no effect.');
+    return pht(
+      'Transaction (of type "%s") has no effect.',
+      $this->getTransactionType());
   }
 
   public function getTitle() {
