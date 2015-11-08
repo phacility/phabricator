@@ -14,6 +14,7 @@ abstract class PhabricatorXHPASTViewPanelController
     $this->id = $data['id'];
     $this->storageTree = id(new PhabricatorXHPASTViewParseTree())
       ->load($this->id);
+
     if (!$this->storageTree) {
       throw new Exception(pht('No such AST!'));
     }
@@ -65,10 +66,9 @@ li span {
       '</html>',
       $content);
 
-    $response = new AphrontWebpageResponse();
-    $response->setFrameable(true);
-    $response->setContent($content);
-    return $response;
+    return id(new AphrontWebpageResponse())
+      ->setFrameable(true)
+      ->setContent($content);
   }
 
 }
