@@ -3,6 +3,10 @@
 final class PhabricatorPhurlURLAccessController
   extends PhabricatorPhurlController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
     $id = $request->getURIData('id');
@@ -32,5 +36,4 @@ final class PhabricatorPhurlURLAccessController
       return id(new AphrontRedirectResponse())->setURI('/'.$url->getMonogram());
     }
   }
-
 }
