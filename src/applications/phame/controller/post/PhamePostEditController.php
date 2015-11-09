@@ -55,7 +55,6 @@ final class PhamePostEditController extends PhamePostController {
     $title = $post->getTitle();
     $phame_title = $post->getPhameTitle();
     $body = $post->getBody();
-    $comments_widget = $post->getCommentsWidget();
     $visibility = $post->getVisibility();
 
     $e_title       = true;
@@ -66,7 +65,6 @@ final class PhamePostEditController extends PhamePostController {
       $phame_title = $request->getStr('phame_title');
       $phame_title = PhabricatorSlug::normalize($phame_title);
       $body = $request->getStr('body');
-      $comments_widget = $request->getStr('comments_widget');
       $v_projects = $request->getArr('projects');
       $v_cc = $request->getArr('cc');
       $visibility = $request->getInt('visibility');
@@ -84,9 +82,6 @@ final class PhamePostEditController extends PhamePostController {
         id(new PhamePostTransaction())
           ->setTransactionType(PhamePostTransaction::TYPE_VISIBILITY)
           ->setNewValue($visibility),
-        id(new PhamePostTransaction())
-          ->setTransactionType(PhamePostTransaction::TYPE_COMMENTS_WIDGET)
-          ->setNewValue($comments_widget),
         id(new PhamePostTransaction())
           ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
           ->setNewValue(array('=' => $v_cc)),
@@ -175,12 +170,6 @@ final class PhamePostEditController extends PhamePostController {
           ->setName('projects')
           ->setValue($v_projects)
           ->setDatasource(new PhabricatorProjectDatasource()))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-        ->setLabel(pht('Comments Widget'))
-        ->setName('comments_widget')
-        ->setvalue($comments_widget)
-        ->setOptions($post->getCommentsWidgetOptionsForSelect()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
         ->addCancelButton($cancel_uri)

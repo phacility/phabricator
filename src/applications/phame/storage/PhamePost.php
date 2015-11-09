@@ -76,20 +76,6 @@ final class PhamePost extends PhameDAO
     return $name;
   }
 
-  public function setCommentsWidget($widget) {
-    $config_data = $this->getConfigData();
-    $config_data['comments_widget'] = $widget;
-    return $this;
-  }
-
-  public function getCommentsWidget() {
-    $config_data = $this->getConfigData();
-    if (empty($config_data)) {
-      return 'none';
-    }
-    return idx($config_data, 'comments_widget', 'none');
-  }
-
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID   => true,
@@ -160,23 +146,6 @@ final class PhamePost extends PhameDAO
       'datePublished' => $this->getDatePublished(),
       'published'     => !$this->isDraft(),
     );
-  }
-
-  public function getCommentsWidgetOptionsForSelect() {
-    $current = $this->getCommentsWidget();
-    $options = array();
-
-    if ($current == 'facebook' ||
-        PhabricatorFacebookAuthProvider::getFacebookApplicationID()) {
-      $options['facebook'] = pht('Facebook');
-    }
-    if ($current == 'disqus' ||
-        PhabricatorEnv::getEnvConfig('disqus.shortname')) {
-      $options['disqus'] = pht('Disqus');
-    }
-    $options['none'] = pht('None');
-
-    return $options;
   }
 
 

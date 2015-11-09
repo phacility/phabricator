@@ -7,7 +7,6 @@ final class PhamePostTransaction
   const TYPE_PHAME_TITLE      = 'phame.post.phame.title';
   const TYPE_BODY             = 'phame.post.body';
   const TYPE_VISIBILITY       = 'phame.post.visibility';
-  const TYPE_COMMENTS_WIDGET  = 'phame.post.comments.widget';
 
   const MAILTAG_CONTENT       = 'phame-post-content';
   const MAILTAG_COMMENT       = 'phame-post-comment';
@@ -56,7 +55,6 @@ final class PhamePostTransaction
       case self::TYPE_PHAME_TITLE:
       case self::TYPE_BODY:
       case self::TYPE_VISIBILITY:
-      case self::TYPE_COMMENTS_WIDGET:
         return 'fa-pencil';
         break;
     }
@@ -67,7 +65,6 @@ final class PhamePostTransaction
     $tags = parent::getMailTags();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_COMMENTS_WIDGET:
       case PhabricatorTransactions::TYPE_COMMENT:
         $tags[] = self::MAILTAG_COMMENT;
         break;
@@ -127,12 +124,6 @@ final class PhamePostTransaction
           $this->renderHandleLink($author_phid),
           rtrim($new, '/'));
         break;
-      case self::TYPE_COMMENTS_WIDGET:
-        return pht(
-          '%s updated the post\'s comment widget to "%s".',
-          $this->renderHandleLink($author_phid),
-          $new);
-        break;
     }
 
     return parent::getTitle();
@@ -182,12 +173,6 @@ final class PhamePostTransaction
       case self::TYPE_PHAME_TITLE:
         return pht(
           '%s updated the Phame title for %s.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid));
-        break;
-      case self::TYPE_COMMENTS_WIDGET:
-        return pht(
-          '%s updated the comments widget for %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;

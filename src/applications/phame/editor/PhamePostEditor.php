@@ -18,7 +18,6 @@ final class PhamePostEditor
     $types[] = PhamePostTransaction::TYPE_PHAME_TITLE;
     $types[] = PhamePostTransaction::TYPE_BODY;
     $types[] = PhamePostTransaction::TYPE_VISIBILITY;
-    $types[] = PhamePostTransaction::TYPE_COMMENTS_WIDGET;
 
     return $types;
   }
@@ -36,8 +35,6 @@ final class PhamePostEditor
         return $object->getBody();
       case PhamePostTransaction::TYPE_VISIBILITY:
         return $object->getVisibility();
-      case PhamePostTransaction::TYPE_COMMENTS_WIDGET:
-        return $object->getCommentsWidget();
     }
   }
 
@@ -50,7 +47,6 @@ final class PhamePostEditor
       case PhamePostTransaction::TYPE_PHAME_TITLE:
       case PhamePostTransaction::TYPE_BODY:
       case PhamePostTransaction::TYPE_VISIBILITY:
-      case PhamePostTransaction::TYPE_COMMENTS_WIDGET:
         return $xaction->getNewValue();
     }
   }
@@ -73,8 +69,6 @@ final class PhamePostEditor
           $object->setDatePublished(0);
         }
         return $object->setVisibility($xaction->getNewValue());
-      case PhamePostTransaction::TYPE_COMMENTS_WIDGET:
-        return $object->setCommentsWidget($xaction->getNewValue());
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -89,7 +83,6 @@ final class PhamePostEditor
       case PhamePostTransaction::TYPE_PHAME_TITLE:
       case PhamePostTransaction::TYPE_BODY:
       case PhamePostTransaction::TYPE_VISIBILITY:
-      case PhamePostTransaction::TYPE_COMMENTS_WIDGET:
         return;
     }
 
