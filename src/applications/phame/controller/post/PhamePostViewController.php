@@ -123,6 +123,7 @@ final class PhamePostViewController extends PhamePostController {
         id(new PhabricatorActionView())
           ->setIcon('fa-eye')
           ->setHref($this->getApplicationURI('post/publish/'.$id.'/'))
+          ->setDisabled(!$can_edit)
           ->setName(pht('Preview / Publish')));
     } else {
       $actions->addAction(
@@ -130,6 +131,7 @@ final class PhamePostViewController extends PhamePostController {
           ->setIcon('fa-eye-slash')
           ->setHref($this->getApplicationURI('post/unpublish/'.$id.'/'))
           ->setName(pht('Unpublish'))
+          ->setDisabled(!$can_edit)
           ->setWorkflow(true));
     }
 

@@ -20,7 +20,6 @@ final class PhameBlogEditor
     $types[] = PhameBlogTransaction::TYPE_SKIN;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
-    $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
 
     return $types;
   }

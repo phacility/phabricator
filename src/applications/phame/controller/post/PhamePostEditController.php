@@ -36,7 +36,7 @@ final class PhamePostEditController extends PhamePostController {
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
-            PhabricatorPolicyCapability::CAN_JOIN,
+            PhabricatorPolicyCapability::CAN_EDIT,
           ))
         ->executeOne();
       if (!$blog) {

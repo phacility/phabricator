@@ -20,7 +20,6 @@ final class PhameBlog extends PhameDAO
   protected $creatorPHID;
   protected $viewPolicy;
   protected $editPolicy;
-  protected $joinPolicy;
   protected $mailKey;
 
   private static $requestBlog;
@@ -39,7 +38,6 @@ final class PhameBlog extends PhameDAO
 
         // T6203/NULLABILITY
         // These policies should always be non-null.
-        'joinPolicy' => 'policy?',
         'editPolicy' => 'policy?',
         'viewPolicy' => 'policy?',
       ),
@@ -73,8 +71,7 @@ final class PhameBlog extends PhameDAO
     $blog = id(new PhameBlog())
       ->setCreatorPHID($actor->getPHID())
       ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
-      ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
-      ->setJoinPolicy(PhabricatorPolicies::POLICY_USER);
+      ->setEditPolicy(PhabricatorPolicies::POLICY_USER);
     return $blog;
   }
 
@@ -236,7 +233,6 @@ final class PhameBlog extends PhameDAO
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
       PhabricatorPolicyCapability::CAN_EDIT,
-      PhabricatorPolicyCapability::CAN_JOIN,
     );
   }
 
@@ -247,27 +243,15 @@ final class PhameBlog extends PhameDAO
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
         return $this->getEditPolicy();
-      case PhabricatorPolicyCapability::CAN_JOIN:
-        return $this->getJoinPolicy();
     }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $user) {
     $can_edit = PhabricatorPolicyCapability::CAN_EDIT;
-    $can_join = PhabricatorPolicyCapability::CAN_JOIN;
 
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
         // Users who can edit or post to a blog can always view it.
-        if (PhabricatorPolicyFilter::hasCapability($user, $this, $can_edit)) {
-          return true;
-        }
-        if (PhabricatorPolicyFilter::hasCapability($user, $this, $can_join)) {
-          return true;
-        }
-        break;
-      case PhabricatorPolicyCapability::CAN_JOIN:
-        // Users who can edit a blog can always post to it.
         if (PhabricatorPolicyFilter::hasCapability($user, $this, $can_edit)) {
           return true;
         }
@@ -282,10 +266,7 @@ final class PhameBlog extends PhameDAO
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
         return pht(
-          'Users who can edit or post on a blog can always view it.');
-      case PhabricatorPolicyCapability::CAN_JOIN:
-        return pht(
-          'Users who can edit a blog can always post on it.');
+          'Users who can edit a blog can always view it.');
     }
 
     return null;

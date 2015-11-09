@@ -49,7 +49,6 @@ final class PhameBlogEditController
     $skin = $blog->getSkin();
     $can_view = $blog->getViewPolicy();
     $can_edit = $blog->getEditPolicy();
-    $can_join = $blog->getJoinPolicy();
 
     $e_name               = true;
     $e_custom_domain      = null;
@@ -62,7 +61,6 @@ final class PhameBlogEditController
       $skin = $request->getStr('skin');
       $can_view = $request->getStr('can_view');
       $can_edit = $request->getStr('can_edit');
-      $can_join = $request->getStr('can_join');
       $v_projects = $request->getArr('projects');
       $v_cc = $request->getArr('cc');
 
@@ -85,9 +83,6 @@ final class PhameBlogEditController
         id(new PhameBlogTransaction())
           ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
           ->setNewValue($can_edit),
-        id(new PhameBlogTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
-          ->setNewValue($can_join),
         id(new PhameBlogTransaction())
           ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
           ->setNewValue(array('=' => $v_cc)),
@@ -170,14 +165,6 @@ final class PhameBlogEditController
           ->setPolicies($policies)
           ->setValue($can_edit)
           ->setName('can_edit'))
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-          ->setUser($viewer)
-          ->setCapability(PhabricatorPolicyCapability::CAN_JOIN)
-          ->setPolicyObject($blog)
-          ->setPolicies($policies)
-          ->setValue($can_join)
-          ->setName('can_join'))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Projects'))

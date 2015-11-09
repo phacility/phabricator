@@ -73,7 +73,8 @@ final class PhameCreatePostConduitAPIMethod extends PhameConduitAPIMethod {
       ->withPHIDs(array($blog_phid))
       ->requireCapabilities(
         array(
-          PhabricatorPolicyCapability::CAN_JOIN,
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->executeOne();
 

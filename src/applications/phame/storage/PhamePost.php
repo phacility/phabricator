@@ -198,18 +198,21 @@ final class PhamePost extends PhameDAO
       case PhabricatorPolicyCapability::CAN_VIEW:
         if (!$this->isDraft() && $this->getBlog()) {
           return $this->getBlog()->getViewPolicy();
-        } else {
-          return PhabricatorPolicies::POLICY_NOONE;
+        } else if ($this->getBlog()) {
+          return $this->getBlog()->getEditPolicy();
         }
         break;
       case PhabricatorPolicyCapability::CAN_EDIT:
-        return PhabricatorPolicies::POLICY_NOONE;
+        if ($this->getBlog()) {
+          return $this->getBlog()->getEditPolicy();
+        } else {
+          return PhabricatorPolicies::POLICY_NOONE;
+        }
     }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $user) {
-    // A blog post's author can always view it, and is the only user allowed
-    // to edit it.
+    // A blog post's author can always view it.
 
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
