@@ -14,7 +14,12 @@ final class PhamePostViewController extends PhamePostController {
       return new Aphront404Response();
     }
 
+    $blog = $post->getBlog();
+
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(
+      $blog->getName(),
+      $this->getApplicationURI('blog/view/'.$blog->getID().'/'));
     $crumbs->addTextCrumb(
       $post->getTitle(),
       $this->getApplicationURI('post/view/'.$post->getID().'/'));

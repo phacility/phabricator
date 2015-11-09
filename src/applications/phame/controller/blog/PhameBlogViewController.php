@@ -39,8 +39,11 @@ final class PhameBlogViewController extends PhameBlogController {
       ->appendChild($post_list);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Blogs'), $this->getApplicationURI('blog/'));
-    $crumbs->addTextCrumb($blog->getName(), $this->getApplicationURI());
+    $crumbs->addTextCrumb(
+      pht('Blogs'),
+      $this->getApplicationURI('blog/'));
+    $crumbs->addTextCrumb(
+      $blog->getName());
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
