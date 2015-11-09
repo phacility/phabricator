@@ -8,6 +8,16 @@ final class PhabricatorPhurlShortURLDefaultController
   }
 
   public function handleRequest(AphrontRequest $request) {
-    return new Aphront404Response();
+    $dialog = $this->newDialog()
+      ->setTitle(pht('Invalid URL'))
+      ->appendParagraph(
+        pht('This domain can only be used to open URLs'.
+          ' shortened using the Phurl application. The'.
+          ' URL you are trying to access does not have'.
+          ' a Phurl URL associated with it.'));
+
+    return id(new AphrontDialogResponse())
+      ->setDialog($dialog)
+      ->setHTTPResponseCode(404);
   }
 }
