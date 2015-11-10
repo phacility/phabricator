@@ -14,8 +14,4 @@ final class PhamePostReplyHandler
     return PhabricatorPhamePostPHIDType::TYPECONST;
   }
 
-  protected function shouldCreateCommentFromMailBody() {
-    return false;
-  }
-
 }
