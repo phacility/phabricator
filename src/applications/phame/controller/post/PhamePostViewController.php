@@ -17,9 +17,15 @@ final class PhamePostViewController extends PhamePostController {
     $blog = $post->getBlog();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(
-      $blog->getName(),
-      $this->getApplicationURI('blog/view/'.$blog->getID().'/'));
+    if ($blog) {
+      $crumbs->addTextCrumb(
+        $blog->getName(),
+        $this->getApplicationURI('blog/view/'.$blog->getID().'/'));
+    } else {
+      $crumbs->addTextCrumb(
+        pht('[No Blog]'),
+        null);
+    }
     $crumbs->addTextCrumb(
       $post->getTitle(),
       $this->getApplicationURI('post/view/'.$post->getID().'/'));
