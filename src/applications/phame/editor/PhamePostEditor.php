@@ -18,6 +18,7 @@ final class PhamePostEditor
     $types[] = PhamePostTransaction::TYPE_PHAME_TITLE;
     $types[] = PhamePostTransaction::TYPE_BODY;
     $types[] = PhamePostTransaction::TYPE_VISIBILITY;
+    $types[] = PhabricatorTransactions::TYPE_COMMENT;
 
     return $types;
   }

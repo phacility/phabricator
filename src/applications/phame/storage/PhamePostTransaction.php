@@ -20,6 +20,10 @@ final class PhamePostTransaction
     return PhabricatorPhamePostPHIDType::TYPECONST;
   }
 
+  public function getApplicationTransactionCommentObject() {
+    return new PhamePostTransactionComment();
+  }
+
   public function getRemarkupBlocks() {
     $blocks = parent::getRemarkupBlocks();
 

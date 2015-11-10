@@ -112,3 +112,64 @@ a.button.phui-document-toc {
 .phui-document-view-pro .phui-info-view {
   margin: 16px 0 0 0;
 }
+
+
+
+
+.phui-document-view-pro-box .phui-timeline-view {
+  padding: 0;
+  background: none;
+}
+
+.phui-document-view-pro-box .phui-timeline-image {
+  border-radius: 25px;
+}
+
+.phui-document-view-pro-box .phui-timeline-wedge {
+  display: none;
+}
+
+.phui-document-view-pro-box .phui-timeline-major-event .phui-timeline-group {
+  border: none;
+}
+
+.phui-document-view-pro-box .phui-timeline-major-event .phui-timeline-content {
+  border: none;
+}
+
+.device-desktop .phui-document-view-pro-box
+  .phui-timeline-event-view.phui-timeline-minor-event {
+    margin-left: 62px;
+}
+
+.phui-document-view-pro-box .phui-timeline-title {
+  border-radius: 3px;
+  background-color: {$lightgreybackground};
+}
+
+.phui-document-view-pro-box .phui-timeline-title-with-icon {
+  padding-left: 12px;
+}
+
+.phui-document-view-pro-box .phui-timeline-icon-fill {
+  display: none;
+}
+
+.phui-document-view-pro-box .phui-timeline-major-event .phui-timeline-content
+  .phui-timeline-core-content {
+    padding-bottom: 24px;
+}
+
+.phui-document-view-pro-box .phui-object-box {
+  background-color: {$lightgreybackground};
+  border: none;
+  margin: 0;
+}
+
+.phui-document-view-pro-box .phui-object-box .phui-form-view {
+  padding-bottom: 0;
+}
+
+.phui-document-view-pro-box .phui-object-box .remarkup-assist-textarea {
+  height: 9em;
+}

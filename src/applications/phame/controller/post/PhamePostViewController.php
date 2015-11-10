@@ -81,13 +81,24 @@ final class PhamePostViewController extends PhamePostController {
         ),
         $engine->getOutput($post, PhamePost::MARKUP_FIELD_BODY)));
 
+    $timeline = $this->buildTransactionTimeline(
+      $post,
+      id(new PhamePostTransactionQuery())
+      ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT)));
+    $timeline = phutil_tag_div('phui-document-view-pro-box', $timeline);
+
+    $add_comment = $this->buildCommentForm($post);
+
     return $this->newPage()
       ->setTitle($post->getTitle())
       ->addClass('pro-white-background')
+      ->setPageObjectPHIDs(array($post->getPHID()))
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
           $document,
+          $timeline,
+          $add_comment,
       ));
   }
 
@@ -195,6 +206,29 @@ final class PhamePostViewController extends PhamePostController {
     $properties->invokeWillRenderEvent();
 
     return $properties;
+  }
+
+  private function buildCommentForm(PhamePost $post) {
+    $viewer = $this->getViewer();
+
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+
+    $add_comment_header = $is_serious
+      ? pht('Add Comment')
+      : pht('Derp Text');
+
+    $draft = PhabricatorDraft::newFromUserAndKey(
+      $viewer, $post->getPHID());
+
+    $box = id(new PhabricatorApplicationTransactionCommentView())
+      ->setUser($viewer)
+      ->setObjectPHID($post->getPHID())
+      ->setDraft($draft)
+      ->setHeaderText($add_comment_header)
+      ->setAction($this->getApplicationURI('post/comment/'.$post->getID().'/'))
+      ->setSubmitButtonName(pht('Add Comment'));
+
+    return phutil_tag_div('phui-document-view-pro-box', $box);
   }
 
 }
