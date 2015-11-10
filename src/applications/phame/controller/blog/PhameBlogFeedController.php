@@ -21,7 +21,7 @@ final class PhameBlogFeedController extends PhameBlogController {
     $posts = id(new PhamePostQuery())
       ->setViewer($viewer)
       ->withBlogPHIDs(array($blog->getPHID()))
-      ->withVisibility(PhamePost::VISIBILITY_PUBLISHED)
+      ->withVisibility(PhameConstants::VISIBILITY_PUBLISHED)
       ->execute();
 
     $blog_uri = PhabricatorEnv::getProductionURI(

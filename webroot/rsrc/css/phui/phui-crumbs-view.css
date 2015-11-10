@@ -25,7 +25,8 @@
   padding-right: 0;
 }
 
-.phui-crumbs-view a.phui-crumbs-action-disabled {
+.phui-crumbs-view a.phui-crumbs-action-disabled,
+.phui-crumbs-view a.phui-crumbs-action-disabled .phui-icon-view {
   color: {$lightgreytext};
 }
 

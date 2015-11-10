@@ -73,7 +73,8 @@ final class PhameCreatePostConduitAPIMethod extends PhameConduitAPIMethod {
       ->withPHIDs(array($blog_phid))
       ->requireCapabilities(
         array(
-          PhabricatorPolicyCapability::CAN_JOIN,
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->executeOne();
 
@@ -85,7 +86,7 @@ final class PhameCreatePostConduitAPIMethod extends PhameConduitAPIMethod {
     $is_draft = $request->getValue('isDraft', false);
     if (!$is_draft) {
       $post->setDatePublished(time());
-      $post->setVisibility(PhamePost::VISIBILITY_PUBLISHED);
+      $post->setVisibility(PhameConstants::VISIBILITY_PUBLISHED);
     }
     $post->setTitle($title);
     $phame_title = $request->getValue(

@@ -65,9 +65,9 @@ final class PhameQueryPostsConduitAPIMethod extends PhameConduitAPIMethod {
 
     $published = $request->getValue('published', null);
     if ($published === true) {
-      $query->withVisibility(PhamePost::VISIBILITY_PUBLISHED);
+      $query->withVisibility(PhameConstants::VISIBILITY_PUBLISHED);
     } else if ($published === false) {
-      $query->withVisibility(PhamePost::VISIBILITY_DRAFT);
+      $query->withVisibility(PhameConstants::VISIBILITY_DRAFT);
     }
 
     $published_after = $request->getValue('publishedAfter', null);

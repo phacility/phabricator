@@ -28,36 +28,41 @@ final class PhameBlogEditController
         $blog->getPHID(),
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
       $v_projects = array_reverse($v_projects);
+      $v_cc = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+        $blog->getPHID());
 
     } else {
+      $this->requireApplicationCapability(
+        PhameBlogCreateCapability::CAPABILITY);
+
       $blog = PhameBlog::initializeNewBlog($viewer);
 
       $submit_button = pht('Create Blog');
       $page_title = pht('Create Blog');
       $cancel_uri = $this->getApplicationURI();
       $v_projects = array();
+      $v_cc = array();
     }
-    $name          = $blog->getName();
-    $description   = $blog->getDescription();
+    $name = $blog->getName();
+    $description = $blog->getDescription();
     $custom_domain = $blog->getDomain();
-    $skin          = $blog->getSkin();
-    $can_view      = $blog->getViewPolicy();
-    $can_edit      = $blog->getEditPolicy();
-    $can_join      = $blog->getJoinPolicy();
+    $skin = $blog->getSkin();
+    $can_view = $blog->getViewPolicy();
+    $can_edit = $blog->getEditPolicy();
 
     $e_name               = true;
     $e_custom_domain      = null;
     $e_view_policy        = null;
     $validation_exception = null;
     if ($request->isFormPost()) {
-      $name          = $request->getStr('name');
-      $description   = $request->getStr('description');
+      $name = $request->getStr('name');
+      $description = $request->getStr('description');
       $custom_domain = nonempty($request->getStr('custom_domain'), null);
-      $skin          = $request->getStr('skin');
-      $can_view      = $request->getStr('can_view');
-      $can_edit      = $request->getStr('can_edit');
-      $can_join      = $request->getStr('can_join');
-      $v_projects      = $request->getArr('projects');
+      $skin = $request->getStr('skin');
+      $can_view = $request->getStr('can_view');
+      $can_edit = $request->getStr('can_edit');
+      $v_projects = $request->getArr('projects');
+      $v_cc = $request->getArr('cc');
 
       $xactions = array(
         id(new PhameBlogTransaction())
@@ -79,8 +84,8 @@ final class PhameBlogEditController
           ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
           ->setNewValue($can_edit),
         id(new PhameBlogTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
-          ->setNewValue($can_join),
+          ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+          ->setNewValue(array('=' => $v_cc)),
       );
 
       $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
@@ -136,6 +141,13 @@ final class PhameBlogEditController
           ->setID('blog-description')
           ->setUser($viewer)
           ->setDisableMacros(true))
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('Subscribers'))
+          ->setName('cc')
+          ->setValue($v_cc)
+          ->setUser($viewer)
+          ->setDatasource(new PhabricatorMetaMTAMailableDatasource()))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setUser($viewer)
@@ -153,14 +165,6 @@ final class PhameBlogEditController
           ->setPolicies($policies)
           ->setValue($can_edit)
           ->setName('can_edit'))
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-          ->setUser($viewer)
-          ->setCapability(PhabricatorPolicyCapability::CAN_JOIN)
-          ->setPolicyObject($blog)
-          ->setPolicies($policies)
-          ->setValue($can_join)
-          ->setName('can_join'))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Projects'))

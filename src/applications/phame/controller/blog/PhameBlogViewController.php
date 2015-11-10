@@ -39,8 +39,11 @@ final class PhameBlogViewController extends PhameBlogController {
       ->appendChild($post_list);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Blogs'), $this->getApplicationURI('blog/'));
-    $crumbs->addTextCrumb($blog->getName(), $this->getApplicationURI());
+    $crumbs->addTextCrumb(
+      pht('Blogs'),
+      $this->getApplicationURI('blog/'));
+    $crumbs->addTextCrumb(
+      $blog->getName());
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -100,10 +103,6 @@ final class PhameBlogViewController extends PhameBlogController {
       pht('Editable By'),
       $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
 
-    $properties->addProperty(
-      pht('Joinable By'),
-      $descriptions[PhabricatorPolicyCapability::CAN_JOIN]);
-
     $engine = id(new PhabricatorMarkupEngine())
       ->setViewer($viewer)
       ->addObject($blog, PhameBlog::MARKUP_FIELD_DESCRIPTION)
@@ -136,18 +135,13 @@ final class PhameBlogViewController extends PhameBlogController {
       $blog,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $can_join = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $blog,
-      PhabricatorPolicyCapability::CAN_JOIN);
-
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-plus')
         ->setHref($this->getApplicationURI('post/edit/?blog='.$blog->getID()))
         ->setName(pht('Write Post'))
-        ->setDisabled(!$can_join)
-        ->setWorkflow(!$can_join));
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
 
     $actions->addAction(
       id(new PhabricatorActionView())

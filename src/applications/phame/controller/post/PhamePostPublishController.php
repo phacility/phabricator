@@ -21,9 +21,17 @@ final class PhamePostPublishController extends PhamePostController {
     $view_uri = $this->getApplicationURI('/post/view/'.$post->getID().'/');
 
     if ($request->isFormPost()) {
-      $post->setVisibility(PhamePost::VISIBILITY_PUBLISHED);
-      $post->setDatePublished(time());
-      $post->save();
+      $xactions = array();
+      $xactions[] = id(new PhamePostTransaction())
+        ->setTransactionType(PhamePostTransaction::TYPE_VISIBILITY)
+        ->setNewValue(PhameConstants::VISIBILITY_PUBLISHED);
+
+      id(new PhamePostEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
+        ->applyTransactions($post, $xactions);
 
       return id(new AphrontRedirectResponse())->setURI($view_uri);
     }

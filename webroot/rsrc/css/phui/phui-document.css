@@ -89,7 +89,8 @@
 }
 
 .phui-document-content .phui-property-list-container {
-  border-color: {$thinblueborder};
+  border-bottom: 1px solid {$thinblueborder};
+  background-color: {$lightgreybackground};
 }
 
 .legalpad .phui-document-content .phui-property-list-view {
