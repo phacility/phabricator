@@ -120,6 +120,10 @@ abstract class PhabricatorTestCase extends PhutilTestCase {
       'phabricator.base-uri',
       'http://phabricator.example.com');
 
+    $this->env->overrideEnvConfig(
+      'auth.email-domains',
+      array());
+
     // Tests do their own stubbing/voiding for events.
     $this->env->overrideEnvConfig('phabricator.silent', false);
   }

@@ -218,21 +218,21 @@ final class DifferentialJIRAIssuesField
       return pht(
         '%s updated JIRA issue(s): added %d %s; removed %d %s.',
         $xaction->renderHandleLink($author_phid),
-        new PhutilNumber(count($add)),
+        phutil_count($add),
         implode(', ', $add),
-        new PhutilNumber(count($rem)),
+        phutil_count($rem),
         implode(', ', $rem));
     } else if ($add) {
       return pht(
         '%s added %d JIRA issue(s): %s.',
         $xaction->renderHandleLink($author_phid),
-        new PhutilNumber(count($add)),
+        phutil_count($add),
         implode(', ', $add));
     } else if ($rem) {
       return pht(
         '%s removed %d JIRA issue(s): %s.',
         $xaction->renderHandleLink($author_phid),
-        new PhutilNumber(count($rem)),
+        phutil_count($rem),
         implode(', ', $rem));
     }
 

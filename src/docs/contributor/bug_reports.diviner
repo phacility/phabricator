@@ -3,6 +3,14 @@
 
 Describes how to file an effective Phabricator bug report.
 
+Include Reproduction Steps!
+===========================
+
+IMPORTANT: When filing a bug report, you **MUST** include reproduction
+instructions. We can not help fix bugs we can not reproduce, and will not
+accept reports which omit reproduction instructions. See below for details.
+
+
 Overview
 ========
 
@@ -27,6 +35,7 @@ If you have a feature request (not a bug report), see
 
 For general information on contributing to Phabricator, see
 @{article:Contributor Introduction}.
+
 
 Common Fixes
 ============
@@ -60,11 +69,12 @@ To update Phabricator, use a script like the one described in
 @{article:Upgrading Phabricator}.
 
 **If you can not update** for some reason, please include the version of
-Phabricator you are running in your report. The version is just the Git hash
-of your local HEAD. You can find the version by running `git show` in
-`phabricator/` and copy/pasting the first line of output, or by browsing to
-{nav Config > All Settings} in the web UI and copy/pasting the information
-at the top.
+Phabricator you are running when you file a report. You can find the version in
+{nav Config > Versions} in the web UI.
+
+(The version is just the Git hash of your local HEAD, so you can also find it
+by running `git show` in `phabricator/` and looking at the first line of
+output.)
 
 
 Supported Issues
@@ -72,6 +82,9 @@ Supported Issues
 
 Before filing a bug, make sure you're filing an issue against something we
 support.
+
+**We can NOT help you with issues we can not reproduce.** It is critical that
+you explain how to reproduce the issue when filing a report.
 
 **We do NOT support prototype applications.** If you're running into an issue
 with a prototype application, you're on your own. For more information about
@@ -101,6 +114,7 @@ Otherwise, if you're having an issue with a supported first-party application
 and followed the upstream install instructions on a normal computer, we're happy
 to try to help.
 
+
 Getting More Information
 ========================
 
@@ -121,6 +135,7 @@ help us figure out and resolve an issue.
     troubleshooting. Adjusting settings or enabling debugging modes may give
     you more information about the issue.
 
+
 Reproducibility
 ===============
 
@@ -135,7 +150,9 @@ trouble narrowing something down or want to check if updating might fix an
 issue.
 
 It is nearly impossible for us to resolve many issues if we can not reproduce
-them.
+them. We will not accept reports which do not contain the information required
+to reproduce problems.
+
 
 Unreproducible Problems
 =======================
@@ -161,6 +178,7 @@ We will make a reasonable effort to reproduce problems, but can not help with
 issues which we can't reproduce. You can make sure we're able to help resolve
 your issue by generating clear reproduction steps.
 
+
 Create a Task in Maniphest
 ==========================
 
@@ -168,11 +186,10 @@ If you're up to date, supported, have collected information about the problem,
 and have the best reproduction instructions you can come up with, you're ready
 to file an issue.
 
-We'll look at any issue report we can find (we monitor IRC, email,
-StackOverflow, Quora, Facebook and Twitter), but the upstream Maniphest is the
-authoritative bug tracker and the best place to file:
+It is **particularly critical** that you include reproduction steps. We will
+not accept reports which describe issues we can not reproduce.
 
-https://secure.phabricator.com/maniphest/task/create/
+(NOTE) https://secure.phabricator.com/maniphest/task/create/
 
 If you don't want to file there (or, for example, your bug relates to being
 unable to log in or unable to file an issue in Maniphest) you can file on any
@@ -182,12 +199,9 @@ filed against the upstream than if they're filed somewhere else.
 | Effectiveness | Filing Method |
 |---|---|
 | Best | Upstream Maniphest |
-| Ehhh | Quora, StackOverflow, Facebook, email, etc. |
+| Ehhh | Quora, StackOverflow, Facebook, Jelly, email, etc. |
 | What | Passive-aggressive tweet |
 
-If you have a quick question or want to discuss something before filing an
-issue, IRC is a great way to get a sanity check first. You can find information
-about IRC in @{article: Give Feedback! Get Support!}.
 
 Next Steps
 ==========
@@ -195,6 +209,5 @@ Next Steps
 Continue by:
 
   - learning about @{article: Contributing Feature Requests}; or
-  - reading general support information in
-    @{article: Give Feedback! Get Support!}; or
+  - reading general support information in @{article:Support Resources}; or
   - returning to the @{article:Contributor Introduction}.

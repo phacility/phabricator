@@ -12,6 +12,10 @@ final class PhabricatorWorkerBulkJobPHIDType extends PhabricatorPHIDType {
     return new PhabricatorWorkerBulkJob();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorDaemonsApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

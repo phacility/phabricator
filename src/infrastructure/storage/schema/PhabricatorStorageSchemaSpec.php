@@ -10,6 +10,7 @@ final class PhabricatorStorageSchemaSpec
       array(
         'patch' => 'text128',
         'applied' => 'uint32',
+        'duration' => 'uint64?',
       ),
       array(
         'PRIMARY' => array(

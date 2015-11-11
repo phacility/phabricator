@@ -12,6 +12,10 @@ final class NuanceQueuePHIDType extends PhabricatorPHIDType {
     return new NuanceQueue();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorNuanceApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

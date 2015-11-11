@@ -85,10 +85,9 @@ However, it is likely that `Derp` is even more complex, and rather than
 containing one class, each directory has several classes. A typical example
 happens around the CRUD of an object:
 
- - **DerpBaseController**: typically extends @{class:PhabricatorController},
-   implements `buildStandardPageResponse` with the `Derp` application name
-   and other `Derp`-specific meta-data, and contains any controller-specific
-   functionality used throughout the `Derp` application.
+ - **DerpBaseController**: typically extends @{class:PhabricatorController}
+   and contains any controller-specific functionality used throughout the
+   `Derp` application.
  - **DerpDeleteController**: typically extends `DerpBaseController` and
    presents a confirmation dialogue to the user about deleting a `Derp`.
  - **DerpEditController**: typically extends `DerpBaseController` and

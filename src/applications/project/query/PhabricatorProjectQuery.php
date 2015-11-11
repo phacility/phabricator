@@ -7,7 +7,6 @@ final class PhabricatorProjectQuery
   private $phids;
   private $memberPHIDs;
   private $slugs;
-  private $phrictionSlugs;
   private $names;
   private $nameTokens;
   private $icons;
@@ -47,11 +46,6 @@ final class PhabricatorProjectQuery
 
   public function withSlugs(array $slugs) {
     $this->slugs = $slugs;
-    return $this;
-  }
-
-  public function withPhrictionSlugs(array $slugs) {
-    $this->phrictionSlugs = $slugs;
     return $this;
   }
 
@@ -306,13 +300,6 @@ final class PhabricatorProjectQuery
         $conn,
         'slug.slug IN (%Ls)',
         $this->slugs);
-    }
-
-    if ($this->phrictionSlugs !== null) {
-      $where[] = qsprintf(
-        $conn,
-        'phrictionSlug IN (%Ls)',
-        $this->phrictionSlugs);
     }
 
     if ($this->names !== null) {

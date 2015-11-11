@@ -27,15 +27,26 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
     }
 
     $map = CelerityResourceMap::getNamedInstance('phabricator');
-    $resource_symbol = 'syntax-highlighting-css';
-    $resource_uri = $map->getURIForSymbol($resource_symbol);
+    $highlight_symbol = 'syntax-highlighting-css';
+    $highlight_uri = $map->getURIForSymbol($highlight_symbol);
 
     $this->cssResources[] = phutil_tag(
       'link',
       array(
         'rel'   => 'stylesheet',
         'type'  => 'text/css',
-        'href'  => PhabricatorEnv::getCDNURI($resource_uri),
+        'href'  => PhabricatorEnv::getCDNURI($highlight_uri),
+      ));
+
+    $remarkup_symbol = 'phabricator-remarkup-css';
+    $remarkup_uri = $map->getURIForSymbol($remarkup_symbol);
+
+    $this->cssResources[] = phutil_tag(
+      'link',
+      array(
+        'rel'   => 'stylesheet',
+        'type'  => 'text/css',
+        'href'  => PhabricatorEnv::getCDNURI($remarkup_uri),
       ));
 
     $this->cssResources = phutil_implode_html("\n", $this->cssResources);
@@ -68,6 +79,12 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
     return $this->cssResources;
   }
 
+  public function remarkup($corpus) {
+    $view = id(new PHUIRemarkupView($this->getViewer(), $corpus));
+
+    return hsprintf('%s', $view);
+  }
+
   public function getName() {
     return $this->getSpecification()->getName();
   }
@@ -96,13 +113,16 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
 
   private function getDefaultScope() {
     return array(
-      'skin'        => $this,
-      'blog'        => $this->getBlog(),
-      'uri'         => $this->getURI($this->getURIPath()),
-      'home_uri'    => $this->getURI(''),
-      'title'       => $this->getTitle(),
+      'skin' => $this,
+      'blog' => $this->getBlog(),
+      'uri' => $this->getURI($this->getURIPath()),
+      'home_uri' => $this->getURI(''),
+
+      // TODO: This is wrong for detail pages, which should show the post
+      // title, but getting it right is a pain and this is better than nothing.
+      'title' => $this->getBlog()->getName(),
       'description' => $this->getDescription(),
-      'og_type'     => $this->getOGType(),
+      'og_type' => $this->getOGType(),
     );
   }
 
@@ -124,7 +144,7 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
     return $this->renderTemplate(
       'post-detail.php',
       array(
-        'post'  => $post,
+        'post' => $post,
       ));
   }
 

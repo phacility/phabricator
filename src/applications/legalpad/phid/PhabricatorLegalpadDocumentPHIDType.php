@@ -16,6 +16,10 @@ final class PhabricatorLegalpadDocumentPHIDType extends PhabricatorPHIDType {
     return new LegalpadDocument();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorLegalpadApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

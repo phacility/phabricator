@@ -12,6 +12,10 @@ final class HeraldRulePHIDType extends PhabricatorPHIDType {
     return new HeraldRule();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorHeraldApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

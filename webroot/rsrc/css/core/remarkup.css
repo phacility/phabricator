@@ -334,6 +334,10 @@
   max-width: 100%;
 }
 
+.phabricator-remarkup .remarkup-table-wrap {
+  overflow-x: auto;
+}
+
 .phabricator-remarkup table.remarkup-table {
   border-collapse: separate;
   border-spacing: 1px;
@@ -359,35 +363,12 @@ body div.phabricator-remarkup.remarkup-has-toc
   padding-top: 0;
 }
 
-body .phabricator-remarkup p:first-child,
-body .phabricator-remarkup ul.remarkup-list:first-child,
-body .phabricator-remarkup ol.remarkup-list:first-child,
-body .phabricator-remarkup .remarkup-code-block:first-child,
-body .phabricator-remarkup h1.remarkup-header:first-child,
-body .phabricator-remarkup h2.remarkup-header:first-child,
-body .phabricator-remarkup h3.remarkup-header:first-child,
-body .phabricator-remarkup h4.remarkup-header:first-child,
-body .phabricator-remarkup h5.remarkup-header:first-child,
-body .phabricator-remarkup h6.remarkup-header:first-child,
-body .phabricator-remarkup blockquote:first-child,
-body .phabricator-remarkup table.remarkup-table:first-child,
-body .phabricator-remarkup .remarkup-note:first-child {
+body .phabricator-remarkup > *:first-child,
+body .phabricator-remarkup .remarkup-header + * {
   margin-top: 0;
 }
 
-body .phabricator-remarkup p:last-child,
-body .phabricator-remarkup ul.remarkup-list:last-child,
-body .phabricator-remarkup ol.remarkup-list:last-child,
-body .phabricator-remarkup .remarkup-code-block:last-child,
-body .phabricator-remarkup h1.remarkup-header:last-child,
-body .phabricator-remarkup h2.remarkup-header:last-child,
-body .phabricator-remarkup h3.remarkup-header:last-child,
-body .phabricator-remarkup h4.remarkup-header:last-child,
-body .phabricator-remarkup h5.remarkup-header:last-child,
-body .phabricator-remarkup h6.remarkup-header:last-child,
-body .phabricator-remarkup blockquote:last-child,
-body .phabricator-remarkup table.remarkup-table:last-child,
-body .phabricator-remarkup .remarkup-note:last-child {
+body .phabricator-remarkup *:last-child {
   margin-bottom: 0;
 }
 
@@ -538,4 +519,9 @@ var.remarkup-assist-textarea {
 .phabricator-remarkup hr {
   background: {$thinblueborder};
   margin: 24px 0;
+}
+
+.phabricator-remarkup .remarkup-highlight {
+  background-color: {$lightviolet};
+  padding: 0 4px;
 }

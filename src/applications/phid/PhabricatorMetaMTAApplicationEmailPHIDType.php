@@ -9,16 +9,16 @@ final class PhabricatorMetaMTAApplicationEmailPHIDType
     return pht('Application Email');
   }
 
-  public function getPHIDTypeApplicationClass() {
-    return 'PhabricatorMetaMTAApplication';
-  }
-
   public function getTypeIcon() {
     return 'fa-email bluegrey';
   }
 
   public function newObject() {
     return new PhabricatorMetaMTAApplicationEmail();
+  }
+
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorMetaMTAApplication';
   }
 
   protected function buildQueryForObjects(

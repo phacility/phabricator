@@ -34,6 +34,9 @@ final class PhabricatorSlugTestCase extends PhabricatorTestCase {
       'a/??/c'            => 'a/_/c/',
       'a/?b/c'            => 'a/b/c/',
       'a/b?/c'            => 'a/b/c/',
+      'a - b'             => 'a_-_b/',
+      'a[b]'              => 'a_b/',
+      'ab!'               => 'ab!/',
     );
 
     foreach ($slugs as $slug => $normal) {
@@ -41,6 +44,24 @@ final class PhabricatorSlugTestCase extends PhabricatorTestCase {
         $normal,
         PhabricatorSlug::normalize($slug),
         pht("Normalization of '%s'", $slug));
+    }
+  }
+
+  public function testProjectSlugs() {
+    $slugs = array(
+      'a:b' => 'a_b',
+      'a!b' => 'a_b',
+      'a - b' => 'a_-_b',
+      '' => '',
+      'Demonology: HSA (Hexes, Signs, Alchemy)' =>
+        'demonology_hsa_hexes_signs_alchemy',
+    );
+
+    foreach ($slugs as $slug => $normal) {
+      $this->assertEqual(
+        $normal,
+        PhabricatorSlug::normalizeProjectSlug($slug),
+        pht('Hashtag normalization of "%s"', $slug));
     }
   }
 

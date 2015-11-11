@@ -381,7 +381,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
   private function buildActionView(ManiphestTask $task) {
     $viewer = $this->getRequest()->getUser();
-    $viewer_phid = $viewer->getPHID();
 
     $id = $task->getID();
     $phid = $task->getPHID();
@@ -390,6 +389,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $viewer,
       $task,
       PhabricatorPolicyCapability::CAN_EDIT);
+
+    $can_create = $viewer->isLoggedIn();
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
@@ -417,7 +418,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
       id(new PhabricatorActionView())
         ->setName(pht('Create Subtask'))
         ->setHref($this->getApplicationURI("/task/create/?parent={$id}"))
-        ->setIcon('fa-level-down'));
+        ->setIcon('fa-level-down')
+        ->setDisabled(!$can_create)
+        ->setWorkflow(!$can_create));
 
     $view->addAction(
       id(new PhabricatorActionView())

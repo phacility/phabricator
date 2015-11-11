@@ -626,7 +626,9 @@ abstract class PhabricatorApplicationTransaction
         return pht('Edges already exist; transaction has no effect.');
     }
 
-    return pht('Transaction has no effect.');
+    return pht(
+      'Transaction (of type "%s") has no effect.',
+      $this->getTransactionType());
   }
 
   public function getTitle() {
@@ -710,19 +712,19 @@ abstract class PhabricatorApplicationTransaction
           return $type_obj->getTransactionEditString(
             $this->renderHandleLink($author_phid),
             new PhutilNumber(count($add) + count($rem)),
-            new PhutilNumber(count($add)),
+            phutil_count($add),
             $this->renderHandleList($add),
-            new PhutilNumber(count($rem)),
+            phutil_count($rem),
             $this->renderHandleList($rem));
         } else if ($add) {
           return $type_obj->getTransactionAddString(
             $this->renderHandleLink($author_phid),
-            new PhutilNumber(count($add)),
+            phutil_count($add),
             $this->renderHandleList($add));
         } else if ($rem) {
           return $type_obj->getTransactionRemoveString(
             $this->renderHandleLink($author_phid),
-            new PhutilNumber(count($rem)),
+            phutil_count($rem),
             $this->renderHandleList($rem));
         } else {
           return $type_obj->getTransactionPreviewString(
@@ -871,21 +873,21 @@ abstract class PhabricatorApplicationTransaction
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($object_phid),
             new PhutilNumber(count($add) + count($rem)),
-            new PhutilNumber(count($add)),
+            phutil_count($add),
             $this->renderHandleList($add),
-            new PhutilNumber(count($rem)),
+            phutil_count($rem),
             $this->renderHandleList($rem));
         } else if ($add) {
           return $type_obj->getFeedAddString(
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($object_phid),
-            new PhutilNumber(count($add)),
+            phutil_count($add),
             $this->renderHandleList($add));
         } else if ($rem) {
           return $type_obj->getFeedRemoveString(
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($object_phid),
-            new PhutilNumber(count($rem)),
+            phutil_count($rem),
             $this->renderHandleList($rem));
         } else {
           return pht(

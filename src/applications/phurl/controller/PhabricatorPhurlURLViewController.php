@@ -35,9 +35,13 @@ final class PhabricatorPhurlURLViewController
     $properties = $this->buildPropertyView($url);
 
     $properties->setActionList($actions);
+    $url_error = id(new PHUIInfoView())
+      ->setErrors(array(pht('This URL is invalid due to a bad protocol.')))
+      ->setIsHidden($url->isValid());
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->addPropertyList($properties);
+      ->addPropertyList($properties)
+      ->setInfoView($url_error);
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
     $add_comment_header = $is_serious
@@ -96,13 +100,20 @@ final class PhabricatorPhurlURLViewController
       $url,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Edit'))
-        ->setIcon('fa-pencil')
-        ->setHref($this->getApplicationURI("url/edit/{$id}/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+    $actions
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Edit'))
+          ->setIcon('fa-pencil')
+          ->setHref($this->getApplicationURI("url/edit/{$id}/"))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(!$can_edit))
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Visit URL'))
+          ->setIcon('fa-external-link')
+          ->setHref("u/{$id}")
+          ->setDisabled(!$url->isValid()));
 
     return $actions;
   }
@@ -117,6 +128,10 @@ final class PhabricatorPhurlURLViewController
     $properties->addProperty(
       pht('Original URL'),
       $url->getLongURL());
+
+    $properties->addProperty(
+      pht('Alias'),
+      $url->getAlias());
 
     $properties->invokeWillRenderEvent();
 

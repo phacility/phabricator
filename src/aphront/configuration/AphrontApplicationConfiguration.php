@@ -372,6 +372,13 @@ abstract class AphrontApplicationConfiguration extends Phobject {
       $result = $this->routePath($maps, $path.'/');
       if ($result) {
         $slash_uri = $request->getRequestURI()->setPath($path.'/');
+
+        // We need to restore URI encoding because the webserver has
+        // interpreted it. For example, this allows us to redirect a path
+        // like `/tag/aa%20bb` to `/tag/aa%20bb/`, which may eventually be
+        // resolved meaningfully by an application.
+        $slash_uri = phutil_escape_uri($slash_uri);
+
         $external = strlen($request->getRequestURI()->getDomain());
         return $this->buildRedirectController($slash_uri, $external);
       }

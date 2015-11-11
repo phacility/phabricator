@@ -42,7 +42,7 @@ final class HarbormasterPlanListController extends HarbormasterPlanController {
     $crumbs = parent::buildApplicationCrumbs();
 
     $can_create = $this->hasApplicationCapability(
-      HarbormasterManagePlansCapability::CAPABILITY);
+      HarbormasterCreatePlansCapability::CAPABILITY);
 
     $crumbs->addAction(
       id(new PHUIListItemView())

@@ -4,13 +4,12 @@
 
 .diffusion-source {
   width: 100%;
-  font-family: "Monaco", Consolas, monospace;
-  font-size: 10px;
+  font: 10px/13px "Menlo", "Consolas", "Monaco", monospace;
   background: #fff;
 }
 
 .diffusion-source tr.phabricator-source-highlight {
-  background: #ffff00;
+  background: {$sh-yellowbackground};
 }
 
 .diffusion-source th {
@@ -19,7 +18,6 @@
   background: {$lightgreybackground};
   color: {$bluetext};
   border-right: 1px solid {$thinblueborder};
-  font-size: {$smallestfontsize};
 }
 
 .diffusion-source td {

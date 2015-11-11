@@ -8,8 +8,16 @@ final class DrydockResourcePHIDType extends PhabricatorPHIDType {
     return pht('Drydock Resource');
   }
 
+  public function getTypeIcon() {
+    return 'fa-map';
+  }
+
   public function newObject() {
     return new DrydockResource();
+  }
+
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorDrydockApplication';
   }
 
   protected function buildQueryForObjects(

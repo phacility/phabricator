@@ -4,19 +4,16 @@ final class HarbormasterPlanRunController extends HarbormasterController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-
-    $this->requireApplicationCapability(
-      HarbormasterManagePlansCapability::CAPABILITY);
-
     $plan_id = $request->getURIData('id');
-
-    // NOTE: At least for now, this only requires the "Can Manage Plans"
-    // capability, not the "Can Edit" capability. Possibly it should have
-    // a more stringent requirement, though.
 
     $plan = id(new HarbormasterBuildPlanQuery())
       ->setViewer($viewer)
       ->withIDs(array($plan_id))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->executeOne();
     if (!$plan) {
       return new Aphront404Response();
@@ -62,7 +59,7 @@ final class HarbormasterPlanRunController extends HarbormasterController {
 
       if (!$errors) {
         $buildable->save();
-        $buildable->applyPlan($plan, array());
+        $buildable->applyPlan($plan, array(), $viewer->getPHID());
 
         $buildable_uri = '/B'.$buildable->getID();
         return id(new AphrontRedirectResponse())->setURI($buildable_uri);

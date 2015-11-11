@@ -71,6 +71,16 @@ final class PhabricatorAuthManagementRecoverWorkflow
           $can_recover));
     }
 
+    if (!$user->canEstablishWebSessions()) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'This account ("%s") can not establish web sessions, so it is '.
+          'not possible to generate a functional recovery link. Special '.
+          'accounts like daemons and mailing lists can not log in via the '.
+          'web UI.',
+          $username));
+    }
+
     $engine = new PhabricatorAuthSessionEngine();
     $onetime_uri = $engine->getOneTimeLoginURI(
       $user,

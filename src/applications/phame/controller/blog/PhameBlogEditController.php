@@ -1,15 +1,15 @@
 <?php
 
 final class PhameBlogEditController
-  extends PhameController {
+  extends PhameBlogController {
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
     if ($id) {
       $blog = id(new PhameBlogQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withIDs(array($id))
         ->requireCapabilities(
           array(
@@ -28,36 +28,41 @@ final class PhameBlogEditController
         $blog->getPHID(),
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
       $v_projects = array_reverse($v_projects);
+      $v_cc = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+        $blog->getPHID());
 
     } else {
-      $blog = PhameBlog::initializeNewBlog($user);
+      $this->requireApplicationCapability(
+        PhameBlogCreateCapability::CAPABILITY);
+
+      $blog = PhameBlog::initializeNewBlog($viewer);
 
       $submit_button = pht('Create Blog');
       $page_title = pht('Create Blog');
       $cancel_uri = $this->getApplicationURI();
       $v_projects = array();
+      $v_cc = array();
     }
-    $name          = $blog->getName();
-    $description   = $blog->getDescription();
+    $name = $blog->getName();
+    $description = $blog->getDescription();
     $custom_domain = $blog->getDomain();
-    $skin          = $blog->getSkin();
-    $can_view      = $blog->getViewPolicy();
-    $can_edit      = $blog->getEditPolicy();
-    $can_join      = $blog->getJoinPolicy();
+    $skin = $blog->getSkin();
+    $can_view = $blog->getViewPolicy();
+    $can_edit = $blog->getEditPolicy();
 
     $e_name               = true;
     $e_custom_domain      = null;
     $e_view_policy        = null;
     $validation_exception = null;
     if ($request->isFormPost()) {
-      $name          = $request->getStr('name');
-      $description   = $request->getStr('description');
+      $name = $request->getStr('name');
+      $description = $request->getStr('description');
       $custom_domain = nonempty($request->getStr('custom_domain'), null);
-      $skin          = $request->getStr('skin');
-      $can_view      = $request->getStr('can_view');
-      $can_edit      = $request->getStr('can_edit');
-      $can_join      = $request->getStr('can_join');
-      $v_projects      = $request->getArr('projects');
+      $skin = $request->getStr('skin');
+      $can_view = $request->getStr('can_view');
+      $can_edit = $request->getStr('can_edit');
+      $v_projects = $request->getArr('projects');
+      $v_cc = $request->getArr('cc');
 
       $xactions = array(
         id(new PhameBlogTransaction())
@@ -79,8 +84,8 @@ final class PhameBlogEditController
           ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
           ->setNewValue($can_edit),
         id(new PhameBlogTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
-          ->setNewValue($can_join),
+          ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+          ->setNewValue(array('=' => $v_cc)),
       );
 
       $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
@@ -90,7 +95,7 @@ final class PhameBlogEditController
         ->setNewValue(array('=' => array_fuse($v_projects)));
 
       $editor = id(new PhameBlogEditor())
-        ->setActor($user)
+        ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true);
 
@@ -111,7 +116,7 @@ final class PhameBlogEditController
     }
 
     $policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->setObject($blog)
       ->execute();
 
@@ -119,7 +124,7 @@ final class PhameBlogEditController
     $skins = mpull($skins, 'getName');
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel(pht('Name'))
@@ -129,16 +134,23 @@ final class PhameBlogEditController
         ->setError($e_name))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setLabel(pht('Description'))
           ->setName('description')
           ->setValue($description)
           ->setID('blog-description')
-          ->setUser($user)
+          ->setUser($viewer)
           ->setDisableMacros(true))
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('Subscribers'))
+          ->setName('cc')
+          ->setValue($v_cc)
+          ->setUser($viewer)
+          ->setDatasource(new PhabricatorMetaMTAMailableDatasource()))
       ->appendChild(
         id(new AphrontFormPolicyControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
           ->setPolicyObject($blog)
           ->setPolicies($policies)
@@ -147,20 +159,12 @@ final class PhameBlogEditController
           ->setName('can_view'))
       ->appendChild(
         id(new AphrontFormPolicyControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
           ->setPolicyObject($blog)
           ->setPolicies($policies)
           ->setValue($can_edit)
           ->setName('can_edit'))
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-          ->setUser($user)
-          ->setCapability(PhabricatorPolicyCapability::CAN_JOIN)
-          ->setPolicyObject($blog)
-          ->setPolicies($policies)
-          ->setValue($can_join)
-          ->setName('can_join'))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Projects'))
@@ -195,13 +199,12 @@ final class PhameBlogEditController
     $crumbs->addTextCrumb(pht('Blogs'), $this->getApplicationURI('blog/'));
     $crumbs->addTextCrumb($page_title, $this->getApplicationURI('blog/new'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
-      array(
-        'title' => $page_title,
+    return $this->newPage()
+      ->setTitle($page_title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $form_box,
       ));
   }
 }

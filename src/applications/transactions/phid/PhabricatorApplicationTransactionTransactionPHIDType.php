@@ -16,6 +16,10 @@ final class PhabricatorApplicationTransactionTransactionPHIDType
     return null;
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorTransactionsApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $object_query,
     array $phids) {

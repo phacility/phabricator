@@ -12,6 +12,10 @@ final class PhabricatorRepositoryPushLogPHIDType extends PhabricatorPHIDType {
     return new PhabricatorRepositoryPushLog();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorDiffusionApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

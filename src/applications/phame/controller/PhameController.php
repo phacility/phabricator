@@ -2,27 +2,6 @@
 
 abstract class PhameController extends PhabricatorController {
 
-  protected function renderSideNavFilterView() {
-
-    $base_uri = new PhutilURI($this->getApplicationURI());
-
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI($base_uri);
-
-    $nav->addLabel(pht('Posts'));
-    $nav->addFilter('post/all', pht('Latest Posts'));
-    $nav->addFilter('post/draft', pht('My Drafts'));
-    $nav->addFilter('post', pht('My Posts'));
-
-    $nav->addLabel(pht('Blogs'));
-    $nav->addFilter('blog/user', pht('Joinable Blogs'));
-    $nav->addFilter('blog/all', pht('All Blogs'));
-
-    $nav->selectFilter(null);
-
-    return $nav;
-  }
-
   protected function renderPostList(
     array $posts,
     PhabricatorUser $viewer,
@@ -111,21 +90,24 @@ abstract class PhameController extends PhabricatorController {
     return $stories;
   }
 
-  public function buildApplicationMenu() {
-    return $this->renderSideNavFilterView()->getMenu();
-  }
-
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
+
+    $can_create = $this->hasApplicationCapability(
+      PhameBlogCreateCapability::CAPABILITY);
+
     $crumbs->addAction(
       id(new PHUIListItemView())
         ->setName(pht('New Blog'))
-        ->setHref($this->getApplicationURI('/blog/new'))
-        ->setIcon('fa-plus-square'));
+        ->setHref($this->getApplicationURI('/blog/new/'))
+        ->setIcon('fa-plus-square')
+        ->setDisabled(!$can_create)
+        ->setWorkflow(!$can_create));
+
     $crumbs->addAction(
       id(new PHUIListItemView())
         ->setName(pht('New Post'))
-        ->setHref($this->getApplicationURI('/post/new'))
+        ->setHref($this->getApplicationURI('/post/new/'))
         ->setIcon('fa-pencil'));
     return $crumbs;
   }

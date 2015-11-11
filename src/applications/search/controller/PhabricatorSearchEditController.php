@@ -3,38 +3,31 @@
 final class PhabricatorSearchEditController
   extends PhabricatorSearchBaseController {
 
-  private $queryKey;
-
-  public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $saved_query = id(new PhabricatorSavedQueryQuery())
-      ->setViewer($user)
-      ->withQueryKeys(array($this->queryKey))
+      ->setViewer($viewer)
+      ->withQueryKeys(array($request->getURIData('queryKey')))
       ->executeOne();
 
     if (!$saved_query) {
       return new Aphront404Response();
     }
 
-    $engine = $saved_query->newEngine()->setViewer($user);
+    $engine = $saved_query->newEngine()->setViewer($viewer);
 
     $complete_uri = $engine->getQueryManagementURI();
     $cancel_uri = $complete_uri;
 
     $named_query = id(new PhabricatorNamedQueryQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withQueryKeys(array($saved_query->getQueryKey()))
-      ->withUserPHIDs(array($user->getPHID()))
+      ->withUserPHIDs(array($viewer->getPHID()))
       ->executeOne();
     if (!$named_query) {
       $named_query = id(new PhabricatorNamedQuery())
-        ->setUserPHID($user->getPHID())
+        ->setUserPHID($viewer->getPHID())
         ->setQueryKey($saved_query->getQueryKey())
         ->setEngineClassName($saved_query->getEngineClassName());
 
@@ -64,7 +57,7 @@ final class PhabricatorSearchEditController
     }
 
     $form = id(new AphrontFormView())
-      ->setUser($user);
+      ->setUser($viewer);
 
     $form->appendChild(
       id(new AphrontFormTextControl())

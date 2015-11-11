@@ -32,7 +32,7 @@ final class PonderAnswerSaveController extends PonderController {
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
-    $answer = PonderAnswer::initializeNewAnswer($viewer);
+    $answer = PonderAnswer::initializeNewAnswer($viewer, $question);
 
     // Question Editor
 

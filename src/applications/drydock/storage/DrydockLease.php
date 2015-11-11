@@ -7,6 +7,7 @@ final class DrydockLease extends DrydockDAO
   protected $resourceType;
   protected $until;
   protected $ownerPHID;
+  protected $authorizingPHID;
   protected $attributes = array();
   protected $status = DrydockLeaseStatus::STATUS_PENDING;
 
@@ -139,6 +140,25 @@ final class DrydockLease extends DrydockDAO
     if ($this->getID()) {
       throw new Exception(
         pht('Only new leases may be queued for activation!'));
+    }
+
+    if (!$this->getAuthorizingPHID()) {
+      throw new Exception(
+        pht(
+          'Trying to queue a lease for activation without an authorizing '.
+          'object. Use "%s" to specify the PHID of the authorizing object. '.
+          'The authorizing object must be approved to use the allowed '.
+          'blueprints.',
+          'setAuthorizingPHID()'));
+    }
+
+    if (!$this->getAllowedBlueprintPHIDs()) {
+      throw new Exception(
+        pht(
+          'Trying to queue a lease for activation without any allowed '.
+          'Blueprints. Use "%s" to specify allowed blueprints. The '.
+          'authorizing object must be approved to use the allowed blueprints.',
+          'setAllowedBlueprintPHIDs()'));
     }
 
     $this
@@ -376,6 +396,15 @@ final class DrydockLease extends DrydockDAO
     return $this;
   }
 
+  public function setAllowedBlueprintPHIDs(array $phids) {
+    $this->setAttribute('internal.blueprintPHIDs', $phids);
+    return $this;
+  }
+
+  public function getAllowedBlueprintPHIDs() {
+    return $this->getAttribute('internal.blueprintPHIDs', array());
+  }
+
   private function didActivate() {
     $viewer = PhabricatorUser::getOmnipotentUser();
     $need_update = false;
@@ -400,10 +429,7 @@ final class DrydockLease extends DrydockDAO
       $this->scheduleUpdate($expires);
     }
 
-    $awaken_ids = $this->getAttribute('internal.awakenTaskIDs');
-    if (is_array($awaken_ids) && $awaken_ids) {
-      PhabricatorWorker::awakenTaskIDs($awaken_ids);
-    }
+    $this->awakenTasks();
   }
 
   public function logEvent($type, array $data = array()) {
@@ -425,6 +451,19 @@ final class DrydockLease extends DrydockDAO
     return $log->save();
   }
 
+  /**
+   * Awaken yielded tasks after a state change.
+   *
+   * @return this
+   */
+  public function awakenTasks() {
+    $awaken_ids = $this->getAttribute('internal.awakenTaskIDs');
+    if (is_array($awaken_ids) && $awaken_ids) {
+      PhabricatorWorker::awakenTaskIDs($awaken_ids);
+    }
+
+    return $this;
+  }
 
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */

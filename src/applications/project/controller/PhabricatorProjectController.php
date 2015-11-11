@@ -70,11 +70,11 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     $nav->setIconNav(true);
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
     $nav->addIcon("profile/{$id}/", $name, null, $picture);
-    $nav->addIcon("board/{$id}/", pht('Workboard'), $board_icon);
 
     $class = 'PhabricatorManiphestApplication';
     if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
       $phid = $project->getPHID();
+      $nav->addIcon("board/{$id}/", pht('Workboard'), $board_icon);
       $query_uri = urisprintf(
         '/maniphest/?statuses=open()&projects=%s#R',
         $phid);

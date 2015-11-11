@@ -1,15 +1,14 @@
 <?php
 
-final class PhamePostPreviewController extends PhameController {
+final class PhamePostPreviewController extends PhamePostController {
 
   protected function getSideNavFilter() {
     return null;
   }
 
-  public function processRequest() {
-    $request     = $this->getRequest();
-    $user        = $request->getUser();
-    $body        = $request->getStr('body');
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $body = $request->getStr('body');
 
     $post = id(new PhamePost())
       ->setBody($body);
@@ -17,7 +16,7 @@ final class PhamePostPreviewController extends PhameController {
     $content = PhabricatorMarkupEngine::renderOneObject(
       $post,
       PhamePost::MARKUP_FIELD_BODY,
-      $user);
+      $viewer);
 
     $content = phutil_tag_div('phabricator-remarkup', $content);
 

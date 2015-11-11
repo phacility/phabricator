@@ -61,6 +61,7 @@ th.aphront-table-view-sortable-selected {
   text-align: right;
   color: {$bluetext};
   font-weight: bold;
+  vertical-align: top;
 }
 
 .aphront-table-view td {
@@ -152,6 +153,10 @@ th.aphront-table-view-sortable-selected {
 .aphront-table-view td.pri {
   font-weight: bold;
   color: {$darkbluetext};
+}
+
+.aphront-table-view td.top {
+  vertical-align: top;
 }
 
 .aphront-table-view td.wide {

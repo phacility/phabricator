@@ -1,0 +1,168 @@
+@title Differential User Guide: Inline Comments
+@group userguide
+
+Guide to inline comments in Differential.
+
+Overview
+========
+
+Differential allows reviewers to leave feedback about changes to code inline,
+within the body of the diff itself. These comments are called "inline
+comments", and can be used to discuss specific parts of a change.
+
+(NOTE) Click the line number next to a line to leave an inline comment.
+
+To leave an inline comment, click the line number next to a line when reviewing
+a change in Differential. You can also leave a comment on a range of adjacent
+lines by clicking one line number and dragging to a nearby line number.
+
+(NOTE) Other users can't see your comments right away!
+
+When you make a comment, it is initially an **unsubmitted draft**, indicated by
+an "Unsubmitted" badge in the comment header. Other users can't see it yet.
+This behavior is different from the behavior of other software you may be
+familiar with.
+
+To publish your inline comments, scroll to the bottom of the page and submit
+the form there. All your unsubmitted inline comments will be published when you
+do, alongside an optional normal comment and optional action (like accepting
+the revision).
+
+Differential doesn't publish inlines initially because having a draft phase
+gives reviewers more time to revise and adjust the inlines, and make their
+feedback more cohesive, and contextualize their inlines with discussion in a
+normal comment. It also allows Differential to send fewer, more relevant emails
+and notifications.
+
+
+Porting / Ghost Comments
+========================
+
+When a revision is updated, we attempt to port inline comments forward and
+display them on the new diff. Ported comments have a pale, ghostly appearance
+and include a button which allows you to jump back to the original context
+where the comment appeared.
+
+Ported comments sometimes appear in unexpected locations. There are two major
+reasons for this:
+
+  - In the general case, it is not possible to always port comments to the same
+    lines humans would automatically.
+  - We are very aggressive about porting comments forward, even in the presence
+    of heavy changes. This helps prevent mistakes and makes it easier to verify
+    feedback has been addressed.
+
+You can disable this behavior in
+{nav Settings > Diff Preferences > Show Older Inlines} if you prefer comments
+stay anchored to their original diff.
+
+To understand why porting comments forward is difficult and can produce
+unexpected results, and why we choose to be aggressive about it, let's look at
+a case where the right behavior is ambiguous. Imagine this code is added as
+part of a change:
+
+```name=important.c
+111 ...
+112
+113 if (a() || b() || c()) {
+114   return;
+115 }
+116
+117 ...
+```
+
+Suppose a reviewer leaves this comment on line 113:
+
+> important.c:113 This is a serious security vulnerability!
+
+The author later updates the diff, and the code now looks like this, with some
+other changes elsewhere so the line numbers have also shifted:
+
+```name=important.c
+140 ...
+141
+142 if (a()) {
+143   return;
+144 }
+145
+146 if (b()) {
+147   return;
+148 }
+149
+150 ...
+```
+
+If we port the inline forward from the first change to the second change, where
+should it go? A human would probably do one of three things:
+
+  # Put it on line 142, with the call to `a()`.
+  # Put it on line 146, with the call to `b()`.
+  # Don't bring it forward at all.
+
+A human would choose between (1) and (2) based on context about what `a()` and
+`b()` are and what the reviewer meant. The algorithm can not possibly read the
+comment and understand which part of the statement it talked about. Humans
+might not even agree on which line is the better fit.
+
+When we choose one of these behaviors, humans will sometimes think the other
+behavior was the better one, because they have more information about what
+`a()` and `b()` are and what the comment actually meant. The line we choose may
+be unexpected, but it is the best the algorithm can do without being able to
+actually read the code or understand what the comment means.
+
+A human might also choose not to bring the comment forward if they knew that
+removing `c()` addressed it, but the algorithm can not know that. The call to
+`a()` or `b()` may be the dangerous thing the reviewer was talking about, and
+we err on the side of caution by bringing comments forward aggressively.
+
+When a line of code with an inline comment on it changes, we can not know if
+the change addressed the inline or not. We take the cautious route and
+//always// assume it did not, and that humans need to verify problems have
+really been addressed.
+
+This means that inlines are sometimes ported forward into places that don't
+make sense (the code has changed completely), but we won't drop important
+inlines just because the structure of the code has changed.
+
+Here's another case where bringing inlines forward seems desirable. Imagine
+this code is added as part of a change:
+
+```name=warpgate.c
+12 ...
+13 function_x();
+14 ...
+```
+
+Suppose a reviewer leaves this comment on line 13:
+
+> warpgate.c:13 This should be function_y() instead.
+
+The author later updates the diff, and the code now looks like this:
+
+```name=warpgate.c
+12 ...
+13 function_y();
+14 ...
+```
+
+For the reasons discussed above, we port the comment forward, so it will appear
+under line 13.
+
+We think this is desirable: it makes it trivial for an author or reviewer to
+look through the changes and verify that the feedback has really been
+addressed, because you can see that the code now uses the proper function.
+
+This isn't to say that we always do the best we can. There may be cases where
+the algorithm can be smarter than it currently is or otherwise produce a better
+result. If you find such a case, file a bug report. But it's expected that the
+algorithm will sometimes port comments into places that aren't optimal or no
+longer make sense, because this is frequently the best behavior available among
+the possible alternatives.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to the @{article:Differential User Guide}.

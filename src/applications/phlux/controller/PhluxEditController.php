@@ -2,35 +2,29 @@
 
 final class PhluxEditController extends PhluxController {
 
-  private $key;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $key = $request->getURIData('key');
 
-  public function willProcessRequest(array $data) {
-    $this->key = idx($data, 'key');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $is_new = ($this->key === null);
+    $is_new = ($key === null);
     if ($is_new) {
       $var = new PhluxVariable();
       $var->setViewPolicy(PhabricatorPolicies::POLICY_USER);
       $var->setEditPolicy(PhabricatorPolicies::POLICY_USER);
     } else {
       $var = id(new PhluxVariableQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
             PhabricatorPolicyCapability::CAN_EDIT,
           ))
-        ->withKeys(array($this->key))
+        ->withKeys(array($key))
         ->executeOne();
       if (!$var) {
         return new Aphront404Response();
       }
-      $view_uri = $this->getApplicationURI('/view/'.$this->key.'/');
+      $view_uri = $this->getApplicationURI('/view/'.$key.'/');
     }
 
     $e_key = ($is_new ? true : null);
@@ -67,7 +61,7 @@ final class PhluxEditController extends PhluxController {
 
       if (!$errors) {
         $editor = id(new PhluxVariableEditor())
-          ->setActor($user)
+          ->setActor($viewer)
           ->setContinueOnNoEffect(true)
           ->setContentSourceFromRequest($request);
 
@@ -110,12 +104,12 @@ final class PhluxEditController extends PhluxController {
     }
 
     $policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->setObject($var)
       ->execute();
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setValue($var->getVariableKey())
@@ -161,7 +155,7 @@ final class PhluxEditController extends PhluxController {
       $title = pht('Create Variable');
       $crumbs->addTextCrumb($title, $request->getRequestURI());
     } else {
-      $title = pht('Edit %s', $this->key);
+      $title = pht('Edit %s', $key);
       $crumbs->addTextCrumb($title, $request->getRequestURI());
     }
 

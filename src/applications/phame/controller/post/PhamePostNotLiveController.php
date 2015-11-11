@@ -1,13 +1,13 @@
 <?php
 
-final class PhamePostNotLiveController extends PhameController {
+final class PhamePostNotLiveController extends PhamePostController {
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
     $post = id(new PhamePostQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withIDs(array($id))
       ->executeOne();
     if (!$post) {
@@ -32,7 +32,7 @@ final class PhamePostNotLiveController extends PhameController {
       $cancel_uri = $this->getApplicationURI('/post/view/'.$post->getID().'/');
 
       $dialog = id(new AphrontDialogView())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setTitle(pht('Post Not Live'))
         ->addCancelButton($cancel_uri);
 

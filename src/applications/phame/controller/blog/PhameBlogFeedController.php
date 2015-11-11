@@ -1,17 +1,17 @@
 <?php
 
-final class PhameBlogFeedController extends PhameController {
+final class PhameBlogFeedController extends PhameBlogController {
 
   public function shouldRequireLogin() {
     return false;
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
     $blog = id(new PhameBlogQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withIDs(array($id))
       ->executeOne();
     if (!$blog) {
@@ -19,9 +19,9 @@ final class PhameBlogFeedController extends PhameController {
     }
 
     $posts = id(new PhamePostQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withBlogPHIDs(array($blog->getPHID()))
-      ->withVisibility(PhamePost::VISIBILITY_PUBLISHED)
+      ->withVisibility(PhameConstants::VISIBILITY_PUBLISHED)
       ->execute();
 
     $blog_uri = PhabricatorEnv::getProductionURI(
@@ -47,7 +47,7 @@ final class PhameBlogFeedController extends PhameController {
       $content[] = phutil_tag('subtitle', array(), $description);
     }
 
-    $engine = id(new PhabricatorMarkupEngine())->setViewer($user);
+    $engine = id(new PhabricatorMarkupEngine())->setViewer($viewer);
     foreach ($posts as $post) {
       $engine->addObject($post, PhamePost::MARKUP_FIELD_BODY);
     }
@@ -55,7 +55,7 @@ final class PhameBlogFeedController extends PhameController {
 
     $blogger_phids = mpull($posts, 'getBloggerPHID');
     $bloggers = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withPHIDs($blogger_phids)
       ->execute();
 

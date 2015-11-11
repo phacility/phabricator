@@ -117,23 +117,23 @@ abstract class PhabricatorStandardCustomFieldPHIDs
         '%s updated %s, added %d: %s.',
         $xaction->renderHandleLink($author_phid),
         $this->getFieldName(),
-        new PhutilNumber(count($add)),
+        phutil_count($add),
         $xaction->renderHandleList($add));
     } else if ($rem && !$add) {
       return pht(
-        '%s updated %s, removed %d: %s.',
+        '%s updated %s, removed %s: %s.',
         $xaction->renderHandleLink($author_phid),
         $this->getFieldName(),
-        new PhutilNumber(count($rem)),
+        phutil_count($rem),
         $xaction->renderHandleList($rem));
     } else {
       return pht(
-        '%s updated %s, added %d: %s; removed %d: %s.',
+        '%s updated %s, added %s: %s; removed %s: %s.',
         $xaction->renderHandleLink($author_phid),
         $this->getFieldName(),
-        new PhutilNumber(count($add)),
+        phutil_count($add),
         $xaction->renderHandleList($add),
-        new PhutilNumber(count($rem)),
+        phutil_count($rem),
         $xaction->renderHandleList($rem));
     }
   }
@@ -158,22 +158,9 @@ abstract class PhabricatorStandardCustomFieldPHIDs
 
       $add = array_diff($new, $old);
 
-      if (!$add) {
-        continue;
-      }
-
-      $objects = id(new PhabricatorObjectQuery())
-        ->setViewer($editor->getActor())
-        ->withPHIDs($add)
-        ->execute();
-      $objects = mpull($objects, null, 'getPHID');
-
-      $invalid = array();
-      foreach ($add as $phid) {
-        if (empty($objects[$phid])) {
-          $invalid[] = $phid;
-        }
-      }
+      $invalid = PhabricatorObjectQuery::loadInvalidPHIDsForViewer(
+        $editor->getActor(),
+        $add);
 
       if ($invalid) {
         $error = new PhabricatorApplicationTransactionValidationError(
@@ -217,7 +204,7 @@ abstract class PhabricatorStandardCustomFieldPHIDs
     return array();
   }
 
-  private function decodeValue($value) {
+  protected function decodeValue($value) {
     $value = json_decode($value);
     if (!is_array($value)) {
       $value = array();

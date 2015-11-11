@@ -292,7 +292,9 @@ final class PonderQuestionViewController extends PonderController {
       $item->setObject($question);
 
       $item->addAttribute(
-        pht('%d Answer(s)', $question->getAnswerCount()));
+        pht(
+          '%s Answer(s)',
+          new PhutilNumber($question->getAnswerCount())));
 
       $list->addItem($item);
     }

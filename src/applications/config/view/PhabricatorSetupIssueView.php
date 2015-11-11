@@ -387,7 +387,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
         array(),
         pht(
           'PHP also loaded these %s configuration file(s):',
-          new PhutilNumber(count($more_loc))));
+          phutil_count($more_loc)));
       $info[] = phutil_tag(
         'pre',
         array(),

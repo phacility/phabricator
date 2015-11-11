@@ -20,11 +20,17 @@ final class DiffusionUpdateCoverageConduitAPIMethod
   }
 
   protected function defineParamTypes() {
+    $modes = array(
+      'overwrite',
+      'update',
+    );
+
     return array(
       'repositoryPHID' => 'required phid',
       'branch' => 'required string',
       'commit' => 'required string',
       'coverage' => 'required map<string, string>',
+      'mode' => 'optional '.$this->formatStringConstants($modes),
     );
   }
 
@@ -77,16 +83,31 @@ final class DiffusionUpdateCoverageConduitAPIMethod
     $table_name = 'repository_coverage';
 
     $conn->openTransaction();
-      queryfx(
-        $conn,
-        'DELETE FROM %T WHERE branchID = %d',
-        $table_name,
-        $branch->getID());
+    $mode = $request->getValue('mode');
+      switch ($mode) {
+        case '':
+        case 'overwrite':
+          // sets the coverage for the whole branch, deleting all previous
+          // coverage information
+          queryfx(
+            $conn,
+            'DELETE FROM %T WHERE branchID = %d',
+            $table_name,
+            $branch->getID());
+          break;
+        case 'update':
+          // sets the coverage for the provided files on the specified commit
+          break;
+        default:
+          $conn->killTransaction();
+          throw new Exception(pht('Invalid mode "%s".', $mode));
+      }
 
       foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
         queryfx(
           $conn,
-          'INSERT INTO %T (branchID, pathID, commitID, coverage) VALUES %Q',
+          'INSERT INTO %T (branchID, pathID, commitID, coverage) VALUES %Q'.
+          ' ON DUPLICATE KEY UPDATE coverage=VALUES(coverage)',
           $table_name,
           $chunk);
       }

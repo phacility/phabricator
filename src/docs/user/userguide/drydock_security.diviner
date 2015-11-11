@@ -1,0 +1,209 @@
+@title Drydock User Guide: Security
+@group userguide
+
+Understanding security concerns in Drydock.
+
+Overview
+========
+
+Different applications use Drydock for different things, and some of the things
+they do with Drydock require different levels of trust and access. It is
+important to configure Drydock properly so that less trusted code can't do
+anything you aren't comfortable with.
+
+For example, running unit tests on Drydock normally involves running relatively
+untrusted code (it often has a single author and has not yet been reviewed)
+that needs very few capabilities (generally, it only needs to be able to report
+results back to Phabricator). In contrast, automating merge requests on Drydock
+involves running trusted code that needs more access (it must be able to write
+to repositories).
+
+Drydock allows resources to be shared and reused, so it's possible to configure
+Drydock in a way that gives untrusted code a lot of access by accident.
+
+One way Drydock makes allocations faster is by sharing, reusing, and recycling
+resources. When an application asks Drydock for a working copy, it will try to
+satisfy the request by cleaning up a suitable existing working copy if it can,
+instead of building a new one. This is faster, but it means that tasks have
+some ability to interact or interfere with each other.
+
+Similarly, Drydock may allocate multiple leases on the same host at the same
+time, running as the same user. This is generally simpler to configure and less
+wasteful than fully isolating leases, but means that they can interact.
+
+Depending on your organization, environment and use cases, you might not want
+this, and it may be important that different use cases are unable to interfere
+with each other. For example, you might want to prevent unit tests from writing
+to repositories.
+
+**Drydock does not guarantee that resources are isolated by default**. When
+resources are more isolated, they are usually also harder to configure and
+slower to allocate. Because most installs will want to find a balance between
+isolation and complexity/performance, Drydock does not make assumptions about
+either isolation or performance having absolute priority.
+
+You'll usually want to isolate things just enough that nothing bad can happen.
+Fortunately, this is straightforward. This document describes how to make sure
+you have enough isolation so that nothing you're uncomfortable with can occur.
+
+
+Choosing an Isolation Policy
+============================
+
+This section provides some reasonable examples of ways you might approach
+configuring Drydock.
+
+| Isolation | Suitable For | Description
+|-----------|-----|-------
+| Zero | Development | Everything on one host.
+| Low | Small Installs | Use a dedicated Drydock host.
+| High | Most Installs | **Recommended**. Use low-trust and high-trust pools.
+| Custom | Special Requirements | Use multiple pools.
+| Absolute | Special Requirements | Completely isolate all resources.
+
+**Zero Isolation**: Run Drydock operations on the same host that Phabricator
+runs on. This is only suitable for developing or testing Phabricator. Any
+Drydock operation can potentially compromise Phabricator. It is intentionally
+difficult to configure Drydock to operate in this mode. Running Drydock
+operations on the Phabricator host is strongly discouraged.
+
+**Low Isolation**: Designate a separate Drydock host and run Drydock
+operations on it. This is suitable for small installs and provides a reasonable
+level of isolation. However, it will allow unit tests (which often run
+lower-trust code) to interfere with repository automation operations.
+
+**High Isolation**: Designate two Drydock host pools and run low-trust
+operations (like builds) on one pool and high-trust operations (like repository
+automation) on a separate pool. This provides a good balance between isolation
+and performance, although tests can still potentially interfere with the
+execution of unrelated tests.
+
+**Custom Isolation**: You can continue adding pools to refine the resource
+isolation model. For example, you may have higher-trust and lower-trust
+repositories or do builds on a mid-trust tier which runs only reviewed code.
+
+**Absolute Isolation**: Configure blueprints to completely initialize and
+destroy hosts or containers on every request, and limit all resources to one
+simultaneous lease. This will completely isolate every operation, but come at
+a high performance and complexity cost.
+
+NOTE: It is not currently possible to configure Drydock in an absolute
+isolation mode.
+
+It is usually reasonable to choose one of these approaches as a starting point
+and then adjust it to fit your requirements. You can also evolve your use of
+Drydock over time as your needs change.
+
+
+Threat Scenarios
+================
+
+This section will help you understand the threats to a Drydock environment.
+Not all threats will be concerning to all installs, and you can choose an
+approach which defuses only the threats you care about.
+
+Attackers have three primary targets:
+
+  - capturing hosts;
+  - compromising Phabricator; and
+  - compromising the integrity of other Drydock processes.
+
+**Attacks against hosts** are the least sophisticated. In this scenario, an
+attacker wants to run a program like a Bitcoin miner or botnet client on
+hardware that they aren't paying for or which can't be traced to them. They
+write a "unit test" or which launches this software, then send a revision
+containing this "unit test" for review. If Phabricator is configured to
+automatically run tests on new revisions, it may execute automatically and give
+the attacker access to computing resources they did not previously control and
+which can not easily be traced back to them.
+
+This is usually only a meaningful threat for open source installs, because
+there is a high probability of eventual detection and the value of these
+resources is small, so employees will generally not have an incentive to
+attempt this sort of attack. The easiest way to prevent this attack is to
+prevent untrusted, anonymous contributors from running tests. For example,
+create a "Trusted Contributors" project and only run tests if a revision author
+is a member of the project.
+
+**Attacks against Phabricator** are more sophisticated. In this scenario, an
+attacker tries to compromise Phabricator itself (for example, to make themselves
+an administrator or gain access to an administrator account).
+
+This is made possible if Drydock is running on the same host as Phabricator or
+runs on a privileged subnet with access to resources like Phabricator database
+hosts. Most installs should be concerned about this attack.
+
+The best way to defuse this attack is to run Drydock processes on a separate
+host which is not on a privileged subnet. For example, use a
+`build.mycompany.com` host or pool for Drydock processes, separate from your
+`phabricator.mycompany.com` host or pool.
+
+Even if the host is not privileged, many Drydock processes have some level of
+privilege (enabling them to clone repositories, or report test results back to
+Phabricator). Be aware that tests can hijack credentials they are run with,
+and potentialy hijack credentials given to other processes on the same hosts.
+You should use credentials with a minimum set of privileges and assume all
+processes on a host have the highest level of access that any process on the
+host has.
+
+**Attacks against Drydock** are the most sophisticated. In this scenario, an
+attacker uses one Drydock process to compromise a different process: for
+example, a unit test which tampers with a merge or injects code into a build.
+This might allow an attacker to make changes to a repository or binary without
+going through review or triggering other rules which would normally detect the
+change.
+
+These attackers could also make failing tests appear to pass, or break tests or
+builds, but these attacks are generally less interesting than tampering with
+a repository or binary.
+
+This is a complex attack which you may not have to worry about unless you have
+a high degree of process and control in your change pipeline. If users can push
+changes directly to repositories, this often represents a faster and easier way
+to achieve the same tampering.
+
+The best way to defuse this attack is to prevent high-trust (repository
+automation) processes from running on the same hosts as low-trust (unit test)
+processes. For example, use an `automation.mycompany.com` host or pool for
+repository automation, and a `build.mycompany.com` host or pool for tests.
+
+
+Applying an Isolation Policy
+============================
+
+Designing a security and isolation policy for Drydock can take some thought,
+but applying it is straightforward. Applications which want to use Drydock must
+explicitly list which blueprints they are allowed to use, and they must be
+approved to use them in Drydock. By default, nothing can do anything, which is
+very safe and secure.
+
+To get builds or automation running on a host, specify the host blueprint as a
+usable blueprint in the build step or repository configuration. This creates a
+new authorization request in Drydock which must be approved before things can
+move forward.
+
+Until the authorization is approved, the process can not use the blueprint to
+create any resources, nor can it use resources previously created by the
+blueprint.
+
+You can review and approve requests from the blueprint detail view in Drydock:
+find the request and click {nav Approve Authorization}. You can also revoke
+approval at any time from this screen which will prevent the object from
+continuing to use the blueprint (but note that this does not release any
+existing leases).
+
+Once the authorization request is approved, the build or automation process
+should be able to run if everything else is configured properly.
+
+Note that authorizations are transitive: if a build step is authorized to use
+blueprint A, and blueprint A is authorized to use blueprint B, the build step
+may indirectly operate on resources created by blueprint B. This should
+normally be consistent with expectations.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to the @{article:Drydock User Guide}.

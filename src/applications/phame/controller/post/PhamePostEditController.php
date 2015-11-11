@@ -1,14 +1,14 @@
 <?php
 
-final class PhamePostEditController extends PhameController {
+final class PhamePostEditController extends PhamePostController {
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
     if ($id) {
       $post = id(new PhamePostQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withIDs(array($id))
         ->requireCapabilities(
           array(
@@ -27,43 +27,47 @@ final class PhamePostEditController extends PhameController {
         $post->getPHID(),
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
       $v_projects = array_reverse($v_projects);
+      $v_cc = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+          $post->getPHID());
     } else {
       $blog = id(new PhameBlogQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withIDs(array($request->getInt('blog')))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
-            PhabricatorPolicyCapability::CAN_JOIN,
+            PhabricatorPolicyCapability::CAN_EDIT,
           ))
         ->executeOne();
       if (!$blog) {
         return new Aphront404Response();
       }
       $v_projects = array();
+      $v_cc = array();
 
-      $post = PhamePost::initializePost($user, $blog);
+      $post = PhamePost::initializePost($viewer, $blog);
       $cancel_uri = $this->getApplicationURI('/blog/view/'.$blog->getID().'/');
 
-      $submit_button = pht('Save Draft');
-      $page_title    = pht('Create Post');
+      $submit_button = pht('Create Post');
+      $page_title = pht('Create Post');
     }
 
-    $title           = $post->getTitle();
-    $phame_title     = $post->getPhameTitle();
-    $body            = $post->getBody();
-    $comments_widget = $post->getCommentsWidget();
+    $title = $post->getTitle();
+    $phame_title = $post->getPhameTitle();
+    $body = $post->getBody();
+    $visibility = $post->getVisibility();
 
     $e_title       = true;
     $e_phame_title = true;
     $validation_exception = null;
     if ($request->isFormPost()) {
-      $title           = $request->getStr('title');
-      $phame_title     = $request->getStr('phame_title');
-      $phame_title     = PhabricatorSlug::normalize($phame_title);
-      $body            = $request->getStr('body');
-      $comments_widget = $request->getStr('comments_widget');
-      $v_projects      = $request->getArr('projects');
+      $title = $request->getStr('title');
+      $phame_title = $request->getStr('phame_title');
+      $phame_title = PhabricatorSlug::normalize($phame_title);
+      $body = $request->getStr('body');
+      $v_projects = $request->getArr('projects');
+      $v_cc = $request->getArr('cc');
+      $visibility = $request->getInt('visibility');
 
       $xactions = array(
         id(new PhamePostTransaction())
@@ -76,8 +80,12 @@ final class PhamePostEditController extends PhameController {
           ->setTransactionType(PhamePostTransaction::TYPE_BODY)
           ->setNewValue($body),
         id(new PhamePostTransaction())
-          ->setTransactionType(PhamePostTransaction::TYPE_COMMENTS_WIDGET)
-          ->setNewValue($comments_widget),
+          ->setTransactionType(PhamePostTransaction::TYPE_VISIBILITY)
+          ->setNewValue($visibility),
+        id(new PhamePostTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+          ->setNewValue(array('=' => $v_cc)),
+
       );
 
       $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
@@ -87,7 +95,7 @@ final class PhamePostEditController extends PhameController {
         ->setNewValue(array('=' => array_fuse($v_projects)));
 
       $editor = id(new PhamePostEditor())
-        ->setActor($user)
+        ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true);
 
@@ -106,12 +114,12 @@ final class PhamePostEditController extends PhameController {
     }
 
     $handle = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withPHIDs(array($post->getBlogPHID()))
       ->executeOne();
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->addHiddenInput('blog', $request->getInt('blog'))
       ->appendChild(
         id(new AphrontFormMarkupControl())
@@ -135,14 +143,27 @@ final class PhamePostEditController extends PhameController {
                      'Formatting is enforced.'))
         ->setError($e_phame_title))
       ->appendChild(
+        id(new AphrontFormSelectControl())
+        ->setLabel(pht('Visibility'))
+        ->setName('visibility')
+        ->setvalue($visibility)
+        ->setOptions(PhameConstants::getPhamePostStatusMap()))
+      ->appendChild(
         id(new PhabricatorRemarkupControl())
         ->setLabel(pht('Body'))
         ->setName('body')
         ->setValue($body)
         ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
         ->setID('post-body')
-        ->setUser($user)
+        ->setUser($viewer)
         ->setDisableMacros(true))
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('Subscribers'))
+          ->setName('cc')
+          ->setValue($v_cc)
+          ->setUser($viewer)
+          ->setDatasource(new PhabricatorMetaMTAMailableDatasource()))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Projects'))
@@ -150,24 +171,22 @@ final class PhamePostEditController extends PhameController {
           ->setValue($v_projects)
           ->setDatasource(new PhabricatorProjectDatasource()))
       ->appendChild(
-        id(new AphrontFormSelectControl())
-        ->setLabel(pht('Comments Widget'))
-        ->setName('comments_widget')
-        ->setvalue($comments_widget)
-        ->setOptions($post->getCommentsWidgetOptionsForSelect()))
-      ->appendChild(
         id(new AphrontFormSubmitControl())
         ->addCancelButton($cancel_uri)
         ->setValue($submit_button));
 
-    $loading = phutil_tag_div(
-      'aphront-panel-preview-loading-text',
-      pht('Loading preview...'));
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('%s (Post Preview)', $title));
 
-    $preview_panel = phutil_tag_div('aphront-panel-preview', array(
-      phutil_tag_div('phame-post-preview-header', pht('Post Preview')),
-      phutil_tag('div', array('id' => 'post-preview'), $loading),
-    ));
+    $container = id(new PHUIBoxView())
+      ->setID('post-preview');
+
+    $document = id(new PHUIDocumentViewPro())
+      ->setHeader($header)
+      ->appendChild($container);
+
+    $preview_panel = id(new PHUIObjectBoxView())
+      ->appendChild($document);
 
     Javelin::initBehavior(
       'phame-post-preview',
@@ -189,14 +208,13 @@ final class PhamePostEditController extends PhameController {
       $page_title,
       $this->getApplicationURI('/post/view/'.$id.'/'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-        $preview_panel,
-      ),
-      array(
-        'title' => $page_title,
+    return $this->newPage()
+      ->setTitle($page_title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $form_box,
+          $preview_panel,
       ));
   }
 

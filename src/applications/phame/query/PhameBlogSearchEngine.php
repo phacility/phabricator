@@ -30,7 +30,7 @@ final class PhameBlogSearchEngine
 
   protected function getBuiltinQueryNames() {
     $names = array(
-      'all' => pht('All'),
+      'all' => pht('All Blogs'),
     );
     return $names;
   }

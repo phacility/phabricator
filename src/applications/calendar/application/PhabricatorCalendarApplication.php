@@ -68,6 +68,15 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
     );
   }
 
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Calendar User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Calendar User Guide'),
+      ),
+    );
+  }
+
   public function getQuickCreateItems(PhabricatorUser $viewer) {
     $items = array();
 

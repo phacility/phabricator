@@ -16,7 +16,7 @@ final class HarbormasterRunBuildPlansHeraldAction
     return ($adapter instanceof HarbormasterBuildableAdapterInterface);
   }
 
-  protected function applyBuilds(array $phids) {
+  protected function applyBuilds(array $phids, HeraldRule $rule) {
     $adapter = $this->getAdapter();
 
     $allowed_types = array(
@@ -32,7 +32,8 @@ final class HarbormasterRunBuildPlansHeraldAction
 
     foreach ($phids as $phid) {
       $request = id(new HarbormasterBuildRequest())
-        ->setBuildPlanPHID($phid);
+        ->setBuildPlanPHID($phid)
+        ->setInitiatorPHID($rule->getPHID());
       $adapter->queueHarbormasterBuildRequest($request);
     }
 
@@ -54,7 +55,7 @@ final class HarbormasterRunBuildPlansHeraldAction
       case self::DO_BUILD:
         return pht(
           'Started %s build(s): %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
     }
   }
@@ -68,7 +69,7 @@ final class HarbormasterRunBuildPlansHeraldAction
   }
 
   public function applyEffect($object, HeraldEffect $effect) {
-    return $this->applyBuilds($effect->getTarget());
+    return $this->applyBuilds($effect->getTarget(), $effect->getRule());
   }
 
   public function getHeraldActionStandardType() {

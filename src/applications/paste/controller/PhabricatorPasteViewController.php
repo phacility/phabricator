@@ -56,10 +56,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    $source_code = $this->buildSourceCodeView(
-      $paste,
-      null,
-      $this->highlightMap);
+    $source_code = $this->buildSourceCodeView($paste, $this->highlightMap);
 
     require_celerity_resource('paste-css');
     $source_code = phutil_tag(
@@ -69,7 +66,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ),
       $source_code);
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView())
+    $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb('P'.$paste->getID(), '/P'.$paste->getID());
 
     $timeline = $this->buildTransactionTimeline(
@@ -92,18 +89,20 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ->setAction($this->getApplicationURI('/comment/'.$paste->getID().'/'))
       ->setSubmitButtonName(pht('Add Comment'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-        $source_code,
-        $timeline,
-        $add_comment_form,
-      ),
-      array(
-        'title' => $paste->getFullName(),
-        'pageObjects' => array($paste->getPHID()),
-      ));
+    return $this->newPage()
+      ->setTitle($paste->getFullName())
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(
+        array(
+          $paste->getPHID(),
+        ))
+      ->appendChild(
+        array(
+          $object_box,
+          $source_code,
+          $timeline,
+          $add_comment_form,
+        ));
   }
 
   private function buildHeaderView(PhabricatorPaste $paste) {
@@ -138,9 +137,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       $paste,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $can_fork = $viewer->isLoggedIn();
     $id = $paste->getID();
-    $fork_uri = $this->getApplicationURI('/create/?parent='.$id);
 
     return id(new PhabricatorActionListView())
       ->setUser($viewer)
@@ -153,13 +150,6 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit)
           ->setHref($this->getApplicationURI("edit/{$id}/")))
-      ->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Fork This Paste'))
-          ->setIcon('fa-code-fork')
-          ->setDisabled(!$can_fork)
-          ->setWorkflow(!$can_fork)
-          ->setHref($fork_uri))
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('View Raw File'))

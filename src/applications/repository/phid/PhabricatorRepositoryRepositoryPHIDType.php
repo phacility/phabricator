@@ -17,6 +17,10 @@ final class PhabricatorRepositoryRepositoryPHIDType
     return new PhabricatorRepository();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorDiffusionApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

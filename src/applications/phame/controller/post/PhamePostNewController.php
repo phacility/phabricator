@@ -1,16 +1,16 @@
 <?php
 
-final class PhamePostNewController extends PhameController {
+final class PhamePostNewController extends PhamePostController {
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
     $post = null;
     $view_uri = null;
     if ($id) {
       $post = id(new PhamePostQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withIDs(array($id))
         ->requireCapabilities(
           array(
@@ -26,11 +26,11 @@ final class PhamePostNewController extends PhameController {
 
       if ($request->isFormPost()) {
         $blog = id(new PhameBlogQuery())
-          ->setViewer($user)
+          ->setViewer($viewer)
           ->withIDs(array($request->getInt('blog')))
           ->requireCapabilities(
             array(
-              PhabricatorPolicyCapability::CAN_JOIN,
+              PhabricatorPolicyCapability::CAN_EDIT,
             ))
           ->executeOne();
 
@@ -49,26 +49,25 @@ final class PhamePostNewController extends PhameController {
     }
 
     $blogs = id(new PhameBlogQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->requireCapabilities(
         array(
-          PhabricatorPolicyCapability::CAN_JOIN,
+          PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->execute();
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title, $view_uri);
-    $display = array();
-    $display[] = $crumbs;
 
+    $notification = null;
+    $form_box = null;
     if (!$blogs) {
       $notification = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
         ->appendChild(
-          pht('You do not have permission to join any blogs. Create a blog '.
+          pht('You do not have permission to post to any blogs. Create a blog '.
               'first, then you can post to it.'));
 
-      $display[] = $notification;
     } else {
       $options = mpull($blogs, 'getName', 'getID');
       asort($options);
@@ -79,7 +78,7 @@ final class PhamePostNewController extends PhameController {
       }
 
       $form = id(new AphrontFormView())
-        ->setUser($user)
+        ->setUser($viewer)
         ->appendChild(
           id(new AphrontFormSelectControl())
             ->setLabel(pht('Blog'))
@@ -102,19 +101,20 @@ final class PhamePostNewController extends PhameController {
               ->setValue(pht('Continue')));
       }
 
-
       $form_box = id(new PHUIObjectBoxView())
         ->setHeaderText($title)
         ->setForm($form);
-
-      $display[] = $form_box;
     }
 
-    return $this->buildApplicationPage(
-      $display,
-      array(
-        'title'   => $title,
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $notification,
+          $form_box,
       ));
-  }
+
+    }
 
 }

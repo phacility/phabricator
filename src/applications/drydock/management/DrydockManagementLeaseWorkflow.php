@@ -28,7 +28,7 @@ final class DrydockManagementLeaseWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $console = PhutilConsole::getConsole();
+    $viewer = $this->getViewer();
 
     $resource_type = $args->getArg('type');
     if (!$resource_type) {
@@ -58,6 +58,23 @@ final class DrydockManagementLeaseWorkflow
 
     $lease = id(new DrydockLease())
       ->setResourceType($resource_type);
+
+    $drydock_phid = id(new PhabricatorDrydockApplication())->getPHID();
+    $lease->setAuthorizingPHID($drydock_phid);
+
+    // TODO: This is not hugely scalable, although this is a debugging workflow
+    // so maybe it's fine. Do we even need `bin/drydock lease` in the long run?
+    $all_blueprints = id(new DrydockBlueprintQuery())
+      ->setViewer($viewer)
+      ->execute();
+    $allowed_phids = mpull($all_blueprints, 'getPHID');
+    if (!$allowed_phids) {
+      throw new Exception(
+        pht(
+          'No blueprints exist which can plausibly allocate resources to '.
+          'satisfy the requested lease.'));
+    }
+    $lease->setAllowedBlueprintPHIDs($allowed_phids);
 
     if ($attributes) {
       $lease->setAttributes($attributes);

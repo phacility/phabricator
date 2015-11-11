@@ -11,9 +11,8 @@ final class DifferentialRevisionLandController extends DifferentialController {
     $this->strategyClass = $data['strategy'];
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $revision_id = $this->revisionID;
 

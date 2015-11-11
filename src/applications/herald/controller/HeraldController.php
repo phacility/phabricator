@@ -2,20 +2,6 @@
 
 abstract class HeraldController extends PhabricatorController {
 
-  public function buildStandardPageResponse($view, array $data) {
-    $page = $this->buildStandardPageView();
-
-    $page->setApplicationName(pht('Herald'));
-    $page->setBaseURI('/herald/');
-    $page->setTitle(idx($data, 'title'));
-    $page->setGlyph("\xE2\x98\xBF");
-
-    $page->appendChild($view);
-
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
-  }
-
   public function buildApplicationMenu() {
     return $this->buildSideNavView(true)->getMenu();
   }

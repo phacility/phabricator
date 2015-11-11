@@ -49,7 +49,7 @@ final class ReleephProductEditController extends ReleephProductController {
       if (!$product_name) {
         $e_name = pht('Required');
         $errors[] =
-          pht('Your releeph product should have a simple descriptive name.');
+          pht('Your Releeph product should have a simple descriptive name.');
       }
 
       if (!$trunk_branch) {

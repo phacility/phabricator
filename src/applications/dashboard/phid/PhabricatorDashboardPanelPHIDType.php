@@ -12,6 +12,10 @@ final class PhabricatorDashboardPanelPHIDType extends PhabricatorPHIDType {
     return new PhabricatorDashboardPanel();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorDashboardApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

@@ -1,6 +1,6 @@
 <?php
 
-final class PhameBlogListController extends PhameController {
+final class PhameBlogListController extends PhameBlogController {
 
   public function shouldAllowPublic() {
     return true;

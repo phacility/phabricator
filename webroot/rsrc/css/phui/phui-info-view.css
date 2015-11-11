@@ -108,12 +108,6 @@ h1.phui-info-view-head {
   color: {$sh-greentext};
 }
 
-.legalpad .phui-info-view {
-  margin: 0;
-  border-radius: 0;
-  border-width: 0;
-}
-
 .aphront-dialog-body .phui-info-view {
   margin: 0 0 8px 0;
 }

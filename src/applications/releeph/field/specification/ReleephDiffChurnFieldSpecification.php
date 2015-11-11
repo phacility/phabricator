@@ -31,6 +31,7 @@ final class ReleephDiffChurnFieldSpecification
     $rejections = 0;
     $comments = 0;
     $updates = 0;
+
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
         case PhabricatorTransactions::TYPE_COMMENT:
@@ -60,13 +61,13 @@ final class ReleephDiffChurnFieldSpecification
     } else {
       $parts = array();
       if ($rejections) {
-        $parts[] = pht('%d rejection(s)', $rejections);
+        $parts[] = pht('%s rejection(s)', new PhutilNumber($rejections));
       }
       if ($comments) {
-        $parts[] = pht('%d comment(s)', $comments);
+        $parts[] = pht('%s comment(s)', new PhutilNumber($comments));
       }
       if ($updates) {
-        $parts[] = pht('%d update(s)', $updates);
+        $parts[] = pht('%s update(s)', new PhutilNumber($updates));
       }
 
       if (count($parts) === 0) {

@@ -28,7 +28,7 @@ final class AphrontRequest extends Phobject {
   private $applicationConfiguration;
   private $site;
   private $controller;
-  private $uriData;
+  private $uriData = array();
   private $cookiePrefix;
 
   public function __construct($host, $path) {

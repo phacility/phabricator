@@ -86,18 +86,18 @@
   .phui-header-shell.phui-header-no-backgound
   .phui-header-view {
   padding: 8px 0 4px;
-  font-size: {$biggestfontsize};
 }
 
 .phui-document-content .phui-property-list-container {
-  border-color: {$thinblueborder};
+  border-bottom: 1px solid {$thinblueborder};
+  background-color: {$lightgreybackground};
 }
 
-.phui-document-content .phui-property-list-view {
+.legalpad .phui-document-content .phui-property-list-view {
   border: none;
   box-shadow: none;
-  margin: 0;
-  background-color: {$lightgreybackground};
+  margin: 16px 0 0  0;
+  background-color: {$lightbluebackground};
 }
 
 .phui-document-content {
@@ -135,10 +135,6 @@
   padding-right: 120px;
 }
 
-.phui-document-view .phui-property-list-view {
-  border-bottom: 1px solid {$thinblueborder};
-}
-
 .phui-document-view .phui-info-severity-nodata {
   background-color: {$lightgreybackground};
 }
@@ -173,19 +169,20 @@ body .phui-document-view .phui-header-shell.phui-bleed-header {
 
 .phui-document-view .phui-property-list-section-header {
   padding: 12px 16px 0px;
+  border-top: none;
 }
 
 .phui-document-view .phui-property-list-text-content {
-  padding: 0;
+  padding: 0 16px;
 }
 
 .phui-document-view .PhabricatorMonospaced,
 .phui-document-view .phabricator-remarkup .remarkup-code-block .remarkup-code {
-  font: 11px/14px "Menlo", "Consolas", "Monaco", monospace;
+  font: 11px/16px "Menlo", "Consolas", "Monaco", monospace;
 }
 
 .platform-windows .phui-document-view .PhabricatorMonospaced,
 .platform-windows .phui-document-view .phabricator-remarkup .remarkup-code-block
   .remarkup-code {
-  font: 12px/14px "Menlo", "Consolas", "Monaco", monospace;
+  font: 12px/16px "Menlo", "Consolas", "Monaco", monospace;
 }

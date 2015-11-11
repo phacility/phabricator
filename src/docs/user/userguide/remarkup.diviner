@@ -19,6 +19,7 @@ formatting text in Remarkup.
 These are inline styles, and can be applied to most text:
 
   **bold** //italic// `monospaced` ##monospaced## ~~deleted~~ __underlined__
+  !!highlighted!!
   D123 T123 rX123           # Link to Objects
   {D123} {T123}             # Link to Objects (Full Name)
   {F123}                    # Embed Images
@@ -63,9 +64,11 @@ Format **basic text styles** like this:
   ##monospaced text##
   ~~deleted text~~
   __underlined text__
+  !!highlighted text!!
 
 Those produce **bold text**, //italic text//, `monospaced text`, ##monospaced
-text##, ~~deleted text~~, and __underlined text__, respectively.
+text##, ~~deleted text~~, __underlined text__, and !!highlighted text!!
+respectively.
 
 = Layout =
 
@@ -495,6 +498,12 @@ For a list of available icons and colors, check the UIExamples application.
 (The icons are sourced from
 [[ http://fortawesome.github.io/Font-Awesome/ | FontAwesome ]], so you can also
 browse the collection there.)
+
+You can add `spin` to make the icon spin:
+
+  {icon cog spin}
+
+This renders: {icon cog spin}
 
 
 = Phriction Documents =

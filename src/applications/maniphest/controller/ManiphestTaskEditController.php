@@ -198,7 +198,8 @@ final class ManiphestTaskEditController extends ManiphestController {
         // in a meaningful way. For now, build User objects. Once the Maniphest
         // objects exist, this will switch over automatically. This is a big
         // hack but shouldn't be long for this world.
-        $placeholder_editor = new PhabricatorUserProfileEditor();
+        $placeholder_editor = id(new PhabricatorUserProfileEditor())
+          ->setActor($viewer);
 
         $field_errors = $aux_field->validateApplicationTransactions(
           $placeholder_editor,

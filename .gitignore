@@ -34,3 +34,7 @@
 
 # NPM local packages
 /support/aphlict/server/node_modules/
+
+# Places for users to add custom resources.
+/resources/cows/custom/*
+/resources/figlet/custom/*

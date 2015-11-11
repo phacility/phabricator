@@ -32,8 +32,8 @@ final class PhamePostSearchEngine
         ->setLabel(pht('Visibility'))
         ->setOptions(array(
           '' => pht('All'),
-          PhamePost::VISIBILITY_PUBLISHED => pht('Live'),
-          PhamePost::VISIBILITY_DRAFT => pht('Draft'),
+          PhameConstants::VISIBILITY_PUBLISHED => pht('Published'),
+          PhameConstants::VISIBILITY_DRAFT => pht('Draft'),
           )),
     );
   }
@@ -44,9 +44,9 @@ final class PhamePostSearchEngine
 
   protected function getBuiltinQueryNames() {
     $names = array(
-      'all' => pht('All'),
-      'live' => pht('Live'),
-      'draft' => pht('Draft'),
+      'all' => pht('All Posts'),
+      'live' => pht('Published Posts'),
+      'draft' => pht('Draft Posts'),
     );
     return $names;
   }
@@ -60,10 +60,10 @@ final class PhamePostSearchEngine
         return $query;
       case 'live':
         return $query->setParameter(
-          'visibility', PhamePost::VISIBILITY_PUBLISHED);
+          'visibility', PhameConstants::VISIBILITY_PUBLISHED);
       case 'draft':
         return $query->setParameter(
-          'visibility', PhamePost::VISIBILITY_DRAFT);
+          'visibility', PhameConstants::VISIBILITY_DRAFT);
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
@@ -81,15 +81,20 @@ final class PhamePostSearchEngine
 
     foreach ($posts as $post) {
       $id = $post->getID();
-      $blog = $viewer->renderHandle($post->getBlogPHID())->render();
+      $blog = $post->getBlog();
+      if ($blog) {
+        $blog_name = $viewer->renderHandle($post->getBlogPHID())->render();
+        $blog_name = pht('Blog: %s', $blog_name);
+      } else {
+        $blog_name = pht('[No Blog]');
+      }
       $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
         ->setObject($post)
         ->setHeader($post->getTitle())
         ->setStatusIcon('fa-star')
         ->setHref($this->getApplicationURI("/post/view/{$id}/"))
-        ->addAttribute(
-          pht('Blog: %s', $blog));
+        ->addAttribute($blog_name);
       if ($post->isDraft()) {
         $item->setStatusIcon('fa-star-o grey');
         $item->setDisabled(true);

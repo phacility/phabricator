@@ -6,6 +6,7 @@ final class AphrontTokenizerTemplateView extends AphrontView {
   private $name;
   private $id;
   private $browseURI;
+  private $originalValue;
 
   public function setBrowseURI($browse_uri) {
     $this->browseURI = $browse_uri;
@@ -34,6 +35,15 @@ final class AphrontTokenizerTemplateView extends AphrontView {
 
   public function getName() {
     return $this->name;
+  }
+
+  public function setOriginalValue(array $original_value) {
+    $this->originalValue = $original_value;
+    return $this;
+  }
+
+  public function getOriginalValue() {
+    return $this->originalValue;
   }
 
   public function render() {
@@ -85,6 +95,20 @@ final class AphrontTokenizerTemplateView extends AphrontView {
       $classes[] = 'has-browse';
     }
 
+    $original = array();
+    $original_value = $this->getOriginalValue();
+    if ($original_value) {
+      foreach ($this->getOriginalValue() as $value) {
+        $original[] = phutil_tag(
+          'input',
+          array(
+            'type' => 'hidden',
+            'name' => $name.'.original[]',
+            'value' => $value,
+          ));
+      }
+    }
+
     $frame = javelin_tag(
       'div',
       array(
@@ -94,6 +118,7 @@ final class AphrontTokenizerTemplateView extends AphrontView {
       array(
         $container,
         $browse,
+        $original,
       ));
 
     return $frame;

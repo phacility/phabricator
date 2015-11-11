@@ -7,12 +7,10 @@ final class PhabricatorMetaMTASendGridReceiveController
     return false;
   }
 
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
 
     // No CSRF for SendGrid.
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-
-    $request = $this->getRequest();
     $user = $request->getUser();
 
     $raw_headers = $request->getStr('headers');

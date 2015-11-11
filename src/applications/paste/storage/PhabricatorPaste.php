@@ -28,6 +28,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
   private $content = self::ATTACHABLE;
   private $rawContent = self::ATTACHABLE;
+  private $snippet = self::ATTACHABLE;
 
   public static function initializeNewPaste(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -40,11 +41,13 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
     return id(new PhabricatorPaste())
       ->setTitle('')
+      ->setLanguage('')
       ->setStatus(self::STATUS_ACTIVE)
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
-      ->setSpacePHID($actor->getDefaultSpacePHID());
+      ->setSpacePHID($actor->getDefaultSpacePHID())
+      ->attachRawContent(null);
   }
 
   public static function getStatusNameMap() {
@@ -132,6 +135,15 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
   public function attachRawContent($raw_content) {
     $this->rawContent = $raw_content;
+    return $this;
+  }
+
+  public function getSnippet() {
+    return $this->assertAttached($this->snippet);
+  }
+
+  public function attachSnippet(PhabricatorPasteSnippet $snippet) {
+    $this->snippet = $snippet;
     return $this;
   }
 

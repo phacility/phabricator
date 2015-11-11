@@ -260,11 +260,12 @@ final class PhabricatorRepositoryManagementReparseWorkflow
 
     if ($all_from_repo && !$force_local) {
       $console->writeOut("%s\n", pht(
-        '**NOTE**: This script will queue tasks to reparse the data. Once the '.
-        'tasks have been queued, you need to run Taskmaster daemons to '.
-        'execute them.'."\n\n".
-        "QUEUEING TASKS (%s Commits):",
-        new PhutilNumber(count($commits))));
+        "**NOTE**: This script will queue tasks to reparse the data. Once the ".
+        "tasks have been queued, you need to run Taskmaster daemons to ".
+        "execute them.\n\n%s",
+        pht(
+          'QUEUEING TASKS (%s Commit(s)):',
+          phutil_count($commits))));
     }
 
     $progress = new PhutilConsoleProgressBar();

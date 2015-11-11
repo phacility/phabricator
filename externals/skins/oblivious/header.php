@@ -13,6 +13,6 @@
           echo _e($blog->getName());
         ?></a>
       </h1>
-      <p><?php echo _e($blog->getDescription()); ?></p>
+      <p><?php echo $skin->remarkup($blog->getDescription()); ?></p>
     </div>
     <div class="oblivious-content">
