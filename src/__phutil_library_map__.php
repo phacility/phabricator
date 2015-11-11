@@ -3428,7 +3428,6 @@ phutil_register_library_map(array(
     'PhortuneMerchantTransactionQuery' => 'applications/phortune/query/PhortuneMerchantTransactionQuery.php',
     'PhortuneMerchantViewController' => 'applications/phortune/controller/PhortuneMerchantViewController.php',
     'PhortuneMonthYearExpiryControl' => 'applications/phortune/control/PhortuneMonthYearExpiryControl.php',
-    'PhortuneNotImplementedException' => 'applications/phortune/exception/PhortuneNotImplementedException.php',
     'PhortuneOrderTableView' => 'applications/phortune/view/PhortuneOrderTableView.php',
     'PhortunePayPalPaymentProvider' => 'applications/phortune/provider/PhortunePayPalPaymentProvider.php',
     'PhortunePaymentMethod' => 'applications/phortune/storage/PhortunePaymentMethod.php',
@@ -7771,7 +7770,6 @@ phutil_register_library_map(array(
     'PhortuneMerchantTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'PhortuneMerchantViewController' => 'PhortuneMerchantController',
     'PhortuneMonthYearExpiryControl' => 'AphrontFormControl',
-    'PhortuneNotImplementedException' => 'Exception',
     'PhortuneOrderTableView' => 'AphrontView',
     'PhortunePayPalPaymentProvider' => 'PhortunePaymentProvider',
     'PhortunePaymentMethod' => array(
