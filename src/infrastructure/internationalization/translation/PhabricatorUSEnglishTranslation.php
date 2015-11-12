@@ -178,14 +178,14 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
-      '%s merged %d task(s): %s.' => array(
+      '%s merged %s task(s): %s.' => array(
         array(
           '%s merged a task: %3$s.',
           '%s merged tasks: %3$s.',
         ),
       ),
 
-      '%s merged %d task(s) %s into %s.' => array(
+      '%s merged %s task(s) %s into %s.' => array(
         array(
           '%s merged %3$s into %4$s.',
           '%s merged tasks %3$s into %4$s.',
