@@ -961,6 +961,11 @@ abstract class PhabricatorEditEngine
   }
 
   public function getAllEditTypes() {
+    $config = $this->loadEditEngineConfiguration(null);
+    if (!$config) {
+      return array();
+    }
+
     $object = $this->newEditableObject();
     $fields = $this->buildEditFields($object);
     return $this->getAllEditTypesFromFields($fields);
