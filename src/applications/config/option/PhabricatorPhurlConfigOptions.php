@@ -16,7 +16,7 @@ final class PhabricatorPhurlConfigOptions
   }
 
   public function getGroup() {
-    return 'phurl';
+    return 'apps';
   }
 
   public function getOptions() {

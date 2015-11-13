@@ -46,6 +46,8 @@ final class PhabricatorPhurlApplication extends PhabricatorApplication {
             => 'PhabricatorPhurlURLEditController',
           'edit/(?P<id>[1-9]\d*)/'
             => 'PhabricatorPhurlURLEditController',
+          'comment/(?P<id>[1-9]\d*)/'
+            => 'PhabricatorPhurlURLCommentController',
         ),
       ),
     );

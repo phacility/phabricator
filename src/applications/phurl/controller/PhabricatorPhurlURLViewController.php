@@ -49,7 +49,7 @@ final class PhabricatorPhurlURLViewController
       : pht('More Cowbell');
     $draft = PhabricatorDraft::newFromUserAndKey($viewer, $url->getPHID());
     $comment_uri = $this->getApplicationURI(
-      '/phurl/comment/'.$url->getID().'/');
+      '/url/comment/'.$url->getID().'/');
     $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($viewer)
       ->setObjectPHID($url->getPHID())

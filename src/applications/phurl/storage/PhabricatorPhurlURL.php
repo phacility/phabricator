@@ -79,6 +79,22 @@ final class PhabricatorPhurlURL extends PhabricatorPhurlDAO
     return isset($allowed_protocols[$uri->getProtocol()]);
   }
 
+  public function getDisplayName() {
+    if ($this->getName()) {
+      return $this->getName();
+    } else {
+      return $this->getMonogram();
+    }
+  }
+
+  public function getRedirectURI() {
+    if (strlen($this->getAlias())) {
+      return '/u/'.$this->getAlias();
+    } else {
+      return '/u/'.$this->getID();
+    }
+  }
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 

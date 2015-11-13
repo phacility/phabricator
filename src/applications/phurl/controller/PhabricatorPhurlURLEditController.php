@@ -9,7 +9,6 @@ final class PhabricatorPhurlURLEditController
 
     $viewer = $this->getViewer();
     $user_phid = $viewer->getPHID();
-    $error_name = true;
     $error_long_url = true;
     $error_alias = null;
     $validation_exception = null;
@@ -131,8 +130,6 @@ final class PhabricatorPhurlURLEditController
           ->setURI($url->getURI());
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
-        $error_name = $ex->getShortMessage(
-          PhabricatorPhurlURLTransaction::TYPE_NAME);
         $error_long_url = $ex->getShortMessage(
           PhabricatorPhurlURLTransaction::TYPE_URL);
         $error_alias = $ex->getShortMessage(
@@ -148,8 +145,7 @@ final class PhabricatorPhurlURLEditController
     $name = id(new AphrontFormTextControl())
       ->setLabel(pht('Name'))
       ->setName('name')
-      ->setValue($name)
-      ->setError($error_name);
+      ->setValue($name);
 
     $long_url = id(new AphrontFormTextControl())
       ->setLabel(pht('URL'))

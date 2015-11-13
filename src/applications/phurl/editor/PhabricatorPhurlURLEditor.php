@@ -106,22 +106,6 @@ final class PhabricatorPhurlURLEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
-      case PhabricatorPhurlURLTransaction::TYPE_NAME:
-        $missing = $this->validateIsEmptyTextField(
-          $object->getName(),
-          $xactions);
-
-        if ($missing) {
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Required'),
-            pht('URL name is required.'),
-            nonempty(last($xactions), null));
-
-          $error->setIsMissingFieldError(true);
-          $errors[] = $error;
-        }
-        break;
       case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
         $overdrawn = $this->validateIsTextFieldTooLong(
           $object->getName(),
