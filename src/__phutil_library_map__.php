@@ -3755,6 +3755,7 @@ phutil_register_library_map(array(
       'PhabricatorCustomFieldInterface',
       'PhabricatorApplicationTransactionInterface',
       'AlmanacPropertyInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'AlmanacBindingEditController' => 'AlmanacServiceController',
     'AlmanacBindingEditor' => 'PhabricatorApplicationTransactionEditor',
