@@ -387,7 +387,6 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $inlines = array();
     foreach ($messages as $message) {
       $description = $message->getProperty('description');
-      $description = '%%%'.$description.'%%%';
 
       $inlines[] = id(clone $template)
         ->setSyntheticAuthor(pht('Lint: %s', $message->getName()))
