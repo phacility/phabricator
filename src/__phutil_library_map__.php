@@ -5073,6 +5073,7 @@ phutil_register_library_map(array(
       'PhabricatorFlaggableInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorDestructibleInterface',
+      'PhabricatorSubscribableInterface',
     ),
     'HeraldRuleController' => 'HeraldController',
     'HeraldRuleEditor' => 'PhabricatorApplicationTransactionEditor',
