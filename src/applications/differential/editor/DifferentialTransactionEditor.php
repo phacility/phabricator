@@ -1298,15 +1298,6 @@ final class DifferentialTransactionEditor
     return true;
   }
 
-  protected function extractFilePHIDsFromCustomTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {}
-
-    return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
-  }
-
   protected function expandCustomRemarkupBlockTransactions(
     PhabricatorLiskDAO $object,
     array $xactions,

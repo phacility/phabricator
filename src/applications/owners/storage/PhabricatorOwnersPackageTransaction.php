@@ -208,4 +208,16 @@ final class PhabricatorOwnersPackageTransaction
     return parent::renderChangeDetails($viewer);
   }
 
+  public function getRemarkupBlocks() {
+    $blocks = parent::getRemarkupBlocks();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_DESCRIPTION:
+        $blocks[] = $this->getNewValue();
+        break;
+    }
+
+    return $blocks;
+  }
+
 }
