@@ -20,6 +20,10 @@ final class PhabricatorEditEngineConfigurationEditEngine
     return pht('Edit Configurations');
   }
 
+  public function getEngineApplicationClass() {
+    return 'PhabricatorTransactionsApplication';
+  }
+
   protected function newEditableObject() {
     return PhabricatorEditEngineConfiguration::initializeNewConfiguration(
       $this->getViewer(),

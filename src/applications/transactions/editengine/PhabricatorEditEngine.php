@@ -50,6 +50,7 @@ abstract class PhabricatorEditEngine
 /* -(  Managing Fields  )---------------------------------------------------- */
 
 
+  abstract public function getEngineApplicationClass();
   abstract protected function buildCustomEditFields($object);
 
   final protected function buildEditFields($object) {

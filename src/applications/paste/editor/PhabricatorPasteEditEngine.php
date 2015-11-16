@@ -9,6 +9,10 @@ final class PhabricatorPasteEditEngine
     return pht('Pastes');
   }
 
+  public function getEngineApplicationClass() {
+    return 'PhabricatorPasteApplication';
+  }
+
   protected function newEditableObject() {
     return PhabricatorPaste::initializeNewPaste($this->getViewer());
   }
