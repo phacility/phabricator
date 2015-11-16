@@ -623,9 +623,8 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
     switch ($xaction->getTransactionType()) {
       case ConpherenceTransaction::TYPE_PICTURE:
-          return array($xaction->getNewValue()->getPHID());
       case ConpherenceTransaction::TYPE_PICTURE_CROP:
-          return array($xaction->getNewValue());
+        return array($xaction->getNewValue());
     }
 
     return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);

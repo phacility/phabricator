@@ -120,19 +120,31 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
+    $images = $this->getNewImages();
+    $images = mpull($images, null, 'getPHID');
+
     switch ($xaction->getTransactionType()) {
       case PholioTransaction::TYPE_IMAGE_FILE:
-        $new = $xaction->getNewValue();
-        $phids = array();
-        foreach ($new as $key => $images) {
-          $phids[] = mpull($images, 'getFilePHID');
+        $file_phids = array();
+        foreach ($xaction->getNewValue() as $image_phid) {
+          $image = idx($images, $image_phid);
+          if (!$image) {
+            continue;
+          }
+          $file_phids[] = $image->getFilePHID();
         }
-        return array_mergev($phids);
+        return $file_phids;
       case PholioTransaction::TYPE_IMAGE_REPLACE:
-        return array($xaction->getNewValue()->getFilePHID());
+        $image_phid = $xaction->getNewValue();
+        $image = idx($images, $image_phid);
+
+        if ($image) {
+          return array($image->getFilePHID());
+        }
+        break;
     }
 
-    return array();
+    return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
   }
 
 
