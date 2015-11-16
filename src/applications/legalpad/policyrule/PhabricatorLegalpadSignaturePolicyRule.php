@@ -1,11 +1,12 @@
 <?php
 
-final class PhabricatorProjectsPolicyRule extends PhabricatorPolicyRule {
+final class PhabricatorLegalpadSignaturePolicyRule
+  extends PhabricatorPolicyRule {
 
-  private $memberships = array();
+  private $signatures = array();
 
   public function getRuleDescription() {
-    return pht('members of projects');
+    return pht('signers of legalpad documents');
   }
 
   public function willApplyRules(
@@ -18,14 +19,15 @@ final class PhabricatorProjectsPolicyRule extends PhabricatorPolicyRule {
       return;
     }
 
-    $projects = id(new PhabricatorProjectQuery())
+    // TODO: This accepts signature of any version of the document, even an
+    // older version.
+
+    $documents = id(new LegalpadDocumentQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withMemberPHIDs(array($viewer->getPHID()))
       ->withPHIDs($values)
+      ->withSignerPHIDs(array($viewer->getPHID()))
       ->execute();
-    foreach ($projects as $project) {
-      $this->memberships[$viewer->getPHID()][$project->getPHID()] = true;
-    }
+    $this->signatures = mpull($documents, 'getPHID', 'getPHID');
   }
 
   public function applyRule(
@@ -33,13 +35,13 @@ final class PhabricatorProjectsPolicyRule extends PhabricatorPolicyRule {
     $value,
     PhabricatorPolicyInterface $object) {
 
-    foreach ($value as $project_phid) {
-      if (isset($this->memberships[$viewer->getPHID()][$project_phid])) {
-        return true;
+    foreach ($value as $document_phid) {
+      if (!isset($this->signatures[$document_phid])) {
+        return false;
       }
     }
 
-    return false;
+    return true;
   }
 
   public function getValueControlType() {
@@ -47,11 +49,11 @@ final class PhabricatorProjectsPolicyRule extends PhabricatorPolicyRule {
   }
 
   public function getValueControlTemplate() {
-    return $this->getDatasourceTemplate(new PhabricatorProjectDatasource());
+    return $this->getDatasourceTemplate(new LegalpadDocumentDatasource());
   }
 
   public function getRuleOrder() {
-    return 200;
+    return 900;
   }
 
   public function getValueForStorage($value) {
@@ -64,7 +66,6 @@ final class PhabricatorProjectsPolicyRule extends PhabricatorPolicyRule {
       ->setViewer($viewer)
       ->withPHIDs($value)
       ->execute();
-
     return mpull($handles, 'getFullName', 'getPHID');
   }
 

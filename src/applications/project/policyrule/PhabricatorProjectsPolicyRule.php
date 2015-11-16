@@ -1,12 +1,12 @@
 <?php
 
-final class PhabricatorLegalpadSignaturePolicyRule
+final class PhabricatorProjectsPolicyRule
   extends PhabricatorPolicyRule {
 
-  private $signatures = array();
+  private $memberships = array();
 
   public function getRuleDescription() {
-    return pht('signers of legalpad documents');
+    return pht('members of projects');
   }
 
   public function willApplyRules(
@@ -19,15 +19,14 @@ final class PhabricatorLegalpadSignaturePolicyRule
       return;
     }
 
-    // TODO: This accepts signature of any version of the document, even an
-    // older version.
-
-    $documents = id(new LegalpadDocumentQuery())
+    $projects = id(new PhabricatorProjectQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withMemberPHIDs(array($viewer->getPHID()))
       ->withPHIDs($values)
-      ->withSignerPHIDs(array($viewer->getPHID()))
       ->execute();
-    $this->signatures = mpull($documents, 'getPHID', 'getPHID');
+    foreach ($projects as $project) {
+      $this->memberships[$viewer->getPHID()][$project->getPHID()] = true;
+    }
   }
 
   public function applyRule(
@@ -35,13 +34,13 @@ final class PhabricatorLegalpadSignaturePolicyRule
     $value,
     PhabricatorPolicyInterface $object) {
 
-    foreach ($value as $document_phid) {
-      if (!isset($this->signatures[$document_phid])) {
-        return false;
+    foreach ($value as $project_phid) {
+      if (isset($this->memberships[$viewer->getPHID()][$project_phid])) {
+        return true;
       }
     }
 
-    return true;
+    return false;
   }
 
   public function getValueControlType() {
@@ -49,11 +48,11 @@ final class PhabricatorLegalpadSignaturePolicyRule
   }
 
   public function getValueControlTemplate() {
-    return $this->getDatasourceTemplate(new LegalpadDocumentDatasource());
+    return $this->getDatasourceTemplate(new PhabricatorProjectDatasource());
   }
 
   public function getRuleOrder() {
-    return 900;
+    return 200;
   }
 
   public function getValueForStorage($value) {
