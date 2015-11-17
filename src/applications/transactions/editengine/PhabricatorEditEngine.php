@@ -46,12 +46,26 @@ abstract class PhabricatorEditEngine
     return $this->getPhobjectClassConstant('ENGINECONST', 64);
   }
 
+  final public function getApplication() {
+    $app_class = $this->getEngineApplicationClass();
+    return PhabricatorApplication::getByClass($app_class);
+  }
+
 
 /* -(  Managing Fields  )---------------------------------------------------- */
 
 
   abstract public function getEngineApplicationClass();
   abstract protected function buildCustomEditFields($object);
+
+  public function getFieldsForConfig(
+    PhabricatorEditEngineConfiguration $config) {
+
+    $object = $this->newEditableObject();
+    $this->editEngineConfiguration = $config;
+
+    return $this->buildEditFields($object);
+  }
 
   final protected function buildEditFields($object) {
     $viewer = $this->getViewer();
@@ -129,6 +143,7 @@ abstract class PhabricatorEditEngine
                 ->setEditTypeKey('space')
                 ->setDescription(
                   pht('Shifts the object in the Spaces application.'))
+                ->setIsReorderable(false)
                 ->setAliases(array('space', 'policy.space'))
                 ->setTransactionType($type_space)
                 ->setValue($object->getSpacePHID());
@@ -222,6 +237,13 @@ abstract class PhabricatorEditEngine
    */
   abstract protected function getObjectCreateTitleText($object);
 
+  /**
+   * @task text
+   */
+  protected function getFormHeaderText($object) {
+    $config = $this->getEditEngineConfiguration();
+    return $config->getName();
+  }
 
   /**
    * @task text
@@ -384,16 +406,16 @@ abstract class PhabricatorEditEngine
   /**
    * @task uri
    */
-  protected function getObjectEditURI($object) {
-    return $this->getController()->getApplicationURI('edit/');
+  protected function getObjectCreateCancelURI($object) {
+    return $this->getApplication()->getApplicationURI();
   }
 
 
   /**
    * @task uri
    */
-  protected function getObjectCreateCancelURI($object) {
-    return $this->getController()->getApplicationURI();
+  protected function getEditorURI() {
+    return $this->getApplication()->getApplicationURI('edit/');
   }
 
 
@@ -408,12 +430,12 @@ abstract class PhabricatorEditEngine
   /**
    * @task uri
    */
-  protected function getEditURI($object, $path = null) {
-    $parts = array(
-      $this->getObjectEditURI($object),
-    );
+  public function getEditURI($object = null, $path = null) {
+    $parts = array();
 
-    if (!$this->getIsCreate()) {
+    $parts[] = $this->getEditorURI();
+
+    if ($object && $object->getID()) {
       $parts[] = $object->getID().'/';
     }
 
@@ -563,7 +585,8 @@ abstract class PhabricatorEditEngine
     $controller = $this->getController();
     $request = $controller->getRequest();
 
-    $config = $this->loadEditEngineConfiguration($request->getURIData('form'));
+    $form_key = $request->getURIData('formKey');
+    $config = $this->loadEditEngineConfiguration($form_key);
     if (!$config) {
       return new Aphront404Response();
     }
@@ -668,7 +691,7 @@ abstract class PhabricatorEditEngine
     $action_button = $this->buildEditFormActionButton($object);
 
     if ($this->getIsCreate()) {
-      $header_text = $this->getObjectCreateTitleText($object);
+      $header_text = $this->getFormHeaderText($object);
     } else {
       $header_text = $this->getObjectEditTitleText($object);
     }

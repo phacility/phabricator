@@ -18,6 +18,8 @@ final class PhabricatorEditEngineConfigurationEditor
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
     $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_NAME;
+    $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_PREAMBLE;
+    $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_ORDER;
 
     return $types;
   }
@@ -57,6 +59,10 @@ final class PhabricatorEditEngineConfigurationEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorEditEngineConfigurationTransaction::TYPE_NAME:
         return $object->getName();
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_PREAMBLE;
+        return $object->getPreamble();
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_ORDER:
+        return $object->getFieldOrder();
     }
   }
 
@@ -66,6 +72,8 @@ final class PhabricatorEditEngineConfigurationEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorEditEngineConfigurationTransaction::TYPE_NAME:
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_PREAMBLE;
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_ORDER:
         return $xaction->getNewValue();
     }
   }
@@ -78,6 +86,12 @@ final class PhabricatorEditEngineConfigurationEditor
       case PhabricatorEditEngineConfigurationTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
         return;
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_PREAMBLE;
+        $object->setPreamble($xaction->getNewValue());
+        return;
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_ORDER:
+        $object->setFieldOrder($xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -89,6 +103,8 @@ final class PhabricatorEditEngineConfigurationEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorEditEngineConfigurationTransaction::TYPE_NAME:
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_PREAMBLE;
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_ORDER;
         return;
     }
 

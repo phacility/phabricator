@@ -99,12 +99,13 @@ final class PhabricatorEditEngineConfiguration
 
     $fields = $this->reorderFields($fields);
 
-    $head_instructions = $this->getProperty('instructions.head');
-    if (strlen($head_instructions)) {
+    $preamble = $this->getPreamble();
+    if (strlen($preamble)) {
       $fields = array(
-        'config.instructions.head' => id(new PhabricatorInstructionsEditField())
-          ->setKey('config.instructions.head')
-          ->setValue($head_instructions),
+        'config.preamble' => id(new PhabricatorInstructionsEditField())
+          ->setKey('config.preamble')
+          ->setIsReorderable(false)
+          ->setValue($preamble),
       ) + $fields;
     }
 
@@ -112,7 +113,7 @@ final class PhabricatorEditEngineConfiguration
   }
 
   private function reorderFields(array $fields) {
-    $keys = array();
+    $keys = $this->getFieldOrder();
     $fields = array_select_keys($fields, $keys) + $fields;
 
     // Now, move locked fields to the bottom.
@@ -156,6 +157,22 @@ final class PhabricatorEditEngineConfiguration
     }
 
     return pht('Untitled Form');
+  }
+
+  public function getPreamble() {
+    return $this->getProperty('preamble');
+  }
+
+  public function setPreamble($preamble) {
+    return $this->setProperty('preamble', $preamble);
+  }
+
+  public function setFieldOrder(array $field_order) {
+    return $this->setProperty('order', $field_order);
+  }
+
+  public function getFieldOrder() {
+    return $this->getProperty('order', array());
   }
 
 

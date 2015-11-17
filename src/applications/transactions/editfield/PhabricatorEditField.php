@@ -14,6 +14,8 @@ abstract class PhabricatorEditField extends Phobject {
   private $description;
   private $editTypeKey;
   private $isLocked;
+  private $isPreview;
+  private $isReorderable = true;
 
   public function setKey($key) {
     $this->key = $key;
@@ -78,6 +80,24 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->isLocked;
   }
 
+  public function setIsPreview($preview) {
+    $this->isPreview = $preview;
+    return $this;
+  }
+
+  public function getIsPreview() {
+    return $this->isPreview;
+  }
+
+  public function setIsReorderable($is_reorderable) {
+    $this->isReorderable = $is_reorderable;
+    return $this;
+  }
+
+  public function getIsReorderable() {
+    return $this->isReorderable;
+  }
+
   protected function newControl() {
     throw new PhutilMethodNotImplementedException();
   }
@@ -96,7 +116,7 @@ abstract class PhabricatorEditField extends Phobject {
       $control->setLabel($this->getLabel());
     }
 
-    if ($this->getIsLocked()) {
+    if ($this->getIsLocked() || $this->getIsPreview()) {
       $control->setDisabled(true);
     }
 
@@ -149,9 +169,6 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   public function getTransactionType() {
-    if (!$this->transactionType) {
-      throw new PhutilInvalidStateException('setTransactionType');
-    }
     return $this->transactionType;
   }
 
@@ -257,6 +274,10 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function getEditTransactionTypes() {
     $transaction_type = $this->getTransactionType();
+    if ($transaction_type === null) {
+      return array();
+    }
+
     $type_key = $this->getEditTypeKey();
 
     // TODO: This is a pretty big pile of hard-coded hacks for now.

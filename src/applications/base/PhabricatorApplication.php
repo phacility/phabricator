@@ -636,7 +636,15 @@ abstract class PhabricatorApplication
   }
 
   protected function getEditRoutePattern($base = null) {
-    return $base.'(?:(?P<id>[0-9]\d*)/)?(?:(?P<editAction>parameters)/)?';
+    return $base.'(?:'.
+      '(?P<id>[0-9]\d*)/)?'.
+      '(?:'.
+        '(?:'.
+          '(?P<editAction>parameters)'.
+          '|'.
+          '(?:form/(?P<formKey>[^/]+))'.
+        ')'.
+      '/)?';
   }
 
   protected function getQueryRoutePattern($base = null) {
