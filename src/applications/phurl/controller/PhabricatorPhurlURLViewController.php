@@ -79,7 +79,7 @@ final class PhabricatorPhurlURLViewController
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setHeader($url->getName())
+      ->setHeader($url->getDisplayName())
       ->setStatus($icon, $color, $status)
       ->setPolicyObject($url);
 

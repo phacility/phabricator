@@ -83,7 +83,7 @@ final class PhabricatorPhurlURL extends PhabricatorPhurlDAO
     if ($this->getName()) {
       return $this->getName();
     } else {
-      return $this->getMonogram();
+      return $this->getLongURL();
     }
   }
 
