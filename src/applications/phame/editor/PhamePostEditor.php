@@ -65,9 +65,9 @@ final class PhamePostEditor
         return $object->setBody($xaction->getNewValue());
       case PhamePostTransaction::TYPE_VISIBILITY:
         if ($xaction->getNewValue() == PhameConstants::VISIBILITY_DRAFT) {
-          $object->setDatePublished(time());
-        } else {
           $object->setDatePublished(0);
+        } else {
+          $object->setDatePublished(time());
         }
         return $object->setVisibility($xaction->getNewValue());
     }
@@ -209,7 +209,10 @@ final class PhamePostEditor
 
     $body = parent::buildMailBody($object, $xactions);
 
-    $body->addRemarkupSection(null, $object->getBody());
+    if ($this->getIsNewObject()) {
+      $body->addRemarkupSection(null, $object->getBody());
+    }
+
     $body->addLinkSection(
       pht('POST DETAIL'),
       PhabricatorEnv::getProductionURI($object->getViewURI()));

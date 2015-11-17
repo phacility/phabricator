@@ -12,7 +12,7 @@ abstract class PhabricatorXHPASTViewPanelController
 
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
-    $this->storageTree = id(new PhabricatorXHPASTViewParseTree())
+    $this->storageTree = id(new PhabricatorXHPASTParseTree())
       ->load($this->id);
 
     if (!$this->storageTree) {

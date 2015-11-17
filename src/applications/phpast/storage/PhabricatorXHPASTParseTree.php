@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorXHPASTViewParseTree extends PhabricatorXHPASTViewDAO {
+final class PhabricatorXHPASTParseTree extends PhabricatorXHPASTDAO {
 
   protected $authorPHID;
   protected $input;

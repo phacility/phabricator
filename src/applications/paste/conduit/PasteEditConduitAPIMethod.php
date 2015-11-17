@@ -1,7 +1,7 @@
 <?php
 
 final class PasteEditConduitAPIMethod
-  extends PhabricatorApplicationEditEngineAPIMethod {
+  extends PhabricatorEditEngineAPIMethod {
 
   public function getAPIMethodName() {
     return 'paste.edit';

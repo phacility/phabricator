@@ -33,6 +33,20 @@ final class PhabricatorTransactionsApplication extends PhabricatorApplication {
           => 'PhabricatorApplicationTransactionShowOlderController',
         '(?P<value>old|new)/(?<phid>[^/]+)/'
           => 'PhabricatorApplicationTransactionValueController',
+        'editengine/' => array(
+          $this->getQueryRoutePattern()
+            => 'PhabricatorEditEngineListController',
+          '(?P<engineKey>[^/]+)/' => array(
+            $this->getQueryRoutePattern() =>
+              'PhabricatorEditEngineConfigurationListController',
+            $this->getEditRoutePattern('edit/') =>
+              'PhabricatorEditEngineConfigurationEditController',
+            'view/(?P<key>[^/]+)/' =>
+              'PhabricatorEditEngineConfigurationViewController',
+            'save/(?P<key>[^/]+)/' =>
+              'PhabricatorEditEngineConfigurationSaveController',
+          ),
+        ),
       ),
     );
   }

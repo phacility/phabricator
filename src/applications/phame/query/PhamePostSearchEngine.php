@@ -81,15 +81,20 @@ final class PhamePostSearchEngine
 
     foreach ($posts as $post) {
       $id = $post->getID();
-      $blog = $viewer->renderHandle($post->getBlogPHID())->render();
+      $blog = $post->getBlog();
+      if ($blog) {
+        $blog_name = $viewer->renderHandle($post->getBlogPHID())->render();
+        $blog_name = pht('Blog: %s', $blog_name);
+      } else {
+        $blog_name = pht('[No Blog]');
+      }
       $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
         ->setObject($post)
         ->setHeader($post->getTitle())
         ->setStatusIcon('fa-star')
         ->setHref($this->getApplicationURI("/post/view/{$id}/"))
-        ->addAttribute(
-          pht('Blog: %s', $blog));
+        ->addAttribute($blog_name);
       if ($post->isDraft()) {
         $item->setStatusIcon('fa-star-o grey');
         $item->setDisabled(true);

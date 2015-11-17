@@ -227,9 +227,7 @@ final class PHUIDiffInlineCommentDetailView
 
       $action_buttons = array();
       if ($this->allowReply) {
-
         if (!$is_synthetic) {
-
           // NOTE: No product reason why you can't reply to these, but the reply
           // mechanism currently sends the inline comment ID to the server, not
           // file/line information, and synthetic comments don't have an inline
@@ -242,7 +240,6 @@ final class PHUIDiffInlineCommentDetailView
             ->addSigil('differential-inline-reply')
             ->setMustCapture(true);
         }
-
       }
     }
 
@@ -267,11 +264,11 @@ final class PHUIDiffInlineCommentDetailView
       $links[] = javelin_tag(
         'a',
         array(
-          'class' => 'inline-button-divider pml msl',
-          'meta'        => array(
+          'class'  => 'inline-button-divider pml msl',
+          'meta'  => array(
             'anchor' => $anchor_name,
           ),
-          'sigil'       => 'differential-inline-preview-jump',
+          'sigil'  => 'differential-inline-preview-jump',
         ),
         pht('Not Visible'));
 

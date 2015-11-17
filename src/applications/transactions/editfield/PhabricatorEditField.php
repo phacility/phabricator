@@ -13,7 +13,7 @@ abstract class PhabricatorEditField extends Phobject {
   private $metadata = array();
   private $description;
   private $editTypeKey;
-
+  private $isLocked;
 
   public function setKey($key) {
     $this->key = $key;
@@ -69,7 +69,18 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->description;
   }
 
-  abstract protected function newControl();
+  public function setIsLocked($is_locked) {
+    $this->isLocked = $is_locked;
+    return $this;
+  }
+
+  public function getIsLocked() {
+    return $this->isLocked;
+  }
+
+  protected function newControl() {
+    throw new PhutilMethodNotImplementedException();
+  }
 
   protected function renderControl() {
     $control = $this->newControl();
@@ -83,6 +94,10 @@ abstract class PhabricatorEditField extends Phobject {
 
     if (!$control->getLabel()) {
       $control->setLabel($this->getLabel());
+    }
+
+    if ($this->getIsLocked()) {
+      $control->setDisabled(true);
     }
 
     return $control;
@@ -164,6 +179,15 @@ abstract class PhabricatorEditField extends Phobject {
   public function readValueFromObject($object) {
     $this->value = $this->getValueFromObject($object);
     return $this;
+  }
+
+  public function readDefaultValueFromConfiguration($value) {
+    $this->value = $this->getDefaultValueFromConfiguration($value);
+    return $this;
+  }
+
+  protected function getDefaultValueFromConfiguration($value) {
+    return $value;
   }
 
   protected function getValueFromObject($object) {

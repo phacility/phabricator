@@ -22,7 +22,7 @@ final class HeraldRuleController extends HeraldController {
       if (!$rule) {
         return new Aphront404Response();
       }
-      $cancel_uri = $this->getApplicationURI("rule/{$id}/");
+      $cancel_uri = '/'.$rule->getMonogram();
     } else {
       $new_uri = $this->getApplicationURI('new/');
 
@@ -128,7 +128,7 @@ final class HeraldRuleController extends HeraldController {
       list($e_name, $errors) = $this->saveRule($adapter, $rule, $request);
       if (!$errors) {
         $id = $rule->getID();
-        $uri = $this->getApplicationURI("rule/{$id}/");
+        $uri = '/'.$rule->getMonogram();
         return id(new AphrontRedirectResponse())->setURI($uri);
       }
     }

@@ -42,8 +42,6 @@ final class PhabricatorDaemonEventListener extends PhabricatorEventListener {
       ->setHost(php_uname('n'))
       ->setPID(getmypid())
       ->setRunningAsUser($current_user['name'])
-      ->setEnvHash(PhabricatorEnv::calculateEnvironmentHash())
-      ->setEnvInfo(PhabricatorEnv::calculateEnvironmentInfo())
       ->setStatus(PhabricatorDaemonLog::STATUS_RUNNING)
       ->setArgv($event->getValue('argv'))
       ->setExplicitArgv($event->getValue('explicitArgv'))

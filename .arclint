@@ -57,13 +57,6 @@
       "type": "phutil-library",
       "include": "(\\.php$)"
     },
-    "phutil-xhpast": {
-      "type": "phutil-xhpast",
-      "include": "(\\.php$)",
-      "phutil-xhpast.deprecated.functions": {
-        "phutil_escape_html": "The phutil_escape_html() function is deprecated. Raw strings passed to phutil_tag() or hsprintf() are escaped automatically."
-      }
-    },
     "spelling": {
       "type": "spelling"
     },
@@ -73,15 +66,7 @@
     "xhpast": {
       "type": "xhpast",
       "include": "(\\.php$)",
-      "severity": {
-        "16": "advice",
-        "34": "error"
-      },
-      "xhpast.blacklisted.function": {
-        "eval": "The eval() function should be avoided. It is potentially unsafe and makes debugging more difficult."
-      },
-      "xhpast.php-version": "5.2.3",
-      "xhpast.php-version.windows": "5.3.0"
+      "standard": "phutil.xhpast"
     }
   }
 }

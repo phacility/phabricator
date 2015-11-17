@@ -169,6 +169,8 @@ final class PhamePost extends PhameDAO
           return $this->getBlog()->getViewPolicy();
         } else if ($this->getBlog()) {
           return $this->getBlog()->getEditPolicy();
+        } else {
+          return PhabricatorPolicies::POLICY_NOONE;
         }
         break;
       case PhabricatorPolicyCapability::CAN_EDIT:

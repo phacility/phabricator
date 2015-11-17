@@ -92,6 +92,10 @@ final class PhabricatorDestructionEngine extends Phobject {
         $token->delete();
       }
     }
+
+    if ($object instanceof AlmanacPropertyInterface) {
+      $this->destroyAlmanacProperties($object_phid);
+    }
   }
 
   private function destroyEdges($src_phid) {
@@ -144,6 +148,17 @@ final class PhabricatorDestructionEngine extends Phobject {
     queryfx(
       $conn_w,
       'DELETE FROM %T WHERE primaryObjectPHID = %s',
+      $table->getTableName(),
+      $object_phid);
+  }
+
+  private function destroyAlmanacProperties($object_phid) {
+    $table = new AlmanacProperty();
+    $conn_w = $table->establishConnection('w');
+
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE objectPHID = %s',
       $table->getTableName(),
       $object_phid);
   }

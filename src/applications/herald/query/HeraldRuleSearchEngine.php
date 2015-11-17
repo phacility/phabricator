@@ -173,12 +173,12 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
     foreach ($rules as $rule) {
-      $id = $rule->getID();
+      $monogram = $rule->getMonogram();
 
       $item = id(new PHUIObjectItemView())
-        ->setObjectName("H{$id}")
+        ->setObjectName($monogram)
         ->setHeader($rule->getName())
-        ->setHref($this->getApplicationURI("rule/{$id}/"));
+        ->setHref("/{$monogram}");
 
       if ($rule->isPersonalRule()) {
         $item->addIcon('fa-user', pht('Personal Rule'));

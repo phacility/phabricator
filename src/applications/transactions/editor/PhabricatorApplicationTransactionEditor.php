@@ -815,18 +815,6 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $xactions = $this->filterTransactions($object, $xactions);
 
-    if (!$xactions) {
-      if ($read_locking) {
-        $object->endReadLocking();
-        $read_locking = false;
-      }
-      if ($transaction_open) {
-        $object->killTransaction();
-        $transaction_open = false;
-      }
-      return array();
-    }
-
     // Now that we've merged, filtered, and combined transactions, check for
     // required capabilities.
     foreach ($xactions as $xaction) {
