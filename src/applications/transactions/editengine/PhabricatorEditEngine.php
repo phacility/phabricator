@@ -658,12 +658,22 @@ abstract class PhabricatorEditEngine
     $validation_exception = null;
     if ($request->isFormPost()) {
       foreach ($fields as $field) {
+        if ($field->getIsLocked() || $field->getIsHidden()) {
+          continue;
+        }
+
         $field->readValueFromSubmit($request);
       }
 
       $xactions = array();
       foreach ($fields as $field) {
-        $xactions[] = $field->generateTransaction(clone $template);
+        $xaction = $field->generateTransaction(clone $template);
+
+        if (!$xaction) {
+          continue;
+        }
+
+        $xactions[] = $xaction;
       }
 
       $editor = $object->getApplicationTransactionEditor()
@@ -683,6 +693,10 @@ abstract class PhabricatorEditEngine
     } else {
       if ($this->getIsCreate()) {
         foreach ($fields as $field) {
+          if ($field->getIsLocked() || $field->getIsHidden()) {
+            continue;
+          }
+
           $field->readValueFromRequest($request);
         }
       } else {

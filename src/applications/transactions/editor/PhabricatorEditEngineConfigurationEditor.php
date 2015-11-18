@@ -21,6 +21,7 @@ final class PhabricatorEditEngineConfigurationEditor
     $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_PREAMBLE;
     $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_ORDER;
     $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULT;
+    $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_LOCKS;
 
     return $types;
   }
@@ -67,6 +68,8 @@ final class PhabricatorEditEngineConfigurationEditor
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULT:
         $field_key = $xaction->getMetadataValue('field.key');
         return $object->getFieldDefault($field_key);
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_LOCKS:
+        return $object->getFieldLocks();
     }
   }
 
@@ -79,6 +82,7 @@ final class PhabricatorEditEngineConfigurationEditor
       case PhabricatorEditEngineConfigurationTransaction::TYPE_PREAMBLE;
       case PhabricatorEditEngineConfigurationTransaction::TYPE_ORDER:
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULT:
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_LOCKS:
         return $xaction->getNewValue();
     }
   }
@@ -101,6 +105,9 @@ final class PhabricatorEditEngineConfigurationEditor
         $field_key = $xaction->getMetadataValue('field.key');
         $object->setFieldDefault($field_key, $xaction->getNewValue());
         return;
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_LOCKS:
+        $object->setFieldLocks($xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -115,6 +122,7 @@ final class PhabricatorEditEngineConfigurationEditor
       case PhabricatorEditEngineConfigurationTransaction::TYPE_PREAMBLE;
       case PhabricatorEditEngineConfigurationTransaction::TYPE_ORDER;
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULT:
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_LOCKS:
         return;
     }
 

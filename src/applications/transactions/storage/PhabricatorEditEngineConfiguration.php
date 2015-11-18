@@ -17,6 +17,10 @@ final class PhabricatorEditEngineConfiguration
 
   private $engine = self::ATTACHABLE;
 
+  const LOCK_VISIBLE = 'visible';
+  const LOCK_LOCKED = 'locked';
+  const LOCK_HIDDEN = 'hidden';
+
   public function getTableName() {
     return 'search_editengineconfiguration';
   }
@@ -97,6 +101,22 @@ final class PhabricatorEditEngineConfiguration
       }
     }
 
+    $locks = $this->getFieldLocks();
+    foreach ($fields as $field) {
+      $key = $field->getKey();
+      switch (idx($locks, $key)) {
+        case self::LOCK_LOCKED:
+          $field->setIsLocked(true);
+          break;
+        case self::LOCK_HIDDEN:
+          $field->setIsHidden(true);
+          break;
+        case self::LOCK_VISIBLE:
+        default:
+          break;
+      }
+    }
+
     $fields = $this->reorderFields($fields);
 
     $preamble = $this->getPreamble();
@@ -106,6 +126,7 @@ final class PhabricatorEditEngineConfiguration
           ->setKey('config.preamble')
           ->setIsReorderable(false)
           ->setIsDefaultable(false)
+          ->setIsLockable(false)
           ->setValue($preamble),
       ) + $fields;
     }
@@ -116,19 +137,7 @@ final class PhabricatorEditEngineConfiguration
   private function reorderFields(array $fields) {
     $keys = $this->getFieldOrder();
     $fields = array_select_keys($fields, $keys) + $fields;
-
-    // Now, move locked fields to the bottom.
-    $head = array();
-    $tail = array();
-    foreach ($fields as $key => $field) {
-      if (!$field->getIsLocked()) {
-        $head[$key] = $field;
-      } else {
-        $tail[$key] = $field;
-      }
-    }
-
-    return $head + $tail;
+    return $fields;
   }
 
   public function getURI() {
@@ -174,6 +183,14 @@ final class PhabricatorEditEngineConfiguration
 
   public function getFieldOrder() {
     return $this->getProperty('order', array());
+  }
+
+  public function setFieldLocks(array $field_locks) {
+    return $this->setProperty('locks', $field_locks);
+  }
+
+  public function getFieldLocks() {
+    return $this->getProperty('locks', array());
   }
 
   public function getFieldDefault($key) {

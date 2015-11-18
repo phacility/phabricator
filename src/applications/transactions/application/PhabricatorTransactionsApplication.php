@@ -49,6 +49,8 @@ final class PhabricatorTransactionsApplication extends PhabricatorApplication {
               'PhabricatorEditEngineConfigurationReorderController',
             'defaults/(?P<key>[^/]+)/' =>
               'PhabricatorEditEngineConfigurationDefaultsController',
+            'lock/(?P<key>[^/]+)/' =>
+              'PhabricatorEditEngineConfigurationLockController',
           ),
         ),
       ),

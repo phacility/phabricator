@@ -13,11 +13,16 @@ abstract class PhabricatorEditField extends Phobject {
   private $metadata = array();
   private $description;
   private $editTypeKey;
+
   private $isLocked;
+  private $isHidden;
+
   private $isPreview;
-  private $isReorderable = true;
   private $isEditDefaults;
+
+  private $isReorderable = true;
   private $isDefaultable = true;
+  private $isLockable = true;
 
   public function setKey($key) {
     $this->key = $key;
@@ -118,6 +123,24 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->isDefaultable;
   }
 
+  public function setIsLockable($is_lockable) {
+    $this->isLockable = $is_lockable;
+    return $this;
+  }
+
+  public function getIsLockable() {
+    return $this->isLockable;
+  }
+
+  public function setIsHidden($is_hidden) {
+    $this->isHidden = $is_hidden;
+    return $this;
+  }
+
+  public function getIsHidden() {
+    return $this->isHidden;
+  }
+
   protected function newControl() {
     throw new PhutilMethodNotImplementedException();
   }
@@ -138,10 +161,17 @@ abstract class PhabricatorEditField extends Phobject {
 
     if ($this->getIsPreview()) {
       $disabled = true;
+      $hidden = false;
     } else if ($this->getIsEditDefaults()) {
       $disabled = false;
+      $hidden = false;
     } else {
       $disabled = $this->getIsLocked();
+      $hidden = $this->getIsHidden();
+    }
+
+    if ($hidden) {
+      return null;
     }
 
     $control->setDisabled($disabled);
@@ -152,6 +182,18 @@ abstract class PhabricatorEditField extends Phobject {
   public function appendToForm(AphrontFormView $form) {
     $control = $this->renderControl();
     if ($control !== null) {
+
+      if ($this->getIsPreview()) {
+        if ($this->getIsHidden()) {
+          $control
+            ->addClass('aphront-form-preview-hidden')
+            ->setError(pht('Hidden'));
+        } else if ($this->getIsLocked()) {
+          $control
+            ->setError(pht('Locked'));
+        }
+      }
+
       $form->appendControl($control);
     }
     return $this;
@@ -186,6 +228,10 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function generateTransaction(
     PhabricatorApplicationTransaction $xaction) {
+
+    if (!$this->getTransactionType()) {
+      return null;
+    }
 
     $xaction
       ->setTransactionType($this->getTransactionType())

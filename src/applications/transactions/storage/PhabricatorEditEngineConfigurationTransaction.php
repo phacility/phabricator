@@ -7,6 +7,7 @@ final class PhabricatorEditEngineConfigurationTransaction
   const TYPE_PREAMBLE = 'editengine.config.preamble';
   const TYPE_ORDER = 'editengine.config.order';
   const TYPE_DEFAULT = 'editengine.config.default';
+  const TYPE_LOCKS = 'editengine.config.locks';
 
   public function getApplicationName() {
     return 'search';
@@ -55,6 +56,10 @@ final class PhabricatorEditEngineConfigurationTransaction
           '%s changed the default value for field "%s".',
           $this->renderHandleLink($author_phid),
           $key);
+      case self::TYPE_LOCKS:
+        return pht(
+          '%s changed locked and hidden fields.',
+          $this->renderHandleLink($author_phid));
     }
 
     return parent::getTitle();

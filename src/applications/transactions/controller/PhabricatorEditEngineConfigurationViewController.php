@@ -139,6 +139,16 @@ final class PhabricatorEditEngineConfigurationViewController
         ->setWorkflow(true)
         ->setDisabled(!$can_edit));
 
+    $lock_uri = "{$base_uri}/lock/{$form_key}/";
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Lock / Hide Fields'))
+        ->setIcon('fa-lock')
+        ->setHref($lock_uri)
+        ->setWorkflow(true)
+        ->setDisabled(!$can_edit));
+
     return $view;
   }
 
