@@ -90,11 +90,19 @@ EOTEXT
         $label = $key;
       }
 
+      if ($field->getIsHidden()) {
+        $value = $lock_hidden;
+      } else if ($field->getIsLocked()) {
+        $value = $lock_locked;
+      } else {
+        $value = $lock_visible;
+      }
+
       $form->appendControl(
         id(new AphrontFormSelectControl())
           ->setName('locks['.$key.']')
           ->setLabel($label)
-          ->setValue(idx($locks, $key, $lock_visible))
+          ->setValue($value)
           ->setOptions($map));
     }
 

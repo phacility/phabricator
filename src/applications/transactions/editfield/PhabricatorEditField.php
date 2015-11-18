@@ -357,6 +357,11 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->editTypeKey;
   }
 
+  protected function newEditType() {
+    return id(new PhabricatorSimpleEditType())
+      ->setValueType($this->getHTTPParameterType()->getTypeName());
+  }
+
   public function getEditTransactionTypes() {
     $transaction_type = $this->getTransactionType();
     if ($transaction_type === null) {
@@ -411,10 +416,9 @@ abstract class PhabricatorEditField extends Phobject {
     }
 
     return array(
-      id(new PhabricatorSimpleEditType())
+      $this->newEditType()
         ->setEditType($type_key)
         ->setTransactionType($transaction_type)
-        ->setValueType($this->getHTTPParameterType()->getTypeName())
         ->setDescription($this->getDescription())
         ->setMetadata($this->metadata),
     );

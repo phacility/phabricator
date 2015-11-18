@@ -214,6 +214,22 @@ abstract class PhabricatorEditEngine
       }
     }
 
+    $xaction = $object->getApplicationTransactionTemplate();
+    $comment = $xaction->getApplicationTransactionCommentObject();
+    if ($comment) {
+      $comment_type = PhabricatorTransactions::TYPE_COMMENT;
+
+      $comment_field = id(new PhabricatorCommentEditField())
+        ->setKey('comment')
+        ->setLabel(pht('Comments'))
+        ->setDescription(pht('Add comments.'))
+        ->setAliases(array('comments'))
+        ->setIsHidden(true)
+        ->setTransactionType($comment_type)
+        ->setValue(null);
+      $fields[] = $comment_field;
+    }
+
     $config = $this->getEditEngineConfiguration();
     $fields = $config->applyConfigurationToFields($this, $fields);
 

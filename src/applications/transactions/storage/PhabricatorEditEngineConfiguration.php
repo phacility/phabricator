@@ -106,13 +106,19 @@ final class PhabricatorEditEngineConfiguration
       $key = $field->getKey();
       switch (idx($locks, $key)) {
         case self::LOCK_LOCKED:
+          $field->setIsHidden(false);
           $field->setIsLocked(true);
           break;
         case self::LOCK_HIDDEN:
           $field->setIsHidden(true);
+          $field->setIsLocked(false);
           break;
         case self::LOCK_VISIBLE:
+          $field->setIsHidden(false);
+          $field->setIsLocked(false);
+          break;
         default:
+          // If we don't have an explicit value, don't make any adjustments.
           break;
       }
     }

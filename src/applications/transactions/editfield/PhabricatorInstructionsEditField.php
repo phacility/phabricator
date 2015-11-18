@@ -7,4 +7,8 @@ final class PhabricatorInstructionsEditField
     return $form->appendRemarkupInstructions($this->getValue());
   }
 
+  protected function newHTTPParameterType() {
+    return null;
+  }
+
 }
