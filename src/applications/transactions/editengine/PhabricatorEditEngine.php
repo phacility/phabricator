@@ -62,7 +62,11 @@ abstract class PhabricatorEditEngine
     PhabricatorEditEngineConfiguration $config) {
 
     $object = $this->newEditableObject();
+
     $this->editEngineConfiguration = $config;
+
+    // This is mostly making sure that we fill in default values.
+    $this->setIsCreate(true);
 
     return $this->buildEditFields($object);
   }

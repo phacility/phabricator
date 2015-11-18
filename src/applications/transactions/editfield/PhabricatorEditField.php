@@ -16,6 +16,8 @@ abstract class PhabricatorEditField extends Phobject {
   private $isLocked;
   private $isPreview;
   private $isReorderable = true;
+  private $isEditDefaults;
+  private $isDefaultable = true;
 
   public function setKey($key) {
     $this->key = $key;
@@ -98,6 +100,24 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->isReorderable;
   }
 
+  public function setIsEditDefaults($is_edit_defaults) {
+    $this->isEditDefaults = $is_edit_defaults;
+    return $this;
+  }
+
+  public function getIsEditDefaults() {
+    return $this->isEditDefaults;
+  }
+
+  public function setIsDefaultable($is_defaultable) {
+    $this->isDefaultable = $is_defaultable;
+    return $this;
+  }
+
+  public function getIsDefaultable() {
+    return $this->isDefaultable;
+  }
+
   protected function newControl() {
     throw new PhutilMethodNotImplementedException();
   }
@@ -116,9 +136,15 @@ abstract class PhabricatorEditField extends Phobject {
       $control->setLabel($this->getLabel());
     }
 
-    if ($this->getIsLocked() || $this->getIsPreview()) {
-      $control->setDisabled(true);
+    if ($this->getIsPreview()) {
+      $disabled = true;
+    } else if ($this->getIsEditDefaults()) {
+      $disabled = false;
+    } else {
+      $disabled = $this->getIsLocked();
     }
+
+    $control->setDisabled($disabled);
 
     return $control;
   }
@@ -133,6 +159,19 @@ abstract class PhabricatorEditField extends Phobject {
 
   protected function getValueForControl() {
     return $this->getValue();
+  }
+
+  public function getValueForDefaults() {
+    $value = $this->getValue();
+
+    // By default, just treat the empty string like `null` since they're
+    // equivalent for almost all fields and this reduces the number of
+    // meaningless transactions we generate when adjusting defaults.
+    if ($value === '') {
+      return null;
+    }
+
+    return $value;
   }
 
   protected function getValue() {

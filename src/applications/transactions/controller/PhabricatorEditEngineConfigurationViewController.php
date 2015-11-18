@@ -119,11 +119,21 @@ final class PhabricatorEditEngineConfigurationViewController
         ->setIcon('fa-th-list')
         ->setHref($use_uri));
 
+    $defaults_uri = "{$base_uri}/defaults/{$form_key}/";
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Change Default Values'))
+        ->setIcon('fa-paint-brush')
+        ->setHref($defaults_uri)
+        ->setWorkflow(!$can_edit)
+        ->setDisabled(!$can_edit));
+
     $reorder_uri = "{$base_uri}/reorder/{$form_key}/";
 
     $view->addAction(
       id(new PhabricatorActionView())
-        ->setName(pht('Reorder Fields'))
+        ->setName(pht('Change Field Order'))
         ->setIcon('fa-sort-alpha-asc')
         ->setHref($reorder_uri)
         ->setWorkflow(true)

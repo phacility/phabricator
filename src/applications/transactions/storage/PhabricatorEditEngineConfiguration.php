@@ -105,6 +105,7 @@ final class PhabricatorEditEngineConfiguration
         'config.preamble' => id(new PhabricatorInstructionsEditField())
           ->setKey('config.preamble')
           ->setIsReorderable(false)
+          ->setIsDefaultable(false)
           ->setValue($preamble),
       ) + $fields;
     }
@@ -173,6 +174,17 @@ final class PhabricatorEditEngineConfiguration
 
   public function getFieldOrder() {
     return $this->getProperty('order', array());
+  }
+
+  public function getFieldDefault($key) {
+    $defaults = $this->getProperty('defaults', array());
+    return idx($defaults, $key);
+  }
+
+  public function setFieldDefault($key, $value) {
+    $defaults = $this->getProperty('defaults', array());
+    $defaults[$key] = $value;
+    return $this->setProperty('defaults', $defaults);
   }
 
 

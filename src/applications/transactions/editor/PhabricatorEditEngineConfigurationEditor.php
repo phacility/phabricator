@@ -20,6 +20,7 @@ final class PhabricatorEditEngineConfigurationEditor
     $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_NAME;
     $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_PREAMBLE;
     $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_ORDER;
+    $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULT;
 
     return $types;
   }
@@ -63,6 +64,9 @@ final class PhabricatorEditEngineConfigurationEditor
         return $object->getPreamble();
       case PhabricatorEditEngineConfigurationTransaction::TYPE_ORDER:
         return $object->getFieldOrder();
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULT:
+        $field_key = $xaction->getMetadataValue('field.key');
+        return $object->getFieldDefault($field_key);
     }
   }
 
@@ -74,6 +78,7 @@ final class PhabricatorEditEngineConfigurationEditor
       case PhabricatorEditEngineConfigurationTransaction::TYPE_NAME:
       case PhabricatorEditEngineConfigurationTransaction::TYPE_PREAMBLE;
       case PhabricatorEditEngineConfigurationTransaction::TYPE_ORDER:
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULT:
         return $xaction->getNewValue();
     }
   }
@@ -92,6 +97,10 @@ final class PhabricatorEditEngineConfigurationEditor
       case PhabricatorEditEngineConfigurationTransaction::TYPE_ORDER:
         $object->setFieldOrder($xaction->getNewValue());
         return;
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULT:
+        $field_key = $xaction->getMetadataValue('field.key');
+        $object->setFieldDefault($field_key, $xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -105,6 +114,7 @@ final class PhabricatorEditEngineConfigurationEditor
       case PhabricatorEditEngineConfigurationTransaction::TYPE_NAME:
       case PhabricatorEditEngineConfigurationTransaction::TYPE_PREAMBLE;
       case PhabricatorEditEngineConfigurationTransaction::TYPE_ORDER;
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULT:
         return;
     }
 
