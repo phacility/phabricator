@@ -60,4 +60,12 @@ final class PhabricatorPhurlApplication extends PhabricatorApplication {
     );
   }
 
+  protected function getCustomCapabilities() {
+    return array(
+      PhabricatorPhurlURLCreateCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_USER,
+      ),
+    );
+  }
+
 }

@@ -17,6 +17,9 @@ final class PhabricatorPhurlURLEditController
     $uri_query = $request->getStr('query');
 
     if ($is_create) {
+      $this->requireApplicationCapability(
+        PhabricatorPhurlURLCreateCapability::CAPABILITY);
+
       $url = PhabricatorPhurlURL::initializeNewPhurlURL(
         $viewer);
       $submit_label = pht('Create');
