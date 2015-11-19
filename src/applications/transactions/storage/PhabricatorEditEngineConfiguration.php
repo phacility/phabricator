@@ -29,7 +29,7 @@ final class PhabricatorEditEngineConfiguration
     PhabricatorUser $actor,
     PhabricatorEditEngine $engine) {
 
-    // TODO: This should probably be controlled by a new defualt capability.
+    // TODO: This should probably be controlled by a new default capability.
     $edit_policy = PhabricatorPolicies::POLICY_ADMIN;
 
     return id(new PhabricatorEditEngineConfiguration())

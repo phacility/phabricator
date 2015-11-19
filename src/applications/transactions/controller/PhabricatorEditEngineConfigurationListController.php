@@ -17,16 +17,16 @@ final class PhabricatorEditEngineConfigurationListController
   }
 
   protected function buildApplicationCrumbs() {
+    $viewer = $this->getViewer();
     $crumbs = parent::buildApplicationCrumbs();
 
-    $engine_key = $this->getEngineKey();
-    $edit_uri = "/transactions/editengine/{$engine_key}/edit/";
+    $target_key = $this->getEngineKey();
+    $target_engine = PhabricatorEditEngine::getByKey($viewer, $target_key);
 
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('New Form'))
-        ->setHref($edit_uri)
-        ->setIcon('fa-plus-square'));
+    id(new PhabricatorEditEngineConfigurationEditEngine())
+      ->setTargetEngine($target_engine)
+      ->setViewer($viewer)
+      ->addActionToCrumbs($crumbs);
 
     return $crumbs;
   }

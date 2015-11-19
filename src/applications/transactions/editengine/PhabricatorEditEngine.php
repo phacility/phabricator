@@ -352,7 +352,9 @@ abstract class PhabricatorEditEngine
     if (!$has_default) {
       $first = head($configurations);
       if (!$first->getBuiltinKey()) {
-        $first->setBuiltinKey(self::EDITENGINECONFIG_DEFAULT);
+        $first
+          ->setBuiltinKey(self::EDITENGINECONFIG_DEFAULT)
+          ->setIsDefault(true);
 
         if (!strlen($first->getName())) {
           $first->setName($this->getObjectCreateShortText());
@@ -629,6 +631,8 @@ abstract class PhabricatorEditEngine
     switch ($action) {
       case 'parameters':
         return $this->buildParametersResponse($object);
+      case 'nodefault':
+        return $this->buildNoDefaultResponse($object);
       default:
         return $this->buildEditResponse($object);
     }
@@ -820,6 +824,74 @@ abstract class PhabricatorEditEngine
     return $actions;
   }
 
+  final public function addActionToCrumbs(PHUICrumbsView $crumbs) {
+    $viewer = $this->getViewer();
+
+    $configs = id(new PhabricatorEditEngineConfigurationQuery())
+      ->setViewer($viewer)
+      ->withEngineKeys(array($this->getEngineKey()))
+      ->withIsDefault(true)
+      ->withIsDisabled(false)
+      ->execute();
+
+    $dropdown = null;
+    $disabled = false;
+    $workflow = false;
+
+    $menu_icon = 'fa-plus-square';
+
+    if (!$configs) {
+      if ($viewer->isLoggedIn()) {
+        $disabled = true;
+      } else {
+        // If the viewer isn't logged in, assume they'll get hit with a login
+        // dialog and are likely able to create objects after they log in.
+        $disabled = false;
+      }
+      $workflow = true;
+      $create_uri = $this->getEditURI(null, 'nodefault/');
+    } else {
+      $config = head($configs);
+      $form_key = $config->getIdentifier();
+      $create_uri = $this->getEditURI(null, "form/{$form_key}/");
+
+      if (count($configs) > 1) {
+        $configs = msort($configs, 'getDisplayName');
+
+        $menu_icon = 'fa-caret-square-o-down';
+
+        $dropdown = id(new PhabricatorActionListView())
+          ->setUser($viewer);
+
+        foreach ($configs as $config) {
+          $form_key = $config->getIdentifier();
+          $config_uri = $this->getEditURI(null, "form/{$form_key}/");
+
+          $item_icon = 'fa-plus';
+
+          $dropdown->addAction(
+            id(new PhabricatorActionView())
+              ->setName($config->getDisplayName())
+              ->setIcon($item_icon)
+              ->setHref($config_uri));
+        }
+      }
+    }
+
+    $action = id(new PHUIListItemView())
+      ->setName($this->getObjectCreateShortText())
+      ->setHref($create_uri)
+      ->setIcon($menu_icon)
+      ->setWorkflow($workflow)
+      ->setDisabled($disabled);
+
+    if ($dropdown) {
+      $action->setDropdownMenu($dropdown);
+    }
+
+    $crumbs->addAction($action);
+  }
+
 
 /* -(  Responding to HTTP Parameter Requests  )------------------------------ */
 
@@ -863,6 +935,19 @@ abstract class PhabricatorEditEngine
       ->appendChild($document);
   }
 
+
+  private function buildNoDefaultResponse($object) {
+    $cancel_uri = $this->getObjectCreateCancelURI($object);
+
+    return $this->getController()
+      ->newDialog()
+      ->setTitle(pht('No Default Create Forms'))
+      ->appendParagraph(
+        pht(
+          'This application is not configured with any visible, enabled '.
+          'forms for creating objects.'))
+      ->addCancelButton($cancel_uri);
+  }
 
 /* -(  Conduit  )------------------------------------------------------------ */
 

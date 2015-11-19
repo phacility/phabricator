@@ -13,6 +13,9 @@ final class PhabricatorEditEngineConfigurationEditEngine
   }
 
   public function getTargetEngine() {
+    if (!$this->targetEngine) {
+      throw new PhutilInvalidStateException('setTargetEngine');
+    }
     return $this->targetEngine;
   }
 
