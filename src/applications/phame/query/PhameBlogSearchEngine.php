@@ -17,11 +17,23 @@ final class PhameBlogSearchEngine
 
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
+    if ($map['statuses']) {
+      $query->withStatuses(array($map['statuses']));
+    }
     return $query;
   }
 
   protected function buildCustomSearchFields() {
-    return array();
+    return array(
+      id(new PhabricatorSearchSelectField())
+        ->setKey('statuses')
+        ->setLabel(pht('Status'))
+        ->setOptions(array(
+          '' => pht('All'),
+          PhameBlog::STATUS_ACTIVE => pht('Active'),
+          PhameBlog::STATUS_ARCHIVED => pht('Archived'),
+          )),
+    );
   }
 
   protected function getURI($path) {
@@ -30,6 +42,8 @@ final class PhameBlogSearchEngine
 
   protected function getBuiltinQueryNames() {
     $names = array(
+      'active' => pht('Active Blogs'),
+      'archived' => pht('Archived Blogs'),
       'all' => pht('All Blogs'),
     );
     return $names;
@@ -42,6 +56,12 @@ final class PhameBlogSearchEngine
     switch ($query_key) {
       case 'all':
         return $query;
+      case 'active':
+        return $query->setParameter(
+          'statuses', PhameBlog::STATUS_ACTIVE);
+      case 'archived':
+        return $query->setParameter(
+          'statuses', PhameBlog::STATUS_ARCHIVED);
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
@@ -58,12 +78,19 @@ final class PhameBlogSearchEngine
     $list->setUser($viewer);
 
     foreach ($blogs as $blog) {
+      $archived = false;
+      $icon = 'fa-star';
+      if ($blog->isArchived()) {
+        $archived = true;
+        $icon = 'fa-ban';
+      }
       $id = $blog->getID();
       $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
         ->setObject($blog)
         ->setHeader($blog->getName())
-        ->setStatusIcon('fa-star')
+        ->setStatusIcon($icon)
+        ->setDisabled($archived)
         ->setHref($this->getApplicationURI("/blog/view/{$id}/"))
         ->addAttribute($blog->getSkin())
         ->addAttribute($blog->getDomain());

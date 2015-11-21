@@ -59,7 +59,7 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
         'blog/' => array(
           '(?:(?P<filter>user|all)/)?' => 'PhameBlogListController',
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhameBlogListController',
-          'delete/(?P<id>[^/]+)/' => 'PhameBlogDeleteController',
+          'archive/(?P<id>[^/]+)/' => 'PhameBlogArchiveController',
           'edit/(?P<id>[^/]+)/' => 'PhameBlogEditController',
           'view/(?P<id>[^/]+)/' => 'PhameBlogViewController',
           'feed/(?P<id>[^/]+)/' => 'PhameBlogFeedController',

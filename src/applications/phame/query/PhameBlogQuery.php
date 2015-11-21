@@ -5,6 +5,7 @@ final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $ids;
   private $phids;
   private $domain;
+  private $statuses;
   private $needBloggers;
 
   public function withIDs(array $ids) {
@@ -22,6 +23,11 @@ final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
+  public function withStatuses(array $status) {
+    $this->statuses = $status;
+    return $this;
+  }
+
   public function newResultObject() {
     return new PhameBlog();
   }
@@ -32,6 +38,13 @@ final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'status IN (%Ls)',
+        $this->statuses);
+    }
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
