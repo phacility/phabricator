@@ -32,12 +32,12 @@ final class HeraldRulePHIDType extends PhabricatorPHIDType {
     foreach ($handles as $phid => $handle) {
       $rule = $objects[$phid];
 
-      $id = $rule->getID();
-      $name = $rule->getName();
+      $monogram = $rule->getMonogram();
+      $name     = $rule->getName();
 
-      $handle->setName("H{$id}");
-      $handle->setFullName("H{$id} {$name}");
-      $handle->setURI("/herald/rule/{$id}/");
+      $handle->setName($monogram);
+      $handle->setFullName("{$monogram} {$name}");
+      $handle->setURI("/{$monogram}");
     }
   }
 

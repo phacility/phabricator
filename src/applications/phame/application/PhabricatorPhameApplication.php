@@ -54,6 +54,7 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
           'framed/(?P<id>\d+)/' => 'PhamePostFramedController',
           'new/' => 'PhamePostNewController',
           'move/(?P<id>\d+)/' => 'PhamePostNewController',
+          'comment/(?P<id>[1-9]\d*)/' => 'PhamePostCommentController',
         ),
         'blog/' => array(
           '(?:(?P<filter>user|all)/)?' => 'PhameBlogListController',
@@ -99,6 +100,15 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
   public function getQuicksandURIPatternBlacklist() {
     return array(
       '/phame/live/.*',
+    );
+  }
+
+  protected function getCustomCapabilities() {
+    return array(
+      PhameBlogCreateCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_USER,
+        'caption' => pht('Default create policy for blogs.'),
+      ),
     );
   }
 

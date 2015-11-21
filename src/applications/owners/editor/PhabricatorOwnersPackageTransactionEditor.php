@@ -205,18 +205,6 @@ final class PhabricatorOwnersPackageTransactionEditor
     return $errors;
   }
 
-  protected function extractFilePHIDsFromCustomTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION:
-        return array($xaction->getNewValue());
-    }
-
-    return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
-  }
-
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {

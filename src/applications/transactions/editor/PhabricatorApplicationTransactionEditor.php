@@ -775,8 +775,6 @@ abstract class PhabricatorApplicationTransactionEditor
         throw new PhabricatorApplicationTransactionValidationException($errors);
       }
 
-      $file_phids = $this->extractFilePHIDs($object, $xactions);
-
       if ($object->getID()) {
         foreach ($xactions as $xaction) {
 
@@ -815,18 +813,6 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $xactions = $this->filterTransactions($object, $xactions);
 
-    if (!$xactions) {
-      if ($read_locking) {
-        $object->endReadLocking();
-        $read_locking = false;
-      }
-      if ($transaction_open) {
-        $object->killTransaction();
-        $transaction_open = false;
-      }
-      return array();
-    }
-
     // Now that we've merged, filtered, and combined transactions, check for
     // required capabilities.
     foreach ($xactions as $xaction) {
@@ -834,6 +820,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     $xactions = $this->sortTransactions($xactions);
+    $file_phids = $this->extractFilePHIDs($object, $xactions);
 
     if ($is_preview) {
       $this->loadHandles($xactions);
@@ -2668,7 +2655,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $body->addRawSection(implode("\n", $headers));
 
     foreach ($comments as $comment) {
-      $body->addRemarkupSection($comment);
+      $body->addRemarkupSection(null, $comment);
     }
   }
 

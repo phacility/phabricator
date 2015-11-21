@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => 'e94665e4',
+    'core.pkg.css' => 'e4f1ea81',
     'core.pkg.js' => '47dc9ebb',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '2de124c9',
@@ -125,8 +125,8 @@ return array(
     'rsrc/css/phui/phui-badge.css' => 'f25c3476',
     'rsrc/css/phui/phui-box.css' => 'a5bb366d',
     'rsrc/css/phui/phui-button.css' => '16020a60',
-    'rsrc/css/phui/phui-crumbs-view.css' => 'd842f867',
-    'rsrc/css/phui/phui-document-pro.css' => '4f2b42e3',
+    'rsrc/css/phui/phui-crumbs-view.css' => '414406b5',
+    'rsrc/css/phui/phui-document-pro.css' => '7f3009ce',
     'rsrc/css/phui/phui-document.css' => 'f841ad0a',
     'rsrc/css/phui/phui-feed-story.css' => 'b7b26d23',
     'rsrc/css/phui/phui-fontkit.css' => 'c9d63950',
@@ -779,9 +779,9 @@ return array(
     'phui-calendar-day-css' => 'd1cf6f93',
     'phui-calendar-list-css' => 'c1c7f338',
     'phui-calendar-month-css' => '476be7e0',
-    'phui-crumbs-view-css' => 'd842f867',
+    'phui-crumbs-view-css' => '414406b5',
     'phui-document-view-css' => 'f841ad0a',
-    'phui-document-view-pro-css' => '4f2b42e3',
+    'phui-document-view-pro-css' => '7f3009ce',
     'phui-feed-story-css' => 'b7b26d23',
     'phui-font-icon-base-css' => 'ecbbb4c2',
     'phui-fontkit-css' => 'c9d63950',

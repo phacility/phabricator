@@ -43,16 +43,16 @@ final class PhabricatorMetaMTAMailBody extends Phobject {
     return $this;
   }
 
-  public function addRemarkupSection($text) {
+  public function addRemarkupSection($header, $text) {
     try {
       $engine = PhabricatorMarkupEngine::newMarkupEngine(array());
       $engine->setConfig('viewer', $this->getViewer());
       $engine->setMode(PhutilRemarkupEngine::MODE_TEXT);
       $styled_text = $engine->markupText($text);
-      $this->sections[] = $styled_text;
+      $this->addPlaintextSection($header, $styled_text);
     } catch (Exception $ex) {
       phlog($ex);
-      $this->sections[] = $text;
+      $this->addTextSection($header, $text);
     }
 
     try {
@@ -63,14 +63,10 @@ final class PhabricatorMetaMTAMailBody extends Phobject {
         'uri.base',
         PhabricatorEnv::getProductionURI('/'));
       $html = $mail_engine->markupText($text);
-      $this->htmlSections[] = $html;
+      $this->addHTMLSection($header, $html);
     } catch (Exception $ex) {
       phlog($ex);
-      $this->htmlSections[] = phutil_escape_html_newlines(
-        phutil_tag(
-          'div',
-          array(),
-          $text));
+      $this->addHTMLSection($header, $text);
     }
 
     return $this;
@@ -121,12 +117,16 @@ final class PhabricatorMetaMTAMailBody extends Phobject {
   }
 
   public function addHTMLSection($header, $html_fragment) {
+    if ($header !== null) {
+      $header = phutil_tag('strong', array(), $header);
+    }
+
     $this->htmlSections[] = array(
       phutil_tag(
         'div',
         array(),
         array(
-          phutil_tag('strong', array(), $header),
+          $header,
           phutil_tag('div', array(), $html_fragment),
         )),
     );
@@ -212,5 +212,4 @@ final class PhabricatorMetaMTAMailBody extends Phobject {
   private function indent($text) {
     return rtrim("  ".str_replace("\n", "\n  ", $text));
   }
-
 }

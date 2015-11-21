@@ -292,6 +292,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'gcdaemon.ttl.task-archive' => $gc_reason,
       'gcdaemon.ttl.general-cache' => $gc_reason,
       'gcdaemon.ttl.conduit-logs' => $gc_reason,
+
+      'phd.variant-config' => pht(
+        'This configuration is no longer relevant because daemons '.
+        'restart automatically on configuration changes.'),
     );
 
     return $ancient_config;

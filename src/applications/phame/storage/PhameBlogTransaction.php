@@ -8,6 +8,10 @@ final class PhameBlogTransaction
   const TYPE_DOMAIN      = 'phame.blog.domain';
   const TYPE_SKIN        = 'phame.blog.skin';
 
+  const MAILTAG_DETAILS       = 'phame-blog-details';
+  const MAILTAG_SUBSCRIBERS   = 'phame-blog-subscribers';
+  const MAILTAG_OTHER         = 'phame-blog-other';
+
   public function getApplicationName() {
     return 'phame';
   }
@@ -44,6 +48,26 @@ final class PhameBlogTransaction
     return parent::getIcon();
   }
 
+  public function getMailTags() {
+    $tags = parent::getMailTags();
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+        $tags[] = self::MAILTAG_SUBSCRIBERS;
+        break;
+      case self::TYPE_NAME:
+      case self::TYPE_DESCRIPTION:
+      case self::TYPE_DOMAIN:
+      case self::TYPE_SKIN:
+        $tags[] = self::MAILTAG_DETAILS;
+        break;
+      default:
+        $tags[] = self::MAILTAG_OTHER;
+        break;
+    }
+    return $tags;
+  }
+
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
@@ -53,7 +77,7 @@ final class PhameBlogTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
-      case self:TYPE_NAME:
+      case self::TYPE_NAME:
         if ($old === null) {
           return pht(
             '%s created this blog.',

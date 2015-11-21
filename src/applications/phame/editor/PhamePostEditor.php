@@ -17,7 +17,8 @@ final class PhamePostEditor
     $types[] = PhamePostTransaction::TYPE_TITLE;
     $types[] = PhamePostTransaction::TYPE_PHAME_TITLE;
     $types[] = PhamePostTransaction::TYPE_BODY;
-    $types[] = PhamePostTransaction::TYPE_COMMENTS_WIDGET;
+    $types[] = PhamePostTransaction::TYPE_VISIBILITY;
+    $types[] = PhabricatorTransactions::TYPE_COMMENT;
 
     return $types;
   }
@@ -33,8 +34,8 @@ final class PhamePostEditor
         return $object->getPhameTitle();
       case PhamePostTransaction::TYPE_BODY:
         return $object->getBody();
-      case PhamePostTransaction::TYPE_COMMENTS_WIDGET:
-        return $object->getCommentsWidget();
+      case PhamePostTransaction::TYPE_VISIBILITY:
+        return $object->getVisibility();
     }
   }
 
@@ -46,7 +47,7 @@ final class PhamePostEditor
       case PhamePostTransaction::TYPE_TITLE:
       case PhamePostTransaction::TYPE_PHAME_TITLE:
       case PhamePostTransaction::TYPE_BODY:
-      case PhamePostTransaction::TYPE_COMMENTS_WIDGET:
+      case PhamePostTransaction::TYPE_VISIBILITY:
         return $xaction->getNewValue();
     }
   }
@@ -62,8 +63,13 @@ final class PhamePostEditor
         return $object->setPhameTitle($xaction->getNewValue());
       case PhamePostTransaction::TYPE_BODY:
         return $object->setBody($xaction->getNewValue());
-      case PhamePostTransaction::TYPE_COMMENTS_WIDGET:
-        return $object->setCommentsWidget($xaction->getNewValue());
+      case PhamePostTransaction::TYPE_VISIBILITY:
+        if ($xaction->getNewValue() == PhameConstants::VISIBILITY_DRAFT) {
+          $object->setDatePublished(0);
+        } else {
+          $object->setDatePublished(time());
+        }
+        return $object->setVisibility($xaction->getNewValue());
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -77,7 +83,7 @@ final class PhamePostEditor
       case PhamePostTransaction::TYPE_TITLE:
       case PhamePostTransaction::TYPE_PHAME_TITLE:
       case PhamePostTransaction::TYPE_BODY:
-      case PhamePostTransaction::TYPE_COMMENTS_WIDGET:
+      case PhamePostTransaction::TYPE_VISIBILITY:
         return;
     }
 
@@ -109,6 +115,9 @@ final class PhamePostEditor
         }
         break;
       case PhamePostTransaction::TYPE_PHAME_TITLE:
+        if (!$xactions) {
+          continue;
+        }
         $missing = $this->validateIsEmptyTextField(
           $object->getPhameTitle(),
           $xactions);
@@ -171,8 +180,11 @@ final class PhamePostEditor
 
     $blog_phid = $object->getBlogPHID();
     if ($blog_phid) {
-      $phids[] = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $cc_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID(
         $blog_phid);
+      foreach ($cc_phids as $cc) {
+        $phids[] = $cc;
+      }
     }
     return $phids;
   }
@@ -196,6 +208,10 @@ final class PhamePostEditor
     array $xactions) {
 
     $body = parent::buildMailBody($object, $xactions);
+
+    if ($this->getIsNewObject()) {
+      $body->addRemarkupSection(null, $object->getBody());
+    }
 
     $body->addLinkSection(
       pht('POST DETAIL'),

@@ -92,15 +92,22 @@ abstract class PhameController extends PhabricatorController {
 
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
+
+    $can_create = $this->hasApplicationCapability(
+      PhameBlogCreateCapability::CAPABILITY);
+
     $crumbs->addAction(
       id(new PHUIListItemView())
         ->setName(pht('New Blog'))
-        ->setHref($this->getApplicationURI('/blog/new'))
-        ->setIcon('fa-plus-square'));
+        ->setHref($this->getApplicationURI('/blog/new/'))
+        ->setIcon('fa-plus-square')
+        ->setDisabled(!$can_create)
+        ->setWorkflow(!$can_create));
+
     $crumbs->addAction(
       id(new PHUIListItemView())
         ->setName(pht('New Post'))
-        ->setHref($this->getApplicationURI('/post/new'))
+        ->setHref($this->getApplicationURI('/post/new/'))
         ->setIcon('fa-pencil'));
     return $crumbs;
   }

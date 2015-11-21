@@ -4,6 +4,7 @@
 /**
  * @task fields Managing Fields
  * @task text Display Text
+ * @task config Edit Engine Configuration
  * @task uri Managing URIs
  * @task load Creating and Loading Objects
  * @task web Responding to Web Requests
@@ -11,11 +12,16 @@
  * @task http Responding to HTTP Parameter Requests
  * @task conduit Responding to Conduit Requests
  */
-abstract class PhabricatorApplicationEditEngine extends Phobject {
+abstract class PhabricatorEditEngine
+  extends Phobject
+  implements PhabricatorPolicyInterface {
+
+  const EDITENGINECONFIG_DEFAULT = 'default';
 
   private $viewer;
   private $controller;
   private $isCreate;
+  private $editEngineConfiguration;
 
   final public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -36,10 +42,15 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
     return $this->controller;
   }
 
+  final public function getEngineKey() {
+    return $this->getPhobjectClassConstant('ENGINECONST', 64);
+  }
+
 
 /* -(  Managing Fields  )---------------------------------------------------- */
 
 
+  abstract public function getEngineApplicationClass();
   abstract protected function buildCustomEditFields($object);
 
   final protected function buildEditFields($object) {
@@ -184,6 +195,9 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
       }
     }
 
+    $config = $this->getEditEngineConfiguration();
+    $fields = $config->applyConfigurationToFields($this, $fields);
+
     foreach ($fields as $field) {
       $field
         ->setViewer($viewer)
@@ -195,6 +209,12 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
 
 
 /* -(  Display Text  )------------------------------------------------------- */
+
+
+  /**
+   * @task text
+   */
+  abstract public function getEngineName();
 
 
   /**
@@ -212,7 +232,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
   /**
    * @task text
    */
-  abstract protected function getObjectCreateShortText($object);
+  abstract protected function getObjectCreateShortText();
 
 
   /**
@@ -234,6 +254,121 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
    */
   protected function getObjectEditButtonText($object) {
     return pht('Save Changes');
+  }
+
+
+/* -(  Edit Engine Configuration  )------------------------------------------ */
+
+
+  protected function supportsEditEngineConfiguration() {
+    return true;
+  }
+
+  final protected function getEditEngineConfiguration() {
+    return $this->editEngineConfiguration;
+  }
+
+  private function loadEditEngineConfiguration($key) {
+    if ($key === null) {
+      $key = self::EDITENGINECONFIG_DEFAULT;
+    }
+
+    $config = id(new PhabricatorEditEngineConfigurationQuery())
+      ->setViewer($this->getViewer())
+      ->withEngineKeys(array($this->getEngineKey()))
+      ->withIdentifiers(array($key))
+      ->executeOne();
+    if (!$config) {
+      return null;
+    }
+
+    $this->editEngineConfiguration = $config;
+
+    return $config;
+  }
+
+  final public function getBuiltinEngineConfigurations() {
+    $configurations = $this->newBuiltinEngineConfigurations();
+
+    if (!$configurations) {
+      throw new Exception(
+        pht(
+          'EditEngine ("%s") returned no builtin engine configurations, but '.
+          'an edit engine must have at least one configuration.',
+          get_class($this)));
+    }
+
+    assert_instances_of($configurations, 'PhabricatorEditEngineConfiguration');
+
+    $has_default = false;
+    foreach ($configurations as $config) {
+      if ($config->getBuiltinKey() == self::EDITENGINECONFIG_DEFAULT) {
+        $has_default = true;
+      }
+    }
+
+    if (!$has_default) {
+      $first = head($configurations);
+      if (!$first->getBuiltinKey()) {
+        $first->setBuiltinKey(self::EDITENGINECONFIG_DEFAULT);
+
+        if (!strlen($first->getName())) {
+          $first->setName($this->getObjectCreateShortText());
+        }
+    } else {
+        throw new Exception(
+          pht(
+            'EditEngine ("%s") returned builtin engine configurations, '.
+            'but none are marked as default and the first configuration has '.
+            'a different builtin key already. Mark a builtin as default or '.
+            'omit the key from the first configuration',
+            get_class($this)));
+      }
+    }
+
+    $builtins = array();
+    foreach ($configurations as $key => $config) {
+      $builtin_key = $config->getBuiltinKey();
+
+      if ($builtin_key === null) {
+        throw new Exception(
+          pht(
+            'EditEngine ("%s") returned builtin engine configurations, '.
+            'but one (with key "%s") is missing a builtin key. Provide a '.
+            'builtin key for each configuration (you can omit it from the '.
+            'first configuration in the list to automatically assign the '.
+            'default key).',
+            get_class($this),
+            $key));
+      }
+
+      if (isset($builtins[$builtin_key])) {
+        throw new Exception(
+          pht(
+            'EditEngine ("%s") returned builtin engine configurations, '.
+            'but at least two specify the same builtin key ("%s"). Engines '.
+            'must have unique builtin keys.',
+            get_class($this),
+            $builtin_key));
+      }
+
+      $builtins[$builtin_key] = $config;
+    }
+
+
+    return $builtins;
+  }
+
+  protected function newBuiltinEngineConfigurations() {
+    return array(
+      $this->newConfiguration(),
+    );
+  }
+
+  final protected function newConfiguration() {
+    return PhabricatorEditEngineConfiguration::initializeNewConfiguration(
+      $this->getViewer(),
+      $this);
   }
 
 
@@ -317,7 +452,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
    * @return bool True if a new object is being created.
    * @task load
    */
-  final protected function getIsCreate() {
+  final public function getIsCreate() {
     return $this->isCreate;
   }
 
@@ -391,6 +526,35 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
   }
 
 
+  /**
+   * Verify that an object is appropriate for editing.
+   *
+   * @param wild Loaded value.
+   * @return void
+   * @task load
+   */
+  private function validateObject($object) {
+    if (!$object || !is_object($object)) {
+      throw new Exception(
+        pht(
+          'EditEngine "%s" created or loaded an invalid object: object must '.
+          'actually be an object, but is of some other type ("%s").',
+          get_class($this),
+          gettype($object)));
+    }
+
+    if (!($object instanceof PhabricatorApplicationTransactionInterface)) {
+      throw new Exception(
+        pht(
+          'EditEngine "%s" created or loaded an invalid object: object (of '.
+          'class "%s") must implement "%s", but does not.',
+          get_class($this),
+          get_class($object),
+          'PhabricatorApplicationTransactionInterface'));
+    }
+  }
+
+
 /* -(  Responding to Web Requests  )----------------------------------------- */
 
 
@@ -398,6 +562,11 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
     $viewer = $this->getViewer();
     $controller = $this->getController();
     $request = $controller->getRequest();
+
+    $config = $this->loadEditEngineConfiguration($request->getURIData('form'));
+    if (!$config) {
+      return new Aphront404Response();
+    }
 
     $id = $request->getURIData('id');
     if ($id) {
@@ -410,6 +579,8 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
       $this->setIsCreate(true);
       $object = $this->newEditableObject();
     }
+
+    $this->validateObject($object);
 
     $action = $request->getURIData('editAction');
     switch ($action) {
@@ -425,7 +596,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
 
     $crumbs = $controller->buildApplicationCrumbsForEditEngine();
     if ($this->getIsCreate()) {
-      $create_text = $this->getObjectCreateShortText($object);
+      $create_text = $this->getObjectCreateShortText();
       if ($final) {
         $crumbs->addTextCrumb($create_text);
       } else {
@@ -570,6 +741,20 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
   private function buildEditFormActions($object) {
     $actions = array();
 
+    if ($this->supportsEditEngineConfiguration()) {
+      $engine_key = $this->getEngineKey();
+      $config = $this->getEditEngineConfiguration();
+
+      $actions[] = id(new PhabricatorActionView())
+        ->setName(pht('Manage Form Configurations'))
+        ->setIcon('fa-list-ul')
+        ->setHref("/transactions/editengine/{$engine_key}/");
+      $actions[] = id(new PhabricatorActionView())
+        ->setName(pht('Edit Form Configuration'))
+        ->setIcon('fa-pencil')
+        ->setHref($config->getURI());
+    }
+
     $actions[] = id(new PhabricatorActionView())
       ->setName(pht('Show HTTP Parameters'))
       ->setIcon('fa-crosshairs')
@@ -601,7 +786,7 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
 
     $header_text = pht(
       'HTTP Parameters: %s',
-      $this->getObjectCreateShortText($object));
+      $this->getObjectCreateShortText());
 
     $header = id(new PHUIHeaderView())
       ->setHeader($header_text);
@@ -637,6 +822,14 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
   final public function buildConduitResponse(ConduitAPIRequest $request) {
     $viewer = $this->getViewer();
 
+    $config = $this->loadEditEngineConfiguration(null);
+    if (!$config) {
+      throw new Exception(
+        pht(
+          'Unable to load configuration for this EditEngine ("%s").',
+          get_class($this)));
+    }
+
     $phid = $request->getValue('objectPHID');
     if ($phid) {
       $this->setIsCreate(false);
@@ -648,6 +841,8 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
       $this->setIsCreate(true);
       $object = $this->newEditableObject();
     }
+
+    $this->validateObject($object);
 
     $fields = $this->buildEditFields($object);
 
@@ -767,10 +962,56 @@ abstract class PhabricatorApplicationEditEngine extends Phobject {
   }
 
   public function getAllEditTypes() {
+    $config = $this->loadEditEngineConfiguration(null);
+    if (!$config) {
+      return array();
+    }
+
     $object = $this->newEditableObject();
     $fields = $this->buildEditFields($object);
     return $this->getAllEditTypesFromFields($fields);
   }
 
+  final public static function getAllEditEngines() {
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->setUniqueMethod('getEngineKey')
+      ->execute();
+  }
 
+  final public static function getByKey(PhabricatorUser $viewer, $key) {
+    return id(new PhabricatorEditEngineQuery())
+      ->setViewer($viewer)
+      ->withEngineKeys(array($key))
+      ->executeOne();
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getPHID() {
+    return get_class($this);
+  }
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::getMostOpenPolicy();
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
 }

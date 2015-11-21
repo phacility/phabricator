@@ -30,7 +30,7 @@ final class PhamePostNewController extends PhamePostController {
           ->withIDs(array($request->getInt('blog')))
           ->requireCapabilities(
             array(
-              PhabricatorPolicyCapability::CAN_JOIN,
+              PhabricatorPolicyCapability::CAN_EDIT,
             ))
           ->executeOne();
 
@@ -52,7 +52,7 @@ final class PhamePostNewController extends PhamePostController {
       ->setViewer($viewer)
       ->requireCapabilities(
         array(
-          PhabricatorPolicyCapability::CAN_JOIN,
+          PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->execute();
 
@@ -65,7 +65,7 @@ final class PhamePostNewController extends PhamePostController {
       $notification = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
         ->appendChild(
-          pht('You do not have permission to join any blogs. Create a blog '.
+          pht('You do not have permission to post to any blogs. Create a blog '.
               'first, then you can post to it.'));
 
     } else {

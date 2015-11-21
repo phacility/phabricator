@@ -73,13 +73,6 @@ final class PhabricatorPHDConfigOptions
             "trace mode. See also '%s'.",
             'phd debug',
             'phd.verbose')),
-      $this->newOption('phd.variant-config', 'list<string>', array())
-        ->setDescription(
-          pht(
-            'Specify config keys that can safely vary between the web tier '.
-            'and the daemons. Primarily, this is a way to suppress the '.
-            '"Daemons and Web Have Different Config" setup issue on a per '.
-            'config key basis.')),
       $this->newOption('phd.garbage-collection', 'wild', array())
         ->setLocked(true)
         ->setLockedMessage(

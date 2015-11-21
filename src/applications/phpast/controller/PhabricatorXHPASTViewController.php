@@ -3,7 +3,6 @@
 abstract class PhabricatorXHPASTViewController extends PhabricatorController {
 
   public function buildStandardPageResponse($view, array $data) {
-
     $page = $this->buildStandardPageView();
 
     $page->setApplicationName('XHPASTView');

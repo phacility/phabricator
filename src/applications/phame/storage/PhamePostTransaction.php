@@ -6,7 +6,7 @@ final class PhamePostTransaction
   const TYPE_TITLE            = 'phame.post.title';
   const TYPE_PHAME_TITLE      = 'phame.post.phame.title';
   const TYPE_BODY             = 'phame.post.body';
-  const TYPE_COMMENTS_WIDGET  = 'phame.post.comments.widget';
+  const TYPE_VISIBILITY       = 'phame.post.visibility';
 
   const MAILTAG_CONTENT       = 'phame-post-content';
   const MAILTAG_COMMENT       = 'phame-post-comment';
@@ -18,6 +18,10 @@ final class PhamePostTransaction
 
   public function getApplicationTransactionType() {
     return PhabricatorPhamePostPHIDType::TYPECONST;
+  }
+
+  public function getApplicationTransactionCommentObject() {
+    return new PhamePostTransactionComment();
   }
 
   public function getRemarkupBlocks() {
@@ -54,7 +58,7 @@ final class PhamePostTransaction
         break;
       case self::TYPE_PHAME_TITLE:
       case self::TYPE_BODY:
-      case self::TYPE_COMMENTS_WIDGET:
+      case self::TYPE_VISIBILITY:
         return 'fa-pencil';
         break;
     }
@@ -65,7 +69,6 @@ final class PhamePostTransaction
     $tags = parent::getMailTags();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_COMMENTS_WIDGET:
       case PhabricatorTransactions::TYPE_COMMENT:
         $tags[] = self::MAILTAG_COMMENT;
         break;
@@ -108,17 +111,22 @@ final class PhamePostTransaction
           '%s updated the blog post.',
           $this->renderHandleLink($author_phid));
         break;
+      case self::TYPE_VISIBILITY:
+        if ($new == PhameConstants::VISIBILITY_DRAFT) {
+          return pht(
+            '%s marked this post as a draft.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+          '%s published this post.',
+          $this->renderHandleLink($author_phid));
+        }
+        break;
       case self::TYPE_PHAME_TITLE:
         return pht(
           '%s updated the post\'s Phame title to "%s".',
           $this->renderHandleLink($author_phid),
           rtrim($new, '/'));
-        break;
-      case self::TYPE_COMMENTS_WIDGET:
-        return pht(
-          '%s updated the post\'s comment widget to "%s".',
-          $this->renderHandleLink($author_phid),
-          $new);
         break;
     }
 
@@ -153,15 +161,22 @@ final class PhamePostTransaction
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
+      case self::TYPE_VISIBILITY:
+        if ($new == PhameConstants::VISIBILITY_DRAFT) {
+          return pht(
+            '%s marked %s as a draft.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        } else {
+          return pht(
+            '%s published %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+        break;
       case self::TYPE_PHAME_TITLE:
         return pht(
           '%s updated the Phame title for %s.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid));
-        break;
-      case self::TYPE_COMMENTS_WIDGET:
-        return pht(
-          '%s updated the comments widget for %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
@@ -171,19 +186,32 @@ final class PhamePostTransaction
   }
 
   public function getBodyForFeed(PhabricatorFeedStory $story) {
-    $new = $this->getNewValue();
-
-    $body = null;
-
+    $text = null;
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
+        if ($this->getOldValue() === null) {
+          $post = $story->getPrimaryObject();
+          $text = $post->getBody();
+        }
+        break;
+      case self::TYPE_VISIBILITY:
+        if ($this->getNewValue() == PhameConstants::VISIBILITY_PUBLISHED) {
+          $post = $story->getPrimaryObject();
+          $text = $post->getBody();
+        }
+        break;
       case self::TYPE_BODY:
-        return phutil_escape_html_newlines(
-          id(new PhutilUTF8StringTruncator())
-          ->setMaximumGlyphs(128)
-          ->truncateString($new));
+        $text = $this->getNewValue();
         break;
     }
+
+    if (strlen($text)) {
+      return phutil_escape_html_newlines(
+        id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs(128)
+        ->truncateString($text));
+    }
+
     return parent::getBodyForFeed($story);
   }
 
@@ -200,7 +228,6 @@ final class PhamePostTransaction
 
     return parent::getColor();
   }
-
 
   public function hasChangeDetails() {
     switch ($this->getTransactionType()) {

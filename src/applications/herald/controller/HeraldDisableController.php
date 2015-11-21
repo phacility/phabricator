@@ -25,7 +25,7 @@ final class HeraldDisableController extends HeraldController {
         HeraldManageGlobalRulesCapability::CAPABILITY);
     }
 
-    $view_uri = $this->getApplicationURI("rule/{$id}/");
+    $view_uri = '/'.$rule->getMonogram();
 
     $is_disable = ($action === 'disable');
 

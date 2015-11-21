@@ -1,0 +1,83 @@
+@title Calendar User Guide
+@group userguide
+
+Guide to the Calendar application.
+
+Overview
+========
+
+IMPORTANT: Calendar is a prototype application. See
+@{article:User Guide: Prototype Applications}.
+
+The Calendar application is a tool that allows users to schedule group events
+and share personal plans.
+
+There are several kinds of events you can create:
+
+- Regular events such as a one-time meeting or a personal appointment.
+- All day events such as a company-wide holiday or a vacation.
+- Recurring events, which can be regular or all day, such as a weekly 1-1 or
+  a birthday.
+
+
+Editing Events
+==============
+
+All fields of basic and all day events can be edited after the event has been
+created.
+
+Every instance of a recurring event has an index that maintains its place in
+the sequence order. Before an instance of a recurring event is edited, it is
+considered a ghost event, or a placeholder. This means that there is no
+database entry for that instance. Rather, when querying for events, if a
+recurring series of events overlaps with the query range, instance
+placeholders of that recurring event are generated and are displayed for
+that range. If a placeholder instance of a recurring event is edited, a real
+entry in the database is created and all changes are saved. When that
+instance falls within a query range, the real instance event replaces the
+old placeholder instance.
+
+To prevent disordering of the recurring sequence of events, parent recurring
+events do not allow editing of date-related fields like recurrence frequency
+and recurrence start and end dates. If all instances of the recurring event
+need to be rescheduled, users are encouraged to cancel a recurring event and
+create a new recurring event with the revised date and time.
+
+
+Cancelling Events
+=================
+
+Cancelling basic events will hide that event from most of the builtin Calendar
+queries, unless the query specifies to display cancelled events.
+
+There are two ways to cancel an instance of a recurring event.
+
+- Cancel an instance of a recurring event.
+- Cancel the entire series of a recurring event.
+
+Cancelling a placeholder instance of a recurring event will create a real
+cancelled event that will replace the placeholder instance. Consequently,
+the cancellation status of that instance of the recurring event will
+persist if the parent event is cancelled and subsequently reinstated.
+
+When an entire series of a recurring event is cancelled, all the placeholder
+and real instances are also cancelled. An entire series can similarly be
+reinstated, but it is currently not possible to reinstate an instance of a
+cancelled recurring event series. To reinstate that instance, the entire
+series must be reinstated. If an instance of a recurring event has been
+cancelled, then the entire recurring event series is also cancelled,
+reinstating the series will not reinstate the previously cancelled instances
+of that event.
+
+
+Commenting On Recurring Events
+==============================
+
+If a placeholder instance of a recurring event has not been converted to a
+real instance of the series as a result of editing or cancelling, commenting on
+that placeholder instance does not currently save a draft for that instance
+only. The draft is saved for the recurring event parent, so the parent
+recurring event and all placeholder instances will show that draft. When a
+comment is actually added to a placeholder instance, the instance is converted
+to a recurrence exception, and the comment will only appear on that instance
+of the recurring event.

@@ -839,9 +839,9 @@ final class ManiphestTransaction
 
       case self::TYPE_MERGED_FROM:
         return pht(
-          '%s merged %d task(s) %s into %s.',
+          '%s merged %s task(s) %s into %s.',
           $this->renderHandleLink($author_phid),
-          count($new),
+          phutil_count($new),
           $this->renderHandleList($new),
           $this->renderHandleLink($object_phid));
 

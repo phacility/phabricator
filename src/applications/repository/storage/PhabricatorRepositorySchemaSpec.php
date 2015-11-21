@@ -37,6 +37,7 @@ final class PhabricatorRepositorySchemaSpec
         ),
         'key_path' => array(
           'columns' => array('branchID', 'pathID', 'commitID'),
+          'unique' => true,
         ),
       ));
 

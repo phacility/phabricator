@@ -633,7 +633,7 @@ abstract class PhabricatorStorageManagementWorkflow
       if ($any_surplus) {
         $message[] = pht(
           'Some of these errors are caused by surplus schemata (extra '.
-          'tables or columsn which Phabricator does not expect). These are '.
+          'tables or columns which Phabricator does not expect). These are '.
           'not serious. For information on resolving these issues, see the '.
           '"Surplus Schemata" section in the "Managing Storage Adjustments" '.
           'article in the documentation.');

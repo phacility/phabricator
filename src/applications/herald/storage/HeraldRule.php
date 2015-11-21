@@ -5,7 +5,8 @@ final class HeraldRule extends HeraldDAO
     PhabricatorApplicationTransactionInterface,
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorSubscribableInterface {
 
   const TABLE_RULE_APPLIED = 'herald_ruleapplied';
 
@@ -320,7 +321,24 @@ final class HeraldRule extends HeraldDAO
   }
 
 
+/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+    return $this->isPersonalRule() && $phid == $this->getAuthorPHID();
+  }
+
+  public function shouldShowSubscribersProperty() {
+    return true;
+  }
+
+  public function shouldAllowSubscription($phid) {
+    return true;
+  }
+
+
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
 
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {

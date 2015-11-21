@@ -1,9 +1,15 @@
 <?php
 
-abstract class PhabricatorApplicationEditEngineAPIMethod
+abstract class PhabricatorEditEngineAPIMethod
   extends ConduitAPIMethod {
 
   abstract public function newEditEngine();
+
+  public function getApplication() {
+    $engine = $this->newEditEngine();
+    $class = $engine->getEngineApplicationClass();
+    return PhabricatorApplication::getByClass($class);
+  }
 
   public function getMethodStatus() {
     return self::METHOD_STATUS_UNSTABLE;
