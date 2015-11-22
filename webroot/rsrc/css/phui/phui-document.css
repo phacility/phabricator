@@ -122,10 +122,6 @@
   display: none;
 }
 
-.device-phone .phui-document-content .phabricator-remarkup-toc {
-  width: 120px;
-}
-
 .phui-document-content .phabricator-remarkup .remarkup-code-block {
   clear: both;
   margin: 16px 0;
@@ -137,30 +133,6 @@
 
 .phui-document-view .phui-info-severity-nodata {
   background-color: {$lightgreybackground};
-}
-
-.phui-document-view .phabricator-remarkup.remarkup-has-toc {
-  position: relative;
-  margin-right: 192px;
-}
-
-.phui-document-view .remarkup-has-toc .phabricator-remarkup-toc {
-  position: absolute;
-  top: 0;
-  right: -186px;
-  bottom: 0;
-  border-left: 1px solid {$thinblueborder};
-  padding: 16px 12px;
-  margin: 0;
-  font-size: 12px;
-}
-
-.device-phone .phui-document-view .phabricator-remarkup.remarkup-has-toc {
-  margin-right: 0;
-}
-
-.device-phone .phui-document-view .remarkup-has-toc .phabricator-remarkup-toc {
-  display: none;
 }
 
 body .phui-document-view .phui-header-shell.phui-bleed-header {

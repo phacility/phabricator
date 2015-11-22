@@ -155,8 +155,11 @@
   margin: 4px 0;
 }
 
-.phabricator-remarkup .remarkup-header + .remarkup-header {
-  margin-top: 0px;
+.phabricator-remarkup h3.remarkup-header + h4.remarkup-header {
+  color: {$bluetext};
+  font-weight: normal;
+  margin-bottom: 16px;
+  margin-top: -4px;
 }
 
 .phabricator-remarkup blockquote {
@@ -363,12 +366,12 @@ body div.phabricator-remarkup.remarkup-has-toc
   padding-top: 0;
 }
 
-body .phabricator-remarkup > *:first-child,
-body .phabricator-remarkup .remarkup-header + * {
+body .phabricator-standard-page div.phabricator-remarkup *:first-child,
+body .phabricator-standard-page div.phabricator-remarkup .remarkup-header + * {
   margin-top: 0;
 }
 
-body .phabricator-remarkup *:last-child {
+body div.phabricator-remarkup *:last-child {
   margin-bottom: 0;
 }
 
