@@ -17,10 +17,11 @@ final class PhrictionContent extends PhrictionDAO
   protected $slug;
   protected $content;
   protected $description;
-  protected $renderedTableOfContents;
 
   protected $changeType;
   protected $changeRef;
+
+  private $renderedTableOfContents;
 
   public function renderContent(PhabricatorUser $viewer) {
     return PhabricatorMarkupEngine::renderOneObject(
