@@ -402,7 +402,7 @@ return array(
     'rsrc/js/application/owners/OwnersPathEditor.js' => 'aa1733d0',
     'rsrc/js/application/owners/owners-path-editor.js' => '7a68dda3',
     'rsrc/js/application/passphrase/passphrase-credential-control.js' => '3cb0b2fc',
-    'rsrc/js/application/phame/phame-post-preview.js' => 'be807912',
+    'rsrc/js/application/phame/phame-post-preview.js' => 'd6bba572',
     'rsrc/js/application/pholio/behavior-pholio-mock-edit.js' => '246dc085',
     'rsrc/js/application/pholio/behavior-pholio-mock-view.js' => 'fbe497e7',
     'rsrc/js/application/phortune/behavior-stripe-payment-form.js' => '3f5d6dbf',
@@ -637,7 +637,7 @@ return array(
     'javelin-behavior-phabricator-transaction-comment-form' => 'b23b49e6',
     'javelin-behavior-phabricator-transaction-list' => '13c739ea',
     'javelin-behavior-phabricator-watch-anchor' => '9f36c42d',
-    'javelin-behavior-phame-post-preview' => 'be807912',
+    'javelin-behavior-phame-post-preview' => 'd6bba572',
     'javelin-behavior-pholio-mock-edit' => '246dc085',
     'javelin-behavior-pholio-mock-view' => 'fbe497e7',
     'javelin-behavior-phui-dropdown-menu' => '54733475',
@@ -1765,12 +1765,6 @@ return array(
       'javelin-util',
       'javelin-request',
     ),
-    'be807912' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-util',
-      'phabricator-shaped-request',
-    ),
     'c1700f6f' => array(
       'javelin-install',
       'javelin-util',
@@ -1850,6 +1844,12 @@ return array(
       'javelin-behavior',
       'javelin-dom',
       'javelin-stratcom',
+    ),
+    'd6bba572' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-util',
+      'phabricator-shaped-request',
     ),
     'd75709e6' => array(
       'javelin-behavior',

@@ -103,7 +103,7 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
 
     } else if ($this->previewType == self::DOCUMENT) {
       $header = id(new PHUIHeaderView())
-        ->setHeader(pht('%s (Document Preview)', $this->header));
+        ->setHeader(pht('%s (Preview)', $this->header));
 
       $content = id(new PHUIDocumentViewPro())
         ->setHeader($header)

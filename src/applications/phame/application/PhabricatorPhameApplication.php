@@ -50,7 +50,7 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
           'publish/(?P<id>\d+)/' => 'PhamePostPublishController',
           'unpublish/(?P<id>\d+)/' => 'PhamePostUnpublishController',
           'notlive/(?P<id>\d+)/' => 'PhamePostNotLiveController',
-          'preview/' => 'PhamePostPreviewController',
+          'preview/' => 'PhabricatorMarkupPreviewController',
           'framed/(?P<id>\d+)/' => 'PhamePostFramedController',
           'new/' => 'PhamePostNewController',
           'move/(?P<id>\d+)/' => 'PhamePostNewController',
