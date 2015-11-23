@@ -33,7 +33,21 @@ final class ProjectRemarkupRuleTestCase extends PhabricatorTestCase {
       ),
       '#123' => array(
         'embed' => array(),
-        'ref' => array(),
+        'ref' => array(
+          array(
+            'offset' => 1,
+            'id' => '123',
+          ),
+        ),
+      ),
+      '#2x4' => array(
+        'embed' => array(),
+        'ref' => array(
+          array(
+            'offset' => 1,
+            'id' => '2x4',
+          ),
+        ),
       ),
       '#security#123' => array(
         'embed' => array(),
