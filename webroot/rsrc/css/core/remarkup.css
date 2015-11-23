@@ -371,7 +371,7 @@ body .phabricator-standard-page div.phabricator-remarkup .remarkup-header + * {
   margin-top: 0;
 }
 
-body div.phabricator-remarkup *:last-child {
+body div.phabricator-remarkup:last-child {
   margin-bottom: 0;
 }
 
