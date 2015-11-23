@@ -115,9 +115,6 @@ final class PhrictionContent extends PhrictionDAO
    * @task markup
    */
   public function getRenderedTableOfContents() {
-    if ($this->renderedTableOfContents === null) {
-      throw new PhutilInvalidStateException('didMarkupText');
-    }
     return $this->renderedTableOfContents;
   }
 
