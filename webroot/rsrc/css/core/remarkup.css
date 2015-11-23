@@ -171,6 +171,10 @@
   background-color: {$lightbluebackground};
 }
 
+.phabricator-remarkup blockquote p {
+  margin: 0;
+}
+
 .phabricator-remarkup blockquote blockquote {
   background-color: rgba(175,175,175, .1);
 }
