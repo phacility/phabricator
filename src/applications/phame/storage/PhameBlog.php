@@ -20,9 +20,13 @@ final class PhameBlog extends PhameDAO
   protected $creatorPHID;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $status;
   protected $mailKey;
 
   private static $requestBlog;
+
+  const STATUS_ACTIVE = 'active';
+  const STATUS_ARCHIVED = 'archived';
 
   protected function getConfiguration() {
     return array(
@@ -34,6 +38,7 @@ final class PhameBlog extends PhameDAO
         'name' => 'text64',
         'description' => 'text',
         'domain' => 'text128?',
+        'status' => 'text32',
         'mailKey' => 'bytes20',
 
         // T6203/NULLABILITY
@@ -96,6 +101,17 @@ final class PhameBlog extends PhameDAO
     $skin->setSpecification($spec);
 
     return $skin;
+  }
+
+  public function isArchived() {
+    return ($this->getStatus() == self::STATUS_ARCHIVED);
+  }
+
+  public static function getStatusNameMap() {
+    return array(
+      self::STATUS_ACTIVE => pht('Active'),
+      self::STATUS_ARCHIVED => pht('Archived'),
+    );
   }
 
   /**

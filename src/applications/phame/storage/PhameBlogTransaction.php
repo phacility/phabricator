@@ -7,6 +7,7 @@ final class PhameBlogTransaction
   const TYPE_DESCRIPTION = 'phame.blog.description';
   const TYPE_DOMAIN      = 'phame.blog.domain';
   const TYPE_SKIN        = 'phame.blog.skin';
+  const TYPE_STATUS      = 'phame.blog.status';
 
   const MAILTAG_DETAILS       = 'phame-blog-details';
   const MAILTAG_SUBSCRIBERS   = 'phame-blog-subscribers';
@@ -106,6 +107,18 @@ final class PhameBlogTransaction
           $this->renderHandleLink($author_phid),
           $new);
         break;
+      case self::TYPE_STATUS:
+        switch ($new) {
+          case PhameBlog::STATUS_ACTIVE:
+            return pht(
+              '%s published this blog.',
+              $this->renderHandleLink($author_phid));
+          case PhameBlog::STATUS_ARCHIVED:
+            return pht(
+              '%s archived this blog.',
+              $this->renderHandleLink($author_phid));
+        }
+
     }
 
     return parent::getTitle();
@@ -151,6 +164,21 @@ final class PhameBlogTransaction
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
+      case self::TYPE_STATUS:
+        switch ($new) {
+          case PhameBlog::STATUS_ACTIVE:
+            return pht(
+              '%s published the blog %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+          case PhameBlog::STATUS_ARCHIVED:
+            return pht(
+              '%s archived the blog %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+        }
+        break;
+
     }
 
     return parent::getTitleForFeed();

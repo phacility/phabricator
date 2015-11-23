@@ -32,6 +32,7 @@ final class PhrictionDocumentController
     $move_notice = '';
     $properties = null;
     $content = null;
+    $toc = null;
 
     if (!$document) {
 
@@ -53,6 +54,7 @@ final class PhrictionDocumentController
       $page_title = pht('Page Not Found');
     } else {
       $version = $request->getInt('v');
+
       if ($version) {
         $content = id(new PhrictionContent())->loadOneWhere(
           'documentID = %d AND version = %d',
@@ -74,7 +76,6 @@ final class PhrictionDocumentController
         $content = id(new PhrictionContent())->load($document->getContentID());
       }
       $page_title = $content->getTitle();
-
       $properties = $this
         ->buildPropertyListView($document, $content, $slug);
 
@@ -84,6 +85,8 @@ final class PhrictionDocumentController
         $current_status == PhrictionChangeType::CHANGE_MOVE_HERE) {
 
         $core_content = $content->renderContent($viewer);
+        $toc = $this->getToc($content);
+
       } else if ($current_status == PhrictionChangeType::CHANGE_DELETE) {
         $notice = new PHUIInfoView();
         $notice->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
@@ -102,7 +105,6 @@ final class PhrictionDocumentController
         $core_content = $notice->render();
       } else if ($current_status == PhrictionChangeType::CHANGE_MOVE_AWAY) {
         $new_doc_id = $content->getChangeRef();
-
         $slug_uri = null;
 
         // If the new document exists and the viewer can see it, provide a link
@@ -212,11 +214,12 @@ final class PhrictionDocumentController
       $prop_list->addPropertyList($properties);
     }
 
-    $page_content = id(new PHUIDocumentView())
+    $page_content = id(new PHUIDocumentViewPro())
       ->setHeader($header)
+      ->setPropertyList($prop_list)
+      ->setToc($toc)
       ->appendChild(
         array(
-          $prop_list,
           $version_note,
           $move_notice,
           $core_content,
@@ -230,7 +233,8 @@ final class PhrictionDocumentController
       ),
       array(
         'pageObjects' => array($document->getPHID()),
-        'title'   => $page_title,
+        'title' => $page_title,
+        'class' => 'pro-white-background',
       ));
 
   }
@@ -278,6 +282,7 @@ final class PhrictionDocumentController
     $action_view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Document'))
+        ->setDisabled(!$can_edit)
         ->setIcon('fa-pencil')
         ->setHref('/phriction/edit/'.$document->getID().'/'));
 
@@ -285,6 +290,7 @@ final class PhrictionDocumentController
       $action_view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Move Document'))
+          ->setDisabled(!$can_edit)
           ->setIcon('fa-arrows')
           ->setHref('/phriction/move/'.$document->getID().'/')
           ->setWorkflow(true));
@@ -292,6 +298,7 @@ final class PhrictionDocumentController
       $action_view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Delete Document'))
+          ->setDisabled(!$can_edit)
           ->setIcon('fa-times')
           ->setHref('/phriction/delete/'.$document->getID().'/')
           ->setWorkflow(true));
@@ -431,7 +438,7 @@ final class PhrictionDocumentController
           ),
           $list)));
 
-     return phutil_tag_div('phui-document-box', $box);
+     return phutil_tag_div('phui-document-view-pro-box', $box);
   }
 
   private function renderChildDocumentLink(array $info) {
@@ -452,6 +459,19 @@ final class PhrictionDocumentController
 
   protected function getDocumentSlug() {
     return $this->slug;
+  }
+
+  protected function getToc(PhrictionContent $content) {
+    $toc = $content->getRenderedTableOfContents();
+    if ($toc) {
+      $toc = phutil_tag_div('phui-document-toc-content', array(
+        phutil_tag_div(
+          'phui-document-toc-header',
+          pht('Contents')),
+        $toc,
+      ));
+    }
+    return $toc;
   }
 
 }

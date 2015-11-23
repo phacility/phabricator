@@ -775,8 +775,6 @@ abstract class PhabricatorApplicationTransactionEditor
         throw new PhabricatorApplicationTransactionValidationException($errors);
       }
 
-      $file_phids = $this->extractFilePHIDs($object, $xactions);
-
       if ($object->getID()) {
         foreach ($xactions as $xaction) {
 
@@ -822,6 +820,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     $xactions = $this->sortTransactions($xactions);
+    $file_phids = $this->extractFilePHIDs($object, $xactions);
 
     if ($is_preview) {
       $this->loadHandles($xactions);

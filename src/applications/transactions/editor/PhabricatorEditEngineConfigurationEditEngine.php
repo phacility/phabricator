@@ -51,20 +51,21 @@ final class PhabricatorEditEngineConfigurationEditEngine
   }
 
   protected function getObjectViewURI($object) {
-    $engine_key = $this->getTargetEngine()->getEngineKey();
     $id = $object->getID();
-    return "/transactions/editengine/{$engine_key}/view/{$id}/";
+    return $this->getURI("view/{$id}/");
   }
 
-  protected function getObjectEditURI($object) {
-    $engine_key = $this->getTargetEngine()->getEngineKey();
-    $id = $object->getID();
-    return "/transactions/editengine/{$engine_key}/edit/{$id}/";
+  protected function getEditorURI() {
+    return $this->getURI('edit/');
   }
 
   protected function getObjectCreateCancelURI($object) {
+    return $this->getURI();
+  }
+
+  private function getURI($path = null) {
     $engine_key = $this->getTargetEngine()->getEngineKey();
-    return "/transactions/editengine/{$engine_key}/";
+    return "/transactions/editengine/{$engine_key}/{$path}";
   }
 
   protected function buildCustomEditFields($object) {
@@ -76,6 +77,13 @@ final class PhabricatorEditEngineConfigurationEditEngine
         ->setTransactionType(
           PhabricatorEditEngineConfigurationTransaction::TYPE_NAME)
         ->setValue($object->getName()),
+      id(new PhabricatorRemarkupEditField())
+        ->setKey('preamble')
+        ->setLabel(pht('Preamble'))
+        ->setDescription(pht('Optional instructions, shown above the form.'))
+        ->setTransactionType(
+          PhabricatorEditEngineConfigurationTransaction::TYPE_PREAMBLE)
+        ->setValue($object->getPreamble()),
     );
   }
 

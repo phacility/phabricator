@@ -31,7 +31,7 @@ final class PHUIDocumentViewPro extends AphrontTagView {
     return $this;
   }
 
-  public function setToc(PHUIListView $toc) {
+  public function setToc($toc) {
     $this->toc = $toc;
     return $this;
   }

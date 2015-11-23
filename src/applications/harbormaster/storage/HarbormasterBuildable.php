@@ -184,6 +184,9 @@ final class HarbormasterBuildable extends HarbormasterDAO
       'HarbormasterBuildWorker',
       array(
         'buildID' => $build->getID(),
+      ),
+      array(
+        'objectPHID' => $build->getPHID(),
       ));
 
     return $build;

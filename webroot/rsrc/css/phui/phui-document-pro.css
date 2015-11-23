@@ -73,6 +73,20 @@ a.button.phui-document-toc {
   color: #fff;
 }
 
+.phui-document-view-pro .phui-document-toc-content {
+  margin: 4px 12px;
+}
+
+.phui-document-view-pro .phui-document-toc-header {
+  font-weight: bold;
+  color: {$bluetext};
+  margin-bottom: 8px;
+}
+
+.phui-document-view-pro .phui-document-toc-content li {
+  margin: 4px 8px;
+}
+
 .phui-document-view-pro .phui-document-content .phabricator-remarkup {
   padding: 16px 0;
   line-height: 1.7em;

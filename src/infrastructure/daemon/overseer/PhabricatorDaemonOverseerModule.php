@@ -17,7 +17,11 @@ final class PhabricatorDaemonOverseerModule
   }
 
   public function shouldReloadDaemons() {
-    if ($this->timestamp < PhabricatorTime::getNow() - 10) {
+    $now = PhabricatorTime::getNow();
+    $ago = ($now - $this->timestamp);
+
+    // Don't check more than once every 10 seconds.
+    if ($ago < 10) {
       return false;
     }
 

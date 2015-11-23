@@ -134,6 +134,31 @@ final class PhabricatorEditEngineConfigurationQuery
     return $page;
   }
 
+  protected function willFilterPage(array $configs) {
+    $engine_keys = mpull($configs, 'getEngineKey');
+
+    $engines = id(new PhabricatorEditEngineQuery())
+      ->setParentQuery($this)
+      ->setViewer($this->getViewer())
+      ->withEngineKeys($engine_keys)
+      ->execute();
+    $engines = mpull($engines, null, 'getEngineKey');
+
+    foreach ($configs as $key => $config) {
+      $engine = idx($engines, $config->getEngineKey());
+
+      if (!$engine) {
+        $this->didRejectResult($config);
+        unset($configs[$key]);
+        continue;
+      }
+
+      $config->attachEngine($engine);
+    }
+
+    return $configs;
+  }
+
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
 

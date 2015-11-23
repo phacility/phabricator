@@ -45,6 +45,12 @@ final class PhabricatorTransactionsApplication extends PhabricatorApplication {
               'PhabricatorEditEngineConfigurationViewController',
             'save/(?P<key>[^/]+)/' =>
               'PhabricatorEditEngineConfigurationSaveController',
+            'reorder/(?P<key>[^/]+)/' =>
+              'PhabricatorEditEngineConfigurationReorderController',
+            'defaults/(?P<key>[^/]+)/' =>
+              'PhabricatorEditEngineConfigurationDefaultsController',
+            'lock/(?P<key>[^/]+)/' =>
+              'PhabricatorEditEngineConfigurationLockController',
           ),
         ),
       ),

@@ -98,6 +98,9 @@ final class HarbormasterBuildTransactionEditor
       'HarbormasterBuildWorker',
       array(
         'buildID' => $build->getID(),
+      ),
+      array(
+        'objectPHID' => $build->getPHID(),
       ));
   }
 
