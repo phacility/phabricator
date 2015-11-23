@@ -109,11 +109,11 @@ final class PhameBlogTransaction
         break;
       case self::TYPE_STATUS:
         switch ($new) {
-          case self::STATUS_OPEN:
+          case PhameBlog::STATUS_ACTIVE:
             return pht(
               '%s published this blog.',
               $this->renderHandleLink($author_phid));
-          case self::STATUS_CLOSED:
+          case PhameBlog::STATUS_ARCHIVED:
             return pht(
               '%s archived this blog.',
               $this->renderHandleLink($author_phid));
@@ -166,12 +166,12 @@ final class PhameBlogTransaction
         break;
       case self::TYPE_STATUS:
         switch ($new) {
-          case self::STATUS_OPEN:
+          case PhameBlog::STATUS_ACTIVE:
             return pht(
               '%s published the blog %s.',
               $this->renderHandleLink($author_phid),
               $this->renderHandleLink($object_phid));
-          case self::STATUS_CLOSED:
+          case PhameBlog::STATUS_ARCHIVED:
             return pht(
               '%s archived the blog %s.',
               $this->renderHandleLink($author_phid),
