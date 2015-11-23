@@ -173,7 +173,7 @@ final class PhabricatorCountdownEditor
     $description = $object->getDescription();
 
     if (strlen($description)) {
-      $body->addTextSection(
+      $body->addRemarkupSection(
         pht('COUNTDOWN DESCRIPTION'),
         $object->getDescription());
     }

@@ -419,7 +419,7 @@ final class PhrictionTransactionEditor
     $body = parent::buildMailBody($object, $xactions);
 
     if ($this->getIsNewObject()) {
-      $body->addTextSection(
+      $body->addRemarkupSection(
         pht('DOCUMENT CONTENT'),
         $object->getContent()->getContent());
     } else if ($this->contentDiffURI) {
