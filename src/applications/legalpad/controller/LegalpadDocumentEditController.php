@@ -243,10 +243,10 @@ final class LegalpadDocumentEditController extends LegalpadController {
     $crumbs->addTextCrumb($short);
 
     $preview = id(new PHUIRemarkupPreviewPanel())
-      ->setHeader(pht('Document Preview'))
+      ->setHeader($document->getTitle())
       ->setPreviewURI($this->getApplicationURI('document/preview/'))
       ->setControlID('document-text')
-      ->addClass('phui-document-view');
+      ->setPreviewType(PHUIRemarkupPreviewPanel::DOCUMENT);
 
     return $this->buildApplicationPage(
       array(
