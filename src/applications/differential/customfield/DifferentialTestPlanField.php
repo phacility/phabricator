@@ -195,7 +195,7 @@ final class DifferentialTestPlanField
       return;
     }
 
-    $body->addTextSection(pht('TEST PLAN'), $test_plan);
+    $body->addRemarkupSection(pht('TEST PLAN'), $test_plan);
   }
 
 
