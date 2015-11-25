@@ -1888,7 +1888,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     foreach ($no_effect as $key => $xaction) {
-      if ($xaction->getComment()) {
+      if ($xaction->hasComment()) {
         $xaction->setTransactionType($type_comment);
         $xaction->setOldValue(null);
         $xaction->setNewValue(null);

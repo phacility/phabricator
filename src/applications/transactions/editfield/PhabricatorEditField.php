@@ -320,7 +320,13 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   protected function getValueExistsInSubmit(AphrontRequest $request, $key) {
-    return $this->getHTTPParameterType()->getExists($request, $key);
+    $type = $this->getHTTPParameterType();
+
+    if ($type) {
+      return $type->getExists($request, $key);
+    }
+
+    return false;
   }
 
   protected function getValueFromSubmit(AphrontRequest $request, $key) {
@@ -328,7 +334,13 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   protected function getDefaultValue() {
-    return $this->getHTTPParameterType()->getDefaultValue();
+    $type = $this->getHTTPParameterType();
+
+    if ($type) {
+      return $type->getDefaultValue();
+    }
+
+    return null;
   }
 
   final public function getHTTPParameterType() {
