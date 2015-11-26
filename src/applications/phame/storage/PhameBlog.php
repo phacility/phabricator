@@ -75,6 +75,7 @@ final class PhameBlog extends PhameDAO
   public static function initializeNewBlog(PhabricatorUser $actor) {
     $blog = id(new PhameBlog())
       ->setCreatorPHID($actor->getPHID())
+      ->setStatus(self::STATUS_ACTIVE)
       ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
       ->setEditPolicy(PhabricatorPolicies::POLICY_USER);
     return $blog;
