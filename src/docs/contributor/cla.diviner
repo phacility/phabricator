@@ -62,7 +62,7 @@ license you may not agree with.
 They do not allow us to //undo// the existing release under the Apache license,
 but allow us to make an //additional// release under a different license, or
 release under multiple licenses (if we do, users may choose which license or
-licesnes they wish to use the software under). It would also allow us to
+licenses they wish to use the software under). It would also allow us to
 discontinue updating the release under the Apache license.
 
 While we do not currently plan to relicense Phabricator, we do not want to
@@ -122,7 +122,7 @@ We offer two CLAs:
   - {L28}
   - {L30}
 
-These are both substantially similar to the equivalent Apache CLAs.
+These are both substantially similar to the corresponding Apache CLAs.
 
 If you own the work you are contributing, sign the individual CLA. If your
 employer owns the work you are contributing, have them sign the corporate CLA.
