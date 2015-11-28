@@ -860,7 +860,6 @@ abstract class PhabricatorEditEngine
     return $controller->newPage()
       ->setTitle(pht('HTTP Parameters'))
       ->setCrumbs($crumbs)
-      ->addClass('pro-white-background')
       ->appendChild($document);
   }
 

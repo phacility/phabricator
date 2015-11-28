@@ -6,7 +6,6 @@ final class PHUIDocumentViewPro extends AphrontTagView {
   private $bookname;
   private $bookdescription;
   private $fluid;
-  private $propertyList;
   private $toc;
 
   public function setHeader(PHUIHeaderView $header) {
@@ -26,11 +25,6 @@ final class PHUIDocumentViewPro extends AphrontTagView {
     return $this;
   }
 
-  public function setPropertyList($view) {
-    $this->propertyList = $view;
-    return $this;
-  }
-
   public function setToc($toc) {
     $this->toc = $toc;
     return $this;
@@ -39,12 +33,13 @@ final class PHUIDocumentViewPro extends AphrontTagView {
   protected function getTagAttributes() {
     $classes = array();
 
+    $classes[] = 'phui-document-container';
     if ($this->fluid) {
       $classes[] = 'phui-document-fluid';
     }
 
     return array(
-      'class' => $classes,
+      'class' => implode(' ', $classes),
     );
   }
 
@@ -118,19 +113,13 @@ final class PHUIDocumentViewPro extends AphrontTagView {
         ),
         $content_inner);
 
-    $view = phutil_tag(
-      'div',
-      array(
-        'class' => implode(' ', $classes),
-      ),
-      $content);
+  return phutil_tag(
+    'div',
+    array(
+      'class' => implode(' ', $classes),
+    ),
+    $content);
 
-    $list = null;
-    if ($this->propertyList) {
-      $list = phutil_tag_div('phui-document-properties', $this->propertyList);
-    }
-
-    return array($view, $list);
   }
 
 }

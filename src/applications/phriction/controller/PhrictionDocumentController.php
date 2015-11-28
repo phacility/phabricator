@@ -216,7 +216,6 @@ final class PhrictionDocumentController
 
     $page_content = id(new PHUIDocumentViewPro())
       ->setHeader($header)
-      ->setPropertyList($prop_list)
       ->setToc($toc)
       ->appendChild(
         array(
@@ -229,12 +228,12 @@ final class PhrictionDocumentController
       array(
         $crumbs->render(),
         $page_content,
+        $prop_list,
         $children,
       ),
       array(
         'pageObjects' => array($document->getPHID()),
         'title' => $page_title,
-        'class' => 'pro-white-background',
       ));
 
   }

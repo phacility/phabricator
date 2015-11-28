@@ -79,7 +79,6 @@ final class DivinerMainController extends DivinerController {
       ),
       array(
         'title' => pht('Documentation Books'),
-        'class' => 'pro-white-background',
       ));
   }
 }
