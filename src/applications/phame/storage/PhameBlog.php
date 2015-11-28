@@ -7,6 +7,7 @@ final class PhameBlog extends PhameDAO
     PhabricatorSubscribableInterface,
     PhabricatorFlaggableInterface,
     PhabricatorProjectInterface,
+    PhabricatorDestructibleInterface,
     PhabricatorApplicationTransactionInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:description';
@@ -318,6 +319,23 @@ final class PhameBlog extends PhameDAO
 
   public function shouldUseMarkupCache($field) {
     return (bool)$this->getPHID();
+  }
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+
+      $posts = id(new PhamePost())
+        ->loadAllWhere('blogPHID = %s', $this->getPHID());
+      foreach ($posts as $post) {
+        $post->delete();
+      }
+      $this->delete();
+
+    $this->saveTransaction();
   }
 
 
