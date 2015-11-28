@@ -55,15 +55,14 @@ final class AlmanacBindingViewController
       new AlmanacBindingTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-        $this->buildAlmanacPropertiesTable($binding),
-        $timeline,
-      ),
-      array(
-        'title' => $title,
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $box,
+          $this->buildAlmanacPropertiesTable($binding),
+          $timeline,
       ));
   }
 
