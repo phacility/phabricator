@@ -175,27 +175,17 @@ final class PhamePostEditController extends PhamePostController {
         ->addCancelButton($cancel_uri)
         ->setValue($submit_button));
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('%s (Post Preview)', $title));
-
-    $container = id(new PHUIBoxView())
-      ->setID('post-preview');
-
-    $document = id(new PHUIDocumentViewPro())
-      ->setHeader($header)
-      ->appendChild($container);
-
-    $preview_panel = id(new PHUIObjectBoxView())
-      ->appendChild($document);
+    $preview = id(new PHUIRemarkupPreviewPanel())
+      ->setHeader($post->getTitle())
+      ->setPreviewURI($this->getApplicationURI('post/preview/'))
+      ->setControlID('post-body')
+      ->setPreviewType(PHUIRemarkupPreviewPanel::DOCUMENT);
 
     Javelin::initBehavior(
       'phame-post-preview',
       array(
-        'preview'     => 'post-preview',
-        'body'        => 'post-body',
         'title'       => 'post-title',
         'phame_title' => 'post-phame-title',
-        'uri'         => '/phame/post/preview/',
       ));
 
     $form_box = id(new PHUIObjectBoxView())
@@ -214,7 +204,7 @@ final class PhamePostEditController extends PhamePostController {
       ->appendChild(
         array(
           $form_box,
-          $preview_panel,
+          $preview,
       ));
   }
 

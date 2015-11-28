@@ -527,3 +527,7 @@ properly, and submit values. */
 .aphront-form-choose-table .aphront-form-choose-button-cell {
   padding: 4px 8px;
 }
+
+.aphront-form-preview-hidden {
+  opacity: 0.5;
+}

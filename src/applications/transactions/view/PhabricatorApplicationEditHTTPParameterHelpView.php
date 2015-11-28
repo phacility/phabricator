@@ -42,6 +42,7 @@ final class PhabricatorApplicationEditHTTPParameterHelpView
       $type = $field->getHTTPParameterType();
       if ($type === null) {
         unset($fields[$key]);
+        continue;
       }
       $types[$type->getTypeName()] = $type;
     }

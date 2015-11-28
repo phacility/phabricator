@@ -13,7 +13,16 @@ abstract class PhabricatorEditField extends Phobject {
   private $metadata = array();
   private $description;
   private $editTypeKey;
+
   private $isLocked;
+  private $isHidden;
+
+  private $isPreview;
+  private $isEditDefaults;
+
+  private $isReorderable = true;
+  private $isDefaultable = true;
+  private $isLockable = true;
 
   public function setKey($key) {
     $this->key = $key;
@@ -78,6 +87,60 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->isLocked;
   }
 
+  public function setIsPreview($preview) {
+    $this->isPreview = $preview;
+    return $this;
+  }
+
+  public function getIsPreview() {
+    return $this->isPreview;
+  }
+
+  public function setIsReorderable($is_reorderable) {
+    $this->isReorderable = $is_reorderable;
+    return $this;
+  }
+
+  public function getIsReorderable() {
+    return $this->isReorderable;
+  }
+
+  public function setIsEditDefaults($is_edit_defaults) {
+    $this->isEditDefaults = $is_edit_defaults;
+    return $this;
+  }
+
+  public function getIsEditDefaults() {
+    return $this->isEditDefaults;
+  }
+
+  public function setIsDefaultable($is_defaultable) {
+    $this->isDefaultable = $is_defaultable;
+    return $this;
+  }
+
+  public function getIsDefaultable() {
+    return $this->isDefaultable;
+  }
+
+  public function setIsLockable($is_lockable) {
+    $this->isLockable = $is_lockable;
+    return $this;
+  }
+
+  public function getIsLockable() {
+    return $this->isLockable;
+  }
+
+  public function setIsHidden($is_hidden) {
+    $this->isHidden = $is_hidden;
+    return $this;
+  }
+
+  public function getIsHidden() {
+    return $this->isHidden;
+  }
+
   protected function newControl() {
     throw new PhutilMethodNotImplementedException();
   }
@@ -96,9 +159,22 @@ abstract class PhabricatorEditField extends Phobject {
       $control->setLabel($this->getLabel());
     }
 
-    if ($this->getIsLocked()) {
-      $control->setDisabled(true);
+    if ($this->getIsPreview()) {
+      $disabled = true;
+      $hidden = false;
+    } else if ($this->getIsEditDefaults()) {
+      $disabled = false;
+      $hidden = false;
+    } else {
+      $disabled = $this->getIsLocked();
+      $hidden = $this->getIsHidden();
     }
+
+    if ($hidden) {
+      return null;
+    }
+
+    $control->setDisabled($disabled);
 
     return $control;
   }
@@ -106,6 +182,18 @@ abstract class PhabricatorEditField extends Phobject {
   public function appendToForm(AphrontFormView $form) {
     $control = $this->renderControl();
     if ($control !== null) {
+
+      if ($this->getIsPreview()) {
+        if ($this->getIsHidden()) {
+          $control
+            ->addClass('aphront-form-preview-hidden')
+            ->setError(pht('Hidden'));
+        } else if ($this->getIsLocked()) {
+          $control
+            ->setError(pht('Locked'));
+        }
+      }
+
       $form->appendControl($control);
     }
     return $this;
@@ -113,6 +201,19 @@ abstract class PhabricatorEditField extends Phobject {
 
   protected function getValueForControl() {
     return $this->getValue();
+  }
+
+  public function getValueForDefaults() {
+    $value = $this->getValue();
+
+    // By default, just treat the empty string like `null` since they're
+    // equivalent for almost all fields and this reduces the number of
+    // meaningless transactions we generate when adjusting defaults.
+    if ($value === '') {
+      return null;
+    }
+
+    return $value;
   }
 
   protected function getValue() {
@@ -127,6 +228,10 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function generateTransaction(
     PhabricatorApplicationTransaction $xaction) {
+
+    if (!$this->getTransactionType()) {
+      return null;
+    }
 
     $xaction
       ->setTransactionType($this->getTransactionType())
@@ -149,9 +254,6 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   public function getTransactionType() {
-    if (!$this->transactionType) {
-      throw new PhutilInvalidStateException('setTransactionType');
-    }
     return $this->transactionType;
   }
 
@@ -218,7 +320,13 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   protected function getValueExistsInSubmit(AphrontRequest $request, $key) {
-    return $this->getHTTPParameterType()->getExists($request, $key);
+    $type = $this->getHTTPParameterType();
+
+    if ($type) {
+      return $type->getExists($request, $key);
+    }
+
+    return false;
   }
 
   protected function getValueFromSubmit(AphrontRequest $request, $key) {
@@ -226,7 +334,13 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   protected function getDefaultValue() {
-    return $this->getHTTPParameterType()->getDefaultValue();
+    $type = $this->getHTTPParameterType();
+
+    if ($type) {
+      return $type->getDefaultValue();
+    }
+
+    return null;
   }
 
   final public function getHTTPParameterType() {
@@ -255,8 +369,17 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->editTypeKey;
   }
 
+  protected function newEditType() {
+    return id(new PhabricatorSimpleEditType())
+      ->setValueType($this->getHTTPParameterType()->getTypeName());
+  }
+
   public function getEditTransactionTypes() {
     $transaction_type = $this->getTransactionType();
+    if ($transaction_type === null) {
+      return array();
+    }
+
     $type_key = $this->getEditTypeKey();
 
     // TODO: This is a pretty big pile of hard-coded hacks for now.
@@ -305,10 +428,9 @@ abstract class PhabricatorEditField extends Phobject {
     }
 
     return array(
-      id(new PhabricatorSimpleEditType())
+      $this->newEditType()
         ->setEditType($type_key)
         ->setTransactionType($transaction_type)
-        ->setValueType($this->getHTTPParameterType()->getTypeName())
         ->setDescription($this->getDescription())
         ->setMetadata($this->metadata),
     );

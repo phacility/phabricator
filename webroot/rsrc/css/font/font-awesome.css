@@ -3,15 +3,15 @@
  */
 
 /*!
- *  Font Awesome 4.4.0 by @davegandy - http://fontawesome.io - @fontawesome
+ *  Font Awesome 4.5.0 by @davegandy - http://fontawesome.io - @fontawesome
  *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
  */
 /* FONT PATH
  * -------------------------- */
 @font-face {
   font-family: 'FontAwesome';
-  src: url('/rsrc/externals/font/fontawesome/fontawesome-webfont.eot?v=4.4.0');
-  src: url('/rsrc/externals/font/fontawesome/fontawesome-webfont.eot?#iefix&v=4.4.0') format('embedded-opentype'), url('/rsrc/externals/font/fontawesome/fontawesome-webfont.woff2?v=4.4.0') format('woff2'), url('/rsrc/externals/font/fontawesome/fontawesome-webfont.woff?v=4.4.0') format('woff'), url('/rsrc/externals/font/fontawesome/fontawesome-webfont.ttf?v=4.4.0') format('truetype');
+  src: url('/rsrc/externals/font/fontawesome/fontawesome-webfont.eot?v=4.5.0');
+  src: url('/rsrc/externals/font/fontawesome/fontawesome-webfont.eot?#iefix&v=4.5.0') format('embedded-opentype'), url('/rsrc/externals/font/fontawesome/fontawesome-webfont.woff2?v=4.5.0') format('woff2'), url('/rsrc/externals/font/fontawesome/fontawesome-webfont.woff?v=4.5.0') format('woff'), url('/rsrc/externals/font/fontawesome/fontawesome-webfont.ttf?v=4.5.0') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
@@ -1886,4 +1886,64 @@
 }
 .fa-fonticons:before {
   content: "\f280";
+}
+.fa-reddit-alien:before {
+  content: "\f281";
+}
+.fa-edge:before {
+  content: "\f282";
+}
+.fa-credit-card-alt:before {
+  content: "\f283";
+}
+.fa-codiepie:before {
+  content: "\f284";
+}
+.fa-modx:before {
+  content: "\f285";
+}
+.fa-fort-awesome:before {
+  content: "\f286";
+}
+.fa-usb:before {
+  content: "\f287";
+}
+.fa-product-hunt:before {
+  content: "\f288";
+}
+.fa-mixcloud:before {
+  content: "\f289";
+}
+.fa-scribd:before {
+  content: "\f28a";
+}
+.fa-pause-circle:before {
+  content: "\f28b";
+}
+.fa-pause-circle-o:before {
+  content: "\f28c";
+}
+.fa-stop-circle:before {
+  content: "\f28d";
+}
+.fa-stop-circle-o:before {
+  content: "\f28e";
+}
+.fa-shopping-bag:before {
+  content: "\f290";
+}
+.fa-shopping-basket:before {
+  content: "\f291";
+}
+.fa-hashtag:before {
+  content: "\f292";
+}
+.fa-bluetooth:before {
+  content: "\f293";
+}
+.fa-bluetooth-b:before {
+  content: "\f294";
+}
+.fa-percent:before {
+  content: "\f295";
 }

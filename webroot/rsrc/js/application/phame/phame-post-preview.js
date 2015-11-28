@@ -8,7 +8,6 @@
 
 JX.behavior('phame-post-preview', function(config) {
 
-  var body        = JX.$(config.body);
   var title       = JX.$(config.title);
   var phame_title = JX.$(config.phame_title);
   var sync_titles = true;
@@ -54,27 +53,15 @@ JX.behavior('phame-post-preview', function(config) {
     return s;
   };
 
-  var callback = function(r) {
-    JX.DOM.setContent(JX.$(config.preview), JX.$H(r));
-  };
-
   var getdata = function() {
     return {
-      body        : body.value,
       title       : title.value,
       phame_title : phame_title.value
     };
   };
 
-  var request = new JX.PhabricatorShapedRequest(config.uri, callback, getdata);
-  var trigger = JX.bind(request, request.trigger);
-
-  JX.DOM.listen(body,        'keydown', null, trigger);
-  JX.DOM.listen(title,       'keydown', null, trigger);
   JX.DOM.listen(title,       'keyup',   null, titleCallback);
-  JX.DOM.listen(phame_title, 'keydown', null, trigger);
   JX.DOM.listen(phame_title, 'keyup',   null, phameTitleKeyupCallback);
   JX.DOM.listen(phame_title, 'blur',    null, phameTitleBlurCallback);
-  request.start();
 
 });

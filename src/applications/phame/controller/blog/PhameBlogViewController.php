@@ -22,10 +22,21 @@ final class PhameBlogViewController extends PhameBlogController {
       ->withBlogPHIDs(array($blog->getPHID()))
       ->executeWithCursorPager($pager);
 
+    if ($blog->isArchived()) {
+      $header_icon = 'fa-ban';
+      $header_name = pht('Archived');
+      $header_color = 'dark';
+    } else {
+      $header_icon = 'fa-check';
+      $header_name = pht('Active');
+      $header_color = 'bluegrey';
+    }
+
     $header = id(new PHUIHeaderView())
       ->setHeader($blog->getName())
       ->setUser($viewer)
-      ->setPolicyObject($blog);
+      ->setPolicyObject($blog)
+      ->setStatus($header_icon, $header_color, $header_name);
 
     $actions = $this->renderActions($blog, $viewer);
     $properties = $this->renderProperties($blog, $viewer, $actions);
@@ -158,13 +169,25 @@ final class PhameBlogViewController extends PhameBlogController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-times')
-        ->setHref($this->getApplicationURI('blog/delete/'.$blog->getID().'/'))
-        ->setName(pht('Delete Blog'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
+    if ($blog->isArchived()) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Activate Blog'))
+          ->setIcon('fa-check')
+          ->setHref(
+            $this->getApplicationURI('blog/archive/'.$blog->getID().'/'))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    } else {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Archive Blog'))
+          ->setIcon('fa-ban')
+          ->setHref(
+            $this->getApplicationURI('blog/archive/'.$blog->getID().'/'))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    }
 
     return $actions;
   }

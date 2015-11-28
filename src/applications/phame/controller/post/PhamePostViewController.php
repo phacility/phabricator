@@ -157,14 +157,6 @@ final class PhamePostViewController extends PhamePostController {
           ->setWorkflow(true));
     }
 
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-times')
-        ->setHref($this->getApplicationURI('post/delete/'.$id.'/'))
-        ->setName(pht('Delete Post'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
-
     $blog = $post->getBlog();
     $can_view_live = $blog && !$post->isDraft();
 

@@ -165,7 +165,7 @@ final class DifferentialSummaryField
       return;
     }
 
-    $body->addTextSection(pht('REVISION SUMMARY'), $summary);
+    $body->addRemarkupSection(pht('REVISION SUMMARY'), $summary);
   }
 
 }

@@ -442,7 +442,7 @@ final class ManiphestTransactionEditor
     $body = parent::buildMailBody($object, $xactions);
 
     if ($this->getIsNewObject()) {
-      $body->addTextSection(
+      $body->addRemarkupSection(
         pht('TASK DESCRIPTION'),
         $object->getDescription());
     }
