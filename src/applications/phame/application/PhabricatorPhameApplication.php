@@ -63,6 +63,7 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
           'view/(?P<id>[^/]+)/' => 'PhameBlogViewController',
           'feed/(?P<id>[^/]+)/' => 'PhameBlogFeedController',
           'new/' => 'PhameBlogEditController',
+          'picture/(?P<id>[1-9]\d*)/' => 'PhameBlogProfilePictureController',
         ),
       ) + $this->getResourceSubroutes(),
     );

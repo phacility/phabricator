@@ -9,6 +9,7 @@ final class PhameBlogViewController extends PhameBlogController {
     $blog = id(new PhameBlogQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->needProfileImage(true)
       ->executeOne();
     if (!$blog) {
       return new Aphront404Response();
@@ -32,10 +33,13 @@ final class PhameBlogViewController extends PhameBlogController {
       $header_color = 'bluegrey';
     }
 
+    $picture = $blog->getProfileImageURI();
+
     $header = id(new PHUIHeaderView())
       ->setHeader($blog->getName())
       ->setUser($viewer)
       ->setPolicyObject($blog)
+      ->setImage($picture)
       ->setStatus($header_icon, $header_color, $header_name);
 
     $actions = $this->renderActions($blog, $viewer);
@@ -166,6 +170,14 @@ final class PhameBlogViewController extends PhameBlogController {
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI('blog/edit/'.$blog->getID().'/'))
         ->setName(pht('Edit Blog'))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-picture-o')
+        ->setHref($this->getApplicationURI('blog/picture/'.$blog->getID().'/'))
+        ->setName(pht('Edit Blog Picture'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
