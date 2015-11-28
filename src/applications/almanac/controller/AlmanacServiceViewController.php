@@ -62,9 +62,9 @@ final class AlmanacServiceViewController
       ->appendChild(
         array(
           $box,
-        $bindings,
-        $this->buildAlmanacPropertiesTable($service),
-        $timeline,
+          $bindings,
+          $this->buildAlmanacPropertiesTable($service),
+          $timeline,
     ));
   }
 
