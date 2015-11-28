@@ -660,7 +660,7 @@ final class PhabricatorAuditEditor
     }
 
     if ($inlines) {
-      $body->addRemarkupSection(
+      $body->addTextSection(
         pht('INLINE COMMENTS'),
         $this->renderInlineCommentsForMail($object, $inlines));
     }

@@ -1212,7 +1212,7 @@ final class DifferentialTransactionEditor
     }
 
     if ($inlines) {
-      $body->addRemarkupSection(
+      $body->addTextSection(
         pht('INLINE COMMENTS'),
         $this->renderInlineCommentsForMail($object, $inlines));
     }
