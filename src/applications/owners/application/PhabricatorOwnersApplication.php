@@ -43,10 +43,12 @@ final class PhabricatorOwnersApplication extends PhabricatorApplication {
     return array(
       '/owners/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorOwnersListController',
-        'edit/(?P<id>[1-9]\d*)/' => 'PhabricatorOwnersEditController',
         'new/' => 'PhabricatorOwnersEditController',
         'package/(?P<id>[1-9]\d*)/' => 'PhabricatorOwnersDetailController',
         'paths/(?P<id>[1-9]\d*)/' => 'PhabricatorOwnersPathsController',
+
+        $this->getEditRoutePattern('edit/')
+          => 'PhabricatorOwnersEditController',
       ),
     );
   }
