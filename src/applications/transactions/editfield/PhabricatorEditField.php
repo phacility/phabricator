@@ -7,6 +7,7 @@ abstract class PhabricatorEditField extends Phobject {
   private $label;
   private $aliases = array();
   private $value;
+  private $initialValue;
   private $hasValue = false;
   private $object;
   private $transactionType;
@@ -262,6 +263,7 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function setValue($value) {
     $this->hasValue = true;
+    $this->initialValue = $value;
     $this->value = $value;
     return $this;
   }
@@ -287,6 +289,10 @@ abstract class PhabricatorEditField extends Phobject {
   public function setMetadataValue($key, $value) {
     $this->metadata[$key] = $value;
     return $this;
+  }
+
+  public function getMetadata() {
+    return $this->metadata;
   }
 
   protected function getValueForTransaction() {
@@ -348,6 +354,31 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->getValueFromSubmit($request, $key);
   }
 
+
+  /**
+   * Read and return the value the object had when the user first loaded the
+   * form.
+   *
+   * This is the initial value from the user's point of view when they started
+   * the edit process, and used primarily to prevent race conditions for fields
+   * like "Projects" and "Subscribers" that use tokenizers and support edge
+   * transactions.
+   *
+   * Most fields do not need to store these values or deal with initial value
+   * handling.
+   *
+   * @param AphrontRequest Request to read from.
+   * @param string Key to read.
+   * @return wild Value read from request.
+   */
+  protected function getInitialValueFromSubmit(AphrontRequest $request, $key) {
+    return null;
+  }
+
+  public function getInitialValue() {
+    return $this->initialValue;
+  }
+
   public function readValueFromSubmit(AphrontRequest $request) {
     $key = $this->getKey();
     if ($this->getValueExistsInSubmit($request, $key)) {
@@ -356,6 +387,10 @@ abstract class PhabricatorEditField extends Phobject {
       $value = $this->getDefaultValue();
     }
     $this->value = $value;
+
+    $initial_value = $this->getInitialValueFromSubmit($request, $key);
+    $this->initialValue = $initial_value;
+
     return $this;
   }
 
@@ -414,66 +449,30 @@ abstract class PhabricatorEditField extends Phobject {
       ->setValueType($this->getHTTPParameterType()->getTypeName());
   }
 
-  public function getEditTransactionTypes() {
+  protected function getEditTransactionType() {
     $transaction_type = $this->getTransactionType();
+
     if ($transaction_type === null) {
-      return array();
+      return null;
     }
 
     $type_key = $this->getEditTypeKey();
 
-    // TODO: This is a pretty big pile of hard-coded hacks for now.
+    return $this->newEditType()
+      ->setEditType($type_key)
+      ->setTransactionType($transaction_type)
+      ->setDescription($this->getDescription())
+      ->setMetadata($this->getMetadata());
+  }
 
-    $edge_types = array(
-      PhabricatorTransactions::TYPE_EDGE => array(
-        '+' => pht('Add projects.'),
-        '-' => pht('Remove projects.'),
-        '=' => pht('Set associated projects, overwriting current value.'),
-      ),
-      PhabricatorTransactions::TYPE_SUBSCRIBERS => array(
-        '+' => pht('Add subscribers.'),
-        '-' => pht('Remove subscribers.'),
-        '=' => pht('Set subscribers, overwriting current value.'),
-      ),
-    );
+  public function getEditTransactionTypes() {
+    $edit_type = $this->getEditTransactionType();
 
-    if (isset($edge_types[$transaction_type])) {
-      $base = id(new PhabricatorEdgeEditType())
-        ->setTransactionType($transaction_type)
-        ->setMetadata($this->metadata);
-
-      $strings = $edge_types[$transaction_type];
-
-      $add = id(clone $base)
-        ->setEditType($type_key.'.add')
-        ->setEdgeOperation('+')
-        ->setDescription($strings['+'])
-        ->setValueDescription(pht('List of PHIDs to add.'));
-      $rem = id(clone $base)
-        ->setEditType($type_key.'.remove')
-        ->setEdgeOperation('-')
-        ->setDescription($strings['-'])
-        ->setValueDescription(pht('List of PHIDs to remove.'));
-      $set = id(clone $base)
-        ->setEditType($type_key.'.set')
-        ->setEdgeOperation('=')
-        ->setDescription($strings['='])
-        ->setValueDescription(pht('List of PHIDs to set.'));
-
-      return array(
-        $add,
-        $rem,
-        $set,
-      );
+    if ($edit_type === null) {
+      return null;
     }
 
-    return array(
-      $this->newEditType()
-        ->setEditType($type_key)
-        ->setTransactionType($transaction_type)
-        ->setDescription($this->getDescription())
-        ->setMetadata($this->metadata),
-    );
+    return array($edit_type);
   }
 
 }

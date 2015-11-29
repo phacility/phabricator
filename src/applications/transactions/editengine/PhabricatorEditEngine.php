@@ -1048,6 +1048,11 @@ abstract class PhabricatorEditEngine
     $types = array();
     foreach ($fields as $field) {
       $field_types = $field->getEditTransactionTypes();
+
+      if ($field_types === null) {
+        continue;
+      }
+
       foreach ($field_types as $field_type) {
         $field_type->setField($field);
         $types[$field_type->getEditType()] = $field_type;
