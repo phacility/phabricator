@@ -384,10 +384,13 @@ final class PholioMockEditController extends PholioController {
 
     $this->addExtraQuicksandConfig(
       array('mockEditConfig' => true));
-    return $this->buildApplicationPage(
-      $content,
-      array(
-        'title' => $title,
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $form_box,
       ));
   }
 
