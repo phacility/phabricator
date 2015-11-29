@@ -6,21 +6,17 @@ abstract class ManiphestController extends PhabricatorController {
     return $this->buildSideNavView(true)->getMenu();
   }
 
-  public function buildSideNavView($for_app = false) {
-    $user = $this->getRequest()->getUser();
+  public function buildSideNavView() {
+    $viewer = $this->getViewer();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    if ($for_app) {
-      $nav->addFilter('task/create/', pht('Create Task'));
-    }
-
     id(new ManiphestTaskSearchEngine())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->addNavigationItems($nav->getMenu());
 
-    if ($user->isLoggedIn()) {
+    if ($viewer->isLoggedIn()) {
       // For now, don't give logged-out users access to reports.
       $nav->addLabel(pht('Reports'));
       $nav->addFilter('report', pht('Reports'));
