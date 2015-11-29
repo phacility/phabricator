@@ -96,10 +96,11 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
           'You have at least one repository configured which uses this '.
           'version control system. It will not work without the VCS binary.');
         $this->raiseWarning($binary, $message);
+        continue;
       }
 
       $version = null;
-      switch ($binary) {
+      switch ($vcs['versionControlSystem']) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
           $minimum_version = null;
           $bad_versions = array();
