@@ -11,6 +11,9 @@ final class PhabricatorDatasourceEditField
   }
 
   public function getDatasource() {
+    if (!$this->datasource) {
+      throw new PhutilInvalidStateException('setDatasource');
+    }
     return $this->datasource;
   }
 

@@ -73,161 +73,25 @@ abstract class PhabricatorEditEngine
 
   final protected function buildEditFields($object) {
     $viewer = $this->getViewer();
-    $editor = $object->getApplicationTransactionEditor();
-
-    $types = $editor->getTransactionTypesForObject($object);
-    $types = array_fuse($types);
 
     $fields = $this->buildCustomEditFields($object);
 
-    if ($object instanceof PhabricatorPolicyInterface) {
-      $policies = id(new PhabricatorPolicyQuery())
-        ->setViewer($viewer)
-        ->setObject($object)
-        ->execute();
+    $extensions = PhabricatorEditEngineExtension::getAllEnabledExtensions();
+    foreach ($extensions as $extension) {
+      $extension->setViewer($viewer);
 
-      $map = array(
-        PhabricatorTransactions::TYPE_VIEW_POLICY => array(
-          'key' => 'policy.view',
-          'aliases' => array('view'),
-          'capability' => PhabricatorPolicyCapability::CAN_VIEW,
-          'label' => pht('View Policy'),
-          'description' => pht('Controls who can view the object.'),
-          'edit' => 'view',
-        ),
-        PhabricatorTransactions::TYPE_EDIT_POLICY => array(
-          'key' => 'policy.edit',
-          'aliases' => array('edit'),
-          'capability' => PhabricatorPolicyCapability::CAN_EDIT,
-          'label' => pht('Edit Policy'),
-          'description' => pht('Controls who can edit the object.'),
-          'edit' => 'edit',
-        ),
-        PhabricatorTransactions::TYPE_JOIN_POLICY => array(
-          'key' => 'policy.join',
-          'aliases' => array('join'),
-          'capability' => PhabricatorPolicyCapability::CAN_JOIN,
-          'label' => pht('Join Policy'),
-          'description' => pht('Controls who can join the object.'),
-          'edit' => 'join',
-        ),
-      );
-
-      foreach ($map as $type => $spec) {
-        if (empty($types[$type])) {
-          continue;
-        }
-
-        $capability = $spec['capability'];
-        $key = $spec['key'];
-        $aliases = $spec['aliases'];
-        $label = $spec['label'];
-        $description = $spec['description'];
-        $edit = $spec['edit'];
-
-        $policy_field = id(new PhabricatorPolicyEditField())
-          ->setKey($key)
-          ->setLabel($label)
-          ->setDescription($description)
-          ->setAliases($aliases)
-          ->setCapability($capability)
-          ->setPolicies($policies)
-          ->setTransactionType($type)
-          ->setEditTypeKey($edit)
-          ->setValue($object->getPolicy($capability));
-        $fields[] = $policy_field;
-
-        if ($object instanceof PhabricatorSpacesInterface) {
-          if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
-            $type_space = PhabricatorTransactions::TYPE_SPACE;
-            if (isset($types[$type_space])) {
-              $space_field = id(new PhabricatorSpaceEditField())
-                ->setKey('spacePHID')
-                ->setLabel(pht('Space'))
-                ->setEditTypeKey('space')
-                ->setDescription(
-                  pht('Shifts the object in the Spaces application.'))
-                ->setIsReorderable(false)
-                ->setAliases(array('space', 'policy.space'))
-                ->setTransactionType($type_space)
-                ->setValue($object->getSpacePHID());
-              $fields[] = $space_field;
-
-              $policy_field->setSpaceField($space_field);
-            }
-          }
-        }
+      if (!$extension->supportsObject($this, $object)) {
+        continue;
       }
-    }
 
-    $edge_type = PhabricatorTransactions::TYPE_EDGE;
-    $object_phid = $object->getPHID();
+      $extension_fields = $extension->buildCustomEditFields($this, $object);
 
-    $project_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+      // TODO: Validate this in more detail with a more tailored error.
+      assert_instances_of($extension_fields, 'PhabricatorEditField');
 
-    if ($object instanceof PhabricatorProjectInterface) {
-      if (isset($types[$edge_type])) {
-        if ($object_phid) {
-          $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-            $object_phid,
-            $project_edge_type);
-          $project_phids = array_reverse($project_phids);
-        } else {
-          $project_phids = array();
-        }
-
-        $edge_field = id(new PhabricatorProjectsEditField())
-          ->setKey('projectPHIDs')
-          ->setLabel(pht('Projects'))
-          ->setEditTypeKey('projects')
-          ->setDescription(pht('Add or remove associated projects.'))
-          ->setAliases(array('project', 'projects'))
-          ->setTransactionType($edge_type)
-          ->setMetadataValue('edge:type', $project_edge_type)
-          ->setValue($project_phids);
-        $fields[] = $edge_field;
+      foreach ($extension_fields as $field) {
+        $fields[] = $field;
       }
-    }
-
-    $subscribers_type = PhabricatorTransactions::TYPE_SUBSCRIBERS;
-
-    if ($object instanceof PhabricatorSubscribableInterface) {
-      if (isset($types[$subscribers_type])) {
-        if ($object_phid) {
-          $sub_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-            $object_phid);
-        } else {
-          // TODO: Allow applications to provide default subscribers; Maniphest
-          // does this at a minimum.
-          $sub_phids = array();
-        }
-
-        $subscribers_field = id(new PhabricatorSubscribersEditField())
-          ->setKey('subscriberPHIDs')
-          ->setLabel(pht('Subscribers'))
-          ->setEditTypeKey('subscribers')
-          ->setDescription(pht('Manage subscribers.'))
-          ->setAliases(array('subscriber', 'subscribers'))
-          ->setTransactionType($subscribers_type)
-          ->setValue($sub_phids);
-        $fields[] = $subscribers_field;
-      }
-    }
-
-    $xaction = $object->getApplicationTransactionTemplate();
-    $comment = $xaction->getApplicationTransactionCommentObject();
-    if ($comment) {
-      $comment_type = PhabricatorTransactions::TYPE_COMMENT;
-
-      $comment_field = id(new PhabricatorCommentEditField())
-        ->setKey('comment')
-        ->setLabel(pht('Comments'))
-        ->setDescription(pht('Add comments.'))
-        ->setAliases(array('comments'))
-        ->setIsHidden(true)
-        ->setTransactionType($comment_type)
-        ->setValue(null);
-      $fields[] = $comment_field;
     }
 
     $config = $this->getEditEngineConfiguration();
@@ -678,6 +542,8 @@ abstract class PhabricatorEditEngine
     $validation_exception = null;
     if ($request->isFormPost()) {
       foreach ($fields as $field) {
+        $field->setIsSubmittedForm(true);
+
         if ($field->getIsLocked() || $field->getIsHidden()) {
           continue;
         }
@@ -709,6 +575,20 @@ abstract class PhabricatorEditEngine
           ->setURI($this->getObjectViewURI($object));
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
+
+        foreach ($fields as $field) {
+          $xaction_type = $field->getTransactionType();
+          if ($xaction_type === null) {
+            continue;
+          }
+
+          $message = $ex->getShortMessage($xaction_type);
+          if ($message === null) {
+            continue;
+          }
+
+          $field->setControlError($message);
+        }
       }
     } else {
       if ($this->getIsCreate()) {

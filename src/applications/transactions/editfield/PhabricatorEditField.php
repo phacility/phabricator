@@ -13,12 +13,15 @@ abstract class PhabricatorEditField extends Phobject {
   private $metadata = array();
   private $description;
   private $editTypeKey;
+  private $isRequired;
 
   private $isLocked;
   private $isHidden;
 
   private $isPreview;
   private $isEditDefaults;
+  private $isSubmittedForm;
+  private $controlError;
 
   private $isReorderable = true;
   private $isDefaultable = true;
@@ -145,6 +148,33 @@ abstract class PhabricatorEditField extends Phobject {
     throw new PhutilMethodNotImplementedException();
   }
 
+  public function setIsSubmittedForm($is_submitted) {
+    $this->isSubmittedForm = $is_submitted;
+    return $this;
+  }
+
+  public function getIsSubmittedForm() {
+    return $this->isSubmittedForm;
+  }
+
+  public function setIsRequired($is_required) {
+    $this->isRequired = $is_required;
+    return $this;
+  }
+
+  public function getIsRequired() {
+    return $this->isRequired;
+  }
+
+  public function setControlError($control_error) {
+    $this->controlError = $control_error;
+    return $this;
+  }
+
+  public function getControlError() {
+    return $this->controlError;
+  }
+
   protected function renderControl() {
     $control = $this->newControl();
     if ($control === null) {
@@ -175,6 +205,16 @@ abstract class PhabricatorEditField extends Phobject {
     }
 
     $control->setDisabled($disabled);
+
+
+    if ($this->getIsSubmittedForm()) {
+      $error = $this->getControlError();
+      if ($error !== null) {
+        $control->setError($error);
+      }
+    } else if ($this->getIsRequired()) {
+      $control->setError(true);
+    }
 
     return $control;
   }
