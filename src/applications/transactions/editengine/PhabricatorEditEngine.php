@@ -379,6 +379,83 @@ abstract class PhabricatorEditEngine
 
 
   /**
+   * Try to load an object by ID, PHID, or monogram. This is done primarily
+   * to make Conduit a little easier to use.
+   *
+   * @param wild ID, PHID, or monogram.
+   * @return object Corresponding editable object.
+   * @task load
+   */
+  private function newObjectFromIdentifier($identifier) {
+    if (is_int($identifier) || ctype_digit($identifier)) {
+      $object = $this->newObjectFromID($identifier);
+
+      if (!$object) {
+        throw new Exception(
+          pht(
+            'No object exists with ID "%s".',
+            $identifier));
+      }
+
+      return $object;
+    }
+
+    $type_unknown = PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN;
+    if (phid_get_type($identifier) != $type_unknown) {
+      $object = $this->newObjectFromPHID($identifier);
+
+      if (!$object) {
+        throw new Exception(
+          pht(
+            'No object exists with PHID "%s".',
+            $identifier));
+      }
+
+      return $object;
+    }
+
+    $target = id(new PhabricatorObjectQuery())
+      ->setViewer($this->getViewer())
+      ->withNames(array($identifier))
+      ->executeOne();
+    if (!$target) {
+      throw new Exception(
+        pht(
+          'Monogram "%s" does not identify a valid object.',
+          $identifier));
+    }
+
+    $expect = $this->newEditableObject();
+    $expect_class = get_class($expect);
+    $target_class = get_class($target);
+    if ($expect_class !== $target_class) {
+      throw new Exception(
+        pht(
+          'Monogram "%s" identifies an object of the wrong type. Loaded '.
+          'object has class "%s", but this editor operates on objects of '.
+          'type "%s".',
+          $identifier,
+          $target_class,
+          $expect_class));
+    }
+
+    // Load the object by PHID using this engine's standard query. This makes
+    // sure it's really valid, goes through standard policy check logic, and
+    // picks up any `need...()` clauses we want it to load with.
+
+    $object = $this->newObjectFromPHID($target->getPHID());
+    if (!$object) {
+      throw new Exception(
+        pht(
+          'Failed to reload object identified by monogram "%s" when '.
+          'querying by PHID.',
+          $identifier));
+    }
+
+    return $object;
+  }
+
+  /**
    * Load an object by ID.
    *
    * @param int Object ID.
@@ -851,13 +928,10 @@ abstract class PhabricatorEditEngine
           get_class($this)));
     }
 
-    $phid = $request->getValue('objectPHID');
-    if ($phid) {
+    $identifier = $request->getValue('objectIdentifier');
+    if ($identifier) {
       $this->setIsCreate(false);
-      $object = $this->newObjectFromPHID($phid);
-      if (!$object) {
-        throw new Exception(pht('No such object with PHID "%s".', $phid));
-      }
+      $object = $this->newObjectFromIdentifier($identifier);
     } else {
       $this->setIsCreate(true);
       $object = $this->newEditableObject();
