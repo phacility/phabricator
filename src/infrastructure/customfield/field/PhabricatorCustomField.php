@@ -1082,6 +1082,33 @@ abstract class PhabricatorCustomField extends Phobject {
 /* -(  Edit View  )---------------------------------------------------------- */
 
 
+  public function getEditEngineFields(PhabricatorEditEngine $engine) {
+    $field = $this->newStandardEditField($engine);
+
+    return array(
+      $field,
+    );
+  }
+
+  protected function newEditField() {
+    return id(new PhabricatorCustomFieldEditField())
+      ->setCustomField($this);
+  }
+
+  protected function newStandardEditField() {
+    if ($this->proxy) {
+      return $this->proxy->newStandardEditField();
+    }
+
+    return $this->newEditField()
+      ->setKey($this->getFieldKey())
+      ->setEditTypeKey('custom.'.$this->getFieldKey())
+      ->setLabel($this->getFieldName())
+      ->setDescription($this->getFieldDescription())
+      ->setTransactionType($this->getApplicationTransactionType())
+      ->setValue($this->getNewValueForApplicationTransactions());
+  }
+
   /**
    * @task edit
    */

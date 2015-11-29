@@ -145,10 +145,6 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->isHidden;
   }
 
-  protected function newControl() {
-    throw new PhutilMethodNotImplementedException();
-  }
-
   public function setIsSubmittedForm($is_submitted) {
     $this->isSubmittedForm = $is_submitted;
     return $this;
@@ -176,7 +172,11 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->controlError;
   }
 
-  protected function renderControl() {
+  protected function newControl() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  protected function buildControl() {
     $control = $this->newControl();
     if ($control === null) {
       return null;
@@ -188,6 +188,24 @@ abstract class PhabricatorEditField extends Phobject {
 
     if (!$control->getLabel()) {
       $control->setLabel($this->getLabel());
+    }
+
+    if ($this->getIsSubmittedForm()) {
+      $error = $this->getControlError();
+      if ($error !== null) {
+        $control->setError($error);
+      }
+    } else if ($this->getIsRequired()) {
+      $control->setError(true);
+    }
+
+    return $control;
+  }
+
+  protected function renderControl() {
+    $control = $this->buildControl();
+    if ($control === null) {
+      return null;
     }
 
     if ($this->getIsPreview()) {
@@ -206,16 +224,6 @@ abstract class PhabricatorEditField extends Phobject {
     }
 
     $control->setDisabled($disabled);
-
-
-    if ($this->getIsSubmittedForm()) {
-      $error = $this->getControlError();
-      if ($error !== null) {
-        $control->setError($error);
-      }
-    } else if ($this->getIsRequired()) {
-      $control->setError(true);
-    }
 
     return $control;
   }
