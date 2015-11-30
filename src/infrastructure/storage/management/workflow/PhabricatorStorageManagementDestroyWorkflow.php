@@ -20,29 +20,29 @@ final class PhabricatorStorageManagementDestroyWorkflow
         ));
   }
 
-  public function execute(PhutilArgumentParser $args) {
-    $is_dry = $args->getArg('dryrun');
-    $is_force = $args->getArg('force');
+  public function didExecute(PhutilArgumentParser $args) {
+    $console = PhutilConsole::getConsole();
 
-    if (!$is_dry && !$is_force) {
-      echo phutil_console_wrap(
-        pht(
-          'Are you completely sure you really want to permanently destroy all '.
-          'storage for Phabricator data? This operation can not be undone and '.
-          'your data will not be recoverable if you proceed.'));
+    if (!$this->isDryRun() && !$this->isForce()) {
+      $console->writeOut(
+        phutil_console_wrap(
+          pht(
+            'Are you completely sure you really want to permanently destroy '.
+            'all storage for Phabricator data? This operation can not be '.
+            'undone and your data will not be recoverable if you proceed.')));
 
       if (!phutil_console_confirm(pht('Permanently destroy all data?'))) {
-        echo pht('Cancelled.')."\n";
+        $console->writeOut("%s\n", pht('Cancelled.'));
         exit(1);
       }
 
       if (!phutil_console_confirm(pht('Really destroy all data forever?'))) {
-        echo pht('Cancelled.')."\n";
+        $console->writeOut("%s\n", pht('Cancelled.'));
         exit(1);
       }
     }
 
-    $api = $this->getAPI();
+    $api     = $this->getAPI();
     $patches = $this->getPatches();
 
     if ($args->getArg('unittest-fixtures')) {
@@ -55,18 +55,23 @@ final class PhabricatorStorageManagementDestroyWorkflow
         PhabricatorTestCase::NAMESPACE_PREFIX);
       $databases = ipull($databases, 'db');
     } else {
-      $databases = $api->getDatabaseList($patches);
+      $databases   = $api->getDatabaseList($patches);
       $databases[] = $api->getDatabaseName('meta_data');
+
       // These are legacy databases that were dropped long ago. See T2237.
       $databases[] = $api->getDatabaseName('phid');
       $databases[] = $api->getDatabaseName('directory');
     }
 
     foreach ($databases as $database) {
-      if ($is_dry) {
-        echo pht("DRYRUN: Would drop database '%s'.", $database)."\n";
+      if ($this->isDryRun()) {
+        $console->writeOut(
+          "%s\n",
+          pht("DRYRUN: Would drop database '%s'.", $database));
       } else {
-        echo pht("Dropping database '%s'...", $database)."\n";
+        $console->writeOut(
+          "%s\n",
+          pht("Dropping database '%s'...", $database));
         queryfx(
           $api->getConn(null),
           'DROP DATABASE IF EXISTS %T',
@@ -74,8 +79,8 @@ final class PhabricatorStorageManagementDestroyWorkflow
       }
     }
 
-    if (!$is_dry) {
-      echo pht('Storage was destroyed.')."\n";
+    if (!$this->isDryRun()) {
+      $console->writeOut("%s\n", pht('Storage was destroyed.'));
     }
 
     return 0;

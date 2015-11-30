@@ -11,6 +11,8 @@ final class PhabricatorStorageManagementShellWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
+
+
     $api = $this->getAPI();
     list($host, $port) = $this->getBareHostAndPort($api->getHost());
 

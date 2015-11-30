@@ -24,13 +24,11 @@ final class PhabricatorStorageManagementAdjustWorkflow
         ));
   }
 
-  public function execute(PhutilArgumentParser $args) {
-    $force = $args->getArg('force');
+  public function didExecute(PhutilArgumentParser $args) {
     $unsafe = $args->getArg('unsafe');
-    $dry_run = $args->getArg('dryrun');
 
     $this->requireAllPatchesApplied();
-    return $this->adjustSchemata($force, $unsafe, $dry_run);
+    return $this->adjustSchemata($unsafe);
   }
 
   private function requireAllPatchesApplied() {

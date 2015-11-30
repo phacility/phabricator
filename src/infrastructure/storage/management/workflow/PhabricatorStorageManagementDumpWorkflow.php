@@ -10,10 +10,11 @@ final class PhabricatorStorageManagementDumpWorkflow
       ->setSynopsis(pht('Dump all data in storage to stdout.'));
   }
 
-  public function execute(PhutilArgumentParser $args) {
-    $console = PhutilConsole::getConsole();
-    $api = $this->getAPI();
+  public function didExecute(PhutilArgumentParser $args) {
+    $api     = $this->getAPI();
     $patches = $this->getPatches();
+
+    $console = PhutilConsole::getConsole();
 
     $applied = $api->getAppliedPatches();
     if ($applied === null) {
@@ -24,11 +25,11 @@ final class PhabricatorStorageManagementDumpWorkflow
           'initialized in this storage namespace ("%s"). Use '.
           '**%s** to initialize storage.',
           $namespace,
-          'storage upgrade'));
+          './bin/storage upgrade'));
       return 1;
     }
 
-    $databases = $api->getDatabaseList($patches, $only_living = true);
+    $databases = $api->getDatabaseList($patches, true);
 
     list($host, $port) = $this->getBareHostAndPort($api->getHost());
 
