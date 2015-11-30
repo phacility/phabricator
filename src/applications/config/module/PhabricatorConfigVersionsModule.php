@@ -14,13 +14,11 @@ final class PhabricatorConfigVersionsModule
   public function renderModuleStatus(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
-
-    $versions = $this->loadVersions();
+    $versions = $this->loadVersions($viewer);
 
     $version_property_list = id(new PHUIPropertyListView());
-    foreach ($versions as $version) {
-      list($name, $hash) = $version;
-      $version_property_list->addProperty($name, $hash);
+    foreach ($versions as $name => $version) {
+      $version_property_list->addProperty($name, $version);
     }
 
     $object_box = id(new PHUIObjectBoxView())
@@ -39,26 +37,23 @@ final class PhabricatorConfigVersionsModule
     return $object_box;
   }
 
-  private function loadVersions() {
+  private function loadVersions(PhabricatorUser $viewer) {
     $specs = array(
-      array(
-        'name' => pht('Phabricator Version'),
-        'root' => 'phabricator',
-      ),
-      array(
-        'name' => pht('Arcanist Version'),
-        'root' => 'arcanist',
-      ),
-      array(
-        'name' => pht('libphutil Version'),
-        'root' => 'phutil',
-      ),
+      'phabricator',
+      'arcanist',
+      'phutil',
     );
 
+    $all_libraries = PhutilBootloader::getInstance()->getAllLibraries();
+    $other_libraries = array_diff($all_libraries, ipull($specs, 'lib'));
+    $specs = $specs + $other_libraries;
+
+
     $futures = array();
-    foreach ($specs as $key => $spec) {
-      $root = dirname(phutil_get_library_root($spec['root']));
-      $futures[$key] = id(new ExecFuture('git log --format=%%H -n 1 --'))
+    foreach ($specs as $lib) {
+      $root = dirname(phutil_get_library_root($lib));
+      $futures[$lib] =
+        id(new ExecFuture('git log --format=%s -n 1 --', '%H %ct'))
         ->setCWD($root);
     }
 
@@ -66,14 +61,15 @@ final class PhabricatorConfigVersionsModule
     foreach ($futures as $key => $future) {
       list($err, $stdout) = $future->resolve();
       if (!$err) {
-        $name = trim($stdout);
+        list($hash, $epoch) = explode(' ', $stdout);
+        $version = pht('%s (%s)', $hash, phabricator_date($epoch, $viewer));
       } else {
-        $name = pht('Unknown');
+        $version = pht('Unknown');
       }
-      $results[$key] = array($specs[$key]['name'], $name);
+      $results[$key] = $version;
     }
 
-    return array_select_keys($results, array_keys($specs));
+    return $results;
   }
 
 }
