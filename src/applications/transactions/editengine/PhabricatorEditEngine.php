@@ -630,13 +630,22 @@ abstract class PhabricatorEditEngine
 
       $xactions = array();
       foreach ($fields as $field) {
-        $xaction = $field->generateTransaction(clone $template);
+        $types = $field->getWebEditTypes();
+        foreach ($types as $type) {
+          $type_xactions = $type->generateTransactions(
+            clone $template,
+            array(
+              'value' => $field->getValueForTransaction(),
+            ));
 
-        if (!$xaction) {
-          continue;
+          if (!$type_xactions) {
+            continue;
+          }
+
+          foreach ($type_xactions as $type_xaction) {
+            $xactions[] = $type_xaction;
+          }
         }
-
-        $xactions[] = $xaction;
       }
 
       $editor = $object->getApplicationTransactionEditor()
@@ -941,7 +950,7 @@ abstract class PhabricatorEditEngine
 
     $fields = $this->buildEditFields($object);
 
-    $types = $this->getAllEditTypesFromFields($fields);
+    $types = $this->getConduitEditTypesFromFields($fields);
     $template = $object->getApplicationTransactionTemplate();
 
     $xactions = $this->getConduitTransactions($request, $types, $template);
@@ -1031,9 +1040,13 @@ abstract class PhabricatorEditEngine
     foreach ($xactions as $xaction) {
       $type = $types[$xaction['type']];
 
-      $results[] = $type->generateTransaction(
+      $type_xactions = $type->generateTransactions(
         clone $template,
         $xaction);
+
+      foreach ($type_xactions as $type_xaction) {
+        $results[] = $type_xaction;
+      }
     }
 
     return $results;
@@ -1044,10 +1057,10 @@ abstract class PhabricatorEditEngine
    * @return map<string, PhabricatorEditType>
    * @task conduit
    */
-  private function getAllEditTypesFromFields(array $fields) {
+  private function getConduitEditTypesFromFields(array $fields) {
     $types = array();
     foreach ($fields as $field) {
-      $field_types = $field->getEditTransactionTypes();
+      $field_types = $field->getConduitEditTypes();
 
       if ($field_types === null) {
         continue;
@@ -1061,7 +1074,7 @@ abstract class PhabricatorEditEngine
     return $types;
   }
 
-  public function getAllEditTypes() {
+  public function getConduitEditTypes() {
     $config = $this->loadEditEngineConfiguration(null);
     if (!$config) {
       return array();
@@ -1069,7 +1082,7 @@ abstract class PhabricatorEditEngine
 
     $object = $this->newEditableObject();
     $fields = $this->buildEditFields($object);
-    return $this->getAllEditTypesFromFields($fields);
+    return $this->getConduitEditTypesFromFields($fields);
   }
 
   final public static function getAllEditEngines() {

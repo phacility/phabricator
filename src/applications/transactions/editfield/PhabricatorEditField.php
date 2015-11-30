@@ -268,24 +268,6 @@ abstract class PhabricatorEditField extends Phobject {
     return $this;
   }
 
-  public function generateTransaction(
-    PhabricatorApplicationTransaction $xaction) {
-
-    if (!$this->getTransactionType()) {
-      return null;
-    }
-
-    $xaction
-      ->setTransactionType($this->getTransactionType())
-      ->setNewValue($this->getValueForTransaction());
-
-    foreach ($this->metadata as $key => $value) {
-      $xaction->setMetadataValue($key, $value);
-    }
-
-    return $xaction;
-  }
-
   public function setMetadataValue($key, $value) {
     $this->metadata[$key] = $value;
     return $this;
@@ -295,7 +277,7 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->metadata;
   }
 
-  protected function getValueForTransaction() {
+  public function getValueForTransaction() {
     return $this->getValue();
   }
 
@@ -449,7 +431,7 @@ abstract class PhabricatorEditField extends Phobject {
       ->setValueType($this->getHTTPParameterType()->getTypeName());
   }
 
-  protected function getEditTransactionType() {
+  protected function getEditType() {
     $transaction_type = $this->getTransactionType();
 
     if ($transaction_type === null) {
@@ -465,8 +447,18 @@ abstract class PhabricatorEditField extends Phobject {
       ->setMetadata($this->getMetadata());
   }
 
-  public function getEditTransactionTypes() {
-    $edit_type = $this->getEditTransactionType();
+  public function getConduitEditTypes() {
+    $edit_type = $this->getEditType();
+
+    if ($edit_type === null) {
+      return null;
+    }
+
+    return array($edit_type);
+  }
+
+  public function getWebEditTypes() {
+    $edit_type = $this->getEditType();
 
     if ($edit_type === null) {
       return null;

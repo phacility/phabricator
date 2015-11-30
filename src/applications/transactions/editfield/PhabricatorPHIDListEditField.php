@@ -28,7 +28,7 @@ abstract class PhabricatorPHIDListEditField
     return new AphrontPHIDListHTTPParameterType();
   }
 
-  protected function getValueForTransaction() {
+  public function getValueForTransaction() {
     $new = parent::getValueForTransaction();
 
     if (!$this->getUseEdgeTransactions()) {
@@ -71,9 +71,9 @@ abstract class PhabricatorPHIDListEditField
     return parent::newEditType();
   }
 
-  public function getEditTransactionTypes() {
+  public function getConduitEditTypes() {
     if (!$this->getUseEdgeTransactions()) {
-      return parent::getEditTransactionTypes();
+      return parent::getConduitEditTypes();
     }
 
     $transaction_type = $this->getTransactionType();
@@ -84,7 +84,7 @@ abstract class PhabricatorPHIDListEditField
     $type_key = $this->getEditTypeKey();
     $strings = $this->transactionDescriptions;
 
-    $base = $this->getEditTransactionType();
+    $base = $this->getEditType();
 
     $add = id(clone $base)
       ->setEditType($type_key.'.add')

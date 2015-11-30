@@ -14,19 +14,14 @@ final class PhabricatorSimpleEditType extends PhabricatorEditType {
     return $this->valueType;
   }
 
-  public function generateTransaction(
+  public function generateTransactions(
     PhabricatorApplicationTransaction $template,
     array $spec) {
 
-    $template
-      ->setTransactionType($this->getTransactionType())
+    $edit = $this->newTransaction($template)
       ->setNewValue(idx($spec, 'value'));
 
-    foreach ($this->getMetadata() as $key => $value) {
-      $template->setMetadataValue($key, $value);
-    }
-
-    return $template;
+    return array($edit);
   }
 
   public function setValueDescription($value_description) {

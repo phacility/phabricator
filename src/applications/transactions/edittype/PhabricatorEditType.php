@@ -66,11 +66,24 @@ abstract class PhabricatorEditType extends Phobject {
     return $this->transactionType;
   }
 
-  abstract public function generateTransaction(
+  abstract public function generateTransactions(
     PhabricatorApplicationTransaction $template,
     array $spec);
 
   abstract public function getValueType();
   abstract public function getValueDescription();
+
+  protected function newTransaction(
+    PhabricatorApplicationTransaction $template) {
+
+    $xaction = id(clone $template)
+      ->setTransactionType($this->getTransactionType());
+
+    foreach ($this->getMetadata() as $key => $value) {
+      $xaction->setMetadataValue($key, $value);
+    }
+
+    return $xaction;
+  }
 
 }

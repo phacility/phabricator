@@ -44,7 +44,7 @@ abstract class PhabricatorEditEngineAPIMethod
     $engine = $this->newEditEngine()
       ->setViewer($viewer);
 
-    $types = $engine->getAllEditTypes();
+    $types = $engine->getConduitEditTypes();
 
     $out = array();
 
