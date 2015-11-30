@@ -61,6 +61,7 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
           'archive/(?P<id>[^/]+)/' => 'PhameBlogArchiveController',
           'edit/(?P<id>[^/]+)/' => 'PhameBlogEditController',
           'view/(?P<id>[^/]+)/' => 'PhameBlogViewController',
+          'manage/(?P<id>[^/]+)/' => 'PhameBlogManageController',
           'feed/(?P<id>[^/]+)/' => 'PhameBlogFeedController',
           'new/' => 'PhameBlogEditController',
           'picture/(?P<id>[1-9]\d*)/' => 'PhameBlogProfilePictureController',

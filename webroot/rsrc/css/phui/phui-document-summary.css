@@ -1,0 +1,26 @@
+/**
+ * @provides phui-document-summary-view-css
+ */
+
+.phui-document-summary-view {
+
+}
+
+body .phui-document-view .phui-document-summary-view h2.remarkup-header {
+  margin: 0;
+  padding: 0;
+}
+
+.phui-document-summary-view h2.remarkup-header a {
+  color: {$darkbluetext};
+}
+
+.phui-document-summary-subtitle {
+  color: {$lightbluetext};
+  font-size: {$normalfontsize};
+  margin-bottom: 8px;
+}
+
+.phui-document-summary-subtitle a {
+  color: {$darkbluetext};
+}

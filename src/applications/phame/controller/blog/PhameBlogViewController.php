@@ -2,6 +2,8 @@
 
 final class PhameBlogViewController extends PhameBlogController {
 
+  private $blog;
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
@@ -14,6 +16,7 @@ final class PhameBlogViewController extends PhameBlogController {
     if (!$blog) {
       return new Aphront404Response();
     }
+    $this->blog = $blog;
 
     $pager = id(new AphrontCursorPagerView())
       ->readFromRequest($request);
@@ -33,110 +36,148 @@ final class PhameBlogViewController extends PhameBlogController {
       $header_color = 'bluegrey';
     }
 
-    $picture = $blog->getProfileImageURI();
+    $actions = $this->renderActions($blog, $viewer);
+    $action_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Actions'))
+      ->setHref('#')
+      ->setIconFont('fa-bars')
+      ->addClass('phui-mobile-menu')
+      ->setDropdownMenu($actions);
 
     $header = id(new PHUIHeaderView())
       ->setHeader($blog->getName())
       ->setUser($viewer)
       ->setPolicyObject($blog)
-      ->setImage($picture)
-      ->setStatus($header_icon, $header_color, $header_name);
+      ->setStatus($header_icon, $header_color, $header_name)
+      ->addActionLink($action_button);
 
-    $actions = $this->renderActions($blog, $viewer);
-    $properties = $this->renderProperties($blog, $viewer, $actions);
     $post_list = $this->renderPostList(
       $posts,
       $viewer,
       pht('This blog has no visible posts.'));
 
-    $post_list = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Latest Posts'))
-      ->appendChild($post_list);
-
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb(
       pht('Blogs'),
       $this->getApplicationURI('blog/'));
     $crumbs->addTextCrumb(
       $blog->getName());
 
-    $object_box = id(new PHUIObjectBoxView())
+    $page = id(new PHUIDocumentViewPro())
       ->setHeader($header)
-      ->addPropertyList($properties);
+      ->appendChild($post_list);
+
+    $description = $this->renderDescription($blog, $viewer);
 
     return $this->newPage()
       ->setTitle($blog->getName())
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $object_box,
-          $post_list,
+          $page,
+          $description,
       ));
   }
 
-  private function renderProperties(
+  private function renderDescription(
     PhameBlog $blog,
-    PhabricatorUser $viewer,
-    PhabricatorActionListView $actions) {
+    PhabricatorUser $viewer) {
 
-    require_celerity_resource('aphront-tooltip-css');
-    Javelin::initBehavior('phabricator-tooltips');
-
-    $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($blog)
-      ->setActionList($actions);
-
-    $properties->addProperty(
-      pht('Skin'),
-      $blog->getSkin());
-
-    $properties->addProperty(
-      pht('Domain'),
-      $blog->getDomain());
-
-    $feed_uri = PhabricatorEnv::getProductionURI(
-      $this->getApplicationURI('blog/feed/'.$blog->getID().'/'));
-    $properties->addProperty(
-      pht('Atom URI'),
-      javelin_tag('a',
-        array(
-          'href' => $feed_uri,
-          'sigil' => 'has-tooltip',
-          'meta' => array(
-            'tip' => pht('Atom URI does not support custom domains.'),
-            'size' => 320,
-          ),
-        ),
-        $feed_uri));
-
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $viewer,
-      $blog);
-
-    $properties->addProperty(
-      pht('Editable By'),
-      $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer)
-      ->addObject($blog, PhameBlog::MARKUP_FIELD_DESCRIPTION)
-      ->process();
-
-    $properties->invokeWillRenderEvent();
+    require_celerity_resource('phame-css');
 
     if (strlen($blog->getDescription())) {
       $description = PhabricatorMarkupEngine::renderOneObject(
         id(new PhabricatorMarkupOneOff())->setContent($blog->getDescription()),
         'default',
         $viewer);
-      $properties->addSectionHeader(
-        pht('Description'),
-        PHUIPropertyListView::ICON_SUMMARY);
-      $properties->addTextContent($description);
+    } else {
+      $description = phutil_tag('em', array(), pht('No description.'));
     }
 
-    return $properties;
+    $picture = $blog->getProfileImageURI();
+    $description = phutil_tag_div(
+      'phame-blog-description-content', $description);
+
+    $image = phutil_tag(
+      'div',
+      array(
+        'class' => 'phame-blog-description-image',
+        'style' => 'background-image: url('.$picture.');',
+      ));
+
+    $header = phutil_tag(
+      'div',
+      array(
+        'class' => 'phame-blog-description-name',
+      ),
+      pht('About %s', $blog->getName()));
+
+    $view = phutil_tag(
+      'div',
+      array(
+        'class' => 'phame-blog-description',
+      ),
+      array(
+        $image,
+        $header,
+        $description,
+      ));
+
+    return $view;
+  }
+
+  protected function renderPostList(
+    array $posts,
+    PhabricatorUser $viewer,
+    $nodata) {
+    assert_instances_of($posts, 'PhamePost');
+
+    $handle_phids = array();
+    foreach ($posts as $post) {
+      $handle_phids[] = $post->getBloggerPHID();
+      if ($post->getBlog()) {
+        $handle_phids[] = $post->getBlog()->getPHID();
+      }
+    }
+    $handles = $viewer->loadHandles($handle_phids);
+
+    $list = array();
+    foreach ($posts as $post) {
+      $blogger = $handles[$post->getBloggerPHID()]->renderLink();
+      $blogger_uri = $handles[$post->getBloggerPHID()]->getURI();
+      $blogger_image = $handles[$post->getBloggerPHID()]->getImageURI();
+
+      $phame_post = null;
+      if ($post->getBody()) {
+        $phame_post = PhabricatorMarkupEngine::summarize($post->getBody());
+        $phame_post = new PHUIRemarkupView($viewer, $phame_post);
+      } else {
+        $phame_post = phutil_tag('em', array(), pht('Empty Post'));
+      }
+
+      $blogger = phutil_tag('strong', array(), $blogger);
+      $date = phabricator_datetime($post->getDatePublished(), $viewer);
+      $subtitle = pht('Written by %s on %s.', $blogger, $date);
+
+      $item = id(new PHUIDocumentSummaryView())
+        ->setTitle($post->getTitle())
+        ->setHref($this->getApplicationURI('/post/view/'.$post->getID().'/'))
+        ->setSubtitle($subtitle)
+        ->setImage($blogger_image)
+        ->setImageHref($blogger_uri)
+        ->setSummary($phame_post);
+
+      $list[] = $item;
+    }
+
+    if (empty($list)) {
+      $list = id(new PHUIInfoView())
+        ->appendChild($nodata);
+    }
+
+    return $list;
   }
 
   private function renderActions(PhameBlog $blog, PhabricatorUser $viewer) {
@@ -168,38 +209,10 @@ final class PhameBlogViewController extends PhameBlogController {
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
-        ->setHref($this->getApplicationURI('blog/edit/'.$blog->getID().'/'))
-        ->setName(pht('Edit Blog'))
+        ->setHref($this->getApplicationURI('blog/manage/'.$blog->getID().'/'))
+        ->setName(pht('Manage Blog'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
-
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-picture-o')
-        ->setHref($this->getApplicationURI('blog/picture/'.$blog->getID().'/'))
-        ->setName(pht('Edit Blog Picture'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
-    if ($blog->isArchived()) {
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Activate Blog'))
-          ->setIcon('fa-check')
-          ->setHref(
-            $this->getApplicationURI('blog/archive/'.$blog->getID().'/'))
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(true));
-    } else {
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Archive Blog'))
-          ->setIcon('fa-ban')
-          ->setHref(
-            $this->getApplicationURI('blog/archive/'.$blog->getID().'/'))
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(true));
-    }
 
     return $actions;
   }
