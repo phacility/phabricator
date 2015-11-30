@@ -159,7 +159,11 @@ final class PhameBlogViewController extends PhameBlogController {
 
       $blogger = phutil_tag('strong', array(), $blogger);
       $date = phabricator_datetime($post->getDatePublished(), $viewer);
-      $subtitle = pht('Written by %s on %s.', $blogger, $date);
+      if ($post->isDraft()) {
+        $subtitle = pht('Unpublished draft by %s.', $blogger);
+      } else {
+        $subtitle = pht('Written by %s on %s.', $blogger, $date);
+      }
 
       $item = id(new PHUIDocumentSummaryView())
         ->setTitle($post->getTitle())
@@ -167,7 +171,8 @@ final class PhameBlogViewController extends PhameBlogController {
         ->setSubtitle($subtitle)
         ->setImage($blogger_image)
         ->setImageHref($blogger_uri)
-        ->setSummary($phame_post);
+        ->setSummary($phame_post)
+        ->setDraft($post->isDraft());
 
       $list[] = $item;
     }

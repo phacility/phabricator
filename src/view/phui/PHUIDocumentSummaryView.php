@@ -8,6 +8,7 @@ final class PHUIDocumentSummaryView extends AphrontTagView {
   private $subtitle;
   private $href;
   private $summary;
+  private $draft;
 
   public function setTitle($title) {
     $this->title = $title;
@@ -39,10 +40,19 @@ final class PHUIDocumentSummaryView extends AphrontTagView {
     return $this;
   }
 
+  public function setDraft($draft) {
+    $this->draft = $draft;
+    return $this;
+  }
+
   protected function getTagAttributes() {
     $classes = array();
     $classes[] = 'phui-document-summary-view';
     $classes[] = 'phabricator-remarkup';
+
+    if ($this->draft) {
+      $classes[] = 'is-draft';
+    }
 
     return array(
       'class' => implode(' ', $classes),

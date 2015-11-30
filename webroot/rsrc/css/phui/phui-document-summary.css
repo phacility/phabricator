@@ -2,8 +2,8 @@
  * @provides phui-document-summary-view-css
  */
 
-.phui-document-summary-view {
-
+.phui-document-summary-view.is-draft {
+  opacity: 0.5;
 }
 
 body .phui-document-view .phui-document-summary-view h2.remarkup-header {
