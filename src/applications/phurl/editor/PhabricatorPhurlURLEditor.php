@@ -211,11 +211,9 @@ final class PhabricatorPhurlURLEditor
 
   public function getMailTagsMap() {
     return array(
-      PhabricatorPhurlURLTransaction::MAILTAG_CONTENT =>
+      PhabricatorPhurlURLTransaction::MAILTAG_DETAILS =>
         pht(
-          "A URL's name or path changes."),
-      PhabricatorPhurlURLTransaction::MAILTAG_OTHER =>
-        pht('Other event activity not listed above occurs.'),
+          "A URL's details change."),
     );
   }
 

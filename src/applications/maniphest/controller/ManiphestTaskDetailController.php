@@ -349,19 +349,23 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $object_box->addPropertyList($description);
     }
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $info_view,
-        $object_box,
-        $timeline,
-        $comment_box,
-        $preview_panel,
-      ),
-      array(
-        'title' => 'T'.$task->getID().' '.$task->getTitle(),
-        'pageObjects' => array($task->getPHID()),
-      ));
+    $title = 'T'.$task->getID().' '.$task->getTitle();
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(
+        array(
+          $task->getPHID(),
+        ))
+      ->appendChild(
+        array(
+          $info_view,
+          $object_box,
+          $timeline,
+          $comment_box,
+          $preview_panel,
+        ));
   }
 
   private function buildHeaderView(ManiphestTask $task) {

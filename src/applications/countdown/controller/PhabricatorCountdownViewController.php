@@ -61,20 +61,22 @@ final class PhabricatorCountdownViewController
 
     $add_comment = $this->buildCommentForm($countdown);
 
-    $content = array(
-      $crumbs,
-      $object_box,
-      $countdown_view,
-      $timeline,
-      $add_comment,
-    );
 
-    return $this->buildApplicationPage(
-      $content,
-      array(
-        'title' => $title,
-        'pageObjects' => array($countdown->getPHID()),
-      ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(
+        array(
+          $countdown->getPHID(),
+        ))
+      ->appendChild(
+        array(
+          $object_box,
+          $countdown_view,
+          $timeline,
+          $add_comment,
+        ));
   }
 
   private function buildActionListView(PhabricatorCountdown $countdown) {

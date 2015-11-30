@@ -98,20 +98,17 @@ final class PholioMockViewController extends PholioController {
       ->setUser($viewer)
       ->setMock($mock);
 
-    $content = array(
-      $crumbs,
-      $object_box,
-      $output,
-      $thumb_grid,
-      $timeline,
-      $add_comment,
-    );
-
-    return $this->buildApplicationPage(
-      $content,
-      array(
-        'title' => 'M'.$mock->getID().' '.$title,
-        'pageObjects' => array($mock->getPHID()),
+    return $this->newPage()
+      ->setTitle('M'.$mock->getID().' '.$title)
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(array($mock->getPHID()))
+      ->appendChild(
+        array(
+          $object_box,
+          $output,
+          $thumb_grid,
+          $timeline,
+          $add_comment,
       ));
   }
 

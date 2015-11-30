@@ -44,7 +44,6 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
           '(?:(?P<filter>draft|all)/)?' => 'PhamePostListController',
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhamePostListController',
           'blogger/(?P<bloggername>[\w\.-_]+)/' => 'PhamePostListController',
-          'delete/(?P<id>[^/]+)/' => 'PhamePostDeleteController',
           'edit/(?:(?P<id>[^/]+)/)?' => 'PhamePostEditController',
           'view/(?P<id>\d+)/' => 'PhamePostViewController',
           'publish/(?P<id>\d+)/' => 'PhamePostPublishController',
@@ -62,8 +61,10 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
           'archive/(?P<id>[^/]+)/' => 'PhameBlogArchiveController',
           'edit/(?P<id>[^/]+)/' => 'PhameBlogEditController',
           'view/(?P<id>[^/]+)/' => 'PhameBlogViewController',
+          'manage/(?P<id>[^/]+)/' => 'PhameBlogManageController',
           'feed/(?P<id>[^/]+)/' => 'PhameBlogFeedController',
           'new/' => 'PhameBlogEditController',
+          'picture/(?P<id>[1-9]\d*)/' => 'PhameBlogProfilePictureController',
         ),
       ) + $this->getResourceSubroutes(),
     );

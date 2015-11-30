@@ -173,7 +173,3 @@ hr {
   height: 2px;
   background: {$sky};
 }
-
-html body.pro-white-background {
-  background-color: white;
-}

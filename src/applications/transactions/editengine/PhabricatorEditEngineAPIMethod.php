@@ -22,7 +22,7 @@ abstract class PhabricatorEditEngineAPIMethod
   final protected function defineParamTypes() {
     return array(
       'transactions' => 'list<map<string, wild>>',
-      'objectPHID' => 'optional phid',
+      'objectIdentifier' => 'optional id|phid|string',
     );
   }
 
@@ -44,7 +44,7 @@ abstract class PhabricatorEditEngineAPIMethod
     $engine = $this->newEditEngine()
       ->setViewer($viewer);
 
-    $types = $engine->getAllEditTypes();
+    $types = $engine->getConduitEditTypes();
 
     $out = array();
 
@@ -90,7 +90,7 @@ Exactly which types of edits are available depends on the object you're editing.
 Creating Objects
 ----------------
 
-To create an object, pass a list of `transactions` but leave `objectPHID`
+To create an object, pass a list of `transactions` but leave `objectIdentifier`
 empty. This will create a new object with the initial field values you
 specify.
 
@@ -99,7 +99,11 @@ Editing Objects
 ---------------
 
 To edit an object, pass a list of `transactions` and specify an object to
-apply them to with `objectPHID`. This will apply the changes to the object.
+apply them to with `objectIdentifier`. This will apply the changes to the
+object.
+
+You may pass an ID (like `123`), PHID (like `PHID-WXYZ-abcdef...`), or
+monogram (like `T123`, for objects which have monograms).
 
 
 Return Type

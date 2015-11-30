@@ -1888,7 +1888,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     foreach ($no_effect as $key => $xaction) {
-      if ($xaction->getComment()) {
+      if ($xaction->hasComment()) {
         $xaction->setTransactionType($type_comment);
         $xaction->setOldValue(null);
         $xaction->setNewValue(null);
@@ -2867,12 +2867,15 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $adapter = $this->buildHeraldAdapter($object, $xactions);
-    $adapter->setContentSource($this->getContentSource());
-    $adapter->setIsNewObject($this->getIsNewObject());
+    $adapter = $this->buildHeraldAdapter($object, $xactions)
+      ->setContentSource($this->getContentSource())
+      ->setIsNewObject($this->getIsNewObject())
+      ->setAppliedTransactions($xactions);
+
     if ($this->getApplicationEmail()) {
       $adapter->setApplicationEmail($this->getApplicationEmail());
     }
+
     $xscript = HeraldEngine::loadAndApplyRules($adapter);
 
     $this->setHeraldAdapter($adapter);

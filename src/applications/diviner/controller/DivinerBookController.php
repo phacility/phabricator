@@ -111,7 +111,6 @@ final class DivinerBookController extends DivinerController {
       ),
       array(
         'title' => $book->getTitle(),
-        'class' => 'pro-white-background',
       ));
   }
 

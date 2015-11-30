@@ -73,161 +73,25 @@ abstract class PhabricatorEditEngine
 
   final protected function buildEditFields($object) {
     $viewer = $this->getViewer();
-    $editor = $object->getApplicationTransactionEditor();
-
-    $types = $editor->getTransactionTypesForObject($object);
-    $types = array_fuse($types);
 
     $fields = $this->buildCustomEditFields($object);
 
-    if ($object instanceof PhabricatorPolicyInterface) {
-      $policies = id(new PhabricatorPolicyQuery())
-        ->setViewer($viewer)
-        ->setObject($object)
-        ->execute();
+    $extensions = PhabricatorEditEngineExtension::getAllEnabledExtensions();
+    foreach ($extensions as $extension) {
+      $extension->setViewer($viewer);
 
-      $map = array(
-        PhabricatorTransactions::TYPE_VIEW_POLICY => array(
-          'key' => 'policy.view',
-          'aliases' => array('view'),
-          'capability' => PhabricatorPolicyCapability::CAN_VIEW,
-          'label' => pht('View Policy'),
-          'description' => pht('Controls who can view the object.'),
-          'edit' => 'view',
-        ),
-        PhabricatorTransactions::TYPE_EDIT_POLICY => array(
-          'key' => 'policy.edit',
-          'aliases' => array('edit'),
-          'capability' => PhabricatorPolicyCapability::CAN_EDIT,
-          'label' => pht('Edit Policy'),
-          'description' => pht('Controls who can edit the object.'),
-          'edit' => 'edit',
-        ),
-        PhabricatorTransactions::TYPE_JOIN_POLICY => array(
-          'key' => 'policy.join',
-          'aliases' => array('join'),
-          'capability' => PhabricatorPolicyCapability::CAN_JOIN,
-          'label' => pht('Join Policy'),
-          'description' => pht('Controls who can join the object.'),
-          'edit' => 'join',
-        ),
-      );
-
-      foreach ($map as $type => $spec) {
-        if (empty($types[$type])) {
-          continue;
-        }
-
-        $capability = $spec['capability'];
-        $key = $spec['key'];
-        $aliases = $spec['aliases'];
-        $label = $spec['label'];
-        $description = $spec['description'];
-        $edit = $spec['edit'];
-
-        $policy_field = id(new PhabricatorPolicyEditField())
-          ->setKey($key)
-          ->setLabel($label)
-          ->setDescription($description)
-          ->setAliases($aliases)
-          ->setCapability($capability)
-          ->setPolicies($policies)
-          ->setTransactionType($type)
-          ->setEditTypeKey($edit)
-          ->setValue($object->getPolicy($capability));
-        $fields[] = $policy_field;
-
-        if ($object instanceof PhabricatorSpacesInterface) {
-          if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
-            $type_space = PhabricatorTransactions::TYPE_SPACE;
-            if (isset($types[$type_space])) {
-              $space_field = id(new PhabricatorSpaceEditField())
-                ->setKey('spacePHID')
-                ->setLabel(pht('Space'))
-                ->setEditTypeKey('space')
-                ->setDescription(
-                  pht('Shifts the object in the Spaces application.'))
-                ->setIsReorderable(false)
-                ->setAliases(array('space', 'policy.space'))
-                ->setTransactionType($type_space)
-                ->setValue($object->getSpacePHID());
-              $fields[] = $space_field;
-
-              $policy_field->setSpaceField($space_field);
-            }
-          }
-        }
+      if (!$extension->supportsObject($this, $object)) {
+        continue;
       }
-    }
 
-    $edge_type = PhabricatorTransactions::TYPE_EDGE;
-    $object_phid = $object->getPHID();
+      $extension_fields = $extension->buildCustomEditFields($this, $object);
 
-    $project_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+      // TODO: Validate this in more detail with a more tailored error.
+      assert_instances_of($extension_fields, 'PhabricatorEditField');
 
-    if ($object instanceof PhabricatorProjectInterface) {
-      if (isset($types[$edge_type])) {
-        if ($object_phid) {
-          $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-            $object_phid,
-            $project_edge_type);
-          $project_phids = array_reverse($project_phids);
-        } else {
-          $project_phids = array();
-        }
-
-        $edge_field = id(new PhabricatorProjectsEditField())
-          ->setKey('projectPHIDs')
-          ->setLabel(pht('Projects'))
-          ->setEditTypeKey('projects')
-          ->setDescription(pht('Add or remove associated projects.'))
-          ->setAliases(array('project', 'projects'))
-          ->setTransactionType($edge_type)
-          ->setMetadataValue('edge:type', $project_edge_type)
-          ->setValue($project_phids);
-        $fields[] = $edge_field;
+      foreach ($extension_fields as $field) {
+        $fields[] = $field;
       }
-    }
-
-    $subscribers_type = PhabricatorTransactions::TYPE_SUBSCRIBERS;
-
-    if ($object instanceof PhabricatorSubscribableInterface) {
-      if (isset($types[$subscribers_type])) {
-        if ($object_phid) {
-          $sub_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-            $object_phid);
-        } else {
-          // TODO: Allow applications to provide default subscribers; Maniphest
-          // does this at a minimum.
-          $sub_phids = array();
-        }
-
-        $subscribers_field = id(new PhabricatorSubscribersEditField())
-          ->setKey('subscriberPHIDs')
-          ->setLabel(pht('Subscribers'))
-          ->setEditTypeKey('subscribers')
-          ->setDescription(pht('Manage subscribers.'))
-          ->setAliases(array('subscriber', 'subscribers'))
-          ->setTransactionType($subscribers_type)
-          ->setValue($sub_phids);
-        $fields[] = $subscribers_field;
-      }
-    }
-
-    $xaction = $object->getApplicationTransactionTemplate();
-    $comment = $xaction->getApplicationTransactionCommentObject();
-    if ($comment) {
-      $comment_type = PhabricatorTransactions::TYPE_COMMENT;
-
-      $comment_field = id(new PhabricatorCommentEditField())
-        ->setKey('comment')
-        ->setLabel(pht('Comments'))
-        ->setDescription(pht('Add comments.'))
-        ->setAliases(array('comments'))
-        ->setIsHidden(true)
-        ->setTransactionType($comment_type)
-        ->setValue(null);
-      $fields[] = $comment_field;
     }
 
     $config = $this->getEditEngineConfiguration();
@@ -352,7 +216,9 @@ abstract class PhabricatorEditEngine
     if (!$has_default) {
       $first = head($configurations);
       if (!$first->getBuiltinKey()) {
-        $first->setBuiltinKey(self::EDITENGINECONFIG_DEFAULT);
+        $first
+          ->setBuiltinKey(self::EDITENGINECONFIG_DEFAULT)
+          ->setIsDefault(true);
 
         if (!strlen($first->getName())) {
           $first->setName($this->getObjectCreateShortText());
@@ -513,6 +379,83 @@ abstract class PhabricatorEditEngine
 
 
   /**
+   * Try to load an object by ID, PHID, or monogram. This is done primarily
+   * to make Conduit a little easier to use.
+   *
+   * @param wild ID, PHID, or monogram.
+   * @return object Corresponding editable object.
+   * @task load
+   */
+  private function newObjectFromIdentifier($identifier) {
+    if (is_int($identifier) || ctype_digit($identifier)) {
+      $object = $this->newObjectFromID($identifier);
+
+      if (!$object) {
+        throw new Exception(
+          pht(
+            'No object exists with ID "%s".',
+            $identifier));
+      }
+
+      return $object;
+    }
+
+    $type_unknown = PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN;
+    if (phid_get_type($identifier) != $type_unknown) {
+      $object = $this->newObjectFromPHID($identifier);
+
+      if (!$object) {
+        throw new Exception(
+          pht(
+            'No object exists with PHID "%s".',
+            $identifier));
+      }
+
+      return $object;
+    }
+
+    $target = id(new PhabricatorObjectQuery())
+      ->setViewer($this->getViewer())
+      ->withNames(array($identifier))
+      ->executeOne();
+    if (!$target) {
+      throw new Exception(
+        pht(
+          'Monogram "%s" does not identify a valid object.',
+          $identifier));
+    }
+
+    $expect = $this->newEditableObject();
+    $expect_class = get_class($expect);
+    $target_class = get_class($target);
+    if ($expect_class !== $target_class) {
+      throw new Exception(
+        pht(
+          'Monogram "%s" identifies an object of the wrong type. Loaded '.
+          'object has class "%s", but this editor operates on objects of '.
+          'type "%s".',
+          $identifier,
+          $target_class,
+          $expect_class));
+    }
+
+    // Load the object by PHID using this engine's standard query. This makes
+    // sure it's really valid, goes through standard policy check logic, and
+    // picks up any `need...()` clauses we want it to load with.
+
+    $object = $this->newObjectFromPHID($target->getPHID());
+    if (!$object) {
+      throw new Exception(
+        pht(
+          'Failed to reload object identified by monogram "%s" when '.
+          'querying by PHID.',
+          $identifier));
+    }
+
+    return $object;
+  }
+
+  /**
    * Load an object by ID.
    *
    * @param int Object ID.
@@ -629,6 +572,8 @@ abstract class PhabricatorEditEngine
     switch ($action) {
       case 'parameters':
         return $this->buildParametersResponse($object);
+      case 'nodefault':
+        return $this->buildNoDefaultResponse($object);
       default:
         return $this->buildEditResponse($object);
     }
@@ -674,6 +619,8 @@ abstract class PhabricatorEditEngine
     $validation_exception = null;
     if ($request->isFormPost()) {
       foreach ($fields as $field) {
+        $field->setIsSubmittedForm(true);
+
         if ($field->getIsLocked() || $field->getIsHidden()) {
           continue;
         }
@@ -683,13 +630,22 @@ abstract class PhabricatorEditEngine
 
       $xactions = array();
       foreach ($fields as $field) {
-        $xaction = $field->generateTransaction(clone $template);
+        $types = $field->getWebEditTypes();
+        foreach ($types as $type) {
+          $type_xactions = $type->generateTransactions(
+            clone $template,
+            array(
+              'value' => $field->getValueForTransaction(),
+            ));
 
-        if (!$xaction) {
-          continue;
+          if (!$type_xactions) {
+            continue;
+          }
+
+          foreach ($type_xactions as $type_xaction) {
+            $xactions[] = $type_xaction;
+          }
         }
-
-        $xactions[] = $xaction;
       }
 
       $editor = $object->getApplicationTransactionEditor()
@@ -705,6 +661,20 @@ abstract class PhabricatorEditEngine
           ->setURI($this->getObjectViewURI($object));
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
+
+        foreach ($fields as $field) {
+          $xaction_type = $field->getTransactionType();
+          if ($xaction_type === null) {
+            continue;
+          }
+
+          $message = $ex->getShortMessage($xaction_type);
+          if ($message === null) {
+            continue;
+          }
+
+          $field->setControlError($message);
+        }
       }
     } else {
       if ($this->getIsCreate()) {
@@ -820,6 +790,74 @@ abstract class PhabricatorEditEngine
     return $actions;
   }
 
+  final public function addActionToCrumbs(PHUICrumbsView $crumbs) {
+    $viewer = $this->getViewer();
+
+    $configs = id(new PhabricatorEditEngineConfigurationQuery())
+      ->setViewer($viewer)
+      ->withEngineKeys(array($this->getEngineKey()))
+      ->withIsDefault(true)
+      ->withIsDisabled(false)
+      ->execute();
+
+    $dropdown = null;
+    $disabled = false;
+    $workflow = false;
+
+    $menu_icon = 'fa-plus-square';
+
+    if (!$configs) {
+      if ($viewer->isLoggedIn()) {
+        $disabled = true;
+      } else {
+        // If the viewer isn't logged in, assume they'll get hit with a login
+        // dialog and are likely able to create objects after they log in.
+        $disabled = false;
+      }
+      $workflow = true;
+      $create_uri = $this->getEditURI(null, 'nodefault/');
+    } else {
+      $config = head($configs);
+      $form_key = $config->getIdentifier();
+      $create_uri = $this->getEditURI(null, "form/{$form_key}/");
+
+      if (count($configs) > 1) {
+        $configs = msort($configs, 'getDisplayName');
+
+        $menu_icon = 'fa-caret-square-o-down';
+
+        $dropdown = id(new PhabricatorActionListView())
+          ->setUser($viewer);
+
+        foreach ($configs as $config) {
+          $form_key = $config->getIdentifier();
+          $config_uri = $this->getEditURI(null, "form/{$form_key}/");
+
+          $item_icon = 'fa-plus';
+
+          $dropdown->addAction(
+            id(new PhabricatorActionView())
+              ->setName($config->getDisplayName())
+              ->setIcon($item_icon)
+              ->setHref($config_uri));
+        }
+      }
+    }
+
+    $action = id(new PHUIListItemView())
+      ->setName($this->getObjectCreateShortText())
+      ->setHref($create_uri)
+      ->setIcon($menu_icon)
+      ->setWorkflow($workflow)
+      ->setDisabled($disabled);
+
+    if ($dropdown) {
+      $action->setDropdownMenu($dropdown);
+    }
+
+    $crumbs->addAction($action);
+  }
+
 
 /* -(  Responding to HTTP Parameter Requests  )------------------------------ */
 
@@ -860,10 +898,22 @@ abstract class PhabricatorEditEngine
     return $controller->newPage()
       ->setTitle(pht('HTTP Parameters'))
       ->setCrumbs($crumbs)
-      ->addClass('pro-white-background')
       ->appendChild($document);
   }
 
+
+  private function buildNoDefaultResponse($object) {
+    $cancel_uri = $this->getObjectCreateCancelURI($object);
+
+    return $this->getController()
+      ->newDialog()
+      ->setTitle(pht('No Default Create Forms'))
+      ->appendParagraph(
+        pht(
+          'This application is not configured with any visible, enabled '.
+          'forms for creating objects.'))
+      ->addCancelButton($cancel_uri);
+  }
 
 /* -(  Conduit  )------------------------------------------------------------ */
 
@@ -887,13 +937,10 @@ abstract class PhabricatorEditEngine
           get_class($this)));
     }
 
-    $phid = $request->getValue('objectPHID');
-    if ($phid) {
+    $identifier = $request->getValue('objectIdentifier');
+    if ($identifier) {
       $this->setIsCreate(false);
-      $object = $this->newObjectFromPHID($phid);
-      if (!$object) {
-        throw new Exception(pht('No such object with PHID "%s".', $phid));
-      }
+      $object = $this->newObjectFromIdentifier($identifier);
     } else {
       $this->setIsCreate(true);
       $object = $this->newEditableObject();
@@ -903,7 +950,7 @@ abstract class PhabricatorEditEngine
 
     $fields = $this->buildEditFields($object);
 
-    $types = $this->getAllEditTypesFromFields($fields);
+    $types = $this->getConduitEditTypesFromFields($fields);
     $template = $object->getApplicationTransactionTemplate();
 
     $xactions = $this->getConduitTransactions($request, $types, $template);
@@ -993,9 +1040,13 @@ abstract class PhabricatorEditEngine
     foreach ($xactions as $xaction) {
       $type = $types[$xaction['type']];
 
-      $results[] = $type->generateTransaction(
+      $type_xactions = $type->generateTransactions(
         clone $template,
         $xaction);
+
+      foreach ($type_xactions as $type_xaction) {
+        $results[] = $type_xaction;
+      }
     }
 
     return $results;
@@ -1006,10 +1057,15 @@ abstract class PhabricatorEditEngine
    * @return map<string, PhabricatorEditType>
    * @task conduit
    */
-  private function getAllEditTypesFromFields(array $fields) {
+  private function getConduitEditTypesFromFields(array $fields) {
     $types = array();
     foreach ($fields as $field) {
-      $field_types = $field->getEditTransactionTypes();
+      $field_types = $field->getConduitEditTypes();
+
+      if ($field_types === null) {
+        continue;
+      }
+
       foreach ($field_types as $field_type) {
         $field_type->setField($field);
         $types[$field_type->getEditType()] = $field_type;
@@ -1018,7 +1074,7 @@ abstract class PhabricatorEditEngine
     return $types;
   }
 
-  public function getAllEditTypes() {
+  public function getConduitEditTypes() {
     $config = $this->loadEditEngineConfiguration(null);
     if (!$config) {
       return array();
@@ -1026,7 +1082,7 @@ abstract class PhabricatorEditEngine
 
     $object = $this->newEditableObject();
     $fields = $this->buildEditFields($object);
-    return $this->getAllEditTypesFromFields($fields);
+    return $this->getConduitEditTypesFromFields($fields);
   }
 
   final public static function getAllEditEngines() {

@@ -49,8 +49,7 @@ final class PhamePostViewController extends PhamePostController {
       ->addActionLink($action_button);
 
     $document = id(new PHUIDocumentViewPro())
-      ->setHeader($header)
-      ->setPropertyList($properties);
+      ->setHeader($header);
 
     if ($post->isDraft()) {
       $document->appendChild(
@@ -94,15 +93,16 @@ final class PhamePostViewController extends PhamePostController {
     $timeline = phutil_tag_div('phui-document-view-pro-box', $timeline);
 
     $add_comment = $this->buildCommentForm($post);
+    $add_comment = phutil_tag_div('mlb mlt', $add_comment);
 
     return $this->newPage()
       ->setTitle($post->getTitle())
-      ->addClass('pro-white-background')
       ->setPageObjectPHIDs(array($post->getPHID()))
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
           $document,
+          $properties,
           $timeline,
           $add_comment,
       ));
@@ -157,14 +157,6 @@ final class PhamePostViewController extends PhamePostController {
           ->setWorkflow(true));
     }
 
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-times')
-        ->setHref($this->getApplicationURI('post/delete/'.$id.'/'))
-        ->setName(pht('Delete Post'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
-
     $blog = $post->getBlog();
     $can_view_live = $blog && !$post->isDraft();
 
@@ -217,12 +209,6 @@ final class PhamePostViewController extends PhamePostController {
   private function buildCommentForm(PhamePost $post) {
     $viewer = $this->getViewer();
 
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
-    $add_comment_header = $is_serious
-      ? pht('Add Comment')
-      : pht('Derp Text');
-
     $draft = PhabricatorDraft::newFromUserAndKey(
       $viewer, $post->getPHID());
 
@@ -230,7 +216,7 @@ final class PhamePostViewController extends PhamePostController {
       ->setUser($viewer)
       ->setObjectPHID($post->getPHID())
       ->setDraft($draft)
-      ->setHeaderText($add_comment_header)
+      ->setHeaderText(pht('Add Comment'))
       ->setAction($this->getApplicationURI('post/comment/'.$post->getID().'/'))
       ->setSubmitButtonName(pht('Add Comment'));
 

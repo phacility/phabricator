@@ -741,16 +741,17 @@ final class ManiphestTaskEditController extends ManiphestController {
 
     $crumbs->addTextCrumb($header_name);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-        $preview,
-      ),
-      array(
-        'title' => $header_name,
-        'pageObjects' => $page_objects,
-      ));
+    $title = $header_name;
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs($page_objects)
+      ->appendChild(
+        array(
+          $form_box,
+          $preview,
+        ));
   }
 
 }

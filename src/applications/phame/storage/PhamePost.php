@@ -8,6 +8,7 @@ final class PhamePost extends PhameDAO
     PhabricatorProjectInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorSubscribableInterface,
+    PhabricatorDestructibleInterface,
     PhabricatorTokenReceiverInterface {
 
   const MARKUP_FIELD_BODY    = 'markup:body';
@@ -250,6 +251,18 @@ final class PhamePost extends PhameDAO
     AphrontRequest $request) {
 
     return $timeline;
+  }
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+
+      $this->delete();
+
+    $this->saveTransaction();
   }
 
 

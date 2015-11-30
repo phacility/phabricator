@@ -56,17 +56,16 @@ final class AlmanacServiceViewController
       new AlmanacServiceTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-        $bindings,
-        $this->buildAlmanacPropertiesTable($service),
-        $timeline,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $box,
+          $bindings,
+          $this->buildAlmanacPropertiesTable($service),
+          $timeline,
+    ));
   }
 
   private function buildPropertyList(AlmanacService $service) {

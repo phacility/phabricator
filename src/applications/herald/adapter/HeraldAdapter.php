@@ -29,6 +29,7 @@ abstract class HeraldAdapter extends Phobject {
   private $contentSource;
   private $isNewObject;
   private $applicationEmail;
+  private $appliedTransactions = array();
   private $queuedTransactions = array();
   private $emailPHIDs = array();
   private $forcedEmailPHIDs = array();
@@ -119,6 +120,36 @@ abstract class HeraldAdapter extends Phobject {
       ->execute();
 
     return !empty($applications);
+  }
+
+
+  /**
+   * Set the list of transactions which just took effect.
+   *
+   * These transactions are set by @{class:PhabricatorApplicationEditor}
+   * automatically, before it invokes Herald.
+   *
+   * @param list<PhabricatorApplicationTransaction> List of transactions.
+   * @return this
+   */
+  final public function setAppliedTransactions(array $xactions) {
+    assert_instances_of($xactions, 'PhabricatorApplicationTransaction');
+    $this->appliedTransactions = $xactions;
+    return $this;
+  }
+
+
+  /**
+   * Get a list of transactions which just took effect.
+   *
+   * When an object is edited normally, transactions are applied and then
+   * Herald executes. You can call this method to examine the transactions
+   * if you want to react to them.
+   *
+   * @return list<PhabricatorApplicationTransaction> List of transactions.
+   */
+  final public function getAppliedTransactions() {
+    return $this->appliedTransactions;
   }
 
   public function queueTransaction($transaction) {

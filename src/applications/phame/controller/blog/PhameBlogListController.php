@@ -31,4 +31,21 @@ final class PhameBlogListController extends PhameBlogController {
     return $nav;
   }
 
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $can_create = $this->hasApplicationCapability(
+      PhameBlogCreateCapability::CAPABILITY);
+
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setName(pht('New Blog'))
+        ->setHref($this->getApplicationURI('/blog/new/'))
+        ->setIcon('fa-plus-square')
+        ->setDisabled(!$can_create)
+        ->setWorkflow(!$can_create));
+
+    return $crumbs;
+  }
+
 }

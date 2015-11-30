@@ -1,7 +1,7 @@
 <?php
 
 final class AphrontStringListHTTPParameterType
-  extends AphrontHTTPParameterType {
+  extends AphrontListHTTPParameterType {
 
   protected function getParameterValue(AphrontRequest $request, $key) {
     $list = $request->getArr($key, null);

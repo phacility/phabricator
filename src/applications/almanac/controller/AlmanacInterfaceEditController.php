@@ -142,13 +142,12 @@ final class AlmanacInterfaceEditController
       $crumbs->addTextCrumb(pht('Edit Interface'));
     }
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => $title,
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $box,
       ));
   }
 

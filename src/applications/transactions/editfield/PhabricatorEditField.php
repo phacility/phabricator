@@ -7,18 +7,22 @@ abstract class PhabricatorEditField extends Phobject {
   private $label;
   private $aliases = array();
   private $value;
+  private $initialValue;
   private $hasValue = false;
   private $object;
   private $transactionType;
   private $metadata = array();
   private $description;
   private $editTypeKey;
+  private $isRequired;
 
   private $isLocked;
   private $isHidden;
 
   private $isPreview;
   private $isEditDefaults;
+  private $isSubmittedForm;
+  private $controlError;
 
   private $isReorderable = true;
   private $isDefaultable = true;
@@ -145,6 +149,33 @@ abstract class PhabricatorEditField extends Phobject {
     throw new PhutilMethodNotImplementedException();
   }
 
+  public function setIsSubmittedForm($is_submitted) {
+    $this->isSubmittedForm = $is_submitted;
+    return $this;
+  }
+
+  public function getIsSubmittedForm() {
+    return $this->isSubmittedForm;
+  }
+
+  public function setIsRequired($is_required) {
+    $this->isRequired = $is_required;
+    return $this;
+  }
+
+  public function getIsRequired() {
+    return $this->isRequired;
+  }
+
+  public function setControlError($control_error) {
+    $this->controlError = $control_error;
+    return $this;
+  }
+
+  public function getControlError() {
+    return $this->controlError;
+  }
+
   protected function renderControl() {
     $control = $this->newControl();
     if ($control === null) {
@@ -175,6 +206,16 @@ abstract class PhabricatorEditField extends Phobject {
     }
 
     $control->setDisabled($disabled);
+
+
+    if ($this->getIsSubmittedForm()) {
+      $error = $this->getControlError();
+      if ($error !== null) {
+        $control->setError($error);
+      }
+    } else if ($this->getIsRequired()) {
+      $control->setError(true);
+    }
 
     return $control;
   }
@@ -222,26 +263,9 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function setValue($value) {
     $this->hasValue = true;
+    $this->initialValue = $value;
     $this->value = $value;
     return $this;
-  }
-
-  public function generateTransaction(
-    PhabricatorApplicationTransaction $xaction) {
-
-    if (!$this->getTransactionType()) {
-      return null;
-    }
-
-    $xaction
-      ->setTransactionType($this->getTransactionType())
-      ->setNewValue($this->getValueForTransaction());
-
-    foreach ($this->metadata as $key => $value) {
-      $xaction->setMetadataValue($key, $value);
-    }
-
-    return $xaction;
   }
 
   public function setMetadataValue($key, $value) {
@@ -249,7 +273,11 @@ abstract class PhabricatorEditField extends Phobject {
     return $this;
   }
 
-  protected function getValueForTransaction() {
+  public function getMetadata() {
+    return $this->metadata;
+  }
+
+  public function getValueForTransaction() {
     return $this->getValue();
   }
 
@@ -308,6 +336,31 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->getValueFromSubmit($request, $key);
   }
 
+
+  /**
+   * Read and return the value the object had when the user first loaded the
+   * form.
+   *
+   * This is the initial value from the user's point of view when they started
+   * the edit process, and used primarily to prevent race conditions for fields
+   * like "Projects" and "Subscribers" that use tokenizers and support edge
+   * transactions.
+   *
+   * Most fields do not need to store these values or deal with initial value
+   * handling.
+   *
+   * @param AphrontRequest Request to read from.
+   * @param string Key to read.
+   * @return wild Value read from request.
+   */
+  protected function getInitialValueFromSubmit(AphrontRequest $request, $key) {
+    return null;
+  }
+
+  public function getInitialValue() {
+    return $this->initialValue;
+  }
+
   public function readValueFromSubmit(AphrontRequest $request) {
     $key = $this->getKey();
     if ($this->getValueExistsInSubmit($request, $key)) {
@@ -316,11 +369,21 @@ abstract class PhabricatorEditField extends Phobject {
       $value = $this->getDefaultValue();
     }
     $this->value = $value;
+
+    $initial_value = $this->getInitialValueFromSubmit($request, $key);
+    $this->initialValue = $initial_value;
+
     return $this;
   }
 
   protected function getValueExistsInSubmit(AphrontRequest $request, $key) {
-    return $this->getHTTPParameterType()->getExists($request, $key);
+    $type = $this->getHTTPParameterType();
+
+    if ($type) {
+      return $type->getExists($request, $key);
+    }
+
+    return false;
   }
 
   protected function getValueFromSubmit(AphrontRequest $request, $key) {
@@ -328,7 +391,13 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   protected function getDefaultValue() {
-    return $this->getHTTPParameterType()->getDefaultValue();
+    $type = $this->getHTTPParameterType();
+
+    if ($type) {
+      return $type->getDefaultValue();
+    }
+
+    return null;
   }
 
   final public function getHTTPParameterType() {
@@ -362,66 +431,40 @@ abstract class PhabricatorEditField extends Phobject {
       ->setValueType($this->getHTTPParameterType()->getTypeName());
   }
 
-  public function getEditTransactionTypes() {
+  protected function getEditType() {
     $transaction_type = $this->getTransactionType();
+
     if ($transaction_type === null) {
-      return array();
+      return null;
     }
 
     $type_key = $this->getEditTypeKey();
 
-    // TODO: This is a pretty big pile of hard-coded hacks for now.
+    return $this->newEditType()
+      ->setEditType($type_key)
+      ->setTransactionType($transaction_type)
+      ->setDescription($this->getDescription())
+      ->setMetadata($this->getMetadata());
+  }
 
-    $edge_types = array(
-      PhabricatorTransactions::TYPE_EDGE => array(
-        '+' => pht('Add projects.'),
-        '-' => pht('Remove projects.'),
-        '=' => pht('Set associated projects, overwriting current value.'),
-      ),
-      PhabricatorTransactions::TYPE_SUBSCRIBERS => array(
-        '+' => pht('Add subscribers.'),
-        '-' => pht('Remove subscribers.'),
-        '=' => pht('Set subscribers, overwriting current value.'),
-      ),
-    );
+  public function getConduitEditTypes() {
+    $edit_type = $this->getEditType();
 
-    if (isset($edge_types[$transaction_type])) {
-      $base = id(new PhabricatorEdgeEditType())
-        ->setTransactionType($transaction_type)
-        ->setMetadata($this->metadata);
-
-      $strings = $edge_types[$transaction_type];
-
-      $add = id(clone $base)
-        ->setEditType($type_key.'.add')
-        ->setEdgeOperation('+')
-        ->setDescription($strings['+'])
-        ->setValueDescription(pht('List of PHIDs to add.'));
-      $rem = id(clone $base)
-        ->setEditType($type_key.'.remove')
-        ->setEdgeOperation('-')
-        ->setDescription($strings['-'])
-        ->setValueDescription(pht('List of PHIDs to remove.'));
-      $set = id(clone $base)
-        ->setEditType($type_key.'.set')
-        ->setEdgeOperation('=')
-        ->setDescription($strings['='])
-        ->setValueDescription(pht('List of PHIDs to set.'));
-
-      return array(
-        $add,
-        $rem,
-        $set,
-      );
+    if ($edit_type === null) {
+      return null;
     }
 
-    return array(
-      $this->newEditType()
-        ->setEditType($type_key)
-        ->setTransactionType($transaction_type)
-        ->setDescription($this->getDescription())
-        ->setMetadata($this->metadata),
-    );
+    return array($edit_type);
+  }
+
+  public function getWebEditTypes() {
+    $edit_type = $this->getEditType();
+
+    if ($edit_type === null) {
+      return null;
+    }
+
+    return array($edit_type);
   }
 
 }
