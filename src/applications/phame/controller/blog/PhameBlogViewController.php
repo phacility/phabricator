@@ -4,6 +4,10 @@ final class PhameBlogViewController extends PhameBlogController {
 
   private $blog;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
@@ -158,9 +162,7 @@ final class PhameBlogViewController extends PhameBlogController {
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI('blog/manage/'.$blog->getID().'/'))
-        ->setName(pht('Manage Blog'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+        ->setName(pht('Manage Blog')));
 
     return $actions;
   }

@@ -2,6 +2,10 @@
 
 final class PhamePostViewController extends PhamePostController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
