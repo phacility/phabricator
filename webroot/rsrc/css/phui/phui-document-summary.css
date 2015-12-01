@@ -2,6 +2,11 @@
  * @provides phui-document-summary-view-css
  */
 
+.phui-document-summary-view {
+  margin-top: 8px;
+  border-bottom: 1px solid rgba(55,55,55,.1);
+}
+
 .phui-document-summary-view.is-draft {
   opacity: 0.5;
 }
@@ -12,13 +17,17 @@ body .phui-document-view .phui-document-summary-view h2.remarkup-header {
 }
 
 .phui-document-summary-view h2.remarkup-header a {
-  color: {$darkbluetext};
+  color: #000;
+}
+
+.phui-document-summary-view h2.remarkup-header a:hover {
+  color: {$violet};
+  text-decoration: none;
 }
 
 .phui-document-summary-subtitle {
-  color: {$lightbluetext};
+  color: {$lightgreytext};
   font-size: {$normalfontsize};
-  margin-bottom: 8px;
 }
 
 .phui-document-summary-subtitle a {

@@ -6,6 +6,7 @@
   max-width: 800px;
   margin: 32px auto;
   position: relative;
+  padding: 0 8px;
 }
 
 .phame-blog-description-name {
