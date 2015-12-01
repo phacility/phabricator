@@ -78,8 +78,6 @@ final class PholioMockViewController extends PholioController {
       ->setUser($viewer)
       ->setMock($mock)
       ->setImageID($image_id);
-    $this->addExtraQuicksandConfig(
-      array('mockViewConfig' => $mock_view->getBehaviorConfig()));
 
     $output = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Image'))
@@ -102,6 +100,8 @@ final class PholioMockViewController extends PholioController {
       ->setTitle('M'.$mock->getID().' '.$title)
       ->setCrumbs($crumbs)
       ->setPageObjectPHIDs(array($mock->getPHID()))
+      ->addQuicksandConfig(
+        array('mockViewConfig' => $mock_view->getBehaviorConfig()))
       ->appendChild(
         array(
           $object_box,
