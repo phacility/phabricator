@@ -38,7 +38,7 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
   public function getRoutes() {
     return array(
      '/phame/' => array(
-        '' => 'PhamePostListController',
+        '' => 'PhameHomeController',
         'live/(?P<id>[^/]+)/(?P<more>.*)' => 'PhameBlogLiveController',
         'post/' => array(
           '(?:(?P<filter>draft|all)/)?' => 'PhamePostListController',
