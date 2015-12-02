@@ -104,21 +104,23 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
   }
 
   public function loadStatus(PhabricatorUser $user) {
+    $limit = self::MAX_STATUS_ITEMS;
+
     $revisions = id(new DifferentialRevisionQuery())
       ->setViewer($user)
       ->withResponsibleUsers(array($user->getPHID()))
       ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
       ->needRelationships(true)
-      ->setLimit(self::MAX_STATUS_ITEMS)
+      ->setLimit($limit)
       ->execute();
 
     $status = array();
-    if (count($revisions) == self::MAX_STATUS_ITEMS) {
+    if (count($revisions) >= $limit) {
       $all_count = count($revisions);
-      $all_count_str = self::formatStatusCount(
-        $all_count,
-        '%s Active Reviews',
-        '%d Active Review(s)');
+      $all_count_str = pht(
+        '%s+ Active Review(s)',
+        new PhutilNumber($limit - 1));
+
       $type = PhabricatorApplicationStatusView::TYPE_WARNING;
       $status[] = id(new PhabricatorApplicationStatusView())
         ->setType($type)
@@ -131,10 +133,10 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
           array($user->getPHID()));
 
       $blocking = count($blocking);
-      $blocking_str = self::formatStatusCount(
-        $blocking,
-        '%s Reviews Blocking Others',
-        '%d Review(s) Blocking Others');
+      $blocking_str = pht(
+        '%s Review(s) Blocking Others',
+        new PhutilNumber($blocking));
+
       $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
       $status[] = id(new PhabricatorApplicationStatusView())
         ->setType($type)
@@ -142,10 +144,10 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
         ->setCount($blocking);
 
       $active = count($active);
-      $active_str = self::formatStatusCount(
-        $active,
-        '%s Reviews Need Attention',
-        '%d Review(s) Need Attention');
+      $active_str = pht(
+        '%s Review(s) Need Attention',
+        new PhutilNumber($active));
+
       $type = PhabricatorApplicationStatusView::TYPE_WARNING;
       $status[] = id(new PhabricatorApplicationStatusView())
         ->setType($type)
@@ -153,10 +155,10 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
         ->setCount($active);
 
       $waiting = count($waiting);
-      $waiting_str = self::formatStatusCount(
-        $waiting,
-        '%s Reviews Waiting on Others',
-        '%d Review(s) Waiting on Others');
+      $waiting_str = pht(
+        '%s Review(s) Waiting on Others',
+        new PhutilNumber($waiting));
+
       $type = PhabricatorApplicationStatusView::TYPE_INFO;
       $status[] = id(new PhabricatorApplicationStatusView())
         ->setType($type)
