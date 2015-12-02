@@ -685,10 +685,6 @@ abstract class PhabricatorEditEngine
 
           $field->readValueFromRequest($request);
         }
-      } else {
-        foreach ($fields as $field) {
-          $field->readValueFromObject($object);
-        }
       }
     }
 

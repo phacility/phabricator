@@ -1091,8 +1091,15 @@ abstract class PhabricatorCustomField extends Phobject {
   }
 
   protected function newEditField() {
-    return id(new PhabricatorCustomFieldEditField())
+    $field = id(new PhabricatorCustomFieldEditField())
       ->setCustomField($this);
+
+    $http_type = $this->getHTTPParameterType();
+    if ($http_type) {
+      $field->setCustomFieldHTTPParameterType($http_type);
+    }
+
+    return $field;
   }
 
   protected function newStandardEditField() {
@@ -1107,6 +1114,13 @@ abstract class PhabricatorCustomField extends Phobject {
       ->setDescription($this->getFieldDescription())
       ->setTransactionType($this->getApplicationTransactionType())
       ->setValue($this->getNewValueForApplicationTransactions());
+  }
+
+  protected function getHTTPParameterType() {
+    if ($this->proxy) {
+      return $this->proxy->getHTTPParameterType();
+    }
+    return null;
   }
 
   /**

@@ -34,14 +34,21 @@ abstract class PhabricatorStandardCustomFieldPHIDs
   }
 
   public function setValueFromStorage($value) {
+    // NOTE: We're accepting either a JSON string (a real storage value) or
+    // an array (from HTTP parameter prefilling). This is a little hacky, but
+    // should hold until this can get cleaned up more thoroughly.
+    // TODO: Clean this up.
+
     $result = array();
-    if ($value) {
+    if (!is_array($value)) {
       $value = json_decode($value, true);
       if (is_array($value)) {
         $result = array_values($value);
       }
     }
+
     $this->setFieldValue($value);
+
     return $this;
   }
 
@@ -211,6 +218,10 @@ abstract class PhabricatorStandardCustomFieldPHIDs
     }
 
     return $value;
+  }
+
+  protected function getHTTPParameterType() {
+    return new AphrontPHIDListHTTPParameterType();
   }
 
 }

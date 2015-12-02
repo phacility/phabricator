@@ -299,24 +299,27 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   public function readValueFromRequest(AphrontRequest $request) {
-    $check = array_merge(array($this->getKey()), $this->getAliases());
+    $check = $this->getAllReadValueFromRequestKeys();
     foreach ($check as $key) {
       if (!$this->getValueExistsInRequest($request, $key)) {
         continue;
       }
 
       $this->value = $this->getValueFromRequest($request, $key);
-      return;
+      break;
     }
-
-    $this->readValueFromObject($this->getObject());
-
     return $this;
   }
 
-  public function readValueFromObject($object) {
-    $this->value = $this->getValueFromObject($object);
-    return $this;
+  public function getAllReadValueFromRequestKeys() {
+    $keys = array();
+
+    $keys[] = $this->getKey();
+    foreach ($this->getAliases() as $alias) {
+      $keys[] = $alias;
+    }
+
+    return $keys;
   }
 
   public function readDefaultValueFromConfiguration($value) {
@@ -337,11 +340,11 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   protected function getValueExistsInRequest(AphrontRequest $request, $key) {
-    return $this->getValueExistsInSubmit($request, $key);
+    return $this->getHTTPParameterValueExists($request, $key);
   }
 
   protected function getValueFromRequest(AphrontRequest $request, $key) {
-    return $this->getValueFromSubmit($request, $key);
+    return $this->getHTTPParameterValue($request, $key);
   }
 
 
@@ -385,6 +388,16 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   protected function getValueExistsInSubmit(AphrontRequest $request, $key) {
+    return $this->getHTTPParameterValueExists($request, $key);
+  }
+
+  protected function getValueFromSubmit(AphrontRequest $request, $key) {
+    return $this->getHTTPParameterValue($request, $key);
+  }
+
+  protected function getHTTPParameterValueExists(
+    AphrontRequest $request,
+    $key) {
     $type = $this->getHTTPParameterType();
 
     if ($type) {
@@ -394,8 +407,14 @@ abstract class PhabricatorEditField extends Phobject {
     return false;
   }
 
-  protected function getValueFromSubmit(AphrontRequest $request, $key) {
-    return $this->getHTTPParameterType()->getValue($request, $key);
+  protected function getHTTPParameterValue($request, $key) {
+    $type = $this->getHTTPParameterType();
+
+    if ($type) {
+      return $type->getValue($request, $key);
+    }
+
+    return null;
   }
 
   protected function getDefaultValue() {

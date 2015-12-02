@@ -34,7 +34,10 @@ final class PhabricatorCustomFieldEditEngineExtension
       PhabricatorCustomField::ROLE_EDIT);
 
     $field_list->setViewer($viewer);
-    $field_list->readFieldsFromStorage($object);
+
+    if (!$engine->getIsCreate()) {
+      $field_list->readFieldsFromStorage($object);
+    }
 
     $results = array();
     foreach ($field_list->getFields() as $field) {
