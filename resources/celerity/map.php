@@ -420,6 +420,7 @@ return array(
     'rsrc/js/application/repository/repository-crossreference.js' => 'e5339c43',
     'rsrc/js/application/search/behavior-reorder-queries.js' => 'e9581f08',
     'rsrc/js/application/slowvote/behavior-slowvote-embed.js' => '887ad43f',
+    'rsrc/js/application/transactions/behavior-comment-actions.js' => 'f2c64202',
     'rsrc/js/application/transactions/behavior-reorder-fields.js' => 'b59e1e96',
     'rsrc/js/application/transactions/behavior-show-older-transactions.js' => 'dbbf48b6',
     'rsrc/js/application/transactions/behavior-transaction-comment-form.js' => 'b23b49e6',
@@ -498,6 +499,8 @@ return array(
     'rsrc/js/phuix/PHUIXActionListView.js' => 'b5c256b8',
     'rsrc/js/phuix/PHUIXActionView.js' => '8cf6d262',
     'rsrc/js/phuix/PHUIXDropdownMenu.js' => 'bd4c8dca',
+    'rsrc/js/phuix/PHUIXFormControl.js' => 'f9fba5ee',
+    'rsrc/js/phuix/PHUIXIconView.js' => 'bff6884b',
   ),
   'symbols' => array(
     'almanac-css' => 'dbb9b3af',
@@ -561,6 +564,7 @@ return array(
     'javelin-behavior-audit-preview' => 'd835b03a',
     'javelin-behavior-bulk-job-reload' => 'edf8a145',
     'javelin-behavior-choose-control' => '6153c708',
+    'javelin-behavior-comment-actions' => 'f2c64202',
     'javelin-behavior-config-reorder-fields' => 'b6993408',
     'javelin-behavior-conpherence-drag-and-drop-photo' => 'cf86d16a',
     'javelin-behavior-conpherence-menu' => '1d45c74d',
@@ -823,6 +827,8 @@ return array(
     'phuix-action-list-view' => 'b5c256b8',
     'phuix-action-view' => '8cf6d262',
     'phuix-dropdown-menu' => 'bd4c8dca',
+    'phuix-form-control-view' => 'f9fba5ee',
+    'phuix-icon-view' => 'bff6884b',
     'policy-css' => '957ea14c',
     'policy-edit-css' => '815c66f7',
     'policy-transaction-detail-css' => '82100a43',
@@ -1767,6 +1773,10 @@ return array(
       'javelin-util',
       'javelin-request',
     ),
+    'bff6884b' => array(
+      'javelin-install',
+      'javelin-dom',
+    ),
     'c1700f6f' => array(
       'javelin-install',
       'javelin-util',
@@ -1973,6 +1983,14 @@ return array(
       'javelin-workflow',
       'javelin-json',
     ),
+    'f2c64202' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-workflow',
+      'javelin-dom',
+      'phuix-form-control-view',
+      'phuix-icon-view',
+    ),
     'f36e01af' => array(
       'javelin-behavior',
       'javelin-behavior-device',
@@ -2028,6 +2046,10 @@ return array(
       'javelin-mask',
       'javelin-util',
       'phabricator-busy',
+    ),
+    'f9fba5ee' => array(
+      'javelin-install',
+      'javelin-dom',
     ),
     'fa0f4fc2' => array(
       'javelin-behavior',

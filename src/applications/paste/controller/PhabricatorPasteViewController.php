@@ -34,6 +34,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ->setViewer($viewer)
       ->withIDs(array($id))
       ->needContent(true)
+      ->needRawContent(true)
       ->executeOne();
     if (!$paste) {
       return new Aphront404Response();

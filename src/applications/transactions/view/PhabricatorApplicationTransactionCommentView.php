@@ -22,6 +22,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
 
   private $currentVersion;
   private $versionedDraft;
+  private $editTypes;
 
   public function setObjectPHID($object_phid) {
     $this->objectPHID = $object_phid;
@@ -98,6 +99,15 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   public function setHeaderText($text) {
     $this->headerText = $text;
     return $this;
+  }
+
+  public function setEditTypes($edit_types) {
+    $this->editTypes = $edit_types;
+    return $this;
+  }
+
+  public function getEditTypes() {
+    return $this->editTypes;
   }
 
   public function render() {
@@ -182,7 +192,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     $version_key = PhabricatorVersionedDraft::KEY_VERSION;
     $version_value = $this->getCurrentVersion();
 
-    return id(new AphrontFormView())
+    $form = id(new AphrontFormView())
       ->setUser($this->getUser())
       ->addSigil('transaction-append')
       ->setWorkflow(true)
@@ -193,7 +203,57 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       ->setAction($this->getAction())
       ->setID($this->getFormID())
       ->addHiddenInput('__draft__', $draft_key)
-      ->addHiddenInput($version_key, $version_value)
+      ->addHiddenInput($version_key, $version_value);
+
+    $edit_types = $this->getEditTypes();
+    if ($edit_types) {
+
+      $action_map = array();
+      foreach ($edit_types as $edit_type) {
+        $key = $edit_type->getEditType();
+        $action_map[$key] = array(
+          'key' => $key,
+          'label' => $edit_type->getLabel(),
+          'type' => $edit_type->getPHUIXControlType(),
+          'spec' => $edit_type->getPHUIXControlSpecification(),
+        );
+      }
+
+      $options = array();
+      $options['+'] = pht('Add Action...');
+      foreach ($action_map as $key => $item) {
+        $options[$key] = $item['label'];
+      }
+
+      $action_id = celerity_generate_unique_node_id();
+      $input_id = celerity_generate_unique_node_id();
+
+      $form->appendChild(
+        phutil_tag(
+          'input',
+          array(
+            'type' => 'hidden',
+            'name' => 'editengine.actions',
+            'id' => $input_id,
+          )));
+
+      $form->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Actions'))
+          ->setID($action_id)
+          ->setOptions($options));
+
+      Javelin::initBehavior(
+        'comment-actions',
+        array(
+          'actionID' => $action_id,
+          'inputID' => $input_id,
+          'formID' => $this->getFormID(),
+          'actions' => $action_map,
+        ));
+    }
+
+    $form
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setID($this->getCommentID())
@@ -207,6 +267,8 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setValue($status));
+
+    return $form;
   }
 
   private function renderPreviewPanel() {

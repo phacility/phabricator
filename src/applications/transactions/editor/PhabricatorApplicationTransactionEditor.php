@@ -811,7 +811,17 @@ abstract class PhabricatorApplicationTransactionEditor
       $this->adjustTransactionValues($object, $xaction);
     }
 
-    $xactions = $this->filterTransactions($object, $xactions);
+    try {
+      $xactions = $this->filterTransactions($object, $xactions);
+    } catch (Exception $ex) {
+      if ($read_locking) {
+        $object->endReadLocking();
+      }
+      if ($transaction_open) {
+        $object->killTransaction();
+      }
+      throw $ex;
+    }
 
     // Now that we've merged, filtered, and combined transactions, check for
     // required capabilities.

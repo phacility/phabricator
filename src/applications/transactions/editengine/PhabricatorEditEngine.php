@@ -873,6 +873,8 @@ abstract class PhabricatorEditEngine
   }
 
   final public function buildEditEngineCommentView($object) {
+    $config = $this->loadEditEngineConfiguration(null);
+
     $viewer = $this->getViewer();
     $object_phid = $object->getPHID();
 
@@ -896,6 +898,19 @@ abstract class PhabricatorEditEngine
     }
 
     $view->setCurrentVersion($this->loadDraftVersion($object));
+
+    $fields = $this->buildEditFields($object);
+
+    $all_types = array();
+    foreach ($fields as $field) {
+      // TODO: Load draft stuff.
+      $types = $field->getCommentEditTypes();
+      foreach ($types as $type) {
+        $all_types[] = $type;
+      }
+    }
+
+    $view->setEditTypes($all_types);
 
     return $view;
   }
@@ -999,6 +1014,9 @@ abstract class PhabricatorEditEngine
       return new Aphront400Response();
     }
 
+    $config = $this->loadEditEngineConfiguration(null);
+    $fields = $this->buildEditFields($object);
+
     $is_preview = $request->isPreviewRequest();
     $view_uri = $this->getObjectViewURI($object);
 
@@ -1025,11 +1043,46 @@ abstract class PhabricatorEditEngine
 
     $xactions = array();
 
-    $xactions[] = id(clone $template)
-      ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-      ->attachComment(
-        id(clone $comment_template)
-          ->setContent($comment_text));
+    $actions = $request->getStr('editengine.actions');
+    if ($actions) {
+      $type_map = array();
+      foreach ($fields as $field) {
+        $types = $field->getCommentEditTypes();
+        foreach ($types as $type) {
+          $type_map[$type->getEditType()] = $type;
+        }
+      }
+
+      $actions = phutil_json_decode($actions);
+      foreach ($actions as $action) {
+        $type = idx($action, 'type');
+        if (!$type) {
+          continue;
+        }
+
+        $edit_type = idx($type_map, $type);
+        if (!$edit_type) {
+          continue;
+        }
+
+        $type_xactions = $edit_type->generateTransactions(
+          $template,
+          array(
+            'value' => idx($action, 'value'),
+          ));
+        foreach ($type_xactions as $type_xaction) {
+          $xactions[] = $type_xaction;
+        }
+      }
+    }
+
+    if (strlen($comment_text) || !$xactions) {
+      $xactions[] = id(clone $template)
+        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+        ->attachComment(
+          id(clone $comment_template)
+            ->setContent($comment_text));
+    }
 
     $editor = $object->getApplicationTransactionEditor()
       ->setActor($viewer)

@@ -494,4 +494,8 @@ abstract class PhabricatorEditField extends Phobject {
     return array($edit_type);
   }
 
+  public function getCommentEditTypes() {
+    return array();
+  }
+
 }
