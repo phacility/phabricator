@@ -1,8 +1,5 @@
 <?php
 
-/**
- * group paste
- */
 final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
   private $highlightMap;
@@ -73,21 +70,9 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       $paste,
       new PhabricatorPasteTransactionQuery());
 
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
-    $add_comment_header = $is_serious
-      ? pht('Add Comment')
-      : pht('Eat Paste');
-
-    $draft = PhabricatorDraft::newFromUserAndKey($viewer, $paste->getPHID());
-
-    $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
-      ->setUser($viewer)
-      ->setObjectPHID($paste->getPHID())
-      ->setDraft($draft)
-      ->setHeaderText($add_comment_header)
-      ->setAction($this->getApplicationURI('/comment/'.$paste->getID().'/'))
-      ->setSubmitButtonName(pht('Add Comment'));
+    $comment_view = id(new PhabricatorPasteEditEngine())
+      ->setViewer($viewer)
+      ->buildEditEngineCommentView($paste);
 
     return $this->newPage()
       ->setTitle($paste->getFullName())
@@ -101,7 +86,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
           $object_box,
           $source_code,
           $timeline,
-          $add_comment_form,
+          $comment_view,
         ));
   }
 

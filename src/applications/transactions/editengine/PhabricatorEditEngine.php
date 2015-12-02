@@ -163,6 +163,22 @@ abstract class PhabricatorEditEngine
   }
 
 
+  /**
+   * @task text
+   */
+  protected function getCommentViewHeaderText($object) {
+    return pht('Add Comment');
+  }
+
+
+  /**
+   * @task text
+   */
+  protected function getCommentViewButtonText($object) {
+    return pht('Add Comment');
+  }
+
+
 /* -(  Edit Engine Configuration  )------------------------------------------ */
 
 
@@ -574,6 +590,8 @@ abstract class PhabricatorEditEngine
         return $this->buildParametersResponse($object);
       case 'nodefault':
         return $this->buildNoDefaultResponse($object);
+      case 'comment':
+        return $this->buildCommentResponse($object);
       default:
         return $this->buildEditResponse($object);
     }
@@ -854,6 +872,27 @@ abstract class PhabricatorEditEngine
     $crumbs->addAction($action);
   }
 
+  final public function buildEditEngineCommentView($object) {
+    $viewer = $this->getViewer();
+    $object_phid = $object->getPHID();
+
+    $header_text = $this->getCommentViewHeaderText($object);
+    $button_text = $this->getCommentViewButtonText($object);
+
+    // TODO: Drafts.
+    // $draft = PhabricatorDraft::newFromUserAndKey(
+    //   $viewer,
+    //   $object_phid);
+
+    $comment_uri = $this->getEditURI($object, 'comment/');
+
+    return id(new PhabricatorApplicationTransactionCommentView())
+      ->setUser($viewer)
+      ->setObjectPHID($object_phid)
+      ->setHeaderText($header_text)
+      ->setAction($comment_uri)
+      ->setSubmitButtonName($button_text);
+  }
 
 /* -(  Responding to HTTP Parameter Requests  )------------------------------ */
 
@@ -910,6 +949,60 @@ abstract class PhabricatorEditEngine
           'forms for creating objects.'))
       ->addCancelButton($cancel_uri);
   }
+
+  private function buildCommentResponse($object) {
+    $viewer = $this->getViewer();
+
+    if ($this->getIsCreate()) {
+      return new Aphront404Response();
+    }
+
+    $controller = $this->getController();
+    $request = $controller->getRequest();
+
+    if (!$request->isFormPost()) {
+      return new Aphront400Response();
+    }
+
+    $is_preview = $request->isPreviewRequest();
+    $view_uri = $this->getObjectViewURI($object);
+
+    $template = $object->getApplicationTransactionTemplate();
+    $comment_template = $template->getApplicationTransactionCommentObject();
+
+    $xactions = array();
+
+    $xactions[] = id(clone $template)
+      ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+      ->attachComment(
+        id(clone $comment_template)
+          ->setContent($request->getStr('comment')));
+
+    $editor = $object->getApplicationTransactionEditor()
+      ->setActor($viewer)
+      ->setContinueOnNoEffect($request->isContinueRequest())
+      ->setContentSourceFromRequest($request)
+      ->setIsPreview($is_preview);
+
+    try {
+      $xactions = $editor->applyTransactions($object, $xactions);
+    } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
+      return id(new PhabricatorApplicationTransactionNoEffectResponse())
+        ->setCancelURI($view_uri)
+        ->setException($ex);
+    }
+
+    if ($request->isAjax() && $is_preview) {
+      return id(new PhabricatorApplicationTransactionResponse())
+        ->setViewer($viewer)
+        ->setTransactions($xactions)
+        ->setIsPreview($is_preview);
+    } else {
+      return id(new AphrontRedirectResponse())
+        ->setURI($view_uri);
+    }
+  }
+
 
 /* -(  Conduit  )------------------------------------------------------------ */
 
