@@ -1,5 +1,3 @@
 <?php
 
-abstract class PhameController extends PhabricatorController {
-
-}
+abstract class PhameController extends PhabricatorController {}

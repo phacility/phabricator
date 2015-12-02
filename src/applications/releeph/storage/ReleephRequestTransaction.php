@@ -77,7 +77,7 @@ final class ReleephRequestTransaction
 
         $markup = $name;
         if ($this->getRenderingTarget() ===
-          PhabricatorApplicationTransaction::TARGET_HTML) {
+          parent::TARGET_HTML) {
 
           $markup = hsprintf('<em>%s</em>', $name);
         }
