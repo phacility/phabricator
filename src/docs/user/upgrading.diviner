@@ -51,7 +51,8 @@ You can now follow the upgrade process normally.
 Upgrade Process
 ===============
 
-IMPORTANT: You **MUST** restart Apache or PHP-FPM after upgrading.
+IMPORTANT: You **MUST** restart Phabricator after upgrading. For help, see
+@{article:Restarting Phabricator}.
 
 IMPORTANT: You **MUST** upgrade `libphutil`, `arcanist` and `phabricator` at
 the same time.
