@@ -63,7 +63,7 @@ final class PhamePostViewController extends PhamePostController {
           ->appendChild(
             pht(
               'Only you can see this draft until you publish it. '.
-              'Use "Preview / Publish" to publish this post.')));
+              'Use "Preview or Publish" to publish this post.')));
     }
 
     if (!$post->getBlog()) {
@@ -150,7 +150,14 @@ final class PhamePostViewController extends PhamePostController {
           ->setIcon('fa-eye')
           ->setHref($this->getApplicationURI('post/publish/'.$id.'/'))
           ->setDisabled(!$can_edit)
-          ->setName(pht('Preview / Publish')));
+          ->setName(pht('Publish'))
+          ->setWorkflow(true));
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('fa-eye')
+          ->setHref($this->getApplicationURI('post/preview/'.$id.'/'))
+          ->setDisabled(!$can_edit)
+          ->setName(pht('Preview in Skin')));
     } else {
       $actions->addAction(
         id(new PhabricatorActionView())

@@ -47,6 +47,7 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
           'edit/(?:(?P<id>[^/]+)/)?' => 'PhamePostEditController',
           'view/(?P<id>\d+)/' => 'PhamePostViewController',
           'publish/(?P<id>\d+)/' => 'PhamePostPublishController',
+          'preview/(?P<id>\d+)/' => 'PhamePostPreviewController',
           'unpublish/(?P<id>\d+)/' => 'PhamePostUnpublishController',
           'notlive/(?P<id>\d+)/' => 'PhamePostNotLiveController',
           'preview/' => 'PhabricatorMarkupPreviewController',

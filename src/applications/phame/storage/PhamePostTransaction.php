@@ -206,10 +206,7 @@ final class PhamePostTransaction
     }
 
     if (strlen($text)) {
-      return phutil_escape_html_newlines(
-        id(new PhutilUTF8StringTruncator())
-        ->setMaximumGlyphs(128)
-        ->truncateString($text));
+      return PhabricatorMarkupEngine::summarize($text);
     }
 
     return parent::getBodyForFeed($story);
