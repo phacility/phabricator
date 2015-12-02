@@ -964,6 +964,12 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function getBodyForFeed(PhabricatorFeedStory $story) {
+    $remarkup = $this->getRemarkupBodyForFeed($story);
+    if ($remarkup !== null) {
+      $remarkup = PhabricatorMarkupEngine::summarize($remarkup);
+      return new PHUIRemarkupView($this->viewer, $remarkup);
+    }
+
     $old = $this->getOldValue();
     $new = $this->getNewValue();
 
@@ -979,6 +985,10 @@ abstract class PhabricatorApplicationTransaction
     }
 
     return $body;
+  }
+
+  public function getRemarkupBodyForFeed(PhabricatorFeedStory $story) {
+    return null;
   }
 
   public function getActionStrength() {
