@@ -8,8 +8,7 @@ final class PhabricatorApplicationTransactionShowOlderController
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
 
     $object = id(new PhabricatorObjectQuery())
       ->withPHIDs(array($request->getURIData('phid')))
