@@ -36,8 +36,15 @@ final class PhabricatorCustomFieldEditField
   }
 
   protected function newEditType() {
-    return id(new PhabricatorCustomFieldEditType())
+    $type = id(new PhabricatorCustomFieldEditType())
       ->setCustomField($this->getCustomField());
+
+    $http_type = $this->getHTTPParameterType();
+    if ($http_type) {
+      $type->setValueType($http_type->getTypeName());
+    }
+
+    return $type;
   }
 
   public function getValueForTransaction() {
@@ -65,8 +72,13 @@ final class PhabricatorCustomFieldEditField
   }
 
   public function getConduitEditTypes() {
-    // TODO: For now, don't support custom fields over Conduit.
-    return array();
+    $field = $this->getCustomField();
+
+    if (!$field->shouldAppearInConduitTransactions()) {
+      return array();
+    }
+
+    return parent::getConduitEditTypes();
   }
 
   protected function newHTTPParameterType() {

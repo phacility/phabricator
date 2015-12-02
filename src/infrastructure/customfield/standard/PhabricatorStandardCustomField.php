@@ -433,4 +433,8 @@ abstract class PhabricatorStandardCustomField
       ->setEditTypeKey($short);
   }
 
+  public function shouldAppearInConduitTransactions() {
+    return true;
+  }
+
 }

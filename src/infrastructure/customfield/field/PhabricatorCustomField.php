@@ -1323,6 +1323,14 @@ abstract class PhabricatorCustomField extends Phobject {
   }
 
 
+  public function shouldAppearInConduitTransactions() {
+    if ($this->proxy) {
+      return $this->proxy->shouldAppearInConduitDictionary();
+    }
+    return false;
+  }
+
+
 /* -(  Herald  )------------------------------------------------------------- */
 
 
