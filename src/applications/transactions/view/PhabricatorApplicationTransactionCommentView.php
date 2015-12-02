@@ -20,6 +20,9 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $objectPHID;
   private $headerText;
 
+  private $currentVersion;
+  private $versionedDraft;
+
   public function setObjectPHID($object_phid) {
     $this->objectPHID = $object_phid;
     return $this;
@@ -44,6 +47,25 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   }
   public function getRequestURI() {
     return $this->requestURI;
+  }
+
+  public function setCurrentVersion($current_version) {
+    $this->currentVersion = $current_version;
+    return $this;
+  }
+
+  public function getCurrentVersion() {
+    return $this->currentVersion;
+  }
+
+  public function setVersionedDraft(
+    PhabricatorVersionedDraft $versioned_draft) {
+    $this->versionedDraft = $versioned_draft;
+    return $this;
+  }
+
+  public function getVersionedDraft() {
+    return $this->versionedDraft;
   }
 
   public function setDraft(PhabricatorDraft $draft) {
@@ -148,9 +170,17 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       $draft_key = $this->getDraft()->getDraftKey();
     }
 
+    $versioned_draft = $this->getVersionedDraft();
+    if ($versioned_draft) {
+      $draft_comment = $versioned_draft->getProperty('temporary.comment', '');
+    }
+
     if (!$this->getObjectPHID()) {
       throw new PhutilInvalidStateException('setObjectPHID', 'render');
     }
+
+    $version_key = PhabricatorVersionedDraft::KEY_VERSION;
+    $version_value = $this->getCurrentVersion();
 
     return id(new AphrontFormView())
       ->setUser($this->getUser())
@@ -163,6 +193,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       ->setAction($this->getAction())
       ->setID($this->getFormID())
       ->addHiddenInput('__draft__', $draft_key)
+      ->addHiddenInput($version_key, $version_value)
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setID($this->getCommentID())

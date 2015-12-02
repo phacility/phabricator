@@ -879,20 +879,55 @@ abstract class PhabricatorEditEngine
     $header_text = $this->getCommentViewHeaderText($object);
     $button_text = $this->getCommentViewButtonText($object);
 
-    // TODO: Drafts.
-    // $draft = PhabricatorDraft::newFromUserAndKey(
-    //   $viewer,
-    //   $object_phid);
-
     $comment_uri = $this->getEditURI($object, 'comment/');
 
-    return id(new PhabricatorApplicationTransactionCommentView())
+    $view = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($viewer)
       ->setObjectPHID($object_phid)
       ->setHeaderText($header_text)
       ->setAction($comment_uri)
       ->setSubmitButtonName($button_text);
+
+    $draft = PhabricatorVersionedDraft::loadDraft(
+      $object_phid,
+      $viewer->getPHID());
+    if ($draft) {
+      $view->setVersionedDraft($draft);
+    }
+
+    $view->setCurrentVersion($this->loadDraftVersion($object));
+
+    return $view;
   }
+
+  protected function loadDraftVersion($object) {
+    $viewer = $this->getViewer();
+
+    if (!$viewer->isLoggedIn()) {
+      return null;
+    }
+
+    $template = $object->getApplicationTransactionTemplate();
+    $conn_r = $template->establishConnection('r');
+
+    // Find the most recent transaction the user has written. We'll use this
+    // as a version number to make sure that out-of-date drafts get discarded.
+    $result = queryfx_one(
+      $conn_r,
+      'SELECT id AS version FROM %T
+        WHERE objectPHID = %s AND authorPHID = %s
+        ORDER BY id DESC LIMIT 1',
+      $template->getTableName(),
+      $object->getPHID(),
+      $viewer->getPHID());
+
+    if ($result) {
+      return (int)$result['version'];
+    } else {
+      return null;
+    }
+  }
+
 
 /* -(  Responding to HTTP Parameter Requests  )------------------------------ */
 
@@ -970,13 +1005,31 @@ abstract class PhabricatorEditEngine
     $template = $object->getApplicationTransactionTemplate();
     $comment_template = $template->getApplicationTransactionCommentObject();
 
+    $comment_text = $request->getStr('comment');
+
+    if ($is_preview) {
+      $version_key = PhabricatorVersionedDraft::KEY_VERSION;
+      $request_version = $request->getInt($version_key);
+      $current_version = $this->loadDraftVersion($object);
+      if ($request_version >= $current_version) {
+        $draft = PhabricatorVersionedDraft::loadOrCreateDraft(
+          $object->getPHID(),
+          $viewer->getPHID(),
+          $current_version);
+
+        // TODO: This is just a proof of concept.
+        $draft->setProperty('temporary.comment', $comment_text);
+        $draft->save();
+      }
+    }
+
     $xactions = array();
 
     $xactions[] = id(clone $template)
       ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
       ->attachComment(
         id(clone $comment_template)
-          ->setContent($request->getStr('comment')));
+          ->setContent($comment_text));
 
     $editor = $object->getApplicationTransactionEditor()
       ->setActor($viewer)
@@ -990,6 +1043,13 @@ abstract class PhabricatorEditEngine
       return id(new PhabricatorApplicationTransactionNoEffectResponse())
         ->setCancelURI($view_uri)
         ->setException($ex);
+    }
+
+    if (!$is_preview) {
+      PhabricatorVersionedDraft::purgeDrafts(
+        $object->getPHID(),
+        $viewer->getPHID(),
+        $this->loadDraftVersion($object));
     }
 
     if ($request->isAjax() && $is_preview) {
