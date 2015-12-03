@@ -45,6 +45,7 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhamePostListController',
           'blogger/(?P<bloggername>[\w\.-_]+)/' => 'PhamePostListController',
           'edit/(?:(?P<id>[^/]+)/)?' => 'PhamePostEditController',
+          'history/(?P<id>\d+)/' => 'PhamePostHistoryController',
           'view/(?P<id>\d+)/' => 'PhamePostViewController',
           'publish/(?P<id>\d+)/' => 'PhamePostPublishController',
           'preview/(?P<id>\d+)/' => 'PhamePostPreviewController',

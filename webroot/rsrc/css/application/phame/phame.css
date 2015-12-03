@@ -29,3 +29,8 @@
   border-radius: 3px;
   position: absolute;
 }
+
+.phame-blog-description + .phui-property-list-section {
+  border-top: 1px solid rgba(71, 87, 120, 0.20);
+  padding-top: 16px;
+}

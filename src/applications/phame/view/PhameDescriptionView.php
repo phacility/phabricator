@@ -52,7 +52,7 @@ final class PhameDescriptionView extends AphrontTagView {
       array(
         'class' => 'phame-blog-description-name',
       ),
-      pht('About %s', $this->title));
+      $this->title);
 
     return array($image, $header, $description);
   }

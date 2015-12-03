@@ -84,7 +84,7 @@ final class PhameBlogViewController extends PhameBlogController {
     }
 
     $about = id(new PhameDescriptionView())
-      ->setTitle($blog->getName())
+      ->setTitle(pht('About %s', $blog->getName()))
       ->setDescription($description)
       ->setImage($blog->getProfileImageURI());
 
