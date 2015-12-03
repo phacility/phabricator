@@ -3319,6 +3319,7 @@ phutil_register_library_map(array(
     'PhameController' => 'applications/phame/controller/PhameController.php',
     'PhameCreatePostConduitAPIMethod' => 'applications/phame/conduit/PhameCreatePostConduitAPIMethod.php',
     'PhameDAO' => 'applications/phame/storage/PhameDAO.php',
+    'PhameDescriptionView' => 'applications/phame/view/PhameDescriptionView.php',
     'PhameHomeController' => 'applications/phame/controller/PhameHomeController.php',
     'PhamePost' => 'applications/phame/storage/PhamePost.php',
     'PhamePostCommentController' => 'applications/phame/controller/post/PhamePostCommentController.php',
@@ -7649,6 +7650,7 @@ phutil_register_library_map(array(
     'PhameController' => 'PhabricatorController',
     'PhameCreatePostConduitAPIMethod' => 'PhameConduitAPIMethod',
     'PhameDAO' => 'PhabricatorLiskDAO',
+    'PhameDescriptionView' => 'AphrontTagView',
     'PhameHomeController' => 'PhamePostController',
     'PhamePost' => array(
       'PhameDAO',
