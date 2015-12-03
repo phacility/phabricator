@@ -25,7 +25,7 @@ final class PhameBlogProfilePictureController
       return new Aphront404Response();
     }
 
-    $blog_uri = '/phame/blog/view/'.$id;
+    $blog_uri = '/phame/blog/manage/'.$id;
 
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
     $e_file = true;

@@ -57,7 +57,7 @@ final class PhamePostListView extends AphrontTagView {
         $phame_post = PhabricatorMarkupEngine::summarize($post->getBody());
         $phame_post = new PHUIRemarkupView($viewer, $phame_post);
       } else {
-        $phame_post = phutil_tag('em', array(), pht('Empty Post'));
+        $phame_post = phutil_tag('em', array(), pht('(Empty Post)'));
       }
 
       $blogger = phutil_tag('strong', array(), $blogger);
@@ -101,6 +101,7 @@ final class PhamePostListView extends AphrontTagView {
 
     if (empty($list)) {
       $list = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
         ->appendChild($nodata);
     }
 
