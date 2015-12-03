@@ -163,6 +163,22 @@ abstract class PhabricatorEditEngine
   }
 
 
+  /**
+   * @task text
+   */
+  protected function getCommentViewHeaderText($object) {
+    return pht('Add Comment');
+  }
+
+
+  /**
+   * @task text
+   */
+  protected function getCommentViewButtonText($object) {
+    return pht('Add Comment');
+  }
+
+
 /* -(  Edit Engine Configuration  )------------------------------------------ */
 
 
@@ -574,6 +590,8 @@ abstract class PhabricatorEditEngine
         return $this->buildParametersResponse($object);
       case 'nodefault':
         return $this->buildNoDefaultResponse($object);
+      case 'comment':
+        return $this->buildCommentResponse($object);
       default:
         return $this->buildEditResponse($object);
     }
@@ -684,10 +702,6 @@ abstract class PhabricatorEditEngine
           }
 
           $field->readValueFromRequest($request);
-        }
-      } else {
-        foreach ($fields as $field) {
-          $field->readValueFromObject($object);
         }
       }
     }
@@ -858,6 +872,62 @@ abstract class PhabricatorEditEngine
     $crumbs->addAction($action);
   }
 
+  final public function buildEditEngineCommentView($object) {
+    $viewer = $this->getViewer();
+    $object_phid = $object->getPHID();
+
+    $header_text = $this->getCommentViewHeaderText($object);
+    $button_text = $this->getCommentViewButtonText($object);
+
+    $comment_uri = $this->getEditURI($object, 'comment/');
+
+    $view = id(new PhabricatorApplicationTransactionCommentView())
+      ->setUser($viewer)
+      ->setObjectPHID($object_phid)
+      ->setHeaderText($header_text)
+      ->setAction($comment_uri)
+      ->setSubmitButtonName($button_text);
+
+    $draft = PhabricatorVersionedDraft::loadDraft(
+      $object_phid,
+      $viewer->getPHID());
+    if ($draft) {
+      $view->setVersionedDraft($draft);
+    }
+
+    $view->setCurrentVersion($this->loadDraftVersion($object));
+
+    return $view;
+  }
+
+  protected function loadDraftVersion($object) {
+    $viewer = $this->getViewer();
+
+    if (!$viewer->isLoggedIn()) {
+      return null;
+    }
+
+    $template = $object->getApplicationTransactionTemplate();
+    $conn_r = $template->establishConnection('r');
+
+    // Find the most recent transaction the user has written. We'll use this
+    // as a version number to make sure that out-of-date drafts get discarded.
+    $result = queryfx_one(
+      $conn_r,
+      'SELECT id AS version FROM %T
+        WHERE objectPHID = %s AND authorPHID = %s
+        ORDER BY id DESC LIMIT 1',
+      $template->getTableName(),
+      $object->getPHID(),
+      $viewer->getPHID());
+
+    if ($result) {
+      return (int)$result['version'];
+    } else {
+      return null;
+    }
+  }
+
 
 /* -(  Responding to HTTP Parameter Requests  )------------------------------ */
 
@@ -914,6 +984,85 @@ abstract class PhabricatorEditEngine
           'forms for creating objects.'))
       ->addCancelButton($cancel_uri);
   }
+
+  private function buildCommentResponse($object) {
+    $viewer = $this->getViewer();
+
+    if ($this->getIsCreate()) {
+      return new Aphront404Response();
+    }
+
+    $controller = $this->getController();
+    $request = $controller->getRequest();
+
+    if (!$request->isFormPost()) {
+      return new Aphront400Response();
+    }
+
+    $is_preview = $request->isPreviewRequest();
+    $view_uri = $this->getObjectViewURI($object);
+
+    $template = $object->getApplicationTransactionTemplate();
+    $comment_template = $template->getApplicationTransactionCommentObject();
+
+    $comment_text = $request->getStr('comment');
+
+    if ($is_preview) {
+      $version_key = PhabricatorVersionedDraft::KEY_VERSION;
+      $request_version = $request->getInt($version_key);
+      $current_version = $this->loadDraftVersion($object);
+      if ($request_version >= $current_version) {
+        $draft = PhabricatorVersionedDraft::loadOrCreateDraft(
+          $object->getPHID(),
+          $viewer->getPHID(),
+          $current_version);
+
+        // TODO: This is just a proof of concept.
+        $draft->setProperty('temporary.comment', $comment_text);
+        $draft->save();
+      }
+    }
+
+    $xactions = array();
+
+    $xactions[] = id(clone $template)
+      ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+      ->attachComment(
+        id(clone $comment_template)
+          ->setContent($comment_text));
+
+    $editor = $object->getApplicationTransactionEditor()
+      ->setActor($viewer)
+      ->setContinueOnNoEffect($request->isContinueRequest())
+      ->setContentSourceFromRequest($request)
+      ->setIsPreview($is_preview);
+
+    try {
+      $xactions = $editor->applyTransactions($object, $xactions);
+    } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
+      return id(new PhabricatorApplicationTransactionNoEffectResponse())
+        ->setCancelURI($view_uri)
+        ->setException($ex);
+    }
+
+    if (!$is_preview) {
+      PhabricatorVersionedDraft::purgeDrafts(
+        $object->getPHID(),
+        $viewer->getPHID(),
+        $this->loadDraftVersion($object));
+    }
+
+    if ($request->isAjax() && $is_preview) {
+      return id(new PhabricatorApplicationTransactionResponse())
+        ->setViewer($viewer)
+        ->setTransactions($xactions)
+        ->setIsPreview($is_preview);
+    } else {
+      return id(new AphrontRedirectResponse())
+        ->setURI($view_uri);
+    }
+  }
+
 
 /* -(  Conduit  )------------------------------------------------------------ */
 

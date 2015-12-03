@@ -8,9 +8,7 @@ final class PhabricatorApplicationTransactionValueController
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
+    $viewer = $this->getViewer();
     $phid = $request->getURIData('phid');
     $type = $request->getURIData('value');
 

@@ -8,7 +8,8 @@ final class PhabricatorSubscriptionsListController
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $viewer = $request->getUser();
+    $viewer = $request->getViewer();
+
     $object = id(new PhabricatorObjectQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($request->getURIData('phid')))

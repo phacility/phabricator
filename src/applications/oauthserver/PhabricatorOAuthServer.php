@@ -64,8 +64,8 @@ final class PhabricatorOAuthServer extends Phobject {
    */
   public function userHasAuthorizedClient(array $scope) {
 
-    $authorization = id(new PhabricatorOAuthClientAuthorization())->
-      loadOneWhere(
+    $authorization = id(new PhabricatorOAuthClientAuthorization())
+      ->loadOneWhere(
         'userPHID = %s AND clientPHID = %s',
         $this->getUser()->getPHID(),
         $this->getClient()->getPHID());

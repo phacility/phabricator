@@ -185,7 +185,7 @@ final class PhamePostTransaction
     return parent::getTitleForFeed();
   }
 
-  public function getBodyForFeed(PhabricatorFeedStory $story) {
+  public function getRemarkupBodyForFeed(PhabricatorFeedStory $story) {
     $text = null;
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
@@ -205,14 +205,7 @@ final class PhamePostTransaction
         break;
     }
 
-    if (strlen($text)) {
-      return phutil_escape_html_newlines(
-        id(new PhutilUTF8StringTruncator())
-        ->setMaximumGlyphs(128)
-        ->truncateString($text));
-    }
-
-    return parent::getBodyForFeed($story);
+    return $text;
   }
 
   public function getColor() {

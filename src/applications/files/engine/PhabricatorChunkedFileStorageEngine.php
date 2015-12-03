@@ -143,7 +143,7 @@ final class PhabricatorChunkedFileStorageEngine
    */
   private function getWritableEngine() {
     // NOTE: We can't just load writable engines or we'll loop forever.
-    $engines = PhabricatorFileStorageEngine::loadAllEngines();
+    $engines = parent::loadAllEngines();
 
     foreach ($engines as $engine) {
       if ($engine->isChunkEngine()) {

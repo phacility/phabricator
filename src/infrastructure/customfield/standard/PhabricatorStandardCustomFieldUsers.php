@@ -11,4 +11,8 @@ final class PhabricatorStandardCustomFieldUsers
     return new PhabricatorPeopleDatasource();
   }
 
+  protected function getHTTPParameterType() {
+    return new AphrontUserListHTTPParameterType();
+  }
+
 }

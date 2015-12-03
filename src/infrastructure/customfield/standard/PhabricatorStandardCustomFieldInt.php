@@ -112,5 +112,9 @@ final class PhabricatorStandardCustomFieldInt
     }
   }
 
+  protected function getHTTPParameterType() {
+    return new AphrontIntHTTPParameterType();
+  }
+
 
 }

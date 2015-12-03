@@ -169,8 +169,8 @@
   background-color: {$lightbluebackground};
 }
 
-.phabricator-remarkup blockquote p {
-  margin: 0;
+.phabricator-remarkup blockquote *:last-child {
+  margin-bottom: 0;
 }
 
 .phabricator-remarkup blockquote blockquote {

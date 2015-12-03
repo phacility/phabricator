@@ -288,22 +288,6 @@ abstract class PhabricatorApplication
     return array();
   }
 
-  /**
-   * @return string
-   * @task ui
-   */
-  final public static function formatStatusCount(
-    $count,
-    $limit_string = '%s',
-    $base_string = '%d') {
-    if ($count == self::MAX_STATUS_ITEMS) {
-      $count_str = pht($limit_string, ($count - 1).'+');
-    } else {
-      $count_str = pht($base_string, $count);
-    }
-    return $count_str;
-  }
-
 
   /**
    * You can provide an optional piece of flavor text for the application. This
@@ -640,7 +624,7 @@ abstract class PhabricatorApplication
       '(?P<id>[0-9]\d*)/)?'.
       '(?:'.
         '(?:'.
-          '(?P<editAction>parameters|nodefault)'.
+          '(?P<editAction>parameters|nodefault|comment)'.
           '|'.
           '(?:form/(?P<formKey>[^/]+))'.
         ')'.

@@ -145,10 +145,6 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->isHidden;
   }
 
-  protected function newControl() {
-    throw new PhutilMethodNotImplementedException();
-  }
-
   public function setIsSubmittedForm($is_submitted) {
     $this->isSubmittedForm = $is_submitted;
     return $this;
@@ -176,7 +172,11 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->controlError;
   }
 
-  protected function renderControl() {
+  protected function newControl() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  protected function buildControl() {
     $control = $this->newControl();
     if ($control === null) {
       return null;
@@ -188,6 +188,24 @@ abstract class PhabricatorEditField extends Phobject {
 
     if (!$control->getLabel()) {
       $control->setLabel($this->getLabel());
+    }
+
+    if ($this->getIsSubmittedForm()) {
+      $error = $this->getControlError();
+      if ($error !== null) {
+        $control->setError($error);
+      }
+    } else if ($this->getIsRequired()) {
+      $control->setError(true);
+    }
+
+    return $control;
+  }
+
+  protected function renderControl() {
+    $control = $this->buildControl();
+    if ($control === null) {
+      return null;
     }
 
     if ($this->getIsPreview()) {
@@ -206,16 +224,6 @@ abstract class PhabricatorEditField extends Phobject {
     }
 
     $control->setDisabled($disabled);
-
-
-    if ($this->getIsSubmittedForm()) {
-      $error = $this->getControlError();
-      if ($error !== null) {
-        $control->setError($error);
-      }
-    } else if ($this->getIsRequired()) {
-      $control->setError(true);
-    }
 
     return $control;
   }
@@ -291,24 +299,27 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   public function readValueFromRequest(AphrontRequest $request) {
-    $check = array_merge(array($this->getKey()), $this->getAliases());
+    $check = $this->getAllReadValueFromRequestKeys();
     foreach ($check as $key) {
       if (!$this->getValueExistsInRequest($request, $key)) {
         continue;
       }
 
       $this->value = $this->getValueFromRequest($request, $key);
-      return;
+      break;
     }
-
-    $this->readValueFromObject($this->getObject());
-
     return $this;
   }
 
-  public function readValueFromObject($object) {
-    $this->value = $this->getValueFromObject($object);
-    return $this;
+  public function getAllReadValueFromRequestKeys() {
+    $keys = array();
+
+    $keys[] = $this->getKey();
+    foreach ($this->getAliases() as $alias) {
+      $keys[] = $alias;
+    }
+
+    return $keys;
   }
 
   public function readDefaultValueFromConfiguration($value) {
@@ -329,11 +340,11 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   protected function getValueExistsInRequest(AphrontRequest $request, $key) {
-    return $this->getValueExistsInSubmit($request, $key);
+    return $this->getHTTPParameterValueExists($request, $key);
   }
 
   protected function getValueFromRequest(AphrontRequest $request, $key) {
-    return $this->getValueFromSubmit($request, $key);
+    return $this->getHTTPParameterValue($request, $key);
   }
 
 
@@ -377,6 +388,16 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   protected function getValueExistsInSubmit(AphrontRequest $request, $key) {
+    return $this->getHTTPParameterValueExists($request, $key);
+  }
+
+  protected function getValueFromSubmit(AphrontRequest $request, $key) {
+    return $this->getHTTPParameterValue($request, $key);
+  }
+
+  protected function getHTTPParameterValueExists(
+    AphrontRequest $request,
+    $key) {
     $type = $this->getHTTPParameterType();
 
     if ($type) {
@@ -386,8 +407,14 @@ abstract class PhabricatorEditField extends Phobject {
     return false;
   }
 
-  protected function getValueFromSubmit(AphrontRequest $request, $key) {
-    return $this->getHTTPParameterType()->getValue($request, $key);
+  protected function getHTTPParameterValue($request, $key) {
+    $type = $this->getHTTPParameterType();
+
+    if ($type) {
+      return $type->getValue($request, $key);
+    }
+
+    return null;
   }
 
   protected function getDefaultValue() {

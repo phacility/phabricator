@@ -61,17 +61,16 @@ final class PhabricatorSlowvotePollController
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-        $poll_view,
-        $timeline,
-        $add_comment,
-      ),
-      array(
-        'title' => 'V'.$poll->getID().' '.$poll->getQuestion(),
-        'pageObjects' => array($poll->getPHID()),
+    return $this->newPage()
+      ->setTitle('V'.$poll->getID().' '.$poll->getQuestion())
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(array($poll->getPHID()))
+      ->appendChild(
+        array(
+          $object_box,
+          $poll_view,
+          $timeline,
+          $add_comment,
       ));
   }
 

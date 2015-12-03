@@ -80,4 +80,8 @@ final class PhabricatorStandardCustomFieldLink
     );
   }
 
+  protected function getHTTPParameterType() {
+    return new AphrontStringHTTPParameterType();
+  }
+
 }

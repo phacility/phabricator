@@ -13,7 +13,7 @@ final class DivinerAtomCache extends DivinerDiskCache {
   private $writeAtoms = array();
 
   public function __construct($cache_directory) {
-    return parent::__construct($cache_directory, 'diviner-atom-cache');
+    parent::__construct($cache_directory, 'diviner-atom-cache');
   }
 
   public function delete() {

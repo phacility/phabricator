@@ -3,17 +3,13 @@
 abstract class PhabricatorStorageManagementWorkflow
   extends PhabricatorManagementWorkflow {
 
-  private $patches;
   private $api;
+  private $dryRun;
+  private $force;
+  private $patches;
 
-  public function setPatches(array $patches) {
-    assert_instances_of($patches, 'PhabricatorStoragePatch');
-    $this->patches = $patches;
-    return $this;
-  }
-
-  public function getPatches() {
-    return $this->patches;
+  final public function getAPI() {
+    return $this->api;
   }
 
   final public function setAPI(PhabricatorStorageManagementAPI $api) {
@@ -21,9 +17,43 @@ abstract class PhabricatorStorageManagementWorkflow
     return $this;
   }
 
-  final public function getAPI() {
-    return $this->api;
+  final protected function isDryRun() {
+    return $this->dryRun;
   }
+
+  final protected function setDryRun($dry_run) {
+    $this->dryRun = $dry_run;
+    return $this;
+  }
+
+  final protected function isForce() {
+    return $this->force;
+  }
+
+  final protected function setForce($force) {
+    $this->force = $force;
+    return $this;
+  }
+
+  public function getPatches() {
+    return $this->patches;
+  }
+
+  public function setPatches(array $patches) {
+    assert_instances_of($patches, 'PhabricatorStoragePatch');
+    $this->patches = $patches;
+    return $this;
+  }
+
+
+  public function execute(PhutilArgumentParser $args) {
+    $this->setDryRun($args->getArg('dryrun'));
+    $this->setForce($args->getArg('force'));
+
+    $this->didExecute($args);
+  }
+
+  public function didExecute(PhutilArgumentParser $args) {}
 
   private function loadSchemata() {
     $query = id(new PhabricatorConfigSchemaQuery())
@@ -36,7 +66,20 @@ abstract class PhabricatorStorageManagementWorkflow
     return array($comp, $expect, $actual);
   }
 
-  protected function adjustSchemata($force, $unsafe, $dry_run) {
+  final protected function adjustSchemata($unsafe) {
+    $lock = $this->lock();
+
+    try {
+      $this->doAdjustSchemata($unsafe);
+    } catch (Exception $ex) {
+      $lock->unlock();
+      throw $ex;
+    }
+
+    $lock->unlock();
+  }
+
+  final private function doAdjustSchemata($unsafe) {
     $console = PhutilConsole::getConsole();
 
     $console->writeOut(
@@ -54,7 +97,7 @@ abstract class PhabricatorStorageManagementWorkflow
       return $this->printErrors($errors, 0);
     }
 
-    if (!$force && !$api->isCharacterSetAvailable('utf8mb4')) {
+    if (!$this->force && !$api->isCharacterSetAvailable('utf8mb4')) {
       $message = pht(
         "You have an old version of MySQL (older than 5.5) which does not ".
         "support the utf8mb4 character set. We strongly recomend upgrading to ".
@@ -110,12 +153,12 @@ abstract class PhabricatorStorageManagementWorkflow
 
     $table->draw();
 
-    if ($dry_run) {
+    if ($this->dryRun) {
       $console->writeOut(
         "%s\n",
         pht('DRYRUN: Would apply adjustments.'));
       return 0;
-    } else if (!$force) {
+    } else if (!$this->force) {
       $console->writeOut(
         "\n%s\n",
         pht(
@@ -665,6 +708,171 @@ abstract class PhabricatorStorageManagementWorkflow
     return 2;
   }
 
+  final protected function upgradeSchemata(
+    $apply_only = null,
+    $no_quickstart = false,
+    $init_only = false) {
+
+    $lock = $this->lock();
+
+    try {
+      $this->doUpgradeSchemata($apply_only, $no_quickstart, $init_only);
+    } catch (Exception $ex) {
+      $lock->unlock();
+      throw $ex;
+    }
+
+    $lock->unlock();
+  }
+
+  final private function doUpgradeSchemata(
+    $apply_only,
+    $no_quickstart,
+    $init_only) {
+
+    $api = $this->getAPI();
+
+    $applied = $this->getApi()->getAppliedPatches();
+    if ($applied === null) {
+      if ($this->dryRun) {
+        echo pht(
+          "DRYRUN: Patch metadata storage doesn't exist yet, ".
+          "it would be created.\n");
+        return 0;
+      }
+
+      if ($apply_only) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Storage has not been initialized yet, you must initialize '.
+            'storage before selectively applying patches.'));
+        return 1;
+      }
+
+      $legacy = $api->getLegacyPatches($this->patches);
+      if ($legacy || $no_quickstart || $init_only) {
+
+        // If we have legacy patches, we can't quickstart.
+
+        $api->createDatabase('meta_data');
+        $api->createTable(
+          'meta_data',
+          'patch_status',
+          array(
+            'patch VARCHAR(255) NOT NULL PRIMARY KEY COLLATE utf8_general_ci',
+            'applied INT UNSIGNED NOT NULL',
+          ));
+
+        foreach ($legacy as $patch) {
+          $api->markPatchApplied($patch);
+        }
+      } else {
+        echo pht('Loading quickstart template...')."\n";
+        $root = dirname(phutil_get_library_root('phabricator'));
+        $sql  = $root.'/resources/sql/quickstart.sql';
+        $api->applyPatchSQL($sql);
+      }
+    }
+
+    if ($init_only) {
+      echo pht('Storage initialized.')."\n";
+      return 0;
+    }
+
+    $applied = $api->getAppliedPatches();
+    $applied = array_fuse($applied);
+
+    $skip_mark = false;
+    if ($apply_only) {
+      if (isset($applied[$apply_only])) {
+
+        unset($applied[$apply_only]);
+        $skip_mark = true;
+
+        if (!$this->force && !$this->dryRun) {
+          echo phutil_console_wrap(
+            pht(
+              "Patch '%s' has already been applied. Are you sure you want ".
+              "to apply it again? This may put your storage in a state ".
+              "that the upgrade scripts can not automatically manage.",
+              $apply_only));
+          if (!phutil_console_confirm(pht('Apply patch again?'))) {
+            echo pht('Cancelled.')."\n";
+            return 1;
+          }
+        }
+      }
+    }
+
+    while (true) {
+      $applied_something = false;
+      foreach ($this->patches as $key => $patch) {
+        if (isset($applied[$key])) {
+          unset($this->patches[$key]);
+          continue;
+        }
+
+        if ($apply_only && $apply_only != $key) {
+          unset($this->patches[$key]);
+          continue;
+        }
+
+        $can_apply = true;
+        foreach ($patch->getAfter() as $after) {
+          if (empty($applied[$after])) {
+            if ($apply_only) {
+              echo pht(
+                "Unable to apply patch '%s' because it depends ".
+                "on patch '%s', which has not been applied.\n",
+                $apply_only,
+                $after);
+              return 1;
+            }
+            $can_apply = false;
+            break;
+          }
+        }
+
+        if (!$can_apply) {
+          continue;
+        }
+
+        $applied_something = true;
+
+        if ($this->dryRun) {
+          echo pht("DRYRUN: Would apply patch '%s'.", $key)."\n";
+        } else {
+          echo pht("Applying patch '%s'...", $key)."\n";
+
+          $t_begin = microtime(true);
+          $api->applyPatch($patch);
+          $t_end = microtime(true);
+
+          if (!$skip_mark) {
+            $api->markPatchApplied($key, ($t_end - $t_begin));
+          }
+        }
+
+        unset($this->patches[$key]);
+        $applied[$key] = true;
+      }
+
+      if (!$applied_something) {
+        if (count($this->patches)) {
+          throw new Exception(
+            pht(
+              'Some patches could not be applied: %s',
+              implode(', ', array_keys($this->patches))));
+        } else if (!$this->dryRun && !$apply_only) {
+          echo pht(
+            "Storage is up to date. Use '%s' for details.",
+            'storage status')."\n";
+        }
+        break;
+      }
+    }
+  }
+
   final protected function getBareHostAndPort($host) {
     // Split out port information, since the command-line client requires a
     // separate flag for the port.
@@ -678,6 +886,17 @@ abstract class PhabricatorStorageManagementWorkflow
     }
 
     return array($bare_hostname, $port);
+  }
+
+  /**
+   * Acquires a @{class:PhabricatorGlobalLock}.
+   *
+   * @return PhabricatorGlobalLock
+   */
+  final protected function lock() {
+    return PhabricatorGlobalLock::newLock(__CLASS__)
+      ->useSpecificConnection($this->getApi()->getConn(null))
+      ->lock();
   }
 
 }

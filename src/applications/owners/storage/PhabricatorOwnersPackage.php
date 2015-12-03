@@ -27,25 +27,8 @@ final class PhabricatorOwnersPackage
       ->setAuditingEnabled(0)
       ->attachPaths(array())
       ->setStatus(self::STATUS_ACTIVE)
-      ->attachOwners(array());
-  }
-
-  public function getCapabilities() {
-    return array(
-      PhabricatorPolicyCapability::CAN_VIEW,
-    );
-  }
-
-  public function getPolicy($capability) {
-    return PhabricatorPolicies::POLICY_USER;
-  }
-
-  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return false;
-  }
-
-  public function describeAutomaticCapability($capability) {
-    return null;
+      ->attachOwners(array())
+      ->setDescription('');
   }
 
   public static function getStatusNameMap() {
@@ -282,6 +265,34 @@ final class PhabricatorOwnersPackage
 
   public function getOwners() {
     return $this->assertAttached($this->owners);
+  }
+
+  public function getOwnerPHIDs() {
+    return mpull($this->getOwners(), 'getUserPHID');
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    // TODO: Implement proper policies.
+    return PhabricatorPolicies::POLICY_USER;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
 

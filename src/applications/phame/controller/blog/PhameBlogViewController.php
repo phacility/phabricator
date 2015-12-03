@@ -4,6 +4,10 @@ final class PhameBlogViewController extends PhameBlogController {
 
   private $blog;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
@@ -52,10 +56,10 @@ final class PhameBlogViewController extends PhameBlogController {
       ->setStatus($header_icon, $header_color, $header_name)
       ->addActionLink($action_button);
 
-    $post_list = $this->renderPostList(
-      $posts,
-      $viewer,
-      pht('This blog has no visible posts.'));
+    $post_list = id(new PhamePostListView())
+      ->setPosts($posts)
+      ->setViewer($viewer)
+      ->setNodata(pht('This blog has no visible posts.'));
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setBorder(true);
@@ -128,58 +132,6 @@ final class PhameBlogViewController extends PhameBlogController {
     return $view;
   }
 
-  protected function renderPostList(
-    array $posts,
-    PhabricatorUser $viewer,
-    $nodata) {
-    assert_instances_of($posts, 'PhamePost');
-
-    $handle_phids = array();
-    foreach ($posts as $post) {
-      $handle_phids[] = $post->getBloggerPHID();
-      if ($post->getBlog()) {
-        $handle_phids[] = $post->getBlog()->getPHID();
-      }
-    }
-    $handles = $viewer->loadHandles($handle_phids);
-
-    $list = array();
-    foreach ($posts as $post) {
-      $blogger = $handles[$post->getBloggerPHID()]->renderLink();
-      $blogger_uri = $handles[$post->getBloggerPHID()]->getURI();
-      $blogger_image = $handles[$post->getBloggerPHID()]->getImageURI();
-
-      $phame_post = null;
-      if ($post->getBody()) {
-        $phame_post = PhabricatorMarkupEngine::summarize($post->getBody());
-        $phame_post = new PHUIRemarkupView($viewer, $phame_post);
-      } else {
-        $phame_post = phutil_tag('em', array(), pht('Empty Post'));
-      }
-
-      $blogger = phutil_tag('strong', array(), $blogger);
-      $date = phabricator_datetime($post->getDatePublished(), $viewer);
-      $subtitle = pht('Written by %s on %s.', $blogger, $date);
-
-      $item = id(new PHUIDocumentSummaryView())
-        ->setTitle($post->getTitle())
-        ->setHref($this->getApplicationURI('/post/view/'.$post->getID().'/'))
-        ->setSubtitle($subtitle)
-        ->setImage($blogger_image)
-        ->setImageHref($blogger_uri)
-        ->setSummary($phame_post);
-
-      $list[] = $item;
-    }
-
-    if (empty($list)) {
-      $list = id(new PHUIInfoView())
-        ->appendChild($nodata);
-    }
-
-    return $list;
-  }
-
   private function renderActions(PhameBlog $blog, PhabricatorUser $viewer) {
     $actions = id(new PhabricatorActionListView())
       ->setObject($blog)
@@ -210,9 +162,7 @@ final class PhameBlogViewController extends PhameBlogController {
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI('blog/manage/'.$blog->getID().'/'))
-        ->setName(pht('Manage Blog'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+        ->setName(pht('Manage Blog')));
 
     return $actions;
   }

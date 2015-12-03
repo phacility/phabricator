@@ -191,4 +191,10 @@ final class PhabricatorStandardCustomFieldDate
     }
   }
 
+  public function shouldAppearInConduitTransactions() {
+    // TODO: Dates are complicated and we don't yet support handling them from
+    // Conduit.
+    return false;
+  }
+
 }

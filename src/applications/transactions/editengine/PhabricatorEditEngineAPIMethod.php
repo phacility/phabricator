@@ -179,6 +179,10 @@ EOTEXT
         $type->getEditType());
 
       $value_type = $type->getValueType();
+      if (!strlen($value_type)) {
+        $value_type = '?';
+      }
+
       $value_description = $type->getValueDescription();
 
       $table = array();
