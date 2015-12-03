@@ -716,5 +716,34 @@ final class ManiphestTransactionEditor
     return array($dst->getPriority(), $sub);
   }
 
+  protected function validateTransaction(
+    PhabricatorLiskDAO $object,
+    $type,
+    array $xactions) {
+
+    $errors = parent::validateTransaction($object, $type, $xactions);
+
+    switch ($type) {
+      case ManiphestTransaction::TYPE_TITLE:
+        $missing = $this->validateIsEmptyTextField(
+          $object->getTitle(),
+          $xactions);
+
+        if ($missing) {
+          $error = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Required'),
+            pht('Task title is required.'),
+            nonempty(last($xactions), null));
+
+          $error->setIsMissingFieldError(true);
+          $errors[] = $error;
+        }
+        break;
+    }
+
+    return $errors;
+  }
+
 
 }
