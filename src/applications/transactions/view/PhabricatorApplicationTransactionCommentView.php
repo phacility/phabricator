@@ -12,7 +12,6 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $previewTimelineID;
   private $previewToggleID;
   private $formID;
-  private $statusID;
   private $commentID;
   private $draft;
   private $requestURI;
@@ -148,23 +147,17 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       $preview = null;
     }
 
-    Javelin::initBehavior(
-      'phabricator-transaction-comment-form',
-      array(
-        'formID'        => $this->getFormID(),
-        'timelineID'    => $this->getPreviewTimelineID(),
-        'panelID'       => $this->getPreviewPanelID(),
-        'statusID'      => $this->getStatusID(),
-        'commentID'     => $this->getCommentID(),
-
-        'loadingString' => pht('Loading Preview...'),
-        'savingString'  => pht('Saving Draft...'),
-        'draftString'   => pht('Saved Draft'),
-
-        'showPreview'   => $this->getShowPreview(),
-
-        'actionURI'     => $this->getAction(),
-      ));
+    if (!$this->getEditTypes()) {
+      Javelin::initBehavior(
+        'phabricator-transaction-comment-form',
+        array(
+          'formID'        => $this->getFormID(),
+          'timelineID'    => $this->getPreviewTimelineID(),
+          'panelID'       => $this->getPreviewPanelID(),
+          'showPreview'   => $this->getShowPreview(),
+          'actionURI'     => $this->getAction(),
+        ));
+    }
 
     $comment_box = id(new PHUIObjectBoxView())
       ->setFlush(true)
@@ -175,13 +168,6 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   }
 
   private function renderCommentPanel() {
-    $status = phutil_tag(
-      'div',
-      array(
-        'id' => $this->getStatusID(),
-      ),
-      '');
-
     $draft_comment = '';
     $draft_key = null;
     if ($this->getDraft()) {
@@ -269,7 +255,11 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
           'inputID' => $input_id,
           'formID' => $this->getFormID(),
           'placeID' => $place_id,
+          'panelID' => $this->getPreviewPanelID(),
+          'timelineID' => $this->getPreviewTimelineID(),
           'actions' => $action_map,
+          'showPreview' => $this->getShowPreview(),
+          'actionURI' => $this->getAction(),
         ));
     }
 
@@ -283,10 +273,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
           ->setValue($draft_comment))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue($this->getSubmitButtonName()))
-      ->appendChild(
-        id(new AphrontFormMarkupControl())
-          ->setValue($status));
+          ->setValue($this->getSubmitButtonName()));
 
     return $form;
   }

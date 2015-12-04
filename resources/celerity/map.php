@@ -427,7 +427,7 @@ return array(
     'rsrc/js/application/repository/repository-crossreference.js' => 'e5339c43',
     'rsrc/js/application/search/behavior-reorder-queries.js' => 'e9581f08',
     'rsrc/js/application/slowvote/behavior-slowvote-embed.js' => '887ad43f',
-    'rsrc/js/application/transactions/behavior-comment-actions.js' => '2ada1547',
+    'rsrc/js/application/transactions/behavior-comment-actions.js' => 'f293e8a0',
     'rsrc/js/application/transactions/behavior-reorder-fields.js' => 'b59e1e96',
     'rsrc/js/application/transactions/behavior-show-older-transactions.js' => 'dbbf48b6',
     'rsrc/js/application/transactions/behavior-transaction-comment-form.js' => 'b23b49e6',
@@ -571,7 +571,7 @@ return array(
     'javelin-behavior-audit-preview' => 'd835b03a',
     'javelin-behavior-bulk-job-reload' => 'edf8a145',
     'javelin-behavior-choose-control' => '6153c708',
-    'javelin-behavior-comment-actions' => '2ada1547',
+    'javelin-behavior-comment-actions' => 'f293e8a0',
     'javelin-behavior-config-reorder-fields' => 'b6993408',
     'javelin-behavior-conpherence-drag-and-drop-photo' => 'cf86d16a',
     'javelin-behavior-conpherence-menu' => '1d45c74d',
@@ -1042,14 +1042,6 @@ return array(
     '29274e2b' => array(
       'javelin-install',
       'javelin-util',
-    ),
-    '2ada1547' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-workflow',
-      'javelin-dom',
-      'phuix-form-control-view',
-      'phuix-icon-view',
     ),
     '2b8de964' => array(
       'javelin-install',
@@ -1979,6 +1971,14 @@ return array(
       'javelin-util',
       'javelin-workflow',
       'javelin-json',
+    ),
+    'f293e8a0' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-workflow',
+      'javelin-dom',
+      'phuix-form-control-view',
+      'phuix-icon-view',
     ),
     'f36e01af' => array(
       'javelin-behavior',

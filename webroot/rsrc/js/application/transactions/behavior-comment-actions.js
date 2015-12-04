@@ -34,19 +34,6 @@ JX.behavior('comment-actions', function(config) {
     }
   });
 
-  JX.DOM.listen(form_node, 'submit', null, function() {
-    var data = [];
-
-    for (var k in rows) {
-      data.push({
-        type: k,
-        value: rows[k].getValue()
-      });
-    }
-
-    input_node.value = JX.JSON.stringify(data);
-  });
-
   function add_row(option) {
     var action = action_map[option.value];
     if (!action) {
@@ -75,6 +62,67 @@ JX.behavior('comment-actions', function(config) {
     });
 
     place_node.parentNode.insertBefore(node, place_node);
+  }
+
+  function serialize_actions() {
+    var data = [];
+
+    for (var k in rows) {
+      data.push({
+        type: k,
+        value: rows[k].getValue()
+      });
+    }
+
+    return JX.JSON.stringify(data);
+  }
+
+  function get_data() {
+    var data = JX.DOM.convertFormToDictionary(form_node);
+
+    data.__preview__ = 1;
+    data[input_node.name] = serialize_actions();
+
+    return data;
+  }
+
+  function onresponse(response) {
+    var panel = JX.$(config.panelID);
+    if (!response.xactions.length) {
+      JX.DOM.hide(panel);
+    } else {
+      JX.DOM.setContent(
+        JX.$(config.timelineID),
+        [
+          JX.$H(response.spacer),
+          JX.$H(response.xactions.join(response.spacer))
+        ]);
+      JX.DOM.show(panel);
+    }
+  }
+
+  JX.DOM.listen(form_node, 'submit', null, function() {
+    input_node.value = serialize_actions();
+  });
+
+  if (config.showPreview) {
+    var request = new JX.PhabricatorShapedRequest(
+      config.actionURI,
+      onresponse,
+      get_data);
+
+    var trigger = JX.bind(request, request.trigger);
+
+    JX.DOM.listen(form_node, 'keydown', null, trigger);
+
+    var always_trigger = function() {
+      new JX.Request(config.actionURI, onresponse)
+        .setData(get_data())
+        .send();
+    };
+
+    JX.DOM.listen(form_node, 'shouldRefresh', null, always_trigger);
+    request.start();
   }
 
 });
