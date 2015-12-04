@@ -143,6 +143,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->setViewer($viewer)
       ->buildEditEngineCommentView($task);
 
+    $timeline->setQuoteRef($monogram);
+    $comment_view->setTransactionTimeline($timeline);
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)

@@ -23,6 +23,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $currentVersion;
   private $versionedDraft;
   private $editTypes;
+  private $transactionTimeline;
 
   public function setObjectPHID($object_phid) {
     $this->objectPHID = $object_phid;
@@ -110,8 +111,16 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     return $this->editTypes;
   }
 
-  public function render() {
+  public function setTransactionTimeline(
+    PhabricatorApplicationTransactionView $timeline) {
 
+    $timeline->setQuoteTargetID($this->getCommentID());
+
+    $this->transactionTimeline = $timeline;
+    return $this;
+  }
+
+  public function render() {
     $user = $this->getUser();
     if (!$user->isLoggedIn()) {
       $uri = id(new PhutilURI('/login/'))

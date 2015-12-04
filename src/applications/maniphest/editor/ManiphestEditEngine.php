@@ -73,7 +73,6 @@ final class ManiphestEditEngine
     // - Don't show "change status" for closed tasks.
     // - Don't show "change owner" for closed tasks.
     // - Don't let users change a task status to "Duplicate".
-    // - Make sure "Quote" works.
     // - When closing an unassigned task, assign the closing user.
     // - Make sure implicit CCs on actions are working reasonably.
 

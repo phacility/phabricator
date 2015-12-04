@@ -64,8 +64,9 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ),
       $source_code);
 
+    $monogram = $paste->getMonogram();
     $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb('P'.$paste->getID(), '/P'.$paste->getID());
+      ->addTextCrumb($monogram, '/'.$monogram);
 
     $timeline = $this->buildTransactionTimeline(
       $paste,
@@ -74,6 +75,9 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     $comment_view = id(new PhabricatorPasteEditEngine())
       ->setViewer($viewer)
       ->buildEditEngineCommentView($paste);
+
+    $timeline->setQuoteRef($monogram);
+    $comment_view->setTransactionTimeline($timeline);
 
     return $this->newPage()
       ->setTitle($paste->getFullName())
