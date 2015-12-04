@@ -173,7 +173,16 @@ JX.install('Prefab', {
       var tokenizer = new JX.Tokenizer(root);
       tokenizer.setTypeahead(typeahead);
       tokenizer.setRenderTokenCallback(function(value, key, container) {
-        var result = datasource.getResult(key);
+        var result;
+        if (value && (typeof value == 'object') && ('id' in value)) {
+          // TODO: In this case, we've been passed the decoded wire format
+          // dictionary directly. Token rendering is kind of a huge mess that
+          // should be cleaned up and made more consistent. Just force our
+          // way through for now.
+          result = value;
+        } else {
+          result = datasource.getResult(key);
+        }
 
         var icon;
         var type;

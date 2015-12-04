@@ -3,7 +3,18 @@
 abstract class PhabricatorTokenizerEditField
   extends PhabricatorPHIDListEditField {
 
+  private $commentActionDefaultValue;
+
   abstract protected function newDatasource();
+
+  public function setCommentActionDefaultValue(array $default) {
+    $this->commentActionDefaultValue = $default;
+    return $this;
+  }
+
+  public function getCommentActionDefaultValue() {
+    return $this->commentActionDefaultValue;
+  }
 
   protected function newControl() {
     $control = id(new AphrontFormTokenizerControl())
@@ -28,18 +39,17 @@ abstract class PhabricatorTokenizerEditField
   protected function newEditType() {
     $type = parent::newEditType();
 
-    if ($this->getUseEdgeTransactions()) {
-      $datasource = $this->newDatasource()
-        ->setViewer($this->getViewer());
-      $type->setDatasource($datasource);
-    }
+    $datasource = $this->newDatasource()
+      ->setViewer($this->getViewer());
+    $type->setDatasource($datasource);
 
     return $type;
   }
 
   public function getCommentEditTypes() {
-    if (!$this->getUseEdgeTransactions()) {
-      return parent::getCommentEditTypes();
+    $label = $this->getCommentActionLabel();
+    if ($label === null) {
+      return array();
     }
 
     $transaction_type = $this->getTransactionType();
@@ -47,20 +57,27 @@ abstract class PhabricatorTokenizerEditField
       return array();
     }
 
-    $label = $this->getCommentActionLabel();
-    if ($label === null) {
-      return array();
+    if ($this->getUseEdgeTransactions()) {
+      $type_key = $this->getEditTypeKey();
+      $base = $this->getEditType();
+
+      $add = id(clone $base)
+        ->setEditType($type_key.'.add')
+        ->setEdgeOperation('+')
+        ->setLabel($label);
+
+      return array($add);
     }
 
-    $type_key = $this->getEditTypeKey();
-    $base = $this->getEditType();
-
-    $add = id(clone $base)
-      ->setEditType($type_key.'.add')
-      ->setEdgeOperation('+')
+    $edit = $this->getEditType()
       ->setLabel($label);
 
-    return array($add);
+    $default = $this->getCommentActionDefaultValue();
+    if ($default) {
+      $edit->setDefaultValue($default);
+    }
+
+    return array($edit);
   }
 
 }

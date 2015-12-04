@@ -92,12 +92,8 @@ abstract class PhabricatorPHIDListEditField
       return new PhabricatorEdgeEditType();
     }
 
-    $type = parent::newEditType();
-
-    if ($this->getIsSingleValue()) {
-      $type->setValueType('phid');
-    }
-
+    $type = new PhabricatorDatasourceEditType();
+    $type->setIsSingleValue($this->getIsSingleValue());
     return $type;
   }
 

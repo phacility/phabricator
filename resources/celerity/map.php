@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '4d47b0a9',
-    'core.pkg.js' => '47dc9ebb',
+    'core.pkg.js' => '21eccc42',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '2de124c9',
     'differential.pkg.js' => '6223dd9d',
@@ -456,7 +456,7 @@ return array(
     'rsrc/js/core/KeyboardShortcutManager.js' => 'c1700f6f',
     'rsrc/js/core/MultirowRowManager.js' => 'b5d57730',
     'rsrc/js/core/Notification.js' => 'ccf1cbf8',
-    'rsrc/js/core/Prefab.js' => '6920d200',
+    'rsrc/js/core/Prefab.js' => '2381d07a',
     'rsrc/js/core/ShapedRequest.js' => '7cbe244b',
     'rsrc/js/core/TextAreaUtils.js' => '5c93c52c',
     'rsrc/js/core/Title.js' => 'df5e11d2',
@@ -506,7 +506,7 @@ return array(
     'rsrc/js/phuix/PHUIXActionListView.js' => 'b5c256b8',
     'rsrc/js/phuix/PHUIXActionView.js' => '8cf6d262',
     'rsrc/js/phuix/PHUIXDropdownMenu.js' => 'bd4c8dca',
-    'rsrc/js/phuix/PHUIXFormControl.js' => '7e1dc09e',
+    'rsrc/js/phuix/PHUIXFormControl.js' => '1adf0d30',
     'rsrc/js/phuix/PHUIXIconView.js' => 'bff6884b',
   ),
   'symbols' => array(
@@ -757,7 +757,7 @@ return array(
     'phabricator-notification-menu-css' => 'f31c0bde',
     'phabricator-object-selector-css' => '85ee8ce6',
     'phabricator-phtize' => 'd254d646',
-    'phabricator-prefab' => '6920d200',
+    'phabricator-prefab' => '2381d07a',
     'phabricator-remarkup-css' => 'b1c10368',
     'phabricator-search-results-css' => '7dea472c',
     'phabricator-shaped-request' => '7cbe244b',
@@ -831,7 +831,7 @@ return array(
     'phuix-action-list-view' => 'b5c256b8',
     'phuix-action-view' => '8cf6d262',
     'phuix-dropdown-menu' => 'bd4c8dca',
-    'phuix-form-control-view' => '7e1dc09e',
+    'phuix-form-control-view' => '1adf0d30',
     'phuix-icon-view' => 'bff6884b',
     'policy-css' => '957ea14c',
     'policy-edit-css' => '815c66f7',
@@ -946,6 +946,10 @@ return array(
       'javelin-util',
       'javelin-reactor-node-calmer',
     ),
+    '1adf0d30' => array(
+      'javelin-install',
+      'javelin-dom',
+    ),
     '1ae869f2' => array(
       'javelin-install',
       'javelin-util',
@@ -1001,6 +1005,18 @@ return array(
       'javelin-dom',
       'javelin-json',
       'javelin-workflow',
+      'javelin-util',
+    ),
+    '2381d07a' => array(
+      'javelin-install',
+      'javelin-util',
+      'javelin-dom',
+      'javelin-typeahead',
+      'javelin-tokenizer',
+      'javelin-typeahead-preloaded-source',
+      'javelin-typeahead-ondemand-source',
+      'javelin-dom',
+      'javelin-stratcom',
       'javelin-util',
     ),
     '246dc085' => array(
@@ -1304,18 +1320,6 @@ return array(
     '6882e80a' => array(
       'javelin-dom',
     ),
-    '6920d200' => array(
-      'javelin-install',
-      'javelin-util',
-      'javelin-dom',
-      'javelin-typeahead',
-      'javelin-tokenizer',
-      'javelin-typeahead-preloaded-source',
-      'javelin-typeahead-ondemand-source',
-      'javelin-dom',
-      'javelin-stratcom',
-      'javelin-util',
-    ),
     '69adf288' => array(
       'javelin-install',
     ),
@@ -1429,10 +1433,6 @@ return array(
       'phuix-action-list-view',
       'phuix-action-view',
       'javelin-workflow',
-    ),
-    '7e1dc09e' => array(
-      'javelin-install',
-      'javelin-dom',
     ),
     '7e41274a' => array(
       'javelin-install',

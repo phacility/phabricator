@@ -61,17 +61,23 @@ final class ManiphestEditEngine
     $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
 
     // TODO: Restore these or toss them:
-    // - Default owner to viewer.
-    // - Don't show "change owner" for closed tasks.
     // - When closing an unassigned task, assign the closing user.
     // - Make sure implicit CCs on actions are working reasonably.
 
     if ($object->isClosed()) {
       $priority_label = null;
+      $owner_label = null;
       $default_status = ManiphestTaskStatus::getDefaultStatus();
     } else {
       $priority_label = pht('Change Priority');
+      $owner_label = pht('Assign / Claim');
       $default_status = ManiphestTaskStatus::getDefaultClosedStatus();
+    }
+
+    if ($object->getOwnerPHID()) {
+      $owner_value = array($object->getOwnerPHID());
+    } else {
+      $owner_value = array($this->getViewer()->getPHID());
     }
 
     return array(
@@ -97,7 +103,9 @@ final class ManiphestEditEngine
         ->setLabel(pht('Assigned To'))
         ->setDescription(pht('User who is responsible for the task.'))
         ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
-        ->setSingleValue($object->getOwnerPHID()),
+        ->setSingleValue($object->getOwnerPHID())
+        ->setCommentActionLabel($owner_label)
+        ->setCommentActionDefaultValue($owner_value),
       id(new PhabricatorSelectEditField())
         ->setKey('priority')
         ->setLabel(pht('Priority'))

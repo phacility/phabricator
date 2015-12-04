@@ -1049,7 +1049,10 @@ abstract class PhabricatorEditEngine
       foreach ($fields as $field) {
         $types = $field->getCommentEditTypes();
         foreach ($types as $type) {
-          $type_map[$type->getEditType()] = $type;
+          $type_map[$type->getEditType()] = array(
+            'type' => $type,
+            'field' => $field,
+          );
         }
       }
 
@@ -1060,15 +1063,20 @@ abstract class PhabricatorEditEngine
           continue;
         }
 
-        $edit_type = idx($type_map, $type);
-        if (!$edit_type) {
+        $spec = idx($type_map, $type);
+        if (!$spec) {
           continue;
         }
+
+        $edit_type = $spec['type'];
+        $field = $spec['field'];
+
+        $field->readValueFromComment($action);
 
         $type_xactions = $edit_type->generateTransactions(
           $template,
           array(
-            'value' => idx($action, 'value'),
+            'value' => $field->getValueForTransaction(),
           ));
         foreach ($type_xactions as $type_xaction) {
           $xactions[] = $type_xaction;

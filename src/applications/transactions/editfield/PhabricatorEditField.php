@@ -182,7 +182,6 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->commentActionLabel;
   }
 
-
   protected function newControl() {
     throw new PhutilMethodNotImplementedException();
   }
@@ -320,6 +319,15 @@ abstract class PhabricatorEditField extends Phobject {
       break;
     }
     return $this;
+  }
+
+  public function readValueFromComment($action) {
+    $this->value = $this->getValueFromComment(idx($action, 'value'));
+    return $this;
+  }
+
+  protected function getValueFromComment($value) {
+    return $value;
   }
 
   public function getAllReadValueFromRequestKeys() {
