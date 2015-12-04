@@ -53,6 +53,7 @@ final class PhabricatorSelectEditField
       ->setPHUIXControlSpecification(
         array(
           'options' => $this->getOptions(),
+          'order' => array_keys($this->getOptions()),
           'value' => $default_value,
         ));
 

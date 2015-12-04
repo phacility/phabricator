@@ -86,5 +86,19 @@ abstract class PhabricatorPHIDListEditType
     );
   }
 
+  public function getCommentActionValueFromDraftValue($value) {
+    $datasource = $this->getDatasource();
+
+    if (!$datasource) {
+      return array();
+    }
+
+    if (!is_array($value)) {
+      return array();
+    }
+
+    return $datasource->getWireTokens($value);
+  }
+
 
 }

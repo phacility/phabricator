@@ -118,7 +118,15 @@ JX.install('PHUIXFormControl', {
         spec.config);
       build.tokenizer.start();
 
+      function get_value() {
+        return JX.keys(build.tokenizer.getTokens());
+      }
+
       function set_value(map) {
+        var tokens = get_value();
+        for (var ii = 0; ii < tokens.length; ii++) {
+          build.tokenizer.removeToken(tokens[ii]);
+        }
         for (var k in map) {
           var v = JX.Prefab.transformDatasourceResults(map[k]);
           build.tokenizer.addToken(k, v);
@@ -129,15 +137,17 @@ JX.install('PHUIXFormControl', {
 
       return {
         node: build.node,
-        get: function() {
-          return JX.keys(build.tokenizer.getTokens());
-        },
+        get: get_value,
         set: set_value
       };
     },
 
     _newSelect: function(spec) {
-      var node = JX.Prefab.renderSelect(spec.options, spec.value);
+      var node = JX.Prefab.renderSelect(
+        spec.options,
+        spec.value,
+        {},
+        spec.order);
 
       return {
         node: node,

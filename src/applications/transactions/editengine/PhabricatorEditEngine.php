@@ -1025,6 +1025,11 @@ abstract class PhabricatorEditEngine
 
     $comment_text = $request->getStr('comment');
 
+    $actions = $request->getStr('editengine.actions');
+    if ($actions) {
+      $actions = phutil_json_decode($actions);
+    }
+
     if ($is_preview) {
       $version_key = PhabricatorVersionedDraft::KEY_VERSION;
       $request_version = $request->getInt($version_key);
@@ -1036,14 +1041,15 @@ abstract class PhabricatorEditEngine
           $current_version);
 
         // TODO: This is just a proof of concept.
-        $draft->setProperty('temporary.comment', $comment_text);
-        $draft->save();
+        $draft
+          ->setProperty('temporary.comment', $comment_text)
+          ->setProperty('actions', $actions)
+          ->save();
       }
     }
 
     $xactions = array();
 
-    $actions = $request->getStr('editengine.actions');
     if ($actions) {
       $type_map = array();
       foreach ($fields as $field) {
@@ -1056,7 +1062,6 @@ abstract class PhabricatorEditEngine
         }
       }
 
-      $actions = phutil_json_decode($actions);
       foreach ($actions as $action) {
         $type = idx($action, 'type');
         if (!$type) {

@@ -104,4 +104,8 @@ abstract class PhabricatorEditType extends Phobject {
     return null;
   }
 
+  public function getCommentActionValueFromDraftValue($value) {
+    return $value;
+  }
+
 }

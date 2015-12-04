@@ -469,14 +469,14 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
     $tokens = array();
     foreach ($rendered as $key => $render) {
       $tokens[$key] = id(new PhabricatorTypeaheadResult())
-        ->setPHID($key)
+        ->setPHID($render->getKey())
         ->setIcon($render->getIcon())
         ->setColor($render->getColor())
         ->setDisplayName($render->getValue())
         ->setTokenType($render->getTokenType());
     }
 
-    return mpull($tokens, 'getWireFormat');
+    return mpull($tokens, 'getWireFormat', 'getPHID');
   }
 
 }

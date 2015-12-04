@@ -19,20 +19,28 @@ JX.behavior('comment-actions', function(config) {
   var rows = {};
 
   JX.DOM.listen(action_node, 'change', null, function() {
+    var option = find_option(action_node.value);
+
+    action_node.value = '+';
+
+    if (option) {
+      add_row(option);
+    }
+  });
+
+  function find_option(key) {
     var options = action_node.options;
     var option;
 
-    var selected = action_node.value;
-    action_node.value = '+';
-
     for (var ii = 0; ii < options.length; ii++) {
       option = options[ii];
-      if (option.value == selected) {
-        add_row(option);
-        break;
+      if (option.value == key) {
+        return option;
       }
     }
-  });
+
+    return null;
+  }
 
   function add_row(option) {
     var action = action_map[option.value];
@@ -62,6 +70,8 @@ JX.behavior('comment-actions', function(config) {
     });
 
     place_node.parentNode.insertBefore(node, place_node);
+
+    return control;
   }
 
   function serialize_actions() {
@@ -84,6 +94,24 @@ JX.behavior('comment-actions', function(config) {
     data[input_node.name] = serialize_actions();
 
     return data;
+  }
+
+  function restore_draft_actions(drafts) {
+    var draft;
+    var option;
+    var control;
+
+    for (var ii = 0; ii < drafts.length; ii++) {
+      draft = drafts[ii];
+
+      option = find_option(draft.type);
+      if (!option) {
+        continue;
+      }
+
+      control = add_row(option);
+      control.setValue(draft.value);
+    }
   }
 
   function onresponse(response) {
@@ -124,5 +152,7 @@ JX.behavior('comment-actions', function(config) {
     JX.DOM.listen(form_node, 'shouldRefresh', null, always_trigger);
     request.start();
   }
+
+  restore_draft_actions(config.drafts || []);
 
 });

@@ -19,15 +19,27 @@
 JX.install('Prefab', {
 
   statics : {
-    renderSelect : function(map, selected, attrs) {
+    renderSelect : function(map, selected, attrs, order) {
       var select = JX.$N('select', attrs || {});
-      for (var k in map) {
+
+      // Callers may optionally pass "order" to force options into a specific
+      // order. Although most browsers do retain order, maps in Javascript
+      // aren't technically ordered. Safari, at least, will reorder maps with
+      // numeric keys.
+
+      order = order || JX.keys(map);
+
+      var k;
+      for (var ii = 0; ii < order.length; ii++) {
+        k = order[ii];
         select.options[select.options.length] = new Option(map[k], k);
         if (k == selected) {
           select.value = k;
         }
       }
-      select.value = select.value || JX.keys(map)[0];
+
+      select.value = select.value || order[0];
+
       return select;
     },
 
