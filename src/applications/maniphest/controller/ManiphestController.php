@@ -30,11 +30,9 @@ abstract class ManiphestController extends PhabricatorController {
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('Create Task'))
-        ->setHref($this->getApplicationURI('task/create/'))
-        ->setIcon('fa-plus-square'));
+    id(new ManiphestEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs);
 
     return $crumbs;
   }
