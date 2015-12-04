@@ -67,11 +67,21 @@ final class ManiphestEditEngine
 
     $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
 
+    // TODO: Restore these or toss them:
+    // - Require a single owner.
+    // - Default owner to viewer.
+    // - Don't show "change status" for closed tasks.
+    // - Don't show "change owner" for closed tasks.
+    // - Don't let users change a task status to "Duplicate".
+    // - Make sure "Quote" works.
+    // - When closing an unassigned task, assign the closing user.
+    // - Make sure implicit CCs on actions are working reasonably.
+
     return array(
       id(new PhabricatorTextEditField())
         ->setKey('title')
         ->setLabel(pht('Title'))
-        ->setDescription(pht('Name of the paste.'))
+        ->setDescription(pht('Name of the task.'))
         ->setTransactionType(ManiphestTransaction::TYPE_TITLE)
         ->setIsRequired(true)
         ->setValue($object->getTitle()),
