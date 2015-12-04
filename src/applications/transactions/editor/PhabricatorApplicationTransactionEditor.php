@@ -1369,7 +1369,7 @@ abstract class PhabricatorApplicationTransactionEditor
    * resigning from a revision in Differential implies removing yourself as
    * a reviewer.
    */
-  private function expandTransactions(
+  protected function expandTransactions(
     PhabricatorLiskDAO $object,
     array $xactions) {
 

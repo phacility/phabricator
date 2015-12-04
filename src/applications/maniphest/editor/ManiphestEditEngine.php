@@ -60,10 +60,6 @@ final class ManiphestEditEngine
 
     $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
 
-    // TODO: Restore these or toss them:
-    // - When closing an unassigned task, assign the closing user.
-    // - Make sure implicit CCs on actions are working reasonably.
-
     if ($object->isClosed()) {
       $priority_label = null;
       $owner_label = null;

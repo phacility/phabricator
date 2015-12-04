@@ -745,5 +745,79 @@ final class ManiphestTransactionEditor
     return $errors;
   }
 
+  protected function expandTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    $results = parent::expandTransactions($object, $xactions);
+
+    $is_unassigned = ($object->getOwnerPHID() === null);
+
+    $any_assign = false;
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() == ManiphestTransaction::TYPE_OWNER) {
+        $any_assign = true;
+        break;
+      }
+    }
+
+    $is_open = !$object->isClosed();
+
+    $new_status = null;
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case ManiphestTransaction::TYPE_STATUS:
+          $new_status = $xaction->getNewValue();
+          break;
+      }
+    }
+
+    if ($new_status === null) {
+      $is_closing = false;
+    } else {
+      $is_closing = ManiphestTaskStatus::isClosedStatus($new_status);
+    }
+
+    // If the task is not assigned, not being assigned, currently open, and
+    // being closed, try to assign the actor as the owner.
+    if ($is_unassigned && !$any_assign && $is_open && $is_closing) {
+      // Don't assign the actor if they aren't a real user.
+      $actor = $this->getActor();
+      $actor_phid = $actor->getPHID();
+      if ($actor_phid) {
+        $results[] = id(new ManiphestTransaction())
+          ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
+          ->setNewValue($actor_phid);
+      }
+    }
+
+    return $results;
+  }
+
+  protected function expandTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $results = parent::expandTransaction($object, $xaction);
+
+    switch ($xaction->getTransactionType()) {
+      case ManiphestTransaction::TYPE_OWNER:
+        // When a task is reassigned, move the old owner to the subscriber
+        // list so they're still in the loop.
+        $owner_phid = $object->getOwnerPHID();
+        if ($owner_phid) {
+          $results[] = id(new ManiphestTransaction())
+            ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+            ->setIgnoreOnNoEffect(true)
+            ->setNewValue(
+              array(
+                '+' => array($owner_phid => $owner_phid),
+              ));
+        }
+        break;
+    }
+
+    return $results;
+  }
+
 
 }
