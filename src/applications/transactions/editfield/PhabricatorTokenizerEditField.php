@@ -25,6 +25,10 @@ abstract class PhabricatorTokenizerEditField
       $control->setOriginalValue($initial_value);
     }
 
+    if ($this->getIsSingleValue()) {
+      $control->setLimit(1);
+    }
+
     return $control;
   }
 

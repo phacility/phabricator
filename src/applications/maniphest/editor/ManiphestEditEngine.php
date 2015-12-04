@@ -58,17 +58,9 @@ final class ManiphestEditEngine
       unset($status_map[$dup_status]);
     }
 
-    $owner_phid = $object->getOwnerPHID();
-    if ($owner_phid) {
-      $owner_value = array($owner_phid);
-    } else {
-      $owner_value = array();
-    }
-
     $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
 
     // TODO: Restore these or toss them:
-    // - Require a single owner.
     // - Default owner to viewer.
     // - Don't show "change status" for closed tasks.
     // - Don't show "change owner" for closed tasks.
@@ -92,12 +84,12 @@ final class ManiphestEditEngine
         ->setValue($object->getStatus())
         ->setOptions($status_map),
       id(new PhabricatorUsersEditField())
-        ->setKey('assigned')
-        ->setAliases(array('assign', 'assignee'))
+        ->setKey('owner')
+        ->setAliases(array('ownerPHID', 'assign', 'assigned'))
         ->setLabel(pht('Assigned To'))
         ->setDescription(pht('User who is responsible for the task.'))
         ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
-        ->setValue($owner_value),
+        ->setSingleValue($object->getOwnerPHID()),
       id(new PhabricatorSelectEditField())
         ->setKey('priority')
         ->setLabel(pht('Priority'))

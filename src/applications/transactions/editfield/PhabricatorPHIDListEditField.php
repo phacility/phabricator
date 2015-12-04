@@ -5,6 +5,7 @@ abstract class PhabricatorPHIDListEditField
 
   private $useEdgeTransactions;
   private $transactionDescriptions = array();
+  private $isSingleValue;
 
   public function setUseEdgeTransactions($use_edge_transactions) {
     $this->useEdgeTransactions = $use_edge_transactions;
@@ -24,12 +25,35 @@ abstract class PhabricatorPHIDListEditField
     return $this;
   }
 
+  public function setSingleValue($value) {
+    if ($value === null) {
+      $value = array();
+    } else {
+      $value = array($value);
+    }
+
+    $this->isSingleValue = true;
+    return $this->setValue($value);
+  }
+
+  public function getIsSingleValue() {
+    return $this->isSingleValue;
+  }
+
   protected function newHTTPParameterType() {
     return new AphrontPHIDListHTTPParameterType();
   }
 
   public function getValueForTransaction() {
     $new = parent::getValueForTransaction();
+
+    if ($this->getIsSingleValue()) {
+      if ($new) {
+        return head($new);
+      } else {
+        return null;
+      }
+    }
 
     if (!$this->getUseEdgeTransactions()) {
       return $new;
@@ -68,7 +92,13 @@ abstract class PhabricatorPHIDListEditField
       return new PhabricatorEdgeEditType();
     }
 
-    return parent::newEditType();
+    $type = parent::newEditType();
+
+    if ($this->getIsSingleValue()) {
+      $type->setValueType('phid');
+    }
+
+    return $type;
   }
 
   public function getConduitEditTypes() {
