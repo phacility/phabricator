@@ -227,6 +227,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
 
       $action_id = celerity_generate_unique_node_id();
       $input_id = celerity_generate_unique_node_id();
+      $place_id = celerity_generate_unique_node_id();
 
       $form->appendChild(
         phutil_tag(
@@ -243,12 +244,22 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
           ->setID($action_id)
           ->setOptions($options));
 
+      // This is an empty placeholder node so we know where to insert the
+      // new actions.
+      $form->appendChild(
+        phutil_tag(
+          'div',
+          array(
+            'id' => $place_id,
+          )));
+
       Javelin::initBehavior(
         'comment-actions',
         array(
           'actionID' => $action_id,
           'inputID' => $input_id,
           'formID' => $this->getFormID(),
+          'placeID' => $place_id,
           'actions' => $action_map,
         ));
     }

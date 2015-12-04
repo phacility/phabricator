@@ -14,6 +14,7 @@ JX.behavior('comment-actions', function(config) {
   var action_node = JX.$(config.actionID);
   var form_node = JX.$(config.formID);
   var input_node = JX.$(config.inputID);
+  var place_node = JX.$(config.placeID);
 
   var rows = {};
 
@@ -73,12 +74,7 @@ JX.behavior('comment-actions', function(config) {
       option.disabled = false;
     });
 
-    // TODO: Grotesque.
-    action_node
-      .parentNode
-      .parentNode
-      .parentNode
-      .insertBefore(node, action_node.parentNode.parentNode.nextSibling);
+    place_node.parentNode.insertBefore(node, place_node);
   }
 
 });
