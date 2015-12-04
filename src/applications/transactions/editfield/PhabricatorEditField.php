@@ -15,6 +15,7 @@ abstract class PhabricatorEditField extends Phobject {
   private $description;
   private $editTypeKey;
   private $isRequired;
+  private $commentActionLabel;
 
   private $isLocked;
   private $isHidden;
@@ -171,6 +172,16 @@ abstract class PhabricatorEditField extends Phobject {
   public function getControlError() {
     return $this->controlError;
   }
+
+  public function setCommentActionLabel($label) {
+    $this->commentActionLabel = $label;
+    return $this;
+  }
+
+  public function getCommentActionLabel() {
+    return $this->commentActionLabel;
+  }
+
 
   protected function newControl() {
     throw new PhutilMethodNotImplementedException();

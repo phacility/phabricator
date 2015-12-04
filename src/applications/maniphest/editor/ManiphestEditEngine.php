@@ -62,11 +62,17 @@ final class ManiphestEditEngine
 
     // TODO: Restore these or toss them:
     // - Default owner to viewer.
-    // - Don't show "change status" for closed tasks.
     // - Don't show "change owner" for closed tasks.
-    // - Don't let users change a task status to "Duplicate".
     // - When closing an unassigned task, assign the closing user.
     // - Make sure implicit CCs on actions are working reasonably.
+
+    if ($object->isClosed()) {
+      $priority_label = null;
+      $default_status = ManiphestTaskStatus::getDefaultStatus();
+    } else {
+      $priority_label = pht('Change Priority');
+      $default_status = ManiphestTaskStatus::getDefaultClosedStatus();
+    }
 
     return array(
       id(new PhabricatorTextEditField())
@@ -82,7 +88,9 @@ final class ManiphestEditEngine
         ->setDescription(pht('Status of the task.'))
         ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
         ->setValue($object->getStatus())
-        ->setOptions($status_map),
+        ->setOptions($status_map)
+        ->setCommentActionLabel(pht('Change Status'))
+        ->setCommentActionDefaultValue($default_status),
       id(new PhabricatorUsersEditField())
         ->setKey('owner')
         ->setAliases(array('ownerPHID', 'assign', 'assigned'))
@@ -96,7 +104,8 @@ final class ManiphestEditEngine
         ->setDescription(pht('Priority of the task.'))
         ->setTransactionType(ManiphestTransaction::TYPE_PRIORITY)
         ->setValue($object->getPriority())
-        ->setOptions($priority_map),
+        ->setOptions($priority_map)
+        ->setCommentActionLabel($priority_label),
       id(new PhabricatorRemarkupEditField())
         ->setKey('description')
         ->setLabel(pht('Description'))

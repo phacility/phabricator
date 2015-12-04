@@ -62,7 +62,7 @@ JX.behavior('comment-actions', function(config) {
     var control = new JX.PHUIXFormControl()
       .setLabel(action.label)
       .setError(remove)
-      .setControl('tokenizer', action.spec);
+      .setControl(action.type, action.spec);
     var node = control.getNode();
 
     rows[action.key] = control;

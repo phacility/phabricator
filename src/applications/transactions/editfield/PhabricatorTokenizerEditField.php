@@ -3,18 +3,7 @@
 abstract class PhabricatorTokenizerEditField
   extends PhabricatorPHIDListEditField {
 
-  private $commentActionLabel;
-
   abstract protected function newDatasource();
-
-  public function setCommentActionLabel($label) {
-    $this->commentActionLabel = $label;
-    return $this;
-  }
-
-  public function getCommentActionLabel() {
-    return $this->commentActionLabel;
-  }
 
   protected function newControl() {
     $control = id(new AphrontFormTokenizerControl())
