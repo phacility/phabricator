@@ -71,6 +71,15 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
     $classes[] = $this->customClass;
     $classes = trim(implode(' ', $classes));
 
+    // NOTE: This needs to be string cast, because if we pass `null` the
+    // tag will be self-closed and some browsers aren't thrilled about that.
+    $value = (string)$this->getValue();
+
+    // NOTE: We also need to prefix the string with a newline, because browsers
+    // ignore a newline immediately after a <textarea> tag, so they'll eat
+    // leading newlines if we don't do this. See T8707.
+    $value = "\n".$value;
+
     return javelin_tag(
       'textarea',
       array(
@@ -83,9 +92,7 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
         'sigil'       => $this->sigil,
         'placeholder' => $this->getPlaceHolder(),
       ),
-      // NOTE: This needs to be string cast, because if we pass `null` the
-      // tag will be self-closed and some browsers aren't thrilled about that.
-      (string)$this->getValue());
+      $value);
   }
 
 }
