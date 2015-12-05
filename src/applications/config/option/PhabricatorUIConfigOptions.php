@@ -85,7 +85,7 @@ EOJSON;
               'is true and otherwise view policy user; mismatches in these '.
               'policy settings will result in a broken logo for some users.'.
               "\n\n".
-              'You should restart your webserver after updating this value '.
+              'You should restart Phabricator after updating this value '.
               'to see this change take effect.'.
               "\n\n".
               'As this feature is experimental, please read [[ %s | T4214 ]] '.

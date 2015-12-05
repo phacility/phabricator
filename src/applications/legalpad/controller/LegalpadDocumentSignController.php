@@ -331,7 +331,6 @@ final class LegalpadDocumentSignController extends LegalpadController {
       ),
       array(
         'title' => $title,
-        'class' => 'pro-white-background',
         'pageObjects' => array($document->getPHID()),
       ));
   }

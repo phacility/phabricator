@@ -129,4 +129,8 @@ final class PhabricatorStandardCustomFieldBool
     );
   }
 
+  protected function getHTTPParameterType() {
+    return new AphrontBoolHTTPParameterType();
+  }
+
 }

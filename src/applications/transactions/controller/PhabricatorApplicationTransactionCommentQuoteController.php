@@ -3,18 +3,12 @@
 final class PhabricatorApplicationTransactionCommentQuoteController
   extends PhabricatorApplicationTransactionController {
 
-  private $phid;
-
-  public function willProcessRequest(array $data) {
-    $this->phid = $data['phid'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $phid = $request->getURIData('phid');
 
     $xaction = id(new PhabricatorObjectQuery())
-      ->withPHIDs(array($this->phid))
+      ->withPHIDs(array($phid))
       ->setViewer($viewer)
       ->executeOne();
     if (!$xaction) {

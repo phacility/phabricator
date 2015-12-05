@@ -63,16 +63,17 @@ try {
           $default_namespace),
       ),
       array(
-        'name'  => 'dryrun',
-        'help'  => pht(
+        'name'    => 'dryrun',
+        'help'    => pht(
           'Do not actually change anything, just show what would be changed.'),
       ),
       array(
-        'name' => 'disable-utf8mb4',
-        'help' => pht(
-          'Disable utf8mb4, even if the database supports it. This is an '.
+        'name'    => 'disable-utf8mb4',
+        'help'    => pht(
+          'Disable %s, even if the database supports it. This is an '.
           'advanced feature used for testing changes to Phabricator; you '.
-          'should not normally use this flag.'),
+          'should not normally use this flag.',
+          'utf8mb4'),
       ),
     ));
 } catch (PhutilArgumentUsageException $ex) {
@@ -83,12 +84,12 @@ try {
 // First, test that the Phabricator configuration is set up correctly. After
 // we know this works we'll test any administrative credentials specifically.
 
-$test_api = new PhabricatorStorageManagementAPI();
-$test_api->setUser($default_user);
-$test_api->setHost($default_host);
-$test_api->setPort($default_port);
-$test_api->setPassword($conf->getPassword());
-$test_api->setNamespace($args->getArg('namespace'));
+$test_api = id(new PhabricatorStorageManagementAPI())
+  ->setUser($default_user)
+  ->setHost($default_host)
+  ->setPort($default_port)
+  ->setPassword($conf->getPassword())
+  ->setNamespace($args->getArg('namespace'));
 
 try {
   queryfx(
@@ -113,12 +114,9 @@ try {
       '--password'),
     pht('Raw MySQL Error'),
     $ex->getMessage());
-
   echo phutil_console_wrap($message);
-
   exit(1);
 }
-
 
 if ($args->getArg('password') === null) {
   // This is already a PhutilOpaqueEnvelope.
@@ -129,14 +127,14 @@ if ($args->getArg('password') === null) {
   PhabricatorEnv::overrideConfig('mysql.pass', $args->getArg('password'));
 }
 
-$api = new PhabricatorStorageManagementAPI();
-$api->setUser($args->getArg('user'));
-PhabricatorEnv::overrideConfig('mysql.user', $args->getArg('user'));
-$api->setHost($default_host);
-$api->setPort($default_port);
-$api->setPassword($password);
-$api->setNamespace($args->getArg('namespace'));
-$api->setDisableUTF8MB4($args->getArg('disable-utf8mb4'));
+$api = id(new PhabricatorStorageManagementAPI())
+  ->setUser($args->getArg('user'))
+  ->setHost($default_host)
+  ->setPort($default_port)
+  ->setPassword($password)
+  ->setNamespace($args->getArg('namespace'))
+  ->setDisableUTF8MB4($args->getArg('disable-utf8mb4'));
+PhabricatorEnv::overrideConfig('mysql.user', $api->getUser());
 
 try {
   queryfx(
@@ -154,9 +152,7 @@ try {
       '--password'),
     pht('Raw MySQL Error'),
     $ex->getMessage());
-
   echo phutil_console_wrap($message);
-
   exit(1);
 }
 

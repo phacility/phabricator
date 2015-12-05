@@ -18,8 +18,6 @@ final class PhamePostPublishController extends PhamePostController {
       return new Aphront404Response();
     }
 
-    $view_uri = $this->getApplicationURI('/post/view/'.$post->getID().'/');
-
     if ($request->isFormPost()) {
       $xactions = array();
       $xactions[] = id(new PhamePostTransaction())
@@ -33,52 +31,22 @@ final class PhamePostPublishController extends PhamePostController {
         ->setContinueOnMissingFields(true)
         ->applyTransactions($post, $xactions);
 
-      return id(new AphrontRedirectResponse())->setURI($view_uri);
+      return id(new AphrontRedirectResponse())
+        ->setURI($this->getApplicationURI('/post/view/'.$post->getID().'/'));
     }
 
-    $form = id(new AphrontFormView())
-      ->setUser($viewer)
+    $cancel_uri = $this->getApplicationURI('/post/view/'.$post->getID().'/');
+
+    $dialog = $this->newDialog()
+      ->setTitle(pht('Publish Post?'))
       ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue(pht('Publish Post'))
-          ->addCancelButton($view_uri));
+        pht(
+          'The post "%s" will go live once you publish it.',
+          $post->getTitle()))
+      ->addSubmitButton(pht('Publish'))
+      ->addCancelButton($cancel_uri);
 
-    $frame = $this->renderPreviewFrame($post);
-
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Preview Post'))
-      ->setForm($form);
-
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Preview'), $view_uri);
-
-    return $this->newPage()
-      ->setTitle(pht('Preview Post'))
-      ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $form_box,
-          $frame,
-      ));
-  }
-
-  private function renderPreviewFrame(PhamePost $post) {
-
-    return phutil_tag(
-      'div',
-      array(
-        'style' => 'text-align: center; padding: 16px;',
-      ),
-      phutil_tag(
-        'iframe',
-        array(
-          'style' => 'width: 100%; height: 600px; '.
-                     'border: 1px solid #BFCFDA; '.
-                     'background-color: #fff; '.
-                     'border-radius: 3px; ',
-          'src' => $this->getApplicationURI('/post/framed/'.$post->getID().'/'),
-        ),
-        ''));
+    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
 }

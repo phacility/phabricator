@@ -102,19 +102,19 @@ final class HeraldTestConsoleController extends HeraldController {
       ->setFormErrors($errors)
       ->setForm($form);
 
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('test');
-    $nav->appendChild($box);
-
     $crumbs = id($this->buildApplicationCrumbs())
       ->addTextCrumb(pht('Test Console'));
-    $nav->setCrumbs($crumbs);
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => pht('Test Console'),
+    $title = pht('Test Console');
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $box,
       ));
+
   }
 
 }

@@ -8,6 +8,8 @@ final class PhabricatorEditEngineConfigurationQuery
   private $engineKeys;
   private $builtinKeys;
   private $identifiers;
+  private $default;
+  private $disabled;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -31,6 +33,16 @@ final class PhabricatorEditEngineConfigurationQuery
 
   public function withIdentifiers(array $identifiers) {
     $this->identifiers = $identifiers;
+    return $this;
+  }
+
+  public function withIsDefault($default) {
+    $this->default = $default;
+    return $this;
+  }
+
+  public function withIsDisabled($disabled) {
+    $this->disabled = $disabled;
     return $this;
   }
 
@@ -113,6 +125,22 @@ final class PhabricatorEditEngineConfigurationQuery
       $builtin_keys = array_fuse($this->builtinKeys);
       foreach ($page as $key => $config) {
         if (empty($builtin_keys[$config->getBuiltinKey()])) {
+          unset($page[$key]);
+        }
+      }
+    }
+
+    if ($this->default !== null) {
+      foreach ($page as $key => $config) {
+        if ($config->getIsDefault() != $this->default) {
+          unset($page[$key]);
+        }
+      }
+    }
+
+    if ($this->disabled !== null) {
+      foreach ($page as $key => $config) {
+        if ($config->getIsDisabled() != $this->disabled) {
           unset($page[$key]);
         }
       }

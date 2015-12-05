@@ -8,6 +8,8 @@ final class PhabricatorEditEngineConfigurationTransaction
   const TYPE_ORDER = 'editengine.config.order';
   const TYPE_DEFAULT = 'editengine.config.default';
   const TYPE_LOCKS = 'editengine.config.locks';
+  const TYPE_DEFAULTCREATE = 'editengine.config.default.create';
+  const TYPE_DISABLE = 'editengine.config.disable';
 
   public function getApplicationName() {
     return 'search';
@@ -60,6 +62,26 @@ final class PhabricatorEditEngineConfigurationTransaction
         return pht(
           '%s changed locked and hidden fields.',
           $this->renderHandleLink($author_phid));
+      case self::TYPE_DEFAULTCREATE:
+        if ($new) {
+          return pht(
+            '%s added this form to the "Create" menu.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s removed this form from the "Create" menu.',
+            $this->renderHandleLink($author_phid));
+        }
+      case self::TYPE_DISABLE:
+        if ($new) {
+          return pht(
+            '%s disabled this form.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s enabled this form.',
+            $this->renderHandleLink($author_phid));
+        }
     }
 
     return parent::getTitle();

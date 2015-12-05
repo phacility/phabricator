@@ -107,9 +107,10 @@ setenv.add-environment = (
 )
 ```
 
-After creating and selecting a configuration file, restart your webserver. Any
-configuration you set should take effect immediately, and your file should be
-visible in the Config application when examining configuration.
+After creating and selecting a configuration file, restart Phabricator (for
+help, see @{article:Restarting Phabricator}). Any configuration you set should
+take effect immediately, and your file should be visible in the Config
+application when examining configuration.
 
 = Next Steps =
 

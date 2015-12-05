@@ -2,6 +2,12 @@
 
 final class PhameBlogViewController extends PhameBlogController {
 
+  private $blog;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
@@ -9,10 +15,12 @@ final class PhameBlogViewController extends PhameBlogController {
     $blog = id(new PhameBlogQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->needProfileImage(true)
       ->executeOne();
     if (!$blog) {
       return new Aphront404Response();
     }
+    $this->blog = $blog;
 
     $pager = id(new AphrontCursorPagerView())
       ->readFromRequest($request);
@@ -32,107 +40,62 @@ final class PhameBlogViewController extends PhameBlogController {
       $header_color = 'bluegrey';
     }
 
+    $actions = $this->renderActions($blog, $viewer);
+    $action_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Actions'))
+      ->setHref('#')
+      ->setIconFont('fa-bars')
+      ->addClass('phui-mobile-menu')
+      ->setDropdownMenu($actions);
+
     $header = id(new PHUIHeaderView())
       ->setHeader($blog->getName())
       ->setUser($viewer)
       ->setPolicyObject($blog)
-      ->setStatus($header_icon, $header_color, $header_name);
+      ->setStatus($header_icon, $header_color, $header_name)
+      ->addActionLink($action_button);
 
-    $actions = $this->renderActions($blog, $viewer);
-    $properties = $this->renderProperties($blog, $viewer, $actions);
-    $post_list = $this->renderPostList(
-      $posts,
-      $viewer,
-      pht('This blog has no visible posts.'));
-
-    $post_list = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Latest Posts'))
-      ->appendChild($post_list);
+    $post_list = id(new PhamePostListView())
+      ->setPosts($posts)
+      ->setViewer($viewer)
+      ->setNodata(pht('This blog has no visible posts.'));
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb(
       pht('Blogs'),
       $this->getApplicationURI('blog/'));
     $crumbs->addTextCrumb(
       $blog->getName());
 
-    $object_box = id(new PHUIObjectBoxView())
+    $page = id(new PHUIDocumentViewPro())
       ->setHeader($header)
-      ->addPropertyList($properties);
+      ->appendChild($post_list);
+
+    $description = null;
+    if (strlen($blog->getDescription())) {
+      $description = PhabricatorMarkupEngine::renderOneObject(
+        id(new PhabricatorMarkupOneOff())->setContent($blog->getDescription()),
+        'default',
+        $viewer);
+    } else {
+      $description = phutil_tag('em', array(), pht('No description.'));
+    }
+
+    $about = id(new PhameDescriptionView())
+      ->setTitle(pht('About %s', $blog->getName()))
+      ->setDescription($description)
+      ->setImage($blog->getProfileImageURI());
 
     return $this->newPage()
       ->setTitle($blog->getName())
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $object_box,
-          $post_list,
+          $page,
+          $about,
       ));
-  }
-
-  private function renderProperties(
-    PhameBlog $blog,
-    PhabricatorUser $viewer,
-    PhabricatorActionListView $actions) {
-
-    require_celerity_resource('aphront-tooltip-css');
-    Javelin::initBehavior('phabricator-tooltips');
-
-    $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($blog)
-      ->setActionList($actions);
-
-    $properties->addProperty(
-      pht('Skin'),
-      $blog->getSkin());
-
-    $properties->addProperty(
-      pht('Domain'),
-      $blog->getDomain());
-
-    $feed_uri = PhabricatorEnv::getProductionURI(
-      $this->getApplicationURI('blog/feed/'.$blog->getID().'/'));
-    $properties->addProperty(
-      pht('Atom URI'),
-      javelin_tag('a',
-        array(
-          'href' => $feed_uri,
-          'sigil' => 'has-tooltip',
-          'meta' => array(
-            'tip' => pht('Atom URI does not support custom domains.'),
-            'size' => 320,
-          ),
-        ),
-        $feed_uri));
-
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $viewer,
-      $blog);
-
-    $properties->addProperty(
-      pht('Editable By'),
-      $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer)
-      ->addObject($blog, PhameBlog::MARKUP_FIELD_DESCRIPTION)
-      ->process();
-
-    $properties->invokeWillRenderEvent();
-
-    if (strlen($blog->getDescription())) {
-      $description = PhabricatorMarkupEngine::renderOneObject(
-        id(new PhabricatorMarkupOneOff())->setContent($blog->getDescription()),
-        'default',
-        $viewer);
-      $properties->addSectionHeader(
-        pht('Description'),
-        PHUIPropertyListView::ICON_SUMMARY);
-      $properties->addTextContent($description);
-    }
-
-    return $properties;
   }
 
   private function renderActions(PhameBlog $blog, PhabricatorUser $viewer) {
@@ -164,30 +127,8 @@ final class PhameBlogViewController extends PhameBlogController {
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
-        ->setHref($this->getApplicationURI('blog/edit/'.$blog->getID().'/'))
-        ->setName(pht('Edit Blog'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
-    if ($blog->isArchived()) {
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Activate Blog'))
-          ->setIcon('fa-check')
-          ->setHref(
-            $this->getApplicationURI('blog/archive/'.$blog->getID().'/'))
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(true));
-    } else {
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Archive Blog'))
-          ->setIcon('fa-ban')
-          ->setHref(
-            $this->getApplicationURI('blog/archive/'.$blog->getID().'/'))
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(true));
-    }
+        ->setHref($this->getApplicationURI('blog/manage/'.$blog->getID().'/'))
+        ->setName(pht('Manage Blog')));
 
     return $actions;
   }

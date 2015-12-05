@@ -1,7 +1,7 @@
 <?php
 
 final class AphrontUserListHTTPParameterType
-  extends AphrontHTTPParameterType {
+  extends AphrontListHTTPParameterType {
 
   protected function getParameterValue(AphrontRequest $request, $key) {
     $type = new AphrontStringListHTTPParameterType();

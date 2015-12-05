@@ -7,10 +7,10 @@ final class PhameBlog extends PhameDAO
     PhabricatorSubscribableInterface,
     PhabricatorFlaggableInterface,
     PhabricatorProjectInterface,
+    PhabricatorDestructibleInterface,
     PhabricatorApplicationTransactionInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:description';
-
   const SKIN_DEFAULT = 'oblivious';
 
   protected $name;
@@ -22,7 +22,9 @@ final class PhameBlog extends PhameDAO
   protected $editPolicy;
   protected $status;
   protected $mailKey;
+  protected $profileImagePHID;
 
+  private $profileImageFile = self::ATTACHABLE;
   private static $requestBlog;
 
   const STATUS_ACTIVE = 'active';
@@ -40,6 +42,7 @@ final class PhameBlog extends PhameDAO
         'domain' => 'text128?',
         'status' => 'text32',
         'mailKey' => 'bytes20',
+        'profileImagePHID' => 'phid?',
 
         // T6203/NULLABILITY
         // These policies should always be non-null.
@@ -242,6 +245,19 @@ final class PhameBlog extends PhameDAO
     return PhabricatorEnv::getProductionURI($uri);
   }
 
+  public function getProfileImageURI() {
+    return $this->getProfileImageFile()->getBestURI();
+  }
+
+  public function attachProfileImageFile(PhabricatorFile $file) {
+    $this->profileImageFile = $file;
+    return $this;
+  }
+
+  public function getProfileImageFile() {
+    return $this->assertAttached($this->profileImageFile);
+  }
+
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 
@@ -318,6 +334,23 @@ final class PhameBlog extends PhameDAO
 
   public function shouldUseMarkupCache($field) {
     return (bool)$this->getPHID();
+  }
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+
+      $posts = id(new PhamePost())
+        ->loadAllWhere('blogPHID = %s', $this->getPHID());
+      foreach ($posts as $post) {
+        $post->delete();
+      }
+      $this->delete();
+
+    $this->saveTransaction();
   }
 
 

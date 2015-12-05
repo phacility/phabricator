@@ -463,9 +463,6 @@ abstract class PhabricatorController extends AphrontController {
       $page->setUser($viewer);
     }
 
-    // TODO: Remove after removing callsites to addExtraQuicksandConfig().
-    $page->addQuicksandConfig($this->extraQuicksandConfig);
-
     return $page;
   }
 
@@ -531,22 +528,6 @@ abstract class PhabricatorController extends AphrontController {
 
 
 /* -(  Deprecated  )--------------------------------------------------------- */
-
-
-  /**
-   * DEPRECATED.
-   */
-  private $extraQuicksandConfig = array();
-
-
-  /**
-   * DEPRECATED. Use @{method:newPage} and call addQuicksandConfig().
-   */
-  public function addExtraQuicksandConfig($config) {
-    // TODO: When this method is removed,
-    $this->extraQuicksandConfig += $config;
-    return $this;
-  }
 
 
   /**

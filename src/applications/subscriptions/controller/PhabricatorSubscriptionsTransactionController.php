@@ -3,22 +3,13 @@
 final class PhabricatorSubscriptionsTransactionController
   extends PhabricatorController {
 
-  private $phid;
-  private $changeType;
-
-  public function willProcessRequest(array $data) {
-    $this->phid = idx($data, 'phid');
-    $this->changeType = idx($data, 'type');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-
-    $viewer = $request->getUser();
-    $xaction_phid = $this->phid;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $phid = $request->getURIData('phid');
+    $type = $request->getURIData('type');
 
     $xaction = id(new PhabricatorObjectQuery())
-      ->withPHIDs(array($xaction_phid))
+      ->withPHIDs(array($phid))
       ->setViewer($viewer)
       ->executeOne();
     if (!$xaction) {
@@ -27,7 +18,7 @@ final class PhabricatorSubscriptionsTransactionController
 
     $old = $xaction->getOldValue();
     $new = $xaction->getNewValue();
-    switch ($this->changeType) {
+    switch ($type) {
       case 'add':
         $subscriber_phids = array_diff($new, $old);
         break;
@@ -53,7 +44,7 @@ final class PhabricatorSubscriptionsTransactionController
       unset($handles[$author_phid]);
     }
 
-    switch ($this->changeType) {
+    switch ($type) {
       case 'add':
         $title = pht(
           'All %d subscribers added by %s',

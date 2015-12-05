@@ -63,4 +63,8 @@ final class PhabricatorStandardCustomFieldText
     );
   }
 
+  protected function getHTTPParameterType() {
+    return new AphrontStringHTTPParameterType();
+  }
+
 }

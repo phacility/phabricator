@@ -2,6 +2,10 @@
 
 final class PhamePostViewController extends PhamePostController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
@@ -32,7 +36,6 @@ final class PhamePostViewController extends PhamePostController {
     $crumbs->setBorder(true);
 
     $actions = $this->renderActions($post, $viewer);
-    $properties = $this->renderProperties($post, $viewer);
 
     $action_button = id(new PHUIButtonView())
       ->setTag('a')
@@ -49,8 +52,7 @@ final class PhamePostViewController extends PhamePostController {
       ->addActionLink($action_button);
 
     $document = id(new PHUIDocumentViewPro())
-      ->setHeader($header)
-      ->setPropertyList($properties);
+      ->setHeader($header);
 
     if ($post->isDraft()) {
       $document->appendChild(
@@ -60,7 +62,7 @@ final class PhamePostViewController extends PhamePostController {
           ->appendChild(
             pht(
               'Only you can see this draft until you publish it. '.
-              'Use "Preview / Publish" to publish this post.')));
+              'Use "Preview or Publish" to publish this post.')));
     }
 
     if (!$post->getBlog()) {
@@ -87,6 +89,33 @@ final class PhamePostViewController extends PhamePostController {
         ),
         $engine->getOutput($post, PhamePost::MARKUP_FIELD_BODY)));
 
+    $blogger = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($post->getBloggerPHID()))
+      ->needProfileImage(true)
+      ->executeOne();
+    $blogger_profile = $blogger->loadUserProfile();
+
+    $author = phutil_tag(
+      'a',
+      array(
+        'href' => '/p/'.$blogger->getUsername().'/',
+      ),
+      $blogger->getUsername());
+
+    $date = phabricator_datetime($post->getDatePublished(), $viewer);
+    if ($post->isDraft()) {
+      $subtitle = pht('Unpublished draft by %s.', $author);
+    } else {
+      $subtitle = pht('Written by %s on %s.', $author, $date);
+    }
+
+    $about = id(new PhameDescriptionView())
+      ->setTitle($subtitle)
+      ->setDescription($blogger_profile->getTitle())
+      ->setImage($blogger->getProfileImageURI())
+      ->setImageHref('/p/'.$blogger->getUsername());
+
     $timeline = $this->buildTransactionTimeline(
       $post,
       id(new PhamePostTransactionQuery())
@@ -94,15 +123,23 @@ final class PhamePostViewController extends PhamePostController {
     $timeline = phutil_tag_div('phui-document-view-pro-box', $timeline);
 
     $add_comment = $this->buildCommentForm($post);
+    $add_comment = phutil_tag_div('mlb mlt', $add_comment);
+
+    $properties = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setObject($post);
+
+    $properties->invokeWillRenderEvent();
 
     return $this->newPage()
       ->setTitle($post->getTitle())
-      ->addClass('pro-white-background')
       ->setPageObjectPHIDs(array($post->getPHID()))
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
           $document,
+          $about,
+          $properties,
           $timeline,
           $add_comment,
       ));
@@ -140,13 +177,26 @@ final class PhamePostViewController extends PhamePostController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-history')
+        ->setHref($this->getApplicationURI('post/history/'.$id.'/'))
+        ->setName(pht('View History')));
+
     if ($post->isDraft()) {
       $actions->addAction(
         id(new PhabricatorActionView())
           ->setIcon('fa-eye')
           ->setHref($this->getApplicationURI('post/publish/'.$id.'/'))
           ->setDisabled(!$can_edit)
-          ->setName(pht('Preview / Publish')));
+          ->setName(pht('Publish'))
+          ->setWorkflow(true));
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('fa-eye')
+          ->setHref($this->getApplicationURI('post/preview/'.$id.'/'))
+          ->setDisabled(!$can_edit)
+          ->setName(pht('Preview in Skin')));
     } else {
       $actions->addAction(
         id(new PhabricatorActionView())
@@ -179,41 +229,8 @@ final class PhamePostViewController extends PhamePostController {
     return $actions;
   }
 
-  private function renderProperties(
-    PhamePost $post,
-    PhabricatorUser $viewer) {
-
-    $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($post);
-
-    $properties->addProperty(
-      pht('Blog'),
-      $viewer->renderHandle($post->getBlogPHID()));
-
-    $properties->addProperty(
-      pht('Blogger'),
-      $viewer->renderHandle($post->getBloggerPHID()));
-
-    $properties->addProperty(
-      pht('Published'),
-      $post->isDraft()
-        ? pht('Draft')
-        : phabricator_datetime($post->getDatePublished(), $viewer));
-
-    $properties->invokeWillRenderEvent();
-
-    return $properties;
-  }
-
   private function buildCommentForm(PhamePost $post) {
     $viewer = $this->getViewer();
-
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
-    $add_comment_header = $is_serious
-      ? pht('Add Comment')
-      : pht('Derp Text');
 
     $draft = PhabricatorDraft::newFromUserAndKey(
       $viewer, $post->getPHID());
@@ -222,7 +239,7 @@ final class PhamePostViewController extends PhamePostController {
       ->setUser($viewer)
       ->setObjectPHID($post->getPHID())
       ->setDraft($draft)
-      ->setHeaderText($add_comment_header)
+      ->setHeaderText(pht('Add Comment'))
       ->setAction($this->getApplicationURI('post/comment/'.$post->getID().'/'))
       ->setSubmitButtonName(pht('Add Comment'));
 

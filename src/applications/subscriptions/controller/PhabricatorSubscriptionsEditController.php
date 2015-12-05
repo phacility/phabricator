@@ -3,22 +3,16 @@
 final class PhabricatorSubscriptionsEditController
   extends PhabricatorController {
 
-  private $phid;
-  private $action;
-
-  public function willProcessRequest(array $data) {
-    $this->phid = idx($data, 'phid');
-    $this->action = idx($data, 'action');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $phid = $request->getURIData('phid');
+    $action = $request->getURIData('action');
 
     if (!$request->isFormPost()) {
       return new Aphront400Response();
     }
 
-    switch ($this->action) {
+    switch ($action) {
       case 'add':
         $is_add = true;
         break;
@@ -29,11 +23,8 @@ final class PhabricatorSubscriptionsEditController
         return new Aphront400Response();
     }
 
-    $user = $request->getUser();
-    $phid = $this->phid;
-
     $handle = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withPHIDs(array($phid))
       ->executeOne();
 
@@ -45,13 +36,13 @@ final class PhabricatorSubscriptionsEditController
       // to become more clear?
 
       $object = id(new PhabricatorProjectQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withPHIDs(array($phid))
         ->needWatchers(true)
         ->executeOne();
     } else {
       $object = id(new PhabricatorObjectQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withPHIDs(array($phid))
         ->executeOne();
     }
@@ -63,14 +54,14 @@ final class PhabricatorSubscriptionsEditController
         $handle->getURI());
     }
 
-    if ($object->isAutomaticallySubscribed($user->getPHID())) {
+    if ($object->isAutomaticallySubscribed($viewer->getPHID())) {
       return $this->buildErrorResponse(
         pht('Automatically Subscribed'),
         pht('You are automatically subscribed to this object.'),
         $handle->getURI());
     }
 
-    if (!$object->shouldAllowSubscription($user->getPHID())) {
+    if (!$object->shouldAllowSubscription($viewer->getPHID())) {
       return $this->buildErrorResponse(
         pht('You Can Not Subscribe'),
         pht('You can not subscribe to this object.'),
@@ -80,11 +71,11 @@ final class PhabricatorSubscriptionsEditController
     if ($object instanceof PhabricatorApplicationTransactionInterface) {
       if ($is_add) {
         $xaction_value = array(
-          '+' => array($user->getPHID()),
+          '+' => array($viewer->getPHID()),
         );
       } else {
         $xaction_value = array(
-          '-' => array($user->getPHID()),
+          '-' => array($viewer->getPHID()),
         );
       }
 
@@ -93,7 +84,7 @@ final class PhabricatorSubscriptionsEditController
         ->setNewValue($xaction_value);
 
       $editor = id($object->getApplicationTransactionEditor())
-        ->setActor($user)
+        ->setActor($viewer)
         ->setContinueOnNoEffect(true)
         ->setContinueOnMissingFields(true)
         ->setContentSourceFromRequest($request);
@@ -107,13 +98,13 @@ final class PhabricatorSubscriptionsEditController
       // PhabriatorApplicationTransactionInterface.
 
       $editor = id(new PhabricatorSubscriptionsEditor())
-        ->setActor($user)
+        ->setActor($viewer)
         ->setObject($object);
 
       if ($is_add) {
-        $editor->subscribeExplicit(array($user->getPHID()), $explicit = true);
+        $editor->subscribeExplicit(array($viewer->getPHID()), $explicit = true);
       } else {
-        $editor->unsubscribe(array($user->getPHID()));
+        $editor->unsubscribe(array($viewer->getPHID()));
       }
 
       $editor->save();
@@ -126,10 +117,10 @@ final class PhabricatorSubscriptionsEditController
 
   private function buildErrorResponse($title, $message, $uri) {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
     $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setTitle($title)
       ->appendChild($message)
       ->addCancelButton($uri);

@@ -15,11 +15,9 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('Create Paste'))
-        ->setHref($this->getApplicationURI('edit/'))
-        ->setIcon('fa-plus-square'));
+    id(new PhabricatorPasteEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs);
 
     return $crumbs;
   }

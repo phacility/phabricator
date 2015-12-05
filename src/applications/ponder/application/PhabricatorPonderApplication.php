@@ -28,14 +28,6 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
     return "\xE2\x97\xB3";
   }
 
-  public function loadStatus(PhabricatorUser $user) {
-    // Replace with "x new unanswered questions" or some such
-    // make sure to use `self::formatStatusCount` and friends...!
-    $status = array();
-
-    return $status;
-  }
-
   public function getRemarkupRules() {
     return array(
       new PonderRemarkupRule(),

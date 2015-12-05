@@ -67,7 +67,7 @@ final class PhamePostEditor
         if ($xaction->getNewValue() == PhameConstants::VISIBILITY_DRAFT) {
           $object->setDatePublished(0);
         } else {
-          $object->setDatePublished(time());
+          $object->setDatePublished(PhabricatorTime::getNow());
         }
         return $object->setVisibility($xaction->getNewValue());
     }
@@ -209,8 +209,21 @@ final class PhamePostEditor
 
     $body = parent::buildMailBody($object, $xactions);
 
+    // We don't send mail if the object is a draft, and we only want
+    // to include the full body of the post on the either the
+    // first creation or if it was created as a draft, once it goes live.
     if ($this->getIsNewObject()) {
       $body->addRemarkupSection(null, $object->getBody());
+    } else {
+      foreach ($xactions as $xaction) {
+        switch ($xaction->getTransactionType()) {
+          case PhamePostTransaction::TYPE_VISIBILITY:
+            if (!$object->isDraft()) {
+              $body->addRemarkupSection(null, $object->getBody());
+            }
+          break;
+        }
+      }
     }
 
     $body->addLinkSection(

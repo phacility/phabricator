@@ -1082,6 +1082,47 @@ abstract class PhabricatorCustomField extends Phobject {
 /* -(  Edit View  )---------------------------------------------------------- */
 
 
+  public function getEditEngineFields(PhabricatorEditEngine $engine) {
+    $field = $this->newStandardEditField($engine);
+
+    return array(
+      $field,
+    );
+  }
+
+  protected function newEditField() {
+    $field = id(new PhabricatorCustomFieldEditField())
+      ->setCustomField($this);
+
+    $http_type = $this->getHTTPParameterType();
+    if ($http_type) {
+      $field->setCustomFieldHTTPParameterType($http_type);
+    }
+
+    return $field;
+  }
+
+  protected function newStandardEditField() {
+    if ($this->proxy) {
+      return $this->proxy->newStandardEditField();
+    }
+
+    return $this->newEditField()
+      ->setKey($this->getFieldKey())
+      ->setEditTypeKey('custom.'.$this->getFieldKey())
+      ->setLabel($this->getFieldName())
+      ->setDescription($this->getFieldDescription())
+      ->setTransactionType($this->getApplicationTransactionType())
+      ->setValue($this->getNewValueForApplicationTransactions());
+  }
+
+  protected function getHTTPParameterType() {
+    if ($this->proxy) {
+      return $this->proxy->getHTTPParameterType();
+    }
+    return null;
+  }
+
   /**
    * @task edit
    */
@@ -1279,6 +1320,14 @@ abstract class PhabricatorCustomField extends Phobject {
       return $this->proxy->getConduitDictionaryValue();
     }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+  }
+
+
+  public function shouldAppearInConduitTransactions() {
+    if ($this->proxy) {
+      return $this->proxy->shouldAppearInConduitDictionary();
+    }
+    return false;
   }
 
 

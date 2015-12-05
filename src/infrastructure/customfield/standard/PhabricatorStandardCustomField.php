@@ -426,4 +426,15 @@ abstract class PhabricatorStandardCustomField
     }
   }
 
+  protected function newStandardEditField() {
+    $short = 'custom.'.$this->getRawStandardFieldKey();
+
+    return parent::newStandardEditField()
+      ->setEditTypeKey($short);
+  }
+
+  public function shouldAppearInConduitTransactions() {
+    return true;
+  }
+
 }

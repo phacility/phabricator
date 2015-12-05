@@ -6,22 +6,17 @@ final class PhabricatorCommentEditType extends PhabricatorEditType {
     return id(new AphrontStringHTTPParameterType())->getTypeName();
   }
 
-  public function generateTransaction(
+  public function generateTransactions(
     PhabricatorApplicationTransaction $template,
     array $spec) {
 
     $comment = $template->getApplicationTransactionCommentObject()
       ->setContent(idx($spec, 'value'));
 
-    $template
-      ->setTransactionType($this->getTransactionType())
+    $xaction = $this->newTransaction($template)
       ->attachComment($comment);
 
-    foreach ($this->getMetadata() as $key => $value) {
-      $template->setMetadataValue($key, $value);
-    }
-
-    return $template;
+    return array($xaction);
   }
 
   public function getValueDescription() {

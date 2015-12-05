@@ -92,6 +92,13 @@ final class PhabricatorEditEngineConfigurationSearchEngine
       }
       $item->setHref("/transactions/editengine/{$engine_key}/view/{$key}/");
 
+      if ($config->getIsDefault()) {
+        $item->addIcon('fa-plus', pht('Default'));
+      }
+
+      if ($config->getIsDisabled()) {
+        $item->addIcon('fa-ban', pht('Disabled'));
+      }
 
       $list->addItem($item);
     }

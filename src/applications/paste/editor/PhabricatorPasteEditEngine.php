@@ -38,6 +38,15 @@ final class PhabricatorPasteEditEngine
     return pht('Create Paste');
   }
 
+  protected function getCommentViewHeaderText($object) {
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+    if (!$is_serious) {
+      return pht('Eat Paste');
+    }
+
+    return parent::getCommentViewHeaderText($object);
+  }
+
   protected function getObjectViewURI($object) {
     return '/P'.$object->getID();
   }

@@ -95,5 +95,9 @@ final class PhabricatorStandardCustomFieldRemarkup
     );
   }
 
+  protected function getHTTPParameterType() {
+    return new AphrontStringHTTPParameterType();
+  }
+
 
 }

@@ -64,17 +64,16 @@ final class PhabricatorBadgesViewController
 
     $add_comment = $this->buildCommentForm($badge);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-        $recipient_list,
-        $timeline,
-        $add_comment,
-      ),
-      array(
-        'title' => $title,
-        'pageObjects' => array($badge->getPHID()),
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(array($badge->getPHID()))
+      ->appendChild(
+        array(
+          $box,
+          $recipient_list,
+          $timeline,
+          $add_comment,
       ));
   }
 

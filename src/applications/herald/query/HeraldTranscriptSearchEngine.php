@@ -76,7 +76,7 @@ final class HeraldTranscriptSearchEngine
 
   protected function getBuiltinQueryNames() {
     return array(
-      'all' => pht('All'),
+      'all' => pht('All Transcripts'),
     );
   }
 

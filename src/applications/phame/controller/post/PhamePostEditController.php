@@ -146,7 +146,7 @@ final class PhamePostEditController extends PhamePostController {
         id(new AphrontFormSelectControl())
         ->setLabel(pht('Visibility'))
         ->setName('visibility')
-        ->setvalue($visibility)
+        ->setValue($visibility)
         ->setOptions(PhameConstants::getPhamePostStatusMap()))
       ->appendChild(
         id(new PhabricatorRemarkupControl())

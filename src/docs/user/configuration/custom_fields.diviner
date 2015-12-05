@@ -170,9 +170,11 @@ want to add a field to:
 | Projects | @{class:PhabricatorProjectCustomField} |
 
 The easiest way to get started is to drop your subclass into
-`phabricator/src/extensions/`, which should make it immediately available in the
-UI (if you use APC, you may need to restart your webserver). For example, this
-is a simple template which adds a custom field to Maniphest:
+`phabricator/src/extensions/`. If Phabricator is configured in development
+mode, the class should immediately be available in the UI. If not, you can
+restart Phabricator (for help, see @{article:Restarting Phabricator}).
+
+For example, this is a simple template which adds a custom field to Maniphest:
 
   name=ExampleManiphestCustomField.php
   <?php

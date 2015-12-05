@@ -57,18 +57,17 @@ final class AlmanacDeviceViewController
       new AlmanacDeviceTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-        $interfaces,
-        $this->buildAlmanacPropertiesTable($device),
-        $this->buildSSHKeysTable($device),
-        $this->buildServicesTable($device),
-        $timeline,
-      ),
-      array(
-        'title' => $title,
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $box,
+          $interfaces,
+          $this->buildAlmanacPropertiesTable($device),
+          $this->buildSSHKeysTable($device),
+          $this->buildServicesTable($device),
+          $timeline,
       ));
   }
 

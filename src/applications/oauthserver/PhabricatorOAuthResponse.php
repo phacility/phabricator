@@ -65,8 +65,7 @@ final class PhabricatorOAuthResponse extends AphrontResponse {
   }
 
   public function __construct() {
-    $this->setHTTPResponseCode(200);      // assume the best
-    return $this;
+    $this->setHTTPResponseCode(200); // assume the best
   }
 
   public function getHeaders() {

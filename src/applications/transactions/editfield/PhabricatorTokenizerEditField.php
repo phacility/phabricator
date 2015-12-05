@@ -1,85 +1,73 @@
 <?php
 
 abstract class PhabricatorTokenizerEditField
-  extends PhabricatorEditField {
+  extends PhabricatorPHIDListEditField {
 
-  private $originalValue;
+  private $commentActionLabel;
 
   abstract protected function newDatasource();
+
+  public function setCommentActionLabel($label) {
+    $this->commentActionLabel = $label;
+    return $this;
+  }
+
+  public function getCommentActionLabel() {
+    return $this->commentActionLabel;
+  }
 
   protected function newControl() {
     $control = id(new AphrontFormTokenizerControl())
       ->setDatasource($this->newDatasource());
 
-    if ($this->originalValue !== null) {
-      $control->setOriginalValue($this->originalValue);
+    $initial_value = $this->getInitialValue();
+    if ($initial_value !== null) {
+      $control->setOriginalValue($initial_value);
     }
 
     return $control;
   }
 
-  public function setValue($value) {
-    $this->originalValue = $value;
-    return parent::setValue($value);
+  protected function getInitialValueFromSubmit(AphrontRequest $request, $key) {
+    return $request->getArr($key.'.original');
   }
 
-  protected function getValueFromSubmit(AphrontRequest $request, $key) {
-    // TODO: Maybe move this unusual read somewhere else so subclassing this
-    // correctly is easier?
-    $this->originalValue = $request->getArr($key.'.original');
+  protected function newEditType() {
+    $type = parent::newEditType();
 
-    return parent::getValueFromSubmit($request, $key);
-  }
-
-  protected function getValueForTransaction() {
-    $new = parent::getValueForTransaction();
-
-    $edge_types = array(
-      PhabricatorTransactions::TYPE_EDGE => true,
-      PhabricatorTransactions::TYPE_SUBSCRIBERS => true,
-    );
-
-    if (isset($edge_types[$this->getTransactionType()])) {
-      if ($this->originalValue !== null) {
-        // If we're building an edge transaction and the request has data
-        // about the original value the user saw when they loaded the form,
-        // interpret the edit as a mixture of "+" and "-" operations instead
-        // of a single "=" operation. This limits our exposure to race
-        // conditions by making most concurrent edits merge correctly.
-
-        $new = parent::getValueForTransaction();
-        $old = $this->originalValue;
-
-        $add = array_diff($new, $old);
-        $rem = array_diff($old, $new);
-
-        $value = array();
-
-        if ($add) {
-          $value['+'] = array_fuse($add);
-        }
-        if ($rem) {
-          $value['-'] = array_fuse($rem);
-        }
-
-        return $value;
-      } else {
-
-        if (!is_array($new)) {
-          throw new Exception(print_r($new, true));
-        }
-
-        return array(
-          '=' => array_fuse($new),
-        );
-      }
+    if ($this->getUseEdgeTransactions()) {
+      $datasource = $this->newDatasource()
+        ->setViewer($this->getViewer());
+      $type->setDatasource($datasource);
     }
 
-    return $new;
+    return $type;
   }
 
-  protected function newHTTPParameterType() {
-    return new AphrontPHIDListHTTPParameterType();
+  public function getCommentEditTypes() {
+    if (!$this->getUseEdgeTransactions()) {
+      return parent::getCommentEditTypes();
+    }
+
+    $transaction_type = $this->getTransactionType();
+    if ($transaction_type === null) {
+      return array();
+    }
+
+    $label = $this->getCommentActionLabel();
+    if ($label === null) {
+      return array();
+    }
+
+    $type_key = $this->getEditTypeKey();
+    $base = $this->getEditType();
+
+    $add = id(clone $base)
+      ->setEditType($type_key.'.add')
+      ->setEdgeOperation('+')
+      ->setLabel($label);
+
+    return array($add);
   }
 
 }

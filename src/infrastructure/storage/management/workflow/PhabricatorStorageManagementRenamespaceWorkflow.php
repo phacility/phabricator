@@ -30,25 +30,31 @@ final class PhabricatorStorageManagementRenamespaceWorkflow
         ));
   }
 
-  public function execute(PhutilArgumentParser $args) {
+  public function didExecute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
 
     $in = $args->getArg('in');
     if (!strlen($in)) {
       throw new PhutilArgumentUsageException(
-        pht('Specify the dumpfile to read with --in.'));
+        pht(
+          'Specify the dumpfile to read with %s.',
+          '--in'));
     }
 
     $from = $args->getArg('from');
     if (!strlen($from)) {
       throw new PhutilArgumentUsageException(
-        pht('Specify namespace to rename from with --from.'));
+        pht(
+          'Specify namespace to rename from with %s.',
+          '--from'));
     }
 
     $to = $args->getArg('to');
     if (!strlen($to)) {
       throw new PhutilArgumentUsageException(
-        pht('Specify namespace to rename to with --to.'));
+        pht(
+          'Specify namespace to rename to with %s.',
+          '--to'));
     }
 
     $patterns = array(

@@ -106,14 +106,13 @@ final class PhabricatorBadgesEditRecipientsController
     $crumbs->addTextCrumb($badge->getName(), $badge_url);
     $crumbs->addTextCrumb(pht('Recipients'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-        $recipient_list,
-      ),
-      array(
-        'title' => $title,
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $form_box,
+          $recipient_list,
       ));
   }
 

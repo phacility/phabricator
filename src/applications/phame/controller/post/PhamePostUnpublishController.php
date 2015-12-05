@@ -37,8 +37,7 @@ final class PhamePostUnpublishController extends PhamePostController {
 
     $cancel_uri = $this->getApplicationURI('/post/view/'.$post->getID().'/');
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    $dialog = $this->newDialog()
       ->setTitle(pht('Unpublish Post?'))
       ->appendChild(
         pht(
