@@ -242,6 +242,15 @@ EOTEXT
 
     $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
 
+    $fields_example = array(
+      'mycompany.estimated-hours' => array(
+        'name' => pht('Estimated Hours'),
+        'type' => 'int',
+        'caption' => pht('Estimated number of hours this will take.'),
+      ),
+    );
+    $fields_json = id(new PhutilJSON())->encodeFormatted($fields_example);
+
     return array(
       $this->newOption('maniphest.custom-field-definitions', 'wild', array())
         ->setSummary(pht('Custom Maniphest fields.'))
@@ -250,11 +259,7 @@ EOTEXT
             'Array of custom fields for Maniphest tasks. For details on '.
             'adding custom fields to Maniphest, see "Configuring Custom '.
             'Fields" in the documentation.'))
-        ->addExample(
-          '{"mycompany:estimated-hours": {"name": "Estimated Hours", '.
-          '"type": "int", "caption": "Estimated number of hours this will '.
-          'take."}}',
-          pht('Valid Setting')),
+        ->addExample($fields_json, pht('Valid setting')),
       $this->newOption('maniphest.fields', $custom_field_type, $default_fields)
         ->setCustomData(id(new ManiphestTask())->getCustomFieldBaseClass())
         ->setDescription(pht('Select and reorder task fields.')),
