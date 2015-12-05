@@ -51,14 +51,8 @@ final class ManiphestEditEngine
   }
 
   protected function buildCustomEditFields($object) {
-    // See T4819.
-    $status_map = ManiphestTaskStatus::getTaskStatusMap();
-    $dup_status = ManiphestTaskStatus::getDuplicateStatus();
-    if ($object->getStatus() != $dup_status) {
-      unset($status_map[$dup_status]);
-    }
-
-    $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
+    $status_map = $this->getTaskStatusMap($object);
+    $priority_map = $this->getTaskPriorityMap($object);
 
     if ($object->isClosed()) {
       $priority_label = null;
@@ -122,6 +116,69 @@ final class ManiphestEditEngine
   protected function getEditorURI() {
     // TODO: Remove when cutting over.
     return $this->getApplication()->getApplicationURI('editpro/');
+  }
+
+  private function getTaskStatusMap(ManiphestTask $task) {
+    $status_map = ManiphestTaskStatus::getTaskStatusMap();
+
+    $current_status = $task->getStatus();
+
+    // If the current status is something we don't recognize (maybe an older
+    // status which was deleted), put a dummy entry in the status map so that
+    // saving the form doesn't destroy any data by accident.
+    if (idx($status_map, $current_status) === null) {
+      $status_map[$current_status] = pht('<Unknown: %s>', $current_status);
+    }
+
+    $dup_status = ManiphestTaskStatus::getDuplicateStatus();
+    foreach ($status_map as $status => $status_name) {
+      // Always keep the task's current status.
+      if ($status == $current_status) {
+        continue;
+      }
+
+      // Don't allow tasks to be changed directly into "Closed, Duplicate"
+      // status. Instead, you have to merge them. See T4819.
+      if ($status == $dup_status) {
+        unset($status_map[$status]);
+        continue;
+      }
+
+      // Don't let new or existing tasks be moved into a disabled status.
+      if (ManiphestTaskStatus::isDisabledStatus($status)) {
+        unset($status_map[$status]);
+        continue;
+      }
+    }
+
+    return $status_map;
+  }
+
+  private function getTaskPriorityMap(ManiphestTask $task) {
+    $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
+    $current_priority = $task->getPriority();
+
+    // If the current value isn't a legitimate one, put it in the dropdown
+    // anyway so saving the form doesn't cause a side effects.
+    if (idx($priority_map, $current_priority) === null) {
+      $priority_map[$current_priority] = pht(
+        '<Unknown: %s>',
+        $current_priority);
+    }
+
+    foreach ($priority_map as $priority => $priority_name) {
+      // Always keep the current priority.
+      if ($priority == $current_priority) {
+        continue;
+      }
+
+      if (ManiphestTaskPriority::isDisabledPriority($priority)) {
+        unset($priority_map[$priority]);
+        continue;
+      }
+    }
+
+    return $priority_map;
   }
 
 }

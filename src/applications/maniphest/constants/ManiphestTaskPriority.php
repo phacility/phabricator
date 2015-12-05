@@ -105,6 +105,11 @@ final class ManiphestTaskPriority extends ManiphestConstants {
     return 'fa-arrow-right';
   }
 
+  public static function isDisabledPriority($priority) {
+    $config = idx(self::getConfig(), $priority, array());
+    return idx($config, 'disabled', false);
+  }
+
   private static function getConfig() {
     $config = PhabricatorEnv::getEnvConfig('maniphest.priorities');
     krsort($config);

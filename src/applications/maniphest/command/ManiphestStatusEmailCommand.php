@@ -23,6 +23,10 @@ final class ManiphestStatusEmailCommand
     $table[] = '| '.pht('Status').' | '.pht('Keywords');
     $table[] = '|---|---|';
     foreach ($keywords as $status => $words) {
+      if (ManiphestTaskStatus::isDisabledStatus($status)) {
+        continue;
+      }
+
       $words = implode(', ', $words);
       $table[] = '| '.$names[$status].' | '.$words;
     }
@@ -59,6 +63,10 @@ final class ManiphestStatusEmailCommand
     }
 
     if ($status === null) {
+      return array();
+    }
+
+    if (ManiphestTaskStatus::isDisabledStatus($status)) {
       return array();
     }
 
