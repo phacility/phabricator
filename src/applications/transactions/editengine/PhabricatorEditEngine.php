@@ -191,12 +191,19 @@ abstract class PhabricatorEditEngine
   }
 
   private function loadEditEngineConfiguration($key) {
+    $viewer = $this->getViewer();
     if ($key === null) {
       $key = self::EDITENGINECONFIG_DEFAULT;
+
+      // TODO: At least for now, we need to load the default configuration
+      // in some cases (editing, comment actions) even if the viewer can not
+      // otherwise see it. This should be cleaned up eventually, but we can
+      // safely use the omnipotent user for now without policy violations.
+      $viewer = PhabricatorUser::getOmnipotentUser();
     }
 
     $config = id(new PhabricatorEditEngineConfigurationQuery())
-      ->setViewer($this->getViewer())
+      ->setViewer($viewer)
       ->withEngineKeys(array($this->getEngineKey()))
       ->withIdentifiers(array($key))
       ->executeOne();
