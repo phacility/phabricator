@@ -139,8 +139,7 @@ final class PhamePostEditController extends PhamePostController {
         ->setValue(rtrim($phame_title, '/'))
         ->setID('post-phame-title')
         ->setCaption(pht('Up to 64 alphanumeric characters '.
-                     'with underscores for spaces. '.
-                     'Formatting is enforced.'))
+                     'with underscores for spaces.'))
         ->setError($e_phame_title))
       ->appendChild(
         id(new AphrontFormSelectControl())
