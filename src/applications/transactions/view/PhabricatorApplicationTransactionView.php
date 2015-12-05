@@ -386,7 +386,9 @@ class PhabricatorApplicationTransactionView extends AphrontView {
       $results = array();
 
       // Sort transactions within the group by action strength, then by
-      // within actions of similar strength.
+      // chronological order. This makes sure that multiple actions of the
+      // same type (like a close, then a reopen) render in the order they
+      // were performed.
       $strength_groups = mgroup($group, 'getActionStrength');
       krsort($strength_groups);
       foreach ($strength_groups as $strength_group) {
