@@ -95,9 +95,13 @@ abstract class HeraldAction extends Phobject {
 
     switch ($type) {
       case self::STANDARD_PHID_LIST:
-        $handles = $viewer->loadHandles($target);
-        $handles = iterator_to_array($handles);
-        return mpull($handles, 'getName', 'getPHID');
+        $datasource = $this->getDatasource();
+
+        if (!$datasource) {
+          return array();
+        }
+
+        return $datasource->getWireTokens($target);
     }
 
     return $target;
