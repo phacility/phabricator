@@ -116,4 +116,33 @@ final class ManiphestTaskPriority extends ManiphestConstants {
     return $config;
   }
 
+  public static function validateConfiguration(array $config) {
+    foreach ($config as $key => $value) {
+      if (!ctype_digit((string)$key)) {
+        throw new Exception(
+          pht(
+            'Key "%s" is not a valid priority constant. Priority constants '.
+            'must be nonnegative integers.',
+            $key));
+      }
+
+      if (!is_array($value)) {
+        throw new Exception(
+          pht(
+            'Value for key "%s" should be a dictionary.',
+            $key));
+      }
+
+      PhutilTypeSpec::checkMap(
+        $value,
+        array(
+          'name' => 'string',
+          'short' => 'optional string',
+          'color' => 'optional string',
+          'keywords' => 'optional list<string>',
+          'disabled' => 'optional bool',
+        ));
+    }
+  }
+
 }

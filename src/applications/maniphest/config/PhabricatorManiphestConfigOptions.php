@@ -20,7 +20,7 @@ final class PhabricatorManiphestConfigOptions
   }
 
   public function getOptions() {
-
+    $priority_type = 'custom:ManiphestPriorityConfigOptionType';
     $priority_defaults = array(
       100 => array(
         'name'  => pht('Unbreak Now!'),
@@ -267,7 +267,10 @@ EOTEXT
       $this->newOption('maniphest.fields', $custom_field_type, $default_fields)
         ->setCustomData(id(new ManiphestTask())->getCustomFieldBaseClass())
         ->setDescription(pht('Select and reorder task fields.')),
-      $this->newOption('maniphest.priorities', 'wild', $priority_defaults)
+      $this->newOption(
+        'maniphest.priorities',
+        $priority_type,
+        $priority_defaults)
         ->setSummary(pht('Configure Maniphest priority names.'))
         ->setDescription(
           pht(
