@@ -10,6 +10,7 @@ final class PhabricatorEditEngineConfigurationQuery
   private $identifiers;
   private $default;
   private $disabled;
+  private $ignoreDatabaseConfigurations;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -46,6 +47,11 @@ final class PhabricatorEditEngineConfigurationQuery
     return $this;
   }
 
+  public function withIgnoreDatabaseConfigurations($ignore) {
+    $this->ignoreDatabaseConfigurations = $ignore;
+    return $this;
+  }
+
   public function newResultObject() {
     return new PhabricatorEditEngineConfiguration();
   }
@@ -57,7 +63,11 @@ final class PhabricatorEditEngineConfigurationQuery
     // number of edit forms for any particular engine for the lack of UI
     // pagination to become a problem.
 
-    $page = $this->loadStandardPage($this->newResultObject());
+    if ($this->ignoreDatabaseConfigurations) {
+      $page = array();
+    } else {
+      $page = $this->loadStandardPage($this->newResultObject());
+    }
 
     // Now that we've loaded the real results from the database, we're going
     // to load builtins from the edit engines and add them to the list.

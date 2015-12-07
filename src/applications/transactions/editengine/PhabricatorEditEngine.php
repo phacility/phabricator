@@ -190,22 +190,51 @@ abstract class PhabricatorEditEngine
     return $this->editEngineConfiguration;
   }
 
-  private function loadEditEngineConfiguration($key) {
-    $viewer = $this->getViewer();
-    if ($key === null) {
-      $key = self::EDITENGINECONFIG_DEFAULT;
 
-      // TODO: At least for now, we need to load the default configuration
-      // in some cases (editing, comment actions) even if the viewer can not
-      // otherwise see it. This should be cleaned up eventually, but we can
-      // safely use the omnipotent user for now without policy violations.
-      $viewer = PhabricatorUser::getOmnipotentUser();
+  /**
+   * Load the default configuration, ignoring customization in the database
+   * (which means we implicitly ignore policies).
+   *
+   * This is used from places like Conduit, where the fields available in the
+   * API should not be affected by configuration changes.
+   *
+   * @return PhabricatorEditEngineConfiguration Default configuration, ignoring
+   *   customization.
+   */
+  private function loadDefaultEditEngineConfiguration() {
+    return $this->loadEditEngineConfigurationWithOptions(
+      self::EDITENGINECONFIG_DEFAULT,
+      true);
+  }
+
+
+  /**
+   * Load a named configuration, respecting database customization and policies.
+   *
+   * @param string Configuration key, or null to load the default.
+   * @return PhabricatorEditEngineConfiguration Default configuration,
+   *   respecting customization.
+   */
+  private function loadEditEngineConfiguration($key) {
+    if (!strlen($key)) {
+      $key = self::EDITENGINECONFIG_DEFAULT;
     }
+
+    return $this->loadEditEngineConfigurationWithOptions(
+      $key,
+      false);
+  }
+
+  private function loadEditEngineConfigurationWithOptions(
+    $key,
+    $ignore_database) {
+    $viewer = $this->getViewer();
 
     $config = id(new PhabricatorEditEngineConfigurationQuery())
       ->setViewer($viewer)
       ->withEngineKeys(array($this->getEngineKey()))
       ->withIdentifiers(array($key))
+      ->withIgnoreDatabaseConfigurations($ignore_database)
       ->executeOne();
     if (!$config) {
       return null;
@@ -482,14 +511,16 @@ abstract class PhabricatorEditEngine
    * Load an object by ID.
    *
    * @param int Object ID.
+   * @param list<const> List of required capability constants, or omit for
+   *   defaults.
    * @return object|null Object, or null if no such object exists.
    * @task load
    */
-  private function newObjectFromID($id) {
+  private function newObjectFromID($id, array $capabilities = array()) {
     $query = $this->newObjectQuery()
       ->withIDs(array($id));
 
-    return $this->newObjectFromQuery($query);
+    return $this->newObjectFromQuery($query, $capabilities);
   }
 
 
@@ -512,19 +543,27 @@ abstract class PhabricatorEditEngine
    * Load an object given a configured query.
    *
    * @param PhabricatorPolicyAwareQuery Configured query.
+   * @param list<const> List of required capabilitiy constants, or omit for
+   *  defaults.
    * @return object|null Object, or null if no such object exists.
    * @task load
    */
-  private function newObjectFromQuery(PhabricatorPolicyAwareQuery $query) {
+  private function newObjectFromQuery(
+    PhabricatorPolicyAwareQuery $query,
+    array $capabilities = array()) {
+
     $viewer = $this->getViewer();
+
+    if (!$capabilities) {
+      $capabilities = array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+        PhabricatorPolicyCapability::CAN_EDIT,
+      );
+    }
 
     $object = $query
       ->setViewer($viewer)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
+      ->requireCapabilities($capabilities)
       ->executeOne();
     if (!$object) {
       return null;
@@ -571,8 +610,28 @@ abstract class PhabricatorEditEngine
     $controller = $this->getController();
     $request = $controller->getRequest();
 
-    $form_key = $request->getURIData('formKey');
-    $config = $this->loadEditEngineConfiguration($form_key);
+    $action = $request->getURIData('editAction');
+
+    $capabilities = array();
+    $use_default = false;
+    switch ($action) {
+      case 'comment':
+        $capabilities = array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+        );
+        $use_default = true;
+        break;
+      default:
+        break;
+    }
+
+    if ($use_default) {
+      $config = $this->loadDefaultEditEngineConfiguration();
+    } else {
+      $form_key = $request->getURIData('formKey');
+      $config = $this->loadEditEngineConfiguration($form_key);
+    }
+
     if (!$config) {
       return new Aphront404Response();
     }
@@ -580,7 +639,7 @@ abstract class PhabricatorEditEngine
     $id = $request->getURIData('id');
     if ($id) {
       $this->setIsCreate(false);
-      $object = $this->newObjectFromID($id);
+      $object = $this->newObjectFromID($id, $capabilities);
       if (!$object) {
         return new Aphront404Response();
       }
@@ -591,7 +650,6 @@ abstract class PhabricatorEditEngine
 
     $this->validateObject($object);
 
-    $action = $request->getURIData('editAction');
     switch ($action) {
       case 'parameters':
         return $this->buildParametersResponse($object);
@@ -880,7 +938,7 @@ abstract class PhabricatorEditEngine
   }
 
   final public function buildEditEngineCommentView($object) {
-    $config = $this->loadEditEngineConfiguration(null);
+    $config = $this->loadDefaultEditEngineConfiguration();
 
     $viewer = $this->getViewer();
     $object_phid = $object->getPHID();
@@ -1021,7 +1079,7 @@ abstract class PhabricatorEditEngine
       return new Aphront400Response();
     }
 
-    $config = $this->loadEditEngineConfiguration(null);
+    $config = $this->loadDefaultEditEngineConfiguration();
     $fields = $this->buildEditFields($object);
 
     $is_preview = $request->isPreviewRequest();
@@ -1151,7 +1209,7 @@ abstract class PhabricatorEditEngine
   final public function buildConduitResponse(ConduitAPIRequest $request) {
     $viewer = $this->getViewer();
 
-    $config = $this->loadEditEngineConfiguration(null);
+    $config = $this->loadDefaultEditEngineConfiguration();
     if (!$config) {
       throw new Exception(
         pht(
@@ -1297,7 +1355,7 @@ abstract class PhabricatorEditEngine
   }
 
   public function getConduitEditTypes() {
-    $config = $this->loadEditEngineConfiguration(null);
+    $config = $this->loadDefaultEditEngineConfiguration();
     if (!$config) {
       return array();
     }
