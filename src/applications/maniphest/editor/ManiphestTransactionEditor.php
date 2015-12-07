@@ -748,6 +748,10 @@ final class ManiphestTransactionEditor
   protected function expandTransactions(
     PhabricatorLiskDAO $object,
     array $xactions) {
+
+    $actor = $this->getActor();
+    $actor_phid = $actor->getPHID();
+
     $results = parent::expandTransactions($object, $xactions);
 
     $is_unassigned = ($object->getOwnerPHID() === null);
@@ -781,12 +785,22 @@ final class ManiphestTransactionEditor
     // being closed, try to assign the actor as the owner.
     if ($is_unassigned && !$any_assign && $is_open && $is_closing) {
       // Don't assign the actor if they aren't a real user.
-      $actor = $this->getActor();
-      $actor_phid = $actor->getPHID();
       if ($actor_phid) {
         $results[] = id(new ManiphestTransaction())
           ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
           ->setNewValue($actor_phid);
+      }
+    }
+
+    // Automatically subscribe the author when they create a task.
+    if ($this->getIsNewObject()) {
+      if ($actor_phid) {
+        $results[] = id(new ManiphestTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+          ->setNewValue(
+            array(
+              '+' => array($actor_phid => $actor_phid),
+            ));
       }
     }
 
