@@ -8,6 +8,7 @@ final class PhamePostViewController extends PhamePostController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
+    $moved = $request->getStr('moved');
 
     $post = id(new PhamePostQuery())
       ->setViewer($viewer)
@@ -56,6 +57,13 @@ final class PhamePostViewController extends PhamePostController {
 
     $document = id(new PHUIDocumentViewPro())
       ->setHeader($header);
+
+    if ($moved) {
+      $document->appendChild(
+        id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+          ->appendChild(pht('Post moved successfully.')));
+    }
 
     if ($post->isDraft()) {
       $document->appendChild(
@@ -169,8 +177,7 @@ final class PhamePostViewController extends PhamePostController {
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI('post/edit/'.$id.'/'))
         ->setName(pht('Edit Post'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+        ->setDisabled(!$can_edit));
 
     $actions->addAction(
       id(new PhabricatorActionView())
@@ -178,7 +185,7 @@ final class PhamePostViewController extends PhamePostController {
         ->setHref($this->getApplicationURI('post/move/'.$id.'/'))
         ->setName(pht('Move Post'))
         ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+        ->setWorkflow(true));
 
     $actions->addAction(
       id(new PhabricatorActionView())

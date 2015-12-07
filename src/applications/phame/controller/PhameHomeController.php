@@ -86,6 +86,13 @@ final class PhameHomeController extends PhamePostController {
 
     $crumbs->addAction(
       id(new PHUIListItemView())
+        ->setName(pht('New Post'))
+        ->setHref($this->getApplicationURI('/post/new/'))
+        ->setIcon('fa-plus-square')
+        ->setWorkflow(true));
+
+    $crumbs->addAction(
+      id(new PHUIListItemView())
         ->setName(pht('New Blog'))
         ->setHref($this->getApplicationURI('/blog/new/'))
         ->setIcon('fa-plus-square')
