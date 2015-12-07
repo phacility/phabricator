@@ -107,15 +107,9 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
   }
 
   public function getQuickCreateItems(PhabricatorUser $viewer) {
-    $items = array();
-
-    $item = id(new PHUIListItemView())
-      ->setName(pht('Maniphest Task'))
-      ->setIcon('fa-anchor')
-      ->setHref($this->getBaseURI().'task/create/');
-    $items[] = $item;
-
-    return $items;
+    return id(new ManiphestEditEngine())
+      ->setViewer($viewer)
+      ->loadQuickCreateItems();
   }
 
   public function supportsEmailIntegration() {

@@ -210,6 +210,10 @@ final class PhabricatorEditEngineConfiguration
     return $this->setProperty('defaults', $defaults);
   }
 
+  public function getIcon() {
+    return $this->getEngine()->getIcon();
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

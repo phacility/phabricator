@@ -76,15 +76,9 @@ final class PhabricatorPasteApplication extends PhabricatorApplication {
   }
 
   public function getQuickCreateItems(PhabricatorUser $viewer) {
-    $items = array();
-
-    $item = id(new PHUIListItemView())
-      ->setName(pht('Paste'))
-      ->setIcon('fa-clipboard')
-      ->setHref($this->getBaseURI().'create/');
-    $items[] = $item;
-
-    return $items;
+    return id(new PhabricatorPasteEditEngine())
+      ->setViewer($viewer)
+      ->loadQuickCreateItems();
   }
 
   public function getMailCommandObjects() {

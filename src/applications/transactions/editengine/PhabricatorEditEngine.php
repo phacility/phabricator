@@ -179,6 +179,14 @@ abstract class PhabricatorEditEngine
   }
 
 
+  /**
+   * @task text
+   */
+  protected function getQuickCreateMenuHeaderText() {
+    return $this->getObjectCreateShortText();
+  }
+
+
 /* -(  Edit Engine Configuration  )------------------------------------------ */
 
 
@@ -872,12 +880,7 @@ abstract class PhabricatorEditEngine
   final public function addActionToCrumbs(PHUICrumbsView $crumbs) {
     $viewer = $this->getViewer();
 
-    $configs = id(new PhabricatorEditEngineConfigurationQuery())
-      ->setViewer($viewer)
-      ->withEngineKeys(array($this->getEngineKey()))
-      ->withIsDefault(true)
-      ->withIsDisabled(false)
-      ->execute();
+    $configs = $this->loadUsableConfigurationsForCreate();
 
     $dropdown = null;
     $disabled = false;
@@ -1377,6 +1380,61 @@ abstract class PhabricatorEditEngine
       ->setViewer($viewer)
       ->withEngineKeys(array($key))
       ->executeOne();
+  }
+
+  public function getIcon() {
+    $application = $this->getApplication();
+    return $application->getFontIcon();
+  }
+
+  public function loadQuickCreateItems() {
+    $configs = $this->loadUsableConfigurationsForCreate();
+
+    $items = array();
+
+    if (!$configs) {
+      // No items to add.
+    } else if (count($configs) == 1) {
+      $config = head($configs);
+      $items[] = $this->newQuickCreateItem($config);
+    } else {
+      $group_name = $this->getQuickCreateMenuHeaderText();
+
+      $items[] = id(new PHUIListItemView())
+        ->setType(PHUIListItemView::TYPE_LABEL)
+        ->setName($group_name);
+
+      foreach ($configs as $config) {
+        $items[] = $this->newQuickCreateItem($config);
+      }
+    }
+
+    return $items;
+  }
+
+  private function loadUsableConfigurationsForCreate() {
+    $viewer = $this->getViewer();
+
+    return id(new PhabricatorEditEngineConfigurationQuery())
+      ->setViewer($viewer)
+      ->withEngineKeys(array($this->getEngineKey()))
+      ->withIsDefault(true)
+      ->withIsDisabled(false)
+      ->execute();
+  }
+
+  private function newQuickCreateItem(
+    PhabricatorEditEngineConfiguration $config) {
+
+    $item_name = $config->getName();
+    $item_icon = $config->getIcon();
+    $form_key = $config->getIdentifier();
+    $item_uri = $this->getEditURI(null, "form/{$form_key}/");
+
+    return id(new PHUIListItemView())
+      ->setName($item_name)
+      ->setIcon($item_icon)
+      ->setHref($item_uri);
   }
 
 
