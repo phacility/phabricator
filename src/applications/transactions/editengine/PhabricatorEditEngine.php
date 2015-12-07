@@ -628,6 +628,7 @@ abstract class PhabricatorEditEngine
 
     $capabilities = array();
     $use_default = false;
+    $require_create = true;
     switch ($action) {
       case 'comment':
         $capabilities = array(
@@ -637,6 +638,11 @@ abstract class PhabricatorEditEngine
         break;
       case 'parameters':
         $use_default = true;
+        break;
+      case 'nodefault':
+      case 'nocreate':
+      case 'nomanage':
+        $require_create = false;
         break;
       default:
         break;
@@ -661,6 +667,12 @@ abstract class PhabricatorEditEngine
         return new Aphront404Response();
       }
     } else {
+      // Make sure the viewer has permission to create new objects of
+      // this type if we're going to create a new object.
+      if ($require_create) {
+        $this->requireCreateCapability();
+      }
+
       $this->setIsCreate(true);
       $object = $this->newEditableObject();
     }
@@ -672,6 +684,10 @@ abstract class PhabricatorEditEngine
         return $this->buildParametersResponse($object);
       case 'nodefault':
         return $this->buildNoDefaultResponse($object);
+      case 'nocreate':
+        return $this->buildNoCreateResponse($object);
+      case 'nomanage':
+        return $this->buildNoManageResponse($object);
       case 'comment':
         return $this->buildCommentResponse($object);
       default:
@@ -757,8 +773,7 @@ abstract class PhabricatorEditEngine
 
         $editor->applyTransactions($object, $xactions);
 
-        return id(new AphrontRedirectResponse())
-          ->setURI($this->getObjectViewURI($object));
+        return $this->newEditResponse($request, $object, $xactions);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
 
@@ -847,6 +862,14 @@ abstract class PhabricatorEditEngine
       ->appendChild($box);
   }
 
+  protected function newEditResponse(
+    AphrontRequest $request,
+    $object,
+    array $xactions) {
+    return id(new AphrontRedirectResponse())
+      ->setURI($this->getObjectViewURI($object));
+  }
+
   private function buildEditForm($object, array $fields) {
     $viewer = $this->getViewer();
 
@@ -896,24 +919,41 @@ abstract class PhabricatorEditEngine
   private function buildEditFormActions($object) {
     $actions = array();
 
-    if ($this->supportsEditEngineConfiguration()) {
-      $engine_key = $this->getEngineKey();
-      $config = $this->getEditEngineConfiguration();
-
-      $actions[] = id(new PhabricatorActionView())
-        ->setName(pht('Manage Form Configurations'))
-        ->setIcon('fa-list-ul')
-        ->setHref("/transactions/editengine/{$engine_key}/");
-      $actions[] = id(new PhabricatorActionView())
-        ->setName(pht('Edit Form Configuration'))
-        ->setIcon('fa-pencil')
-        ->setHref($config->getURI());
-    }
-
     $actions[] = id(new PhabricatorActionView())
       ->setName(pht('Show HTTP Parameters'))
       ->setIcon('fa-crosshairs')
       ->setHref($this->getEditURI($object, 'parameters/'));
+
+    if ($this->supportsEditEngineConfiguration()) {
+      $engine_key = $this->getEngineKey();
+      $config = $this->getEditEngineConfiguration();
+
+      $can_manage = PhabricatorPolicyFilter::hasCapability(
+        $this->getViewer(),
+        $config,
+        PhabricatorPolicyCapability::CAN_EDIT);
+
+      if ($can_manage) {
+        $manage_uri = $config->getURI();
+      } else {
+        $manage_uri = $this->getEditURI(null, 'nomanage/');
+      }
+
+      $view_uri = "/transactions/editengine/{$engine_key}/";
+
+      $actions[] = id(new PhabricatorActionView())
+        ->setName(pht('View Form Configurations'))
+        ->setIcon('fa-list-ul')
+        ->setHref($view_uri);
+
+      $actions[] = id(new PhabricatorActionView())
+        ->setName(pht('Edit Form Configuration'))
+        ->setIcon('fa-pencil')
+        ->setHref($manage_uri)
+        ->setDisabled(!$can_manage)
+        ->setWorkflow(!$can_manage);
+    }
+
 
     return $actions;
   }
@@ -921,7 +961,12 @@ abstract class PhabricatorEditEngine
   final public function addActionToCrumbs(PHUICrumbsView $crumbs) {
     $viewer = $this->getViewer();
 
-    $configs = $this->loadUsableConfigurationsForCreate();
+    $can_create = $this->hasCreateCapability();
+    if ($can_create) {
+      $configs = $this->loadUsableConfigurationsForCreate();
+    } else {
+      $configs = array();
+    }
 
     $dropdown = null;
     $disabled = false;
@@ -938,7 +983,12 @@ abstract class PhabricatorEditEngine
         $disabled = false;
       }
       $workflow = true;
-      $create_uri = $this->getEditURI(null, 'nodefault/');
+
+      if ($can_create) {
+        $create_uri = $this->getEditURI(null, 'nodefault/');
+      } else {
+        $create_uri = $this->getEditURI(null, 'nocreate/');
+      }
     } else {
       $config = head($configs);
       $form_key = $config->getIdentifier();
@@ -1109,6 +1159,31 @@ abstract class PhabricatorEditEngine
       ->addCancelButton($cancel_uri);
   }
 
+  private function buildNoCreateResponse($object) {
+    $cancel_uri = $this->getObjectCreateCancelURI($object);
+
+    return $this->getController()
+      ->newDialog()
+      ->setTitle(pht('No Create Permission'))
+      ->appendParagraph(
+        pht(
+          'You do not have permission to create these objects.'))
+      ->addCancelButton($cancel_uri);
+  }
+
+  private function buildNoManageResponse($object) {
+    $cancel_uri = $this->getObjectCreateCancelURI($object);
+
+    return $this->getController()
+      ->newDialog()
+      ->setTitle(pht('No Manage Permission'))
+      ->appendParagraph(
+        pht(
+          'You do not have permission to configure forms for this '.
+          'application.'))
+      ->addCancelButton($cancel_uri);
+  }
+
   private function buildCommentResponse($object) {
     $viewer = $this->getViewer();
 
@@ -1266,6 +1341,8 @@ abstract class PhabricatorEditEngine
       $this->setIsCreate(false);
       $object = $this->newObjectFromIdentifier($identifier);
     } else {
+      $this->requireCreateCapability();
+
       $this->setIsCreate(true);
       $object = $this->newEditableObject();
     }
@@ -1429,9 +1506,13 @@ abstract class PhabricatorEditEngine
   }
 
   public function loadQuickCreateItems() {
-    $configs = $this->loadUsableConfigurationsForCreate();
-
     $items = array();
+
+    if (!$this->hasCreateCapability()) {
+      return $items;
+    }
+
+    $configs = $this->loadUsableConfigurationsForCreate();
 
     if (!$configs) {
       // No items to add.
@@ -1456,12 +1537,16 @@ abstract class PhabricatorEditEngine
   private function loadUsableConfigurationsForCreate() {
     $viewer = $this->getViewer();
 
-    return id(new PhabricatorEditEngineConfigurationQuery())
+    $configs = id(new PhabricatorEditEngineConfigurationQuery())
       ->setViewer($viewer)
       ->withEngineKeys(array($this->getEngineKey()))
       ->withIsDefault(true)
       ->withIsDisabled(false)
       ->execute();
+
+    $configs = msort($configs, 'getCreateSortKey');
+
+    return $configs;
   }
 
   private function newQuickCreateItem(
@@ -1478,6 +1563,24 @@ abstract class PhabricatorEditEngine
       ->setHref($item_uri);
   }
 
+  protected function getCreateNewObjectPolicy() {
+    return PhabricatorPolicies::POLICY_USER;
+  }
+
+  private function requireCreateCapability() {
+    PhabricatorPolicyFilter::requireCapability(
+      $this->getViewer(),
+      $this,
+      PhabricatorPolicyCapability::CAN_EDIT);
+  }
+
+  private function hasCreateCapability() {
+    return PhabricatorPolicyFilter::hasCapability(
+      $this->getViewer(),
+      $this,
+      PhabricatorPolicyCapability::CAN_EDIT);
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -1489,6 +1592,7 @@ abstract class PhabricatorEditEngine
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
@@ -1496,6 +1600,8 @@ abstract class PhabricatorEditEngine
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
         return PhabricatorPolicies::getMostOpenPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return $this->getCreateNewObjectPolicy();
     }
   }
 

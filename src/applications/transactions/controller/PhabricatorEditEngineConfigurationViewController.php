@@ -10,7 +10,7 @@ final class PhabricatorEditEngineConfigurationViewController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
-    $config = $this->loadConfigForEdit();
+    $config = $this->loadConfigForView();
     if (!$config) {
       return id(new Aphront404Response());
     }
