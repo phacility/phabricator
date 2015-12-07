@@ -56,11 +56,9 @@ final class ManiphestEditEngine
 
     if ($object->isClosed()) {
       $priority_label = null;
-      $owner_label = null;
       $default_status = ManiphestTaskStatus::getDefaultStatus();
     } else {
       $priority_label = pht('Change Priority');
-      $owner_label = pht('Assign / Claim');
       $default_status = ManiphestTaskStatus::getDefaultClosedStatus();
     }
 
@@ -94,7 +92,7 @@ final class ManiphestEditEngine
         ->setDescription(pht('User who is responsible for the task.'))
         ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
         ->setSingleValue($object->getOwnerPHID())
-        ->setCommentActionLabel($owner_label)
+        ->setCommentActionLabel(pht('Assign / Claim'))
         ->setCommentActionDefaultValue($owner_value),
       id(new PhabricatorSelectEditField())
         ->setKey('priority')
