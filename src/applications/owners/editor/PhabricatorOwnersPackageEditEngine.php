@@ -58,6 +58,7 @@ final class PhabricatorOwnersPackageEditEngine
         ->setDescription(pht('Users and projects which own the package.'))
         ->setTransactionType(PhabricatorOwnersPackageTransaction::TYPE_OWNERS)
         ->setDatasource(new PhabricatorProjectOrUserDatasource())
+        ->setIsCopyable(true)
         ->setValue($object->getOwnerPHIDs()),
       id(new PhabricatorSelectEditField())
         ->setKey('status')
@@ -74,6 +75,7 @@ final class PhabricatorOwnersPackageEditEngine
             'Automatically trigger audits for commits affecting files in '.
             'this package.'))
         ->setTransactionType(PhabricatorOwnersPackageTransaction::TYPE_AUDITING)
+        ->setIsCopyable(true)
         ->setValue($object->getAuditingEnabled())
         ->setOptions(
           array(

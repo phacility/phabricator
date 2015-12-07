@@ -81,6 +81,7 @@ final class ManiphestEditEngine
         ->setLabel(pht('Status'))
         ->setDescription(pht('Status of the task.'))
         ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
+        ->setIsCopyable(true)
         ->setValue($object->getStatus())
         ->setOptions($status_map)
         ->setCommentActionLabel(pht('Change Status'))
@@ -91,6 +92,7 @@ final class ManiphestEditEngine
         ->setLabel(pht('Assigned To'))
         ->setDescription(pht('User who is responsible for the task.'))
         ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
+        ->setIsCopyable(true)
         ->setSingleValue($object->getOwnerPHID())
         ->setCommentActionLabel(pht('Assign / Claim'))
         ->setCommentActionDefaultValue($owner_value),
@@ -99,6 +101,7 @@ final class ManiphestEditEngine
         ->setLabel(pht('Priority'))
         ->setDescription(pht('Priority of the task.'))
         ->setTransactionType(ManiphestTransaction::TYPE_PRIORITY)
+        ->setIsCopyable(true)
         ->setValue($object->getPriority())
         ->setOptions($priority_map)
         ->setCommentActionLabel($priority_label),

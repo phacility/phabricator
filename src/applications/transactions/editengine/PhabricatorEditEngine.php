@@ -95,7 +95,7 @@ abstract class PhabricatorEditEngine
     }
 
     $config = $this->getEditEngineConfiguration();
-    $fields = $config->applyConfigurationToFields($this, $fields);
+    $fields = $config->applyConfigurationToFields($this, $object, $fields);
 
     foreach ($fields as $field) {
       $field
@@ -443,12 +443,16 @@ abstract class PhabricatorEditEngine
    * to make Conduit a little easier to use.
    *
    * @param wild ID, PHID, or monogram.
+   * @param list<const> List of required capability constants, or omit for
+   *   defaults.
    * @return object Corresponding editable object.
    * @task load
    */
-  private function newObjectFromIdentifier($identifier) {
+  private function newObjectFromIdentifier(
+    $identifier,
+    array $capabilities = array()) {
     if (is_int($identifier) || ctype_digit($identifier)) {
-      $object = $this->newObjectFromID($identifier);
+      $object = $this->newObjectFromID($identifier, $capabilities);
 
       if (!$object) {
         throw new Exception(
@@ -462,7 +466,7 @@ abstract class PhabricatorEditEngine
 
     $type_unknown = PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN;
     if (phid_get_type($identifier) != $type_unknown) {
-      $object = $this->newObjectFromPHID($identifier);
+      $object = $this->newObjectFromPHID($identifier, $capabilities);
 
       if (!$object) {
         throw new Exception(
@@ -503,7 +507,7 @@ abstract class PhabricatorEditEngine
     // sure it's really valid, goes through standard policy check logic, and
     // picks up any `need...()` clauses we want it to load with.
 
-    $object = $this->newObjectFromPHID($target->getPHID());
+    $object = $this->newObjectFromPHID($target->getPHID(), $capabilities);
     if (!$object) {
       throw new Exception(
         pht(
@@ -536,14 +540,16 @@ abstract class PhabricatorEditEngine
    * Load an object by PHID.
    *
    * @param phid Object PHID.
+   * @param list<const> List of required capability constants, or omit for
+   *   defaults.
    * @return object|null Object, or null if no such object exists.
    * @task load
    */
-  private function newObjectFromPHID($phid) {
+  private function newObjectFromPHID($phid, array $capabilities = array()) {
     $query = $this->newObjectQuery()
       ->withPHIDs(array($phid));
 
-    return $this->newObjectFromQuery($query);
+    return $this->newObjectFromQuery($query, $capabilities);
   }
 
 
@@ -627,6 +633,9 @@ abstract class PhabricatorEditEngine
         $capabilities = array(
           PhabricatorPolicyCapability::CAN_VIEW,
         );
+        $use_default = true;
+        break;
+      case 'parameters':
         $use_default = true;
         break;
       default:
@@ -769,9 +778,41 @@ abstract class PhabricatorEditEngine
       }
     } else {
       if ($this->getIsCreate()) {
+        $template = $request->getStr('template');
+
+        if (strlen($template)) {
+          $template_object = $this->newObjectFromIdentifier(
+            $template,
+            array(
+              PhabricatorPolicyCapability::CAN_VIEW,
+            ));
+          if (!$template_object) {
+            return new Aphront404Response();
+          }
+        } else {
+          $template_object = null;
+        }
+
+        if ($template_object) {
+          $copy_fields = $this->buildEditFields($template_object);
+          $copy_fields = mpull($copy_fields, null, 'getKey');
+          foreach ($copy_fields as $copy_key => $copy_field) {
+            if (!$copy_field->getIsCopyable()) {
+              unset($copy_fields[$copy_key]);
+            }
+          }
+        } else {
+          $copy_fields = array();
+        }
+
         foreach ($fields as $field) {
           if ($field->getIsLocked() || $field->getIsHidden()) {
             continue;
+          }
+
+          $field_key = $field->getKey();
+          if (isset($copy_fields[$field_key])) {
+            $field->readValueFromField($copy_fields[$field_key]);
           }
 
           $field->readValueFromRequest($request);

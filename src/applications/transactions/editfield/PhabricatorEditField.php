@@ -28,6 +28,7 @@ abstract class PhabricatorEditField extends Phobject {
   private $isReorderable = true;
   private $isDefaultable = true;
   private $isLockable = true;
+  private $isCopyable = false;
 
   public function setKey($key) {
     $this->key = $key;
@@ -144,6 +145,15 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function getIsHidden() {
     return $this->isHidden;
+  }
+
+  public function setIsCopyable($is_copyable) {
+    $this->isCopyable = $is_copyable;
+    return $this;
+  }
+
+  public function getIsCopyable() {
+    return $this->isCopyable;
   }
 
   public function setIsSubmittedForm($is_submitted) {
@@ -364,6 +374,15 @@ abstract class PhabricatorEditField extends Phobject {
 
   protected function getValueFromRequest(AphrontRequest $request, $key) {
     return $this->getHTTPParameterValue($request, $key);
+  }
+
+  public function readValueFromField(PhabricatorEditField $other) {
+    $this->value = $this->getValueFromField($other);
+    return $this;
+  }
+
+  protected function getValueFromField(PhabricatorEditField $other) {
+    return $other->getValue();
   }
 
 

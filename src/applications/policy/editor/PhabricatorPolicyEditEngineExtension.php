@@ -83,6 +83,7 @@ final class PhabricatorPolicyEditEngineExtension
         ->setLabel($label)
         ->setDescription($description)
         ->setAliases($aliases)
+        ->setIsCopyable(true)
         ->setCapability($capability)
         ->setPolicies($policies)
         ->setTransactionType($type)
@@ -100,6 +101,7 @@ final class PhabricatorPolicyEditEngineExtension
               ->setEditTypeKey('space')
               ->setDescription(
                 pht('Shifts the object in the Spaces application.'))
+              ->setIsCopyable(true)
               ->setIsReorderable(false)
               ->setAliases(array('space', 'policy.space'))
               ->setTransactionType($type_space)

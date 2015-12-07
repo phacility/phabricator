@@ -89,12 +89,15 @@ final class PhabricatorEditEngineConfiguration
 
   public function applyConfigurationToFields(
     PhabricatorEditEngine $engine,
+    $object,
     array $fields) {
     $fields = mpull($fields, null, 'getKey');
 
+    $is_new = !$object->getID();
+
     $values = $this->getProperty('defaults', array());
     foreach ($fields as $key => $field) {
-      if ($engine->getIsCreate()) {
+      if ($is_new) {
         if (array_key_exists($key, $values)) {
           $field->readDefaultValueFromConfiguration($values[$key]);
         }

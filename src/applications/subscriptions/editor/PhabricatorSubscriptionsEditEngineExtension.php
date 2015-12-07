@@ -45,6 +45,7 @@ final class PhabricatorSubscriptionsEditEngineExtension
       ->setEditTypeKey('subscribers')
       ->setDescription(pht('Manage subscribers.'))
       ->setAliases(array('subscriber', 'subscribers'))
+      ->setIsCopyable(true)
       ->setUseEdgeTransactions(true)
       ->setEdgeTransactionDescriptions(
         pht('Add subscribers.'),
