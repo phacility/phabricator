@@ -193,12 +193,10 @@ final class ManiphestEditEngine
     AphrontRequest $request,
     $object,
     array $xactions) {
-    $viewer = $this->getViewer();
-    $controller = $this->getController();
 
     if ($request->isAjax()) {
-
       // Reload the task to make sure we pick up the final task state.
+      $viewer = $this->getViewer();
       $task = id(new ManiphestTaskQuery())
         ->setViewer($viewer)
         ->withIDs(array($object->getID()))
@@ -206,15 +204,108 @@ final class ManiphestEditEngine
         ->needProjectPHIDs(true)
         ->executeOne();
 
-      $payload = array(
-        'tasks' => $controller->renderSingleTask($task),
-        'data' => array(),
-      );
+      switch ($request->getStr('responseType')) {
+        case 'card':
+          return $this->buildCardResponse($task);
+        default:
+          return $this->buildListResponse($task);
+      }
 
-      return id(new AphrontAjaxResponse())->setContent($payload);
     }
 
     return parent::newEditResponse();
   }
+
+  private function buildListResponse(ManiphestTask $task) {
+    $controller = $this->getController();
+
+    $payload = array(
+      'tasks' => $controller->renderSingleTask($task),
+      'data' => array(),
+    );
+
+    return id(new AphrontAjaxResponse())->setContent($payload);
+  }
+
+  private function buildCardResponse(ManiphestTask $task) {
+    $controller = $this->getController();
+    $request = $controller->getRequest();
+    $viewer = $request->getViewer();
+
+    $column_phid = $request->getStr('columnPHID');
+    $order = $request->getStr('order');
+
+    $column = id(new PhabricatorProjectColumnQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($column_phid))
+      ->executeOne();
+    if (!$column) {
+      return new Aphront404Response();
+    }
+
+    // If the workboard's project has been removed from the card's project
+    // list, we are going to remove it from the board completely.
+    $project_map = array_fuse($task->getProjectPHIDs());
+    $remove_card = empty($project_map[$column->getProjectPHID()]);
+
+    $positions = id(new PhabricatorProjectColumnPositionQuery())
+      ->setViewer($viewer)
+      ->withColumns(array($column))
+      ->execute();
+    $task_phids = mpull($positions, 'getObjectPHID');
+
+    $column_tasks = id(new ManiphestTaskQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($task_phids)
+      ->execute();
+
+    if ($order == PhabricatorProjectColumn::ORDER_NATURAL) {
+      // TODO: This is a little bit awkward, because PHP and JS use
+      // slightly different sort order parameters to achieve the same
+      // effect. It would be good to unify this a bit at some point.
+      $sort_map = array();
+      foreach ($positions as $position) {
+        $sort_map[$position->getObjectPHID()] = array(
+          -$position->getSequence(),
+          $position->getID(),
+        );
+      }
+    } else {
+      $sort_map = mpull(
+        $column_tasks,
+        'getPrioritySortVector',
+        'getPHID');
+    }
+
+    $data = array(
+      'removeFromBoard' => $remove_card,
+      'sortMap' => $sort_map,
+    );
+
+    // TODO: This should just use HandlePool once we get through the EditEngine
+    // transition.
+    $owner = null;
+    if ($task->getOwnerPHID()) {
+      $owner = id(new PhabricatorHandleQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($task->getOwnerPHID()))
+        ->executeOne();
+    }
+
+    $tasks = id(new ProjectBoardTaskCard())
+      ->setViewer($viewer)
+      ->setTask($task)
+      ->setOwner($owner)
+      ->setCanEdit(true)
+      ->getItem();
+
+    $payload = array(
+      'tasks' => $tasks,
+      'data' => $data,
+    );
+
+    return id(new AphrontAjaxResponse())->setContent($payload);
+  }
+
 
 }

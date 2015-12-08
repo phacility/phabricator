@@ -66,7 +66,7 @@ final class ProjectBoardTaskCard extends Phobject {
         ->setName(pht('Edit'))
         ->setIcon('fa-pencil')
         ->addSigil('edit-project-card')
-        ->setHref('/maniphest/task/edit/'.$task->getID().'/'))
+        ->setHref('/maniphest/editpro/'.$task->getID().'/'))
       ->setBarColor($bar_color);
 
     if ($owner) {

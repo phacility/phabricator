@@ -6,6 +6,9 @@ final class ManiphestTaskEditProController extends ManiphestController {
     return id(new ManiphestEditEngine())
       ->setController($this)
       ->addContextParameter('ungrippable')
+      ->addContextParameter('responseType')
+      ->addContextParameter('columnPHID')
+      ->addContextParameter('order')
       ->buildResponse();
   }
 
