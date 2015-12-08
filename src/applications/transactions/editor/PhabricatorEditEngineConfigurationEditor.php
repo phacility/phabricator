@@ -23,6 +23,7 @@ final class PhabricatorEditEngineConfigurationEditor
     $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_LOCKS;
     $types[] =
       PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULTCREATE;
+    $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_ISEDIT;
     $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_DISABLE;
 
 
@@ -75,6 +76,8 @@ final class PhabricatorEditEngineConfigurationEditor
         return $object->getFieldLocks();
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULTCREATE:
         return (int)$object->getIsDefault();
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_ISEDIT:
+        return (int)$object->getIsEdit();
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DISABLE:
         return (int)$object->getIsDisabled();
     }
@@ -92,6 +95,7 @@ final class PhabricatorEditEngineConfigurationEditor
       case PhabricatorEditEngineConfigurationTransaction::TYPE_LOCKS:
         return $xaction->getNewValue();
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULTCREATE:
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_ISEDIT:
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DISABLE:
         return (int)$xaction->getNewValue();
     }
@@ -121,6 +125,9 @@ final class PhabricatorEditEngineConfigurationEditor
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULTCREATE:
         $object->setIsDefault($xaction->getNewValue());
         return;
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_ISEDIT:
+        $object->setIsEdit($xaction->getNewValue());
+        return;
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DISABLE:
         $object->setIsDisabled($xaction->getNewValue());
         return;
@@ -138,6 +145,7 @@ final class PhabricatorEditEngineConfigurationEditor
       case PhabricatorEditEngineConfigurationTransaction::TYPE_PREAMBLE;
       case PhabricatorEditEngineConfigurationTransaction::TYPE_ORDER;
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULT:
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_ISEDIT:
       case PhabricatorEditEngineConfigurationTransaction::TYPE_LOCKS:
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULTCREATE:
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DISABLE:

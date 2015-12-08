@@ -9,6 +9,7 @@ final class PhabricatorEditEngineConfigurationQuery
   private $builtinKeys;
   private $identifiers;
   private $default;
+  private $isEdit;
   private $disabled;
   private $ignoreDatabaseConfigurations;
 
@@ -39,6 +40,11 @@ final class PhabricatorEditEngineConfigurationQuery
 
   public function withIsDefault($default) {
     $this->default = $default;
+    return $this;
+  }
+
+  public function withIsEdit($edit) {
+    $this->isEdit = $edit;
     return $this;
   }
 
@@ -143,6 +149,14 @@ final class PhabricatorEditEngineConfigurationQuery
     if ($this->default !== null) {
       foreach ($page as $key => $config) {
         if ($config->getIsDefault() != $this->default) {
+          unset($page[$key]);
+        }
+      }
+    }
+
+    if ($this->isEdit !== null) {
+      foreach ($page as $key => $config) {
+        if ($config->getIsEdit() != $this->isEdit) {
           unset($page[$key]);
         }
       }

@@ -33,11 +33,37 @@ final class PhabricatorEditEngineConfigurationSearchEngine
 
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
+
+    $is_create = $map['isCreate'];
+    if ($is_create !== null) {
+      $query->withIsDefault($is_create);
+    }
+
+    $is_edit = $map['isEdit'];
+    if ($is_edit !== null) {
+      $query->withIsEdit($is_edit);
+    }
+
     return $query;
   }
 
   protected function buildCustomSearchFields() {
-    return array();
+    return array(
+      id(new PhabricatorSearchThreeStateField())
+        ->setLabel(pht('Create'))
+        ->setKey('isCreate')
+        ->setOptions(
+          pht('Show All'),
+          pht('Hide Create Forms'),
+          pht('Show Only Create Forms')),
+      id(new PhabricatorSearchThreeStateField())
+        ->setLabel(pht('Edit'))
+        ->setKey('isEdit')
+        ->setOptions(
+          pht('Show All'),
+          pht('Hide Edit Forms'),
+          pht('Show Only Edit Forms')),
+    );
   }
 
   protected function getDefaultFieldOrder() {
@@ -51,6 +77,8 @@ final class PhabricatorEditEngineConfigurationSearchEngine
   protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All Forms'),
+      'create' => pht('Create Forms'),
+      'modify' => pht('Edit Forms'),
     );
 
     return $names;
@@ -63,6 +91,10 @@ final class PhabricatorEditEngineConfigurationSearchEngine
     switch ($query_key) {
       case 'all':
         return $query;
+      case 'create':
+        return $query->setParameter('isCreate', true);
+      case 'modify':
+        return $query->setParameter('isEdit', true);
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
@@ -94,6 +126,10 @@ final class PhabricatorEditEngineConfigurationSearchEngine
 
       if ($config->getIsDefault()) {
         $item->addIcon('fa-plus', pht('Default'));
+      }
+
+      if ($config->getIsEdit()) {
+        $item->addIcon('fa-pencil', pht('Edit Form'));
       }
 
       if ($config->getIsDisabled()) {

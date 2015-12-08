@@ -53,6 +53,8 @@ final class PhabricatorTransactionsApplication extends PhabricatorApplication {
               'PhabricatorEditEngineConfigurationLockController',
             'defaultcreate/(?P<key>[^/]+)/' =>
               'PhabricatorEditEngineConfigurationDefaultCreateController',
+            'defaultedit/(?P<key>[^/]+)/' =>
+              'PhabricatorEditEngineConfigurationIsEditController',
             'disable/(?P<key>[^/]+)/' =>
               'PhabricatorEditEngineConfigurationDisableController',
           ),

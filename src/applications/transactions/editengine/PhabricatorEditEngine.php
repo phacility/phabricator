@@ -198,59 +198,68 @@ abstract class PhabricatorEditEngine
     return $this->editEngineConfiguration;
   }
 
-
-  /**
-   * Load the default configuration, ignoring customization in the database
-   * (which means we implicitly ignore policies).
-   *
-   * This is used from places like Conduit, where the fields available in the
-   * API should not be affected by configuration changes.
-   *
-   * @return PhabricatorEditEngineConfiguration Default configuration, ignoring
-   *   customization.
-   */
-  private function loadDefaultEditEngineConfiguration() {
-    return $this->loadEditEngineConfigurationWithOptions(
-      self::EDITENGINECONFIG_DEFAULT,
-      true);
+  private function newConfigurationQuery() {
+    return id(new PhabricatorEditEngineConfigurationQuery())
+      ->setViewer($this->getViewer())
+      ->withEngineKeys(array($this->getEngineKey()));
   }
 
+  private function loadEditEngineConfigurationWithQuery(
+    PhabricatorEditEngineConfigurationQuery $query,
+    $sort_method) {
 
-  /**
-   * Load a named configuration, respecting database customization and policies.
-   *
-   * @param string Configuration key, or null to load the default.
-   * @return PhabricatorEditEngineConfiguration Default configuration,
-   *   respecting customization.
-   */
-  private function loadEditEngineConfiguration($key) {
-    if (!strlen($key)) {
-      $key = self::EDITENGINECONFIG_DEFAULT;
+    if ($sort_method) {
+      $results = $query->execute();
+      $results = msort($results, $sort_method);
+      $result = head($results);
+    } else {
+      $result = $query->executeOne();
     }
 
-    return $this->loadEditEngineConfigurationWithOptions(
-      $key,
-      false);
-  }
-
-  private function loadEditEngineConfigurationWithOptions(
-    $key,
-    $ignore_database) {
-    $viewer = $this->getViewer();
-
-    $config = id(new PhabricatorEditEngineConfigurationQuery())
-      ->setViewer($viewer)
-      ->withEngineKeys(array($this->getEngineKey()))
-      ->withIdentifiers(array($key))
-      ->withIgnoreDatabaseConfigurations($ignore_database)
-      ->executeOne();
-    if (!$config) {
+    if (!$result) {
       return null;
     }
 
-    $this->editEngineConfiguration = $config;
+    $this->editEngineConfiguration = $result;
+    return $result;
+  }
 
-    return $config;
+  private function loadEditEngineConfigurationWithIdentifier($identifier) {
+    $query = $this->newConfigurationQuery()
+      ->withIdentifiers(array($identifier));
+
+    return $this->loadEditEngineConfigurationWithQuery($query, null);
+  }
+
+  private function loadDefaultConfiguration() {
+    $query = $this->newConfigurationQuery()
+      ->withIdentifiers(
+        array(
+          self::EDITENGINECONFIG_DEFAULT,
+        ))
+      ->withIgnoreDatabaseConfigurations(true);
+
+    return $this->loadEditEngineConfigurationWithQuery($query, null);
+  }
+
+  private function loadDefaultCreateConfiguration() {
+    $query = $this->newConfigurationQuery()
+      ->withIsDefault(true)
+      ->withIsDisabled(false);
+
+    return $this->loadEditEngineConfigurationWithQuery(
+      $query,
+      'getCreateSortKey');
+  }
+
+  private function loadDefaultEditConfiguration() {
+    $query = $this->newConfigurationQuery()
+      ->withIsEdit(true)
+      ->withIsDisabled(false);
+
+    return $this->loadEditEngineConfigurationWithQuery(
+      $query,
+      'getEditSortKey');
   }
 
   final public function getBuiltinEngineConfigurations() {
@@ -278,7 +287,8 @@ abstract class PhabricatorEditEngine
       if (!$first->getBuiltinKey()) {
         $first
           ->setBuiltinKey(self::EDITENGINECONFIG_DEFAULT)
-          ->setIsDefault(true);
+          ->setIsDefault(true)
+          ->setIsEdit(true);
 
         if (!strlen($first->getName())) {
           $first->setName($this->getObjectCreateShortText());
@@ -648,18 +658,8 @@ abstract class PhabricatorEditEngine
         break;
     }
 
-    if ($use_default) {
-      $config = $this->loadDefaultEditEngineConfiguration();
-    } else {
-      $form_key = $request->getURIData('formKey');
-      $config = $this->loadEditEngineConfiguration($form_key);
-    }
-
-    if (!$config) {
-      return new Aphront404Response();
-    }
-
     $id = $request->getURIData('id');
+
     if ($id) {
       $this->setIsCreate(false);
       $object = $this->newObjectFromID($id, $capabilities);
@@ -678,6 +678,42 @@ abstract class PhabricatorEditEngine
     }
 
     $this->validateObject($object);
+
+    if ($use_default) {
+      $config = $this->loadDefaultConfiguration();
+      if (!$config) {
+        return new Aphront404Response();
+      }
+    } else {
+      $form_key = $request->getURIData('formKey');
+      if (strlen($form_key)) {
+        $config = $this->loadEditEngineConfigurationWithIdentifier($form_key);
+
+        if (!$config) {
+          return new Aphront404Response();
+        }
+
+        if ($id && !$config->getIsEdit()) {
+          return $this->buildNotEditFormRespose($object, $config);
+        }
+      } else {
+        if ($id) {
+          $config = $this->loadDefaultEditConfiguration();
+          if (!$config) {
+            return $this->buildNoEditResponse($object);
+          }
+        } else {
+          $config = $this->loadDefaultCreateConfiguration();
+          if (!$config) {
+            return $this->buildNoCreateResponse($object);
+          }
+        }
+      }
+    }
+
+    if ($config->getIsDisabled()) {
+      return $this->buildFormDisabledResponse($object, $config);
+    }
 
     switch ($action) {
       case 'parameters':
@@ -1032,7 +1068,7 @@ abstract class PhabricatorEditEngine
   }
 
   final public function buildEditEngineCommentView($object) {
-    $config = $this->loadDefaultEditEngineConfiguration();
+    $config = $this->loadDefaultConfiguration();
 
     $viewer = $this->getViewer();
     $object_phid = $object->getPHID();
@@ -1146,42 +1182,68 @@ abstract class PhabricatorEditEngine
   }
 
 
-  private function buildNoDefaultResponse($object) {
+  private function buildError($object, $title, $body) {
     $cancel_uri = $this->getObjectCreateCancelURI($object);
 
     return $this->getController()
       ->newDialog()
-      ->setTitle(pht('No Default Create Forms'))
-      ->appendParagraph(
-        pht(
-          'This application is not configured with any visible, enabled '.
-          'forms for creating objects.'))
+      ->setTitle($title)
+      ->appendParagraph($body)
       ->addCancelButton($cancel_uri);
+  }
+
+
+  private function buildNoDefaultResponse($object) {
+    return $this->buildError(
+      $object,
+      pht('No Default Create Forms'),
+      pht(
+        'This application is not configured with any forms for creating '.
+        'objects that are visible to you and enabled.'));
   }
 
   private function buildNoCreateResponse($object) {
-    $cancel_uri = $this->getObjectCreateCancelURI($object);
-
-    return $this->getController()
-      ->newDialog()
-      ->setTitle(pht('No Create Permission'))
-      ->appendParagraph(
-        pht(
-          'You do not have permission to create these objects.'))
-      ->addCancelButton($cancel_uri);
+    return $this->buildError(
+      $object,
+      pht('No Create Permission'),
+      pht('You do not have permission to create these objects.'));
   }
 
   private function buildNoManageResponse($object) {
-    $cancel_uri = $this->getObjectCreateCancelURI($object);
+    return $this->buildError(
+      $object,
+      pht('No Manage Permission'),
+      pht(
+        'You do not have permission to configure forms for this '.
+        'application.'));
+  }
 
-    return $this->getController()
-      ->newDialog()
-      ->setTitle(pht('No Manage Permission'))
-      ->appendParagraph(
-        pht(
-          'You do not have permission to configure forms for this '.
-          'application.'))
-      ->addCancelButton($cancel_uri);
+  private function buildNoEditResponse($object) {
+    return $this->buildError(
+      $object,
+      pht('No Edit Forms'),
+      pht(
+        'You do not have access to any forms which are enabled and marked '.
+        'as edit forms.'));
+  }
+
+  private function buildNotEditFormRespose($object, $config) {
+    return $this->buildError(
+      $object,
+      pht('Not an Edit Form'),
+      pht(
+        'This form ("%s") is not marked as an edit form, so '.
+        'it can not be used to edit objects.',
+        $config->getName()));
+  }
+
+  private function buildDisabledFormResponse($object, $config) {
+    return $this->buildError(
+      $object,
+      pht('Form Disabled'),
+      pht(
+        'This form ("%s") has been disabled, so it can not be used.',
+        $config->getName()));
   }
 
   private function buildCommentResponse($object) {
@@ -1198,7 +1260,7 @@ abstract class PhabricatorEditEngine
       return new Aphront400Response();
     }
 
-    $config = $this->loadDefaultEditEngineConfiguration();
+    $config = $this->loadDefaultConfiguration();
     $fields = $this->buildEditFields($object);
 
     $is_preview = $request->isPreviewRequest();
@@ -1328,7 +1390,7 @@ abstract class PhabricatorEditEngine
   final public function buildConduitResponse(ConduitAPIRequest $request) {
     $viewer = $this->getViewer();
 
-    $config = $this->loadDefaultEditEngineConfiguration();
+    $config = $this->loadDefaultConfiguration();
     if (!$config) {
       throw new Exception(
         pht(
@@ -1476,7 +1538,7 @@ abstract class PhabricatorEditEngine
   }
 
   public function getConduitEditTypes() {
-    $config = $this->loadDefaultEditEngineConfiguration();
+    $config = $this->loadDefaultConfiguration();
     if (!$config) {
       return array();
     }

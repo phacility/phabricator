@@ -177,6 +177,24 @@ final class PhabricatorEditEngineConfigurationViewController
         ->setWorkflow(true)
         ->setDisabled(!$can_edit));
 
+    if ($config->getIsEdit()) {
+      $isedit_name = pht('Unmark as "Edit" Form');
+      $isedit_icon = 'fa-minus';
+    } else {
+      $isedit_name = pht('Mark as "Edit" Form');
+      $isedit_icon = 'fa-plus';
+    }
+
+    $isedit_uri = "{$base_uri}/defaultedit/{$form_key}/";
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName($isedit_name)
+        ->setIcon($isedit_icon)
+        ->setHref($isedit_uri)
+        ->setWorkflow(true)
+        ->setDisabled(!$can_edit));
+
     return $view;
   }
 
