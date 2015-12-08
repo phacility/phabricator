@@ -10,10 +10,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $viewer = $this->getViewer();
     $id = $request->getURIData('id');
 
-    $e_title = null;
-
-    $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
-
     $task = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
@@ -21,15 +17,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->executeOne();
     if (!$task) {
       return new Aphront404Response();
-    }
-
-    $workflow = $request->getStr('workflow');
-    $parent_task = null;
-    if ($workflow && is_numeric($workflow)) {
-      $parent_task = id(new ManiphestTaskQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($workflow))
-        ->executeOne();
     }
 
     $field_list = PhabricatorCustomField::getObjectFields(
@@ -65,53 +52,13 @@ final class ManiphestTaskDetailController extends ManiphestController {
     }
     $phids[$task->getAuthorPHID()] = true;
 
-    $attached = $task->getAttached();
-    foreach ($attached as $type => $list) {
-      foreach ($list as $phid => $info) {
-        $phids[$phid] = true;
-      }
-    }
-
-    if ($parent_task) {
-      $phids[$parent_task->getPHID()] = true;
-    }
-
     $phids = array_keys($phids);
     $handles = $viewer->loadHandles($phids);
 
-    $info_view = null;
-    if ($parent_task) {
-      $info_view = new PHUIInfoView();
-      $info_view->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
-      $info_view->addButton(
-        id(new PHUIButtonView())
-          ->setTag('a')
-          ->setHref('/maniphest/task/create/?parent='.$parent_task->getID())
-          ->setText(pht('Create Another Subtask')));
-
-      $info_view->appendChild(hsprintf(
-        'Created a subtask of <strong>%s</strong>.',
-        $handles->renderHandle($parent_task->getPHID())));
-    } else if ($workflow == 'create') {
-      $info_view = new PHUIInfoView();
-      $info_view->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
-      $info_view->addButton(
-        id(new PHUIButtonView())
-          ->setTag('a')
-          ->setHref('/maniphest/task/create/?template='.$task->getID())
-          ->setText(pht('Similar Task')));
-      $info_view->addButton(
-        id(new PHUIButtonView())
-          ->setTag('a')
-          ->setHref('/maniphest/task/create/')
-          ->setText(pht('Empty Task')));
-      $info_view->appendChild(pht('New task created. Create another?'));
-    }
-
-    $engine = new PhabricatorMarkupEngine();
-    $engine->setViewer($viewer);
-    $engine->setContextObject($task);
-    $engine->addObject($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION);
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($viewer)
+      ->setContextObject($task)
+      ->addObject($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION);
 
     $timeline = $this->buildTransactionTimeline(
       $task,
@@ -155,7 +102,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ))
       ->appendChild(
         array(
-          $info_view,
           $object_box,
           $timeline,
           $comment_view,
@@ -323,30 +269,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $view->addProperty(
         pht('Commits'),
         phutil_implode_html(phutil_tag('br'), $revisions_commits));
-    }
-
-    $attached = $task->getAttached();
-    if (!is_array($attached)) {
-      $attached = array();
-    }
-
-    $file_infos = idx($attached, PhabricatorFileFilePHIDType::TYPECONST);
-    if ($file_infos) {
-      $file_phids = array_keys($file_infos);
-
-      // TODO: These should probably be handles or something; clean this up
-      // as we sort out file attachments.
-      $files = id(new PhabricatorFileQuery())
-        ->setViewer($viewer)
-        ->withPHIDs($file_phids)
-        ->execute();
-
-      $file_view = new PhabricatorFileLinkListView();
-      $file_view->setFiles($files);
-
-      $view->addProperty(
-        pht('Files'),
-        $file_view->render());
     }
 
     $view->invokeWillRenderEvent();

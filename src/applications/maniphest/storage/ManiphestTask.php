@@ -32,7 +32,6 @@ final class ManiphestTask extends ManiphestDAO
   protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
   protected $editPolicy = PhabricatorPolicies::POLICY_USER;
 
-  protected $attached = array();
   protected $projectPHIDs = array();
 
   protected $ownerOrdering;
@@ -42,6 +41,9 @@ final class ManiphestTask extends ManiphestDAO
   private $groupByProjectPHID = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
   private $edgeProjectPHIDs = self::ATTACHABLE;
+
+  // TODO: This field is unused and should eventually be removed.
+  protected $attached = array();
 
   public static function initializeNewTask(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
