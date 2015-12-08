@@ -22,6 +22,7 @@ abstract class PhabricatorEditEngine
   private $controller;
   private $isCreate;
   private $editEngineConfiguration;
+  private $contextParameters = array();
 
   final public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -49,6 +50,11 @@ abstract class PhabricatorEditEngine
   final public function getApplication() {
     $app_class = $this->getEngineApplicationClass();
     return PhabricatorApplication::getByClass($app_class);
+  }
+
+  final public function addContextParameter($key) {
+    $this->contextParameters[] = $key;
+    return $this;
   }
 
 
@@ -879,12 +885,32 @@ abstract class PhabricatorEditEngine
       $header_text = $this->getObjectEditTitleText($object);
     }
 
+    $form = $this->buildEditForm($object, $fields);
+
+    if ($request->isAjax()) {
+      if ($this->getIsCreate()) {
+        $cancel_uri = $this->getObjectCreateCancelURI($object);
+        $submit_button = $this->getObjectCreateButtonText($object);
+      } else {
+        $cancel_uri = $this->getObjectEditCancelURI($object);
+        $submit_button = $this->getObjectEditButtonText($object);
+      }
+
+      return $this->getController()
+        ->newDialog()
+        ->setWidth(AphrontDialogView::WIDTH_FULL)
+        ->setTitle($header_text)
+        ->setValidationException($validation_exception)
+        ->appendForm($form)
+        ->addCancelButton($cancel_uri)
+        ->addSubmitButton($submit_button);
+    }
+
     $header = id(new PHUIHeaderView())
       ->setHeader($header_text)
       ->addActionLink($action_button);
 
     $crumbs = $this->buildCrumbs($object, $final = true);
-    $form = $this->buildEditForm($object, $fields);
 
     $box = id(new PHUIObjectBoxView())
       ->setUser($viewer)
@@ -908,9 +934,15 @@ abstract class PhabricatorEditEngine
 
   private function buildEditForm($object, array $fields) {
     $viewer = $this->getViewer();
+    $controller = $this->getController();
+    $request = $controller->getRequest();
 
     $form = id(new AphrontFormView())
       ->setUser($viewer);
+
+    foreach ($this->contextParameters as $param) {
+      $form->addHiddenInput($param, $request->getStr($param));
+    }
 
     foreach ($fields as $field) {
       $field->appendToForm($form);
@@ -924,10 +956,12 @@ abstract class PhabricatorEditEngine
       $submit_button = $this->getObjectEditButtonText($object);
     }
 
-    $form->appendControl(
-      id(new AphrontFormSubmitControl())
-        ->addCancelButton($cancel_uri)
-        ->setValue($submit_button));
+    if (!$request->isAjax()) {
+      $form->appendControl(
+        id(new AphrontFormSubmitControl())
+          ->addCancelButton($cancel_uri)
+          ->setValue($submit_button));
+    }
 
     return $form;
   }

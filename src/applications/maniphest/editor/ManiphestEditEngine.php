@@ -83,16 +83,6 @@ final class ManiphestEditEngine
         ->setTransactionType(ManiphestTransaction::TYPE_TITLE)
         ->setIsRequired(true)
         ->setValue($object->getTitle()),
-      id(new PhabricatorSelectEditField())
-        ->setKey('status')
-        ->setLabel(pht('Status'))
-        ->setDescription(pht('Status of the task.'))
-        ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
-        ->setIsCopyable(true)
-        ->setValue($object->getStatus())
-        ->setOptions($status_map)
-        ->setCommentActionLabel(pht('Change Status'))
-        ->setCommentActionDefaultValue($default_status),
       id(new PhabricatorUsersEditField())
         ->setKey('owner')
         ->setAliases(array('ownerPHID', 'assign', 'assigned'))
@@ -103,6 +93,16 @@ final class ManiphestEditEngine
         ->setSingleValue($object->getOwnerPHID())
         ->setCommentActionLabel(pht('Assign / Claim'))
         ->setCommentActionDefaultValue($owner_value),
+      id(new PhabricatorSelectEditField())
+        ->setKey('status')
+        ->setLabel(pht('Status'))
+        ->setDescription(pht('Status of the task.'))
+        ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
+        ->setIsCopyable(true)
+        ->setValue($object->getStatus())
+        ->setOptions($status_map)
+        ->setCommentActionLabel(pht('Change Status'))
+        ->setCommentActionDefaultValue($default_status),
       id(new PhabricatorSelectEditField())
         ->setKey('priority')
         ->setLabel(pht('Priority'))
@@ -187,6 +187,34 @@ final class ManiphestEditEngine
     }
 
     return $priority_map;
+  }
+
+  protected function newEditResponse(
+    AphrontRequest $request,
+    $object,
+    array $xactions) {
+    $viewer = $this->getViewer();
+    $controller = $this->getController();
+
+    if ($request->isAjax()) {
+
+      // Reload the task to make sure we pick up the final task state.
+      $task = id(new ManiphestTaskQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($object->getID()))
+        ->needSubscriberPHIDs(true)
+        ->needProjectPHIDs(true)
+        ->executeOne();
+
+      $payload = array(
+        'tasks' => $controller->renderSingleTask($task),
+        'data' => array(),
+      );
+
+      return id(new AphrontAjaxResponse())->setContent($payload);
+    }
+
+    return parent::newEditResponse();
   }
 
 }
