@@ -15,17 +15,10 @@ final class PhamePostNotLiveController extends PhamePostController {
     }
 
     $reasons = array();
-    if (!$post->getBlog()) {
-      $reasons[] = phutil_tag('p', array(), pht(
-        'You can not view the live version of this post because it '.
-        'is not associated with a blog. Move the post to a blog in order to '.
-        'view it live.'));
-    }
-
     if ($post->isDraft()) {
       $reasons[] = phutil_tag('p', array(), pht(
         'You can not view the live version of this post because it '.
-        'is still a draft. Use "Preview/Publish" to publish the post.'));
+        'is still a draft. Use "Preview" or "Publish" to publish the post.'));
     }
 
     if ($reasons) {
@@ -45,7 +38,7 @@ final class PhamePostNotLiveController extends PhamePostController {
 
     // No reason this can't go live, maybe an old link. Kick them live and see
     // what happens.
-    $live_uri = $post->getViewURI();
+    $live_uri = $post->getLiveURI();
     return id(new AphrontRedirectResponse())->setURI($live_uri);
   }
 

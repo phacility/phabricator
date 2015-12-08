@@ -89,7 +89,7 @@ final class PhamePostListView extends AphrontTagView {
 
       $item = id(new PHUIDocumentSummaryView())
         ->setTitle($post->getTitle())
-        ->setHref('/phame/post/view/'.$post->getID().'/')
+        ->setHref($post->getViewURI())
         ->setSubtitle($subtitle)
         ->setImage($blogger_image)
         ->setImageHref($blogger_uri)

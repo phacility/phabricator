@@ -48,7 +48,7 @@ final class PhamePost extends PhameDAO
     return $this->blog;
   }
 
-  public function getViewURI() {
+  public function getLiveURI() {
     // go for the pretty uri if we can
     $domain = ($this->blog ? $this->blog->getDomain() : '');
     if ($domain) {
@@ -57,6 +57,11 @@ final class PhamePost extends PhameDAO
     }
     $uri = '/phame/post/view/'.$this->getID().'/';
     return PhabricatorEnv::getProductionURI($uri);
+  }
+
+  public function getViewURI() {
+    $phame_title = PhabricatorSlug::normalize($this->getPhameTitle());
+    return '/phame/post/view/'.$this->getID().'/'.$phame_title;
   }
 
   public function getEditURI() {
