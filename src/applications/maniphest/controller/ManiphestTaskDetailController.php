@@ -145,7 +145,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       id(new PhabricatorActionView())
         ->setName(pht('Edit Task'))
         ->setIcon('fa-pencil')
-        ->setHref($this->getApplicationURI("/task/edit/{$id}/"))
+        ->setHref($this->getApplicationURI("/editpro/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
