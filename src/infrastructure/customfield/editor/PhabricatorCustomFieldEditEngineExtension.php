@@ -35,7 +35,7 @@ final class PhabricatorCustomFieldEditEngineExtension
 
     $field_list->setViewer($viewer);
 
-    if (!$engine->getIsCreate()) {
+    if ($object->getID()) {
       $field_list->readFieldsFromStorage($object);
     }
 

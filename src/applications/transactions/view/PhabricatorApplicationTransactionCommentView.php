@@ -12,7 +12,6 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $previewTimelineID;
   private $previewToggleID;
   private $formID;
-  private $statusID;
   private $commentID;
   private $draft;
   private $requestURI;
@@ -22,6 +21,8 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
 
   private $currentVersion;
   private $versionedDraft;
+  private $editTypes;
+  private $transactionTimeline;
 
   public function setObjectPHID($object_phid) {
     $this->objectPHID = $object_phid;
@@ -100,8 +101,25 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     return $this;
   }
 
-  public function render() {
+  public function setEditTypes($edit_types) {
+    $this->editTypes = $edit_types;
+    return $this;
+  }
 
+  public function getEditTypes() {
+    return $this->editTypes;
+  }
+
+  public function setTransactionTimeline(
+    PhabricatorApplicationTransactionView $timeline) {
+
+    $timeline->setQuoteTargetID($this->getCommentID());
+
+    $this->transactionTimeline = $timeline;
+    return $this;
+  }
+
+  public function render() {
     $user = $this->getUser();
     if (!$user->isLoggedIn()) {
       $uri = id(new PhutilURI('/login/'))
@@ -129,23 +147,17 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       $preview = null;
     }
 
-    Javelin::initBehavior(
-      'phabricator-transaction-comment-form',
-      array(
-        'formID'        => $this->getFormID(),
-        'timelineID'    => $this->getPreviewTimelineID(),
-        'panelID'       => $this->getPreviewPanelID(),
-        'statusID'      => $this->getStatusID(),
-        'commentID'     => $this->getCommentID(),
-
-        'loadingString' => pht('Loading Preview...'),
-        'savingString'  => pht('Saving Draft...'),
-        'draftString'   => pht('Saved Draft'),
-
-        'showPreview'   => $this->getShowPreview(),
-
-        'actionURI'     => $this->getAction(),
-      ));
+    if (!$this->getEditTypes()) {
+      Javelin::initBehavior(
+        'phabricator-transaction-comment-form',
+        array(
+          'formID'        => $this->getFormID(),
+          'timelineID'    => $this->getPreviewTimelineID(),
+          'panelID'       => $this->getPreviewPanelID(),
+          'showPreview'   => $this->getShowPreview(),
+          'actionURI'     => $this->getAction(),
+        ));
+    }
 
     $comment_box = id(new PHUIObjectBoxView())
       ->setFlush(true)
@@ -156,13 +168,6 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   }
 
   private function renderCommentPanel() {
-    $status = phutil_tag(
-      'div',
-      array(
-        'id' => $this->getStatusID(),
-      ),
-      '');
-
     $draft_comment = '';
     $draft_key = null;
     if ($this->getDraft()) {
@@ -182,7 +187,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     $version_key = PhabricatorVersionedDraft::KEY_VERSION;
     $version_value = $this->getCurrentVersion();
 
-    return id(new AphrontFormView())
+    $form = id(new AphrontFormView())
       ->setUser($this->getUser())
       ->addSigil('transaction-append')
       ->setWorkflow(true)
@@ -193,7 +198,98 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       ->setAction($this->getAction())
       ->setID($this->getFormID())
       ->addHiddenInput('__draft__', $draft_key)
-      ->addHiddenInput($version_key, $version_value)
+      ->addHiddenInput($version_key, $version_value);
+
+    $edit_types = $this->getEditTypes();
+    if ($edit_types) {
+
+      $action_map = array();
+      $type_map = array();
+      foreach ($edit_types as $edit_type) {
+        $key = $edit_type->getEditType();
+        $action_map[$key] = array(
+          'key' => $key,
+          'label' => $edit_type->getLabel(),
+          'type' => $edit_type->getPHUIXControlType(),
+          'spec' => $edit_type->getPHUIXControlSpecification(),
+        );
+
+        $type_map[$key] = $edit_type;
+      }
+
+      $options = array();
+      $options['+'] = pht('Add Action...');
+      foreach ($action_map as $key => $item) {
+        $options[$key] = $item['label'];
+      }
+
+      $action_id = celerity_generate_unique_node_id();
+      $input_id = celerity_generate_unique_node_id();
+      $place_id = celerity_generate_unique_node_id();
+
+      $form->appendChild(
+        phutil_tag(
+          'input',
+          array(
+            'type' => 'hidden',
+            'name' => 'editengine.actions',
+            'id' => $input_id,
+          )));
+
+      $form->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Actions'))
+          ->setID($action_id)
+          ->setOptions($options));
+
+      // This is an empty placeholder node so we know where to insert the
+      // new actions.
+      $form->appendChild(
+        phutil_tag(
+          'div',
+          array(
+            'id' => $place_id,
+          )));
+
+      $draft_actions = array();
+      if ($versioned_draft) {
+        $draft_actions = $versioned_draft->getProperty('actions', array());
+        foreach ($draft_actions as $key => $action) {
+          $type = idx($action, 'type');
+          if (!$type) {
+            unset($draft_actions[$key]);
+            continue;
+          }
+
+          $edit_type = idx($type_map, $type);
+          if (!$edit_type) {
+            unset($draft_actions[$key]);
+            continue;
+          }
+
+          $value = idx($action, 'value');
+          $value = $edit_type->getCommentActionValueFromDraftValue($value);
+          $draft_actions[$key]['value'] = $value;
+        }
+      }
+
+      Javelin::initBehavior(
+        'comment-actions',
+        array(
+          'actionID' => $action_id,
+          'inputID' => $input_id,
+          'formID' => $this->getFormID(),
+          'placeID' => $place_id,
+          'panelID' => $this->getPreviewPanelID(),
+          'timelineID' => $this->getPreviewTimelineID(),
+          'actions' => $action_map,
+          'showPreview' => $this->getShowPreview(),
+          'actionURI' => $this->getAction(),
+          'drafts' => $draft_actions,
+        ));
+    }
+
+    $form
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setID($this->getCommentID())
@@ -203,10 +299,9 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
           ->setValue($draft_comment))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue($this->getSubmitButtonName()))
-      ->appendChild(
-        id(new AphrontFormMarkupControl())
-          ->setValue($status));
+          ->setValue($this->getSubmitButtonName()));
+
+    return $form;
   }
 
   private function renderPreviewPanel() {

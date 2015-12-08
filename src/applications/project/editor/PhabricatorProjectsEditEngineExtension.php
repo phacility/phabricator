@@ -48,11 +48,13 @@ final class PhabricatorProjectsEditEngineExtension
       ->setEditTypeKey('projects')
       ->setDescription(pht('Add or remove associated projects.'))
       ->setAliases(array('project', 'projects'))
+      ->setIsCopyable(true)
       ->setUseEdgeTransactions(true)
       ->setEdgeTransactionDescriptions(
         pht('Add projects.'),
         pht('Remove projects.'),
         pht('Set associated projects, overwriting current value.'))
+      ->setCommentActionLabel(pht('Add Projects'))
       ->setTransactionType($edge_type)
       ->setMetadataValue('edge:type', $project_edge_type)
       ->setValue($project_phids);

@@ -118,228 +118,16 @@ final class ManiphestTaskDetailController extends ManiphestController {
       new ManiphestTransactionQuery(),
       $engine);
 
-    $resolution_types = ManiphestTaskStatus::getTaskStatusMap();
-
-    $transaction_types = array(
-      PhabricatorTransactions::TYPE_COMMENT     => pht('Comment'),
-      ManiphestTransaction::TYPE_STATUS         => pht('Change Status'),
-      ManiphestTransaction::TYPE_OWNER          => pht('Reassign / Claim'),
-      PhabricatorTransactions::TYPE_SUBSCRIBERS => pht('Add CCs'),
-      ManiphestTransaction::TYPE_PRIORITY       => pht('Change Priority'),
-      PhabricatorTransactions::TYPE_EDGE        => pht('Associate Projects'),
-    );
-
-    // Remove actions the user doesn't have permission to take.
-
-    $requires = array(
-      ManiphestTransaction::TYPE_OWNER =>
-        ManiphestEditAssignCapability::CAPABILITY,
-      ManiphestTransaction::TYPE_PRIORITY =>
-        ManiphestEditPriorityCapability::CAPABILITY,
-      PhabricatorTransactions::TYPE_EDGE =>
-        ManiphestEditProjectsCapability::CAPABILITY,
-      ManiphestTransaction::TYPE_STATUS =>
-        ManiphestEditStatusCapability::CAPABILITY,
-    );
-
-    foreach ($transaction_types as $type => $name) {
-      if (isset($requires[$type])) {
-        if (!$this->hasApplicationCapability($requires[$type])) {
-          unset($transaction_types[$type]);
-        }
-      }
-    }
-
-    // Don't show an option to change to the current status, or to change to
-    // the duplicate status explicitly.
-    unset($resolution_types[$task->getStatus()]);
-    unset($resolution_types[ManiphestTaskStatus::getDuplicateStatus()]);
-
-    // Don't show owner/priority changes for closed tasks, as they don't make
-    // much sense.
-    if ($task->isClosed()) {
-      unset($transaction_types[ManiphestTransaction::TYPE_PRIORITY]);
-      unset($transaction_types[ManiphestTransaction::TYPE_OWNER]);
-    }
-
-    $default_claim = array(
-      $viewer->getPHID() => $viewer->getUsername().
-        ' ('.$viewer->getRealName().')',
-    );
-
-    $draft = id(new PhabricatorDraft())->loadOneWhere(
-      'authorPHID = %s AND draftKey = %s',
-      $viewer->getPHID(),
-      $task->getPHID());
-    if ($draft) {
-      $draft_text = $draft->getDraft();
-    } else {
-      $draft_text = null;
-    }
-
-    $projects_source = new PhabricatorProjectDatasource();
-    $users_source = new PhabricatorPeopleDatasource();
-    $mailable_source = new PhabricatorMetaMTAMailableDatasource();
-
-    $comment_form = new AphrontFormView();
-    $comment_form
-      ->setUser($viewer)
-      ->setWorkflow(true)
-      ->setAction('/maniphest/transaction/save/')
-      ->setEncType('multipart/form-data')
-      ->addHiddenInput('taskID', $task->getID())
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Action'))
-          ->setName('action')
-          ->setOptions($transaction_types)
-          ->setID('transaction-action'))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Status'))
-          ->setName('resolution')
-          ->setControlID('resolution')
-          ->setControlStyle('display: none')
-          ->setOptions($resolution_types))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('Assign To'))
-          ->setName('assign_to')
-          ->setControlID('assign_to')
-          ->setControlStyle('display: none')
-          ->setID('assign-tokenizer')
-          ->setDisableBehavior(true)
-          ->setDatasource($users_source))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('CCs'))
-          ->setName('ccs')
-          ->setControlID('ccs')
-          ->setControlStyle('display: none')
-          ->setID('cc-tokenizer')
-          ->setDisableBehavior(true)
-          ->setDatasource($mailable_source))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Priority'))
-          ->setName('priority')
-          ->setOptions($priority_map)
-          ->setControlID('priority')
-          ->setControlStyle('display: none')
-          ->setValue($task->getPriority()))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('Projects'))
-          ->setName('projects')
-          ->setControlID('projects')
-          ->setControlStyle('display: none')
-          ->setID('projects-tokenizer')
-          ->setDisableBehavior(true)
-          ->setDatasource($projects_source))
-      ->appendChild(
-        id(new AphrontFormFileControl())
-          ->setLabel(pht('File'))
-          ->setName('file')
-          ->setControlID('file')
-          ->setControlStyle('display: none'))
-      ->appendChild(
-        id(new PhabricatorRemarkupControl())
-          ->setUser($viewer)
-          ->setLabel(pht('Comments'))
-          ->setName('comments')
-          ->setValue($draft_text)
-          ->setID('transaction-comments')
-          ->setUser($viewer))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue(pht('Submit')));
-
-    $control_map = array(
-      ManiphestTransaction::TYPE_STATUS         => 'resolution',
-      ManiphestTransaction::TYPE_OWNER          => 'assign_to',
-      PhabricatorTransactions::TYPE_SUBSCRIBERS => 'ccs',
-      ManiphestTransaction::TYPE_PRIORITY       => 'priority',
-      PhabricatorTransactions::TYPE_EDGE        => 'projects',
-    );
-
-    $tokenizer_map = array(
-      PhabricatorTransactions::TYPE_EDGE => array(
-        'id'          => 'projects-tokenizer',
-        'src'         => $projects_source->getDatasourceURI(),
-        'placeholder' => $projects_source->getPlaceholderText(),
-      ),
-      ManiphestTransaction::TYPE_OWNER => array(
-        'id'          => 'assign-tokenizer',
-        'src'         => $users_source->getDatasourceURI(),
-        'value'       => $default_claim,
-        'limit'       => 1,
-        'placeholder' => $users_source->getPlaceholderText(),
-      ),
-      PhabricatorTransactions::TYPE_SUBSCRIBERS => array(
-        'id'          => 'cc-tokenizer',
-        'src'         => $mailable_source->getDatasourceURI(),
-        'placeholder' => $mailable_source->getPlaceholderText(),
-      ),
-    );
-
-    // TODO: Initializing these behaviors for logged out users fatals things.
-    if ($viewer->isLoggedIn()) {
-      Javelin::initBehavior('maniphest-transaction-controls', array(
-        'select'     => 'transaction-action',
-        'controlMap' => $control_map,
-        'tokenizers' => $tokenizer_map,
-      ));
-
-      Javelin::initBehavior('maniphest-transaction-preview', array(
-        'uri'        => '/maniphest/transaction/preview/'.$task->getID().'/',
-        'preview'    => 'transaction-preview',
-        'comments'   => 'transaction-comments',
-        'action'     => 'transaction-action',
-        'map'        => $control_map,
-        'tokenizers' => $tokenizer_map,
-      ));
-    }
-
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-    $comment_header = $is_serious
-      ? pht('Add Comment')
-      : pht('Weigh In');
-
-    $preview_panel = phutil_tag_div(
-      'aphront-panel-preview',
-      phutil_tag(
-        'div',
-        array('id' => 'transaction-preview'),
-        phutil_tag_div(
-          'aphront-panel-preview-loading-text',
-          pht('Loading preview...'))));
-
-    $object_name = 'T'.$task->getID();
     $actions = $this->buildActionView($task);
 
+    $monogram = $task->getMonogram();
     $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb($object_name, '/'.$object_name);
+      ->addTextCrumb($monogram, '/'.$monogram);
 
     $header = $this->buildHeaderView($task);
     $properties = $this->buildPropertyView(
       $task, $field_list, $edges, $actions, $handles);
     $description = $this->buildDescriptionView($task, $engine);
-
-    if (!$viewer->isLoggedIn()) {
-      // TODO: Eventually, everything should run through this. For now, we're
-      // only using it to get a consistent "Login to Comment" button.
-      $comment_box = id(new PhabricatorApplicationTransactionCommentView())
-        ->setUser($viewer)
-        ->setRequestURI($request->getRequestURI());
-      $preview_panel = null;
-    } else {
-      $comment_box = id(new PHUIObjectBoxView())
-        ->setFlush(true)
-        ->setHeaderText($comment_header)
-        ->setForm($comment_form);
-      $timeline->setQuoteTargetID('transaction-comments');
-      $timeline->setQuoteRef($object_name);
-    }
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -349,7 +137,14 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $object_box->addPropertyList($description);
     }
 
-    $title = 'T'.$task->getID().' '.$task->getTitle();
+    $title = pht('%s %s', $monogram, $task->getTitle());
+
+    $comment_view = id(new ManiphestEditEngine())
+      ->setViewer($viewer)
+      ->buildEditEngineCommentView($task);
+
+    $timeline->setQuoteRef($monogram);
+    $comment_view->setTransactionTimeline($timeline);
 
     return $this->newPage()
       ->setTitle($title)
@@ -363,8 +158,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
           $info_view,
           $object_box,
           $timeline,
-          $comment_box,
-          $preview_panel,
+          $comment_view,
         ));
   }
 

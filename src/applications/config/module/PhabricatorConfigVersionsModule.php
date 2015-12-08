@@ -45,9 +45,9 @@ final class PhabricatorConfigVersionsModule
     );
 
     $all_libraries = PhutilBootloader::getInstance()->getAllLibraries();
-    $other_libraries = array_diff($all_libraries, ipull($specs, 'lib'));
-    $specs = $specs + $other_libraries;
-
+    // This puts the core libraries at the top:
+    $other_libraries = array_diff($all_libraries, $specs);
+    $specs = array_merge($specs, $other_libraries);
 
     $futures = array();
     foreach ($specs as $lib) {

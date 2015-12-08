@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorEdgeEditType extends PhabricatorEditType {
+final class PhabricatorEdgeEditType
+  extends PhabricatorPHIDListEditType {
 
   private $edgeOperation;
   private $valueDescription;
@@ -12,10 +13,6 @@ final class PhabricatorEdgeEditType extends PhabricatorEditType {
 
   public function getEdgeOperation() {
     return $this->edgeOperation;
-  }
-
-  public function getValueType() {
-    return 'list<phid>';
   }
 
   public function generateTransactions(

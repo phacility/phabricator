@@ -12,7 +12,8 @@ final class PhameBlogSearchEngine
   }
 
   public function newQuery() {
-    return new PhameBlogQuery();
+    return id(new PhameBlogQuery())
+      ->needProfileImage(true);
   }
 
   protected function buildQueryFromParameters(array $map) {
@@ -78,22 +79,28 @@ final class PhameBlogSearchEngine
     $list->setUser($viewer);
 
     foreach ($blogs as $blog) {
-      $archived = false;
-      $icon = 'fa-star';
-      if ($blog->isArchived()) {
-        $archived = true;
-        $icon = 'fa-ban';
-      }
       $id = $blog->getID();
+      if ($blog->getDomain()) {
+        $domain = $blog->getDomain();
+      } else {
+        $domain = pht('Local Blog');
+      }
       $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
         ->setObject($blog)
         ->setHeader($blog->getName())
-        ->setStatusIcon($icon)
-        ->setDisabled($archived)
+        ->setImageURI($blog->getProfileImageURI())
+        ->setDisabled($blog->isArchived())
         ->setHref($this->getApplicationURI("/blog/view/{$id}/"))
-        ->addAttribute($blog->getSkin())
-        ->addAttribute($blog->getDomain());
+        ->addAttribute($domain);
+      if (!$blog->isArchived()) {
+        $button = id(new PHUIButtonView())
+          ->setTag('a')
+          ->setText('New Post')
+          ->setHref($this->getApplicationURI('/post/edit/?blog='.$id));
+        $item->setLaunchButton($button);
+      }
+
       $list->addItem($item);
     }
 

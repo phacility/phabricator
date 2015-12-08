@@ -15,6 +15,7 @@ abstract class PhabricatorStandardCustomField
   private $fieldError;
   private $required;
   private $default;
+  private $isCopyable;
 
   abstract public function getFieldType();
 
@@ -115,6 +116,9 @@ abstract class PhabricatorStandardCustomField
         case 'default':
           $this->setFieldValue($value);
           break;
+        case 'copy':
+          $this->setIsCopyable($value);
+          break;
         case 'type':
           // We set this earlier on.
           break;
@@ -183,6 +187,15 @@ abstract class PhabricatorStandardCustomField
 
   public function getString($key, $default = null) {
     return idx($this->strings, $key, $default);
+  }
+
+  public function setIsCopyable($is_copyable) {
+    $this->isCopyable = $is_copyable;
+    return $this;
+  }
+
+  public function getIsCopyable() {
+    return $this->isCopyable;
   }
 
   public function shouldUseStorage() {
@@ -430,7 +443,8 @@ abstract class PhabricatorStandardCustomField
     $short = 'custom.'.$this->getRawStandardFieldKey();
 
     return parent::newStandardEditField()
-      ->setEditTypeKey($short);
+      ->setEditTypeKey($short)
+      ->setIsCopyable($this->getIsCopyable());
   }
 
   public function shouldAppearInConduitTransactions() {

@@ -15,6 +15,7 @@ abstract class PhabricatorEditField extends Phobject {
   private $description;
   private $editTypeKey;
   private $isRequired;
+  private $commentActionLabel;
 
   private $isLocked;
   private $isHidden;
@@ -27,6 +28,7 @@ abstract class PhabricatorEditField extends Phobject {
   private $isReorderable = true;
   private $isDefaultable = true;
   private $isLockable = true;
+  private $isCopyable = false;
 
   public function setKey($key) {
     $this->key = $key;
@@ -145,6 +147,15 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->isHidden;
   }
 
+  public function setIsCopyable($is_copyable) {
+    $this->isCopyable = $is_copyable;
+    return $this;
+  }
+
+  public function getIsCopyable() {
+    return $this->isCopyable;
+  }
+
   public function setIsSubmittedForm($is_submitted) {
     $this->isSubmittedForm = $is_submitted;
     return $this;
@@ -170,6 +181,15 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function getControlError() {
     return $this->controlError;
+  }
+
+  public function setCommentActionLabel($label) {
+    $this->commentActionLabel = $label;
+    return $this;
+  }
+
+  public function getCommentActionLabel() {
+    return $this->commentActionLabel;
   }
 
   protected function newControl() {
@@ -311,6 +331,15 @@ abstract class PhabricatorEditField extends Phobject {
     return $this;
   }
 
+  public function readValueFromComment($action) {
+    $this->value = $this->getValueFromComment(idx($action, 'value'));
+    return $this;
+  }
+
+  protected function getValueFromComment($value) {
+    return $value;
+  }
+
   public function getAllReadValueFromRequestKeys() {
     $keys = array();
 
@@ -345,6 +374,15 @@ abstract class PhabricatorEditField extends Phobject {
 
   protected function getValueFromRequest(AphrontRequest $request, $key) {
     return $this->getHTTPParameterValue($request, $key);
+  }
+
+  public function readValueFromField(PhabricatorEditField $other) {
+    $this->value = $this->getValueFromField($other);
+    return $this;
+  }
+
+  protected function getValueFromField(PhabricatorEditField $other) {
+    return $other->getValue();
   }
 
 
@@ -492,6 +530,10 @@ abstract class PhabricatorEditField extends Phobject {
     }
 
     return array($edit_type);
+  }
+
+  public function getCommentEditTypes() {
+    return array();
   }
 
 }

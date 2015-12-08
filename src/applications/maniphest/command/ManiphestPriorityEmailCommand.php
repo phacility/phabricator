@@ -23,6 +23,9 @@ final class ManiphestPriorityEmailCommand
     $table[] = '| '.pht('Priority').' | '.pht('Keywords');
     $table[] = '|---|---|';
     foreach ($keywords as $priority => $words) {
+      if (ManiphestTaskPriority::isDisabledPriority($priority)) {
+        continue;
+      }
       $words = implode(', ', $words);
       $table[] = '| '.$names[$priority].' | '.$words;
     }
@@ -60,6 +63,10 @@ final class ManiphestPriorityEmailCommand
     }
 
     if ($priority === null) {
+      return array();
+    }
+
+    if (ManiphestTaskPriority::isDisabledPriority($priority)) {
       return array();
     }
 

@@ -19,6 +19,12 @@ final class PhabricatorEditEngineConfigurationEditEngine
     return $this->targetEngine;
   }
 
+  protected function getCreateNewObjectPolicy() {
+    return $this->getTargetEngine()
+      ->getApplication()
+      ->getPolicy(PhabricatorPolicyCapability::CAN_EDIT);
+  }
+
   public function getEngineName() {
     return pht('Edit Configurations');
   }

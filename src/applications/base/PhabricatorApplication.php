@@ -624,7 +624,7 @@ abstract class PhabricatorApplication
       '(?P<id>[0-9]\d*)/)?'.
       '(?:'.
         '(?:'.
-          '(?P<editAction>parameters|nodefault|comment)'.
+          '(?P<editAction>parameters|nodefault|nocreate|nomanage|comment)'.
           '|'.
           '(?:form/(?P<formKey>[^/]+))'.
         ')'.

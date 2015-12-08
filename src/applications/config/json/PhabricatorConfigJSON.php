@@ -8,12 +8,34 @@ final class PhabricatorConfigJSON extends Phobject {
    * @return string
    */
   public static function prettyPrintJSON($value) {
-    // Check not only that it's an array, but that it's an "unnatural" array
-    // meaning that the keys aren't 0 -> size_of_array.
-    if (is_array($value) && array_keys($value) != range(0, count($value) - 1)) {
-      $result = id(new PhutilJSON())->encodeFormatted($value);
-    } else {
-      $result = json_encode($value);
+    // If the value is an array with keys "0, 1, 2, ..." then we want to
+    // show it as a list.
+    // If the value is an array with other keys, we want to show it as an
+    // object.
+    // Otherwise, just use the default encoder.
+
+    $type = null;
+    if (is_array($value)) {
+      $list_keys = range(0, count($value) - 1);
+      $actual_keys = array_keys($value);
+
+      if ($actual_keys === $list_keys) {
+        $type = 'list';
+      } else {
+        $type = 'object';
+      }
+    }
+
+    switch ($type) {
+      case 'list':
+        $result = id(new PhutilJSON())->encodeAsList($value);
+        break;
+      case 'object':
+        $result = id(new PhutilJSON())->encodeFormatted($value);
+        break;
+      default:
+        $result = json_encode($value);
+        break;
     }
 
     // For readability, unescape forward slashes. These are normally escaped

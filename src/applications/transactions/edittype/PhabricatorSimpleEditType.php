@@ -4,6 +4,8 @@ final class PhabricatorSimpleEditType extends PhabricatorEditType {
 
   private $valueType;
   private $valueDescription;
+  private $phuixControlType;
+  private $phuixControlSpecification = array();
 
   public function setValueType($value_type) {
     $this->valueType = $value_type;
@@ -31,6 +33,24 @@ final class PhabricatorSimpleEditType extends PhabricatorEditType {
 
   public function getValueDescription() {
     return $this->valueDescription;
+  }
+
+  public function setPHUIXControlType($type) {
+    $this->phuixControlType = $type;
+    return $this;
+  }
+
+  public function getPHUIXControlType() {
+    return $this->phuixControlType;
+  }
+
+  public function setPHUIXControlSpecification(array $spec) {
+    $this->phuixControlSpecification = $spec;
+    return $this;
+  }
+
+  public function getPHUIXControlSpecification() {
+    return $this->phuixControlSpecification;
   }
 
 }

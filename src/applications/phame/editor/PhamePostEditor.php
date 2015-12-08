@@ -67,7 +67,7 @@ final class PhamePostEditor
         if ($xaction->getNewValue() == PhameConstants::VISIBILITY_DRAFT) {
           $object->setDatePublished(0);
         } else {
-          $object->setDatePublished(time());
+          $object->setDatePublished(PhabricatorTime::getNow());
         }
         return $object->setVisibility($xaction->getNewValue());
     }
@@ -237,6 +237,8 @@ final class PhamePostEditor
     return array(
       PhamePostTransaction::MAILTAG_CONTENT =>
         pht("A post's content changes."),
+      PhamePostTransaction::MAILTAG_SUBSCRIBERS =>
+        pht("A post's subscribers change."),
       PhamePostTransaction::MAILTAG_COMMENT =>
         pht('Someone comments on a post.'),
       PhamePostTransaction::MAILTAG_OTHER =>

@@ -4,6 +4,7 @@ abstract class PhabricatorEditType extends Phobject {
 
   private $editType;
   private $transactionType;
+  private $label;
   private $field;
   private $description;
   private $summary;
@@ -28,6 +29,15 @@ abstract class PhabricatorEditType extends Phobject {
       return $this->getDescription();
     }
     return $this->summary;
+  }
+
+  public function setLabel($label) {
+    $this->label = $label;
+    return $this;
+  }
+
+  public function getLabel() {
+    return $this->label;
   }
 
   public function setField(PhabricatorEditField $field) {
@@ -84,6 +94,18 @@ abstract class PhabricatorEditType extends Phobject {
     }
 
     return $xaction;
+  }
+
+  public function getPHUIXControlType() {
+    return null;
+  }
+
+  public function getPHUIXControlSpecification() {
+    return null;
+  }
+
+  public function getCommentActionValueFromDraftValue($value) {
+    return $value;
   }
 
 }

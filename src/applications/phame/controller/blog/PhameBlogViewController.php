@@ -73,24 +73,7 @@ final class PhameBlogViewController extends PhameBlogController {
       ->setHeader($header)
       ->appendChild($post_list);
 
-    $description = $this->renderDescription($blog, $viewer);
-
-    return $this->newPage()
-      ->setTitle($blog->getName())
-      ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $page,
-          $description,
-      ));
-  }
-
-  private function renderDescription(
-    PhameBlog $blog,
-    PhabricatorUser $viewer) {
-
-    require_celerity_resource('phame-css');
-
+    $description = null;
     if (strlen($blog->getDescription())) {
       $description = PhabricatorMarkupEngine::renderOneObject(
         id(new PhabricatorMarkupOneOff())->setContent($blog->getDescription()),
@@ -100,36 +83,19 @@ final class PhameBlogViewController extends PhameBlogController {
       $description = phutil_tag('em', array(), pht('No description.'));
     }
 
-    $picture = $blog->getProfileImageURI();
-    $description = phutil_tag_div(
-      'phame-blog-description-content', $description);
+    $about = id(new PhameDescriptionView())
+      ->setTitle(pht('About %s', $blog->getName()))
+      ->setDescription($description)
+      ->setImage($blog->getProfileImageURI());
 
-    $image = phutil_tag(
-      'div',
-      array(
-        'class' => 'phame-blog-description-image',
-        'style' => 'background-image: url('.$picture.');',
+    return $this->newPage()
+      ->setTitle($blog->getName())
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $page,
+          $about,
       ));
-
-    $header = phutil_tag(
-      'div',
-      array(
-        'class' => 'phame-blog-description-name',
-      ),
-      pht('About %s', $blog->getName()));
-
-    $view = phutil_tag(
-      'div',
-      array(
-        'class' => 'phame-blog-description',
-      ),
-      array(
-        $image,
-        $header,
-        $description,
-      ));
-
-    return $view;
   }
 
   private function renderActions(PhameBlog $blog, PhabricatorUser $viewer) {

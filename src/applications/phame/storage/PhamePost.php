@@ -34,7 +34,7 @@ final class PhamePost extends PhameDAO
       ->setBloggerPHID($blogger->getPHID())
       ->setBlogPHID($blog->getPHID())
       ->setBlog($blog)
-      ->setDatePublished(0)
+      ->setDatePublished(PhabricatorTime::getNow())
       ->setVisibility(PhameConstants::VISIBILITY_PUBLISHED);
     return $post;
   }

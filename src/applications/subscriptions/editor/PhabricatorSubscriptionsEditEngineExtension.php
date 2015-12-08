@@ -45,11 +45,13 @@ final class PhabricatorSubscriptionsEditEngineExtension
       ->setEditTypeKey('subscribers')
       ->setDescription(pht('Manage subscribers.'))
       ->setAliases(array('subscriber', 'subscribers'))
+      ->setIsCopyable(true)
       ->setUseEdgeTransactions(true)
       ->setEdgeTransactionDescriptions(
         pht('Add subscribers.'),
         pht('Remove subscribers.'),
         pht('Set subscribers, overwriting current value.'))
+      ->setCommentActionLabel(pht('Add Subscribers'))
       ->setTransactionType($subscribers_type)
       ->setValue($sub_phids);
 
