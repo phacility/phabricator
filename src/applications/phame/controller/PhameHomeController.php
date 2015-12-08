@@ -9,20 +9,28 @@ final class PhameHomeController extends PhamePostController {
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
+    $blogs = id(new PhameBlogQuery())
+      ->setViewer($viewer)
+      ->withStatuses(array(PhameBlog::STATUS_ACTIVE))
+      ->execute();
+
+    $blog_phids = mpull($blogs, 'getPHID');
+
     $pager = id(new AphrontCursorPagerView())
       ->readFromRequest($request);
 
     $posts = id(new PhamePostQuery())
       ->setViewer($viewer)
+      ->withBlogPHIDs($blog_phids)
       ->withVisibility(PhameConstants::VISIBILITY_PUBLISHED)
       ->executeWithCursorPager($pager);
 
     $actions = $this->renderActions($viewer);
     $action_button = id(new PHUIButtonView())
       ->setTag('a')
-      ->setText(pht('Search'))
+      ->setText(pht('Actions'))
       ->setHref('#')
-      ->setIconFont('fa-search')
+      ->setIconFont('fa-bars')
       ->addClass('phui-mobile-menu')
       ->setDropdownMenu($actions);
 
@@ -65,15 +73,21 @@ final class PhameHomeController extends PhamePostController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
+        ->setIcon('fa-pencil')
+        ->setHref($this->getApplicationURI('post/query/draft/'))
+        ->setName(pht('My Drafts')));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
         ->setIcon('fa-pencil-square-o')
         ->setHref($this->getApplicationURI('post/'))
-        ->setName(pht('Find Posts')));
+        ->setName(pht('All Posts')));
 
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-star')
         ->setHref($this->getApplicationURI('blog/'))
-        ->setName(pht('Find Blogs')));
+        ->setName(pht('Active Blogs')));
 
     return $actions;
   }
