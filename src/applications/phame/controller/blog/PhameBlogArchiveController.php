@@ -20,7 +20,7 @@ final class PhameBlogArchiveController
       return new Aphront404Response();
     }
 
-    $view_uri = $this->getApplicationURI('blog/view/'.$blog->getID().'/');
+    $view_uri = $this->getApplicationURI('blog/manage/'.$blog->getID().'/');
 
     if ($request->isFormPost()) {
       if ($blog->isArchived()) {
