@@ -173,6 +173,10 @@ You must describe the problem you are facing when filing a feature request. We
 will not accept feature requests which do not contextualize the request by
 describing the root problem.
 
+If you aren't sure exactly what we're after when we ask you to describe a root
+problem, you can find examples and more discussion in
+@{article:Describing Root Problems}.
+
 
 Hypotheticals
 =============
