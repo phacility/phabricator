@@ -26,6 +26,7 @@ final class ManiphestTransactionEditor
     $types[] = ManiphestTransaction::TYPE_MERGED_INTO;
     $types[] = ManiphestTransaction::TYPE_MERGED_FROM;
     $types[] = ManiphestTransaction::TYPE_UNBLOCK;
+    $types[] = ManiphestTransaction::TYPE_PARENT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -67,6 +68,8 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_MERGED_INTO:
       case ManiphestTransaction::TYPE_MERGED_FROM:
         return null;
+      case ManiphestTransaction::TYPE_PARENT:
+        return null;
     }
   }
 
@@ -87,6 +90,8 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_MERGED_INTO:
       case ManiphestTransaction::TYPE_MERGED_FROM:
       case ManiphestTransaction::TYPE_UNBLOCK:
+        return $xaction->getNewValue();
+      case ManiphestTransaction::TYPE_PARENT:
         return $xaction->getNewValue();
     }
   }
@@ -155,6 +160,8 @@ final class ManiphestTransactionEditor
         return;
       case ManiphestTransaction::TYPE_MERGED_FROM:
         return;
+      case ManiphestTransaction::TYPE_PARENT:
+        return;
     }
   }
 
@@ -163,6 +170,15 @@ final class ManiphestTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case ManiphestTransaction::TYPE_PARENT:
+        $parent_phid = $xaction->getNewValue();
+        $parent_type = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
+        $task_phid = $object->getPHID();
+
+        id(new PhabricatorEdgeEditor())
+          ->addEdge($parent_phid, $parent_type, $task_phid)
+          ->save();
+        break;
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
         $board_phid = idx($xaction->getNewValue(), 'projectPHID');
         if (!$board_phid) {
@@ -738,6 +754,17 @@ final class ManiphestTransactionEditor
 
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
+        }
+        break;
+      case ManiphestTransaction::TYPE_PARENT:
+        if ($xactions && !$this->getIsNewObject()) {
+          $error = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'You can only select a parent task when creating a '.
+              'transaction for the first time.'),
+            last($xactions));
         }
         break;
     }

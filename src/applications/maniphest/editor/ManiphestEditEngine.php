@@ -69,6 +69,13 @@ final class ManiphestEditEngine
     }
 
     return array(
+      id(new PhabricatorHandlesEditField())
+        ->setKey('parent')
+        ->setLabel(pht('Parent Task'))
+        ->setDescription(pht('Task to make this a subtask of.'))
+        ->setAliases(array('parentPHID'))
+        ->setTransactionType(ManiphestTransaction::TYPE_PARENT)
+        ->setSingleValue(null),
       id(new PhabricatorTextEditField())
         ->setKey('title')
         ->setLabel(pht('Title'))

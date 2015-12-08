@@ -134,8 +134,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $task,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $can_create = $viewer->isLoggedIn();
-
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
       ->setObject($task)
@@ -158,10 +156,26 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
 
+    $edit_config = id(new ManiphestEditEngine())
+      ->setViewer($viewer)
+      ->loadDefaultEditConfiguration();
+
+    $can_create = (bool)$edit_config;
+    if ($can_create) {
+      $form_key = $edit_config->getIdentifier();
+      $edit_uri = "/editpro/form/{$form_key}/?parent={$id}&template={$id}";
+      $edit_uri = $this->getApplicationURI($edit_uri);
+    } else {
+      // TODO: This will usually give us a somewhat-reasonable error page, but
+      // could be a bit cleaner.
+      $edit_uri = "/editpro/{$id}/";
+      $edit_uri = $this->getApplicationURI($edit_uri);
+    }
+
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Create Subtask'))
-        ->setHref($this->getApplicationURI("/task/create/?parent={$id}"))
+        ->setHref($edit_uri)
         ->setIcon('fa-level-down')
         ->setDisabled(!$can_create)
         ->setWorkflow(!$can_create));

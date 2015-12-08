@@ -252,7 +252,7 @@ abstract class PhabricatorEditEngine
       'getCreateSortKey');
   }
 
-  private function loadDefaultEditConfiguration() {
+  public function loadDefaultEditConfiguration() {
     $query = $this->newConfigurationQuery()
       ->withIsEdit(true)
       ->withIsDisabled(false);
