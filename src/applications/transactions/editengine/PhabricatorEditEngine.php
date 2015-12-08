@@ -1031,8 +1031,6 @@ abstract class PhabricatorEditEngine
       $create_uri = $this->getEditURI(null, "form/{$form_key}/");
 
       if (count($configs) > 1) {
-        $configs = msort($configs, 'getDisplayName');
-
         $menu_icon = 'fa-caret-square-o-down';
 
         $dropdown = id(new PhabricatorActionListView())
@@ -1068,7 +1066,14 @@ abstract class PhabricatorEditEngine
   }
 
   final public function buildEditEngineCommentView($object) {
-    $config = $this->loadDefaultConfiguration();
+    $config = $this->loadDefaultEditConfiguration();
+
+    if (!$config) {
+      // TODO: This just nukes the entire comment form if you don't have access
+      // to any edit forms. We might want to tailor this UX a bit.
+      return id(new PhabricatorApplicationTransactionCommentView())
+        ->setNoPermission(true);
+    }
 
     $viewer = $this->getViewer();
     $object_phid = $object->getPHID();
@@ -1260,7 +1265,11 @@ abstract class PhabricatorEditEngine
       return new Aphront400Response();
     }
 
-    $config = $this->loadDefaultConfiguration();
+    $config = $this->loadDefaultEditConfiguration();
+    if (!$config) {
+      return new Aphront404Response();
+    }
+
     $fields = $this->buildEditFields($object);
 
     $is_preview = $request->isPreviewRequest();

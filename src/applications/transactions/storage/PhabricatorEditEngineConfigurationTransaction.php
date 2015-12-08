@@ -11,6 +11,8 @@ final class PhabricatorEditEngineConfigurationTransaction
   const TYPE_DEFAULTCREATE = 'editengine.config.default.create';
   const TYPE_ISEDIT = 'editengine.config.isedit';
   const TYPE_DISABLE = 'editengine.config.disable';
+  const TYPE_CREATEORDER = 'editengine.order.create';
+  const TYPE_EDITORDER = 'editengine.order.edit';
 
   public function getApplicationName() {
     return 'search';

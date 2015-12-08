@@ -41,6 +41,8 @@ final class PhabricatorTransactionsApplication extends PhabricatorApplication {
               'PhabricatorEditEngineConfigurationListController',
             $this->getEditRoutePattern('edit/') =>
               'PhabricatorEditEngineConfigurationEditController',
+            'sort/(?P<type>edit|create)/' =>
+              'PhabricatorEditEngineConfigurationSortController',
             'view/(?P<key>[^/]+)/' =>
               'PhabricatorEditEngineConfigurationViewController',
             'save/(?P<key>[^/]+)/' =>
