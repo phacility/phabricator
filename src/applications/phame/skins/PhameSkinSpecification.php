@@ -2,8 +2,9 @@
 
 final class PhameSkinSpecification extends Phobject {
 
-  const TYPE_ADVANCED   = 'advanced';
-  const TYPE_BASIC      = 'basic';
+  const TYPE_ADVANCED = 'advanced';
+  const TYPE_BASIC = 'basic';
+  const SKIN_PATH = 'externals/skins/';
 
   private $type;
   private $rootDirectory;
@@ -16,7 +17,7 @@ final class PhameSkinSpecification extends Phobject {
     static $specs;
 
     if ($specs === null) {
-      $paths = PhabricatorEnv::getEnvConfig('phame.skins');
+      $paths = array(self::SKIN_PATH);
       $base  = dirname(phutil_get_library_root('phabricator'));
 
       $specs = array();
@@ -48,7 +49,7 @@ final class PhameSkinSpecification extends Phobject {
                 $name,
                 $this_dir,
                 $that_dir,
-                'phame.skins'));
+                self::SKIN_PATH));
           }
 
           $specs[$name] = $spec;
@@ -70,7 +71,7 @@ final class PhameSkinSpecification extends Phobject {
           $name));
     }
 
-    $paths = PhabricatorEnv::getEnvConfig('phame.skins');
+    $paths = array(self::SKIN_PATH);
     $base = dirname(phutil_get_library_root('phabricator'));
     foreach ($paths as $path) {
       $path = Filesystem::resolvePath($path, $base);
