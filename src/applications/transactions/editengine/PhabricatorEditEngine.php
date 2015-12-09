@@ -989,11 +989,6 @@ abstract class PhabricatorEditEngine
   private function buildEditFormActions($object) {
     $actions = array();
 
-    $actions[] = id(new PhabricatorActionView())
-      ->setName(pht('Show HTTP Parameters'))
-      ->setIcon('fa-crosshairs')
-      ->setHref($this->getEditURI($object, 'parameters/'));
-
     if ($this->supportsEditEngineConfiguration()) {
       $engine_key = $this->getEngineKey();
       $config = $this->getEditEngineConfiguration();
@@ -1012,6 +1007,10 @@ abstract class PhabricatorEditEngine
       $view_uri = "/transactions/editengine/{$engine_key}/";
 
       $actions[] = id(new PhabricatorActionView())
+        ->setLabel(true)
+        ->setName(pht('Configuration'));
+
+      $actions[] = id(new PhabricatorActionView())
         ->setName(pht('View Form Configurations'))
         ->setIcon('fa-list-ul')
         ->setHref($view_uri);
@@ -1024,6 +1023,20 @@ abstract class PhabricatorEditEngine
         ->setWorkflow(!$can_manage);
     }
 
+    $actions[] = id(new PhabricatorActionView())
+      ->setLabel(true)
+      ->setName(pht('Documentation'));
+
+    $actions[] = id(new PhabricatorActionView())
+      ->setName(pht('Using HTTP Parameters'))
+      ->setIcon('fa-book')
+      ->setHref($this->getEditURI($object, 'parameters/'));
+
+    $doc_href = PhabricatorEnv::getDoclink('User Guide: Customizing Forms');
+    $actions[] = id(new PhabricatorActionView())
+      ->setName(pht('User Guide: Customizing Forms'))
+      ->setIcon('fa-book')
+      ->setHref($doc_href);
 
     return $actions;
   }

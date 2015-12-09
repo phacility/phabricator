@@ -162,10 +162,10 @@ final class PhabricatorEditEngineConfigurationViewController
     $defaultcreate_uri = "{$base_uri}/defaultcreate/{$form_key}/";
 
     if ($config->getIsDefault()) {
-      $defaultcreate_name = pht('Remove from "Create" Menu');
+      $defaultcreate_name = pht('Unmark as "Create" Form');
       $defaultcreate_icon = 'fa-minus';
     } else {
-      $defaultcreate_name = pht('Add to "Create" Menu');
+      $defaultcreate_name = pht('Mark as "Create" Form');
       $defaultcreate_icon = 'fa-plus';
     }
 

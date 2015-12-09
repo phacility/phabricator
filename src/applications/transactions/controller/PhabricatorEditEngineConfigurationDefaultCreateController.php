@@ -37,18 +37,18 @@ final class PhabricatorEditEngineConfigurationDefaultCreateController
     }
 
     if ($config->getIsDefault()) {
-      $title = pht('Remove From "Create" Menu');
+      $title = pht('Unmark as Create Form');
       $body = pht(
-        'Remove this form from the application "Create" menu? It will still '.
-        'function properly, but no longer be reachable directly from the '.
-        'application.');
-      $button = pht('Remove From Menu');
+        'Unmark this form as a create form? It will still function properly, '.
+        'but no longer be reachable directly from the application "Create" '.
+        'menu.');
+      $button = pht('Unmark Form');
     } else {
-      $title = pht('Add To "Create" Menu');
+      $title = pht('Mark as Create Form');
       $body = pht(
-        'Add this form to the application "Create" menu? Users will '.
-        'be able to choose it when creating new objects.');
-      $button = pht('Add To Menu');
+        'Mark this form as a create form? It will appear in the application '.
+        '"Create" menus by default.');
+      $button = pht('Mark Form');
     }
 
     return $this->newDialog()
