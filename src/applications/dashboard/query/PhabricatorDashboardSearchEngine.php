@@ -140,7 +140,7 @@ final class PhabricatorDashboardSearchEngine
           ->setSlim(true)
           ->setHandles($project_handles));
 
-      if ($dashboard->isClosed()) {
+      if ($dashboard->isArchived()) {
         $item->setDisabled(true);
       }
 
