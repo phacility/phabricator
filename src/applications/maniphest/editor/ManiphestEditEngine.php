@@ -37,6 +37,10 @@ final class ManiphestEditEngine
     return pht('Create Task');
   }
 
+  protected function getEditorURI() {
+    return $this->getApplication()->getApplicationURI('task/edit/');
+  }
+
   protected function getCommentViewHeaderText($object) {
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
     if (!$is_serious) {
