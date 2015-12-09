@@ -43,14 +43,10 @@ final class PhabricatorBadgesEditController
 
     $e_name = true;
     $v_name = $badge->getName();
-
     $v_icon = $badge->getIcon();
-
     $v_flav = $badge->getFlavor();
     $v_desc = $badge->getDescription();
     $v_qual = $badge->getQuality();
-    $v_stat = $badge->getStatus();
-
     $v_edit = $badge->getEditPolicy();
 
     $validation_exception = null;
@@ -59,7 +55,6 @@ final class PhabricatorBadgesEditController
       $v_flav = $request->getStr('flavor');
       $v_desc = $request->getStr('description');
       $v_icon = $request->getStr('icon');
-      $v_stat = $request->getStr('status');
       $v_qual = $request->getStr('quality');
 
       $v_view = $request->getStr('viewPolicy');
@@ -70,7 +65,6 @@ final class PhabricatorBadgesEditController
       $type_desc = PhabricatorBadgesTransaction::TYPE_DESCRIPTION;
       $type_icon = PhabricatorBadgesTransaction::TYPE_ICON;
       $type_qual = PhabricatorBadgesTransaction::TYPE_QUALITY;
-      $type_stat = PhabricatorBadgesTransaction::TYPE_STATUS;
 
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -95,10 +89,6 @@ final class PhabricatorBadgesEditController
       $xactions[] = id(new PhabricatorBadgesTransaction())
         ->setTransactionType($type_qual)
         ->setNewValue($v_qual);
-
-      $xactions[] = id(new PhabricatorBadgesTransaction())
-        ->setTransactionType($type_stat)
-        ->setNewValue($v_stat);
 
       $xactions[] = id(new PhabricatorBadgesTransaction())
         ->setTransactionType($type_edit)
@@ -160,12 +150,6 @@ final class PhabricatorBadgesEditController
           ->setLabel(pht('Quality'))
           ->setValue($v_qual)
           ->setOptions($badge->getQualityNameMap()))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Status'))
-          ->setName('status')
-          ->setValue($v_stat)
-          ->setOptions($badge->getStatusNameMap()))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setUser($viewer)

@@ -1750,6 +1750,7 @@ phutil_register_library_map(array(
     'PhabricatorAutoEventListener' => 'infrastructure/events/PhabricatorAutoEventListener.php',
     'PhabricatorBadgeHasRecipientEdgeType' => 'applications/badges/edge/PhabricatorBadgeHasRecipientEdgeType.php',
     'PhabricatorBadgesApplication' => 'applications/badges/application/PhabricatorBadgesApplication.php',
+    'PhabricatorBadgesArchiveController' => 'applications/badges/controller/PhabricatorBadgesArchiveController.php',
     'PhabricatorBadgesBadge' => 'applications/badges/storage/PhabricatorBadgesBadge.php',
     'PhabricatorBadgesCommentController' => 'applications/badges/controller/PhabricatorBadgesCommentController.php',
     'PhabricatorBadgesController' => 'applications/badges/controller/PhabricatorBadgesController.php',
@@ -5807,6 +5808,7 @@ phutil_register_library_map(array(
     'PhabricatorAutoEventListener' => 'PhabricatorEventListener',
     'PhabricatorBadgeHasRecipientEdgeType' => 'PhabricatorEdgeType',
     'PhabricatorBadgesApplication' => 'PhabricatorApplication',
+    'PhabricatorBadgesArchiveController' => 'PhabricatorBadgesController',
     'PhabricatorBadgesBadge' => array(
       'PhabricatorBadgesDAO',
       'PhabricatorPolicyInterface',
