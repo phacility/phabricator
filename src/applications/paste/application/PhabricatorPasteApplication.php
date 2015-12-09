@@ -41,6 +41,7 @@ final class PhabricatorPasteApplication extends PhabricatorApplication {
         'create/' => 'PhabricatorPasteEditController',
         $this->getEditRoutePattern('edit/') => 'PhabricatorPasteEditController',
         'raw/(?P<id>[1-9]\d*)/' => 'PhabricatorPasteRawController',
+        'archive/(?P<id>[1-9]\d*)/' => 'PhabricatorPasteArchiveController',
       ),
     );
   }
