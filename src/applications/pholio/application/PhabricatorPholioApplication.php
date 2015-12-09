@@ -45,6 +45,7 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
         '(?:query/(?P<queryKey>[^/]+)/)?' => 'PholioMockListController',
         'new/'                  => 'PholioMockEditController',
         'edit/(?P<id>\d+)/'     => 'PholioMockEditController',
+        'archive/(?P<id>\d+)/'  => 'PholioMockArchiveController',
         'comment/(?P<id>\d+)/'  => 'PholioMockCommentController',
         'inline/' => array(
           '(?:(?P<id>\d+)/)?' => 'PholioInlineController',
