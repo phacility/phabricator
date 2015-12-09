@@ -1483,6 +1483,24 @@ final class PhabricatorUSEnglishTranslation
         'repositories for updates yet.',
       ),
 
+
+      '%s updated %s, added %d: %s.' =>
+        '%s updated %s, added: %4$s.',
+
+      '%s updated %s, removed %s: %s.' =>
+        '%s updated %s, removed: %4$s.',
+
+      '%s updated %s, added %s: %s; removed %s: %s.' =>
+        '%s updated %s, added: %4$s; removed: %6$s.',
+
+      '%s updated %s for %s, added %d: %s.' =>
+        '%s updated %s for %s, added: %5$s.',
+
+      '%s updated %s for %s, removed %s: %s.' =>
+        '%s updated %s for %s, removed: %5$s.',
+
+      '%s updated %s for %s, added %s: %s; removed %s: %s.' =>
+        '%s updated %s for %s, added: %5$s; removed; %7$s.',
     );
   }
 
