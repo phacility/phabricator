@@ -810,11 +810,6 @@ final class PhabricatorUSEnglishTranslation
         '%d Users Need Approval',
       ),
 
-      '%s older changes(s) are hidden.' => array(
-        '%d older change is hidden.',
-        '%d older changes are hidden.',
-      ),
-
       '%s, %s line(s)' => array(
         array(
           '%s, %s line',
