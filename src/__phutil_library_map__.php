@@ -2568,6 +2568,7 @@ phutil_register_library_map(array(
     'PhabricatorOpcodeCacheSpec' => 'applications/cache/spec/PhabricatorOpcodeCacheSpec.php',
     'PhabricatorOwnerPathQuery' => 'applications/owners/query/PhabricatorOwnerPathQuery.php',
     'PhabricatorOwnersApplication' => 'applications/owners/application/PhabricatorOwnersApplication.php',
+    'PhabricatorOwnersArchiveController' => 'applications/owners/controller/PhabricatorOwnersArchiveController.php',
     'PhabricatorOwnersConfigOptions' => 'applications/owners/config/PhabricatorOwnersConfigOptions.php',
     'PhabricatorOwnersConfiguredCustomField' => 'applications/owners/customfield/PhabricatorOwnersConfiguredCustomField.php',
     'PhabricatorOwnersController' => 'applications/owners/controller/PhabricatorOwnersController.php',
@@ -6762,6 +6763,7 @@ phutil_register_library_map(array(
     'PhabricatorOpcodeCacheSpec' => 'PhabricatorCacheSpec',
     'PhabricatorOwnerPathQuery' => 'Phobject',
     'PhabricatorOwnersApplication' => 'PhabricatorApplication',
+    'PhabricatorOwnersArchiveController' => 'PhabricatorOwnersController',
     'PhabricatorOwnersConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorOwnersConfiguredCustomField' => array(
       'PhabricatorOwnersCustomField',
