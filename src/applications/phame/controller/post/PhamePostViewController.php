@@ -65,9 +65,8 @@ final class PhamePostViewController extends PhamePostController {
           ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
           ->setTitle(pht('Draft Post'))
           ->appendChild(
-            pht(
-              'Only you can see this draft until you publish it. '.
-              'Use "Preview or Publish" to publish this post.')));
+            pht('Only you can see this draft until you publish it. '.
+                'Use "Preview" or "Publish" to publish this post.')));
     }
 
     if (!$post->getBlog()) {
@@ -76,9 +75,8 @@ final class PhamePostViewController extends PhamePostController {
           ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
           ->setTitle(pht('Not On A Blog'))
           ->appendChild(
-            pht(
-              'This post is not associated with a blog (the blog may have '.
-              'been deleted). Use "Move Post" to move it to a new blog.')));
+            pht('This post is not associated with a blog (the blog may have '.
+                'been deleted). Use "Move Post" to move it to a new blog.')));
     }
 
     $engine = id(new PhabricatorMarkupEngine())
@@ -197,7 +195,7 @@ final class PhamePostViewController extends PhamePostController {
           ->setWorkflow(true));
       $actions->addAction(
         id(new PhabricatorActionView())
-          ->setIcon('fa-eye')
+          ->setIcon('fa-desktop')
           ->setHref($this->getApplicationURI('post/preview/'.$id.'/'))
           ->setDisabled(!$can_edit)
           ->setName(pht('Preview in Skin')));
