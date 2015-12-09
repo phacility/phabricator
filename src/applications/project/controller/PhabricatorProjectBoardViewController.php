@@ -778,9 +778,9 @@ final class PhabricatorProjectBoardViewController
       ->loadDefaultEditConfiguration();
     if ($edit_config) {
       $form_key = $edit_config->getIdentifier();
-      $create_uri = "/maniphest/editpro/form/{$form_key}/";
+      $create_uri = "/maniphest/task/edit/form/{$form_key}/";
     } else {
-      $create_uri = '/maniphest/editpro/';
+      $create_uri = '/maniphest/task/edit/';
     }
 
     return $create_uri;

@@ -111,7 +111,7 @@ final class ManiphestTaskListView extends ManiphestView {
         ));
 
       if ($this->showBatchControls) {
-        $href = new PhutilURI('/maniphest/editpro/'.$task->getID().'/');
+        $href = new PhutilURI('/maniphest/task/edit/'.$task->getID().'/');
         if (!$this->showSubpriorityControls) {
           $href->setQueryParam('ungrippable', 'true');
         }

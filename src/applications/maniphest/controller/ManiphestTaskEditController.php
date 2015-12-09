@@ -1,6 +1,6 @@
 <?php
 
-final class ManiphestTaskEditProController extends ManiphestController {
+final class ManiphestTaskEditController extends ManiphestController {
 
   public function handleRequest(AphrontRequest $request) {
     return id(new ManiphestEditEngine())

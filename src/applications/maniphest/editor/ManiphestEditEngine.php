@@ -136,11 +136,6 @@ final class ManiphestEditEngine
     );
   }
 
-  protected function getEditorURI() {
-    // TODO: Remove when cutting over.
-    return $this->getApplication()->getApplicationURI('editpro/');
-  }
-
   private function getTaskStatusMap(ManiphestTask $task) {
     $status_map = ManiphestTaskStatus::getTaskStatusMap();
 

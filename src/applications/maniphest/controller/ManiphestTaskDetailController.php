@@ -143,7 +143,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       id(new PhabricatorActionView())
         ->setName(pht('Edit Task'))
         ->setIcon('fa-pencil')
-        ->setHref($this->getApplicationURI("/editpro/{$id}/"))
+        ->setHref($this->getApplicationURI("/task/edit/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
@@ -163,12 +163,12 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $can_create = (bool)$edit_config;
     if ($can_create) {
       $form_key = $edit_config->getIdentifier();
-      $edit_uri = "/editpro/form/{$form_key}/?parent={$id}&template={$id}";
+      $edit_uri = "/task/edit/form/{$form_key}/?parent={$id}&template={$id}";
       $edit_uri = $this->getApplicationURI($edit_uri);
     } else {
       // TODO: This will usually give us a somewhat-reasonable error page, but
       // could be a bit cleaner.
-      $edit_uri = "/editpro/{$id}/";
+      $edit_uri = "/task/edit/{$id}/";
       $edit_uri = $this->getApplicationURI($edit_uri);
     }
 
