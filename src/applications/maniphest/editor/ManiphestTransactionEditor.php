@@ -27,6 +27,7 @@ final class ManiphestTransactionEditor
     $types[] = ManiphestTransaction::TYPE_MERGED_FROM;
     $types[] = ManiphestTransaction::TYPE_UNBLOCK;
     $types[] = ManiphestTransaction::TYPE_PARENT;
+    $types[] = ManiphestTransaction::TYPE_COLUMN;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -69,6 +70,7 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_MERGED_FROM:
         return null;
       case ManiphestTransaction::TYPE_PARENT:
+      case ManiphestTransaction::TYPE_COLUMN:
         return null;
     }
   }
@@ -92,6 +94,7 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_UNBLOCK:
         return $xaction->getNewValue();
       case ManiphestTransaction::TYPE_PARENT:
+      case ManiphestTransaction::TYPE_COLUMN:
         return $xaction->getNewValue();
     }
   }
@@ -159,8 +162,8 @@ final class ManiphestTransactionEditor
         $object->setStatus(ManiphestTaskStatus::getDuplicateStatus());
         return;
       case ManiphestTransaction::TYPE_MERGED_FROM:
-        return;
       case ManiphestTransaction::TYPE_PARENT:
+      case ManiphestTransaction::TYPE_COLUMN:
         return;
     }
   }
@@ -757,14 +760,71 @@ final class ManiphestTransactionEditor
         }
         break;
       case ManiphestTransaction::TYPE_PARENT:
-        if ($xactions && !$this->getIsNewObject()) {
-          $error = new PhabricatorApplicationTransactionValidationError(
+        $with_effect = array();
+        foreach ($xactions as $xaction) {
+          $task_phid = $xaction->getNewValue();
+          if (!$task_phid) {
+            continue;
+          }
+
+          $with_effect[] = $xaction;
+
+          $task = id(new ManiphestTaskQuery())
+            ->setViewer($this->getActor())
+            ->withPHIDs(array($task_phid))
+            ->executeOne();
+          if (!$task) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'Parent task identifier "%s" does not identify a visible '.
+                'task.',
+                $task_phid),
+              $xaction);
+          }
+        }
+
+        if ($with_effect && !$this->getIsNewObject()) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
             $type,
             pht('Invalid'),
             pht(
               'You can only select a parent task when creating a '.
               'transaction for the first time.'),
-            last($xactions));
+            last($with_effect));
+        }
+        break;
+      case ManiphestTransaction::TYPE_COLUMN:
+        $with_effect = array();
+        foreach ($xactions as $xaction) {
+          $column_phid = $xaction->getNewValue();
+          if (!$column_phid) {
+            continue;
+          }
+
+          $with_effect[] = $xaction;
+
+          $column = $this->loadProjectColumn($column_phid);
+          if (!$column) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'Column PHID "%s" does not identify a visible column.',
+                $column_phid),
+              $xaction);
+          }
+        }
+
+        if ($with_effect && !$this->getIsNewObject()) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'You can only put a task into an initial column during task '.
+              'creation.'),
+            last($with_effect));
         }
         break;
     }
@@ -841,6 +901,28 @@ final class ManiphestTransactionEditor
     $results = parent::expandTransaction($object, $xaction);
 
     switch ($xaction->getTransactionType()) {
+      case ManiphestTransaction::TYPE_COLUMN:
+        $column_phid = $xaction->getNewValue();
+        if (!$column_phid) {
+          break;
+        }
+
+        // When a task is created into a column, we also generate a transaction
+        // to actually put it in that column.
+        $column = $this->loadProjectColumn($column_phid);
+        $results[] = id(new ManiphestTransaction())
+          ->setTransactionType(ManiphestTransaction::TYPE_PROJECT_COLUMN)
+          ->setOldValue(
+            array(
+              'projectPHID' => $column->getProjectPHID(),
+              'columnPHIDs' => array(),
+            ))
+          ->setNewValue(
+            array(
+              'projectPHID' => $column->getProjectPHID(),
+              'columnPHIDs' => array($column->getPHID()),
+            ));
+        break;
       case ManiphestTransaction::TYPE_OWNER:
         // When a task is reassigned, move the old owner to the subscriber
         // list so they're still in the loop.
@@ -858,6 +940,13 @@ final class ManiphestTransactionEditor
     }
 
     return $results;
+  }
+
+  private function loadProjectColumn($column_phid) {
+    return id(new PhabricatorProjectColumnQuery())
+      ->setViewer($this->getActor())
+      ->withPHIDs(array($column_phid))
+      ->executeOne();
   }
 
 

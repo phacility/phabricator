@@ -1137,7 +1137,10 @@ abstract class PhabricatorEditEngine
 
     $all_types = array();
     foreach ($fields as $field) {
-      // TODO: Load draft stuff.
+      if (!$this->isCommentField($field)) {
+        continue;
+      }
+
       $types = $field->getCommentEditTypes();
       foreach ($types as $type) {
         $all_types[] = $type;
@@ -1329,9 +1332,8 @@ abstract class PhabricatorEditEngine
           $viewer->getPHID(),
           $current_version);
 
-        // TODO: This is just a proof of concept.
         $draft
-          ->setProperty('temporary.comment', $comment_text)
+          ->setProperty('comment', $comment_text)
           ->setProperty('actions', $actions)
           ->save();
       }
@@ -1342,6 +1344,10 @@ abstract class PhabricatorEditEngine
     if ($actions) {
       $type_map = array();
       foreach ($fields as $field) {
+        if (!$this->isCommentField($field)) {
+          continue;
+        }
+
         $types = $field->getCommentEditTypes();
         foreach ($types as $type) {
           $type_map[$type->getEditType()] = array(
@@ -1684,6 +1690,23 @@ abstract class PhabricatorEditEngine
       $this->getViewer(),
       $this,
       PhabricatorPolicyCapability::CAN_EDIT);
+  }
+
+  private function isCommentField(PhabricatorEditField $field) {
+    // TODO: This is a little bit hacky.
+    if ($field->getKey() == 'comment') {
+      return true;
+    }
+
+    if ($field->getIsLocked()) {
+      return false;
+    }
+
+    if ($field->getIsHidden()) {
+      return false;
+    }
+
+    return true;
   }
 
 

@@ -44,6 +44,9 @@ final class PhabricatorCommentEditEngineExtension
       ->setDescription(pht('Add comments.'))
       ->setAliases(array('comments'))
       ->setIsHidden(true)
+      ->setIsReorderable(false)
+      ->setIsDefaultable(false)
+      ->setIsLockable(false)
       ->setTransactionType($comment_type)
       ->setValue(null);
 

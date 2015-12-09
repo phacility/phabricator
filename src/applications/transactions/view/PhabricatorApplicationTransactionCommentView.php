@@ -196,7 +196,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
 
     $versioned_draft = $this->getVersionedDraft();
     if ($versioned_draft) {
-      $draft_comment = $versioned_draft->getProperty('temporary.comment', '');
+      $draft_comment = $versioned_draft->getProperty('comment', '');
     }
 
     if (!$this->getObjectPHID()) {

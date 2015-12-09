@@ -66,7 +66,7 @@ final class PhabricatorJumpNavHandler extends Phobject {
               return id(new AphrontRedirectResponse())->setURI($uri);
             case 'create-task':
               return id(new AphrontRedirectResponse())
-                ->setURI('/maniphest/task/create/?title='
+                ->setURI('/maniphest/editpro/?title='
                   .phutil_escape_uri($matches[1]));
             default:
               throw new Exception(pht("Unknown jump effect '%s'!", $effect));

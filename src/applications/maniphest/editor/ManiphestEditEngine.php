@@ -75,7 +75,22 @@ final class ManiphestEditEngine
         ->setDescription(pht('Task to make this a subtask of.'))
         ->setAliases(array('parentPHID'))
         ->setTransactionType(ManiphestTransaction::TYPE_PARENT)
-        ->setSingleValue(null),
+        ->setHandleParameterType(new ManiphestTaskListHTTPParameterType())
+        ->setSingleValue(null)
+        ->setIsReorderable(false)
+        ->setIsDefaultable(false)
+        ->setIsLockable(false),
+      id(new PhabricatorHandlesEditField())
+        ->setKey('column')
+        ->setLabel(pht('Column'))
+        ->setDescription(pht('Workboard column to create this task into.'))
+        ->setAliases(array('columnPHID'))
+        ->setTransactionType(ManiphestTransaction::TYPE_COLUMN)
+        ->setSingleValue(null)
+        ->setIsInvisible(true)
+        ->setIsReorderable(false)
+        ->setIsDefaultable(false)
+        ->setIsLockable(false),
       id(new PhabricatorTextEditField())
         ->setKey('title')
         ->setLabel(pht('Title'))
@@ -213,7 +228,7 @@ final class ManiphestEditEngine
 
     }
 
-    return parent::newEditResponse();
+    return parent::newEditResponse($request, $object, $xactions);
   }
 
   private function buildListResponse(ManiphestTask $task) {
