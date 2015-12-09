@@ -23,7 +23,7 @@ The most important things to do are:
   - align your expectations around timelines and priorities;
   - describe your problem, not your solution; and
   - file a task in
-    [[ http://secure.phabricator.com/maniphest/task/create/ | Maniphest ]].
+    [[ http://secure.phabricator.com/u/newfeature/ | Maniphest ]].
 
 The rest of this article walks through these points in detail.
 
@@ -230,7 +230,7 @@ It is **particularly critical** that you describe the problem you are facing,
 not just the feature you want. We will not accept feature requests which do
 not describe the root problem the feature is intended to resolve.
 
-(NOTE) https://secure.phabricator.com/maniphest/task/create/
+(NOTE) https://secure.phabricator.com/u/newfeature/
 
 
 Next Steps

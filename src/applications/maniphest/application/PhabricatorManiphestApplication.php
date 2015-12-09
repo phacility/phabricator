@@ -57,8 +57,6 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
         'report/(?:(?P<view>\w+)/)?' => 'ManiphestReportController',
         'batch/' => 'ManiphestBatchEditController',
         'task/' => array(
-          'create/' => 'ManiphestTaskEditController',
-          'edit/(?P<id>[1-9]\d*)/' => 'ManiphestTaskEditController',
           'descriptionpreview/'
             => 'PhabricatorMarkupPreviewController',
         ),

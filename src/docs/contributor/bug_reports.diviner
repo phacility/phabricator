@@ -26,7 +26,7 @@ The most important things to do are:
   - gather debugging information;
   - explain how to reproduce the issue; and
   - create a task in
-    [[ http://secure.phabricator.com/maniphest/task/create/ | Maniphest ]].
+    [[ http://secure.phabricator.com/u/newbug/ | Maniphest ]].
 
 The rest of this article walks through these points in detail.
 
@@ -189,7 +189,7 @@ to file an issue.
 It is **particularly critical** that you include reproduction steps. We will
 not accept reports which describe issues we can not reproduce.
 
-(NOTE) https://secure.phabricator.com/maniphest/task/create/
+(NOTE) https://secure.phabricator.com/u/newbug/
 
 If you don't want to file there (or, for example, your bug relates to being
 unable to log in or unable to file an issue in Maniphest) you can file on any
