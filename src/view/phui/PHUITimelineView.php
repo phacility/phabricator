@@ -263,6 +263,7 @@ final class PHUITimelineView extends AphrontView {
     $all_badges = id(new PhabricatorBadgesQuery())
       ->setViewer($viewer)
       ->withPHIDs($badge_phids)
+      ->withStatuses(array(PhabricatorBadgesBadge::STATUS_ACTIVE))
       ->execute();
     $all_badges = mpull($all_badges, null, 'getPHID');
 
