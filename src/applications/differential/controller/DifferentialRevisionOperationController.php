@@ -27,39 +27,90 @@ final class DifferentialRevisionOperationController
         ->addCancelButton($detail_uri);
     }
 
+    $diff = $revision->getActiveDiff();
+    $repository = $revision->getRepository();
+
+    $ref_types = array(
+      PhabricatorRepositoryRefCursor::TYPE_BRANCH,
+    );
+
+    $e_ref = true;
+
+    $errors = array();
     if ($request->isFormPost()) {
-      // NOTE: The operation is locked to the current active diff, so if the
-      // revision is updated before the operation applies nothing sneaky
-      // occurs.
 
-      $diff = $revision->getActiveDiff();
-      $repository = $revision->getRepository();
+      $ref_phid = head($request->getArr('refPHIDs'));
+      if (!strlen($ref_phid)) {
+        $e_ref = pht('Required');
+        $errors[] = pht(
+          'You must select a branch to land this revision onto.');
+      } else {
+        $ref = id(new PhabricatorRepositoryRefCursorQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($ref_phid))
+          ->withRepositoryPHIDs(array($repository->getPHID()))
+          ->withRefTypes($ref_types)
+          ->executeOne();
+        if (!$ref) {
+          $e_ref = pht('Invalid');
+          $errors[] = pht(
+            'You must select a branch from this repository to land this '.
+            'revision onto.');
+        }
+      }
 
-      $operation = DrydockRepositoryOperation::initializeNewOperation($op)
-        ->setAuthorPHID($viewer->getPHID())
-        ->setObjectPHID($revision->getPHID())
-        ->setRepositoryPHID($repository->getPHID())
-        ->setRepositoryTarget('branch:master')
-        ->setProperty('differential.diffPHID', $diff->getPHID());
+      if (!$errors) {
+        // NOTE: The operation is locked to the current active diff, so if the
+        // revision is updated before the operation applies nothing sneaky
+        // occurs.
 
-      $operation->save();
-      $operation->scheduleUpdate();
+        $target = 'branch:'.$ref->getRefName();
 
-      return id(new AphrontRedirectResponse())
-        ->setURI($detail_uri);
+        $operation = DrydockRepositoryOperation::initializeNewOperation($op)
+          ->setAuthorPHID($viewer->getPHID())
+          ->setObjectPHID($revision->getPHID())
+          ->setRepositoryPHID($repository->getPHID())
+          ->setRepositoryTarget($target)
+          ->setProperty('differential.diffPHID', $diff->getPHID());
+
+        $operation->save();
+        $operation->scheduleUpdate();
+
+        return id(new AphrontRedirectResponse())
+          ->setURI($detail_uri);
+      }
     }
 
-    return $this->newDialog()
-      ->setTitle(pht('Land Revision'))
-      ->appendParagraph(
+    $ref_datasource = id(new DiffusionRefDatasource())
+      ->setParameters(
+        array(
+          'repositoryPHIDs' => array($repository->getPHID()),
+          'refTypes' => $ref_types,
+        ));
+
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->appendRemarkupInstructions(
         pht(
           'In theory, this will do approximately what `arc land` would do. '.
-          'In practice, that is almost certainly not what it will actually '.
-          'do.'))
-      ->appendParagraph(
+          'In practice, you will have a riveting adventure instead.'))
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('Onto Branch'))
+          ->setName('refPHIDs')
+          ->setLimit(1)
+          ->setError($e_ref)
+          ->setDatasource($ref_datasource))
+      ->appendRemarkupInstructions(
         pht(
-          'THIS FEATURE IS EXPERIMENTAL AND DANGEROUS! USE IT AT YOUR '.
-          'OWN RISK!'))
+          '(WARNING) THIS FEATURE IS EXPERIMENTAL AND DANGEROUS! USE IT AT '.
+          'YOUR OWN RISK!'));
+
+    return $this->newDialog()
+      ->setWidth(AphrontDialogView::WIDTH_FORM)
+      ->setTitle(pht('Land Revision'))
+      ->setErrors($errors)
+      ->appendForm($form)
       ->addCancelButton($detail_uri)
       ->addSubmitButton(pht('Mutate Repository Unpredictably'));
   }

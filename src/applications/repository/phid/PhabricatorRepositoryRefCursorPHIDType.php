@@ -9,6 +9,10 @@ final class PhabricatorRepositoryRefCursorPHIDType
     return pht('Repository Ref');
   }
 
+  public function getTypeIcon() {
+    return 'fa-code-fork';
+  }
+
   public function newObject() {
     return new PhabricatorRepositoryRefCursor();
   }
