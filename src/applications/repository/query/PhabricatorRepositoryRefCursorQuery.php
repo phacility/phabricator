@@ -8,6 +8,7 @@ final class PhabricatorRepositoryRefCursorQuery
   private $repositoryPHIDs;
   private $refTypes;
   private $refNames;
+  private $datasourceQuery;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -31,6 +32,11 @@ final class PhabricatorRepositoryRefCursorQuery
 
   public function withRefNames(array $names) {
     $this->refNames = $names;
+    return $this;
+  }
+
+  public function withDatasourceQuery($query) {
+    $this->datasourceQuery = $query;
     return $this;
   }
 
@@ -106,6 +112,13 @@ final class PhabricatorRepositoryRefCursorQuery
         $conn,
         'refNameHash IN (%Ls)',
         $name_hashes);
+    }
+
+    if (strlen($this->datasourceQuery)) {
+      $where[] = qsprintf(
+        $conn,
+        'refNameRaw LIKE %>',
+        $this->datasourceQuery);
     }
 
     return $where;
