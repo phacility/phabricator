@@ -1501,6 +1501,11 @@ final class PhabricatorUSEnglishTranslation
 
       '%s updated %s for %s, added %s: %s; removed %s: %s.' =>
         '%s updated %s for %s, added: %5$s; removed; %7$s.',
+
+      'Permanently destroyed %s object(s).' => array(
+        'Permanently destroyed %s object.',
+        'Permanently destroyed %s objects.',
+      ),
     );
   }
 

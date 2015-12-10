@@ -6784,6 +6784,7 @@ phutil_register_library_map(array(
       'PhabricatorPolicyInterface',
       'PhabricatorApplicationTransactionInterface',
       'PhabricatorCustomFieldInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'PhabricatorOwnersPackageDatasource' => 'PhabricatorTypeaheadDatasource',
     'PhabricatorOwnersPackageEditEngine' => 'PhabricatorEditEngine',
