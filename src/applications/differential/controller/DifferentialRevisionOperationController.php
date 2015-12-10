@@ -30,7 +30,7 @@ final class DifferentialRevisionOperationController
     $diff = $revision->getActiveDiff();
     $repository = $revision->getRepository();
 
-    $default_ref = $this->loadDefaultRef($repository);
+    $default_ref = $this->loadDefaultRef($repository, $diff);
 
     if ($default_ref) {
       $v_ref = array($default_ref->getPHID());
@@ -133,8 +133,10 @@ final class DifferentialRevisionOperationController
     );
   }
 
-  private function loadDefaultRef(PhabricatorRepository $repository) {
-    $default_name = $this->getDefaultRefName($repository);
+  private function loadDefaultRef(
+    PhabricatorRepository $repository,
+    DifferentialDiff $diff) {
+    $default_name = $this->getDefaultRefName($repository, $diff);
 
     if (!strlen($default_name)) {
       return null;
@@ -145,7 +147,15 @@ final class DifferentialRevisionOperationController
       ->executeOne();
   }
 
-  private function getDefaultRefName(PhabricatorRepository $repository) {
+  private function getDefaultRefName(
+    PhabricatorRepository $repository,
+    DifferentialDiff $diff) {
+
+    $onto = $diff->loadTargetBranch();
+    if ($onto !== null) {
+      return $onto;
+    }
+
     return $repository->getDefaultBranch();
   }
 
