@@ -30,26 +30,28 @@ final class DifferentialRevisionOperationController
     $diff = $revision->getActiveDiff();
     $repository = $revision->getRepository();
 
-    $ref_types = array(
-      PhabricatorRepositoryRefCursor::TYPE_BRANCH,
-    );
+    $default_ref = $this->loadDefaultRef($repository);
+
+    if ($default_ref) {
+      $v_ref = array($default_ref->getPHID());
+    } else {
+      $v_ref = array();
+    }
 
     $e_ref = true;
 
     $errors = array();
     if ($request->isFormPost()) {
 
-      $ref_phid = head($request->getArr('refPHIDs'));
+      $v_ref = $request->getArr('refPHIDs');
+      $ref_phid = head($v_ref);
       if (!strlen($ref_phid)) {
         $e_ref = pht('Required');
         $errors[] = pht(
           'You must select a branch to land this revision onto.');
       } else {
-        $ref = id(new PhabricatorRepositoryRefCursorQuery())
-          ->setViewer($viewer)
+        $ref = $this->newRefQuery($repository)
           ->withPHIDs(array($ref_phid))
-          ->withRepositoryPHIDs(array($repository->getPHID()))
-          ->withRefTypes($ref_types)
           ->executeOne();
         if (!$ref) {
           $e_ref = pht('Invalid');
@@ -85,7 +87,7 @@ final class DifferentialRevisionOperationController
       ->setParameters(
         array(
           'repositoryPHIDs' => array($repository->getPHID()),
-          'refTypes' => $ref_types,
+          'refTypes' => $this->getTargetableRefTypes(),
         ));
 
     $form = id(new AphrontFormView())
@@ -100,6 +102,7 @@ final class DifferentialRevisionOperationController
           ->setName('refPHIDs')
           ->setLimit(1)
           ->setError($e_ref)
+          ->setValue($v_ref)
           ->setDatasource($ref_datasource))
       ->appendRemarkupInstructions(
         pht(
@@ -113,6 +116,37 @@ final class DifferentialRevisionOperationController
       ->appendForm($form)
       ->addCancelButton($detail_uri)
       ->addSubmitButton(pht('Mutate Repository Unpredictably'));
+  }
+
+  private function newRefQuery(PhabricatorRepository $repository) {
+    $viewer = $this->getViewer();
+
+    return id(new PhabricatorRepositoryRefCursorQuery())
+      ->setViewer($viewer)
+      ->withRepositoryPHIDs(array($repository->getPHID()))
+      ->withRefTypes($this->getTargetableRefTypes());
+  }
+
+  private function getTargetableRefTypes() {
+    return array(
+      PhabricatorRepositoryRefCursor::TYPE_BRANCH,
+    );
+  }
+
+  private function loadDefaultRef(PhabricatorRepository $repository) {
+    $default_name = $this->getDefaultRefName($repository);
+
+    if (!strlen($default_name)) {
+      return null;
+    }
+
+    return $this->newRefQuery($repository)
+      ->withRefNames(array($default_name))
+      ->executeOne();
+  }
+
+  private function getDefaultRefName(PhabricatorRepository $repository) {
+    return $repository->getDefaultBranch();
   }
 
 }
