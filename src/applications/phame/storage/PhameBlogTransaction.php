@@ -6,7 +6,6 @@ final class PhameBlogTransaction
   const TYPE_NAME        = 'phame.blog.name';
   const TYPE_DESCRIPTION = 'phame.blog.description';
   const TYPE_DOMAIN      = 'phame.blog.domain';
-  const TYPE_SKIN        = 'phame.blog.skin';
   const TYPE_STATUS      = 'phame.blog.status';
 
   const MAILTAG_DETAILS       = 'phame-blog-details';
@@ -43,7 +42,6 @@ final class PhameBlogTransaction
         break;
       case self::TYPE_DESCRIPTION:
       case self::TYPE_DOMAIN:
-      case self::TYPE_SKIN:
         return 'fa-pencil';
       case self::TYPE_STATUS:
         if ($new == PhameBlog::STATUS_ARCHIVED) {
@@ -82,7 +80,6 @@ final class PhameBlogTransaction
       case self::TYPE_NAME:
       case self::TYPE_DESCRIPTION:
       case self::TYPE_DOMAIN:
-      case self::TYPE_SKIN:
         $tags[] = self::MAILTAG_DETAILS;
         break;
       default:
@@ -121,12 +118,6 @@ final class PhameBlogTransaction
       case self::TYPE_DOMAIN:
         return pht(
           '%s updated the blog\'s domain to "%s".',
-          $this->renderHandleLink($author_phid),
-          $new);
-        break;
-      case self::TYPE_SKIN:
-        return pht(
-          '%s updated the blog\'s skin to "%s".',
           $this->renderHandleLink($author_phid),
           $new);
         break;
@@ -178,12 +169,6 @@ final class PhameBlogTransaction
       case self::TYPE_DOMAIN:
         return pht(
           '%s updated the domain for %s.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid));
-        break;
-      case self::TYPE_SKIN:
-        return pht(
-          '%s updated the skin for %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;

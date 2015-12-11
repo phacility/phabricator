@@ -80,17 +80,11 @@ final class PhameBlogManageController extends PhameBlogController {
       ->setObject($blog)
       ->setActionList($actions);
 
-    $skin = $blog->getSkin();
-    if (!$skin) {
-      $skin = phutil_tag('em', array(), pht('No external skin'));
-    }
-
     $domain = $blog->getDomain();
     if (!$domain) {
       $domain = phutil_tag('em', array(), pht('No external domain'));
     }
 
-    $properties->addProperty(pht('Skin'), $skin);
     $properties->addProperty(pht('Domain'), $domain);
 
     $feed_uri = PhabricatorEnv::getProductionURI(
