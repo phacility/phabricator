@@ -313,7 +313,7 @@ JX.install('Tokenizer', {
 
       root.insertBefore(token, focus);
 
-      this.invoke('change', this);
+      this._didChangeValue();
 
       return true;
     },
@@ -419,7 +419,31 @@ JX.install('Tokenizer', {
       this._redraw(true);
       focus && this.focus();
 
+      this._didChangeValue();
+
+      return true;
+    },
+
+    _didChangeValue: function() {
+
+      if (this.getBrowseURI()) {
+        var button = JX.DOM.find(this._frame, 'a', 'tokenizer-browse');
+        JX.DOM.alterClass(button, 'disabled', !!this._isAtTokenLimit());
+      }
+
       this.invoke('change', this);
+    },
+
+    _isAtTokenLimit: function() {
+      var limit = this.getLimit();
+
+      if (!limit) {
+        return false;
+      }
+
+      if (limit > JX.keys(this.getTokens()).length) {
+        return false;
+      }
 
       return true;
     },
@@ -459,6 +483,10 @@ JX.install('Tokenizer', {
 
       var uri = this.getBrowseURI();
       if (!uri) {
+        return;
+      }
+
+      if (this._isAtTokenLimit()) {
         return;
       }
 
