@@ -10,7 +10,8 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     PhabricatorProjectInterface,
     PhabricatorDestructibleInterface,
     PhabricatorApplicationTransactionInterface,
-    PhabricatorSpacesInterface {
+    PhabricatorSpacesInterface,
+    PhabricatorConduitResultInterface {
 
   protected $title;
   protected $authorPHID;
@@ -248,6 +249,40 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
   public function getSpacePHID() {
     return $this->spacePHID;
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      'title' => array(
+        'type' => 'string',
+        'description' => pht('The name of the object.'),
+      ),
+      'authorPHID' => array(
+        'type' => 'phid',
+        'description' => pht('User PHID of the author.'),
+      ),
+      'language' => array(
+        'type' => 'string?',
+        'description' => pht('Language to use for syntax highlighting.'),
+      ),
+      'status' => array(
+        'type' => 'string',
+        'description' => pht('Active or archived status of the paste.'),
+      ),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'title' => $this->getTitle(),
+      'authorPHID' => $this->getAuthorPHID(),
+      'language' => nonempty($this->getLanguage(), null),
+      'status' => $this->getStatus(),
+    );
   }
 
 }

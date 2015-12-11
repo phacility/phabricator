@@ -1172,4 +1172,197 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     return $fields;
   }
 
+  public function getSearchFieldsForConduit() {
+    $fields = $this->buildSearchFields();
+    return $fields;
+  }
+
+  public function buildConduitResponse(ConduitAPIRequest $request) {
+    $viewer = $this->requireViewer();
+    $fields = $this->buildSearchFields();
+
+    $query_key = $request->getValue('queryKey');
+    if (!strlen($query_key)) {
+      $saved_query = new PhabricatorSavedQuery();
+    } else if ($this->isBuiltinQuery($query_key)) {
+      $saved_query = $this->buildSavedQueryFromBuiltin($query_key);
+    } else {
+      $saved_query = id(new PhabricatorSavedQueryQuery())
+        ->setViewer($viewer)
+        ->withQueryKeys(array($query_key))
+        ->executeOne();
+      if (!$saved_query) {
+        throw new Exception(
+          pht(
+            'Query key "%s" does not correspond to a valid query.',
+            $query_key));
+      }
+    }
+
+    foreach ($fields as $field) {
+      $field->setViewer($viewer);
+    }
+
+    $constraints = $request->getValue('constraints', array());
+
+    foreach ($fields as $field) {
+      if (!$field->getValueExistsInConduitRequest($constraints)) {
+        continue;
+      }
+
+      $value = $field->readValueFromConduitRequest($constraints);
+      $saved_query->setParameter($field->getKey(), $value);
+    }
+
+    $this->saveQuery($saved_query);
+
+
+    $query = $this->buildQueryFromSavedQuery($saved_query);
+    $pager = $this->newPagerForSavedQuery($saved_query);
+
+    $this->setQueryOrderForConduit($query, $request);
+    $this->setPagerLimitForConduit($pager, $request);
+    $this->setPagerOffsetsForConduit($pager, $request);
+
+    $objects = $this->executeQuery($query, $pager);
+
+    $data = array();
+    if ($objects) {
+      $field_extensions = $this->getConduitFieldExtensions();
+
+      foreach ($objects as $object) {
+        $data[] = $this->getObjectWireFormatForConduit(
+          $object,
+          $field_extensions);
+      }
+    }
+
+    return array(
+      'data' => $data,
+      'query' => array(
+        'queryKey' => $saved_query->getQueryKey(),
+      ),
+      'cursor' => array(
+        'limit' => $pager->getPageSize(),
+        'after' => $pager->getNextPageID(),
+        'before' => $pager->getPrevPageID(),
+        'order' => $request->getValue('order'),
+      ),
+    );
+  }
+
+  public function getAllConduitFieldSpecifications() {
+    $extensions = $this->getConduitFieldExtensions();
+    $object = $this->newQuery()->newResultObject();
+
+    $specifications = array();
+    foreach ($extensions as $extension) {
+      $specifications += $extension->getFieldSpecificationsForConduit($object);
+    }
+
+    return $specifications;
+  }
+
+  private function getConduitFieldExtensions() {
+    $extensions = PhabricatorSearchEngineExtension::getAllEnabledExtensions();
+    $object = $this->newQuery()->newResultObject();
+
+    $field_extensions = array();
+    foreach ($extensions as $key => $extension) {
+      if ($extension->getFieldSpecificationsForConduit($object)) {
+        $field_extensions[$key] = $extension;
+      }
+    }
+
+    return $field_extensions;
+  }
+
+  private function setQueryOrderForConduit($query, ConduitAPIRequest $request) {
+    $order = $request->getValue('order');
+    if ($order === null) {
+      return;
+    }
+
+    if (is_scalar($order)) {
+      $query->setOrder($order);
+    } else {
+      $query->setOrderVector($order);
+    }
+  }
+
+  private function setPagerLimitForConduit($pager, ConduitAPIRequest $request) {
+    $limit = $request->getValue('limit');
+
+    // If there's no limit specified and the query uses a weird huge page
+    // size, just leave it at the default gigantic page size. Otherwise,
+    // make sure it's between 1 and 100, inclusive.
+
+    if ($limit === null) {
+      if ($pager->getPageSize() >= 0xFFFF) {
+        return;
+      } else {
+        $limit = 100;
+      }
+    }
+
+    if ($limit > 100) {
+      throw new Exception(
+        pht(
+          'Maximum page size for Conduit API method calls is 100, but '.
+          'this call specified %s.',
+          $limit));
+    }
+
+    if ($limit < 1) {
+      throw new Exception(
+        pht(
+          'Minimum page size for API searches is 1, but this call '.
+          'specified %s.',
+          $limit));
+    }
+
+    $pager->setPageSize($limit);
+  }
+
+  private function setPagerOffsetsForConduit(
+    $pager,
+    ConduitAPIRequest $request) {
+    $before_id = $request->getValue('before');
+    if ($before_id !== null) {
+      $pager->setBeforeID($before_id);
+    }
+
+    $after_id = $request->getValue('after');
+    if ($after_id !== null) {
+      $pager->setAfterID($after_id);
+    }
+  }
+
+  protected function getObjectWireFormatForConduit(
+    $object,
+    array $field_extensions) {
+    $phid = $object->getPHID();
+
+    return array(
+      'id' => (int)$object->getID(),
+      'type' => phid_get_type($phid),
+      'phid' => $phid,
+      'fields' => $this->getObjectWireFieldsForConduit(
+        $object,
+        $field_extensions),
+    );
+  }
+
+  protected function getObjectWireFieldsForConduit(
+    $object,
+    array $field_extensions) {
+
+    $fields = array();
+    foreach ($field_extensions as $extension) {
+      $fields += $extension->getFieldValuesForConduit($object);
+    }
+
+    return $fields;
+  }
+
 }

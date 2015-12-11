@@ -205,6 +205,14 @@ abstract class PhabricatorSearchField extends Phobject {
     return $value;
   }
 
+  public function getValueExistsInConduitRequest(array $constraints) {
+    return array_key_exists($this->getKey(), $constraints);
+  }
+
+  public function readValueFromConduitRequest(array $constraints) {
+    return idx($constraints, $this->getKey());
+  }
+
 
 /* -(  Rendering Controls  )------------------------------------------------- */
 
