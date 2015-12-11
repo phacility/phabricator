@@ -129,7 +129,14 @@ abstract class PhameLiveController extends PhameController {
           $uri = $post->getViewURI();
         }
 
-        return id(new AphrontRedirectResponse())->setURI($uri);
+        $response = id(new AphrontRedirectResponse())
+          ->setURI($uri);
+
+        if ($is_external) {
+          $response->setIsExternal(true);
+        }
+
+        return $response;
       }
     }
 
