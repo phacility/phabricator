@@ -47,11 +47,12 @@ Supported Applications
 
 These applications currently support form customization:
 
-| Application | Support |
-|-------------|---------|
-| Maniphest   | Full
-| Paste       | Full
-| Owners      | Full
+| Application       | Support |
+|-------------------|---------|
+| Maniphest         | Full
+| Owners            | Full
+| Paste             | Full
+| ApplicationEditor | Meta
 
 This documentation is geared toward use in Maniphest because customizing task
 creation flows is the most common use case for many of these features, but the
