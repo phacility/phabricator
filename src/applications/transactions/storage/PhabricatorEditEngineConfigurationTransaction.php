@@ -9,7 +9,10 @@ final class PhabricatorEditEngineConfigurationTransaction
   const TYPE_DEFAULT = 'editengine.config.default';
   const TYPE_LOCKS = 'editengine.config.locks';
   const TYPE_DEFAULTCREATE = 'editengine.config.default.create';
+  const TYPE_ISEDIT = 'editengine.config.isedit';
   const TYPE_DISABLE = 'editengine.config.disable';
+  const TYPE_CREATEORDER = 'editengine.order.create';
+  const TYPE_EDITORDER = 'editengine.order.edit';
 
   public function getApplicationName() {
     return 'search';
@@ -70,6 +73,16 @@ final class PhabricatorEditEngineConfigurationTransaction
         } else {
           return pht(
             '%s removed this form from the "Create" menu.',
+            $this->renderHandleLink($author_phid));
+        }
+      case self::TYPE_ISEDIT:
+        if ($new) {
+          return pht(
+            '%s marked this form as an edit form.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s unmarked this form as an edit form.',
             $this->renderHandleLink($author_phid));
         }
       case self::TYPE_DISABLE:

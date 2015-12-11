@@ -5,7 +5,8 @@ final class PhabricatorOwnersPackage
   implements
     PhabricatorPolicyInterface,
     PhabricatorApplicationTransactionInterface,
-    PhabricatorCustomFieldInterface {
+    PhabricatorCustomFieldInterface,
+    PhabricatorDestructibleInterface {
 
   protected $name;
   protected $originalName;
@@ -336,6 +337,32 @@ final class PhabricatorOwnersPackage
   public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
     $this->customFields = $fields;
     return $this;
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $conn_w = $this->establishConnection('w');
+
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE packageID = %d',
+        id(new PhabricatorOwnersPath())->getTableName(),
+        $this->getID());
+
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE packageID = %d',
+        id(new PhabricatorOwnersOwner())->getTableName(),
+        $this->getID());
+
+      $this->delete();
+    $this->saveTransaction();
   }
 
 }

@@ -6,6 +6,10 @@ final class PhamePostEditController extends PhamePostController {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(
+      pht('Blogs'),
+      $this->getApplicationURI('blog/'));
     if ($id) {
       $post = id(new PhamePostQuery())
         ->setViewer($viewer)
@@ -29,6 +33,9 @@ final class PhamePostEditController extends PhamePostController {
       $v_projects = array_reverse($v_projects);
       $v_cc = PhabricatorSubscribersQuery::loadSubscribersForPHID(
           $post->getPHID());
+      $blog = $post->getBlog();
+
+
     } else {
       $blog = id(new PhameBlogQuery())
         ->setViewer($viewer)
@@ -102,7 +109,7 @@ final class PhamePostEditController extends PhamePostController {
       try {
         $editor->applyTransactions($post, $xactions);
 
-        $uri = $this->getApplicationURI('/post/view/'.$post->getID().'/');
+        $uri = $post->getViewURI();
         return id(new AphrontRedirectResponse())->setURI($uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
@@ -192,10 +199,12 @@ final class PhamePostEditController extends PhamePostController {
       ->setValidationException($validation_exception)
       ->setForm($form);
 
-    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(
+      $blog->getName(),
+      $blog->getViewURI());
     $crumbs->addTextCrumb(
       $page_title,
-      $this->getApplicationURI('/post/view/'.$id.'/'));
+      $cancel_uri);
 
     return $this->newPage()
       ->setTitle($page_title)

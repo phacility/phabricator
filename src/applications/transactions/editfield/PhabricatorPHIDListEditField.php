@@ -52,6 +52,14 @@ abstract class PhabricatorPHIDListEditField
     return parent::readValueFromComment($value);
   }
 
+  protected function getValueFromRequest(AphrontRequest $request, $key) {
+    $value = parent::getValueFromRequest($request, $key);
+    if ($this->getIsSingleValue()) {
+      $value = array_slice($value, 0, 1);
+    }
+    return $value;
+  }
+
   public function getValueForTransaction() {
     $new = parent::getValueForTransaction();
 

@@ -54,7 +54,6 @@ final class PholioMockEditController extends PholioController {
 
     $v_name = $mock->getName();
     $v_desc = $mock->getDescription();
-    $v_status = $mock->getStatus();
     $v_view = $mock->getViewPolicy();
     $v_edit = $mock->getEditPolicy();
     $v_cc = PhabricatorSubscribersQuery::loadSubscribersForPHID(
@@ -66,7 +65,6 @@ final class PholioMockEditController extends PholioController {
 
       $type_name = PholioTransaction::TYPE_NAME;
       $type_desc = PholioTransaction::TYPE_DESCRIPTION;
-      $type_status = PholioTransaction::TYPE_STATUS;
       $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
       $type_cc   = PhabricatorTransactions::TYPE_SUBSCRIBERS;
@@ -74,7 +72,6 @@ final class PholioMockEditController extends PholioController {
 
       $v_name = $request->getStr('name');
       $v_desc = $request->getStr('description');
-      $v_status = $request->getStr('status');
       $v_view = $request->getStr('can_view');
       $v_edit = $request->getStr('can_edit');
       $v_cc   = $request->getArr('cc');
@@ -84,7 +81,6 @@ final class PholioMockEditController extends PholioController {
       $mock_xactions = array();
       $mock_xactions[$type_name] = $v_name;
       $mock_xactions[$type_desc] = $v_desc;
-      $mock_xactions[$type_status] = $v_status;
       $mock_xactions[$type_view] = $v_view;
       $mock_xactions[$type_edit] = $v_edit;
       $mock_xactions[$type_cc]   = array('=' => $v_cc);
@@ -315,20 +311,7 @@ final class PholioMockEditController extends PholioController {
         ->setName('description')
         ->setValue($v_desc)
         ->setLabel(pht('Description'))
-        ->setUser($viewer));
-
-    if ($id) {
-      $form->appendChild(
-        id(new AphrontFormSelectControl())
-        ->setLabel(pht('Status'))
-        ->setName('status')
-        ->setValue($mock->getStatus())
-        ->setOptions($mock->getStatuses()));
-    } else {
-      $form->addHiddenInput('status', 'open');
-    }
-
-    $form
+        ->setUser($viewer))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Projects'))

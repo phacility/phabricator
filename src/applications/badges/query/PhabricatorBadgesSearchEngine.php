@@ -84,7 +84,7 @@ final class PhabricatorBadgesSearchEngine
         return $query->setParameter(
           'statuses',
           array(
-            PhabricatorBadgesBadge::STATUS_OPEN,
+            PhabricatorBadgesBadge::STATUS_ACTIVE,
           ));
     }
 
@@ -124,7 +124,7 @@ final class PhabricatorBadgesSearchEngine
         ->addAttribute($quality)
         ->addAttribute($badge->getFlavor());
 
-      if ($badge->isClosed()) {
+      if ($badge->isArchived()) {
         $item->setDisabled(true);
         $item->addIcon('fa-ban', pht('Archived'));
       }

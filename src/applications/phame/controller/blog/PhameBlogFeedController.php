@@ -62,7 +62,7 @@ final class PhameBlogFeedController extends PhameBlogController {
     foreach ($posts as $post) {
       $content[] = hsprintf('<entry>');
       $content[] = phutil_tag('title', array(), $post->getTitle());
-      $content[] = phutil_tag('link', array('href' => $post->getViewURI()));
+      $content[] = phutil_tag('link', array('href' => $post->getLiveURI()));
 
       $content[] = phutil_tag('id', array(), PhabricatorEnv::getProductionURI(
         '/phame/post/view/'.$post->getID().'/'));

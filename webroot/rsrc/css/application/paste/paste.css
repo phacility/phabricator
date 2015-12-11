@@ -3,11 +3,11 @@
  */
 
 .container-of-paste {
-  margin: 16px;
+  margin: 16px 16px 0 16px;
 }
 
 .device .container-of-paste {
-  margin: 8px;
+  margin: 8px 8px 0 8px;
 }
 
 .paste-embed {

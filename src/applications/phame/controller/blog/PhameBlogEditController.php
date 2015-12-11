@@ -46,7 +46,6 @@ final class PhameBlogEditController
     $name = $blog->getName();
     $description = $blog->getDescription();
     $custom_domain = $blog->getDomain();
-    $skin = $blog->getSkin();
     $can_view = $blog->getViewPolicy();
     $can_edit = $blog->getEditPolicy();
 
@@ -58,7 +57,6 @@ final class PhameBlogEditController
       $name = $request->getStr('name');
       $description = $request->getStr('description');
       $custom_domain = nonempty($request->getStr('custom_domain'), null);
-      $skin = $request->getStr('skin');
       $can_view = $request->getStr('can_view');
       $can_edit = $request->getStr('can_edit');
       $v_projects = $request->getArr('projects');
@@ -74,9 +72,6 @@ final class PhameBlogEditController
         id(new PhameBlogTransaction())
           ->setTransactionType(PhameBlogTransaction::TYPE_DOMAIN)
           ->setNewValue($custom_domain),
-        id(new PhameBlogTransaction())
-          ->setTransactionType(PhameBlogTransaction::TYPE_SKIN)
-          ->setNewValue($skin),
         id(new PhameBlogTransaction())
           ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
           ->setNewValue($can_view),
@@ -119,9 +114,6 @@ final class PhameBlogEditController
       ->setViewer($viewer)
       ->setObject($blog)
       ->execute();
-
-    $skins = PhameSkinSpecification::loadAllSkinSpecifications();
-    $skins = mpull($skins, 'getName');
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
@@ -179,12 +171,6 @@ final class PhameBlogEditController
         ->setCaption(
           pht('Must include at least one dot (.), e.g. %s', 'blog.example.com'))
         ->setError($e_custom_domain))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-        ->setLabel(pht('Skin'))
-        ->setName('skin')
-        ->setValue($skin)
-        ->setOptions($skins))
       ->appendChild(
         id(new AphrontFormSubmitControl())
         ->addCancelButton($cancel_uri)

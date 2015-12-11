@@ -37,7 +37,7 @@ abstract class ManiphestController extends PhabricatorController {
     return $crumbs;
   }
 
-  protected function renderSingleTask(ManiphestTask $task) {
+  public function renderSingleTask(ManiphestTask $task) {
     $request = $this->getRequest();
     $user = $request->getUser();
 

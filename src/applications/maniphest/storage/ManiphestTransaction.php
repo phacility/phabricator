@@ -14,6 +14,8 @@ final class ManiphestTransaction
   const TYPE_MERGED_INTO = 'mergedinto';
   const TYPE_MERGED_FROM = 'mergedfrom';
   const TYPE_UNBLOCK = 'unblock';
+  const TYPE_PARENT = 'parent';
+  const TYPE_COLUMN = 'column';
 
   // NOTE: this type is deprecated. Keep it around for legacy installs
   // so any transactions render correctly.
@@ -147,6 +149,8 @@ final class ManiphestTransaction
         }
         break;
       case self::TYPE_SUBPRIORITY:
+      case self::TYPE_PARENT:
+      case self::TYPE_COLUMN:
         return true;
       case self::TYPE_PROJECT_COLUMN:
         $old_cols = idx($this->getOldValue(), 'columnPHIDs');

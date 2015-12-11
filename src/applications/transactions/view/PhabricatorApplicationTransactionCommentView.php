@@ -18,6 +18,9 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $showPreview = true;
   private $objectPHID;
   private $headerText;
+  private $noPermission;
+
+
 
   private $currentVersion;
   private $versionedDraft;
@@ -110,16 +113,32 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     return $this->editTypes;
   }
 
+  public function setNoPermission($no_permission) {
+    $this->noPermission = $no_permission;
+    return $this;
+  }
+
+  public function getNoPermission() {
+    return $this->noPermission;
+  }
+
   public function setTransactionTimeline(
     PhabricatorApplicationTransactionView $timeline) {
 
     $timeline->setQuoteTargetID($this->getCommentID());
+    if ($this->getNoPermission()) {
+      $timeline->setShouldTerminate(true);
+    }
 
     $this->transactionTimeline = $timeline;
     return $this;
   }
 
   public function render() {
+    if ($this->getNoPermission()) {
+      return null;
+    }
+
     $user = $this->getUser();
     if (!$user->isLoggedIn()) {
       $uri = id(new PhutilURI('/login/'))
@@ -177,7 +196,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
 
     $versioned_draft = $this->getVersionedDraft();
     if ($versioned_draft) {
-      $draft_comment = $versioned_draft->getProperty('temporary.comment', '');
+      $draft_comment = $versioned_draft->getProperty('comment', '');
     }
 
     if (!$this->getObjectPHID()) {

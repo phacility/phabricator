@@ -61,13 +61,6 @@ final class PhabricatorOwnersPackageEditEngine
         ->setIsCopyable(true)
         ->setValue($object->getOwnerPHIDs()),
       id(new PhabricatorSelectEditField())
-        ->setKey('status')
-        ->setLabel(pht('Status'))
-        ->setDescription(pht('Archive or enable the package.'))
-        ->setTransactionType(PhabricatorOwnersPackageTransaction::TYPE_STATUS)
-        ->setValue($object->getStatus())
-        ->setOptions($object->getStatusNameMap()),
-      id(new PhabricatorSelectEditField())
         ->setKey('auditing')
         ->setLabel(pht('Auditing'))
         ->setDescription(

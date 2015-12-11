@@ -87,6 +87,7 @@ final class PhabricatorPeopleHovercardEventListener
         $badges = id(new PhabricatorBadgesQuery())
           ->setViewer($viewer)
           ->withPHIDs($badge_phids)
+          ->withStatuses(array(PhabricatorBadgesBadge::STATUS_ACTIVE))
           ->execute();
 
         foreach ($badges as $badge) {

@@ -57,8 +57,8 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
         'report/(?:(?P<view>\w+)/)?' => 'ManiphestReportController',
         'batch/' => 'ManiphestBatchEditController',
         'task/' => array(
-          'create/' => 'ManiphestTaskEditController',
-          'edit/(?P<id>[1-9]\d*)/' => 'ManiphestTaskEditController',
+          $this->getEditRoutePattern('edit/')
+            => 'ManiphestTaskEditController',
           'descriptionpreview/'
             => 'PhabricatorMarkupPreviewController',
         ),
@@ -69,8 +69,6 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
         ),
         'export/(?P<key>[^/]+)/' => 'ManiphestExportController',
         'subpriority/' => 'ManiphestSubpriorityController',
-        $this->getEditRoutePattern('editpro/')
-          => 'ManiphestTaskEditProController',
       ),
     );
   }

@@ -48,15 +48,38 @@ final class PhamePost extends PhameDAO
     return $this->blog;
   }
 
-  public function getViewURI() {
-    // go for the pretty uri if we can
-    $domain = ($this->blog ? $this->blog->getDomain() : '');
-    if ($domain) {
-      $phame_title = PhabricatorSlug::normalize($this->getPhameTitle());
-      return 'http://'.$domain.'/post/'.$phame_title;
+  public function getLiveURI() {
+    $blog = $this->getBlog();
+    $is_draft = $this->isDraft();
+    if (strlen($blog->getDomain()) && !$is_draft) {
+      return $this->getExternalLiveURI();
+    } else {
+      return $this->getInternalLiveURI();
     }
-    $uri = '/phame/post/view/'.$this->getID().'/';
-    return PhabricatorEnv::getProductionURI($uri);
+  }
+
+  public function getExternalLiveURI() {
+    $id = $this->getID();
+    $slug = $this->getSlug();
+    $path = "/post/{$id}/{$slug}/";
+
+    $domain = $this->getBlog()->getDomain();
+
+    return (string)id(new PhutilURI('http://'.$domain))
+      ->setPath($path);
+  }
+
+  public function getInternalLiveURI() {
+    $id = $this->getID();
+    $slug = $this->getSlug();
+    $blog_id = $this->getBlog()->getID();
+    return "/phame/live/{$blog_id}/post/{$id}/{$slug}/";
+  }
+
+  public function getViewURI() {
+    $id = $this->getID();
+    $slug = $this->getSlug();
+    return "/phame/post/view/{$id}/{$slug}/";
   }
 
   public function getEditURI() {
@@ -64,17 +87,7 @@ final class PhamePost extends PhameDAO
   }
 
   public function isDraft() {
-    return $this->getVisibility() == PhameConstants::VISIBILITY_DRAFT;
-  }
-
-  public function getHumanName() {
-    if ($this->isDraft()) {
-      $name = 'draft';
-    } else {
-      $name = 'post';
-    }
-
-    return $name;
+    return ($this->getVisibility() == PhameConstants::VISIBILITY_DRAFT);
   }
 
   protected function getConfiguration() {
@@ -131,6 +144,10 @@ final class PhamePost extends PhameDAO
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorPhamePostPHIDType::TYPECONST);
+  }
+
+  public function getSlug() {
+    return rtrim($this->getPhameTitle(), '/');
   }
 
   public function toDictionary() {

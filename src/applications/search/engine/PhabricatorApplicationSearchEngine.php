@@ -24,6 +24,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   private $context;
   private $controller;
   private $namedQueries;
+  private $navigationItems = array();
 
   const CONTEXT_LIST  = 'list';
   const CONTEXT_PANEL = 'panel';
@@ -85,6 +86,18 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   public function isPanelContext() {
     return ($this->context == self::CONTEXT_PANEL);
   }
+
+  public function setNavigationItems(array $navigation_items) {
+    assert_instances_of($navigation_items, 'PHUIListItemView');
+    $this->navigationItems = $navigation_items;
+    return $this;
+  }
+
+  public function getNavigationItems() {
+    return $this->navigationItems;
+  }
+
+
 
   public function canUseInPanelContext() {
     return true;
@@ -475,6 +488,10 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     $menu->newLabel(pht('Search'));
     $advanced_uri = $this->getQueryResultsPageURI('advanced');
     $menu->newLink(pht('Advanced Search'), $advanced_uri, 'query/advanced');
+
+    foreach ($this->navigationItems as $extra_item) {
+      $menu->addMenuItem($extra_item);
+    }
 
     return $this;
   }

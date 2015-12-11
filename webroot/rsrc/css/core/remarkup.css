@@ -153,13 +153,6 @@
   margin: 4px 0;
 }
 
-.phabricator-remarkup h3.remarkup-header + h4.remarkup-header {
-  color: {$bluetext};
-  font-weight: normal;
-  margin-bottom: 16px;
-  margin-top: -4px;
-}
-
 .phabricator-remarkup blockquote {
   border-left: 3px solid {$sh-blueborder};
   color: {$darkbluetext};

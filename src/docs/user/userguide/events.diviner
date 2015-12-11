@@ -5,6 +5,10 @@ Using Phabricator event listeners to customize behavior.
 
 = Overview =
 
+(WARNING) The event system is an artifact of a bygone era. Use of the event
+system is strongly discouraged. We have been removing events since 2013 and
+will continue to remove events in the future.
+
 Phabricator and Arcanist allow you to install custom runtime event listeners
 which can react to certain things happening (like a Maniphest Task being edited
 or a user creating a new Differential Revision) and run custom code to perform
@@ -129,42 +133,6 @@ fields to, e.g., edit revision titles. Data available on this event:
 
   - `specification` Parameters that will be used to invoke the
     `differential.createrevision` Conduit call.
-
-== Maniphest: Will Edit Task ==
-
-The constant for this event is
-`PhabricatorEventType::TYPE_MANIPHEST_WILLEDITTASK`.
-
-This event is dispatched before a task is edited, and allows you to respond to
-or alter the edit. Data available on this event:
-
-  - `task` The @{class:ManiphestTask} being edited.
-  - `transactions` The list of edits (objects of class
-    @{class:ManiphestTransaction}) being applied.
-  - `new` A boolean indicating if this task is being created.
-  - `mail` If this edit originates from email, the
-    @{class:PhabricatorMetaMTAReceivedMail} object.
-
-This is similar to the next event (did edit task) but occurs before the edit
-begins.
-
-== Maniphest: Did Edit Task ==
-
-The constant for this event is
-`PhabricatorEventType::TYPE_MANIPHEST_DIDEDITTASK`.
-
-This event is dispatched after a task is edited, and allows you to react to the
-edit. Data available on this event:
-
-  - `task` The @{class:ManiphestTask} that was edited.
-  - `transactions` The list of edits (objects of class
-    @{class:ManiphestTransaction}) that were applied.
-  - `new` A boolean indicating if this task was newly created.
-  - `mail` If this edit originates from email, the
-    @{class:PhabricatorMetaMTAReceivedMail} object.
-
-This is similar to the previous event (will edit task) but occurs after the
-edit completes.
 
 == Differential: Will Mark Generated ==
 
