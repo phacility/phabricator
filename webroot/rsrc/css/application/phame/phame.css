@@ -55,8 +55,11 @@
 }
 
 .device .phame-blog-list {
-  background-color: #fff;
-  padding: 8px;
+  padding: 16px 8px;
+  background-color: #F1F1F4;
+  margin: 0;
+  border-radius: 0;
+  border-bottom: 1px solid {$lightblueborder};
 }
 
 .phame-blog-list-item:last-child {
