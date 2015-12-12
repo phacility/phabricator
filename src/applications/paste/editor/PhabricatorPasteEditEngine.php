@@ -39,12 +39,11 @@ final class PhabricatorPasteEditEngine
   }
 
   protected function getCommentViewHeaderText($object) {
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-    if (!$is_serious) {
-      return pht('Eat Paste');
-    }
+    return pht('Eat Paste');
+  }
 
-    return parent::getCommentViewHeaderText($object);
+  protected function getCommentViewButtonText($object) {
+    return pht('Nom Nom Nom Nom Nom');
   }
 
   protected function getObjectViewURI($object) {

@@ -42,12 +42,11 @@ final class ManiphestEditEngine
   }
 
   protected function getCommentViewHeaderText($object) {
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-    if (!$is_serious) {
-      return pht('Weigh In');
-    }
+    return pht('Weigh In');
+  }
 
-    return parent::getCommentViewHeaderText($object);
+  protected function getCommentViewButtonText($object) {
+    return pht('Set Sail for Adventure');
   }
 
   protected function getObjectViewURI($object) {
