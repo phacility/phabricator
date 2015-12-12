@@ -334,12 +334,12 @@ final class PhabricatorRepositoryPullEngine
             $remote_uri);
         }
       } else if ($err) {
-        throw new Exception(
-          pht(
-            "git fetch failed with error #%d:\nstdout:%s\n\nstderr:%s\n",
-            $err,
-            $stdout,
-            $stderr));
+        throw new CommandException(
+          pht('Failed to fetch changes!'),
+          $future->getCommand(),
+          $err,
+          $stdout,
+          $stderr);
       } else {
         $retry = false;
       }
