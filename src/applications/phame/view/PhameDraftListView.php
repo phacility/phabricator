@@ -1,9 +1,16 @@
 <?php
 
-final class PhameBlogListView extends AphrontTagView {
+final class PhameDraftListView extends AphrontTagView {
 
+  private $posts;
   private $blogs;
   private $viewer;
+
+  public function setPosts($posts) {
+    assert_instances_of($posts, 'PhamePost');
+    $this->posts = $posts;
+    return $this;
+  }
 
   public function setBlogs($blogs) {
     assert_instances_of($blogs, 'PhameBlog');
@@ -26,7 +33,8 @@ final class PhameBlogListView extends AphrontTagView {
     require_celerity_resource('phame-css');
 
     $list = array();
-    foreach ($this->blogs as $blog) {
+    foreach ($this->posts as $post) {
+      $blog = $post->getBlog();
       $image_uri = $blog->getProfileImageURI();
       $image = phutil_tag(
         'a',
@@ -40,18 +48,18 @@ final class PhameBlogListView extends AphrontTagView {
         'a',
         array(
           'class' => 'phame-blog-list-title',
-          'href' => $blog->getViewURI(),
+          'href' => $post->getViewURI(),
         ),
-        $blog->getName());
+        $post->getTitle());
 
       $icon = id(new PHUIIconView())
-        ->setIconFont('fa-plus-square')
+        ->setIconFont('fa-pencil-square-o')
         ->addClass('phame-blog-list-icon');
 
-      $add_new = phutil_tag(
+      $edit = phutil_tag(
         'a',
         array(
-          'href' => '/phame/post/edit/?blog='.$blog->getID(),
+          'href' => '/phame/post/edit/'.$post->getID().'/',
           'class' => 'phame-blog-list-new-post',
         ),
         $icon);
@@ -64,17 +72,12 @@ final class PhameBlogListView extends AphrontTagView {
         array(
           $image,
           $title,
-          $add_new,
+          $edit,
         ));
     }
 
     if (empty($list)) {
-      $list = phutil_tag(
-        'a',
-        array(
-          'href' => '/phame/blog/new/',
-        ),
-        pht('Create a Blog'));
+      $list = pht('You have no draft posts.');
     }
 
     $header = phutil_tag(
@@ -85,9 +88,9 @@ final class PhameBlogListView extends AphrontTagView {
       phutil_tag(
         'a',
         array(
-          'href' => '/phame/blog/',
+          'href' => '/phame/post/query/draft/',
         ),
-        pht('Blogs')));
+        pht('Drafts')));
 
     return array($header, $list);
   }

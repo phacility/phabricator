@@ -57,15 +57,34 @@ final class PhameHomeController extends PhamePostController {
       ->setHeader($header)
       ->appendChild($post_list);
 
-    $sidebar = id(new PhameBlogListView())
+    $blog_list = id(new PhameBlogListView())
       ->setBlogs($blogs)
       ->setViewer($viewer);
+
+    $draft_list = null;
+    if ($viewer->isLoggedIn()) {
+      $drafts = id(new PhamePostQuery())
+        ->setViewer($viewer)
+        ->withBloggerPHIDs(array($viewer->getPHID()))
+        ->withBlogPHIDs(mpull($blogs, 'getPHID'))
+        ->withVisibility(PhameConstants::VISIBILITY_DRAFT)
+        ->setLimit(5)
+        ->execute();
+
+      $draft_list = id(new PhameDraftListView())
+        ->setPosts($drafts)
+        ->setBlogs($blogs)
+        ->setViewer($viewer);
+    }
 
     $phame_view = id(new PHUITwoColumnView())
       ->setMainColumn(array(
         $page,
       ))
-      ->setSideColumn($sidebar)
+      ->setSideColumn(array(
+        $blog_list,
+        $draft_list,
+      ))
       ->setDisplay(PHUITwoColumnView::DISPLAY_LEFT)
       ->addClass('phame-home-view');
 
