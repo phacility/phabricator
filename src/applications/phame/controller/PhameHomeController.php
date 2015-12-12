@@ -12,6 +12,7 @@ final class PhameHomeController extends PhamePostController {
     $blogs = id(new PhameBlogQuery())
       ->setViewer($viewer)
       ->withStatuses(array(PhameBlog::STATUS_ACTIVE))
+      ->needProfileImage(true)
       ->execute();
 
     $blog_phids = mpull($blogs, 'getPHID');
@@ -56,12 +57,24 @@ final class PhameHomeController extends PhamePostController {
       ->setHeader($header)
       ->appendChild($post_list);
 
+    $sidebar = id(new PhameBlogListView())
+      ->setBlogs($blogs)
+      ->setViewer($viewer);
+
+    $phame_view = id(new PHUITwoColumnView())
+      ->setMainColumn(array(
+        $page,
+      ))
+      ->setSideColumn($sidebar)
+      ->setDisplay(PHUITwoColumnView::DISPLAY_LEFT)
+      ->addClass('phame-home-view');
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $page,
+          $phame_view,
       ));
 
 
@@ -83,27 +96,16 @@ final class PhameHomeController extends PhamePostController {
         ->setHref($this->getApplicationURI('post/'))
         ->setName(pht('All Posts')));
 
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-star')
-        ->setHref($this->getApplicationURI('blog/'))
-        ->setName(pht('Active Blogs')));
-
     return $actions;
   }
+
+  private function renderBlogs($viewer, $blogs) {}
 
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $can_create = $this->hasApplicationCapability(
       PhameBlogCreateCapability::CAPABILITY);
-
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('New Post'))
-        ->setHref($this->getApplicationURI('/post/new/'))
-        ->setIcon('fa-plus-square')
-        ->setWorkflow(true));
 
     $crumbs->addAction(
       id(new PHUIListItemView())

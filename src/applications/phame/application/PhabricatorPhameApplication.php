@@ -54,7 +54,6 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
           'preview/(?P<id>\d+)/' => 'PhamePostPreviewController',
           'preview/' => 'PhabricatorMarkupPreviewController',
           'framed/(?P<id>\d+)/' => 'PhamePostFramedController',
-          'new/' => 'PhamePostNewController',
           'move/(?P<id>\d+)/' => 'PhamePostMoveController',
           'comment/(?P<id>[1-9]\d*)/' => 'PhamePostCommentController',
         ),
