@@ -163,21 +163,23 @@ abstract class PhameLiveController extends PhameController {
 
     $crumbs->setBorder(true);
 
-    if ($post) {
-      if ($is_live) {
-        if ($is_external) {
-          $blog_uri = $blog->getExternalLiveURI();
+    if ($blog) {
+      if ($post) {
+        if ($is_live) {
+          if ($is_external) {
+            $blog_uri = $blog->getExternalLiveURI();
+          } else {
+            $blog_uri = $blog->getInternalLiveURI();
+          }
         } else {
-          $blog_uri = $blog->getInternalLiveURI();
+          $blog_uri = $blog->getViewURI();
         }
       } else {
-        $blog_uri = $blog->getViewURI();
+        $blog_uri = null;
       }
-    } else {
-      $blog_uri = null;
-    }
 
-    $crumbs->addTextCrumb($blog->getName(), $blog_uri);
+      $crumbs->addTextCrumb($blog->getName(), $blog_uri);
+    }
 
     if ($post) {
       $crumbs->addTextCrumb($post->getTitle());

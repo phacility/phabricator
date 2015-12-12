@@ -42,7 +42,7 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
 
         // NOTE: The live routes include an initial "/", so leave it off
         // this route.
-        '(?P<live>live)/(?P<blogID>[^/]+)' => $this->getLiveRoutes(),
+        '(?P<live>live)/(?P<blogID>\d+)' => $this->getLiveRoutes(),
         'post/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhamePostListController',
           'blogger/(?P<bloggername>[\w\.-_]+)/' => 'PhamePostListController',
@@ -61,7 +61,7 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhameBlogListController',
           'archive/(?P<id>[^/]+)/' => 'PhameBlogArchiveController',
           'edit/(?P<id>[^/]+)/' => 'PhameBlogEditController',
-          'view/(?P<blogID>[^/]+)/' => 'PhameBlogViewController',
+          'view/(?P<blogID>\d+)/' => 'PhameBlogViewController',
           'manage/(?P<id>[^/]+)/' => 'PhameBlogManageController',
           'feed/(?P<id>[^/]+)/' => 'PhameBlogFeedController',
           'new/' => 'PhameBlogEditController',
@@ -92,7 +92,7 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
     return array(
       '/' => array(
         '' => 'PhameBlogViewController',
-        'post/(?P<id>[^/]+)/(?:(?P<slug>[^/]+)/)?' => 'PhamePostViewController',
+        'post/(?P<id>\d+)/(?:(?P<slug>[^/]+)/)?' => 'PhamePostViewController',
       ),
     );
   }
