@@ -21,19 +21,29 @@ final class PhabricatorOwnersPackageSearchEngine
         ->setLabel(pht('Authority'))
         ->setKey('authorityPHIDs')
         ->setAliases(array('authority', 'authorities'))
+        ->setConduitKey('owners')
+        ->setDescription(
+          pht('Search for packages with specific owners.'))
         ->setDatasource(new PhabricatorProjectOrUserDatasource()),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Repositories'))
         ->setKey('repositoryPHIDs')
+        ->setConduitKey('repositories')
         ->setAliases(array('repository', 'repositories'))
+        ->setDescription(
+          pht('Search for packages by included repositories.'))
         ->setDatasource(new DiffusionRepositoryDatasource()),
       id(new PhabricatorSearchStringListField())
         ->setLabel(pht('Paths'))
         ->setKey('paths')
-        ->setAliases(array('path')),
+        ->setAliases(array('path'))
+        ->setDescription(
+          pht('Search for packages affecting specific paths.')),
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('statuses')
         ->setLabel(pht('Status'))
+        ->setDescription(
+          pht('Search for active or archived packages.'))
         ->setOptions(
           id(new PhabricatorOwnersPackage())
             ->getStatusNameMap()),

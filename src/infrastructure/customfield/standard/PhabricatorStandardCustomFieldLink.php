@@ -84,4 +84,7 @@ final class PhabricatorStandardCustomFieldLink
     return new AphrontStringHTTPParameterType();
   }
 
+  protected function newConduitSearchParameterType() {
+    return new ConduitStringListParameterType();
+  }
 }

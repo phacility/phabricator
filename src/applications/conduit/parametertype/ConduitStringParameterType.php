@@ -1,41 +1,34 @@
 <?php
 
-final class ConduitEpochParameterType
+final class ConduitStringParameterType
   extends ConduitListParameterType {
 
   protected function getParameterValue(array $request, $key) {
     $value = parent::getParameterValue($request, $key);
 
-    if (!is_int($value)) {
+    if (!is_string($value)) {
       $this->raiseValidationException(
         $request,
         $key,
-        pht('Expected epoch timestamp as integer, got something else.'));
-    }
-
-    if ($value <= 0) {
-      $this->raiseValidationException(
-        $request,
-        $key,
-        pht('Epoch timestamp must be larger than 0, got %d.', $value));
+        pht('Expected string, got something else.'));
     }
 
     return $value;
   }
 
   protected function getParameterTypeName() {
-    return 'epoch';
+    return 'string';
   }
 
   protected function getParameterFormatDescriptions() {
     return array(
-      pht('Epoch timestamp, as an integer.'),
+      pht('A string.'),
     );
   }
 
   protected function getParameterExamples() {
     return array(
-      '1450019509',
+      '"papaya"',
     );
   }
 

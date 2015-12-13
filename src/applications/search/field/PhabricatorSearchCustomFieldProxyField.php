@@ -63,4 +63,12 @@ final class PhabricatorSearchCustomFieldProxyField
       $this->getValue());
   }
 
+  public function getDescription() {
+    return $this->getCustomField()->getFieldDescription();
+  }
+
+  protected function newConduitParameterType() {
+    return $this->getCustomField()->getConduitSearchParameterType();
+  }
+
 }

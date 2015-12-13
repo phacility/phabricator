@@ -14,4 +14,8 @@ final class PhabricatorSearchDatasourceField
     return $this;
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitStringListParameterType();
+  }
+
 }

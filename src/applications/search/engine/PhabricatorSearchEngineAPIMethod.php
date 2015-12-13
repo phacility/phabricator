@@ -196,13 +196,13 @@ EOTEXT
       );
 
     $head_builtin = pht('Builtin Order');
-    $head_description = pht('Description');
+    $head_label = pht('Label');
     $head_columns = pht('Columns');
 
     $orders = $query->getBuiltinOrders();
 
     $table = array();
-    $table[] = "| {$head_builtin} | {$head_description} | {$head_columns} |";
+    $table[] = "| {$head_builtin} | {$head_label} | {$head_columns} |";
     $table[] = '|-----------------|---------------------|-----------------|';
     foreach ($orders as $key => $order) {
       $name = $order['name'];
@@ -309,6 +309,10 @@ These are the fields available on this object type:
 
 EOTEXT
       );
+
+    $head_key = pht('Key');
+    $head_type = pht('Type');
+    $head_description = pht('Description');
 
     $specs = $engine->getAllConduitFieldSpecifications();
 

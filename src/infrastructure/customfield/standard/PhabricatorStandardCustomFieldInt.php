@@ -116,5 +116,8 @@ final class PhabricatorStandardCustomFieldInt
     return new AphrontIntHTTPParameterType();
   }
 
+  protected function newConduitSearchParameterType() {
+    return new ConduitIntParameterType();
+  }
 
 }

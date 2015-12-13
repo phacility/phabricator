@@ -99,5 +99,8 @@ final class PhabricatorStandardCustomFieldRemarkup
     return new AphrontStringHTTPParameterType();
   }
 
+  public function shouldAppearInApplicationSearch() {
+    return false;
+  }
 
 }

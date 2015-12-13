@@ -1337,6 +1337,17 @@ abstract class PhabricatorCustomField extends Phobject {
     return false;
   }
 
+  public function getConduitSearchParameterType() {
+    return $this->newConduitSearchParameterType();
+  }
+
+  protected function newConduitSearchParameterType() {
+    if ($this->proxy) {
+      return $this->proxy->newConduitSearchParameterType();
+    }
+    return null;
+  }
+
 
 /* -(  Herald  )------------------------------------------------------------- */
 

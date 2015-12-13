@@ -67,4 +67,8 @@ final class PhabricatorStandardCustomFieldText
     return new AphrontStringHTTPParameterType();
   }
 
+  public function shouldAppearInApplicationSearch() {
+    return false;
+  }
+
 }
