@@ -4,6 +4,7 @@ final class PhabricatorSearchDatasourceField
   extends PhabricatorSearchTokenizerField {
 
   private $datasource;
+  private $conduitParameterType;
 
   protected function newDatasource() {
     return id(clone $this->datasource);
@@ -14,8 +15,17 @@ final class PhabricatorSearchDatasourceField
     return $this;
   }
 
+  public function setConduitParameterType(ConduitParameterType $type) {
+    $this->conduitParameterType = $type;
+    return $this;
+  }
+
   protected function newConduitParameterType() {
-    return new ConduitStringListParameterType();
+    if (!$this->conduitParameterType) {
+      return new ConduitStringListParameterType();
+    }
+
+    return $this->conduitParameterType;
   }
 
 }

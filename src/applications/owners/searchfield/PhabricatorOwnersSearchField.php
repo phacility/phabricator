@@ -15,4 +15,8 @@ final class PhabricatorOwnersSearchField
     return new PhabricatorPeopleOwnerDatasource();
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitUserListParameterType();
+  }
+
 }

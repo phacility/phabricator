@@ -48,20 +48,30 @@ final class ManiphestTaskSearchEngine
       id(new PhabricatorOwnersSearchField())
         ->setLabel(pht('Assigned To'))
         ->setKey('assignedPHIDs')
-        ->setAliases(array('assigned')),
+        ->setConduitKey('assigned')
+        ->setAliases(array('assigned'))
+        ->setDescription(
+          pht('Search for tasks owned by a user from a list.')),
       id(new PhabricatorUsersSearchField())
         ->setLabel(pht('Authors'))
         ->setKey('authorPHIDs')
-        ->setAliases(array('author', 'authors')),
+        ->setAliases(array('author', 'authors'))
+        ->setDescription(
+          pht('Search for tasks with given authors.')),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Statuses'))
         ->setKey('statuses')
         ->setAliases(array('status'))
+        ->setDescription(
+          pht('Search for tasks with given statuses.'))
         ->setDatasource(new ManiphestTaskStatusFunctionDatasource()),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Priorities'))
         ->setKey('priorities')
         ->setAliases(array('priority'))
+        ->setDescription(
+          pht('Search for tasks with given priorities.'))
+        ->setConduitParameterType(new ConduitIntListParameterType())
         ->setDatasource(new ManiphestTaskPriorityDatasource()),
       id(new PhabricatorSearchTextField())
         ->setLabel(pht('Contains Words'))
