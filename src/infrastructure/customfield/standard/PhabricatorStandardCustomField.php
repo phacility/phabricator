@@ -440,7 +440,7 @@ abstract class PhabricatorStandardCustomField
   }
 
   protected function newStandardEditField() {
-    $short = 'custom.'.$this->getRawStandardFieldKey();
+    $short = $this->getModernFieldKey();
 
     return parent::newStandardEditField()
       ->setEditTypeKey($short)
@@ -449,6 +449,18 @@ abstract class PhabricatorStandardCustomField
 
   public function shouldAppearInConduitTransactions() {
     return true;
+  }
+
+  public function shouldAppearInConduitDictionary() {
+    return true;
+  }
+
+  public function getModernFieldKey() {
+    return 'custom.'.$this->getRawStandardFieldKey();
+  }
+
+  public function getConduitDictionaryValue() {
+    return $this->getFieldValue();
   }
 
 }

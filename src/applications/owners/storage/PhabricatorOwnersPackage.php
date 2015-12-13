@@ -6,7 +6,8 @@ final class PhabricatorOwnersPackage
     PhabricatorPolicyInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorCustomFieldInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorConduitResultInterface {
 
   protected $name;
   protected $originalName;
@@ -363,6 +364,35 @@ final class PhabricatorOwnersPackage
 
       $this->delete();
     $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      'name' => array(
+        'type' => 'string',
+        'description' => pht('The name of the package.'),
+      ),
+      'description' => array(
+        'type' => 'string',
+        'description' => pht('The package description.'),
+      ),
+      'status' => array(
+        'type' => 'string',
+        'description' => pht('Active or archived status of the package.'),
+      ),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getName(),
+      'description' => $this->getDescription(),
+      'status' => $this->getStatus(),
+    );
   }
 
 }

@@ -1174,6 +1174,14 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
   public function getSearchFieldsForConduit() {
     $fields = $this->buildSearchFields();
+
+    // These are handled separately for Conduit, so don't show them as
+    // supported.
+    unset($fields['ids']);
+    unset($fields['phids']);
+    unset($fields['order']);
+    unset($fields['limit']);
+
     return $fields;
   }
 
@@ -1220,6 +1228,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     $query = $this->buildQueryFromSavedQuery($saved_query);
     $pager = $this->newPagerForSavedQuery($saved_query);
 
+    $this->setAutomaticConstraintsForConduit($query, $request, $constraints);
     $this->setQueryOrderForConduit($query, $request);
     $this->setPagerLimitForConduit($pager, $request);
     $this->setPagerOffsetsForConduit($pager, $request);
@@ -1269,12 +1278,34 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
     $field_extensions = array();
     foreach ($extensions as $key => $extension) {
+      $extension->setViewer($this->requireViewer());
+
+      if (!$extension->supportsObject($object)) {
+        continue;
+      }
+
       if ($extension->getFieldSpecificationsForConduit($object)) {
         $field_extensions[$key] = $extension;
       }
     }
 
     return $field_extensions;
+  }
+
+  private function setAutomaticConstraintsForConduit(
+    $query,
+    ConduitAPIRequest $request,
+    array $constraints) {
+
+    $with_ids = idx($constraints, 'ids');
+    if ($with_ids) {
+      $query->withIDs($with_ids);
+    }
+
+    $with_phids = idx($constraints, 'phids');
+    if ($with_phids) {
+      $query->withPHIDs($with_phids);
+    }
   }
 
   private function setQueryOrderForConduit($query, ConduitAPIRequest $request) {

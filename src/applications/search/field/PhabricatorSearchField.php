@@ -271,4 +271,14 @@ abstract class PhabricatorSearchField extends Phobject {
 
     return $list;
   }
+
+
+  public function getKeyForConduit() {
+    // TODO: This shouldn't really be different, but internal handling of
+    // custom field keys is a bit of a mess for now.
+    return $this->getKey();
+  }
+
+
+
 }

@@ -143,13 +143,18 @@ EOTEXT
     $head_type = pht('Type');
     $head_desc = pht('Description');
 
+    $desc_ids = pht('Search for specific objects by ID.');
+    $desc_phids = pht('Search for specific objects by PHID.');
+
     $fields = $engine->getSearchFieldsForConduit();
 
     $table = array();
     $table[] = "| {$head_key} | {$head_label} | {$head_type} | {$head_desc} |";
     $table[] = '|-------------|---------------|--------------|--------------|';
+    $table[] = "| `ids` | **IDs** | `list<int>` | {$desc_ids} |";
+    $table[] = "| `phids` | **PHIDs** | `list<phid>` | {$desc_phids} |";
     foreach ($fields as $field) {
-      $key = $field->getKey();
+      $key = $field->getKeyForConduit();
       $label = $field->getLabel();
 
       // TODO: Support generating and surfacing this information.

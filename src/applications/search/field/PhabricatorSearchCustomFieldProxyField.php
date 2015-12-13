@@ -26,12 +26,20 @@ final class PhabricatorSearchCustomFieldProxyField
     return $this;
   }
 
+  public function getLabel() {
+    return $this->getCustomField()->getFieldName();
+  }
+
   public function getCustomField() {
     return $this->customField;
   }
 
   protected function getDefaultValue() {
     return null;
+  }
+
+  public function getKeyForConduit() {
+    return $this->getCustomField()->getModernFieldKey();
   }
 
   protected function getValueExistsInRequest(AphrontRequest $request, $key) {
