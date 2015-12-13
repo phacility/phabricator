@@ -37,6 +37,10 @@ abstract class ConduitAPIMethod
    */
   abstract public function getMethodDescription();
 
+  public function getMethodDocumentation() {
+    return null;
+  }
+
   abstract protected function defineParamTypes();
   abstract protected function defineReturnType();
 

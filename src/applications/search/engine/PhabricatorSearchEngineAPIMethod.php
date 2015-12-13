@@ -39,6 +39,12 @@ abstract class PhabricatorSearchEngineAPIMethod
   }
 
   final public function getMethodDescription() {
+    return pht(
+      'This is a standard **ApplicationSearch** method which will let you '.
+      'list, query, or search for objects.');
+  }
+
+  final public function getMethodDocumentation() {
     $viewer = $this->getViewer();
 
     $engine = $this->newSearchEngine()
@@ -48,26 +54,29 @@ abstract class PhabricatorSearchEngineAPIMethod
 
     $out = array();
 
-    $out[] = pht(<<<EOTEXT
-This is a standard **ApplicationSearch** method which will let you list, query,
-or search for objects.
+    $out[] = $this->buildQueriesBox($engine);
+    $out[] = $this->buildConstraintsBox($engine);
+    $out[] = $this->buildOrderBox($engine, $query);
+    $out[] = $this->buildFieldsBox($engine);
+    $out[] = $this->buildPagingBox($engine);
 
-EOTEXT
-      );
+    return $out;
+  }
 
-    $out[] = pht(<<<EOTEXT
-Prebuilt Queries
-----------------
+  private function buildQueriesBox(
+    PhabricatorApplicationSearchEngine $engine) {
+    $viewer = $this->getViewer();
 
-You can use a builtin or saved query as a starting point by passing it with
-`queryKey`. If you don't specify a `queryKey`, the query will start with no
-constraints.
+    $info = pht(<<<EOTEXT
+You can choose a builtin or saved query as a starting point for filtering
+results by selecting it with `queryKey`. If you don't specify a `queryKey`,
+the query will start with no constraints.
 
 For example, many applications have builtin queries like `"active"` or
 `"open"` to find only active or enabled results. To use a `queryKey`, specify
 it like this:
 
-```lang=json
+```lang=json, name="Selecting a Builtin Query"
 {
   ...
   "queryKey": "active",
@@ -75,115 +84,145 @@ it like this:
 }
 ```
 
+The table below shows the keys to use to select builtin queries and your
+saved queries, but you can also use **any** query you run via the web UI as a
+starting point. You can find the key for a query by examining the URI after
+running a normal search.
+
 You can use these keys to select builtin queries and your configured saved
 queries:
 EOTEXT
       );
 
-    $head_querykey = pht('Query Key');
-    $head_name = pht('Name');
-    $head_builtin = pht('Builtin');
-
     $named_queries = $engine->loadAllNamedQueries();
 
-    $table = array();
-    $table[] = "| {$head_querykey} | {$head_name} | {$head_builtin} |";
-    $table[] = '|------------------|--------------|-----------------|';
+    $rows = array();
     foreach ($named_queries as $named_query) {
-      $key = $named_query->getQueryKey();
-      $name = $named_query->getQueryName();
       $builtin = $named_query->getIsBuiltin()
         ? pht('Builtin')
         : pht('Custom');
 
-      $table[] = "| `{$key}` | {$name} | {$builtin} |";
-    }
-    $table = implode("\n", $table);
-    $out[] = $table;
-
-    $out[] = pht(<<<EOTEXT
-You can also use **any** query you run via the web UI as a starting point. You
-can find the key for a query by examining the URI after running a normal
-search.
-EOTEXT
+      $rows[] = array(
+        $named_query->getQueryKey(),
+        $named_query->getQueryName(),
+        $builtin,
       );
+    }
 
-    $out[] = pht(<<<EOTEXT
-Custom Constraints
-------------------
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('Query Key'),
+          pht('Name'),
+          pht('Builtin'),
+        ))
+      ->setColumnClasses(
+        array(
+          'prewrap',
+          'pri wide',
+          null,
+        ));
 
-You can add custom constraints to the basic query by passing `constraints`.
-This will let you filter results (for example, show only results with a
-certain state, status, or owner).
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Builtin and Saved Queries'))
+      ->setCollapsed(true)
+      ->appendChild($this->buildRemarkup($info))
+      ->appendChild($table);
+  }
+
+  private function buildConstraintsBox(
+    PhabricatorApplicationSearchEngine $engine) {
+
+    $info = pht(<<<EOTEXT
+You can apply custom constraints by passing a dictionary in `constraints`.
+This will let you search for specific sets of results (for example, you may
+want show only results with a certain state, status, or owner).
+
+
+If you specify both a `queryKey` and `constraints`, the builtin or saved query
+will be applied first as a starting point, then any additional values in
+`constraints` will be applied, overwriting the defaults from the original query.
 
 Specify constraints like this:
 
-```lang=json
+```lang=json, name="Example Custom Constraints"
 {
   ...
   "constraints": {
-    "authorPHIDs": ["PHID-USER-1111", "PHID-USER-2222"],
-    "statuses": ["open", "closed"]
+    "authors": ["PHID-USER-1111", "PHID-USER-2222"],
+    "statuses": ["open", "closed"],
+    ...
   },
   ...
 }
 ```
 
-If you specify both a `queryKey` and `constraints`, the basic query
-configuration will be applied first as a starting point, then any additional
-values in `constraints` will be applied, overwriting the defaults from the
-original query.
-
 This API endpoint supports these constraints:
 EOTEXT
       );
 
-    $head_key = pht('Key');
-    $head_label = pht('Label');
-    $head_type = pht('Type');
-    $head_desc = pht('Description');
-
-    $desc_ids = pht('Search for specific objects by ID.');
-    $desc_phids = pht('Search for specific objects by PHID.');
-
     $fields = $engine->getSearchFieldsForConduit();
 
-    $table = array();
-    $table[] = "| {$head_key} | {$head_label} | {$head_type} | {$head_desc} |";
-    $table[] = '|-------------|---------------|--------------|--------------|';
-    $table[] = "| `ids` | **IDs** | `list<int>` | {$desc_ids} |";
-    $table[] = "| `phids` | **PHIDs** | `list<phid>` | {$desc_phids} |";
+    $rows = array();
     foreach ($fields as $field) {
       $key = $field->getConduitKey();
       $label = $field->getLabel();
 
       $type_object = $field->getConduitParameterType();
       if ($type_object) {
-        $type = '`'.$type_object->getTypeName().'`';
+        $type = $type_object->getTypeName();
         $description = $field->getDescription();
       } else {
-        $type = '';
-        $description = '//'.pht('Not Supported').'//';
+        $type = null;
+        $description = phutil_tag('em', array(), pht('Not supported.'));
       }
 
-      $table[] = "| `{$key}` | **{$label}** | {$type} | {$description}";
+      $rows[] = array(
+        $key,
+        $label,
+        $type,
+        $description,
+      );
     }
-    $table = implode("\n", $table);
-    $out[] = $table;
 
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('Key'),
+          pht('Label'),
+          pht('Type'),
+          pht('Description'),
+        ))
+      ->setColumnClasses(
+        array(
+          'prewrap',
+          'pri',
+          'prewrap',
+          'wide',
+        ));
 
-    $out[] = pht(<<<EOTEXT
-Result Order
-------------
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Custom Query Constraints'))
+      ->setCollapsed(true)
+      ->appendChild($this->buildRemarkup($info))
+      ->appendChild($table);
+  }
 
-Use `order` to choose an ordering for the results. Either specify a single
-key from the builtin orders (these are a set of meaningful, high-level,
-human-readable orders) or specify a list of low-level columns.
+  private function buildOrderBox(
+    PhabricatorApplicationSearchEngine $engine,
+    $query) {
+
+    $orders_info = pht(<<<EOTEXT
+Use `order` to choose an ordering for the results.
+
+Either specify a single key from the builtin orders (these are a set of
+meaningful, high-level, human-readable orders) or specify a custom list of
+low-level columns.
 
 To use a high-level order, choose a builtin order from the table below
 and specify it like this:
 
-```lang=json
+```lang=json, name="Choosing a Result Order"
 {
   ...
   "order": "newest",
@@ -195,34 +234,46 @@ These builtin orders are available:
 EOTEXT
       );
 
-    $head_builtin = pht('Builtin Order');
-    $head_label = pht('Label');
-    $head_columns = pht('Columns');
-
     $orders = $query->getBuiltinOrders();
 
-    $table = array();
-    $table[] = "| {$head_builtin} | {$head_label} | {$head_columns} |";
-    $table[] = '|-----------------|---------------------|-----------------|';
+    $rows = array();
     foreach ($orders as $key => $order) {
-      $name = $order['name'];
-      $columns = implode(', ', $order['vector']);
-      $table[] = "| `{$key}` | {$name} | {$columns} |";
+      $rows[] = array(
+        $key,
+        $order['name'],
+        implode(', ', $order['vector']),
+      );
     }
-    $table = implode("\n", $table);
-    $out[] = $table;
 
-    $out[] = pht(<<<EOTEXT
-You can choose a low-level column order instead. This is an advanced feature.
+    $orders_table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('Key'),
+          pht('Description'),
+          pht('Columns'),
+        ))
+      ->setColumnClasses(
+        array(
+          'pri',
+          '',
+          'wide',
+        ));
 
-In your custom order: each column may only be specified once; each column may
-be prefixed with "-" to invert the order; the last column must be unique; and
-no column other than the last may be unique.
+    $columns_info = pht(<<<EOTEXT
+You can choose a low-level column order instead. To do this, provide a list
+of columns instead of a single key. This is an advanced feature.
+
+In a custom column order:
+
+  - each column may only be specified once;
+  - each column may be prefixed with `-` to invert the order;
+  - the last column must be a unique column, usually `id`; and
+  - no column other than the last may be unique.
 
 To use a low-level order, choose a sequence of columns and specify them like
 this:
 
-```lang=json
+```lang=json, name="Using a Custom Order"
 {
   ...
   "order": ["color", "-name", "id"],
@@ -234,49 +285,49 @@ These low-level columns are available:
 EOTEXT
       );
 
-    $head_column = pht('Column Key');
-    $head_unique = pht('Unique');
-
     $columns = $query->getOrderableColumns();
-
-    $table = array();
-    $table[] = "| {$head_column} | {$head_unique} |";
-    $table[] = '|----------------|----------------|';
+    $rows = array();
     foreach ($columns as $key => $column) {
-      $unique = idx($column, 'unique')
-        ? pht('Yes')
-        : pht('No');
-
-      $table[] = "| `{$key}` | {$unique} |";
-    }
-    $table = implode("\n", $table);
-    $out[] = $table;
-
-
-    $out[] = pht(<<<EOTEXT
-Result Format
--------------
-
-The result format is a dictionary with several fields:
-
-  - `data`: Contains the actual results, as a list of dictionaries.
-  - `query`: Details about the query which was issued.
-  - `cursor`: Information about how to issue another query to get the next
-    (or previous) page of results. See "Paging and Limits" below.
-
-EOTEXT
+      $rows[] = array(
+        $key,
+        idx($column, 'unique') ? pht('Yes') : pht('No'),
       );
+    }
 
-    $out[] = pht(<<<EOTEXT
-Fields
-------
+    $columns_table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('Key'),
+          pht('Unique'),
+        ))
+      ->setColumnClasses(
+        array(
+          'pri',
+          'wide',
+        ));
 
-The `data` field of the result contains a list of results. Each result has
-some metadata and a `fields` key, which contains the primary object fields.
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Result Ordering'))
+      ->setCollapsed(true)
+      ->appendChild($this->buildRemarkup($orders_info))
+      ->appendChild($orders_table)
+      ->appendChild($this->buildRemarkup($columns_info))
+      ->appendChild($columns_table);
+  }
+
+  private function buildFieldsBox(
+    PhabricatorApplicationSearchEngine $engine) {
+
+    $info = pht(<<<EOTEXT
+Objects matching your query are returned as a list of dictionaries in the
+`data` property of the results. Each dictionary has some metadata and a
+`fields` key, which contains the information abou the object that most callers
+will be interested in.
 
 For example, the results may look something like this:
 
-```lang=json
+```lang=json, name="Example Results"
 {
   ...
   "data": [
@@ -306,31 +357,47 @@ This result structure is standardized across all search methods, but the
 available fields differ from application to application.
 
 These are the fields available on this object type:
-
 EOTEXT
       );
 
-    $head_key = pht('Key');
-    $head_type = pht('Type');
-    $head_description = pht('Description');
-
     $specs = $engine->getAllConduitFieldSpecifications();
 
-    $table = array();
-    $table[] = "| {$head_key} | {$head_type} | {$head_description} |";
-    $table[] = '|-------------|--------------|---------------------|';
+    $rows = array();
     foreach ($specs as $key => $spec) {
       $type = idx($spec, 'type');
       $description = idx($spec, 'description');
-      $table[] = "| `{$key}` | `{$type}` | {$description} |";
+      $rows[] = array(
+        $key,
+        $type,
+        $description,
+      );
     }
-    $table = implode("\n", $table);
-    $out[] = $table;
 
-    $out[] = pht(<<<EOTEXT
-Paging and Limits
------------------
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('Key'),
+          pht('Type'),
+          pht('Description'),
+        ))
+      ->setColumnClasses(
+        array(
+          'pri',
+          'mono',
+          'wide',
+        ));
 
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Object Fields'))
+      ->setCollapsed(true)
+      ->appendChild($this->buildRemarkup($info))
+      ->appendChild($table);
+  }
+
+  private function buildPagingBox(
+    PhabricatorApplicationSearchEngine $engine) {
+
+    $info = pht(<<<EOTEXT
 Queries are limited to returning 100 results at a time. If you want fewer
 results than this, you can use `limit` to specify a smaller limit.
 
@@ -338,10 +405,10 @@ If you want more results, you'll need to make additional queries to retrieve
 more pages of results.
 
 The result structure contains a `cursor` key with information you'll need in
-order to fetch the next page. After an initial query, it will usually look
-something like this:
+order to fetch the next page of results. After an initial query, it will
+usually look something like this:
 
-```lang=json
+```lang=json, name="Example Cursor Result"
 {
   ...
   "cursor": {
@@ -366,7 +433,7 @@ the first call in the `after` parameter when making the second call.
 If you do things correctly, you should get the second page of results, and
 a cursor structure like this:
 
-```lang=json
+```lang=json, name="Second Result Page"
 {
   ...
   "cursor": {
@@ -387,12 +454,22 @@ might be useful if you are rendering a web UI for a user and want to provide
 
 If `after` is `null`, there is no next page of results available. Likewise,
 if `before` is `null`, there are no previous results available.
-
 EOTEXT
       );
 
-    $out = implode("\n\n", $out);
-    return $out;
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Paging and Limits'))
+      ->setCollapsed(true)
+      ->appendChild($this->buildRemarkup($info));
   }
 
+  private function buildRemarkup($remarkup) {
+    $viewer = $this->getViewer();
+
+    $view = new PHUIRemarkupView($viewer, $remarkup);
+
+    return id(new PHUIBoxView())
+      ->appendChild($view)
+      ->addPadding(PHUI::PADDING_LARGE);
+  }
 }

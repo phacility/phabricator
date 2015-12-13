@@ -13,6 +13,10 @@ final class PhabricatorLiskSearchEngineExtension
     return pht('Lisk Builtin Properties');
   }
 
+  public function getExtensionOrder() {
+    return 5000;
+  }
+
   public function supportsObject($object) {
     if (!($object instanceof LiskDAO)) {
       return false;

@@ -17,6 +17,10 @@ final class PhabricatorPolicySearchEngineExtension
     return ($object instanceof PhabricatorPolicyInterface);
   }
 
+  public function getExtensionOrder() {
+    return 6000;
+  }
+
   public function getFieldSpecificationsForConduit($object) {
     return array(
       'policy' => array(

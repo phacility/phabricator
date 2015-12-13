@@ -9,6 +9,10 @@ final class ConduitResultSearchEngineExtension
     return true;
   }
 
+  public function getExtensionOrder() {
+    return 1000;
+  }
+
   public function getExtensionName() {
     return pht('Support for ConduitResultInterface');
   }

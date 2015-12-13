@@ -33,7 +33,7 @@ abstract class PhabricatorSearchEngineExtension extends Phobject {
   abstract public function supportsObject($object);
 
   public function getExtensionOrder() {
-    return 5000;
+    return 7000;
   }
 
   public function getSearchFields($object) {

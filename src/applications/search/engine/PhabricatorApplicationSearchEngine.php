@@ -1068,17 +1068,33 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       $fields[$conduit_key] = $field;
     }
 
-    $viewer = $this->requireViewer();
-    foreach ($fields as $key => $field) {
-      $field->setViewer($viewer);
-    }
-
     // These are handled separately for Conduit, so don't show them as
     // supported.
     unset($fields['ids']);
     unset($fields['phids']);
     unset($fields['order']);
     unset($fields['limit']);
+
+    // TODO: Clean these up, shortly.
+    $fields = array(
+      'ids' => id(new PhabricatorSearchDatasourceField())
+        ->setKey('ids')
+        ->setLabel(pht('IDs'))
+        ->setDescription(
+          pht('Search for objects with specific IDs.'))
+        ->setConduitParameterType(new ConduitIntListParameterType()),
+      'phids' => id(new PhabricatorSearchDatasourceField())
+        ->setKey('phids')
+        ->setLabel(pht('PHIDs'))
+        ->setDescription(
+          pht('Search for objects with specific PHIDs.'))
+        ->setConduitParameterType(new ConduitPHIDListParameterType()),
+    ) + $fields;
+
+    $viewer = $this->requireViewer();
+    foreach ($fields as $key => $field) {
+      $field->setViewer($viewer);
+    }
 
     return $fields;
   }

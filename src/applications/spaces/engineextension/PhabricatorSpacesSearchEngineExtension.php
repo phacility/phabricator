@@ -15,7 +15,7 @@ final class PhabricatorSpacesSearchEngineExtension
   }
 
   public function getExtensionOrder() {
-    return 3000;
+    return 4000;
   }
 
   public function supportsObject($object) {

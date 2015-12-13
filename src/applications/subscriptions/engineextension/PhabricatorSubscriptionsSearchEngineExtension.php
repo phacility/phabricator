@@ -15,7 +15,7 @@ final class PhabricatorSubscriptionsSearchEngineExtension
   }
 
   public function getExtensionOrder() {
-    return 1000;
+    return 2000;
   }
 
   public function supportsObject($object) {
