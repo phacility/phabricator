@@ -19,7 +19,6 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   private $application;
   private $viewer;
   private $errors = array();
-  private $customFields = false;
   private $request;
   private $context;
   private $controller;
@@ -164,35 +163,9 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       return $query;
     }
 
-    if ($object instanceof PhabricatorSubscribableInterface) {
-      if (!empty($map['subscriberPHIDs'])) {
-        $query->withEdgeLogicPHIDs(
-          PhabricatorObjectHasSubscriberEdgeType::EDGECONST,
-          PhabricatorQueryConstraint::OPERATOR_OR,
-          $map['subscriberPHIDs']);
-      }
-    }
-
-    if ($object instanceof PhabricatorProjectInterface) {
-      if (!empty($map['projectPHIDs'])) {
-        $query->withEdgeLogicConstraints(
-          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
-          $map['projectPHIDs']);
-      }
-    }
-
-    if ($object instanceof PhabricatorSpacesInterface) {
-      if (!empty($map['spacePHIDs'])) {
-        $query->withSpacePHIDs($map['spacePHIDs']);
-      } else {
-        // If the user doesn't search for objects in specific spaces, we
-        // default to "all active spaces you have permission to view".
-        $query->withSpaceIsArchived(false);
-      }
-    }
-
-    if ($object instanceof PhabricatorCustomFieldInterface) {
-      $this->applyCustomFieldsToQuery($query, $saved);
+    $extensions = $this->getEngineExtensions();
+    foreach ($extensions as $extension) {
+      $extension->applyConstraintsToQuery($object, $query, $saved, $map);
     }
 
     $order = $saved->getParameter('order');
@@ -272,32 +245,13 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
     $object = $this->newResultObject();
     if ($object) {
-      if ($object instanceof PhabricatorSubscribableInterface) {
-        $fields[] = id(new PhabricatorSearchSubscribersField())
-          ->setLabel(pht('Subscribers'))
-          ->setKey('subscriberPHIDs')
-          ->setAliases(array('subscriber', 'subscribers'));
-      }
-
-      if ($object instanceof PhabricatorProjectInterface) {
-        $fields[] = id(new PhabricatorProjectSearchField())
-          ->setKey('projectPHIDs')
-          ->setAliases(array('project', 'projects'))
-          ->setLabel(pht('Projects'));
-      }
-
-      if ($object instanceof PhabricatorSpacesInterface) {
-        if (PhabricatorSpacesNamespaceQuery::getSpacesExist()) {
-          $fields[] = id(new PhabricatorSpacesSearchField())
-            ->setKey('spacePHIDs')
-            ->setAliases(array('space', 'spaces'))
-            ->setLabel(pht('Spaces'));
+      $extensions = $this->getEngineExtensions();
+      foreach ($extensions as $extension) {
+        $extension_fields = $extension->getSearchFields($object);
+        foreach ($extension_fields as $extension_field) {
+          $fields[] = $extension_field;
         }
       }
-    }
-
-    foreach ($this->buildCustomFieldSearchFields() as $custom_field) {
-      $fields[] = $custom_field;
     }
 
     $query = $this->newQuery();
@@ -1089,89 +1043,6 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 /* -(  Application Search  )------------------------------------------------- */
 
 
-  /**
-   * Retrieve an object to use to define custom fields for this search.
-   *
-   * To integrate with custom fields, subclasses should override this method
-   * and return an instance of the application object which implements
-   * @{interface:PhabricatorCustomFieldInterface}.
-   *
-   * @return PhabricatorCustomFieldInterface|null Object with custom fields.
-   * @task appsearch
-   */
-  public function getCustomFieldObject() {
-    $object = $this->newResultObject();
-    if ($object instanceof PhabricatorCustomFieldInterface) {
-      return $object;
-    }
-    return null;
-  }
-
-
-  /**
-   * Get the custom fields for this search.
-   *
-   * @return PhabricatorCustomFieldList|null Custom fields, if this search
-   *   supports custom fields.
-   * @task appsearch
-   */
-  public function getCustomFieldList() {
-    if ($this->customFields === false) {
-      $object = $this->getCustomFieldObject();
-      if ($object) {
-        $fields = PhabricatorCustomField::getObjectFields(
-          $object,
-          PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
-        $fields->setViewer($this->requireViewer());
-      } else {
-        $fields = null;
-      }
-      $this->customFields = $fields;
-    }
-    return $this->customFields;
-  }
-
-
-  /**
-   * Applies data from a saved query to an executable query.
-   *
-   * @param PhabricatorCursorPagedPolicyAwareQuery Query to constrain.
-   * @param PhabricatorSavedQuery Saved query to read.
-   * @return void
-   */
-  protected function applyCustomFieldsToQuery(
-    PhabricatorCursorPagedPolicyAwareQuery $query,
-    PhabricatorSavedQuery $saved) {
-
-    $list = $this->getCustomFieldList();
-    if (!$list) {
-      return;
-    }
-
-    foreach ($list->getFields() as $field) {
-      $value = $field->applyApplicationSearchConstraintToQuery(
-        $this,
-        $query,
-        $saved->getParameter('custom:'.$field->getFieldIndex()));
-    }
-  }
-
-  private function buildCustomFieldSearchFields() {
-    $list = $this->getCustomFieldList();
-    if (!$list) {
-      return array();
-    }
-
-    $fields = array();
-    foreach ($list->getFields() as $field) {
-      $fields[] = id(new PhabricatorSearchCustomFieldProxyField())
-        ->setSearchEngine($this)
-        ->setCustomField($field);
-    }
-
-    return $fields;
-  }
-
   public function getSearchFieldsForConduit() {
     $standard_fields = $this->buildSearchFields();
 
@@ -1302,24 +1173,37 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     return $specifications;
   }
 
-  private function getConduitFieldExtensions() {
+  private function getEngineExtensions() {
     $extensions = PhabricatorSearchEngineExtension::getAllEnabledExtensions();
-    $object = $this->newQuery()->newResultObject();
 
-    $field_extensions = array();
     foreach ($extensions as $key => $extension) {
-      $extension->setViewer($this->requireViewer());
+      $extension
+        ->setViewer($this->requireViewer())
+        ->setSearchEngine($this);
+    }
 
+    $object = $this->newResultObject();
+    foreach ($extensions as $key => $extension) {
       if (!$extension->supportsObject($object)) {
-        continue;
-      }
-
-      if ($extension->getFieldSpecificationsForConduit($object)) {
-        $field_extensions[$key] = $extension;
+        unset($extensions[$key]);
       }
     }
 
-    return $field_extensions;
+    return $extensions;
+  }
+
+
+  private function getConduitFieldExtensions() {
+    $extensions = $this->getEngineExtensions();
+    $object = $this->newResultObject();
+
+    foreach ($extensions as $key => $extension) {
+      if (!$extension->getFieldSpecificationsForConduit($object)) {
+        unset($extensions[$key]);
+      }
+    }
+
+    return $extensions;
   }
 
   private function setAutomaticConstraintsForConduit(

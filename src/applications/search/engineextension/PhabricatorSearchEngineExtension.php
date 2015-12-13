@@ -3,6 +3,7 @@
 abstract class PhabricatorSearchEngineExtension extends Phobject {
 
   private $viewer;
+  private $searchEngine;
 
   final public function getExtensionKey() {
     return $this->getPhobjectClassConstant('EXTENSIONKEY');
@@ -17,9 +18,35 @@ abstract class PhabricatorSearchEngineExtension extends Phobject {
     return $this->viewer;
   }
 
+  final public function setSearchEngine(
+    PhabricatorApplicationSearchEngine $engine) {
+    $this->searchEngine = $engine;
+    return $this;
+  }
+
+  final public function getSearchEngine() {
+    return $this->searchEngine;
+  }
+
   abstract public function isExtensionEnabled();
   abstract public function getExtensionName();
   abstract public function supportsObject($object);
+
+  public function getExtensionOrder() {
+    return 5000;
+  }
+
+  public function getSearchFields($object) {
+    return array();
+  }
+
+  public function applyConstraintsToQuery(
+    $object,
+    $query,
+    PhabricatorSavedQuery $saved,
+    array $map) {
+    return;
+  }
 
   public function getFieldSpecificationsForConduit($object) {
     return array();
@@ -33,6 +60,7 @@ abstract class PhabricatorSearchEngineExtension extends Phobject {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
       ->setUniqueMethod('getExtensionKey')
+      ->setSortMethod('getExtensionOrder')
       ->execute();
   }
 

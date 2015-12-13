@@ -19,6 +19,7 @@ final class PhabricatorSearchEngineExtensionModule
     $rows = array();
     foreach ($extensions as $extension) {
       $rows[] = array(
+        $extension->getExtensionOrder(),
         $extension->getExtensionKey(),
         get_class($extension),
         $extension->getExtensionName(),
@@ -31,6 +32,7 @@ final class PhabricatorSearchEngineExtensionModule
     $table = id(new AphrontTableView($rows))
       ->setHeaders(
         array(
+          pht('Order'),
           pht('Key'),
           pht('Class'),
           pht('Name'),
@@ -38,6 +40,7 @@ final class PhabricatorSearchEngineExtensionModule
         ))
       ->setColumnClasses(
         array(
+          null,
           null,
           null,
           'wide pri',

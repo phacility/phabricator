@@ -17,6 +17,50 @@ final class PhabricatorCustomFieldSearchEngineExtension
     return ($object instanceof PhabricatorCustomFieldInterface);
   }
 
+  public function getExtensionOrder() {
+    return 9000;
+  }
+
+  public function getSearchFields($object) {
+    $engine = $this->getSearchEngine();
+    $custom_fields = $this->getCustomFields($object);
+
+    $fields = array();
+    foreach ($custom_fields as $field) {
+      $fields[] = id(new PhabricatorSearchCustomFieldProxyField())
+        ->setSearchEngine($engine)
+        ->setCustomField($field);
+    }
+
+    return $fields;
+  }
+
+  public function applyConstraintsToQuery(
+    $object,
+    $query,
+    PhabricatorSavedQuery $saved,
+    array $map) {
+
+    $engine = $this->getSearchEngine();
+    $fields = $this->getCustomFields($object);
+
+    foreach ($fields as $field) {
+      $field->applyApplicationSearchConstraintToQuery(
+        $engine,
+        $query,
+        $saved->getParameter('custom:'.$field->getFieldIndex()));
+    }
+  }
+
+  private function getCustomFields($object) {
+    $fields = PhabricatorCustomField::getObjectFields(
+      $object,
+      PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
+    $fields->setViewer($this->getViewer());
+
+    return $fields->getFields();
+  }
+
   public function getFieldSpecificationsForConduit($object) {
     $fields = PhabricatorCustomField::getObjectFields(
       $object,

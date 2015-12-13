@@ -14,8 +14,41 @@ final class PhabricatorSpacesSearchEngineExtension
     return pht('Support for Spaces');
   }
 
+  public function getExtensionOrder() {
+    return 3000;
+  }
+
   public function supportsObject($object) {
     return ($object instanceof PhabricatorSpacesInterface);
+  }
+
+  public function getSearchFields($object) {
+    $fields = array();
+
+    if (PhabricatorSpacesNamespaceQuery::getSpacesExist()) {
+      $fields[] = id(new PhabricatorSpacesSearchField())
+        ->setKey('spacePHIDs')
+        ->setConduitKey('spaces')
+        ->setAliases(array('space', 'spaces'))
+        ->setLabel(pht('Spaces'));
+    }
+
+    return $fields;
+  }
+
+  public function applyConstraintsToQuery(
+    $object,
+    $query,
+    PhabricatorSavedQuery $saved,
+    array $map) {
+
+    if (!empty($map['spacePHIDs'])) {
+      $query->withSpacePHIDs($map['spacePHIDs']);
+    } else {
+      // If the user doesn't search for objects in specific spaces, we
+      // default to "all active spaces you have permission to view".
+      $query->withSpaceIsArchived(false);
+    }
   }
 
   public function getFieldSpecificationsForConduit($object) {

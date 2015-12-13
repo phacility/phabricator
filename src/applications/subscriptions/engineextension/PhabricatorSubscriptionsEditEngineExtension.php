@@ -34,8 +34,6 @@ final class PhabricatorSubscriptionsEditEngineExtension
       $sub_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID(
         $object_phid);
     } else {
-      // TODO: Allow applications to provide default subscribers? Maniphest
-      // does this at a minimum.
       $sub_phids = array();
     }
 
