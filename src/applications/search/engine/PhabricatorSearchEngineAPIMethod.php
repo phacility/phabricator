@@ -39,8 +39,7 @@ abstract class PhabricatorSearchEngineAPIMethod
   }
 
   final public function getMethodDescription() {
-    // TODO: We don't currently have a real viewer in this method.
-    $viewer = PhabricatorUser::getOmnipotentUser();
+    $viewer = $this->getViewer();
 
     $engine = $this->newSearchEngine()
       ->setViewer($viewer);
@@ -76,7 +75,8 @@ it like this:
 }
 ```
 
-These builtin and saved queries are available:
+You can use these keys to select builtin queries and your configured saved
+queries:
 EOTEXT
       );
 

@@ -19,6 +19,8 @@ final class PhabricatorConduitConsoleController
       return new Aphront404Response();
     }
 
+    $method->setViewer($viewer);
+
     $call_uri = '/api/'.$method->getAPIMethodName();
 
     $status = $method->getMethodStatus();
