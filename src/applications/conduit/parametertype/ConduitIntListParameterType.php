@@ -18,7 +18,7 @@ final class ConduitIntListParameterType
       }
     }
 
-    return $this->validateIntList($request, $key, $list);
+    return $list;
   }
 
   protected function getParameterTypeName() {

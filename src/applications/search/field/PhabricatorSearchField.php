@@ -273,17 +273,26 @@ abstract class PhabricatorSearchField extends Phobject {
 
 
   protected function renderControl() {
+    $control = $this->newControl();
+
+    if (!$control) {
+      return null;
+    }
+
     // TODO: We should `setError($this->getShortError())` here, but it looks
     // terrible in the form layout.
 
-    return $this->newControl()
+    return $control
       ->setValue($this->getValueForControl())
       ->setName($this->getKey())
       ->setLabel($this->getLabel());
   }
 
   public function appendToForm(AphrontFormView $form) {
-    $form->appendControl($this->renderControl());
+    $control = $this->renderControl();
+    if ($control !== null) {
+      $form->appendControl($this->renderControl());
+    }
     return $this;
   }
 

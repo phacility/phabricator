@@ -26,7 +26,7 @@ abstract class ConduitParameterType extends Phobject {
 
 
   final public function getExists(array $request, $key) {
-    return $this->getValueExists($request, $key);
+    return $this->getParameterExists($request, $key);
   }
 
 

@@ -163,6 +163,13 @@ EOTEXT
 
     $fields = $engine->getSearchFieldsForConduit();
 
+    // As a convenience, put these fields at the very top, even if the engine
+    // specifies and alternate display order for the web UI. These fields are
+    // very important in the API and nearly useless in the web UI.
+    $fields = array_select_keys(
+      $fields,
+      array('ids', 'phids')) + $fields;
+
     $rows = array();
     foreach ($fields as $field) {
       $key = $field->getConduitKey();

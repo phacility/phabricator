@@ -10,7 +10,7 @@ final class ConduitResultSearchEngineExtension
   }
 
   public function getExtensionOrder() {
-    return 1000;
+    return 1500;
   }
 
   public function getExtensionName() {

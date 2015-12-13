@@ -94,9 +94,6 @@ final class ManiphestTaskSearchEngine
         ->setLabel(pht('Group By'))
         ->setKey('group')
         ->setOptions($this->getGroupOptions()),
-      id(new PhabricatorSearchStringListField())
-        ->setLabel(pht('Task IDs'))
-        ->setKey('ids'),
       id(new PhabricatorSearchDateField())
         ->setLabel(pht('Created After'))
         ->setKey('createdStart'),

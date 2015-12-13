@@ -1070,26 +1070,8 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
     // These are handled separately for Conduit, so don't show them as
     // supported.
-    unset($fields['ids']);
-    unset($fields['phids']);
     unset($fields['order']);
     unset($fields['limit']);
-
-    // TODO: Clean these up, shortly.
-    $fields = array(
-      'ids' => id(new PhabricatorSearchDatasourceField())
-        ->setKey('ids')
-        ->setLabel(pht('IDs'))
-        ->setDescription(
-          pht('Search for objects with specific IDs.'))
-        ->setConduitParameterType(new ConduitIntListParameterType()),
-      'phids' => id(new PhabricatorSearchDatasourceField())
-        ->setKey('phids')
-        ->setLabel(pht('PHIDs'))
-        ->setDescription(
-          pht('Search for objects with specific PHIDs.'))
-        ->setConduitParameterType(new ConduitPHIDListParameterType()),
-    ) + $fields;
 
     $viewer = $this->requireViewer();
     foreach ($fields as $key => $field) {
@@ -1145,7 +1127,6 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     $query = $this->buildQueryFromSavedQuery($saved_query);
     $pager = $this->newPagerForSavedQuery($saved_query);
 
-    $this->setAutomaticConstraintsForConduit($query, $request, $constraints);
     $this->setQueryOrderForConduit($query, $request);
     $this->setPagerLimitForConduit($pager, $request);
     $this->setPagerOffsetsForConduit($pager, $request);
@@ -1220,22 +1201,6 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     }
 
     return $extensions;
-  }
-
-  private function setAutomaticConstraintsForConduit(
-    $query,
-    ConduitAPIRequest $request,
-    array $constraints) {
-
-    $with_ids = idx($constraints, 'ids');
-    if ($with_ids) {
-      $query->withIDs($with_ids);
-    }
-
-    $with_phids = idx($constraints, 'phids');
-    if ($with_phids) {
-      $query->withPHIDs($with_phids);
-    }
   }
 
   private function setQueryOrderForConduit($query, ConduitAPIRequest $request) {
