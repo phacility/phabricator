@@ -16,6 +16,7 @@ abstract class PhabricatorSearchField extends Phobject {
   private $label;
   private $aliases = array();
   private $errors = array();
+  private $description;
 
 
 /* -(  Configuring Fields  )------------------------------------------------- */
@@ -160,6 +161,30 @@ abstract class PhabricatorSearchField extends Phobject {
     }
 
     return $this->getKey();
+  }
+
+
+  /**
+   * Set a human-readable description for this field.
+   *
+   * @param string Human-readable description.
+   * @return this
+   * @task config
+   */
+  public function setDescription($description) {
+    $this->description = $description;
+    return $this;
+  }
+
+
+  /**
+   * Get this field's human-readable description.
+   *
+   * @return string|null Human-readable description.
+   * @task config
+   */
+  public function getDescription() {
+    return $this->description;
   }
 
 

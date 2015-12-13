@@ -43,7 +43,9 @@ final class PhabricatorSubscriptionsSearchEngineExtension
       ->setLabel(pht('Subscribers'))
       ->setKey('subscriberPHIDs')
       ->setConduitKey('subscribers')
-      ->setAliases(array('subscriber', 'subscribers'));
+      ->setAliases(array('subscriber', 'subscribers'))
+      ->setDescription(
+        pht('Search for objects with certain subscribers.'));
 
     return $fields;
   }

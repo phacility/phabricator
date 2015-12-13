@@ -30,7 +30,9 @@ final class PhabricatorSpacesSearchEngineExtension
         ->setKey('spacePHIDs')
         ->setConduitKey('spaces')
         ->setAliases(array('space', 'spaces'))
-        ->setLabel(pht('Spaces'));
+        ->setLabel(pht('Spaces'))
+        ->setDescription(
+          pht('Search for objects in certain spaces.'));
     }
 
     return $fields;

@@ -42,7 +42,9 @@ final class PhabricatorProjectsSearchEngineExtension
       ->setKey('projectPHIDs')
       ->setConduitKey('projects')
       ->setAliases(array('project', 'projects'))
-      ->setLabel(pht('Projects'));
+      ->setLabel(pht('Projects'))
+      ->setDescription(
+        pht('Search for objects associated with given projects.'));
 
     return $fields;
   }

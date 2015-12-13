@@ -4,7 +4,7 @@ abstract class ConduitListParameterType
   extends ConduitParameterType {
 
   protected function getParameterValue(array $request, $key) {
-    $value = parent::getParameterValue();
+    $value = parent::getParameterValue($request, $key);
 
     if (!is_array($value)) {
       $this->raiseValidationException(
@@ -28,6 +28,22 @@ abstract class ConduitListParameterType
     }
 
     return $value;
+  }
+
+  protected function validateStringList(array $request, $key, array $list) {
+    foreach ($list as $idx => $item) {
+      if (!is_string($item)) {
+        $this->raiseValidationException(
+          $request,
+          $key,
+          pht(
+            'Expected a list of strings, but item with index "%s" is '.
+            'not a string.',
+            $idx));
+      }
+    }
+
+    return $list;
   }
 
   protected function getParameterDefault() {

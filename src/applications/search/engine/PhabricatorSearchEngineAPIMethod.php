@@ -160,8 +160,7 @@ EOTEXT
       $type_object = $field->getConduitParameterType();
       if ($type_object) {
         $type = '`'.$type_object->getTypeName().'`';
-        // TODO: Support generating and surfacing this information.
-        $description = pht('TODO');
+        $description = $field->getDescription();
       } else {
         $type = '';
         $description = '//'.pht('Not Supported').'//';

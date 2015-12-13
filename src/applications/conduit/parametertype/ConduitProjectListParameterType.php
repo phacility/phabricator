@@ -1,33 +1,33 @@
 <?php
 
-final class ConduitUserListParameterType
+final class ConduitProjectListParameterType
   extends ConduitListParameterType {
 
   protected function getParameterValue(array $request, $key) {
     $list = parent::getParameterValue($request, $key);
     $list = $this->validateStringList($request, $key, $list);
-    return id(new PhabricatorUserPHIDResolver())
+    return id(new PhabricatorProjectPHIDResolver())
       ->setViewer($this->getViewer())
       ->resolvePHIDs($list);
   }
 
   protected function getParameterTypeName() {
-    return 'list<user>';
+    return 'list<project>';
   }
 
   protected function getParameterFormatDescriptions() {
     return array(
-      pht('List of user PHIDs.'),
-      pht('List of usernames.'),
-      pht('List with a mixture of PHIDs and usernames.'),
+      pht('List of project PHIDs.'),
+      pht('List of project tags.'),
+      pht('List with a mixture of PHIDs and tags.'),
     );
   }
 
   protected function getParameterExamples() {
     return array(
-      '["PHID-USER-1111"]',
-      '["alincoln"]',
-      '["PHID-USER-2222", "alincoln"]',
+      '["PHID-PROJ-1111"]',
+      '["backend"]',
+      '["PHID-PROJ-2222", "frontend"]',
     );
   }
 

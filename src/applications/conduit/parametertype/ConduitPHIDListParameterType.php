@@ -1,6 +1,6 @@
 <?php
 
-final class ConduitStringListParameterType
+final class ConduitPHIDListParameterType
   extends ConduitListParameterType {
 
   protected function getParameterValue(array $request, $key) {
@@ -9,18 +9,18 @@ final class ConduitStringListParameterType
   }
 
   protected function getParameterTypeName() {
-    return 'list<string>';
+    return 'list<phid>';
   }
 
   protected function getParameterFormatDescriptions() {
     return array(
-      pht('List of strings.'),
+      pht('List of PHIDs.'),
     );
   }
 
   protected function getParameterExamples() {
     return array(
-      '["mango", "nectarine"]',
+      '["PHID-WXYZ-1111", "PHID-WXYZ-2222"]',
     );
   }
 
