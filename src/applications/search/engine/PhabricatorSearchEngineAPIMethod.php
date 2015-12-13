@@ -154,14 +154,20 @@ EOTEXT
     $table[] = "| `ids` | **IDs** | `list<int>` | {$desc_ids} |";
     $table[] = "| `phids` | **PHIDs** | `list<phid>` | {$desc_phids} |";
     foreach ($fields as $field) {
-      $key = $field->getKeyForConduit();
+      $key = $field->getConduitKey();
       $label = $field->getLabel();
 
-      // TODO: Support generating and surfacing this information.
-      $type = pht('TODO');
-      $description = pht('TODO');
+      $type_object = $field->getConduitParameterType();
+      if ($type_object) {
+        $type = '`'.$type_object->getTypeName().'`';
+        // TODO: Support generating and surfacing this information.
+        $description = pht('TODO');
+      } else {
+        $type = '';
+        $description = '//'.pht('Not Supported').'//';
+      }
 
-      $table[] = "| `{$key}` | **{$label}** | `{$type}` | {$description}";
+      $table[] = "| `{$key}` | **{$label}** | {$type} | {$description}";
     }
     $table = implode("\n", $table);
     $out[] = $table;

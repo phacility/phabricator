@@ -47,6 +47,7 @@ final class PhabricatorPasteSearchEngine
       id(new PhabricatorUsersSearchField())
         ->setAliases(array('authors'))
         ->setKey('authorPHIDs')
+        ->setConduitKey('authors')
         ->setLabel(pht('Authors')),
       id(new PhabricatorSearchStringListField())
         ->setKey('languages')

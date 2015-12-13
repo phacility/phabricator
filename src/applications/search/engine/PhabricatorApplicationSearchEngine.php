@@ -1173,7 +1173,34 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   }
 
   public function getSearchFieldsForConduit() {
-    $fields = $this->buildSearchFields();
+    $standard_fields = $this->buildSearchFields();
+
+    $fields = array();
+    foreach ($standard_fields as $field_key => $field) {
+      $conduit_key = $field->getConduitKey();
+
+      if (isset($fields[$conduit_key])) {
+        $other = $fields[$conduit_key];
+        $other_key = $other->getKey();
+
+        throw new Exception(
+          pht(
+            'SearchFields "%s" (of class "%s") and "%s" (of class "%s") both '.
+            'define the same Conduit key ("%s"). Keys must be unique.',
+            $field_key,
+            get_class($field),
+            $other_key,
+            get_class($other),
+            $conduit_key));
+      }
+
+      $fields[$conduit_key] = $field;
+    }
+
+    $viewer = $this->requireViewer();
+    foreach ($fields as $key => $field) {
+      $field->setViewer($viewer);
+    }
 
     // These are handled separately for Conduit, so don't show them as
     // supported.
@@ -1187,7 +1214,6 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
   public function buildConduitResponse(ConduitAPIRequest $request) {
     $viewer = $this->requireViewer();
-    $fields = $this->buildSearchFields();
 
     $query_key = $request->getValue('queryKey');
     if (!strlen($query_key)) {
@@ -1207,11 +1233,15 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       }
     }
 
-    foreach ($fields as $field) {
-      $field->setViewer($viewer);
-    }
-
     $constraints = $request->getValue('constraints', array());
+
+    $fields = $this->getSearchFieldsForConduit();
+
+    foreach ($fields as $key => $field) {
+      if (!$field->getConduitParameterType()) {
+        unset($fields[$key]);
+      }
+    }
 
     foreach ($fields as $field) {
       if (!$field->getValueExistsInConduitRequest($constraints)) {

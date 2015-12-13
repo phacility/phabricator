@@ -4,11 +4,13 @@
  * @task config Configuring Fields
  * @task error Handling Errors
  * @task io Reading and Writing Field Values
+ * @task conduit Integration with Conduit
  * @task util Utility Methods
  */
 abstract class PhabricatorSearchField extends Phobject {
 
   private $key;
+  private $conduitKey;
   private $viewer;
   private $value;
   private $label;
@@ -130,6 +132,37 @@ abstract class PhabricatorSearchField extends Phobject {
   }
 
 
+  /**
+   * Provide an alternate field key for Conduit.
+   *
+   * This can allow you to choose a more usable key for API endpoints.
+   * If no key is provided, the main key is used.
+   *
+   * @param string Alternate key for Conduit.
+   * @return this
+   * @task config
+   */
+  public function setConduitKey($conduit_key) {
+    $this->conduitKey = $conduit_key;
+    return $this;
+  }
+
+
+  /**
+   * Get the field key for use in Conduit.
+   *
+   * @return string Conduit key for this field.
+   * @task config
+   */
+  public function getConduitKey() {
+    if ($this->conduitKey !== null) {
+      return $this->conduitKey;
+    }
+
+    return $this->getKey();
+  }
+
+
 /* -(  Handling Errors  )---------------------------------------------------- */
 
 
@@ -205,14 +238,6 @@ abstract class PhabricatorSearchField extends Phobject {
     return $value;
   }
 
-  public function getValueExistsInConduitRequest(array $constraints) {
-    return array_key_exists($this->getKey(), $constraints);
-  }
-
-  public function readValueFromConduitRequest(array $constraints) {
-    return idx($constraints, $this->getKey());
-  }
-
 
 /* -(  Rendering Controls  )------------------------------------------------- */
 
@@ -235,6 +260,39 @@ abstract class PhabricatorSearchField extends Phobject {
   public function appendToForm(AphrontFormView $form) {
     $form->appendControl($this->renderControl());
     return $this;
+  }
+
+
+/* -(  Integration with Conduit  )------------------------------------------- */
+
+
+  /**
+   * @task conduit
+   */
+  final public function getConduitParameterType() {
+    $type = $this->newConduitParameterType();
+
+    if ($type) {
+      $type->setViewer($this->getViewer());
+    }
+
+    return $type;
+  }
+
+  protected function newConduitParameterType() {
+    return null;
+  }
+
+  public function getValueExistsInConduitRequest(array $constraints) {
+    return $this->getConduitParameterType()->getExists(
+      $constraints,
+      $this->getConduitKey());
+  }
+
+  public function readValueFromConduitRequest(array $constraints) {
+    return $this->getConduitParameterType()->getValue(
+      $constraints,
+      $this->getConduitKey());
   }
 
 
@@ -270,13 +328,6 @@ abstract class PhabricatorSearchField extends Phobject {
     }
 
     return $list;
-  }
-
-
-  public function getKeyForConduit() {
-    // TODO: This shouldn't really be different, but internal handling of
-    // custom field keys is a bit of a mess for now.
-    return $this->getKey();
   }
 
 

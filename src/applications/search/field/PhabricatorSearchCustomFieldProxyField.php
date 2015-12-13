@@ -38,7 +38,7 @@ final class PhabricatorSearchCustomFieldProxyField
     return null;
   }
 
-  public function getKeyForConduit() {
+  public function getConduitKey() {
     return $this->getCustomField()->getModernFieldKey();
   }
 
