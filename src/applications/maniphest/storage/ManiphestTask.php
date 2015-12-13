@@ -13,7 +13,8 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorDestructibleInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
-    PhabricatorSpacesInterface {
+    PhabricatorSpacesInterface,
+    PhabricatorConduitResultInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -390,6 +391,50 @@ final class ManiphestTask extends ManiphestDAO
 
   public function getSpacePHID() {
     return $this->spacePHID;
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      'title' => array(
+        'type' => 'string',
+        'description' => pht('The name of the object.'),
+      ),
+      'authorPHID' => array(
+        'type' => 'phid',
+        'description' => pht('Original task author.'),
+      ),
+      'ownerPHID' => array(
+        'type' => 'phid?',
+        'description' => pht('Current task owner.'),
+      ),
+      'status' => array(
+        'type' => 'string',
+        'description' => pht('Current task status.'),
+      ),
+      'priority' => array(
+        'type' => 'int',
+        'description' => pht('Task priority.'),
+      ),
+      'subpriority' => array(
+        'type' => 'double',
+        'description' => pht('Order within priority level.'),
+      ),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getTitle(),
+      'authorPHID' => $this->getAuthorPHID(),
+      'ownerPHID' => $this->getOwnerPHID(),
+      'status' => $this->getStatus(),
+      'priority' => (int)$this->getPriority(),
+      'subpriority' => (double)$this->getSubpriority(),
+    );
   }
 
 }
