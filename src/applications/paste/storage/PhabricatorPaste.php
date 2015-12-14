@@ -285,4 +285,11 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     );
   }
 
+  public function getConduitSearchAttachments() {
+    return array(
+      id(new PhabricatorPasteContentSearchEngineAttachment())
+        ->setAttachmentKey('content'),
+    );
+  }
+
 }

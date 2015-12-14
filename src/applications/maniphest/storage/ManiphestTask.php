@@ -437,4 +437,8 @@ final class ManiphestTask extends ManiphestDAO
     );
   }
 
+  public function getConduitSearchAttachments() {
+    return array();
+  }
+
 }

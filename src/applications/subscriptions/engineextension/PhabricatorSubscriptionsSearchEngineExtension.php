@@ -50,7 +50,7 @@ final class PhabricatorSubscriptionsSearchEngineExtension
     return $fields;
   }
 
-  public function getSearchAttachments() {
+  public function getSearchAttachments($object) {
     return array(
       id(new PhabricatorSubscriptionsSearchEngineAttachment())
         ->setAttachmentKey('subscribers'),

@@ -1319,10 +1319,11 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
   public function getConduitSearchAttachments() {
     $extensions = $this->getEngineExtensions();
+    $object = $this->newResultObject();
 
     $attachments = array();
     foreach ($extensions as $extension) {
-      $extension_attachments = $extension->getSearchAttachments();
+      $extension_attachments = $extension->getSearchAttachments($object);
       foreach ($extension_attachments as $attachment) {
         $attachment_key = $attachment->getAttachmentKey();
         if (isset($attachments[$attachment_key])) {

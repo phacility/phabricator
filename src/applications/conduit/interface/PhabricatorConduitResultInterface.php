@@ -5,6 +5,7 @@ interface PhabricatorConduitResultInterface
 
   public function getFieldSpecificationsForConduit();
   public function getFieldValuesForConduit();
+  public function getConduitSearchAttachments();
 
 }
 
@@ -26,6 +27,10 @@ interface PhabricatorConduitResultInterface
     return array(
       'name' => $this->getName(),
     );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 */

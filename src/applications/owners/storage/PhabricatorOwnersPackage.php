@@ -395,4 +395,8 @@ final class PhabricatorOwnersPackage
     );
   }
 
+  public function getConduitSearchAttachments() {
+    return array();
+  }
+
 }

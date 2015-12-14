@@ -49,7 +49,7 @@ final class PhabricatorProjectsSearchEngineExtension
     return $fields;
   }
 
-  public function getSearchAttachments() {
+  public function getSearchAttachments($object) {
     return array(
       id(new PhabricatorProjectsSearchEngineAttachment())
         ->setAttachmentKey('projects'),

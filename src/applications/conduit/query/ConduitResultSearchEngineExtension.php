@@ -29,4 +29,8 @@ final class ConduitResultSearchEngineExtension
     return $object->getFieldValuesForConduit();
   }
 
+  public function getSearchAttachments($object) {
+    return $object->getConduitSearchAttachments();
+  }
+
 }
