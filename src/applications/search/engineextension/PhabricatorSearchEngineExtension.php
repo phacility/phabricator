@@ -40,6 +40,10 @@ abstract class PhabricatorSearchEngineExtension extends Phobject {
     return array();
   }
 
+  public function getSearchAttachments() {
+    return array();
+  }
+
   public function applyConstraintsToQuery(
     $object,
     $query,

@@ -23,6 +23,7 @@ abstract class PhabricatorSearchEngineAPIMethod
     return array(
       'queryKey' => 'optional string',
       'constraints' => 'optional map<string, wild>',
+      'attachments' => 'optional map<string, bool>',
       'order' => 'optional order',
     ) + $this->getPagerParamTypes();
   }
@@ -58,6 +59,7 @@ abstract class PhabricatorSearchEngineAPIMethod
     $out[] = $this->buildConstraintsBox($engine);
     $out[] = $this->buildOrderBox($engine, $query);
     $out[] = $this->buildFieldsBox($engine);
+    $out[] = $this->buildAttachmentsBox($engine);
     $out[] = $this->buildPagingBox($engine);
 
     return $out;
@@ -396,6 +398,94 @@ EOTEXT
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Object Fields'))
+      ->setCollapsed(true)
+      ->appendChild($this->buildRemarkup($info))
+      ->appendChild($table);
+  }
+
+  private function buildAttachmentsBox(
+    PhabricatorApplicationSearchEngine $engine) {
+
+    $info = pht(<<<EOTEXT
+By default, only basic information about objects is returned. If you want
+more extensive information, you can use available `attachments` to get more
+information in the results (like subscribers and projects).
+
+Generally, requesting more information means the query executes more slowly
+and returns more data (in some cases, much more data). You should normally
+request only the data you need.
+
+To request extra data, specify which attachments you want in the `attachments`
+parameter:
+
+```lang=json, name="Example Attachments Request"
+{
+  ...
+  "attachments": {
+    "subscribers": true
+  },
+  ...
+}
+```
+
+This example specifies that results should include information about
+subscribers. In the return value, each object will now have this information
+filled out in the corresponding `attachments` value:
+
+```lang=json, name="Example Attachments Result"
+{
+  ...
+  "data": [
+    {
+      ...
+      "attachments": {
+        "subscribers": {
+          "subscriberPHIDs": [
+            "PHID-WXYZ-2222",
+          ],
+          "subscriberCount": 1,
+          "viewerIsSubscribed": false
+        }
+      },
+      ...
+    },
+    ...
+  ],
+  ...
+}
+```
+
+These attachments are available:
+EOTEXT
+      );
+
+    $attachments = $engine->getConduitSearchAttachments();
+
+    $rows = array();
+    foreach ($attachments as $key => $attachment) {
+      $rows[] = array(
+        $key,
+        $attachment->getAttachmentName(),
+        $attachment->getAttachmentDescription(),
+      );
+    }
+
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('Key'),
+          pht('Name'),
+          pht('Description'),
+        ))
+      ->setColumnClasses(
+        array(
+          'prewrap',
+          'pri',
+          'wide',
+        ));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Attachments'))
       ->setCollapsed(true)
       ->appendChild($this->buildRemarkup($info))
       ->appendChild($table);

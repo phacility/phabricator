@@ -516,7 +516,7 @@ abstract class PhabricatorEditField extends Phobject {
     $edit_type = $this->getEditType();
 
     if ($edit_type === null) {
-      return null;
+      return array();
     }
 
     return array($edit_type);
@@ -526,7 +526,7 @@ abstract class PhabricatorEditField extends Phobject {
     $edit_type = $this->getEditType();
 
     if ($edit_type === null) {
-      return null;
+      return array();
     }
 
     return array($edit_type);

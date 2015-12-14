@@ -1123,9 +1123,24 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
     $this->saveQuery($saved_query);
 
-
     $query = $this->buildQueryFromSavedQuery($saved_query);
     $pager = $this->newPagerForSavedQuery($saved_query);
+
+    $attachments = $this->getConduitSearchAttachments();
+
+    // TODO: Validate this better.
+    $attachment_specs = $request->getValue('attachments');
+    $attachments = array_select_keys(
+      $attachments,
+      array_keys($attachment_specs));
+
+    foreach ($attachments as $key => $attachment) {
+      $attachment->setViewer($viewer);
+    }
+
+    foreach ($attachments as $key => $attachment) {
+      $attachment->willLoadAttachmentData($query, $attachment_specs[$key]);
+    }
 
     $this->setQueryOrderForConduit($query, $request);
     $this->setPagerLimitForConduit($pager, $request);
@@ -1137,10 +1152,36 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     if ($objects) {
       $field_extensions = $this->getConduitFieldExtensions();
 
+      $attachment_data = array();
+      foreach ($attachments as $key => $attachment) {
+        $attachment_data[$key] = $attachment->loadAttachmentData(
+          $objects,
+          $attachment_specs[$key]);
+      }
+
       foreach ($objects as $object) {
-        $data[] = $this->getObjectWireFormatForConduit(
+        $field_map = $this->getObjectWireFieldsForConduit(
           $object,
           $field_extensions);
+
+        $attachment_map = array();
+        foreach ($attachments as $key => $attachment) {
+          $attachment_map[$key] = $attachment->getAttachmentForObject(
+            $object,
+            $attachment_data[$key],
+            $attachment_specs[$key]);
+        }
+
+        $id = (int)$object->getID();
+        $phid = $object->getPHID();
+
+        $data[] = array(
+          'id' => $id,
+          'type' => phid_get_type($phid),
+          'phid' => $phid,
+          'fields' => $field_map,
+          'attachments' => $attachment_map,
+        );
       }
     }
 
@@ -1264,21 +1305,6 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     }
   }
 
-  protected function getObjectWireFormatForConduit(
-    $object,
-    array $field_extensions) {
-    $phid = $object->getPHID();
-
-    return array(
-      'id' => (int)$object->getID(),
-      'type' => phid_get_type($phid),
-      'phid' => $phid,
-      'fields' => $this->getObjectWireFieldsForConduit(
-        $object,
-        $field_extensions),
-    );
-  }
-
   protected function getObjectWireFieldsForConduit(
     $object,
     array $field_extensions) {
@@ -1289,6 +1315,31 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     }
 
     return $fields;
+  }
+
+  public function getConduitSearchAttachments() {
+    $extensions = $this->getEngineExtensions();
+
+    $attachments = array();
+    foreach ($extensions as $extension) {
+      $extension_attachments = $extension->getSearchAttachments();
+      foreach ($extension_attachments as $attachment) {
+        $attachment_key = $attachment->getAttachmentKey();
+        if (isset($attachments[$attachment_key])) {
+          $other = $attachments[$attachment_key];
+          throw new Exception(
+            pht(
+              'Two search engine attachments (of classes "%s" and "%s") '.
+              'specify the same attachment key ("%s"); keys must be unique.',
+              get_class($attachment),
+              get_class($other),
+              $attachment_key));
+        }
+        $attachments[$attachment_key] = $attachment;
+      }
+    }
+
+    return $attachments;
   }
 
 }
