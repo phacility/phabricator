@@ -1431,6 +1431,7 @@ abstract class PhabricatorEditEngine
     $editor = $object->getApplicationTransactionEditor()
       ->setActor($viewer)
       ->setContinueOnNoEffect($request->isContinueRequest())
+      ->setContinueOnMissingFields(true)
       ->setContentSourceFromRequest($request)
       ->setIsPreview($is_preview);
 
