@@ -399,30 +399,30 @@ final class ManiphestTask extends ManiphestDAO
 
   public function getFieldSpecificationsForConduit() {
     return array(
-      'title' => array(
-        'type' => 'string',
-        'description' => pht('The name of the object.'),
-      ),
-      'authorPHID' => array(
-        'type' => 'phid',
-        'description' => pht('Original task author.'),
-      ),
-      'ownerPHID' => array(
-        'type' => 'phid?',
-        'description' => pht('Current task owner.'),
-      ),
-      'status' => array(
-        'type' => 'string',
-        'description' => pht('Current task status.'),
-      ),
-      'priority' => array(
-        'type' => 'int',
-        'description' => pht('Task priority.'),
-      ),
-      'subpriority' => array(
-        'type' => 'double',
-        'description' => pht('Order within priority level.'),
-      ),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('title')
+        ->setType('string')
+        ->setDescription(pht('The title of the task.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('authorPHID')
+        ->setType('phid')
+        ->setDescription(pht('Original task author.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('ownerPHID')
+        ->setType('phid?')
+        ->setDescription(pht('Current task owner, if task is assigned.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('string')
+        ->setDescription(pht('Task status.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('priority')
+        ->setType('int')
+        ->setDescription(pht('Task priority.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('subpriority')
+        ->setType('double')
+        ->setDescription(pht('Order within priority level.')),
     );
   }
 

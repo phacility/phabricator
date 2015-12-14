@@ -391,22 +391,22 @@ final class PhabricatorOwnersPackage
 
   public function getFieldSpecificationsForConduit() {
     return array(
-      'name' => array(
-        'type' => 'string',
-        'description' => pht('The name of the package.'),
-      ),
-      'description' => array(
-        'type' => 'string',
-        'description' => pht('The package description.'),
-      ),
-      'status' => array(
-        'type' => 'string',
-        'description' => pht('Active or archived status of the package.'),
-      ),
-      'owners' => array(
-        'type' => 'list<map<string, wild>>',
-        'description' => pht('List of package owners.'),
-      ),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of the package.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('description')
+        ->setType('string')
+        ->setDescription(pht('The package description.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('string')
+        ->setDescription(pht('Active or archived status of the package.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('owners')
+        ->setType('list<map<string, wild>>')
+        ->setDescription(pht('List of package owners.')),
     );
   }
 

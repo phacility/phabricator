@@ -31,16 +31,16 @@ final class PhabricatorLiskSearchEngineExtension
 
   public function getFieldSpecificationsForConduit($object) {
     return array(
-      'dateCreated' => array(
-        'type' => 'int',
-        'description' => pht(
-          'Epoch timestamp when the object was created.'),
-      ),
-      'dateModified' => array(
-        'type' => 'int',
-        'description' => pht(
-          'Epoch timestamp when the object was last updated.'),
-      ),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('dateCreated')
+        ->setType('int')
+        ->setDescription(
+          pht('Epoch timestamp when the object was created.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('dateModified')
+        ->setType('int')
+        ->setDescription(
+          pht('Epoch timestamp when the object was last updated.')),
     );
   }
 

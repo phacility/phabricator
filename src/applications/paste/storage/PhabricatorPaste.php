@@ -257,22 +257,22 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
   public function getFieldSpecificationsForConduit() {
     return array(
-      'title' => array(
-        'type' => 'string',
-        'description' => pht('The name of the object.'),
-      ),
-      'authorPHID' => array(
-        'type' => 'phid',
-        'description' => pht('User PHID of the author.'),
-      ),
-      'language' => array(
-        'type' => 'string?',
-        'description' => pht('Language to use for syntax highlighting.'),
-      ),
-      'status' => array(
-        'type' => 'string',
-        'description' => pht('Active or archived status of the paste.'),
-      ),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('title')
+        ->setType('string')
+        ->setDescription(pht('The title of the paste.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('authorPHID')
+        ->setType('phid')
+        ->setDescription(pht('User PHID of the author.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('language')
+        ->setType('string?')
+        ->setDescription(pht('Language to use for syntax highlighting.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('string')
+        ->setDescription(pht('Active or arhived status of the paste.')),
     );
   }
 

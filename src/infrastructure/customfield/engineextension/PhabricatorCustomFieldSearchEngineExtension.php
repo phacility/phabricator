@@ -69,10 +69,12 @@ final class PhabricatorCustomFieldSearchEngineExtension
     $map = array();
     foreach ($fields->getFields() as $field) {
       $key = $field->getModernFieldKey();
-      $map[$key] = array(
-        'type' => 'wild',
-        'description' => $field->getFieldDescription(),
-      );
+
+      // TODO: These should have proper types.
+      $map[] = id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey($key)
+        ->setType('wild')
+        ->setDescription($field->getFieldDescription());
     }
 
     return $map;

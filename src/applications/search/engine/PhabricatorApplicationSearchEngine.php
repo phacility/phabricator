@@ -1129,7 +1129,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     $attachments = $this->getConduitSearchAttachments();
 
     // TODO: Validate this better.
-    $attachment_specs = $request->getValue('attachments');
+    $attachment_specs = $request->getValue('attachments', array());
     $attachments = array_select_keys(
       $attachments,
       array_keys($attachment_specs));
@@ -1203,12 +1203,23 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     $extensions = $this->getConduitFieldExtensions();
     $object = $this->newQuery()->newResultObject();
 
-    $specifications = array();
+    $map = array();
     foreach ($extensions as $extension) {
-      $specifications += $extension->getFieldSpecificationsForConduit($object);
+      $specifications = $extension->getFieldSpecificationsForConduit($object);
+      foreach ($specifications as $specification) {
+        $key = $specification->getKey();
+        if (isset($map[$key])) {
+          throw new Exception(
+            pht(
+              'Two field specifications share the same key ("%s"). Each '.
+              'specification must have a unique key.',
+              $key));
+        }
+        $map[$key] = $specification;
+      }
     }
 
-    return $specifications;
+    return $map;
   }
 
   private function getEngineExtensions() {

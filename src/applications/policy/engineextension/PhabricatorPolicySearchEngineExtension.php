@@ -23,11 +23,10 @@ final class PhabricatorPolicySearchEngineExtension
 
   public function getFieldSpecificationsForConduit($object) {
     return array(
-      'policy' => array(
-        'type' => 'map<string, wild>',
-        'description' => pht(
-          'Map of capabilities to current policies.'),
-      ),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('policy')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Map of capabilities to current policies.')),
     );
   }
 

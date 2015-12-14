@@ -16,10 +16,10 @@ interface PhabricatorConduitResultInterface
 
   public function getFieldSpecificationsForConduit() {
     return array(
-      'name' => array(
-        'type' => 'string',
-        'description' => pht('The name of the object.'),
-      ),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of the object.')),
     );
   }
 

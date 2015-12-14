@@ -55,11 +55,11 @@ final class PhabricatorSpacesSearchEngineExtension
 
   public function getFieldSpecificationsForConduit($object) {
     return array(
-      'spacePHID' => array(
-        'type' => 'phid?',
-        'description' => pht(
-          'PHID of the policy space this object is part of.'),
-      ),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('spacePHID')
+        ->setType('phid?')
+        ->setDescription(
+          pht('PHID of the policy space this object is part of.')),
     );
   }
 

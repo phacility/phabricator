@@ -1897,6 +1897,7 @@ phutil_register_library_map(array(
     'PhabricatorConduitRequestExceptionHandler' => 'aphront/handler/PhabricatorConduitRequestExceptionHandler.php',
     'PhabricatorConduitResultInterface' => 'applications/conduit/interface/PhabricatorConduitResultInterface.php',
     'PhabricatorConduitSearchEngine' => 'applications/conduit/query/PhabricatorConduitSearchEngine.php',
+    'PhabricatorConduitSearchFieldSpecification' => 'applications/conduit/interface/PhabricatorConduitSearchFieldSpecification.php',
     'PhabricatorConduitTestCase' => '__tests__/PhabricatorConduitTestCase.php',
     'PhabricatorConduitToken' => 'applications/conduit/storage/PhabricatorConduitToken.php',
     'PhabricatorConduitTokenController' => 'applications/conduit/controller/PhabricatorConduitTokenController.php',
@@ -6014,6 +6015,7 @@ phutil_register_library_map(array(
     'PhabricatorConduitRequestExceptionHandler' => 'PhabricatorRequestExceptionHandler',
     'PhabricatorConduitResultInterface' => 'PhabricatorPHIDInterface',
     'PhabricatorConduitSearchEngine' => 'PhabricatorApplicationSearchEngine',
+    'PhabricatorConduitSearchFieldSpecification' => 'Phobject',
     'PhabricatorConduitTestCase' => 'PhabricatorTestCase',
     'PhabricatorConduitToken' => array(
       'PhabricatorConduitDAO',

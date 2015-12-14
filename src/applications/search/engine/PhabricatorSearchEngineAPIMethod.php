@@ -373,8 +373,8 @@ EOTEXT
 
     $rows = array();
     foreach ($specs as $key => $spec) {
-      $type = idx($spec, 'type');
-      $description = idx($spec, 'description');
+      $type = $spec->getType();
+      $description = $spec->getDescription();
       $rows[] = array(
         $key,
         $type,
