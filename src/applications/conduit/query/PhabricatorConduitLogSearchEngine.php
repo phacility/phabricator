@@ -18,6 +18,10 @@ final class PhabricatorConduitLogSearchEngine
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
+    if ($map['callerPHIDs']) {
+      $query->withCallerPHIDs($map['callerPHIDs']);
+    }
+
     if ($map['methods']) {
       $query->withMethods($map['methods']);
     }
@@ -31,6 +35,11 @@ final class PhabricatorConduitLogSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
+      id(new PhabricatorUsersSearchField())
+        ->setKey('callerPHIDs')
+        ->setLabel(pht('Methods'))
+        ->setAliases(array('caller', 'callers'))
+        ->setDescription(pht('Find calls by specific users.')),
       id(new PhabricatorSearchStringListField())
         ->setKey('methods')
         ->setLabel(pht('Methods'))
@@ -39,6 +48,8 @@ final class PhabricatorConduitLogSearchEngine
         ->setKey('statuses')
         ->setLabel(pht('Method Status'))
         ->setAliases(array('status'))
+        ->setDescription(
+          pht('Find calls to stable, unstable, or deprecated methods.'))
         ->setOptions(ConduitAPIMethod::getMethodStatusMap()),
     );
   }
@@ -48,10 +59,16 @@ final class PhabricatorConduitLogSearchEngine
   }
 
   protected function getBuiltinQueryNames() {
-    $names = array(
-      'all' => pht('All Logs'),
-      'deprecated' => pht('Deprecated Calls'),
-    );
+    $names = array();
+
+    $viewer = $this->requireViewer();
+    if ($viewer->isLoggedIn()) {
+      $names['viewer'] = pht('My Calls');
+      $names['viewerdeprecated'] = pht('My Deprecated Calls');
+    }
+
+    $names['all'] = pht('All Call Logs');
+    $names['deprecated'] = pht('Deprecated Call Logs');
 
     return $names;
   }
@@ -60,13 +77,24 @@ final class PhabricatorConduitLogSearchEngine
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
+    $viewer = $this->requireViewer();
+    $viewer_phid = $viewer->getPHID();
+
+    $deprecated = array(
+      ConduitAPIMethod::METHOD_STATUS_DEPRECATED,
+    );
+
     switch ($query_key) {
+      case 'viewer':
+        return $query
+          ->setParameter('callerPHIDs', array($viewer_phid));
+      case 'viewerdeprecated':
+        return $query
+          ->setParameter('callerPHIDs', array($viewer_phid))
+          ->setParameter('statuses', $deprecated);
       case 'deprecated':
-        return $query->setParameter(
-          'statuses',
-          array(
-            ConduitAPIMethod::METHOD_STATUS_DEPRECATED,
-          ));
+        return $query
+          ->setParameter('statuses', $deprecated);
       case 'all':
         return $query;
     }

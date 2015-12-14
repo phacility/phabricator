@@ -3,8 +3,14 @@
 final class PhabricatorConduitLogQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  private $callerPHIDs;
   private $methods;
   private $methodStatuses;
+
+  public function withCallerPHIDs(array $phids) {
+    $this->callerPHIDs = $phids;
+    return $this;
+  }
 
   public function withMethods(array $methods) {
     $this->methods = $methods;
@@ -26,6 +32,13 @@ final class PhabricatorConduitLogQuery
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->callerPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'callerPHID IN (%Ls)',
+        $this->callerPHIDs);
+    }
 
     if ($this->methods !== null) {
       $where[] = qsprintf(
