@@ -32,8 +32,7 @@ final class PhabricatorOwnersPackageTransactionEditor
       case PhabricatorOwnersPackageTransaction::TYPE_NAME:
         return $object->getName();
       case PhabricatorOwnersPackageTransaction::TYPE_OWNERS:
-        // TODO: needOwners() this on the Query.
-        $phids = mpull($object->loadOwners(), 'getUserPHID');
+        $phids = mpull($object->getOwners(), 'getUserPHID');
         $phids = array_values($phids);
         return $phids;
       case PhabricatorOwnersPackageTransaction::TYPE_AUDITING:
@@ -125,8 +124,7 @@ final class PhabricatorOwnersPackageTransactionEditor
         $old = $xaction->getOldValue();
         $new = $xaction->getNewValue();
 
-        // TODO: needOwners this
-        $owners = $object->loadOwners();
+        $owners = $object->getOwners();
         $owners = mpull($owners, null, 'getUserPHID');
 
         $rem = array_diff($old, $new);
@@ -222,8 +220,7 @@ final class PhabricatorOwnersPackageTransactionEditor
   }
 
   protected function getMailCC(PhabricatorLiskDAO $object) {
-    // TODO: needOwners() this
-    return mpull($object->loadOwners(), 'getUserPHID');
+    return mpull($object->getOwners(), 'getUserPHID');
   }
 
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {

@@ -273,6 +273,17 @@ final class PhabricatorOwnersPackage
     return mpull($this->getOwners(), 'getUserPHID');
   }
 
+  public function isOwnerPHID($phid) {
+    if (!$phid) {
+      return false;
+    }
+
+    $owner_phids = $this->getOwnerPHIDs();
+    $owner_phids = array_fuse($owner_phids);
+
+    return isset($owner_phids[$phid]);
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -290,11 +301,19 @@ final class PhabricatorOwnersPackage
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        if ($this->isOwnerPHID($viewer->getPHID())) {
+          return true;
+        }
+        break;
+    }
+
     return false;
   }
 
   public function describeAutomaticCapability($capability) {
-    return null;
+    return pht('Owners of a package may always view it.');
   }
 
 
@@ -384,19 +403,34 @@ final class PhabricatorOwnersPackage
         'type' => 'string',
         'description' => pht('Active or archived status of the package.'),
       ),
+      'owners' => array(
+        'type' => 'list<map<string, wild>>',
+        'description' => pht('List of package owners.'),
+      ),
     );
   }
 
   public function getFieldValuesForConduit() {
+    $owner_list = array();
+    foreach ($this->getOwners() as $owner) {
+      $owner_list[] = array(
+        'ownerPHID' => $owner->getUserPHID(),
+      );
+    }
+
     return array(
       'name' => $this->getName(),
       'description' => $this->getDescription(),
       'status' => $this->getStatus(),
+      'owners' => $owner_list,
     );
   }
 
   public function getConduitSearchAttachments() {
-    return array();
+    return array(
+      id(new PhabricatorOwnersPathsSearchEngineAttachment())
+        ->setAttachmentKey('paths'),
+    );
   }
 
 }

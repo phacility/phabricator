@@ -17,7 +17,7 @@ final class PhabricatorPasteContentSearchEngineAttachment
 
   public function getAttachmentForObject($object, $data, $spec) {
     return array(
-      'data' => $object->getRawContent(),
+      'content' => $object->getRawContent(),
     );
   }
 

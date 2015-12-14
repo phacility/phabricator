@@ -14,7 +14,6 @@ final class PhabricatorOwnersDetailController
       ->setViewer($viewer)
       ->withIDs(array($request->getURIData('id')))
       ->needPaths(true)
-      ->needOwners(true)
       ->executeOne();
     if (!$package) {
       return new Aphront404Response();
