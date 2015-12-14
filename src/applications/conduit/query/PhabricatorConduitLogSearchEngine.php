@@ -22,6 +22,10 @@ final class PhabricatorConduitLogSearchEngine
       $query->withMethods($map['methods']);
     }
 
+    if ($map['statuses']) {
+      $query->withMethodStatuses($map['statuses']);
+    }
+
     return $query;
   }
 
@@ -31,6 +35,11 @@ final class PhabricatorConduitLogSearchEngine
         ->setKey('methods')
         ->setLabel(pht('Methods'))
         ->setDescription(pht('Find calls to specific methods.')),
+      id(new PhabricatorSearchCheckboxesField())
+        ->setKey('statuses')
+        ->setLabel(pht('Method Status'))
+        ->setAliases(array('status'))
+        ->setOptions(ConduitAPIMethod::getMethodStatusMap()),
     );
   }
 
@@ -41,6 +50,7 @@ final class PhabricatorConduitLogSearchEngine
   protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All Logs'),
+      'deprecated' => pht('Deprecated Calls'),
     );
 
     return $names;
@@ -51,6 +61,12 @@ final class PhabricatorConduitLogSearchEngine
     $query->setQueryKey($query_key);
 
     switch ($query_key) {
+      case 'deprecated':
+        return $query->setParameter(
+          'statuses',
+          array(
+            ConduitAPIMethod::METHOD_STATUS_DEPRECATED,
+          ));
       case 'all':
         return $query;
     }

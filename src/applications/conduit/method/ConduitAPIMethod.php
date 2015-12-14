@@ -139,6 +139,16 @@ abstract class ConduitAPIMethod
     return "{$head}.{$ord}.{$tail}";
   }
 
+  public static function getMethodStatusMap() {
+    $map = array(
+      self::METHOD_STATUS_STABLE => pht('Stable'),
+      self::METHOD_STATUS_UNSTABLE => pht('Unstable'),
+      self::METHOD_STATUS_DEPRECATED => pht('Deprecated'),
+    );
+
+    return $map;
+  }
+
   public function getApplicationName() {
     return head(explode('.', $this->getAPIMethodName(), 2));
   }
