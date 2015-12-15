@@ -18,7 +18,8 @@ final class PhabricatorOwnersPackageEditEngine
   }
 
   protected function newObjectQuery() {
-    return id(new PhabricatorOwnersPackageQuery());
+    return id(new PhabricatorOwnersPackageQuery())
+      ->needPaths(true);
   }
 
   protected function getObjectCreateTitleText($object) {
@@ -81,6 +82,20 @@ final class PhabricatorOwnersPackageEditEngine
         ->setTransactionType(
           PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION)
         ->setValue($object->getDescription()),
+      id(new PhabricatorSelectEditField())
+        ->setKey('status')
+        ->setLabel(pht('Status'))
+        ->setDescription(pht('Archive or enable the package.'))
+        ->setTransactionType(PhabricatorOwnersPackageTransaction::TYPE_STATUS)
+        ->setIsConduitOnly(true)
+        ->setValue($object->getStatus())
+        ->setOptions($object->getStatusNameMap()),
+      id(new PhabricatorConduitEditField())
+        ->setKey('paths.set')
+        ->setLabel(pht('Paths'))
+        ->setDescription(pht('Set paths for this package.'))
+        ->setIsConduitOnly(true)
+        ->setTransactionType(PhabricatorOwnersPackageTransaction::TYPE_PATHS),
     );
   }
 

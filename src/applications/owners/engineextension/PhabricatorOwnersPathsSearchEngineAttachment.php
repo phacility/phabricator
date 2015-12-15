@@ -23,7 +23,7 @@ final class PhabricatorOwnersPathsSearchEngineAttachment
       $list[] = array(
         'repositoryPHID' => $path->getRepositoryPHID(),
         'path' => $path->getPath(),
-        'isExcluded' => (bool)$path->getExcluded(),
+        'excluded' => (bool)$path->getExcluded(),
       );
     }
 
