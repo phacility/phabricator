@@ -83,6 +83,14 @@ final class PhabricatorPasteEditEngine
         ->setMonospaced(true)
         ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
         ->setValue($object->getRawContent()),
+      id(new PhabricatorSelectEditField())
+        ->setKey('status')
+        ->setLabel(pht('Status'))
+        ->setDescription(pht('Active or archive the paste.'))
+        ->setTransactionType(PhabricatorPasteTransaction::TYPE_STATUS)
+        ->setIsConduitOnly(true)
+        ->setValue($object->getStatus())
+        ->setOptions(PhabricatorPaste::getStatusNameMap()),
     );
   }
 

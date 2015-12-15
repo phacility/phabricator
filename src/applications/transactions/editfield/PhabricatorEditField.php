@@ -29,6 +29,7 @@ abstract class PhabricatorEditField extends Phobject {
   private $isDefaultable = true;
   private $isLockable = true;
   private $isCopyable = false;
+  private $isConduitOnly = false;
 
   public function setKey($key) {
     $this->key = $key;
@@ -109,6 +110,15 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function getIsReorderable() {
     return $this->isReorderable;
+  }
+
+  public function setIsConduitOnly($is_conduit_only) {
+    $this->isConduitOnly = $is_conduit_only;
+    return $this;
+  }
+
+  public function getIsConduitOnly() {
+    return $this->isConduitOnly;
   }
 
   public function setIsEditDefaults($is_edit_defaults) {
@@ -197,6 +207,10 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   protected function buildControl() {
+    if ($this->getIsConduitOnly()) {
+      return null;
+    }
+
     $control = $this->newControl();
     if ($control === null) {
       return null;
@@ -466,6 +480,10 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   final public function getHTTPParameterType() {
+    if ($this->getIsConduitOnly()) {
+      return null;
+    }
+
     $type = $this->newHTTPParameterType();
 
     if ($type) {
@@ -492,8 +510,16 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   protected function newEditType() {
+    // TODO: This could be a little cleaner.
+    $http_type = $this->getHTTPParameterType();
+    if ($http_type) {
+      $value_type = $http_type->getTypeName();
+    } else {
+      $value_type = 'wild';
+    }
+
     return id(new PhabricatorSimpleEditType())
-      ->setValueType($this->getHTTPParameterType()->getTypeName());
+      ->setValueType($value_type);
   }
 
   protected function getEditType() {
@@ -523,6 +549,10 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   public function getWebEditTypes() {
+    if ($this->getIsConduitOnly()) {
+      return array();
+    }
+
     $edit_type = $this->getEditType();
 
     if ($edit_type === null) {
