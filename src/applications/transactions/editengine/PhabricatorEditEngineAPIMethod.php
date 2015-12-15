@@ -38,8 +38,7 @@ abstract class PhabricatorEditEngineAPIMethod
   }
 
   final public function getMethodDescription() {
-    // TODO: We don't currently have a real viewer in this method.
-    $viewer = PhabricatorUser::getOmnipotentUser();
+    $viewer = $this->getViewer();
 
     $engine = $this->newEditEngine()
       ->setViewer($viewer);

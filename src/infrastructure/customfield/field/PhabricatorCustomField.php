@@ -188,6 +188,13 @@ abstract class PhabricatorCustomField extends Phobject {
       $field_key_is_incomplete = true);
   }
 
+  public function getModernFieldKey() {
+    if ($this->proxy) {
+      return $this->proxy->getModernFieldKey();
+    }
+    return $this->getFieldKey();
+  }
+
 
   /**
    * Return a human-readable field name.
@@ -199,7 +206,7 @@ abstract class PhabricatorCustomField extends Phobject {
     if ($this->proxy) {
       return $this->proxy->getFieldName();
     }
-    return $this->getFieldKey();
+    return $this->getModernFieldKey();
   }
 
 
@@ -1109,7 +1116,7 @@ abstract class PhabricatorCustomField extends Phobject {
 
     return $this->newEditField()
       ->setKey($this->getFieldKey())
-      ->setEditTypeKey('custom.'.$this->getFieldKey())
+      ->setEditTypeKey($this->getModernFieldKey())
       ->setLabel($this->getFieldName())
       ->setDescription($this->getFieldDescription())
       ->setTransactionType($this->getApplicationTransactionType())
@@ -1328,6 +1335,17 @@ abstract class PhabricatorCustomField extends Phobject {
       return $this->proxy->shouldAppearInConduitDictionary();
     }
     return false;
+  }
+
+  public function getConduitSearchParameterType() {
+    return $this->newConduitSearchParameterType();
+  }
+
+  protected function newConduitSearchParameterType() {
+    if ($this->proxy) {
+      return $this->proxy->newConduitSearchParameterType();
+    }
+    return null;
   }
 
 

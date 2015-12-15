@@ -47,19 +47,30 @@ final class PhabricatorPasteSearchEngine
       id(new PhabricatorUsersSearchField())
         ->setAliases(array('authors'))
         ->setKey('authorPHIDs')
-        ->setLabel(pht('Authors')),
+        ->setConduitKey('authors')
+        ->setLabel(pht('Authors'))
+        ->setDescription(
+          pht('Search for pastes with specific authors.')),
       id(new PhabricatorSearchStringListField())
         ->setKey('languages')
-        ->setLabel(pht('Languages')),
+        ->setLabel(pht('Languages'))
+        ->setDescription(
+          pht('Search for pastes highlighted in specific languages.')),
       id(new PhabricatorSearchDateField())
         ->setKey('createdStart')
-        ->setLabel(pht('Created After')),
+        ->setLabel(pht('Created After'))
+        ->setDescription(
+          pht('Search for pastes created after a given time.')),
       id(new PhabricatorSearchDateField())
         ->setKey('createdEnd')
-        ->setLabel(pht('Created Before')),
+        ->setLabel(pht('Created Before'))
+        ->setDescription(
+          pht('Search for pastes created before a given time.')),
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('statuses')
         ->setLabel(pht('Status'))
+        ->setDescription(
+          pht('Search for archived or active pastes.'))
         ->setOptions(
           id(new PhabricatorPaste())
             ->getStatusNameMap()),

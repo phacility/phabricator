@@ -18,8 +18,7 @@ final class PhabricatorOwnersPackageEditEngine
   }
 
   protected function newObjectQuery() {
-    return id(new PhabricatorOwnersPackageQuery())
-      ->needOwners(true);
+    return id(new PhabricatorOwnersPackageQuery());
   }
 
   protected function getObjectCreateTitleText($object) {

@@ -190,26 +190,12 @@ final class PhamePostTransaction
   }
 
   public function getRemarkupBodyForFeed(PhabricatorFeedStory $story) {
-    $text = null;
     switch ($this->getTransactionType()) {
-      case self::TYPE_TITLE:
-        if ($this->getOldValue() === null) {
-          $post = $story->getPrimaryObject();
-          $text = $post->getBody();
-        }
-        break;
-      case self::TYPE_VISIBILITY:
-        if ($this->getNewValue() == PhameConstants::VISIBILITY_PUBLISHED) {
-          $post = $story->getPrimaryObject();
-          $text = $post->getBody();
-        }
-        break;
       case self::TYPE_BODY:
-        $text = $this->getNewValue();
-        break;
+        return $this->getNewValue();
     }
 
-    return $text;
+    return null;
   }
 
   public function getColor() {

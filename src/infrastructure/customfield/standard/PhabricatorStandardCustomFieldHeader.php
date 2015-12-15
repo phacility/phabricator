@@ -30,4 +30,8 @@ final class PhabricatorStandardCustomFieldHeader
     return $this->getFieldName();
   }
 
+  public function shouldAppearInApplicationSearch() {
+    return false;
+  }
+
 }

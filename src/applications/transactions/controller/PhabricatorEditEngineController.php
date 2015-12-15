@@ -70,13 +70,6 @@ abstract class PhabricatorEditEngineController
       ->executeOne();
     if ($config) {
       $engine = $config->getEngine();
-
-      // TODO: When we're editing the meta-engine, we need to set the engine
-      // itself as its own target. This is hacky and it would be nice to find
-      // a cleaner approach later.
-      if ($engine instanceof PhabricatorEditEngineConfigurationEditEngine) {
-        $engine->setTargetEngine($engine);
-      }
     }
 
     return $config;

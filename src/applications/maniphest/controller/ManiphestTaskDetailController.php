@@ -163,7 +163,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $can_create = (bool)$edit_config;
     if ($can_create) {
       $form_key = $edit_config->getIdentifier();
-      $edit_uri = "/task/edit/form/{$form_key}/?parent={$id}&template={$id}";
+      $edit_uri = id(new PhutilURI("/task/edit/form/{$form_key}/"))
+        ->setQueryParam('parent', $id)
+        ->setQueryParam('template', $id)
+        ->setQueryParam('status', ManiphestTaskStatus::getDefaultStatus());
       $edit_uri = $this->getApplicationURI($edit_uri);
     } else {
       // TODO: This will usually give us a somewhat-reasonable error page, but

@@ -16,7 +16,6 @@ final class PhabricatorOwnersPackageQuery
   private $controlResults;
 
   private $needPaths;
-  private $needOwners;
 
 
   /**
@@ -89,11 +88,6 @@ final class PhabricatorOwnersPackageQuery
     return $this;
   }
 
-  public function needOwners($need_owners) {
-    $this->needOwners = $need_owners;
-    return $this;
-  }
-
   public function newResultObject() {
     return new PhabricatorOwnersPackage();
   }
@@ -103,13 +97,27 @@ final class PhabricatorOwnersPackageQuery
   }
 
   protected function loadPage() {
-    return $this->loadStandardPage(new PhabricatorOwnersPackage());
+    return $this->loadStandardPage($this->newResultObject());
+  }
+
+  protected function willFilterPage(array $packages) {
+    $package_ids = mpull($packages, 'getID');
+
+    $owners = id(new PhabricatorOwnersOwner())->loadAllWhere(
+      'packageID IN (%Ld)',
+      $package_ids);
+    $owners = mgroup($owners, 'getPackageID');
+    foreach ($packages as $package) {
+      $package->attachOwners(idx($owners, $package->getID(), array()));
+    }
+
+    return $packages;
   }
 
   protected function didFilterPage(array $packages) {
-    if ($this->needPaths) {
-      $package_ids = mpull($packages, 'getID');
+    $package_ids = mpull($packages, 'getID');
 
+    if ($this->needPaths) {
       $paths = id(new PhabricatorOwnersPath())->loadAllWhere(
         'packageID IN (%Ld)',
         $package_ids);
@@ -117,19 +125,6 @@ final class PhabricatorOwnersPackageQuery
 
       foreach ($packages as $package) {
         $package->attachPaths(idx($paths, $package->getID(), array()));
-      }
-    }
-
-    if ($this->needOwners) {
-      $package_ids = mpull($packages, 'getID');
-
-      $owners = id(new PhabricatorOwnersOwner())->loadAllWhere(
-        'packageID IN (%Ld)',
-        $package_ids);
-      $owners = mgroup($owners, 'getPackageID');
-
-      foreach ($packages as $package) {
-        $package->attachOwners(idx($owners, $package->getID(), array()));
       }
     }
 

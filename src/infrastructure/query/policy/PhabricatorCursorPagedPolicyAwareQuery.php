@@ -716,13 +716,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           continue;
         }
 
-        $key = $field->getFieldKey();
-        $digest = $field->getFieldIndex();
+        $legacy_key = 'custom:'.$field->getFieldKey();
+        $modern_key = $field->getModernFieldKey();
 
-        $full_key = 'custom:'.$key;
-        $orders[$full_key] = array(
-          'vector' => array($full_key, 'id'),
+        $orders[$modern_key] = array(
+          'vector' => array($modern_key, 'id'),
           'name' => $field->getFieldName(),
+          'aliases' => array($legacy_key),
         );
       }
     }
@@ -903,11 +903,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           continue;
         }
 
-        $key = $field->getFieldKey();
         $digest = $field->getFieldIndex();
 
-        $full_key = 'custom:'.$key;
-        $columns[$full_key] = array(
+        $key = $field->getModernFieldKey();
+
+        $columns[$key] = array(
           'table' => 'appsearch_order_'.$digest,
           'column' => 'indexValue',
           'type' => $index->getIndexValueType(),

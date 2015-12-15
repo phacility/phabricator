@@ -428,16 +428,23 @@ JX.install('Tokenizer', {
 
       if (this.getBrowseURI()) {
         var button = JX.DOM.find(this._frame, 'a', 'tokenizer-browse');
-        JX.DOM.alterClass(button, 'disabled', !!this._isAtTokenLimit());
+        JX.DOM.alterClass(button, 'disabled', !!this._shouldLockBrowse());
       }
 
       this.invoke('change', this);
     },
 
-    _isAtTokenLimit: function() {
+    _shouldLockBrowse: function() {
       var limit = this.getLimit();
 
       if (!limit) {
+        // If there's no limit, never lock the browse button.
+        return false;
+      }
+
+      if (limit == 1) {
+        // If the limit is 1, we'll replace the current token if the
+        // user selects a new one, so we never need to lock the button.
         return false;
       }
 
@@ -486,7 +493,7 @@ JX.install('Tokenizer', {
         return;
       }
 
-      if (this._isAtTokenLimit()) {
+      if (this._shouldLockBrowse()) {
         return;
       }
 
@@ -497,6 +504,14 @@ JX.install('Tokenizer', {
 
             source.addResult(r.token);
             var result = source.getResult(r.key);
+
+            // If we have a limit of 1 token, replace the current token with
+            // the new token if we currently have a token.
+            if (this.getLimit() == 1) {
+              for (var k in this.getTokens()) {
+                this.removeToken(k);
+              }
+            }
 
             this.addToken(r.key, result.name);
             this.focus();

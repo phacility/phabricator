@@ -14,7 +14,8 @@ final class PhabricatorEditEngineConfigurationEditEngine
 
   public function getTargetEngine() {
     if (!$this->targetEngine) {
-      throw new PhutilInvalidStateException('setTargetEngine');
+      // If we don't have a target engine, assume we're editing ourselves.
+      return new PhabricatorEditEngineConfigurationEditEngine();
     }
     return $this->targetEngine;
   }

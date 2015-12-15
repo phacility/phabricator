@@ -172,8 +172,24 @@ abstract class PhabricatorEditEngine
   /**
    * @task text
    */
+  protected function getCommentViewSeriousHeaderText($object) {
+    return pht('Take Action');
+  }
+
+
+  /**
+   * @task text
+   */
+  protected function getCommentViewSeriousButtonText($object) {
+    return pht('Submit');
+  }
+
+
+  /**
+   * @task text
+   */
   protected function getCommentViewHeaderText($object) {
-    return pht('Add Comment');
+    return $this->getCommentViewSeriousHeaderText($object);
   }
 
 
@@ -181,7 +197,7 @@ abstract class PhabricatorEditEngine
    * @task text
    */
   protected function getCommentViewButtonText($object) {
-    return pht('Add Comment');
+    return $this->getCommentViewSeriousButtonText($object);
   }
 
 
@@ -718,7 +734,7 @@ abstract class PhabricatorEditEngine
     }
 
     if ($config->getIsDisabled()) {
-      return $this->buildFormDisabledResponse($object, $config);
+      return $this->buildDisabledFormResponse($object, $config);
     }
 
     switch ($action) {
@@ -1125,8 +1141,15 @@ abstract class PhabricatorEditEngine
     $viewer = $this->getViewer();
     $object_phid = $object->getPHID();
 
-    $header_text = $this->getCommentViewHeaderText($object);
-    $button_text = $this->getCommentViewButtonText($object);
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+
+    if ($is_serious) {
+      $header_text = $this->getCommentViewSeriousHeaderText($object);
+      $button_text = $this->getCommentViewSeriousButtonText($object);
+    } else {
+      $header_text = $this->getCommentViewHeaderText($object);
+      $button_text = $this->getCommentViewButtonText($object);
+    }
 
     $comment_uri = $this->getEditURI($object, 'comment/');
 
@@ -1408,6 +1431,7 @@ abstract class PhabricatorEditEngine
     $editor = $object->getApplicationTransactionEditor()
       ->setActor($viewer)
       ->setContinueOnNoEffect($request->isContinueRequest())
+      ->setContinueOnMissingFields(true)
       ->setContentSourceFromRequest($request)
       ->setIsPreview($is_preview);
 

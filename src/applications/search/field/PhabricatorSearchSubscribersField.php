@@ -18,4 +18,10 @@ final class PhabricatorSearchSubscribersField
     return new PhabricatorMetaMTAMailableFunctionDatasource();
   }
 
+  protected function newConduitParameterType() {
+    // TODO: Ideally, this should eventually be a "Subscribers" type which
+    // accepts projects as well.
+    return new ConduitUserListParameterType();
+  }
+
 }

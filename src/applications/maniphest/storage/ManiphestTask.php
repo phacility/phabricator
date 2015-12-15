@@ -13,7 +13,8 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorDestructibleInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
-    PhabricatorSpacesInterface {
+    PhabricatorSpacesInterface,
+    PhabricatorConduitResultInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -390,6 +391,65 @@ final class ManiphestTask extends ManiphestDAO
 
   public function getSpacePHID() {
     return $this->spacePHID;
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('title')
+        ->setType('string')
+        ->setDescription(pht('The title of the task.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('authorPHID')
+        ->setType('phid')
+        ->setDescription(pht('Original task author.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('ownerPHID')
+        ->setType('phid?')
+        ->setDescription(pht('Current task owner, if task is assigned.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Information about task status.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('priority')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Information about task priority.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+
+    $status_value = $this->getStatus();
+    $status_info = array(
+      'value' => $status_value,
+      'name' => ManiphestTaskStatus::getTaskStatusName($status_value),
+      'color' => ManiphestTaskStatus::getStatusColor($status_value),
+    );
+
+    $priority_value = (int)$this->getPriority();
+    $priority_info = array(
+      'value' => $priority_value,
+      'subpriority' => (double)$this->getSubpriority(),
+      'name' => ManiphestTaskPriority::getTaskPriorityName($priority_value),
+      'color' => ManiphestTaskPriority::getTaskPriorityColor($priority_value),
+    );
+
+    return array(
+      'name' => $this->getTitle(),
+      'authorPHID' => $this->getAuthorPHID(),
+      'ownerPHID' => $this->getOwnerPHID(),
+      'status' => $status_info,
+      'priority' => $priority_info,
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 }
