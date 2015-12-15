@@ -15,6 +15,7 @@ final class PhabricatorAuthProviderConfigEditor
     $types = parent::getTransactionTypes();
 
     $types[] = PhabricatorAuthProviderConfigTransaction::TYPE_ENABLE;
+    $types[] = PhabricatorAuthProviderConfigTransaction::TYPE_LOGIN;
     $types[] = PhabricatorAuthProviderConfigTransaction::TYPE_REGISTRATION;
     $types[] = PhabricatorAuthProviderConfigTransaction::TYPE_LINK;
     $types[] = PhabricatorAuthProviderConfigTransaction::TYPE_UNLINK;
@@ -36,6 +37,8 @@ final class PhabricatorAuthProviderConfigEditor
         } else {
           return (int)$object->getIsEnabled();
         }
+      case PhabricatorAuthProviderConfigTransaction::TYPE_LOGIN:
+        return (int)$object->getShouldAllowLogin();
       case PhabricatorAuthProviderConfigTransaction::TYPE_REGISTRATION:
         return (int)$object->getShouldAllowRegistration();
       case PhabricatorAuthProviderConfigTransaction::TYPE_LINK:
@@ -59,6 +62,7 @@ final class PhabricatorAuthProviderConfigEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorAuthProviderConfigTransaction::TYPE_ENABLE:
+      case PhabricatorAuthProviderConfigTransaction::TYPE_LOGIN:
       case PhabricatorAuthProviderConfigTransaction::TYPE_REGISTRATION:
       case PhabricatorAuthProviderConfigTransaction::TYPE_LINK:
       case PhabricatorAuthProviderConfigTransaction::TYPE_UNLINK:
@@ -76,6 +80,8 @@ final class PhabricatorAuthProviderConfigEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorAuthProviderConfigTransaction::TYPE_ENABLE:
         return $object->setIsEnabled($v);
+      case PhabricatorAuthProviderConfigTransaction::TYPE_LOGIN:
+        return $object->setShouldAllowLogin($v);
       case PhabricatorAuthProviderConfigTransaction::TYPE_REGISTRATION:
         return $object->setShouldAllowRegistration($v);
       case PhabricatorAuthProviderConfigTransaction::TYPE_LINK:
@@ -106,6 +112,7 @@ final class PhabricatorAuthProviderConfigEditor
     $type = $u->getTransactionType();
     switch ($type) {
       case PhabricatorAuthProviderConfigTransaction::TYPE_ENABLE:
+      case PhabricatorAuthProviderConfigTransaction::TYPE_LOGIN:
       case PhabricatorAuthProviderConfigTransaction::TYPE_REGISTRATION:
       case PhabricatorAuthProviderConfigTransaction::TYPE_LINK:
       case PhabricatorAuthProviderConfigTransaction::TYPE_UNLINK:
