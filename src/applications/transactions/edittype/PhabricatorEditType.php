@@ -9,6 +9,7 @@ abstract class PhabricatorEditType extends Phobject {
   private $description;
   private $summary;
   private $metadata = array();
+  private $conduitDocumentation;
 
   public function setDescription($description) {
     $this->description = $description;
@@ -56,6 +57,15 @@ abstract class PhabricatorEditType extends Phobject {
 
   public function getEditType() {
     return $this->editType;
+  }
+
+  public function setConduitDocumentation($conduit_documentation) {
+    $this->conduitDocumentation = $conduit_documentation;
+    return $this;
+  }
+
+  public function getConduitDocumentation() {
+    return $this->conduitDocumentation;
   }
 
   public function setMetadata($metadata) {

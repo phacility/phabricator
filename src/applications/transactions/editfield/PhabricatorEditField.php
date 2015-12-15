@@ -15,6 +15,7 @@ abstract class PhabricatorEditField extends Phobject {
   private $description;
   private $editTypeKey;
   private $isRequired;
+  private $conduitDocumentation;
 
   private $commentActionLabel;
   private $commentActionValue;
@@ -553,7 +554,8 @@ abstract class PhabricatorEditField extends Phobject {
       ->setEditType($type_key)
       ->setTransactionType($transaction_type)
       ->setDescription($this->getDescription())
-      ->setMetadata($this->getMetadata());
+      ->setMetadata($this->getMetadata())
+      ->setConduitDocumentation($this->getConduitDocumentation());
   }
 
   public function getConduitEditTypes() {
@@ -675,6 +677,15 @@ abstract class PhabricatorEditField extends Phobject {
     }
 
     return $edit_type->generateTransactions($template, $spec);
+  }
+
+  public function setConduitDocumentation($conduit_documentation) {
+    $this->conduitDocumentation = $conduit_documentation;
+    return $this;
+  }
+
+  public function getConduitDocumentation() {
+    return $this->conduitDocumentation;
   }
 
 }

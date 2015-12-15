@@ -173,6 +173,12 @@ EOTEXT
         $type->getTransactionType());
       $section[] = null;
 
+      $type_documentation = $type->getConduitDocumentation();
+      if ($type_documentation) {
+        $section[] = $type_documentation;
+        $section[] = null;
+      }
+
       $type_description = pht(
         'Use `%s` to select this edit type.',
         $type->getEditType());

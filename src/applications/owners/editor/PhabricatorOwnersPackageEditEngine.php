@@ -44,6 +44,35 @@ final class PhabricatorOwnersPackageEditEngine
   }
 
   protected function buildCustomEditFields($object) {
+
+    $paths_help = pht(<<<EOTEXT
+When updating the paths for a package, pass a list of dictionaries like
+this as the `value` for the transaction:
+
+```lang=json, name="Example Paths Value"
+[
+  {
+    "repositoryPHID": "PHID-REPO-1234",
+    "path": "/path/to/directory/",
+    "excluded": false
+  },
+  {
+    "repositoryPHID": "PHID-REPO-1234",
+    "path": "/another/example/path/",
+    "excluded": false
+  }
+]
+```
+
+This transaction will set the paths to the list you provide, overwriting any
+previous paths.
+
+Generally, you will call `owners.search` first to get a list of current paths
+(which are provided in the same format), make changes, then update them by
+applying a transaction of this type.
+EOTEXT
+      );
+
     return array(
       id(new PhabricatorTextEditField())
         ->setKey('name')
@@ -95,7 +124,8 @@ final class PhabricatorOwnersPackageEditEngine
         ->setLabel(pht('Paths'))
         ->setDescription(pht('Set paths for this package.'))
         ->setIsConduitOnly(true)
-        ->setTransactionType(PhabricatorOwnersPackageTransaction::TYPE_PATHS),
+        ->setTransactionType(PhabricatorOwnersPackageTransaction::TYPE_PATHS)
+        ->setConduitDocumentation($paths_help),
     );
   }
 
