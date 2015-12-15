@@ -98,7 +98,7 @@ final class PhamePost extends PhameDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255',
-        'phameTitle' => 'sort64',
+        'phameTitle' => 'sort64?',
         'visibility' => 'uint32',
         'mailKey' => 'bytes20',
 
@@ -116,10 +116,6 @@ final class PhamePost extends PhameDAO
         'key_phid' => null,
         'phid' => array(
           'columns' => array('phid'),
-          'unique' => true,
-        ),
-        'phameTitle' => array(
-          'columns' => array('bloggerPHID', 'phameTitle'),
           'unique' => true,
         ),
         'bloggerPosts' => array(
@@ -147,7 +143,7 @@ final class PhamePost extends PhameDAO
   }
 
   public function getSlug() {
-    return rtrim($this->getPhameTitle(), '/');
+    return PhabricatorSlug::normalizeProjectSlug($this->getTitle(), true);
   }
 
   public function toDictionary() {
@@ -158,7 +154,6 @@ final class PhamePost extends PhameDAO
       'bloggerPHID'   => $this->getBloggerPHID(),
       'viewURI'       => $this->getViewURI(),
       'title'         => $this->getTitle(),
-      'phameTitle'    => $this->getPhameTitle(),
       'body'          => $this->getBody(),
       'summary'       => PhabricatorMarkupEngine::summarize($this->getBody()),
       'datePublished' => $this->getDatePublished(),

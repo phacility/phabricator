@@ -15,7 +15,6 @@ final class PhamePostEditor
     $types = parent::getTransactionTypes();
 
     $types[] = PhamePostTransaction::TYPE_TITLE;
-    $types[] = PhamePostTransaction::TYPE_PHAME_TITLE;
     $types[] = PhamePostTransaction::TYPE_BODY;
     $types[] = PhamePostTransaction::TYPE_VISIBILITY;
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
@@ -30,8 +29,6 @@ final class PhamePostEditor
     switch ($xaction->getTransactionType()) {
       case PhamePostTransaction::TYPE_TITLE:
         return $object->getTitle();
-      case PhamePostTransaction::TYPE_PHAME_TITLE:
-        return $object->getPhameTitle();
       case PhamePostTransaction::TYPE_BODY:
         return $object->getBody();
       case PhamePostTransaction::TYPE_VISIBILITY:
@@ -45,7 +42,6 @@ final class PhamePostEditor
 
     switch ($xaction->getTransactionType()) {
       case PhamePostTransaction::TYPE_TITLE:
-      case PhamePostTransaction::TYPE_PHAME_TITLE:
       case PhamePostTransaction::TYPE_BODY:
       case PhamePostTransaction::TYPE_VISIBILITY:
         return $xaction->getNewValue();
@@ -59,8 +55,6 @@ final class PhamePostEditor
     switch ($xaction->getTransactionType()) {
       case PhamePostTransaction::TYPE_TITLE:
         return $object->setTitle($xaction->getNewValue());
-      case PhamePostTransaction::TYPE_PHAME_TITLE:
-        return $object->setPhameTitle($xaction->getNewValue());
       case PhamePostTransaction::TYPE_BODY:
         return $object->setBody($xaction->getNewValue());
       case PhamePostTransaction::TYPE_VISIBILITY:
@@ -81,7 +75,6 @@ final class PhamePostEditor
 
     switch ($xaction->getTransactionType()) {
       case PhamePostTransaction::TYPE_TITLE:
-      case PhamePostTransaction::TYPE_PHAME_TITLE:
       case PhamePostTransaction::TYPE_BODY:
       case PhamePostTransaction::TYPE_VISIBILITY:
         return;
@@ -113,43 +106,6 @@ final class PhamePostEditor
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
         }
-        break;
-      case PhamePostTransaction::TYPE_PHAME_TITLE:
-        if (!$xactions) {
-          continue;
-        }
-        $missing = $this->validateIsEmptyTextField(
-          $object->getPhameTitle(),
-          $xactions);
-        $phame_title = last($xactions)->getNewValue();
-
-        if ($missing || $phame_title == '/') {
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Required'),
-            pht('Phame title is required.'),
-            nonempty(last($xactions), null));
-
-          $error->setIsMissingFieldError(true);
-          $errors[] = $error;
-        }
-
-        $duplicate_post = id(new PhamePostQuery())
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withPhameTitles(array($phame_title))
-          ->executeOne();
-        if ($duplicate_post && $duplicate_post->getID() != $object->getID()) {
-          $error_text = pht(
-            'Phame title must be unique; another post already has this phame '.
-            'title.');
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Not Unique'),
-            $error_text,
-            nonempty(last($xactions), null));
-          $errors[] = $error;
-        }
-
         break;
     }
     return $errors;

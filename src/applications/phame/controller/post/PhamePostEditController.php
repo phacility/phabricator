@@ -60,17 +60,13 @@ final class PhamePostEditController extends PhamePostController {
     }
 
     $title = $post->getTitle();
-    $phame_title = $post->getPhameTitle();
     $body = $post->getBody();
     $visibility = $post->getVisibility();
 
     $e_title       = true;
-    $e_phame_title = true;
     $validation_exception = null;
     if ($request->isFormPost()) {
       $title = $request->getStr('title');
-      $phame_title = $request->getStr('phame_title');
-      $phame_title = PhabricatorSlug::normalize($phame_title);
       $body = $request->getStr('body');
       $v_projects = $request->getArr('projects');
       $v_cc = $request->getArr('cc');
@@ -80,9 +76,6 @@ final class PhamePostEditController extends PhamePostController {
         id(new PhamePostTransaction())
           ->setTransactionType(PhamePostTransaction::TYPE_TITLE)
           ->setNewValue($title),
-        id(new PhamePostTransaction())
-          ->setTransactionType(PhamePostTransaction::TYPE_PHAME_TITLE)
-          ->setNewValue($phame_title),
         id(new PhamePostTransaction())
           ->setTransactionType(PhamePostTransaction::TYPE_BODY)
           ->setNewValue($body),
@@ -115,8 +108,6 @@ final class PhamePostEditController extends PhamePostController {
         $validation_exception = $ex;
         $e_title = $validation_exception->getShortMessage(
           PhamePostTransaction::TYPE_TITLE);
-        $e_phame_title = $validation_exception->getShortMessage(
-          PhamePostTransaction::TYPE_PHAME_TITLE);
       }
     }
 
@@ -139,15 +130,6 @@ final class PhamePostEditController extends PhamePostController {
         ->setValue($title)
         ->setID('post-title')
         ->setError($e_title))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-        ->setLabel(pht('Phame Title'))
-        ->setName('phame_title')
-        ->setValue(rtrim($phame_title, '/'))
-        ->setID('post-phame-title')
-        ->setCaption(pht('Up to 64 alphanumeric characters '.
-                     'with underscores for spaces.'))
-        ->setError($e_phame_title))
       ->appendChild(
         id(new AphrontFormSelectControl())
         ->setLabel(pht('Visibility'))
@@ -186,13 +168,6 @@ final class PhamePostEditController extends PhamePostController {
       ->setPreviewURI($this->getApplicationURI('post/preview/'))
       ->setControlID('post-body')
       ->setPreviewType(PHUIRemarkupPreviewPanel::DOCUMENT);
-
-    Javelin::initBehavior(
-      'phame-post-preview',
-      array(
-        'title'       => 'post-title',
-        'phame_title' => 'post-phame-title',
-      ));
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
