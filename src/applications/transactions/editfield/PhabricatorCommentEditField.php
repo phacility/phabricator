@@ -11,4 +11,8 @@ final class PhabricatorCommentEditField
     return new PhabricatorCommentEditType();
   }
 
+  public function shouldGenerateTransactionsFromComment() {
+    return true;
+  }
+
 }

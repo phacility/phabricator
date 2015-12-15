@@ -44,14 +44,6 @@ abstract class PhabricatorPHIDListEditField
     return new AphrontPHIDListHTTPParameterType();
   }
 
-  public function readValueFromComment($value) {
-    // TODO: This is really hacky -- make sure we pass a plain PHID list to
-    // the edit type. This method probably needs to move down to EditType, and
-    // maybe more additional logic does too.
-    $this->setUseEdgeTransactions(false);
-    return parent::readValueFromComment($value);
-  }
-
   protected function getValueFromRequest(AphrontRequest $request, $key) {
     $value = parent::getValueFromRequest($request, $key);
     if ($this->getIsSingleValue()) {

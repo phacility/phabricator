@@ -49,7 +49,7 @@ final class PhabricatorSubscriptionsEditEngineExtension
         pht('Add subscribers.'),
         pht('Remove subscribers.'),
         pht('Set subscribers, overwriting current value.'))
-      ->setCommentActionLabel(pht('Add Subscribers'))
+      ->setCommentActionLabel(pht('Change Subscribers'))
       ->setTransactionType($subscribers_type)
       ->setValue($sub_phids);
 

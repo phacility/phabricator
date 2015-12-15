@@ -80,7 +80,8 @@ JX.behavior('comment-actions', function(config) {
     for (var k in rows) {
       data.push({
         type: k,
-        value: rows[k].getValue()
+        value: rows[k].getValue(),
+        initialValue: action_map[k].initialValue || null
       });
     }
 
@@ -104,13 +105,12 @@ JX.behavior('comment-actions', function(config) {
     for (var ii = 0; ii < drafts.length; ii++) {
       draft = drafts[ii];
 
-      option = find_option(draft.type);
+      option = find_option(draft);
       if (!option) {
         continue;
       }
 
       control = add_row(option);
-      control.setValue(draft.value);
     }
   }
 
@@ -133,6 +133,7 @@ JX.behavior('comment-actions', function(config) {
     input_node.value = serialize_actions();
   });
 
+
   if (config.showPreview) {
     var request = new JX.PhabricatorShapedRequest(
       config.actionURI,
@@ -154,5 +155,4 @@ JX.behavior('comment-actions', function(config) {
   }
 
   restore_draft_actions(config.drafts || []);
-
 });

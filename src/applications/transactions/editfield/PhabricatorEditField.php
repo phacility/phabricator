@@ -15,7 +15,10 @@ abstract class PhabricatorEditField extends Phobject {
   private $description;
   private $editTypeKey;
   private $isRequired;
+
   private $commentActionLabel;
+  private $commentActionValue;
+  private $hasCommentActionValue;
 
   private $isLocked;
   private $isHidden;
@@ -202,6 +205,16 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->commentActionLabel;
   }
 
+  public function setCommentActionValue($comment_action_value) {
+    $this->hasCommentActionValue = true;
+    $this->commentActionValue = $comment_action_value;
+    return $this;
+  }
+
+  public function getCommentActionValue() {
+    return $this->commentActionValue;
+  }
+
   protected function newControl() {
     throw new PhutilMethodNotImplementedException();
   }
@@ -345,8 +358,8 @@ abstract class PhabricatorEditField extends Phobject {
     return $this;
   }
 
-  public function readValueFromComment($action) {
-    $this->value = $this->getValueFromComment(idx($action, 'value'));
+  public function readValueFromComment($value) {
+    $this->value = $this->getValueFromComment($value);
     return $this;
   }
 
@@ -422,6 +435,11 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function getInitialValue() {
     return $this->initialValue;
+  }
+
+  public function setInitialValue($initial_value) {
+    $this->initialValue = $initial_value;
+    return $this;
   }
 
   public function readValueFromSubmit(AphrontRequest $request) {
@@ -548,22 +566,115 @@ abstract class PhabricatorEditField extends Phobject {
     return array($edit_type);
   }
 
-  public function getWebEditTypes() {
+  public function getCommentAction() {
+    $label = $this->getCommentActionLabel();
+    if ($label === null) {
+      return null;
+    }
+
+    $action = $this->newCommentAction();
+    if ($action === null) {
+      return null;
+    }
+
+    if ($this->hasCommentActionValue) {
+      $value = $this->getCommentActionValue();
+    } else {
+      $value = $this->getValue();
+    }
+
+    $action
+      ->setKey($this->getKey())
+      ->setLabel($label)
+      ->setValue($this->getValueForCommentAction($value));
+
+    return $action;
+  }
+
+  protected function newCommentAction() {
+    return null;
+  }
+
+  protected function getValueForCommentAction($value) {
+    return $value;
+  }
+
+  public function shouldGenerateTransactionsFromSubmit() {
     if ($this->getIsConduitOnly()) {
-      return array();
+      return false;
     }
 
     $edit_type = $this->getEditType();
-
-    if ($edit_type === null) {
-      return array();
+    if (!$edit_type) {
+      return false;
     }
 
-    return array($edit_type);
+    return true;
   }
 
-  public function getCommentEditTypes() {
-    return array();
+  public function shouldReadValueFromRequest() {
+    if ($this->getIsConduitOnly()) {
+      return false;
+    }
+
+    if ($this->getIsLocked()) {
+      return false;
+    }
+
+    if ($this->getIsHidden()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function shouldReadValueFromSubmit() {
+    if ($this->getIsConduitOnly()) {
+      return false;
+    }
+
+    if ($this->getIsLocked()) {
+      return false;
+    }
+
+    if ($this->getIsHidden()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function shouldGenerateTransactionsFromComment() {
+    if ($this->getIsConduitOnly()) {
+      return false;
+    }
+
+    if ($this->getIsLocked()) {
+      return false;
+    }
+
+    if ($this->getIsHidden()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function generateTransactions(
+    PhabricatorApplicationTransaction $template,
+    array $spec) {
+
+    $edit_type = $this->getEditType();
+    if (!$edit_type) {
+      throw new Exception(
+        pht(
+          'EditField (with key "%s", of class "%s") is generating '.
+          'transactions, but has no EditType.',
+          $this->getKey(),
+          get_class($this)));
+    }
+
+    return $edit_type->generateTransactions($template, $spec);
   }
 
 }

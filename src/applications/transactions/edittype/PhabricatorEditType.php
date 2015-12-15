@@ -96,16 +96,4 @@ abstract class PhabricatorEditType extends Phobject {
     return $xaction;
   }
 
-  public function getPHUIXControlType() {
-    return null;
-  }
-
-  public function getPHUIXControlSpecification() {
-    return null;
-  }
-
-  public function getCommentActionValueFromDraftValue($value) {
-    return $value;
-  }
-
 }

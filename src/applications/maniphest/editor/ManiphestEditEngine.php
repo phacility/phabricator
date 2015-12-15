@@ -110,7 +110,7 @@ final class ManiphestEditEngine
         ->setIsCopyable(true)
         ->setSingleValue($object->getOwnerPHID())
         ->setCommentActionLabel(pht('Assign / Claim'))
-        ->setCommentActionDefaultValue($owner_value),
+        ->setCommentActionValue($owner_value),
       id(new PhabricatorSelectEditField())
         ->setKey('status')
         ->setLabel(pht('Status'))
@@ -120,7 +120,7 @@ final class ManiphestEditEngine
         ->setValue($object->getStatus())
         ->setOptions($status_map)
         ->setCommentActionLabel(pht('Change Status'))
-        ->setCommentActionDefaultValue($default_status),
+        ->setCommentActionValue($default_status),
       id(new PhabricatorSelectEditField())
         ->setKey('priority')
         ->setLabel(pht('Priority'))

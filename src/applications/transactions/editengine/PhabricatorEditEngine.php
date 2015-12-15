@@ -792,10 +792,17 @@ abstract class PhabricatorEditEngine
 
     $validation_exception = null;
     if ($request->isFormPost()) {
-      foreach ($fields as $field) {
+      $submit_fields = $fields;
+
+      foreach ($submit_fields as $key => $field) {
+        if (!$field->shouldGenerateTransactionsFromSubmit()) {
+          unset($submit_fields[$key]);
+          continue;
+        }
+
         $field->setIsSubmittedForm(true);
 
-        if ($field->getIsLocked() || $field->getIsHidden()) {
+        if (!$field->shouldReadValueFromSubmit()) {
           continue;
         }
 
@@ -803,22 +810,15 @@ abstract class PhabricatorEditEngine
       }
 
       $xactions = array();
-      foreach ($fields as $field) {
-        $types = $field->getWebEditTypes();
-        foreach ($types as $type) {
-          $type_xactions = $type->generateTransactions(
-            clone $template,
-            array(
-              'value' => $field->getValueForTransaction(),
-            ));
+      foreach ($submit_fields as $field) {
+        $type_xactions = $field->generateTransactions(
+          clone $template,
+          array(
+            'value' => $field->getValueForTransaction(),
+          ));
 
-          if (!$type_xactions) {
-            continue;
-          }
-
-          foreach ($type_xactions as $type_xaction) {
-            $xactions[] = $type_xaction;
-          }
+        foreach ($type_xactions as $type_xaction) {
+          $xactions[] = $type_xaction;
         }
       }
 
@@ -879,7 +879,7 @@ abstract class PhabricatorEditEngine
         }
 
         foreach ($fields as $field) {
-          if ($field->getIsLocked() || $field->getIsHidden()) {
+          if (!$field->shouldReadValueFromRequest()) {
             continue;
           }
 
@@ -1171,19 +1171,25 @@ abstract class PhabricatorEditEngine
 
     $fields = $this->buildEditFields($object);
 
-    $all_types = array();
+    $comment_actions = array();
     foreach ($fields as $field) {
-      if (!$this->isCommentField($field)) {
+      if (!$field->shouldGenerateTransactionsFromComment()) {
         continue;
       }
 
-      $types = $field->getCommentEditTypes();
-      foreach ($types as $type) {
-        $all_types[] = $type;
+      $comment_action = $field->getCommentAction();
+      if (!$comment_action) {
+        continue;
       }
+
+      $key = $comment_action->getKey();
+
+      // TODO: Validate these better.
+
+      $comment_actions[$key] = $comment_action;
     }
 
-    $view->setEditTypes($all_types);
+    $view->setCommentActions($comment_actions);
 
     return $view;
   }
@@ -1378,39 +1384,35 @@ abstract class PhabricatorEditEngine
     $xactions = array();
 
     if ($actions) {
-      $type_map = array();
-      foreach ($fields as $field) {
-        if (!$this->isCommentField($field)) {
-          continue;
-        }
-
-        $types = $field->getCommentEditTypes();
-        foreach ($types as $type) {
-          $type_map[$type->getEditType()] = array(
-            'type' => $type,
-            'field' => $field,
-          );
-        }
-      }
-
+      $action_map = array();
       foreach ($actions as $action) {
         $type = idx($action, 'type');
         if (!$type) {
           continue;
         }
 
-        $spec = idx($type_map, $type);
-        if (!$spec) {
+        if (empty($fields[$type])) {
           continue;
         }
 
-        $edit_type = $spec['type'];
-        $field = $spec['field'];
+        $action_map[$type] = $action;
+      }
 
-        $field->readValueFromComment($action);
+      foreach ($action_map as $type => $action) {
+        $field = $fields[$type];
 
-        $type_xactions = $edit_type->generateTransactions(
-          $template,
+        if (!$field->shouldGenerateTransactionsFromComment()) {
+          continue;
+        }
+
+        if (array_key_exists('initialValue', $action)) {
+          $field->setInitialValue($action['initialValue']);
+        }
+
+        $field->readValueFromComment(idx($action, 'value'));
+
+        $type_xactions = $field->generateTransactions(
+          clone $template,
           array(
             'value' => $field->getValueForTransaction(),
           ));
@@ -1508,6 +1510,10 @@ abstract class PhabricatorEditEngine
       ->setActor($viewer)
       ->setContentSourceFromConduitRequest($request)
       ->setContinueOnNoEffect(true);
+
+    if (!$this->getIsCreate()) {
+      $editor->setContinueOnMissingFields(true);
+    }
 
     $xactions = $editor->applyTransactions($object, $xactions);
 
@@ -1727,23 +1733,6 @@ abstract class PhabricatorEditEngine
       $this->getViewer(),
       $this,
       PhabricatorPolicyCapability::CAN_EDIT);
-  }
-
-  private function isCommentField(PhabricatorEditField $field) {
-    // TODO: This is a little bit hacky.
-    if ($field->getKey() == 'comment') {
-      return true;
-    }
-
-    if ($field->getIsLocked()) {
-      return false;
-    }
-
-    if ($field->getIsHidden()) {
-      return false;
-    }
-
-    return true;
   }
 
 
