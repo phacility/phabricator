@@ -229,7 +229,7 @@ final class PhabricatorAuthStartController
 
     return $this->newDialog()
       ->setTitle(pht('Login Required'))
-      ->appendParagraph(pht('You must login to continue.'))
+      ->appendParagraph(pht('You must login to take this action.'))
       ->addSubmitButton(pht('Login'))
       ->addCancelButton('/');
   }
