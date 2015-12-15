@@ -734,7 +734,7 @@ abstract class PhabricatorEditEngine
     }
 
     if ($config->getIsDisabled()) {
-      return $this->buildFormDisabledResponse($object, $config);
+      return $this->buildDisabledFormResponse($object, $config);
     }
 
     switch ($action) {
