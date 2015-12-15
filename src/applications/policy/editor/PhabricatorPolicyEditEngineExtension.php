@@ -91,7 +91,7 @@ final class PhabricatorPolicyEditEngineExtension
         ->setValue($object->getPolicy($capability));
       $fields[] = $policy_field;
 
-      if (!($object instanceof PhabricatorSpacesInterface)) {
+      if ($object instanceof PhabricatorSpacesInterface) {
         if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
           $type_space = PhabricatorTransactions::TYPE_SPACE;
           if (isset($types[$type_space])) {
