@@ -724,6 +724,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           'name' => $field->getFieldName(),
           'aliases' => array($legacy_key),
         );
+
+        $orders['-'.$modern_key] = array(
+          'vector' => array('-'.$modern_key, '-id'),
+          'name' => pht('%s (Reversed)', $field->getFieldName()),
+        );
       }
     }
 
