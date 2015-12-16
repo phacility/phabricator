@@ -193,6 +193,10 @@ final class PhameBlog extends PhameDAO
     return '/phame/blog/view/'.$this->getID().'/';
   }
 
+  public function getManageURI() {
+    return '/phame/blog/manage/'.$this->getID().'/';
+  }
+
   public function getProfileImageURI() {
     return $this->getProfileImageFile()->getBestURI();
   }
