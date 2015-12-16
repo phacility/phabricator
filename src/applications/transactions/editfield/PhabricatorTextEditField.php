@@ -7,4 +7,8 @@ final class PhabricatorTextEditField
     return new AphrontFormTextControl();
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitStringParameterType();
+  }
+
 }

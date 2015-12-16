@@ -146,17 +146,16 @@ EOTEXT
       );
 
     $key = pht('Key');
-    $summary = pht('Summary');
     $description = pht('Description');
     $head_type = pht('Type');
 
     $table = array();
-    $table[] = "| {$key} | {$summary} |";
+    $table[] = "| {$key} | {$description} |";
     $table[] = '|--------|----------------|';
     foreach ($types as $type) {
       $edit_type = $type->getEditType();
-      $edit_summary = $type->getSummary();
-      $table[] = "| `{$edit_type}` | {$edit_summary} |";
+      $edit_description = $type->getConduitDescription();
+      $table[] = "| `{$edit_type}` | {$edit_description} |";
     }
 
     $out[] = implode("\n", $table);
@@ -166,7 +165,7 @@ EOTEXT
       $section[] = pht('Edit Type: %s', $type->getEditType());
       $section[] = '---------';
       $section[] = null;
-      $section[] = $type->getDescription();
+      $section[] = $type->getConduitDescription();
       $section[] = null;
       $section[] = pht(
         'This edit generates transactions of type `%s` internally.',
@@ -183,12 +182,8 @@ EOTEXT
         'Use `%s` to select this edit type.',
         $type->getEditType());
 
-      $value_type = $type->getValueType();
-      if (!strlen($value_type)) {
-        $value_type = '?';
-      }
-
-      $value_description = $type->getValueDescription();
+      $value_type = $type->getConduitType();
+      $value_description = $type->getConduitTypeDescription();
 
       $table = array();
       $table[] = "| {$key} | {$head_type} | {$description} |";

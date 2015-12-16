@@ -81,13 +81,14 @@ final class PhabricatorPolicyEditEngineExtension
       $policy_field = id(new PhabricatorPolicyEditField())
         ->setKey($key)
         ->setLabel($label)
-        ->setDescription($description)
         ->setAliases($aliases)
         ->setIsCopyable(true)
         ->setCapability($capability)
         ->setPolicies($policies)
         ->setTransactionType($type)
         ->setEditTypeKey($edit)
+        ->setConduitDescription($description)
+        ->setConduitTypeDescription(pht('New policy PHID or constant.'))
         ->setValue($object->getPolicy($capability));
       $fields[] = $policy_field;
 
@@ -99,12 +100,14 @@ final class PhabricatorPolicyEditEngineExtension
               ->setKey('spacePHID')
               ->setLabel(pht('Space'))
               ->setEditTypeKey('space')
-              ->setDescription(
-                pht('Shifts the object in the Spaces application.'))
               ->setIsCopyable(true)
               ->setIsReorderable(false)
               ->setAliases(array('space', 'policy.space'))
               ->setTransactionType($type_space)
+              ->setDescription(pht('Select a space for the object.'))
+              ->setConduitDescription(
+                pht('Shift the object between spaces.'))
+              ->setConduitTypeDescription(pht('New space PHID.'))
               ->setValue($object->getSpacePHID());
             $fields[] = $space_field;
 

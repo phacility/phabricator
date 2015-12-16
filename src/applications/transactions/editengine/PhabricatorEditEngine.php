@@ -64,6 +64,10 @@ abstract class PhabricatorEditEngine
   abstract public function getEngineApplicationClass();
   abstract protected function buildCustomEditFields($object);
 
+  protected function didBuildCustomEditFields($object, array $fields) {
+    return;
+  }
+
   public function getFieldsForConfig(
     PhabricatorEditEngineConfiguration $config) {
 
@@ -82,6 +86,15 @@ abstract class PhabricatorEditEngine
 
     $fields = $this->buildCustomEditFields($object);
 
+    foreach ($fields as $field) {
+      $field
+        ->setViewer($viewer)
+        ->setObject($object);
+    }
+
+    $fields = mpull($fields, null, 'getKey');
+    $this->didBuildCustomEditFields($object, $fields);
+
     $extensions = PhabricatorEditEngineExtension::getAllEnabledExtensions();
     foreach ($extensions as $extension) {
       $extension->setViewer($viewer);
@@ -96,18 +109,21 @@ abstract class PhabricatorEditEngine
       assert_instances_of($extension_fields, 'PhabricatorEditField');
 
       foreach ($extension_fields as $field) {
-        $fields[] = $field;
+        $field
+          ->setViewer($viewer)
+          ->setObject($object);
+      }
+
+      $extension_fields = mpull($extension_fields, null, 'getKey');
+      $extension->didBuildCustomEditFields($this, $object, $extension_fields);
+
+      foreach ($extension_fields as $key => $field) {
+        $fields[$key] = $field;
       }
     }
 
     $config = $this->getEditEngineConfiguration();
     $fields = $config->applyConfigurationToFields($this, $object, $fields);
-
-    foreach ($fields as $field) {
-      $field
-        ->setViewer($viewer)
-        ->setObject($object);
-    }
 
     return $fields;
   }
@@ -1594,6 +1610,11 @@ abstract class PhabricatorEditEngine
     $results = array();
     foreach ($xactions as $xaction) {
       $type = $types[$xaction['type']];
+
+      // Let the parameter type interpret the value. This allows you to
+      // use usernames in list<user> fields, for example.
+      $parameter_type = $type->getConduitParameterType();
+      $xaction['value'] = $parameter_type->getValue($xaction, 'value');
 
       $type_xactions = $type->generateTransactions(
         clone $template,

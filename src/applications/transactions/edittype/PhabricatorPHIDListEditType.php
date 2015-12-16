@@ -42,4 +42,17 @@ abstract class PhabricatorPHIDListEditType
     }
   }
 
+  protected function newConduitParameterType() {
+    $default = parent::newConduitParameterType();
+    if ($default) {
+      return $default;
+    }
+
+    if ($this->getIsSingleValue()) {
+      return new ConduitPHIDParameterType();
+    } else {
+      return new ConduitPHIDListParameterType();
+    }
+  }
+
 }

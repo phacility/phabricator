@@ -31,4 +31,8 @@ final class PhabricatorSelectEditField
       ->setOptions($this->getOptions());
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitStringParameterType();
+  }
+
 }

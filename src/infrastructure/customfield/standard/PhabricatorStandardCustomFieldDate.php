@@ -202,4 +202,8 @@ final class PhabricatorStandardCustomFieldDate
     return null;
   }
 
+  protected function newConduitEditParameterType() {
+    return new ConduitEpochParameterType();
+  }
+
 }

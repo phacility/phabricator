@@ -1106,6 +1106,11 @@ abstract class PhabricatorCustomField extends Phobject {
       $field->setCustomFieldHTTPParameterType($http_type);
     }
 
+    $conduit_type = $this->getConduitEditParameterType();
+    if ($conduit_type) {
+      $field->setCustomFieldConduitParameterType($conduit_type);
+    }
+
     return $field;
   }
 
@@ -1344,6 +1349,17 @@ abstract class PhabricatorCustomField extends Phobject {
   protected function newConduitSearchParameterType() {
     if ($this->proxy) {
       return $this->proxy->newConduitSearchParameterType();
+    }
+    return null;
+  }
+
+  public function getConduitEditParameterType() {
+    return $this->newConduitEditParameterType();
+  }
+
+  protected function newConduitEditParameterType() {
+    if ($this->proxy) {
+      return $this->proxy->newConduitEditParameterType();
     }
     return null;
   }

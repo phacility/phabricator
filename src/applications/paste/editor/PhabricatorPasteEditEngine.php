@@ -59,38 +59,46 @@ final class PhabricatorPasteEditEngine
       id(new PhabricatorTextEditField())
         ->setKey('title')
         ->setLabel(pht('Title'))
-        ->setDescription(pht('Name of the paste.'))
         ->setTransactionType(PhabricatorPasteTransaction::TYPE_TITLE)
+        ->setDescription(pht('The title of the paste.'))
+        ->setConduitDescription(pht('Retitle the paste.'))
+        ->setConduitTypeDescription(pht('New paste title.'))
         ->setValue($object->getTitle()),
       id(new PhabricatorSelectEditField())
         ->setKey('language')
         ->setLabel(pht('Language'))
+        ->setTransactionType(PhabricatorPasteTransaction::TYPE_LANGUAGE)
+        ->setAliases(array('lang'))
+        ->setIsCopyable(true)
+        ->setOptions($langs)
         ->setDescription(
           pht(
-            'Programming language to interpret the paste as for syntax '.
-            'highlighting. By default, the language is inferred from the '.
-            'title.'))
-        ->setAliases(array('lang'))
-        ->setTransactionType(PhabricatorPasteTransaction::TYPE_LANGUAGE)
-        ->setIsCopyable(true)
-        ->setValue($object->getLanguage())
-        ->setOptions($langs),
+            'Language used for syntax highlighting. By default, inferred '.
+            'from the title.'))
+        ->setConduitDescription(
+          pht('Change language used for syntax highlighting.'))
+        ->setConduitTypeDescription(pht('New highlighting language.'))
+        ->setValue($object->getLanguage()),
       id(new PhabricatorTextAreaEditField())
         ->setKey('text')
         ->setLabel(pht('Text'))
-        ->setDescription(pht('The main body text of the paste.'))
         ->setTransactionType(PhabricatorPasteTransaction::TYPE_CONTENT)
         ->setMonospaced(true)
         ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
+        ->setDescription(pht('The main body text of the paste.'))
+        ->setConduitDescription(pht('Change the paste content.'))
+        ->setConduitTypeDescription(pht('New body content.'))
         ->setValue($object->getRawContent()),
       id(new PhabricatorSelectEditField())
         ->setKey('status')
         ->setLabel(pht('Status'))
-        ->setDescription(pht('Active or archive the paste.'))
         ->setTransactionType(PhabricatorPasteTransaction::TYPE_STATUS)
         ->setIsConduitOnly(true)
-        ->setValue($object->getStatus())
-        ->setOptions(PhabricatorPaste::getStatusNameMap()),
+        ->setOptions(PhabricatorPaste::getStatusNameMap())
+        ->setDescription(pht('Active or archived status.'))
+        ->setConduitDescription(pht('Active or archive the paste.'))
+        ->setConduitTypeDescription(pht('New paste status constant.'))
+        ->setValue($object->getStatus()),
     );
   }
 

@@ -12,10 +12,13 @@ abstract class PhabricatorEditField extends Phobject {
   private $object;
   private $transactionType;
   private $metadata = array();
-  private $description;
   private $editTypeKey;
   private $isRequired;
+
+  private $description;
+  private $conduitDescription;
   private $conduitDocumentation;
+  private $conduitTypeDescription;
 
   private $commentActionLabel;
   private $commentActionValue;
@@ -34,6 +37,8 @@ abstract class PhabricatorEditField extends Phobject {
   private $isLockable = true;
   private $isCopyable = false;
   private $isConduitOnly = false;
+
+  private $conduitEditTypes;
 
   public function setKey($key) {
     $this->key = $key;
@@ -80,15 +85,6 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->object;
   }
 
-  public function setDescription($description) {
-    $this->description = $description;
-    return $this;
-  }
-
-  public function getDescription() {
-    return $this->description;
-  }
-
   public function setIsLocked($is_locked) {
     $this->isLocked = $is_locked;
     return $this;
@@ -123,6 +119,45 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function getIsConduitOnly() {
     return $this->isConduitOnly;
+  }
+
+  public function setDescription($description) {
+    $this->description = $description;
+    return $this;
+  }
+
+  public function getDescription() {
+    return $this->description;
+  }
+
+  public function setConduitDescription($conduit_description) {
+    $this->conduitDescription = $conduit_description;
+    return $this;
+  }
+
+  public function getConduitDescription() {
+    if ($this->conduitDescription === null) {
+      return $this->getDescription();
+    }
+    return $this->conduitDescription;
+  }
+
+  public function setConduitDocumentation($conduit_documentation) {
+    $this->conduitDocumentation = $conduit_documentation;
+    return $this;
+  }
+
+  public function getConduitDocumentation() {
+    return $this->conduitDocumentation;
+  }
+
+  public function setConduitTypeDescription($conduit_type_description) {
+    $this->conduitTypeDescription = $conduit_type_description;
+    return $this;
+  }
+
+  public function getConduitTypeDescription() {
+    return $this->conduitTypeDescription;
   }
 
   public function setIsEditDefaults($is_edit_defaults) {
@@ -516,6 +551,20 @@ abstract class PhabricatorEditField extends Phobject {
     return new AphrontStringHTTPParameterType();
   }
 
+  public function getConduitParameterType() {
+    $type = $this->newConduitParameterType();
+
+    if (!$type) {
+      return null;
+    }
+
+    $type->setViewer($this->getViewer());
+
+    return $type;
+  }
+
+  abstract protected function newConduitParameterType();
+
   public function setEditTypeKey($edit_type_key) {
     $this->editTypeKey = $edit_type_key;
     return $this;
@@ -529,16 +578,13 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   protected function newEditType() {
-    // TODO: This could be a little cleaner.
-    $http_type = $this->getHTTPParameterType();
-    if ($http_type) {
-      $value_type = $http_type->getTypeName();
-    } else {
-      $value_type = 'wild';
+    $parameter_type = $this->getConduitParameterType();
+    if (!$parameter_type) {
+      return null;
     }
 
     return id(new PhabricatorSimpleEditType())
-      ->setValueType($value_type);
+      ->setConduitParameterType($parameter_type);
   }
 
   protected function getEditType() {
@@ -549,19 +595,49 @@ abstract class PhabricatorEditField extends Phobject {
     }
 
     $type_key = $this->getEditTypeKey();
+    $edit_type = $this->newEditType();
+    if (!$edit_type) {
+      return null;
+    }
 
-    return $this->newEditType()
+    return $edit_type
       ->setEditType($type_key)
       ->setTransactionType($transaction_type)
-      ->setDescription($this->getDescription())
-      ->setMetadata($this->getMetadata())
-      ->setConduitDocumentation($this->getConduitDocumentation());
+      ->setMetadata($this->getMetadata());
   }
 
-  public function getConduitEditTypes() {
+  final public function getConduitEditTypes() {
+    if ($this->conduitEditTypes === null) {
+      $edit_types = $this->newConduitEditTypes();
+      $edit_types = mpull($edit_types, null, 'getEditType');
+
+      foreach ($edit_types as $edit_type) {
+        $edit_type->setEditField($this);
+      }
+
+      $this->conduitEditTypes = $edit_types;
+    }
+
+    return $this->conduitEditTypes;
+  }
+
+  final public function getConduitEditType($key) {
+    $edit_types = $this->getConduitEditTypes();
+
+    if (empty($edit_types[$key])) {
+      throw new Exception(
+        pht(
+          'This EditField does not provide a Conduit EditType with key "%s".',
+          $key));
+    }
+
+    return $edit_types[$key];
+  }
+
+  protected function newConduitEditTypes() {
     $edit_type = $this->getEditType();
 
-    if ($edit_type === null) {
+    if (!$edit_type) {
       return array();
     }
 
@@ -679,13 +755,8 @@ abstract class PhabricatorEditField extends Phobject {
     return $edit_type->generateTransactions($template, $spec);
   }
 
-  public function setConduitDocumentation($conduit_documentation) {
-    $this->conduitDocumentation = $conduit_documentation;
-    return $this;
-  }
 
-  public function getConduitDocumentation() {
-    return $this->conduitDocumentation;
-  }
+
+
 
 }

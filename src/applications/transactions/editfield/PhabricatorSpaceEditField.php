@@ -13,4 +13,8 @@ final class PhabricatorSpaceEditField
     return new AphrontPHIDHTTPParameterType();
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitPHIDParameterType();
+  }
+
 }

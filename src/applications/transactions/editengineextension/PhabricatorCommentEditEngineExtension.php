@@ -41,13 +41,15 @@ final class PhabricatorCommentEditEngineExtension
     $comment_field = id(new PhabricatorCommentEditField())
       ->setKey('comment')
       ->setLabel(pht('Comments'))
-      ->setDescription(pht('Add comments.'))
       ->setAliases(array('comments'))
       ->setIsHidden(true)
       ->setIsReorderable(false)
       ->setIsDefaultable(false)
       ->setIsLockable(false)
       ->setTransactionType($comment_type)
+      ->setConduitDescription(pht('Make comments.'))
+      ->setConduitTypeDescription(
+        pht('Comment to add, formatted as remarkup.'))
       ->setValue(null);
 
     return array(

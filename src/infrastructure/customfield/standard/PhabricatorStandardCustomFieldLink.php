@@ -87,4 +87,9 @@ final class PhabricatorStandardCustomFieldLink
   protected function newConduitSearchParameterType() {
     return new ConduitStringListParameterType();
   }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitStringParameterType();
+  }
+
 }

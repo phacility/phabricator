@@ -32,6 +32,13 @@ abstract class PhabricatorEditEngineExtension extends Phobject {
     PhabricatorEditEngine $engine,
     PhabricatorApplicationTransactionInterface $object);
 
+  public function didBuildCustomEditFields(
+    PhabricatorEditEngine $engine,
+    PhabricatorApplicationTransactionInterface $object,
+    array $fields) {
+    return;
+  }
+
   final public static function getAllExtensions() {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)

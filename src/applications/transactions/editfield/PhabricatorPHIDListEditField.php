@@ -4,7 +4,6 @@ abstract class PhabricatorPHIDListEditField
   extends PhabricatorEditField {
 
   private $useEdgeTransactions;
-  private $transactionDescriptions = array();
   private $isSingleValue;
 
   public function setUseEdgeTransactions($use_edge_transactions) {
@@ -14,15 +13,6 @@ abstract class PhabricatorPHIDListEditField
 
   public function getUseEdgeTransactions() {
     return $this->useEdgeTransactions;
-  }
-
-  public function setEdgeTransactionDescriptions($add, $rem, $set) {
-    $this->transactionDescriptions = array(
-      '+' => $add,
-      '-' => $rem,
-      '=' => $set,
-    );
-    return $this;
   }
 
   public function setSingleValue($value) {
@@ -42,6 +32,10 @@ abstract class PhabricatorPHIDListEditField
 
   protected function newHTTPParameterType() {
     return new AphrontPHIDListHTTPParameterType();
+  }
+
+  protected function newConduitParameterType() {
+    return new ConduitPHIDListParameterType();
   }
 
   protected function getValueFromRequest(AphrontRequest $request, $key) {
@@ -105,9 +99,9 @@ abstract class PhabricatorPHIDListEditField
     return $type;
   }
 
-  public function getConduitEditTypes() {
+  protected function newConduitEditTypes() {
     if (!$this->getUseEdgeTransactions()) {
-      return parent::getConduitEditTypes();
+      return parent::newConduitEditTypes();
     }
 
     $transaction_type = $this->getTransactionType();
@@ -116,27 +110,26 @@ abstract class PhabricatorPHIDListEditField
     }
 
     $type_key = $this->getEditTypeKey();
-    $strings = $this->transactionDescriptions;
 
     $base = $this->getEditType();
 
     $add = id(clone $base)
       ->setEditType($type_key.'.add')
       ->setEdgeOperation('+')
-      ->setDescription(idx($strings, '+'))
-      ->setValueDescription(pht('List of PHIDs to add.'));
+      ->setConduitTypeDescription(pht('List of PHIDs to add.'))
+      ->setConduitParameterType($this->getConduitParameterType());
 
     $rem = id(clone $base)
       ->setEditType($type_key.'.remove')
       ->setEdgeOperation('-')
-      ->setDescription(idx($strings, '-'))
-      ->setValueDescription(pht('List of PHIDs to remove.'));
+      ->setConduitTypeDescription(pht('List of PHIDs to remove.'))
+      ->setConduitParameterType($this->getConduitParameterType());
 
     $set = id(clone $base)
       ->setEditType($type_key.'.set')
       ->setEdgeOperation('=')
-      ->setDescription(idx($strings, '='))
-      ->setValueDescription(pht('List of PHIDs to set.'));
+      ->setConduitTypeDescription(pht('List of PHIDs to set.'))
+      ->setConduitParameterType($this->getConduitParameterType());
 
     return array(
       $add,

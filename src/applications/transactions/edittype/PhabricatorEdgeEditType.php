@@ -34,13 +34,4 @@ final class PhabricatorEdgeEditType
     return array($xaction);
   }
 
-  public function setValueDescription($value_description) {
-    $this->valueDescription = $value_description;
-    return $this;
-  }
-
-  public function getValueDescription() {
-    return $this->valueDescription;
-  }
-
 }

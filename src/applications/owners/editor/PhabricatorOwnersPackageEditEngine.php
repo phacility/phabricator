@@ -122,9 +122,12 @@ EOTEXT
       id(new PhabricatorConduitEditField())
         ->setKey('paths.set')
         ->setLabel(pht('Paths'))
-        ->setDescription(pht('Set paths for this package.'))
         ->setIsConduitOnly(true)
         ->setTransactionType(PhabricatorOwnersPackageTransaction::TYPE_PATHS)
+        ->setConduitDescription(
+          pht('Overwrite existing package paths with new paths.'))
+        ->setConduitTypeDescription(
+          pht('List of dictionaries, each describing a path.'))
         ->setConduitDocumentation($paths_help),
     );
   }
