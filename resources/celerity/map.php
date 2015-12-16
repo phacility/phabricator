@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '6d8c526d',
+    'core.pkg.css' => '8378907a',
     'core.pkg.js' => 'c60f35d8',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '2de124c9',
@@ -131,7 +131,7 @@ return array(
     'rsrc/css/phui/phui-document.css' => 'a4a1c3b9',
     'rsrc/css/phui/phui-feed-story.css' => 'b7b26d23',
     'rsrc/css/phui/phui-fontkit.css' => '9cda225e',
-    'rsrc/css/phui/phui-form-view.css' => 'c1d2ef29',
+    'rsrc/css/phui/phui-form-view.css' => 'cf7da606',
     'rsrc/css/phui/phui-form.css' => 'afdb2c6e',
     'rsrc/css/phui/phui-header-view.css' => '55bb32dd',
     'rsrc/css/phui/phui-icon.css' => 'b0a6b1b6',
@@ -464,7 +464,7 @@ return array(
     'rsrc/js/core/behavior-active-nav.js' => 'e379b58e',
     'rsrc/js/core/behavior-audio-source.js' => '59b251eb',
     'rsrc/js/core/behavior-autofocus.js' => '7319e029',
-    'rsrc/js/core/behavior-choose-control.js' => '6153c708',
+    'rsrc/js/core/behavior-choose-control.js' => 'dfaafb14',
     'rsrc/js/core/behavior-crop.js' => 'fa0f4fc2',
     'rsrc/js/core/behavior-dark-console.js' => 'f411b6ae',
     'rsrc/js/core/behavior-device.js' => 'a205cf28',
@@ -570,7 +570,7 @@ return array(
     'javelin-behavior-audio-source' => '59b251eb',
     'javelin-behavior-audit-preview' => 'd835b03a',
     'javelin-behavior-bulk-job-reload' => 'edf8a145',
-    'javelin-behavior-choose-control' => '6153c708',
+    'javelin-behavior-choose-control' => 'dfaafb14',
     'javelin-behavior-comment-actions' => 'bb0d2d0c',
     'javelin-behavior-config-reorder-fields' => 'b6993408',
     'javelin-behavior-conpherence-drag-and-drop-photo' => 'cf86d16a',
@@ -805,7 +805,7 @@ return array(
     'phui-font-icon-base-css' => 'ecbbb4c2',
     'phui-fontkit-css' => '9cda225e',
     'phui-form-css' => 'afdb2c6e',
-    'phui-form-view-css' => 'c1d2ef29',
+    'phui-form-view-css' => 'cf7da606',
     'phui-header-view-css' => '55bb32dd',
     'phui-icon-view-css' => 'b0a6b1b6',
     'phui-image-mask-css' => '5a8b09c8',
@@ -1265,12 +1265,6 @@ return array(
       'javelin-behavior',
       'javelin-stratcom',
       'javelin-dom',
-    ),
-    '6153c708' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
-      'javelin-workflow',
     ),
     '61cbc29a' => array(
       'javelin-magical-init',
@@ -1889,6 +1883,12 @@ return array(
     ),
     'df5e11d2' => array(
       'javelin-install',
+    ),
+    'dfaafb14' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
+      'javelin-workflow',
     ),
     'e10f8e18' => array(
       'javelin-behavior',

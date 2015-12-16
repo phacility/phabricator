@@ -85,7 +85,6 @@ final class PhabricatorBadgesViewController
       ->setObject($badge);
 
     $quality = idx($badge->getQualityNameMap(), $badge->getQuality());
-    $icon = idx($badge->getIconNameMap(), $badge->getIcon());
 
     $view->addProperty(
       pht('Quality'),
@@ -93,7 +92,8 @@ final class PhabricatorBadgesViewController
 
     $view->addProperty(
       pht('Icon'),
-      $icon);
+      id(new PhabricatorBadgesIconSet())
+        ->getIconLabel($badge->getIcon()));
 
     $view->addProperty(
       pht('Flavor'),

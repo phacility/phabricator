@@ -111,13 +111,6 @@ final class PhabricatorBadgesEditController
       }
     }
 
-    if ($is_new) {
-      $icon_uri = $this->getApplicationURI('icon/');
-    } else {
-      $icon_uri = $this->getApplicationURI('icon/'.$badge->getID().'/');
-    }
-    $icon_display = PhabricatorBadgesIcon::renderIconForChooser($v_icon);
-
     $policies = id(new PhabricatorPolicyQuery())
       ->setViewer($viewer)
       ->setObject($badge)
@@ -137,12 +130,10 @@ final class PhabricatorBadgesEditController
           ->setLabel(pht('Flavor Text'))
           ->setValue($v_flav))
       ->appendChild(
-        id(new AphrontFormChooseButtonControl())
+        id(new PHUIFormIconSetControl())
           ->setLabel(pht('Icon'))
           ->setName('icon')
-          ->setDisplayValue($icon_display)
-          ->setButtonText(pht('Choose Icon...'))
-          ->setChooseURI($icon_uri)
+          ->setIconSet(new PhabricatorBadgesIconSet())
           ->setValue($v_icon))
       ->appendChild(
         id(new AphrontFormSelectControl())

@@ -59,10 +59,6 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
           => 'PhabricatorProjectViewController',
         'picture/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectEditPictureController',
-        'icon/(?P<id>[1-9]\d*)/'
-          => 'PhabricatorProjectEditIconController',
-        'icon/'
-          => 'PhabricatorProjectEditIconController',
         'create/' => 'PhabricatorProjectEditDetailsController',
         'board/(?P<id>[1-9]\d*)/'.
           '(?P<filter>filter/)?'.

@@ -1,62 +1,59 @@
 <?php
 
-final class AphrontFormChooseButtonControl extends AphrontFormControl {
+final class PHUIFormIconSetControl
+  extends AphrontFormControl {
 
-  private $displayValue;
-  private $buttonText;
-  private $chooseURI;
+  private $iconSet;
 
-  public function setDisplayValue($display_value) {
-    $this->displayValue = $display_value;
+  public function setIconSet(PhabricatorIconSet $icon_set) {
+    $this->iconSet = $icon_set;
     return $this;
   }
 
-  public function getDisplayValue() {
-    return $this->displayValue;
-  }
-
-  public function setButtonText($text) {
-    $this->buttonText = $text;
-    return $this;
-  }
-
-  public function setChooseURI($choose_uri) {
-    $this->chooseURI = $choose_uri;
-    return $this;
+  public function getIconSet() {
+    return $this->iconSet;
   }
 
   protected function getCustomControlClass() {
-    return 'aphront-form-control-choose-button';
+    return 'phui-form-iconset-control';
   }
 
   protected function renderInput() {
     Javelin::initBehavior('choose-control');
 
+    $set = $this->getIconSet();
+
     $input_id = celerity_generate_unique_node_id();
     $display_id = celerity_generate_unique_node_id();
 
-    $display_value = $this->displayValue;
     $button = javelin_tag(
       'a',
       array(
         'href' => '#',
         'class' => 'button grey',
-        'sigil' => 'aphront-form-choose-button',
+        'sigil' => 'phui-form-iconset-button',
       ),
-      nonempty($this->buttonText, pht('Choose...')));
+      $set->getChooseButtonText());
+
+    $icon = $set->getIcon($this->getValue());
+    if ($icon) {
+      $display = $set->renderIconForControl($icon);
+    } else {
+      $display = null;
+    }
 
     $display_cell = phutil_tag(
       'td',
       array(
-        'class' => 'aphront-form-choose-display-cell',
+        'class' => 'phui-form-iconset-display-cell',
         'id' => $display_id,
       ),
-      $display_value);
+      $display);
 
     $button_cell = phutil_tag(
       'td',
       array(
-        'class' => 'aphront-form-choose-button-cell',
+        'class' => 'phui-form-iconset-button-cell',
       ),
       $button);
 
@@ -68,10 +65,10 @@ final class AphrontFormChooseButtonControl extends AphrontFormControl {
     $layout = javelin_tag(
       'table',
       array(
-        'class' => 'aphront-form-choose-table',
-        'sigil' => 'aphront-form-choose',
+        'class' => 'phui-form-iconset-table',
+        'sigil' => 'phui-form-iconset',
         'meta' => array(
-          'uri' => $this->chooseURI,
+          'uri' => $set->getSelectURI(),
           'inputID' => $input_id,
           'displayID' => $display_id,
         ),

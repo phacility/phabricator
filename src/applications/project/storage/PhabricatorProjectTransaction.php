@@ -147,10 +147,12 @@ final class PhabricatorProjectTransaction
         break;
 
       case self::TYPE_ICON:
+        $set = new PhabricatorProjectIconSet();
+
         return pht(
           "%s set this project's icon to %s.",
           $author_handle,
-          PhabricatorProjectIcon::getLabel($new));
+          $set->getIconLabel($new));
         break;
 
       case self::TYPE_COLOR:
@@ -301,11 +303,13 @@ final class PhabricatorProjectTransaction
         }
 
       case self::TYPE_ICON:
+        $set = new PhabricatorProjectIconSet();
+
         return pht(
           '%s set the icon for %s to %s.',
           $author_handle,
           $object_handle,
-          PhabricatorProjectIcon::getLabel($new));
+          $set->getIconLabel($new));
 
       case self::TYPE_COLOR:
         return pht(

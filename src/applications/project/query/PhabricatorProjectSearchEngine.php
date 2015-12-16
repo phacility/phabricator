@@ -128,12 +128,13 @@ protected function buildQueryFromParameters(array $map) {
   private function getIconOptions() {
     $options = array();
 
-    foreach (PhabricatorProjectIcon::getIconMap() as $icon => $name) {
-      $options[$icon] = array(
+    $set = new PhabricatorProjectIconSet();
+    foreach ($set->getIcons() as $icon) {
+      $options[$icon->getKey()] = array(
         id(new PHUIIconView())
-          ->setIconFont($icon),
+          ->setIconFont($icon->getIcon()),
         ' ',
-        $name,
+        $icon->getLabel(),
       );
     }
 
@@ -143,7 +144,7 @@ protected function buildQueryFromParameters(array $map) {
   private function getColorOptions() {
     $options = array();
 
-    foreach (PhabricatorProjectIcon::getColorMap() as $color => $name) {
+    foreach (PhabricatorProjectIconSet::getColorMap() as $color => $name) {
       $options[$color] = array(
         id(new PHUITagView())
           ->setType(PHUITagView::TYPE_SHADE)

@@ -188,14 +188,8 @@ final class PhabricatorProjectEditDetailsController
           ->setError($e_name));
     $field_list->appendFieldsToForm($form);
 
-    $shades = PhabricatorProjectIcon::getColorMap();
+    $shades = PhabricatorProjectIconSet::getColorMap();
 
-    if ($is_new) {
-      $icon_uri = $this->getApplicationURI('icon/');
-    } else {
-      $icon_uri = $this->getApplicationURI('icon/'.$project->getID().'/');
-    }
-    $icon_display = PhabricatorProjectIcon::renderIconForChooser($v_icon);
     list($can_lock, $lock_message) = $this->explainApplicationCapability(
       ProjectCanLockProjectsCapability::CAPABILITY,
       pht('You can update the Lock Project setting.'),
@@ -203,12 +197,10 @@ final class PhabricatorProjectEditDetailsController
 
     $form
       ->appendChild(
-        id(new AphrontFormChooseButtonControl())
+        id(new PHUIFormIconSetControl())
           ->setLabel(pht('Icon'))
           ->setName('icon')
-          ->setDisplayValue($icon_display)
-          ->setButtonText(pht('Choose Icon...'))
-          ->setChooseURI($icon_uri)
+          ->setIconSet(new PhabricatorProjectIconSet())
           ->setValue($v_icon))
       ->appendChild(
         id(new AphrontFormSelectControl())

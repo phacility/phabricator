@@ -10,11 +10,11 @@ JX.behavior('choose-control', function() {
 
   JX.Stratcom.listen(
     'click',
-    'aphront-form-choose-button',
+    'phui-form-iconset-button',
     function(e) {
       e.kill();
 
-      var data = e.getNodeData('aphront-form-choose');
+      var data = e.getNodeData('phui-form-iconset');
 
       var params = {
         value: JX.$(data.inputID).value

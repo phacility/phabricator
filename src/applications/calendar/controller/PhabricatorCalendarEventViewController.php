@@ -360,11 +360,10 @@ final class PhabricatorCalendarEventViewController
 
     $properties->invokeWillRenderEvent();
 
-    $icon_display = PhabricatorCalendarIcon::renderIconForChooser(
-      $event->getIcon());
     $properties->addProperty(
       pht('Icon'),
-      $icon_display);
+      id(new PhabricatorCalendarIconSet())
+        ->getIconLabel($event->getIcon()));
 
     if (strlen($event->getDescription())) {
       $description = PhabricatorMarkupEngine::renderOneObject(
