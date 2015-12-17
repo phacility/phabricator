@@ -236,6 +236,10 @@ final class AphrontRequest extends Phobject {
     return 'X-Phabricator-Csrf';
   }
 
+  public static function getViaHeaderName() {
+    return 'X-Phabricator-Via';
+  }
+
   public function validateCSRF() {
     $token_name = self::getCSRFTokenName();
     $token = $this->getStr($token_name);

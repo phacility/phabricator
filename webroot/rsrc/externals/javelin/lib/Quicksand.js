@@ -50,7 +50,7 @@ JX.install('Quicksand', {
       JX.Stratcom.listen('history:change', null, self._onchange);
 
       self._started = true;
-      var path = self._getRelativeURI(window.location);
+      var path = JX.$U(window.location).getRelativeURI();
       self._id = window.history.state || 0;
       var id = self._id;
       self._onpage = id;
@@ -157,7 +157,7 @@ JX.install('Quicksand', {
       }
 
       // Set up the new state and fire a request to fetch the page data.
-      var path = self._getRelativeURI(uri);
+      var path = JX.$U(uri).getRelativeURI();
       var id = ++self._id;
 
       self._history.push({path: path, id: id});
@@ -293,18 +293,6 @@ JX.install('Quicksand', {
         // Redraw the page.
         self._draw(false);
       }
-    },
-
-
-    /**
-     * Get just the relative part of a URI, for History operations.
-     */
-    _getRelativeURI: function(uri) {
-      return JX.$U(uri)
-        .setProtocol(null)
-        .setPort(null)
-        .setDomain(null)
-        .toString();
     },
 
 

@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '8378907a',
-    'core.pkg.js' => 'c60f35d8',
+    'core.pkg.js' => '5058979d',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '2de124c9',
     'differential.pkg.js' => '6223dd9d',
@@ -227,14 +227,14 @@ return array(
     'rsrc/externals/javelin/lib/JSON.js' => '69adf288',
     'rsrc/externals/javelin/lib/Leader.js' => '331b1611',
     'rsrc/externals/javelin/lib/Mask.js' => '8a41885b',
-    'rsrc/externals/javelin/lib/Quicksand.js' => '4cebc641',
+    'rsrc/externals/javelin/lib/Quicksand.js' => '6b8ef10b',
     'rsrc/externals/javelin/lib/Request.js' => '94b750d2',
     'rsrc/externals/javelin/lib/Resource.js' => '44959b73',
     'rsrc/externals/javelin/lib/Routable.js' => 'b3e7d692',
     'rsrc/externals/javelin/lib/Router.js' => '29274e2b',
     'rsrc/externals/javelin/lib/Scrollbar.js' => '087e919c',
     'rsrc/externals/javelin/lib/Sound.js' => '949c0fe5',
-    'rsrc/externals/javelin/lib/URI.js' => '6eff08aa',
+    'rsrc/externals/javelin/lib/URI.js' => 'c989ade3',
     'rsrc/externals/javelin/lib/Vector.js' => '2caa8fb8',
     'rsrc/externals/javelin/lib/WebSocket.js' => 'e292eaf4',
     'rsrc/externals/javelin/lib/Workflow.js' => '5b2e3e2b',
@@ -487,7 +487,7 @@ return array(
     'rsrc/js/core/behavior-oncopy.js' => '2926fff2',
     'rsrc/js/core/behavior-phabricator-nav.js' => '56a1ca03',
     'rsrc/js/core/behavior-phabricator-remarkup-assist.js' => 'eeaa9e5a',
-    'rsrc/js/core/behavior-refresh-csrf.js' => '7814b593',
+    'rsrc/js/core/behavior-refresh-csrf.js' => 'ab2f381b',
     'rsrc/js/core/behavior-remarkup-preview.js' => 'f7379f45',
     'rsrc/js/core/behavior-reorder-applications.js' => '76b9fc3e',
     'rsrc/js/core/behavior-reveal-content.js' => '60821bc7',
@@ -657,7 +657,7 @@ return array(
     'javelin-behavior-project-create' => '065227cc',
     'javelin-behavior-quicksand-blacklist' => '7927a7d3',
     'javelin-behavior-recurring-edit' => '5f1c4d5f',
-    'javelin-behavior-refresh-csrf' => '7814b593',
+    'javelin-behavior-refresh-csrf' => 'ab2f381b',
     'javelin-behavior-releeph-preview-branch' => 'b2b4fbaf',
     'javelin-behavior-releeph-request-state-change' => 'a0b57eb8',
     'javelin-behavior-releeph-request-typeahead' => 'de2e896f',
@@ -690,7 +690,7 @@ return array(
     'javelin-leader' => '331b1611',
     'javelin-magical-init' => '3010e992',
     'javelin-mask' => '8a41885b',
-    'javelin-quicksand' => '4cebc641',
+    'javelin-quicksand' => '6b8ef10b',
     'javelin-reactor' => '2b8de964',
     'javelin-reactor-dom' => 'c90a04fc',
     'javelin-reactor-node-calmer' => '76f4ebed',
@@ -710,7 +710,7 @@ return array(
     'javelin-typeahead-preloaded-source' => '54f314a0',
     'javelin-typeahead-source' => '2818f5ce',
     'javelin-typeahead-static-source' => '6c0e62fa',
-    'javelin-uri' => '6eff08aa',
+    'javelin-uri' => 'c989ade3',
     'javelin-util' => '93cc50d6',
     'javelin-vector' => '2caa8fb8',
     'javelin-view' => '0f764c35',
@@ -1130,9 +1130,6 @@ return array(
       'javelin-request',
       'javelin-util',
     ),
-    '4cebc641' => array(
-      'javelin-install',
-    ),
     '4e3e79a6' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1302,6 +1299,9 @@ return array(
     '69adf288' => array(
       'javelin-install',
     ),
+    '6b8ef10b' => array(
+      'javelin-install',
+    ),
     '6c0e62fa' => array(
       'javelin-install',
       'javelin-typeahead-source',
@@ -1328,11 +1328,6 @@ return array(
       'javelin-dom',
       'phabricator-drag-and-drop-file-upload',
       'phabricator-textareautils',
-    ),
-    '6eff08aa' => array(
-      'javelin-install',
-      'javelin-util',
-      'javelin-stratcom',
     ),
     '70baed2f' => array(
       'javelin-install',
@@ -1367,14 +1362,6 @@ return array(
       'javelin-install',
       'javelin-reactor',
       'javelin-util',
-    ),
-    '7814b593' => array(
-      'javelin-request',
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-router',
-      'javelin-util',
-      'phabricator-busy',
     ),
     '782ab6e7' => array(
       'javelin-behavior',
@@ -1642,6 +1629,14 @@ return array(
       'javelin-util',
       'phabricator-prefab',
     ),
+    'ab2f381b' => array(
+      'javelin-request',
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-router',
+      'javelin-util',
+      'phabricator-busy',
+    ),
     'ad10aeac' => array(
       'javelin-install',
       'javelin-util',
@@ -1802,6 +1797,11 @@ return array(
       'javelin-reactornode',
       'javelin-install',
       'javelin-util',
+    ),
+    'c989ade3' => array(
+      'javelin-install',
+      'javelin-util',
+      'javelin-stratcom',
     ),
     'ca3f91eb' => array(
       'javelin-behavior',
