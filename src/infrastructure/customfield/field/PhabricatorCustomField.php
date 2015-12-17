@@ -594,6 +594,13 @@ abstract class PhabricatorCustomField extends Phobject {
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
+  public function didSetValueFromStorage() {
+    if ($this->proxy) {
+      return $this->proxy->didSetValueFromStorage();
+    }
+    return $this;
+  }
+
 
 /* -(  ApplicationSearch  )-------------------------------------------------- */
 

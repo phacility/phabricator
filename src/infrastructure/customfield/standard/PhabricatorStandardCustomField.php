@@ -16,6 +16,7 @@ abstract class PhabricatorStandardCustomField
   private $required;
   private $default;
   private $isCopyable;
+  private $hasStorageValue;
 
   abstract public function getFieldType();
 
@@ -213,6 +214,19 @@ abstract class PhabricatorStandardCustomField
 
   public function setValueFromStorage($value) {
     return $this->setFieldValue($value);
+  }
+
+  public function didSetValueFromStorage() {
+    $this->hasStorageValue = true;
+    return $this;
+  }
+
+  public function getOldValueForApplicationTransactions() {
+    if ($this->hasStorageValue) {
+      return $this->getValueForStorage();
+    } else {
+      return null;
+    }
   }
 
   public function shouldAppearInApplicationTransactions() {
