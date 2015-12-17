@@ -101,6 +101,7 @@ final class PhabricatorPolicyEditEngineExtension
               ->setLabel(pht('Space'))
               ->setEditTypeKey('space')
               ->setIsCopyable(true)
+              ->setIsLockable(false)
               ->setIsReorderable(false)
               ->setAliases(array('space', 'policy.space'))
               ->setTransactionType($type_space)
@@ -111,6 +112,7 @@ final class PhabricatorPolicyEditEngineExtension
               ->setValue($object->getSpacePHID());
             $fields[] = $space_field;
 
+            $space_field->setPolicyField($policy_field);
             $policy_field->setSpaceField($space_field);
           }
         }
