@@ -823,6 +823,12 @@ abstract class PhabricatorApplicationTransactionEditor
       throw $ex;
     }
 
+    foreach ($xactions as $xaction) {
+      if ($this->getIsNewObject()) {
+        $xaction->setIsCreateTransaction(true);
+      }
+    }
+
     // Now that we've merged, filtered, and combined transactions, check for
     // required capabilities.
     foreach ($xactions as $xaction) {

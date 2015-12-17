@@ -142,6 +142,22 @@ abstract class PhabricatorApplicationTransaction
     return $this->comment;
   }
 
+  public function setIsCreateTransaction($create) {
+    return $this->setMetadataValue('core.create', $create);
+  }
+
+  public function getIsCreateTransaction() {
+    return (bool)$this->getMetadataValue('core.create', false);
+  }
+
+  public function setIsDefaultTransaction($default) {
+    return $this->setMetadataValue('core.default', $default);
+  }
+
+  public function getIsDefaultTransaction() {
+    return (bool)$this->getMetadataValue('core.default', false);
+  }
+
   public function attachComment(
     PhabricatorApplicationTransactionComment $comment) {
     $this->comment = $comment;
@@ -456,6 +472,39 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function shouldHide() {
+    // Never hide comments.
+    if ($this->hasComment()) {
+      return false;
+    }
+
+    // Hide creation transactions if the old value is empty. These are
+    // transactions like "alice set the task tile to: ...", which are
+    // essentially never interesting.
+    if ($this->getIsCreateTransaction()) {
+      $old = $this->getOldValue();
+
+      if (is_array($old) && !$old) {
+        return true;
+      }
+
+      if (!strlen($old)) {
+        return true;
+      }
+    }
+
+    // Hide creation transactions setting values to defaults, even if
+    // the old value is not empty. For example, tasks may have a global
+    // default view policy of "All Users", but a particular form sets the
+    // policy to "Administrators". The transaction corresponding to this
+    // change is not interesting, since it is the default behavior of the
+    // form.
+
+    if ($this->getIsCreateTransaction()) {
+      if ($this->getIsDefaultTransaction()) {
+        return true;
+      }
+    }
+
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:

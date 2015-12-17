@@ -755,8 +755,4 @@ abstract class PhabricatorEditField extends Phobject {
     return $edit_type->generateTransactions($template, $spec);
   }
 
-
-
-
-
 }

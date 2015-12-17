@@ -836,7 +836,17 @@ abstract class PhabricatorEditEngine
           unset($submit_fields[$key]);
           continue;
         }
+      }
 
+      // Before we read the submitted values, store a copy of what we would
+      // use if the form was empty so we can figure out which transactions are
+      // just setting things to their default values for the current form.
+      $defaults = array();
+      foreach ($submit_fields as $key => $field) {
+        $defaults[$key] = $field->getValueForTransaction();
+      }
+
+      foreach ($submit_fields as $key => $field) {
         $field->setIsSubmittedForm(true);
 
         if (!$field->shouldReadValueFromSubmit()) {
@@ -847,14 +857,22 @@ abstract class PhabricatorEditEngine
       }
 
       $xactions = array();
-      foreach ($submit_fields as $field) {
+      foreach ($submit_fields as $key => $field) {
+        $field_value = $field->getValueForTransaction();
+
         $type_xactions = $field->generateTransactions(
           clone $template,
           array(
-            'value' => $field->getValueForTransaction(),
+            'value' => $field_value,
           ));
 
         foreach ($type_xactions as $type_xaction) {
+          $default = $defaults[$key];
+
+          if ($default === $field->getValueForTransaction()) {
+            $type_xaction->setIsDefaultTransaction(true);
+          }
+
           $xactions[] = $type_xaction;
         }
       }
