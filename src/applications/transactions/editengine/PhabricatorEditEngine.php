@@ -225,6 +225,27 @@ abstract class PhabricatorEditEngine
   }
 
 
+  /**
+   * Return a human-readable header describing what this engine is used to do,
+   * like "Configure Maniphest Task Forms".
+   *
+   * @return string Human-readable description of the engine.
+   * @task text
+   */
+  abstract public function getSummaryHeader();
+
+
+  /**
+   * Return a human-readable summary of what this engine is used to do.
+   *
+   * @return string Human-readable description of the engine.
+   * @task text
+   */
+  abstract public function getSummaryText();
+
+
+
+
 /* -(  Edit Engine Configuration  )------------------------------------------ */
 
 
@@ -1010,9 +1031,9 @@ abstract class PhabricatorEditEngine
 
     $action_button = id(new PHUIButtonView())
       ->setTag('a')
-      ->setText(pht('Actions'))
+      ->setText(pht('Configure Form'))
       ->setHref('#')
-      ->setIconFont('fa-bars')
+      ->setIconFont('fa-gear')
       ->setDropdownMenu($action_view);
 
     return $action_button;

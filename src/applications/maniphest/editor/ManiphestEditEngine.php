@@ -9,6 +9,14 @@ final class ManiphestEditEngine
     return pht('Maniphest Tasks');
   }
 
+  public function getSummaryHeader() {
+    return pht('Configure Maniphest Task Forms');
+  }
+
+  public function getSummaryText() {
+    return pht('Configure how users create and edit tasks.');
+  }
+
   public function getEngineApplicationClass() {
     return 'PhabricatorManiphestApplication';
   }

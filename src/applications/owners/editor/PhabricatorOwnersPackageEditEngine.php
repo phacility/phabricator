@@ -9,6 +9,14 @@ final class PhabricatorOwnersPackageEditEngine
     return pht('Owners Packages');
   }
 
+  public function getSummaryHeader() {
+    return pht('Configure Owners Package Forms');
+  }
+
+  public function getSummaryText() {
+    return pht('Configure forms for creating and editing packages in Owners.');
+  }
+
   public function getEngineApplicationClass() {
     return 'PhabricatorOwnersApplication';
   }

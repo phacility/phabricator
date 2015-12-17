@@ -30,6 +30,16 @@ final class PhabricatorEditEngineConfigurationEditEngine
     return pht('Edit Configurations');
   }
 
+  public function getSummaryHeader() {
+    return pht('Configure Forms for Configuring Forms');
+  }
+
+  public function getSummaryText() {
+    return pht(
+      'Change how forms in other applications are created and edited. '.
+      'Advanced!');
+  }
+
   public function getEngineApplicationClass() {
     return 'PhabricatorTransactionsApplication';
   }

@@ -9,6 +9,14 @@ final class PhabricatorPasteEditEngine
     return pht('Pastes');
   }
 
+  public function getSummaryHeader() {
+    return pht('Configure Paste Forms');
+  }
+
+  public function getSummaryText() {
+    return pht('Configure creation and editing forms in Paste.');
+  }
+
   public function getEngineApplicationClass() {
     return 'PhabricatorPasteApplication';
   }

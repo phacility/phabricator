@@ -13,6 +13,14 @@ final class PhameBlogEditEngine
     return 'PhabricatorPhameApplication';
   }
 
+  public function getSummaryHeader() {
+    return pht('Configure Phame Blog Forms');
+  }
+
+  public function getSummaryText() {
+    return pht('Configure how blogs in Phame are created and edited.');
+  }
+
   protected function newEditableObject() {
     return PhameBlog::initializeNewBlog($this->getViewer());
   }
