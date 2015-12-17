@@ -224,7 +224,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -327,7 +326,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -364,7 +362,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -419,7 +416,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -469,7 +465,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -509,7 +504,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -551,7 +545,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -592,7 +585,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -640,7 +632,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getViewer();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -678,7 +669,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getViewer();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -732,7 +722,6 @@ final class DiffusionRepositoryEditMainController
     $user = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($user);
 
     $edit = id(new PhabricatorActionView())
@@ -1240,7 +1229,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $mirror_actions = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $new_mirror_uri = $this->getRepositoryControllerURI(
@@ -1319,7 +1307,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())

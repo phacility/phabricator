@@ -903,8 +903,7 @@ final class DiffusionCommitController extends DiffusionController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
-      ->setObject($commit)
-      ->setObjectURI($request->getRequestURI());
+      ->setObject($commit);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $user,

@@ -134,7 +134,6 @@ final class PhameBlogManageController extends PhameBlogController {
   private function renderActions(PhameBlog $blog, PhabricatorUser $viewer) {
     $actions = id(new PhabricatorActionListView())
       ->setObject($blog)
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(

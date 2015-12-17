@@ -79,8 +79,7 @@ final class PhabricatorProjectProfileController
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($project)
-      ->setObjectURI($request->getRequestURI());
+      ->setObject($project);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,

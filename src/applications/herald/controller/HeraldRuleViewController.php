@@ -67,8 +67,7 @@ final class HeraldRuleViewController extends HeraldController {
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($rule)
-      ->setObjectURI('/'.$rule->getMonogram());
+      ->setObject($rule);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,

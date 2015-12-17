@@ -152,7 +152,6 @@ final class PhabricatorCalendarEventViewController
     $is_attending = $event->getIsUserAttending($viewer->getPHID());
 
     $actions = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getApplicationURI('event/'.$id.'/'))
       ->setUser($viewer)
       ->setObject($event);
 

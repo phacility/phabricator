@@ -83,7 +83,6 @@ final class PhabricatorProjectColumnDetailController
     $base_uri = '/board/'.$project_id.'/';
 
     $actions = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getApplicationURI($base_uri.'column/'.$id.'/'))
       ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(

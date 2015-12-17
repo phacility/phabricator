@@ -221,8 +221,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
 
     $list = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($plan)
-      ->setObjectURI($this->getApplicationURI("plan/{$id}/"));
+      ->setObject($plan);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,

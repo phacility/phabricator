@@ -87,8 +87,7 @@ final class ReleephBranchViewController extends ReleephBranchController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($branch)
-      ->setObjectURI($this->getRequest()->getRequestURI());
+      ->setObject($branch);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,

@@ -59,7 +59,6 @@ final class NuanceQueueViewController extends NuanceController {
     $id = $queue->getID();
 
     $actions = id(new PhabricatorActionListView())
-      ->setObjectURI($queue->getURI())
       ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
