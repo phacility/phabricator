@@ -306,20 +306,27 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return array_values($this->subscribers);
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
         return $object->getViewPolicy();
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
         return $object->getEditPolicy();
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
         return $object->getJoinPolicy();
       case PhabricatorTransactions::TYPE_SPACE:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
+
         $space_phid = $object->getSpacePHID();
         if ($space_phid === null) {
-          if ($this->getIsNewObject()) {
-            // In this case, just return `null` so we know this is the initial
-            // transaction and it should be hidden.
-            return null;
-          }
-
           $default_space = PhabricatorSpacesNamespaceQuery::getDefaultSpace();
           if ($default_space) {
             $space_phid = $default_space->getPHID();

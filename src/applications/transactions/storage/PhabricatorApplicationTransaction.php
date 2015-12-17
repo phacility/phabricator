@@ -481,14 +481,22 @@ abstract class PhabricatorApplicationTransaction
     // transactions like "alice set the task tile to: ...", which are
     // essentially never interesting.
     if ($this->getIsCreateTransaction()) {
-      $old = $this->getOldValue();
+      switch ($this->getTransactionType()) {
+        case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        case PhabricatorTransactions::TYPE_SPACE:
+          break;
+        default:
+          $old = $this->getOldValue();
 
-      if (is_array($old) && !$old) {
-        return true;
-      }
+          if (is_array($old) && !$old) {
+            return true;
+          }
 
-      if (!strlen($old)) {
-        return true;
+          if (!strlen($old)) {
+            return true;
+          }
       }
     }
 
@@ -510,6 +518,13 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
       case PhabricatorTransactions::TYPE_SPACE:
+        if ($this->getIsCreateTransaction()) {
+          break;
+        }
+
+        // TODO: Remove this eventually, this is handling old changes during
+        // object creation prior to the introduction of "create" and "default"
+        // transaction display flags.
         if ($this->getOldValue() === null) {
           return true;
         } else {
@@ -692,29 +707,57 @@ abstract class PhabricatorApplicationTransaction
           '%s added a comment.',
           $this->renderHandleLink($author_phid));
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        return pht(
-          '%s changed the visibility from "%s" to "%s".',
-          $this->renderHandleLink($author_phid),
-          $this->renderPolicyName($old, 'old'),
-          $this->renderPolicyName($new, 'new'));
+        if ($this->getIsCreateTransaction()) {
+          return pht(
+            '%s created this object with visibility "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderPolicyName($new, 'new'));
+        } else {
+          return pht(
+            '%s changed the visibility from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderPolicyName($old, 'old'),
+            $this->renderPolicyName($new, 'new'));
+        }
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        return pht(
-          '%s changed the edit policy from "%s" to "%s".',
-          $this->renderHandleLink($author_phid),
-          $this->renderPolicyName($old, 'old'),
-          $this->renderPolicyName($new, 'new'));
+        if ($this->getIsCreateTransaction()) {
+          return pht(
+            '%s created this object with edit policy "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderPolicyName($new, 'new'));
+        } else {
+          return pht(
+            '%s changed the edit policy from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderPolicyName($old, 'old'),
+            $this->renderPolicyName($new, 'new'));
+        }
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
-        return pht(
-          '%s changed the join policy from "%s" to "%s".',
-          $this->renderHandleLink($author_phid),
-          $this->renderPolicyName($old, 'old'),
-          $this->renderPolicyName($new, 'new'));
+        if ($this->getIsCreateTransaction()) {
+          return pht(
+            '%s created this object with join policy "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderPolicyName($new, 'new'));
+        } else {
+          return pht(
+            '%s changed the join policy from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderPolicyName($old, 'old'),
+            $this->renderPolicyName($new, 'new'));
+        }
       case PhabricatorTransactions::TYPE_SPACE:
-        return pht(
-          '%s shifted this object from the %s space to the %s space.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($old),
-          $this->renderHandleLink($new));
+        if ($this->getIsCreateTransaction()) {
+          return pht(
+            '%s created this object in space %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($new));
+        } else {
+          return pht(
+            '%s shifted this object from the %s space to the %s space.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($old),
+            $this->renderHandleLink($new));
+        }
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
