@@ -1741,7 +1741,8 @@ abstract class PhabricatorEditEngine
         ->setName($group_name);
 
       foreach ($configs as $config) {
-        $items[] = $this->newQuickCreateItem($config);
+        $items[] = $this->newQuickCreateItem($config)
+          ->setIndented(true);
       }
     }
 

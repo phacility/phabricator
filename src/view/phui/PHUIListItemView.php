@@ -28,6 +28,7 @@ final class PHUIListItemView extends AphrontTagView {
   private $order;
   private $aural;
   private $profileImage;
+  private $indented;
 
   public function setDropdownMenu(PhabricatorActionListView $actions) {
     Javelin::initBehavior('phui-dropdown-menu');
@@ -89,6 +90,15 @@ final class PHUIListItemView extends AphrontTagView {
 
   public function getIcon() {
     return $this->icon;
+  }
+
+  public function setIndented($indented) {
+    $this->indented = $indented;
+    return $this;
+  }
+
+  public function getIndented() {
+    return $this->indented;
   }
 
   public function setKey($key) {
@@ -256,11 +266,20 @@ final class PHUIListItemView extends AphrontTagView {
         ->setIconFont($this->appIcon);
     }
 
+    $classes = array();
+    if ($this->href) {
+      $classes[] = 'phui-list-item-href';
+    }
+
+    if ($this->indented) {
+      $classes[] = 'phui-list-item-indented';
+    }
+
     return javelin_tag(
       $this->href ? 'a' : 'div',
       array(
         'href' => $this->href,
-        'class' => $this->href ? 'phui-list-item-href' : null,
+        'class' => implode(' ', $classes),
         'meta' => $meta,
         'sigil' => $sigil,
       ),
