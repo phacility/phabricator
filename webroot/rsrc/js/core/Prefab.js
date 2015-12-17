@@ -240,6 +240,10 @@ JX.install('Prefab', {
         tokenizer.setBrowseURI(config.browseURI);
       }
 
+      if (config.disabled) {
+        tokenizer.setDisabled(true);
+      }
+
       JX.Stratcom.addData(root, {'tokenizer' : tokenizer});
 
       return {

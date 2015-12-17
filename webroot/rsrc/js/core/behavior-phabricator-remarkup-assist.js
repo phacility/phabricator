@@ -196,6 +196,10 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
 
       e.kill();
 
+      if (config.disabled) {
+        return;
+      }
+
       var root = e.getNode('remarkup-assist-control');
       var area = JX.DOM.find(root, 'textarea');
 

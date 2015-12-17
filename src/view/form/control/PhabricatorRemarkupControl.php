@@ -31,14 +31,16 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
     // currently ship JS or CSS.
     require_celerity_resource('lightbox-attachment-css');
 
-    Javelin::initBehavior(
-      'aphront-drag-and-drop-textarea',
-      array(
-        'target' => $id,
-        'activatedClass' => 'aphront-textarea-drag-and-drop',
-        'uri' => '/file/dropupload/',
-        'chunkThreshold' => PhabricatorFileStorageEngine::getChunkThreshold(),
-      ));
+    if (!$this->getDisabled()) {
+      Javelin::initBehavior(
+        'aphront-drag-and-drop-textarea',
+        array(
+          'target' => $id,
+          'activatedClass' => 'aphront-textarea-drag-and-drop',
+          'uri' => '/file/dropupload/',
+          'chunkThreshold' => PhabricatorFileStorageEngine::getChunkThreshold(),
+        ));
+    }
 
     Javelin::initBehavior(
       'phabricator-remarkup-assist',
@@ -53,6 +55,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
           'name' => pht('name'),
           'URL' => pht('URL'),
         ),
+        'disabled' => $this->getDisabled(),
       ));
     Javelin::initBehavior('phabricator-tooltips', array());
 
@@ -175,12 +178,18 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
           $tip);
       }
 
+      $sigils = array();
+      $sigils[] = 'remarkup-assist';
+      if (!$this->getDisabled()) {
+        $sigils[] = 'has-tooltip';
+      }
+
       $buttons[] = javelin_tag(
         'a',
         array(
           'class'       => implode(' ', $classes),
           'href'        => $href,
-          'sigil'       => 'remarkup-assist has-tooltip',
+          'sigil'       => implode(' ', $sigils),
           'meta'        => $meta,
           'mustcapture' => $mustcapture,
           'target'      => $target,
@@ -220,6 +229,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       'div',
       array(
         'sigil' => 'remarkup-assist-control',
+        'class' => $this->getDisabled() ? 'disabled-control' : null,
       ),
       array(
         $buttons,

@@ -112,6 +112,7 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
         'username' => $username,
         'placeholder' => $placeholder,
         'browseURI' => $browse_uri,
+        'disabled' => $this->getDisabled(),
       ));
     }
 
