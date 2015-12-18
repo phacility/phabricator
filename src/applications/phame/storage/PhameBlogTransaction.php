@@ -24,7 +24,9 @@ final class PhameBlogTransaction
     $old = $this->getOldValue();
     switch ($this->getTransactionType()) {
       case self::TYPE_DESCRIPTION:
-        return ($old === null);
+        if ($old === null) {
+          return true;
+        }
     }
     return parent::shouldHide();
   }
@@ -98,6 +100,10 @@ final class PhameBlogTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return pht(
+          '%s created this blog.',
+          $this->renderHandleLink($author_phid));
       case self::TYPE_NAME:
         if ($old === null) {
           return pht(

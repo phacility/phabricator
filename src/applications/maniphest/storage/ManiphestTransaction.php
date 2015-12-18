@@ -381,6 +381,11 @@ final class ManiphestTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return pht(
+          '%s created this task.',
+          $this->renderHandleLink($author_phid));
+
       case self::TYPE_TITLE:
         if ($old === null) {
           return pht(

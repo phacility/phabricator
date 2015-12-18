@@ -34,6 +34,10 @@ final class PhabricatorEditEngineConfigurationTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return pht(
+          '%s created this form configuration.',
+          $this->renderHandleLink($author_phid));
       case self::TYPE_NAME:
         if (strlen($old)) {
           return pht(

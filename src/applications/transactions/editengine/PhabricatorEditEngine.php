@@ -857,6 +857,12 @@ abstract class PhabricatorEditEngine
       }
 
       $xactions = array();
+
+      if ($this->getIsCreate()) {
+        $xactions[] = id(clone $template)
+          ->setTransactionType(PhabricatorTransactions::TYPE_CREATE);
+      }
+
       foreach ($submit_fields as $key => $field) {
         $field_value = $field->getValueForTransaction();
 
@@ -1647,6 +1653,12 @@ abstract class PhabricatorEditEngine
     }
 
     $results = array();
+
+    if ($this->getIsCreate()) {
+      $results[] = id(clone $template)
+        ->setTransactionType(PhabricatorTransactions::TYPE_CREATE);
+    }
+
     foreach ($xactions as $xaction) {
       $type = $types[$xaction['type']];
 

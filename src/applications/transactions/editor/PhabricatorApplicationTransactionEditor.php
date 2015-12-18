@@ -258,6 +258,8 @@ abstract class PhabricatorApplicationTransactionEditor
   public function getTransactionTypes() {
     $types = array();
 
+    $types[] = PhabricatorTransactions::TYPE_CREATE;
+
     if ($this->object instanceof PhabricatorSubscribableInterface) {
       $types[] = PhabricatorTransactions::TYPE_SUBSCRIBERS;
     }
@@ -303,6 +305,8 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return null;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return array_values($this->subscribers);
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -371,6 +375,8 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return null;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return $this->getPHIDTransactionNewValue($xaction);
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -422,6 +428,8 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return true;
       case PhabricatorTransactions::TYPE_COMMENT:
         return $xaction->hasComment();
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
@@ -484,6 +492,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionInternalEffects($xaction);
+      case PhabricatorTransactions::TYPE_CREATE:
       case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -534,6 +543,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionExternalEffects($xaction);
+      case PhabricatorTransactions::TYPE_CREATE:
       case PhabricatorTransactions::TYPE_EDGE:
       case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:

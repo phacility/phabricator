@@ -482,6 +482,7 @@ abstract class PhabricatorApplicationTransaction
     // essentially never interesting.
     if ($this->getIsCreateTransaction()) {
       switch ($this->getTransactionType()) {
+        case PhabricatorTransactions::TYPE_CREATE:
         case PhabricatorTransactions::TYPE_VIEW_POLICY:
         case PhabricatorTransactions::TYPE_EDIT_POLICY:
         case PhabricatorTransactions::TYPE_JOIN_POLICY:
@@ -497,6 +498,7 @@ abstract class PhabricatorApplicationTransaction
           if (!strlen($old)) {
             return true;
           }
+          break;
       }
     }
 
@@ -702,6 +704,10 @@ abstract class PhabricatorApplicationTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return pht(
+          '%s created this object.',
+          $this->renderHandleLink($author_phid));
       case PhabricatorTransactions::TYPE_COMMENT:
         return pht(
           '%s added a comment.',
@@ -918,6 +924,11 @@ abstract class PhabricatorApplicationTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return pht(
+          '%s created %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
       case PhabricatorTransactions::TYPE_COMMENT:
         return pht(
           '%s added a comment to %s.',
@@ -1119,6 +1130,7 @@ abstract class PhabricatorApplicationTransaction
         // Make this weaker than TYPE_COMMENT.
         return 0.25;
     }
+
     return 1.0;
   }
 
