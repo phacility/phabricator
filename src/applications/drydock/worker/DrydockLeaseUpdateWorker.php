@@ -26,6 +26,7 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
       $this->handleUpdate($lease);
     } catch (Exception $ex) {
       $lock->unlock();
+      $this->flushDrydockTaskQueue();
       throw $ex;
     }
 

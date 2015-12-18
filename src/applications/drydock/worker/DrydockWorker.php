@@ -170,4 +170,30 @@ abstract class DrydockWorker extends PhabricatorWorker {
     return 15;
   }
 
+  protected function flushDrydockTaskQueue() {
+    // NOTE: By default, queued tasks are not scheduled if the current task
+    // fails. This is a good, safe default behavior. For example, it can
+    // protect us from executing side effect tasks too many times, like
+    // sending extra email.
+
+    // However, it is not the behavior we want in Drydock, because we queue
+    // followup tasks after lease and resource failures and want them to
+    // execute in order to clean things up.
+
+    // At least for now, we just explicitly flush the queue before exiting
+    // with a failure to make sure tasks get queued up properly.
+    try {
+      $this->flushTaskQueue();
+    } catch (Exception $ex) {
+      // If this fails, we want to swallow the exception so the caller throws
+      // the original error, since we're more likely to be able to understand
+      // and fix the problem if we have the original error than if we replace
+      // it with this one.
+      phlog($ex);
+    }
+
+    return $this;
+  }
+
+
 }

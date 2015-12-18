@@ -24,6 +24,7 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
       $this->handleUpdate($resource);
     } catch (Exception $ex) {
       $lock->unlock();
+      $this->flushDrydockTaskQueue();
       throw $ex;
     }
 
