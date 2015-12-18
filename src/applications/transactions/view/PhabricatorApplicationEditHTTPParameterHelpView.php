@@ -39,11 +39,17 @@ final class PhabricatorApplicationEditHTTPParameterHelpView
     // Remove fields which do not expose an HTTP parameter type.
     $types = array();
     foreach ($fields as $key => $field) {
+      if (!$field->shouldGenerateTransactionsFromSubmit()) {
+        unset($fields[$key]);
+        continue;
+      }
+
       $type = $field->getHTTPParameterType();
       if ($type === null) {
         unset($fields[$key]);
         continue;
       }
+
       $types[$type->getTypeName()] = $type;
     }
 

@@ -45,6 +45,7 @@ final class PhabricatorSubscriptionsEditEngineExtension
       ->setIsCopyable(true)
       ->setUseEdgeTransactions(true)
       ->setCommentActionLabel(pht('Change Subscribers'))
+      ->setDescription(pht('Choose subscribers.'))
       ->setTransactionType($subscribers_type)
       ->setValue($sub_phids);
 

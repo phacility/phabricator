@@ -45,6 +45,7 @@ final class PhabricatorPolicyEditEngineExtension
         'capability' => PhabricatorPolicyCapability::CAN_VIEW,
         'label' => pht('View Policy'),
         'description' => pht('Controls who can view the object.'),
+        'description.conduit' => pht('Change the view policy of the object.'),
         'edit' => 'view',
       ),
       PhabricatorTransactions::TYPE_EDIT_POLICY => array(
@@ -53,6 +54,7 @@ final class PhabricatorPolicyEditEngineExtension
         'capability' => PhabricatorPolicyCapability::CAN_EDIT,
         'label' => pht('Edit Policy'),
         'description' => pht('Controls who can edit the object.'),
+        'description.conduit' => pht('Change the edit policy of the object.'),
         'edit' => 'edit',
       ),
       PhabricatorTransactions::TYPE_JOIN_POLICY => array(
@@ -61,6 +63,7 @@ final class PhabricatorPolicyEditEngineExtension
         'capability' => PhabricatorPolicyCapability::CAN_JOIN,
         'label' => pht('Join Policy'),
         'description' => pht('Controls who can join the object.'),
+        'description.conduit' => pht('Change the join policy of the object.'),
         'edit' => 'join',
       ),
     );
@@ -76,6 +79,7 @@ final class PhabricatorPolicyEditEngineExtension
       $aliases = $spec['aliases'];
       $label = $spec['label'];
       $description = $spec['description'];
+      $conduit_description = $spec['description.conduit'];
       $edit = $spec['edit'];
 
       $policy_field = id(new PhabricatorPolicyEditField())
@@ -87,7 +91,8 @@ final class PhabricatorPolicyEditEngineExtension
         ->setPolicies($policies)
         ->setTransactionType($type)
         ->setEditTypeKey($edit)
-        ->setConduitDescription($description)
+        ->setDescription($description)
+        ->setConduitDescription($conduit_description)
         ->setConduitTypeDescription(pht('New policy PHID or constant.'))
         ->setValue($object->getPolicy($capability));
       $fields[] = $policy_field;
