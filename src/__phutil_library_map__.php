@@ -1684,6 +1684,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthApplication' => 'applications/auth/application/PhabricatorAuthApplication.php',
     'PhabricatorAuthAuthFactorPHIDType' => 'applications/auth/phid/PhabricatorAuthAuthFactorPHIDType.php',
     'PhabricatorAuthAuthProviderPHIDType' => 'applications/auth/phid/PhabricatorAuthAuthProviderPHIDType.php',
+    'PhabricatorAuthSSHKeyPHIDType' => 'applications/auth/phid/PhabricatorAuthSSHKeyPHIDType.php',
     'PhabricatorAuthConduitAPIMethod' => 'applications/auth/conduit/PhabricatorAuthConduitAPIMethod.php',
     'PhabricatorAuthConfirmLinkController' => 'applications/auth/controller/PhabricatorAuthConfirmLinkController.php',
     'PhabricatorAuthController' => 'applications/auth/controller/PhabricatorAuthController.php',
@@ -5833,6 +5834,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthSSHKey' => array(
       'PhabricatorAuthDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'PhabricatorAuthSSHKeyController' => 'PhabricatorAuthController',
     'PhabricatorAuthSSHKeyDeleteController' => 'PhabricatorAuthSSHKeyController',
@@ -5840,6 +5842,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthSSHKeyGenerateController' => 'PhabricatorAuthSSHKeyController',
     'PhabricatorAuthSSHKeyQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorAuthSSHKeyTableView' => 'AphrontView',
+    'PhabricatorAuthSSHKeyPHIDType' => 'PhabricatorPHIDType',
     'PhabricatorAuthSSHPublicKey' => 'Phobject',
     'PhabricatorAuthSession' => array(
       'PhabricatorAuthDAO',
