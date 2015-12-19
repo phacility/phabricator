@@ -12,8 +12,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   protected $name;
   protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;
   protected $authorPHID;
-  protected $subprojectPHIDs = array();
-  protected $phrictionSlug;
+  protected $primarySlug;
   protected $profileImagePHID;
   protected $icon;
   protected $color;
@@ -24,6 +23,12 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   protected $joinPolicy;
   protected $isMembershipLocked;
 
+  protected $parentProjectPHID;
+  protected $hasWorkboard;
+  protected $hasMilestones;
+  protected $hasSubprojects;
+  protected $milestoneNumber;
+
   private $memberPHIDs = self::ATTACHABLE;
   private $watcherPHIDs = self::ATTACHABLE;
   private $sparseWatchers = self::ATTACHABLE;
@@ -31,6 +36,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   private $customFields = self::ATTACHABLE;
   private $profileImageFile = self::ATTACHABLE;
   private $slugs = self::ATTACHABLE;
+  private $parentProject = self::ATTACHABLE;
 
   const DEFAULT_ICON = 'fa-briefcase';
   const DEFAULT_COLOR = 'blue';
@@ -59,7 +65,10 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       ->setJoinPolicy($join_policy)
       ->setIsMembershipLocked(0)
       ->attachMemberPHIDs(array())
-      ->attachSlugs(array());
+      ->attachSlugs(array())
+      ->setHasWorkboard(0)
+      ->setHasMilestones(0)
+      ->setHasSubprojects(0);
   }
 
   public function getCapabilities() {
@@ -132,24 +141,21 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
-      self::CONFIG_SERIALIZATION => array(
-        'subprojectPHIDs' => self::SERIALIZATION_JSON,
-      ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'sort128',
         'status' => 'text32',
-        'phrictionSlug' => 'text128?',
+        'primarySlug' => 'text128?',
         'isMembershipLocked' => 'bool',
         'profileImagePHID' => 'phid?',
         'icon' => 'text32',
         'color' => 'text32',
         'mailKey' => 'bytes20',
-
-        // T6203/NULLABILITY
-        // These are definitely wrong and should always exist.
-        'editPolicy' => 'policy?',
-        'viewPolicy' => 'policy?',
-        'joinPolicy' => 'policy?',
+        'joinPolicy' => 'policy',
+        'parentProjectPHID' => 'phid?',
+        'hasWorkboard' => 'bool',
+        'hasMilestones' => 'bool',
+        'hasSubprojects' => 'bool',
+        'milestoneNumber' => 'uint32?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -163,12 +169,16 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         'key_color' => array(
           'columns' => array('color'),
         ),
-        'phrictionSlug' => array(
-          'columns' => array('phrictionSlug'),
-          'unique' => true,
-        ),
         'name' => array(
           'columns' => array('name'),
+          'unique' => true,
+        ),
+        'key_milestone' => array(
+          'columns' => array('parentProjectPHID', 'milestoneNumber'),
+          'unique' => true,
+        ),
+        'key_primaryslug' => array(
+          'columns' => array('primarySlug'),
           'unique' => true,
         ),
       ),
@@ -187,19 +197,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function getMemberPHIDs() {
     return $this->assertAttached($this->memberPHIDs);
-  }
-
-  public function setPrimarySlug($slug) {
-    $this->phrictionSlug = $slug.'/';
-    return $this;
-  }
-
-  // TODO - once we sever project => phriction automagicalness,
-  // migrate getPhrictionSlug to have no trailing slash and be called
-  // getPrimarySlug
-  public function getPrimarySlug() {
-    $slug = $this->getPhrictionSlug();
-    return rtrim($slug, '/');
   }
 
   public function isArchived() {
@@ -311,6 +308,19 @@ final class PhabricatorProject extends PhabricatorProjectDAO
           $chunk);
       }
     $this->saveTransaction();
+  }
+
+  public function isMilestone() {
+    return ($this->getMilestoneNumber() !== null);
+  }
+
+  public function getParentProject() {
+    return $this->assertAttached($this->parentProject);
+  }
+
+  public function attachParentProject(PhabricatorProject $project) {
+    $this->parentProject = $project;
+    return $this;
   }
 
 
