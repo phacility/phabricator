@@ -85,7 +85,7 @@
 }
 
 .phame-blog-list-title:hover {
-  color: {$indigo};
+  color: {$violet};
   text-decoration: none;
 }
 
@@ -120,12 +120,12 @@
 }
 
 .phame-blog-list-new-post:hover {
-  color: {$indigo};
+  color: {$violet};
   text-decoration: none;
 }
 
 .phame-blog-list-new-post:hover .phame-blog-list-icon {
-  color: {$indigo};
+  color: {$violet};
 }
 
 .phame-blog-list-icon {

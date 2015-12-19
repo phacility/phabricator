@@ -25,6 +25,21 @@ body .phui-document-view .phui-document-summary-view h2.remarkup-header {
   text-decoration: none;
 }
 
+.phui-document-view .phui-document-summary-body div.phabricator-remarkup {
+  padding-bottom: 4px;
+}
+
+a.phui-document-read-more {
+  color: {$lightgreytext};
+  font-size: {$smallerfontsize};
+  display: block;
+  padding-bottom: 12px;
+}
+
+a.phui-document-read-more:hover {
+  color: {$violet};
+}
+
 .phui-document-summary-subtitle {
   color: {$lightgreytext};
   font-size: {$normalfontsize};
@@ -32,4 +47,8 @@ body .phui-document-view .phui-document-summary-view h2.remarkup-header {
 
 .phui-document-summary-subtitle a {
   color: {$darkbluetext};
+}
+
+.phui-document-summary-subtitle a:hover {
+  color: {$violet};
 }
