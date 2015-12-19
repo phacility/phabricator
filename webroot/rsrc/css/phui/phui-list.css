@@ -62,6 +62,7 @@
   line-height: 18px;
 }
 
+.phabricator-side-menu .phui-list-item-disabled .phui-list-item-href,
 .phui-list-sidenav .phui-list-item-disabled .phui-list-item-href {
   color: {$lightgreytext};
 }

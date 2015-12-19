@@ -13,7 +13,8 @@ final class PhabricatorEditEngineConfigurationListController
     $engine_key = $request->getURIData('engineKey');
     $this->setEngineKey($engine_key);
 
-    $engine = PhabricatorEditEngine::getByKey($viewer, $engine_key);
+    $engine = PhabricatorEditEngine::getByKey($viewer, $engine_key)
+      ->setViewer($viewer);
 
     $items = array();
     $items[] = id(new PHUIListItemView())
@@ -23,9 +24,12 @@ final class PhabricatorEditEngineConfigurationListController
     $sort_create_uri = "/transactions/editengine/{$engine_key}/sort/create/";
     $sort_edit_uri = "/transactions/editengine/{$engine_key}/sort/edit/";
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
+    $builtins = $engine->getBuiltinEngineConfigurations();
+    $builtin = head($builtins);
+
+    $can_sort = PhabricatorPolicyFilter::hasCapability(
       $viewer,
-      $engine,
+      $builtin,
       PhabricatorPolicyCapability::CAN_EDIT);
 
     $items[] = id(new PHUIListItemView())
@@ -33,14 +37,14 @@ final class PhabricatorEditEngineConfigurationListController
       ->setName(pht('Reorder Create Forms'))
       ->setHref($sort_create_uri)
       ->setWorkflow(true)
-      ->setDisabled(!$can_edit);
+      ->setDisabled(!$can_sort);
 
     $items[] = id(new PHUIListItemView())
       ->setType(PHUIListItemView::TYPE_LINK)
       ->setName(pht('Reorder Edit Forms'))
       ->setHref($sort_edit_uri)
       ->setWorkflow(true)
-      ->setDisabled(!$can_edit);
+      ->setDisabled(!$can_sort);
 
     return id(new PhabricatorEditEngineConfigurationSearchEngine())
       ->setController($this)
