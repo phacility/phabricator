@@ -94,10 +94,9 @@ final class PhabricatorSearchManagementIndexWorkflow
       ->setTotal(count($phids));
 
     $any_success = false;
-    $indexer = new PhabricatorSearchIndexer();
     foreach ($phids as $phid) {
       try {
-        $indexer->queueDocumentForIndexing($phid);
+        PhabricatorSearchWorker::queueDocumentForIndexing($phid);
         $any_success = true;
       } catch (Exception $ex) {
         phlog($ex);

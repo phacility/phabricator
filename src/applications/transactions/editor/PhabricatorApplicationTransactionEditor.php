@@ -1093,10 +1093,9 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if ($this->supportsSearch()) {
-      id(new PhabricatorSearchIndexer())
-        ->queueDocumentForIndexing(
-          $object->getPHID(),
-          $this->getSearchContextParameter($object, $xactions));
+      PhabricatorSearchWorker::queueDocumentForIndexing(
+        $object->getPHID(),
+        $this->getSearchContextParameter($object, $xactions));
     }
 
     if ($this->shouldPublishFeedStory($object, $xactions)) {

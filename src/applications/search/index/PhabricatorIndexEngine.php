@@ -1,18 +1,6 @@
 <?php
 
-final class PhabricatorSearchIndexer extends Phobject {
-
-  public function queueDocumentForIndexing($phid, $context = null) {
-    PhabricatorWorker::scheduleTask(
-      'PhabricatorSearchWorker',
-      array(
-        'documentPHID' => $phid,
-        'context' => $context,
-      ),
-      array(
-        'priority' => PhabricatorWorker::PRIORITY_IMPORT,
-      ));
-  }
+final class PhabricatorIndexEngine extends Phobject {
 
   public function indexDocumentByPHID($phid, $context) {
     $indexers = id(new PhutilClassMapQuery())

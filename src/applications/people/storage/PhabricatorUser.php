@@ -273,8 +273,7 @@ final class PhabricatorUser
 
     $this->updateNameTokens();
 
-    id(new PhabricatorSearchIndexer())
-      ->queueDocumentForIndexing($this->getPHID());
+    PhabricatorSearchWorker::queueDocumentForIndexing($this->getPHID());
 
     return $result;
   }
