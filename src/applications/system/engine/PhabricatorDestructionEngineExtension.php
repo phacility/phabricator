@@ -7,9 +7,13 @@ abstract class PhabricatorDestructionEngineExtension extends Phobject {
   }
 
   abstract public function getExtensionName();
-  abstract public function canDestroyObject(
+
+  public function canDestroyObject(
     PhabricatorDestructionEngine $engine,
-    $object);
+    $object) {
+    return true;
+  }
+
   abstract public function destroyObject(
     PhabricatorDestructionEngine $engine,
     $object);
