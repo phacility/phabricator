@@ -8,7 +8,7 @@ final class PhabricatorEditEngineExtensionModule
   }
 
   public function getModuleName() {
-    return pht('EditEngine Extensions');
+    return pht('Engine: Edit');
   }
 
   public function renderModuleStatus(AphrontRequest $request) {

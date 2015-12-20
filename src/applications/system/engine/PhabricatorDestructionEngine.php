@@ -17,14 +17,9 @@ final class PhabricatorDestructionEngine extends Phobject {
       $log->setRootLogID($this->rootLogID);
     }
 
-    $object_phid = null;
-    if (method_exists($object, 'getPHID')) {
-      try {
-        $object_phid = $object->getPHID();
-        $log->setObjectPHID($object_phid);
-      } catch (Exception $ex) {
-        // Ignore.
-      }
+    $object_phid = $this->getObjectPHID($object);
+    if ($object_phid) {
+      $log->setObjectPHID($object_phid);
     }
 
     if (method_exists($object, 'getMonogram')) {
@@ -42,6 +37,18 @@ final class PhabricatorDestructionEngine extends Phobject {
     }
 
     $object->destroyObjectPermanently($this);
+
+    $extensions = PhabricatorDestructionEngineExtension::getAllExtensions();
+    foreach ($extensions as $key => $extension) {
+      if (!$extension->canDestroyObject($this, $object)) {
+        unset($extensions[$key]);
+        continue;
+      }
+    }
+
+    foreach ($extensions as $key => $extension) {
+      $extension->destroyObject($this, $object);
+    }
 
     if ($object_phid) {
       $this->destroyEdges($object_phid);
@@ -91,10 +98,6 @@ final class PhabricatorDestructionEngine extends Phobject {
       foreach ($tokens as $token) {
         $token->delete();
       }
-    }
-
-    if ($object instanceof AlmanacPropertyInterface) {
-      $this->destroyAlmanacProperties($object_phid);
     }
   }
 
@@ -152,15 +155,22 @@ final class PhabricatorDestructionEngine extends Phobject {
       $object_phid);
   }
 
-  private function destroyAlmanacProperties($object_phid) {
-    $table = new AlmanacProperty();
-    $conn_w = $table->establishConnection('w');
+  private function destroyAlmanacProperties($object_phid) {}
 
-    queryfx(
-      $conn_w,
-      'DELETE FROM %T WHERE objectPHID = %s',
-      $table->getTableName(),
-      $object_phid);
+  public function getObjectPHID($object) {
+    if (!is_object($object)) {
+      return null;
+    }
+
+    if (!method_exists($object, 'getPHID')) {
+      return null;
+    }
+
+    try {
+      return $object->getPHID();
+    } catch (Exception $ex) {
+      return null;
+    }
   }
 
 }
