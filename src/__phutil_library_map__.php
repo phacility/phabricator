@@ -2749,6 +2749,7 @@ phutil_register_library_map(array(
     'PhabricatorPhurlURLTransactionComment' => 'applications/phurl/storage/PhabricatorPhurlURLTransactionComment.php',
     'PhabricatorPhurlURLTransactionQuery' => 'applications/phurl/query/PhabricatorPhurlURLTransactionQuery.php',
     'PhabricatorPhurlURLViewController' => 'applications/phurl/controller/PhabricatorPhurlURLViewController.php',
+    'PhabricatorPirateEnglishTranslation' => 'infrastructure/internationalization/translation/PhabricatorPirateEnglishTranslation.php',
     'PhabricatorPlatformSite' => 'aphront/site/PhabricatorPlatformSite.php',
     'PhabricatorPolicies' => 'applications/policy/constants/PhabricatorPolicies.php',
     'PhabricatorPolicy' => 'applications/policy/storage/PhabricatorPolicy.php',
@@ -7014,6 +7015,7 @@ phutil_register_library_map(array(
     'PhabricatorPhurlURLTransactionComment' => 'PhabricatorApplicationTransactionComment',
     'PhabricatorPhurlURLTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'PhabricatorPhurlURLViewController' => 'PhabricatorPhurlController',
+    'PhabricatorPirateEnglishTranslation' => 'PhutilTranslation',
     'PhabricatorPlatformSite' => 'PhabricatorSite',
     'PhabricatorPolicies' => 'PhabricatorPolicyConstants',
     'PhabricatorPolicy' => array(
