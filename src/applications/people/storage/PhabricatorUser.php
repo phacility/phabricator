@@ -15,7 +15,8 @@ final class PhabricatorUser
     PhabricatorDestructibleInterface,
     PhabricatorSSHPublicKeyInterface,
     PhabricatorFlaggableInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorFulltextInterface {
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';
@@ -1306,6 +1307,14 @@ final class PhabricatorUser
     PhabricatorApplicationTransactionView $timeline,
     AphrontRequest $request) {
     return $timeline;
+  }
+
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+
+  public function newFulltextEngine() {
+    return new PhabricatorUserFulltextEngine();
   }
 
 }

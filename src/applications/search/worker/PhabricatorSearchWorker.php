@@ -47,8 +47,6 @@ final class PhabricatorSearchWorker extends PhabricatorWorker {
       $engine->setObject($object);
 
       $engine->indexObject();
-
-      $engine->indexDocumentByPHID($object->getPHID());
     } catch (Exception $ex) {
       $lock->unlock();
 

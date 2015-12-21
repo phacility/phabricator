@@ -14,7 +14,8 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
     PhabricatorSpacesInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorFulltextInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -450,6 +451,14 @@ final class ManiphestTask extends ManiphestDAO
 
   public function getConduitSearchAttachments() {
     return array();
+  }
+
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+
+  public function newFulltextEngine() {
+    return new ManiphestTaskFulltextEngine();
   }
 
 }

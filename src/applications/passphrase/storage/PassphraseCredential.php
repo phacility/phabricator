@@ -7,7 +7,8 @@ final class PassphraseCredential extends PassphraseDAO
     PhabricatorFlaggableInterface,
     PhabricatorSubscribableInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorSpacesInterface {
+    PhabricatorSpacesInterface,
+    PhabricatorFulltextInterface {
 
   protected $name;
   protected $credentialType;
@@ -188,5 +189,14 @@ final class PassphraseCredential extends PassphraseDAO
   public function getSpacePHID() {
     return $this->spacePHID;
   }
+
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+
+  public function newFulltextEngine() {
+    return new PassphraseCredentialFulltextEngine();
+  }
+
 
 }

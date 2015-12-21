@@ -7,7 +7,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface,
     PhabricatorCustomFieldInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorFulltextInterface {
 
   protected $name;
   protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;
@@ -387,6 +388,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
+
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
 
@@ -406,6 +408,14 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       }
 
     $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+
+  public function newFulltextEngine() {
+    return new PhabricatorProjectFulltextEngine();
   }
 
 }

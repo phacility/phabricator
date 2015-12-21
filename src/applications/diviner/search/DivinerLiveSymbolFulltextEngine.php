@@ -1,49 +1,43 @@
 <?php
 
-final class DivinerAtomSearchIndexer extends PhabricatorSearchDocumentIndexer {
+final class DivinerLiveSymbolFulltextEngine
+  extends PhabricatorFulltextEngine {
 
-  public function getIndexableObject() {
-    return new DivinerLiveSymbol();
-  }
+  protected function buildAbstractDocument(
+    PhabricatorSearchAbstractDocument $document,
+    $object) {
 
-  protected function buildAbstractDocumentByPHID($phid) {
-    $atom = $this->loadDocumentByPHID($phid);
+    $atom = $object;
     $book = $atom->getBook();
 
-    if (!$atom->getIsDocumentable()) {
-      return null;
-    }
-
-    $doc = $this->newDocument($phid)
+    $document
       ->setDocumentTitle($atom->getTitle())
       ->setDocumentCreated($book->getDateCreated())
       ->setDocumentModified($book->getDateModified());
 
-    $doc->addField(
+    $document->addField(
       PhabricatorSearchDocumentFieldType::FIELD_BODY,
       $atom->getSummary());
 
-    $doc->addRelationship(
+    $document->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_BOOK,
       $atom->getBookPHID(),
       DivinerBookPHIDType::TYPECONST,
       PhabricatorTime::getNow());
 
-    $doc->addRelationship(
+    $document->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_REPOSITORY,
       $atom->getRepositoryPHID(),
       PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
       PhabricatorTime::getNow());
 
-    $doc->addRelationship(
+    $document->addRelationship(
       $atom->getGraphHash()
         ? PhabricatorSearchRelationship::RELATIONSHIP_CLOSED
         : PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
       $atom->getBookPHID(),
       DivinerBookPHIDType::TYPECONST,
       PhabricatorTime::getNow());
-
-    return $doc;
   }
 
 }

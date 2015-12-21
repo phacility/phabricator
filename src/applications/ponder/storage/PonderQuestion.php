@@ -10,7 +10,8 @@ final class PonderQuestion extends PonderDAO
     PhabricatorTokenReceiverInterface,
     PhabricatorProjectInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorSpacesInterface {
+    PhabricatorSpacesInterface,
+    PhabricatorFulltextInterface {
 
   const MARKUP_FIELD_CONTENT = 'markup:content';
 
@@ -289,6 +290,14 @@ final class PonderQuestion extends PonderDAO
 
   public function getSpacePHID() {
     return $this->spacePHID;
+  }
+
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+
+  public function newFulltextEngine() {
+    return new PonderQuestionFulltextEngine();
   }
 
 }
