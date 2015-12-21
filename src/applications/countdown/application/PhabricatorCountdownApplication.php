@@ -48,6 +48,8 @@ final class PhabricatorCountdownApplication extends PhabricatorApplication {
           => 'PhabricatorCountdownCommentController',
         'edit/(?:(?P<id>[1-9]\d*)/)?'
           => 'PhabricatorCountdownEditController',
+        'create/'
+          => 'PhabricatorCountdownEditController',
         'delete/(?P<id>[1-9]\d*)/'
           => 'PhabricatorCountdownDeleteController',
       ),

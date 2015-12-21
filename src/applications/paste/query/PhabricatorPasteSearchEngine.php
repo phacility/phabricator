@@ -202,4 +202,23 @@ final class PhabricatorPasteSearchEngine
 
     return $result;
   }
+
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create a Paste'))
+      ->setHref('/paste/create/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getFontIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Store, share, and embed snippets of code.'))
+      ->addAction($create_button);
+
+      return $view;
+  }
 }
