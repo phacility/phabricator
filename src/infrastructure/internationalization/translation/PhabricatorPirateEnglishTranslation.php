@@ -55,11 +55,11 @@ final class PhabricatorPirateEnglishTranslation
       'Projects' => 'Prrojects',
       '%s added a comment.' => '%s scrawled.',
       '%s edited the task description.' =>
-        'Capn %s be stakin\' a claim on this here task.',
+        'Cap\'n %s be updatin\' ye task\'s splainin\'.',
       '%s claimed this task.' =>
-        'Capn %s be updatin\' ye task\'s splainin.',
+        'Cap\'n %s be stakin\' a claim on this here task.',
       '%s created this task.' =>
-        'Capn %s be the one creatin\' this here task.',
+        'Cap\'n %s be the one creatin\' this here task.',
     );
   }
 }
