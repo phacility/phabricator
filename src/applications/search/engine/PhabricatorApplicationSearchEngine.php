@@ -1355,19 +1355,13 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   }
 
   final public function renderNewUserView() {
-    $head = $this->getNewUserHeader();
     $body = $this->getNewUserBody();
 
-    if (!strlen($head) && !strlen($body)) {
+    if (!$body) {
       return null;
     }
 
-    $viewer = $this->requireViewer();
-
-    return id(new PHUIBoxView())
-      ->addMargin(PHUI::MARGIN_LARGE)
-      ->appendChild($head)
-      ->appendChild(new PHUIRemarkupView($viewer, $body));
+    return $body;
   }
 
   protected function getNewUserHeader() {
