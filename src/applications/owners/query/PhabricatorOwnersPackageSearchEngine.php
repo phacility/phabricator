@@ -146,4 +146,25 @@ final class PhabricatorOwnersPackageSearchEngine
     return $result;
 
   }
+
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create a Package'))
+      ->setHref('/owners/edit/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getFontIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Group sections of a codebase into packages for re-use in other '.
+        'areas of Phabricator, like Herald rules.'))
+      ->addAction($create_button);
+
+      return $view;
+  }
+
 }
