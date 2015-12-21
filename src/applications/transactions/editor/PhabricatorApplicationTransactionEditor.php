@@ -1095,7 +1095,9 @@ abstract class PhabricatorApplicationTransactionEditor
     if ($this->supportsSearch()) {
       PhabricatorSearchWorker::queueDocumentForIndexing(
         $object->getPHID(),
-        $this->getSearchContextParameter($object, $xactions));
+        array(
+          'transactionPHIDs' => mpull($xactions, 'getPHID'),
+        ));
     }
 
     if ($this->shouldPublishFeedStory($object, $xactions)) {
@@ -2860,15 +2862,6 @@ abstract class PhabricatorApplicationTransactionEditor
    */
   protected function supportsSearch() {
     return false;
-  }
-
-  /**
-   * @task search
-   */
-  protected function getSearchContextParameter(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-    return null;
   }
 
 

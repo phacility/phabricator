@@ -1,58 +1,50 @@
 <?php
 
-final class ConpherenceThreadIndexer
-  extends PhabricatorSearchDocumentIndexer {
+final class ConpherenceThreadIndexEngineExtension
+  extends PhabricatorIndexEngineExtension {
 
-  public function getIndexableObject() {
-    return new ConpherenceThread();
+  const EXTENSIONKEY = 'conpherence.thread';
+
+  public function getExtensionName() {
+    return pht('Conpherence Threads');
   }
 
-  protected function loadDocumentByPHID($phid) {
-    $object = id(new ConpherenceThreadQuery())
-      ->setViewer($this->getViewer())
-      ->withPHIDs(array($phid))
-      ->executeOne();
-
-    if (!$object) {
-      throw new Exception(pht('No thread "%s" exists!', $phid));
-    }
-
-    return $object;
+  public function shouldIndexObject($object) {
+    return ($object instanceof ConpherenceThread);
   }
 
-  protected function buildAbstractDocumentByPHID($phid) {
-    $thread = $this->loadDocumentByPHID($phid);
+  public function indexObject(
+    PhabricatorIndexEngine $engine,
+    $object) {
 
-    // NOTE: We're explicitly not building a document here, only rebuilding
-    // the Conpherence search index.
+    $force = $this->shouldForceFullReindex();
 
-    $context = nonempty($this->getContext(), array());
-    $comment_phids = idx($context, 'commentPHIDs');
-
-    if (is_array($comment_phids) && !$comment_phids) {
-      // If this property is set, but empty, the transaction did not
-      // include any chat text. For example, a user might have left the
-      // conversation.
-      return null;
+    if (!$force) {
+      $xaction_phids = $this->getParameter('transactionPHIDs');
+      if (!$xaction_phids) {
+        return;
+      }
     }
 
     $query = id(new ConpherenceTransactionQuery())
       ->setViewer($this->getViewer())
-      ->withObjectPHIDs(array($thread->getPHID()))
+      ->withObjectPHIDs(array($object->getPHID()))
       ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT))
       ->needComments(true);
 
-    if ($comment_phids !== null) {
-      $query->withPHIDs($comment_phids);
+    if (!$force) {
+      $query->withPHIDs($xaction_phids);
     }
 
     $xactions = $query->execute();
 
-    foreach ($xactions as $xaction) {
-      $this->indexComment($thread, $xaction);
+    if (!$xactions) {
+      return;
     }
 
-    return null;
+    foreach ($xactions as $xaction) {
+      $this->indexComment($object, $xaction);
+    }
   }
 
   private function indexComment(

@@ -2,12 +2,16 @@
 
 final class PhabricatorSearchWorker extends PhabricatorWorker {
 
-  public static function queueDocumentForIndexing($phid, $context = null) {
+  public static function queueDocumentForIndexing($phid, $parameters = null) {
+    if ($parameters === null) {
+      $parameters = array();
+    }
+
     parent::scheduleTask(
       __CLASS__,
       array(
         'documentPHID' => $phid,
-        'context' => $context,
+        'parameters' => $parameters,
       ),
       array(
         'priority' => parent::PRIORITY_IMPORT,
@@ -17,9 +21,18 @@ final class PhabricatorSearchWorker extends PhabricatorWorker {
   protected function doWork() {
     $data = $this->getTaskData();
     $object_phid = idx($data, 'documentPHID');
-    $context = idx($data, 'context');
 
-    $engine = new PhabricatorIndexEngine();
+    $object = $this->loadObjectForIndexing($object_phid);
+
+    $engine = id(new PhabricatorIndexEngine())
+      ->setObject($object);
+
+    $parameters = idx($data, 'parameters', array());
+    $engine->setParameters($parameters);
+
+    if (!$engine->shouldIndexObject()) {
+      return;
+    }
 
     $key = "index.{$object_phid}";
     $lock = PhabricatorGlobalLock::newLock($key);
@@ -27,10 +40,15 @@ final class PhabricatorSearchWorker extends PhabricatorWorker {
     $lock->lock(1);
 
     try {
-      $object = $this->loadObjectForIndexing($object_phid);
+      // Reload the object now that we have a lock, to make sure we have the
+      // most current version.
+      $object = $this->loadObjectForIndexing($object->getPHID());
 
-      $engine->indexDocumentByPHID($object->getPHID(), $context);
+      $engine->setObject($object);
 
+      $engine->indexObject();
+
+      $engine->indexDocumentByPHID($object->getPHID());
     } catch (Exception $ex) {
       $lock->unlock();
 

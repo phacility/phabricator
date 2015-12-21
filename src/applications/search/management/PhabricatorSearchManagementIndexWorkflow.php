@@ -30,6 +30,13 @@ final class PhabricatorSearchManagementIndexWorkflow
               'it more difficult to debug search indexing.'),
           ),
           array(
+            'name' => 'force',
+            'short' => 'f',
+            'help' => pht(
+              'Force a complete rebuild of the entire index instead of an '.
+              'incremental update.'),
+          ),
+          array(
             'name'      => 'objects',
             'wildcard'  => true,
           ),
@@ -41,6 +48,7 @@ final class PhabricatorSearchManagementIndexWorkflow
 
     $is_all = $args->getArg('all');
     $is_type = $args->getArg('type');
+    $is_force = $args->getArg('force');
 
     $obj_names = $args->getArg('objects');
 
@@ -93,10 +101,14 @@ final class PhabricatorSearchManagementIndexWorkflow
     $bar = id(new PhutilConsoleProgressBar())
       ->setTotal(count($phids));
 
+    $parameters = array(
+      'force' => $is_force,
+    );
+
     $any_success = false;
     foreach ($phids as $phid) {
       try {
-        PhabricatorSearchWorker::queueDocumentForIndexing($phid);
+        PhabricatorSearchWorker::queueDocumentForIndexing($phid, $parameters);
         $any_success = true;
       } catch (Exception $ex) {
         phlog($ex);

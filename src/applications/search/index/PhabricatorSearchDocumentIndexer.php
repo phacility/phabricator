@@ -2,17 +2,6 @@
 
 abstract class PhabricatorSearchDocumentIndexer extends Phobject {
 
-  private $context;
-
-  protected function setContext($context) {
-    $this->context = $context;
-    return $this;
-  }
-
-  protected function getContext() {
-    return $this->context;
-  }
-
   abstract public function getIndexableObject();
   abstract protected function buildAbstractDocumentByPHID($phid);
 
@@ -41,9 +30,7 @@ abstract class PhabricatorSearchDocumentIndexer extends Phobject {
     return $object;
   }
 
-  public function indexDocumentByPHID($phid, $context) {
-    $this->setContext($context);
-
+  public function indexDocumentByPHID($phid) {
     $document = $this->buildAbstractDocumentByPHID($phid);
     if ($document === null) {
       // This indexer doesn't build a document index, so we're done.
