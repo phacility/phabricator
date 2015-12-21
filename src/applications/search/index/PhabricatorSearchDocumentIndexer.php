@@ -75,26 +75,4 @@ abstract class PhabricatorSearchDocumentIndexer extends Phobject {
       ->setDocumentType(phid_get_type($phid));
   }
 
-  protected function indexTransactions(
-    PhabricatorSearchAbstractDocument $doc,
-    PhabricatorApplicationTransactionQuery $query,
-    array $phids) {
-
-    $xactions = id(clone $query)
-      ->setViewer($this->getViewer())
-      ->withObjectPHIDs($phids)
-      ->execute();
-
-    foreach ($xactions as $xaction) {
-      if (!$xaction->hasComment()) {
-        continue;
-      }
-
-      $comment = $xaction->getComment();
-      $doc->addField(
-        PhabricatorSearchDocumentFieldType::FIELD_COMMENT,
-        $comment->getContent());
-    }
-  }
-
 }

@@ -51,11 +51,6 @@ final class FundInitiativeIndexer
       FundInitiativePHIDType::TYPECONST,
       time());
 
-    $this->indexTransactions(
-      $doc,
-      new FundInitiativeTransactionQuery(),
-      array($initiative->getPHID()));
-
     return $doc;
   }
 }

@@ -37,15 +37,6 @@ final class PonderSearchIndexer
       }
     }
 
-    $this->indexTransactions(
-      $doc,
-      new PonderQuestionTransactionQuery(),
-      array($phid));
-    $this->indexTransactions(
-      $doc,
-      new PonderAnswerTransactionQuery(),
-      mpull($answers, 'getPHID'));
-
     return $doc;
   }
 }

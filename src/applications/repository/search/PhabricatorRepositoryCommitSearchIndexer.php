@@ -53,11 +53,6 @@ final class PhabricatorRepositoryCommitSearchIndexer
       PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
       $date_created);
 
-    $this->indexTransactions(
-      $doc,
-      new PhabricatorAuditTransactionQuery(),
-      array($commit->getPHID()));
-
     return $doc;
   }
 }

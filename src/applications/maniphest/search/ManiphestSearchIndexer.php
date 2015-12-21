@@ -34,11 +34,6 @@ final class ManiphestSearchIndexer extends PhabricatorSearchDocumentIndexer {
       ManiphestTaskPHIDType::TYPECONST,
       time());
 
-    $this->indexTransactions(
-      $doc,
-      new ManiphestTransactionQuery(),
-      array($phid));
-
     $owner = $task->getOwnerPHID();
     if ($owner) {
       $doc->addRelationship(

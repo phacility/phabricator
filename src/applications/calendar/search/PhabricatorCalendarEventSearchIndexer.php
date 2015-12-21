@@ -41,11 +41,6 @@ final class PhabricatorCalendarEventSearchIndexer
       PhabricatorCalendarEventPHIDType::TYPECONST,
       time());
 
-    $this->indexTransactions(
-      $doc,
-      new PhabricatorCalendarEventTransactionQuery(),
-      array($phid));
-
     return $doc;
   }
 

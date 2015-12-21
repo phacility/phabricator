@@ -24,11 +24,6 @@ final class PholioSearchIndexer extends PhabricatorSearchDocumentIndexer {
       PhabricatorPeopleUserPHIDType::TYPECONST,
       $mock->getDateCreated());
 
-    $this->indexTransactions(
-      $doc,
-      new PholioTransactionQuery(),
-      array($phid));
-
     return $doc;
   }
 

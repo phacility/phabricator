@@ -24,11 +24,6 @@ final class DivinerBookSearchIndexer extends PhabricatorSearchDocumentIndexer {
       PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
       $book->getDateCreated());
 
-    $this->indexTransactions(
-      $doc,
-      new DivinerLiveBookTransactionQuery(),
-      array($phid));
-
     return $doc;
   }
 

@@ -28,11 +28,6 @@ final class PassphraseSearchIndexer extends PhabricatorSearchDocumentIndexer {
       PassphraseCredentialPHIDType::TYPECONST,
       time());
 
-    $this->indexTransactions(
-      $doc,
-      new PassphraseCredentialTransactionQuery(),
-      array($phid));
-
     return $doc;
   }
 

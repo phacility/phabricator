@@ -43,11 +43,6 @@ final class DifferentialSearchIndexer
       DifferentialRevisionPHIDType::TYPECONST,
       time());
 
-    $this->indexTransactions(
-      $doc,
-      new DifferentialTransactionQuery(),
-      array($rev->getPHID()));
-
     // If a revision needs review, the owners are the reviewers. Otherwise, the
     // owner is the author (e.g., accepted, rejected, closed).
     if ($rev->getStatus() == ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) {
