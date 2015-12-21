@@ -385,4 +385,24 @@ final class ManiphestTaskSearchEngine
     $saved->setParameter('projectPHIDs', $project_phids);
   }
 
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create a Task'))
+      ->setHref('/maniphest/task/edit/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getFontIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Use Maniphest to track bugs, features, todos, or anything else '.
+            'you need to get done. Tasks assigned to you will appear here.'))
+      ->addAction($create_button);
+
+      return $view;
+  }
+
 }

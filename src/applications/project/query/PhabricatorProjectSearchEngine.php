@@ -202,4 +202,24 @@ protected function buildQueryFromParameters(array $map) {
 
   }
 
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create a Project'))
+      ->setHref('/project/create/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getFontIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Projects are flexible storage containers used as '.
+            'tags, teams, projects, or anything you need to group.'))
+      ->addAction($create_button);
+
+      return $view;
+  }
+
 }
