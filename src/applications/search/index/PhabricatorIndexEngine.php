@@ -45,8 +45,8 @@ final class PhabricatorIndexEngine extends Phobject {
     if (idx($parameters, 'force')) {
       $current_versions = array();
     } else {
-      // TODO: Load current indexed versions.
-      $current_versions = array();
+      $keys = array_keys($versions);
+      $current_versions = $this->loadIndexVersions($keys);
     }
 
     foreach ($versions as $key => $version) {
@@ -78,7 +78,7 @@ final class PhabricatorIndexEngine extends Phobject {
       $extension->indexObject($this, $object);
     }
 
-    // TODO: Save new index versions.
+    $this->saveIndexVersions($this->versions);
 
     return $this;
   }
@@ -94,6 +94,57 @@ final class PhabricatorIndexEngine extends Phobject {
     }
 
     return $extensions;
+  }
+
+  private function loadIndexVersions(array $extension_keys) {
+    if (!$extension_keys) {
+      return array();
+    }
+
+    $object = $this->getObject();
+    $object_phid = $object->getPHID();
+
+    $table = new PhabricatorSearchIndexVersion();
+    $conn_r = $table->establishConnection('w');
+
+    $rows = queryfx_all(
+      $conn_r,
+      'SELECT * FROM %T WHERE objectPHID = %s AND extensionKey IN (%Ls)',
+      $table->getTableName(),
+      $object_phid,
+      $extension_keys);
+
+    return ipull($rows, 'version', 'extensionKey');
+  }
+
+  private function saveIndexVersions(array $versions) {
+    if (!$versions) {
+      return;
+    }
+
+    $object = $this->getObject();
+    $object_phid = $object->getPHID();
+
+    $table = new PhabricatorSearchIndexVersion();
+    $conn_w = $table->establishConnection('w');
+
+    $sql = array();
+    foreach ($versions as $key => $version) {
+      $sql[] = qsprintf(
+        $conn_w,
+        '(%s, %s, %s)',
+        $object_phid,
+        $key,
+        $version);
+    }
+
+    queryfx(
+      $conn_w,
+      'INSERT INTO %T (objectPHID, extensionKey, version)
+        VALUES %Q
+        ON DUPLICATE KEY UPDATE version = VALUES(version)',
+      $table->getTableName(),
+      implode(', ', $sql));
   }
 
 }
