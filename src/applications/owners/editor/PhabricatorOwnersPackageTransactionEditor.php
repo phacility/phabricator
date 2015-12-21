@@ -334,4 +334,8 @@ final class PhabricatorOwnersPackageTransactionEditor
     return $body;
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
 }

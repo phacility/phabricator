@@ -22,7 +22,7 @@ final class PhabricatorOwnersPackageDatasource
     $results = array();
 
     $query = id(new PhabricatorOwnersPackageQuery())
-      ->withNamePrefix($raw_query)
+      ->withNameNgrams($raw_query)
       ->setOrder('name');
 
     $packages = $this->executeQuery($query);

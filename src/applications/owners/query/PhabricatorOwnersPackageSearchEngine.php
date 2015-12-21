@@ -25,6 +25,10 @@ final class PhabricatorOwnersPackageSearchEngine
         ->setDescription(
           pht('Search for packages with specific owners.'))
         ->setDatasource(new PhabricatorProjectOrUserDatasource()),
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('name')
+        ->setDescription(pht('Search for packages by name substrings.')),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Repositories'))
         ->setKey('repositoryPHIDs')
@@ -67,6 +71,10 @@ final class PhabricatorOwnersPackageSearchEngine
 
     if ($map['statuses']) {
       $query->withStatuses($map['statuses']);
+    }
+
+    if (strlen($map['name'])) {
+      $query->withNameNgrams($map['name']);
     }
 
     return $query;

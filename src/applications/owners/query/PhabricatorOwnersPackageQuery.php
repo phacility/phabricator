@@ -9,7 +9,6 @@ final class PhabricatorOwnersPackageQuery
   private $authorityPHIDs;
   private $repositoryPHIDs;
   private $paths;
-  private $namePrefix;
   private $statuses;
 
   private $controlMap = array();
@@ -78,9 +77,10 @@ final class PhabricatorOwnersPackageQuery
     return $this;
   }
 
-  public function withNamePrefix($prefix) {
-    $this->namePrefix = $prefix;
-    return $this;
+  public function withNameNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      new PhabricatorOwnersPackageNameNgrams(),
+      $ngrams);
   }
 
   public function needPaths($need_paths) {
@@ -206,15 +206,6 @@ final class PhabricatorOwnersPackageQuery
         $conn,
         'p.status IN (%Ls)',
         $this->statuses);
-    }
-
-    if (strlen($this->namePrefix)) {
-      // NOTE: This is a hacky mess, but this column is currently case
-      // sensitive and unique.
-      $where[] = qsprintf(
-        $conn,
-        'LOWER(p.name) LIKE %>',
-        phutil_utf8_strtolower($this->namePrefix));
     }
 
     if ($this->controlMap) {

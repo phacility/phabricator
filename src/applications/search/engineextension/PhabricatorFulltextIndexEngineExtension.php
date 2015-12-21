@@ -65,6 +65,9 @@ final class PhabricatorFulltextIndexEngineExtension
 
     try {
       $comment = $xaction->getApplicationTransactionCommentObject();
+      if (!$comment) {
+        return 'none';
+      }
     } catch (Exception $ex) {
       return 'none';
     }

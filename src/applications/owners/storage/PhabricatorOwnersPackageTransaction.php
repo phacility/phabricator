@@ -27,6 +27,14 @@ final class PhabricatorOwnersPackageTransaction
 
     switch ($this->getTransactionType()) {
       case self::TYPE_OWNERS:
+        if (!is_array($old)) {
+          $old = array();
+        }
+
+        if (!is_array($new)) {
+          $new = array();
+        }
+
         $add = array_diff($new, $old);
         foreach ($add as $phid) {
           $phids[] = $phid;
