@@ -66,8 +66,6 @@ abstract class PhabricatorSearchDocumentIndexer extends Phobject {
     $engine = PhabricatorSearchEngine::loadEngine();
     $engine->reindexAbstractDocument($document);
 
-    $this->dispatchDidUpdateIndexEvent($phid, $document);
-
     return $this;
   }
 
@@ -97,21 +95,6 @@ abstract class PhabricatorSearchDocumentIndexer extends Phobject {
         PhabricatorSearchDocumentFieldType::FIELD_COMMENT,
         $comment->getContent());
     }
-  }
-
-  private function dispatchDidUpdateIndexEvent(
-    $phid,
-    PhabricatorSearchAbstractDocument $document) {
-
-    $event = new PhabricatorEvent(
-      PhabricatorEventType::TYPE_SEARCH_DIDUPDATEINDEX,
-      array(
-        'phid'      => $phid,
-        'object'    => $this->loadDocumentByPHID($phid),
-        'document'  => $document,
-      ));
-    $event->setUser($this->getViewer());
-    PhutilEventEngine::dispatchEvent($event);
   }
 
 }
