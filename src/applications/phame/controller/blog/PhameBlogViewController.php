@@ -57,12 +57,35 @@ final class PhameBlogViewController extends PhameLiveController {
       $header->setPolicyObject($blog);
     }
 
-    $post_list = id(new PhamePostListView())
-      ->setPosts($posts)
-      ->setViewer($viewer)
-      ->setIsExternal($is_external)
-      ->setIsLive($is_live)
-      ->setNodata(pht('This blog has no visible posts.'));
+    if ($posts) {
+      $post_list = id(new PhamePostListView())
+        ->setPosts($posts)
+        ->setViewer($viewer)
+        ->setIsExternal($is_external)
+        ->setIsLive($is_live)
+        ->setNodata(pht('This blog has no visible posts.'));
+    } else {
+      $create_button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText(pht('Write a Post'))
+        ->setHref($this->getApplicationURI('post/edit/?blog='.$blog->getID()))
+        ->setColor(PHUIButtonView::GREEN);
+
+      $post_list = id(new PHUIBigInfoView())
+        ->setIcon('fa-star')
+        ->setTitle($blog->getName())
+        ->setDescription(
+          pht('No one has written any blog posts yet.'));
+
+      $can_edit = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $blog,
+        PhabricatorPolicyCapability::CAN_EDIT);
+
+      if ($can_edit) {
+        $post_list->addAction($create_button);
+      }
+    }
 
     $page = id(new PHUIDocumentViewPro())
       ->setHeader($header)

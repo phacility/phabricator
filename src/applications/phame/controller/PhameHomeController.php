@@ -15,16 +15,37 @@ final class PhameHomeController extends PhamePostController {
       ->needProfileImage(true)
       ->execute();
 
-    $blog_phids = mpull($blogs, 'getPHID');
+    $post_list = null;
+    if ($blogs) {
+      $blog_phids = mpull($blogs, 'getPHID');
 
-    $pager = id(new AphrontCursorPagerView())
-      ->readFromRequest($request);
+      $pager = id(new AphrontCursorPagerView())
+        ->readFromRequest($request);
 
-    $posts = id(new PhamePostQuery())
-      ->setViewer($viewer)
-      ->withBlogPHIDs($blog_phids)
-      ->withVisibility(PhameConstants::VISIBILITY_PUBLISHED)
-      ->executeWithCursorPager($pager);
+      $posts = id(new PhamePostQuery())
+        ->setViewer($viewer)
+        ->withBlogPHIDs($blog_phids)
+        ->withVisibility(PhameConstants::VISIBILITY_PUBLISHED)
+        ->executeWithCursorPager($pager);
+
+      $post_list = id(new PhamePostListView())
+        ->setPosts($posts)
+        ->setViewer($viewer)
+        ->showBlog(true);
+    } else {
+      $create_button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText(pht('Create a Blog'))
+        ->setHref('/phame/blog/new/')
+        ->setColor(PHUIButtonView::GREEN);
+
+      $post_list = id(new PHUIBigInfoView())
+        ->setIcon('fa-star')
+        ->setTitle('Welcome to Phame')
+        ->setDescription(
+          pht('There aren\'t any visible Blog Posts.'))
+        ->addAction($create_button);
+    }
 
     $actions = $this->renderActions($viewer);
     $action_button = id(new PHUIButtonView())
@@ -40,12 +61,6 @@ final class PhameHomeController extends PhamePostController {
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
       ->addActionLink($action_button);
-
-    $post_list = id(new PhamePostListView())
-      ->setPosts($posts)
-      ->setViewer($viewer)
-      ->showBlog(true)
-      ->setNodata(pht('No Recent Visible Posts.'));
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setBorder(true);
