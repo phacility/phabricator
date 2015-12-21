@@ -52,20 +52,15 @@ abstract class PhabricatorSearchDocumentIndexer extends Phobject {
 
     $object = $this->loadDocumentByPHID($phid);
 
-    // Automatically rebuild CustomField indexes if the object uses custom
-    // fields.
-    if ($object instanceof PhabricatorCustomFieldInterface) {
-      $this->indexCustomFields($document, $object);
+    $extensions = PhabricatorFulltextEngineExtension::getAllExtensions();
+    foreach ($extensions as $key => $extension) {
+      if (!$extension->shouldIndexFulltextObject($object)) {
+        unset($extensions[$key]);
+      }
     }
 
-    // Automatically rebuild subscriber indexes if the object is subscribable.
-    if ($object instanceof PhabricatorSubscribableInterface) {
-      $this->indexSubscribers($document);
-    }
-
-    // Automatically build project relationships
-    if ($object instanceof PhabricatorProjectInterface) {
-      $this->indexProjects($document, $object);
+    foreach ($extensions as $extension) {
+      $extension->indexFulltextObject($object, $document);
     }
 
     $engine = PhabricatorSearchEngine::loadEngine();
@@ -80,43 +75,6 @@ abstract class PhabricatorSearchDocumentIndexer extends Phobject {
     return id(new PhabricatorSearchAbstractDocument())
       ->setPHID($phid)
       ->setDocumentType(phid_get_type($phid));
-  }
-
-  protected function indexSubscribers(
-    PhabricatorSearchAbstractDocument $doc) {
-
-    $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-      $doc->getPHID());
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->getViewer())
-      ->withPHIDs($subscribers)
-      ->execute();
-
-    foreach ($handles as $phid => $handle) {
-      $doc->addRelationship(
-        PhabricatorSearchRelationship::RELATIONSHIP_SUBSCRIBER,
-        $phid,
-        $handle->getType(),
-        $doc->getDocumentModified()); // Bogus timestamp.
-    }
-  }
-
-  protected function indexProjects(
-    PhabricatorSearchAbstractDocument $doc,
-    PhabricatorProjectInterface $object) {
-
-    $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $object->getPHID(),
-      PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
-    if ($project_phids) {
-      foreach ($project_phids as $project_phid) {
-        $doc->addRelationship(
-          PhabricatorSearchRelationship::RELATIONSHIP_PROJECT,
-          $project_phid,
-          PhabricatorProjectProjectPHIDType::TYPECONST,
-          $doc->getDocumentModified()); // Bogus timestamp.
-      }
-    }
   }
 
   protected function indexTransactions(
@@ -139,28 +97,6 @@ abstract class PhabricatorSearchDocumentIndexer extends Phobject {
         PhabricatorSearchDocumentFieldType::FIELD_COMMENT,
         $comment->getContent());
     }
-  }
-
-  protected function indexCustomFields(
-    PhabricatorSearchAbstractDocument $document,
-    PhabricatorCustomFieldInterface $object) {
-
-    // Rebuild the ApplicationSearch indexes. These are internal and not part of
-    // the fulltext search, but putting them in this workflow allows users to
-    // use the same tools to rebuild the indexes, which is easy to understand.
-
-    $field_list = PhabricatorCustomField::getObjectFields(
-      $object,
-      PhabricatorCustomField::ROLE_DEFAULT);
-
-    $field_list->setViewer($this->getViewer());
-    $field_list->readFieldsFromStorage($object);
-
-    // Rebuild ApplicationSearch indexes.
-    $field_list->rebuildIndexes($object);
-
-    // Rebuild global search indexes.
-    $field_list->updateAbstractDocument($document);
   }
 
   private function dispatchDidUpdateIndexEvent(
