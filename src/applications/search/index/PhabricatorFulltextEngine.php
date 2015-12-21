@@ -40,7 +40,7 @@ abstract class PhabricatorFulltextEngine
       $extension->indexFulltextObject($object, $document);
     }
 
-    $storage_engine = PhabricatorSearchEngine::loadEngine();
+    $storage_engine = PhabricatorFulltextStorageEngine::loadEngine();
     $storage_engine->reindexAbstractDocument($document);
   }
 

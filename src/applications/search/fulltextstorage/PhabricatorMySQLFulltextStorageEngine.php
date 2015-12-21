@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorMySQLSearchEngine extends PhabricatorSearchEngine {
+final class PhabricatorMySQLFulltextStorageEngine
+  extends PhabricatorFulltextStorageEngine {
 
   public function getEngineIdentifier() {
     return 'mysql';

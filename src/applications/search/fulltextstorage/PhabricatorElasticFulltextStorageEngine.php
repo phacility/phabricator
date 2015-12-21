@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorElasticSearchEngine extends PhabricatorSearchEngine {
+final class PhabricatorElasticFulltextStorageEngine
+  extends PhabricatorFulltextStorageEngine {
 
   private $uri;
   private $index;

@@ -16,8 +16,8 @@ final class PhabricatorSearchApplicationStorageEnginePanel
     $viewer = $this->getViewer();
     $application = $this->getApplication();
 
-    $active_engine = PhabricatorSearchEngine::loadEngine();
-    $engines = PhabricatorSearchEngine::loadAllEngines();
+    $active_engine = PhabricatorFulltextStorageEngine::loadEngine();
+    $engines = PhabricatorFulltextStorageEngine::loadAllEngines();
 
     $rows = array();
     $rowc = array();
