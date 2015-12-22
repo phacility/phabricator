@@ -81,7 +81,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
 
   function update(area, l, m, r) {
     // Replace the selection with the entire assisted text.
-    JX.TextAreaUtils.setSelectionText(area, l + m + r);
+    JX.TextAreaUtils.setSelectionText(area, l + m + r, true);
 
     // Now, select just the middle part. For instance, if the user clicked
     // "B" to create bold text, we insert '**bold**' but just select the word
