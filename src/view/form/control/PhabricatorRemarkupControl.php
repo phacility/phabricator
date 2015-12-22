@@ -42,6 +42,8 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         ));
     }
 
+    $root_id = celerity_generate_unique_node_id();
+
     Javelin::initBehavior(
       'phabricator-remarkup-assist',
       array(
@@ -56,6 +58,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
           'URL' => pht('URL'),
         ),
         'disabled' => $this->getDisabled(),
+        'rootID' => $root_id,
       ));
     Javelin::initBehavior('phabricator-tooltips', array());
 
@@ -114,11 +117,22 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       );
     }
 
+    $actions['fa-eye'] = array(
+      'tip' => pht('Preview'),
+      'align' => 'right',
+    );
+
+    $actions[] = array(
+      'spacer' => true,
+      'align' => 'right',
+    );
+
     $actions['fa-life-bouy'] = array(
-        'tip' => pht('Help'),
-        'align' => 'right',
-        'href'  => PhabricatorEnv::getDoclink('Remarkup Reference'),
-      );
+      'tip' => pht('Help'),
+      'align' => 'right',
+      'href'  => PhabricatorEnv::getDoclink('Remarkup Reference'),
+    );
+
 
     if (!$this->disableFullScreen) {
       $actions[] = array(
@@ -230,6 +244,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       array(
         'sigil' => 'remarkup-assist-control',
         'class' => $this->getDisabled() ? 'disabled-control' : null,
+        'id' => $root_id,
       ),
       array(
         $buttons,
