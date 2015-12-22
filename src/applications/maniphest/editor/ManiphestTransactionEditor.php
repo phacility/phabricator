@@ -371,12 +371,14 @@ final class ManiphestTransactionEditor
         $new = $unblock_xaction->getNewValue();
 
         foreach ($blocked_tasks as $blocked_task) {
-          $unblock_xactions = array();
-
-          $unblock_xactions[] = id(new ManiphestTransaction())
+          $parent_xaction = id(new ManiphestTransaction())
             ->setTransactionType(ManiphestTransaction::TYPE_UNBLOCK)
             ->setOldValue(array($object->getPHID() => $old))
             ->setNewValue(array($object->getPHID() => $new));
+
+          if ($this->getIsNewObject()) {
+            $parent_xaction->setMetadataValue('blocker.new', true);
+          }
 
           id(new ManiphestTransactionEditor())
             ->setActor($this->getActor())
@@ -384,7 +386,7 @@ final class ManiphestTransactionEditor
             ->setContentSource($this->getContentSource())
             ->setContinueOnNoEffect(true)
             ->setContinueOnMissingFields(true)
-            ->applyTransactions($blocked_task, $unblock_xactions);
+            ->applyTransactions($blocked_task, array($parent_xaction));
         }
       }
     }

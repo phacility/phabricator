@@ -167,6 +167,21 @@ final class ManiphestTransaction
     return parent::shouldHide();
   }
 
+  public function shouldHideForFeed() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_UNBLOCK:
+        // Hide "alice created X, a task blocking Y." from feed because it
+        // will almost always appear adjacent to "alice created Y".
+        $is_new = $this->getMetadataValue('blocker.new');
+        if ($is_new) {
+          return true;
+        }
+        break;
+    }
+
+    return parent::shouldHideForFeed();
+  }
+
   public function getActionStrength() {
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
@@ -479,7 +494,12 @@ final class ManiphestTransaction
         $old_name = ManiphestTaskStatus::getTaskStatusName($old_status);
         $new_name = ManiphestTaskStatus::getTaskStatusName($new_status);
 
-        if ($old_closed && !$new_closed) {
+        if ($this->getMetadataValue('blocker.new')) {
+          return pht(
+            '%s created blocking task %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($blocker_phid));
+        } else if ($old_closed && !$new_closed) {
           return pht(
             '%s reopened blocking task %s as "%s".',
             $this->renderHandleLink($author_phid),
