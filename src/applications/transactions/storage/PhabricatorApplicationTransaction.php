@@ -565,6 +565,10 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function shouldHideForMail(array $xactions) {
+    if ($this->isSelfSubscription()) {
+      return true;
+    }
+
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_TOKEN:
         return true;
@@ -614,6 +618,10 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function shouldHideForFeed() {
+    if ($this->isSelfSubscription()) {
+      return true;
+    }
+
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_TOKEN:
         return true;
@@ -1103,32 +1111,11 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_COMMENT:
         return 0.5;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-        $old = $this->getOldValue();
-        $new = $this->getNewValue();
-
-        $add = array_diff($old, $new);
-        $rem = array_diff($new, $old);
-
-        // If this action is the actor subscribing or unsubscribing themselves,
-        // it is less interesting. In particular, if someone makes a comment and
-        // also implicitly subscribes themselves, we should treat the
-        // transaction group as "comment", not "subscribe". In this specific
-        // case (one affected user, and that affected user it the actor),
-        // decrease the action strength.
-
-        if ((count($add) + count($rem)) != 1) {
-          // Not exactly one CC change.
-          break;
+        if ($this->isSelfSubscription()) {
+          // Make this weaker than TYPE_COMMENT.
+          return 0.25;
         }
-
-        $affected_phid = head(array_merge($add, $rem));
-        if ($affected_phid != $this->getAuthorPHID()) {
-          // Affected user is someone else.
-          break;
-        }
-
-        // Make this weaker than TYPE_COMMENT.
-        return 0.25;
+        break;
     }
 
     return 1.0;
@@ -1333,6 +1320,35 @@ abstract class PhabricatorApplicationTransaction
     return rtrim($text."\n\n".$body);
   }
 
+  /**
+   * Test if this transaction is just a user subscribing or unsubscribing
+   * themselves.
+   */
+  private function isSelfSubscription() {
+    $type = $this->getTransactionType();
+    if ($type != PhabricatorTransactions::TYPE_SUBSCRIBERS) {
+      return false;
+    }
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    $add = array_diff($old, $new);
+    $rem = array_diff($new, $old);
+
+    if ((count($add) + count($rem)) != 1) {
+      // More than one user affected.
+      return false;
+    }
+
+    $affected_phid = head(array_merge($add, $rem));
+    if ($affected_phid != $this->getAuthorPHID()) {
+      // Affected user is someone else.
+      return false;
+    }
+
+    return true;
+  }
 
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
