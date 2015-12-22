@@ -115,6 +115,10 @@ JX.behavior('comment-actions', function(config) {
   }
 
   function onresponse(response) {
+    if (JX.Device.getDevice() != 'desktop') {
+      return;
+    }
+
     var panel = JX.$(config.panelID);
     if (!response.xactions.length) {
       JX.DOM.hide(panel);
@@ -152,7 +156,25 @@ JX.behavior('comment-actions', function(config) {
 
     JX.DOM.listen(form_node, 'shouldRefresh', null, always_trigger);
     request.start();
+
+    var ondevicechange = function() {
+      var panel = JX.$(config.panelID);
+      if (JX.Device.getDevice() == 'desktop') {
+        request.setRateLimit(500);
+        always_trigger();
+      } else {
+        // On mobile, don't show live previews and only save drafts every
+        // 10 seconds.
+        request.setRateLimit(10000);
+        JX.DOM.hide(panel);
+      }
+    };
+
+    ondevicechange();
+
+    JX.Stratcom.listen('phabricator-device-change', null, ondevicechange);
   }
 
   restore_draft_actions(config.drafts || []);
+
 });

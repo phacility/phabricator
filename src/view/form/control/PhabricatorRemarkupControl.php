@@ -65,33 +65,43 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
     $actions = array(
       'fa-bold' => array(
         'tip' => pht('Bold'),
+        'nodevice' => true,
       ),
       'fa-italic' => array(
         'tip' => pht('Italics'),
+        'nodevice' => true,
       ),
       'fa-text-width' => array(
         'tip' => pht('Monospaced'),
+        'nodevice' => true,
       ),
       'fa-link' => array(
         'tip' => pht('Link'),
+        'nodevice' => true,
       ),
       array(
         'spacer' => true,
+        'nodevice' => true,
       ),
       'fa-list-ul' => array(
         'tip' => pht('Bulleted List'),
+        'nodevice' => true,
       ),
       'fa-list-ol' => array(
         'tip' => pht('Numbered List'),
+        'nodevice' => true,
       ),
       'fa-code' => array(
         'tip' => pht('Code Block'),
+        'nodevice' => true,
       ),
       'fa-quote-right' => array(
         'tip' => pht('Quote'),
+        'nodevice' => true,
       ),
       'fa-table' => array(
         'tip' => pht('Table'),
+        'nodevice' => true,
       ),
       'fa-cloud-upload' => array(
         'tip' => pht('Upload File'),
@@ -153,6 +163,10 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
 
       if (idx($spec, 'align') == 'right') {
         $classes[] = 'remarkup-assist-right';
+      }
+
+      if (idx($spec, 'nodevice')) {
+        $classes[] = 'remarkup-assist-nodevice';
       }
 
       if (idx($spec, 'spacer')) {

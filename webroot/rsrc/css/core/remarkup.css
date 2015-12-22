@@ -556,3 +556,7 @@ var.remarkup-assist-textarea {
 .remarkup-assist-button.preview-active:hover .phui-icon-view {
   color: {$lightsky};
 }
+
+.device .remarkup-assist-nodevice {
+  display: none;
+}
