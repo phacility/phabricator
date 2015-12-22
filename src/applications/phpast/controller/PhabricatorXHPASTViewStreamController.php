@@ -22,7 +22,7 @@ final class PhabricatorXHPASTViewStreamController
     foreach ($tree->getRawTokenStream() as $id => $token) {
       $seq = $id;
       $name = $token->getTypeName();
-      $title = pht('Token %s: %s', $seq, $name);
+      $title = pht('Token %d: %s', $seq, $name);
 
       $tokens[] = phutil_tag(
         'span',
