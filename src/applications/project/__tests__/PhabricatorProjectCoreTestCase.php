@@ -113,6 +113,80 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $this->assertTrue($caught instanceof Exception);
   }
 
+  public function testAncestryQueries() {
+    $user = $this->createUser();
+    $user->save();
+
+    $ancestor = $this->createProject($user);
+    $parent = $this->createProject($user, $ancestor);
+    $child = $this->createProject($user, $parent);
+
+    $projects = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withAncestorProjectPHIDs(array($ancestor->getPHID()))
+      ->execute();
+    $this->assertEqual(2, count($projects));
+
+    $projects = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withParentProjectPHIDs(array($ancestor->getPHID()))
+      ->execute();
+    $this->assertEqual(1, count($projects));
+    $this->assertEqual(
+      $parent->getPHID(),
+      head($projects)->getPHID());
+
+    $projects = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withAncestorProjectPHIDs(array($ancestor->getPHID()))
+      ->withDepthBetween(2, null)
+      ->execute();
+    $this->assertEqual(1, count($projects));
+    $this->assertEqual(
+      $child->getPHID(),
+      head($projects)->getPHID());
+
+    $parent2 = $this->createProject($user, $ancestor);
+    $child2 = $this->createProject($user, $parent2);
+    $grandchild2 = $this->createProject($user, $child2);
+
+    $projects = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withAncestorProjectPHIDs(array($ancestor->getPHID()))
+      ->execute();
+    $this->assertEqual(5, count($projects));
+
+    $projects = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withParentProjectPHIDs(array($ancestor->getPHID()))
+      ->execute();
+    $this->assertEqual(2, count($projects));
+
+    $projects = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withAncestorProjectPHIDs(array($ancestor->getPHID()))
+      ->withDepthBetween(2, null)
+      ->execute();
+    $this->assertEqual(3, count($projects));
+
+    $projects = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withAncestorProjectPHIDs(array($ancestor->getPHID()))
+      ->withDepthBetween(3, null)
+      ->execute();
+    $this->assertEqual(1, count($projects));
+
+    $projects = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withPHIDs(
+        array(
+          $child->getPHID(),
+          $grandchild2->getPHID(),
+        ))
+      ->execute();
+    $this->assertEqual(2, count($projects));
+  }
+
   public function testParentProject() {
     $user = $this->createUser();
     $user->save();

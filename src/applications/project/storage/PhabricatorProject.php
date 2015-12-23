@@ -33,6 +33,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   protected $projectPath;
   protected $projectDepth;
+  protected $projectPathKey;
 
   private $memberPHIDs = self::ATTACHABLE;
   private $watcherPHIDs = self::ATTACHABLE;
@@ -196,6 +197,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         'milestoneNumber' => 'uint32?',
         'projectPath' => 'hashpath64',
         'projectDepth' => 'uint32',
+        'projectPathKey' => 'bytes4',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -223,6 +225,10 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         ),
         'key_path' => array(
           'columns' => array('projectPath', 'projectDepth'),
+        ),
+        'key_pathkey' => array(
+          'columns' => array('projectPathKey'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();
@@ -310,6 +316,12 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       $this->setPHID($this->generatePHID());
     }
 
+    if (!strlen($this->getProjectPathKey())) {
+      $hash = PhabricatorHash::digestForIndex($this->getPHID());
+      $hash = substr($hash, 0, 4);
+      $this->setProjectPathKey($hash);
+    }
+
     $path = array();
     $depth = 0;
     if ($this->parentProjectPHID) {
@@ -317,15 +329,12 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       $path[] = $parent->getProjectPath();
       $depth = $parent->getProjectDepth() + 1;
     }
-    $hash = PhabricatorHash::digestForIndex($this->getPHID());
-    $path[] = substr($hash, 0, 4);
-
+    $path[] = $this->getProjectPathKey();
     $path = implode('', $path);
 
     $limit = self::getProjectDepthLimit();
-    if (strlen($path) > ($limit * 4)) {
-      throw new Exception(
-        pht('Unable to save project: path length is too long.'));
+    if ($depth >= $limit) {
+      throw new Exception(pht('Project depth is too great.'));
     }
 
     $this->setProjectPath($path);
@@ -403,7 +412,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     $path = $this->getProjectPath();
     $parent_length = (strlen($path) - 4);
 
-    for ($ii = $parent_length; $ii >= 0; $ii -= 4) {
+    for ($ii = $parent_length; $ii > 0; $ii -= 4) {
       $parts[] = substr($path, 0, $ii);
     }
 

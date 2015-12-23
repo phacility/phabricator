@@ -11,6 +11,11 @@ final class PhabricatorProjectQuery
   private $nameTokens;
   private $icons;
   private $colors;
+  private $ancestorPHIDs;
+  private $parentPHIDs;
+  private $isMilestone;
+  private $minDepth;
+  private $maxDepth;
 
   private $status       = 'status-any';
   const STATUS_ANY      = 'status-any';
@@ -66,6 +71,27 @@ final class PhabricatorProjectQuery
 
   public function withColors(array $colors) {
     $this->colors = $colors;
+    return $this;
+  }
+
+  public function withParentProjectPHIDs($parent_phids) {
+    $this->parentPHIDs = $parent_phids;
+    return $this;
+  }
+
+  public function withAncestorProjectPHIDs($ancestor_phids) {
+    $this->ancestorPHIDs = $ancestor_phids;
+    return $this;
+  }
+
+  public function withIsMilestone($is_milestone) {
+    $this->isMilestone = $is_milestone;
+    return $this;
+  }
+
+  public function withDepthBetween($min, $max) {
+    $this->minDepth = $min;
+    $this->maxDepth = $max;
     return $this;
   }
 
@@ -335,6 +361,65 @@ final class PhabricatorProjectQuery
         $conn,
         'color IN (%Ls)',
         $this->colors);
+    }
+
+    if ($this->parentPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'parentProjectPHID IN (%Ls)',
+        $this->parentPHIDs);
+    }
+
+    if ($this->ancestorPHIDs !== null) {
+      $ancestor_paths = queryfx_all(
+        $conn,
+        'SELECT projectPath, projectDepth FROM %T WHERE phid IN (%Ls)',
+        id(new PhabricatorProject())->getTableName(),
+        $this->ancestorPHIDs);
+      if (!$ancestor_paths) {
+        throw new PhabricatorEmptyQueryException();
+      }
+
+      $sql = array();
+      foreach ($ancestor_paths as $ancestor_path) {
+        $sql[] = qsprintf(
+          $conn,
+          '(projectPath LIKE %> AND projectDepth > %d)',
+          $ancestor_path['projectPath'],
+          $ancestor_path['projectDepth']);
+      }
+
+      $where[] = '('.implode(' OR ', $sql).')';
+
+      $where[] = qsprintf(
+        $conn,
+        'parentProjectPHID IS NOT NULL');
+    }
+
+    if ($this->isMilestone !== null) {
+      if ($this->isMilestone) {
+        $where[] = qsprintf(
+          $conn,
+          'milestoneNumber IS NOT NULL');
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          'milestoneNumber IS NULL');
+      }
+    }
+
+    if ($this->minDepth !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'projectDepth >= %d',
+        $this->minDepth);
+    }
+
+    if ($this->maxDepth !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'projectDepth <= %d',
+        $this->maxDepth);
     }
 
     return $where;
