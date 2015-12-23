@@ -6,6 +6,7 @@
  *           javelin-dom
  *           phuix-form-control-view
  *           phuix-icon-view
+ *           javelin-behavior-phabricator-gesture
  */
 
 JX.behavior('comment-actions', function(config) {
@@ -60,13 +61,35 @@ JX.behavior('comment-actions', function(config) {
       .setControl(action.type, action.spec);
     var node = control.getNode();
 
+    JX.Stratcom.addSigil(node, 'touchable');
+
+    var remove_action = function() {
+      JX.DOM.remove(node);
+      delete rows[action.key];
+      option.disabled = false;
+    };
+
+    JX.DOM.listen(node, 'gesture.swipe.end', null, function(e) {
+      var data = e.getData();
+
+      if (data.direction != 'left') {
+        // Didn't swipe left.
+        return;
+      }
+
+      if (data.length <= (JX.Vector.getDim(node).x / 2)) {
+        // Didn't swipe far enough.
+        return;
+      }
+
+      remove_action();
+    });
+
     rows[action.key] = control;
 
     JX.DOM.listen(remove, 'click', null, function(e) {
       e.kill();
-      JX.DOM.remove(node);
-      delete rows[action.key];
-      option.disabled = false;
+      remove_action();
     });
 
     place_node.parentNode.insertBefore(node, place_node);
