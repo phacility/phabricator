@@ -351,7 +351,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
         $viewer,
         $space_phid),
       array(
-        'disabled' => $this->getDisabled(),
+        'disabled' => ($this->getDisabled() ? 'disabled' : null),
         'name' => 'spacePHID',
         'class' => 'aphront-space-select-control-knob',
       ));
