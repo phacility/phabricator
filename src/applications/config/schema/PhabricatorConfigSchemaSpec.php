@@ -321,6 +321,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
           break;
         case 'phid':
         case 'policy';
+        case 'hashpath64':
           $column_type = 'varbinary(64)';
           break;
         case 'bytes64':

@@ -5,6 +5,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     PhabricatorApplicationTransactionInterface,
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface,
+    PhabricatorExtendedPolicyInterface,
     PhabricatorSubscribableInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorDestructibleInterface,
@@ -29,6 +30,9 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   protected $hasMilestones;
   protected $hasSubprojects;
   protected $milestoneNumber;
+
+  protected $projectPath;
+  protected $projectDepth;
 
   private $memberPHIDs = self::ATTACHABLE;
   private $watcherPHIDs = self::ATTACHABLE;
@@ -69,7 +73,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       ->attachSlugs(array())
       ->setHasWorkboard(0)
       ->setHasMilestones(0)
-      ->setHasSubprojects(0);
+      ->setHasSubprojects(0)
+      ->attachParentProject(null);
   }
 
   public function getCapabilities() {
@@ -92,6 +97,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    $can_edit = PhabricatorPolicyCapability::CAN_EDIT;
 
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
@@ -101,9 +107,18 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         }
         break;
       case PhabricatorPolicyCapability::CAN_EDIT:
+        $parent = $this->getParentProject();
+        if ($parent) {
+          $can_edit_parent = PhabricatorPolicyFilter::hasCapability(
+            $viewer,
+            $parent,
+            $can_edit);
+          if ($can_edit_parent) {
+            return true;
+          }
+        }
         break;
       case PhabricatorPolicyCapability::CAN_JOIN:
-        $can_edit = PhabricatorPolicyCapability::CAN_EDIT;
         if (PhabricatorPolicyFilter::hasCapability($viewer, $this, $can_edit)) {
           // Project editors can always join a project.
           return true;
@@ -115,6 +130,9 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   }
 
   public function describeAutomaticCapability($capability) {
+
+    // TODO: Clarify the additional rules that parent and subprojects imply.
+
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
         return pht('Members of a project can always view it.');
@@ -123,6 +141,25 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     }
     return null;
   }
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    $extended = array();
+
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        $parent = $this->getParentProject();
+        if ($parent) {
+          $extended[] = array(
+            $parent,
+            PhabricatorPolicyCapability::CAN_VIEW,
+          );
+        }
+        break;
+    }
+
+    return $extended;
+  }
+
 
   public function isUserMember($user_phid) {
     if ($this->memberPHIDs !== self::ATTACHABLE) {
@@ -157,6 +194,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         'hasMilestones' => 'bool',
         'hasSubprojects' => 'bool',
         'milestoneNumber' => 'uint32?',
+        'projectPath' => 'hashpath64',
+        'projectDepth' => 'uint32',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -181,6 +220,9 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         'key_primaryslug' => array(
           'columns' => array('primarySlug'),
           'unique' => true,
+        ),
+        'key_path' => array(
+          'columns' => array('projectPath', 'projectDepth'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -264,12 +306,43 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       $this->setMailKey(Filesystem::readRandomCharacters(20));
     }
 
+    if (!strlen($this->getPHID())) {
+      $this->setPHID($this->generatePHID());
+    }
+
+    $path = array();
+    $depth = 0;
+    if ($this->parentProjectPHID) {
+      $parent = $this->getParentProject();
+      $path[] = $parent->getProjectPath();
+      $depth = $parent->getProjectDepth() + 1;
+    }
+    $hash = PhabricatorHash::digestForIndex($this->getPHID());
+    $path[] = substr($hash, 0, 4);
+
+    $path = implode('', $path);
+
+    $limit = self::getProjectDepthLimit();
+    if (strlen($path) > ($limit * 4)) {
+      throw new Exception(
+        pht('Unable to save project: path length is too long.'));
+    }
+
+    $this->setProjectPath($path);
+    $this->setProjectDepth($depth);
+
     $this->openTransaction();
       $result = parent::save();
       $this->updateDatasourceTokens();
     $this->saveTransaction();
 
     return $result;
+  }
+
+  public static function getProjectDepthLimit() {
+    // This is limited by how many path hashes we can fit in the path
+    // column.
+    return 16;
   }
 
   public function updateDatasourceTokens() {
@@ -319,9 +392,34 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return $this->assertAttached($this->parentProject);
   }
 
-  public function attachParentProject(PhabricatorProject $project) {
+  public function attachParentProject(PhabricatorProject $project = null) {
     $this->parentProject = $project;
     return $this;
+  }
+
+  public function getAncestorProjectPaths() {
+    $parts = array();
+
+    $path = $this->getProjectPath();
+    $parent_length = (strlen($path) - 4);
+
+    for ($ii = $parent_length; $ii >= 0; $ii -= 4) {
+      $parts[] = substr($path, 0, $ii);
+    }
+
+    return $parts;
+  }
+
+  public function getAncestorProjects() {
+    $ancestors = array();
+
+    $cursor = $this->getParentProject();
+    while ($cursor) {
+      $ancestors[] = $cursor;
+      $cursor = $cursor->getParentProject();
+    }
+
+    return $ancestors;
   }
 
 

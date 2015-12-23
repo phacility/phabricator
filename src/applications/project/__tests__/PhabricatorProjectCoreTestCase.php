@@ -113,6 +113,59 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $this->assertTrue($caught instanceof Exception);
   }
 
+  public function testParentProject() {
+    $user = $this->createUser();
+    $user->save();
+
+    $parent = $this->createProject($user);
+    $child = $this->createProject($user, $parent);
+
+    $this->assertTrue(true);
+
+    $child = $this->refreshProject($child, $user);
+
+    $this->assertEqual(
+      $parent->getPHID(),
+      $child->getParentProject()->getPHID());
+
+    $this->assertEqual(1, (int)$child->getProjectDepth());
+
+    $this->assertFalse(
+      $child->isUserMember($user->getPHID()));
+
+    $this->assertFalse(
+      $child->getParentProject()->isUserMember($user->getPHID()));
+
+    $this->joinProject($child, $user);
+
+    $child = $this->refreshProject($child, $user);
+
+    $this->assertTrue(
+      $child->isUserMember($user->getPHID()));
+
+    $this->assertTrue(
+      $child->getParentProject()->isUserMember($user->getPHID()));
+
+
+    // Test that hiding a parent hides the child.
+
+    $user2 = $this->createUser();
+    $user2->save();
+
+    // Second user can see the project for now.
+    $this->assertTrue((bool)$this->refreshProject($child, $user2));
+
+    // Hide the parent.
+    $this->setViewPolicy($parent, $user, $user->getPHID());
+
+    // First user (who can see the parent because they are a member of
+    // the child) can see the project.
+    $this->assertTrue((bool)$this->refreshProject($child, $user));
+
+    // Second user can not, because they can't see the parent.
+    $this->assertFalse((bool)$this->refreshProject($child, $user2));
+  }
+
   private function attemptProjectEdit(
     PhabricatorProject $proj,
     PhabricatorUser $user,
@@ -126,10 +179,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $xaction->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME);
     $xaction->setNewValue($new_name);
 
-    $editor = new PhabricatorProjectTransactionEditor();
-    $editor->setActor($user);
-    $editor->setContentSource(PhabricatorContentSource::newConsoleSource());
-    $editor->applyTransactions($proj, array($xaction));
+    $this->applyTransactions($proj, $user, array($xaction));
 
     return true;
   }
@@ -270,10 +320,43 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     }
   }
 
-  private function createProject(PhabricatorUser $user) {
+  private function createProject(
+    PhabricatorUser $user,
+    PhabricatorProject $parent = null) {
+
     $project = PhabricatorProject::initializeNewProject($user);
-    $project->setName(pht('Test Project %d', mt_rand()));
-    $project->save();
+
+    $name = pht('Test Project %d', mt_rand());
+
+    $xactions = array();
+
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+      ->setNewValue($name);
+
+    if ($parent) {
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorProjectTransaction::TYPE_PARENT)
+        ->setNewValue($parent->getPHID());
+    }
+
+    $this->applyTransactions($project, $user, $xactions);
+
+    return $project;
+  }
+
+  private function setViewPolicy(
+    PhabricatorProject $project,
+    PhabricatorUser $user,
+    $policy) {
+
+    $xactions = array();
+
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+      ->setNewValue($policy);
+
+    $this->applyTransactions($project, $user, $xactions);
 
     return $project;
   }
@@ -359,13 +442,21 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
       ->setMetadataValue('edge:type', $edge_type)
       ->setNewValue($spec);
 
+    $this->applyTransactions($project, $user, $xactions);
+
+    return $project;
+  }
+
+  private function applyTransactions(
+    PhabricatorProject $project,
+    PhabricatorUser $user,
+    array $xactions) {
+
     $editor = id(new PhabricatorProjectTransactionEditor())
       ->setActor($user)
       ->setContentSource(PhabricatorContentSource::newConsoleSource())
       ->setContinueOnNoEffect(true)
       ->applyTransactions($project, $xactions);
-
-    return $project;
   }
 
 

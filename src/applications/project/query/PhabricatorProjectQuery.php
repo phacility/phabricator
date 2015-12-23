@@ -130,6 +130,27 @@ final class PhabricatorProjectQuery
   }
 
   protected function willFilterPage(array $projects) {
+    $project_phids = array();
+    $ancestor_paths = array();
+
+    foreach ($projects as $project) {
+      $project_phids[] = $project->getPHID();
+
+      foreach ($project->getAncestorProjectPaths() as $path) {
+        $ancestor_paths[$path] = $path;
+      }
+    }
+
+    if ($ancestor_paths) {
+      $ancestors = id(new PhabricatorProject())->loadAllWhere(
+        'projectPath IN (%Ls)',
+        $ancestor_paths);
+    } else {
+      $ancestors = array();
+    }
+
+    $projects = $this->linkProjectGraph($projects, $ancestors);
+
     $viewer_phid = $this->getViewer()->getPHID();
     $project_phids = mpull($projects, 'getPHID');
 
@@ -154,6 +175,7 @@ final class PhabricatorProjectQuery
 
     $edge_query->execute();
 
+    $membership_projects = array();
     foreach ($projects as $project) {
       $project_phid = $project->getPHID();
 
@@ -161,9 +183,9 @@ final class PhabricatorProjectQuery
         array($project_phid),
         array($member_type));
 
-      $project->setIsUserMember(
-        $viewer_phid,
-        in_array($viewer_phid, $member_phids));
+      if (in_array($viewer_phid, $member_phids)) {
+        $membership_projects[$project_phid] = $project;
+      }
 
       if ($this->needMembers) {
         $project->attachMemberPHIDs($member_phids);
@@ -178,6 +200,14 @@ final class PhabricatorProjectQuery
           $viewer_phid,
           in_array($viewer_phid, $watcher_phids));
       }
+    }
+
+    $all_graph = $this->getAllReachableAncestors($projects);
+    $member_graph = $this->getAllReachableAncestors($membership_projects);
+
+    foreach ($all_graph as $phid => $project) {
+      $is_member = isset($member_graph[$phid]);
+      $project->setIsUserMember($viewer_phid, $is_member);
     }
 
     return $projects;
@@ -358,6 +388,90 @@ final class PhabricatorProjectQuery
 
   protected function getPrimaryTableAlias() {
     return 'p';
+  }
+
+  private function linkProjectGraph(array $projects, array $ancestors) {
+    $ancestor_map = mpull($ancestors, null, 'getPHID');
+    $projects_map = mpull($projects, null, 'getPHID');
+
+    $all_map = $projects_map + $ancestor_map;
+
+    $done = array();
+    foreach ($projects as $key => $project) {
+      $seen = array($project->getPHID() => true);
+
+      if (!$this->linkProject($project, $all_map, $done, $seen)) {
+        $this->didRejectResult($project);
+        unset($projects[$key]);
+        continue;
+      }
+
+      foreach ($project->getAncestorProjects() as $ancestor) {
+        $seen[$ancestor->getPHID()] = true;
+      }
+    }
+
+    return $projects;
+  }
+
+  private function linkProject($project, array $all, array $done, array $seen) {
+    $parent_phid = $project->getParentProjectPHID();
+
+    // This project has no parent, so just attach `null` and return.
+    if (!$parent_phid) {
+      $project->attachParentProject(null);
+      return true;
+    }
+
+    // This project has a parent, but it failed to load.
+    if (empty($all[$parent_phid])) {
+      return false;
+    }
+
+    // Test for graph cycles. If we encounter one, we're going to hide the
+    // entire cycle since we can't meaningfully resolve it.
+    if (isset($seen[$parent_phid])) {
+      return false;
+    }
+
+    $seen[$parent_phid] = true;
+
+    $parent = $all[$parent_phid];
+    $project->attachParentProject($parent);
+
+    if (!empty($done[$parent_phid])) {
+      return true;
+    }
+
+    return $this->linkProject($parent, $all, $done, $seen);
+  }
+
+  private function getAllReachableAncestors(array $projects) {
+    $ancestors = array();
+
+    $seen = mpull($projects, null, 'getPHID');
+
+    $stack = $projects;
+    while ($stack) {
+      $project = array_pop($stack);
+
+      $phid = $project->getPHID();
+      $ancestors[$phid] = $project;
+
+      $parent_phid = $project->getParentProjectPHID();
+      if (!$parent_phid) {
+        continue;
+      }
+
+      if (isset($seen[$parent_phid])) {
+        continue;
+      }
+
+      $seen[$parent_phid] = true;
+      $stack[] = $project->getParentProject();
+    }
+
+    return $ancestors;
   }
 
 }

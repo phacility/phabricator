@@ -26,6 +26,7 @@ final class PhabricatorProjectTransactionEditor
     $types[] = PhabricatorProjectTransaction::TYPE_ICON;
     $types[] = PhabricatorProjectTransaction::TYPE_COLOR;
     $types[] = PhabricatorProjectTransaction::TYPE_LOCKED;
+    $types[] = PhabricatorProjectTransaction::TYPE_PARENT;
 
     return $types;
   }
@@ -52,6 +53,8 @@ final class PhabricatorProjectTransactionEditor
         return $object->getColor();
       case PhabricatorProjectTransaction::TYPE_LOCKED:
         return (int)$object->getIsMembershipLocked();
+      case PhabricatorProjectTransaction::TYPE_PARENT:
+        return null;
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -69,6 +72,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_ICON:
       case PhabricatorProjectTransaction::TYPE_COLOR:
       case PhabricatorProjectTransaction::TYPE_LOCKED:
+      case PhabricatorProjectTransaction::TYPE_PARENT:
         return $xaction->getNewValue();
     }
 
@@ -101,6 +105,9 @@ final class PhabricatorProjectTransactionEditor
         return;
       case PhabricatorProjectTransaction::TYPE_LOCKED:
         $object->setIsMembershipLocked($xaction->getNewValue());
+        return;
+      case PhabricatorProjectTransaction::TYPE_PARENT:
+        $object->setParentProjectPHID($xaction->getNewValue());
         return;
     }
 
@@ -153,6 +160,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_ICON:
       case PhabricatorProjectTransaction::TYPE_COLOR:
       case PhabricatorProjectTransaction::TYPE_LOCKED:
+      case PhabricatorProjectTransaction::TYPE_PARENT:
         return;
      }
 
@@ -324,7 +332,77 @@ final class PhabricatorProjectTransactionEditor
         }
 
         break;
+      case PhabricatorProjectTransaction::TYPE_PARENT:
+        if (!$xactions) {
+          break;
+        }
 
+        $xaction = last($xactions);
+
+        if (!$this->getIsNewObject()) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'You can only set a parent project when creating a project '.
+              'for the first time.'),
+            $xaction);
+          break;
+        }
+
+        $parent_phid = $xaction->getNewValue();
+
+        $projects = id(new PhabricatorProjectQuery())
+          ->setViewer($this->requireActor())
+          ->withPHIDs(array($parent_phid))
+          ->requireCapabilities(
+            array(
+              PhabricatorPolicyCapability::CAN_VIEW,
+              PhabricatorPolicyCapability::CAN_EDIT,
+            ))
+          ->execute();
+        if (!$projects) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'Parent project PHID ("%s") must be the PHID of a valid, '.
+              'visible project which you have permission to edit.',
+              $parent_phid),
+            $xaction);
+          break;
+        }
+
+        $project = head($projects);
+
+        if ($project->isMilestone()) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'Parent project PHID ("%s") must not be a milestone. '.
+              'Milestones may not have subprojects.',
+              $parent_phid),
+            $xaction);
+          break;
+        }
+
+        $limit = PhabricatorProject::getProjectDepthLimit();
+        if ($project->getProjectDepth() >= ($limit - 1)) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'You can not create a subproject under this parent because '.
+              'it would nest projects too deeply. The maximum nesting '.
+              'depth of projects is %s.',
+              new PhutilNumber($limit)),
+            $xaction);
+          break;
+        }
+
+        $object->attachParentProject($project);
+        break;
     }
 
     return $errors;
