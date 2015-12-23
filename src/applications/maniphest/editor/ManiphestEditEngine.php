@@ -66,10 +66,8 @@ final class ManiphestEditEngine
     $priority_map = $this->getTaskPriorityMap($object);
 
     if ($object->isClosed()) {
-      $priority_label = null;
       $default_status = ManiphestTaskStatus::getDefaultStatus();
     } else {
-      $priority_label = pht('Change Priority');
       $default_status = ManiphestTaskStatus::getDefaultClosedStatus();
     }
 
@@ -150,7 +148,7 @@ final class ManiphestEditEngine
         ->setIsCopyable(true)
         ->setValue($object->getPriority())
         ->setOptions($priority_map)
-        ->setCommentActionLabel($priority_label),
+        ->setCommentActionLabel(pht('Change Priority')),
       id(new PhabricatorRemarkupEditField())
         ->setKey('description')
         ->setLabel(pht('Description'))
