@@ -27,6 +27,7 @@ final class PhabricatorProjectTransactionEditor
     $types[] = PhabricatorProjectTransaction::TYPE_COLOR;
     $types[] = PhabricatorProjectTransaction::TYPE_LOCKED;
     $types[] = PhabricatorProjectTransaction::TYPE_PARENT;
+    $types[] = PhabricatorProjectTransaction::TYPE_MILESTONE;
 
     return $types;
   }
@@ -54,6 +55,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_LOCKED:
         return (int)$object->getIsMembershipLocked();
       case PhabricatorProjectTransaction::TYPE_PARENT:
+      case PhabricatorProjectTransaction::TYPE_MILESTONE:
         return null;
     }
 
@@ -74,6 +76,20 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_LOCKED:
       case PhabricatorProjectTransaction::TYPE_PARENT:
         return $xaction->getNewValue();
+      case PhabricatorProjectTransaction::TYPE_MILESTONE:
+        $current = queryfx_one(
+          $object->establishConnection('w'),
+          'SELECT MAX(milestoneNumber) n
+            FROM %T
+            WHERE parentProjectPHID = %s',
+          $object->getTableName(),
+          $object->getParentProject()->getPHID());
+        if (!$current) {
+          $number = 1;
+        } else {
+          $number = (int)$current['n'] + 1;
+        }
+        return $number;
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -108,6 +124,9 @@ final class PhabricatorProjectTransactionEditor
         return;
       case PhabricatorProjectTransaction::TYPE_PARENT:
         $object->setParentProjectPHID($xaction->getNewValue());
+        return;
+      case PhabricatorProjectTransaction::TYPE_MILESTONE:
+        $object->setMilestoneNumber($xaction->getNewValue());
         return;
     }
 
@@ -161,6 +180,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_COLOR:
       case PhabricatorProjectTransaction::TYPE_LOCKED:
       case PhabricatorProjectTransaction::TYPE_PARENT:
+      case PhabricatorProjectTransaction::TYPE_MILESTONE:
         return;
      }
 
@@ -590,4 +610,34 @@ final class PhabricatorProjectTransactionEditor
       ->setProjectPHID($object->getPHID())
       ->save();
   }
+
+
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $materialize = false;
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorTransactions::TYPE_EDGE:
+          switch ($xaction->getMetadataValue('edge:type')) {
+            case PhabricatorProjectProjectHasMemberEdgeType::EDGECONST:
+              $materialize = true;
+              break;
+          }
+          break;
+        case PhabricatorProjectTransaction::TYPE_PARENT:
+          $materialize = true;
+          break;
+      }
+    }
+
+    if ($materialize) {
+      id(new PhabricatorProjectsMembershipIndexEngineExtension())
+        ->rematerialize($object);
+    }
+
+    return parent::applyFinalEffects($object, $xactions);
+  }
+
 }

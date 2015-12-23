@@ -11,6 +11,7 @@ final class PhabricatorProjectTransaction
   const TYPE_COLOR      = 'project:color';
   const TYPE_LOCKED     = 'project:locked';
   const TYPE_PARENT = 'project:parent';
+  const TYPE_MILESTONE = 'project:milestone';
 
   // NOTE: This is deprecated, members are just a normal edge now.
   const TYPE_MEMBERS    = 'project:members';

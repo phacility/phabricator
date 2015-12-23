@@ -14,6 +14,7 @@ final class PhabricatorProjectQuery
   private $ancestorPHIDs;
   private $parentPHIDs;
   private $isMilestone;
+  private $hasSubprojects;
   private $minDepth;
   private $maxDepth;
 
@@ -89,6 +90,15 @@ final class PhabricatorProjectQuery
     return $this;
   }
 
+  public function withHasSubprojects($has_subprojects) {
+    $this->hasSubprojects = $has_subprojects;
+    return $this;
+  }
+
+  public function getProperty() {
+    return $this->property;
+  }
+
   public function withDepthBetween($min, $max) {
     $this->minDepth = $min;
     $this->maxDepth = $max;
@@ -156,12 +166,8 @@ final class PhabricatorProjectQuery
   }
 
   protected function willFilterPage(array $projects) {
-    $project_phids = array();
     $ancestor_paths = array();
-
     foreach ($projects as $project) {
-      $project_phids[] = $project->getPHID();
-
       foreach ($project->getAncestorProjectPaths() as $path) {
         $ancestor_paths[$path] = $path;
       }
@@ -178,7 +184,6 @@ final class PhabricatorProjectQuery
     $projects = $this->linkProjectGraph($projects, $ancestors);
 
     $viewer_phid = $this->getViewer()->getPHID();
-    $project_phids = mpull($projects, 'getPHID');
 
     $member_type = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
     $watcher_type = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
@@ -189,8 +194,18 @@ final class PhabricatorProjectQuery
       $types[] = $watcher_type;
     }
 
+    $all_sources = array();
+    foreach ($projects as $project) {
+      if ($project->isMilestone()) {
+        $phid = $project->getParentProjectPHID();
+      } else {
+        $phid = $project->getPHID();
+      }
+      $all_sources[$phid] = $phid;
+    }
+
     $edge_query = id(new PhabricatorEdgeQuery())
-      ->withSourcePHIDs($project_phids)
+      ->withSourcePHIDs($all_sources)
       ->withEdgeTypes($types);
 
     // If we only need to know if the viewer is a member, we can restrict
@@ -205,8 +220,14 @@ final class PhabricatorProjectQuery
     foreach ($projects as $project) {
       $project_phid = $project->getPHID();
 
+      if ($project->isMilestone()) {
+        $source_phids = array($project->getParentProjectPHID());
+      } else {
+        $source_phids = array($project_phid);
+      }
+
       $member_phids = $edge_query->getDestinationPHIDs(
-        array($project_phid),
+        $source_phids,
         array($member_type));
 
       if (in_array($viewer_phid, $member_phids)) {
@@ -219,7 +240,7 @@ final class PhabricatorProjectQuery
 
       if ($this->needWatchers) {
         $watcher_phids = $edge_query->getDestinationPHIDs(
-          array($project_phid),
+          $source_phids,
           array($watcher_type));
         $project->attachWatcherPHIDs($watcher_phids);
         $project->setIsUserWatcher(
@@ -406,6 +427,13 @@ final class PhabricatorProjectQuery
           $conn,
           'milestoneNumber IS NULL');
       }
+    }
+
+    if ($this->hasSubprojects !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'hasSubprojects = %d',
+        (int)$this->hasSubprojects);
     }
 
     if ($this->minDepth !== null) {

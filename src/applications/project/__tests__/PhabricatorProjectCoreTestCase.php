@@ -187,6 +187,68 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $this->assertEqual(2, count($projects));
   }
 
+  public function testMemberMaterialization() {
+    $material_type = PhabricatorProjectMaterializedMemberEdgeType::EDGECONST;
+
+    $user = $this->createUser();
+    $user->save();
+
+    $parent = $this->createProject($user);
+    $child = $this->createProject($user, $parent);
+
+    $this->joinProject($child, $user);
+
+    $parent_material = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $parent->getPHID(),
+      $material_type);
+
+    $this->assertEqual(
+      array($user->getPHID()),
+      $parent_material);
+  }
+
+  public function testMilestones() {
+    $user = $this->createUser();
+    $user->save();
+
+    $parent = $this->createProject($user);
+
+    $m1 = $this->createProject($user, $parent, true);
+    $m2 = $this->createProject($user, $parent, true);
+    $m3 = $this->createProject($user, $parent, true);
+
+    $this->assertEqual(1, $m1->getMilestoneNumber());
+    $this->assertEqual(2, $m2->getMilestoneNumber());
+    $this->assertEqual(3, $m3->getMilestoneNumber());
+  }
+
+  public function testMilestoneMembership() {
+    $user = $this->createUser();
+    $user->save();
+
+    $parent = $this->createProject($user);
+    $milestone = $this->createProject($user, $parent, true);
+
+    $this->joinProject($parent, $user);
+
+    $milestone = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($milestone->getPHID()))
+      ->executeOne();
+
+    $this->assertTrue($milestone->isUserMember($user->getPHID()));
+
+    $milestone = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($milestone->getPHID()))
+      ->needMembers(true)
+      ->executeOne();
+
+    $this->assertEqual(
+      array($user->getPHID()),
+      $milestone->getMemberPHIDs());
+  }
+
   public function testParentProject() {
     $user = $this->createUser();
     $user->save();
@@ -396,9 +458,11 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
 
   private function createProject(
     PhabricatorUser $user,
-    PhabricatorProject $parent = null) {
+    PhabricatorProject $parent = null,
+    $is_milestone = false) {
 
     $project = PhabricatorProject::initializeNewProject($user);
+
 
     $name = pht('Test Project %d', mt_rand());
 
@@ -412,6 +476,12 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType(PhabricatorProjectTransaction::TYPE_PARENT)
         ->setNewValue($parent->getPHID());
+    }
+
+    if ($is_milestone) {
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorProjectTransaction::TYPE_MILESTONE)
+        ->setNewValue(true);
     }
 
     $this->applyTransactions($project, $user, $xactions);
