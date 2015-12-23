@@ -126,59 +126,57 @@ final class PhabricatorProjectQuery
   }
 
   protected function loadPage() {
-    $table = new PhabricatorProject();
-    $data = $this->loadStandardPageRows($table);
-    $projects = $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
+  }
 
-    if ($projects) {
-      $viewer_phid = $this->getViewer()->getPHID();
-      $project_phids = mpull($projects, 'getPHID');
+  protected function willFilterPage(array $projects) {
+    $viewer_phid = $this->getViewer()->getPHID();
+    $project_phids = mpull($projects, 'getPHID');
 
-      $member_type = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
-      $watcher_type = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
+    $member_type = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+    $watcher_type = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
 
-      $need_edge_types = array();
+    $types = array();
+    $types[] = $member_type;
+    if ($this->needWatchers) {
+      $types[] = $watcher_type;
+    }
+
+    $edge_query = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs($project_phids)
+      ->withEdgeTypes($types);
+
+    // If we only need to know if the viewer is a member, we can restrict
+    // the query to just their PHID.
+    if (!$this->needMembers && !$this->needWatchers) {
+      $edge_query->withDestinationPHIDs(array($viewer_phid));
+    }
+
+    $edge_query->execute();
+
+    foreach ($projects as $project) {
+      $project_phid = $project->getPHID();
+
+      $member_phids = $edge_query->getDestinationPHIDs(
+        array($project_phid),
+        array($member_type));
+
+      $project->setIsUserMember(
+        $viewer_phid,
+        in_array($viewer_phid, $member_phids));
+
       if ($this->needMembers) {
-        $need_edge_types[] = $member_type;
-      } else {
-        foreach ($data as $row) {
-          $projects[$row['id']]->setIsUserMember(
-            $viewer_phid,
-            ($row['viewerIsMember'] !== null));
-        }
+        $project->attachMemberPHIDs($member_phids);
       }
 
       if ($this->needWatchers) {
-        $need_edge_types[] = $watcher_type;
-      }
-
-      if ($need_edge_types) {
-        $edges = id(new PhabricatorEdgeQuery())
-          ->withSourcePHIDs($project_phids)
-          ->withEdgeTypes($need_edge_types)
-          ->execute();
-
-        if ($this->needMembers) {
-          foreach ($projects as $project) {
-            $phid = $project->getPHID();
-            $project->attachMemberPHIDs(
-              array_keys($edges[$phid][$member_type]));
-            $project->setIsUserMember(
-              $viewer_phid,
-              isset($edges[$phid][$member_type][$viewer_phid]));
-          }
-        }
-
-        if ($this->needWatchers) {
-          foreach ($projects as $project) {
-            $phid = $project->getPHID();
-            $project->attachWatcherPHIDs(
-              array_keys($edges[$phid][$watcher_type]));
-            $project->setIsUserWatcher(
-              $viewer_phid,
-              isset($edges[$phid][$watcher_type][$viewer_phid]));
-          }
-        }
+        $watcher_phids = $edge_query->getDestinationPHIDs(
+          array($project_phid),
+          array($watcher_type));
+        $project->attachWatcherPHIDs($watcher_phids);
+        $project->setIsUserWatcher(
+          $viewer_phid,
+          in_array($viewer_phid, $watcher_phids));
       }
     }
 
@@ -229,20 +227,6 @@ final class PhabricatorProjectQuery
     }
 
     return $projects;
-  }
-
-  protected function buildSelectClauseParts(AphrontDatabaseConnection $conn) {
-    $select = parent::buildSelectClauseParts($conn);
-
-    // NOTE: Because visibility checks for projects depend on whether or not
-    // the user is a project member, we always load their membership. If we're
-    // loading all members anyway we can piggyback on that; otherwise we
-    // do an explicit join.
-    if (!$this->needMembers) {
-      $select[] = 'vm.dst viewerIsMember';
-    }
-
-    return $select;
   }
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
@@ -335,15 +319,6 @@ final class PhabricatorProjectQuery
 
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
     $joins = parent::buildJoinClauseParts($conn);
-
-    if (!$this->needMembers !== null) {
-      $joins[] = qsprintf(
-        $conn,
-        'LEFT JOIN %T vm ON vm.src = p.phid AND vm.type = %d AND vm.dst = %s',
-        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-        PhabricatorProjectProjectHasMemberEdgeType::EDGECONST,
-        $this->getViewer()->getPHID());
-    }
 
     if ($this->memberPHIDs !== null) {
       $joins[] = qsprintf(

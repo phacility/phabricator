@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
+final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
 
   protected function getPhabricatorTestCaseConfiguration() {
     return array(
@@ -37,6 +37,49 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
 
     $this->assertTrue((bool)$this->refreshProject($proj, $user));
     $this->assertFalse((bool)$this->refreshProject($proj, $user2));
+  }
+
+  public function testIsViewerMemberOrWatcher() {
+    $user1 = $this->createUser()
+      ->save();
+
+    $user2 = $this->createUser()
+      ->save();
+
+    $user3 = $this->createUser()
+      ->save();
+
+    $proj1 = $this->createProject($user1);
+    $proj1 = $this->refreshProject($proj1, $user1);
+
+    $this->joinProject($proj1, $user1);
+    $this->joinProject($proj1, $user3);
+    $this->watchProject($proj1, $user3);
+
+    $proj1 = $this->refreshProject($proj1, $user1);
+
+    $this->assertTrue($proj1->isUserMember($user1->getPHID()));
+
+    $proj1 = $this->refreshProject($proj1, $user1, false, true);
+
+    $this->assertTrue($proj1->isUserMember($user1->getPHID()));
+    $this->assertFalse($proj1->isUserWatcher($user1->getPHID()));
+
+    $proj1 = $this->refreshProject($proj1, $user1, true, false);
+
+    $this->assertTrue($proj1->isUserMember($user1->getPHID()));
+    $this->assertFalse($proj1->isUserMember($user2->getPHID()));
+    $this->assertTrue($proj1->isUserMember($user3->getPHID()));
+
+    $proj1 = $this->refreshProject($proj1, $user1, true, true);
+
+    $this->assertTrue($proj1->isUserMember($user1->getPHID()));
+    $this->assertFalse($proj1->isUserMember($user2->getPHID()));
+    $this->assertTrue($proj1->isUserMember($user3->getPHID()));
+
+    $this->assertFalse($proj1->isUserWatcher($user1->getPHID()));
+    $this->assertFalse($proj1->isUserWatcher($user2->getPHID()));
+    $this->assertTrue($proj1->isUserWatcher($user3->getPHID()));
   }
 
   public function testEditProject() {
@@ -210,11 +253,13 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
   private function refreshProject(
     PhabricatorProject $project,
     PhabricatorUser $viewer,
-    $need_members = false) {
+    $need_members = false,
+    $need_watchers = false) {
 
     $results = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
       ->needMembers($need_members)
+      ->needWatchers($need_watchers)
       ->withIDs(array($project->getID()))
       ->execute();
 
@@ -255,19 +300,54 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
   private function joinProject(
     PhabricatorProject $project,
     PhabricatorUser $user) {
-    $this->joinOrLeaveProject($project, $user, '+');
+    return $this->joinOrLeaveProject($project, $user, '+');
   }
 
   private function leaveProject(
     PhabricatorProject $project,
     PhabricatorUser $user) {
-    $this->joinOrLeaveProject($project, $user, '-');
+    return $this->joinOrLeaveProject($project, $user, '-');
+  }
+
+  private function watchProject(
+    PhabricatorProject $project,
+    PhabricatorUser $user) {
+    return $this->watchOrUnwatchProject($project, $user, '+');
+  }
+
+  private function unwatchProject(
+    PhabricatorProject $project,
+    PhabricatorUser $user) {
+    return $this->watchOrUnwatchProject($project, $user, '-');
   }
 
   private function joinOrLeaveProject(
     PhabricatorProject $project,
     PhabricatorUser $user,
     $operation) {
+    return $this->applyProjectEdgeTransaction(
+      $project,
+      $user,
+      $operation,
+      PhabricatorProjectProjectHasMemberEdgeType::EDGECONST);
+  }
+
+  private function watchOrUnwatchProject(
+    PhabricatorProject $project,
+    PhabricatorUser $user,
+    $operation) {
+    return $this->applyProjectEdgeTransaction(
+      $project,
+      $user,
+      $operation,
+      PhabricatorObjectHasWatcherEdgeType::EDGECONST);
+  }
+
+  private function applyProjectEdgeTransaction(
+    PhabricatorProject $project,
+    PhabricatorUser $user,
+    $operation,
+    $edge_type) {
 
     $spec = array(
       $operation => array($user->getPHID() => $user->getPHID()),
@@ -276,9 +356,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $xactions = array();
     $xactions[] = id(new PhabricatorProjectTransaction())
       ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-      ->setMetadataValue(
-        'edge:type',
-        PhabricatorProjectProjectHasMemberEdgeType::EDGECONST)
+      ->setMetadataValue('edge:type', $edge_type)
       ->setNewValue($spec);
 
     $editor = id(new PhabricatorProjectTransactionEditor())
@@ -286,6 +364,9 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
       ->setContentSource(PhabricatorContentSource::newConsoleSource())
       ->setContinueOnNoEffect(true)
       ->applyTransactions($project, $xactions);
+
+    return $project;
   }
+
 
 }
