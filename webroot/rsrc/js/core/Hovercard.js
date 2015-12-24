@@ -109,7 +109,7 @@ JX.install('Hovercard', {
 
       // If the card is near the top of the window, show it beneath the
       // link we're hovering over instead.
-      if ((y + margin) < s.y) {
+      if ((y - margin) < s.y) {
         y = p.y + d.y + margin;
         self._alignment = 'south';
       }

@@ -265,7 +265,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->execute();
 
       foreach ($commit_phids as $phid) {
-        $revisions_commits[$phid] = $handles->renderHandle($phid);
+        $revisions_commits[$phid] = $handles->renderHandle($phid)
+          ->setShowHovercard(true);
         $revision_phid = key($drev_edges[$phid][$commit_drev]);
         $revision_handle = $handles->getHandleIfExists($revision_phid);
         if ($revision_handle) {
@@ -273,7 +274,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
           unset($edges[$task_drev][$revision_phid]);
           $revisions_commits[$phid] = hsprintf(
             '%s / %s',
-            $revision_handle->renderLink($revision_handle->getName()),
+            $revision_handle->renderHovercardLink($revision_handle->getName()),
             $revisions_commits[$phid]);
         }
       }
