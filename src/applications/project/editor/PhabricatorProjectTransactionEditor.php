@@ -146,9 +146,9 @@ final class PhabricatorProjectTransactionEditor
         // First, add the old name as a secondary slug; this is helpful
         // for renames and generally a good thing to do.
         if ($old !== null) {
-          $this->addSlug($object, $old);
+          $this->addSlug($object, $old, false);
         }
-        $this->addSlug($object, $new);
+        $this->addSlug($object, $new, false);
 
         return;
       case PhabricatorProjectTransaction::TYPE_SLUGS:
@@ -157,23 +157,11 @@ final class PhabricatorProjectTransactionEditor
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
 
-        if ($add) {
-          $add_slug_template = id(new PhabricatorProjectSlug())
-            ->setProjectPHID($object->getPHID());
-          foreach ($add as $add_slug_str) {
-            $add_slug = id(clone $add_slug_template)
-              ->setSlug($add_slug_str)
-              ->save();
-          }
-        }
-        if ($rem) {
-          $rem_slugs = id(new PhabricatorProjectSlug())
-            ->loadAllWhere('slug IN (%Ls)', $rem);
-          foreach ($rem_slugs as $rem_slug) {
-            $rem_slug->delete();
-          }
+        foreach ($add as $slug) {
+          $this->addSlug($object, $slug, true);
         }
 
+        $this->removeSlugs($object, $rem);
         return;
       case PhabricatorProjectTransaction::TYPE_STATUS:
       case PhabricatorProjectTransaction::TYPE_IMAGE:
@@ -328,20 +316,11 @@ final class PhabricatorProjectTransactionEditor
 
         $slugs_used_already = mgroup($slugs_used_already, 'getProjectPHID');
         foreach ($slugs_used_already as $project_phid => $used_slugs) {
-          $used_slug_strs = mpull($used_slugs, 'getSlug');
           if ($project_phid == $object->getPHID()) {
-            if (in_array($object->getPrimarySlug(), $used_slug_strs)) {
-              $error = new PhabricatorApplicationTransactionValidationError(
-                $type,
-                pht('Invalid'),
-                pht(
-                  'Project hashtag "%s" is already the primary hashtag.',
-                  $object->getPrimarySlug()),
-                $slug_xaction);
-              $errors[] = $error;
-            }
             continue;
           }
+
+          $used_slug_strs = mpull($used_slugs, 'getSlug');
 
           $error = new PhabricatorApplicationTransactionValidationError(
             $type,
@@ -594,27 +573,6 @@ final class PhabricatorProjectTransactionEditor
     return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
   }
 
-  private function addSlug(
-    PhabricatorLiskDAO $object,
-    $name) {
-
-    $slug = PhabricatorSlug::normalizeProjectSlug($name);
-
-    $slug_object = id(new PhabricatorProjectSlug())->loadOneWhere(
-      'slug = %s',
-      $slug);
-
-    if ($slug_object) {
-      return;
-    }
-
-    $new_slug = id(new PhabricatorProjectSlug())
-      ->setSlug($slug)
-      ->setProjectPHID($object->getPHID())
-      ->save();
-  }
-
-
   protected function applyFinalEffects(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -641,6 +599,54 @@ final class PhabricatorProjectTransactionEditor
     }
 
     return parent::applyFinalEffects($object, $xactions);
+  }
+
+  private function addSlug(PhabricatorProject $project, $slug, $force) {
+    $slug = PhabricatorSlug::normalizeProjectSlug($slug);
+    $table = new PhabricatorProjectSlug();
+    $project_phid = $project->getPHID();
+
+    if ($force) {
+      // If we have the `$force` flag set, we only want to ignore an existing
+      // slug if it's for the same project. We'll error on collisions with
+      // other projects.
+      $current = $table->loadOneWhere(
+        'slug = %s AND projectPHID = %s',
+        $slug,
+        $project_phid);
+    } else {
+      // Without the `$force` flag, we'll just return without doing anything
+      // if any other project already has the slug.
+      $current = $table->loadOneWhere(
+        'slug = %s',
+        $slug);
+    }
+
+    if ($current) {
+      return;
+    }
+
+    return id(new PhabricatorProjectSlug())
+      ->setSlug($slug)
+      ->setProjectPHID($project_phid)
+      ->save();
+  }
+
+  private function removeSlugs(PhabricatorProject $project, array $slugs) {
+    $slugs = $this->normalizeSlugs($slugs);
+
+    if (!$slugs) {
+      return;
+    }
+
+    $objects = id(new PhabricatorProjectSlug())->loadAllWhere(
+      'projectPHID = %s AND slug IN (%Ls)',
+      $project->getPHID(),
+      $slugs);
+
+    foreach ($objects as $object) {
+      $object->delete();
+    }
   }
 
   private function normalizeSlugs(array $slugs) {

@@ -249,6 +249,70 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
       $milestone->getMemberPHIDs());
   }
 
+  public function testSameSlugAsName() {
+    // It should be OK to type the primary hashtag into "additional hashtags",
+    // even if the primary hashtag doesn't exist yet because you're creating
+    // or renaming the project.
+
+    $user = $this->createUser();
+    $user->save();
+
+    $project = $this->createProject($user);
+
+    // In this first case, set the name and slugs at the same time.
+    $name = 'slugproject';
+
+    $xactions = array();
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+      ->setNewValue($name);
+    $this->applyTransactions($project, $user, $xactions);
+
+    $xactions = array();
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorProjectTransaction::TYPE_SLUGS)
+      ->setNewValue(array($name));
+    $this->applyTransactions($project, $user, $xactions);
+
+    $project = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($project->getPHID()))
+      ->needSlugs(true)
+      ->executeOne();
+
+    $slugs = $project->getSlugs();
+    $slugs = mpull($slugs, 'getSlug');
+
+    $this->assertTrue(in_array($name, $slugs));
+
+    // In this second case, set the name first and then the slugs separately.
+    $name2 = 'slugproject2';
+
+    $xactions = array();
+
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+      ->setNewValue($name2);
+
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorProjectTransaction::TYPE_SLUGS)
+      ->setNewValue(array($name2));
+
+    $this->applyTransactions($project, $user, $xactions);
+
+    $project = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($project->getPHID()))
+      ->needSlugs(true)
+      ->executeOne();
+
+    $slugs = $project->getSlugs();
+    $slugs = mpull($slugs, 'getSlug');
+
+    $this->assertTrue(in_array($name2, $slugs));
+
+  }
+
   public function testDuplicateSlugs() {
     // Creating a project with multiple duplicate slugs should succeed.
 
