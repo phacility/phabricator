@@ -268,6 +268,17 @@ final class PhabricatorProjectTransactionEditor
         }
 
         $name = last($xactions)->getNewValue();
+
+        if (!PhabricatorSlug::isValidProjectSlug($name)) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'Project names must contain at least one letter or number.'),
+            last($xactions));
+          break;
+        }
+
         $name_used_already = id(new PhabricatorProjectQuery())
           ->setViewer($this->getActor())
           ->withNames(array($name))
@@ -304,6 +315,27 @@ final class PhabricatorProjectTransactionEditor
         $slug_xaction = last($xactions);
 
         $new = $slug_xaction->getNewValue();
+
+        $invalid = array();
+        foreach ($new as $slug) {
+          if (!PhabricatorSlug::isValidProjectSlug($slug)) {
+            $invalid[] = $slug;
+          }
+        }
+
+        if ($invalid) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'Hashtags must contain at least one letter or number. %s '.
+              'project hashtag(s) are invalid: %s.',
+              phutil_count($invalid),
+              implode(', ', $invalid)),
+            $slug_xaction);
+          break;
+        }
+
         $new = $this->normalizeSlugs($new);
 
         if ($new) {

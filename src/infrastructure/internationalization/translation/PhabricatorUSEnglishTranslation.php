@@ -774,6 +774,14 @@ final class PhabricatorUSEnglishTranslation
       '%s changed project hashtag(s), added %d: %s; removed %d: %s.' =>
         '%s changed project hashtags, added %3$s; removed %5$s.',
 
+      'Hashtags must contain at least one letter or number. %s '.
+      'project hashtag(s) are invalid: %s.' => array(
+        'Hashtags must contain at least one letter or number. The '.
+        'hashtag "%2$s" is not valid.',
+        'Hashtags must contain at least one letter or number. These '.
+        'hashtags are invalid: %2$s.',
+      ),
+
       '%s added %d project hashtag(s): %s.' => array(
         array(
           '%s added a hashtag: %3$s.',

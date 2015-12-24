@@ -310,7 +310,6 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $slugs = mpull($slugs, 'getSlug');
 
     $this->assertTrue(in_array($name2, $slugs));
-
   }
 
   public function testDuplicateSlugs() {
