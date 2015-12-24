@@ -5,7 +5,11 @@ final class PhabricatorProjectTestDataGenerator
 
   private $xactions = array();
 
-  public function generate() {
+  public function getGeneratorName() {
+    return pht('Projects');
+  }
+
+  public function generateObject() {
     $title = $this->generateTitle();
     $author = $this->loadPhabrictorUser();
     $author_phid = $author->getPHID();

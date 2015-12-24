@@ -3,7 +3,11 @@
 final class PhabricatorDifferentialRevisionTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
-  public function generate() {
+  public function getGeneratorName() {
+    return pht('Differential Revisions');
+  }
+
+  public function generateObject() {
     $author = $this->loadPhabrictorUser();
 
     $revision = DifferentialRevision::initializeNewRevision($author);

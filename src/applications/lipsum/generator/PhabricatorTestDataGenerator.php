@@ -2,9 +2,8 @@
 
 abstract class PhabricatorTestDataGenerator extends Phobject {
 
-  public function generate() {
-    return;
-  }
+  abstract public function getGeneratorName();
+  abstract public function generateObject();
 
   public function loadOneRandom($classname) {
     try {

@@ -3,13 +3,17 @@
 final class PhabricatorPasteTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
+  public function getGeneratorName() {
+    return pht('Pastes');
+  }
+
   // Better Support for this in the future
   public $supportedLanguages = array(
     'Java' => 'java',
     'PHP' => 'php',
   );
 
-  public function generate() {
+  public function generateObject() {
     $author = $this->loadPhabrictorUser();
     $authorphid = $author->getPHID();
     $language = $this->generateLanguage();

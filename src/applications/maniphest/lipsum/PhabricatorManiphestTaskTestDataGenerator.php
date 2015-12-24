@@ -3,7 +3,11 @@
 final class PhabricatorManiphestTaskTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
-  public function generate() {
+  public function getGeneratorName() {
+    return pht('Maniphest Tasks');
+  }
+
+  public function generateObject() {
     $author_phid = $this->loadPhabrictorUserPHID();
     $author = id(new PhabricatorUser())
       ->loadOneWhere('phid = %s', $author_phid);
