@@ -120,10 +120,30 @@ final class PhabricatorLipsumGenerateWorkflow
   protected function generate(array $generators) {
     $viewer = $this->getViewer();
 
+    foreach ($generators as $generator) {
+      $generator->setViewer($this->getViewer());
+    }
+
     while (true) {
       $generator = $generators[array_rand($generators)];
 
-      $object = $generator->generateObject();
+      try {
+        $object = $generator->generateObject();
+      } catch (Exception $ex) {
+        echo tsprintf(
+          "**<bg:yellow> %s </bg>** %s\n",
+          pht('OOPS'),
+          pht(
+            'Generator ("%s") was unable to generate an object.',
+            $generator->getGeneratorName()));
+
+        echo tsprintf(
+          "%B\n",
+          $ex->getMessage());
+
+        continue;
+      }
+
       $object_phid = $object->getPHID();
 
       $handles = $viewer->loadHandles(array($object_phid));

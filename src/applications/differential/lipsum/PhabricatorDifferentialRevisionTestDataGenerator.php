@@ -27,13 +27,10 @@ final class PhabricatorDifferentialRevisionTestDataGenerator
       ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
       ->setNewValue($diff->getPHID());
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_LIPSUM,
-      array());
 
     id(new DifferentialTransactionEditor())
       ->setActor($author)
-      ->setContentSource($content_source)
+      ->setContentSource($this->getLipsumContentSource())
       ->applyTransactions($revision, $xactions);
 
     return $revision;
