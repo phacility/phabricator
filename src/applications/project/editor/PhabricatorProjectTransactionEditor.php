@@ -68,7 +68,6 @@ final class PhabricatorProjectTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorProjectTransaction::TYPE_NAME:
-      case PhabricatorProjectTransaction::TYPE_SLUGS:
       case PhabricatorProjectTransaction::TYPE_STATUS:
       case PhabricatorProjectTransaction::TYPE_IMAGE:
       case PhabricatorProjectTransaction::TYPE_ICON:
@@ -76,6 +75,8 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_LOCKED:
       case PhabricatorProjectTransaction::TYPE_PARENT:
         return $xaction->getNewValue();
+      case PhabricatorProjectTransaction::TYPE_SLUGS:
+        return $this->normalizeSlugs($xaction->getNewValue());
       case PhabricatorProjectTransaction::TYPE_MILESTONE:
         $current = queryfx_one(
           $object->establishConnection('w'),
@@ -313,7 +314,9 @@ final class PhabricatorProjectTransactionEditor
         }
 
         $slug_xaction = last($xactions);
+
         $new = $slug_xaction->getNewValue();
+        $new = $this->normalizeSlugs($new);
 
         if ($new) {
           $slugs_used_already = id(new PhabricatorProjectSlug())
@@ -332,7 +335,7 @@ final class PhabricatorProjectTransactionEditor
                 $type,
                 pht('Invalid'),
                 pht(
-                  'Project hashtag %s is already the primary hashtag.',
+                  'Project hashtag "%s" is already the primary hashtag.',
                   $object->getPrimarySlug()),
                 $slug_xaction);
               $errors[] = $error;
@@ -344,8 +347,8 @@ final class PhabricatorProjectTransactionEditor
             $type,
             pht('Invalid'),
             pht(
-              '%d project hashtag(s) are already used: %s.',
-              count($used_slug_strs),
+              '%s project hashtag(s) are already used by other projects: %s.',
+              phutil_count($used_slug_strs),
               implode(', ', $used_slug_strs)),
             $slug_xaction);
           $errors[] = $error;
@@ -638,6 +641,17 @@ final class PhabricatorProjectTransactionEditor
     }
 
     return parent::applyFinalEffects($object, $xactions);
+  }
+
+  private function normalizeSlugs(array $slugs) {
+    foreach ($slugs as $key => $slug) {
+      $slugs[$key] = PhabricatorSlug::normalizeProjectSlug($slug);
+    }
+
+    $slugs = array_unique($slugs);
+    $slugs = array_values($slugs);
+
+    return $slugs;
   }
 
 }

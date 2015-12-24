@@ -766,9 +766,9 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
-      '%d project hashtag(s) are already used: %s.' => array(
-          'Project hashtag %2$s is already used.',
-          '%d project hashtags are already used: %2$s.',
+      '%s project hashtag(s) are already used by other projects: %s.' => array(
+        'Project hashtag "%2$s" is already used by another project.',
+        'Some project hashtags are already used by other projects: %2$s.',
       ),
 
       '%s changed project hashtag(s), added %d: %s; removed %d: %s.' =>

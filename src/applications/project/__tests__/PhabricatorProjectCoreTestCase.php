@@ -249,6 +249,90 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
       $milestone->getMemberPHIDs());
   }
 
+  public function testDuplicateSlugs() {
+    // Creating a project with multiple duplicate slugs should succeed.
+
+    $user = $this->createUser();
+    $user->save();
+
+    $project = $this->createProject($user);
+
+    $input = 'duplicate';
+
+    $xactions = array();
+
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorProjectTransaction::TYPE_SLUGS)
+      ->setNewValue(array($input, $input));
+
+    $this->applyTransactions($project, $user, $xactions);
+
+    $project = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($project->getPHID()))
+      ->needSlugs(true)
+      ->executeOne();
+
+    $slugs = $project->getSlugs();
+    $slugs = mpull($slugs, 'getSlug');
+
+    $this->assertTrue(in_array($input, $slugs));
+  }
+
+  public function testNormalizeSlugs() {
+    // When a user creates a project with slug "XxX360n0sc0perXxX", normalize
+    // it before writing it.
+
+    $user = $this->createUser();
+    $user->save();
+
+    $project = $this->createProject($user);
+
+    $input = 'NoRmAlIzE';
+    $expect = 'normalize';
+
+    $xactions = array();
+
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorProjectTransaction::TYPE_SLUGS)
+      ->setNewValue(array($input));
+
+    $this->applyTransactions($project, $user, $xactions);
+
+    $project = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($project->getPHID()))
+      ->needSlugs(true)
+      ->executeOne();
+
+    $slugs = $project->getSlugs();
+    $slugs = mpull($slugs, 'getSlug');
+
+    $this->assertTrue(in_array($expect, $slugs));
+
+
+    // If another user tries to add the same slug in denormalized form, it
+    // should be caught and fail, even though the database version of the slug
+    // is normalized.
+
+    $project2 = $this->createProject($user);
+
+    $xactions = array();
+
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorProjectTransaction::TYPE_SLUGS)
+      ->setNewValue(array($input));
+
+    $caught = null;
+    try {
+      $this->applyTransactions($project2, $user, $xactions);
+    } catch (PhabricatorApplicationTransactionValidationException $ex) {
+      $caught = $ex;
+    }
+
+    $this->assertTrue((bool)$caught);
+  }
+
   public function testParentProject() {
     $user = $this->createUser();
     $user->save();
