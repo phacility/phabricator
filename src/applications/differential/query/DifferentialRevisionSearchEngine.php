@@ -11,6 +11,13 @@ final class DifferentialRevisionSearchEngine
     return 'PhabricatorDifferentialApplication';
   }
 
+  public function newQuery() {
+    return id(new DifferentialRevisionQuery())
+      ->needFlags(true)
+      ->needDrafts(true)
+      ->needRelationships(true);
+  }
+
   public function getPageSize(PhabricatorSavedQuery $saved) {
     if ($saved->getQueryKey() == 'active') {
       return 0xFFFF;
