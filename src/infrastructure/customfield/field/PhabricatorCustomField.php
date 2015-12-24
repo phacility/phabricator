@@ -506,7 +506,7 @@ abstract class PhabricatorCustomField extends Phobject {
 
     $out = array();
     foreach ($handles as $handle) {
-      $out[] = $handle->renderLink();
+      $out[] = $handle->renderHovercardLink();
     }
 
     return phutil_implode_html(phutil_tag('br'), $out);

@@ -39,10 +39,11 @@ JX.install('Hovercard', {
 
     show : function(root, phid) {
       var self = JX.Hovercard;
-      // Already displaying
-      if (self.getCard() && phid == self._visiblePHID) {
+
+      if (root === this._activeRoot) {
         return;
       }
+
       self.hide();
 
       self._visiblePHID = phid;

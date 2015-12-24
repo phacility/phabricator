@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => 'a419cf4b',
-    'core.pkg.js' => '2a50ac55',
+    'core.pkg.js' => '400453e4',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '2de124c9',
     'differential.pkg.js' => '64e69521',
@@ -452,7 +452,7 @@ return array(
     'rsrc/js/core/DragAndDropFileUpload.js' => 'ad10aeac',
     'rsrc/js/core/DraggableList.js' => 'a16ec1c6',
     'rsrc/js/core/FileUpload.js' => '477359c8',
-    'rsrc/js/core/Hovercard.js' => '88e3466d',
+    'rsrc/js/core/Hovercard.js' => 'c6f720ff',
     'rsrc/js/core/KeyboardShortcut.js' => '1ae869f2',
     'rsrc/js/core/KeyboardShortcutManager.js' => 'c1700f6f',
     'rsrc/js/core/MultirowRowManager.js' => 'b5d57730',
@@ -747,7 +747,7 @@ return array(
     'phabricator-file-upload' => '477359c8',
     'phabricator-filetree-view-css' => 'fccf9f82',
     'phabricator-flag-css' => '5337623f',
-    'phabricator-hovercard' => '88e3466d',
+    'phabricator-hovercard' => 'c6f720ff',
     'phabricator-hovercard-view-css' => '1239cd52',
     'phabricator-keyboard-shortcut' => '1ae869f2',
     'phabricator-keyboard-shortcut-manager' => 'c1700f6f',
@@ -1461,13 +1461,6 @@ return array(
       'javelin-stratcom',
       'javelin-dom',
     ),
-    '88e3466d' => array(
-      'javelin-install',
-      'javelin-dom',
-      'javelin-vector',
-      'javelin-request',
-      'javelin-uri',
-    ),
     '88f0c5b3' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1779,6 +1772,13 @@ return array(
       'javelin-stratcom',
       'javelin-dom',
       'javelin-vector',
+    ),
+    'c6f720ff' => array(
+      'javelin-install',
+      'javelin-dom',
+      'javelin-vector',
+      'javelin-request',
+      'javelin-uri',
     ),
     'c72aa091' => array(
       'javelin-behavior',
