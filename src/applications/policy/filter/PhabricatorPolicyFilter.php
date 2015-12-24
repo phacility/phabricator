@@ -608,6 +608,11 @@ final class PhabricatorPolicyFilter extends Phobject {
 
     $rules = PhabricatorPolicyQuery::getObjectPolicyRules(null);
 
+    // Make sure we have clean, empty policy rule objects.
+    foreach ($rules as $key => $rule) {
+      $rules[$key] = clone $rule;
+    }
+
     $results = array();
     foreach ($map as $key => $object_list) {
       $rule = idx($rules, $key);

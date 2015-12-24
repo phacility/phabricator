@@ -287,7 +287,6 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
 
     // In this second case, set the name first and then the slugs separately.
     $name2 = 'slugproject2';
-
     $xactions = array();
 
     $xactions[] = id(new PhabricatorProjectTransaction())
@@ -394,6 +393,51 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     }
 
     $this->assertTrue((bool)$caught);
+  }
+
+  public function testProjectMembersVisibility() {
+    // This is primarily testing that you can create a project and set the
+    // visibility or edit policy to "Project Members" immediately.
+
+    $user1 = $this->createUser();
+    $user1->save();
+
+    $user2 = $this->createUser();
+    $user2->save();
+
+    $project = PhabricatorProject::initializeNewProject($user1);
+    $name = pht('Test Project %d', mt_rand());
+
+    $xactions = array();
+
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+      ->setNewValue($name);
+
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+      ->setNewValue(
+        id(new PhabricatorProjectMembersPolicyRule())
+          ->getObjectPolicyFullKey());
+
+    $edge_type = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+      ->setMetadataValue('edge:type', $edge_type)
+      ->setNewValue(
+        array(
+          '=' => array($user1->getPHID() => $user1->getPHID()),
+        ));
+
+    $this->applyTransactions($project, $user1, $xactions);
+
+    $this->assertTrue((bool)$this->refreshProject($project, $user1));
+    $this->assertFalse((bool)$this->refreshProject($project, $user2));
+
+    $this->leaveProject($project, $user1);
+
+    $this->assertFalse((bool)$this->refreshProject($project, $user1));
   }
 
   public function testParentProject() {

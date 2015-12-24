@@ -95,10 +95,6 @@ final class PhabricatorProjectQuery
     return $this;
   }
 
-  public function getProperty() {
-    return $this->property;
-  }
-
   public function withDepthBetween($min, $max) {
     $this->minDepth = $min;
     $this->maxDepth = $max;

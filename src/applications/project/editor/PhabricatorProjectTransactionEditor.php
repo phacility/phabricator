@@ -692,4 +692,53 @@ final class PhabricatorProjectTransactionEditor
     return $slugs;
   }
 
+  protected function adjustObjectForPolicyChecks(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $copy = parent::adjustObjectForPolicyChecks($object, $xactions);
+
+    $type_edge = PhabricatorTransactions::TYPE_EDGE;
+    $edgetype_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+
+    $member_xaction = null;
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() !== $type_edge) {
+        continue;
+      }
+
+      $edgetype = $xaction->getMetadataValue('edge:type');
+      if ($edgetype !== $edgetype_member) {
+        continue;
+      }
+
+      $member_xaction = $xaction;
+    }
+
+    if ($member_xaction) {
+      $object_phid = $object->getPHID();
+
+      if ($object_phid) {
+        $members = PhabricatorEdgeQuery::loadDestinationPHIDs(
+          $object_phid,
+          PhabricatorProjectProjectHasMemberEdgeType::EDGECONST);
+      } else {
+        $members = array();
+      }
+
+      $clone_xaction = clone $member_xaction;
+      $hint = $this->getPHIDTransactionNewValue($clone_xaction, $members);
+      $rule = new PhabricatorProjectMembersPolicyRule();
+
+      $hint = array_fuse($hint);
+
+      PhabricatorPolicyRule::passTransactionHintToRule(
+        $copy,
+        $rule,
+        $hint);
+    }
+
+    return $copy;
+  }
+
 }
