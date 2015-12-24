@@ -208,19 +208,26 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->setObject($task)
       ->setActionList($actions);
 
-    $view->addProperty(
-      pht('Assigned To'),
-      $task->getOwnerPHID()
-        ? $handles->renderHandle($task->getOwnerPHID())
-        : phutil_tag('em', array(), pht('None')));
+    $owner_phid = $task->getOwnerPHID();
+    if ($owner_phid) {
+      $assigned_to = $handles
+        ->renderHandle($owner_phid)
+        ->setShowHovercard(true);
+    } else {
+      $assigned_to = phutil_tag('em', array(), pht('None'));
+    }
+
+    $view->addProperty(pht('Assigned To'), $assigned_to);
 
     $view->addProperty(
       pht('Priority'),
       ManiphestTaskPriority::getTaskPriorityName($task->getPriority()));
 
-    $view->addProperty(
-      pht('Author'),
-      $handles->renderHandle($task->getAuthorPHID()));
+    $author = $handles
+      ->renderHandle($task->getAuthorPHID())
+      ->setShowHovercard(true);
+
+    $view->addProperty(pht('Author'), $author);
 
     $source = $task->getOriginalEmailSource();
     if ($source) {

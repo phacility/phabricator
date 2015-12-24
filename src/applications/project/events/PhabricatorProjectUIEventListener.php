@@ -101,7 +101,8 @@ final class PhabricatorProjectUIEventListener
     if ($handles) {
       $list = id(new PHUIHandleTagListView())
         ->setHandles($handles)
-        ->setAnnotations($annotations);
+        ->setAnnotations($annotations)
+        ->setShowHovercards(true);
     } else {
       $list = phutil_tag('em', array(), pht('None'));
     }

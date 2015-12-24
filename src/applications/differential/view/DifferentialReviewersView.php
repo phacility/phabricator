@@ -120,7 +120,7 @@ final class DifferentialReviewersView extends AphrontView {
 
       }
 
-      $item->setTarget($handle->renderLink());
+      $item->setTarget($handle->renderHovercardLink());
       $view->addItem($item);
     }
 
