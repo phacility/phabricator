@@ -15,7 +15,7 @@ JX.install('Hovercard', {
     _activeRoot : null,
     _visiblePHID : null,
 
-    fetchUrl : '/search/hovercard/retrieve/',
+    fetchUrl : '/search/hovercard/',
 
     /**
      * Hovercard storage. {"PHID-XXXX-YYYY":"<...>", ...}

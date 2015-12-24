@@ -36,12 +36,6 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
     );
   }
 
-  public function getEventListeners() {
-    return array(
-      new ManiphestHovercardEventListener(),
-    );
-  }
-
   public function getRemarkupRules() {
     return array(
       new ManiphestRemarkupRule(),

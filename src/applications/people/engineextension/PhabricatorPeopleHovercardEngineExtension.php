@@ -1,45 +1,58 @@
 <?php
 
-final class PhabricatorPeopleHovercardEventListener
-  extends PhabricatorEventListener {
+final class PhabricatorPeopleHovercardEngineExtension
+  extends PhabricatorHovercardEngineExtension {
 
-  public function register() {
-    $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERHOVERCARD);
+  const EXTENSIONKEY = 'people';
+
+  public function isExtensionEnabled() {
+    return true;
   }
 
-  public function handleEvent(PhutilEvent $event) {
-    switch ($event->getType()) {
-      case PhabricatorEventType::TYPE_UI_DIDRENDERHOVERCARD:
-        $this->handleHovercardEvent($event);
-      break;
-    }
+  public function getExtensionName() {
+    return pht('User Accounts');
   }
 
-  private function handleHovercardEvent($event) {
-    $viewer = $event->getUser();
-    $hovercard = $event->getValue('hovercard');
-    $object_handle = $event->getValue('handle');
-    $phid = $object_handle->getPHID();
-    $user = $event->getValue('object');
+  public function canRenderObjectHovercard($object) {
+    return ($object instanceof PhabricatorUser);
+  }
 
-    if (!($user instanceof PhabricatorUser)) {
-      return;
-    }
+  public function willRenderHovercards(array $objects) {
+    $viewer = $this->getViewer();
+    $phids = mpull($objects, 'getPHID');
 
-    // Reload to get availability.
-    $user = id(new PhabricatorPeopleQuery())
+    $users = id(new PhabricatorPeopleQuery())
       ->setViewer($viewer)
-      ->withIDs(array($user->getID()))
+      ->withPHIDs($phids)
       ->needAvailability(true)
       ->needProfile(true)
       ->needBadges(true)
-      ->executeOne();
+      ->execute();
+    $users = mpull($users, null, 'getPHID');
+
+    return array(
+      'users' => $users,
+    );
+  }
+
+  public function renderHovercard(
+    PhabricatorHovercardView $hovercard,
+    PhabricatorObjectHandle $handle,
+    $object,
+    $data) {
+    $viewer = $this->getViewer();
+
+    $user = idx($data['users'], $object->getPHID());
+    if (!$user) {
+      return;
+    }
 
     $hovercard->setTitle($user->getUsername());
+
     $profile = $user->getUserProfile();
     $detail = $user->getRealName();
     if ($profile->getTitle()) {
-      $detail .= ' - '.$profile->getTitle().'.';
+      $detail .= ' - '.$profile->getTitle();
     }
     $hovercard->setDetail($detail);
 
@@ -70,8 +83,6 @@ final class PhabricatorPeopleHovercardEventListener
     foreach ($badges as $badge) {
       $hovercard->addBadge($badge);
     }
-
-    $event->setValue('hovercard', $hovercard);
   }
 
   private function buildBadges(
@@ -100,6 +111,5 @@ final class PhabricatorPeopleHovercardEventListener
     }
     return $items;
   }
-
 
 }
