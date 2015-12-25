@@ -215,6 +215,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
     require_celerity_resource('font-aleo');
 
     Javelin::initBehavior('workflow', array());
+    Javelin::initBehavior('phabricator-trail');
 
     $request = $this->getRequest();
     $user = null;
