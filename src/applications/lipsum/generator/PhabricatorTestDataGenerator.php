@@ -74,6 +74,22 @@ abstract class PhabricatorTestDataGenerator extends Phobject {
     return $sum;
   }
 
+  protected function newEmptyTransaction() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  protected function newTransaction($type, $value, $metadata = array()) {
+    $xaction = $this->newEmptyTransaction()
+      ->setTransactionType($type)
+      ->setNewValue($value);
+
+    foreach ($metadata as $key => $value) {
+      $xaction->setMetadataValue($key, $value);
+    }
+
+    return $xaction;
+  }
+
 
 
 
@@ -88,7 +104,6 @@ abstract class PhabricatorTestDataGenerator extends Phobject {
           $classname));
     }
   }
-
 
   public function loadPhabrictorUserPHID() {
     return $this->loadOneRandom('PhabricatorUser')->getPHID();

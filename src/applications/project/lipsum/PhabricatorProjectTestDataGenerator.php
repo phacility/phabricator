@@ -51,16 +51,8 @@ final class PhabricatorProjectTestDataGenerator
     return $project;
   }
 
-  private function newTransaction($type, $value, $metadata = array()) {
-    $xaction = id(new PhabricatorProjectTransaction())
-      ->setTransactionType($type)
-      ->setNewValue($value);
-
-    foreach ($metadata as $key => $value) {
-      $xaction->setMetadataValue($key, $value);
-    }
-
-    return $xaction;
+  protected function newEmptyTransaction() {
+    return new PhabricatorProjectTransaction();
   }
 
   public function newProjectTitle() {
