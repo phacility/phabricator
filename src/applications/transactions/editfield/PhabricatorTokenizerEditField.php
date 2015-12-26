@@ -3,18 +3,7 @@
 abstract class PhabricatorTokenizerEditField
   extends PhabricatorPHIDListEditField {
 
-  private $commentActionLabel;
-
   abstract protected function newDatasource();
-
-  public function setCommentActionLabel($label) {
-    $this->commentActionLabel = $label;
-    return $this;
-  }
-
-  public function getCommentActionLabel() {
-    return $this->commentActionLabel;
-  }
 
   protected function newControl() {
     $control = id(new AphrontFormTokenizerControl())
@@ -22,52 +11,49 @@ abstract class PhabricatorTokenizerEditField
 
     $initial_value = $this->getInitialValue();
     if ($initial_value !== null) {
-      $control->setOriginalValue($initial_value);
+      $control->setInitialValue($initial_value);
+    }
+
+    if ($this->getIsSingleValue()) {
+      $control->setLimit(1);
     }
 
     return $control;
   }
 
   protected function getInitialValueFromSubmit(AphrontRequest $request, $key) {
-    return $request->getArr($key.'.original');
+    return $request->getArr($key.'.initial');
   }
 
   protected function newEditType() {
     $type = parent::newEditType();
 
-    if ($this->getUseEdgeTransactions()) {
-      $datasource = $this->newDatasource()
-        ->setViewer($this->getViewer());
-      $type->setDatasource($datasource);
-    }
+    $datasource = $this->newDatasource()
+      ->setViewer($this->getViewer());
+    $type->setDatasource($datasource);
 
     return $type;
   }
 
-  public function getCommentEditTypes() {
-    if (!$this->getUseEdgeTransactions()) {
-      return parent::getCommentEditTypes();
+  protected function newCommentAction() {
+    $viewer = $this->getViewer();
+
+    $datasource = $this->newDatasource()
+      ->setViewer($viewer);
+
+    $action = id(new PhabricatorEditEngineTokenizerCommentAction())
+      ->setDatasource($datasource);
+
+    if ($this->getIsSingleValue()) {
+      $action->setLimit(1);
     }
 
-    $transaction_type = $this->getTransactionType();
-    if ($transaction_type === null) {
-      return array();
+    $initial_value = $this->getInitialValue();
+    if ($initial_value !== null) {
+      $action->setInitialValue($initial_value);
     }
 
-    $label = $this->getCommentActionLabel();
-    if ($label === null) {
-      return array();
-    }
-
-    $type_key = $this->getEditTypeKey();
-    $base = $this->getEditType();
-
-    $add = id(clone $base)
-      ->setEditType($type_key.'.add')
-      ->setEdgeOperation('+')
-      ->setLabel($label);
-
-    return array($add);
+    return $action;
   }
 
 }

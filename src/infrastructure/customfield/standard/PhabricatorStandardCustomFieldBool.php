@@ -133,4 +133,12 @@ final class PhabricatorStandardCustomFieldBool
     return new AphrontBoolHTTPParameterType();
   }
 
+  protected function newConduitSearchParameterType() {
+    return new ConduitBoolParameterType();
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitBoolParameterType();
+  }
+
 }

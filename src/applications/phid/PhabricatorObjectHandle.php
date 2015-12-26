@@ -248,6 +248,23 @@ final class PhabricatorObjectHandle
 
 
   public function renderLink($name = null) {
+    return $this->renderLinkWithAttributes($name, array());
+  }
+
+  public function renderHovercardLink($name = null) {
+    Javelin::initBehavior('phabricator-hovercards');
+
+    $attributes = array(
+      'sigil' => 'hovercard',
+      'meta' => array(
+        'hoverPHID' => $this->getPHID(),
+      ),
+    );
+
+    return $this->renderLinkWithAttributes($name, $attributes);
+  }
+
+  private function renderLinkWithAttributes($name, array $attributes) {
     if ($name === null) {
       $name = $this->getLinkName();
     }
@@ -275,13 +292,15 @@ final class PhabricatorObjectHandle
         ->setIconFont('fa-lock lightgreytext');
     }
 
-    return phutil_tag(
+    $attributes = $attributes + array(
+      'href'  => $uri,
+      'class' => implode(' ', $classes),
+      'title' => $title,
+    );
+
+    return javelin_tag(
       $uri ? 'a' : 'span',
-      array(
-        'href'  => $uri,
-        'class' => implode(' ', $classes),
-        'title' => $title,
-      ),
+      $attributes,
       array($icon, $name));
   }
 

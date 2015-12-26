@@ -29,10 +29,16 @@ final class ManiphestTaskPriorityDatasource
 
     $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
     foreach ($priority_map as $value => $name) {
-      $results[$value] = id(new PhabricatorTypeaheadResult())
+      $result = id(new PhabricatorTypeaheadResult())
         ->setIcon(ManiphestTaskPriority::getTaskPriorityIcon($value))
         ->setPHID($value)
         ->setName($name);
+
+      if (ManiphestTaskPriority::isDisabledPriority($value)) {
+        $result->setClosed(pht('Disabled'));
+      }
+
+      $results[$value] = $result;
     }
 
     return $results;

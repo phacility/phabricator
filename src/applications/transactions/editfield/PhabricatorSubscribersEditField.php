@@ -13,4 +13,8 @@ final class PhabricatorSubscribersEditField
     return new AphrontUserListHTTPParameterType();
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitUserListParameterType();
+  }
+
 }

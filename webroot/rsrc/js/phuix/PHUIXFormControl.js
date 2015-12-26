@@ -32,6 +32,9 @@ JX.install('PHUIXFormControl', {
         case 'tokenizer':
           input = this._newTokenizer(spec);
           break;
+        case 'select':
+          input = this._newSelect(spec);
+          break;
         default:
           // TODO: Default or better error?
           JX.$E('Bad Input Type');
@@ -115,15 +118,44 @@ JX.install('PHUIXFormControl', {
         spec.config);
       build.tokenizer.start();
 
+      function get_value() {
+        return JX.keys(build.tokenizer.getTokens());
+      }
+
+      function set_value(map) {
+        var tokens = get_value();
+        for (var ii = 0; ii < tokens.length; ii++) {
+          build.tokenizer.removeToken(tokens[ii]);
+        }
+        for (var k in map) {
+          var v = JX.Prefab.transformDatasourceResults(map[k]);
+          build.tokenizer.addToken(k, v);
+        }
+      }
+
+      set_value(spec.value || {});
+
       return {
         node: build.node,
+        get: get_value,
+        set: set_value
+      };
+    },
+
+    _newSelect: function(spec) {
+      var node = JX.Prefab.renderSelect(
+        spec.options,
+        spec.value,
+        {},
+        spec.order);
+
+      return {
+        node: node,
         get: function() {
-          return JX.keys(build.tokenizer.getTokens());
+          return node.value;
         },
-        set: function(map) {
-          for (var k in map) {
-            build.tokenizer.addToken(k, map[k]);
-          }
+        set: function(value) {
+          node.value = value;
         }
       };
     }

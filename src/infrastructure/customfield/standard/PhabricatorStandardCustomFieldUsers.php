@@ -15,4 +15,12 @@ final class PhabricatorStandardCustomFieldUsers
     return new AphrontUserListHTTPParameterType();
   }
 
+  protected function newConduitSearchParameterType() {
+    return new ConduitUserListParameterType();
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitUserListParameterType();
+  }
+
 }

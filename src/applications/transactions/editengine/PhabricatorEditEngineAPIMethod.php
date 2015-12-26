@@ -38,8 +38,16 @@ abstract class PhabricatorEditEngineAPIMethod
   }
 
   final public function getMethodDescription() {
-    // TODO: We don't currently have a real viewer in this method.
-    $viewer = PhabricatorUser::getOmnipotentUser();
+    return pht(
+      'This is a standard **ApplicationEditor** method which allows you to '.
+      'create and modify objects by applying transactions. For documentation '.
+      'on these endpoints, see '.
+      '**[[ %s | Conduit API: Using Edit Endpoints ]]**.',
+      PhabricatorEnv::getDoclink('Conduit API: Using Edit Endpoints'));
+  }
+
+  final public function getMethodDocumentation() {
+    $viewer = $this->getViewer();
 
     $engine = $this->newEditEngine()
       ->setViewer($viewer);
@@ -48,155 +56,106 @@ abstract class PhabricatorEditEngineAPIMethod
 
     $out = array();
 
-    $out[] = pht(<<<EOTEXT
-This is a standard **ApplicationEditor** method which allows you to create and
-modify objects by applying transactions.
+    $out[] = $this->buildEditTypesBoxes($engine, $types);
 
-Each transaction applies one change to the object. For example, to create an
-object with a specific title or change the title of an existing object you might
-start by building a transaction like this:
-
-```lang=json, name=Example Single Transaction
-{
-  "type": "title",
-  "value": "New Object Title"
-}
-```
-
-By passing a list of transactions in the `transactions` parameter, you can
-apply a sequence of edits. For example, you'll often pass a value like this to
-create an object with several field values or apply changes to multiple fields:
-
-```lang=json, name=Example Transaction List
-[
-  {
-    "type": "title",
-    "value": "New Object Title"
-  },
-  {
-    "type": "body",
-    "value": "New body text for the object."
-  },
-  {
-    "type": "projects.add",
-    "value": ["PHID-PROJ-1111", "PHID-PROJ-2222"]
+    return $out;
   }
-]
-```
 
-Exactly which types of edits are available depends on the object you're editing.
+  private function buildEditTypesBoxes(
+    PhabricatorEditEngine $engine,
+    array $types) {
 
+    $boxes = array();
 
-Creating Objects
-----------------
+    $summary_info = pht(
+      'This endpoint supports these types of transactions. See below for '.
+      'detailed information about each transaction type.');
 
-To create an object, pass a list of `transactions` but leave `objectIdentifier`
-empty. This will create a new object with the initial field values you
-specify.
-
-
-Editing Objects
----------------
-
-To edit an object, pass a list of `transactions` and specify an object to
-apply them to with `objectIdentifier`. This will apply the changes to the
-object.
-
-You may pass an ID (like `123`), PHID (like `PHID-WXYZ-abcdef...`), or
-monogram (like `T123`, for objects which have monograms).
-
-
-Return Type
------------
-
-WARNING: The structure of the return value from these methods is likely to
-change as ApplicationEditor evolves.
-
-Return values look something like this for now:
-
-```lang=json, name=Example Return Value
-{
-  "object": {
-    "phid": "PHID-XXXX-1111"
-  },
-  "transactions": [
-    {
-      "phid": "PHID-YYYY-1111",
-    },
-    {
-      "phid": "PHID-YYYY-2222",
-    }
-  ]
-}
-```
-
-The `object` key contains information about the object which was created or
-edited.
-
-The `transactions` key contains information about the transactions which were
-actually applied. For many reasons, the transactions which actually apply may
-be greater or fewer in number than the transactions you provided, or may differ
-in their nature in other ways.
-
-
-Edit Types
-==========
-
-This API method supports these edit types:
-EOTEXT
-      );
-
-    $key = pht('Key');
-    $summary = pht('Summary');
-    $description = pht('Description');
-    $head_type = pht('Type');
-
-    $table = array();
-    $table[] = "| {$key} | {$summary} |";
-    $table[] = '|--------|----------------|';
+    $rows = array();
     foreach ($types as $type) {
-      $edit_type = $type->getEditType();
-      $edit_summary = $type->getSummary();
-      $table[] = "| `{$edit_type}` | {$edit_summary} |";
+      $rows[] = array(
+        $type->getEditType(),
+        $type->getConduitDescription(),
+      );
     }
 
-    $out[] = implode("\n", $table);
+    $summary_table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('Key'),
+          pht('Description'),
+        ))
+      ->setColumnClasses(
+        array(
+          'prewrap',
+          'wide',
+        ));
+
+    $boxes[] = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Transaction Types'))
+      ->setCollapsed(true)
+      ->appendChild($this->buildRemarkup($summary_info))
+      ->appendChild($summary_table);
 
     foreach ($types as $type) {
       $section = array();
-      $section[] = pht('Edit Type: %s', $type->getEditType());
-      $section[] = '---------';
-      $section[] = null;
-      $section[] = $type->getDescription();
-      $section[] = null;
-      $section[] = pht(
-        'This edit generates transactions of type `%s` internally.',
-        $type->getTransactionType());
-      $section[] = null;
 
-      $type_description = pht(
-        'Use `%s` to select this edit type.',
-        $type->getEditType());
+      $section[] = $type->getConduitDescription();
 
-      $value_type = $type->getValueType();
-      if (!strlen($value_type)) {
-        $value_type = '?';
+      $type_documentation = $type->getConduitDocumentation();
+      if (strlen($type_documentation)) {
+        $section[] = $type_documentation;
       }
 
-      $value_description = $type->getValueDescription();
+      $section = implode("\n\n", $section);
 
-      $table = array();
-      $table[] = "| {$key} | {$head_type} | {$description} |";
-      $table[] = '|--------|--------------|----------------|';
-      $table[] = "| `type` | `const` | {$type_description} |";
-      $table[] = "| `value` | `{$value_type}` | {$value_description} |";
-      $section[] = implode("\n", $table);
+      $rows = array();
 
-      $out[] = implode("\n", $section);
+      $rows[] = array(
+        'type',
+        'const',
+        $type->getEditType(),
+      );
+
+      $rows[] = array(
+        'value',
+        $type->getConduitType(),
+        $type->getConduitTypeDescription(),
+      );
+
+      $type_table = id(new AphrontTableView($rows))
+        ->setHeaders(
+          array(
+            pht('Key'),
+            pht('Type'),
+            pht('Description'),
+          ))
+        ->setColumnClasses(
+          array(
+            'prewrap',
+            'prewrap',
+            'wide',
+          ));
+
+      $boxes[] = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Transaction Type: %s', $type->getEditType()))
+      ->setCollapsed(true)
+      ->appendChild($this->buildRemarkup($section))
+      ->appendChild($type_table);
     }
 
-    $out = implode("\n\n", $out);
-    return $out;
+    return $boxes;
+  }
+
+
+  private function buildRemarkup($remarkup) {
+    $viewer = $this->getViewer();
+
+    $view = new PHUIRemarkupView($viewer, $remarkup);
+
+    return id(new PHUIBoxView())
+      ->appendChild($view)
+      ->addPadding(PHUI::PADDING_LARGE);
   }
 
 }

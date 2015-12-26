@@ -93,7 +93,7 @@ final class PhamePostSearchEngine
         ->setObject($post)
         ->setHeader($post->getTitle())
         ->setStatusIcon('fa-star')
-        ->setHref($this->getApplicationURI("/post/view/{$id}/"))
+        ->setHref($post->getViewURI())
         ->addAttribute($blog_name);
       if ($post->isDraft()) {
         $item->setStatusIcon('fa-star-o grey');

@@ -10,7 +10,7 @@ final class PhabricatorEditEngineConfigurationViewController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
-    $config = $this->loadConfigForEdit();
+    $config = $this->loadConfigForView();
     if (!$config) {
       return id(new Aphront404Response());
     }
@@ -162,10 +162,10 @@ final class PhabricatorEditEngineConfigurationViewController
     $defaultcreate_uri = "{$base_uri}/defaultcreate/{$form_key}/";
 
     if ($config->getIsDefault()) {
-      $defaultcreate_name = pht('Remove from "Create" Menu');
+      $defaultcreate_name = pht('Unmark as "Create" Form');
       $defaultcreate_icon = 'fa-minus';
     } else {
-      $defaultcreate_name = pht('Add to "Create" Menu');
+      $defaultcreate_name = pht('Mark as "Create" Form');
       $defaultcreate_icon = 'fa-plus';
     }
 
@@ -174,6 +174,24 @@ final class PhabricatorEditEngineConfigurationViewController
         ->setName($defaultcreate_name)
         ->setIcon($defaultcreate_icon)
         ->setHref($defaultcreate_uri)
+        ->setWorkflow(true)
+        ->setDisabled(!$can_edit));
+
+    if ($config->getIsEdit()) {
+      $isedit_name = pht('Unmark as "Edit" Form');
+      $isedit_icon = 'fa-minus';
+    } else {
+      $isedit_name = pht('Mark as "Edit" Form');
+      $isedit_icon = 'fa-plus';
+    }
+
+    $isedit_uri = "{$base_uri}/defaultedit/{$form_key}/";
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName($isedit_name)
+        ->setIcon($isedit_icon)
+        ->setHref($isedit_uri)
         ->setWorkflow(true)
         ->setDisabled(!$can_edit));
 

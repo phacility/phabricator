@@ -76,13 +76,11 @@ final class PhabricatorObjectMailReceiverTestCase
   }
 
   private function buildMail($style) {
-
-    // TODO: Clean up test data generators so that we don't need to guarantee
-    // the existence of a user.
-    $this->generateNewTestUser();
-
-    $task = id(new PhabricatorManiphestTaskTestDataGenerator())->generate();
     $user = $this->generateNewTestUser();
+
+    $task = id(new PhabricatorManiphestTaskTestDataGenerator())
+      ->setViewer($user)
+      ->generateObject();
 
     $is_public = ($style === 'public');
     $is_bad_hash = ($style == 'badhash');

@@ -1,58 +1,51 @@
 <?php
 
-final class PhamePostViewController extends PhamePostController {
-
-  public function shouldAllowPublic() {
-    return true;
-  }
+final class PhamePostViewController
+  extends PhameLiveController {
 
   public function handleRequest(AphrontRequest $request) {
+    $response = $this->setupLiveEnvironment();
+    if ($response) {
+      return $response;
+    }
+
     $viewer = $request->getViewer();
+    $moved = $request->getStr('moved');
 
-    $post = id(new PhamePostQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($request->getURIData('id')))
-      ->executeOne();
+    $post = $this->getPost();
+    $blog = $this->getBlog();
 
-    if (!$post) {
-      return new Aphront404Response();
-    }
-
-    $blog = $post->getBlog();
-
-    $crumbs = $this->buildApplicationCrumbs();
-    if ($blog) {
-      $crumbs->addTextCrumb(
-        $blog->getName(),
-        $this->getApplicationURI('blog/view/'.$blog->getID().'/'));
-    } else {
-      $crumbs->addTextCrumb(
-        pht('[No Blog]'),
-        null);
-    }
-    $crumbs->addTextCrumb(
-      $post->getTitle(),
-      $this->getApplicationURI('post/view/'.$post->getID().'/'));
-    $crumbs->setBorder(true);
-
-    $actions = $this->renderActions($post, $viewer);
-
-    $action_button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('Actions'))
-      ->setHref('#')
-      ->setIconFont('fa-bars')
-      ->addClass('phui-mobile-menu')
-      ->setDropdownMenu($actions);
+    $is_live = $this->getIsLive();
+    $is_external = $this->getIsExternal();
 
     $header = id(new PHUIHeaderView())
       ->setHeader($post->getTitle())
-      ->setUser($viewer)
-      ->setPolicyObject($post)
-      ->addActionLink($action_button);
+      ->setUser($viewer);
+
+    if (!$is_external) {
+      $actions = $this->renderActions($post);
+
+      $action_button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText(pht('Actions'))
+        ->setHref('#')
+        ->setIconFont('fa-bars')
+        ->addClass('phui-mobile-menu')
+        ->setDropdownMenu($actions);
+
+      $header->setPolicyObject($post);
+      $header->addActionLink($action_button);
+    }
 
     $document = id(new PHUIDocumentViewPro())
       ->setHeader($header);
+
+    if ($moved) {
+      $document->appendChild(
+        id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+          ->appendChild(pht('Post moved successfully.')));
+    }
 
     if ($post->isDraft()) {
       $document->appendChild(
@@ -60,9 +53,8 @@ final class PhamePostViewController extends PhamePostController {
           ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
           ->setTitle(pht('Draft Post'))
           ->appendChild(
-            pht(
-              'Only you can see this draft until you publish it. '.
-              'Use "Preview or Publish" to publish this post.')));
+            pht('Only you can see this draft until you publish it. '.
+                'Use "Publish" to publish this post.')));
     }
 
     if (!$post->getBlog()) {
@@ -71,9 +63,8 @@ final class PhamePostViewController extends PhamePostController {
           ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
           ->setTitle(pht('Not On A Blog'))
           ->appendChild(
-            pht(
-              'This post is not associated with a blog (the blog may have '.
-              'been deleted). Use "Move Post" to move it to a new blog.')));
+            pht('This post is not associated with a blog (the blog may have '.
+                'been deleted). Use "Move Post" to move it to a new blog.')));
     }
 
     $engine = id(new PhabricatorMarkupEngine())
@@ -122,8 +113,12 @@ final class PhamePostViewController extends PhamePostController {
       ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT)));
     $timeline = phutil_tag_div('phui-document-view-pro-box', $timeline);
 
-    $add_comment = $this->buildCommentForm($post);
-    $add_comment = phutil_tag_div('mlb mlt', $add_comment);
+    if ($is_external) {
+      $add_comment = null;
+    } else {
+      $add_comment = $this->buildCommentForm($post);
+      $add_comment = phutil_tag_div('mlb mlt', $add_comment);
+    }
 
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)
@@ -131,7 +126,9 @@ final class PhamePostViewController extends PhamePostController {
 
     $properties->invokeWillRenderEvent();
 
-    return $this->newPage()
+    $crumbs = $this->buildApplicationCrumbs();
+
+    $page =  $this->newPage()
       ->setTitle($post->getTitle())
       ->setPageObjectPHIDs(array($post->getPHID()))
       ->setCrumbs($crumbs)
@@ -143,16 +140,22 @@ final class PhamePostViewController extends PhamePostController {
           $timeline,
           $add_comment,
       ));
+
+    if ($is_live) {
+      $page
+        ->setShowChrome(false)
+        ->setShowFooter(false);
+    }
+
+    return $page;
   }
 
-  private function renderActions(
-    PhamePost $post,
-    PhabricatorUser $viewer) {
+  private function renderActions(PhamePost $post) {
+    $viewer = $this->getViewer();
 
-      $actions = id(new PhabricatorActionListView())
-        ->setObject($post)
-        ->setObjectURI($this->getRequest()->getRequestURI())
-        ->setUser($viewer);
+    $actions = id(new PhabricatorActionListView())
+      ->setObject($post)
+      ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -166,8 +169,7 @@ final class PhamePostViewController extends PhamePostController {
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI('post/edit/'.$id.'/'))
         ->setName(pht('Edit Post'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+        ->setDisabled(!$can_edit));
 
     $actions->addAction(
       id(new PhabricatorActionView())
@@ -175,7 +177,7 @@ final class PhamePostViewController extends PhamePostController {
         ->setHref($this->getApplicationURI('post/move/'.$id.'/'))
         ->setName(pht('Move Post'))
         ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+        ->setWorkflow(true));
 
     $actions->addAction(
       id(new PhabricatorActionView())
@@ -188,15 +190,9 @@ final class PhamePostViewController extends PhamePostController {
         id(new PhabricatorActionView())
           ->setIcon('fa-eye')
           ->setHref($this->getApplicationURI('post/publish/'.$id.'/'))
-          ->setDisabled(!$can_edit)
           ->setName(pht('Publish'))
-          ->setWorkflow(true));
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setIcon('fa-eye')
-          ->setHref($this->getApplicationURI('post/preview/'.$id.'/'))
           ->setDisabled(!$can_edit)
-          ->setName(pht('Preview in Skin')));
+          ->setWorkflow(true));
     } else {
       $actions->addAction(
         id(new PhabricatorActionView())
@@ -207,24 +203,18 @@ final class PhamePostViewController extends PhamePostController {
           ->setWorkflow(true));
     }
 
-    $blog = $post->getBlog();
-    $can_view_live = $blog && !$post->isDraft();
-
-    if ($can_view_live) {
-      $live_uri = $blog->getLiveURI($post);
+    if ($post->isDraft()) {
+      $live_name = pht('Preview');
     } else {
-      $live_uri = 'post/notlive/'.$post->getID().'/';
-      $live_uri = $this->getApplicationURI($live_uri);
+      $live_name = pht('View Live');
     }
 
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setUser($viewer)
         ->setIcon('fa-globe')
-        ->setHref($live_uri)
-        ->setName(pht('View Live'))
-        ->setDisabled(!$can_view_live)
-        ->setWorkflow(!$can_view_live));
+        ->setHref($post->getLiveURI())
+        ->setName($live_name));
 
     return $actions;
   }

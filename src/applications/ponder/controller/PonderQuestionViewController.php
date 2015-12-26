@@ -143,8 +143,7 @@ final class PonderQuestionViewController extends PonderController {
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($question)
-      ->setObjectURI($request->getRequestURI());
+      ->setObject($question);
 
     $view->addAction(
       id(new PhabricatorActionView())

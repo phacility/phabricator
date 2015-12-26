@@ -128,12 +128,13 @@ protected function buildQueryFromParameters(array $map) {
   private function getIconOptions() {
     $options = array();
 
-    foreach (PhabricatorProjectIcon::getIconMap() as $icon => $name) {
-      $options[$icon] = array(
+    $set = new PhabricatorProjectIconSet();
+    foreach ($set->getIcons() as $icon) {
+      $options[$icon->getKey()] = array(
         id(new PHUIIconView())
-          ->setIconFont($icon),
+          ->setIconFont($icon->getIcon()),
         ' ',
-        $name,
+        $icon->getLabel(),
       );
     }
 
@@ -143,7 +144,7 @@ protected function buildQueryFromParameters(array $map) {
   private function getColorOptions() {
     $options = array();
 
-    foreach (PhabricatorProjectIcon::getColorMap() as $color => $name) {
+    foreach (PhabricatorProjectIconSet::getColorMap() as $color => $name) {
       $options[$color] = array(
         id(new PHUITagView())
           ->setType(PHUITagView::TYPE_SHADE)
@@ -199,6 +200,26 @@ protected function buildQueryFromParameters(array $map) {
 
     return $result;
 
+  }
+
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create a Project'))
+      ->setHref('/project/create/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getFontIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Projects are flexible storage containers used as '.
+            'tags, teams, projects, or anything you need to group.'))
+      ->addAction($create_button);
+
+      return $view;
   }
 
 }

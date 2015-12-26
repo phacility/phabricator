@@ -601,22 +601,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     return true;
   }
 
-  protected function getSearchContextParameter(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-
-    $comment_phids = array();
-    foreach ($xactions as $xaction) {
-      if ($xaction->hasComment()) {
-        $comment_phids[] = $xaction->getPHID();
-      }
-    }
-
-    return array(
-      'commentPHIDs' => $comment_phids,
-    );
-  }
-
   protected function extractFilePHIDsFromCustomTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {

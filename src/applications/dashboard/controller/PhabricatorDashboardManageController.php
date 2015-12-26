@@ -75,7 +75,7 @@ final class PhabricatorDashboardManageController
   private function buildHeaderView(PhabricatorDashboard $dashboard) {
     $viewer = $this->getRequest()->getUser();
 
-    if ($dashboard->isClosed()) {
+    if ($dashboard->isArchived()) {
       $status_icon = 'fa-ban';
       $status_color = 'dark';
     } else {
@@ -99,7 +99,6 @@ final class PhabricatorDashboardManageController
     $id = $dashboard->getID();
 
     $actions = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getApplicationURI('view/'.$dashboard->getID().'/'))
       ->setObject($dashboard)
       ->setUser($viewer);
 
@@ -119,8 +118,25 @@ final class PhabricatorDashboardManageController
         ->setName(pht('Edit Dashboard'))
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI("edit/{$id}/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+        ->setDisabled(!$can_edit));
+
+    if ($dashboard->isArchived()) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Activate Dashboard'))
+          ->setIcon('fa-check')
+          ->setHref($this->getApplicationURI("archive/{$id}/"))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow($can_edit));
+    } else {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Archive Dashboard'))
+          ->setIcon('fa-ban')
+          ->setHref($this->getApplicationURI("archive/{$id}/"))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow($can_edit));
+    }
 
     $actions->addAction(
       id(new PhabricatorActionView())

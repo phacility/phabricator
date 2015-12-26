@@ -102,8 +102,7 @@ final class PhabricatorSpacesViewController
     $viewer = $this->getRequest()->getUser();
 
     $list = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObjectURI('/'.$space->getMonogram());
+      ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,

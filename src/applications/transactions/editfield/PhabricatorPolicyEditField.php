@@ -55,4 +55,9 @@ final class PhabricatorPolicyEditField
     return new AphrontPHIDHTTPParameterType();
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitStringParameterType();
+  }
+
+
 }

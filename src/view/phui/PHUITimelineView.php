@@ -91,6 +91,9 @@ final class PHUITimelineView extends AphrontView {
 
     $spacer = self::renderSpacer();
 
+    // Track why we're hiding older results.
+    $hide_reason = null;
+
     $hide = array();
     $show = array();
 
@@ -109,14 +112,35 @@ final class PHUITimelineView extends AphrontView {
     // by default. We may still need to paginate if there are a large number
     // of events.
     $more = (bool)$hide;
+
+    if ($more) {
+      $hide_reason = 'comment';
+    }
+
     if ($this->getPager()) {
       if ($this->getPager()->getHasMoreResults()) {
+        if (!$more) {
+          $hide_reason = 'limit';
+        }
         $more = true;
       }
     }
 
     $events = array();
     if ($more && $this->getPager()) {
+      switch ($hide_reason) {
+        case 'comment':
+          $hide_help = pht(
+            'Changes from before your most recent comment are hidden.');
+          break;
+        case 'limit':
+        default:
+          $hide_help = pht(
+            'There are a very large number of changes, so older changes are '.
+            'hidden.');
+          break;
+      }
+
       $uri = $this->getPager()->getNextPageURI();
       $uri->setQueryParam('quoteTargetID', $this->getQuoteTargetID());
       $uri->setQueryParam('quoteRef', $this->getQuoteRef());
@@ -127,7 +151,7 @@ final class PHUITimelineView extends AphrontView {
           'class' => 'phui-timeline-older-transactions-are-hidden',
         ),
         array(
-          pht('Older changes are hidden. '),
+          $hide_help,
           ' ',
           javelin_tag(
             'a',
@@ -136,7 +160,7 @@ final class PHUITimelineView extends AphrontView {
               'mustcapture' => true,
               'sigil' => 'show-older-link',
             ),
-            pht('Show older changes.')),
+            pht('Show Older Changes')),
         ));
 
       if ($show) {
@@ -239,6 +263,7 @@ final class PHUITimelineView extends AphrontView {
     $all_badges = id(new PhabricatorBadgesQuery())
       ->setViewer($viewer)
       ->withPHIDs($badge_phids)
+      ->withStatuses(array(PhabricatorBadgesBadge::STATUS_ACTIVE))
       ->execute();
     $all_badges = mpull($all_badges, null, 'getPHID');
 

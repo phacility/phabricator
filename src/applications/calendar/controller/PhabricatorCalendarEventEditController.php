@@ -499,18 +499,11 @@ final class PhabricatorCalendarEventEditController
       ->setUser($viewer)
       ->setDatasource(new PhabricatorMetaMTAMailableDatasource());
 
-    if ($this->isCreate()) {
-      $icon_uri = $this->getApplicationURI('icon/');
-    } else {
-      $icon_uri = $this->getApplicationURI('icon/'.$event->getID().'/');
-    }
-    $icon_display = PhabricatorCalendarIcon::renderIconForChooser($icon);
-    $icon = id(new AphrontFormChooseButtonControl())
+
+    $icon = id(new PHUIFormIconSetControl())
       ->setLabel(pht('Icon'))
       ->setName('icon')
-      ->setDisplayValue($icon_display)
-      ->setButtonText(pht('Choose Icon...'))
-      ->setChooseURI($icon_uri)
+      ->setIconSet(new PhabricatorCalendarIconSet())
       ->setValue($icon);
 
     $form = id(new AphrontFormView())

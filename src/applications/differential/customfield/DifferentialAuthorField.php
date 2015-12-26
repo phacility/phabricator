@@ -32,7 +32,7 @@ final class DifferentialAuthorField
   }
 
   public function renderPropertyViewValue(array $handles) {
-    return $handles[$this->getObject()->getAuthorPHID()]->renderLink();
+    return $handles[$this->getObject()->getAuthorPHID()]->renderHovercardLink();
   }
 
 }

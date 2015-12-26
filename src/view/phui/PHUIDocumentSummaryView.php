@@ -90,7 +90,15 @@ final class PHUIDocumentSummaryView extends AphrontTagView {
       ),
       $this->summary);
 
-    return array($header, $subtitle, $body);
+    $read_more = phutil_tag(
+      'a',
+      array(
+        'class' => 'phui-document-read-more',
+        'href' => $this->href,
+      ),
+      pht('Read more...'));
+
+    return array($header, $subtitle, $body, $read_more);
   }
 
 }

@@ -26,6 +26,8 @@ final class PhabricatorProjectTransactionEditor
     $types[] = PhabricatorProjectTransaction::TYPE_ICON;
     $types[] = PhabricatorProjectTransaction::TYPE_COLOR;
     $types[] = PhabricatorProjectTransaction::TYPE_LOCKED;
+    $types[] = PhabricatorProjectTransaction::TYPE_PARENT;
+    $types[] = PhabricatorProjectTransaction::TYPE_MILESTONE;
 
     return $types;
   }
@@ -52,6 +54,9 @@ final class PhabricatorProjectTransactionEditor
         return $object->getColor();
       case PhabricatorProjectTransaction::TYPE_LOCKED:
         return (int)$object->getIsMembershipLocked();
+      case PhabricatorProjectTransaction::TYPE_PARENT:
+      case PhabricatorProjectTransaction::TYPE_MILESTONE:
+        return null;
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -63,13 +68,29 @@ final class PhabricatorProjectTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorProjectTransaction::TYPE_NAME:
-      case PhabricatorProjectTransaction::TYPE_SLUGS:
       case PhabricatorProjectTransaction::TYPE_STATUS:
       case PhabricatorProjectTransaction::TYPE_IMAGE:
       case PhabricatorProjectTransaction::TYPE_ICON:
       case PhabricatorProjectTransaction::TYPE_COLOR:
       case PhabricatorProjectTransaction::TYPE_LOCKED:
+      case PhabricatorProjectTransaction::TYPE_PARENT:
         return $xaction->getNewValue();
+      case PhabricatorProjectTransaction::TYPE_SLUGS:
+        return $this->normalizeSlugs($xaction->getNewValue());
+      case PhabricatorProjectTransaction::TYPE_MILESTONE:
+        $current = queryfx_one(
+          $object->establishConnection('w'),
+          'SELECT MAX(milestoneNumber) n
+            FROM %T
+            WHERE parentProjectPHID = %s',
+          $object->getTableName(),
+          $object->getParentProject()->getPHID());
+        if (!$current) {
+          $number = 1;
+        } else {
+          $number = (int)$current['n'] + 1;
+        }
+        return $number;
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -102,6 +123,12 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_LOCKED:
         $object->setIsMembershipLocked($xaction->getNewValue());
         return;
+      case PhabricatorProjectTransaction::TYPE_PARENT:
+        $object->setParentProjectPHID($xaction->getNewValue());
+        return;
+      case PhabricatorProjectTransaction::TYPE_MILESTONE:
+        $object->setMilestoneNumber($xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -119,9 +146,9 @@ final class PhabricatorProjectTransactionEditor
         // First, add the old name as a secondary slug; this is helpful
         // for renames and generally a good thing to do.
         if ($old !== null) {
-          $this->addSlug($object, $old);
+          $this->addSlug($object, $old, false);
         }
-        $this->addSlug($object, $new);
+        $this->addSlug($object, $new, false);
 
         return;
       case PhabricatorProjectTransaction::TYPE_SLUGS:
@@ -130,29 +157,19 @@ final class PhabricatorProjectTransactionEditor
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
 
-        if ($add) {
-          $add_slug_template = id(new PhabricatorProjectSlug())
-            ->setProjectPHID($object->getPHID());
-          foreach ($add as $add_slug_str) {
-            $add_slug = id(clone $add_slug_template)
-              ->setSlug($add_slug_str)
-              ->save();
-          }
-        }
-        if ($rem) {
-          $rem_slugs = id(new PhabricatorProjectSlug())
-            ->loadAllWhere('slug IN (%Ls)', $rem);
-          foreach ($rem_slugs as $rem_slug) {
-            $rem_slug->delete();
-          }
+        foreach ($add as $slug) {
+          $this->addSlug($object, $slug, true);
         }
 
+        $this->removeSlugs($object, $rem);
         return;
       case PhabricatorProjectTransaction::TYPE_STATUS:
       case PhabricatorProjectTransaction::TYPE_IMAGE:
       case PhabricatorProjectTransaction::TYPE_ICON:
       case PhabricatorProjectTransaction::TYPE_COLOR:
       case PhabricatorProjectTransaction::TYPE_LOCKED:
+      case PhabricatorProjectTransaction::TYPE_PARENT:
+      case PhabricatorProjectTransaction::TYPE_MILESTONE:
         return;
      }
 
@@ -251,6 +268,17 @@ final class PhabricatorProjectTransactionEditor
         }
 
         $name = last($xactions)->getNewValue();
+
+        if (!PhabricatorSlug::isValidProjectSlug($name)) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'Project names must contain at least one letter or number.'),
+            last($xactions));
+          break;
+        }
+
         $name_used_already = id(new PhabricatorProjectQuery())
           ->setViewer($this->getActor())
           ->withNames(array($name))
@@ -285,7 +313,30 @@ final class PhabricatorProjectTransactionEditor
         }
 
         $slug_xaction = last($xactions);
+
         $new = $slug_xaction->getNewValue();
+
+        $invalid = array();
+        foreach ($new as $slug) {
+          if (!PhabricatorSlug::isValidProjectSlug($slug)) {
+            $invalid[] = $slug;
+          }
+        }
+
+        if ($invalid) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'Hashtags must contain at least one letter or number. %s '.
+              'project hashtag(s) are invalid: %s.',
+              phutil_count($invalid),
+              implode(', ', $invalid)),
+            $slug_xaction);
+          break;
+        }
+
+        $new = $this->normalizeSlugs($new);
 
         if ($new) {
           $slugs_used_already = id(new PhabricatorProjectSlug())
@@ -297,34 +348,95 @@ final class PhabricatorProjectTransactionEditor
 
         $slugs_used_already = mgroup($slugs_used_already, 'getProjectPHID');
         foreach ($slugs_used_already as $project_phid => $used_slugs) {
-          $used_slug_strs = mpull($used_slugs, 'getSlug');
           if ($project_phid == $object->getPHID()) {
-            if (in_array($object->getPrimarySlug(), $used_slug_strs)) {
-              $error = new PhabricatorApplicationTransactionValidationError(
-                $type,
-                pht('Invalid'),
-                pht(
-                  'Project hashtag %s is already the primary hashtag.',
-                  $object->getPrimarySlug()),
-                $slug_xaction);
-              $errors[] = $error;
-            }
             continue;
           }
+
+          $used_slug_strs = mpull($used_slugs, 'getSlug');
 
           $error = new PhabricatorApplicationTransactionValidationError(
             $type,
             pht('Invalid'),
             pht(
-              '%d project hashtag(s) are already used: %s.',
-              count($used_slug_strs),
+              '%s project hashtag(s) are already used by other projects: %s.',
+              phutil_count($used_slug_strs),
               implode(', ', $used_slug_strs)),
             $slug_xaction);
           $errors[] = $error;
         }
 
         break;
+      case PhabricatorProjectTransaction::TYPE_PARENT:
+        if (!$xactions) {
+          break;
+        }
 
+        $xaction = last($xactions);
+
+        if (!$this->getIsNewObject()) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'You can only set a parent project when creating a project '.
+              'for the first time.'),
+            $xaction);
+          break;
+        }
+
+        $parent_phid = $xaction->getNewValue();
+
+        $projects = id(new PhabricatorProjectQuery())
+          ->setViewer($this->requireActor())
+          ->withPHIDs(array($parent_phid))
+          ->requireCapabilities(
+            array(
+              PhabricatorPolicyCapability::CAN_VIEW,
+              PhabricatorPolicyCapability::CAN_EDIT,
+            ))
+          ->execute();
+        if (!$projects) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'Parent project PHID ("%s") must be the PHID of a valid, '.
+              'visible project which you have permission to edit.',
+              $parent_phid),
+            $xaction);
+          break;
+        }
+
+        $project = head($projects);
+
+        if ($project->isMilestone()) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'Parent project PHID ("%s") must not be a milestone. '.
+              'Milestones may not have subprojects.',
+              $parent_phid),
+            $xaction);
+          break;
+        }
+
+        $limit = PhabricatorProject::getProjectDepthLimit();
+        if ($project->getProjectDepth() >= ($limit - 1)) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'You can not create a subproject under this parent because '.
+              'it would nest projects too deeply. The maximum nesting '.
+              'depth of projects is %s.',
+              new PhutilNumber($limit)),
+            $xaction);
+          break;
+        }
+
+        $object->attachParentProject($project);
+        break;
     }
 
     return $errors;
@@ -493,23 +605,140 @@ final class PhabricatorProjectTransactionEditor
     return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
   }
 
-  private function addSlug(
+  protected function applyFinalEffects(
     PhabricatorLiskDAO $object,
-    $name) {
+    array $xactions) {
 
-    $slug = PhabricatorSlug::normalizeProjectSlug($name);
+    $materialize = false;
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorTransactions::TYPE_EDGE:
+          switch ($xaction->getMetadataValue('edge:type')) {
+            case PhabricatorProjectProjectHasMemberEdgeType::EDGECONST:
+              $materialize = true;
+              break;
+          }
+          break;
+        case PhabricatorProjectTransaction::TYPE_PARENT:
+          $materialize = true;
+          break;
+      }
+    }
 
-    $slug_object = id(new PhabricatorProjectSlug())->loadOneWhere(
-      'slug = %s',
-      $slug);
+    if ($materialize) {
+      id(new PhabricatorProjectsMembershipIndexEngineExtension())
+        ->rematerialize($object);
+    }
 
-    if ($slug_object) {
+    return parent::applyFinalEffects($object, $xactions);
+  }
+
+  private function addSlug(PhabricatorProject $project, $slug, $force) {
+    $slug = PhabricatorSlug::normalizeProjectSlug($slug);
+    $table = new PhabricatorProjectSlug();
+    $project_phid = $project->getPHID();
+
+    if ($force) {
+      // If we have the `$force` flag set, we only want to ignore an existing
+      // slug if it's for the same project. We'll error on collisions with
+      // other projects.
+      $current = $table->loadOneWhere(
+        'slug = %s AND projectPHID = %s',
+        $slug,
+        $project_phid);
+    } else {
+      // Without the `$force` flag, we'll just return without doing anything
+      // if any other project already has the slug.
+      $current = $table->loadOneWhere(
+        'slug = %s',
+        $slug);
+    }
+
+    if ($current) {
       return;
     }
 
-    $new_slug = id(new PhabricatorProjectSlug())
+    return id(new PhabricatorProjectSlug())
       ->setSlug($slug)
-      ->setProjectPHID($object->getPHID())
+      ->setProjectPHID($project_phid)
       ->save();
   }
+
+  private function removeSlugs(PhabricatorProject $project, array $slugs) {
+    $slugs = $this->normalizeSlugs($slugs);
+
+    if (!$slugs) {
+      return;
+    }
+
+    $objects = id(new PhabricatorProjectSlug())->loadAllWhere(
+      'projectPHID = %s AND slug IN (%Ls)',
+      $project->getPHID(),
+      $slugs);
+
+    foreach ($objects as $object) {
+      $object->delete();
+    }
+  }
+
+  private function normalizeSlugs(array $slugs) {
+    foreach ($slugs as $key => $slug) {
+      $slugs[$key] = PhabricatorSlug::normalizeProjectSlug($slug);
+    }
+
+    $slugs = array_unique($slugs);
+    $slugs = array_values($slugs);
+
+    return $slugs;
+  }
+
+  protected function adjustObjectForPolicyChecks(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $copy = parent::adjustObjectForPolicyChecks($object, $xactions);
+
+    $type_edge = PhabricatorTransactions::TYPE_EDGE;
+    $edgetype_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+
+    $member_xaction = null;
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() !== $type_edge) {
+        continue;
+      }
+
+      $edgetype = $xaction->getMetadataValue('edge:type');
+      if ($edgetype !== $edgetype_member) {
+        continue;
+      }
+
+      $member_xaction = $xaction;
+    }
+
+    if ($member_xaction) {
+      $object_phid = $object->getPHID();
+
+      if ($object_phid) {
+        $members = PhabricatorEdgeQuery::loadDestinationPHIDs(
+          $object_phid,
+          PhabricatorProjectProjectHasMemberEdgeType::EDGECONST);
+      } else {
+        $members = array();
+      }
+
+      $clone_xaction = clone $member_xaction;
+      $hint = $this->getPHIDTransactionNewValue($clone_xaction, $members);
+      $rule = new PhabricatorProjectMembersPolicyRule();
+
+      $hint = array_fuse($hint);
+
+      PhabricatorPolicyRule::passTransactionHintToRule(
+        $copy,
+        $rule,
+        $hint);
+    }
+
+    return $copy;
+  }
+
 }

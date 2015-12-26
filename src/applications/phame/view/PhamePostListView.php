@@ -6,6 +6,8 @@ final class PhamePostListView extends AphrontTagView {
   private $nodata;
   private $viewer;
   private $showBlog = false;
+  private $isExternal;
+  private $isLive;
 
   public function setPosts($posts) {
     assert_instances_of($posts, 'PhamePost');
@@ -26,6 +28,24 @@ final class PhamePostListView extends AphrontTagView {
   public function setViewer($viewer) {
     $this->viewer = $viewer;
     return $this;
+  }
+
+  public function setIsExternal($is_external) {
+    $this->isExternal = $is_external;
+    return $this;
+  }
+
+  public function getIsExternal() {
+    return $this->isExternal;
+  }
+
+  public function setIsLive($is_live) {
+    $this->isLive = $is_live;
+    return $this;
+  }
+
+  public function getIsLive() {
+    return $this->isLive;
   }
 
   protected function getTagAttributes() {
@@ -63,21 +83,40 @@ final class PhamePostListView extends AphrontTagView {
       $blogger = phutil_tag('strong', array(), $blogger);
       $date = phabricator_datetime($post->getDatePublished(), $viewer);
 
-      $blog = null;
-      if ($post->getBlog()) {
-        $blog = phutil_tag(
-          'a',
-          array(
-            'href' => '/phame/blog/view/'.$post->getBlog()->getID().'/',
-          ),
-          $post->getBlog()->getName());
+      $blog = $post->getBlog();
+
+      if ($this->getIsLive()) {
+        if ($this->getIsExternal()) {
+          $blog_uri = $blog->getExternalLiveURI();
+          $post_uri = $post->getExternalLiveURI();
+        } else {
+          $blog_uri = $blog->getInternalLiveURI();
+          $post_uri = $post->getInternalLiveURI();
+        }
+      } else {
+        $blog_uri = $blog->getViewURI();
+        $post_uri = $post->getViewURI();
       }
 
-      if ($this->showBlog && $blog) {
+      $blog_link = phutil_tag(
+        'a',
+        array(
+          'href' => $blog_uri,
+        ),
+        $blog->getName());
+
+      if ($this->showBlog) {
         if ($post->isDraft()) {
-          $subtitle = pht('Unpublished draft by %s in %s.', $blogger, $blog);
+          $subtitle = pht(
+            'Unpublished draft by %s in %s.',
+            $blogger,
+            $blog_link);
         } else {
-          $subtitle = pht('By %s on %s in %s.', $blogger, $date, $blog);
+          $subtitle = pht(
+            'Written by %s on %s in %s.',
+            $blogger,
+            $date,
+            $blog_link);
         }
       } else {
         if ($post->isDraft()) {
@@ -89,7 +128,7 @@ final class PhamePostListView extends AphrontTagView {
 
       $item = id(new PHUIDocumentSummaryView())
         ->setTitle($post->getTitle())
-        ->setHref('/phame/post/view/'.$post->getID().'/')
+        ->setHref($post_uri)
         ->setSubtitle($subtitle)
         ->setImage($blogger_image)
         ->setImageHref($blogger_uri)

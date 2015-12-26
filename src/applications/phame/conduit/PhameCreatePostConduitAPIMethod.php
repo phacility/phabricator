@@ -19,7 +19,6 @@ final class PhameCreatePostConduitAPIMethod extends PhameConduitAPIMethod {
       'blogPHID'      => 'required phid',
       'title'         => 'required string',
       'body'          => 'required string',
-      'phameTitle'    => 'optional string',
       'bloggerPHID'   => 'optional phid',
       'isDraft'       => 'optional bool',
     );
@@ -89,12 +88,6 @@ final class PhameCreatePostConduitAPIMethod extends PhameConduitAPIMethod {
       $post->setVisibility(PhameConstants::VISIBILITY_PUBLISHED);
     }
     $post->setTitle($title);
-    $phame_title = $request->getValue(
-      'phameTitle',
-      id(new PhutilUTF8StringTruncator())
-      ->setMaximumBytes(64)
-      ->truncateString($title));
-    $post->setPhameTitle(PhabricatorSlug::normalize($phame_title));
     $post->setBody($body);
     $post->save();
 

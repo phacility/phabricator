@@ -38,13 +38,11 @@ final class PonderAnswerTransaction
 
   public function getRemarkupBlocks() {
     $blocks = parent::getRemarkupBlocks();
-
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
         $blocks[] = $this->getNewValue();
         break;
     }
-
     return $blocks;
   }
 
@@ -134,20 +132,14 @@ final class PonderAnswerTransaction
     return parent::getTitleForFeed();
   }
 
-  public function getBodyForFeed(PhabricatorFeedStory $story) {
-    $new = $this->getNewValue();
-
-    $body = null;
-
+  public function getRemarkupBodyForFeed(PhabricatorFeedStory $story) {
+    $text = null;
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
-        return phutil_escape_html_newlines(
-          id(new PhutilUTF8StringTruncator())
-          ->setMaximumGlyphs(128)
-          ->truncateString($new));
+        $text = $this->getNewValue();
         break;
     }
-    return parent::getBodyForFeed($story);
+    return $text;
   }
 
 

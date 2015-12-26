@@ -140,4 +140,12 @@ final class PhabricatorStandardCustomFieldSelect
     return new AphrontSelectHTTPParameterType();
   }
 
+  protected function newConduitSearchParameterType() {
+    return new ConduitStringListParameterType();
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitStringParameterType();
+  }
+
 }

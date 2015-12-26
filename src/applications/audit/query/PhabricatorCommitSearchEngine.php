@@ -178,4 +178,16 @@ final class PhabricatorCommitSearchEngine
     return $result;
   }
 
+  protected function getNewUserBody() {
+
+    $view = id(new PHUIBigInfoView())
+      ->setIcon('fa-check-circle-o')
+      ->setTitle(pht('Welcome to Audit'))
+      ->setDescription(
+        pht('Post-commit code review and auditing. Audits you are assigned '.
+            'to will appear here.'));
+
+      return $view;
+  }
+
 }

@@ -35,6 +35,14 @@ abstract class PhabricatorEditEngineController
   }
 
   protected function loadConfigForEdit() {
+    return $this->loadConfig($need_edit = true);
+  }
+
+  protected function loadConfigForView() {
+    return $this->loadConfig($need_edit = false);
+  }
+
+  private function loadConfig($need_edit) {
     $request = $this->getRequest();
     $viewer = $this->getViewer();
 
@@ -43,26 +51,25 @@ abstract class PhabricatorEditEngineController
 
     $key = $request->getURIData('key');
 
+    if ($need_edit) {
+      $capabilities = array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+        PhabricatorPolicyCapability::CAN_EDIT,
+      );
+    } else {
+      $capabilities = array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+      );
+    }
+
     $config = id(new PhabricatorEditEngineConfigurationQuery())
       ->setViewer($viewer)
       ->withEngineKeys(array($engine_key))
       ->withIdentifiers(array($key))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
+      ->requireCapabilities($capabilities)
       ->executeOne();
-
     if ($config) {
       $engine = $config->getEngine();
-
-      // TODO: When we're editing the meta-engine, we need to set the engine
-      // itself as its own target. This is hacky and it would be nice to find
-      // a cleaner approach later.
-      if ($engine instanceof PhabricatorEditEngineConfigurationEditEngine) {
-        $engine->setTargetEngine($engine);
-      }
     }
 
     return $config;

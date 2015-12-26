@@ -4,7 +4,7 @@ abstract class PhabricatorPHIDListEditField
   extends PhabricatorEditField {
 
   private $useEdgeTransactions;
-  private $transactionDescriptions = array();
+  private $isSingleValue;
 
   public function setUseEdgeTransactions($use_edge_transactions) {
     $this->useEdgeTransactions = $use_edge_transactions;
@@ -15,21 +15,47 @@ abstract class PhabricatorPHIDListEditField
     return $this->useEdgeTransactions;
   }
 
-  public function setEdgeTransactionDescriptions($add, $rem, $set) {
-    $this->transactionDescriptions = array(
-      '+' => $add,
-      '-' => $rem,
-      '=' => $set,
-    );
-    return $this;
+  public function setSingleValue($value) {
+    if ($value === null) {
+      $value = array();
+    } else {
+      $value = array($value);
+    }
+
+    $this->isSingleValue = true;
+    return $this->setValue($value);
+  }
+
+  public function getIsSingleValue() {
+    return $this->isSingleValue;
   }
 
   protected function newHTTPParameterType() {
     return new AphrontPHIDListHTTPParameterType();
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitPHIDListParameterType();
+  }
+
+  protected function getValueFromRequest(AphrontRequest $request, $key) {
+    $value = parent::getValueFromRequest($request, $key);
+    if ($this->getIsSingleValue()) {
+      $value = array_slice($value, 0, 1);
+    }
+    return $value;
+  }
+
   public function getValueForTransaction() {
     $new = parent::getValueForTransaction();
+
+    if ($this->getIsSingleValue()) {
+      if ($new) {
+        return head($new);
+      } else {
+        return null;
+      }
+    }
 
     if (!$this->getUseEdgeTransactions()) {
       return $new;
@@ -68,12 +94,14 @@ abstract class PhabricatorPHIDListEditField
       return new PhabricatorEdgeEditType();
     }
 
-    return parent::newEditType();
+    $type = new PhabricatorDatasourceEditType();
+    $type->setIsSingleValue($this->getIsSingleValue());
+    return $type;
   }
 
-  public function getConduitEditTypes() {
+  protected function newConduitEditTypes() {
     if (!$this->getUseEdgeTransactions()) {
-      return parent::getConduitEditTypes();
+      return parent::newConduitEditTypes();
     }
 
     $transaction_type = $this->getTransactionType();
@@ -82,27 +110,26 @@ abstract class PhabricatorPHIDListEditField
     }
 
     $type_key = $this->getEditTypeKey();
-    $strings = $this->transactionDescriptions;
 
     $base = $this->getEditType();
 
     $add = id(clone $base)
       ->setEditType($type_key.'.add')
       ->setEdgeOperation('+')
-      ->setDescription(idx($strings, '+'))
-      ->setValueDescription(pht('List of PHIDs to add.'));
+      ->setConduitTypeDescription(pht('List of PHIDs to add.'))
+      ->setConduitParameterType($this->getConduitParameterType());
 
     $rem = id(clone $base)
       ->setEditType($type_key.'.remove')
       ->setEdgeOperation('-')
-      ->setDescription(idx($strings, '-'))
-      ->setValueDescription(pht('List of PHIDs to remove.'));
+      ->setConduitTypeDescription(pht('List of PHIDs to remove.'))
+      ->setConduitParameterType($this->getConduitParameterType());
 
     $set = id(clone $base)
       ->setEditType($type_key.'.set')
       ->setEdgeOperation('=')
-      ->setDescription(idx($strings, '='))
-      ->setValueDescription(pht('List of PHIDs to set.'));
+      ->setConduitTypeDescription(pht('List of PHIDs to set.'))
+      ->setConduitParameterType($this->getConduitParameterType());
 
     return array(
       $add,

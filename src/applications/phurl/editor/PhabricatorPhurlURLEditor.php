@@ -262,4 +262,9 @@ final class PhabricatorPhurlURLEditor
     throw new PhabricatorApplicationTransactionValidationException($errors);
   }
 
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new PhabricatorPhurlURLReplyHandler())
+      ->setMailReceiver($object);
+  }
+
 }

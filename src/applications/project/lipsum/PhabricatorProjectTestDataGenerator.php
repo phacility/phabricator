@@ -3,75 +3,68 @@
 final class PhabricatorProjectTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
-  private $xactions = array();
+  public function getGeneratorName() {
+    return pht('Projects');
+  }
 
-  public function generate() {
-    $title = $this->generateTitle();
-    $author = $this->loadPhabrictorUser();
-    $author_phid = $author->getPHID();
-    $project = PhabricatorProject::initializeNewProject($author)
-      ->setName($title);
+  public function generateObject() {
+    $author = $this->loadRandomUser();
+    $project = PhabricatorProject::initializeNewProject($author);
 
-    $this->addTransaction(
+    $xactions = array();
+
+    $xactions[] = $this->newTransaction(
       PhabricatorProjectTransaction::TYPE_NAME,
-      $title);
-    $project->attachMemberPHIDs(
-      $this->loadMembersWithAuthor($author_phid));
-    $this->addTransaction(
+      $this->newProjectTitle());
+
+    $xactions[] = $this->newTransaction(
       PhabricatorProjectTransaction::TYPE_STATUS,
-      $this->generateProjectStatus());
-    $this->addTransaction(
-      PhabricatorTransactions::TYPE_VIEW_POLICY,
-      PhabricatorPolicies::POLICY_PUBLIC);
-    $this->addTransaction(
-      PhabricatorTransactions::TYPE_EDIT_POLICY,
-      PhabricatorPolicies::POLICY_PUBLIC);
-    $this->addTransaction(
-      PhabricatorTransactions::TYPE_JOIN_POLICY,
-      PhabricatorPolicies::POLICY_PUBLIC);
+      $this->newProjectStatus());
+
+    // Almost always make the author a member.
+    $members = array();
+    if ($this->roll(1, 20) > 2) {
+      $members[] = $author->getPHID();
+    }
+
+    // Add a few other members.
+    $size = $this->roll(2, 6, -2);
+    for ($ii = 0; $ii < $size; $ii++) {
+      $members[] = $this->loadRandomUser()->getPHID();
+    }
+
+    $xactions[] = $this->newTransaction(
+      PhabricatorTransactions::TYPE_EDGE,
+      array(
+        '+' => array_fuse($members),
+      ),
+      array(
+        'edge:type' => PhabricatorProjectProjectHasMemberEdgeType::EDGECONST,
+      ));
 
     $editor = id(new PhabricatorProjectTransactionEditor())
       ->setActor($author)
-      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContentSource($this->getLipsumContentSource())
       ->setContinueOnNoEffect(true)
-      ->applyTransactions($project, $this->xactions);
+      ->applyTransactions($project, $xactions);
 
-    return $project->save();
+    return $project;
   }
 
-  private function addTransaction($type, $value) {
-    $this->xactions[] = id(new PhabricatorProjectTransaction())
-      ->setTransactionType($type)
-      ->setNewValue($value);
+  protected function newEmptyTransaction() {
+    return new PhabricatorProjectTransaction();
   }
 
-
-  public function loadMembersWithAuthor($author) {
-    $members = array($author);
-    for ($i = 0; $i < rand(10, 20);$i++) {
-      $members[] = $this->loadPhabrictorUserPHID();
-    }
-    return $members;
-  }
-
-  public function generateTitle() {
-    return id(new PhutilLipsumContextFreeGrammar())
+  public function newProjectTitle() {
+    return id(new PhabricatorProjectNameContextFreeGrammar())
       ->generate();
   }
 
-  public function generateDescription() {
-    return id(new PhutilLipsumContextFreeGrammar())
-      ->generateSeveral(rand(30, 40));
-  }
-
-  public function generateProjectStatus() {
-    $statuses = array_keys(PhabricatorProjectStatus::getStatusMap());
-    // Make sure 4/5th of all generated Projects are active
-    $random = rand(0, 4);
-    if ($random != 0) {
-      return $statuses[0];
+  public function newProjectStatus() {
+    if ($this->roll(1, 20) > 5) {
+      return PhabricatorProjectStatus::STATUS_ACTIVE;
     } else {
-      return $statuses[1];
+      return PhabricatorProjectStatus::STATUS_ARCHIVED;
     }
   }
 }

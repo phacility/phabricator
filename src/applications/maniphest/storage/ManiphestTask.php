@@ -13,7 +13,9 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorDestructibleInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
-    PhabricatorSpacesInterface {
+    PhabricatorSpacesInterface,
+    PhabricatorConduitResultInterface,
+    PhabricatorFulltextInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -32,7 +34,6 @@ final class ManiphestTask extends ManiphestDAO
   protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
   protected $editPolicy = PhabricatorPolicies::POLICY_USER;
 
-  protected $attached = array();
   protected $projectPHIDs = array();
 
   protected $ownerOrdering;
@@ -42,6 +43,9 @@ final class ManiphestTask extends ManiphestDAO
   private $groupByProjectPHID = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
   private $edgeProjectPHIDs = self::ATTACHABLE;
+
+  // TODO: This field is unused and should eventually be removed.
+  protected $attached = array();
 
   public static function initializeNewTask(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -388,6 +392,73 @@ final class ManiphestTask extends ManiphestDAO
 
   public function getSpacePHID() {
     return $this->spacePHID;
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('title')
+        ->setType('string')
+        ->setDescription(pht('The title of the task.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('authorPHID')
+        ->setType('phid')
+        ->setDescription(pht('Original task author.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('ownerPHID')
+        ->setType('phid?')
+        ->setDescription(pht('Current task owner, if task is assigned.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Information about task status.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('priority')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Information about task priority.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+
+    $status_value = $this->getStatus();
+    $status_info = array(
+      'value' => $status_value,
+      'name' => ManiphestTaskStatus::getTaskStatusName($status_value),
+      'color' => ManiphestTaskStatus::getStatusColor($status_value),
+    );
+
+    $priority_value = (int)$this->getPriority();
+    $priority_info = array(
+      'value' => $priority_value,
+      'subpriority' => (double)$this->getSubpriority(),
+      'name' => ManiphestTaskPriority::getTaskPriorityName($priority_value),
+      'color' => ManiphestTaskPriority::getTaskPriorityColor($priority_value),
+    );
+
+    return array(
+      'name' => $this->getTitle(),
+      'authorPHID' => $this->getAuthorPHID(),
+      'ownerPHID' => $this->getOwnerPHID(),
+      'status' => $status_info,
+      'priority' => $priority_info,
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
+  }
+
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+
+  public function newFulltextEngine() {
+    return new ManiphestTaskFulltextEngine();
   }
 
 }

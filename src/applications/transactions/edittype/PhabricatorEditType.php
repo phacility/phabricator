@@ -3,33 +3,16 @@
 abstract class PhabricatorEditType extends Phobject {
 
   private $editType;
+  private $editField;
   private $transactionType;
   private $label;
   private $field;
-  private $description;
-  private $summary;
   private $metadata = array();
 
-  public function setDescription($description) {
-    $this->description = $description;
-    return $this;
-  }
-
-  public function getDescription() {
-    return $this->description;
-  }
-
-  public function setSummary($summary) {
-    $this->summary = $summary;
-    return $this;
-  }
-
-  public function getSummary() {
-    if ($this->summary === null) {
-      return $this->getDescription();
-    }
-    return $this->summary;
-  }
+  private $conduitDescription;
+  private $conduitDocumentation;
+  private $conduitTypeDescription;
+  private $conduitParameterType;
 
   public function setLabel($label) {
     $this->label = $label;
@@ -80,9 +63,6 @@ abstract class PhabricatorEditType extends Phobject {
     PhabricatorApplicationTransaction $template,
     array $spec);
 
-  abstract public function getValueType();
-  abstract public function getValueDescription();
-
   protected function newTransaction(
     PhabricatorApplicationTransaction $template) {
 
@@ -96,12 +76,83 @@ abstract class PhabricatorEditType extends Phobject {
     return $xaction;
   }
 
-  public function getPHUIXControlType() {
+  public function setEditField(PhabricatorEditField $edit_field) {
+    $this->editField = $edit_field;
+    return $this;
+  }
+
+  public function getEditField() {
+    return $this->editField;
+  }
+
+/* -(  Conduit  )------------------------------------------------------------ */
+
+
+  protected function newConduitParameterType() {
+    if ($this->conduitParameterType) {
+      return clone $this->conduitParameterType;
+    }
+
     return null;
   }
 
-  public function getPHUIXControlSpecification() {
-    return null;
+  public function setConduitParameterType(ConduitParameterType $type) {
+    $this->conduitParameterType = $type;
+    return $this;
+  }
+
+  public function getConduitParameterType() {
+    return $this->newConduitParameterType();
+  }
+
+  public function getConduitType() {
+    $parameter_type = $this->getConduitParameterType();
+    return $parameter_type->getTypeName();
+  }
+
+  public function setConduitTypeDescription($conduit_type_description) {
+    $this->conduitTypeDescription = $conduit_type_description;
+    return $this;
+  }
+
+  public function getConduitTypeDescription() {
+    if ($this->conduitTypeDescription === null) {
+      if ($this->getEditField()) {
+        return $this->getEditField()->getConduitTypeDescription();
+      }
+    }
+
+    return $this->conduitTypeDescription;
+  }
+
+  public function setConduitDescription($conduit_description) {
+    $this->conduitDescription = $conduit_description;
+    return $this;
+  }
+
+  public function getConduitDescription() {
+    if ($this->conduitDescription === null) {
+      if ($this->getEditField()) {
+        return $this->getEditField()->getConduitDescription();
+      }
+    }
+
+    return $this->conduitDescription;
+  }
+
+  public function setConduitDocumentation($conduit_documentation) {
+    $this->conduitDocumentation = $conduit_documentation;
+    return $this;
+  }
+
+  public function getConduitDocumentation() {
+    if ($this->conduitDocumentation === null) {
+      if ($this->getEditField()) {
+        return $this->getEditField()->getConduitDocumentation();
+      }
+    }
+
+    return $this->conduitDocumentation;
   }
 
 }

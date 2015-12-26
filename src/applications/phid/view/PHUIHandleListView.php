@@ -34,9 +34,14 @@ final class PHUIHandleListView
   }
 
   protected function getTagContent() {
+    $list = $this->handleList;
     $items = array();
-    foreach ($this->handleList as $handle) {
-      $items[] = $handle->renderLink();
+    foreach ($list as $handle) {
+      $view = $list->renderHandle($handle->getPHID());
+
+      $view->setShowHovercard(true);
+
+      $items[] = $view;
     }
 
     if ($this->getAsInline()) {

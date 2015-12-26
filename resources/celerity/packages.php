@@ -187,9 +187,6 @@ return array(
   ),
   'maniphest.pkg.js' => array(
     'javelin-behavior-maniphest-batch-selector',
-    'javelin-behavior-maniphest-transaction-controls',
-    'javelin-behavior-maniphest-transaction-preview',
-    'javelin-behavior-maniphest-transaction-expand',
     'javelin-behavior-maniphest-subpriority-editor',
     'javelin-behavior-maniphest-list-editor',
   ),

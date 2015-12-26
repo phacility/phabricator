@@ -44,7 +44,15 @@ final class DifferentialBranchField
     } else if (strlen($bookmark)) {
       return pht('%s (bookmark)', $bookmark);
     } else if (strlen($branch)) {
-      return $branch;
+      $onto = $diff->loadTargetBranch();
+      if (strlen($onto) && ($onto !== $branch)) {
+        return pht(
+          '%s (branched from %s)',
+          $branch,
+          $onto);
+      } else {
+        return $branch;
+      }
     } else {
       return null;
     }

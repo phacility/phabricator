@@ -26,6 +26,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $edgeLogicConstraintsAreValid = false;
   private $spacePHIDs;
   private $spaceIsArchived;
+  private $ngrams = array();
 
   protected function getPageCursors(array $page) {
     return array(
@@ -253,6 +254,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $joins = array();
     $joins[] = $this->buildEdgeLogicJoinClause($conn);
     $joins[] = $this->buildApplicationSearchJoinClause($conn);
+    $joins[] = $this->buildNgramsJoinClause($conn);
     return $joins;
   }
 
@@ -274,6 +276,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $where[] = $this->buildPagingClause($conn);
     $where[] = $this->buildEdgeLogicWhereClause($conn);
     $where[] = $this->buildSpacesWhereClause($conn);
+    $where[] = $this->buildNgramsWhereClause($conn);
     return $where;
   }
 
@@ -321,6 +324,10 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     if ($this->getApplicationSearchMayJoinMultipleRows()) {
+      return true;
+    }
+
+    if ($this->shouldGroupNgramResultRows()) {
       return true;
     }
 
@@ -716,13 +723,18 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           continue;
         }
 
-        $key = $field->getFieldKey();
-        $digest = $field->getFieldIndex();
+        $legacy_key = 'custom:'.$field->getFieldKey();
+        $modern_key = $field->getModernFieldKey();
 
-        $full_key = 'custom:'.$key;
-        $orders[$full_key] = array(
-          'vector' => array($full_key, 'id'),
+        $orders[$modern_key] = array(
+          'vector' => array($modern_key, 'id'),
           'name' => $field->getFieldName(),
+          'aliases' => array($legacy_key),
+        );
+
+        $orders['-'.$modern_key] = array(
+          'vector' => array('-'.$modern_key, '-id'),
+          'name' => pht('%s (Reversed)', $field->getFieldName()),
         );
       }
     }
@@ -903,11 +915,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           continue;
         }
 
-        $key = $field->getFieldKey();
         $digest = $field->getFieldIndex();
 
-        $full_key = 'custom:'.$key;
-        $columns[$full_key] = array(
+        $key = $field->getModernFieldKey();
+
+        $columns[$key] = array(
           'table' => 'appsearch_order_'.$digest,
           'column' => 'indexValue',
           'type' => $index->getIndexValueType(),
@@ -1337,6 +1349,138 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   protected function isCustomFieldOrderKey($key) {
     $prefix = 'custom:';
     return !strncmp($key, $prefix, strlen($prefix));
+  }
+
+
+/* -(  Ngrams  )------------------------------------------------------------- */
+
+
+  protected function withNgramsConstraint(
+    PhabricatorSearchNgrams $index,
+    $value) {
+
+    if (strlen($value)) {
+      $this->ngrams[] = array(
+        'index' => $index,
+        'value' => $value,
+        'length' => count(phutil_utf8v($value)),
+      );
+    }
+
+    return $this;
+  }
+
+
+  protected function buildNgramsJoinClause(AphrontDatabaseConnection $conn) {
+    $flat = array();
+    foreach ($this->ngrams as $spec) {
+      $index = $spec['index'];
+      $value = $spec['value'];
+      $length = $spec['length'];
+
+      if ($length >= 3) {
+        $ngrams = $index->getNgramsFromString($value, 'query');
+        $prefix = false;
+      } else if ($length == 2) {
+        $ngrams = $index->getNgramsFromString($value, 'prefix');
+        $prefix = false;
+      } else {
+        $ngrams = array(' '.$value);
+        $prefix = true;
+      }
+
+      foreach ($ngrams as $ngram) {
+        $flat[] = array(
+          'table' => $index->getTableName(),
+          'ngram' => $ngram,
+          'prefix' => $prefix,
+        );
+      }
+    }
+
+    // MySQL only allows us to join a maximum of 61 tables per query. Each
+    // ngram is going to cost us a join toward that limit, so if the user
+    // specified a very long query string, just pick 16 of the ngrams
+    // at random.
+    if (count($flat) > 16) {
+      shuffle($flat);
+      $flat = array_slice($flat, 0, 16);
+    }
+
+    $alias = $this->getPrimaryTableAlias();
+    if ($alias) {
+      $id_column = qsprintf($conn, '%T.%T', $alias, 'id');
+    } else {
+      $id_column = qsprintf($conn, '%T', 'id');
+    }
+
+    $idx = 1;
+    $joins = array();
+    foreach ($flat as $spec) {
+      $table = $spec['table'];
+      $ngram = $spec['ngram'];
+      $prefix = $spec['prefix'];
+
+      $alias = 'ngm'.$idx++;
+
+      if ($prefix) {
+        $joins[] = qsprintf(
+          $conn,
+          'JOIN %T %T ON %T.objectID = %Q AND %T.ngram LIKE %>',
+          $table,
+          $alias,
+          $alias,
+          $id_column,
+          $alias,
+          $ngram);
+      } else {
+        $joins[] = qsprintf(
+          $conn,
+          'JOIN %T %T ON %T.objectID = %Q AND %T.ngram = %s',
+          $table,
+          $alias,
+          $alias,
+          $id_column,
+          $alias,
+          $ngram);
+      }
+    }
+
+    return $joins;
+  }
+
+
+  protected function buildNgramsWhereClause(AphrontDatabaseConnection $conn) {
+    $where = array();
+
+    foreach ($this->ngrams as $ngram) {
+      $index = $ngram['index'];
+      $value = $ngram['value'];
+
+      $column = $index->getColumnName();
+      $alias = $this->getPrimaryTableAlias();
+      if ($alias) {
+        $column = qsprintf($conn, '%T.%T', $alias, $column);
+      } else {
+        $column = qsprintf($conn, '%T', $column);
+      }
+
+      $tokens = $index->tokenizeString($value);
+      foreach ($tokens as $token) {
+        $where[] = qsprintf(
+          $conn,
+          '%Q LIKE %~',
+          $column,
+          $token);
+      }
+    }
+
+    return $where;
+  }
+
+
+  protected function shouldGroupNgramResultRows() {
+    return (bool)$this->ngrams;
   }
 
 

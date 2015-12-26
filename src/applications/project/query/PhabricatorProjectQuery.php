@@ -11,6 +11,12 @@ final class PhabricatorProjectQuery
   private $nameTokens;
   private $icons;
   private $colors;
+  private $ancestorPHIDs;
+  private $parentPHIDs;
+  private $isMilestone;
+  private $hasSubprojects;
+  private $minDepth;
+  private $maxDepth;
 
   private $status       = 'status-any';
   const STATUS_ANY      = 'status-any';
@@ -66,6 +72,32 @@ final class PhabricatorProjectQuery
 
   public function withColors(array $colors) {
     $this->colors = $colors;
+    return $this;
+  }
+
+  public function withParentProjectPHIDs($parent_phids) {
+    $this->parentPHIDs = $parent_phids;
+    return $this;
+  }
+
+  public function withAncestorProjectPHIDs($ancestor_phids) {
+    $this->ancestorPHIDs = $ancestor_phids;
+    return $this;
+  }
+
+  public function withIsMilestone($is_milestone) {
+    $this->isMilestone = $is_milestone;
+    return $this;
+  }
+
+  public function withHasSubprojects($has_subprojects) {
+    $this->hasSubprojects = $has_subprojects;
+    return $this;
+  }
+
+  public function withDepthBetween($min, $max) {
+    $this->minDepth = $min;
+    $this->maxDepth = $max;
     return $this;
   }
 
@@ -126,60 +158,99 @@ final class PhabricatorProjectQuery
   }
 
   protected function loadPage() {
-    $table = new PhabricatorProject();
-    $data = $this->loadStandardPageRows($table);
-    $projects = $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
+  }
 
-    if ($projects) {
-      $viewer_phid = $this->getViewer()->getPHID();
-      $project_phids = mpull($projects, 'getPHID');
+  protected function willFilterPage(array $projects) {
+    $ancestor_paths = array();
+    foreach ($projects as $project) {
+      foreach ($project->getAncestorProjectPaths() as $path) {
+        $ancestor_paths[$path] = $path;
+      }
+    }
 
-      $member_type = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
-      $watcher_type = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
+    if ($ancestor_paths) {
+      $ancestors = id(new PhabricatorProject())->loadAllWhere(
+        'projectPath IN (%Ls)',
+        $ancestor_paths);
+    } else {
+      $ancestors = array();
+    }
 
-      $need_edge_types = array();
-      if ($this->needMembers) {
-        $need_edge_types[] = $member_type;
+    $projects = $this->linkProjectGraph($projects, $ancestors);
+
+    $viewer_phid = $this->getViewer()->getPHID();
+
+    $member_type = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+    $watcher_type = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
+
+    $types = array();
+    $types[] = $member_type;
+    if ($this->needWatchers) {
+      $types[] = $watcher_type;
+    }
+
+    $all_sources = array();
+    foreach ($projects as $project) {
+      if ($project->isMilestone()) {
+        $phid = $project->getParentProjectPHID();
       } else {
-        foreach ($data as $row) {
-          $projects[$row['id']]->setIsUserMember(
-            $viewer_phid,
-            ($row['viewerIsMember'] !== null));
-        }
+        $phid = $project->getPHID();
+      }
+      $all_sources[$phid] = $phid;
+    }
+
+    $edge_query = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs($all_sources)
+      ->withEdgeTypes($types);
+
+    // If we only need to know if the viewer is a member, we can restrict
+    // the query to just their PHID.
+    if (!$this->needMembers && !$this->needWatchers) {
+      $edge_query->withDestinationPHIDs(array($viewer_phid));
+    }
+
+    $edge_query->execute();
+
+    $membership_projects = array();
+    foreach ($projects as $project) {
+      $project_phid = $project->getPHID();
+
+      if ($project->isMilestone()) {
+        $source_phids = array($project->getParentProjectPHID());
+      } else {
+        $source_phids = array($project_phid);
+      }
+
+      $member_phids = $edge_query->getDestinationPHIDs(
+        $source_phids,
+        array($member_type));
+
+      if (in_array($viewer_phid, $member_phids)) {
+        $membership_projects[$project_phid] = $project;
+      }
+
+      if ($this->needMembers) {
+        $project->attachMemberPHIDs($member_phids);
       }
 
       if ($this->needWatchers) {
-        $need_edge_types[] = $watcher_type;
+        $watcher_phids = $edge_query->getDestinationPHIDs(
+          $source_phids,
+          array($watcher_type));
+        $project->attachWatcherPHIDs($watcher_phids);
+        $project->setIsUserWatcher(
+          $viewer_phid,
+          in_array($viewer_phid, $watcher_phids));
       }
+    }
 
-      if ($need_edge_types) {
-        $edges = id(new PhabricatorEdgeQuery())
-          ->withSourcePHIDs($project_phids)
-          ->withEdgeTypes($need_edge_types)
-          ->execute();
+    $all_graph = $this->getAllReachableAncestors($projects);
+    $member_graph = $this->getAllReachableAncestors($membership_projects);
 
-        if ($this->needMembers) {
-          foreach ($projects as $project) {
-            $phid = $project->getPHID();
-            $project->attachMemberPHIDs(
-              array_keys($edges[$phid][$member_type]));
-            $project->setIsUserMember(
-              $viewer_phid,
-              isset($edges[$phid][$member_type][$viewer_phid]));
-          }
-        }
-
-        if ($this->needWatchers) {
-          foreach ($projects as $project) {
-            $phid = $project->getPHID();
-            $project->attachWatcherPHIDs(
-              array_keys($edges[$phid][$watcher_type]));
-            $project->setIsUserWatcher(
-              $viewer_phid,
-              isset($edges[$phid][$watcher_type][$viewer_phid]));
-          }
-        }
-      }
+    foreach ($all_graph as $phid => $project) {
+      $is_member = isset($member_graph[$phid]);
+      $project->setIsUserMember($viewer_phid, $is_member);
     }
 
     return $projects;
@@ -229,20 +300,6 @@ final class PhabricatorProjectQuery
     }
 
     return $projects;
-  }
-
-  protected function buildSelectClauseParts(AphrontDatabaseConnection $conn) {
-    $select = parent::buildSelectClauseParts($conn);
-
-    // NOTE: Because visibility checks for projects depend on whether or not
-    // the user is a project member, we always load their membership. If we're
-    // loading all members anyway we can piggyback on that; otherwise we
-    // do an explicit join.
-    if (!$this->needMembers) {
-      $select[] = 'vm.dst viewerIsMember';
-    }
-
-    return $select;
   }
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
@@ -323,6 +380,72 @@ final class PhabricatorProjectQuery
         $this->colors);
     }
 
+    if ($this->parentPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'parentProjectPHID IN (%Ls)',
+        $this->parentPHIDs);
+    }
+
+    if ($this->ancestorPHIDs !== null) {
+      $ancestor_paths = queryfx_all(
+        $conn,
+        'SELECT projectPath, projectDepth FROM %T WHERE phid IN (%Ls)',
+        id(new PhabricatorProject())->getTableName(),
+        $this->ancestorPHIDs);
+      if (!$ancestor_paths) {
+        throw new PhabricatorEmptyQueryException();
+      }
+
+      $sql = array();
+      foreach ($ancestor_paths as $ancestor_path) {
+        $sql[] = qsprintf(
+          $conn,
+          '(projectPath LIKE %> AND projectDepth > %d)',
+          $ancestor_path['projectPath'],
+          $ancestor_path['projectDepth']);
+      }
+
+      $where[] = '('.implode(' OR ', $sql).')';
+
+      $where[] = qsprintf(
+        $conn,
+        'parentProjectPHID IS NOT NULL');
+    }
+
+    if ($this->isMilestone !== null) {
+      if ($this->isMilestone) {
+        $where[] = qsprintf(
+          $conn,
+          'milestoneNumber IS NOT NULL');
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          'milestoneNumber IS NULL');
+      }
+    }
+
+    if ($this->hasSubprojects !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'hasSubprojects = %d',
+        (int)$this->hasSubprojects);
+    }
+
+    if ($this->minDepth !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'projectDepth >= %d',
+        $this->minDepth);
+    }
+
+    if ($this->maxDepth !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'projectDepth <= %d',
+        $this->maxDepth);
+    }
+
     return $where;
   }
 
@@ -335,15 +458,6 @@ final class PhabricatorProjectQuery
 
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
     $joins = parent::buildJoinClauseParts($conn);
-
-    if (!$this->needMembers !== null) {
-      $joins[] = qsprintf(
-        $conn,
-        'LEFT JOIN %T vm ON vm.src = p.phid AND vm.type = %d AND vm.dst = %s',
-        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-        PhabricatorProjectProjectHasMemberEdgeType::EDGECONST,
-        $this->getViewer()->getPHID());
-    }
 
     if ($this->memberPHIDs !== null) {
       $joins[] = qsprintf(
@@ -383,6 +497,90 @@ final class PhabricatorProjectQuery
 
   protected function getPrimaryTableAlias() {
     return 'p';
+  }
+
+  private function linkProjectGraph(array $projects, array $ancestors) {
+    $ancestor_map = mpull($ancestors, null, 'getPHID');
+    $projects_map = mpull($projects, null, 'getPHID');
+
+    $all_map = $projects_map + $ancestor_map;
+
+    $done = array();
+    foreach ($projects as $key => $project) {
+      $seen = array($project->getPHID() => true);
+
+      if (!$this->linkProject($project, $all_map, $done, $seen)) {
+        $this->didRejectResult($project);
+        unset($projects[$key]);
+        continue;
+      }
+
+      foreach ($project->getAncestorProjects() as $ancestor) {
+        $seen[$ancestor->getPHID()] = true;
+      }
+    }
+
+    return $projects;
+  }
+
+  private function linkProject($project, array $all, array $done, array $seen) {
+    $parent_phid = $project->getParentProjectPHID();
+
+    // This project has no parent, so just attach `null` and return.
+    if (!$parent_phid) {
+      $project->attachParentProject(null);
+      return true;
+    }
+
+    // This project has a parent, but it failed to load.
+    if (empty($all[$parent_phid])) {
+      return false;
+    }
+
+    // Test for graph cycles. If we encounter one, we're going to hide the
+    // entire cycle since we can't meaningfully resolve it.
+    if (isset($seen[$parent_phid])) {
+      return false;
+    }
+
+    $seen[$parent_phid] = true;
+
+    $parent = $all[$parent_phid];
+    $project->attachParentProject($parent);
+
+    if (!empty($done[$parent_phid])) {
+      return true;
+    }
+
+    return $this->linkProject($parent, $all, $done, $seen);
+  }
+
+  private function getAllReachableAncestors(array $projects) {
+    $ancestors = array();
+
+    $seen = mpull($projects, null, 'getPHID');
+
+    $stack = $projects;
+    while ($stack) {
+      $project = array_pop($stack);
+
+      $phid = $project->getPHID();
+      $ancestors[$phid] = $project;
+
+      $parent_phid = $project->getParentProjectPHID();
+      if (!$parent_phid) {
+        continue;
+      }
+
+      if (isset($seen[$parent_phid])) {
+        continue;
+      }
+
+      $seen[$parent_phid] = true;
+      $stack[] = $project->getParentProject();
+    }
+
+    return $ancestors;
   }
 
 }

@@ -109,7 +109,7 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     return $this->assertAttached($this->panels);
   }
 
-  public function isClosed() {
+  public function isArchived() {
     return ($this->getStatus() == self::STATUS_ARCHIVED);
   }
 

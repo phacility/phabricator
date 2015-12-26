@@ -3,92 +3,97 @@
 final class PhabricatorPasteTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
-  // Better Support for this in the future
-  public $supportedLanguages = array(
-    'Java' => 'java',
-    'PHP' => 'php',
-  );
+  public function getGeneratorName() {
+    return pht('Pastes');
+  }
 
-  public function generate() {
-    $author = $this->loadPhabrictorUser();
-    $authorphid = $author->getPHID();
-    $language = $this->generateLanguage();
-    $content = $this->generateContent($language);
-    $title = $this->generateTitle($language);
-    $paste_file = PhabricatorFile::newFromFileData(
-      $content,
-      array(
-        'name' => $title,
-        'mime-type' => 'text/plain; charset=utf-8',
-        'authorPHID' => $authorphid,
-        ));
-    $policy = $this->generatePolicy();
-    $filephid = $paste_file->getPHID();
-    $parentphid = $this->loadPhabrictorPastePHID();
-    $paste = PhabricatorPaste::initializeNewPaste($author)
-      ->setParentPHID($parentphid)
-      ->setTitle($title)
-      ->setLanguage($language)
-      ->setViewPolicy($policy)
-      ->setEditPolicy($policy)
-      ->setFilePHID($filephid)
-      ->save();
+  public function generateObject() {
+    $author = $this->loadRandomUser();
+
+    list($name, $language, $content) = $this->newPasteContent();
+
+    $paste = PhabricatorPaste::initializeNewPaste($author);
+
+    $xactions = array();
+
+    $xactions[] = $this->newTransaction(
+      PhabricatorPasteTransaction::TYPE_TITLE,
+      $name);
+
+    $xactions[] = $this->newTransaction(
+      PhabricatorPasteTransaction::TYPE_LANGUAGE,
+      $language);
+
+    $xactions[] = $this->newTransaction(
+      PhabricatorPasteTransaction::TYPE_CONTENT,
+      $content);
+
+    $editor = id(new PhabricatorPasteEditor())
+      ->setActor($author)
+      ->setContentSource($this->getLipsumContentSource())
+      ->setContinueOnNoEffect(true)
+      ->applyTransactions($paste, $xactions);
+
     return $paste;
   }
 
-  private function loadPhabrictorPastePHID() {
-    $random = rand(0, 1);
-    if ($random == 1) {
-      $paste = id($this->loadOneRandom('PhabricatorPaste'));
-      if ($paste) {
-        return $paste->getPHID();
-      }
+  protected function newEmptyTransaction() {
+    return new PhabricatorPasteTransaction();
+  }
+
+  private function newPasteContent() {
+    $languages = array(
+      'txt' => array(),
+      'php' => array(
+        'content' => 'PhutilPHPCodeSnippetContextFreeGrammar',
+      ),
+      'java' => array(
+        'content' => 'PhutilJavaCodeSnippetContextFreeGrammar',
+      ),
+    );
+
+    $language = array_rand($languages);
+    $spec = $languages[$language];
+
+    $title_generator = idx($spec, 'title');
+    if (!$title_generator) {
+      $title_generator = 'PhabricatorPasteFilenameContextFreeGrammar';
     }
-    return null;
-  }
 
-  public function generateTitle($language = null) {
-    $taskgen = new PhutilLipsumContextFreeGrammar();
-    // Remove Punctuation
-    $title = preg_replace('/[^a-zA-Z 0-9]+/', '', $taskgen->generate());
-    // Capitalize First Letters
-    $title = ucwords($title);
-    // Remove Spaces
-    $title = preg_replace('/\s+/', '', $title);
-    if ($language == null ||
-      !in_array($language, array_keys($this->supportedLanguages))) {
-        return $title.'.txt';
-    } else {
-      return $title.'.'.$this->supportedLanguages[$language];
+    $content_generator = idx($spec, 'content');
+    if (!$content_generator) {
+      $content_generator = 'PhutilLipsumContextFreeGrammar';
     }
-  }
 
-  public function generateLanguage() {
-    $supplemented_lang = $this->supportedLanguages;
-    $supplemented_lang['lipsum'] = 'txt';
-    return array_rand($supplemented_lang);
-  }
+    $title = newv($title_generator, array())
+      ->generate();
 
-  public function generateContent($language = null) {
-      if ($language == null ||
-        !in_array($language, array_keys($this->supportedLanguages))) {
-        return id(new PhutilLipsumContextFreeGrammar())
-            ->generateSeveral(rand(30, 40));
-      } else {
-        $cfg_class = 'Phutil'.$language.'CodeSnippetContextFreeGrammar';
-        return newv($cfg_class, array())->generate();
-      }
-  }
+    $content = newv($content_generator, array())
+      ->generateSeveral($this->roll(4, 12, 10));
 
-  public function generatePolicy() {
-    // Make sure 4/5th of all generated Pastes are viewable to all
-    switch (rand(0, 4)) {
-      case 0:
-        return PhabricatorPolicies::POLICY_PUBLIC;
+    // Usually add the language as a suffix.
+    if ($this->roll(1, 20) > 2) {
+      $title = $title.'.'.$language;
+    }
+
+    switch ($this->roll(1, 20)) {
       case 1:
-        return PhabricatorPolicies::POLICY_NOONE;
+        // On critical miss, set a different, random language.
+        $highlight_as = array_rand($languages);
+        break;
+      case 18:
+      case 19:
+      case 20:
+        // Sometimes set it to the correct language.
+        $highlight_as = $language;
+        break;
       default:
-        return PhabricatorPolicies::POLICY_USER;
+        // Usually leave it as autodetect.
+        $highlight_as = '';
+        break;
     }
+
+    return array($title, $highlight_as, $content);
   }
+
 }

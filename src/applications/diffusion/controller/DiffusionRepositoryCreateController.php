@@ -323,25 +323,6 @@ final class DiffusionRepositoryCreateController
         pht('Subversion'),
         $svn_str);
 
-    if ($is_import) {
-      $control->addButton(
-        PhabricatorRepositoryType::REPOSITORY_TYPE_PERFORCE,
-        pht('Perforce'),
-        pht(
-          'Perforce is not directly supported, but you can import '.
-          'a Perforce repository as a Git repository using %s.',
-          phutil_tag(
-            'a',
-            array(
-              'href' =>
-                'http://www.perforce.com/product/components/git-fusion',
-              'target' => '_blank',
-            ),
-            pht('Perforce Git Fusion'))),
-        'disabled',
-        $disabled = true);
-    }
-
     return id(new PHUIFormPageView())
       ->setPageName(pht('Repository Type'))
       ->setUser($this->getRequest()->getUser())

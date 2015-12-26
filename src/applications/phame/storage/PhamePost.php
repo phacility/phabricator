@@ -48,15 +48,38 @@ final class PhamePost extends PhameDAO
     return $this->blog;
   }
 
-  public function getViewURI() {
-    // go for the pretty uri if we can
-    $domain = ($this->blog ? $this->blog->getDomain() : '');
-    if ($domain) {
-      $phame_title = PhabricatorSlug::normalize($this->getPhameTitle());
-      return 'http://'.$domain.'/post/'.$phame_title;
+  public function getLiveURI() {
+    $blog = $this->getBlog();
+    $is_draft = $this->isDraft();
+    if (strlen($blog->getDomain()) && !$is_draft) {
+      return $this->getExternalLiveURI();
+    } else {
+      return $this->getInternalLiveURI();
     }
-    $uri = '/phame/post/view/'.$this->getID().'/';
-    return PhabricatorEnv::getProductionURI($uri);
+  }
+
+  public function getExternalLiveURI() {
+    $id = $this->getID();
+    $slug = $this->getSlug();
+    $path = "/post/{$id}/{$slug}/";
+
+    $domain = $this->getBlog()->getDomain();
+
+    return (string)id(new PhutilURI('http://'.$domain))
+      ->setPath($path);
+  }
+
+  public function getInternalLiveURI() {
+    $id = $this->getID();
+    $slug = $this->getSlug();
+    $blog_id = $this->getBlog()->getID();
+    return "/phame/live/{$blog_id}/post/{$id}/{$slug}/";
+  }
+
+  public function getViewURI() {
+    $id = $this->getID();
+    $slug = $this->getSlug();
+    return "/phame/post/view/{$id}/{$slug}/";
   }
 
   public function getEditURI() {
@@ -64,17 +87,7 @@ final class PhamePost extends PhameDAO
   }
 
   public function isDraft() {
-    return $this->getVisibility() == PhameConstants::VISIBILITY_DRAFT;
-  }
-
-  public function getHumanName() {
-    if ($this->isDraft()) {
-      $name = 'draft';
-    } else {
-      $name = 'post';
-    }
-
-    return $name;
+    return ($this->getVisibility() == PhameConstants::VISIBILITY_DRAFT);
   }
 
   protected function getConfiguration() {
@@ -85,7 +98,7 @@ final class PhamePost extends PhameDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255',
-        'phameTitle' => 'sort64',
+        'phameTitle' => 'sort64?',
         'visibility' => 'uint32',
         'mailKey' => 'bytes20',
 
@@ -103,10 +116,6 @@ final class PhamePost extends PhameDAO
         'key_phid' => null,
         'phid' => array(
           'columns' => array('phid'),
-          'unique' => true,
-        ),
-        'phameTitle' => array(
-          'columns' => array('bloggerPHID', 'phameTitle'),
           'unique' => true,
         ),
         'bloggerPosts' => array(
@@ -133,6 +142,10 @@ final class PhamePost extends PhameDAO
       PhabricatorPhamePostPHIDType::TYPECONST);
   }
 
+  public function getSlug() {
+    return PhabricatorSlug::normalizeProjectSlug($this->getTitle(), true);
+  }
+
   public function toDictionary() {
     return array(
       'id'            => $this->getID(),
@@ -141,7 +154,6 @@ final class PhamePost extends PhameDAO
       'bloggerPHID'   => $this->getBloggerPHID(),
       'viewURI'       => $this->getViewURI(),
       'title'         => $this->getTitle(),
-      'phameTitle'    => $this->getPhameTitle(),
       'body'          => $this->getBody(),
       'summary'       => PhabricatorMarkupEngine::summarize($this->getBody()),
       'datePublished' => $this->getDatePublished(),

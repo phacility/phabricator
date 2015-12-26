@@ -93,8 +93,7 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     $commit->writeImportStatusFlag(
       PhabricatorRepositoryCommit::IMPORTED_CHANGE);
 
-    id(new PhabricatorSearchIndexer())
-      ->queueDocumentForIndexing($commit->getPHID());
+    PhabricatorSearchWorker::queueDocumentForIndexing($commit->getPHID());
 
     if ($this->shouldQueueFollowupTasks()) {
       $this->queueTask(

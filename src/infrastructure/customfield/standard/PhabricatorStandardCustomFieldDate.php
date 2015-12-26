@@ -197,4 +197,13 @@ final class PhabricatorStandardCustomFieldDate
     return false;
   }
 
+  protected function newConduitSearchParameterType() {
+    // TODO: Build a new "pair<epoch|null, epoch|null>" type or similar.
+    return null;
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitEpochParameterType();
+  }
+
 }

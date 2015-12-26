@@ -78,9 +78,11 @@ final class PhabricatorBadgesTransaction
             $this->renderHandleLink($author_phid),
             $new);
         } else {
-          $icon_map = PhabricatorBadgesBadge::getIconNameMap();
-          $icon_new = idx($icon_map, $new, $new);
-          $icon_old = idx($icon_map, $old, $old);
+          $set = new PhabricatorBadgesIconSet();
+
+          $icon_old = $set->getIconLabel($old);
+          $icon_new = $set->getIconLabel($new);
+
           return pht(
             '%s updated the icon for this badge from "%s" to "%s".',
             $this->renderHandleLink($author_phid),
@@ -155,12 +157,12 @@ final class PhabricatorBadgesTransaction
           $this->renderHandleLink($object_phid));
       case self::TYPE_STATUS:
         switch ($new) {
-          case PhabricatorBadgesBadge::STATUS_OPEN:
+          case PhabricatorBadgesBadge::STATUS_ACTIVE:
             return pht(
               '%s activated %s.',
               $this->renderHandleLink($author_phid),
               $this->renderHandleLink($object_phid));
-          case PhabricatorBadgesBadge::STATUS_CLOSED:
+          case PhabricatorBadgesBadge::STATUS_ARCHIVED:
             return pht(
               '%s archived %s.',
               $this->renderHandleLink($author_phid),

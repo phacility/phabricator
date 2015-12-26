@@ -26,6 +26,7 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
       $this->handleUpdate($lease);
     } catch (Exception $ex) {
       $lock->unlock();
+      $this->flushDrydockTaskQueue();
       throw $ex;
     }
 
@@ -178,6 +179,23 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
       // satisfy the lease, just not right now. This is a temporary failure,
       // and we expect allocation to succeed eventually.
       if (!$usable_blueprints) {
+        $blueprints = $this->rankBlueprints($blueprints, $lease);
+
+        // Try to actively reclaim unused resources. If we succeed, jump back
+        // into the queue in an effort to claim it.
+        foreach ($blueprints as $blueprint) {
+          $reclaimed = $this->reclaimResources($blueprint, $lease);
+          if ($reclaimed) {
+            $lease->logEvent(
+              DrydockLeaseReclaimLogType::LOGCONST,
+              array(
+                'resourcePHIDs' => array($reclaimed->getPHID()),
+              ));
+
+            throw new PhabricatorWorkerYieldException(15);
+          }
+        }
+
         $lease->logEvent(
           DrydockLeaseWaitingForResourcesLogType::LOGCONST,
           array(
@@ -438,6 +456,7 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
     assert_instances_of($blueprints, 'DrydockBlueprint');
 
     $keep = array();
+
     foreach ($blueprints as $key => $blueprint) {
       if (!$blueprint->canAllocateResourceForLease($lease)) {
         continue;
@@ -570,6 +589,35 @@ final class DrydockLeaseUpdateWorker extends DrydockWorker {
           $resource_type,
           $lease_type));
     }
+  }
+
+  private function reclaimResources(
+    DrydockBlueprint $blueprint,
+    DrydockLease $lease) {
+    $viewer = $this->getViewer();
+
+    $resources = id(new DrydockResourceQuery())
+      ->setViewer($viewer)
+      ->withBlueprintPHIDs(array($blueprint->getPHID()))
+      ->withStatuses(
+        array(
+          DrydockResourceStatus::STATUS_ACTIVE,
+        ))
+      ->execute();
+
+    // TODO: We could be much smarter about this and try to release long-unused
+    // resources, resources with many similar copies, old resources, resources
+    // that are cheap to rebuild, etc.
+    shuffle($resources);
+
+    foreach ($resources as $resource) {
+      if ($this->canReclaimResource($resource)) {
+        $this->reclaimResource($resource, $lease);
+        return $resource;
+      }
+    }
+
+    return null;
   }
 
 

@@ -6,7 +6,6 @@ final class PhameBlogTransaction
   const TYPE_NAME        = 'phame.blog.name';
   const TYPE_DESCRIPTION = 'phame.blog.description';
   const TYPE_DOMAIN      = 'phame.blog.domain';
-  const TYPE_SKIN        = 'phame.blog.skin';
   const TYPE_STATUS      = 'phame.blog.status';
 
   const MAILTAG_DETAILS       = 'phame-blog-details';
@@ -25,13 +24,16 @@ final class PhameBlogTransaction
     $old = $this->getOldValue();
     switch ($this->getTransactionType()) {
       case self::TYPE_DESCRIPTION:
-        return ($old === null);
+        if ($old === null) {
+          return true;
+        }
     }
     return parent::shouldHide();
   }
 
   public function getIcon() {
     $old = $this->getOldValue();
+    $new = $this->getNewValue();
     switch ($this->getTransactionType()) {
       case self::TYPE_NAME:
         if ($old === null) {
@@ -42,11 +44,32 @@ final class PhameBlogTransaction
         break;
       case self::TYPE_DESCRIPTION:
       case self::TYPE_DOMAIN:
-      case self::TYPE_SKIN:
         return 'fa-pencil';
+      case self::TYPE_STATUS:
+        if ($new == PhameBlog::STATUS_ARCHIVED) {
+          return 'fa-ban';
+        } else {
+          return 'fa-check';
+        }
         break;
     }
     return parent::getIcon();
+  }
+
+    public function getColor() {
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_STATUS:
+        if ($new == PhameBlog::STATUS_ARCHIVED) {
+          return 'red';
+        } else {
+          return 'green';
+        }
+      }
+    return parent::getColor();
   }
 
   public function getMailTags() {
@@ -59,7 +82,6 @@ final class PhameBlogTransaction
       case self::TYPE_NAME:
       case self::TYPE_DESCRIPTION:
       case self::TYPE_DOMAIN:
-      case self::TYPE_SKIN:
         $tags[] = self::MAILTAG_DETAILS;
         break;
       default:
@@ -78,6 +100,10 @@ final class PhameBlogTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return pht(
+          '%s created this blog.',
+          $this->renderHandleLink($author_phid));
       case self::TYPE_NAME:
         if ($old === null) {
           return pht(
@@ -98,12 +124,6 @@ final class PhameBlogTransaction
       case self::TYPE_DOMAIN:
         return pht(
           '%s updated the blog\'s domain to "%s".',
-          $this->renderHandleLink($author_phid),
-          $new);
-        break;
-      case self::TYPE_SKIN:
-        return pht(
-          '%s updated the blog\'s skin to "%s".',
           $this->renderHandleLink($author_phid),
           $new);
         break;
@@ -158,12 +178,6 @@ final class PhameBlogTransaction
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
-      case self::TYPE_SKIN:
-        return pht(
-          '%s updated the skin for %s.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid));
-        break;
       case self::TYPE_STATUS:
         switch ($new) {
           case PhameBlog::STATUS_ACTIVE:
@@ -183,21 +197,6 @@ final class PhameBlogTransaction
 
     return parent::getTitleForFeed();
   }
-
-  public function getColor() {
-    $old = $this->getOldValue();
-
-    switch ($this->getTransactionType()) {
-      case self::TYPE_NAME:
-        if ($old === null) {
-          return PhabricatorTransactions::COLOR_GREEN;
-        }
-        break;
-    }
-
-    return parent::getColor();
-  }
-
 
   public function hasChangeDetails() {
     switch ($this->getTransactionType()) {

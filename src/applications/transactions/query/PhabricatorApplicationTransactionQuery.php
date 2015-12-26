@@ -11,6 +11,27 @@ abstract class PhabricatorApplicationTransactionQuery
   private $needComments = true;
   private $needHandles  = true;
 
+  final public static function newQueryForObject(
+    PhabricatorApplicationTransactionInterface $object) {
+
+    $xaction = $object->getApplicationTransactionTemplate();
+    $target_class = get_class($xaction);
+
+    $queries = id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->execute();
+    foreach ($queries as $query) {
+      $query_xaction = $query->getTemplateApplicationTransaction();
+      $query_class = get_class($query_xaction);
+
+      if ($query_class === $target_class) {
+        return id(clone $query);
+      }
+    }
+
+    return null;
+  }
+
   abstract public function getTemplateApplicationTransaction();
 
   protected function buildMoreWhereClauses(AphrontDatabaseConnection $conn_r) {

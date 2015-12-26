@@ -80,17 +80,11 @@ final class PhameBlogManageController extends PhameBlogController {
       ->setObject($blog)
       ->setActionList($actions);
 
-    $skin = $blog->getSkin();
-    if (!$skin) {
-      $skin = pht('(No external skin)');
-    }
-
     $domain = $blog->getDomain();
     if (!$domain) {
-      $domain = pht('(No external domain)');
+      $domain = phutil_tag('em', array(), pht('No external domain'));
     }
 
-    $properties->addProperty(pht('Skin'), $skin);
     $properties->addProperty(pht('Domain'), $domain);
 
     $feed_uri = PhabricatorEnv::getProductionURI(
@@ -140,28 +134,12 @@ final class PhameBlogManageController extends PhameBlogController {
   private function renderActions(PhameBlog $blog, PhabricatorUser $viewer) {
     $actions = id(new PhabricatorActionListView())
       ->setObject($blog)
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $blog,
       PhabricatorPolicyCapability::CAN_EDIT);
-
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-plus')
-        ->setHref($this->getApplicationURI('post/edit/?blog='.$blog->getID()))
-        ->setName(pht('Write Post'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setUser($viewer)
-        ->setIcon('fa-globe')
-        ->setHref($blog->getLiveURI())
-        ->setName(pht('View Live')));
 
     $actions->addAction(
       id(new PhabricatorActionView())

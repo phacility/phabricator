@@ -15,7 +15,6 @@ final class PhabricatorJumpNavHandler extends Phobject {
       '/^u$/i' => 'uri:/people/',
       '/^p\s+(.+)$/i' => 'project',
       '/^u\s+(\S+)$/i' => 'user',
-      '/^task:\s*(.+)/i' => 'create-task',
       '/^(?:s)\s+(\S+)/i' => 'find-symbol',
       '/^r\s+(.+)$/i' => 'find-repository',
     );
@@ -64,10 +63,6 @@ final class PhabricatorJumpNavHandler extends Phobject {
                 $uri = urisprintf('/diffusion/?order=name&name=%s', $name);
               }
               return id(new AphrontRedirectResponse())->setURI($uri);
-            case 'create-task':
-              return id(new AphrontRedirectResponse())
-                ->setURI('/maniphest/task/create/?title='
-                  .phutil_escape_uri($matches[1]));
             default:
               throw new Exception(pht("Unknown jump effect '%s'!", $effect));
           }

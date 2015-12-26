@@ -64,8 +64,9 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ),
       $source_code);
 
+    $monogram = $paste->getMonogram();
     $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb('P'.$paste->getID(), '/P'.$paste->getID());
+      ->addTextCrumb($monogram, '/'.$monogram);
 
     $timeline = $this->buildTransactionTimeline(
       $paste,
@@ -74,6 +75,9 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     $comment_view = id(new PhabricatorPasteEditEngine())
       ->setViewer($viewer)
       ->buildEditEngineCommentView($paste);
+
+    $timeline->setQuoteRef($monogram);
+    $comment_view->setTransactionTimeline($timeline);
 
     return $this->newPage()
       ->setTitle($paste->getFullName())
@@ -125,22 +129,42 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
     $id = $paste->getID();
 
-    return id(new PhabricatorActionListView())
+    $action_list = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($paste)
-      ->setObjectURI($this->getRequest()->getRequestURI())
-      ->addAction(
+      ->setObject($paste);
+
+    $action_list->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit Paste'))
           ->setIcon('fa-pencil')
           ->setDisabled(!$can_edit)
-          ->setWorkflow(!$can_edit)
-          ->setHref($this->getApplicationURI("edit/{$id}/")))
-      ->addAction(
+          ->setHref($this->getApplicationURI("edit/{$id}/")));
+
+    if ($paste->isArchived()) {
+      $action_list->addAction(
+        id(new PhabricatorActionView())
+            ->setName(pht('Activate Paste'))
+            ->setIcon('fa-check')
+            ->setDisabled(!$can_edit)
+            ->setWorkflow($can_edit)
+            ->setHref($this->getApplicationURI("archive/{$id}/")));
+    } else {
+      $action_list->addAction(
+        id(new PhabricatorActionView())
+            ->setName(pht('Archive Paste'))
+            ->setIcon('fa-ban')
+            ->setDisabled(!$can_edit)
+            ->setWorkflow($can_edit)
+            ->setHref($this->getApplicationURI("archive/{$id}/")));
+    }
+
+    $action_list->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('View Raw File'))
           ->setIcon('fa-file-text-o')
           ->setHref($this->getApplicationURI("raw/{$id}/")));
+
+    return $action_list;
   }
 
   private function buildPropertyView(

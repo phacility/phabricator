@@ -74,8 +74,7 @@ final class HarbormasterBuildableViewController
 
     $list = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($buildable)
-      ->setObjectURI($buildable->getMonogram());
+      ->setObject($buildable);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,

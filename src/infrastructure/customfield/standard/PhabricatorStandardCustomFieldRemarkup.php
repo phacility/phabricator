@@ -99,5 +99,12 @@ final class PhabricatorStandardCustomFieldRemarkup
     return new AphrontStringHTTPParameterType();
   }
 
+  public function shouldAppearInApplicationSearch() {
+    return false;
+  }
+
+  public function getConduitEditParameterType() {
+    return new ConduitStringParameterType();
+  }
 
 }

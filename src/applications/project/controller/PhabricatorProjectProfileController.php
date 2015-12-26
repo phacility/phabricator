@@ -79,8 +79,7 @@ final class PhabricatorProjectProfileController
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($project)
-      ->setObjectURI($request->getRequestURI());
+      ->setObject($project);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -92,7 +91,8 @@ final class PhabricatorProjectProfileController
         ->setName(pht('Edit Details'))
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI("details/{$id}/"))
-        ->setDisabled(!$can_edit));
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
 
     $view->addAction(
       id(new PhabricatorActionView())

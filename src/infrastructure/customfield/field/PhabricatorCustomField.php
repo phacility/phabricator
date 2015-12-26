@@ -188,6 +188,13 @@ abstract class PhabricatorCustomField extends Phobject {
       $field_key_is_incomplete = true);
   }
 
+  public function getModernFieldKey() {
+    if ($this->proxy) {
+      return $this->proxy->getModernFieldKey();
+    }
+    return $this->getFieldKey();
+  }
+
 
   /**
    * Return a human-readable field name.
@@ -199,7 +206,7 @@ abstract class PhabricatorCustomField extends Phobject {
     if ($this->proxy) {
       return $this->proxy->getFieldName();
     }
-    return $this->getFieldKey();
+    return $this->getModernFieldKey();
   }
 
 
@@ -499,7 +506,7 @@ abstract class PhabricatorCustomField extends Phobject {
 
     $out = array();
     foreach ($handles as $handle) {
-      $out[] = $handle->renderLink();
+      $out[] = $handle->renderHovercardLink();
     }
 
     return phutil_implode_html(phutil_tag('br'), $out);
@@ -585,6 +592,13 @@ abstract class PhabricatorCustomField extends Phobject {
       return $this->proxy->setValueFromStorage($value);
     }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+  }
+
+  public function didSetValueFromStorage() {
+    if ($this->proxy) {
+      return $this->proxy->didSetValueFromStorage();
+    }
+    return $this;
   }
 
 
@@ -1099,6 +1113,11 @@ abstract class PhabricatorCustomField extends Phobject {
       $field->setCustomFieldHTTPParameterType($http_type);
     }
 
+    $conduit_type = $this->getConduitEditParameterType();
+    if ($conduit_type) {
+      $field->setCustomFieldConduitParameterType($conduit_type);
+    }
+
     return $field;
   }
 
@@ -1109,7 +1128,7 @@ abstract class PhabricatorCustomField extends Phobject {
 
     return $this->newEditField()
       ->setKey($this->getFieldKey())
-      ->setEditTypeKey('custom.'.$this->getFieldKey())
+      ->setEditTypeKey($this->getModernFieldKey())
       ->setLabel($this->getFieldName())
       ->setDescription($this->getFieldDescription())
       ->setTransactionType($this->getApplicationTransactionType())
@@ -1328,6 +1347,28 @@ abstract class PhabricatorCustomField extends Phobject {
       return $this->proxy->shouldAppearInConduitDictionary();
     }
     return false;
+  }
+
+  public function getConduitSearchParameterType() {
+    return $this->newConduitSearchParameterType();
+  }
+
+  protected function newConduitSearchParameterType() {
+    if ($this->proxy) {
+      return $this->proxy->newConduitSearchParameterType();
+    }
+    return null;
+  }
+
+  public function getConduitEditParameterType() {
+    return $this->newConduitEditParameterType();
+  }
+
+  protected function newConduitEditParameterType() {
+    if ($this->proxy) {
+      return $this->proxy->newConduitEditParameterType();
+    }
+    return null;
   }
 
 

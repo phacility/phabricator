@@ -92,8 +92,7 @@ abstract class PhragmentController extends PhabricatorController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($fragment)
-      ->setObjectURI($fragment->getURI());
+      ->setObject($fragment);
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Download Fragment'))

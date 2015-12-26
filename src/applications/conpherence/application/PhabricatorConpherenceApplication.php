@@ -28,12 +28,6 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
     );
   }
 
-  public function getEventListeners() {
-    return array(
-      new ConpherenceHovercardEventListener(),
-    );
-  }
-
   public function getRoutes() {
     return array(
       '/Z(?P<id>[1-9]\d*)'         => 'ConpherenceViewController',

@@ -5,7 +5,8 @@ final class DivinerLiveBook extends DivinerDAO
     PhabricatorPolicyInterface,
     PhabricatorProjectInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorFulltextInterface {
 
   protected $name;
   protected $repositoryPHID;
@@ -160,5 +161,13 @@ final class DivinerLiveBook extends DivinerDAO
 
     return $timeline;
   }
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+
+  public function newFulltextEngine() {
+    return new DivinerLiveBookFulltextEngine();
+  }
+
 
 }

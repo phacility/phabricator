@@ -6,6 +6,10 @@ final class PhamePostEditController extends PhamePostController {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(
+      pht('Blogs'),
+      $this->getApplicationURI('blog/'));
     if ($id) {
       $post = id(new PhamePostQuery())
         ->setViewer($viewer)
@@ -29,6 +33,9 @@ final class PhamePostEditController extends PhamePostController {
       $v_projects = array_reverse($v_projects);
       $v_cc = PhabricatorSubscribersQuery::loadSubscribersForPHID(
           $post->getPHID());
+      $blog = $post->getBlog();
+
+
     } else {
       $blog = id(new PhameBlogQuery())
         ->setViewer($viewer)
@@ -53,17 +60,13 @@ final class PhamePostEditController extends PhamePostController {
     }
 
     $title = $post->getTitle();
-    $phame_title = $post->getPhameTitle();
     $body = $post->getBody();
     $visibility = $post->getVisibility();
 
     $e_title       = true;
-    $e_phame_title = true;
     $validation_exception = null;
     if ($request->isFormPost()) {
       $title = $request->getStr('title');
-      $phame_title = $request->getStr('phame_title');
-      $phame_title = PhabricatorSlug::normalize($phame_title);
       $body = $request->getStr('body');
       $v_projects = $request->getArr('projects');
       $v_cc = $request->getArr('cc');
@@ -73,9 +76,6 @@ final class PhamePostEditController extends PhamePostController {
         id(new PhamePostTransaction())
           ->setTransactionType(PhamePostTransaction::TYPE_TITLE)
           ->setNewValue($title),
-        id(new PhamePostTransaction())
-          ->setTransactionType(PhamePostTransaction::TYPE_PHAME_TITLE)
-          ->setNewValue($phame_title),
         id(new PhamePostTransaction())
           ->setTransactionType(PhamePostTransaction::TYPE_BODY)
           ->setNewValue($body),
@@ -102,14 +102,12 @@ final class PhamePostEditController extends PhamePostController {
       try {
         $editor->applyTransactions($post, $xactions);
 
-        $uri = $this->getApplicationURI('/post/view/'.$post->getID().'/');
+        $uri = $post->getViewURI();
         return id(new AphrontRedirectResponse())->setURI($uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
         $e_title = $validation_exception->getShortMessage(
           PhamePostTransaction::TYPE_TITLE);
-        $e_phame_title = $validation_exception->getShortMessage(
-          PhamePostTransaction::TYPE_PHAME_TITLE);
       }
     }
 
@@ -132,16 +130,6 @@ final class PhamePostEditController extends PhamePostController {
         ->setValue($title)
         ->setID('post-title')
         ->setError($e_title))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-        ->setLabel(pht('Phame Title'))
-        ->setName('phame_title')
-        ->setValue(rtrim($phame_title, '/'))
-        ->setID('post-phame-title')
-        ->setCaption(pht('Up to 64 alphanumeric characters '.
-                     'with underscores for spaces. '.
-                     'Formatting is enforced.'))
-        ->setError($e_phame_title))
       ->appendChild(
         id(new AphrontFormSelectControl())
         ->setLabel(pht('Visibility'))
@@ -181,22 +169,17 @@ final class PhamePostEditController extends PhamePostController {
       ->setControlID('post-body')
       ->setPreviewType(PHUIRemarkupPreviewPanel::DOCUMENT);
 
-    Javelin::initBehavior(
-      'phame-post-preview',
-      array(
-        'title'       => 'post-title',
-        'phame_title' => 'post-phame-title',
-      ));
-
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
       ->setValidationException($validation_exception)
       ->setForm($form);
 
-    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(
+      $blog->getName(),
+      $blog->getViewURI());
     $crumbs->addTextCrumb(
       $page_title,
-      $this->getApplicationURI('/post/view/'.$id.'/'));
+      $cancel_uri);
 
     return $this->newPage()
       ->setTitle($page_title)

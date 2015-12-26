@@ -20,7 +20,6 @@ final class PhameQueryPostsConduitAPIMethod extends PhameConduitAPIMethod {
       'phids'          => 'optional list<phid>',
       'blogPHIDs'      => 'optional list<phid>',
       'bloggerPHIDs'   => 'optional list<phid>',
-      'phameTitles'    => 'optional list<string>',
       'published'      => 'optional bool',
       'publishedAfter' => 'optional date',
       'before'         => 'optional int',
@@ -56,11 +55,6 @@ final class PhameQueryPostsConduitAPIMethod extends PhameConduitAPIMethod {
     $blogger_phids = $request->getValue('bloggerPHIDs', array());
     if ($blogger_phids) {
       $query->withBloggerPHIDs($blogger_phids);
-    }
-
-    $phame_titles = $request->getValue('phameTitles', array());
-    if ($phame_titles) {
-      $query->withPhameTitles($phame_titles);
     }
 
     $published = $request->getValue('published', null);

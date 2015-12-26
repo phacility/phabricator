@@ -39,4 +39,8 @@ final class PhabricatorTextAreaEditField
     return $control;
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitStringParameterType();
+  }
+
 }

@@ -45,6 +45,7 @@ final class PhabricatorPolicyEditEngineExtension
         'capability' => PhabricatorPolicyCapability::CAN_VIEW,
         'label' => pht('View Policy'),
         'description' => pht('Controls who can view the object.'),
+        'description.conduit' => pht('Change the view policy of the object.'),
         'edit' => 'view',
       ),
       PhabricatorTransactions::TYPE_EDIT_POLICY => array(
@@ -53,6 +54,7 @@ final class PhabricatorPolicyEditEngineExtension
         'capability' => PhabricatorPolicyCapability::CAN_EDIT,
         'label' => pht('Edit Policy'),
         'description' => pht('Controls who can edit the object.'),
+        'description.conduit' => pht('Change the edit policy of the object.'),
         'edit' => 'edit',
       ),
       PhabricatorTransactions::TYPE_JOIN_POLICY => array(
@@ -61,6 +63,7 @@ final class PhabricatorPolicyEditEngineExtension
         'capability' => PhabricatorPolicyCapability::CAN_JOIN,
         'label' => pht('Join Policy'),
         'description' => pht('Controls who can join the object.'),
+        'description.conduit' => pht('Change the join policy of the object.'),
         'edit' => 'join',
       ),
     );
@@ -76,21 +79,25 @@ final class PhabricatorPolicyEditEngineExtension
       $aliases = $spec['aliases'];
       $label = $spec['label'];
       $description = $spec['description'];
+      $conduit_description = $spec['description.conduit'];
       $edit = $spec['edit'];
 
       $policy_field = id(new PhabricatorPolicyEditField())
         ->setKey($key)
         ->setLabel($label)
-        ->setDescription($description)
         ->setAliases($aliases)
+        ->setIsCopyable(true)
         ->setCapability($capability)
         ->setPolicies($policies)
         ->setTransactionType($type)
         ->setEditTypeKey($edit)
+        ->setDescription($description)
+        ->setConduitDescription($conduit_description)
+        ->setConduitTypeDescription(pht('New policy PHID or constant.'))
         ->setValue($object->getPolicy($capability));
       $fields[] = $policy_field;
 
-      if (!($object instanceof PhabricatorSpacesInterface)) {
+      if ($object instanceof PhabricatorSpacesInterface) {
         if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
           $type_space = PhabricatorTransactions::TYPE_SPACE;
           if (isset($types[$type_space])) {
@@ -98,14 +105,19 @@ final class PhabricatorPolicyEditEngineExtension
               ->setKey('spacePHID')
               ->setLabel(pht('Space'))
               ->setEditTypeKey('space')
-              ->setDescription(
-                pht('Shifts the object in the Spaces application.'))
+              ->setIsCopyable(true)
+              ->setIsLockable(false)
               ->setIsReorderable(false)
               ->setAliases(array('space', 'policy.space'))
               ->setTransactionType($type_space)
+              ->setDescription(pht('Select a space for the object.'))
+              ->setConduitDescription(
+                pht('Shift the object between spaces.'))
+              ->setConduitTypeDescription(pht('New space PHID.'))
               ->setValue($object->getSpacePHID());
             $fields[] = $space_field;
 
+            $space_field->setPolicyField($policy_field);
             $policy_field->setSpaceField($space_field);
           }
         }

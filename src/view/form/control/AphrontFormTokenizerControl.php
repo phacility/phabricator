@@ -7,7 +7,7 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
   private $limit;
   private $placeholder;
   private $handles;
-  private $originalValue;
+  private $initialValue;
 
   public function setDatasource(PhabricatorTypeaheadDatasource $datasource) {
     $this->datasource = $datasource;
@@ -33,13 +33,13 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     return $this;
   }
 
-  public function setOriginalValue(array $original_value) {
-    $this->originalValue = $original_value;
+  public function setInitialValue(array $initial_value) {
+    $this->initialValue = $initial_value;
     return $this;
   }
 
-  public function getOriginalValue() {
-    return $this->originalValue;
+  public function getInitialValue() {
+    return $this->initialValue;
   }
 
   public function willRender() {
@@ -84,9 +84,9 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       ->setID($id)
       ->setValue($tokens);
 
-    $original_value = $this->getOriginalValue();
-    if ($original_value !== null) {
-      $template->setOriginalValue($original_value);
+    $initial_value = $this->getInitialValue();
+    if ($initial_value !== null) {
+      $template->setInitialValue($initial_value);
     }
 
     $username = null;
@@ -112,6 +112,7 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
         'username' => $username,
         'placeholder' => $placeholder,
         'browseURI' => $browse_uri,
+        'disabled' => $this->getDisabled(),
       ));
     }
 

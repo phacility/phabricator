@@ -1,73 +1,91 @@
 <?php
 
-final class PhameBlogViewController extends PhameBlogController {
-
-  private $blog;
-
-  public function shouldAllowPublic() {
-    return true;
-  }
+final class PhameBlogViewController extends PhameLiveController {
 
   public function handleRequest(AphrontRequest $request) {
-    $viewer = $request->getViewer();
-    $id = $request->getURIData('id');
-
-    $blog = id(new PhameBlogQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($id))
-      ->needProfileImage(true)
-      ->executeOne();
-    if (!$blog) {
-      return new Aphront404Response();
+    $response = $this->setupLiveEnvironment();
+    if ($response) {
+      return $response;
     }
-    $this->blog = $blog;
+
+    $viewer = $this->getViewer();
+    $blog = $this->getBlog();
+
+    $is_live = $this->getIsLive();
+    $is_external = $this->getIsExternal();
 
     $pager = id(new AphrontCursorPagerView())
       ->readFromRequest($request);
 
-    $posts = id(new PhamePostQuery())
+    $post_query = id(new PhamePostQuery())
       ->setViewer($viewer)
-      ->withBlogPHIDs(array($blog->getPHID()))
-      ->executeWithCursorPager($pager);
+      ->withBlogPHIDs(array($blog->getPHID()));
 
-    if ($blog->isArchived()) {
-      $header_icon = 'fa-ban';
-      $header_name = pht('Archived');
-      $header_color = 'dark';
-    } else {
-      $header_icon = 'fa-check';
-      $header_name = pht('Active');
-      $header_color = 'bluegrey';
+    if ($is_live) {
+      $post_query->withVisibility(PhameConstants::VISIBILITY_PUBLISHED);
     }
 
-    $actions = $this->renderActions($blog, $viewer);
-    $action_button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('Actions'))
-      ->setHref('#')
-      ->setIconFont('fa-bars')
-      ->addClass('phui-mobile-menu')
-      ->setDropdownMenu($actions);
+    $posts = $post_query->executeWithCursorPager($pager);
 
     $header = id(new PHUIHeaderView())
       ->setHeader($blog->getName())
-      ->setUser($viewer)
-      ->setPolicyObject($blog)
-      ->setStatus($header_icon, $header_color, $header_name)
-      ->addActionLink($action_button);
+      ->setUser($viewer);
 
-    $post_list = id(new PhamePostListView())
-      ->setPosts($posts)
-      ->setViewer($viewer)
-      ->setNodata(pht('This blog has no visible posts.'));
+    if (!$is_external) {
+      if ($blog->isArchived()) {
+        $header_icon = 'fa-ban';
+        $header_name = pht('Archived');
+        $header_color = 'dark';
+      } else {
+        $header_icon = 'fa-check';
+        $header_name = pht('Active');
+        $header_color = 'bluegrey';
+      }
+      $header->setStatus($header_icon, $header_color, $header_name);
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->setBorder(true);
-    $crumbs->addTextCrumb(
-      pht('Blogs'),
-      $this->getApplicationURI('blog/'));
-    $crumbs->addTextCrumb(
-      $blog->getName());
+      $actions = $this->renderActions($blog);
+      $action_button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText(pht('Actions'))
+        ->setHref('#')
+        ->setIconFont('fa-bars')
+        ->addClass('phui-mobile-menu')
+        ->setDropdownMenu($actions);
+
+      $header->addActionLink($action_button);
+
+      $header->setPolicyObject($blog);
+    }
+
+    if ($posts) {
+      $post_list = id(new PhamePostListView())
+        ->setPosts($posts)
+        ->setViewer($viewer)
+        ->setIsExternal($is_external)
+        ->setIsLive($is_live)
+        ->setNodata(pht('This blog has no visible posts.'));
+    } else {
+      $create_button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText(pht('Write a Post'))
+        ->setHref($this->getApplicationURI('post/edit/?blog='.$blog->getID()))
+        ->setColor(PHUIButtonView::GREEN);
+
+      $post_list = id(new PHUIBigInfoView())
+        ->setIcon('fa-star')
+        ->setTitle($blog->getName())
+        ->setDescription(
+          pht('No one has written any blog posts yet.'));
+
+      $can_edit = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $blog,
+        PhabricatorPolicyCapability::CAN_EDIT);
+
+      if ($can_edit) {
+        $post_list->addAction($create_button);
+      }
+    }
 
     $page = id(new PHUIDocumentViewPro())
       ->setHeader($header)
@@ -75,10 +93,9 @@ final class PhameBlogViewController extends PhameBlogController {
 
     $description = null;
     if (strlen($blog->getDescription())) {
-      $description = PhabricatorMarkupEngine::renderOneObject(
-        id(new PhabricatorMarkupOneOff())->setContent($blog->getDescription()),
-        'default',
-        $viewer);
+      $description = new PHUIRemarkupView(
+        $viewer,
+        $blog->getDescription());
     } else {
       $description = phutil_tag('em', array(), pht('No description.'));
     }
@@ -88,20 +105,32 @@ final class PhameBlogViewController extends PhameBlogController {
       ->setDescription($description)
       ->setImage($blog->getProfileImageURI());
 
-    return $this->newPage()
+    $crumbs = $this->buildApplicationCrumbs();
+
+    $page = $this->newPage()
       ->setTitle($blog->getName())
+      ->setPageObjectPHIDs(array($blog->getPHID()))
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
           $page,
           $about,
       ));
+
+    if ($is_live) {
+      $page
+        ->setShowChrome(false)
+        ->setShowFooter(false);
+    }
+
+    return $page;
   }
 
-  private function renderActions(PhameBlog $blog, PhabricatorUser $viewer) {
+  private function renderActions(PhameBlog $blog) {
+    $viewer = $this->getViewer();
+
     $actions = id(new PhabricatorActionListView())
       ->setObject($blog)
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(

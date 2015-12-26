@@ -117,7 +117,6 @@ final class PholioMockViewController extends PholioController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($mock);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -132,6 +131,24 @@ final class PholioMockViewController extends PholioController {
       ->setHref($this->getApplicationURI('/edit/'.$mock->getID().'/'))
       ->setDisabled(!$can_edit)
       ->setWorkflow(!$can_edit));
+
+    if ($mock->isClosed()) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+        ->setIcon('fa-check')
+        ->setName(pht('Open Mock'))
+        ->setHref($this->getApplicationURI('/archive/'.$mock->getID().'/'))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
+    } else {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+        ->setIcon('fa-ban')
+        ->setName(pht('Close Mock'))
+        ->setHref($this->getApplicationURI('/archive/'.$mock->getID().'/'))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
+    }
 
     $actions->addAction(
       id(new PhabricatorActionView())

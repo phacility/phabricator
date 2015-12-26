@@ -4,7 +4,6 @@ final class PhabricatorCustomFieldEditType
   extends PhabricatorEditType {
 
   private $customField;
-  private $valueType;
 
   public function setCustomField(PhabricatorCustomField $custom_field) {
     $this->customField = $custom_field;
@@ -15,23 +14,9 @@ final class PhabricatorCustomFieldEditType
     return $this->customField;
   }
 
-  public function setValueType($value_type) {
-    $this->valueType = $value_type;
-    return $this;
-  }
-
-  public function getValueType() {
-    return $this->valueType;
-  }
-
   public function getMetadata() {
     $field = $this->getCustomField();
     return parent::getMetadata() + $field->getApplicationTransactionMetadata();
-  }
-
-  public function getValueDescription() {
-    $field = $this->getCustomField();
-    return $field->getFieldDescription();
   }
 
   public function generateTransactions(

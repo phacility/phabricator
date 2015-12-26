@@ -11,7 +11,8 @@ final class PhabricatorRepositoryCommit
     PhabricatorMentionableInterface,
     HarbormasterBuildableInterface,
     PhabricatorCustomFieldInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorFulltextInterface {
 
   protected $repositoryID;
   protected $phid;
@@ -435,6 +436,13 @@ final class PhabricatorRepositoryCommit
     }
 
     return $timeline->setPathMap($path_map);
+  }
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+
+  public function newFulltextEngine() {
+    return new DiffusionCommitFulltextEngine();
   }
 
 }

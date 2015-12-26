@@ -58,7 +58,7 @@ final class PhabricatorVersionedDraft extends PhabricatorDraftDAO {
     return id(new PhabricatorVersionedDraft())
       ->setObjectPHID($object_phid)
       ->setAuthorPHID($viewer_phid)
-      ->setVersion($version)
+      ->setVersion((int)$version)
       ->save();
   }
 

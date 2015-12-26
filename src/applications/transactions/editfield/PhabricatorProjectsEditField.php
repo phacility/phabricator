@@ -11,4 +11,8 @@ final class PhabricatorProjectsEditField
     return new AphrontProjectListHTTPParameterType();
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitProjectListParameterType();
+  }
+
 }

@@ -519,15 +519,24 @@ properly, and submit values. */
   width: 180px;
 }
 
-.aphront-form-choose-table td {
+.phui-form-iconset-table td {
   vertical-align: middle;
   padding: 4px 0;
 }
 
-.aphront-form-choose-table .aphront-form-choose-button-cell {
+.phui-form-iconset-table .phui-form-iconset-button-cell {
   padding: 4px 8px;
 }
 
 .aphront-form-preview-hidden {
   opacity: 0.5;
+}
+
+.aphront-form-error .phui-icon-view {
+  color: {$lightgreyborder};
+  font-size: 16px;
+}
+
+.device-desktop .aphront-form-error .phui-icon-view:hover {
+  color: {$darkgreyborder};
 }

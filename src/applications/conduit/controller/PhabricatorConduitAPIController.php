@@ -110,19 +110,11 @@ final class PhabricatorConduitAPIController
 
     $time_end = microtime(true);
 
-    $connection_id = null;
-    if (idx($metadata, 'connectionID')) {
-      $connection_id = $metadata['connectionID'];
-    } else if (($method == 'conduit.connect') && $result) {
-      $connection_id = idx($result, 'connectionID');
-    }
-
     $log
       ->setCallerPHID(
         isset($conduit_user)
           ? $conduit_user->getPHID()
           : null)
-      ->setConnectionID($connection_id)
       ->setError((string)$error_code)
       ->setDuration(1000000 * ($time_end - $time_start));
 
