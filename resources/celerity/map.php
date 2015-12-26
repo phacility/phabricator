@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => 'ac9bbf2a',
+    'core.pkg.css' => 'a419cf4b',
     'core.pkg.js' => '400453e4',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '2de124c9',
@@ -111,7 +111,7 @@ return array(
     'rsrc/css/font/font-aleo.css' => '8bdb2835',
     'rsrc/css/font/font-awesome.css' => 'c43323c5',
     'rsrc/css/font/font-lato.css' => 'c7ccd872',
-    'rsrc/css/font/phui-font-icon-base.css' => 'c0fc32fa',
+    'rsrc/css/font/phui-font-icon-base.css' => 'ecbbb4c2',
     'rsrc/css/layout/phabricator-filetree-view.css' => 'fccf9f82',
     'rsrc/css/layout/phabricator-hovercard-view.css' => '1239cd52',
     'rsrc/css/layout/phabricator-side-menu-view.css' => 'bec2458e',
@@ -509,7 +509,6 @@ return array(
     'rsrc/js/phuix/PHUIXDropdownMenu.js' => 'bd4c8dca',
     'rsrc/js/phuix/PHUIXFormControl.js' => '8fba1997',
     'rsrc/js/phuix/PHUIXIconView.js' => 'bff6884b',
-    'rsrc/js/special/behavior-trail.js' => '740fe844',
   ),
   'symbols' => array(
     'almanac-css' => 'dbb9b3af',
@@ -646,7 +645,6 @@ return array(
     'javelin-behavior-phabricator-search-typeahead' => '048330fa',
     'javelin-behavior-phabricator-show-older-transactions' => 'dbbf48b6',
     'javelin-behavior-phabricator-tooltips' => '3ee3408b',
-    'javelin-behavior-phabricator-trail' => '740fe844',
     'javelin-behavior-phabricator-transaction-comment-form' => 'b23b49e6',
     'javelin-behavior-phabricator-transaction-list' => '13c739ea',
     'javelin-behavior-phabricator-watch-anchor' => '9f36c42d',
@@ -806,7 +804,7 @@ return array(
     'phui-document-view-css' => 'a4a1c3b9',
     'phui-document-view-pro-css' => 'e0fad431',
     'phui-feed-story-css' => 'b7b26d23',
-    'phui-font-icon-base-css' => 'c0fc32fa',
+    'phui-font-icon-base-css' => 'ecbbb4c2',
     'phui-fontkit-css' => '9cda225e',
     'phui-form-css' => '0b98e572',
     'phui-form-view-css' => '4a1a0f5e',
@@ -1361,12 +1359,6 @@ return array(
       'javelin-behavior',
       'javelin-vector',
       'javelin-dom',
-    ),
-    '740fe844' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-stratcom',
-      'javelin-vector',
     ),
     '76b9fc3e' => array(
       'javelin-behavior',

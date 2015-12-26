@@ -161,21 +161,3 @@
 .device-desktop a.phui-icon-view.bluegrey:hover {
   color: {$darkbluetext};
 }
-
-
-.ph-bounceout {
-  animation: bounceout 0.5s linear forwards;
-}
-
-@keyframes bounceout {
-  0% {
-    transform: scale(1.0) rotate(0deg);
-  }
-  10% {
-    transform: scale(2.0) rotate(0deg);
-  }
-  100% {
-    transform: scale(0) rotate(359deg);
-    opacity: 0;
-  }
-}
