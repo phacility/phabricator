@@ -962,6 +962,28 @@ abstract class PhabricatorEditEngine
       $header_text = $this->getObjectEditTitleText($object);
     }
 
+    $show_preview = !$request->isAjax();
+
+    if ($show_preview) {
+      $previews = array();
+      foreach ($fields as $field) {
+        $preview = $field->getPreviewPanel();
+        if (!$preview) {
+          continue;
+        }
+
+        $control_id = $field->getControlID();
+
+        $preview
+          ->setControlID($control_id)
+          ->setPreviewURI('/transactions/remarkuppreview/');
+
+        $previews[] = $preview;
+      }
+    } else {
+      $previews = array();
+    }
+
     $form = $this->buildEditForm($object, $fields);
 
     if ($request->isAjax()) {
@@ -998,7 +1020,8 @@ abstract class PhabricatorEditEngine
     return $controller->newPage()
       ->setTitle($header_text)
       ->setCrumbs($crumbs)
-      ->appendChild($box);
+      ->appendChild($box)
+      ->appendChild($previews);
   }
 
   protected function newEditResponse(

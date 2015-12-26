@@ -14,6 +14,8 @@ abstract class PhabricatorEditField extends Phobject {
   private $metadata = array();
   private $editTypeKey;
   private $isRequired;
+  private $previewPanel;
+  private $controlID;
 
   private $description;
   private $conduitDescription;
@@ -251,6 +253,15 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->commentActionValue;
   }
 
+  public function setPreviewPanel(PHUIRemarkupPreviewPanel $preview_panel) {
+    $this->previewPanel = $preview_panel;
+    return $this;
+  }
+
+  public function getPreviewPanel() {
+    return $this->previewPanel;
+  }
+
   protected function newControl() {
     throw new PhutilMethodNotImplementedException();
   }
@@ -285,6 +296,13 @@ abstract class PhabricatorEditField extends Phobject {
     return $control;
   }
 
+  public function getControlID() {
+    if (!$this->controlID) {
+      $this->controlID = celerity_generate_unique_node_id();
+    }
+    return $this->controlID;
+  }
+
   protected function renderControl() {
     $control = $this->buildControl();
     if ($control === null) {
@@ -307,6 +325,10 @@ abstract class PhabricatorEditField extends Phobject {
     }
 
     $control->setDisabled($disabled);
+
+    if ($this->controlID) {
+      $control->setID($this->controlID);
+    }
 
     return $control;
   }
