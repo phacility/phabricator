@@ -201,11 +201,11 @@ final class PhabricatorProjectQuery
 
     $viewer_phid = $this->getViewer()->getPHID();
 
-    $member_type = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+    $material_type = PhabricatorProjectMaterializedMemberEdgeType::EDGECONST;
     $watcher_type = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
 
     $types = array();
-    $types[] = $member_type;
+    $types[] = $material_type;
     if ($this->needWatchers) {
       $types[] = $watcher_type;
     }
@@ -255,7 +255,7 @@ final class PhabricatorProjectQuery
       if ($any_edges) {
         $member_phids = $edge_query->getDestinationPHIDs(
           $source_phids,
-          array($member_type));
+          array($material_type));
       } else {
         $member_phids = array();
       }
@@ -488,7 +488,7 @@ final class PhabricatorProjectQuery
         $conn,
         'JOIN %T e ON e.src = p.phid AND e.type = %d',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-        PhabricatorProjectProjectHasMemberEdgeType::EDGECONST);
+        PhabricatorProjectMaterializedMemberEdgeType::EDGECONST);
     }
 
     if ($this->slugs !== null) {

@@ -509,12 +509,13 @@ final class PhabricatorProjectTransactionEditor
   }
 
   protected function willPublish(PhabricatorLiskDAO $object, array $xactions) {
-    $member_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $object->getPHID(),
-      PhabricatorProjectProjectHasMemberEdgeType::EDGECONST);
-    $object->attachMemberPHIDs($member_phids);
-
-    return $object;
+    // NOTE: We're using the omnipotent user here because the original actor
+    // may no longer have permission to view the object.
+    return id(new PhabricatorProjectQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($object->getPHID()))
+      ->needMembers(true)
+      ->executeOne();
   }
 
   protected function shouldSendMail(
@@ -719,9 +720,12 @@ final class PhabricatorProjectTransactionEditor
       $object_phid = $object->getPHID();
 
       if ($object_phid) {
-        $members = PhabricatorEdgeQuery::loadDestinationPHIDs(
-          $object_phid,
-          PhabricatorProjectProjectHasMemberEdgeType::EDGECONST);
+        $project = id(new PhabricatorProjectQuery())
+          ->setViewer($this->getActor())
+          ->withPHIDs(array($object_phid))
+          ->needMembers(true)
+          ->executeOne();
+        $members = $project->getMemberPHIDs();
       } else {
         $members = array();
       }
