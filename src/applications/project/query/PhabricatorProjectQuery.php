@@ -226,11 +226,21 @@ final class PhabricatorProjectQuery
 
     // If we only need to know if the viewer is a member, we can restrict
     // the query to just their PHID.
+    $any_edges = true;
     if (!$this->needMembers && !$this->needWatchers) {
-      $edge_query->withDestinationPHIDs(array($viewer_phid));
+      if ($viewer_phid) {
+        $edge_query->withDestinationPHIDs(array($viewer_phid));
+      } else {
+        // If we don't need members or watchers and don't have a viewer PHID
+        // (viewer is logged-out or omnipotent), they'll never be a member
+        // so we don't need to issue this query at all.
+        $any_edges = false;
+      }
     }
 
-    $edge_query->execute();
+    if ($any_edges) {
+      $edge_query->execute();
+    }
 
     $membership_projects = array();
     foreach ($projects as $project) {
@@ -242,9 +252,13 @@ final class PhabricatorProjectQuery
         $source_phids = array($project_phid);
       }
 
-      $member_phids = $edge_query->getDestinationPHIDs(
-        $source_phids,
-        array($member_type));
+      if ($any_edges) {
+        $member_phids = $edge_query->getDestinationPHIDs(
+          $source_phids,
+          array($member_type));
+      } else {
+        $member_phids = array();
+      }
 
       if (in_array($viewer_phid, $member_phids)) {
         $membership_projects[$project_phid] = $project;
