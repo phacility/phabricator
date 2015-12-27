@@ -54,7 +54,6 @@ final class PhabricatorProjectEditDetailsController
     $v_slugs = $project_slugs;
     $v_color = $project->getColor();
     $v_icon = $project->getIcon();
-    $v_locked = $project->getIsMembershipLocked();
 
     $validation_exception = null;
 
@@ -69,14 +68,12 @@ final class PhabricatorProjectEditDetailsController
       $v_join = $request->getStr('can_join');
       $v_color = $request->getStr('color');
       $v_icon = $request->getStr('icon');
-      $v_locked = $request->getInt('is_membership_locked', 0);
 
       $type_name = PhabricatorProjectTransaction::TYPE_NAME;
       $type_slugs = PhabricatorProjectTransaction::TYPE_SLUGS;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
       $type_icon = PhabricatorProjectTransaction::TYPE_ICON;
       $type_color = PhabricatorProjectTransaction::TYPE_COLOR;
-      $type_locked = PhabricatorProjectTransaction::TYPE_LOCKED;
 
       $xactions = array();
 
@@ -107,10 +104,6 @@ final class PhabricatorProjectEditDetailsController
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType($type_color)
         ->setNewValue($v_color);
-
-      $xactions[] = id(new PhabricatorProjectTransaction())
-        ->setTransactionType($type_locked)
-        ->setNewValue($v_locked);
 
       $xactions = array_merge(
         $xactions,
@@ -190,11 +183,6 @@ final class PhabricatorProjectEditDetailsController
 
     $shades = PhabricatorProjectIconSet::getColorMap();
 
-    list($can_lock, $lock_message) = $this->explainApplicationCapability(
-      ProjectCanLockProjectsCapability::CAPABILITY,
-      pht('You can update the Lock Project setting.'),
-      pht('You can not update the Lock Project setting.'));
-
     $form
       ->appendChild(
         id(new PHUIFormIconSetControl())
@@ -249,17 +237,7 @@ final class PhabricatorProjectEditDetailsController
             pht('Users who can edit a project can always join a project.'))
           ->setPolicyObject($project)
           ->setPolicies($policies)
-          ->setCapability(PhabricatorPolicyCapability::CAN_JOIN))
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-        ->setLabel(pht('Lock Project'))
-        ->setDisabled(!$can_lock)
-        ->addCheckbox(
-          'is_membership_locked',
-          1,
-          pht('Prevent members from leaving this project.'),
-          $v_locked)
-        ->setCaption($lock_message));
+          ->setCapability(PhabricatorPolicyCapability::CAN_JOIN));
 
     if ($request->isAjax()) {
       $errors = array();

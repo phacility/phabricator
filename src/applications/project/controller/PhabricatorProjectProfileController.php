@@ -106,6 +106,25 @@ final class PhabricatorProjectProfileController
           ->setWorkflow(true));
     }
 
+    $can_lock = $can_edit && $this->hasApplicationCapability(
+      ProjectCanLockProjectsCapability::CAPABILITY);
+
+    if ($project->getIsMembershipLocked()) {
+      $lock_name = pht('Unlock Project');
+      $lock_icon = 'fa-unlock';
+    } else {
+      $lock_name = pht('Lock Project');
+      $lock_icon = 'fa-lock';
+    }
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName($lock_name)
+        ->setIcon($lock_icon)
+        ->setHref($this->getApplicationURI("lock/{$id}/"))
+        ->setDisabled(!$can_lock)
+        ->setWorkflow(true));
+
     $action = null;
     if (!$project->isUserMember($viewer->getPHID())) {
       $can_join = PhabricatorPolicyFilter::hasCapability(
