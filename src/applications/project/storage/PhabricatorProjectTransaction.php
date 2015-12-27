@@ -99,9 +99,15 @@ final class PhabricatorProjectTransaction
   public function getTitle() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();
-    $author_handle = $this->renderHandleLink($this->getAuthorPHID());
+    $author_phid = $this->getAuthorPHID();
+    $author_handle = $this->renderHandleLink($author_phid);
 
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return pht(
+          '%s created this project.',
+          $this->renderHandleLink($author_phid));
+
       case self::TYPE_NAME:
         if ($old === null) {
           return pht(

@@ -76,7 +76,7 @@ final class PhabricatorProjectProfileController
       id(new PhabricatorActionView())
         ->setName(pht('Edit Details'))
         ->setIcon('fa-pencil')
-        ->setHref($this->getApplicationURI("details/{$id}/"))
+        ->setHref($this->getApplicationURI("edit/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 

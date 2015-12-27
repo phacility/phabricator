@@ -745,4 +745,38 @@ final class PhabricatorProjectTransactionEditor
     return $copy;
   }
 
+  protected function expandTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $actor = $this->getActor();
+    $actor_phid = $actor->getPHID();
+
+    $results = parent::expandTransactions($object, $xactions);
+
+    // Automatically add the author as a member when they create a project
+    // if they're using the web interface.
+
+    $content_source = $this->getContentSource();
+    $source_web = PhabricatorContentSource::SOURCE_WEB;
+    $is_web = ($content_source->getSource() === $source_web);
+
+    if ($this->getIsNewObject() && $is_web) {
+      if ($actor_phid) {
+        $type_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+
+        $results[] = id(new PhabricatorProjectTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+          ->setMetadataValue('edge:type', $type_member)
+          ->setNewValue(
+            array(
+              '+' => array($actor_phid => $actor_phid),
+            ));
+      }
+    }
+
+    return $results;
+  }
+
+
 }
