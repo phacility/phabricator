@@ -308,6 +308,11 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return $this->color;
   }
 
+  public function getURI() {
+    $id = $this->getID();
+    return "/project/view/{$id}/";
+  }
+
   public function save() {
     if (!$this->getMailKey()) {
       $this->setMailKey(Filesystem::readRandomCharacters(20));

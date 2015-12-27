@@ -46,8 +46,11 @@ final class PhabricatorProjectProfileController
     $nav = $this->buildIconNavView($project);
     $nav->selectFilter("profile/{$id}/");
 
+    $crumbs = $this->buildApplicationCrumbs();
+
     return $this->newPage()
       ->setNavigation($nav)
+      ->setCrumbs($crumbs)
       ->setTitle($project->getName())
       ->setPageObjectPHIDs(array($project->getPHID()))
       ->appendChild($object_box)

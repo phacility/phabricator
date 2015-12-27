@@ -95,14 +95,16 @@ final class PhabricatorProjectMembersEditController
 
     $nav = $this->buildIconNavView($project);
     $nav->selectFilter("members/{$id}/");
-    $nav->appendChild($form_box);
-    $nav->appendChild($member_list);
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Members'));
+
+    return $this->newPage()
+      ->setNavigation($nav)
+      ->setCrumbs($crumbs)
+      ->setTitle(array($project->getName(), $title))
+      ->appendChild($form_box)
+      ->appendChild($member_list);
   }
 
   private function renderMemberList(

@@ -154,4 +154,22 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     return $nav;
   }
 
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $project = $this->getProject();
+    if ($project) {
+      $ancestors = $project->getAncestorProjects();
+      $ancestors = array_reverse($ancestors);
+      $ancestors[] = $project;
+      foreach ($ancestors as $ancestor) {
+        $crumbs->addTextCrumb(
+          $project->getName(),
+          $project->getURI());
+      }
+    }
+
+    return $crumbs;
+  }
+
 }

@@ -37,11 +37,14 @@ final class PhabricatorProjectFeedController
     $nav->selectFilter("feed/{$id}/");
     $nav->appendChild($box);
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $project->getName(),
-      ));
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Feed'));
+
+    return $this->newPage()
+      ->setNavigation($nav)
+      ->setCrumbs($crumbs)
+      ->setTitle(array($project->getName(), pht('Feed')))
+      ->appendChild($box);
   }
 
   private function renderStories(array $stories) {
