@@ -1081,7 +1081,9 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     return $fields;
   }
 
-  public function buildConduitResponse(ConduitAPIRequest $request) {
+  public function buildConduitResponse(
+    ConduitAPIRequest $request,
+    ConduitAPIMethod $method) {
     $viewer = $this->requireViewer();
 
     $query_key = $request->getValue('queryKey');
@@ -1172,6 +1174,12 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
             $attachment_specs[$key]);
         }
 
+        // If this is empty, we still want to emit a JSON object, not a
+        // JSON list.
+        if (!$attachment_map) {
+          $attachment_map = (object)$attachment_map;
+        }
+
         $id = (int)$object->getID();
         $phid = $object->getPHID();
 
@@ -1187,6 +1195,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
     return array(
       'data' => $data,
+      'maps' => $method->getQueryMaps($query),
       'query' => array(
         'queryKey' => $saved_query->getQueryKey(),
       ),

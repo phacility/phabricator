@@ -9,7 +9,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     PhabricatorSubscribableInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorFulltextInterface {
+    PhabricatorFulltextInterface,
+    PhabricatorConduitResultInterface {
 
   protected $name;
   protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;
@@ -523,6 +524,34 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function newFulltextEngine() {
     return new PhabricatorProjectFulltextEngine();
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of the project.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('slug')
+        ->setType('string')
+        ->setDescription(pht('Primary slug/hashtag.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getName(),
+      'slug' => $this->getPrimarySlug(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 }
