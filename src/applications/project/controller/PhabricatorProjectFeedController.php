@@ -35,7 +35,6 @@ final class PhabricatorProjectFeedController
 
     $nav = $this->buildIconNavView($project);
     $nav->selectFilter("feed/{$id}/");
-    $nav->appendChild($box);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Feed'));

@@ -151,6 +151,12 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     $nav->addIcon("members/{$id}/", pht('Members'), 'fa-group');
     $nav->addIcon("details/{$id}/", pht('Edit Details'), 'fa-pencil');
 
+    if (PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
+      $nav->addIcon("subprojects/{$id}/", pht('Subprojects'), 'fa-sitemap');
+      $nav->addIcon("milestones/{$id}/", pht('Milestones'), 'fa-map-marker');
+    }
+
+
     return $nav;
   }
 

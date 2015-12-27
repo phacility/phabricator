@@ -60,6 +60,10 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
         'picture/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectEditPictureController',
         'create/' => 'PhabricatorProjectEditDetailsController',
+        'subprojects/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorProjectSubprojectsController',
+        'milestones/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorProjectMilestonesController',
         'board/(?P<id>[1-9]\d*)/'.
           '(?P<filter>filter/)?'.
           '(?:query/(?P<queryKey>[^/]+)/)?'
