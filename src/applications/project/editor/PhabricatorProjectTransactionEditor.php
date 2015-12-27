@@ -74,23 +74,10 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_COLOR:
       case PhabricatorProjectTransaction::TYPE_LOCKED:
       case PhabricatorProjectTransaction::TYPE_PARENT:
+      case PhabricatorProjectTransaction::TYPE_MILESTONE:
         return $xaction->getNewValue();
       case PhabricatorProjectTransaction::TYPE_SLUGS:
         return $this->normalizeSlugs($xaction->getNewValue());
-      case PhabricatorProjectTransaction::TYPE_MILESTONE:
-        $current = queryfx_one(
-          $object->establishConnection('w'),
-          'SELECT MAX(milestoneNumber) n
-            FROM %T
-            WHERE parentProjectPHID = %s',
-          $object->getTableName(),
-          $object->getParentProject()->getPHID());
-        if (!$current) {
-          $number = 1;
-        } else {
-          $number = (int)$current['n'] + 1;
-        }
-        return $number;
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -127,7 +114,21 @@ final class PhabricatorProjectTransactionEditor
         $object->setParentProjectPHID($xaction->getNewValue());
         return;
       case PhabricatorProjectTransaction::TYPE_MILESTONE:
-        $object->setMilestoneNumber($xaction->getNewValue());
+        $current = queryfx_one(
+          $object->establishConnection('w'),
+          'SELECT MAX(milestoneNumber) n
+            FROM %T
+            WHERE parentProjectPHID = %s',
+          $object->getTableName(),
+          $object->getParentProject()->getPHID());
+        if (!$current) {
+          $number = 1;
+        } else {
+          $number = (int)$current['n'] + 1;
+        }
+
+        $object->setMilestoneNumber($number);
+        $object->setParentProjectPHID($xaction->getNewValue());
         return;
     }
 
@@ -237,6 +238,84 @@ final class PhabricatorProjectTransactionEditor
     }
 
     return parent::applyBuiltinExternalTransaction($object, $xaction);
+  }
+
+  protected function validateAllTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $errors = array();
+
+    // Prevent creating projects which are both subprojects and milestones,
+    // since this does not make sense, won't work, and will break everything.
+    $parent_xaction = null;
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorProjectTransaction::TYPE_PARENT:
+        case PhabricatorProjectTransaction::TYPE_MILESTONE:
+          if ($xaction->getNewValue() === null) {
+            continue;
+          }
+
+          if (!$parent_xaction) {
+            $parent_xaction = $xaction;
+            continue;
+          }
+
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $xaction->getTransactionType(),
+            pht('Invalid'),
+            pht(
+              'When creating a project, specify a maximum of one parent '.
+              'project or milestone project. A project can not be both a '.
+              'subproject and a milestone.'),
+            $xaction);
+          break;
+          break;
+      }
+    }
+
+    $is_milestone = $object->isMilestone();
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorProjectTransaction::TYPE_MILESTONE:
+          if ($xaction->getNewValue() !== null) {
+            $is_milestone = true;
+          }
+          break;
+      }
+    }
+
+    $is_parent = $object->getHasSubprojects();
+
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorProjectTransaction::TYPE_MEMBERS:
+          if ($is_parent) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $xaction->getTransactionType(),
+              pht('Invalid'),
+              pht(
+                'You can not change members of a project with subprojects '.
+                'directly. Members of any subproject are automatically '.
+                'members of the parent project.'),
+              $xaction);
+          }
+
+          if ($is_milestone) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $xaction->getTransactionType(),
+              pht('Invalid'),
+              pht(
+                'You can not change members of a milestone. Members of the '.
+                'parent project are automatically members of the milestone.'),
+              $xaction);
+          }
+          break;
+      }
+    }
+
+    return $errors;
   }
 
   protected function validateTransaction(
@@ -367,24 +446,28 @@ final class PhabricatorProjectTransactionEditor
 
         break;
       case PhabricatorProjectTransaction::TYPE_PARENT:
+      case PhabricatorProjectTransaction::TYPE_MILESTONE:
         if (!$xactions) {
           break;
         }
 
         $xaction = last($xactions);
 
+        $parent_phid = $xaction->getNewValue();
+        if (!$parent_phid) {
+          continue;
+        }
+
         if (!$this->getIsNewObject()) {
           $errors[] = new PhabricatorApplicationTransactionValidationError(
             $type,
             pht('Invalid'),
             pht(
-              'You can only set a parent project when creating a project '.
-              'for the first time.'),
+              'You can only set a parent or milestone project when creating a '.
+              'project for the first time.'),
             $xaction);
           break;
         }
-
-        $parent_phid = $xaction->getNewValue();
 
         $projects = id(new PhabricatorProjectQuery())
           ->setViewer($this->requireActor())
@@ -400,8 +483,8 @@ final class PhabricatorProjectTransactionEditor
             $type,
             pht('Invalid'),
             pht(
-              'Parent project PHID ("%s") must be the PHID of a valid, '.
-              'visible project which you have permission to edit.',
+              'Parent or milestone project PHID ("%s") must be the PHID of a '.
+              'valid, visible project which you have permission to edit.',
               $parent_phid),
             $xaction);
           break;
@@ -414,8 +497,8 @@ final class PhabricatorProjectTransactionEditor
             $type,
             pht('Invalid'),
             pht(
-              'Parent project PHID ("%s") must not be a milestone. '.
-              'Milestones may not have subprojects.',
+              'Parent or milestone project PHID ("%s") must not be a '.
+              'milestone. Milestones may not have subprojects or milestones.',
               $parent_phid),
             $xaction);
           break;
@@ -427,9 +510,9 @@ final class PhabricatorProjectTransactionEditor
             $type,
             pht('Invalid'),
             pht(
-              'You can not create a subproject under this parent because '.
-              'it would nest projects too deeply. The maximum nesting '.
-              'depth of projects is %s.',
+              'You can not create a subproject or mielstone under this parent '.
+              'because it would nest projects too deeply. The maximum '.
+              'nesting depth of projects is %s.',
               new PhutilNumber($limit)),
             $xaction);
           break;
@@ -611,6 +694,7 @@ final class PhabricatorProjectTransactionEditor
     array $xactions) {
 
     $materialize = false;
+    $new_parent = null;
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
         case PhabricatorTransactions::TYPE_EDGE:
@@ -622,9 +706,33 @@ final class PhabricatorProjectTransactionEditor
           break;
         case PhabricatorProjectTransaction::TYPE_PARENT:
           $materialize = true;
+          $new_parent = $object->getParentProject();
           break;
       }
     }
+
+    if ($new_parent) {
+      // If we just created the first subproject of this parent, we want to
+      // copy all of the real members to the subproject.
+      if (!$new_parent->getHasSubprojects()) {
+        $member_type = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+
+        $project_members = PhabricatorEdgeQuery::loadDestinationPHIDs(
+          $new_parent->getPHID(),
+          $member_type);
+
+        if ($project_members) {
+          $editor = id(new PhabricatorEdgeEditor());
+          foreach ($project_members as $phid) {
+            $editor->addEdge($object->getPHID(), $member_type, $phid);
+          }
+          $editor->save();
+        }
+      }
+    }
+
+    // TODO: We should dump an informational transaction onto the parent
+    // project to show that we created the sub-thing.
 
     if ($materialize) {
       id(new PhabricatorProjectsMembershipIndexEngineExtension())

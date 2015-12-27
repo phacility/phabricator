@@ -88,6 +88,10 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   }
 
   public function getPolicy($capability) {
+    if ($this->isMilestone()) {
+      return $this->getParentProject()->getPolicy($capability);
+    }
+
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
@@ -99,6 +103,12 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    if ($this->isMilestone()) {
+      return $this->getParentProject()->hasAutomaticCapability(
+        $capability,
+        $viewer);
+    }
+
     $can_edit = PhabricatorPolicyCapability::CAN_EDIT;
 
     switch ($capability) {
@@ -435,6 +445,34 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     }
 
     return $ancestors;
+  }
+
+  public function supportsEditMembers() {
+    if ($this->isMilestone()) {
+      return false;
+    }
+
+    if ($this->getHasSubprojects()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function supportsMilestones() {
+    if ($this->isMilestone()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function supportsSubprojects() {
+    if ($this->isMilestone()) {
+      return false;
+    }
+
+    return true;
   }
 
 

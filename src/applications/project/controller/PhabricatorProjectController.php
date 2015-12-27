@@ -99,7 +99,6 @@ abstract class PhabricatorProjectController extends PhabricatorController {
         $nav->addFilter("board/{$id}/", pht('Workboard'));
         $nav->addFilter("members/{$id}/", pht('Members'));
         $nav->addFilter("feed/{$id}/", pht('Feed'));
-        $nav->addFilter("details/{$id}/", pht('Edit Details'));
       }
       $nav->addFilter('create', pht('Create Project'));
     }
@@ -149,11 +148,29 @@ abstract class PhabricatorProjectController extends PhabricatorController {
 
     $nav->addIcon("feed/{$id}/", pht('Feed'), 'fa-newspaper-o');
     $nav->addIcon("members/{$id}/", pht('Members'), 'fa-group');
-    $nav->addIcon("details/{$id}/", pht('Edit Details'), 'fa-pencil');
 
     if (PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
-      $nav->addIcon("subprojects/{$id}/", pht('Subprojects'), 'fa-sitemap');
-      $nav->addIcon("milestones/{$id}/", pht('Milestones'), 'fa-map-marker');
+      if ($project->supportsSubprojects()) {
+        $subprojects_icon = 'fa-sitemap';
+      } else {
+        $subprojects_icon = 'fa-sitemap grey';
+      }
+
+      if ($project->supportsMilestones()) {
+        $milestones_icon = 'fa-map-marker';
+      } else {
+        $milestones_icon = 'fa-map-marker grey';
+      }
+
+      $nav->addIcon(
+        "subprojects/{$id}/",
+        pht('Subprojects'),
+        $subprojects_icon);
+
+      $nav->addIcon(
+        "milestones/{$id}/",
+        pht('Milestones'),
+        $milestones_icon);
     }
 
 
@@ -170,8 +187,8 @@ abstract class PhabricatorProjectController extends PhabricatorController {
       $ancestors[] = $project;
       foreach ($ancestors as $ancestor) {
         $crumbs->addTextCrumb(
-          $project->getName(),
-          $project->getURI());
+          $ancestor->getName(),
+          $ancestor->getURI());
       }
     }
 

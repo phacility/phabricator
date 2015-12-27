@@ -89,6 +89,10 @@
   color: {$blue};
 }
 
+.phabricator-icon-nav .phabricator-side-menu .phui-list-item-icon.grey {
+  color: {$lightgreyborder};
+}
+
 .phabricator-icon-nav .phabricator-side-menu .phui-list-item-selected {
   border: none;
 }

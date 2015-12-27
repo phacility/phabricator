@@ -748,15 +748,15 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
       ->setNewValue($name);
 
     if ($parent) {
-      $xactions[] = id(new PhabricatorProjectTransaction())
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_PARENT)
-        ->setNewValue($parent->getPHID());
-    }
-
-    if ($is_milestone) {
-      $xactions[] = id(new PhabricatorProjectTransaction())
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_MILESTONE)
-        ->setNewValue(true);
+      if ($is_milestone) {
+        $xactions[] = id(new PhabricatorProjectTransaction())
+          ->setTransactionType(PhabricatorProjectTransaction::TYPE_MILESTONE)
+          ->setNewValue($parent->getPHID());
+      } else {
+        $xactions[] = id(new PhabricatorProjectTransaction())
+          ->setTransactionType(PhabricatorProjectTransaction::TYPE_PARENT)
+          ->setNewValue($parent->getPHID());
+      }
     }
 
     $this->applyTransactions($project, $user, $xactions);

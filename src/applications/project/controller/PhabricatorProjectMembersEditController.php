@@ -68,9 +68,11 @@ final class PhabricatorProjectMembersEditController
       $project,
       PhabricatorPolicyCapability::CAN_EDIT);
 
+    $supports_edit = $project->supportsEditMembers();
+
     $form_box = null;
     $title = pht('Add Members');
-    if ($can_edit) {
+    if ($can_edit && $supports_edit) {
       $header_name = pht('Edit Members');
       $view_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
 
