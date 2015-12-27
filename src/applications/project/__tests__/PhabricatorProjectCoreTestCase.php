@@ -493,6 +493,90 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $this->assertFalse((bool)$this->refreshProject($child, $user2));
   }
 
+  public function testSlugMaps() {
+    // When querying by slugs, slugs should be normalized and the mapping
+    // should be reported correctly.
+    $user = $this->createUser();
+    $user->save();
+
+    $name = 'queryslugproject';
+    $name2 = 'QUERYslugPROJECT';
+    $slug = 'queryslugextra';
+    $slug2 = 'QuErYSlUgExTrA';
+
+    $project = PhabricatorProject::initializeNewProject($user);
+
+    $xactions = array();
+
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+      ->setNewValue($name);
+
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorProjectTransaction::TYPE_SLUGS)
+      ->setNewValue(array($slug));
+
+    $this->applyTransactions($project, $user, $xactions);
+
+    $project_query = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withSlugs(array($name));
+    $project_query->execute();
+    $map = $project_query->getSlugMap();
+
+    $this->assertEqual(
+      array(
+        $name => $project->getPHID(),
+      ),
+      ipull($map, 'projectPHID'));
+
+    $project_query = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withSlugs(array($slug));
+    $project_query->execute();
+    $map = $project_query->getSlugMap();
+
+    $this->assertEqual(
+      array(
+        $slug => $project->getPHID(),
+      ),
+      ipull($map, 'projectPHID'));
+
+    $project_query = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withSlugs(array($name, $slug, $name2, $slug2));
+    $project_query->execute();
+    $map = $project_query->getSlugMap();
+
+    $expect = array(
+      $name => $project->getPHID(),
+      $slug => $project->getPHID(),
+      $name2 => $project->getPHID(),
+      $slug2 => $project->getPHID(),
+    );
+
+    $actual = ipull($map, 'projectPHID');
+
+    ksort($expect);
+    ksort($actual);
+
+    $this->assertEqual($expect, $actual);
+
+    $expect = array(
+      $name => $name,
+      $slug => $slug,
+      $name2 => $name,
+      $slug2 => $slug,
+    );
+
+    $actual = ipull($map, 'slug');
+
+    ksort($expect);
+    ksort($actual);
+
+    $this->assertEqual($expect, $actual);
+  }
+
   private function attemptProjectEdit(
     PhabricatorProject $proj,
     PhabricatorUser $user,
