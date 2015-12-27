@@ -12,10 +12,6 @@ final class PhabricatorProjectMembersEditController
       ->withIDs(array($id))
       ->needMembers(true)
       ->needImages(true)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-        ))
       ->executeOne();
     if (!$project) {
       return new Aphront404Response();

@@ -8,38 +8,25 @@ final class PhabricatorProjectFeedController
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
-    $query = id(new PhabricatorProjectQuery())
-      ->setViewer($user)
-      ->needMembers(true)
-      ->needWatchers(true)
-      ->needImages(true)
-      ->needSlugs(true);
-    $id = $request->getURIData('id');
-    $slug = $request->getURIData('slug');
-    if ($slug) {
-      $query->withSlugs(array($slug));
-    } else {
-      $query->withIDs(array($id));
-    }
-    $project = $query->executeOne();
-    if (!$project) {
-      return new Aphront404Response();
-    }
-    if ($slug && $slug != $project->getPrimarySlug()) {
-      return id(new AphrontRedirectResponse())
-        ->setURI('/tag/'.$project->getPrimarySlug().'/');
+    $response = $this->loadProject();
+    if ($response) {
+      return $response;
     }
 
-    $query = new PhabricatorFeedQuery();
-    $query->setFilterPHIDs(
-      array(
-        $project->getPHID(),
-      ));
-    $query->setLimit(50);
-    $query->setViewer($request->getUser());
-    $stories = $query->execute();
+    $project = $this->getProject();
+    $id = $project->getID();
+
+    $stories = id(new PhabricatorFeedQuery())
+      ->setViewer($viewer)
+      ->setFilterPHIDs(
+        array(
+          $project->getPHID(),
+        ))
+      ->setLimit(50)
+      ->execute();
+
     $feed = $this->renderStories($stories);
 
     $box = id(new PHUIObjectBoxView())
@@ -57,21 +44,6 @@ final class PhabricatorProjectFeedController
       ));
   }
 
-  private function renderFeedPage(PhabricatorProject $project) {
-
-    $query = new PhabricatorFeedQuery();
-    $query->setFilterPHIDs(array($project->getPHID()));
-    $query->setViewer($this->getRequest()->getUser());
-    $query->setLimit(100);
-    $stories = $query->execute();
-
-    if (!$stories) {
-      return pht('There are no stories about this project.');
-    }
-
-    return $this->renderStories($stories);
-  }
-
   private function renderStories(array $stories) {
     assert_instances_of($stories, 'PhabricatorFeedStory');
 
@@ -84,6 +56,5 @@ final class PhabricatorProjectFeedController
       'profile-feed',
       $view->render());
   }
-
 
 }

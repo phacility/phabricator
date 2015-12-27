@@ -8,35 +8,20 @@ final class PhabricatorProjectProfileController
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
-    $query = id(new PhabricatorProjectQuery())
-      ->setViewer($user)
-      ->needMembers(true)
-      ->needWatchers(true)
-      ->needImages(true)
-      ->needSlugs(true);
-    $id = $request->getURIData('id');
-    $slug = $request->getURIData('slug');
-    if ($slug) {
-      $query->withSlugs(array($slug));
-    } else {
-      $query->withIDs(array($id));
-    }
-    $project = $query->executeOne();
-    if (!$project) {
-      return new Aphront404Response();
-    }
-    if ($slug && $slug != $project->getPrimarySlug()) {
-      return id(new AphrontRedirectResponse())
-        ->setURI('/tag/'.$project->getPrimarySlug().'/');
+    $response = $this->loadProject();
+    if ($response) {
+      return $response;
     }
 
+    $project = $this->getProject();
+    $id = $project->getID();
     $picture = $project->getProfileImageURI();
 
     $header = id(new PHUIHeaderView())
       ->setHeader($project->getName())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setPolicyObject($project)
       ->setImage($picture);
 
@@ -60,15 +45,13 @@ final class PhabricatorProjectProfileController
 
     $nav = $this->buildIconNavView($project);
     $nav->selectFilter("profile/{$id}/");
-    $nav->appendChild($object_box);
-    $nav->appendChild($timeline);
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $project->getName(),
-        'pageObjects' => array($project->getPHID()),
-      ));
+    return $this->newPage()
+      ->setNavigation($nav)
+      ->setTitle($project->getName())
+      ->setPageObjectPHIDs(array($project->getPHID()))
+      ->appendChild($object_box)
+      ->appendChild($timeline);
   }
 
   private function buildActionListView(PhabricatorProject $project) {
