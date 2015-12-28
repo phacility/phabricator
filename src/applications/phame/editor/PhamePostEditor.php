@@ -264,4 +264,18 @@ final class PhamePostEditor
     return false;
   }
 
+  protected function shouldApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  protected function buildHeraldAdapter(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    return id(new HeraldPhamePostAdapter())
+      ->setPost($object);
+  }
+
 }

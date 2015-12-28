@@ -230,4 +230,18 @@ final class PhameBlogEditor
     return false;
   }
 
+  protected function shouldApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  protected function buildHeraldAdapter(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    return id(new HeraldPhameBlogAdapter())
+      ->setBlog($object);
+  }
+
 }
