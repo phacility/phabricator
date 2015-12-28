@@ -20,59 +20,57 @@ final class PhamePostMoveController extends PhamePostController {
       return new Aphront404Response();
     }
 
-    $view_uri = '/post/view/'.$post->getID().'/';
-    $view_uri = $this->getApplicationURI($view_uri);
+    $view_uri = $post->getViewURI();
+    $v_blog = $post->getBlog()->getPHID();
 
     if ($request->isFormPost()) {
-      $blog = id(new PhameBlogQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($request->getInt('blog')))
-        ->requireCapabilities(
-          array(
-            PhabricatorPolicyCapability::CAN_EDIT,
-          ))
-        ->executeOne();
+      $v_blog = $request->getStr('blogPHID');
 
-      if ($blog) {
-        $post->setBlogPHID($blog->getPHID());
-        $post->save();
+      $xactions = array();
+      $xactions[] = id(new PhamePostTransaction())
+        ->setTransactionType(PhamePostTransaction::TYPE_BLOG)
+        ->setNewValue($v_blog);
 
-        return id(new AphrontRedirectResponse())
-          ->setURI($view_uri.'?moved=1');
-      }
+      $editor = id(new PhamePostEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnMissingFields(true)
+        ->setContinueOnNoEffect(true);
+
+      $editor->applyTransactions($post, $xactions);
+
+      $view_uri = $post->getViewURI();
+
+      return id(new AphrontRedirectResponse())
+        ->setURI($view_uri.'?moved=1');
     }
 
     $blogs = id(new PhameBlogQuery())
       ->setViewer($viewer)
       ->requireCapabilities(
         array(
+          PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->execute();
 
-    $options = mpull($blogs, 'getName', 'getID');
+    $options = mpull($blogs, 'getName', 'getPHID');
     asort($options);
-
-    $selected_value = null;
-    if ($post && $post->getBlog()) {
-      $selected_value = $post->getBlog()->getID();
-    }
 
     $form = id(new PHUIFormLayoutView())
       ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Blog'))
-          ->setName('blog')
+          ->setName('blogPHID')
           ->setOptions($options)
-          ->setValue($selected_value));
+          ->setValue($v_blog));
 
     return $this->newDialog()
       ->setTitle(pht('Move Post'))
       ->appendChild($form)
       ->addSubmitButton(pht('Move Post'))
       ->addCancelButton($view_uri);
-
     }
 
 }

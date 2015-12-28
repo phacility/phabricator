@@ -7,6 +7,7 @@ final class PhamePostTransaction
   const TYPE_PHAME_TITLE      = 'phame.post.phame.title';
   const TYPE_BODY             = 'phame.post.body';
   const TYPE_VISIBILITY       = 'phame.post.visibility';
+  const TYPE_BLOG             = 'phame.post.blog';
 
   const MAILTAG_CONTENT       = 'phame-post-content';
   const MAILTAG_SUBSCRIBERS   = 'phame-post-subscribers';
@@ -46,6 +47,28 @@ final class PhamePostTransaction
     }
     return parent::shouldHide();
   }
+
+  public function getRequiredHandlePHIDs() {
+    $phids = parent::getRequiredHandlePHIDs();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_BLOG:
+        $old = $this->getOldValue();
+        $new = $this->getNewValue();
+
+        if ($old) {
+          $phids[] = $old;
+        }
+
+        if ($new) {
+          $phids[] = $new;
+        }
+        break;
+    }
+
+    return $phids;
+  }
+
 
   public function getIcon() {
     $old = $this->getOldValue();
@@ -98,6 +121,16 @@ final class PhamePostTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return pht(
+          '%s created this post.',
+          $this->renderHandleLink($author_phid));
+      case self::TYPE_BLOG:
+        return pht(
+          '%s moved this post from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($old),
+          $this->renderHandleLink($new));
       case self::TYPE_TITLE:
         if ($old === null) {
           return pht(
@@ -146,6 +179,13 @@ final class PhamePostTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
+      case self::TYPE_BLOG:
+        return pht(
+          '%s moved post "%s" from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid),
+          $this->renderHandleLink($old),
+          $this->renderHandleLink($new));
       case self::TYPE_TITLE:
         if ($old === null) {
           return pht(

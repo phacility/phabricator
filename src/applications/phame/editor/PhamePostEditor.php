@@ -14,6 +14,7 @@ final class PhamePostEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
+    $types[] = PhamePostTransaction::TYPE_BLOG;
     $types[] = PhamePostTransaction::TYPE_TITLE;
     $types[] = PhamePostTransaction::TYPE_BODY;
     $types[] = PhamePostTransaction::TYPE_VISIBILITY;
@@ -27,6 +28,8 @@ final class PhamePostEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhamePostTransaction::TYPE_BLOG:
+        return $object->getBlogPHID();
       case PhamePostTransaction::TYPE_TITLE:
         return $object->getTitle();
       case PhamePostTransaction::TYPE_BODY:
@@ -44,6 +47,7 @@ final class PhamePostEditor
       case PhamePostTransaction::TYPE_TITLE:
       case PhamePostTransaction::TYPE_BODY:
       case PhamePostTransaction::TYPE_VISIBILITY:
+      case PhamePostTransaction::TYPE_BLOG:
         return $xaction->getNewValue();
     }
   }
@@ -57,6 +61,8 @@ final class PhamePostEditor
         return $object->setTitle($xaction->getNewValue());
       case PhamePostTransaction::TYPE_BODY:
         return $object->setBody($xaction->getNewValue());
+      case PhamePostTransaction::TYPE_BLOG:
+        return $object->setBlogPHID($xaction->getNewValue());
       case PhamePostTransaction::TYPE_VISIBILITY:
         if ($xaction->getNewValue() == PhameConstants::VISIBILITY_DRAFT) {
           $object->setDatePublished(0);
@@ -77,6 +83,7 @@ final class PhamePostEditor
       case PhamePostTransaction::TYPE_TITLE:
       case PhamePostTransaction::TYPE_BODY:
       case PhamePostTransaction::TYPE_VISIBILITY:
+      case PhamePostTransaction::TYPE_BLOG:
         return;
     }
 
@@ -106,6 +113,53 @@ final class PhamePostEditor
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
         }
+        break;
+      case PhamePostTransaction::TYPE_BLOG:
+        if ($this->getIsNewObject()) {
+          if (!$xactions) {
+            $error = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Required'),
+              pht(
+                'When creating a post, you must specify which blog it '.
+                'should belong to.'),
+              null);
+
+            $error->setIsMissingFieldError(true);
+
+            $errors[] = $error;
+            break;
+          }
+        }
+
+        foreach ($xactions as $xaction) {
+          $new_phid = $xaction->getNewValue();
+
+          $blog = id(new PhameBlogQuery())
+            ->setViewer($this->getActor())
+            ->withPHIDs(array($new_phid))
+            ->requireCapabilities(
+              array(
+                PhabricatorPolicyCapability::CAN_VIEW,
+                PhabricatorPolicyCapability::CAN_EDIT,
+              ))
+            ->execute();
+
+          if ($blog) {
+            continue;
+          }
+
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'The specified blog PHID ("%s") is not valid. You can only '.
+              'create a post on (or move a post into) a blog which you '.
+              'have permission to see and edit.',
+              $new_phid),
+            $xaction);
+        }
+
         break;
     }
     return $errors;

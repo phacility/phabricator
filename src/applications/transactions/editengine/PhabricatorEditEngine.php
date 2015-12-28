@@ -1688,7 +1688,16 @@ abstract class PhabricatorEditEngine
       // Let the parameter type interpret the value. This allows you to
       // use usernames in list<user> fields, for example.
       $parameter_type = $type->getConduitParameterType();
-      $xaction['value'] = $parameter_type->getValue($xaction, 'value');
+
+      try {
+        $xaction['value'] = $parameter_type->getValue($xaction, 'value');
+      } catch (Exception $ex) {
+        throw new PhutilProxyException(
+          pht(
+            'Exception when processing transaction of type "%s".',
+            $xaction['type']),
+          $ex);
+      }
 
       $type_xactions = $type->generateTransactions(
         clone $template,

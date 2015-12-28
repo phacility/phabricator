@@ -2,6 +2,17 @@
 
 final class PhamePostEditController extends PhamePostController {
 
+  private $blog;
+
+  public function setBlog(PhameBlog $blog) {
+    $this->blog = $blog;
+    return $this;
+  }
+
+  public function getBlog() {
+    return $this->blog;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
@@ -12,6 +23,7 @@ final class PhamePostEditController extends PhamePostController {
         ->withIDs(array($id))
         ->requireCapabilities(
           array(
+            PhabricatorPolicyCapability::CAN_VIEW,
             PhabricatorPolicyCapability::CAN_EDIT,
           ))
         ->executeOne();
@@ -32,15 +44,29 @@ final class PhamePostEditController extends PhamePostController {
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->executeOne();
-
     if (!$blog) {
       return new Aphront404Response();
     }
+
+    $this->setBlog($blog);
 
     return id(new PhamePostEditEngine())
       ->setController($this)
       ->setBlog($blog)
       ->buildResponse();
   }
+
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $blog = $this->getBlog();
+
+    $crumbs->addTextCrumb(
+      $blog->getName(),
+      $blog->getViewURI());
+
+    return $crumbs;
+  }
+
 
 }

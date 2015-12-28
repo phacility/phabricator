@@ -65,16 +65,24 @@ final class PhamePostEditEngine
   }
 
   protected function buildCustomEditFields($object) {
-
-    if ($this->blog) {
-      $blog_title = pht('Blog: %s', $this->blog->getName());
-    } else {
-      $blog_title = pht('Sample Blog Title');
-    }
+    $blog_phid = $object->getBlog()->getPHID();
 
     return array(
-      id(new PhabricatorInstructionsEditField())
-        ->setValue($blog_title),
+      id(new PhabricatorHandlesEditField())
+        ->setKey('blog')
+        ->setLabel(pht('Blog'))
+        ->setDescription(pht('Blog to publish this post to.'))
+        ->setConduitDescription(
+          pht('Choose a blog to create a post on (or move a post to).'))
+        ->setConduitTypeDescription(pht('PHID of the blog.'))
+        ->setAliases(array('blogPHID'))
+        ->setTransactionType(PhamePostTransaction::TYPE_BLOG)
+        ->setHandleParameterType(new AphrontPHIDListHTTPParameterType())
+        ->setSingleValue($blog_phid)
+        ->setIsReorderable(false)
+        ->setIsDefaultable(false)
+        ->setIsLockable(false)
+        ->setIsLocked(true),
       id(new PhabricatorTextEditField())
         ->setKey('title')
         ->setLabel(pht('Title'))
