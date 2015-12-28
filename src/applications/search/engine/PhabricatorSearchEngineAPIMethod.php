@@ -15,6 +15,10 @@ abstract class PhabricatorSearchEngineAPIMethod
       }
     }
 
+    if (!$maps) {
+      $maps = (object)$maps;
+    }
+
     return $maps;
   }
 

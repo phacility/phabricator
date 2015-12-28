@@ -8,7 +8,8 @@ final class PhameBlog extends PhameDAO
     PhabricatorFlaggableInterface,
     PhabricatorProjectInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorConduitResultInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:description';
 
@@ -341,6 +342,39 @@ final class PhameBlog extends PhameDAO
 
   public function shouldAllowSubscription($phid) {
     return true;
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of the blog.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('description')
+        ->setType('string')
+        ->setDescription(pht('Blog description.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('string')
+        ->setDescription(pht('Archived or active status.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getName(),
+      'description' => $this->getDescription(),
+      'status' => $this->getStatus(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 
