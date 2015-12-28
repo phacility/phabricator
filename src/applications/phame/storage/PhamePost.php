@@ -9,7 +9,8 @@ final class PhamePost extends PhameDAO
     PhabricatorApplicationTransactionInterface,
     PhabricatorSubscribableInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorTokenReceiverInterface {
+    PhabricatorTokenReceiverInterface,
+    PhabricatorConduitResultInterface {
 
   const MARKUP_FIELD_BODY    = 'markup:body';
   const MARKUP_FIELD_SUMMARY = 'markup:summary';
@@ -24,7 +25,7 @@ final class PhamePost extends PhameDAO
   protected $blogPHID;
   protected $mailKey;
 
-  private $blog;
+  private $blog = self::ATTACHABLE;
 
   public static function initializePost(
     PhabricatorUser $blogger,
@@ -33,19 +34,20 @@ final class PhamePost extends PhameDAO
     $post = id(new PhamePost())
       ->setBloggerPHID($blogger->getPHID())
       ->setBlogPHID($blog->getPHID())
-      ->setBlog($blog)
+      ->attachBlog($blog)
       ->setDatePublished(PhabricatorTime::getNow())
       ->setVisibility(PhameConstants::VISIBILITY_PUBLISHED);
+
     return $post;
   }
 
-  public function setBlog(PhameBlog $blog) {
+  public function attachBlog(PhameBlog $blog) {
     $this->blog = $blog;
     return $this;
   }
 
   public function getBlog() {
-    return $this->blog;
+    return $this->assertAttached($this->blog);
   }
 
   public function getLiveURI() {
@@ -144,21 +146,6 @@ final class PhamePost extends PhameDAO
 
   public function getSlug() {
     return PhabricatorSlug::normalizeProjectSlug($this->getTitle(), true);
-  }
-
-  public function toDictionary() {
-    return array(
-      'id'            => $this->getID(),
-      'phid'          => $this->getPHID(),
-      'blogPHID'      => $this->getBlogPHID(),
-      'bloggerPHID'   => $this->getBloggerPHID(),
-      'viewURI'       => $this->getViewURI(),
-      'title'         => $this->getTitle(),
-      'body'          => $this->getBody(),
-      'summary'       => PhabricatorMarkupEngine::summarize($this->getBody()),
-      'datePublished' => $this->getDatePublished(),
-      'published'     => !$this->isDraft(),
-    );
   }
 
 
@@ -301,6 +288,61 @@ final class PhamePost extends PhameDAO
 
   public function shouldAllowSubscription($phid) {
     return true;
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('title')
+        ->setType('string')
+        ->setDescription(pht('Title of the post.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('slug')
+        ->setType('string')
+        ->setDescription(pht('Slug for the post.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('blogPHID')
+        ->setType('phid')
+        ->setDescription(pht('PHID of the blog that the post belongs to.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('authorPHID')
+        ->setType('phid')
+        ->setDescription(pht('PHID of the author of the post.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('body')
+        ->setType('string')
+        ->setDescription(pht('Body of the post.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('datePublished')
+        ->setType('epoch?')
+        ->setDescription(pht('Publish date, if the post has been published.')),
+
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    if ($this->isDraft()) {
+      $date_published = null;
+    } else {
+      $date_published = (int)$this->getDatePublished();
+    }
+
+    return array(
+      'title' => $this->getTitle(),
+      'slug' => $this->getSlug(),
+      'blogPHID' => $this->getBlogPHID(),
+      'authorPHID' => $this->getBloggerPHID(),
+      'body' => $this->getBody(),
+      'datePublished' => $date_published,
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 }
