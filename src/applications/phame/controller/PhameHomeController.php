@@ -85,7 +85,7 @@ final class PhameHomeController extends PhamePostController {
       ->setViewer($viewer);
 
     $draft_list = null;
-    if ($viewer->isLoggedIn()) {
+    if ($viewer->isLoggedIn() && $blogs) {
       $drafts = id(new PhamePostQuery())
         ->setViewer($viewer)
         ->withBloggerPHIDs(array($viewer->getPHID()))
