@@ -1516,8 +1516,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $constraints = mgroup($constraints, 'getOperator');
     foreach ($constraints as $operator => $list) {
       foreach ($list as $item) {
-        $value = $item->getValue();
-        $this->edgeLogicConstraints[$edge_type][$operator][$value] = $item;
+        $this->edgeLogicConstraints[$edge_type][$operator][] = $item;
       }
     }
 
@@ -1548,6 +1547,47 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
                 $this->buildEdgeLogicTableAliasCount($alias));
             }
             break;
+          case PhabricatorQueryConstraint::OPERATOR_ANCESTOR:
+            // This is tricky. We have a query which specifies multiple
+            // projects, each of which may have an arbitrarily large number
+            // of descendants.
+
+            // Suppose the projects are "Engineering" and "Operations", and
+            // "Engineering" has subprojects X, Y and Z.
+
+            // We first use `FIELD(dst, X, Y, Z)` to produce a 0 if a row
+            // is not part of Engineering at all, or some number other than
+            // 0 if it is.
+
+            // Then we use `IF(..., idx, NULL)` to convert the 0 to a NULL and
+            // any other value to an index (say, 1) for the ancestor.
+
+            // We build these up for every ancestor, then use `COALESCE(...)`
+            // to select the non-null one, giving us an ancestor which this
+            // row is a member of.
+
+            // From there, we use `COUNT(DISTINCT(...))` to make sure that
+            // each result row is a member of all ancestors.
+            if (count($list) > 1) {
+              $idx = 1;
+              $parts = array();
+              foreach ($list as $constraint) {
+                $parts[] = qsprintf(
+                  $conn,
+                  'IF(FIELD(%T.dst, %Ls) != 0, %d, NULL)',
+                  $alias,
+                  (array)$constraint->getValue(),
+                  $idx++);
+              }
+              $parts = implode(', ', $parts);
+
+              $select[] = qsprintf(
+                $conn,
+                'COUNT(DISTINCT(COALESCE(%Q))) %T',
+                $parts,
+                $this->buildEdgeLogicTableAliasAncestor($alias));
+            }
+            break;
           default:
             break;
         }
@@ -1573,6 +1613,16 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
       foreach ($constraints as $operator => $list) {
         $alias = $this->getEdgeLogicTableAlias($operator, $type);
+
+        $phids = array();
+        foreach ($list as $constraint) {
+          $value = (array)$constraint->getValue();
+          foreach ($value as $v) {
+            $phids[$v] = $v;
+          }
+        }
+        $phids = array_keys($phids);
+
         switch ($operator) {
           case PhabricatorQueryConstraint::OPERATOR_NOT:
             $joins[] = qsprintf(
@@ -1586,8 +1636,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
               $alias,
               $type,
               $alias,
-              mpull($list, 'getValue'));
+              $phids);
             break;
+          case PhabricatorQueryConstraint::OPERATOR_ANCESTOR:
           case PhabricatorQueryConstraint::OPERATOR_AND:
           case PhabricatorQueryConstraint::OPERATOR_OR:
             // If we're including results with no matches, we have to degrade
@@ -1611,7 +1662,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
               $alias,
               $type,
               $alias,
-              mpull($list, 'getValue'));
+              $phids);
             break;
           case PhabricatorQueryConstraint::OPERATOR_NULL:
             $joins[] = qsprintf(
@@ -1711,6 +1762,15 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
                 count($list));
             }
             break;
+          case PhabricatorQueryConstraint::OPERATOR_ANCESTOR:
+            if (count($list) > 1) {
+              $having[] = qsprintf(
+                $conn,
+                '%T = %d',
+                $this->buildEdgeLogicTableAliasAncestor($alias),
+                count($list));
+            }
+            break;
         }
       }
     }
@@ -1729,6 +1789,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           case PhabricatorQueryConstraint::OPERATOR_NOT:
           case PhabricatorQueryConstraint::OPERATOR_AND:
           case PhabricatorQueryConstraint::OPERATOR_OR:
+          case PhabricatorQueryConstraint::OPERATOR_ANCESTOR:
             if (count($list) > 1) {
               return true;
             }
@@ -1758,6 +1819,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $alias.'_count';
   }
 
+  /**
+   * @task edgelogic
+   */
+  private function buildEdgeLogicTableAliasAncestor($alias) {
+    return $alias.'_ancestor';
+  }
+
 
   /**
    * Select certain edge logic constraint values.
@@ -1781,7 +1849,10 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
       foreach ($constraints as $operator => $list) {
         foreach ($list as $constraint) {
-          $values[] = $constraint->getValue();
+          $value = (array)$constraint->getValue();
+          foreach ($value as $v) {
+            $values[] = $v;
+          }
         }
       }
     }
@@ -1812,6 +1883,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         PhabricatorQueryConstraint::OPERATOR_AND,
         PhabricatorQueryConstraint::OPERATOR_OR,
         PhabricatorQueryConstraint::OPERATOR_NOT,
+        PhabricatorQueryConstraint::OPERATOR_ANCESTOR,
       ));
     if ($project_phids) {
       $projects = id(new PhabricatorProjectQuery())
