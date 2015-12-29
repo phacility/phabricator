@@ -186,7 +186,9 @@ final class PhabricatorProjectProfileController
         ->setName('#'.$slug->getSlug());
     }
 
-    $view->addProperty(pht('Hashtags'), phutil_implode_html(' ', $hashtags));
+    if ($hashtags) {
+      $view->addProperty(pht('Hashtags'), phutil_implode_html(' ', $hashtags));
+    }
 
     $view->addProperty(
       pht('Members'),

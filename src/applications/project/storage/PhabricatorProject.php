@@ -211,20 +211,11 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         'projectPathKey' => 'bytes4',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_phid' => null,
-        'phid' => array(
-          'columns' => array('phid'),
-          'unique' => true,
-        ),
         'key_icon' => array(
           'columns' => array('icon'),
         ),
         'key_color' => array(
           'columns' => array('color'),
-        ),
-        'name' => array(
-          'columns' => array('name'),
-          'unique' => true,
         ),
         'key_milestone' => array(
           'columns' => array('parentProjectPHID', 'milestoneNumber'),
@@ -473,6 +464,24 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     }
 
     return true;
+  }
+
+  public function loadNextMilestoneNumber() {
+    $current = queryfx_one(
+      $this->establishConnection('w'),
+      'SELECT MAX(milestoneNumber) n
+        FROM %T
+        WHERE parentProjectPHID = %s',
+      $this->getTableName(),
+      $this->getPHID());
+
+    if (!$current) {
+      $number = 1;
+    } else {
+      $number = (int)$current['n'] + 1;
+    }
+
+    return $number;
   }
 
 

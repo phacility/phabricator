@@ -64,10 +64,6 @@ abstract class PhabricatorEditEngine
   abstract public function getEngineApplicationClass();
   abstract protected function buildCustomEditFields($object);
 
-  protected function didBuildCustomEditFields($object, array $fields) {
-    return;
-  }
-
   public function getFieldsForConfig(
     PhabricatorEditEngineConfiguration $config) {
 
@@ -93,7 +89,6 @@ abstract class PhabricatorEditEngine
     }
 
     $fields = mpull($fields, null, 'getKey');
-    $this->didBuildCustomEditFields($object, $fields);
 
     $extensions = PhabricatorEditEngineExtension::getAllEnabledExtensions();
     foreach ($extensions as $extension) {
@@ -115,7 +110,6 @@ abstract class PhabricatorEditEngine
       }
 
       $extension_fields = mpull($extension_fields, null, 'getKey');
-      $extension->didBuildCustomEditFields($this, $object, $extension_fields);
 
       foreach ($extension_fields as $key => $field) {
         $fields[$key] = $field;
@@ -123,8 +117,13 @@ abstract class PhabricatorEditEngine
     }
 
     $config = $this->getEditEngineConfiguration();
+    $fields = $this->willConfigureFields($object, $fields);
     $fields = $config->applyConfigurationToFields($this, $object, $fields);
 
+    return $fields;
+  }
+
+  protected function willConfigureFields($object, array $fields) {
     return $fields;
   }
 

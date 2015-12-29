@@ -43,7 +43,17 @@ final class PhabricatorProjectEditEngine
   }
 
   protected function newEditableObject() {
-    return PhabricatorProject::initializeNewProject($this->getViewer());
+    $project = PhabricatorProject::initializeNewProject($this->getViewer());
+
+    $milestone = $this->getMilestoneProject();
+    if ($milestone) {
+      $default_name = pht(
+        'Milestone %s',
+        new PhutilNumber($milestone->loadNextMilestoneNumber()));
+      $project->setName($default_name);
+    }
+
+    return $project;
   }
 
   protected function newObjectQuery() {
@@ -90,6 +100,28 @@ final class PhabricatorProjectEditEngine
   protected function getCreateNewObjectPolicy() {
     return $this->getApplication()->getPolicy(
       ProjectCreateProjectsCapability::CAPABILITY);
+  }
+
+  protected function willConfigureFields($object, array $fields) {
+    $is_milestone = ($this->getMilestoneProject() || $object->isMilestone());
+
+    $unavailable = array(
+      PhabricatorTransactions::TYPE_VIEW_POLICY,
+      PhabricatorTransactions::TYPE_EDIT_POLICY,
+      PhabricatorTransactions::TYPE_JOIN_POLICY,
+    );
+    $unavailable = array_fuse($unavailable);
+
+    if ($is_milestone) {
+      foreach ($fields as $key => $field) {
+        $xaction_type = $field->getTransactionType();
+        if (isset($unavailable[$xaction_type])) {
+          unset($fields[$key]);
+        }
+      }
+    }
+
+    return $fields;
   }
 
   protected function newBuiltinEngineConfigurations() {

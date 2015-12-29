@@ -3,6 +3,17 @@
 final class PhabricatorProjectTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  private $isMilestone;
+
+  private function setIsMilestone($is_milestone) {
+    $this->isMilestone = $is_milestone;
+    return $this;
+  }
+
+  private function getIsMilestone() {
+    return $this->isMilestone;
+  }
+
   public function getEditorApplicationClass() {
     return 'PhabricatorProjectApplication';
   }
@@ -91,7 +102,9 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_NAME:
         $name = $xaction->getNewValue();
         $object->setName($name);
-        $object->setPrimarySlug(PhabricatorSlug::normalizeProjectSlug($name));
+        if ($this->getIsMilestone()) {
+          $object->setPrimarySlug(PhabricatorSlug::normalizeProjectSlug($name));
+        }
         return;
       case PhabricatorProjectTransaction::TYPE_SLUGS:
         return;
@@ -114,19 +127,7 @@ final class PhabricatorProjectTransactionEditor
         $object->setParentProjectPHID($xaction->getNewValue());
         return;
       case PhabricatorProjectTransaction::TYPE_MILESTONE:
-        $current = queryfx_one(
-          $object->establishConnection('w'),
-          'SELECT MAX(milestoneNumber) n
-            FROM %T
-            WHERE parentProjectPHID = %s',
-          $object->getTableName(),
-          $object->getParentProject()->getPHID());
-        if (!$current) {
-          $number = 1;
-        } else {
-          $number = (int)$current['n'] + 1;
-        }
-
+        $number = $object->getParentProject()->loadNextMilestoneNumber();
         $object->setMilestoneNumber($number);
         $object->setParentProjectPHID($xaction->getNewValue());
         return;
@@ -275,16 +276,7 @@ final class PhabricatorProjectTransactionEditor
       }
     }
 
-    $is_milestone = $object->isMilestone();
-    foreach ($xactions as $xaction) {
-      switch ($xaction->getTransactionType()) {
-        case PhabricatorProjectTransaction::TYPE_MILESTONE:
-          if ($xaction->getNewValue() !== null) {
-            $is_milestone = true;
-          }
-          break;
-      }
-    }
+    $is_milestone = $this->getIsMilestone();
 
     $is_parent = $object->getHasSubprojects();
 
@@ -346,6 +338,10 @@ final class PhabricatorProjectTransactionEditor
           break;
         }
 
+        if ($this->getIsMilestone()) {
+          break;
+        }
+
         $name = last($xactions)->getNewValue();
 
         if (!PhabricatorSlug::isValidProjectSlug($name)) {
@@ -358,20 +354,6 @@ final class PhabricatorProjectTransactionEditor
           break;
         }
 
-        $name_used_already = id(new PhabricatorProjectQuery())
-          ->setViewer($this->getActor())
-          ->withNames(array($name))
-          ->executeOne();
-        if ($name_used_already &&
-           ($name_used_already->getPHID() != $object->getPHID())) {
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Duplicate'),
-            pht('Project name is already used.'),
-            nonempty(last($xactions), null));
-          $errors[] = $error;
-        }
-
         $slug = PhabricatorSlug::normalizeProjectSlug($name);
 
         $slug_used_already = id(new PhabricatorProjectSlug())
@@ -381,7 +363,10 @@ final class PhabricatorProjectTransactionEditor
           $error = new PhabricatorApplicationTransactionValidationError(
             $type,
             pht('Duplicate'),
-            pht('Project name can not be used due to hashtag collision.'),
+            pht(
+              'Project name generates the same hashtag ("%s") as another '.
+              'existing project. Choose a unique name.',
+              '#'.$slug),
             nonempty(last($xactions), null));
           $errors[] = $error;
         }
@@ -882,6 +867,19 @@ final class PhabricatorProjectTransactionEditor
             ));
       }
     }
+
+    $is_milestone = $object->isMilestone();
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorProjectTransaction::TYPE_MILESTONE:
+          if ($xaction->getNewValue() !== null) {
+            $is_milestone = true;
+          }
+          break;
+      }
+    }
+
+    $this->setIsMilestone($is_milestone);
 
     return $results;
   }
