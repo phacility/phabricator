@@ -484,6 +484,22 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return $number;
   }
 
+  public function getDisplayIcon() {
+    if ($this->isMilestone()) {
+      return 'fa-map-marker';
+    }
+
+    return $this->getIcon();
+  }
+
+  public function getDisplayColor() {
+    if ($this->isMilestone()) {
+      return self::DEFAULT_COLOR;
+    }
+
+    return $this->getColor();
+  }
+
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 

@@ -109,6 +109,8 @@ final class PhabricatorProjectEditEngine
       PhabricatorTransactions::TYPE_VIEW_POLICY,
       PhabricatorTransactions::TYPE_EDIT_POLICY,
       PhabricatorTransactions::TYPE_JOIN_POLICY,
+      PhabricatorProjectTransaction::TYPE_ICON,
+      PhabricatorProjectTransaction::TYPE_COLOR,
     );
     $unavailable = array_fuse($unavailable);
 
