@@ -102,7 +102,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_NAME:
         $name = $xaction->getNewValue();
         $object->setName($name);
-        if ($this->getIsMilestone()) {
+        if (!$this->getIsMilestone()) {
           $object->setPrimarySlug(PhabricatorSlug::normalizeProjectSlug($name));
         }
         return;

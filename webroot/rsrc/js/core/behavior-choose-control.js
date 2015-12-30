@@ -15,14 +15,19 @@ JX.behavior('choose-control', function() {
       e.kill();
 
       var data = e.getNodeData('phui-form-iconset');
+      var input = JX.$(data.inputID);
+
+      if (input.disabled) {
+        return;
+      }
 
       var params = {
-        value: JX.$(data.inputID).value
+        value: input.value
       };
 
       new JX.Workflow(data.uri, params)
         .setHandler(function(r) {
-          JX.$(data.inputID).value = r.value;
+          input.value = r.value;
           JX.DOM.setContent(JX.$(data.displayID), JX.$H(r.display));
         })
         .start();

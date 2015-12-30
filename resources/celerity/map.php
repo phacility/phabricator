@@ -465,7 +465,7 @@ return array(
     'rsrc/js/core/behavior-active-nav.js' => 'e379b58e',
     'rsrc/js/core/behavior-audio-source.js' => '59b251eb',
     'rsrc/js/core/behavior-autofocus.js' => '7319e029',
-    'rsrc/js/core/behavior-choose-control.js' => 'dfaafb14',
+    'rsrc/js/core/behavior-choose-control.js' => '8fee767e',
     'rsrc/js/core/behavior-crop.js' => 'fa0f4fc2',
     'rsrc/js/core/behavior-dark-console.js' => 'f411b6ae',
     'rsrc/js/core/behavior-device.js' => 'a205cf28',
@@ -571,7 +571,7 @@ return array(
     'javelin-behavior-audio-source' => '59b251eb',
     'javelin-behavior-audit-preview' => 'd835b03a',
     'javelin-behavior-bulk-job-reload' => 'edf8a145',
-    'javelin-behavior-choose-control' => 'dfaafb14',
+    'javelin-behavior-choose-control' => '8fee767e',
     'javelin-behavior-comment-actions' => 'b65559c0',
     'javelin-behavior-config-reorder-fields' => 'b6993408',
     'javelin-behavior-conpherence-drag-and-drop-photo' => 'cf86d16a',
@@ -1517,6 +1517,12 @@ return array(
       'javelin-install',
       'javelin-dom',
     ),
+    '8fee767e' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
+      'javelin-workflow',
+    ),
     '9007c197' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1908,12 +1914,6 @@ return array(
     ),
     'df5e11d2' => array(
       'javelin-install',
-    ),
-    'dfaafb14' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
-      'javelin-workflow',
     ),
     'e10f8e18' => array(
       'javelin-behavior',
