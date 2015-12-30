@@ -131,6 +131,10 @@ protected function buildQueryFromParameters(array $map) {
 
     $set = new PhabricatorProjectIconSet();
     foreach ($set->getIcons() as $icon) {
+      if ($icon->getIsDisabled()) {
+        continue;
+      }
+
       $options[$icon->getKey()] = array(
         id(new PHUIIconView())
           ->setIconFont($icon->getIcon()),

@@ -25,15 +25,24 @@ final class PhabricatorProjectListView extends AphrontView {
     foreach ($projects as $key => $project) {
       $id = $project->getID();
 
-      $tag_list = id(new PHUIHandleTagListView())
-        ->setSlim(true)
-        ->setHandles(array($handles[$project->getPHID()]));
+      $icon = $project->getDisplayIconIcon();
+      $color = $project->getColor();
+
+      $icon_icon = id(new PHUIIconView())
+        ->setIconFont("{$icon} {$color}");
+
+      $icon_name = $project->getDisplayIconName();
 
       $item = id(new PHUIObjectItemView())
         ->setHeader($project->getName())
         ->setHref("/project/view/{$id}/")
         ->setImageURI($project->getProfileImageURI())
-        ->addAttribute($tag_list);
+        ->addAttribute(
+          array(
+            $icon_icon,
+            ' ',
+            $icon_name,
+          ));
 
       if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ARCHIVED) {
         $item->addIcon('delete-grey', pht('Archived'));

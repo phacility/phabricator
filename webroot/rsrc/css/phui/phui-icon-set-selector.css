@@ -1,5 +1,5 @@
 /**
- * @provides project-icon-css
+ * @provides phui-icon-set-selector-css
  */
 
 button.icon-button {
@@ -25,4 +25,5 @@ button.icon-button {
 
 button.icon-button.selected {
   background: {$bluebackground};
+  border: 1px solid {$blueborder};
 }
