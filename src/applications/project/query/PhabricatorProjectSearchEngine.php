@@ -180,7 +180,7 @@ protected function buildQueryFromParameters(array $map) {
     $create_button = id(new PHUIButtonView())
       ->setTag('a')
       ->setText(pht('Create a Project'))
-      ->setHref('/project/create/')
+      ->setHref('/project/edit/')
       ->setColor(PHUIButtonView::GREEN);
 
     $icon = $this->getApplication()->getFontIcon();

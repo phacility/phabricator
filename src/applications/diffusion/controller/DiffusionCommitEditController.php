@@ -47,15 +47,6 @@ final class DiffusionCommitEditController extends DiffusionController {
         ->setName('projects')
         ->setValue($current_proj_phids)
         ->setID($tokenizer_id)
-        ->setCaption(
-          javelin_tag(
-            'a',
-            array(
-              'href'        => '/project/create/',
-              'mustcapture' => true,
-              'sigil'       => 'project-create',
-            ),
-            pht('Create New Project')))
         ->setDatasource(new PhabricatorProjectDatasource()));
 
     $reason = $data->getCommitDetail('autocloseReason', false);
