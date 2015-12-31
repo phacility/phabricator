@@ -7,6 +7,7 @@ final class PHUIDocumentViewPro extends AphrontTagView {
   private $bookdescription;
   private $fluid;
   private $toc;
+  private $foot;
 
   public function setHeader(PHUIHeaderView $header) {
     $header->setTall(true);
@@ -30,12 +31,20 @@ final class PHUIDocumentViewPro extends AphrontTagView {
     return $this;
   }
 
+  public function setFoot($foot) {
+    $this->foot = $foot;
+    return $this;
+  }
+
   protected function getTagAttributes() {
     $classes = array();
 
     $classes[] = 'phui-document-container';
     if ($this->fluid) {
       $classes[] = 'phui-document-fluid';
+    }
+    if ($this->foot) {
+      $classes[] = 'document-has-foot';
     }
 
     return array(
@@ -95,6 +104,16 @@ final class PHUIDocumentViewPro extends AphrontTagView {
         $toc);
     }
 
+    $foot_content = null;
+    if ($this->foot) {
+      $foot_content = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-document-foot-content',
+        ),
+        $this->foot);
+    }
+
     $content_inner = phutil_tag(
         'div',
         array(
@@ -104,6 +123,7 @@ final class PHUIDocumentViewPro extends AphrontTagView {
           $table_of_contents,
           $this->header,
           $main_content,
+          $foot_content,
         ));
 
     $content = phutil_tag(

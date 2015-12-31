@@ -126,20 +126,15 @@ final class PhamePostViewController
       ->setUser($viewer)
       ->setObject($post);
 
+    $next_view = new PhameNextPostView();
     if ($next) {
-      $properties->addProperty(
-        pht('Later Posts'),
-        $viewer->renderHandleList(mpull($next, 'getPHID')));
+      $next_view->setNext($next->getTitle(), $next->getViewURI());
     }
-
     if ($prev) {
-      $properties->addProperty(
-        pht('Earlier Posts'),
-        $viewer->renderHandleList(mpull($prev, 'getPHID')));
+      $next_view->setPrevious($prev->getTitle(), $prev->getViewURI());
     }
 
-    $properties->invokeWillRenderEvent();
-
+    $document->setFoot($next_view);
     $crumbs = $this->buildApplicationCrumbs();
 
     $page = $this->newPage()
@@ -257,7 +252,7 @@ final class PhamePostViewController
       ->setViewer($viewer)
       ->withVisibility(PhameConstants::VISIBILITY_PUBLISHED)
       ->withBlogPHIDs(array($post->getBlog()->getPHID()))
-      ->setLimit(2);
+      ->setLimit(1);
 
     $prev = id(clone $query)
       ->setAfterID($post->getID())
@@ -267,7 +262,7 @@ final class PhamePostViewController
       ->setBeforeID($post->getID())
       ->execute();
 
-    return array($prev, $next);
+    return array(head($prev), head($next));
   }
 
 }

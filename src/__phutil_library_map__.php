@@ -3427,6 +3427,7 @@ phutil_register_library_map(array(
     'PhameDraftListView' => 'applications/phame/view/PhameDraftListView.php',
     'PhameHomeController' => 'applications/phame/controller/PhameHomeController.php',
     'PhameLiveController' => 'applications/phame/controller/PhameLiveController.php',
+    'PhameNextPostView' => 'applications/phame/view/PhameNextPostView.php',
     'PhamePost' => 'applications/phame/storage/PhamePost.php',
     'PhamePostCommentController' => 'applications/phame/controller/post/PhamePostCommentController.php',
     'PhamePostController' => 'applications/phame/controller/post/PhamePostController.php',
@@ -7880,6 +7881,7 @@ phutil_register_library_map(array(
     'PhameDraftListView' => 'AphrontTagView',
     'PhameHomeController' => 'PhamePostController',
     'PhameLiveController' => 'PhameController',
+    'PhameNextPostView' => 'AphrontTagView',
     'PhamePost' => array(
       'PhameDAO',
       'PhabricatorPolicyInterface',
