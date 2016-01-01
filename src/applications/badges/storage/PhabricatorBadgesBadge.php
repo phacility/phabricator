@@ -111,6 +111,10 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
     return $this->assertAttached($this->recipientPHIDs);
   }
 
+  public function getViewURI() {
+    return '/badges/view/'.$this->getID().'/';
+  }
+
   public function save() {
     if (!$this->getMailKey()) {
       $this->setMailKey(Filesystem::readRandomCharacters(20));
