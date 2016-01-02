@@ -28,7 +28,7 @@ final class DiffusionRepositoryDatasource
     foreach ($repos as $repo) {
       $results[] = id(new PhabricatorTypeaheadResult())
         ->setName($repo->getMonogram().' '.$repo->getName())
-        ->setURI('/diffusion/'.$repo->getCallsign().'/')
+        ->setURI($repo->getURI())
         ->setPHID($repo->getPHID())
         ->setPriorityString($repo->getMonogram());
     }

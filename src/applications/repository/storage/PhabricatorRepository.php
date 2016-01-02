@@ -601,6 +601,11 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return '/diffusion/'.$this->getCallsign().'/';
   }
 
+  public function getCommitURI($identifier) {
+    $callsign = $this->getCallsign();
+    return "/r{$callsign}{$identifier}";
+  }
+
   public function getNormalizedPath() {
     $uri = (string)$this->getCloneURIObject();
 

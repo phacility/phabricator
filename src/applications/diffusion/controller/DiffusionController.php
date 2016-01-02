@@ -235,7 +235,7 @@ abstract class DiffusionController extends PhabricatorController {
         }
       }
     } else {
-      $links[] = 'r'.$drequest->getRepository()->getCallsign();
+      $links[] = $drequest->getRepository()->getDisplayName();
       $links[] = $divider;
     }
 

@@ -181,7 +181,7 @@ final class DiffusionCommitController extends DiffusionController {
         id(new PhabricatorRepository())->establishConnection('r'),
         'SELECT * FROM %T WHERE fullCommitName = %s',
         PhabricatorRepository::TABLE_BADCOMMIT,
-        'r'.$callsign.$commit->getCommitIdentifier());
+        $commit->getMonogram());
     }
 
     $show_changesets = false;
@@ -314,9 +314,8 @@ final class DiffusionCommitController extends DiffusionController {
         }
       }
 
-      $change_list_title = DiffusionView::nameCommit(
-        $repository,
-        $commit->getCommitIdentifier());
+      $change_list_title = $commit->getDisplayName();
+
       $change_list = new DifferentialChangesetListView();
       $change_list->setTitle($change_list_title);
       $change_list->setChangesets($changesets);
@@ -344,11 +343,6 @@ final class DiffusionCommitController extends DiffusionController {
 
     $content[] = $this->renderAddCommentPanel($commit, $audit_requests);
 
-    $commit_id = 'r'.$callsign.$commit->getCommitIdentifier();
-    $short_name = DiffusionView::nameCommit(
-      $repository,
-      $commit->getCommitIdentifier());
-
     $prefs = $user->loadPreferences();
     $pref_filetree = PhabricatorUserPreferences::PREFERENCE_DIFF_FILETREE;
     $pref_collapse = PhabricatorUserPreferences::PREFERENCE_NAV_COLLAPSED;
@@ -357,8 +351,8 @@ final class DiffusionCommitController extends DiffusionController {
 
     if ($show_changesets && $show_filetree) {
       $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
-        ->setTitle($short_name)
-        ->setBaseURI(new PhutilURI('/'.$commit_id))
+        ->setTitle($commit->getDisplayName())
+        ->setBaseURI(new PhutilURI($commit->getURI()))
         ->build($changesets)
         ->setCrumbs($crumbs)
         ->setCollapsed((bool)$collapsed)
@@ -371,7 +365,7 @@ final class DiffusionCommitController extends DiffusionController {
     return $this->buildApplicationPage(
       $content,
       array(
-        'title' => $commit_id,
+        'title' => $commit->getDisplayName(),
         'pageObjects' => array($commit->getPHID()),
       ));
   }

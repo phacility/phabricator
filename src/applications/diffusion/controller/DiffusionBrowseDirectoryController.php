@@ -98,9 +98,7 @@ final class DiffusionBrowseDirectoryController
       array(
         'title' => array(
           nonempty(basename($drequest->getPath()), '/'),
-          pht(
-            '%s Repository',
-            $drequest->getRepository()->getCallsign()),
+          $drequest->getRepository()->getDisplayName(),
         ),
       ));
   }

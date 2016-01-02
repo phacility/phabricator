@@ -39,6 +39,7 @@ final class DiffusionPushLogListView extends AphrontView {
 
     $rows = array();
     foreach ($logs as $log) {
+      $repository = $log->getRepository();
 
       // Reveal this if it's valid and the user can edit the repository.
       $remote_addr = '-';
@@ -51,16 +52,16 @@ final class DiffusionPushLogListView extends AphrontView {
 
       $event_id = $log->getPushEvent()->getID();
 
-      $callsign = $log->getRepository()->getCallsign();
       $old_ref_link = null;
       if ($log->getRefOld() != DiffusionCommitHookEngine::EMPTY_HASH) {
         $old_ref_link = phutil_tag(
           'a',
           array(
-            'href' => '/r'.$callsign.$log->getRefOld(),
+            'href' => $repository->getCommitURI($log->getRefOld()),
           ),
           $log->getRefOldShort());
       }
+
       $rows[] = array(
         phutil_tag(
           'a',
@@ -71,9 +72,9 @@ final class DiffusionPushLogListView extends AphrontView {
         phutil_tag(
           'a',
           array(
-            'href' => '/diffusion/'.$callsign.'/',
+            'href' => $repository->getURI(),
           ),
-          $callsign),
+          $repository->getDisplayName()),
         $handles[$log->getPusherPHID()]->renderLink(),
         $remote_addr,
         $log->getPushEvent()->getRemoteProtocol(),
@@ -83,7 +84,7 @@ final class DiffusionPushLogListView extends AphrontView {
         phutil_tag(
           'a',
           array(
-            'href' => '/r'.$callsign.$log->getRefNew(),
+            'href' => $repository->getCommitURI($log->getRefNew()),
           ),
           $log->getRefNewShort()),
 

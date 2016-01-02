@@ -66,7 +66,7 @@ final class DiffusionBranchTableController extends DiffusionController {
       array(
         'title' => array(
           pht('Branches'),
-          'r'.$repository->getCallsign(),
+          $repository->getDisplayName(),
         ),
       ));
   }

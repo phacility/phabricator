@@ -256,6 +256,12 @@ final class PhabricatorRepositoryCommit
     return "r{$callsign}{$identifier}";
   }
 
+  public function getDisplayName() {
+    $repository = $this->getRepository();
+    $identifier = $this->getCommitIdentifier();
+    return $repository->formatCommitName($identifier);
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

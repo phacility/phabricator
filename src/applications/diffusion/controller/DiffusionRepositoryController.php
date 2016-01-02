@@ -500,9 +500,8 @@ final class DiffusionRepositoryController extends DiffusionController {
         ->setDisabled(!$can_edit));
 
     if ($repository->isHosted()) {
-      $callsign = $repository->getCallsign();
       $push_uri = $this->getApplicationURI(
-        'pushlog/?repositories=r'.$callsign);
+        'pushlog/?repositories='.$repository->getMonogram());
 
       $view->addAction(
         id(new PhabricatorActionView())
@@ -551,7 +550,6 @@ final class DiffusionRepositoryController extends DiffusionController {
     }
 
     $history_table->setIsHead(true);
-    $callsign = $drequest->getRepository()->getCallsign();
 
     $icon = id(new PHUIIconView())
       ->setIconFont('fa-list-alt');
