@@ -37,7 +37,7 @@ final class PhabricatorRepositoryMirrorEngine
       throw new PhutilAggregateException(
         pht(
           'Exceptions occurred while mirroring the "%s" repository.',
-          $repository->getCallsign()),
+          $repository->getDisplayName()),
         $exceptions);
     }
   }
