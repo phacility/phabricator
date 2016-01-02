@@ -146,7 +146,7 @@ final class DifferentialRevisionLandController extends DifferentialController {
     $looksoon = new ConduitCall(
       'diffusion.looksoon',
       array(
-        'callsigns' => array($repository->getCallsign()),
+        'repositories' => array($repository->getPHID()),
       ));
     $looksoon->setUser($request->getUser());
     $looksoon->execute();
@@ -155,7 +155,7 @@ final class DifferentialRevisionLandController extends DifferentialController {
   }
 
   private function lockRepository($repository) {
-    $lock_name = __CLASS__.':'.($repository->getCallsign());
+    $lock_name = __CLASS__.':'.($repository->getPHID());
     $lock = PhabricatorGlobalLock::newLock($lock_name);
     $lock->lock();
     return $lock;

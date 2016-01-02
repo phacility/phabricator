@@ -25,8 +25,8 @@ final class DiffusionRepositoryEditUpdateController
 
     if ($request->isFormPost()) {
       $params = array(
-        'callsigns' => array(
-          $repository->getCallsign(),
+        'repositories' => array(
+          $repository->getPHID(),
         ),
       );
 

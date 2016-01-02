@@ -212,7 +212,7 @@ abstract class DiffusionController extends PhabricatorController {
               'path' => '',
             )),
         ),
-        'r'.$drequest->getRepository()->getCallsign());
+        $drequest->getRepository()->getDisplayName());
       $links[] = $divider;
       $accum = '';
       $last_key = last_key($path_parts);
