@@ -129,7 +129,6 @@ abstract class DiffusionView extends AphrontView {
     $summary = '') {
 
     $commit_name = $repository->formatCommitName($commit);
-    $callsign = $repository->getCallsign();
 
     if (strlen($summary)) {
       $commit_name .= ': '.$summary;
@@ -138,7 +137,7 @@ abstract class DiffusionView extends AphrontView {
     return phutil_tag(
       'a',
       array(
-        'href' => "/r{$callsign}{$commit}",
+        'href' => $repository->getCommitURI($commit),
       ),
       $commit_name);
   }

@@ -38,7 +38,6 @@ final class PhabricatorRepositoryRepositoryPHIDType
       $repository = $objects[$phid];
 
       $monogram = $repository->getMonogram();
-      $callsign = $repository->getCallsign();
       $name = $repository->getName();
       $uri = $repository->getURI();
 
