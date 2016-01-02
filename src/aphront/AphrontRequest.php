@@ -123,6 +123,11 @@ final class AphrontRequest extends Phobject {
    */
   public function getInt($name, $default = null) {
     if (isset($this->requestData[$name])) {
+      // Converting from array to int is "undefined". Don't rely on whatever
+      // PHP decides to do.
+      if (is_array($this->requestData[$name])) {
+        return $default;
+      }
       return (int)$this->requestData[$name];
     } else {
       return $default;

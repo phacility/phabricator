@@ -32,18 +32,27 @@ final class PhamePostEditController extends PhamePostController {
       }
       $blog_id = $post->getBlog()->getID();
     } else {
-      $blog_id = $request->getInt('blog');
+      $blog_id = head($request->getArr('blog'));
+      if (!$blog_id) {
+        $blog_id = $request->getStr('blog');
+      }
     }
 
-    $blog = id(new PhameBlogQuery())
+    $query = id(new PhameBlogQuery())
       ->setViewer($viewer)
-      ->withIDs(array($blog_id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->executeOne();
+        ));
+
+    if (ctype_digit($blog_id)) {
+      $query->withIDs(array($blog_id));
+    } else {
+      $query->withPHIDs(array($blog_id));
+    }
+
+    $blog = $query->executeOne();
     if (!$blog) {
       return new Aphront404Response();
     }
@@ -60,10 +69,11 @@ final class PhamePostEditController extends PhamePostController {
     $crumbs = parent::buildApplicationCrumbs();
 
     $blog = $this->getBlog();
-
-    $crumbs->addTextCrumb(
-      $blog->getName(),
-      $blog->getViewURI());
+    if ($blog) {
+      $crumbs->addTextCrumb(
+        $blog->getName(),
+        $blog->getViewURI());
+    }
 
     return $crumbs;
   }
