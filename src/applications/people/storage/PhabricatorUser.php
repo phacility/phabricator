@@ -504,7 +504,11 @@ final class PhabricatorUser
     return $preferences;
   }
 
-  public function loadEditorLink($path, $line, $callsign) {
+  public function loadEditorLink(
+    $path,
+    $line,
+    PhabricatorRepository $repository = null) {
+
     $editor = $this->loadPreferences()->getPreference(
       PhabricatorUserPreferences::PREFERENCE_EDITOR);
 
@@ -522,6 +526,12 @@ final class PhabricatorUser
 
     if (!strlen($editor)) {
       return null;
+    }
+
+    if ($repository) {
+      $callsign = $repository->getCallsign();
+    } else {
+      $callsign = null;
     }
 
     $uri = strtr($editor, array(

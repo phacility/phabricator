@@ -50,14 +50,6 @@ final class AphrontStackTraceView extends AphrontView {
       if ($file) {
         if (isset($callsigns[$lib])) {
           $attrs = array('title' => $file);
-          try {
-            $attrs['href'] = $user->loadEditorLink(
-              '/src/'.$relative,
-              $part['line'],
-              $callsigns[$lib]);
-          } catch (Exception $ex) {
-            // The database can be inaccessible.
-          }
           if (empty($attrs['href'])) {
             $attrs['href'] = sprintf($path, $callsigns[$lib]).
               str_replace(DIRECTORY_SEPARATOR, '/', $relative).

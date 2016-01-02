@@ -435,9 +435,8 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
     $path = $drequest->getPath();
     $line = nonempty((int)$drequest->getLine(), 1);
 
-    $callsign = $repository->getCallsign();
-    $editor_link = $user->loadEditorLink($path, $line, $callsign);
-    $template = $user->loadEditorLink($path, '%l', $callsign);
+    $editor_link = $user->loadEditorLink($path, $line, $repository);
+    $template = $user->loadEditorLink($path, '%l', $repository);
 
     $icon_edit = id(new PHUIIconView())
       ->setIconFont('fa-pencil');
