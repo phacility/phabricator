@@ -203,10 +203,7 @@ final class PhabricatorRepositoryCommit
   }
 
   public function getURI() {
-    $repository = $this->getRepository();
-    $callsign = $repository->getCallsign();
-    $commit_identifier = $this->getCommitIdentifier();
-    return '/r'.$callsign.$commit_identifier;
+    return '/'.$this->getMonogram();
   }
 
   /**
@@ -249,6 +246,14 @@ final class PhabricatorRepositoryCommit
     }
 
     return $this->setAuditStatus($status);
+  }
+
+  public function getMonogram() {
+    $repository = $this->getRepository();
+    $callsign = $repository->getCallsign();
+    $identifier = $this->getCommitIdentifier();
+
+    return "r{$callsign}{$identifier}";
   }
 
 

@@ -40,10 +40,11 @@ final class PhabricatorRepositoryRepositoryPHIDType
       $monogram = $repository->getMonogram();
       $callsign = $repository->getCallsign();
       $name = $repository->getName();
+      $uri = $repository->getURI();
 
       $handle->setName($monogram);
       $handle->setFullName("{$monogram} {$name}");
-      $handle->setURI("/diffusion/{$callsign}/");
+      $handle->setURI($uri);
     }
   }
 

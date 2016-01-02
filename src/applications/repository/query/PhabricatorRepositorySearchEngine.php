@@ -155,15 +155,15 @@ final class PhabricatorRepositorySearchEngine
         ->setUser($viewer)
         ->setObject($repository)
         ->setHeader($repository->getName())
-        ->setObjectName('r'.$repository->getCallsign())
-        ->setHref($this->getApplicationURI($repository->getCallsign().'/'));
+        ->setObjectName($repository->getMonogram())
+        ->setHref($repository->getURI());
 
       $commit = $repository->getMostRecentCommit();
       if ($commit) {
         $commit_link = DiffusionView::linkCommit(
-            $repository,
-            $commit->getCommitIdentifier(),
-            $commit->getSummary());
+          $repository,
+          $commit->getCommitIdentifier(),
+          $commit->getSummary());
         $item->setSubhead($commit_link);
         $item->setEpoch($commit->getEpoch());
       }

@@ -20,8 +20,10 @@ final class DiffusionCommitFulltextEngine
     $commit_message = $commit_data->getCommitMessage();
     $author_phid = $commit_data->getCommitDetail('authorPHID');
 
-    $title = 'r'.$repository->getCallsign().$commit->getCommitIdentifier().
-      ' '.$commit_data->getSummary();
+    $monogram = $commit->getMonogram();
+    $summary = $commit_data->getSummary();
+
+    $title = "{$monogram} {$summary}";
 
     $document
       ->setDocumentCreated($date_created)
