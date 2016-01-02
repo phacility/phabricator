@@ -36,7 +36,6 @@ final class DiffusionCommitController extends DiffusionController {
     }
 
     $repository = $drequest->getRepository();
-    $callsign = $repository->getCallsign();
 
     $content = array();
     $commit = id(new DiffusionCommitQuery())
@@ -321,19 +320,21 @@ final class DiffusionCommitController extends DiffusionController {
       $change_list->setChangesets($changesets);
       $change_list->setVisibleChangesets($visible_changesets);
       $change_list->setRenderingReferences($references);
-      $change_list->setRenderURI('/diffusion/'.$callsign.'/diff/');
+      $change_list->setRenderURI(
+        $repository->getPathURI('diff/'));
       $change_list->setRepository($repository);
       $change_list->setUser($user);
 
       // TODO: Try to setBranch() to something reasonable here?
 
       $change_list->setStandaloneURI(
-        '/diffusion/'.$callsign.'/diff/');
+        $repository->getPathURI('diff/'));
+
       $change_list->setRawFileURIs(
         // TODO: Implement this, somewhat tricky if there's an octopus merge
         // or whatever?
         null,
-        '/diffusion/'.$callsign.'/diff/?view=r');
+        $repository->getPathURI('diff/?view=r'));
 
       $change_list->setInlineCommentControllerURI(
         '/diffusion/inline/edit/'.phutil_escape_uri($commit->getPHID()).'/');
@@ -567,8 +568,8 @@ final class DiffusionCommitController extends DiffusionController {
         ),
         pht('Unknown'));
 
-      $callsign = $repository->getCallsign();
-      $root = '/diffusion/'.$callsign.'/commit/'.$commit->getCommitIdentifier();
+      $identifier = $commit->getCommitIdentifier();
+      $root = $repository->getPathURI("commit/{$identifier}");
       Javelin::initBehavior(
         'diffusion-commit-branches',
         array(
@@ -904,8 +905,8 @@ final class DiffusionCommitController extends DiffusionController {
       $commit,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $uri = '/diffusion/'.$repository->getCallsign().'/commit/'.
-           $commit->getCommitIdentifier().'/edit/';
+    $identifier = $commit->getCommitIdentifier();
+    $uri = $repository->getPathURI("commit/{$identifier}/edit/");
 
     $action = id(new PhabricatorActionView())
       ->setName(pht('Edit Commit'))

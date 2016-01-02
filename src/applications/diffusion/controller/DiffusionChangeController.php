@@ -33,7 +33,6 @@ final class DiffusionChangeController extends DiffusionController {
     }
 
     $repository = $drequest->getRepository();
-    $callsign = $repository->getCallsign();
     $changesets = array(
       0 => $changeset,
     );
@@ -59,7 +58,8 @@ final class DiffusionChangeController extends DiffusionController {
     $left_uri = $drequest->generateURI($raw_params);
     $changeset_view->setRawFileURIs($left_uri, $right_uri);
 
-    $changeset_view->setRenderURI('/diffusion/'.$callsign.'/diff/');
+    $changeset_view->setRenderURI($repository->getPathURI('diff/'));
+
     $changeset_view->setWhitespace(
       DifferentialChangesetParser::WHITESPACE_SHOW_ALL);
     $changeset_view->setUser($viewer);

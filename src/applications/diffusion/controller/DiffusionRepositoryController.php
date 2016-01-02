@@ -480,7 +480,7 @@ final class DiffusionRepositoryController extends DiffusionController {
   private function buildActionList(PhabricatorRepository $repository) {
     $viewer = $this->getRequest()->getUser();
 
-    $edit_uri = $this->getApplicationURI($repository->getCallsign().'/edit/');
+    $edit_uri = $repository->getPathURI('edit/');
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)

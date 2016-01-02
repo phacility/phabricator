@@ -177,7 +177,7 @@ final class PhabricatorRepositorySearchEngine
       if ($size) {
         $history_uri = DiffusionRequest::generateDiffusionURI(
           array(
-            'callsign' => $repository->getCallsign(),
+            'repository' => $repository,
             'action' => 'history',
           ));
 

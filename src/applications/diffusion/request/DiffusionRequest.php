@@ -465,7 +465,7 @@ abstract class DiffusionRequest extends Phobject {
     }
 
     $defaults = array(
-      'callsign'  => $this->getCallsign(),
+      'repository' => $this->getRepository(),
       'path'      => $this->getPath(),
       'branch'    => $this->getBranch(),
       'commit'    => $default_commit,
@@ -487,6 +487,7 @@ abstract class DiffusionRequest extends Phobject {
    *   - `action` One of `history`, `browse`, `change`, `lastmodified`,
    *     `branch`, `tags`, `branches`,  or `revision-ref`. The action specified
    *      by the URI.
+   *   - `repository` Repository.
    *   - `callsign` Repository callsign.
    *   - `branch` Optional if action is not `branch`, branch name.
    *   - `path` Optional, path to file.
@@ -504,7 +505,14 @@ abstract class DiffusionRequest extends Phobject {
   public static function generateDiffusionURI(array $params) {
     $action = idx($params, 'action');
 
-    $callsign = idx($params, 'callsign');
+    $repository = idx($params, 'repository');
+
+    if ($repository) {
+      $callsign = $repository->getCallsign();
+    } else {
+      $callsign = idx($params, 'callsign');
+    }
+
     $path     = idx($params, 'path');
     $branch   = idx($params, 'branch');
     $commit   = idx($params, 'commit');
