@@ -49,7 +49,7 @@ final class PhabricatorRepositoryRepositoryPHIDType
   }
 
   public function canLoadNamedObject($name) {
-    return preg_match('/^r[A-Z]+|R[0-9]+$/', $name);
+    return preg_match('/^r[A-Z]+|R[1-9]\d*\z/', $name);
   }
 
   public function loadNamedObjects(

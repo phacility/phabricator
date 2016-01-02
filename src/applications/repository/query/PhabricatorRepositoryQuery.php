@@ -15,6 +15,7 @@ final class PhabricatorRepositoryQuery
   private $numericIdentifiers;
   private $callsignIdentifiers;
   private $phidIdentifiers;
+  private $monogramIdentifiers;
 
   private $identifierMap;
 
@@ -48,10 +49,16 @@ final class PhabricatorRepositoryQuery
   }
 
   public function withIdentifiers(array $identifiers) {
-    $ids = array(); $callsigns = array(); $phids = array();
+    $ids = array();
+    $callsigns = array();
+    $phids = array();
+    $monograms = array();
+
     foreach ($identifiers as $identifier) {
       if (ctype_digit($identifier)) {
         $ids[$identifier] = $identifier;
+      } else if (preg_match('/^(r[A-Z]+)|(R[1-9]\d*)\z/', $identifier)) {
+        $monograms[$identifier] = $identifier;
       } else {
         $repository_type = PhabricatorRepositoryRepositoryPHIDType::TYPECONST;
         if (phid_get_type($identifier) === $repository_type) {
@@ -65,6 +72,8 @@ final class PhabricatorRepositoryQuery
     $this->numericIdentifiers = $ids;
     $this->callsignIdentifiers = $callsigns;
     $this->phidIdentifiers = $phids;
+    $this->monogramIdentifiers = $monograms;
+
     return $this;
   }
 
@@ -273,6 +282,21 @@ final class PhabricatorRepositoryQuery
       }
     }
 
+    if ($this->monogramIdentifiers) {
+      $monogram_map = array();
+      foreach ($repositories as $repository) {
+        foreach ($repository->getAllMonograms() as $monogram) {
+          $monogram_map[$monogram] = $repository;
+        }
+      }
+
+      foreach ($this->monogramIdentifiers as $monogram) {
+        if (isset($monogram_map[$monogram])) {
+          $this->identifierMap[$monogram] = $monogram_map[$monogram];
+        }
+      }
+    }
+
     return $repositories;
   }
 
@@ -447,7 +471,8 @@ final class PhabricatorRepositoryQuery
 
     if ($this->numericIdentifiers ||
       $this->callsignIdentifiers ||
-      $this->phidIdentifiers) {
+      $this->phidIdentifiers ||
+      $this->monogramIdentifiers) {
       $identifier_clause = array();
 
       if ($this->numericIdentifiers) {
@@ -469,6 +494,33 @@ final class PhabricatorRepositoryQuery
           $conn,
           'r.phid IN (%Ls)',
           $this->phidIdentifiers);
+      }
+
+      if ($this->monogramIdentifiers) {
+        $monogram_callsigns = array();
+        $monogram_ids = array();
+
+        foreach ($this->monogramIdentifiers as $identifier) {
+          if ($identifier[0] == 'r') {
+            $monogram_callsigns[] = substr($identifier, 1);
+          } else {
+            $monogram_ids[] = substr($identifier, 1);
+          }
+        }
+
+        if ($monogram_ids) {
+          $identifier_clause[] = qsprintf(
+            $conn,
+            'r.id IN (%Ld)',
+            $monogram_ids);
+        }
+
+        if ($monogram_callsigns) {
+          $identifier_clause[] = qsprintf(
+            $conn,
+            'r.callsign IN (%Ls)',
+            $monogram_callsigns);
+        }
       }
 
       $where = array('('.implode(' OR ', $identifier_clause).')');

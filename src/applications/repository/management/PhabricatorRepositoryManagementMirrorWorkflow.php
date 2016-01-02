@@ -8,7 +8,7 @@ final class PhabricatorRepositoryManagementMirrorWorkflow
       ->setName('mirror')
       ->setExamples('**mirror** [__options__] __repository__ ...')
       ->setSynopsis(
-        pht('Push __repository__, named by callsign, to mirrors.'))
+        pht('Push __repository__ to mirrors.'))
       ->setArguments(
         array(
           array(
@@ -28,14 +28,16 @@ final class PhabricatorRepositoryManagementMirrorWorkflow
     if (!$repos) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Specify one or more repositories to push to mirrors, by callsign.'));
+          'Specify one or more repositories to push to mirrors.'));
     }
 
     $console = PhutilConsole::getConsole();
     foreach ($repos as $repo) {
       $console->writeOut(
         "%s\n",
-        pht('Pushing "%s" to mirrors...', $repo->getCallsign()));
+        pht(
+          "Pushing '%s' to mirrors...",
+          $repo->getDisplayName()));
 
       $engine = id(new PhabricatorRepositoryMirrorEngine())
         ->setRepository($repo)
@@ -43,7 +45,7 @@ final class PhabricatorRepositoryManagementMirrorWorkflow
         ->pushToMirrors();
     }
 
-    $console->writeOut('%s\b', pht('Done.'));
+    $console->writeOut("%s\n", pht('Done.'));
 
     return 0;
   }

@@ -151,6 +151,26 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return 'r'.$this->getCallsign();
   }
 
+  public function getDisplayName() {
+    // TODO: This is intended to produce a human-readable name that is not
+    // necessarily a global, unique identifier. Eventually, it may just return
+    // a string like "skynet" instead of "rSKYNET".
+    return $this->getMonogram();
+  }
+
+  public function getAllMonograms() {
+    $monograms = array();
+
+    $monograms[] = 'R'.$this->getID();
+
+    $callsign = $this->getCallsign();
+    if (strlen($callsign)) {
+      $monograms[] = 'r'.$callsign;
+    }
+
+    return $monograms;
+  }
+
   public function getDetail($key, $default = null) {
     return idx($this->details, $key, $default);
   }
