@@ -43,10 +43,10 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
       '/project/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorProjectListController',
         'filter/(?P<filter>[^/]+)/' => 'PhabricatorProjectListController',
-        'details/(?P<id>[1-9]\d*)/'
-          => 'PhabricatorProjectEditDetailsController',
         'archive/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectArchiveController',
+        'lock/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorProjectLockController',
         'members/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectMembersEditController',
         'members/(?P<id>[1-9]\d*)/remove/'
@@ -59,11 +59,12 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
           => 'PhabricatorProjectViewController',
         'picture/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectEditPictureController',
-        'icon/(?P<id>[1-9]\d*)/'
-          => 'PhabricatorProjectEditIconController',
-        'icon/'
-          => 'PhabricatorProjectEditIconController',
-        'create/' => 'PhabricatorProjectEditDetailsController',
+        $this->getEditRoutePattern('edit/')
+          => 'PhabricatorProjectEditController',
+        'subprojects/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorProjectSubprojectsController',
+        'milestones/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorProjectMilestonesController',
         'board/(?P<id>[1-9]\d*)/'.
           '(?P<filter>filter/)?'.
           '(?:query/(?P<queryKey>[^/]+)/)?'
@@ -95,21 +96,9 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
   }
 
   public function getQuickCreateItems(PhabricatorUser $viewer) {
-    $can_create = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $this,
-      ProjectCreateProjectsCapability::CAPABILITY);
-
-    $items = array();
-    if ($can_create) {
-      $item = id(new PHUIListItemView())
-        ->setName(pht('Project'))
-        ->setIcon('fa-briefcase')
-        ->setHref($this->getBaseURI().'create/');
-      $items[] = $item;
-    }
-
-    return $items;
+    return id(new PhabricatorProjectEditEngine())
+      ->setViewer($viewer)
+      ->loadQuickCreateItems();
   }
 
   protected function getCustomCapabilities() {

@@ -41,17 +41,25 @@ final class PhabricatorSubscriptionsEditEngineExtension
       ->setKey('subscriberPHIDs')
       ->setLabel(pht('Subscribers'))
       ->setEditTypeKey('subscribers')
-      ->setDescription(pht('Manage subscribers.'))
       ->setAliases(array('subscriber', 'subscribers'))
       ->setIsCopyable(true)
       ->setUseEdgeTransactions(true)
-      ->setEdgeTransactionDescriptions(
-        pht('Add subscribers.'),
-        pht('Remove subscribers.'),
-        pht('Set subscribers, overwriting current value.'))
-      ->setCommentActionLabel(pht('Add Subscribers'))
+      ->setCommentActionLabel(pht('Change Subscribers'))
+      ->setDescription(pht('Choose subscribers.'))
       ->setTransactionType($subscribers_type)
       ->setValue($sub_phids);
+
+    $subscribers_field->setViewer($engine->getViewer());
+
+    $edit_add = $subscribers_field->getConduitEditType('subscribers.add')
+      ->setConduitDescription(pht('Add subscribers.'));
+
+    $edit_set = $subscribers_field->getConduitEditType('subscribers.set')
+      ->setConduitDescription(
+        pht('Set subscribers, overwriting current value.'));
+
+    $edit_rem = $subscribers_field->getConduitEditType('subscribers.remove')
+      ->setConduitDescription(pht('Remove subscribers.'));
 
     return array(
       $subscribers_field,

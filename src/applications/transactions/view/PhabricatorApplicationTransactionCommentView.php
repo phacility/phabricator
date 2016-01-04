@@ -20,11 +20,9 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $headerText;
   private $noPermission;
 
-
-
   private $currentVersion;
   private $versionedDraft;
-  private $editTypes;
+  private $commentActions;
   private $transactionTimeline;
 
   public function setObjectPHID($object_phid) {
@@ -104,13 +102,14 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     return $this;
   }
 
-  public function setEditTypes($edit_types) {
-    $this->editTypes = $edit_types;
+  public function setCommentActions(array $comment_actions) {
+    assert_instances_of($comment_actions, 'PhabricatorEditEngineCommentAction');
+    $this->commentActions = $comment_actions;
     return $this;
   }
 
-  public function getEditTypes() {
-    return $this->editTypes;
+  public function getCommentActions() {
+    return $this->commentActions;
   }
 
   public function setNoPermission($no_permission) {
@@ -166,7 +165,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       $preview = null;
     }
 
-    if (!$this->getEditTypes()) {
+    if (!$this->getCommentActions()) {
       Javelin::initBehavior(
         'phabricator-transaction-comment-form',
         array(
@@ -219,21 +218,47 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       ->addHiddenInput('__draft__', $draft_key)
       ->addHiddenInput($version_key, $version_value);
 
-    $edit_types = $this->getEditTypes();
-    if ($edit_types) {
-
+    $comment_actions = $this->getCommentActions();
+    if ($comment_actions) {
       $action_map = array();
       $type_map = array();
-      foreach ($edit_types as $edit_type) {
-        $key = $edit_type->getEditType();
+
+      $comment_actions = mpull($comment_actions, null, 'getKey');
+
+      $draft_actions = array();
+      $draft_keys = array();
+      if ($versioned_draft) {
+        $draft_actions = $versioned_draft->getProperty('actions', array());
+
+        if (!is_array($draft_actions)) {
+          $draft_actions = array();
+        }
+
+        foreach ($draft_actions as $action) {
+          $type = idx($action, 'type');
+          $comment_action = idx($comment_actions, $type);
+          if (!$comment_action) {
+            continue;
+          }
+
+          $value = idx($action, 'value');
+          $comment_action->setValue($value);
+
+          $draft_keys[] = $type;
+        }
+      }
+
+      foreach ($comment_actions as $key => $comment_action) {
+        $key = $comment_action->getKey();
         $action_map[$key] = array(
           'key' => $key,
-          'label' => $edit_type->getLabel(),
-          'type' => $edit_type->getPHUIXControlType(),
-          'spec' => $edit_type->getPHUIXControlSpecification(),
+          'label' => $comment_action->getLabel(),
+          'type' => $comment_action->getPHUIXControlType(),
+          'spec' => $comment_action->getPHUIXControlSpecification(),
+          'initialValue' => $comment_action->getInitialValue(),
         );
 
-        $type_map[$key] = $edit_type;
+        $type_map[$key] = $comment_action;
       }
 
       $options = array();
@@ -270,28 +295,6 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
             'id' => $place_id,
           )));
 
-      $draft_actions = array();
-      if ($versioned_draft) {
-        $draft_actions = $versioned_draft->getProperty('actions', array());
-        foreach ($draft_actions as $key => $action) {
-          $type = idx($action, 'type');
-          if (!$type) {
-            unset($draft_actions[$key]);
-            continue;
-          }
-
-          $edit_type = idx($type_map, $type);
-          if (!$edit_type) {
-            unset($draft_actions[$key]);
-            continue;
-          }
-
-          $value = idx($action, 'value');
-          $value = $edit_type->getCommentActionValueFromDraftValue($value);
-          $draft_actions[$key]['value'] = $value;
-        }
-      }
-
       Javelin::initBehavior(
         'comment-actions',
         array(
@@ -304,7 +307,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
           'actions' => $action_map,
           'showPreview' => $this->getShowPreview(),
           'actionURI' => $this->getAction(),
-          'drafts' => $draft_actions,
+          'drafts' => $draft_keys,
         ));
     }
 

@@ -93,7 +93,7 @@ final class DiffusionHistoryController extends DiffusionController {
       array(
         'title' => array(
           pht('History'),
-          pht('%s Repository', $drequest->getRepository()->getCallsign()),
+          $drequest->getRepository()->getDisplayName(),
         ),
       ));
   }
@@ -151,7 +151,6 @@ final class DiffusionHistoryController extends DiffusionController {
       ->setActionList($actions);
 
     $stable_commit = $drequest->getStableCommit();
-    $callsign = $drequest->getRepository()->getCallsign();
 
     $view->addProperty(
       pht('Commit'),

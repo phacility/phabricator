@@ -506,7 +506,7 @@ abstract class PhabricatorCustomField extends Phobject {
 
     $out = array();
     foreach ($handles as $handle) {
-      $out[] = $handle->renderLink();
+      $out[] = $handle->renderHovercardLink();
     }
 
     return phutil_implode_html(phutil_tag('br'), $out);
@@ -592,6 +592,13 @@ abstract class PhabricatorCustomField extends Phobject {
       return $this->proxy->setValueFromStorage($value);
     }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+  }
+
+  public function didSetValueFromStorage() {
+    if ($this->proxy) {
+      return $this->proxy->didSetValueFromStorage();
+    }
+    return $this;
   }
 
 
@@ -1106,6 +1113,11 @@ abstract class PhabricatorCustomField extends Phobject {
       $field->setCustomFieldHTTPParameterType($http_type);
     }
 
+    $conduit_type = $this->getConduitEditParameterType();
+    if ($conduit_type) {
+      $field->setCustomFieldConduitParameterType($conduit_type);
+    }
+
     return $field;
   }
 
@@ -1344,6 +1356,17 @@ abstract class PhabricatorCustomField extends Phobject {
   protected function newConduitSearchParameterType() {
     if ($this->proxy) {
       return $this->proxy->newConduitSearchParameterType();
+    }
+    return null;
+  }
+
+  public function getConduitEditParameterType() {
+    return $this->newConduitEditParameterType();
+  }
+
+  protected function newConduitEditParameterType() {
+    if ($this->proxy) {
+      return $this->proxy->newConduitEditParameterType();
     }
     return null;
   }

@@ -5,7 +5,6 @@ final class DiffusionCommitEditController extends DiffusionController {
   protected function processDiffusionRequest(AphrontRequest $request) {
     $user       = $request->getUser();
     $drequest   = $this->getDiffusionRequest();
-    $callsign   = $drequest->getRepository()->getCallsign();
     $repository = $drequest->getRepository();
     $commit     = $drequest->loadCommit();
     $data = $commit->loadCommitData();
@@ -34,7 +33,7 @@ final class DiffusionCommitEditController extends DiffusionController {
         ->setContentSourceFromRequest($request);
       $xactions = $editor->applyTransactions($commit, $xactions);
       return id(new AphrontRedirectResponse())
-        ->setURI('/r'.$callsign.$commit->getCommitIdentifier());
+        ->setURI($commit->getURI());
     }
 
     $tokenizer_id = celerity_generate_unique_node_id();
@@ -47,15 +46,6 @@ final class DiffusionCommitEditController extends DiffusionController {
         ->setName('projects')
         ->setValue($current_proj_phids)
         ->setID($tokenizer_id)
-        ->setCaption(
-          javelin_tag(
-            'a',
-            array(
-              'href'        => '/project/create/',
-              'mustcapture' => true,
-              'sigil'       => 'project-create',
-            ),
-            pht('Create New Project')))
         ->setDatasource(new PhabricatorProjectDatasource()));
 
     $reason = $data->getCommitDetail('autocloseReason', false);
@@ -104,8 +94,8 @@ final class DiffusionCommitEditController extends DiffusionController {
 
     $submit = id(new AphrontFormSubmitControl())
       ->setValue(pht('Save'))
-      ->addCancelButton('/r'.$callsign.$commit->getCommitIdentifier());
-    $form->appendChild($submit);
+      ->addCancelButton($commit->getURI());
+      $form->appendChild($submit);
 
     $crumbs = $this->buildCrumbs(array(
       'commit' => true,

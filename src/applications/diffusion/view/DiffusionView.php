@@ -123,31 +123,12 @@ abstract class DiffusionView extends AphrontView {
       ));
   }
 
-  final public static function nameCommit(
-    PhabricatorRepository $repository,
-    $commit) {
-
-    switch ($repository->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $commit_name = substr($commit, 0, 12);
-        break;
-      default:
-        $commit_name = $commit;
-        break;
-    }
-
-    $callsign = $repository->getCallsign();
-    return "r{$callsign}{$commit_name}";
-  }
-
   final public static function linkCommit(
     PhabricatorRepository $repository,
     $commit,
     $summary = '') {
 
-    $commit_name = self::nameCommit($repository, $commit);
-    $callsign = $repository->getCallsign();
+    $commit_name = $repository->formatCommitName($commit);
 
     if (strlen($summary)) {
       $commit_name .= ': '.$summary;
@@ -156,7 +137,7 @@ abstract class DiffusionView extends AphrontView {
     return phutil_tag(
       'a',
       array(
-        'href' => "/r{$callsign}{$commit}",
+        'href' => $repository->getCommitURI($commit),
       ),
       $commit_name);
   }

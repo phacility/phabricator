@@ -152,7 +152,6 @@ final class PhabricatorCalendarEventViewController
     $is_attending = $event->getIsUserAttending($viewer->getPHID());
 
     $actions = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getApplicationURI('event/'.$id.'/'))
       ->setUser($viewer)
       ->setObject($event);
 
@@ -360,11 +359,10 @@ final class PhabricatorCalendarEventViewController
 
     $properties->invokeWillRenderEvent();
 
-    $icon_display = PhabricatorCalendarIcon::renderIconForChooser(
-      $event->getIcon());
     $properties->addProperty(
       pht('Icon'),
-      $icon_display);
+      id(new PhabricatorCalendarIconSet())
+        ->getIconLabel($event->getIcon()));
 
     if (strlen($event->getDescription())) {
       $description = PhabricatorMarkupEngine::renderOneObject(

@@ -36,13 +36,6 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
     );
   }
 
-  public function getEventListeners() {
-    return array(
-      new ManiphestNameIndexEventListener(),
-      new ManiphestHovercardEventListener(),
-    );
-  }
-
   public function getRemarkupRules() {
     return array(
       new ManiphestRemarkupRule(),
@@ -59,13 +52,6 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
         'task/' => array(
           $this->getEditRoutePattern('edit/')
             => 'ManiphestTaskEditController',
-          'descriptionpreview/'
-            => 'PhabricatorMarkupPreviewController',
-        ),
-        'transaction/' => array(
-          'save/' => 'ManiphestTransactionSaveController',
-          'preview/(?P<id>[1-9]\d*)/'
-            => 'ManiphestTransactionPreviewController',
         ),
         'export/(?P<key>[^/]+)/' => 'ManiphestExportController',
         'subpriority/' => 'ManiphestSubpriorityController',

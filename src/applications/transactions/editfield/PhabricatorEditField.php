@@ -12,10 +12,19 @@ abstract class PhabricatorEditField extends Phobject {
   private $object;
   private $transactionType;
   private $metadata = array();
-  private $description;
   private $editTypeKey;
   private $isRequired;
+  private $previewPanel;
+  private $controlID;
+
+  private $description;
+  private $conduitDescription;
+  private $conduitDocumentation;
+  private $conduitTypeDescription;
+
   private $commentActionLabel;
+  private $commentActionValue;
+  private $hasCommentActionValue;
 
   private $isLocked;
   private $isHidden;
@@ -30,6 +39,8 @@ abstract class PhabricatorEditField extends Phobject {
   private $isLockable = true;
   private $isCopyable = false;
   private $isConduitOnly = false;
+
+  private $conduitEditTypes;
 
   public function setKey($key) {
     $this->key = $key;
@@ -76,15 +87,6 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->object;
   }
 
-  public function setDescription($description) {
-    $this->description = $description;
-    return $this;
-  }
-
-  public function getDescription() {
-    return $this->description;
-  }
-
   public function setIsLocked($is_locked) {
     $this->isLocked = $is_locked;
     return $this;
@@ -119,6 +121,45 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function getIsConduitOnly() {
     return $this->isConduitOnly;
+  }
+
+  public function setDescription($description) {
+    $this->description = $description;
+    return $this;
+  }
+
+  public function getDescription() {
+    return $this->description;
+  }
+
+  public function setConduitDescription($conduit_description) {
+    $this->conduitDescription = $conduit_description;
+    return $this;
+  }
+
+  public function getConduitDescription() {
+    if ($this->conduitDescription === null) {
+      return $this->getDescription();
+    }
+    return $this->conduitDescription;
+  }
+
+  public function setConduitDocumentation($conduit_documentation) {
+    $this->conduitDocumentation = $conduit_documentation;
+    return $this;
+  }
+
+  public function getConduitDocumentation() {
+    return $this->conduitDocumentation;
+  }
+
+  public function setConduitTypeDescription($conduit_type_description) {
+    $this->conduitTypeDescription = $conduit_type_description;
+    return $this;
+  }
+
+  public function getConduitTypeDescription() {
+    return $this->conduitTypeDescription;
   }
 
   public function setIsEditDefaults($is_edit_defaults) {
@@ -202,6 +243,25 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->commentActionLabel;
   }
 
+  public function setCommentActionValue($comment_action_value) {
+    $this->hasCommentActionValue = true;
+    $this->commentActionValue = $comment_action_value;
+    return $this;
+  }
+
+  public function getCommentActionValue() {
+    return $this->commentActionValue;
+  }
+
+  public function setPreviewPanel(PHUIRemarkupPreviewPanel $preview_panel) {
+    $this->previewPanel = $preview_panel;
+    return $this;
+  }
+
+  public function getPreviewPanel() {
+    return $this->previewPanel;
+  }
+
   protected function newControl() {
     throw new PhutilMethodNotImplementedException();
   }
@@ -236,6 +296,13 @@ abstract class PhabricatorEditField extends Phobject {
     return $control;
   }
 
+  public function getControlID() {
+    if (!$this->controlID) {
+      $this->controlID = celerity_generate_unique_node_id();
+    }
+    return $this->controlID;
+  }
+
   protected function renderControl() {
     $control = $this->buildControl();
     if ($control === null) {
@@ -258,6 +325,10 @@ abstract class PhabricatorEditField extends Phobject {
     }
 
     $control->setDisabled($disabled);
+
+    if ($this->controlID) {
+      $control->setID($this->controlID);
+    }
 
     return $control;
   }
@@ -345,8 +416,8 @@ abstract class PhabricatorEditField extends Phobject {
     return $this;
   }
 
-  public function readValueFromComment($action) {
-    $this->value = $this->getValueFromComment(idx($action, 'value'));
+  public function readValueFromComment($value) {
+    $this->value = $this->getValueFromComment($value);
     return $this;
   }
 
@@ -424,6 +495,11 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->initialValue;
   }
 
+  public function setInitialValue($initial_value) {
+    $this->initialValue = $initial_value;
+    return $this;
+  }
+
   public function readValueFromSubmit(AphrontRequest $request) {
     $key = $this->getKey();
     if ($this->getValueExistsInSubmit($request, $key)) {
@@ -497,6 +573,20 @@ abstract class PhabricatorEditField extends Phobject {
     return new AphrontStringHTTPParameterType();
   }
 
+  public function getConduitParameterType() {
+    $type = $this->newConduitParameterType();
+
+    if (!$type) {
+      return null;
+    }
+
+    $type->setViewer($this->getViewer());
+
+    return $type;
+  }
+
+  abstract protected function newConduitParameterType();
+
   public function setEditTypeKey($edit_type_key) {
     $this->editTypeKey = $edit_type_key;
     return $this;
@@ -510,16 +600,13 @@ abstract class PhabricatorEditField extends Phobject {
   }
 
   protected function newEditType() {
-    // TODO: This could be a little cleaner.
-    $http_type = $this->getHTTPParameterType();
-    if ($http_type) {
-      $value_type = $http_type->getTypeName();
-    } else {
-      $value_type = 'wild';
+    $parameter_type = $this->getConduitParameterType();
+    if (!$parameter_type) {
+      return null;
     }
 
     return id(new PhabricatorSimpleEditType())
-      ->setValueType($value_type);
+      ->setConduitParameterType($parameter_type);
   }
 
   protected function getEditType() {
@@ -530,40 +617,164 @@ abstract class PhabricatorEditField extends Phobject {
     }
 
     $type_key = $this->getEditTypeKey();
+    $edit_type = $this->newEditType();
+    if (!$edit_type) {
+      return null;
+    }
 
-    return $this->newEditType()
+    return $edit_type
       ->setEditType($type_key)
       ->setTransactionType($transaction_type)
-      ->setDescription($this->getDescription())
       ->setMetadata($this->getMetadata());
   }
 
-  public function getConduitEditTypes() {
+  final public function getConduitEditTypes() {
+    if ($this->conduitEditTypes === null) {
+      $edit_types = $this->newConduitEditTypes();
+      $edit_types = mpull($edit_types, null, 'getEditType');
+
+      foreach ($edit_types as $edit_type) {
+        $edit_type->setEditField($this);
+      }
+
+      $this->conduitEditTypes = $edit_types;
+    }
+
+    return $this->conduitEditTypes;
+  }
+
+  final public function getConduitEditType($key) {
+    $edit_types = $this->getConduitEditTypes();
+
+    if (empty($edit_types[$key])) {
+      throw new Exception(
+        pht(
+          'This EditField does not provide a Conduit EditType with key "%s".',
+          $key));
+    }
+
+    return $edit_types[$key];
+  }
+
+  protected function newConduitEditTypes() {
     $edit_type = $this->getEditType();
 
-    if ($edit_type === null) {
+    if (!$edit_type) {
       return array();
     }
 
     return array($edit_type);
   }
 
-  public function getWebEditTypes() {
+  public function getCommentAction() {
+    $label = $this->getCommentActionLabel();
+    if ($label === null) {
+      return null;
+    }
+
+    $action = $this->newCommentAction();
+    if ($action === null) {
+      return null;
+    }
+
+    if ($this->hasCommentActionValue) {
+      $value = $this->getCommentActionValue();
+    } else {
+      $value = $this->getValue();
+    }
+
+    $action
+      ->setKey($this->getKey())
+      ->setLabel($label)
+      ->setValue($this->getValueForCommentAction($value));
+
+    return $action;
+  }
+
+  protected function newCommentAction() {
+    return null;
+  }
+
+  protected function getValueForCommentAction($value) {
+    return $value;
+  }
+
+  public function shouldGenerateTransactionsFromSubmit() {
     if ($this->getIsConduitOnly()) {
-      return array();
+      return false;
     }
 
     $edit_type = $this->getEditType();
-
-    if ($edit_type === null) {
-      return array();
+    if (!$edit_type) {
+      return false;
     }
 
-    return array($edit_type);
+    return true;
   }
 
-  public function getCommentEditTypes() {
-    return array();
+  public function shouldReadValueFromRequest() {
+    if ($this->getIsConduitOnly()) {
+      return false;
+    }
+
+    if ($this->getIsLocked()) {
+      return false;
+    }
+
+    if ($this->getIsHidden()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function shouldReadValueFromSubmit() {
+    if ($this->getIsConduitOnly()) {
+      return false;
+    }
+
+    if ($this->getIsLocked()) {
+      return false;
+    }
+
+    if ($this->getIsHidden()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function shouldGenerateTransactionsFromComment() {
+    if ($this->getIsConduitOnly()) {
+      return false;
+    }
+
+    if ($this->getIsLocked()) {
+      return false;
+    }
+
+    if ($this->getIsHidden()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function generateTransactions(
+    PhabricatorApplicationTransaction $template,
+    array $spec) {
+
+    $edit_type = $this->getEditType();
+    if (!$edit_type) {
+      throw new Exception(
+        pht(
+          'EditField (with key "%s", of class "%s") is generating '.
+          'transactions, but has no EditType.',
+          $this->getKey(),
+          get_class($this)));
+    }
+
+    return $edit_type->generateTransactions($template, $spec);
   }
 
 }

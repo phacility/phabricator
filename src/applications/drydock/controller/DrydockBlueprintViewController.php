@@ -86,7 +86,6 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($blueprint);
 
     $edit_uri = $this->getApplicationURI("blueprint/edit/{$id}/");

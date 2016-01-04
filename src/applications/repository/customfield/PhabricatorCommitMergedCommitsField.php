@@ -39,7 +39,7 @@ final class PhabricatorCommitMergedCommitsField
         id(new ConduitCall('diffusion.mergedcommitsquery', array(
           'commit' => $commit->getCommitIdentifier(),
           'limit' => $limit + 1,
-          'callsign' => $commit->getRepository()->getCallsign(),
+          'repository' => $commit->getRepository()->getPHID(),
         )))
         ->setUser($this->getViewer())
         ->execute());

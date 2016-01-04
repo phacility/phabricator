@@ -91,7 +91,6 @@ final class PhabricatorPhurlURLViewController
     $id = $url->getID();
 
     $actions = id(new PhabricatorActionListView())
-      ->setObjectURI($url->getURI())
       ->setUser($viewer)
       ->setObject($url);
 

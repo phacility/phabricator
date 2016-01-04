@@ -57,7 +57,7 @@ final class PhabricatorJumpNavHandler extends Phobject {
                 ->execute();
               if (count($repositories) == 1) {
                 // Just one match, jump to repository.
-                $uri = '/diffusion/'.head($repositories)->getCallsign().'/';
+                $uri = head($repositories)->getURI();
               } else {
                 // More than one match, jump to search.
                 $uri = urisprintf('/diffusion/?order=name&name=%s', $name);

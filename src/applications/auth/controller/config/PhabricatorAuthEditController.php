@@ -79,6 +79,7 @@ final class PhabricatorAuthEditController
 
     $errors = array();
 
+    $v_login = $config->getShouldAllowLogin();
     $v_registration = $config->getShouldAllowRegistration();
     $v_link = $config->getShouldAllowLink();
     $v_unlink = $config->getShouldAllowUnlink();
@@ -103,6 +104,11 @@ final class PhabricatorAuthEditController
             $config->setProviderDomain($provider->getProviderDomain());
           }
         }
+
+        $xactions[] = id(new PhabricatorAuthProviderConfigTransaction())
+          ->setTransactionType(
+            PhabricatorAuthProviderConfigTransaction::TYPE_LOGIN)
+          ->setNewValue($request->getInt('allowLogin', 0));
 
         $xactions[] = id(new PhabricatorAuthProviderConfigTransaction())
           ->setTransactionType(
@@ -199,6 +205,14 @@ final class PhabricatorAuthEditController
         $config_name);
     }
 
+    $str_login = array(
+      phutil_tag('strong', array(), pht('Allow Login:')),
+      ' ',
+      pht(
+        'Allow users to log in using this provider. If you disable login, '.
+        'users can still use account integrations for this provider.'),
+    );
+
     $str_registration = array(
       phutil_tag('strong', array(), pht('Allow Registration:')),
       ' ',
@@ -268,6 +282,13 @@ final class PhabricatorAuthEditController
       ->appendChild(
         id(new AphrontFormCheckboxControl())
           ->setLabel(pht('Allow'))
+          ->addCheckbox(
+            'allowLogin',
+            1,
+            $str_login,
+            $v_login))
+      ->appendChild(
+        id(new AphrontFormCheckboxControl())
           ->addCheckbox(
             'allowRegistration',
             1,

@@ -131,8 +131,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
     $action_list = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($paste)
-      ->setObjectURI($this->getRequest()->getRequestURI());
+      ->setObject($paste);
 
     $action_list->addAction(
         id(new PhabricatorActionView())

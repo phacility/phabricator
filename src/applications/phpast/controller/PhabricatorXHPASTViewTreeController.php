@@ -29,7 +29,7 @@ final class PhabricatorXHPASTViewTreeController
   protected function buildTree($root) {
     try {
       $name = $root->getTypeName();
-      $title = $root->getDescription();
+      $title = pht('Node %d: %s', $root->getID(), $name);
     } catch (Exception $ex) {
       $name = '???';
       $title = '???';

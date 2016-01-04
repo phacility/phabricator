@@ -11,10 +11,6 @@ abstract class PhabricatorPolicyRule extends Phobject {
   const CONTROL_TYPE_NONE       = 'none';
 
   abstract public function getRuleDescription();
-  abstract public function applyRule(
-    PhabricatorUser $viewer,
-    $value,
-    PhabricatorPolicyInterface $object);
 
   public function willApplyRules(
     PhabricatorUser $viewer,
@@ -22,6 +18,11 @@ abstract class PhabricatorPolicyRule extends Phobject {
     array $objects) {
     return;
   }
+
+  abstract public function applyRule(
+    PhabricatorUser $viewer,
+    $value,
+    PhabricatorPolicyInterface $object);
 
   public function getValueControlType() {
     return self::CONTROL_TYPE_TEXT;
@@ -35,7 +36,7 @@ abstract class PhabricatorPolicyRule extends Phobject {
    * Return `true` if this rule can be applied to the given object.
    *
    * Some policy rules may only operation on certain kinds of objects. For
-   * example, a "task author" rule
+   * example, a "task author" rule can only operate on tasks.
    */
   public function canApplyToObject(PhabricatorPolicyInterface $object) {
     return true;
@@ -43,6 +44,7 @@ abstract class PhabricatorPolicyRule extends Phobject {
 
   protected function getDatasourceTemplate(
     PhabricatorTypeaheadDatasource $datasource) {
+
     return array(
       'markup' => new AphrontTokenizerTemplateView(),
       'uri' => $datasource->getDatasourceURI(),
@@ -65,6 +67,7 @@ abstract class PhabricatorPolicyRule extends Phobject {
 
   public function getRequiredHandlePHIDsForSummary($value) {
     $phids = array();
+
     switch ($this->getValueControlType()) {
       case self::CONTROL_TYPE_TOKENIZER:
         $phids = $value;
@@ -86,7 +89,7 @@ abstract class PhabricatorPolicyRule extends Phobject {
   }
 
   /**
-   * Return true if the given value creates a rule with a meaningful effect.
+   * Return `true` if the given value creates a rule with a meaningful effect.
    * An example of a rule with no meaningful effect is a "users" rule with no
    * users specified.
    *
@@ -131,7 +134,7 @@ abstract class PhabricatorPolicyRule extends Phobject {
     $cache->setKey(self::getObjectPolicyCacheKey($object, $rule), $hint);
   }
 
-  protected function getTransactionHint(
+  final protected function getTransactionHint(
     PhabricatorPolicyInterface $object) {
 
     $cache = PhabricatorCaches::getRequestCache();
@@ -164,7 +167,7 @@ abstract class PhabricatorPolicyRule extends Phobject {
     return null;
   }
 
-  public function getObjectPolicyFullKey() {
+  final public function getObjectPolicyFullKey() {
     $key = $this->getObjectPolicyKey();
 
     if (!$key) {

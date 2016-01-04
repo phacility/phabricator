@@ -258,6 +258,8 @@ abstract class PhabricatorApplicationTransactionEditor
   public function getTransactionTypes() {
     $types = array();
 
+    $types[] = PhabricatorTransactions::TYPE_CREATE;
+
     if ($this->object instanceof PhabricatorSubscribableInterface) {
       $types[] = PhabricatorTransactions::TYPE_SUBSCRIBERS;
     }
@@ -303,23 +305,32 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return null;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return array_values($this->subscribers);
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
         return $object->getViewPolicy();
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
         return $object->getEditPolicy();
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
         return $object->getJoinPolicy();
       case PhabricatorTransactions::TYPE_SPACE:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
+
         $space_phid = $object->getSpacePHID();
         if ($space_phid === null) {
-          if ($this->getIsNewObject()) {
-            // In this case, just return `null` so we know this is the initial
-            // transaction and it should be hidden.
-            return null;
-          }
-
           $default_space = PhabricatorSpacesNamespaceQuery::getDefaultSpace();
           if ($default_space) {
             $space_phid = $default_space->getPHID();
@@ -364,6 +375,8 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return null;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return $this->getPHIDTransactionNewValue($xaction);
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -415,6 +428,8 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return true;
       case PhabricatorTransactions::TYPE_COMMENT:
         return $xaction->hasComment();
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
@@ -477,6 +492,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionInternalEffects($xaction);
+      case PhabricatorTransactions::TYPE_CREATE:
       case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -527,6 +543,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionExternalEffects($xaction);
+      case PhabricatorTransactions::TYPE_CREATE:
       case PhabricatorTransactions::TYPE_EDGE:
       case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
@@ -823,6 +840,22 @@ abstract class PhabricatorApplicationTransactionEditor
       throw $ex;
     }
 
+    // TODO: Once everything is on EditEngine, just use getIsNewObject() to
+    // figure this out instead.
+    $mark_as_create = false;
+    $create_type = PhabricatorTransactions::TYPE_CREATE;
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() == $create_type) {
+        $mark_as_create = true;
+      }
+    }
+
+    if ($mark_as_create) {
+      foreach ($xactions as $xaction) {
+        $xaction->setIsCreateTransaction(true);
+      }
+    }
+
     // Now that we've merged, filtered, and combined transactions, check for
     // required capabilities.
     foreach ($xactions as $xaction) {
@@ -1060,10 +1093,11 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if ($this->supportsSearch()) {
-      id(new PhabricatorSearchIndexer())
-        ->queueDocumentForIndexing(
-          $object->getPHID(),
-          $this->getSearchContextParameter($object, $xactions));
+      PhabricatorSearchWorker::queueDocumentForIndexing(
+        $object->getPHID(),
+        array(
+          'transactionPHIDs' => mpull($xactions, 'getPHID'),
+        ));
     }
 
     if ($this->shouldPublishFeedStory($object, $xactions)) {
@@ -2828,15 +2862,6 @@ abstract class PhabricatorApplicationTransactionEditor
    */
   protected function supportsSearch() {
     return false;
-  }
-
-  /**
-   * @task search
-   */
-  protected function getSearchContextParameter(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-    return null;
   }
 
 

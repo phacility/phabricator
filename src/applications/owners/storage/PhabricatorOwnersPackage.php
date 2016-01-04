@@ -7,7 +7,9 @@ final class PhabricatorOwnersPackage
     PhabricatorApplicationTransactionInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorFulltextInterface,
+    PhabricatorNgramsInterface {
 
   protected $name;
   protected $originalName;
@@ -46,24 +48,13 @@ final class PhabricatorOwnersPackage
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text128',
+        'name' => 'sort128',
         'originalName' => 'text255',
         'description' => 'text',
         'primaryOwnerPHID' => 'phid?',
         'auditingEnabled' => 'bool',
         'mailKey' => 'bytes20',
         'status' => 'text32',
-      ),
-      self::CONFIG_KEY_SCHEMA => array(
-        'key_phid' => null,
-        'phid' => array(
-          'columns' => array('phid'),
-          'unique' => true,
-        ),
-        'name' => array(
-          'columns' => array('name'),
-          'unique' => true,
-        ),
       ),
     ) + parent::getConfiguration();
   }
@@ -430,6 +421,25 @@ final class PhabricatorOwnersPackage
     return array(
       id(new PhabricatorOwnersPathsSearchEngineAttachment())
         ->setAttachmentKey('paths'),
+    );
+  }
+
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+
+  public function newFulltextEngine() {
+    return new PhabricatorOwnersPackageFulltextEngine();
+  }
+
+
+/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+
+
+  public function newNgrams() {
+    return array(
+      id(new PhabricatorOwnersPackageNameNgrams())
+        ->setValue($this->getName()),
     );
   }
 

@@ -70,16 +70,14 @@ final class DiffusionQueryCommitsConduitAPIMethod
     foreach ($commits as $commit) {
       $commit_data = $commit->getCommitData();
 
-      $callsign = $commit->getRepository()->getCallsign();
-      $identifier = $commit->getCommitIdentifier();
-      $uri = '/r'.$callsign.$identifier;
+      $uri = $commit->getURI();
       $uri = PhabricatorEnv::getProductionURI($uri);
 
       $dict = array(
         'id' => $commit->getID(),
         'phid' => $commit->getPHID(),
         'repositoryPHID' => $commit->getRepository()->getPHID(),
-        'identifier' => $identifier,
+        'identifier' => $commit->getCommitIdentifier(),
         'epoch' => $commit->getEpoch(),
         'uri' => $uri,
         'isImporting' => !$commit->isImported(),

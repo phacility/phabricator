@@ -4,16 +4,10 @@ final class PhabricatorActionListView extends AphrontView {
 
   private $actions = array();
   private $object;
-  private $objectURI;
   private $id = null;
 
   public function setObject(PhabricatorLiskDAO $object) {
     $this->object = $object;
-    return $this;
-  }
-
-  public function setObjectURI($uri) {
-    $this->objectURI = $uri;
     return $this;
   }
 
@@ -47,7 +41,6 @@ final class PhabricatorActionListView extends AphrontView {
     }
 
     foreach ($actions as $action) {
-      $action->setObjectURI($this->objectURI);
       $action->setUser($this->user);
     }
 

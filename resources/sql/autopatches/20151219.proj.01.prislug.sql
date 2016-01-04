@@ -1,0 +1,2 @@
+ALTER TABLE {$NAMESPACE}_project.project
+  ADD COLUMN primarySlug VARCHAR(128) COLLATE {$COLLATE_TEXT};

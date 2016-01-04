@@ -194,7 +194,7 @@ final class PhabricatorBadgesEditor
     $body = parent::buildMailBody($object, $xactions);
 
     if (strlen($description)) {
-      $body->addRemarkupSeciton(
+      $body->addRemarkupSection(
         pht('BADGE DESCRIPTION'),
         $object->getDescription());
     }

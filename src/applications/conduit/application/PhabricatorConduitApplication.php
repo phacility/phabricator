@@ -17,8 +17,8 @@ final class PhabricatorConduitApplication extends PhabricatorApplication {
   public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
     return array(
       array(
-        'name' => pht('Conduit Technical Documentation'),
-        'href' => PhabricatorEnv::getDoclink('Conduit Technical Documentation'),
+        'name' => pht('Conduit API Overview'),
+        'href' => PhabricatorEnv::getDoclink('Conduit API Overview'),
       ),
     );
   }

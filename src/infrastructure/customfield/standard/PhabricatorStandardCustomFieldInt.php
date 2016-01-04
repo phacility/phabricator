@@ -120,4 +120,8 @@ final class PhabricatorStandardCustomFieldInt
     return new ConduitIntParameterType();
   }
 
+  protected function newConduitEditParameterType() {
+    return new ConduitIntParameterType();
+  }
+
 }

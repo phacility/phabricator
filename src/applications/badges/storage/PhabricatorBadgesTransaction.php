@@ -78,9 +78,11 @@ final class PhabricatorBadgesTransaction
             $this->renderHandleLink($author_phid),
             $new);
         } else {
-          $icon_map = PhabricatorBadgesBadge::getIconNameMap();
-          $icon_new = idx($icon_map, $new, $new);
-          $icon_old = idx($icon_map, $old, $old);
+          $set = new PhabricatorBadgesIconSet();
+
+          $icon_old = $set->getIconLabel($old);
+          $icon_new = $set->getIconLabel($new);
+
           return pht(
             '%s updated the icon for this badge from "%s" to "%s".',
             $this->renderHandleLink($author_phid),

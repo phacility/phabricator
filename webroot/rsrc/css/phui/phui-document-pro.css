@@ -179,11 +179,6 @@ a.button.phui-document-toc {
   display: none;
 }
 
-.phui-document-view-pro-box .phui-timeline-major-event .phui-timeline-content
-  .phui-timeline-core-content {
-
-}
-
 .phui-document-view-pro-box .phui-object-box {
   margin: 0;
 }
@@ -194,4 +189,12 @@ a.button.phui-document-toc {
 
 .phui-document-view-pro-box .phui-object-box .remarkup-assist-textarea {
   height: 9em;
+}
+
+.document-has-foot .phui-document-view-pro {
+  padding-bottom: 0;
+}
+
+.phui-document-foot-content {
+  margin: 64px 0 32px;
 }

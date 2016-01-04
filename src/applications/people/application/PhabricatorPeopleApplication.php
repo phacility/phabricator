@@ -34,12 +34,6 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
     return false;
   }
 
-  public function getEventListeners() {
-    return array(
-      new PhabricatorPeopleHovercardEventListener(),
-    );
-  }
-
   public function getRoutes() {
     return array(
       '/people/' => array(
@@ -128,48 +122,6 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
 
     return $status;
   }
-
-  public function buildMainMenuItems(
-    PhabricatorUser $user,
-    PhabricatorController $controller = null) {
-
-    $items = array();
-
-    if ($user->isLoggedIn() && $user->isUserActivated()) {
-      $profile = id(new PhabricatorPeopleQuery())
-        ->setViewer($user)
-        ->needProfileImage(true)
-        ->withPHIDs(array($user->getPHID()))
-        ->executeOne();
-      $image = $profile->getProfileImageURI();
-
-      $item = id(new PHUIListItemView())
-        ->setName($user->getUsername())
-        ->setHref('/p/'.$user->getUsername().'/')
-        ->addClass('core-menu-item')
-        ->setAural(pht('Profile'))
-        ->setOrder(100);
-
-      $classes = array(
-        'phabricator-core-menu-icon',
-        'phabricator-core-menu-profile-image',
-      );
-
-      $item->appendChild(
-        phutil_tag(
-          'span',
-          array(
-            'class' => implode(' ', $classes),
-            'style' => 'background-image: url('.$image.')',
-          ),
-          ''));
-
-      $items[] = $item;
-    }
-
-    return $items;
-  }
-
 
   public function getQuickCreateItems(PhabricatorUser $viewer) {
     $items = array();

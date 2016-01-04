@@ -42,63 +42,17 @@ abstract class PhabricatorPHIDListEditType
     }
   }
 
-  public function getPHUIXControlType() {
-    $datasource = $this->getDatasource();
-
-    if (!$datasource) {
-      return null;
+  protected function newConduitParameterType() {
+    $default = parent::newConduitParameterType();
+    if ($default) {
+      return $default;
     }
-
-    return 'tokenizer';
-  }
-
-  public function getPHUIXControlSpecification() {
-    $datasource = $this->getDatasource();
-
-    if (!$datasource) {
-      return null;
-    }
-
-    $template = new AphrontTokenizerTemplateView();
 
     if ($this->getIsSingleValue()) {
-      $limit = 1;
+      return new ConduitPHIDParameterType();
     } else {
-      $limit = null;
+      return new ConduitPHIDListParameterType();
     }
-
-    $default = $this->getDefaultValue();
-    if ($default) {
-      $value = $datasource->getWireTokens($default);
-    } else {
-      $value = array();
-    }
-
-    return array(
-      'markup' => $template->render(),
-      'config' => array(
-        'src' => $datasource->getDatasourceURI(),
-        'browseURI' => $datasource->getBrowseURI(),
-        'placeholder' => $datasource->getPlaceholderText(),
-        'limit' => $limit,
-      ),
-      'value' => $value,
-    );
   }
-
-  public function getCommentActionValueFromDraftValue($value) {
-    $datasource = $this->getDatasource();
-
-    if (!$datasource) {
-      return array();
-    }
-
-    if (!is_array($value)) {
-      return array();
-    }
-
-    return $datasource->getWireTokens($value);
-  }
-
 
 }

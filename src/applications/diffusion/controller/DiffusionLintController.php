@@ -80,7 +80,12 @@ final class DiffusionLintController extends DiffusionController {
       $rows[] = array(
         phutil_tag('a', array('href' => $href_lint), $code['n']),
         phutil_tag('a', array('href' => $href_browse), $code['files']),
-        phutil_tag('a', array('href' => $href_repo), $drequest->getCallsign()),
+        phutil_tag(
+          'a',
+          array(
+            'href' => $href_repo,
+          ),
+          $drequest->getRepository()->getDisplayName()),
         ArcanistLintSeverity::getStringForSeverity($code['maxSeverity']),
         $code['code'],
         $code['maxName'],
@@ -133,7 +138,7 @@ final class DiffusionLintController extends DiffusionController {
       ));
 
     if ($this->diffusionRequest) {
-      $title[] = $drequest->getCallsign();
+      $title[] = $drequest->getRepository()->getDisplayName();
     } else {
       $crumbs->addTextCrumb(pht('All Lint'));
     }
@@ -314,7 +319,6 @@ final class DiffusionLintController extends DiffusionController {
       ->setUser($viewer)
       ->setActionList($actions);
 
-    $callsign = $drequest->getRepository()->getCallsign();
     $lint_commit = $branch->getLintCommit();
 
     $view->addProperty(

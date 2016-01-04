@@ -82,6 +82,14 @@ abstract class PhabricatorEditEngine
 
     $fields = $this->buildCustomEditFields($object);
 
+    foreach ($fields as $field) {
+      $field
+        ->setViewer($viewer)
+        ->setObject($object);
+    }
+
+    $fields = mpull($fields, null, 'getKey');
+
     $extensions = PhabricatorEditEngineExtension::getAllEnabledExtensions();
     foreach ($extensions as $extension) {
       $extension->setViewer($viewer);
@@ -96,19 +104,26 @@ abstract class PhabricatorEditEngine
       assert_instances_of($extension_fields, 'PhabricatorEditField');
 
       foreach ($extension_fields as $field) {
-        $fields[] = $field;
+        $field
+          ->setViewer($viewer)
+          ->setObject($object);
+      }
+
+      $extension_fields = mpull($extension_fields, null, 'getKey');
+
+      foreach ($extension_fields as $key => $field) {
+        $fields[$key] = $field;
       }
     }
 
     $config = $this->getEditEngineConfiguration();
+    $fields = $this->willConfigureFields($object, $fields);
     $fields = $config->applyConfigurationToFields($this, $object, $fields);
 
-    foreach ($fields as $field) {
-      $field
-        ->setViewer($viewer)
-        ->setObject($object);
-    }
+    return $fields;
+  }
 
+  protected function willConfigureFields($object, array $fields) {
     return $fields;
   }
 
@@ -207,6 +222,27 @@ abstract class PhabricatorEditEngine
   protected function getQuickCreateMenuHeaderText() {
     return $this->getObjectCreateShortText();
   }
+
+
+  /**
+   * Return a human-readable header describing what this engine is used to do,
+   * like "Configure Maniphest Task Forms".
+   *
+   * @return string Human-readable description of the engine.
+   * @task text
+   */
+  abstract public function getSummaryHeader();
+
+
+  /**
+   * Return a human-readable summary of what this engine is used to do.
+   *
+   * @return string Human-readable description of the engine.
+   * @task text
+   */
+  abstract public function getSummaryText();
+
+
 
 
 /* -(  Edit Engine Configuration  )------------------------------------------ */
@@ -792,10 +828,27 @@ abstract class PhabricatorEditEngine
 
     $validation_exception = null;
     if ($request->isFormPost()) {
-      foreach ($fields as $field) {
+      $submit_fields = $fields;
+
+      foreach ($submit_fields as $key => $field) {
+        if (!$field->shouldGenerateTransactionsFromSubmit()) {
+          unset($submit_fields[$key]);
+          continue;
+        }
+      }
+
+      // Before we read the submitted values, store a copy of what we would
+      // use if the form was empty so we can figure out which transactions are
+      // just setting things to their default values for the current form.
+      $defaults = array();
+      foreach ($submit_fields as $key => $field) {
+        $defaults[$key] = $field->getValueForTransaction();
+      }
+
+      foreach ($submit_fields as $key => $field) {
         $field->setIsSubmittedForm(true);
 
-        if ($field->getIsLocked() || $field->getIsHidden()) {
+        if (!$field->shouldReadValueFromSubmit()) {
           continue;
         }
 
@@ -803,22 +856,29 @@ abstract class PhabricatorEditEngine
       }
 
       $xactions = array();
-      foreach ($fields as $field) {
-        $types = $field->getWebEditTypes();
-        foreach ($types as $type) {
-          $type_xactions = $type->generateTransactions(
-            clone $template,
-            array(
-              'value' => $field->getValueForTransaction(),
-            ));
 
-          if (!$type_xactions) {
-            continue;
+      if ($this->getIsCreate()) {
+        $xactions[] = id(clone $template)
+          ->setTransactionType(PhabricatorTransactions::TYPE_CREATE);
+      }
+
+      foreach ($submit_fields as $key => $field) {
+        $field_value = $field->getValueForTransaction();
+
+        $type_xactions = $field->generateTransactions(
+          clone $template,
+          array(
+            'value' => $field_value,
+          ));
+
+        foreach ($type_xactions as $type_xaction) {
+          $default = $defaults[$key];
+
+          if ($default === $field->getValueForTransaction()) {
+            $type_xaction->setIsDefaultTransaction(true);
           }
 
-          foreach ($type_xactions as $type_xaction) {
-            $xactions[] = $type_xaction;
-          }
+          $xactions[] = $type_xaction;
         }
       }
 
@@ -879,7 +939,7 @@ abstract class PhabricatorEditEngine
         }
 
         foreach ($fields as $field) {
-          if ($field->getIsLocked() || $field->getIsHidden()) {
+          if (!$field->shouldReadValueFromRequest()) {
             continue;
           }
 
@@ -899,6 +959,28 @@ abstract class PhabricatorEditEngine
       $header_text = $this->getFormHeaderText($object);
     } else {
       $header_text = $this->getObjectEditTitleText($object);
+    }
+
+    $show_preview = !$request->isAjax();
+
+    if ($show_preview) {
+      $previews = array();
+      foreach ($fields as $field) {
+        $preview = $field->getPreviewPanel();
+        if (!$preview) {
+          continue;
+        }
+
+        $control_id = $field->getControlID();
+
+        $preview
+          ->setControlID($control_id)
+          ->setPreviewURI('/transactions/remarkuppreview/');
+
+        $previews[] = $preview;
+      }
+    } else {
+      $previews = array();
     }
 
     $form = $this->buildEditForm($object, $fields);
@@ -937,7 +1019,8 @@ abstract class PhabricatorEditEngine
     return $controller->newPage()
       ->setTitle($header_text)
       ->setCrumbs($crumbs)
-      ->appendChild($box);
+      ->appendChild($box)
+      ->appendChild($previews);
   }
 
   protected function newEditResponse(
@@ -994,9 +1077,9 @@ abstract class PhabricatorEditEngine
 
     $action_button = id(new PHUIButtonView())
       ->setTag('a')
-      ->setText(pht('Actions'))
+      ->setText(pht('Configure Form'))
       ->setHref('#')
-      ->setIconFont('fa-bars')
+      ->setIconFont('fa-gear')
       ->setDropdownMenu($action_view);
 
     return $action_button;
@@ -1171,19 +1254,25 @@ abstract class PhabricatorEditEngine
 
     $fields = $this->buildEditFields($object);
 
-    $all_types = array();
+    $comment_actions = array();
     foreach ($fields as $field) {
-      if (!$this->isCommentField($field)) {
+      if (!$field->shouldGenerateTransactionsFromComment()) {
         continue;
       }
 
-      $types = $field->getCommentEditTypes();
-      foreach ($types as $type) {
-        $all_types[] = $type;
+      $comment_action = $field->getCommentAction();
+      if (!$comment_action) {
+        continue;
       }
+
+      $key = $comment_action->getKey();
+
+      // TODO: Validate these better.
+
+      $comment_actions[$key] = $comment_action;
     }
 
-    $view->setEditTypes($all_types);
+    $view->setCommentActions($comment_actions);
 
     return $view;
   }
@@ -1378,39 +1467,35 @@ abstract class PhabricatorEditEngine
     $xactions = array();
 
     if ($actions) {
-      $type_map = array();
-      foreach ($fields as $field) {
-        if (!$this->isCommentField($field)) {
-          continue;
-        }
-
-        $types = $field->getCommentEditTypes();
-        foreach ($types as $type) {
-          $type_map[$type->getEditType()] = array(
-            'type' => $type,
-            'field' => $field,
-          );
-        }
-      }
-
+      $action_map = array();
       foreach ($actions as $action) {
         $type = idx($action, 'type');
         if (!$type) {
           continue;
         }
 
-        $spec = idx($type_map, $type);
-        if (!$spec) {
+        if (empty($fields[$type])) {
           continue;
         }
 
-        $edit_type = $spec['type'];
-        $field = $spec['field'];
+        $action_map[$type] = $action;
+      }
 
-        $field->readValueFromComment($action);
+      foreach ($action_map as $type => $action) {
+        $field = $fields[$type];
 
-        $type_xactions = $edit_type->generateTransactions(
-          $template,
+        if (!$field->shouldGenerateTransactionsFromComment()) {
+          continue;
+        }
+
+        if (array_key_exists('initialValue', $action)) {
+          $field->setInitialValue($action['initialValue']);
+        }
+
+        $field->readValueFromComment(idx($action, 'value'));
+
+        $type_xactions = $field->generateTransactions(
+          clone $template,
           array(
             'value' => $field->getValueForTransaction(),
           ));
@@ -1509,6 +1594,10 @@ abstract class PhabricatorEditEngine
       ->setContentSourceFromConduitRequest($request)
       ->setContinueOnNoEffect(true);
 
+    if (!$this->getIsCreate()) {
+      $editor->setContinueOnMissingFields(true);
+    }
+
     $xactions = $editor->applyTransactions($object, $xactions);
 
     $xactions_struct = array();
@@ -1586,8 +1675,28 @@ abstract class PhabricatorEditEngine
     }
 
     $results = array();
+
+    if ($this->getIsCreate()) {
+      $results[] = id(clone $template)
+        ->setTransactionType(PhabricatorTransactions::TYPE_CREATE);
+    }
+
     foreach ($xactions as $xaction) {
       $type = $types[$xaction['type']];
+
+      // Let the parameter type interpret the value. This allows you to
+      // use usernames in list<user> fields, for example.
+      $parameter_type = $type->getConduitParameterType();
+
+      try {
+        $xaction['value'] = $parameter_type->getValue($xaction, 'value');
+      } catch (Exception $ex) {
+        throw new PhutilProxyException(
+          pht(
+            'Exception when processing transaction of type "%s".',
+            $xaction['type']),
+          $ex);
+      }
 
       $type_xactions = $type->generateTransactions(
         clone $template,
@@ -1675,7 +1784,8 @@ abstract class PhabricatorEditEngine
         ->setName($group_name);
 
       foreach ($configs as $config) {
-        $items[] = $this->newQuickCreateItem($config);
+        $items[] = $this->newQuickCreateItem($config)
+          ->setIndented(true);
       }
     }
 
@@ -1727,23 +1837,6 @@ abstract class PhabricatorEditEngine
       $this->getViewer(),
       $this,
       PhabricatorPolicyCapability::CAN_EDIT);
-  }
-
-  private function isCommentField(PhabricatorEditField $field) {
-    // TODO: This is a little bit hacky.
-    if ($field->getKey() == 'comment') {
-      return true;
-    }
-
-    if ($field->getIsLocked()) {
-      return false;
-    }
-
-    if ($field->getIsHidden()) {
-      return false;
-    }
-
-    return true;
   }
 
 

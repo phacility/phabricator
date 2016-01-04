@@ -5,6 +5,7 @@ final class PhabricatorCustomFieldEditField
 
   private $customField;
   private $httpParameterType;
+  private $conduitParameterType;
 
   public function setCustomField(PhabricatorCustomField $custom_field) {
     $this->customField = $custom_field;
@@ -25,6 +26,16 @@ final class PhabricatorCustomFieldEditField
     return $this->httpParameterType;
   }
 
+  public function setCustomFieldConduitParameterType(
+    ConduitParameterType $type) {
+    $this->conduitParameterType = $type;
+    return $this;
+  }
+
+  public function getCustomFieldConduitParameterType() {
+    return $this->conduitParameterType;
+  }
+
   protected function buildControl() {
     $field = $this->getCustomField();
     $clone = clone $field;
@@ -36,13 +47,14 @@ final class PhabricatorCustomFieldEditField
   }
 
   protected function newEditType() {
-    $type = id(new PhabricatorCustomFieldEditType())
-      ->setCustomField($this->getCustomField());
-
-    $http_type = $this->getHTTPParameterType();
-    if ($http_type) {
-      $type->setValueType($http_type->getTypeName());
+    $conduit_type = $this->newConduitParameterType();
+    if (!$conduit_type) {
+      return null;
     }
+
+    $type = id(new PhabricatorCustomFieldEditType())
+      ->setCustomField($this->getCustomField())
+      ->setConduitParameterType($conduit_type);
 
     return $type;
   }
@@ -71,18 +83,28 @@ final class PhabricatorCustomFieldEditField
     return $clone->getNewValueForApplicationTransactions();
   }
 
-  public function getConduitEditTypes() {
+  protected function newConduitEditTypes() {
     $field = $this->getCustomField();
 
     if (!$field->shouldAppearInConduitTransactions()) {
       return array();
     }
 
-    return parent::getConduitEditTypes();
+    return parent::newConduitEditTypes();
   }
 
   protected function newHTTPParameterType() {
     $type = $this->getCustomFieldHTTPParameterType();
+
+    if ($type) {
+      return clone $type;
+    }
+
+    return null;
+  }
+
+  protected function newConduitParameterType() {
+    $type = $this->getCustomFieldConduitParameterType();
 
     if ($type) {
       return clone $type;

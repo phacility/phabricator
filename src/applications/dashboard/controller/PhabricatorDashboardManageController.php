@@ -99,7 +99,6 @@ final class PhabricatorDashboardManageController
     $id = $dashboard->getID();
 
     $actions = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getApplicationURI('view/'.$dashboard->getID().'/'))
       ->setObject($dashboard)
       ->setUser($viewer);
 

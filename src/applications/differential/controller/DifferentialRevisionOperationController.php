@@ -94,8 +94,7 @@ final class DifferentialRevisionOperationController
       ->setUser($viewer)
       ->appendRemarkupInstructions(
         pht(
-          'In theory, this will do approximately what `arc land` would do. '.
-          'In practice, you will have a riveting adventure instead.'))
+          '(NOTE) This feature is new and experimental.'))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Onto Branch'))
@@ -103,11 +102,7 @@ final class DifferentialRevisionOperationController
           ->setLimit(1)
           ->setError($e_ref)
           ->setValue($v_ref)
-          ->setDatasource($ref_datasource))
-      ->appendRemarkupInstructions(
-        pht(
-          '(WARNING) THIS FEATURE IS EXPERIMENTAL AND DANGEROUS! USE IT AT '.
-          'YOUR OWN RISK!'));
+          ->setDatasource($ref_datasource));
 
     return $this->newDialog()
       ->setWidth(AphrontDialogView::WIDTH_FORM)
@@ -115,7 +110,7 @@ final class DifferentialRevisionOperationController
       ->setErrors($errors)
       ->appendForm($form)
       ->addCancelButton($detail_uri)
-      ->addSubmitButton(pht('Mutate Repository Unpredictably'));
+      ->addSubmitButton(pht('Land Revision'));
   }
 
   private function newRefQuery(PhabricatorRepository $repository) {

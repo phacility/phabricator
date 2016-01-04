@@ -71,4 +71,8 @@ final class PhabricatorStandardCustomFieldText
     return false;
   }
 
+  public function getConduitEditParameterType() {
+    return new ConduitStringParameterType();
+  }
+
 }

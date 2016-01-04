@@ -11,7 +11,8 @@ final class PhabricatorRepositoryCommit
     PhabricatorMentionableInterface,
     HarbormasterBuildableInterface,
     PhabricatorCustomFieldInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorFulltextInterface {
 
   protected $repositoryID;
   protected $phid;
@@ -202,10 +203,7 @@ final class PhabricatorRepositoryCommit
   }
 
   public function getURI() {
-    $repository = $this->getRepository();
-    $callsign = $repository->getCallsign();
-    $commit_identifier = $this->getCommitIdentifier();
-    return '/r'.$callsign.$commit_identifier;
+    return '/'.$this->getMonogram();
   }
 
   /**
@@ -248,6 +246,20 @@ final class PhabricatorRepositoryCommit
     }
 
     return $this->setAuditStatus($status);
+  }
+
+  public function getMonogram() {
+    $repository = $this->getRepository();
+    $callsign = $repository->getCallsign();
+    $identifier = $this->getCommitIdentifier();
+
+    return "r{$callsign}{$identifier}";
+  }
+
+  public function getDisplayName() {
+    $repository = $this->getRepository();
+    $identifier = $this->getCommitIdentifier();
+    return $repository->formatCommitName($identifier);
   }
 
 
@@ -435,6 +447,13 @@ final class PhabricatorRepositoryCommit
     }
 
     return $timeline->setPathMap($path_map);
+  }
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+
+  public function newFulltextEngine() {
+    return new DiffusionCommitFulltextEngine();
   }
 
 }

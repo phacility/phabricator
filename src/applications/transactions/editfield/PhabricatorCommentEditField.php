@@ -11,4 +11,16 @@ final class PhabricatorCommentEditField
     return new PhabricatorCommentEditType();
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitStringParameterType();
+  }
+
+  public function shouldGenerateTransactionsFromSubmit() {
+    return false;
+  }
+
+  public function shouldGenerateTransactionsFromComment() {
+    return true;
+  }
+
 }

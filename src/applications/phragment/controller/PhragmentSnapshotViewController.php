@@ -106,8 +106,7 @@ final class PhragmentSnapshotViewController extends PhragmentController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($snapshot)
-      ->setObjectURI($snapshot->getURI());
+      ->setObject($snapshot);
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Download Snapshot as ZIP'))

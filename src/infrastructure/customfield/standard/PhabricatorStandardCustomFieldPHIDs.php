@@ -83,7 +83,7 @@ abstract class PhabricatorStandardCustomFieldPHIDs
       return null;
     }
 
-    $handles = mpull($handles, 'renderLink');
+    $handles = mpull($handles, 'renderHovercardLink');
     $handles = phutil_implode_html(', ', $handles);
     return $handles;
   }

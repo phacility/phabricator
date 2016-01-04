@@ -36,7 +36,6 @@ final class DiffusionCommitController extends DiffusionController {
     }
 
     $repository = $drequest->getRepository();
-    $callsign = $repository->getCallsign();
 
     $content = array();
     $commit = id(new DiffusionCommitQuery())
@@ -181,7 +180,7 @@ final class DiffusionCommitController extends DiffusionController {
         id(new PhabricatorRepository())->establishConnection('r'),
         'SELECT * FROM %T WHERE fullCommitName = %s',
         PhabricatorRepository::TABLE_BADCOMMIT,
-        'r'.$callsign.$commit->getCommitIdentifier());
+        $commit->getMonogram());
     }
 
     $show_changesets = false;
@@ -314,27 +313,28 @@ final class DiffusionCommitController extends DiffusionController {
         }
       }
 
-      $change_list_title = DiffusionView::nameCommit(
-        $repository,
-        $commit->getCommitIdentifier());
+      $change_list_title = $commit->getDisplayName();
+
       $change_list = new DifferentialChangesetListView();
       $change_list->setTitle($change_list_title);
       $change_list->setChangesets($changesets);
       $change_list->setVisibleChangesets($visible_changesets);
       $change_list->setRenderingReferences($references);
-      $change_list->setRenderURI('/diffusion/'.$callsign.'/diff/');
+      $change_list->setRenderURI(
+        $repository->getPathURI('diff/'));
       $change_list->setRepository($repository);
       $change_list->setUser($user);
 
       // TODO: Try to setBranch() to something reasonable here?
 
       $change_list->setStandaloneURI(
-        '/diffusion/'.$callsign.'/diff/');
+        $repository->getPathURI('diff/'));
+
       $change_list->setRawFileURIs(
         // TODO: Implement this, somewhat tricky if there's an octopus merge
         // or whatever?
         null,
-        '/diffusion/'.$callsign.'/diff/?view=r');
+        $repository->getPathURI('diff/?view=r'));
 
       $change_list->setInlineCommentControllerURI(
         '/diffusion/inline/edit/'.phutil_escape_uri($commit->getPHID()).'/');
@@ -344,11 +344,6 @@ final class DiffusionCommitController extends DiffusionController {
 
     $content[] = $this->renderAddCommentPanel($commit, $audit_requests);
 
-    $commit_id = 'r'.$callsign.$commit->getCommitIdentifier();
-    $short_name = DiffusionView::nameCommit(
-      $repository,
-      $commit->getCommitIdentifier());
-
     $prefs = $user->loadPreferences();
     $pref_filetree = PhabricatorUserPreferences::PREFERENCE_DIFF_FILETREE;
     $pref_collapse = PhabricatorUserPreferences::PREFERENCE_NAV_COLLAPSED;
@@ -357,8 +352,8 @@ final class DiffusionCommitController extends DiffusionController {
 
     if ($show_changesets && $show_filetree) {
       $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
-        ->setTitle($short_name)
-        ->setBaseURI(new PhutilURI('/'.$commit_id))
+        ->setTitle($commit->getDisplayName())
+        ->setBaseURI(new PhutilURI($commit->getURI()))
         ->build($changesets)
         ->setCrumbs($crumbs)
         ->setCollapsed((bool)$collapsed)
@@ -371,7 +366,7 @@ final class DiffusionCommitController extends DiffusionController {
     return $this->buildApplicationPage(
       $content,
       array(
-        'title' => $commit_id,
+        'title' => $commit->getDisplayName(),
         'pageObjects' => array($commit->getPHID()),
       ));
   }
@@ -573,8 +568,8 @@ final class DiffusionCommitController extends DiffusionController {
         ),
         pht('Unknown'));
 
-      $callsign = $repository->getCallsign();
-      $root = '/diffusion/'.$callsign.'/commit/'.$commit->getCommitIdentifier();
+      $identifier = $commit->getCommitIdentifier();
+      $root = $repository->getPathURI("commit/{$identifier}");
       Javelin::initBehavior(
         'diffusion-commit-branches',
         array(
@@ -903,16 +898,15 @@ final class DiffusionCommitController extends DiffusionController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
-      ->setObject($commit)
-      ->setObjectURI($request->getRequestURI());
+      ->setObject($commit);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $user,
       $commit,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $uri = '/diffusion/'.$repository->getCallsign().'/commit/'.
-           $commit->getCommitIdentifier().'/edit/';
+    $identifier = $commit->getCommitIdentifier();
+    $uri = $repository->getPathURI("commit/{$identifier}/edit/");
 
     $action = id(new PhabricatorActionView())
       ->setName(pht('Edit Commit'))

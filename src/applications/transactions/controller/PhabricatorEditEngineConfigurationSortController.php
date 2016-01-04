@@ -39,6 +39,15 @@ final class PhabricatorEditEngineConfigurationSortController
 
     $configs = $query->execute();
 
+    // Do this check here (instead of in the Query above) to get a proper
+    // policy exception if the user doesn't satisfy
+    foreach ($configs as $config) {
+      PhabricatorPolicyFilter::requireCapability(
+        $viewer,
+        $config,
+        PhabricatorPolicyCapability::CAN_EDIT);
+    }
+
     if ($is_create) {
       $configs = msort($configs, 'getCreateSortKey');
     } else {

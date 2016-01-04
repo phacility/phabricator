@@ -498,6 +498,7 @@ var.remarkup-assist-textarea {
   height: auto;
   border-width: 1px 0 0 0;
   outline: none;
+  resize: none;
 }
 
 .phabricator-image-macro-hero {
@@ -522,4 +523,40 @@ var.remarkup-assist-textarea {
 .phabricator-remarkup .remarkup-highlight {
   background-color: {$lightviolet};
   padding: 0 4px;
+}
+
+.remarkup-inline-preview {
+  display: block;
+  position: relative;
+  background: #fff;
+  overflow-y: auto;
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid {$sky};
+  resize: vertical;
+  padding: 4px 6px;
+}
+
+.remarkup-control-fullscreen-mode .remarkup-inline-preview {
+  resize: none;
+}
+
+.remarkup-inline-preview * {
+  resize: none;
+}
+
+.remarkup-assist-button.preview-active {
+  background: {$sky};
+}
+
+.remarkup-assist-button.preview-active .phui-icon-view {
+  color: #ffffff;
+}
+
+.remarkup-assist-button.preview-active:hover .phui-icon-view {
+  color: {$lightsky};
+}
+
+.device .remarkup-assist-nodevice {
+  display: none;
 }

@@ -47,9 +47,14 @@ final class PhameBlogEditor
     switch ($xaction->getTransactionType()) {
       case PhameBlogTransaction::TYPE_NAME:
       case PhameBlogTransaction::TYPE_DESCRIPTION:
-      case PhameBlogTransaction::TYPE_DOMAIN:
       case PhameBlogTransaction::TYPE_STATUS:
         return $xaction->getNewValue();
+      case PhameBlogTransaction::TYPE_DOMAIN:
+        $domain = $xaction->getNewValue();
+        if (!strlen($xaction->getNewValue())) {
+          return null;
+        }
+        return $domain;
     }
   }
 

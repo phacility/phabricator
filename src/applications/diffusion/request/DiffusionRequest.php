@@ -9,7 +9,6 @@
  */
 abstract class DiffusionRequest extends Phobject {
 
-  protected $callsign;
   protected $path;
   protected $line;
   protected $branch;
@@ -47,9 +46,8 @@ abstract class DiffusionRequest extends Phobject {
    *
    * Parameters are:
    *
-   *   - `callsign` Repository callsign. Provide this or `repository`.
-   *   - `user` Viewing user. Required if `callsign` is provided.
-   *   - `repository` Repository object. Provide this or `callsign`.
+   *   - `repository` Repository object or identifier.
+   *   - `user` Viewing user. Required if `repository` is an identifier.
    *   - `branch` Optional, branch name.
    *   - `path` Optional, file path.
    *   - `commit` Optional, commit identifier.
@@ -60,30 +58,51 @@ abstract class DiffusionRequest extends Phobject {
    * @task new
    */
   final public static function newFromDictionary(array $data) {
-    if (isset($data['repository']) && isset($data['callsign'])) {
+    $repository_key = 'repository';
+    $identifier_key = 'callsign';
+    $viewer_key = 'user';
+
+    $repository = idx($data, $repository_key);
+    $identifier = idx($data, $identifier_key);
+
+    $have_repository = ($repository !== null);
+    $have_identifier = ($identifier !== null);
+
+    if ($have_repository && $have_identifier) {
       throw new Exception(
         pht(
-          "Specify '%s' or '%s', but not both.",
-          'repository',
-          'callsign'));
-    } else if (!isset($data['repository']) && !isset($data['callsign'])) {
-      throw new Exception(
-        pht(
-          "One of '%s' and '%s' is required.",
-          'repository',
-          'callsign'));
-    } else if (isset($data['callsign']) && empty($data['user'])) {
-      throw new Exception(
-        pht(
-          "Parameter '%s' is required if '%s' is provided.",
-          'user',
-          'callsign'));
+          'Specify "%s" or "%s", but not both.',
+          $repository_key,
+          $identifier_key));
     }
 
-    if (isset($data['repository'])) {
-      $object = self::newFromRepository($data['repository']);
+    if (!$have_repository && !$have_identifier) {
+      throw new Exception(
+        pht(
+          'One of "%s" and "%s" is required.',
+          $repository_key,
+          $identifier_key));
+    }
+
+    if ($have_repository) {
+      if (!($repository instanceof PhabricatorRepository)) {
+        if (empty($data[$viewer_key])) {
+          throw new Exception(
+            pht(
+              'Parameter "%s" is required if "%s" is provided.',
+              $viewer_key,
+              $identifier_key));
+        }
+
+        $identifier = $repository;
+        $repository = null;
+      }
+    }
+
+    if ($identifier !== null) {
+      $object = self::newFromIdentifier($identifier, $data[$viewer_key]);
     } else {
-      $object = self::newFromCallsign($data['callsign'], $data['user']);
+      $object = self::newFromRepository($repository);
     }
 
     $object->initializeFromDictionary($data);
@@ -105,8 +124,8 @@ abstract class DiffusionRequest extends Phobject {
     array $data,
     AphrontRequest $request) {
 
-    $callsign = phutil_unescape_uri_path_component(idx($data, 'callsign'));
-    $object = self::newFromCallsign($callsign, $request->getUser());
+    $identifier = phutil_unescape_uri_path_component(idx($data, 'callsign'));
+    $object = self::newFromIdentifier($identifier, $request->getUser());
 
     $use_branches = $object->supportsBranches();
 
@@ -141,22 +160,22 @@ abstract class DiffusionRequest extends Phobject {
   /**
    * Internal. Use @{method:newFromDictionary}, not this method.
    *
-   * @param   string              Repository callsign.
+   * @param   string              Repository identifier.
    * @param   PhabricatorUser     Viewing user.
    * @return  DiffusionRequest    New request object.
    * @task new
    */
-  final private static function newFromCallsign(
-    $callsign,
+  final private static function newFromIdentifier(
+    $identifier,
     PhabricatorUser $viewer) {
 
     $repository = id(new PhabricatorRepositoryQuery())
       ->setViewer($viewer)
-      ->withCallsigns(array($callsign))
+      ->withIdentifiers(array($identifier))
       ->executeOne();
 
     if (!$repository) {
-      throw new Exception(pht("No such repository '%s'.", $callsign));
+      throw new Exception(pht("No such repository '%s'.", $identifier));
     }
 
     return self::newFromRepository($repository);
@@ -189,7 +208,6 @@ abstract class DiffusionRequest extends Phobject {
     $object = new $class();
 
     $object->repository = $repository;
-    $object->callsign   = $repository->getCallsign();
 
     return $object;
   }
@@ -239,7 +257,7 @@ abstract class DiffusionRequest extends Phobject {
   }
 
   public function getCallsign() {
-    return $this->callsign;
+    return $this->getRepository()->getCallsign();
   }
 
   public function setPath($path) {
@@ -447,7 +465,7 @@ abstract class DiffusionRequest extends Phobject {
     }
 
     $defaults = array(
-      'callsign'  => $this->getCallsign(),
+      'repository' => $this->getRepository(),
       'path'      => $this->getPath(),
       'branch'    => $this->getBranch(),
       'commit'    => $default_commit,
@@ -469,6 +487,7 @@ abstract class DiffusionRequest extends Phobject {
    *   - `action` One of `history`, `browse`, `change`, `lastmodified`,
    *     `branch`, `tags`, `branches`,  or `revision-ref`. The action specified
    *      by the URI.
+   *   - `repository` Repository.
    *   - `callsign` Repository callsign.
    *   - `branch` Optional if action is not `branch`, branch name.
    *   - `path` Optional, path to file.
@@ -486,7 +505,14 @@ abstract class DiffusionRequest extends Phobject {
   public static function generateDiffusionURI(array $params) {
     $action = idx($params, 'action');
 
-    $callsign = idx($params, 'callsign');
+    $repository = idx($params, 'repository');
+
+    if ($repository) {
+      $callsign = $repository->getCallsign();
+    } else {
+      $callsign = idx($params, 'callsign');
+    }
+
     $path     = idx($params, 'path');
     $branch   = idx($params, 'branch');
     $commit   = idx($params, 'commit');
@@ -702,28 +728,26 @@ abstract class DiffusionRequest extends Phobject {
 
   protected function raisePermissionException() {
     $host = php_uname('n');
-    $callsign = $this->getRepository()->getCallsign();
     throw new DiffusionSetupException(
       pht(
-        "The clone of this repository ('%s') on the local machine ('%s') ".
-        "could not be read. Ensure that the repository is in a ".
-        "location where the web server has read permissions.",
-        $callsign,
+        'The clone of this repository ("%s") on the local machine ("%s") '.
+        'could not be read. Ensure that the repository is in a '.
+        'location where the web server has read permissions.',
+        $this->getRepository()->getDisplayName(),
         $host));
   }
 
   protected function raiseCloneException() {
     $host = php_uname('n');
-    $callsign = $this->getRepository()->getCallsign();
     throw new DiffusionSetupException(
       pht(
-        "The working copy for this repository ('%s') hasn't been cloned yet ".
-        "on this machine ('%s'). Make sure you've started the Phabricator ".
-        "daemons. If this problem persists for longer than a clone should ".
-        "take, check the daemon logs (in the Daemon Console) to see if there ".
-        "were errors cloning the repository. Consult the 'Diffusion User ".
-        "Guide' in the documentation for help setting up repositories.",
-        $callsign,
+        'The working copy for this repository ("%s") has not been cloned yet '.
+        'on this machine ("%s"). Make sure you havestarted the Phabricator '.
+        'daemons. If this problem persists for longer than a clone should '.
+        'take, check the daemon logs (in the Daemon Console) to see if there '.
+        'were errors cloning the repository. Consult the "Diffusion User '.
+        'Guide" in the documentation for help setting up repositories.',
+        $this->getRepository()->getDisplayName(),
         $host));
   }
 

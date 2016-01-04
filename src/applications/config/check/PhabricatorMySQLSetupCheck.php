@@ -366,8 +366,8 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
   }
 
   protected function shouldUseMySQLSearchEngine() {
-    $search_engine = PhabricatorSearchEngine::loadEngine();
-    return $search_engine instanceof PhabricatorMySQLSearchEngine;
+    $search_engine = PhabricatorFulltextStorageEngine::loadEngine();
+    return ($search_engine instanceof PhabricatorMySQLFulltextStorageEngine);
   }
 
 }

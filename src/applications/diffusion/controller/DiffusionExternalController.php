@@ -48,7 +48,7 @@ final class DiffusionExternalController extends DiffusionController {
         $redirect = DiffusionRequest::generateDiffusionURI(
           array(
             'action'    => 'browse',
-            'callsign'  => $repository->getCallsign(),
+            'repository'  => $repository,
             'branch'    => $repository->getDefaultBranch(),
             'commit'    => $id,
           ));
@@ -86,7 +86,7 @@ final class DiffusionExternalController extends DiffusionController {
       $redirect = DiffusionRequest::generateDiffusionURI(
         array(
           'action'    => 'browse',
-          'callsign'  => $repo->getCallsign(),
+          'repository'  => $repo,
           'branch'    => $repo->getDefaultBranch(),
           'commit'    => $commit->getCommitIdentifier(),
         ));
@@ -99,7 +99,7 @@ final class DiffusionExternalController extends DiffusionController {
         $href = DiffusionRequest::generateDiffusionURI(
           array(
             'action'    => 'browse',
-            'callsign'  => $repo->getCallsign(),
+            'repository' => $repo,
             'branch'    => $repo->getDefaultBranch(),
             'commit'    => $commit->getCommitIdentifier(),
           ));
@@ -109,7 +109,7 @@ final class DiffusionExternalController extends DiffusionController {
             array(
               'href' => $href,
             ),
-              'r'.$repo->getCallsign().$commit->getCommitIdentifier()),
+            $commit->getMonogram()),
           $commit->loadCommitData()->getSummary(),
         );
       }

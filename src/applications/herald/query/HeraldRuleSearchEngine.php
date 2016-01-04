@@ -211,4 +211,24 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
 
   }
 
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create Herald Rule'))
+      ->setHref('/herald/create/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getFontIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('A flexible rules engine that can notify and act on '.
+            'other actions such as tasks, diffs, and commits.'))
+      ->addAction($create_button);
+
+      return $view;
+  }
+
 }

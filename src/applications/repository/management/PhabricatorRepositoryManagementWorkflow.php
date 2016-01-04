@@ -4,26 +4,32 @@ abstract class PhabricatorRepositoryManagementWorkflow
   extends PhabricatorManagementWorkflow {
 
   protected function loadRepositories(PhutilArgumentParser $args, $param) {
-    $callsigns = $args->getArg($param);
+    $identifiers = $args->getArg($param);
 
-    if (!$callsigns) {
+    if (!$identifiers) {
       return null;
     }
 
-    $repos = id(new PhabricatorRepositoryQuery())
+    $query = id(new PhabricatorRepositoryQuery())
       ->setViewer($this->getViewer())
-      ->withCallsigns($callsigns)
-      ->execute();
+      ->withIdentifiers($identifiers);
 
-    $repos = mpull($repos, null, 'getCallsign');
-    foreach ($callsigns as $callsign) {
-      if (empty($repos[$callsign])) {
+    $query->execute();
+
+    $map = $query->getIdentifierMap();
+    foreach ($identifiers as $identifier) {
+      if (empty($map[$identifier])) {
         throw new PhutilArgumentUsageException(
-          pht("No repository with callsign '%s' exists!", $callsign));
+          pht(
+            'Repository "%s" does not exist!',
+            $identifier));
       }
     }
 
-    return $repos;
+    // Reorder repositories according to argument order.
+    $repositories = array_select_keys($map, $identifiers);
+
+    return array_values($repositories);
   }
 
   protected function loadCommits(PhutilArgumentParser $args, $param) {

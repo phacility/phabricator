@@ -480,13 +480,11 @@ final class DiffusionRepositoryController extends DiffusionController {
   private function buildActionList(PhabricatorRepository $repository) {
     $viewer = $this->getRequest()->getUser();
 
-    $view_uri = $this->getApplicationURI($repository->getCallsign().'/');
-    $edit_uri = $this->getApplicationURI($repository->getCallsign().'/edit/');
+    $edit_uri = $repository->getPathURI('edit/');
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($repository)
-      ->setObjectURI($view_uri);
+      ->setObject($repository);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -502,9 +500,8 @@ final class DiffusionRepositoryController extends DiffusionController {
         ->setDisabled(!$can_edit));
 
     if ($repository->isHosted()) {
-      $callsign = $repository->getCallsign();
       $push_uri = $this->getApplicationURI(
-        'pushlog/?repositories=r'.$callsign);
+        'pushlog/?repositories='.$repository->getMonogram());
 
       $view->addAction(
         id(new PhabricatorActionView())
@@ -553,7 +550,6 @@ final class DiffusionRepositoryController extends DiffusionController {
     }
 
     $history_table->setIsHead(true);
-    $callsign = $drequest->getRepository()->getCallsign();
 
     $icon = id(new PHUIIconView())
       ->setIconFont('fa-list-alt');

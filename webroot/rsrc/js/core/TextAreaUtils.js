@@ -38,14 +38,21 @@ JX.install('TextAreaUtils', {
       }
     },
 
-    setSelectionText : function(area, text) {
+    setSelectionText : function(area, text, select) {
       var v = area.value;
       var r = JX.TextAreaUtils.getSelectionRange(area);
 
       v = v.substring(0, r.start) + text + v.substring(r.end, v.length);
       area.value = v;
 
-      JX.TextAreaUtils.setSelectionRange(area, r.start, r.start + text.length);
+      var start = r.start;
+      var end = r.start + text.length;
+
+      if (!select) {
+        start = end;
+      }
+
+      JX.TextAreaUtils.setSelectionRange(area, start, end);
     },
 
     /**

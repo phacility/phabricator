@@ -4,7 +4,8 @@ final class DivinerLiveSymbol extends DivinerDAO
   implements
     PhabricatorPolicyInterface,
     PhabricatorMarkupInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorFulltextInterface {
 
   protected $bookPHID;
   protected $repositoryPHID;
@@ -278,6 +279,18 @@ final class DivinerLiveSymbol extends DivinerDAO
 
       $this->delete();
     $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+
+  public function newFulltextEngine() {
+    if (!$this->getIsDocumentable()) {
+      return null;
+    }
+
+    return new DivinerLiveSymbolFulltextEngine();
   }
 
 }

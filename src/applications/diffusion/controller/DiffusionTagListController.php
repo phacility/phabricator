@@ -88,7 +88,7 @@ final class DiffusionTagListController extends DiffusionController {
       array(
         'title' => array(
           pht('Tags'),
-          pht('%s Repository', $repository->getCallsign()),
+          $repository->getDisplayName(),
         ),
       ));
   }

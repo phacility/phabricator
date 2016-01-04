@@ -125,7 +125,6 @@ abstract class DiffusionBrowseController extends DiffusionController {
       ->setActionList($actions);
 
     $stable_commit = $drequest->getStableCommit();
-    $callsign = $drequest->getRepository()->getCallsign();
 
     $view->addProperty(
       pht('Commit'),

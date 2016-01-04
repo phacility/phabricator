@@ -136,4 +136,9 @@ final class PhabricatorStandardCustomFieldBool
   protected function newConduitSearchParameterType() {
     return new ConduitBoolParameterType();
   }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitBoolParameterType();
+  }
+
 }

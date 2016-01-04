@@ -90,11 +90,10 @@ final class DiffusionLintDetailsController extends DiffusionController {
         $pager,
       ),
       array(
-        'title' =>
-          array(
-            pht('Lint'),
-            $drequest->getRepository()->getCallsign(),
-          ),
+        'title' => array(
+          pht('Lint'),
+          $drequest->getRepository()->getDisplayName(),
+        ),
       ));
   }
 

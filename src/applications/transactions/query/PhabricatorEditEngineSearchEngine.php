@@ -65,9 +65,14 @@ final class PhabricatorEditEngineSearchEngine
       $engine_key = $engine->getEngineKey();
       $query_uri = "/transactions/editengine/{$engine_key}/";
 
+      $application = $engine->getApplication();
+      $app_icon = $application->getFontIcon();
+
       $item = id(new PHUIObjectItemView())
-        ->setHeader($engine->getEngineName())
-        ->setHref($query_uri);
+        ->setHeader($engine->getSummaryHeader())
+        ->setHref($query_uri)
+        ->setStatusIcon($app_icon)
+        ->addAttribute($engine->getSummaryText());
 
       $list->addItem($item);
     }

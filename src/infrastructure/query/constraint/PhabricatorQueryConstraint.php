@@ -6,6 +6,7 @@ final class PhabricatorQueryConstraint extends Phobject {
   const OPERATOR_OR = 'or';
   const OPERATOR_NOT = 'not';
   const OPERATOR_NULL = 'null';
+  const OPERATOR_ANCESTOR = 'ancestor';
 
   private $operator;
   private $value;

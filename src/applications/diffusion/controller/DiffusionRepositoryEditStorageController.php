@@ -60,7 +60,7 @@ final class DiffusionRepositoryEditStorageController
           "web interface. To edit it, run this command:\n\n  %s",
           sprintf(
             'phabricator/ $ ./bin/repository edit %s --as %s --local-path ...',
-            $repository->getCallsign(),
+            $repository->getMonogram(),
             $user->getUsername())))
       ->appendChild(
         id(new AphrontFormSubmitControl())

@@ -372,7 +372,7 @@ final class DifferentialReleephRequestFieldSpecification extends Phobject {
             'part of a Releeph branch, but also has %d path change(s) not '.
             'part of a Releeph branch!',
             $commit->getCommitIdentifier(),
-            $repo->getCallsign(),
+            $repo->getDisplayName(),
             count($in_branch),
             count($ex_branch));
           phlog($error);

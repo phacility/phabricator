@@ -68,7 +68,6 @@ final class DrydockRepositoryOperationViewController
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($operation);
 
     return $view;

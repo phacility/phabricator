@@ -9,6 +9,14 @@ final class PhabricatorOwnersPackageEditEngine
     return pht('Owners Packages');
   }
 
+  public function getSummaryHeader() {
+    return pht('Configure Owners Package Forms');
+  }
+
+  public function getSummaryText() {
+    return pht('Configure forms for creating and editing packages in Owners.');
+  }
+
   public function getEngineApplicationClass() {
     return 'PhabricatorOwnersApplication';
   }
@@ -18,7 +26,8 @@ final class PhabricatorOwnersPackageEditEngine
   }
 
   protected function newObjectQuery() {
-    return id(new PhabricatorOwnersPackageQuery());
+    return id(new PhabricatorOwnersPackageQuery())
+      ->needPaths(true);
   }
 
   protected function getObjectCreateTitleText($object) {
@@ -43,6 +52,35 @@ final class PhabricatorOwnersPackageEditEngine
   }
 
   protected function buildCustomEditFields($object) {
+
+    $paths_help = pht(<<<EOTEXT
+When updating the paths for a package, pass a list of dictionaries like
+this as the `value` for the transaction:
+
+```lang=json, name="Example Paths Value"
+[
+  {
+    "repositoryPHID": "PHID-REPO-1234",
+    "path": "/path/to/directory/",
+    "excluded": false
+  },
+  {
+    "repositoryPHID": "PHID-REPO-1234",
+    "path": "/another/example/path/",
+    "excluded": false
+  }
+]
+```
+
+This transaction will set the paths to the list you provide, overwriting any
+previous paths.
+
+Generally, you will call `owners.search` first to get a list of current paths
+(which are provided in the same format), make changes, then update them by
+applying a transaction of this type.
+EOTEXT
+      );
+
     return array(
       id(new PhabricatorTextEditField())
         ->setKey('name')
@@ -81,6 +119,24 @@ final class PhabricatorOwnersPackageEditEngine
         ->setTransactionType(
           PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION)
         ->setValue($object->getDescription()),
+      id(new PhabricatorSelectEditField())
+        ->setKey('status')
+        ->setLabel(pht('Status'))
+        ->setDescription(pht('Archive or enable the package.'))
+        ->setTransactionType(PhabricatorOwnersPackageTransaction::TYPE_STATUS)
+        ->setIsConduitOnly(true)
+        ->setValue($object->getStatus())
+        ->setOptions($object->getStatusNameMap()),
+      id(new PhabricatorConduitEditField())
+        ->setKey('paths.set')
+        ->setLabel(pht('Paths'))
+        ->setIsConduitOnly(true)
+        ->setTransactionType(PhabricatorOwnersPackageTransaction::TYPE_PATHS)
+        ->setConduitDescription(
+          pht('Overwrite existing package paths with new paths.'))
+        ->setConduitTypeDescription(
+          pht('List of dictionaries, each describing a path.'))
+        ->setConduitDocumentation($paths_help),
     );
   }
 

@@ -7,7 +7,7 @@ final class PhabricatorRepositoryManagementDiscoverWorkflow
     $this
       ->setName('discover')
       ->setExamples('**discover** [__options__] __repository__ ...')
-      ->setSynopsis(pht('Discover __repository__, named by callsign.'))
+      ->setSynopsis(pht('Discover __repository__.'))
       ->setArguments(
         array(
           array(
@@ -31,14 +31,16 @@ final class PhabricatorRepositoryManagementDiscoverWorkflow
 
     if (!$repos) {
       throw new PhutilArgumentUsageException(
-        pht('Specify one or more repositories to discover, by callsign.'));
+        pht('Specify one or more repositories to discover.'));
     }
 
     $console = PhutilConsole::getConsole();
     foreach ($repos as $repo) {
       $console->writeOut(
         "%s\n",
-        pht("Discovering '%s'...", $repo->getCallsign()));
+        pht(
+          'Discovering "%s"...',
+          $repo->getDisplayName()));
 
       id(new PhabricatorRepositoryDiscoveryEngine())
         ->setRepository($repo)

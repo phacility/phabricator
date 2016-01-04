@@ -174,4 +174,24 @@ final class PhabricatorDashboardSearchEngine
     return $result;
   }
 
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create a Dashboard'))
+      ->setHref('/dashboard/create/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getFontIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Customize your homepage with different panels and '.
+            'search queries.'))
+      ->addAction($create_button);
+
+      return $view;
+  }
+
 }

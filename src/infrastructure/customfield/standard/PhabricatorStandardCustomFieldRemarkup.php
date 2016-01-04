@@ -103,4 +103,8 @@ final class PhabricatorStandardCustomFieldRemarkup
     return false;
   }
 
+  public function getConduitEditParameterType() {
+    return new ConduitStringParameterType();
+  }
+
 }

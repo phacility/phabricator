@@ -14,8 +14,8 @@ final class PhamePostEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
+    $types[] = PhamePostTransaction::TYPE_BLOG;
     $types[] = PhamePostTransaction::TYPE_TITLE;
-    $types[] = PhamePostTransaction::TYPE_PHAME_TITLE;
     $types[] = PhamePostTransaction::TYPE_BODY;
     $types[] = PhamePostTransaction::TYPE_VISIBILITY;
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
@@ -28,10 +28,10 @@ final class PhamePostEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhamePostTransaction::TYPE_BLOG:
+        return $object->getBlogPHID();
       case PhamePostTransaction::TYPE_TITLE:
         return $object->getTitle();
-      case PhamePostTransaction::TYPE_PHAME_TITLE:
-        return $object->getPhameTitle();
       case PhamePostTransaction::TYPE_BODY:
         return $object->getBody();
       case PhamePostTransaction::TYPE_VISIBILITY:
@@ -45,9 +45,9 @@ final class PhamePostEditor
 
     switch ($xaction->getTransactionType()) {
       case PhamePostTransaction::TYPE_TITLE:
-      case PhamePostTransaction::TYPE_PHAME_TITLE:
       case PhamePostTransaction::TYPE_BODY:
       case PhamePostTransaction::TYPE_VISIBILITY:
+      case PhamePostTransaction::TYPE_BLOG:
         return $xaction->getNewValue();
     }
   }
@@ -59,10 +59,10 @@ final class PhamePostEditor
     switch ($xaction->getTransactionType()) {
       case PhamePostTransaction::TYPE_TITLE:
         return $object->setTitle($xaction->getNewValue());
-      case PhamePostTransaction::TYPE_PHAME_TITLE:
-        return $object->setPhameTitle($xaction->getNewValue());
       case PhamePostTransaction::TYPE_BODY:
         return $object->setBody($xaction->getNewValue());
+      case PhamePostTransaction::TYPE_BLOG:
+        return $object->setBlogPHID($xaction->getNewValue());
       case PhamePostTransaction::TYPE_VISIBILITY:
         if ($xaction->getNewValue() == PhameConstants::VISIBILITY_DRAFT) {
           $object->setDatePublished(0);
@@ -81,9 +81,9 @@ final class PhamePostEditor
 
     switch ($xaction->getTransactionType()) {
       case PhamePostTransaction::TYPE_TITLE:
-      case PhamePostTransaction::TYPE_PHAME_TITLE:
       case PhamePostTransaction::TYPE_BODY:
       case PhamePostTransaction::TYPE_VISIBILITY:
+      case PhamePostTransaction::TYPE_BLOG:
         return;
     }
 
@@ -114,40 +114,50 @@ final class PhamePostEditor
           $errors[] = $error;
         }
         break;
-      case PhamePostTransaction::TYPE_PHAME_TITLE:
-        if (!$xactions) {
-          continue;
-        }
-        $missing = $this->validateIsEmptyTextField(
-          $object->getPhameTitle(),
-          $xactions);
-        $phame_title = last($xactions)->getNewValue();
+      case PhamePostTransaction::TYPE_BLOG:
+        if ($this->getIsNewObject()) {
+          if (!$xactions) {
+            $error = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Required'),
+              pht(
+                'When creating a post, you must specify which blog it '.
+                'should belong to.'),
+              null);
 
-        if ($missing || $phame_title == '/') {
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Required'),
-            pht('Phame title is required.'),
-            nonempty(last($xactions), null));
+            $error->setIsMissingFieldError(true);
 
-          $error->setIsMissingFieldError(true);
-          $errors[] = $error;
+            $errors[] = $error;
+            break;
+          }
         }
 
-        $duplicate_post = id(new PhamePostQuery())
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withPhameTitles(array($phame_title))
-          ->executeOne();
-        if ($duplicate_post && $duplicate_post->getID() != $object->getID()) {
-          $error_text = pht(
-            'Phame title must be unique; another post already has this phame '.
-            'title.');
-          $error = new PhabricatorApplicationTransactionValidationError(
+        foreach ($xactions as $xaction) {
+          $new_phid = $xaction->getNewValue();
+
+          $blog = id(new PhameBlogQuery())
+            ->setViewer($this->getActor())
+            ->withPHIDs(array($new_phid))
+            ->requireCapabilities(
+              array(
+                PhabricatorPolicyCapability::CAN_VIEW,
+                PhabricatorPolicyCapability::CAN_EDIT,
+              ))
+            ->execute();
+
+          if ($blog) {
+            continue;
+          }
+
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
             $type,
-            pht('Not Unique'),
-            $error_text,
-            nonempty(last($xactions), null));
-          $errors[] = $error;
+            pht('Invalid'),
+            pht(
+              'The specified blog PHID ("%s") is not valid. You can only '.
+              'create a post on (or move a post into) a blog which you '.
+              'have permission to see and edit.',
+              $new_phid),
+            $xaction);
         }
 
         break;

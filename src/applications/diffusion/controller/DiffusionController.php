@@ -86,7 +86,6 @@ abstract class DiffusionController extends PhabricatorController {
       return $crumb_list;
     }
 
-    $callsign = $repository->getCallsign();
     $repository_name = $repository->getName();
 
     if (!$spec['commit'] && !$spec['tags'] && !$spec['branches']) {
@@ -112,17 +111,14 @@ abstract class DiffusionController extends PhabricatorController {
     $crumb_list[] = $crumb;
 
     $stable_commit = $drequest->getStableCommit();
+    $commit_name = $repository->formatCommitName($stable_commit);
+    $commit_uri = $repository->getCommitURI($stable_commit);
 
     if ($spec['tags']) {
       $crumb = new PHUICrumbView();
       if ($spec['commit']) {
-        $crumb->setName(
-          pht('Tags for %s', 'r'.$callsign.$stable_commit));
-        $crumb->setHref($drequest->generateURI(
-          array(
-            'action' => 'commit',
-            'commit' => $drequest->getStableCommit(),
-          )));
+        $crumb->setName(pht('Tags for %s', $commit_name));
+        $crumb->setHref($commit_uri);
       } else {
         $crumb->setName(pht('Tags'));
       }
@@ -139,8 +135,8 @@ abstract class DiffusionController extends PhabricatorController {
 
     if ($spec['commit']) {
       $crumb = id(new PHUICrumbView())
-        ->setName("r{$callsign}{$stable_commit}")
-        ->setHref("r{$callsign}{$stable_commit}");
+        ->setName($commit_name)
+        ->setHref($commit_uri);
       $crumb_list[] = $crumb;
       return $crumb_list;
     }
@@ -187,7 +183,7 @@ abstract class DiffusionController extends PhabricatorController {
   protected function getRepositoryControllerURI(
     PhabricatorRepository $repository,
     $path) {
-    return $this->getApplicationURI($repository->getCallsign().'/'.$path);
+    return $repository->getPathURI($path);
   }
 
   protected function renderPathLinks(DiffusionRequest $drequest, $action) {
@@ -212,7 +208,7 @@ abstract class DiffusionController extends PhabricatorController {
               'path' => '',
             )),
         ),
-        'r'.$drequest->getRepository()->getCallsign());
+        $drequest->getRepository()->getDisplayName());
       $links[] = $divider;
       $accum = '';
       $last_key = last_key($path_parts);
@@ -235,7 +231,7 @@ abstract class DiffusionController extends PhabricatorController {
         }
       }
     } else {
-      $links[] = 'r'.$drequest->getRepository()->getCallsign();
+      $links[] = $drequest->getRepository()->getDisplayName();
       $links[] = $divider;
     }
 

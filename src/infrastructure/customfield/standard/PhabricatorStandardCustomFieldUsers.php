@@ -19,4 +19,8 @@ final class PhabricatorStandardCustomFieldUsers
     return new ConduitUserListParameterType();
   }
 
+  protected function newConduitEditParameterType() {
+    return new ConduitUserListParameterType();
+  }
+
 }

@@ -84,7 +84,6 @@ final class PhabricatorDashboardPanelViewController
     $id = $panel->getID();
 
     $actions = id(new PhabricatorActionListView())
-      ->setObjectURI('/'.$panel->getMonogram())
       ->setObject($panel)
       ->setUser($viewer);
 

@@ -151,6 +151,26 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return 'r'.$this->getCallsign();
   }
 
+  public function getDisplayName() {
+    // TODO: This is intended to produce a human-readable name that is not
+    // necessarily a global, unique identifier. Eventually, it may just return
+    // a string like "skynet" instead of "rSKYNET".
+    return $this->getMonogram();
+  }
+
+  public function getAllMonograms() {
+    $monograms = array();
+
+    $monograms[] = 'R'.$this->getID();
+
+    $callsign = $this->getCallsign();
+    if (strlen($callsign)) {
+      $monograms[] = 'r'.$callsign;
+    }
+
+    return $monograms;
+  }
+
   public function getDetail($key, $default = null) {
     return idx($this->details, $key, $default);
   }
@@ -579,6 +599,15 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function getURI() {
     return '/diffusion/'.$this->getCallsign().'/';
+  }
+
+  public function getPathURI($path) {
+    return $this->getURI().$path;
+  }
+
+  public function getCommitURI($identifier) {
+    $callsign = $this->getCallsign();
+    return "/r{$callsign}{$identifier}";
   }
 
   public function getNormalizedPath() {

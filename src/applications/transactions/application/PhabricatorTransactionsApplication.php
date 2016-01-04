@@ -33,6 +33,8 @@ final class PhabricatorTransactionsApplication extends PhabricatorApplication {
           => 'PhabricatorApplicationTransactionShowOlderController',
         '(?P<value>old|new)/(?<phid>[^/]+)/'
           => 'PhabricatorApplicationTransactionValueController',
+        'remarkuppreview/'
+          => 'PhabricatorApplicationTransactionRemarkupPreviewController',
         'editengine/' => array(
           $this->getQueryRoutePattern()
             => 'PhabricatorEditEngineListController',

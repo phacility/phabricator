@@ -7,4 +7,8 @@ final class PhabricatorRemarkupEditField
     return new PhabricatorRemarkupControl();
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitStringParameterType();
+  }
+
 }

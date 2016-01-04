@@ -2,8 +2,8 @@
 
 final class PhabricatorCommentEditType extends PhabricatorEditType {
 
-  public function getValueType() {
-    return id(new AphrontStringHTTPParameterType())->getTypeName();
+  protected function newConduitParameterType() {
+    return new ConduitStringParameterType();
   }
 
   public function generateTransactions(
@@ -17,10 +17,6 @@ final class PhabricatorCommentEditType extends PhabricatorEditType {
       ->attachComment($comment);
 
     return array($xaction);
-  }
-
-  public function getValueDescription() {
-    return pht('Comment to add, formated as remarkup.');
   }
 
 }

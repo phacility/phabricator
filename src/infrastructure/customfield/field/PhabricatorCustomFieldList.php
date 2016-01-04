@@ -73,10 +73,12 @@ final class PhabricatorCustomFieldList extends Phobject {
       $storage = idx($objects, $key);
       if ($storage) {
         $field->setValueFromStorage($storage->getFieldValue());
+        $field->didSetValueFromStorage();
       } else if ($object->getPHID()) {
         // NOTE: We set this only if the object exists. Otherwise, we allow the
         // field to retain any default value it may have.
         $field->setValueFromStorage(null);
+        $field->didSetValueFromStorage();
       }
     }
 

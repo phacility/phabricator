@@ -46,7 +46,8 @@ JX.install('Tokenizer', {
   properties : {
     limit : null,
     renderTokenCallback : null,
-    browseURI: null
+    browseURI: null,
+    disabled: false
   },
 
   members : {
@@ -65,6 +66,11 @@ JX.install('Tokenizer', {
     _placeholder : null,
 
     start : function() {
+      if (this.getDisabled()) {
+        JX.DOM.alterClass(this._containerNode, 'disabled-control', true);
+        return;
+      }
+
       if (__DEV__) {
         if (!this._typeahead) {
           throw new Error(

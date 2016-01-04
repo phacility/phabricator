@@ -1,0 +1,74 @@
+@title Conduit API: Using Search Endpoints
+@group conduit
+
+Describes how to use search endpoints to find objects and read information.
+
+Overview
+========
+
+Many applications provide `search` endpoints, which are the primary way to
+get information about objects (like tasks) using the API.
+
+To read information about objects, you'll specify a //query// which describes
+which objects you want to retrieve. You can query for specific objects by
+ID, or for a list of objects satisfying certain constraints (for example, open
+tasks in a particular project).
+
+The best reference for a particular `search` endpoint is the Conduit API
+console. For example, you can find the console page for `maniphest.search` by
+navigating to {nav Conduit > maniphest.search} in the web UI. This page
+contains detailed information about the endpoint and how it can be used.
+
+
+Specifying a Query
+==================
+
+The simplest query you can use is no query at all: just make a request with
+no parameters. This will return the first page of visible objects. Most
+applications sort objects by creation date by default, so usually this is
+the 100 most recent objects.
+
+The easiest way to constrain results is to use a builtin query or a custom
+query that you build using the web UI. To do this, first issue the query in
+the web UI (for example, by clicking the builtin link on the left nav of the
+list view, or by submitting the query form).
+
+The results page will include a //query key// in the URL. For builtin queries,
+this is usually a human-readable term like `all` or `active`. For custom
+queries, it is a hash value which looks something like `MT0Rh0fB2x4I`.
+
+You can submit this key in the `queryKey` parameter to issue the exact same
+query via the Conduit API. This provides a simple way to build complex queries:
+just build the via the web UI, then reuse the same query in the API.
+
+If you need more control or want to build dynamic queries, use the
+`constraints` parameter to set constraints for individual query fields.
+
+For more details, consult the Conduit API console documentation for the
+method you're using. It includes documentation on all available constraints
+and lists builtin and saved query keys.
+
+
+Attachments
+===========
+
+By default, queries return basic information about objects. If you want more
+detailed information, most applications offer //attachments// which can let
+you retrieve more information.
+
+For example, subscribers and projects are not returned by default, but you
+can use subscribers to query them if you need this data.
+
+Asking for more data means a slower query and a larger result, so usually you
+should only ask for data you need.
+
+The Conduit API console page for each query method has detailed information
+on which attachments it supports.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to the @{article:Conduit API Overview}.

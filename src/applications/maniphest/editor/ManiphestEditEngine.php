@@ -9,6 +9,14 @@ final class ManiphestEditEngine
     return pht('Maniphest Tasks');
   }
 
+  public function getSummaryHeader() {
+    return pht('Configure Maniphest Task Forms');
+  }
+
+  public function getSummaryText() {
+    return pht('Configure how users create and edit tasks.');
+  }
+
   public function getEngineApplicationClass() {
     return 'PhabricatorManiphestApplication';
   }
@@ -58,10 +66,8 @@ final class ManiphestEditEngine
     $priority_map = $this->getTaskPriorityMap($object);
 
     if ($object->isClosed()) {
-      $priority_label = null;
       $default_status = ManiphestTaskStatus::getDefaultStatus();
     } else {
-      $priority_label = pht('Change Priority');
       $default_status = ManiphestTaskStatus::getDefaultClosedStatus();
     }
 
@@ -76,6 +82,8 @@ final class ManiphestEditEngine
         ->setKey('parent')
         ->setLabel(pht('Parent Task'))
         ->setDescription(pht('Task to make this a subtask of.'))
+        ->setConduitDescription(pht('Create as a subtask of another task.'))
+        ->setConduitTypeDescription(pht('PHID of the parent task.'))
         ->setAliases(array('parentPHID'))
         ->setTransactionType(ManiphestTransaction::TYPE_PARENT)
         ->setHandleParameterType(new ManiphestTaskListHTTPParameterType())
@@ -87,6 +95,8 @@ final class ManiphestEditEngine
         ->setKey('column')
         ->setLabel(pht('Column'))
         ->setDescription(pht('Workboard column to create this task into.'))
+        ->setConduitDescription(pht('Create into a workboard column.'))
+        ->setConduitTypeDescription(pht('PHID of workboard column.'))
         ->setAliases(array('columnPHID'))
         ->setTransactionType(ManiphestTransaction::TYPE_COLUMN)
         ->setSingleValue(null)
@@ -98,6 +108,8 @@ final class ManiphestEditEngine
         ->setKey('title')
         ->setLabel(pht('Title'))
         ->setDescription(pht('Name of the task.'))
+        ->setConduitDescription(pht('Rename the task.'))
+        ->setConduitTypeDescription(pht('New task name.'))
         ->setTransactionType(ManiphestTransaction::TYPE_TITLE)
         ->setIsRequired(true)
         ->setValue($object->getTitle()),
@@ -106,36 +118,48 @@ final class ManiphestEditEngine
         ->setAliases(array('ownerPHID', 'assign', 'assigned'))
         ->setLabel(pht('Assigned To'))
         ->setDescription(pht('User who is responsible for the task.'))
+        ->setConduitDescription(pht('Reassign the task.'))
+        ->setConduitTypeDescription(
+          pht('New task owner, or `null` to unassign.'))
         ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
         ->setIsCopyable(true)
         ->setSingleValue($object->getOwnerPHID())
         ->setCommentActionLabel(pht('Assign / Claim'))
-        ->setCommentActionDefaultValue($owner_value),
+        ->setCommentActionValue($owner_value),
       id(new PhabricatorSelectEditField())
         ->setKey('status')
         ->setLabel(pht('Status'))
         ->setDescription(pht('Status of the task.'))
+        ->setConduitDescription(pht('Change the task status.'))
+        ->setConduitTypeDescription(pht('New task status constant.'))
         ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
         ->setIsCopyable(true)
         ->setValue($object->getStatus())
         ->setOptions($status_map)
         ->setCommentActionLabel(pht('Change Status'))
-        ->setCommentActionDefaultValue($default_status),
+        ->setCommentActionValue($default_status),
       id(new PhabricatorSelectEditField())
         ->setKey('priority')
         ->setLabel(pht('Priority'))
         ->setDescription(pht('Priority of the task.'))
+        ->setConduitDescription(pht('Change the priority of the task.'))
+        ->setConduitTypeDescription(pht('New task priority constant.'))
         ->setTransactionType(ManiphestTransaction::TYPE_PRIORITY)
         ->setIsCopyable(true)
         ->setValue($object->getPriority())
         ->setOptions($priority_map)
-        ->setCommentActionLabel($priority_label),
+        ->setCommentActionLabel(pht('Change Priority')),
       id(new PhabricatorRemarkupEditField())
         ->setKey('description')
         ->setLabel(pht('Description'))
         ->setDescription(pht('Task description.'))
+        ->setConduitDescription(pht('Update the task description.'))
+        ->setConduitTypeDescription(pht('New task description.'))
         ->setTransactionType(ManiphestTransaction::TYPE_DESCRIPTION)
-        ->setValue($object->getDescription()),
+        ->setValue($object->getDescription())
+        ->setPreviewPanel(
+          id(new PHUIRemarkupPreviewPanel())
+            ->setHeader(pht('Description Preview'))),
     );
   }
 

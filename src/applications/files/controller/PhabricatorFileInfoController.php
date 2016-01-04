@@ -120,7 +120,6 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($file);
 
     $can_download = !$file->getIsPartial();

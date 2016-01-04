@@ -54,9 +54,14 @@ final class PhabricatorOwnersPackageTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorOwnersPackageTransaction::TYPE_NAME:
       case PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION:
-      case PhabricatorOwnersPackageTransaction::TYPE_PATHS:
       case PhabricatorOwnersPackageTransaction::TYPE_STATUS:
         return $xaction->getNewValue();
+      case PhabricatorOwnersPackageTransaction::TYPE_PATHS:
+        $new = $xaction->getNewValue();
+        foreach ($new as $key => $info) {
+          $new[$key]['excluded'] = (int)idx($info, 'excluded');
+        }
+        return $new;
       case PhabricatorOwnersPackageTransaction::TYPE_AUDITING:
         return (int)$xaction->getNewValue();
       case PhabricatorOwnersPackageTransaction::TYPE_OWNERS:
@@ -198,6 +203,86 @@ final class PhabricatorOwnersPackageTransactionEditor
           $errors[] = $error;
         }
         break;
+      case PhabricatorOwnersPackageTransaction::TYPE_PATHS:
+        if (!$xactions) {
+          continue;
+        }
+
+        $old = mpull($object->getPaths(), 'getRef');
+        foreach ($xactions as $xaction) {
+          $new = $xaction->getNewValue();
+
+          // Check that we have a list of paths.
+          if (!is_array($new)) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('Path specification must be a list of paths.'),
+              $xaction);
+            continue;
+          }
+
+          // Check that each item in the list is formatted properly.
+          $type_exception = null;
+          foreach ($new as $key => $value) {
+            try {
+              PhutilTypeSpec::checkMap(
+                $value,
+                array(
+                  'repositoryPHID' => 'string',
+                  'path' => 'string',
+                  'excluded' => 'optional wild',
+                ));
+            } catch (PhutilTypeCheckException $ex) {
+              $errors[] = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Invalid'),
+                pht(
+                  'Path specification list contains invalid value '.
+                  'in key "%s": %s.',
+                  $key,
+                  $ex->getMessage()),
+                $xaction);
+              $type_exception = $ex;
+            }
+          }
+
+          if ($type_exception) {
+            continue;
+          }
+
+          // Check that any new paths reference legitimate repositories which
+          // the viewer has permission to see.
+          list($rem, $add) = PhabricatorOwnersPath::getTransactionValueChanges(
+            $old,
+            $new);
+
+          if ($add) {
+            $repository_phids = ipull($add, 'repositoryPHID');
+
+            $repositories = id(new PhabricatorRepositoryQuery())
+              ->setViewer($this->getActor())
+              ->withPHIDs($repository_phids)
+              ->execute();
+            $repositories = mpull($repositories, null, 'getPHID');
+
+            foreach ($add as $ref) {
+              $repository_phid = $ref['repositoryPHID'];
+              if (isset($repositories[$repository_phid])) {
+                continue;
+              }
+
+              $errors[] = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Invalid'),
+                pht(
+                  'Path specification list references repository PHID "%s", '.
+                  'but that is not a valid, visible repository.',
+                  $repository_phid));
+            }
+          }
+        }
+        break;
     }
 
     return $errors;
@@ -251,6 +336,10 @@ final class PhabricatorOwnersPackageTransactionEditor
       $detail_uri);
 
     return $body;
+  }
+
+  protected function supportsSearch() {
+    return true;
   }
 
 }

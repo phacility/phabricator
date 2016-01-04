@@ -261,7 +261,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       'refresh-csrf',
       array(
         'tokenName' => AphrontRequest::getCSRFTokenName(),
-        'header'    => AphrontRequest::getCSRFHeaderName(),
+        'header' => AphrontRequest::getCSRFHeaderName(),
+        'viaHeader' => AphrontRequest::getViaHeaderName(),
         'current'   => $current_token,
       ));
 

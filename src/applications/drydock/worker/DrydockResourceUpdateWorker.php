@@ -24,6 +24,7 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
       $this->handleUpdate($resource);
     } catch (Exception $ex) {
       $lock->unlock();
+      $this->flushDrydockTaskQueue();
       throw $ex;
     }
 
@@ -142,7 +143,11 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
 
     switch ($command->getCommand()) {
       case DrydockCommand::COMMAND_RELEASE:
-        $this->releaseResource($resource);
+        $this->releaseResource($resource, null);
+        break;
+      case DrydockCommand::COMMAND_RECLAIM:
+        $reclaimer_phid = $command->getAuthorPHID();
+        $this->releaseResource($resource, $reclaimer_phid);
         break;
     }
   }
@@ -187,7 +192,22 @@ final class DrydockResourceUpdateWorker extends DrydockWorker {
   /**
    * @task release
    */
-  private function releaseResource(DrydockResource $resource) {
+  private function releaseResource(
+    DrydockResource $resource,
+    $reclaimer_phid) {
+
+    if ($reclaimer_phid) {
+      if (!$this->canReclaimResource($resource)) {
+        return;
+      }
+
+      $resource->logEvent(
+        DrydockResourceReclaimLogType::LOGCONST,
+        array(
+          'reclaimerPHID' => $reclaimer_phid,
+        ));
+    }
+
     $viewer = $this->getViewer();
     $drydock_phid = id(new PhabricatorDrydockApplication())->getPHID();
 

@@ -54,10 +54,6 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
     );
   }
 
-  public static function getIconNameMap() {
-    return PhabricatorBadgesIcon::getIconMap();
-  }
-
   public static function initializeNewBadge(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
@@ -113,6 +109,10 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
 
   public function getRecipientPHIDs() {
     return $this->assertAttached($this->recipientPHIDs);
+  }
+
+  public function getViewURI() {
+    return '/badges/view/'.$this->getID().'/';
   }
 
   public function save() {

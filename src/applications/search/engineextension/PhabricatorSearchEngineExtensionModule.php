@@ -8,7 +8,7 @@ final class PhabricatorSearchEngineExtensionModule
   }
 
   public function getModuleName() {
-    return pht('SearchEngine Extensions');
+    return pht('Engine: Search');
   }
 
   public function renderModuleStatus(AphrontRequest $request) {

@@ -140,4 +140,24 @@ final class PhabricatorBadgesSearchEngine
 
   }
 
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create a Badge'))
+      ->setHref('/badges/create/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getFontIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Badges let you award and distinguish special users '.
+          'throughout your instance.'))
+      ->addAction($create_button);
+
+      return $view;
+  }
+
 }

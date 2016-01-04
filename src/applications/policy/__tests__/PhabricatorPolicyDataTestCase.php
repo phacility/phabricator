@@ -11,19 +11,11 @@ final class PhabricatorPolicyDataTestCase extends PhabricatorTestCase {
   public function testProjectPolicyMembership() {
     $author = $this->generateNewTestUser();
 
-    $proj_a = id(new PhabricatorProject())
+    $proj_a = PhabricatorProject::initializeNewProject($author)
       ->setName('A')
-      ->setAuthorPHID($author->getPHID())
-      ->setIcon(PhabricatorProject::DEFAULT_ICON)
-      ->setColor(PhabricatorProject::DEFAULT_COLOR)
-      ->setIsMembershipLocked(0)
       ->save();
-    $proj_b = id(new PhabricatorProject())
+    $proj_b = PhabricatorProject::initializeNewProject($author)
       ->setName('B')
-      ->setAuthorPHID($author->getPHID())
-      ->setIcon(PhabricatorProject::DEFAULT_ICON)
-      ->setColor(PhabricatorProject::DEFAULT_COLOR)
-      ->setIsMembershipLocked(0)
       ->save();
 
     $proj_a->setViewPolicy($proj_b->getPHID())->save();

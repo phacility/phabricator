@@ -8,35 +8,20 @@ final class PhabricatorProjectProfileController
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
-    $query = id(new PhabricatorProjectQuery())
-      ->setViewer($user)
-      ->needMembers(true)
-      ->needWatchers(true)
-      ->needImages(true)
-      ->needSlugs(true);
-    $id = $request->getURIData('id');
-    $slug = $request->getURIData('slug');
-    if ($slug) {
-      $query->withSlugs(array($slug));
-    } else {
-      $query->withIDs(array($id));
-    }
-    $project = $query->executeOne();
-    if (!$project) {
-      return new Aphront404Response();
-    }
-    if ($slug && $slug != $project->getPrimarySlug()) {
-      return id(new AphrontRedirectResponse())
-        ->setURI('/tag/'.$project->getPrimarySlug().'/');
+    $response = $this->loadProject();
+    if ($response) {
+      return $response;
     }
 
+    $project = $this->getProject();
+    $id = $project->getID();
     $picture = $project->getProfileImageURI();
 
     $header = id(new PHUIHeaderView())
       ->setHeader($project->getName())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setPolicyObject($project)
       ->setImage($picture);
 
@@ -60,15 +45,16 @@ final class PhabricatorProjectProfileController
 
     $nav = $this->buildIconNavView($project);
     $nav->selectFilter("profile/{$id}/");
-    $nav->appendChild($object_box);
-    $nav->appendChild($timeline);
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $project->getName(),
-        'pageObjects' => array($project->getPHID()),
-      ));
+    $crumbs = $this->buildApplicationCrumbs();
+
+    return $this->newPage()
+      ->setNavigation($nav)
+      ->setCrumbs($crumbs)
+      ->setTitle($project->getName())
+      ->setPageObjectPHIDs(array($project->getPHID()))
+      ->appendChild($object_box)
+      ->appendChild($timeline);
   }
 
   private function buildActionListView(PhabricatorProject $project) {
@@ -79,8 +65,7 @@ final class PhabricatorProjectProfileController
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($project)
-      ->setObjectURI($request->getRequestURI());
+      ->setObject($project);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -91,8 +76,9 @@ final class PhabricatorProjectProfileController
       id(new PhabricatorActionView())
         ->setName(pht('Edit Details'))
         ->setIcon('fa-pencil')
-        ->setHref($this->getApplicationURI("details/{$id}/"))
-        ->setDisabled(!$can_edit));
+        ->setHref($this->getApplicationURI("edit/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
 
     $view->addAction(
       id(new PhabricatorActionView())
@@ -119,6 +105,25 @@ final class PhabricatorProjectProfileController
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));
     }
+
+    $can_lock = $can_edit && $this->hasApplicationCapability(
+      ProjectCanLockProjectsCapability::CAPABILITY);
+
+    if ($project->getIsMembershipLocked()) {
+      $lock_name = pht('Unlock Project');
+      $lock_icon = 'fa-unlock';
+    } else {
+      $lock_name = pht('Lock Project');
+      $lock_icon = 'fa-lock';
+    }
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName($lock_name)
+        ->setIcon($lock_icon)
+        ->setHref($this->getApplicationURI("lock/{$id}/"))
+        ->setDisabled(!$can_lock)
+        ->setWorkflow(true));
 
     $action = null;
     if (!$project->isUserMember($viewer->getPHID())) {
@@ -181,7 +186,9 @@ final class PhabricatorProjectProfileController
         ->setName('#'.$slug->getSlug());
     }
 
-    $view->addProperty(pht('Hashtags'), phutil_implode_html(' ', $hashtags));
+    if ($hashtags) {
+      $view->addProperty(pht('Hashtags'), phutil_implode_html(' ', $hashtags));
+    }
 
     $view->addProperty(
       pht('Members'),

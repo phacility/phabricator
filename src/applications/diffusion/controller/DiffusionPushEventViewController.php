@@ -25,7 +25,8 @@ final class DiffusionPushEventViewController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
       $repository->getName(),
-      $this->getApplicationURI($repository->getCallsign().'/'));
+      $repository->getURI());
+
     $crumbs->addTextCrumb(
       pht('Push Logs'),
       $this->getApplicationURI(

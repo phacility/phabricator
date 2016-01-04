@@ -11,4 +11,8 @@ final class PhabricatorInstructionsEditField
     return null;
   }
 
+  protected function newConduitParameterType() {
+    return null;
+  }
+
 }

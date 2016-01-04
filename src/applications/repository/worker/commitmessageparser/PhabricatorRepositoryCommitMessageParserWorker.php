@@ -319,8 +319,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       ->setDescription(
         pht(
           'Commit %s',
-          'r'.$this->repository->getCallsign().
-          $this->commit->getCommitIdentifier()));
+          $this->commit->getMonogram()));
 
     $parents = DiffusionQuery::callConduitWithDiffusionRequest(
       $viewer,
