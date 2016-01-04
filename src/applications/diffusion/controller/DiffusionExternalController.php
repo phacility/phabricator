@@ -45,13 +45,13 @@ final class DiffusionExternalController extends DiffusionController {
 
       if ($best_match) {
         $repository = $repositories[$best_match];
-        $redirect = DiffusionRequest::generateDiffusionURI(
+        $redirect = $repository->generateURI(
           array(
-            'action'    => 'browse',
-            'repository'  => $repository,
-            'branch'    => $repository->getDefaultBranch(),
-            'commit'    => $id,
+            'action' => 'browse',
+            'branch' => $repository->getDefaultBranch(),
+            'commit' => $id,
           ));
+
         return id(new AphrontRedirectResponse())->setURI($redirect);
       }
     }
@@ -83,10 +83,9 @@ final class DiffusionExternalController extends DiffusionController {
     } else if (count($commits) == 1) {
       $commit = head($commits);
       $repo = $repositories[$commit->getRepositoryID()];
-      $redirect = DiffusionRequest::generateDiffusionURI(
+      $redirect = $repo->generateURI(
         array(
           'action'    => 'browse',
-          'repository'  => $repo,
           'branch'    => $repo->getDefaultBranch(),
           'commit'    => $commit->getCommitIdentifier(),
         ));
@@ -96,10 +95,9 @@ final class DiffusionExternalController extends DiffusionController {
       $rows = array();
       foreach ($commits as $commit) {
         $repo = $repositories[$commit->getRepositoryID()];
-        $href = DiffusionRequest::generateDiffusionURI(
+        $href = $repo->generateURI(
           array(
             'action'    => 'browse',
-            'repository' => $repo,
             'branch'    => $repo->getDefaultBranch(),
             'commit'    => $commit->getCommitIdentifier(),
           ));

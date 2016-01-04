@@ -175,9 +175,8 @@ final class PhabricatorRepositorySearchEngine
 
       $size = $repository->getCommitCount();
       if ($size) {
-        $history_uri = DiffusionRequest::generateDiffusionURI(
+        $history_uri = $repository->generateURI(
           array(
-            'repository' => $repository,
             'action' => 'history',
           ));
 
