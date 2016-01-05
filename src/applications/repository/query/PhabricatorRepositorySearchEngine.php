@@ -204,6 +204,8 @@ final class PhabricatorRepositorySearchEngine
       if (!$repository->isTracked()) {
         $item->setDisabled(true);
         $item->addIcon('disable-grey', pht('Inactive'));
+      } else if ($repository->isImporting()) {
+        $item->addIcon('fa-clock-o violet', pht('Importing...'));
       }
 
       $list->addItem($item);
