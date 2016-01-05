@@ -6,16 +6,19 @@ final class DiffusionRepositoryController extends DiffusionController {
     return true;
   }
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
+    }
 
+    $viewer = $this->getViewer();
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
     $content = array();
 
     $crumbs = $this->buildCrumbs();
-    $content[] = $crumbs;
 
     $content[] = $this->buildPropertiesTable($drequest->getRepository());
 
@@ -73,11 +76,14 @@ final class DiffusionRepositoryController extends DiffusionController {
         ->setErrors(array($empty_message));
     }
 
-    return $this->buildApplicationPage(
-      $content,
-      array(
-        'title' => $drequest->getRepository()->getName(),
-      ));
+    return $this->newPage()
+      ->setTitle(
+        array(
+          $repository->getName(),
+          $repository->getDisplayName(),
+        ))
+      ->setCrumbs($crumbs)
+      ->appendChild($content);
   }
 
 

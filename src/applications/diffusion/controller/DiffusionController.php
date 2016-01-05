@@ -67,15 +67,12 @@ abstract class DiffusionController extends PhabricatorController {
     $request = $this->getRequest();
     $viewer = $this->getViewer();
 
-    $identifier = $request->getURIData('repositoryCallsign');
-    if (!strlen($identifier)) {
-      $identifier = (int)$request->getURIData('repositoryID');
-    }
+    $identifier = $this->getRepositoryIdentifierFromRequest($request);
 
     $params = $options + array(
       'repository' => $identifier,
       'user' => $viewer,
-      'blob' => $request->getURIData('dblob'),
+      'blob' => $this->getDiffusionBlobFromRequest($request),
       'commit' => $request->getURIData('commit'),
       'path' => $request->getURIData('path'),
       'line' => $request->getURIData('line'),
@@ -92,6 +89,21 @@ abstract class DiffusionController extends PhabricatorController {
     $this->diffusionRequest = $drequest;
 
     return null;
+  }
+
+  protected function getDiffusionBlobFromRequest(AphrontRequest $request) {
+    return $request->getURIData('dblob');
+  }
+
+  protected function getRepositoryIdentifierFromRequest(
+    AphrontRequest $request) {
+
+    $identifier = $request->getURIData('repositoryCallsign');
+    if (strlen($identifier)) {
+      return $identifier;
+    }
+
+    return (int)$request->getURIData('repositoryID');
   }
 
   protected function processDiffusionRequest(AphrontRequest $request) {
