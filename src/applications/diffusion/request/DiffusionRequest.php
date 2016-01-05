@@ -117,43 +117,6 @@ abstract class DiffusionRequest extends Phobject {
     return $object;
   }
 
-
-  /**
-   * Create a new request from an Aphront request dictionary. This is an
-   * internal method that you generally should not call directly; instead,
-   * call @{method:newFromDictionary}.
-   *
-   * @param   map                 Map of Aphront request data.
-   * @return  DiffusionRequest    New request object.
-   * @task new
-   */
-  final public static function newFromAphrontRequestDictionary(
-    array $data,
-    AphrontRequest $request) {
-
-    $identifier = phutil_unescape_uri_path_component(idx($data, 'callsign'));
-    $object = self::newFromIdentifier($identifier, $request->getUser());
-
-    $use_branches = $object->supportsBranches();
-
-    if (isset($data['dblob'])) {
-      $parsed = self::parseRequestBlob(idx($data, 'dblob'), $use_branches);
-    } else {
-      $parsed = array(
-        'commit' => idx($data, 'commit'),
-        'path' => idx($data, 'path'),
-        'line' => idx($data, 'line'),
-        'branch' => idx($data, 'branch'),
-      );
-    }
-
-    $object->setUser($request->getUser());
-    $object->initializeFromDictionary($parsed);
-    $object->lint = $request->getStr('lint');
-    return $object;
-  }
-
-
   /**
    * Internal.
    *

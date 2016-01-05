@@ -2,18 +2,17 @@
 
 abstract class DiffusionController extends PhabricatorController {
 
-  protected $diffusionRequest;
-
-  public function setDiffusionRequest(DiffusionRequest $request) {
-    $this->diffusionRequest = $request;
-    return $this;
-  }
+  private $diffusionRequest;
 
   protected function getDiffusionRequest() {
     if (!$this->diffusionRequest) {
-      throw new Exception(pht('No Diffusion request object!'));
+      throw new PhutilInvalidStateException('loadDiffusionContext');
     }
     return $this->diffusionRequest;
+  }
+
+  protected function hasDiffusionRequest() {
+    return (bool)$this->diffusionRequest;
   }
 
   public function willBeginExecution() {
@@ -22,34 +21,13 @@ abstract class DiffusionController extends PhabricatorController {
     // Check if this is a VCS request, e.g. from "git clone", "hg clone", or
     // "svn checkout". If it is, we jump off into repository serving code to
     // process the request.
-    if (DiffusionServeController::isVCSRequest($request)) {
-      $serve_controller = id(new DiffusionServeController())
-        ->setCurrentApplication($this->getCurrentApplication());
+
+    $serve_controller = new DiffusionServeController();
+    if ($serve_controller->isVCSRequest($request)) {
       return $this->delegateToController($serve_controller);
     }
 
     return parent::willBeginExecution();
-  }
-
-  protected function shouldLoadDiffusionRequest() {
-    return true;
-  }
-
-  public function handleRequest(AphrontRequest $request) {
-    if ($request->getURIData('callsign') &&
-        $this->shouldLoadDiffusionRequest()) {
-      try {
-      $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
-        $request->getURIMap(),
-        $request);
-      } catch (Exception $ex) {
-        return id(new Aphront404Response())
-          ->setRequest($request);
-      }
-      $this->setDiffusionRequest($drequest);
-    }
-
-    return $this->processDiffusionRequest($request);
   }
 
   protected function loadDiffusionContextForEdit() {
@@ -103,11 +81,12 @@ abstract class DiffusionController extends PhabricatorController {
       return $identifier;
     }
 
-    return (int)$request->getURIData('repositoryID');
-  }
+    $id = $request->getURIData('repositoryID');
+    if (strlen($id)) {
+      return (int)$id;
+    }
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    throw new PhutilMethodNotImplementedException();
+    return null;
   }
 
   public function buildCrumbs(array $spec = array()) {
