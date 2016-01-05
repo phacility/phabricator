@@ -244,9 +244,10 @@ abstract class DiffusionRequest extends Phobject {
       $data = $blob + $data;
     }
 
-    $this->path            = idx($data, 'path');
-    $this->line            = idx($data, 'line');
+    $this->path = idx($data, 'path');
+    $this->line = idx($data, 'line');
     $this->initFromConduit = idx($data, 'initFromConduit', true);
+    $this->lint = idx($data, 'lint');
 
     $this->symbolicCommit = idx($data, 'commit');
     if ($this->supportsBranches()) {
