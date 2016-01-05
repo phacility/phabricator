@@ -61,23 +61,16 @@ abstract class DiffusionController extends PhabricatorController {
       $identifier = (int)$request->getURIData('repositoryID');
     }
 
-    $blob = $request->getURIData('dblob');
-    if (strlen($blob)) {
-      $parsed = DiffusionRequest::parseRequestBlob($blob);
-    } else {
-      $parsed = array(
-        'commit' => $request->getURIData('commit'),
-        'path' => $request->getURIData('path'),
-        'line' => $request->getURIData('line'),
-        'branch' => $request->getURIData('branch'),
-        'lint' => $request->getStr('lint'),
-      );
-    }
-
     $params = array(
       'repository' => $identifier,
       'user' => $viewer,
-    ) + $parsed;
+      'blob' => $request->getURIData('dblob'),
+      'commit' => $request->getURIData('commit'),
+      'path' => $request->getURIData('path'),
+      'line' => $request->getURIData('line'),
+      'branch' => $request->getURIData('branch'),
+      'lint' => $request->getStr('lint'),
+    );
 
     $drequest = DiffusionRequest::newFromDictionary($params);
 
@@ -284,6 +277,12 @@ abstract class DiffusionController extends PhabricatorController {
       ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
       ->setTitle($title)
       ->appendChild($body);
+  }
+
+  protected function renderTablePagerBox(PHUIPagerView $pager) {
+    return id(new PHUIBoxView())
+      ->addMargin(PHUI::MARGIN_LARGE)
+      ->appendChild($pager);
   }
 
 }

@@ -225,6 +225,12 @@ abstract class DiffusionRequest extends Phobject {
    * @task new
    */
   final private function initializeFromDictionary(array $data) {
+    $blob = idx($data, 'blob');
+    if (strlen($blob)) {
+      $blob = self::parseRequestBlob($blob, $this->supportsBranches());
+      $data = $blob + $data;
+    }
+
     $this->path            = idx($data, 'path');
     $this->line            = idx($data, 'line');
     $this->initFromConduit = idx($data, 'initFromConduit', true);

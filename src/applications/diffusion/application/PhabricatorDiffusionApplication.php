@@ -64,7 +64,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'DiffusionPushLogListController',
           'view/(?P<id>\d+)/' => 'DiffusionPushEventViewController',
         ),
-        '(?P<callsign>[A-Z]+)/' => array(
+        '(?P<repositoryCallsign>(?P<callsign>[A-Z]+))/' => array(
           '' => 'DiffusionRepositoryController',
 
           'repository/(?P<dblob>.*)'    => 'DiffusionRepositoryController',
