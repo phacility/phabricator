@@ -117,17 +117,13 @@ final class DiffusionMirrorEditController
           ->setError($e_credentials)
           ->setOptions($credentials));
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setTitle($title)
       ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->appendChild($form_errors)
       ->appendChild($form)
       ->addSubmitButton($submit)
       ->addCancelButton($edit_uri);
-
-    return id(new AphrontDialogResponse())
-      ->setDialog($dialog);
   }
 
 

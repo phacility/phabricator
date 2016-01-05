@@ -3,24 +3,15 @@
 final class DiffusionRepositoryEditDangerousController
   extends DiffusionRepositoryEditController {
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $viewer = $request->getUser();
-    $drequest = $this->diffusionRequest;
-    $repository = $drequest->getRepository();
-
-    $repository = id(new PhabricatorRepositoryQuery())
-      ->setViewer($viewer)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->withIDs(array($repository->getID()))
-      ->executeOne();
-
-    if (!$repository) {
-      return new Aphront404Response();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContextForEdit();
+    if ($response) {
+      return $response;
     }
+
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
 
     if (!$repository->canAllowDangerousChanges()) {
       return new Aphront400Response();
@@ -42,13 +33,10 @@ final class DiffusionRepositoryEditDangerousController
       return id(new AphrontReloadResponse())->setURI($edit_uri);
     }
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer);
-
     $force = phutil_tag('tt', array(), '--force');
 
     if ($repository->shouldAllowDangerousChanges()) {
-      $dialog
+      return $this->newDialog()
         ->setTitle(pht('Prevent Dangerous changes?'))
         ->appendChild(
           pht(
@@ -58,7 +46,7 @@ final class DiffusionRepositoryEditDangerousController
         ->addSubmitButton(pht('Prevent Dangerous Changes'))
         ->addCancelButton($edit_uri);
     } else {
-      $dialog
+      return $this->newDialog()
         ->setTitle(pht('Allow Dangerous Changes?'))
         ->appendChild(
           pht(
@@ -69,9 +57,6 @@ final class DiffusionRepositoryEditDangerousController
         ->addSubmitButton(pht('Allow Dangerous Changes'))
         ->addCancelButton($edit_uri);
     }
-
-    return id(new AphrontDialogResponse())
-      ->setDialog($dialog);
   }
 
 }

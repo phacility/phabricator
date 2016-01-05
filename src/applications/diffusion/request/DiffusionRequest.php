@@ -100,7 +100,10 @@ abstract class DiffusionRequest extends Phobject {
     }
 
     if ($identifier !== null) {
-      $object = self::newFromIdentifier($identifier, $data[$viewer_key]);
+      $object = self::newFromIdentifier(
+        $identifier,
+        $data[$viewer_key],
+        idx($data, 'edit'));
     } else {
       $object = self::newFromRepository($repository);
     }
@@ -171,12 +174,22 @@ abstract class DiffusionRequest extends Phobject {
    */
   final private static function newFromIdentifier(
     $identifier,
-    PhabricatorUser $viewer) {
+    PhabricatorUser $viewer,
+    $need_edit = false) {
 
-    $repository = id(new PhabricatorRepositoryQuery())
+    $query = id(new PhabricatorRepositoryQuery())
       ->setViewer($viewer)
-      ->withIdentifiers(array($identifier))
-      ->executeOne();
+      ->withIdentifiers(array($identifier));
+
+    if ($need_edit) {
+      $query->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ));
+    }
+
+    $repository = $query->executeOne();
 
     if (!$repository) {
       return null;

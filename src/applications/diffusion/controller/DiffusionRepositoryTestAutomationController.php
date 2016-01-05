@@ -4,7 +4,7 @@ final class DiffusionRepositoryTestAutomationController
   extends DiffusionRepositoryEditController {
 
   public function handleRequest(AphrontRequest $request) {
-    $response = $this->loadDiffusionContext();
+    $response = $this->loadDiffusionContextForEdit();
     if ($response) {
       return $response;
     }
@@ -12,19 +12,6 @@ final class DiffusionRepositoryTestAutomationController
     $viewer = $this->getViewer();
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
-
-    $repository = id(new PhabricatorRepositoryQuery())
-      ->setViewer($viewer)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->withIDs(array($repository->getID()))
-      ->executeOne();
-    if (!$repository) {
-      return new Aphront404Response();
-    }
 
     $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
 

@@ -52,7 +52,18 @@ abstract class DiffusionController extends PhabricatorController {
     return $this->processDiffusionRequest($request);
   }
 
+  protected function loadDiffusionContextForEdit() {
+    return $this->loadContext(
+      array(
+        'edit' => true,
+      ));
+  }
+
   protected function loadDiffusionContext() {
+    return $this->loadContext(array());
+  }
+
+  private function loadContext(array $options) {
     $request = $this->getRequest();
     $viewer = $this->getViewer();
 
@@ -61,7 +72,7 @@ abstract class DiffusionController extends PhabricatorController {
       $identifier = (int)$request->getURIData('repositoryID');
     }
 
-    $params = array(
+    $params = $options + array(
       'repository' => $identifier,
       'user' => $viewer,
       'blob' => $request->getURIData('dblob'),

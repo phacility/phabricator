@@ -33,16 +33,12 @@ final class DiffusionMirrorDeleteController
       return id(new AphrontReloadResponse())->setURI($edit_uri);
     }
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setTitle(pht('Really delete mirror?'))
       ->appendChild(
         pht('Phabricator will stop pushing updates to this mirror.'))
       ->addSubmitButton(pht('Delete Mirror'))
       ->addCancelButton($edit_uri);
-
-    return id(new AphrontDialogResponse())
-      ->setDialog($dialog);
   }
 
 
