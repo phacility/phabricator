@@ -8,7 +8,10 @@ final class ManiphestClaimEmailCommand
   }
 
   public function getCommandSummary() {
-    return pht('Assign yourself as the owner of a task.');
+    return pht(
+      'Assign yourself as the owner of a task. To assign another user, '.
+      'see `%s`.',
+      '!assign');
   }
 
   public function buildTransactions(
