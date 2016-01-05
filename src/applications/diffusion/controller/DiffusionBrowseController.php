@@ -351,19 +351,16 @@ final class DiffusionBrowseController extends DiffusionController {
   }
 
   private function renderSearchResults() {
+    $request = $this->getRequest();
+
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
     $results = array();
 
-    $limit = 100;
-    $page = $this->getRequest()->getInt('page', 0);
-    $pager = new PHUIPagerView();
-    $pager->setPageSize($limit);
-    $pager->setOffset($page);
-    $pager->setURI($this->getRequest()->getRequestURI(), 'page');
+    $pager = id(new PHUIPagerView())
+      ->readFromRequest($request);
 
     $search_mode = null;
-
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $results = array();
@@ -371,32 +368,31 @@ final class DiffusionBrowseController extends DiffusionController {
       default:
         if (strlen($this->getRequest()->getStr('grep'))) {
           $search_mode = 'grep';
-          $query_string = $this->getRequest()->getStr('grep');
+          $query_string = $request->getStr('grep');
           $results = $this->callConduitWithDiffusionRequest(
             'diffusion.searchquery',
             array(
               'grep' => $query_string,
               'commit' => $drequest->getStableCommit(),
               'path' => $drequest->getPath(),
-              'limit' => $limit + 1,
-              'offset' => $page,
+              'limit' => $pager->getPageSize() + 1,
+              'offset' => $pager->getOffset(),
             ));
         } else { // Filename search.
           $search_mode = 'find';
-          $query_string = $this->getRequest()->getStr('find');
+          $query_string = $request->getStr('find');
           $results = $this->callConduitWithDiffusionRequest(
             'diffusion.querypaths',
             array(
               'pattern' => $query_string,
               'commit' => $drequest->getStableCommit(),
               'path' => $drequest->getPath(),
-              'limit' => $limit + 1,
-              'offset' => $page,
+              'limit' => $pager->getPageSize() + 1,
+              'offset' => $pager->getOffset(),
             ));
         }
         break;
     }
-
     $results = $pager->sliceResults($results);
 
     if ($search_mode == 'grep') {
