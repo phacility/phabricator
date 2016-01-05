@@ -17,19 +17,15 @@ final class DiffusionCommitController extends DiffusionController {
     return true;
   }
 
-  protected function shouldLoadDiffusionRequest() {
-    return false;
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
+    }
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
+    $drequest = $this->getDiffusionRequest();
+
     $user = $request->getUser();
-
-    // This controller doesn't use blob/path stuff, just pass the dictionary
-    // in directly instead of using the AphrontRequest parsing mechanism.
-    $data = $request->getURIMap();
-    $data['user'] = $user;
-    $drequest = DiffusionRequest::newFromDictionary($data);
-    $this->diffusionRequest = $drequest;
 
     if ($request->getStr('diff')) {
       return $this->buildRawDiffResponse($drequest);

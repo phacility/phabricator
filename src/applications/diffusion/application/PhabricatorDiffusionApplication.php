@@ -47,8 +47,13 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
-      '/r(?P<callsign>[A-Z]+)(?P<commit>[a-z0-9]+)'
+      '/(?:'.
+        'r(?P<repositoryCallsign>[A-Z]+)'.
+        '|'.
+        'R(?P<repositoryID>[1-9]\d*):'.
+      ')(?P<commit>[a-f0-9]+)'
         => 'DiffusionCommitController',
+
       '/diffusion/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'DiffusionRepositoryListController',

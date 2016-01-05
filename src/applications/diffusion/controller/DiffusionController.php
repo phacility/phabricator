@@ -35,7 +35,7 @@ abstract class DiffusionController extends PhabricatorController {
     return true;
   }
 
-  final public function handleRequest(AphrontRequest $request) {
+  public function handleRequest(AphrontRequest $request) {
     if ($request->getURIData('callsign') &&
         $this->shouldLoadDiffusionRequest()) {
       try {
@@ -48,10 +48,51 @@ abstract class DiffusionController extends PhabricatorController {
       }
       $this->setDiffusionRequest($drequest);
     }
+
     return $this->processDiffusionRequest($request);
   }
 
-  abstract protected function processDiffusionRequest(AphrontRequest $request);
+  protected function loadDiffusionContext() {
+    $request = $this->getRequest();
+    $viewer = $this->getViewer();
+
+    $identifier = $request->getURIData('repositoryCallsign');
+    if (!strlen($identifier)) {
+      $identifier = (int)$request->getURIData('repositoryID');
+    }
+
+    $blob = $request->getURIData('dblob');
+    if (strlen($blob)) {
+      $parsed = DiffusionRequest::parseRequestBlob($blob);
+    } else {
+      $parsed = array(
+        'commit' => $request->getURIData('commit'),
+        'path' => $request->getURIData('path'),
+        'line' => $request->getURIData('line'),
+        'branch' => $request->getURIData('branch'),
+        'lint' => $request->getStr('lint'),
+      );
+    }
+
+    $params = array(
+      'repository' => $identifier,
+      'user' => $viewer,
+    ) + $parsed;
+
+    $drequest = DiffusionRequest::newFromDictionary($params);
+
+    if (!$drequest) {
+      return new Aphront404Response();
+    }
+
+    $this->diffusionRequest = $drequest;
+
+    return null;
+  }
+
+  protected function processDiffusionRequest(AphrontRequest $request) {
+    throw new PhutilMethodNotImplementedException();
+  }
 
   public function buildCrumbs(array $spec = array()) {
     $crumbs = $this->buildApplicationCrumbs();

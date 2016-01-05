@@ -105,6 +105,10 @@ abstract class DiffusionRequest extends Phobject {
       $object = self::newFromRepository($repository);
     }
 
+    if (!$object) {
+      return null;
+    }
+
     $object->initializeFromDictionary($data);
 
     return $object;
@@ -175,7 +179,7 @@ abstract class DiffusionRequest extends Phobject {
       ->executeOne();
 
     if (!$repository) {
-      throw new Exception(pht("No such repository '%s'.", $identifier));
+      return null;
     }
 
     return self::newFromRepository($repository);
