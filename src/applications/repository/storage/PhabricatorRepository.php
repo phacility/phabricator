@@ -867,6 +867,47 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return (bool)$this->getDetail('importing', false);
   }
 
+  public function loadImportProgress() {
+    $progress = queryfx_all(
+      $this->establishConnection('r'),
+      'SELECT importStatus, count(*) N FROM %T WHERE repositoryID = %d
+        GROUP BY importStatus',
+      id(new PhabricatorRepositoryCommit())->getTableName(),
+      $this->getID());
+
+    $done = 0;
+    $total = 0;
+    foreach ($progress as $row) {
+      $total += $row['N'] * 4;
+      $status = $row['importStatus'];
+      if ($status & PhabricatorRepositoryCommit::IMPORTED_MESSAGE) {
+        $done += $row['N'];
+      }
+      if ($status & PhabricatorRepositoryCommit::IMPORTED_CHANGE) {
+        $done += $row['N'];
+      }
+      if ($status & PhabricatorRepositoryCommit::IMPORTED_OWNERS) {
+        $done += $row['N'];
+      }
+      if ($status & PhabricatorRepositoryCommit::IMPORTED_HERALD) {
+        $done += $row['N'];
+      }
+    }
+
+    if ($total) {
+      $ratio = ($done / $total);
+    } else {
+      $ratio = 0;
+    }
+
+    // Cap this at "99.99%", because it's confusing to users when the actual
+    // fraction is "99.996%" and it rounds up to "100.00%".
+    if ($ratio > 0.9999) {
+      $ratio = 0.9999;
+    }
+
+    return $ratio;
+  }
 
   /**
    * Should this repository publish feed, notifications, audits, and email?

@@ -1137,45 +1137,8 @@ final class DiffusionRepositoryEditMainController
     }
 
     if ($repository->isImporting()) {
-      $progress = queryfx_all(
-        $repository->establishConnection('r'),
-        'SELECT importStatus, count(*) N FROM %T WHERE repositoryID = %d
-          GROUP BY importStatus',
-        id(new PhabricatorRepositoryCommit())->getTableName(),
-        $repository->getID());
-
-      $done = 0;
-      $total = 0;
-      foreach ($progress as $row) {
-        $total += $row['N'] * 4;
-        $status = $row['importStatus'];
-        if ($status & PhabricatorRepositoryCommit::IMPORTED_MESSAGE) {
-          $done += $row['N'];
-        }
-        if ($status & PhabricatorRepositoryCommit::IMPORTED_CHANGE) {
-          $done += $row['N'];
-        }
-        if ($status & PhabricatorRepositoryCommit::IMPORTED_OWNERS) {
-          $done += $row['N'];
-        }
-        if ($status & PhabricatorRepositoryCommit::IMPORTED_HERALD) {
-          $done += $row['N'];
-        }
-      }
-
-      if ($total) {
-        $percentage = 100 * ($done / $total);
-      } else {
-        $percentage = 0;
-      }
-
-      // Cap this at "99.99%", because it's confusing to users when the actual
-      // fraction is "99.996%" and it rounds up to "100.00%".
-      if ($percentage > 99.99) {
-        $percentage = 99.99;
-      }
-
-      $percentage = sprintf('%.2f%%', $percentage);
+      $ratio = $repository->loadImportProgress();
+      $percentage = sprintf('%.2f%%', 100 * $ratio);
 
       $view->addItem(
         id(new PHUIStatusItemView())
