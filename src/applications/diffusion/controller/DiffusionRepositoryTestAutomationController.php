@@ -3,9 +3,14 @@
 final class DiffusionRepositoryTestAutomationController
   extends DiffusionRepositoryEditController {
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
+    }
+
     $viewer = $this->getViewer();
-    $drequest = $this->diffusionRequest;
+    $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
     $repository = id(new PhabricatorRepositoryQuery())

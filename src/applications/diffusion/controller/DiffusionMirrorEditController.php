@@ -3,9 +3,14 @@
 final class DiffusionMirrorEditController
   extends DiffusionController {
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $viewer = $request->getUser();
-    $drequest = $this->diffusionRequest;
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
+    }
+
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
     PhabricatorPolicyFilter::requireCapability(

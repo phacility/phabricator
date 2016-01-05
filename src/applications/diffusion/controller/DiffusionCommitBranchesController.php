@@ -6,7 +6,12 @@ final class DiffusionCommitBranchesController extends DiffusionController {
     return true;
   }
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
+    }
+
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
