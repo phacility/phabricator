@@ -27,20 +27,30 @@ final class DiffusionBrowseController extends DiffusionController {
       return $this->browseSearch();
     }
 
+    $pager = id(new PHUIPagerView())
+      ->readFromRequest($request);
+
     $results = DiffusionBrowseResultSet::newFromConduit(
       $this->callConduitWithDiffusionRequest(
         'diffusion.browsequery',
         array(
           'path' => $drequest->getPath(),
           'commit' => $drequest->getStableCommit(),
+          'offset' => $pager->getOffset(),
+          'limit' => $pager->getPageSize() + 1,
         )));
+
     $reason = $results->getReasonForEmptyResultSet();
     $is_file = ($reason == DiffusionBrowseResultSet::REASON_IS_FILE);
 
     if ($is_file) {
       return $this->browseFile($results);
     } else {
-      return $this->browseDirectory($results);
+      $paths = $results->getPaths();
+      $paths = $pager->sliceResults($paths);
+      $results->setPaths($paths);
+
+      return $this->browseDirectory($results, $pager);
     }
   }
 
@@ -262,7 +272,10 @@ final class DiffusionBrowseController extends DiffusionController {
       ->appendChild($content);
   }
 
-  public function browseDirectory(DiffusionBrowseResultSet $results) {
+  public function browseDirectory(
+    DiffusionBrowseResultSet $results,
+    PHUIPagerView $pager) {
+
     $request = $this->getRequest();
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
@@ -339,6 +352,8 @@ final class DiffusionBrowseController extends DiffusionController {
         'view'   => 'browse',
       ));
 
+    $pager_box = $this->renderTablePagerBox($pager);
+
     return $this->newPage()
       ->setTitle(
         array(
@@ -346,7 +361,11 @@ final class DiffusionBrowseController extends DiffusionController {
           $repository->getDisplayName(),
         ))
       ->setCrumbs($crumbs)
-      ->appendChild($content);
+      ->appendChild(
+        array(
+          $content,
+          $pager_box,
+        ));
   }
 
   private function renderSearchResults() {

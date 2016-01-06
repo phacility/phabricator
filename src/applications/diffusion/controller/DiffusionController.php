@@ -110,7 +110,7 @@ abstract class DiffusionController extends PhabricatorController {
     $crumb_list = array();
 
     // On the home page, we don't have a DiffusionRequest.
-    if ($this->diffusionRequest) {
+    if ($this->hasDiffusionRequest()) {
       $drequest = $this->getDiffusionRequest();
       $repository = $drequest->getRepository();
     } else {

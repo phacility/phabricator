@@ -627,7 +627,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       case 'refs':
         break;
       case 'branch':
-        $req_branch = true;
+        // NOTE: This does not actually require a branch, and won't have one
+        // in Subversion. Possibly this should be more clear.
         break;
       case 'commit':
       case 'rendering-ref':
