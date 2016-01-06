@@ -10,8 +10,7 @@ final class DiffusionSvnFileContentQuery extends DiffusionFileContentQuery {
     $commit = $drequest->getCommit();
 
     return $repository->getRemoteCommandFuture(
-      '%C %s',
-      $this->getNeedsBlame() ? 'blame --force' : 'cat',
+      'cat %s',
       $repository->getSubversionPathURI($path, $commit));
   }
 
@@ -39,18 +38,6 @@ final class DiffusionSvnFileContentQuery extends DiffusionFileContentQuery {
     $file_content->setCorpus($corpus);
 
     return $file_content;
-  }
-
-  protected function tokenizeLine($line) {
-    // sample line:
-    // 347498       yliu     function print();
-    $m = array();
-    preg_match('/^\s*(\d+)\s+(\S+)(?: (.*))?$/', $line, $m);
-    $rev_id = $m[1];
-    $author = $m[2];
-    $text = idx($m, 3);
-
-    return array($rev_id, $author, $text);
   }
 
 }
