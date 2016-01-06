@@ -597,12 +597,9 @@ final class PhabricatorProjectTransactionEditor
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
-    return $object->getMemberPHIDs();
-  }
-
-  protected function getMailCC(PhabricatorLiskDAO $object) {
-    $all = parent::getMailCC($object);
-    return array_diff($all, $object->getMemberPHIDs());
+    return array(
+      $this->getActingAsPHID(),
+    );
   }
 
   public function getMailTagsMap() {

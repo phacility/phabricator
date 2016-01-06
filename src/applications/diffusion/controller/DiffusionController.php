@@ -2,18 +2,17 @@
 
 abstract class DiffusionController extends PhabricatorController {
 
-  protected $diffusionRequest;
-
-  public function setDiffusionRequest(DiffusionRequest $request) {
-    $this->diffusionRequest = $request;
-    return $this;
-  }
+  private $diffusionRequest;
 
   protected function getDiffusionRequest() {
     if (!$this->diffusionRequest) {
-      throw new Exception(pht('No Diffusion request object!'));
+      throw new PhutilInvalidStateException('loadDiffusionContext');
     }
     return $this->diffusionRequest;
+  }
+
+  protected function hasDiffusionRequest() {
+    return (bool)$this->diffusionRequest;
   }
 
   public function willBeginExecution() {
@@ -22,36 +21,73 @@ abstract class DiffusionController extends PhabricatorController {
     // Check if this is a VCS request, e.g. from "git clone", "hg clone", or
     // "svn checkout". If it is, we jump off into repository serving code to
     // process the request.
-    if (DiffusionServeController::isVCSRequest($request)) {
-      $serve_controller = id(new DiffusionServeController())
-        ->setCurrentApplication($this->getCurrentApplication());
+
+    $serve_controller = new DiffusionServeController();
+    if ($serve_controller->isVCSRequest($request)) {
       return $this->delegateToController($serve_controller);
     }
 
     return parent::willBeginExecution();
   }
 
-  protected function shouldLoadDiffusionRequest() {
-    return true;
+  protected function loadDiffusionContextForEdit() {
+    return $this->loadContext(
+      array(
+        'edit' => true,
+      ));
   }
 
-  final public function handleRequest(AphrontRequest $request) {
-    if ($request->getURIData('callsign') &&
-        $this->shouldLoadDiffusionRequest()) {
-      try {
-      $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
-        $request->getURIMap(),
-        $request);
-      } catch (Exception $ex) {
-        return id(new Aphront404Response())
-          ->setRequest($request);
-      }
-      $this->setDiffusionRequest($drequest);
+  protected function loadDiffusionContext() {
+    return $this->loadContext(array());
+  }
+
+  private function loadContext(array $options) {
+    $request = $this->getRequest();
+    $viewer = $this->getViewer();
+
+    $identifier = $this->getRepositoryIdentifierFromRequest($request);
+
+    $params = $options + array(
+      'repository' => $identifier,
+      'user' => $viewer,
+      'blob' => $this->getDiffusionBlobFromRequest($request),
+      'commit' => $request->getURIData('commit'),
+      'path' => $request->getURIData('path'),
+      'line' => $request->getURIData('line'),
+      'branch' => $request->getURIData('branch'),
+      'lint' => $request->getStr('lint'),
+    );
+
+    $drequest = DiffusionRequest::newFromDictionary($params);
+
+    if (!$drequest) {
+      return new Aphront404Response();
     }
-    return $this->processDiffusionRequest($request);
+
+    $this->diffusionRequest = $drequest;
+
+    return null;
   }
 
-  abstract protected function processDiffusionRequest(AphrontRequest $request);
+  protected function getDiffusionBlobFromRequest(AphrontRequest $request) {
+    return $request->getURIData('dblob');
+  }
+
+  protected function getRepositoryIdentifierFromRequest(
+    AphrontRequest $request) {
+
+    $identifier = $request->getURIData('repositoryCallsign');
+    if (strlen($identifier)) {
+      return $identifier;
+    }
+
+    $id = $request->getURIData('repositoryID');
+    if (strlen($id)) {
+      return (int)$id;
+    }
+
+    return null;
+  }
 
   public function buildCrumbs(array $spec = array()) {
     $crumbs = $this->buildApplicationCrumbs();
@@ -243,6 +279,12 @@ abstract class DiffusionController extends PhabricatorController {
       ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
       ->setTitle($title)
       ->appendChild($body);
+  }
+
+  protected function renderTablePagerBox(PHUIPagerView $pager) {
+    return id(new PHUIBoxView())
+      ->addMargin(PHUI::MARGIN_LARGE)
+      ->appendChild($pager);
   }
 
 }

@@ -3,31 +3,24 @@
 final class DiffusionRepositoryEditBasicController
   extends DiffusionRepositoryEditController {
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $user = $request->getUser();
-    $drequest = $this->diffusionRequest;
-    $repository = $drequest->getRepository();
-
-    $repository = id(new PhabricatorRepositoryQuery())
-      ->setViewer($user)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->needProjectPHIDs(true)
-      ->withIDs(array($repository->getID()))
-      ->executeOne();
-
-    if (!$repository) {
-      return new Aphront404Response();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContextForEdit();
+    if ($response) {
+      return $response;
     }
+
+    $viewer = $request->getUser();
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
 
     $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
 
     $v_name = $repository->getName();
     $v_desc = $repository->getDetail('description');
     $v_clone_name = $repository->getDetail('clone-name');
+    $v_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $repository->getPHID(),
+      PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
     $e_name = true;
     $errors = array();
 
@@ -81,7 +74,7 @@ final class DiffusionRepositoryEditBasicController
         id(new PhabricatorRepositoryEditor())
           ->setContinueOnNoEffect(true)
           ->setContentSourceFromRequest($request)
-          ->setActor($user)
+          ->setActor($viewer)
           ->applyTransactions($repository, $xactions);
 
         return id(new AphrontRedirectResponse())->setURI($edit_uri);
@@ -94,7 +87,7 @@ final class DiffusionRepositoryEditBasicController
     $title = pht('Edit %s', $repository->getName());
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('name')
@@ -118,7 +111,7 @@ final class DiffusionRepositoryEditBasicController
     $form
       ->appendChild(
         id(new PhabricatorRemarkupControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setName('description')
           ->setLabel(pht('Description'))
           ->setValue($v_desc))
@@ -127,7 +120,7 @@ final class DiffusionRepositoryEditBasicController
           ->setDatasource(new PhabricatorProjectDatasource())
           ->setName('projectPHIDs')
           ->setLabel(pht('Projects'))
-          ->setValue($repository->getProjectPHIDs()))
+          ->setValue($v_projects))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save'))
@@ -140,14 +133,10 @@ final class DiffusionRepositoryEditBasicController
       ->setForm($form)
       ->setFormErrors($errors);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($object_box);
   }
 
   private function getReadmeInstructions() {

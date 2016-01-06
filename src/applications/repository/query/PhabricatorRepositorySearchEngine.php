@@ -175,9 +175,8 @@ final class PhabricatorRepositorySearchEngine
 
       $size = $repository->getCommitCount();
       if ($size) {
-        $history_uri = DiffusionRequest::generateDiffusionURI(
+        $history_uri = $repository->generateURI(
           array(
-            'repository' => $repository,
             'action' => 'history',
           ));
 
@@ -205,6 +204,8 @@ final class PhabricatorRepositorySearchEngine
       if (!$repository->isTracked()) {
         $item->setDisabled(true);
         $item->addIcon('disable-grey', pht('Inactive'));
+      } else if ($repository->isImporting()) {
+        $item->addIcon('fa-clock-o indigo', pht('Importing...'));
       }
 
       $list->addItem($item);

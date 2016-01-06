@@ -252,8 +252,12 @@ final class PhabricatorRepositoryCommit
     $repository = $this->getRepository();
     $callsign = $repository->getCallsign();
     $identifier = $this->getCommitIdentifier();
-
-    return "r{$callsign}{$identifier}";
+    if ($callsign !== null) {
+      return "r{$callsign}{$identifier}";
+    } else {
+      $id = $repository->getID();
+      return "R{$id}:{$identifier}";
+    }
   }
 
   public function getDisplayName() {

@@ -6,16 +6,19 @@ final class DiffusionRepositoryController extends DiffusionController {
     return true;
   }
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
+    }
 
+    $viewer = $this->getViewer();
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
     $content = array();
 
     $crumbs = $this->buildCrumbs();
-    $content[] = $crumbs;
 
     $content[] = $this->buildPropertiesTable($drequest->getRepository());
 
@@ -73,11 +76,14 @@ final class DiffusionRepositoryController extends DiffusionController {
         ->setErrors(array($empty_message));
     }
 
-    return $this->buildApplicationPage(
-      $content,
-      array(
-        'title' => $drequest->getRepository()->getName(),
-      ));
+    return $this->newPage()
+      ->setTitle(
+        array(
+          $repository->getName(),
+          $repository->getDisplayName(),
+        ))
+      ->setCrumbs($crumbs)
+      ->appendChild($content);
   }
 
 
@@ -217,7 +223,12 @@ final class DiffusionRepositoryController extends DiffusionController {
     if (!$repository->isTracked()) {
       $header->setStatus('fa-ban', 'dark', pht('Inactive'));
     } else if ($repository->isImporting()) {
-      $header->setStatus('fa-clock-o', 'indigo', pht('Importing...'));
+      $ratio = $repository->loadImportProgress();
+      $percentage = sprintf('%.2f%%', 100 * $ratio);
+      $header->setStatus(
+        'fa-clock-o',
+        'indigo',
+        pht('Importing (%s)...', $percentage));
     } else {
       $header->setStatus('fa-check', 'bluegrey', pht('Active'));
     }

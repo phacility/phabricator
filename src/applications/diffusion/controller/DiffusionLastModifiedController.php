@@ -6,9 +6,14 @@ final class DiffusionLastModifiedController extends DiffusionController {
     return true;
   }
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
+    }
+
+    $viewer = $this->getViewer();
     $drequest = $this->getDiffusionRequest();
-    $viewer = $request->getUser();
 
     $paths = $request->getStr('paths');
     try {

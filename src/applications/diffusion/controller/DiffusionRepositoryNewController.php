@@ -2,8 +2,8 @@
 
 final class DiffusionRepositoryNewController extends DiffusionController {
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $this->requireApplicationCapability(
       DiffusionCreateRepositoriesCapability::CAPABILITY);
@@ -70,14 +70,10 @@ final class DiffusionRepositoryNewController extends DiffusionController {
       ->setHeaderText(pht('Create or Import Repository'))
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
-      array(
-        'title' => pht('New Repository'),
-      ));
+    return $this->newPage()
+      ->setTitle(pht('New Repository'))
+      ->setCrumbs($crumbs)
+      ->appendChild($form_box);
   }
 
 }

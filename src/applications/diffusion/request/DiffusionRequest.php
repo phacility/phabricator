@@ -100,52 +100,22 @@ abstract class DiffusionRequest extends Phobject {
     }
 
     if ($identifier !== null) {
-      $object = self::newFromIdentifier($identifier, $data[$viewer_key]);
+      $object = self::newFromIdentifier(
+        $identifier,
+        $data[$viewer_key],
+        idx($data, 'edit'));
     } else {
       $object = self::newFromRepository($repository);
+    }
+
+    if (!$object) {
+      return null;
     }
 
     $object->initializeFromDictionary($data);
 
     return $object;
   }
-
-
-  /**
-   * Create a new request from an Aphront request dictionary. This is an
-   * internal method that you generally should not call directly; instead,
-   * call @{method:newFromDictionary}.
-   *
-   * @param   map                 Map of Aphront request data.
-   * @return  DiffusionRequest    New request object.
-   * @task new
-   */
-  final public static function newFromAphrontRequestDictionary(
-    array $data,
-    AphrontRequest $request) {
-
-    $identifier = phutil_unescape_uri_path_component(idx($data, 'callsign'));
-    $object = self::newFromIdentifier($identifier, $request->getUser());
-
-    $use_branches = $object->supportsBranches();
-
-    if (isset($data['dblob'])) {
-      $parsed = self::parseRequestBlob(idx($data, 'dblob'), $use_branches);
-    } else {
-      $parsed = array(
-        'commit' => idx($data, 'commit'),
-        'path' => idx($data, 'path'),
-        'line' => idx($data, 'line'),
-        'branch' => idx($data, 'branch'),
-      );
-    }
-
-    $object->setUser($request->getUser());
-    $object->initializeFromDictionary($parsed);
-    $object->lint = $request->getStr('lint');
-    return $object;
-  }
-
 
   /**
    * Internal.
@@ -167,15 +137,25 @@ abstract class DiffusionRequest extends Phobject {
    */
   final private static function newFromIdentifier(
     $identifier,
-    PhabricatorUser $viewer) {
+    PhabricatorUser $viewer,
+    $need_edit = false) {
 
-    $repository = id(new PhabricatorRepositoryQuery())
+    $query = id(new PhabricatorRepositoryQuery())
       ->setViewer($viewer)
-      ->withIdentifiers(array($identifier))
-      ->executeOne();
+      ->withIdentifiers(array($identifier));
+
+    if ($need_edit) {
+      $query->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ));
+    }
+
+    $repository = $query->executeOne();
 
     if (!$repository) {
-      throw new Exception(pht("No such repository '%s'.", $identifier));
+      return null;
     }
 
     return self::newFromRepository($repository);
@@ -221,9 +201,16 @@ abstract class DiffusionRequest extends Phobject {
    * @task new
    */
   final private function initializeFromDictionary(array $data) {
-    $this->path            = idx($data, 'path');
-    $this->line            = idx($data, 'line');
+    $blob = idx($data, 'blob');
+    if (strlen($blob)) {
+      $blob = self::parseRequestBlob($blob, $this->supportsBranches());
+      $data = $blob + $data;
+    }
+
+    $this->path = idx($data, 'path');
+    $this->line = idx($data, 'line');
     $this->initFromConduit = idx($data, 'initFromConduit', true);
+    $this->lint = idx($data, 'lint');
 
     $this->symbolicCommit = idx($data, 'commit');
     if ($this->supportsBranches()) {
@@ -448,15 +435,6 @@ abstract class DiffusionRequest extends Phobject {
 /* -(  Managing Diffusion URIs  )-------------------------------------------- */
 
 
-  /**
-   * Generate a Diffusion URI using this request to provide defaults. See
-   * @{method:generateDiffusionURI} for details. This method is the same, but
-   * preserves the request parameters if they are not overridden.
-   *
-   * @param   map         See @{method:generateDiffusionURI}.
-   * @return  PhutilURI   Generated URI.
-   * @task uri
-   */
   public function generateURI(array $params) {
     if (empty($params['stable'])) {
       $default_commit = $this->getSymbolicCommit();
@@ -465,180 +443,20 @@ abstract class DiffusionRequest extends Phobject {
     }
 
     $defaults = array(
-      'repository' => $this->getRepository(),
       'path'      => $this->getPath(),
       'branch'    => $this->getBranch(),
       'commit'    => $default_commit,
       'lint'      => idx($params, 'lint', $this->getLint()),
     );
+
     foreach ($defaults as $key => $val) {
       if (!isset($params[$key])) { // Overwrite NULL.
         $params[$key] = $val;
       }
     }
-    return self::generateDiffusionURI($params);
+
+    return $this->getRepository()->generateURI($params);
   }
-
-
-  /**
-   * Generate a Diffusion URI from a parameter map. Applies the correct encoding
-   * and formatting to the URI. Parameters are:
-   *
-   *   - `action` One of `history`, `browse`, `change`, `lastmodified`,
-   *     `branch`, `tags`, `branches`,  or `revision-ref`. The action specified
-   *      by the URI.
-   *   - `repository` Repository.
-   *   - `callsign` Repository callsign.
-   *   - `branch` Optional if action is not `branch`, branch name.
-   *   - `path` Optional, path to file.
-   *   - `commit` Optional, commit identifier.
-   *   - `line` Optional, line range.
-   *   - `lint` Optional, lint code.
-   *   - `params` Optional, query parameters.
-   *
-   * The function generates the specified URI and returns it.
-   *
-   * @param   map         See documentation.
-   * @return  PhutilURI   Generated URI.
-   * @task uri
-   */
-  public static function generateDiffusionURI(array $params) {
-    $action = idx($params, 'action');
-
-    $repository = idx($params, 'repository');
-
-    if ($repository) {
-      $callsign = $repository->getCallsign();
-    } else {
-      $callsign = idx($params, 'callsign');
-    }
-
-    $path     = idx($params, 'path');
-    $branch   = idx($params, 'branch');
-    $commit   = idx($params, 'commit');
-    $line     = idx($params, 'line');
-
-    if (strlen($callsign)) {
-      $callsign = phutil_escape_uri_path_component($callsign).'/';
-    }
-
-    if (strlen($branch)) {
-      $branch = phutil_escape_uri_path_component($branch).'/';
-    }
-
-    if (strlen($path)) {
-      $path = ltrim($path, '/');
-      $path = str_replace(array(';', '$'), array(';;', '$$'), $path);
-      $path = phutil_escape_uri($path);
-    }
-
-    $path = "{$branch}{$path}";
-
-    if (strlen($commit)) {
-      $commit = str_replace('$', '$$', $commit);
-      $commit = ';'.phutil_escape_uri($commit);
-    }
-
-    if (strlen($line)) {
-      $line = '$'.phutil_escape_uri($line);
-    }
-
-    $req_callsign = false;
-    $req_branch   = false;
-    $req_commit   = false;
-
-    switch ($action) {
-      case 'history':
-      case 'browse':
-      case 'change':
-      case 'lastmodified':
-      case 'tags':
-      case 'branches':
-      case 'lint':
-      case 'refs':
-        $req_callsign = true;
-        break;
-      case 'branch':
-        $req_callsign = true;
-        $req_branch = true;
-        break;
-      case 'commit':
-        $req_callsign = true;
-        $req_commit = true;
-        break;
-    }
-
-    if ($req_callsign && !strlen($callsign)) {
-      throw new Exception(
-        pht(
-          "Diffusion URI action '%s' requires callsign!",
-          $action));
-    }
-
-    if ($req_commit && !strlen($commit)) {
-      throw new Exception(
-        pht(
-          "Diffusion URI action '%s' requires commit!",
-          $action));
-    }
-
-    switch ($action) {
-      case 'change':
-      case 'history':
-      case 'browse':
-      case 'lastmodified':
-      case 'tags':
-      case 'branches':
-      case 'lint':
-      case 'pathtree':
-      case 'refs':
-        $uri = "/diffusion/{$callsign}{$action}/{$path}{$commit}{$line}";
-        break;
-      case 'branch':
-        if (strlen($path)) {
-          $uri = "/diffusion/{$callsign}repository/{$path}";
-        } else {
-          $uri = "/diffusion/{$callsign}";
-        }
-        break;
-      case 'external':
-        $commit = ltrim($commit, ';');
-        $uri = "/diffusion/external/{$commit}/";
-        break;
-      case 'rendering-ref':
-        // This isn't a real URI per se, it's passed as a query parameter to
-        // the ajax changeset stuff but then we parse it back out as though
-        // it came from a URI.
-        $uri = rawurldecode("{$path}{$commit}");
-        break;
-      case 'commit':
-        $commit = ltrim($commit, ';');
-        $callsign = rtrim($callsign, '/');
-        $uri = "/r{$callsign}{$commit}";
-        break;
-      default:
-        throw new Exception(pht("Unknown Diffusion URI action '%s'!", $action));
-    }
-
-    if ($action == 'rendering-ref') {
-      return $uri;
-    }
-
-    $uri = new PhutilURI($uri);
-
-    if (isset($params['lint'])) {
-      $params['params'] = idx($params, 'params', array()) + array(
-        'lint' => $params['lint'],
-      );
-    }
-
-    if (idx($params, 'params')) {
-      $uri->setQueryParams($params['params']);
-    }
-
-    return $uri;
-  }
-
 
   /**
    * Internal. Public only for unit tests.

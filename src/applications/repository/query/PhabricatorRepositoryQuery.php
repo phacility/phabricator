@@ -55,7 +55,7 @@ final class PhabricatorRepositoryQuery
     $monograms = array();
 
     foreach ($identifiers as $identifier) {
-      if (ctype_digit($identifier)) {
+      if (ctype_digit((string)$identifier)) {
         $ids[$identifier] = $identifier;
       } else if (preg_match('/^(r[A-Z]+)|(R[1-9]\d*)\z/', $identifier)) {
         $monograms[$identifier] = $identifier;
