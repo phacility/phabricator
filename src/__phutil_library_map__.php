@@ -5954,7 +5954,7 @@ phutil_register_library_map(array(
     'PhabricatorBadgesCreateCapability' => 'PhabricatorPolicyCapability',
     'PhabricatorBadgesDAO' => 'PhabricatorLiskDAO',
     'PhabricatorBadgesDefaultEditCapability' => 'PhabricatorPolicyCapability',
-    'PhabricatorBadgesEditController' => 'PhabricatorPasteController',
+    'PhabricatorBadgesEditController' => 'PhabricatorBadgesController',
     'PhabricatorBadgesEditEngine' => 'PhabricatorEditEngine',
     'PhabricatorBadgesEditRecipientsController' => 'PhabricatorBadgesController',
     'PhabricatorBadgesEditor' => 'PhabricatorApplicationTransactionEditor',
