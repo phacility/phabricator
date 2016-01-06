@@ -110,6 +110,13 @@ abstract class DiffusionQueryConduitAPIMethod
         'commit' => $request->getValue('commit'),
       ));
 
+    if (!$drequest) {
+      throw new Exception(
+        pht(
+          'Repository "%s" is not a valid repository.',
+          $identifier));
+    }
+
     // Figure out whether we're going to handle this request on this device,
     // or proxy it to another node in the cluster.
 
