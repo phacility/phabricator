@@ -585,6 +585,8 @@ final class DiffusionBrowseController extends DiffusionController {
     }
 
     $file_corpus = $file_content->getCorpus();
+    $highlight_limit = DifferentialChangesetParser::HIGHLIGHT_BYTE_LIMIT;
+    $can_highlight = (strlen($file_corpus) <= $highlight_limit);
 
     if (!$show_color) {
       $lines = phutil_split_lines($file_corpus);
@@ -625,12 +627,16 @@ final class DiffusionBrowseController extends DiffusionController {
           implode('', $rows));
       }
     } else {
-      require_celerity_resource('syntax-highlighting-css');
+      if ($can_highlight) {
+        require_celerity_resource('syntax-highlighting-css');
 
-      $highlighted = PhabricatorSyntaxHighlighter::highlightWithFilename(
-        $path,
-        $file_corpus);
-      $lines = phutil_split_lines($highlighted);
+        $highlighted = PhabricatorSyntaxHighlighter::highlightWithFilename(
+          $path,
+          $file_corpus);
+        $lines = phutil_split_lines($highlighted);
+      } else {
+        $lines = phutil_split_lines($file_corpus);
+      }
 
       $rows = $this->buildDisplayRows(
         $lines,
@@ -705,6 +711,18 @@ final class DiffusionBrowseController extends DiffusionController {
       ->setHeader($header)
       ->appendChild($corpus)
       ->setCollapsed(true);
+
+    if (!$can_highlight) {
+      $message = pht(
+        'This file is larger than %s, so syntax highlighting is disabled '.
+        'by default.',
+        phutil_format_bytes($highlight_limit));
+
+      $corpus->setInfoView(
+        id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+          ->setErrors(array($message)));
+    }
 
     return $corpus;
   }
@@ -851,6 +869,7 @@ final class DiffusionBrowseController extends DiffusionController {
     $show_blame) {
 
     $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
 
     $handles = array();
     if ($blame) {
@@ -989,8 +1008,6 @@ final class DiffusionBrowseController extends DiffusionController {
     }
     $handles = $this->loadViewerHandles($phids);
 
-    Javelin::initBehavior('phabricator-oncopy', array());
-
     $engine = null;
     $inlines = array();
     if ($this->getRequest()->getStr('lint') !== null && $this->lintMessages) {
@@ -1021,13 +1038,21 @@ final class DiffusionBrowseController extends DiffusionController {
       (bool)$this->coverage,
       $engine);
 
+    // NOTE: We're doing this manually because rendering is otherwise
+    // dominated by URI generation for very large files.
+    $line_base = (string)$repository->generateURI(
+      array(
+        'action'  => 'browse',
+        'stable'  => true,
+      ));
+
+    require_celerity_resource('aphront-tooltip-css');
+    Javelin::initBehavior('phabricator-oncopy');
+    Javelin::initBehavior('phabricator-tooltips');
+    Javelin::initBehavior('phabricator-line-linker');
+
     foreach ($display as $line) {
-      $line_href = $drequest->generateURI(
-        array(
-          'action'  => 'browse',
-          'line'    => $line['line'],
-          'stable'  => true,
-        ));
+      $line_href = $line_base.'$'.$line['line'];
 
       $blame = array();
       $style = null;
@@ -1050,9 +1075,6 @@ final class DiffusionBrowseController extends DiffusionController {
           } else {
             $tooltip = null;
           }
-
-          Javelin::initBehavior('phabricator-tooltips', array());
-          require_celerity_resource('aphront-tooltip-css');
 
           $commit_link = javelin_tag(
             'a',
@@ -1095,19 +1117,23 @@ final class DiffusionBrowseController extends DiffusionController {
             }
           }
 
-          $uri = $line_href->alter('before', $commit);
-          $before_link = javelin_tag(
-            'a',
-            array(
-              'href'  => $uri->setQueryParam('view', 'blame'),
-              'sigil' => 'has-tooltip',
-              'meta'  => array(
-                'tip'     => pht('Skip Past This Commit'),
-                'align'   => 'E',
-                'size'    => 300,
+          if ($commit) {
+            $identifier = $commit->getCommitIdentifier();
+            $skip_href = $line_href.'?before='.$identifier.'&view=blame';
+
+            $before_link = javelin_tag(
+              'a',
+              array(
+                'href'  => $skip_href,
+                'sigil' => 'has-tooltip',
+                'meta'  => array(
+                  'tip'     => pht('Skip Past This Commit'),
+                  'align'   => 'E',
+                  'size'    => 300,
+                ),
               ),
-            ),
-            "\xC2\xAB");
+              "\xC2\xAB");
+          }
         }
 
         $blame[] = phutil_tag(
@@ -1148,8 +1174,6 @@ final class DiffusionBrowseController extends DiffusionController {
           'style' => $style,
         ),
         $line_link);
-
-      Javelin::initBehavior('phabricator-line-linker');
 
       if ($line['target']) {
         Javelin::initBehavior(
