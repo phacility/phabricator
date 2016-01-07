@@ -592,15 +592,12 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $viewer = $this->getViewer();
 
-    $blame_handles = array();
     if ($needs_blame) {
       $blame = $this->loadBlame($path, $drequest->getCommit());
-      if ($blame) {
-        $author_phids = mpull($blame, 'getAuthorPHID');
-        $blame_handles = $viewer->loadHandles($author_phids);
-      }
+      list($blame_list, $blame_commits) = $blame;
     } else {
-      $blame = array();
+      $blame_list = array();
+      $blame_commits = array();
     }
 
     $file_corpus = $file_content->getCorpus();
@@ -608,43 +605,11 @@ final class DiffusionBrowseController extends DiffusionController {
     $can_highlight = (strlen($file_corpus) <= $highlight_limit);
 
     if (!$show_color) {
-      $lines = phutil_split_lines($file_corpus);
-
-      $style =
-        'border: none; width: 100%; height: 80em; font-family: monospace';
-      if (!$show_blame) {
-        $corpus = phutil_tag(
-          'textarea',
-          array(
-            'style' => $style,
-          ),
-          $file_corpus);
-      } else {
-        $rows = array();
-        foreach ($lines as $line_number => $line) {
-          $commit = idx($blame, $line_number);
-          if ($commit) {
-            $author = $commit->renderAuthorShortName($blame_handles);
-            $commit_name = $commit->getShortName();
-          } else {
-            $author = null;
-            $commit_name = null;
-          }
-
-          $rows[] = sprintf(
-            '%-10s %-20s %s',
-            $commit_name,
-            $author,
-            $line);
-        }
-
-        $corpus = phutil_tag(
-          'textarea',
-          array(
-            'style' => $style,
-          ),
-          implode('', $rows));
-      }
+      $corpus = $this->renderPlaintextCorpus(
+        $file_corpus,
+        $blame_list,
+        $blame_commits,
+        $show_blame);
     } else {
       if ($can_highlight) {
         require_celerity_resource('syntax-highlighting-css');
@@ -659,7 +624,8 @@ final class DiffusionBrowseController extends DiffusionController {
 
       $rows = $this->buildDisplayRows(
         $lines,
-        $blame,
+        $blame_list,
+        $blame_commits,
         $show_blame,
         $show_color);
 
@@ -883,25 +849,116 @@ final class DiffusionBrowseController extends DiffusionController {
 
   private function buildDisplayRows(
     array $lines,
-    array $blame,
+    array $blame_list,
+    array $blame_commits,
     $show_color,
     $show_blame) {
 
+    $request = $this->getRequest();
+    $viewer = $this->getViewer();
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $handles = array();
-    if ($blame) {
-      $epoch_list = mpull($blame, 'getEpoch', 'getID');
-      $epoch_list = array_filter($epoch_list);
+    $revision_map = array();
+    $revisions = array();
+    if ($blame_commits) {
+      $commit_map = mpull($blame_commits, 'getCommitIdentifier', 'getPHID');
+
+      $revision_ids = id(new DifferentialRevision())
+        ->loadIDsByCommitPHIDs(array_keys($commit_map));
+      if ($revision_ids) {
+        $revisions = id(new DifferentialRevisionQuery())
+          ->setViewer($viewer)
+          ->withIDs($revision_ids)
+          ->execute();
+        $revisions = mpull($revisions, null, 'getID');
+      }
+
+      foreach ($revision_ids as $commit_phid => $revision_id) {
+        $revision_map[$commit_map[$commit_phid]] = $revision_id;
+      }
+    }
+
+    $phids = array();
+    foreach ($blame_commits as $commit) {
+      $author_phid = $commit->getAuthorPHID();
+      if ($author_phid === null) {
+        continue;
+      }
+      $phids[$author_phid] = $author_phid;
+    }
+
+    foreach ($revisions as $revision) {
+      $author_phid = $revision->getAuthorPHID();
+      if ($author_phid === null) {
+        continue;
+      }
+      $phids[$author_phid] = $author_phid;
+    }
+
+    $handles = $viewer->loadHandles($phids);
+
+    $colors = array();
+    if ($blame_commits) {
+      $epochs = array();
+
+      foreach ($blame_commits as $identifier => $commit) {
+        $epochs[$identifier] = $commit->getEpoch();
+      }
+
+      $epoch_list = array_filter($epochs);
       $epoch_list = array_unique($epoch_list);
       $epoch_list = array_values($epoch_list);
 
       $epoch_min   = min($epoch_list);
       $epoch_max   = max($epoch_list);
       $epoch_range = ($epoch_max - $epoch_min) + 1;
+
+      foreach ($blame_commits as $identifier => $commit) {
+        $epoch = $epochs[$identifier];
+        if (!$epoch) {
+          $color = '#ffffdd'; // Warning color, missing data.
+        } else {
+          $color_ratio = ($epoch - $epoch_min) / $epoch_range;
+          $color_value = 0xE6 * (1.0 - $color_ratio);
+          $color = sprintf(
+            '#%02x%02x%02x',
+            $color_value,
+            0xF6,
+            $color_value);
+        }
+
+        $colors[$identifier] = $color;
+      }
     }
 
+    $display = array();
+    $last_identifier = null;
+    $last_color = null;
+    foreach ($lines as $line_index => $line) {
+      $color = '#f6f6f6';
+      $duplicate = false;
+      if (isset($blame_list[$line_index])) {
+        $identifier = $blame_list[$line_index];
+        if (isset($colors[$identifier])) {
+          $color = $colors[$identifier];
+        }
+
+        if ($identifier === $last_identifier) {
+          $duplicate = true;
+        } else {
+          $last_identifier = $identifier;
+        }
+      }
+
+      $display[$line_index] = array(
+        'data' => $line,
+        'target' => false,
+        'highlighted' => false,
+        'color' => $color,
+        'duplicate' => $duplicate,
+      );
+    }
 
     $line_arr = array();
     $line_str = $drequest->getLine();
@@ -921,111 +978,22 @@ final class DiffusionBrowseController extends DiffusionController {
       }
     }
 
-    $display = array();
+    // Mark the first highlighted line as the target line.
+    if ($line_arr) {
+      $target_line = $line_arr[0]['min'];
+      if (isset($display[$target_line - 1])) {
+        $display[$target_line - 1]['target'] = true;
+      }
+    }
 
-    $line_number = 1;
-    $last_commit = null;
-    $color = null;
-    foreach ($lines as $line_index => $line) {
-      $display_line = array(
-        'epoch'       => null,
-        'commit'      => null,
-        'author'      => null,
-        'target'      => null,
-        'highlighted' => null,
-        'line'        => $line_number,
-        'data'        => $line,
-      );
-
-      if ($show_blame) {
-        // If the line's rev is same as the line above, show empty content
-        // with same color; otherwise generate blame info. The newer a change
-        // is, the more saturated the color.
-
-        $commit = idx($blame, $line_index, $last_commit);
-
-        if ($commit && $last_commit &&
-            ($last_commit->getID() == $commit->getID())) {
-          $display_line['color'] = $color;
-        } else {
-          if ($commit) {
-            $epoch = $commit->getEpoch();
-          } else {
-            $epoch = null;
-          }
-
-          if (!$epoch) {
-            if (!$blame) {
-              $color = '#f6f6f6';
-            } else {
-              $color = '#ffd'; // Render as warning.
-            }
-          } else {
-            $color_ratio = ($epoch - $epoch_min) / $epoch_range;
-            $color_value = 0xE6 * (1.0 - $color_ratio);
-            $color = sprintf(
-              '#%02x%02x%02x',
-              $color_value,
-              0xF6,
-              $color_value);
-          }
-
-          $display_line['epoch'] = $epoch;
-          $display_line['color'] = $color;
-
-          if ($commit) {
-            $display_line['commit'] = $commit;
-          } else {
-            $display_line['commit'] = null;
-          }
-
-          $last_commit = $commit;
+    // Mark all other highlighted lines as highlighted.
+    foreach ($line_arr as $range) {
+      for ($ii = $range['min']; $ii <= $range['max']; $ii++) {
+        if (isset($display[$ii - 1])) {
+          $display[$ii - 1]['highlighted'] = true;
         }
       }
-
-      if ($line_arr) {
-        if ($line_number == $line_arr[0]['min']) {
-          $display_line['target'] = true;
-        }
-        foreach ($line_arr as $range) {
-          if ($line_number >= $range['min'] &&
-              $line_number <= $range['max']) {
-            $display_line['highlighted'] = true;
-          }
-        }
-      }
-
-      $display[] = $display_line;
-      ++$line_number;
     }
-
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $commits = mpull($blame, null, 'getCommitIdentifier');
-
-    $revision_ids = id(new DifferentialRevision())
-      ->loadIDsByCommitPHIDs(mpull($commits, 'getPHID'));
-    $revisions = array();
-    if ($revision_ids) {
-      $revisions = id(new DifferentialRevisionQuery())
-        ->setViewer($viewer)
-        ->withIDs($revision_ids)
-        ->execute();
-    }
-
-    $phids = array();
-    foreach ($commits as $blame_commit) {
-      if ($blame_commit->getAuthorPHID()) {
-        $phids[] = $blame_commit->getAuthorPHID();
-      }
-    }
-    foreach ($revisions as $revision) {
-      if ($revision->getAuthorPHID()) {
-        $phids[] = $revision->getAuthorPHID();
-      }
-    }
-    $handles = $this->loadViewerHandles($phids);
 
     $engine = null;
     $inlines = array();
@@ -1059,7 +1027,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
     // NOTE: We're doing this manually because rendering is otherwise
     // dominated by URI generation for very large files.
-    $line_base = (string)$repository->generateURI(
+    $line_base = (string)$drequest->generateURI(
       array(
         'action'  => 'browse',
         'stable'  => true,
@@ -1070,112 +1038,77 @@ final class DiffusionBrowseController extends DiffusionController {
     Javelin::initBehavior('phabricator-tooltips');
     Javelin::initBehavior('phabricator-line-linker');
 
-    foreach ($display as $line) {
-      $line_href = $line_base.'$'.$line['line'];
+    // Render these once, since they tend to get repeated many times in large
+    // blame outputs.
+    $commit_links = $this->renderCommitLinks($blame_commits, $handles);
+    $revision_links = $this->renderRevisionLinks($revisions, $handles);
 
-      $blame = array();
-      $style = null;
-      if (array_key_exists('color', $line)) {
-        if ($line['color']) {
-          $style = 'background: '.$line['color'].';';
-        }
+    $skip_text = pht('Skip Past This Commit');
+    foreach ($display as $line_index => $line) {
+      $row = array();
 
-        $before_link = null;
-        $commit_link = null;
-        $revision_link = null;
-        if (idx($line, 'commit')) {
-          $commit = $line['commit'];
+      $line_number = $line_index + 1;
+      $line_href = $line_base.'$'.$line_number;
 
-          if ($commit) {
-            $tooltip = $this->renderCommitTooltip(
-              $commit,
-              $handles,
-              $commit->renderAuthorLink($handles));
-          } else {
-            $tooltip = null;
-          }
-
-          $commit_link = javelin_tag(
-            'a',
-            array(
-              'href' => $drequest->generateURI(
-                array(
-                  'action' => 'commit',
-                  'commit' => $commit->getCommitIdentifier(),
-                )),
-              'sigil' => 'has-tooltip',
-              'meta'  => array(
-                'tip'   => $tooltip,
-                'align' => 'E',
-                'size'  => 600,
-              ),
-            ),
-            $commit->getShortName());
-
-          $revision_id = null;
-          if ($commit) {
-            $revision_id = idx($revision_ids, $commit->getPHID());
-          }
-
-          if ($revision_id) {
-            $revision = idx($revisions, $revision_id);
-            if ($revision) {
-              $tooltip = $this->renderRevisionTooltip($revision, $handles);
-              $revision_link = javelin_tag(
-                'a',
-                array(
-                  'href' => '/D'.$revision->getID(),
-                  'sigil' => 'has-tooltip',
-                  'meta'  => array(
-                    'tip'   => $tooltip,
-                    'align' => 'E',
-                    'size'  => 600,
-                  ),
-                ),
-                'D'.$revision->getID());
-            }
-          }
-
-          if ($commit) {
-            $identifier = $commit->getCommitIdentifier();
-            $skip_href = $line_href.'?before='.$identifier.'&view=blame';
-
-            $before_link = javelin_tag(
-              'a',
-              array(
-                'href'  => $skip_href,
-                'sigil' => 'has-tooltip',
-                'meta'  => array(
-                  'tip'     => pht('Skip Past This Commit'),
-                  'align'   => 'E',
-                  'size'    => 300,
-                ),
-              ),
-              "\xC2\xAB");
-          }
-        }
-
-        $blame[] = phutil_tag(
-          'th',
-          array(
-            'class' => 'diffusion-blame-link',
-          ),
-          $before_link);
-
-        $object_links = array();
-        $object_links[] = $commit_link;
-        if ($revision_link) {
-          $object_links[] = phutil_tag('span', array(), '/');
-          $object_links[] = $revision_link;
-        }
-
-        $blame[] = phutil_tag(
-          'th',
-          array(
-            'class' => 'diffusion-rev-link',
-          ),
-          $object_links);
+      if (isset($blame_list[$line_index])) {
+        $identifier = $blame_list[$line_index];
+      } else {
+        $identifier = null;
       }
+
+      $revision_link = null;
+      $commit_link = null;
+      $before_link = null;
+      $style = null;
+      if ($identifier && !$line['duplicate']) {
+        $style = 'background: '.$line['color'].';';
+
+        if (isset($commit_links[$identifier])) {
+          $commit_link = $commit_links[$identifier];
+        }
+
+        if (isset($revision_map[$identifier])) {
+          $revision_id = $revision_map[$identifier];
+          if (isset($revision_links[$revision_id])) {
+            $revision_link = $revision_links[$revision_id];
+          }
+        }
+
+        $skip_href = $line_href.'?before='.$identifier.'&view=blame';
+        $before_link = javelin_tag(
+          'a',
+          array(
+            'href'  => $skip_href,
+            'sigil' => 'has-tooltip',
+            'meta'  => array(
+              'tip'     => $skip_text,
+              'align'   => 'E',
+              'size'    => 300,
+            ),
+          ),
+          "\xC2\xAB");
+      }
+
+      $row[] = phutil_tag(
+        'th',
+        array(
+          'class' => 'diffusion-blame-link',
+        ),
+        $before_link);
+
+      $object_links = array();
+      $object_links[] = $commit_link;
+      if ($revision_link) {
+        $object_links[] = phutil_tag('span', array(), '/');
+        $object_links[] = $revision_link;
+      }
+
+      $row[] = phutil_tag(
+        'th',
+        array(
+          'class' => 'diffusion-rev-link',
+        ),
+        $object_links);
 
       $line_link = phutil_tag(
         'a',
@@ -1183,9 +1116,9 @@ final class DiffusionBrowseController extends DiffusionController {
           'href' => $line_href,
           'style' => $style,
         ),
-        $line['line']);
+        $line_number);
 
-      $blame[] = javelin_tag(
+      $row[] = javelin_tag(
         'th',
         array(
           'class' => 'diffusion-line-link',
@@ -1210,7 +1143,7 @@ final class DiffusionBrowseController extends DiffusionController {
         $anchor_text = null;
       }
 
-      $blame[] = phutil_tag(
+      $row[] = phutil_tag(
         'td',
         array(
         ),
@@ -1234,7 +1167,7 @@ final class DiffusionBrowseController extends DiffusionController {
           $cov_class = 'N';
         }
 
-        $blame[] = phutil_tag(
+        $row[] = phutil_tag(
           'td',
           array(
             'class' => 'cov cov-'.$cov_class,
@@ -1249,10 +1182,10 @@ final class DiffusionBrowseController extends DiffusionController {
                       'phabricator-source-highlight' :
                       null),
         ),
-        $blame);
+        $row);
 
       $cur_inlines = $this->renderInlines(
-        idx($inlines, $line['line'], array()),
+        idx($inlines, $line_number, array()),
         $show_blame,
         $this->coverage,
         $engine);
@@ -1520,17 +1453,12 @@ final class DiffusionBrowseController extends DiffusionController {
 
   private function renderCommitTooltip(
     PhabricatorRepositoryCommit $commit,
-    array $handles,
     $author) {
 
     $viewer = $this->getRequest()->getUser();
 
     $date = phabricator_date($commit->getEpoch(), $viewer);
     $summary = trim($commit->getSummary());
-
-    if ($commit->getAuthorPHID()) {
-      $author = $handles[$commit->getAuthorPHID()]->getName();
-    }
 
     return "{$summary}\n{$date} \xC2\xB7 {$author}";
   }
@@ -1809,16 +1737,133 @@ final class DiffusionBrowseController extends DiffusionController {
       $commits = array();
     }
 
-    foreach ($identifiers as $key => $identifier) {
-      $commit = idx($commits, $identifier);
-      if ($commit) {
-        $identifiers[$key] = $commit;
-      } else {
-        $identifiers[$key] = null;
-      }
+    return array($identifiers, $commits);
+  }
+
+  private function renderCommitLinks(array $commits, $handles) {
+    $links = array();
+    foreach ($commits as $identifier => $commit) {
+      $tooltip = $this->renderCommitTooltip(
+        $commit,
+        $commit->renderAuthorShortName($handles));
+
+      $commit_link = javelin_tag(
+        'a',
+        array(
+          'href' => $commit->getURI(),
+          'sigil' => 'has-tooltip',
+          'meta'  => array(
+            'tip'   => $tooltip,
+            'align' => 'E',
+            'size'  => 600,
+          ),
+        ),
+        $commit->getShortName());
+
+      $links[$identifier] = $commit_link;
     }
 
-    return $identifiers;
+    return $links;
+  }
+
+  private function renderRevisionLinks(array $revisions, $handles) {
+    $links = array();
+
+    foreach ($revisions as $revision) {
+      $revision_id = $revision->getID();
+
+      $tooltip = $this->renderRevisionTooltip($revision, $handles);
+
+      $revision_link = javelin_tag(
+        'a',
+        array(
+          'href' => $revision->getURI(),
+          'sigil' => 'has-tooltip',
+          'meta'  => array(
+            'tip'   => $tooltip,
+            'align' => 'E',
+            'size'  => 600,
+          ),
+        ),
+        $revision->getMonogram());
+
+      $links[$revision_id] = $revision_link;
+    }
+
+    return $links;
+  }
+
+  private function renderPlaintextCorpus(
+    $file_corpus,
+    array $blame_list,
+    array $blame_commits,
+    $show_blame) {
+
+    $viewer = $this->getViewer();
+
+    if (!$show_blame) {
+      $corpus = $file_corpus;
+    } else {
+      $author_phids = array();
+      foreach ($blame_commits as $commit) {
+        $author_phid = $commit->getAuthorPHID();
+        if ($author_phid === null) {
+          continue;
+        }
+        $author_phids[$author_phid] = $author_phid;
+      }
+
+      if ($author_phids) {
+        $handles = $viewer->loadHandles($author_phids);
+      } else {
+        $handles = array();
+      }
+
+      $authors = array();
+      $names = array();
+      foreach ($blame_commits as $identifier => $commit) {
+        $author = $commit->renderAuthorShortName($handles);
+        $name = $commit->getShortName();
+
+        $authors[$identifier] = $author;
+        $names[$identifier] = $name;
+      }
+
+      $lines = phutil_split_lines($file_corpus);
+
+      $rows = array();
+      foreach ($lines as $line_number => $line) {
+        $commit_name = null;
+        $author = null;
+
+        if (isset($blame_list[$line_number])) {
+          $identifier = $blame_list[$line_number];
+
+          if (isset($names[$identifier])) {
+            $commit_name = $names[$identifier];
+          }
+
+          if (isset($authors[$identifier])) {
+            $author = $authors[$identifier];
+          }
+        }
+
+        $rows[] = sprintf(
+          '%-10s %-20s %s',
+          $commit_name,
+          $author,
+          $line);
+      }
+      $corpus = implode('', $rows);
+    }
+
+    return phutil_tag(
+      'textarea',
+      array(
+        'style' => 'border: none; width: 100%; height: 80em; '.
+                   'font-family: monospace',
+      ),
+      $corpus);
   }
 
 }
