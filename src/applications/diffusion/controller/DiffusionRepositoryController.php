@@ -88,6 +88,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
 
   private function buildNormalContent(DiffusionRequest $drequest) {
+    $request = $this->getRequest();
     $repository = $drequest->getRepository();
 
     $phids = array();
@@ -123,6 +124,9 @@ final class DiffusionRepositoryController extends DiffusionController {
       $history_exception = $ex;
     }
 
+    $browse_pager = id(new PHUIPagerView())
+      ->readFromRequest($request);
+
     try {
       $browse_results = DiffusionBrowseResultSet::newFromConduit(
         $this->callConduitWithDiffusionRequest(
@@ -130,8 +134,10 @@ final class DiffusionRepositoryController extends DiffusionController {
           array(
             'path' => $drequest->getPath(),
             'commit' => $drequest->getCommit(),
+            'limit' => $browse_pager->getPageSize() + 1,
           )));
       $browse_paths = $browse_results->getPaths();
+      $browse_paths = $browse_pager->sliceResults($browse_paths);
 
       foreach ($browse_paths as $item) {
         $data = $item->getLastCommitData();
@@ -178,7 +184,8 @@ final class DiffusionRepositoryController extends DiffusionController {
       $browse_results,
       $browse_paths,
       $browse_exception,
-      $handles);
+      $handles,
+      $browse_pager);
 
     $content[] = $this->buildHistoryTable(
       $history_results,
@@ -588,7 +595,8 @@ final class DiffusionRepositoryController extends DiffusionController {
     $browse_results,
     $browse_paths,
     $browse_exception,
-    array $handles) {
+    array $handles,
+    PHUIPagerView $pager) {
 
     require_celerity_resource('diffusion-icons-css');
 
@@ -669,7 +677,19 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $browse_panel->setTable($browse_table);
 
-    return array($locate_panel, $browse_panel);
+    $pager->setURI($browse_uri, 'offset');
+
+    if ($pager->willShowPagingControls()) {
+      $pager_box = $this->renderTablePagerBox($pager);
+    } else {
+      $pager_box = null;
+    }
+
+    return array(
+      $locate_panel,
+      $browse_panel,
+      $pager_box,
+    );
   }
 
   private function renderCloneCommand(

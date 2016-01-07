@@ -8,7 +8,6 @@
  */
 abstract class DiffusionFileContentQuery extends DiffusionQuery {
 
-  private $needsBlame;
   private $fileContent;
   private $viewer;
   private $timeout;
@@ -30,6 +29,15 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
 
   public function getByteLimit() {
     return $this->byteLimit;
+  }
+
+  public function setViewer(PhabricatorUser $user) {
+    $this->viewer = $user;
+    return $this;
+  }
+
+  public function getViewer() {
+    return $this->viewer;
   }
 
   final public static function newFromDiffusionRequest(
@@ -90,110 +98,4 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
     return $this->fileContent->getCorpus();
   }
 
-  /**
-   * Pretty hairy function. If getNeedsBlame is false, this returns
-   *
-   *   ($text_list, array(), array())
-   *
-   * Where $text_list is the raw file content with trailing new lines stripped.
-   *
-   * If getNeedsBlame is true, this returns
-   *
-   *   ($text_list, $line_rev_dict, $blame_dict)
-   *
-   * Where $text_list is just the lines of code -- the raw file content will
-   * contain lots of blame data, $line_rev_dict is a dictionary of line number
-   * => revision id, and $blame_dict is another complicated data structure.
-   * In detail, $blame_dict contains [revision id][author] keys, as well
-   * as [commit id][authorPhid] and [commit id][epoch] keys.
-   *
-   * @return ($text_list, $line_rev_dict, $blame_dict)
-   */
-  final public function getBlameData() {
-    $raw_data = preg_replace('/\n$/', '', $this->getRawData());
-
-    $text_list = array();
-    $line_rev_dict = array();
-    $blame_dict = array();
-
-    if (!$this->getNeedsBlame()) {
-      $text_list = explode("\n", $raw_data);
-    } else if ($raw_data != '') {
-      $lines = array();
-      foreach (explode("\n", $raw_data) as $k => $line) {
-        $lines[$k] = $this->tokenizeLine($line);
-
-        list($rev_id, $author, $text) = $lines[$k];
-        $text_list[$k] = $text;
-        $line_rev_dict[$k] = $rev_id;
-      }
-
-      $line_rev_dict = $this->processRevList($line_rev_dict);
-
-      foreach ($lines as $k => $line) {
-        list($rev_id, $author, $text) = $line;
-        $rev_id = $line_rev_dict[$k];
-
-        if (!isset($blame_dict[$rev_id])) {
-          $blame_dict[$rev_id]['author'] = $author;
-        }
-      }
-
-      $repository = $this->getRequest()->getRepository();
-
-      $commits = id(new DiffusionCommitQuery())
-        ->setViewer($this->getViewer())
-        ->withDefaultRepository($repository)
-        ->withIdentifiers(array_unique($line_rev_dict))
-        ->execute();
-
-      foreach ($commits as $commit) {
-        $blame_dict[$commit->getCommitIdentifier()]['epoch'] =
-          $commit->getEpoch();
-      }
-
-      if ($commits) {
-        $commits_data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
-          'commitID IN (%Ls)',
-          mpull($commits, 'getID'));
-
-        foreach ($commits_data as $data) {
-          $author_phid = $data->getCommitDetail('authorPHID');
-          if (!$author_phid) {
-            continue;
-          }
-          $commit = $commits[$data->getCommitID()];
-          $commit_identifier = $commit->getCommitIdentifier();
-          $blame_dict[$commit_identifier]['authorPHID'] = $author_phid;
-        }
-      }
-
-   }
-
-    return array($text_list, $line_rev_dict, $blame_dict);
-  }
-
-  abstract protected function tokenizeLine($line);
-
-  public function setNeedsBlame($needs_blame) {
-    $this->needsBlame = $needs_blame;
-    return $this;
-  }
-
-  public function getNeedsBlame() {
-    return $this->needsBlame;
-  }
-
-  public function setViewer(PhabricatorUser $user) {
-    $this->viewer = $user;
-    return $this;
-  }
-
-  public function getViewer() {
-    return $this->viewer;
-  }
-
-  protected function processRevList(array $rev_list) {
-    return $rev_list;
-  }
 }

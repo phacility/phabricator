@@ -49,6 +49,8 @@ final class PhabricatorRepositoryQuery
   }
 
   public function withIdentifiers(array $identifiers) {
+    $identifiers = array_fuse($identifiers);
+
     $ids = array();
     $callsigns = array();
     $phids = array();
