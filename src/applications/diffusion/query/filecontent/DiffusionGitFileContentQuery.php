@@ -2,7 +2,7 @@
 
 final class DiffusionGitFileContentQuery extends DiffusionFileContentQuery {
 
-  public function getFileContentFuture() {
+  protected function getFileContentFuture() {
     $drequest = $this->getRequest();
 
     $repository = $drequest->getRepository();
@@ -15,13 +15,9 @@ final class DiffusionGitFileContentQuery extends DiffusionFileContentQuery {
       $path);
   }
 
-  protected function executeQueryFromFuture(Future $future) {
+  protected function resolveFileContentFuture(Future $future) {
     list($corpus) = $future->resolvex();
-
-    $file_content = new DiffusionFileContent();
-    $file_content->setCorpus($corpus);
-
-    return $file_content;
+    return $corpus;
   }
 
 }

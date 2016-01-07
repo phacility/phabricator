@@ -156,9 +156,21 @@ final class DifferentialDiffExtractionEngine extends Phobject {
             'commit' => $identifier,
             'path' => $path,
           ));
-        $corpus = $response['corpus'];
 
-        if ($files[$file_phid]->loadFileData() != $corpus) {
+        $new_file_phid = $response['filePHID'];
+        if (!$new_file_phid) {
+          return true;
+        }
+
+        $new_file = id(new PhabricatorFileQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($new_file_phid))
+          ->executeOne();
+        if (!$new_file) {
+          return true;
+        }
+
+        if ($files[$file_phid]->loadFileData() != $new_file->loadFileData()) {
           return true;
         }
       } else {

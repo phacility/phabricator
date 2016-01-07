@@ -161,23 +161,10 @@ final class DiffusionRepositoryController extends DiffusionController {
     $phids = array_keys($phids);
     $handles = $this->loadViewerHandles($phids);
 
-    $readme = null;
     if ($browse_results) {
-      $readme_path = $browse_results->getReadmePath();
-      if ($readme_path) {
-        $readme_content = $this->callConduitWithDiffusionRequest(
-          'diffusion.filecontentquery',
-          array(
-            'path' => $readme_path,
-            'commit' => $drequest->getStableCommit(),
-          ));
-        if ($readme_content) {
-          $readme = id(new DiffusionReadmeView())
-            ->setUser($this->getViewer())
-            ->setPath($readme_path)
-            ->setContent($readme_content['corpus']);
-        }
-      }
+      $readme = $this->renderDirectoryReadme($browse_results);
+    } else {
+      $readme = null;
     }
 
     $content[] = $this->buildBrowseTable(
