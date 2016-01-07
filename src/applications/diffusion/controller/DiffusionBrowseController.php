@@ -591,18 +591,26 @@ final class DiffusionBrowseController extends DiffusionController {
     $data) {
 
     $viewer = $this->getViewer();
+    $blame_timeout = 15;
+    $blame_failed = false;
 
-    if ($needs_blame) {
-      $blame = $this->loadBlame($path, $drequest->getCommit());
+    $file_corpus = $file_content->getCorpus();
+    $highlight_limit = DifferentialChangesetParser::HIGHLIGHT_BYTE_LIMIT;
+    $blame_limit = DifferentialChangesetParser::HIGHLIGHT_BYTE_LIMIT;
+    $can_highlight = (strlen($file_corpus) <= $highlight_limit);
+    $can_blame = (strlen($file_corpus) <= $blame_limit);
+
+    if ($needs_blame && $can_blame) {
+      $blame = $this->loadBlame($path, $drequest->getCommit(), $blame_timeout);
       list($blame_list, $blame_commits) = $blame;
+      if ($blame_list === null) {
+        $blame_failed = true;
+        $blame_list = array();
+      }
     } else {
       $blame_list = array();
       $blame_commits = array();
     }
-
-    $file_corpus = $file_content->getCorpus();
-    $highlight_limit = DifferentialChangesetParser::HIGHLIGHT_BYTE_LIMIT;
-    $can_highlight = (strlen($file_corpus) <= $highlight_limit);
 
     if (!$show_color) {
       $corpus = $this->renderPlaintextCorpus(
@@ -697,16 +705,32 @@ final class DiffusionBrowseController extends DiffusionController {
       ->appendChild($corpus)
       ->setCollapsed(true);
 
+    $messages = array();
+
     if (!$can_highlight) {
-      $message = pht(
+      $messages[] = pht(
         'This file is larger than %s, so syntax highlighting is disabled '.
         'by default.',
         phutil_format_bytes($highlight_limit));
+    }
 
+    if ($show_blame && !$can_blame) {
+      $messages[] = pht(
+        'This file is larger than %s, so blame is disabled.',
+        phutil_format_bytes($blame_limit));
+    }
+
+    if ($blame_failed) {
+      $messages[] = pht(
+        'Failed to load blame information for this file in %s second(s).',
+        new PhutilNumber($blame_timeout));
+    }
+
+    if ($messages) {
       $corpus->setInfoView(
         id(new PHUIInfoView())
           ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
-          ->setErrors(array($message)));
+          ->setErrors($messages));
     }
 
     return $corpus;
@@ -1709,15 +1733,16 @@ final class DiffusionBrowseController extends DiffusionController {
     return $view;
   }
 
-  private function loadBlame($path, $commit) {
+  private function loadBlame($path, $commit, $timeout) {
     $blame = $this->callConduitWithDiffusionRequest(
       'diffusion.blame',
       array(
         'commit' => $commit,
         'paths' => array($path),
+        'timeout' => $timeout,
       ));
 
-    $identifiers = idx($blame, $path, array());
+    $identifiers = idx($blame, $path, null);
 
     if ($identifiers) {
       $viewer = $this->getViewer();
