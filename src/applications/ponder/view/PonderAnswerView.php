@@ -168,8 +168,7 @@ final class PonderAnswerView extends AphrontTagView {
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($answer)
-      ->setObjectURI('Q'.$answer->getQuestionID());
+      ->setObject($answer);
 
     $user_marked = $answer->getUserVote();
     $can_vote = $viewer->isLoggedIn();

@@ -37,7 +37,7 @@ final class HarbormasterSendMessageConduitAPIMethod
     $unit_spec = HarbormasterBuildUnitMessage::getParameterSpec();
     foreach ($unit_spec as $key => $parameter) {
       $type = idx($parameter, 'type');
-      $type = str_replace('|', pht(' or '), $type);
+      $type = str_replace('|', ' '.pht('or').' ', $type);
       $description = idx($parameter, 'description');
       $rows[] = "| `{$key}` | //{$type}// | {$description} |";
     }
@@ -61,7 +61,7 @@ final class HarbormasterSendMessageConduitAPIMethod
     $lint_spec = HarbormasterBuildLintMessage::getParameterSpec();
     foreach ($lint_spec as $key => $parameter) {
       $type = idx($parameter, 'type');
-      $type = str_replace('|', pht(' or '), $type);
+      $type = str_replace('|', ' '.pht('or').' ', $type);
       $description = idx($parameter, 'description');
       $rows[] = "| `{$key}` | //{$type}// | {$description} |";
     }
@@ -256,10 +256,15 @@ final class HarbormasterSendMessageConduitAPIMethod
 
     // If the build has completely paused because all steps are blocked on
     // waiting targets, this will resume it.
+    $build = $build_target->getBuild();
+
     PhabricatorWorker::scheduleTask(
       'HarbormasterBuildWorker',
       array(
-        'buildID' => $build_target->getBuild()->getID(),
+        'buildID' => $build->getID(),
+      ),
+      array(
+        'objectPHID' => $build->getPHID(),
       ));
 
     return null;

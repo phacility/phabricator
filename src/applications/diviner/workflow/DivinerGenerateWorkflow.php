@@ -69,7 +69,7 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
             '.book',
             '--book <book>'));
       } else {
-        $this->log(pht('Found %s book(s).', new PhutilNumber(count($books))));
+        $this->log(pht('Found %s book(s).', phutil_count($books)));
       }
     }
 
@@ -224,26 +224,26 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     $this->log(
       pht(
         'Found %s file(s) in project.',
-        new PhutilNumber(count($file_hashes))));
+        phutil_count($file_hashes)));
 
     $this->deleteDeadAtoms($file_hashes);
     $atomize = $this->getFilesToAtomize($file_hashes);
     $this->log(
       pht(
         'Found %s unatomized, uncached file(s).',
-        new PhutilNumber(count($atomize))));
+        phutil_count($atomize)));
 
     $file_atomizers = $this->getAtomizersForFiles($atomize);
     $this->log(
       pht(
         'Found %s file(s) to atomize.',
-        new PhutilNumber(count($file_atomizers))));
+        phutil_count($file_atomizers)));
 
     $futures = $this->buildAtomizerFutures($file_atomizers);
     $this->log(
       pht(
         'Atomizing %s file(s).',
-        new PhutilNumber(count($file_atomizers))));
+        phutil_count($file_atomizers)));
 
     if ($futures) {
       $this->resolveAtomizerFutures($futures, $file_hashes);
@@ -452,7 +452,7 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     $this->log(
       pht(
         'Found %s obsolete atom(s) in graph.',
-        new PhutilNumber(count($del_atoms))));
+        phutil_count($del_atoms)));
 
     foreach ($del_atoms as $nhash => $shash) {
       $atom_cache->deleteSymbol($nhash);
@@ -466,7 +466,7 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     $this->log(
       pht(
         'Found %s new atom(s) in graph.',
-        new PhutilNumber(count($new_atoms))));
+        phutil_count($new_atoms)));
 
     foreach ($new_atoms as $nhash => $ignored) {
       $shash = $this->computeSymbolHash($nhash);
@@ -505,7 +505,7 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     $this->log(
       pht(
         'Found %s affected atoms.',
-        new PhutilNumber(count($dirty_nhashes))));
+        phutil_count($dirty_nhashes)));
 
     foreach ($dirty_nhashes as $nhash => $ignored) {
       $atom_cache->addGraph($nhash, $this->computeGraphHash($nhash));

@@ -3,10 +3,15 @@
 final class PhamePostTransaction
   extends PhabricatorApplicationTransaction {
 
-  const TYPE_TITLE           = 'phame.post.title';
-  const TYPE_PHAME_TITLE     = 'phame.post.phame.title';
-  const TYPE_BODY            = 'phame.post.body';
-  const TYPE_COMMENTS_WIDGET = 'phame.post.comments.widget';
+  const TYPE_TITLE            = 'phame.post.title';
+  const TYPE_BODY             = 'phame.post.body';
+  const TYPE_VISIBILITY       = 'phame.post.visibility';
+  const TYPE_BLOG             = 'phame.post.blog';
+
+  const MAILTAG_CONTENT       = 'phame-post-content';
+  const MAILTAG_SUBSCRIBERS   = 'phame-post-subscribers';
+  const MAILTAG_COMMENT       = 'phame-post-comment';
+  const MAILTAG_OTHER         = 'phame-post-other';
 
   public function getApplicationName() {
     return 'phame';
@@ -14,6 +19,10 @@ final class PhamePostTransaction
 
   public function getApplicationTransactionType() {
     return PhabricatorPhamePostPHIDType::TYPECONST;
+  }
+
+  public function getApplicationTransactionCommentObject() {
+    return new PhamePostTransactionComment();
   }
 
   public function getRemarkupBlocks() {
@@ -29,33 +38,70 @@ final class PhamePostTransaction
   }
 
   public function shouldHide() {
-    $old = $this->getOldValue();
-    switch ($this->getTransactionType()) {
-      case self::TYPE_PHAME_TITLE:
-      case self::TYPE_BODY:
-        return ($old === null);
-    }
     return parent::shouldHide();
   }
 
-  public function getIcon() {
-    $old = $this->getOldValue();
+  public function getRequiredHandlePHIDs() {
+    $phids = parent::getRequiredHandlePHIDs();
+
     switch ($this->getTransactionType()) {
-      case self::TYPE_TITLE:
-        if ($old === null) {
-          return 'fa-plus';
-        } else {
-          return 'fa-pencil';
+      case self::TYPE_BLOG:
+        $old = $this->getOldValue();
+        $new = $this->getNewValue();
+
+        if ($old) {
+          $phids[] = $old;
+        }
+
+        if ($new) {
+          $phids[] = $new;
         }
         break;
-      case self::TYPE_PHAME_TITLE:
-      case self::TYPE_BODY:
-      case self::TYPE_COMMENTS_WIDGET:
-        return 'fa-pencil';
-        break;
+    }
+
+    return $phids;
+  }
+
+
+  public function getIcon() {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return 'fa-plus';
+      break;
+      case self::TYPE_VISIBILITY:
+        if ($new == PhameConstants::VISIBILITY_PUBLISHED) {
+          return 'fa-globe';
+        } else {
+          return 'fa-eye-slash';
+        }
+      break;
     }
     return parent::getIcon();
   }
+
+  public function getMailTags() {
+    $tags = parent::getMailTags();
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $tags[] = self::MAILTAG_COMMENT;
+        break;
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+        $tags[] = self::MAILTAG_SUBSCRIBERS;
+        break;
+      case self::TYPE_TITLE:
+      case self::TYPE_BODY:
+        $tags[] = self::MAILTAG_CONTENT;
+        break;
+      default:
+        $tags[] = self::MAILTAG_OTHER;
+        break;
+    }
+    return $tags;
+  }
+
 
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
@@ -66,10 +112,20 @@ final class PhamePostTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return pht(
+          '%s authored this post.',
+          $this->renderHandleLink($author_phid));
+      case self::TYPE_BLOG:
+        return pht(
+          '%s moved this post from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($old),
+          $this->renderHandleLink($new));
       case self::TYPE_TITLE:
         if ($old === null) {
           return pht(
-            '%s created this post.',
+            '%s authored this post.',
             $this->renderHandleLink($author_phid));
         } else {
           return pht(
@@ -80,20 +136,19 @@ final class PhamePostTransaction
         break;
       case self::TYPE_BODY:
         return pht(
-          '%s updated the post\'s body.',
+          '%s updated the blog post.',
           $this->renderHandleLink($author_phid));
         break;
-      case self::TYPE_PHAME_TITLE:
-        return pht(
-          '%s updated the post\'s phame title to "%s".',
-          $this->renderHandleLink($author_phid),
-          rtrim($new, '/'));
-        break;
-      case self::TYPE_COMMENTS_WIDGET:
-        return pht(
-          '%s updated the post\'s comment widget to "%s".',
-          $this->renderHandleLink($author_phid),
-          $new);
+      case self::TYPE_VISIBILITY:
+        if ($new == PhameConstants::VISIBILITY_DRAFT) {
+          return pht(
+            '%s marked this post as a draft.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+          '%s published this post.',
+          $this->renderHandleLink($author_phid));
+        }
         break;
     }
 
@@ -109,10 +164,22 @@ final class PhamePostTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return pht(
+          '%s authored %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+      case self::TYPE_BLOG:
+        return pht(
+          '%s moved post "%s" from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid),
+          $this->renderHandleLink($old),
+          $this->renderHandleLink($new));
       case self::TYPE_TITLE:
         if ($old === null) {
           return pht(
-            '%s created %s.',
+            '%s authored %s.',
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($object_phid));
         } else {
@@ -124,41 +191,49 @@ final class PhamePostTransaction
         break;
       case self::TYPE_BODY:
         return pht(
-          '%s updated the body for %s.',
+          '%s updated the blog post %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
-      case self::TYPE_PHAME_TITLE:
-        return pht(
-          '%s updated the phame title for %s.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid));
-        break;
-      case self::TYPE_COMMENTS_WIDGET:
-        return pht(
-          '%s updated the comments widget for %s.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid));
+      case self::TYPE_VISIBILITY:
+        if ($new == PhameConstants::VISIBILITY_DRAFT) {
+          return pht(
+            '%s marked %s as a draft.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        } else {
+          return pht(
+            '%s published %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
         break;
     }
 
     return parent::getTitleForFeed();
   }
 
-  public function getColor() {
+  public function getRemarkupBodyForFeed(PhabricatorFeedStory $story) {
     $old = $this->getOldValue();
 
     switch ($this->getTransactionType()) {
-      case self::TYPE_TITLE:
+      case self::TYPE_BODY:
         if ($old === null) {
-          return PhabricatorTransactions::COLOR_GREEN;
+          return $this->getNewValue();
         }
-        break;
+      break;
     }
 
-    return parent::getColor();
+    return null;
   }
 
+  public function getColor() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return PhabricatorTransactions::COLOR_GREEN;
+    }
+    return parent::getColor();
+  }
 
   public function hasChangeDetails() {
     switch ($this->getTransactionType()) {

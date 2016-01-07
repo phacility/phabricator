@@ -135,12 +135,12 @@ abstract class DifferentialReviewersHeraldAction
       case self::DO_ADD_REVIEWERS:
         return pht(
           'Added %s reviewer(s): %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
       case self::DO_ADD_BLOCKING_REVIEWERS:
         return pht(
           'Added %s blocking reviewer(s): %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
     }
   }

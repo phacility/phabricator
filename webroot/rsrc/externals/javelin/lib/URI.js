@@ -178,6 +178,14 @@ JX.install('URI', {
       return this._domain;
     },
 
+    getRelativeURI: function() {
+      return JX.$U(this.toString())
+        .setProtocol(null)
+        .setPort(null)
+        .setDomain(null)
+        .toString();
+    },
+
     toString : function() {
       if (__DEV__) {
         if (this.getPath() && this.getPath().charAt(0) != '/') {

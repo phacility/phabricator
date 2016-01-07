@@ -288,22 +288,6 @@ abstract class PhabricatorApplication
     return array();
   }
 
-  /**
-   * @return string
-   * @task ui
-   */
-  final public static function formatStatusCount(
-    $count,
-    $limit_string = '%s',
-    $base_string = '%d') {
-    if ($count == self::MAX_STATUS_ITEMS) {
-      $count_str = pht($limit_string, ($count - 1).'+');
-    } else {
-      $count_str = pht($base_string, $count);
-    }
-    return $count_str;
-  }
-
 
   /**
    * You can provide an optional piece of flavor text for the application. This
@@ -633,6 +617,22 @@ abstract class PhabricatorApplication
 
   public function getApplicationSearchDocumentTypes() {
     return array();
+  }
+
+  protected function getEditRoutePattern($base = null) {
+    return $base.'(?:'.
+      '(?P<id>[0-9]\d*)/)?'.
+      '(?:'.
+        '(?:'.
+          '(?P<editAction>parameters|nodefault|nocreate|nomanage|comment)'.
+          '|'.
+          '(?:form/(?P<formKey>[^/]+))'.
+        ')'.
+      '/)?';
+  }
+
+  protected function getQueryRoutePattern($base = null) {
+    return $base.'(?:query/(?P<queryKey>[^/]+)/)?';
   }
 
 }

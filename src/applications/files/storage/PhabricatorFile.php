@@ -557,7 +557,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
               'Failed to fetch remote URI "%s" after following %s redirect(s) '.
               '(%s): %s',
               $uri,
-              new PhutilNumber(count($redirects)),
+              phutil_count($redirects),
               implode(' > ', array_keys($redirects)),
               $ex->getMessage()),
             $ex);

@@ -80,7 +80,6 @@ final class NuanceSourceViewController extends NuanceController {
     $id = $source->getID();
 
     $actions = id(new PhabricatorActionListView())
-      ->setObjectURI($source->getURI())
       ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(

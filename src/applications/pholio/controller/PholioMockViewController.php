@@ -78,8 +78,6 @@ final class PholioMockViewController extends PholioController {
       ->setUser($viewer)
       ->setMock($mock)
       ->setImageID($image_id);
-    $this->addExtraQuicksandConfig(
-      array('mockViewConfig' => $mock_view->getBehaviorConfig()));
 
     $output = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Image'))
@@ -98,20 +96,19 @@ final class PholioMockViewController extends PholioController {
       ->setUser($viewer)
       ->setMock($mock);
 
-    $content = array(
-      $crumbs,
-      $object_box,
-      $output,
-      $thumb_grid,
-      $timeline,
-      $add_comment,
-    );
-
-    return $this->buildApplicationPage(
-      $content,
-      array(
-        'title' => 'M'.$mock->getID().' '.$title,
-        'pageObjects' => array($mock->getPHID()),
+    return $this->newPage()
+      ->setTitle('M'.$mock->getID().' '.$title)
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(array($mock->getPHID()))
+      ->addQuicksandConfig(
+        array('mockViewConfig' => $mock_view->getBehaviorConfig()))
+      ->appendChild(
+        array(
+          $object_box,
+          $output,
+          $thumb_grid,
+          $timeline,
+          $add_comment,
       ));
   }
 
@@ -120,7 +117,6 @@ final class PholioMockViewController extends PholioController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($mock);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -135,6 +131,24 @@ final class PholioMockViewController extends PholioController {
       ->setHref($this->getApplicationURI('/edit/'.$mock->getID().'/'))
       ->setDisabled(!$can_edit)
       ->setWorkflow(!$can_edit));
+
+    if ($mock->isClosed()) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+        ->setIcon('fa-check')
+        ->setName(pht('Open Mock'))
+        ->setHref($this->getApplicationURI('/archive/'.$mock->getID().'/'))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
+    } else {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+        ->setIcon('fa-ban')
+        ->setName(pht('Close Mock'))
+        ->setHref($this->getApplicationURI('/archive/'.$mock->getID().'/'))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
+    }
 
     $actions->addAction(
       id(new PhabricatorActionView())

@@ -143,8 +143,7 @@ final class PonderQuestionViewController extends PonderController {
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($question)
-      ->setObjectURI($request->getRequestURI());
+      ->setObject($question);
 
     $view->addAction(
       id(new PhabricatorActionView())
@@ -292,7 +291,9 @@ final class PonderQuestionViewController extends PonderController {
       $item->setObject($question);
 
       $item->addAttribute(
-        pht('%d Answer(s)', $question->getAnswerCount()));
+        pht(
+          '%s Answer(s)',
+          new PhutilNumber($question->getAnswerCount())));
 
       $list->addItem($item);
     }

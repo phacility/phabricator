@@ -10,21 +10,26 @@ final class PhabricatorXHPASTViewTreeController
   public function handleRequest(AphrontRequest $request) {
     $storage = $this->getStorageTree();
     $input = $storage->getInput();
+    $err = $storage->getReturnCode();
     $stdout = $storage->getStdout();
+    $stderr = $storage->getStderr();
 
-    $tree = XHPASTTree::newFromDataAndResolvedExecFuture(
-      $input,
-      array(0, $stdout, ''));
+    try {
+      $tree = XHPASTTree::newFromDataAndResolvedExecFuture(
+        $input,
+        array($err, $stdout, $stderr));
+    } catch (XHPASTSyntaxErrorException $ex) {
+      return $this->buildXHPASTViewPanelResponse($ex->getMessage());
+    }
 
     $tree = phutil_tag('ul', array(), $this->buildTree($tree->getRootNode()));
     return $this->buildXHPASTViewPanelResponse($tree);
   }
 
   protected function buildTree($root) {
-
     try {
       $name = $root->getTypeName();
-      $title = $root->getDescription();
+      $title = pht('Node %d: %s', $root->getID(), $name);
     } catch (Exception $ex) {
       $name = '???';
       $title = '???';

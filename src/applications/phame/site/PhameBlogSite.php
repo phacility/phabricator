@@ -38,6 +38,11 @@ final class PhameBlogSite extends PhameSite {
       $blog = id(new PhameBlogQuery())
         ->setViewer(new PhabricatorUser())
         ->withDomain($host)
+        ->needProfileImage(true)
+        ->withStatuses(
+          array(
+            PhameBlog::STATUS_ACTIVE,
+          ))
         ->executeOne();
     } catch (PhabricatorPolicyException $ex) {
       throw new Exception(

@@ -6,7 +6,7 @@
  *
  * By default, the daemon pulls **every** repository. If you want it to be
  * responsible for only some repositories, you can launch it with a list of
- * PHIDs or callsigns:
+ * repositories:
  *
  *   ./phd launch repositorypulllocal -- X Q Z
  *
@@ -172,7 +172,7 @@ final class PhabricatorRepositoryPullLocalDaemon
           pht(
             'Not enough process slots to schedule the other %s '.
             'repository(s) for updates yet.',
-            new PhutilNumber(count($queue))));
+            phutil_count($queue)));
       }
 
       if ($futures) {
@@ -228,9 +228,8 @@ final class PhabricatorRepositoryPullLocalDaemon
       $flags[] = '--no-discovery';
     }
 
-    $callsign = $repository->getCallsign();
-
-    $future = new ExecFuture('%s update %Ls -- %s', $bin, $flags, $callsign);
+    $monogram = $repository->getMonogram();
+    $future = new ExecFuture('%s update %Ls -- %s', $bin, $flags, $monogram);
 
     // Sometimes, the underlying VCS commands will hang indefinitely. We've
     // observed this occasionally with GitHub, and other users have observed
@@ -303,29 +302,43 @@ final class PhabricatorRepositoryPullLocalDaemon
       ->setViewer($this->getViewer());
 
     if ($include) {
-      $query->withCallsigns($include);
+      $query->withIdentifiers($include);
     }
 
     $repositories = $query->execute();
+    $repositories = mpull($repositories, null, 'getPHID');
 
     if ($include) {
-      $by_callsign = mpull($repositories, null, 'getCallsign');
-      foreach ($include as $name) {
-        if (empty($by_callsign[$name])) {
+      $map = $query->getIdentifierMap();
+      foreach ($include as $identifier) {
+        if (empty($map[$identifier])) {
           throw new Exception(
             pht(
-              "No repository exists with callsign '%s'!",
-              $name));
+              'No repository "%s" exists!',
+              $identifier));
         }
       }
     }
 
     if ($exclude) {
-      $exclude = array_fuse($exclude);
-      foreach ($repositories as $key => $repository) {
-        if (isset($exclude[$repository->getCallsign()])) {
-          unset($repositories[$key]);
+      $xquery = id(new PhabricatorRepositoryQuery())
+        ->setViewer($this->getViewer())
+        ->withIdentifiers($exclude);
+
+      $excluded_repos = $xquery->execute();
+      $xmap = $xquery->getIdentifierMap();
+
+      foreach ($exclude as $identifier) {
+        if (empty($xmap[$identifier])) {
+          throw new Exception(
+            pht(
+              'No repository "%s" exists!',
+              $identifier));
         }
+      }
+
+      foreach ($excluded_repos as $excluded_repo) {
+        unset($repositories[$excluded_repo->getPHID()]);
       }
     }
 

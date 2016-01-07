@@ -112,12 +112,12 @@ abstract class PhabricatorProjectHeraldAction
       case self::DO_ADD_PROJECTS:
         return pht(
           'Added %s project(s): %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
       case self::DO_REMOVE_PROJECTS:
         return pht(
           'Removed %s project(s): %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
     }
   }

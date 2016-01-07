@@ -16,6 +16,7 @@ final class PhabricatorPhurlURLEditor
 
     $types[] = PhabricatorPhurlURLTransaction::TYPE_NAME;
     $types[] = PhabricatorPhurlURLTransaction::TYPE_URL;
+    $types[] = PhabricatorPhurlURLTransaction::TYPE_ALIAS;
     $types[] = PhabricatorPhurlURLTransaction::TYPE_DESCRIPTION;
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
@@ -33,6 +34,8 @@ final class PhabricatorPhurlURLEditor
         return $object->getName();
       case PhabricatorPhurlURLTransaction::TYPE_URL:
         return $object->getLongURL();
+      case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
+        return $object->getAlias();
       case PhabricatorPhurlURLTransaction::TYPE_DESCRIPTION:
         return $object->getDescription();
     }
@@ -47,6 +50,11 @@ final class PhabricatorPhurlURLEditor
       case PhabricatorPhurlURLTransaction::TYPE_NAME:
       case PhabricatorPhurlURLTransaction::TYPE_URL:
       case PhabricatorPhurlURLTransaction::TYPE_DESCRIPTION:
+        return $xaction->getNewValue();
+      case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
+        if (!strlen($xaction->getNewValue())) {
+          return null;
+        }
         return $xaction->getNewValue();
     }
 
@@ -64,6 +72,9 @@ final class PhabricatorPhurlURLEditor
       case PhabricatorPhurlURLTransaction::TYPE_URL:
         $object->setLongURL($xaction->getNewValue());
         return;
+      case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
+        $object->setAlias($xaction->getNewValue());
+        return;
       case PhabricatorPhurlURLTransaction::TYPE_DESCRIPTION:
         $object->setDescription($xaction->getNewValue());
         return;
@@ -79,6 +90,7 @@ final class PhabricatorPhurlURLEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorPhurlURLTransaction::TYPE_NAME:
       case PhabricatorPhurlURLTransaction::TYPE_URL:
+      case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
       case PhabricatorPhurlURLTransaction::TYPE_DESCRIPTION:
         return;
     }
@@ -94,21 +106,40 @@ final class PhabricatorPhurlURLEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
-      case PhabricatorPhurlURLTransaction::TYPE_NAME:
-        $missing = $this->validateIsEmptyTextField(
+      case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
+        $overdrawn = $this->validateIsTextFieldTooLong(
           $object->getName(),
-          $xactions);
+          $xactions,
+          64);
 
-        if ($missing) {
-          $error = new PhabricatorApplicationTransactionValidationError(
+        if ($overdrawn) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
             $type,
-            pht('Required'),
-            pht('URL name is required.'),
+            pht('Alias Too Long'),
+            pht('The alias can be no longer than 64 characters.'),
             nonempty(last($xactions), null));
-
-          $error->setIsMissingFieldError(true);
-          $errors[] = $error;
         }
+
+        foreach ($xactions as $xaction) {
+          if ($xaction->getOldValue() != $xaction->getNewValue()) {
+            $new_alias = $xaction->getNewValue();
+            if (!preg_match('/[a-zA-Z]/', $new_alias)) {
+              $errors[] = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Invalid Alias'),
+                pht('The alias must contain at least one letter.'),
+                $xaction);
+            }
+            if (preg_match('/[^a-z0-9]/i', $new_alias)) {
+              $errors[] = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Invalid Alias'),
+                pht('The alias may only contain letters and numbers.'),
+                $xaction);
+            }
+          }
+        }
+
         break;
       case PhabricatorPhurlURLTransaction::TYPE_URL:
         $missing = $this->validateIsEmptyTextField(
@@ -125,6 +156,21 @@ final class PhabricatorPhurlURLEditor
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
         }
+
+        foreach ($xactions as $xaction) {
+          if ($xaction->getOldValue() != $xaction->getNewValue()) {
+            $protocols = PhabricatorEnv::getEnvConfig('uri.allowed-protocols');
+            $uri = new PhutilURI($xaction->getNewValue());
+            if (!isset($protocols[$uri->getProtocol()])) {
+              $errors[] = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Invalid URL'),
+                pht('The protocol of the URL is invalid.'),
+                null);
+            }
+          }
+        }
+
         break;
     }
 
@@ -165,11 +211,9 @@ final class PhabricatorPhurlURLEditor
 
   public function getMailTagsMap() {
     return array(
-      PhabricatorPhurlURLTransaction::MAILTAG_CONTENT =>
+      PhabricatorPhurlURLTransaction::MAILTAG_DETAILS =>
         pht(
-          "A URL's name or path changes."),
-      PhabricatorPhurlURLTransaction::MAILTAG_OTHER =>
-        pht('Other event activity not listed above occurs.'),
+          "A URL's details change."),
     );
   }
 
@@ -190,7 +234,7 @@ final class PhabricatorPhurlURLEditor
     $body = parent::buildMailBody($object, $xactions);
 
     if (strlen($description)) {
-      $body->addTextSection(
+      $body->addRemarkupSection(
         pht('URL DESCRIPTION'),
         $object->getDescription());
     }
@@ -203,5 +247,24 @@ final class PhabricatorPhurlURLEditor
     return $body;
   }
 
+  protected function didCatchDuplicateKeyException(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    Exception $ex) {
+
+    $errors = array();
+    $errors[] = new PhabricatorApplicationTransactionValidationError(
+      PhabricatorPhurlURLTransaction::TYPE_ALIAS,
+      pht('Duplicate'),
+      pht('This alias is already in use.'),
+      null);
+
+    throw new PhabricatorApplicationTransactionValidationException($errors);
+  }
+
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new PhabricatorPhurlURLReplyHandler())
+      ->setMailReceiver($object);
+  }
 
 }

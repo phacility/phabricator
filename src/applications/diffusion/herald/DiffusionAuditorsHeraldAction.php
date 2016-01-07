@@ -68,7 +68,7 @@ abstract class DiffusionAuditorsHeraldAction
       case self::DO_ADD_AUDITORS:
         return pht(
           'Added %s auditor(s): %s.',
-          new PhutilNumber(count($data)),
+          phutil_count($data),
           $this->renderHandleList($data));
     }
   }

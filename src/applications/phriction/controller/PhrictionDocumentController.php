@@ -32,27 +32,42 @@ final class PhrictionDocumentController
     $move_notice = '';
     $properties = null;
     $content = null;
+    $toc = null;
 
     if (!$document) {
 
       $document = PhrictionDocument::initializeNewDocument($viewer, $slug);
 
+      if ($slug == '/') {
+        $title = pht('Welcome to Phriction');
+        $subtitle = pht('Phriction is a simple and easy to use wiki for '.
+          'keeping track of documents and their changes.');
+        $page_title = pht('Welcome');
+        $create_text = pht('Edit this Document');
+
+      } else {
+        $title = pht('No Document Here');
+        $subtitle = pht('There is no document here, but you may create it.');
+        $page_title = pht('Page Not Found');
+        $create_text = pht('Create this Document');
+      }
+
       $create_uri = '/phriction/edit/?slug='.$slug;
+      $create_button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText($create_text)
+        ->setHref($create_uri)
+        ->setColor(PHUIButtonView::GREEN);
 
-      $notice = new PHUIInfoView();
-      $notice->setSeverity(PHUIInfoView::SEVERITY_WARNING);
-      $notice->setTitle(pht('No content here!'));
-      $notice->appendChild(
-        pht(
-          'No document found at %s. You can <strong>'.
-            '<a href="%s">create a new document here</a></strong>.',
-          phutil_tag('tt', array(), $slug),
-          $create_uri));
-      $core_content = $notice;
+      $core_content = id(new PHUIBigInfoView())
+        ->setIcon('fa-book')
+        ->setTitle($title)
+        ->setDescription($subtitle)
+        ->addAction($create_button);
 
-      $page_title = pht('Page Not Found');
     } else {
       $version = $request->getInt('v');
+
       if ($version) {
         $content = id(new PhrictionContent())->loadOneWhere(
           'documentID = %d AND version = %d',
@@ -74,7 +89,6 @@ final class PhrictionDocumentController
         $content = id(new PhrictionContent())->load($document->getContentID());
       }
       $page_title = $content->getTitle();
-
       $properties = $this
         ->buildPropertyListView($document, $content, $slug);
 
@@ -84,6 +98,8 @@ final class PhrictionDocumentController
         $current_status == PhrictionChangeType::CHANGE_MOVE_HERE) {
 
         $core_content = $content->renderContent($viewer);
+        $toc = $this->getToc($content);
+
       } else if ($current_status == PhrictionChangeType::CHANGE_DELETE) {
         $notice = new PHUIInfoView();
         $notice->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
@@ -102,7 +118,6 @@ final class PhrictionDocumentController
         $core_content = $notice->render();
       } else if ($current_status == PhrictionChangeType::CHANGE_MOVE_AWAY) {
         $new_doc_id = $content->getChangeRef();
-
         $slug_uri = null;
 
         // If the new document exists and the viewer can see it, provide a link
@@ -212,11 +227,11 @@ final class PhrictionDocumentController
       $prop_list->addPropertyList($properties);
     }
 
-    $page_content = id(new PHUIDocumentView())
+    $page_content = id(new PHUIDocumentViewPro())
       ->setHeader($header)
+      ->setToc($toc)
       ->appendChild(
         array(
-          $prop_list,
           $version_note,
           $move_notice,
           $core_content,
@@ -226,11 +241,12 @@ final class PhrictionDocumentController
       array(
         $crumbs->render(),
         $page_content,
+        $prop_list,
         $children,
       ),
       array(
         'pageObjects' => array($document->getPHID()),
-        'title'   => $page_title,
+        'title' => $page_title,
       ));
 
   }
@@ -264,7 +280,6 @@ final class PhrictionDocumentController
 
     $action_view = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($document);
 
     if (!$document->getID()) {
@@ -278,6 +293,7 @@ final class PhrictionDocumentController
     $action_view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Document'))
+        ->setDisabled(!$can_edit)
         ->setIcon('fa-pencil')
         ->setHref('/phriction/edit/'.$document->getID().'/'));
 
@@ -285,6 +301,7 @@ final class PhrictionDocumentController
       $action_view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Move Document'))
+          ->setDisabled(!$can_edit)
           ->setIcon('fa-arrows')
           ->setHref('/phriction/move/'.$document->getID().'/')
           ->setWorkflow(true));
@@ -292,6 +309,7 @@ final class PhrictionDocumentController
       $action_view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Delete Document'))
+          ->setDisabled(!$can_edit)
           ->setIcon('fa-times')
           ->setHref('/phriction/delete/'.$document->getID().'/')
           ->setWorkflow(true));
@@ -431,7 +449,7 @@ final class PhrictionDocumentController
           ),
           $list)));
 
-     return phutil_tag_div('phui-document-box', $box);
+     return phutil_tag_div('phui-document-view-pro-box', $box);
   }
 
   private function renderChildDocumentLink(array $info) {
@@ -452,6 +470,19 @@ final class PhrictionDocumentController
 
   protected function getDocumentSlug() {
     return $this->slug;
+  }
+
+  protected function getToc(PhrictionContent $content) {
+    $toc = $content->getRenderedTableOfContents();
+    if ($toc) {
+      $toc = phutil_tag_div('phui-document-toc-content', array(
+        phutil_tag_div(
+          'phui-document-toc-header',
+          pht('Contents')),
+        $toc,
+      ));
+    }
+    return $toc;
   }
 
 }

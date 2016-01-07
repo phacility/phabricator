@@ -26,12 +26,20 @@ final class PhabricatorSearchCustomFieldProxyField
     return $this;
   }
 
+  public function getLabel() {
+    return $this->getCustomField()->getFieldName();
+  }
+
   public function getCustomField() {
     return $this->customField;
   }
 
   protected function getDefaultValue() {
     return null;
+  }
+
+  public function getConduitKey() {
+    return $this->getCustomField()->getModernFieldKey();
   }
 
   protected function getValueExistsInRequest(AphrontRequest $request, $key) {
@@ -53,6 +61,14 @@ final class PhabricatorSearchCustomFieldProxyField
       $this->getSearchEngine(),
       $form,
       $this->getValue());
+  }
+
+  public function getDescription() {
+    return $this->getCustomField()->getFieldDescription();
+  }
+
+  protected function newConduitParameterType() {
+    return $this->getCustomField()->getConduitSearchParameterType();
   }
 
 }

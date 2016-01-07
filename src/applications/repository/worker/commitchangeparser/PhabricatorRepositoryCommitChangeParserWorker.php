@@ -17,12 +17,8 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    $identifier = $commit->getCommitIdentifier();
-    $callsign = $repository->getCallsign();
-    $full_name = 'r'.$callsign.$identifier;
-
-    $this->log("%s\n", pht('Parsing %s...', $full_name));
-    if ($this->isBadCommit($full_name)) {
+    $this->log("%s\n", pht('Parsing "%s"...', $commit->getMonogram()));
+    if ($this->isBadCommit($commit)) {
       $this->log(pht('This commit is marked bad!'));
       return;
     }
@@ -93,8 +89,7 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     $commit->writeImportStatusFlag(
       PhabricatorRepositoryCommit::IMPORTED_CHANGE);
 
-    id(new PhabricatorSearchIndexer())
-      ->queueDocumentForIndexing($commit->getPHID());
+    PhabricatorSearchWorker::queueDocumentForIndexing($commit->getPHID());
 
     if ($this->shouldQueueFollowupTasks()) {
       $this->queueTask(

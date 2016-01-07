@@ -85,7 +85,7 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
   }
 
   public function getCacheGranularity() {
-    return ArcanistLinter::GRANULARITY_REPOSITORY;
+    return parent::GRANULARITY_REPOSITORY;
   }
 
   public function getCacheVersion() {

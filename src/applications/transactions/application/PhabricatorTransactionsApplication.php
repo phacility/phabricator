@@ -33,6 +33,36 @@ final class PhabricatorTransactionsApplication extends PhabricatorApplication {
           => 'PhabricatorApplicationTransactionShowOlderController',
         '(?P<value>old|new)/(?<phid>[^/]+)/'
           => 'PhabricatorApplicationTransactionValueController',
+        'remarkuppreview/'
+          => 'PhabricatorApplicationTransactionRemarkupPreviewController',
+        'editengine/' => array(
+          $this->getQueryRoutePattern()
+            => 'PhabricatorEditEngineListController',
+          '(?P<engineKey>[^/]+)/' => array(
+            $this->getQueryRoutePattern() =>
+              'PhabricatorEditEngineConfigurationListController',
+            $this->getEditRoutePattern('edit/') =>
+              'PhabricatorEditEngineConfigurationEditController',
+            'sort/(?P<type>edit|create)/' =>
+              'PhabricatorEditEngineConfigurationSortController',
+            'view/(?P<key>[^/]+)/' =>
+              'PhabricatorEditEngineConfigurationViewController',
+            'save/(?P<key>[^/]+)/' =>
+              'PhabricatorEditEngineConfigurationSaveController',
+            'reorder/(?P<key>[^/]+)/' =>
+              'PhabricatorEditEngineConfigurationReorderController',
+            'defaults/(?P<key>[^/]+)/' =>
+              'PhabricatorEditEngineConfigurationDefaultsController',
+            'lock/(?P<key>[^/]+)/' =>
+              'PhabricatorEditEngineConfigurationLockController',
+            'defaultcreate/(?P<key>[^/]+)/' =>
+              'PhabricatorEditEngineConfigurationDefaultCreateController',
+            'defaultedit/(?P<key>[^/]+)/' =>
+              'PhabricatorEditEngineConfigurationIsEditController',
+            'disable/(?P<key>[^/]+)/' =>
+              'PhabricatorEditEngineConfigurationDisableController',
+          ),
+        ),
       ),
     );
   }

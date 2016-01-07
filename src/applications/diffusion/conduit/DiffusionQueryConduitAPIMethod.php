@@ -38,7 +38,7 @@ abstract class DiffusionQueryConduitAPIMethod
     return $this->defineCustomErrorTypes() +
       array(
         'ERR-UNKNOWN-REPOSITORY' =>
-          pht('There is no repository with that callsign.'),
+          pht('There is no matching repository.'),
         'ERR-UNKNOWN-VCS-TYPE' =>
           pht('Unknown repository VCS type.'),
         'ERR-UNSUPPORTED-VCS' =>
@@ -56,7 +56,8 @@ abstract class DiffusionQueryConduitAPIMethod
   final protected function defineParamTypes() {
     return $this->defineCustomParamTypes() +
       array(
-        'callsign' => 'required string',
+        'callsign' => 'optional string (deprecated)',
+        'repository' => 'optional string',
         'branch' => 'optional string',
       );
   }
@@ -95,14 +96,26 @@ abstract class DiffusionQueryConduitAPIMethod
    * should occur after @{method:getResult}, like formatting a timestamp.
    */
   final protected function execute(ConduitAPIRequest $request) {
+    $identifier = $request->getValue('repository');
+    if ($identifier === null) {
+      $identifier = $request->getValue('callsign');
+    }
+
     $drequest = DiffusionRequest::newFromDictionary(
       array(
         'user' => $request->getUser(),
-        'callsign' => $request->getValue('callsign'),
+        'repository' => $identifier,
         'branch' => $request->getValue('branch'),
         'path' => $request->getValue('path'),
         'commit' => $request->getValue('commit'),
       ));
+
+    if (!$drequest) {
+      throw new Exception(
+        pht(
+          'Repository "%s" is not a valid repository.',
+          $identifier));
+    }
 
     // Figure out whether we're going to handle this request on this device,
     // or proxy it to another node in the cluster.

@@ -1186,7 +1186,7 @@ final class PhabricatorChangeParserTestCase
           pht(
             'No test entry for commit "%s" in repository "%s"!',
             $commit_identifier,
-            $repository->getCallsign()));
+            $repository->getDisplayName()));
       }
 
       $changes = $this->parseCommit($repository, $commit);

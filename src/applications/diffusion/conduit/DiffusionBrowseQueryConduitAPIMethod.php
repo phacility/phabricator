@@ -22,6 +22,8 @@ final class DiffusionBrowseQueryConduitAPIMethod
       'path' => 'optional string',
       'commit' => 'optional string',
       'needValidityOnly' => 'optional bool',
+      'limit' => 'optional int',
+      'offset' => 'optional int',
     );
   }
 
@@ -35,6 +37,8 @@ final class DiffusionBrowseQueryConduitAPIMethod
     $repository = $drequest->getRepository();
     $path = $request->getValue('path');
     $commit = $request->getValue('commit');
+    $offset = (int)$request->getValue('offset');
+    $limit = (int)$request->getValue('limit');
     $result = $this->getEmptyResultSet();
 
     if ($path == '') {
@@ -99,6 +103,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
       $prefix = '';
     }
 
+    $count = 0;
     $results = array();
     foreach (explode("\0", rtrim($stdout)) as $line) {
       // NOTE: Limit to 5 components so we parse filenames with spaces in them
@@ -140,7 +145,15 @@ final class DiffusionBrowseQueryConduitAPIMethod
       $path_result->setFileType($file_type);
       $path_result->setFileSize($size);
 
-      $results[] = $path_result;
+      if ($count >= $offset) {
+        $results[] = $path_result;
+      }
+
+      $count++;
+
+      if ($limit && $count >= ($offset + $limit)) {
+        break;
+      }
     }
 
     // If we identified submodules, lookup the module info at this commit to
@@ -196,6 +209,8 @@ final class DiffusionBrowseQueryConduitAPIMethod
     $repository = $drequest->getRepository();
     $path = $request->getValue('path');
     $commit = $request->getValue('commit');
+    $offset = (int)$request->getValue('offset');
+    $limit = (int)$request->getValue('limit');
     $result = $this->getEmptyResultSet();
 
 
@@ -215,6 +230,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
     // but ours do.
     $trim_len = $match_len ? $match_len + 1 : 0;
 
+    $count = 0;
     foreach ($entire_manifest as $path) {
       if (strncmp($path, $match_against, $match_len)) {
         continue;
@@ -236,7 +252,16 @@ final class DiffusionBrowseQueryConduitAPIMethod
       } else {
         $type = DifferentialChangeType::FILE_DIRECTORY;
       }
-      $results[reset($parts)] = $type;
+
+      if ($count >= $offset) {
+        $results[reset($parts)] = $type;
+      }
+
+      $count++;
+
+      if ($limit && ($count >= ($offset + $limit))) {
+        break;
+      }
     }
 
     foreach ($results as $key => $type) {
@@ -266,6 +291,8 @@ final class DiffusionBrowseQueryConduitAPIMethod
     $repository = $drequest->getRepository();
     $path = $request->getValue('path');
     $commit = $request->getValue('commit');
+    $offset = (int)$request->getValue('offset');
+    $limit = (int)$request->getValue('limit');
     $result = $this->getEmptyResultSet();
 
     $subpath = $repository->getDetail('svn-subpath');
@@ -422,6 +449,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
     $path_normal = DiffusionPathIDQuery::normalizePath($path);
 
     $results = array();
+    $count = 0;
     foreach ($browse as $file) {
 
       $full_path = $file['pathName'];
@@ -431,9 +459,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
       $result_path = new DiffusionRepositoryPath();
       $result_path->setPath($file_path);
       $result_path->setFullPath($full_path);
-//      $result_path->setHash($hash);
       $result_path->setFileType($file['fileType']);
-//      $result_path->setFileSize($size);
 
       if (!empty($file['hasCommit'])) {
         $commit = idx($commits, $file['svnCommit']);
@@ -444,7 +470,15 @@ final class DiffusionBrowseQueryConduitAPIMethod
         }
       }
 
-      $results[] = $result_path;
+      if ($count >= $offset) {
+        $results[] = $result_path;
+      }
+
+      $count++;
+
+      if ($limit && ($count >= ($offset + $limit))) {
+        break;
+      }
     }
 
     if (empty($results)) {

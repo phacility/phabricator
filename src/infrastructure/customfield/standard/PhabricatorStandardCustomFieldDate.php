@@ -191,4 +191,19 @@ final class PhabricatorStandardCustomFieldDate
     }
   }
 
+  public function shouldAppearInConduitTransactions() {
+    // TODO: Dates are complicated and we don't yet support handling them from
+    // Conduit.
+    return false;
+  }
+
+  protected function newConduitSearchParameterType() {
+    // TODO: Build a new "pair<epoch|null, epoch|null>" type or similar.
+    return null;
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitEpochParameterType();
+  }
+
 }

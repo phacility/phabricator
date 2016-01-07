@@ -107,7 +107,7 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
       return array();
     }
 
-    $tokens = preg_split('/\s+|[-\[\]]/', $string);
+    $tokens = preg_split('/\s+|[-\[\]]/u', $string);
     return array_unique($tokens);
   }
 
@@ -456,6 +456,27 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
     }
 
     return $tokens;
+  }
+
+  public function getWireTokens(array $values) {
+    // TODO: This is a bit hacky for now: we're sort of generating wire
+    // results, rendering them, then reverting them back to wire results. This
+    // is pretty silly. It would probably be much cleaner to make
+    // renderTokens() call this method instead, then render from the result
+    // structure.
+    $rendered = $this->renderTokens($values);
+
+    $tokens = array();
+    foreach ($rendered as $key => $render) {
+      $tokens[$key] = id(new PhabricatorTypeaheadResult())
+        ->setPHID($render->getKey())
+        ->setIcon($render->getIcon())
+        ->setColor($render->getColor())
+        ->setDisplayName($render->getValue())
+        ->setTokenType($render->getTokenType());
+    }
+
+    return mpull($tokens, 'getWireFormat', 'getPHID');
   }
 
 }

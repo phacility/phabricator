@@ -2,8 +2,238 @@
  * @provides phame-css
  */
 
-.fb-comments,
-.fb-comments span,
-.fb-comments iframe[style] {
-  width: 100% !important;
+.phame-blog-description {
+  max-width: 800px;
+  margin: 32px auto;
+  position: relative;
+  padding: 0 8px;
+}
+
+.phame-blog-description-name {
+  font-weight: bold;
+  font-size: {$biggerfontsize};
+  margin: 0 0 4px 50px;
+}
+
+.phame-blog-description-content {
+  margin-left: 50px;
+}
+
+.phame-blog-description-image {
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-size: 100%;
+  box-shadow: inset 0 0 0 1px rgba(55,55,55,.15);
+  width: 40px;
+  height: 40px;
+  border-radius: 3px;
+  position: absolute;
+}
+
+.phame-blog-description + .phui-property-list-section {
+  border-top: 1px solid rgba(71, 87, 120, 0.20);
+  padding-top: 16px;
+}
+
+.phame-home-view .phui-document-view.phui-document-view-pro {
+  margin: 0;
+}
+
+.phame-home-view .phui-side-column {
+  background-color: #fff;
+}
+
+.device .phame-home-view .phui-side-column {
+  background-color: transparent;
+}
+
+.phame-blog-list {
+  margin: 24px 16px 16px 16px;
+  padding: 16px;
+  background-color: {$bluebackground};
+  border-radius: 3px;
+}
+
+.device .phame-blog-list {
+  padding: 16px 8px;
+  background-color: #F1F1F4;
+  margin: 0;
+  border-radius: 0;
+  border-bottom: 1px solid {$lightblueborder};
+}
+
+.phame-blog-list-item:last-child {
+  margin-bottom: 0;
+}
+
+.phame-blog-list-header {
+  font-size: {$biggerfontsize};
+  margin-bottom: 16px;
+}
+
+.phame-blog-list-header a {
+  color: {$darkbluetext};
+}
+
+.phame-blog-list-item {
+  display: block;
+  color: {$darkgreytext};
+  height: 24px;
+  position: relative;
+  margin-bottom: 8px;
+  padding-right: 20px;
+}
+
+.phame-blog-list-title:hover {
+  color: {$violet};
+  text-decoration: none;
+}
+
+.phame-blog-list-image {
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-size: 100%;
+  box-shadow: inset 0 0 0 1px rgba(55,55,55,.15);
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  position: absolute;
+}
+
+.phame-blog-list-title {
+  margin-left: 30px;
+  margin-top: 4px;
+  display: inline-block;
+  font-weight: bold;
+  color: {$bluetext};
+  width: 190px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.phame-blog-list-new-post {
+  display: block;
+  position: absolute;
+  top: 6px;
+  right: 0;
+}
+
+.phame-blog-list-new-post:hover {
+  color: {$violet};
+  text-decoration: none;
+}
+
+.phame-blog-list-new-post:hover .phame-blog-list-icon {
+  color: {$violet};
+}
+
+.phame-blog-list-icon {
+  display: block;
+  height: 14px;
+  width: 14px;
+  color: {$lightbluetext};
+}
+
+.phame-next-post-view {
+  margin: 0 auto;
+  padding: 12px 0;
+  font-family: 'Aleo', {$fontfamily};
+}
+
+.phame-next {
+  width: 360px;
+  float: right;
+  text-align: right;
+  color: #000;
+  position: relative;
+}
+
+.phame-next-arrow,
+.phame-previous-arrow {
+  border: 1px solid {$lightblueborder};
+  border-radius: 36px;
+  height: 36px;
+  width: 36px;
+  text-align: center;
+}
+
+.phame-next-arrow .phui-icon-view,
+.phame-previous-arrow .phui-icon-view {
+  height: 36px;
+  width: 34px;
+  font-size: 24px;
+  line-height: 35px;
+  color: {$lightblueborder};
+}
+
+.phame-previous-arrow {
+  float: left;
+}
+
+.phame-next-arrow {
+  float: right;
+}
+
+.phame-previous {
+  width: 360px;
+  float: left;
+  text-align: left;
+  color: #000;
+  position: relative;
+}
+
+.device .phame-previous,
+.device .phame-next {
+  width: 100px;
+}
+
+.device .phame-previous .phame-previous-title,
+.device .phame-next .phame-next-title {
+  display: none;
+}
+
+.phame-next:hover,
+.phame-previous:hover {
+  text-decoration: none;
+}
+
+.phame-next:hover .phame-next-arrow,
+.phame-previous:hover .phame-previous-arrow {
+  border-color: {$indigo};
+}
+
+.phame-next:hover .phui-icon-view,
+.phame-previous:hover .phui-icon-view {
+  color: {$indigo};
+}
+
+.phame-next-header,
+.phame-previous-header {
+  font-weight: bold;
+  font-size: {$biggerfontsize};
+}
+
+.phame-next-header {
+  top: 2px;
+  right: 50px;
+  position: absolute;
+}
+
+.phame-next-title {
+  top: 22px;
+  right: 50px;
+  position: absolute;
+}
+
+.phame-previous-header {
+  top: 2px;
+  left: 50px;
+  position: absolute;
+}
+
+.phame-previous-title {
+  top: 22px;
+  left: 50px;
+  position: absolute;
 }

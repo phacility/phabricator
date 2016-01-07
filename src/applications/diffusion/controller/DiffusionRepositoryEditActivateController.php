@@ -3,24 +3,15 @@
 final class DiffusionRepositoryEditActivateController
   extends DiffusionRepositoryEditController {
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $viewer = $request->getUser();
-    $drequest = $this->diffusionRequest;
-    $repository = $drequest->getRepository();
-
-    $repository = id(new PhabricatorRepositoryQuery())
-      ->setViewer($viewer)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->withIDs(array($repository->getID()))
-      ->executeOne();
-
-    if (!$repository) {
-      return new Aphront404Response();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContextForEdit();
+    if ($response) {
+      return $response;
     }
+
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
 
     $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
 
@@ -38,28 +29,21 @@ final class DiffusionRepositoryEditActivateController
       return id(new AphrontReloadResponse())->setURI($edit_uri);
     }
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer);
-
     if ($repository->isTracked()) {
-      $dialog
+      return $this->newDialog()
         ->setTitle(pht('Deactivate Repository?'))
         ->appendChild(
           pht('Deactivate this repository?'))
         ->addSubmitButton(pht('Deactivate Repository'))
         ->addCancelButton($edit_uri);
     } else {
-      $dialog
+      return $this->newDialog()
         ->setTitle(pht('Activate Repository?'))
         ->appendChild(
           pht('Activate this repository?'))
         ->addSubmitButton(pht('Activate Repository'))
         ->addCancelButton($edit_uri);
     }
-
-    return id(new AphrontDialogResponse())
-      ->setDialog($dialog);
   }
-
 
 }

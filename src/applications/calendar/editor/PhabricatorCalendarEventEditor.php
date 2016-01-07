@@ -436,9 +436,9 @@ final class PhabricatorCalendarEventEditor
     $body = parent::buildMailBody($object, $xactions);
 
     if (strlen($description)) {
-      $body->addTextSection(
+      $body->addRemarkupSection(
         pht('EVENT DESCRIPTION'),
-        $object->getDescription());
+        $description);
     }
 
     $body->addLinkSection(

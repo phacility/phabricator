@@ -10,15 +10,15 @@ final class PhabricatorStorageManagementProbeWorkflow
       ->setSynopsis(pht('Show approximate table sizes.'));
   }
 
-  public function execute(PhutilArgumentParser $args) {
+  public function didExecute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
     $console->writeErr(
       "%s\n",
       pht('Analyzing table sizes (this may take a moment)...'));
 
-    $api = $this->getAPI();
-    $patches = $this->getPatches();
-    $databases = $api->getDatabaseList($patches, $only_living = true);
+    $api       = $this->getAPI();
+    $patches   = $this->getPatches();
+    $databases = $api->getDatabaseList($patches, true);
 
     $conn_r = $api->getConn(null);
 

@@ -80,24 +80,10 @@ final class HeraldTokenizerFieldValue
     $viewer = $this->getViewer();
     $value = (array)$value;
 
-    // TODO: This should eventually render properly through the datasource
-    // to get icons and colors.
+    $datasource = $this->getDatasource()
+      ->setViewer($viewer);
 
-    if ($this->valueMap !== null) {
-      $map = array();
-      foreach ($value as $v) {
-        $map[$v] = idx($this->valueMap, $v, $v);
-      }
-      return $map;
-    }
-
-    $handles = $viewer->loadHandles($value);
-
-    $map = array();
-    foreach ($value as $v) {
-      $map[$v] = $handles[$v]->getName();
-    }
-    return $map;
+    return $datasource->getWireTokens($value);
   }
 
 }

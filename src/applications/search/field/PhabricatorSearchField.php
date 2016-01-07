@@ -4,16 +4,19 @@
  * @task config Configuring Fields
  * @task error Handling Errors
  * @task io Reading and Writing Field Values
+ * @task conduit Integration with Conduit
  * @task util Utility Methods
  */
 abstract class PhabricatorSearchField extends Phobject {
 
   private $key;
+  private $conduitKey;
   private $viewer;
   private $value;
   private $label;
   private $aliases = array();
   private $errors = array();
+  private $description;
 
 
 /* -(  Configuring Fields  )------------------------------------------------- */
@@ -130,6 +133,61 @@ abstract class PhabricatorSearchField extends Phobject {
   }
 
 
+  /**
+   * Provide an alternate field key for Conduit.
+   *
+   * This can allow you to choose a more usable key for API endpoints.
+   * If no key is provided, the main key is used.
+   *
+   * @param string Alternate key for Conduit.
+   * @return this
+   * @task config
+   */
+  public function setConduitKey($conduit_key) {
+    $this->conduitKey = $conduit_key;
+    return $this;
+  }
+
+
+  /**
+   * Get the field key for use in Conduit.
+   *
+   * @return string Conduit key for this field.
+   * @task config
+   */
+  public function getConduitKey() {
+    if ($this->conduitKey !== null) {
+      return $this->conduitKey;
+    }
+
+    return $this->getKey();
+  }
+
+
+  /**
+   * Set a human-readable description for this field.
+   *
+   * @param string Human-readable description.
+   * @return this
+   * @task config
+   */
+  public function setDescription($description) {
+    $this->description = $description;
+    return $this;
+  }
+
+
+  /**
+   * Get this field's human-readable description.
+   *
+   * @return string|null Human-readable description.
+   * @task config
+   */
+  public function getDescription() {
+    return $this->description;
+  }
+
+
 /* -(  Handling Errors  )---------------------------------------------------- */
 
 
@@ -215,18 +273,60 @@ abstract class PhabricatorSearchField extends Phobject {
 
 
   protected function renderControl() {
+    $control = $this->newControl();
+
+    if (!$control) {
+      return null;
+    }
+
     // TODO: We should `setError($this->getShortError())` here, but it looks
     // terrible in the form layout.
 
-    return $this->newControl()
+    return $control
       ->setValue($this->getValueForControl())
       ->setName($this->getKey())
       ->setLabel($this->getLabel());
   }
 
   public function appendToForm(AphrontFormView $form) {
-    $form->appendControl($this->renderControl());
+    $control = $this->renderControl();
+    if ($control !== null) {
+      $form->appendControl($this->renderControl());
+    }
     return $this;
+  }
+
+
+/* -(  Integration with Conduit  )------------------------------------------- */
+
+
+  /**
+   * @task conduit
+   */
+  final public function getConduitParameterType() {
+    $type = $this->newConduitParameterType();
+
+    if ($type) {
+      $type->setViewer($this->getViewer());
+    }
+
+    return $type;
+  }
+
+  protected function newConduitParameterType() {
+    return null;
+  }
+
+  public function getValueExistsInConduitRequest(array $constraints) {
+    return $this->getConduitParameterType()->getExists(
+      $constraints,
+      $this->getConduitKey());
+  }
+
+  public function readValueFromConduitRequest(array $constraints) {
+    return $this->getConduitParameterType()->getValue(
+      $constraints,
+      $this->getConduitKey());
   }
 
 
@@ -263,4 +363,7 @@ abstract class PhabricatorSearchField extends Phobject {
 
     return $list;
   }
+
+
+
 }

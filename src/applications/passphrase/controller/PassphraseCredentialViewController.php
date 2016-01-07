@@ -89,7 +89,6 @@ final class PassphraseCredentialViewController extends PassphraseController {
     }
 
     $actions = id(new PhabricatorActionListView())
-      ->setObjectURI('/K'.$id)
       ->setObject($credential)
       ->setUser($viewer);
 

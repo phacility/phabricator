@@ -112,7 +112,7 @@ final class HarbormasterBuildableSearchEngine
         } else if ($object instanceof DifferentialDiff) {
           $diff_names[] = $object->getID();
         } else if ($object instanceof PhabricatorRepository) {
-          $repository_names[] = 'r'.$object->getCallsign();
+          $repository_names[] = $object->getMonogram();
         } else if ($object instanceof PhabricatorRepositoryCommit) {
           $repository = $object->getRepository();
           $commit_names[] = $repository->formatCommitName(

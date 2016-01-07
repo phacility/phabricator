@@ -119,6 +119,8 @@ When defining custom fields using a configuration option like
     above the control when rendered on the edit view.
   - **placeholder**: A placeholder text that appears on text boxes. Only
     supported in text, int and remarkup fields (optional).
+  - **copy**: If true, this field's value will be copied when an object is
+    created using another object as a template.
 
 The `strings` value supports different strings per control type. They are:
 
@@ -127,15 +129,6 @@ The `strings` value supports different strings per control type. They are:
     - **view.yes** Text for the view interface, defaults to "Yes".
     - **search.default** Text for the search interface, defaults to "(Any)".
     - **search.require** Text for the search interface, defaults to "Require".
-
-Some applications have specific options which only work in that application.
-
-In **Maniphest**:
-
-  - **copy**: When a user creates a task, the UI gives them an option to
-    "Create Another Similar Task". Some fields from the original task are copied
-    into the new task, while others are not; by default, fields are not copied.
-    If you want this field to be copied, specify `true` for the `copy` property.
 
 Internally, Phabricator implements some additional custom field types and
 options. These are not intended for general use and are subject to abrupt
@@ -170,9 +163,11 @@ want to add a field to:
 | Projects | @{class:PhabricatorProjectCustomField} |
 
 The easiest way to get started is to drop your subclass into
-`phabricator/src/extensions/`, which should make it immediately available in the
-UI (if you use APC, you may need to restart your webserver). For example, this
-is a simple template which adds a custom field to Maniphest:
+`phabricator/src/extensions/`. If Phabricator is configured in development
+mode, the class should immediately be available in the UI. If not, you can
+restart Phabricator (for help, see @{article:Restarting Phabricator}).
+
+For example, this is a simple template which adds a custom field to Maniphest:
 
   name=ExampleManiphestCustomField.php
   <?php

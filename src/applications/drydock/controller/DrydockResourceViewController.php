@@ -74,7 +74,6 @@ final class DrydockResourceViewController extends DrydockResourceController {
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($resource);
 
     $can_release = $resource->canRelease();

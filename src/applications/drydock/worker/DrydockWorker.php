@@ -170,4 +170,86 @@ abstract class DrydockWorker extends PhabricatorWorker {
     return 15;
   }
 
+  protected function flushDrydockTaskQueue() {
+    // NOTE: By default, queued tasks are not scheduled if the current task
+    // fails. This is a good, safe default behavior. For example, it can
+    // protect us from executing side effect tasks too many times, like
+    // sending extra email.
+
+    // However, it is not the behavior we want in Drydock, because we queue
+    // followup tasks after lease and resource failures and want them to
+    // execute in order to clean things up.
+
+    // At least for now, we just explicitly flush the queue before exiting
+    // with a failure to make sure tasks get queued up properly.
+    try {
+      $this->flushTaskQueue();
+    } catch (Exception $ex) {
+      // If this fails, we want to swallow the exception so the caller throws
+      // the original error, since we're more likely to be able to understand
+      // and fix the problem if we have the original error than if we replace
+      // it with this one.
+      phlog($ex);
+    }
+
+    return $this;
+  }
+
+  protected function canReclaimResource(DrydockResource $resource) {
+    $viewer = $this->getViewer();
+
+    // Don't reclaim a resource if it has been updated recently. If two
+    // leases are fighting, we don't want them to keep reclaming resources
+    // from one another forever without making progress, so make resources
+    // immune to reclamation for a little while after they activate or update.
+
+    // TODO: It would be nice to use a more narrow time here, like "last
+    // activation or lease release", but we don't currently store that
+    // anywhere.
+
+    $updated = $resource->getDateModified();
+    $now = PhabricatorTime::getNow();
+    $ago = ($now - $updated);
+    if ($ago < phutil_units('3 minutes in seconds')) {
+      return false;
+    }
+
+    $statuses = array(
+      DrydockLeaseStatus::STATUS_PENDING,
+      DrydockLeaseStatus::STATUS_ACQUIRED,
+      DrydockLeaseStatus::STATUS_ACTIVE,
+      DrydockLeaseStatus::STATUS_RELEASED,
+      DrydockLeaseStatus::STATUS_BROKEN,
+    );
+
+    // Don't reclaim resources that have any active leases.
+    $leases = id(new DrydockLeaseQuery())
+      ->setViewer($viewer)
+      ->withResourcePHIDs(array($resource->getPHID()))
+      ->withStatuses($statuses)
+      ->setLimit(1)
+      ->execute();
+    if ($leases) {
+      return false;
+    }
+
+    return true;
+  }
+
+  protected function reclaimResource(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    $viewer = $this->getViewer();
+
+    $command = DrydockCommand::initializeNewCommand($viewer)
+      ->setTargetPHID($resource->getPHID())
+      ->setAuthorPHID($lease->getPHID())
+      ->setCommand(DrydockCommand::COMMAND_RECLAIM)
+      ->save();
+
+    $resource->scheduleUpdate();
+
+    return $this;
+  }
+
 }

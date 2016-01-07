@@ -145,7 +145,7 @@ final class PhabricatorSlowvoteEditor
     $description = $object->getDescription();
 
     if (strlen($description)) {
-      $body->addTextSection(
+      $body->addRemarkupSection(
         pht('SLOWVOTE DESCRIPTION'),
         $object->getDescription());
     }

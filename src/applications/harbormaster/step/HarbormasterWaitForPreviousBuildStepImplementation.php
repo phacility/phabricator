@@ -63,8 +63,8 @@ final class HarbormasterWaitForPreviousBuildStepImplementation
     $call = new ConduitCall(
       'diffusion.commitparentsquery',
       array(
-        'commit'   => $commit->getCommitIdentifier(),
-        'callsign' => $commit->getRepository()->getCallsign(),
+        'commit' => $commit->getCommitIdentifier(),
+        'repository' => $commit->getRepository()->getPHID(),
       ));
     $call->setUser(PhabricatorUser::getOmnipotentUser());
     $parents = $call->execute();

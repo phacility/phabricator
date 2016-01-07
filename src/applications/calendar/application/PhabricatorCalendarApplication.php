@@ -46,10 +46,6 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
         '(?:query/(?P<queryKey>[^/]+)/(?:(?P<year>\d+)/'.
           '(?P<month>\d+)/)?(?:(?P<day>\d+)/)?)?'
           => 'PhabricatorCalendarEventListController',
-        'icon/(?P<id>[1-9]\d*)/'
-          => 'PhabricatorCalendarEventEditIconController',
-        'icon/'
-          => 'PhabricatorCalendarEventEditIconController',
         'event/' => array(
           'create/'
             => 'PhabricatorCalendarEventEditController',
@@ -64,6 +60,15 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
           'comment/(?P<id>[1-9]\d*)/(?:(?P<sequence>\d+)/)?'
             => 'PhabricatorCalendarEventCommentController',
         ),
+      ),
+    );
+  }
+
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Calendar User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Calendar User Guide'),
       ),
     );
   }

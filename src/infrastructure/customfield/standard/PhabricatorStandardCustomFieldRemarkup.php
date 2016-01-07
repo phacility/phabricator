@@ -95,5 +95,16 @@ final class PhabricatorStandardCustomFieldRemarkup
     );
   }
 
+  protected function getHTTPParameterType() {
+    return new AphrontStringHTTPParameterType();
+  }
+
+  public function shouldAppearInApplicationSearch() {
+    return false;
+  }
+
+  public function getConduitEditParameterType() {
+    return new ConduitStringParameterType();
+  }
 
 }

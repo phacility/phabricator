@@ -2,15 +2,11 @@
 
 final class HeraldTranscriptListController extends HeraldController {
 
-  public function buildSideNavView($for_app = false) {
+  public function buildSideNavView() {
     $user = $this->getRequest()->getUser();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
-
-    if ($for_app) {
-      $nav->addFilter('new', pht('Create Rule'));
-    }
 
     id(new HeraldTranscriptSearchEngine())
       ->setViewer($user)
@@ -31,14 +27,9 @@ final class HeraldTranscriptListController extends HeraldController {
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $querykey = $request->getURIData('queryKey');
-
-    $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($querykey)
-      ->setSearchEngine(new HeraldTranscriptSearchEngine())
-      ->setNavigation($this->buildSideNavView());
-
-    return $this->delegateToController($controller);
+    return id(new HeraldTranscriptSearchEngine())
+      ->setController($this)
+      ->buildResponse();
   }
 
 }

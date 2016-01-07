@@ -136,4 +136,16 @@ final class PhabricatorStandardCustomFieldSelect
       ->setValueMap($this->getOptions());
   }
 
+  protected function getHTTPParameterType() {
+    return new AphrontSelectHTTPParameterType();
+  }
+
+  protected function newConduitSearchParameterType() {
+    return new ConduitStringListParameterType();
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitStringParameterType();
+  }
+
 }

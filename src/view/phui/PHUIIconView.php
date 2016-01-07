@@ -725,7 +725,26 @@ final class PHUIIconView extends AphrontTagView {
       'fa-vimeo',
       'fa-black-tie',
       'fa-fonticons',
-
+      'fa-reddit-alien',
+      'fa-edge',
+      'fa-credit-card-alt',
+      'fa-codiepie:before',
+      'fa-modx',
+      'fa-fort-awesome',
+      'fa-usb',
+      'fa-product-hunt',
+      'fa-mixcloud',
+      'fa-scribd',
+      'fa-pause-circle',
+      'fa-pause-circle-o',
+      'fa-stop-circle',
+      'fa-stop-circle-o',
+      'fa-shopping-bag',
+      'fa-shopping-basket',
+      'fa-hashtag',
+      'fa-bluetooth',
+      'fa-bluetooth-b',
+      'fa-percent',
     );
   }
 

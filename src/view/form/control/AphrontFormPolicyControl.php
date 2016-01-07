@@ -272,6 +272,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
         'capability' => $this->capability,
         'editURI' => '/policy/edit/'.$context_path,
         'customPlaceholder' => $this->getCustomPolicyPlaceholder(),
+        'disabled' => $this->getDisabled(),
       ));
 
     $selected = idx($flat_options, $this->getValue(), array());
@@ -350,6 +351,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
         $viewer,
         $space_phid),
       array(
+        'disabled' => ($this->getDisabled() ? 'disabled' : null),
         'name' => 'spacePHID',
         'class' => 'aphront-space-select-control-knob',
       ));

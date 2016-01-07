@@ -293,7 +293,8 @@ JX.install('HeraldRuleEditor', {
         },
         function(map) {
           for (var k in map) {
-            build.tokenizer.addToken(k, map[k]);
+            var v = JX.Prefab.transformDatasourceResults(map[k]);
+            build.tokenizer.addToken(k, v);
           }
         }];
     },

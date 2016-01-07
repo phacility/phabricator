@@ -40,14 +40,14 @@ final class AlmanacConsoleController extends AlmanacController {
       ->setHeaderText(pht('Console'))
       ->setObjectList($menu);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title'  => pht('Almanac Console'),
+    return $this->newPage()
+      ->setTitle(pht('Almanac Console'))
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $box,
       ));
+
   }
 
 }

@@ -2,12 +2,9 @@
 
 final class DiffusionServeController extends DiffusionController {
 
-  protected function shouldLoadDiffusionRequest() {
-    return false;
-  }
-
-  public static function isVCSRequest(AphrontRequest $request) {
-    if (!self::getCallsign($request)) {
+  public function isVCSRequest(AphrontRequest $request) {
+    $identifier = $this->getRepositoryIdentifierFromRequest($request);
+    if ($identifier === null) {
       return null;
     }
 
@@ -47,20 +44,8 @@ final class DiffusionServeController extends DiffusionController {
     return $vcs;
   }
 
-  private static function getCallsign(AphrontRequest $request) {
-    $uri = $request->getRequestURI();
-
-    $regex = '@^/diffusion/(?P<callsign>[A-Z]+)(/|$)@';
-    $matches = null;
-    if (!preg_match($regex, (string)$uri, $matches)) {
-      return null;
-    }
-
-    return $matches['callsign'];
-  }
-
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $callsign = self::getCallsign($request);
+  public function handleRequest(AphrontRequest $request) {
+    $identifier = $this->getRepositoryIdentifierFromRequest($request);
 
     // If authentication credentials have been provided, try to find a user
     // that actually matches those credentials.
@@ -99,7 +84,7 @@ final class DiffusionServeController extends DiffusionController {
     try {
       $repository = id(new PhabricatorRepositoryQuery())
         ->setViewer($viewer)
-        ->withCallsigns(array($callsign))
+        ->withIdentifiers(array($identifier))
         ->executeOne();
       if (!$repository) {
         return new PhabricatorVCSResponse(

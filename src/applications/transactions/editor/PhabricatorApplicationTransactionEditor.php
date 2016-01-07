@@ -242,8 +242,23 @@ abstract class PhabricatorApplicationTransactionEditor
     return $this->applicationEmail;
   }
 
+  public function getTransactionTypesForObject($object) {
+    $old = $this->object;
+    try {
+      $this->object = $object;
+      $result = $this->getTransactionTypes();
+      $this->object = $old;
+    } catch (Exception $ex) {
+      $this->object = $old;
+      throw $ex;
+    }
+    return $result;
+  }
+
   public function getTransactionTypes() {
     $types = array();
+
+    $types[] = PhabricatorTransactions::TYPE_CREATE;
 
     if ($this->object instanceof PhabricatorSubscribableInterface) {
       $types[] = PhabricatorTransactions::TYPE_SUBSCRIBERS;
@@ -290,23 +305,32 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return null;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return array_values($this->subscribers);
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
         return $object->getViewPolicy();
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
         return $object->getEditPolicy();
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
         return $object->getJoinPolicy();
       case PhabricatorTransactions::TYPE_SPACE:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
+
         $space_phid = $object->getSpacePHID();
         if ($space_phid === null) {
-          if ($this->getIsNewObject()) {
-            // In this case, just return `null` so we know this is the initial
-            // transaction and it should be hidden.
-            return null;
-          }
-
           $default_space = PhabricatorSpacesNamespaceQuery::getDefaultSpace();
           if ($default_space) {
             $space_phid = $default_space->getPHID();
@@ -351,6 +375,8 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return null;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return $this->getPHIDTransactionNewValue($xaction);
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -402,6 +428,8 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return true;
       case PhabricatorTransactions::TYPE_COMMENT:
         return $xaction->hasComment();
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
@@ -464,6 +492,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionInternalEffects($xaction);
+      case PhabricatorTransactions::TYPE_CREATE:
       case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -514,6 +543,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionExternalEffects($xaction);
+      case PhabricatorTransactions::TYPE_CREATE:
       case PhabricatorTransactions::TYPE_EDGE:
       case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
@@ -762,8 +792,6 @@ abstract class PhabricatorApplicationTransactionEditor
         throw new PhabricatorApplicationTransactionValidationException($errors);
       }
 
-      $file_phids = $this->extractFilePHIDs($object, $xactions);
-
       if ($object->getID()) {
         foreach ($xactions as $xaction) {
 
@@ -800,18 +828,32 @@ abstract class PhabricatorApplicationTransactionEditor
       $this->adjustTransactionValues($object, $xaction);
     }
 
-    $xactions = $this->filterTransactions($object, $xactions);
-
-    if (!$xactions) {
+    try {
+      $xactions = $this->filterTransactions($object, $xactions);
+    } catch (Exception $ex) {
       if ($read_locking) {
         $object->endReadLocking();
-        $read_locking = false;
       }
       if ($transaction_open) {
         $object->killTransaction();
-        $transaction_open = false;
       }
-      return array();
+      throw $ex;
+    }
+
+    // TODO: Once everything is on EditEngine, just use getIsNewObject() to
+    // figure this out instead.
+    $mark_as_create = false;
+    $create_type = PhabricatorTransactions::TYPE_CREATE;
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() == $create_type) {
+        $mark_as_create = true;
+      }
+    }
+
+    if ($mark_as_create) {
+      foreach ($xactions as $xaction) {
+        $xaction->setIsCreateTransaction(true);
+      }
     }
 
     // Now that we've merged, filtered, and combined transactions, check for
@@ -821,6 +863,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     $xactions = $this->sortTransactions($xactions);
+    $file_phids = $this->extractFilePHIDs($object, $xactions);
 
     if ($is_preview) {
       $this->loadHandles($xactions);
@@ -1050,10 +1093,11 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if ($this->supportsSearch()) {
-      id(new PhabricatorSearchIndexer())
-        ->queueDocumentForIndexing(
-          $object->getPHID(),
-          $this->getSearchContextParameter($object, $xactions));
+      PhabricatorSearchWorker::queueDocumentForIndexing(
+        $object->getPHID(),
+        array(
+          'transactionPHIDs' => mpull($xactions, 'getPHID'),
+        ));
     }
 
     if ($this->shouldPublishFeedStory($object, $xactions)) {
@@ -1359,7 +1403,7 @@ abstract class PhabricatorApplicationTransactionEditor
    * resigning from a revision in Differential implies removing yourself as
    * a reviewer.
    */
-  private function expandTransactions(
+  protected function expandTransactions(
     PhabricatorLiskDAO $object,
     array $xactions) {
 
@@ -1650,7 +1694,7 @@ abstract class PhabricatorApplicationTransactionEditor
       throw new Exception(
         pht(
           "Invalid '%s' value for PHID transaction. Value should contain only ".
-          "keys '%s' (add PHIDs), '%' (remove PHIDs) and '%s' (set PHIDS).",
+          "keys '%s' (add PHIDs), '%s' (remove PHIDs) and '%s' (set PHIDS).",
           'new',
           '+',
           '-',
@@ -1888,7 +1932,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     foreach ($no_effect as $key => $xaction) {
-      if ($xaction->getComment()) {
+      if ($xaction->hasComment()) {
         $xaction->setTransactionType($type_comment);
         $xaction->setOldValue(null);
         $xaction->setNewValue(null);
@@ -2158,6 +2202,51 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if ($xactions && strlen(last($xactions)->getNewValue())) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Check that text field input isn't longer than a specified length.
+   *
+   * A text field input is invalid if the length of the input is longer than a
+   * specified length. This length can be determined by the space allotted in
+   * the database, or given arbitrarily.
+   * This method is intended to make implementing @{method:validateTransaction}
+   * more convenient:
+   *
+   *   $overdrawn = $this->validateIsTextFieldTooLong(
+   *     $object->getName(),
+   *     $xactions,
+   *     $field_length);
+   *
+   * This will return `true` if the net effect of the object and transactions
+   * is a field that is too long.
+   *
+   * @param wild Current field value.
+   * @param list<PhabricatorApplicationTransaction> Transactions editing the
+   *          field.
+   * @param integer for maximum field length.
+   * @return bool True if the field will be too long after edits.
+   */
+  protected function validateIsTextFieldTooLong(
+    $field_value,
+    array $xactions,
+    $length) {
+
+    if ($xactions) {
+      $new_value_length = phutil_utf8_strlen(last($xactions)->getNewValue());
+      if ($new_value_length <= $length) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+
+    $old_value_length = phutil_utf8_strlen($field_value);
+    if ($old_value_length <= $length) {
       return false;
     }
 
@@ -2610,7 +2699,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $body->addRawSection(implode("\n", $headers));
 
     foreach ($comments as $comment) {
-      $body->addRemarkupSection($comment);
+      $body->addRemarkupSection(null, $comment);
     }
   }
 
@@ -2775,15 +2864,6 @@ abstract class PhabricatorApplicationTransactionEditor
     return false;
   }
 
-  /**
-   * @task search
-   */
-  protected function getSearchContextParameter(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-    return null;
-  }
-
 
 /* -(  Herald Integration )-------------------------------------------------- */
 
@@ -2822,12 +2902,15 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $adapter = $this->buildHeraldAdapter($object, $xactions);
-    $adapter->setContentSource($this->getContentSource());
-    $adapter->setIsNewObject($this->getIsNewObject());
+    $adapter = $this->buildHeraldAdapter($object, $xactions)
+      ->setContentSource($this->getContentSource())
+      ->setIsNewObject($this->getIsNewObject())
+      ->setAppliedTransactions($xactions);
+
     if ($this->getApplicationEmail()) {
       $adapter->setApplicationEmail($this->getApplicationEmail());
     }
+
     $xscript = HeraldEngine::loadAndApplyRules($adapter);
 
     $this->setHeraldAdapter($adapter);

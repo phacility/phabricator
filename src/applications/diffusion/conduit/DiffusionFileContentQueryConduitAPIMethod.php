@@ -19,7 +19,6 @@ final class DiffusionFileContentQueryConduitAPIMethod
     return array(
       'path' => 'required string',
       'commit' => 'required string',
-      'needsBlame' => 'optional bool',
       'timeout' => 'optional int',
       'byteLimit' => 'optional int',
     );
@@ -27,12 +26,9 @@ final class DiffusionFileContentQueryConduitAPIMethod
 
   protected function getResult(ConduitAPIRequest $request) {
     $drequest = $this->getDiffusionRequest();
-    $needs_blame = $request->getValue('needsBlame');
-    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
-      $drequest);
-    $file_query
-      ->setViewer($request->getUser())
-      ->setNeedsBlame($needs_blame);
+
+    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest($drequest)
+      ->setViewer($request->getUser());
 
     $timeout = $request->getValue('timeout');
     if ($timeout) {
@@ -46,11 +42,7 @@ final class DiffusionFileContentQueryConduitAPIMethod
 
     $file_content = $file_query->loadFileContent();
 
-    if ($needs_blame) {
-      list($text_list, $rev_list, $blame_dict) = $file_query->getBlameData();
-    } else {
-      $text_list = $rev_list = $blame_dict = array();
-    }
+    $text_list = $rev_list = $blame_dict = array();
 
     $file_content
       ->setBlameDict($blame_dict)

@@ -29,7 +29,6 @@ final class PhabricatorRepositoryPullEngine
     $is_svn = false;
 
     $vcs = $repository->getVersionControlSystem();
-    $callsign = $repository->getCallsign();
 
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
@@ -37,9 +36,9 @@ final class PhabricatorRepositoryPullEngine
         if (!$repository->isHosted()) {
           $this->skipPull(
             pht(
-              "Repository '%s' is a non-hosted Subversion repository, which ".
-              "does not require a local working copy to be pulled.",
-              $callsign));
+              'Repository "%s" is a non-hosted Subversion repository, which '.
+              'does not require a local working copy to be pulled.',
+              $repository->getDisplayName()));
           return;
         }
         $is_svn = true;
@@ -55,13 +54,12 @@ final class PhabricatorRepositoryPullEngine
         break;
     }
 
-    $callsign = $repository->getCallsign();
     $local_path = $repository->getLocalPath();
     if ($local_path === null) {
       $this->abortPull(
         pht(
-          "No local path is configured for repository '%s'.",
-          $callsign));
+          'No local path is configured for repository "%s".',
+          $repository->getDisplayName()));
     }
 
     try {
@@ -73,8 +71,8 @@ final class PhabricatorRepositoryPullEngine
       if (!Filesystem::pathExists($local_path)) {
         $this->logPull(
           pht(
-            "Creating a new working copy for repository '%s'.",
-            $callsign));
+            'Creating a new working copy for repository "%s".',
+            $repository->getDisplayName()));
         if ($is_git) {
           $this->executeGitCreate();
         } else if ($is_hg) {
@@ -86,8 +84,8 @@ final class PhabricatorRepositoryPullEngine
         if (!$repository->isHosted()) {
           $this->logPull(
             pht(
-              "Updating the working copy for repository '%s'.",
-              $callsign));
+              'Updating the working copy for repository "%s".',
+              $repository->getDisplayName()));
           if ($is_git) {
             $this->verifyGitOrigin($repository);
             $this->executeGitUpdate();
@@ -113,7 +111,10 @@ final class PhabricatorRepositoryPullEngine
 
     } catch (Exception $ex) {
       $this->abortPull(
-        pht('Pull of "%s" failed: %s', $callsign, $ex->getMessage()),
+        pht(
+          "Pull of '%s' failed: %s",
+          $repository->getDisplayName(),
+          $ex->getMessage()),
         $ex);
     }
 
@@ -334,12 +335,12 @@ final class PhabricatorRepositoryPullEngine
             $remote_uri);
         }
       } else if ($err) {
-        throw new Exception(
-          pht(
-            "git fetch failed with error #%d:\nstdout:%s\n\nstderr:%s\n",
-            $err,
-            $stdout,
-            $stderr));
+        throw new CommandException(
+          pht('Failed to fetch changes!'),
+          $future->getCommand(),
+          $err,
+          $stdout,
+          $stderr);
       } else {
         $retry = false;
       }

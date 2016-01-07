@@ -75,6 +75,16 @@ class PhabricatorBarePageView extends AphrontPageView {
                        'maximum-scale=1',
         ));
     }
+
+    $mask_icon = phutil_tag(
+      'link',
+      array(
+        'rel' => 'mask-icon',
+        'color' => '#3D4B67',
+        'href' => celerity_get_resource_uri(
+          '/rsrc/favicons/mask-icon.svg'),
+      ));
+
     $icon_tag_76 = phutil_tag(
       'link',
       array(
@@ -130,8 +140,9 @@ class PhabricatorBarePageView extends AphrontPageView {
 
     $developer = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
     return hsprintf(
-      '%s%s%s%s%s%s%s%s',
+      '%s%s%s%s%s%s%s%s%s',
       $viewport_tag,
+      $mask_icon,
       $icon_tag_76,
       $icon_tag_120,
       $icon_tag_152,

@@ -14,7 +14,6 @@ final class PhabricatorOwnersDetailController
       ->setViewer($viewer)
       ->withIDs(array($request->getURIData('id')))
       ->needPaths(true)
-      ->needOwners(true)
       ->executeOne();
     if (!$package) {
       return new Aphront404Response();
@@ -219,17 +218,37 @@ final class PhabricatorOwnersDetailController
     $edit_uri = $this->getApplicationURI("/edit/{$id}/");
     $paths_uri = $this->getApplicationURI("/paths/{$id}/");
 
-    $view = id(new PhabricatorActionListView())
+    $action_list = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($package)
-      ->addAction(
+      ->setObject($package);
+
+    $action_list->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit Package'))
           ->setIcon('fa-pencil')
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit)
-          ->setHref($edit_uri))
-      ->addAction(
+          ->setHref($edit_uri));
+
+    if ($package->isArchived()) {
+      $action_list->addAction(
+          id(new PhabricatorActionView())
+            ->setName(pht('Activate Package'))
+            ->setIcon('fa-check')
+            ->setDisabled(!$can_edit)
+            ->setWorkflow($can_edit)
+            ->setHref($this->getApplicationURI("/archive/{$id}/")));
+    } else {
+      $action_list->addAction(
+          id(new PhabricatorActionView())
+            ->setName(pht('Archive Package'))
+            ->setIcon('fa-ban')
+            ->setDisabled(!$can_edit)
+            ->setWorkflow($can_edit)
+            ->setHref($this->getApplicationURI("/archive/{$id}/")));
+    }
+
+    $action_list->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit Paths'))
           ->setIcon('fa-folder-open')
@@ -237,7 +256,7 @@ final class PhabricatorOwnersDetailController
           ->setWorkflow(!$can_edit)
           ->setHref($paths_uri));
 
-    return $view;
+    return $action_list;
   }
 
   private function renderPathsTable(array $paths, array $repositories) {
@@ -249,9 +268,8 @@ final class PhabricatorOwnersDetailController
       if (!$repo) {
         continue;
       }
-      $href = DiffusionRequest::generateDiffusionURI(
+      $href = $repo->generateURI(
         array(
-          'callsign' => $repo->getCallsign(),
           'branch'   => $repo->getDefaultBranch(),
           'path'     => $path->getPath(),
           'action'   => 'browse',

@@ -56,7 +56,6 @@ final class PhabricatorAccessControlTestCase extends PhabricatorTestCase {
     $env->overrideEnvConfig('phabricator.base-uri', 'http://'.$host);
     $env->overrideEnvConfig('policy.allow-public', false);
     $env->overrideEnvConfig('auth.require-email-verification', false);
-    $env->overrideEnvConfig('auth.email-domains', array());
     $env->overrideEnvConfig('security.require-multi-factor-auth', false);
 
 

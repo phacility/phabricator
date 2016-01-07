@@ -172,11 +172,11 @@ final class CelerityDefaultPostprocessor
       'sh-pinkbackground'   => '#fbeaf8',
 
       // Shade Grey
-      'sh-lightgreyborder'    => '#d8d8d8',
+      'sh-lightgreyborder'    => '#e3e4e8',
       'sh-greyborder'         => '#b2b2b2',
       'sh-greyicon'           => '#757575',
       'sh-greytext'           => '#555555',
-      'sh-greybackground'     => '#e7e7e7',
+      'sh-greybackground'     => '#edeef2',
 
       // Shade Disabled
       'sh-lightdisabledborder'  => '#e5e5e5',

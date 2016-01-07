@@ -55,7 +55,7 @@ final class ReleephDiffSizeFieldSpecification
         $mr_changes['tests']['lines'],
         count($mr_changes['tests']['paths']));
       foreach ($mr_changes['tests']['paths'] as $mr_test_path) {
-        $test_blurb .= pht("%s\n", $mr_test_path);
+        $test_blurb .= sprintf("%s\n", $mr_test_path);
       }
 
       $test_tag = javelin_tag(

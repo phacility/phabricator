@@ -9,6 +9,9 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
   private $loadingText;
   private $controlID;
   private $previewURI;
+  private $previewType;
+
+  const DOCUMENT = 'document';
 
   protected function canAppendChild() {
     return false;
@@ -31,6 +34,11 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
 
   public function setLoadingText($loading_text) {
     $this->loadingText = $loading_text;
+    return $this;
+  }
+
+  public function setPreviewType($type) {
+    $this->previewType = $type;
     return $this;
   }
 
@@ -73,16 +81,6 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
       ),
       nonempty($this->loadingText, pht('Loading preview...')));
 
-    $header = null;
-    if ($this->header) {
-      $header = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-preview-header',
-        ),
-        $this->header);
-    }
-
     $preview = phutil_tag(
       'div',
       array(
@@ -91,7 +89,26 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
       ),
       $loading);
 
-    $content = array($header, $preview);
+    if (!$this->previewType) {
+      $header = null;
+      if ($this->header) {
+        $header = phutil_tag(
+          'div',
+          array(
+            'class' => 'phui-preview-header',
+          ),
+          $this->header);
+      }
+      $content = array($header, $preview);
+
+    } else if ($this->previewType == self::DOCUMENT) {
+      $header = id(new PHUIHeaderView())
+        ->setHeader(pht('%s (Preview)', $this->header));
+
+      $content = id(new PHUIDocumentViewPro())
+        ->setHeader($header)
+        ->appendChild($preview);
+    }
 
     return id(new PHUIObjectBoxView())
       ->appendChild($content)

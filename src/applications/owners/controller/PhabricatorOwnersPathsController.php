@@ -83,7 +83,7 @@ final class PhabricatorOwnersPathsController
       }
     }
 
-    $repos = mpull($repos, 'getCallsign', 'getPHID');
+    $repos = mpull($repos, 'getMonogram', 'getPHID');
     asort($repos);
 
     $template = new AphrontTypeaheadTemplateView();

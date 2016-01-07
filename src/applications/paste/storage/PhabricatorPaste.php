@@ -10,7 +10,8 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     PhabricatorProjectInterface,
     PhabricatorDestructibleInterface,
     PhabricatorApplicationTransactionInterface,
-    PhabricatorSpacesInterface {
+    PhabricatorSpacesInterface,
+    PhabricatorConduitResultInterface {
 
   protected $title;
   protected $authorPHID;
@@ -41,11 +42,13 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
     return id(new PhabricatorPaste())
       ->setTitle('')
+      ->setLanguage('')
       ->setStatus(self::STATUS_ACTIVE)
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
-      ->setSpacePHID($actor->getDefaultSpacePHID());
+      ->setSpacePHID($actor->getDefaultSpacePHID())
+      ->attachRawContent(null);
   }
 
   public static function getStatusNameMap() {
@@ -246,6 +249,47 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
   public function getSpacePHID() {
     return $this->spacePHID;
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('title')
+        ->setType('string')
+        ->setDescription(pht('The title of the paste.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('authorPHID')
+        ->setType('phid')
+        ->setDescription(pht('User PHID of the author.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('language')
+        ->setType('string?')
+        ->setDescription(pht('Language to use for syntax highlighting.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('string')
+        ->setDescription(pht('Active or arhived status of the paste.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'title' => $this->getTitle(),
+      'authorPHID' => $this->getAuthorPHID(),
+      'language' => nonempty($this->getLanguage(), null),
+      'status' => $this->getStatus(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array(
+      id(new PhabricatorPasteContentSearchEngineAttachment())
+        ->setAttachmentKey('content'),
+    );
   }
 
 }

@@ -2,7 +2,9 @@
 
 final class PhabricatorAuthSSHKey
   extends PhabricatorAuthDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $objectPHID;
   protected $name;
@@ -16,6 +18,7 @@ final class PhabricatorAuthSSHKey
 
   protected function getConfiguration() {
     return array(
+      self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text255',
         'keyType' => 'text255',
@@ -63,8 +66,10 @@ final class PhabricatorAuthSSHKey
     return $this;
   }
 
-
-
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorAuthSSHKeyPHIDType::TYPECONST);
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -87,6 +92,17 @@ final class PhabricatorAuthSSHKey
   public function describeAutomaticCapability($capability) {
     return pht(
       'SSH keys inherit the policies of the user or object they authenticate.');
+  }
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+    $this->delete();
+    $this->saveTransaction();
   }
 
 }

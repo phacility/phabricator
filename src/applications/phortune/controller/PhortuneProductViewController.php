@@ -22,8 +22,7 @@ final class PhortuneProductViewController extends PhortuneController {
     $edit_uri = $this->getApplicationURI('product/edit/'.$product->getID().'/');
 
     $actions = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObjectURI($request->getRequestURI());
+      ->setUser($viewer);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(

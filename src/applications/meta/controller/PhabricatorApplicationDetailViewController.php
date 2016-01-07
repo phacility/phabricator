@@ -135,8 +135,7 @@ final class PhabricatorApplicationDetailViewController
     PhabricatorApplication $selected) {
 
     $view = id(new PhabricatorActionListView())
-      ->setUser($user)
-      ->setObjectURI($this->getRequest()->getRequestURI());
+      ->setUser($user);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $user,

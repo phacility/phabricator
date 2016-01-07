@@ -214,14 +214,24 @@ final class PhabricatorAuthStartController
         $request->getRequestURI());
     }
 
-    $dialog = new AphrontDialogView();
-    $dialog->setUser($viewer);
-    $dialog->setTitle(pht('Login Required'));
-    $dialog->appendChild(pht('You must login to continue.'));
-    $dialog->addSubmitButton(pht('Login'));
-    $dialog->addCancelButton('/');
+    // Often, users end up here by clicking a disabled action link in the UI
+    // (for example, they might click "Edit Blocking Tasks" on a Maniphest
+    // task page). After they log in we want to send them back to that main
+    // object page if we can, since it's confusing to end up on a standalone
+    // page with only a dialog (particularly if that dialog is another error,
+    // like a policy exception).
 
-    return id(new AphrontDialogResponse())->setDialog($dialog);
+    $via_header = AphrontRequest::getViaHeaderName();
+    $via_uri = AphrontRequest::getHTTPHeader($via_header);
+    if (strlen($via_uri)) {
+      PhabricatorCookies::setNextURICookie($request, $via_uri, $force = true);
+    }
+
+    return $this->newDialog()
+      ->setTitle(pht('Login Required'))
+      ->appendParagraph(pht('You must login to take this action.'))
+      ->addSubmitButton(pht('Login'))
+      ->addCancelButton('/');
   }
 
 

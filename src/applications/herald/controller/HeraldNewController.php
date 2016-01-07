@@ -206,13 +206,14 @@ final class HeraldNewController extends HeraldController {
       ->buildApplicationCrumbs()
       ->addTextCrumb(pht('Create Rule'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
-      array(
-        'title' => pht('Create Herald Rule'),
+    $title = pht('Create Herald Rule');
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $form_box,
       ));
   }
 

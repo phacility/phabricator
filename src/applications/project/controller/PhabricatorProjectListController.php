@@ -26,16 +26,9 @@ final class PhabricatorProjectListController
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    $can_create = $this->hasApplicationCapability(
-      ProjectCreateProjectsCapability::CAPABILITY);
-
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('Create Project'))
-        ->setHref($this->getApplicationURI('create/'))
-        ->setIcon('fa-plus-square')
-        ->setWorkflow(!$can_create)
-        ->setDisabled(!$can_create));
+    id(new PhabricatorProjectEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs);
 
     return $crumbs;
   }

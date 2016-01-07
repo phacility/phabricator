@@ -7,7 +7,8 @@ final class PhrictionDocument extends PhrictionDAO
     PhabricatorFlaggableInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorFulltextInterface {
 
   protected $slug;
   protected $depth;
@@ -250,6 +251,14 @@ final class PhrictionDocument extends PhrictionDAO
       }
 
     $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+
+  public function newFulltextEngine() {
+    return new PhrictionDocumentFulltextEngine();
   }
 
 }

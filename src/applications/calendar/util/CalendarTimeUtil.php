@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This class is useful for generating various time objects, relative to the
  * user and their timezone.

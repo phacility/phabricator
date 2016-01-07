@@ -257,7 +257,7 @@ final class PhabricatorSlowvoteEditController
           ->setValue($button)
           ->addCancelButton($cancel_uri));
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+    $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);
 
     $form_box = id(new PHUIObjectBoxView())
@@ -265,13 +265,12 @@ final class PhabricatorSlowvoteEditController
       ->setFormErrors($errors)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
-      array(
-        'title' => $title,
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $form_box,
       ));
   }
 

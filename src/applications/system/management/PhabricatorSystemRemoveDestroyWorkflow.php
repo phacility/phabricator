@@ -119,7 +119,7 @@ EOBANNER;
     $console->writeOut(
       pht(
         'These %s object(s) will be destroyed forever:',
-        new PhutilNumber(count($named_objects)))."\n\n");
+        phutil_count($named_objects))."\n\n");
 
     foreach ($named_objects as $object_name => $object) {
       $phid = $object->getPHID();
@@ -136,7 +136,7 @@ EOBANNER;
       $ok = $console->confirm(
         pht(
           'Are you absolutely certain you want to destroy these %s object(s)?',
-          new PhutilNumber(count($named_objects))));
+          phutil_count($named_objects)));
       if (!$ok) {
         throw new PhutilArgumentUsageException(
           pht('Aborted, your objects are safe.'));
@@ -160,7 +160,7 @@ EOBANNER;
       "%s\n",
       pht(
         'Permanently destroyed %s object(s).',
-        new PhutilNumber(count($named_objects))));
+        phutil_count($named_objects)));
 
     return 0;
   }

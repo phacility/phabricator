@@ -8,7 +8,7 @@ final class PhameBlogEditor
   }
 
   public function getEditorObjectsDescription() {
-    return pht('Blogs');
+    return pht('Phame Blogs');
   }
 
   public function getTransactionTypes() {
@@ -17,10 +17,9 @@ final class PhameBlogEditor
     $types[] = PhameBlogTransaction::TYPE_NAME;
     $types[] = PhameBlogTransaction::TYPE_DESCRIPTION;
     $types[] = PhameBlogTransaction::TYPE_DOMAIN;
-    $types[] = PhameBlogTransaction::TYPE_SKIN;
+    $types[] = PhameBlogTransaction::TYPE_STATUS;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
-    $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
 
     return $types;
   }
@@ -36,8 +35,8 @@ final class PhameBlogEditor
         return $object->getDescription();
       case PhameBlogTransaction::TYPE_DOMAIN:
         return $object->getDomain();
-      case PhameBlogTransaction::TYPE_SKIN:
-        return $object->getSkin();
+      case PhameBlogTransaction::TYPE_STATUS:
+        return $object->getStatus();
     }
   }
 
@@ -48,9 +47,14 @@ final class PhameBlogEditor
     switch ($xaction->getTransactionType()) {
       case PhameBlogTransaction::TYPE_NAME:
       case PhameBlogTransaction::TYPE_DESCRIPTION:
-      case PhameBlogTransaction::TYPE_DOMAIN:
-      case PhameBlogTransaction::TYPE_SKIN:
+      case PhameBlogTransaction::TYPE_STATUS:
         return $xaction->getNewValue();
+      case PhameBlogTransaction::TYPE_DOMAIN:
+        $domain = $xaction->getNewValue();
+        if (!strlen($xaction->getNewValue())) {
+          return null;
+        }
+        return $domain;
     }
   }
 
@@ -65,8 +69,8 @@ final class PhameBlogEditor
         return $object->setDescription($xaction->getNewValue());
       case PhameBlogTransaction::TYPE_DOMAIN:
         return $object->setDomain($xaction->getNewValue());
-      case PhameBlogTransaction::TYPE_SKIN:
-        return $object->setSkin($xaction->getNewValue());
+      case PhameBlogTransaction::TYPE_STATUS:
+        return $object->setStatus($xaction->getNewValue());
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -80,7 +84,7 @@ final class PhameBlogEditor
       case PhameBlogTransaction::TYPE_NAME:
       case PhameBlogTransaction::TYPE_DESCRIPTION:
       case PhameBlogTransaction::TYPE_DOMAIN:
-      case PhameBlogTransaction::TYPE_SKIN:
+      case PhameBlogTransaction::TYPE_STATUS:
         return;
     }
 
@@ -93,6 +97,7 @@ final class PhameBlogEditor
     array $xactions) {
 
     $errors = parent::validateTransaction($object, $type, $xactions);
+
 
     switch ($type) {
       case PhameBlogTransaction::TYPE_NAME:
@@ -112,6 +117,9 @@ final class PhameBlogEditor
         }
         break;
       case PhameBlogTransaction::TYPE_DOMAIN:
+        if (!$xactions) {
+          continue;
+        }
         $custom_domain = last($xactions)->getNewValue();
         if (empty($custom_domain)) {
           continue;
@@ -158,17 +166,82 @@ final class PhameBlogEditor
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return false;
+    return true;
   }
 
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return false;
+    return true;
   }
+
+   protected function getMailTo(PhabricatorLiskDAO $object) {
+    $phids = array();
+    $phids[] = $this->requireActor()->getPHID();
+    $phids[] = $object->getCreatorPHID();
+
+    return $phids;
+  }
+
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $phid = $object->getPHID();
+    $name = $object->getName();
+
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject($name)
+      ->addHeader('Thread-Topic', $phid);
+  }
+
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new PhameBlogReplyHandler())
+      ->setMailReceiver($object);
+  }
+
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $body = parent::buildMailBody($object, $xactions);
+
+    $body->addLinkSection(
+      pht('BLOG DETAIL'),
+      PhabricatorEnv::getProductionURI($object->getViewURI()));
+
+    return $body;
+  }
+
+  public function getMailTagsMap() {
+    return array(
+      PhameBlogTransaction::MAILTAG_DETAILS =>
+        pht("A blog's details change."),
+      PhameBlogTransaction::MAILTAG_SUBSCRIBERS =>
+        pht("A blog's subscribers change."),
+      PhameBlogTransaction::MAILTAG_OTHER =>
+        pht('Other blog activity not listed above occurs.'),
+    );
+  }
+
+  protected function getMailSubjectPrefix() {
+    return '[Phame]';
+  }
+
 
   protected function supportsSearch() {
     return false;
+  }
+
+  protected function shouldApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  protected function buildHeraldAdapter(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    return id(new HeraldPhameBlogAdapter())
+      ->setBlog($object);
   }
 
 }

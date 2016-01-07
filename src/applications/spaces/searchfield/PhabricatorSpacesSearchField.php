@@ -40,4 +40,8 @@ final class PhabricatorSpacesSearchField
     return $phids;
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitPHIDListParameterType();
+  }
+
 }

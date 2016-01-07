@@ -14,6 +14,14 @@ JX.behavior('policy-control', function(config) {
   var input = JX.$(config.inputID);
   var value = config.value;
 
+  if (config.disabled) {
+    JX.DOM.alterClass(control, 'disabled-control', true);
+    JX.DOM.listen(control, 'click', null, function(e) {
+      e.kill();
+    });
+    return;
+  }
+
   var menu = new JX.PHUIXDropdownMenu(control)
     .setWidth(260)
     .setAlign('left');

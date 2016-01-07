@@ -6,7 +6,8 @@ final class AlmanacBinding
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
-    AlmanacPropertyInterface {
+    AlmanacPropertyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $servicePHID;
   protected $devicePHID;
@@ -203,5 +204,15 @@ final class AlmanacBinding
 
     return $timeline;
   }
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->delete();
+  }
+
 
 }

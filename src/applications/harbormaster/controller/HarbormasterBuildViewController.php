@@ -377,7 +377,7 @@ final class HarbormasterBuildViewController
         array(
           pht(
             '%s empty logs are hidden.',
-            new PhutilNumber(count($empty_logs))),
+            phutil_count($empty_logs)),
           ' ',
           javelin_tag(
             'a',
@@ -445,8 +445,7 @@ final class HarbormasterBuildViewController
 
     $list = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($build)
-      ->setObjectURI("/build/{$id}");
+      ->setObject($build);
 
     $can_restart = $build->canRestartBuild();
     $can_pause = $build->canPauseBuild();

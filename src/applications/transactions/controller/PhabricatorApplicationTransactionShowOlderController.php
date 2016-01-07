@@ -8,8 +8,7 @@ final class PhabricatorApplicationTransactionShowOlderController
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
 
     $object = id(new PhabricatorObjectQuery())
       ->withPHIDs(array($request->getURIData('phid')))
@@ -18,30 +17,17 @@ final class PhabricatorApplicationTransactionShowOlderController
     if (!$object) {
       return new Aphront404Response();
     }
+
     if (!$object instanceof PhabricatorApplicationTransactionInterface) {
       return new Aphront404Response();
     }
 
-    $template = $object->getApplicationTransactionTemplate();
-    $queries = id(new PhutilClassMapQuery())
-      ->setAncestorClass('PhabricatorApplicationTransactionQuery')
-      ->execute();
-
-    $object_query = null;
-    foreach ($queries as $query) {
-      if ($query->getTemplateApplicationTransaction() == $template) {
-        $object_query = $query;
-        break;
-      }
-    }
-
-    if (!$object_query) {
+    $query = PhabricatorApplicationTransactionQuery::newQueryForObject($object);
+    if (!$query) {
       return new Aphront404Response();
     }
 
-    $timeline = $this->buildTransactionTimeline(
-      $object,
-      $query);
+    $timeline = $this->buildTransactionTimeline($object, $query);
 
     $phui_timeline = $timeline->buildPHUITimelineView($with_hiding = false);
     $phui_timeline->setShouldAddSpacers(false);

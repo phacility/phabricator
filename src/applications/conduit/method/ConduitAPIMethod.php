@@ -9,6 +9,7 @@ abstract class ConduitAPIMethod
   extends Phobject
   implements PhabricatorPolicyInterface {
 
+  private $viewer;
 
   const METHOD_STATUS_STABLE      = 'stable';
   const METHOD_STATUS_UNSTABLE    = 'unstable';
@@ -36,6 +37,10 @@ abstract class ConduitAPIMethod
    */
   abstract public function getMethodDescription();
 
+  public function getMethodDocumentation() {
+    return null;
+  }
+
   abstract protected function defineParamTypes();
   abstract protected function defineReturnType();
 
@@ -45,8 +50,6 @@ abstract class ConduitAPIMethod
 
   abstract protected function execute(ConduitAPIRequest $request);
 
-
-  public function __construct() {}
 
   public function getParamTypes() {
     $types = $this->defineParamTypes();
@@ -110,6 +113,8 @@ abstract class ConduitAPIMethod
   }
 
   public function executeMethod(ConduitAPIRequest $request) {
+    $this->setViewer($request->getUser());
+
     return $this->execute($request);
   }
 
@@ -132,6 +137,16 @@ abstract class ConduitAPIMethod
     list($head, $tail) = explode('.', $name, 2);
 
     return "{$head}.{$ord}.{$tail}";
+  }
+
+  public static function getMethodStatusMap() {
+    $map = array(
+      self::METHOD_STATUS_STABLE => pht('Stable'),
+      self::METHOD_STATUS_UNSTABLE => pht('Unstable'),
+      self::METHOD_STATUS_DEPRECATED => pht('Deprecated'),
+    );
+
+    return $map;
   }
 
   public function getApplicationName() {
@@ -209,6 +224,15 @@ abstract class ConduitAPIMethod
     }
 
     return null;
+  }
+
+  final public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  final public function getViewer() {
+    return $this->viewer;
   }
 
 /* -(  Paging Results  )----------------------------------------------------- */

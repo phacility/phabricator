@@ -32,7 +32,7 @@ final class PhabricatorUSEnglishTranslation
       '%d path(s)' => array('%d path', '%d paths'),
       '%d diff(s)' => array('%d diff', '%d diffs'),
 
-      '%d Answer(s)' => array('%d Answer', '%d Answers'),
+      '%s Answer(s)' => array('%s Answer', '%s Answers'),
       'Show %d Comment(s)' => array('Show %d Comment', 'Show %d Comments'),
 
       '%s DIFF LINK(S)' => array('DIFF LINK', 'DIFF LINKS'),
@@ -55,49 +55,49 @@ final class PhabricatorUSEnglishTranslation
         'There are %d aggregate facts in storage.',
       ),
 
-      '%d Commit(s) Awaiting Audit' => array(
-        '%d Commit Awaiting Audit',
-        '%d Commits Awaiting Audit',
+      '%s Commit(s) Awaiting Audit' => array(
+        '%s Commit Awaiting Audit',
+        '%s Commits Awaiting Audit',
       ),
 
-      '%d Problem Commit(s)' => array(
-        '%d Problem Commit',
-        '%d Problem Commits',
+      '%s Problem Commit(s)' => array(
+        '%s Problem Commit',
+        '%s Problem Commits',
       ),
 
-      '%d Review(s) Blocking Others' => array(
-        '%d Review Blocking Others',
-        '%d Reviews Blocking Others',
+      '%s Review(s) Blocking Others' => array(
+        '%s Review Blocking Others',
+        '%s Reviews Blocking Others',
       ),
 
-      '%d Review(s) Need Attention' => array(
-        '%d Review Needs Attention',
-        '%d Reviews Need Attention',
+      '%s Review(s) Need Attention' => array(
+        '%s Review Needs Attention',
+        '%s Reviews Need Attention',
       ),
 
-      '%d Review(s) Waiting on Others' => array(
-        '%d Review Waiting on Others',
-        '%d Reviews Waiting on Others',
+      '%s Review(s) Waiting on Others' => array(
+        '%s Review Waiting on Others',
+        '%s Reviews Waiting on Others',
       ),
 
-      '%d Active Review(s)' => array(
-        '%d Active Review',
-        '%d Active Reviews',
+      '%s Active Review(s)' => array(
+        '%s Active Review',
+        '%s Active Reviews',
       ),
 
-      '%d Flagged Object(s)' => array(
-        '%d Flagged Object',
-        '%d Flagged Objects',
+      '%s Flagged Object(s)' => array(
+        '%s Flagged Object',
+        '%s Flagged Objects',
       ),
 
-      '%d Object(s) Tracked' => array(
-        '%d Object Tracked',
-        '%d Objects Tracked',
+      '%s Object(s) Tracked' => array(
+        '%s Object Tracked',
+        '%s Objects Tracked',
       ),
 
-      '%d Assigned Task(s)' => array(
-        '%d Assigned Task',
-        '%d Assigned Tasks',
+      '%s Assigned Task(s)' => array(
+        '%s Assigned Task',
+        '%s Assigned Tasks',
       ),
 
       'Show %d Lint Message(s)' => array(
@@ -114,17 +114,17 @@ final class PhabricatorUSEnglishTranslation
         'This is a binary file. It is %s bytes in length.',
       ),
 
-      '%d Action(s) Have No Effect' => array(
+      '%s Action(s) Have No Effect' => array(
         'Action Has No Effect',
         'Actions Have No Effect',
       ),
 
-      '%d Action(s) With No Effect' => array(
+      '%s Action(s) With No Effect' => array(
         'Action With No Effect',
         'Actions With No Effect',
       ),
 
-      'Some of your %d action(s) have no effect:' => array(
+      'Some of your %s action(s) have no effect:' => array(
         'One of your actions has no effect:',
         'Some of your actions have no effect:',
       ),
@@ -139,7 +139,7 @@ final class PhabricatorUSEnglishTranslation
         'Apply Remaining Actions',
       ),
 
-      'The %d action(s) you are taking have no effect:' => array(
+      'The %s action(s) you are taking have no effect:' => array(
         'The action you are taking has no effect:',
         'The actions you are taking have no effect:',
       ),
@@ -178,14 +178,14 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
-      '%s merged %d task(s): %s.' => array(
+      '%s merged %s task(s): %s.' => array(
         array(
           '%s merged a task: %3$s.',
           '%s merged tasks: %3$s.',
         ),
       ),
 
-      '%s merged %d task(s) %s into %s.' => array(
+      '%s merged %s task(s) %s into %s.' => array(
         array(
           '%s merged %3$s into %4$s.',
           '%s merged tasks %3$s into %4$s.',
@@ -550,9 +550,9 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
-      '%d comment(s)' => array('%d comment', '%d comments'),
-      '%d rejection(s)' => array('%d rejection', '%d rejections'),
-      '%d update(s)' => array('%d update', '%d updates'),
+      '%s comment(s)' => array('%s comment', '%s comments'),
+      '%s rejection(s)' => array('%s rejection', '%s rejections'),
+      '%s update(s)' => array('%s update', '%s updates'),
 
       'This configuration value is defined in these %d '.
       'configuration source(s): %s.' => array(
@@ -562,9 +562,9 @@ final class PhabricatorUSEnglishTranslation
         'configuration sources: %s.',
       ),
 
-      '%d Open Pull Request(s)' => array(
-        '%d Open Pull Request',
-        '%d Open Pull Requests',
+      '%s Open Pull Request(s)' => array(
+        '%s Open Pull Request',
+        '%s Open Pull Requests',
       ),
 
       'Stale (%s day(s))' => array(
@@ -766,13 +766,21 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
-      '%d project hashtag(s) are already used: %s.' => array(
-          'Project hashtag %2$s is already used.',
-          '%d project hashtags are already used: %2$s.',
+      '%s project hashtag(s) are already used by other projects: %s.' => array(
+        'Project hashtag "%2$s" is already used by another project.',
+        'Some project hashtags are already used by other projects: %2$s.',
       ),
 
       '%s changed project hashtag(s), added %d: %s; removed %d: %s.' =>
         '%s changed project hashtags, added %3$s; removed %5$s.',
+
+      'Hashtags must contain at least one letter or number. %s '.
+      'project hashtag(s) are invalid: %s.' => array(
+        'Hashtags must contain at least one letter or number. The '.
+        'hashtag "%2$s" is not valid.',
+        'Hashtags must contain at least one letter or number. These '.
+        'hashtags are invalid: %2$s.',
+      ),
 
       '%s added %d project hashtag(s): %s.' => array(
         array(
@@ -810,14 +818,11 @@ final class PhabricatorUSEnglishTranslation
         '%d Users Need Approval',
       ),
 
-      '%s older changes(s) are hidden.' => array(
-        '%d older change is hidden.',
-        '%d older changes are hidden.',
-      ),
-
       '%s, %s line(s)' => array(
-        '%s, %s line',
-        '%s, %s lines',
+        array(
+          '%s, %s line',
+          '%s, %s lines',
+        ),
       ),
 
       '%s pushed %d commit(s) to %s.' => array(
@@ -1153,6 +1158,10 @@ final class PhabricatorUSEnglishTranslation
         'Found %s book.',
         'Found %s books.',
       ),
+      'Found %s file(s)...' => array(
+        'Found %s file...',
+        'Found %s files...',
+      ),
       'Found %s file(s) in project.' => array(
         'Found %s file in project.',
         'Found %s files in project.',
@@ -1392,6 +1401,10 @@ final class PhabricatorUSEnglishTranslation
         '%s Day',
         '%s Days',
       ),
+      '%s Day(s) Ago' => array(
+        '%s Day Ago',
+        '%s Days Ago',
+      ),
 
       'Setting retention policy for "%s" to %s day(s).' => array(
         'Setting retention policy for "%s" to one day.',
@@ -1425,6 +1438,82 @@ final class PhabricatorUSEnglishTranslation
         'WARNING: There are unapproved authorizations!',
       ),
 
+      'Found %s Open Resource(s)' => array(
+        'Found %s Open Resource',
+        'Found %s Open Resources',
+      ),
+
+      '%s Open Resource(s) Remain' => array(
+        '%s Open Resource Remain',
+        '%s Open Resources Remain',
+      ),
+
+      'Found %s Blueprint(s)' => array(
+        'Found %s Blueprint',
+        'Found %s Blueprints',
+      ),
+
+      '%s Blueprint(s) Can Allocate' => array(
+        '%s Blueprint Can Allocate',
+        '%s Blueprints Can Allocate',
+      ),
+
+      '%s Blueprint(s) Enabled' => array(
+        '%s Blueprint Enabled',
+        '%s Blueprints Enabled',
+      ),
+
+      '%s Event(s)' => array(
+        '%s Event',
+        '%s Events',
+      ),
+
+      '%s Unit(s)' => array(
+        '%s Unit',
+        '%s Units',
+      ),
+
+      'QUEUEING TASKS (%s Commit(s)):' => array(
+        'QUEUEING TASKS (%s Commit):',
+        'QUEUEING TASKS (%s Commits):',
+      ),
+
+      'Found %s total commit(s); updating...' => array(
+        'Found %s total commit; updating...',
+        'Found %s total commits; updating...',
+      ),
+
+      'Not enough process slots to schedule the other %s '.
+      'repository(s) for updates yet.' => array(
+        'Not enough process slots to schedule the other '.'
+        repository for update yet.',
+        'Not enough process slots to schedule the other %s '.
+        'repositories for updates yet.',
+      ),
+
+
+      '%s updated %s, added %d: %s.' =>
+        '%s updated %s, added: %4$s.',
+
+      '%s updated %s, removed %s: %s.' =>
+        '%s updated %s, removed: %4$s.',
+
+      '%s updated %s, added %s: %s; removed %s: %s.' =>
+        '%s updated %s, added: %4$s; removed: %6$s.',
+
+      '%s updated %s for %s, added %d: %s.' =>
+        '%s updated %s for %s, added: %5$s.',
+
+      '%s updated %s for %s, removed %s: %s.' =>
+        '%s updated %s for %s, removed: %5$s.',
+
+      '%s updated %s for %s, added %s: %s; removed %s: %s.' =>
+        '%s updated %s for %s, added: %5$s; removed; %7$s.',
+
+      'Permanently destroyed %s object(s).' => array(
+        'Permanently destroyed %s object.',
+        'Permanently destroyed %s objects.',
+      ),
     );
   }
 

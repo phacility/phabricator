@@ -24,11 +24,15 @@ final class ManiphestTaskAssignOtherHeraldAction
   protected function getDatasource() {
     // TODO: Eventually, it would be nice to get "limit = 1" exported from here
     // up to the UI.
-    return new PhabricatorPeopleDatasource();
+    return new ManiphestAssigneeDatasource();
   }
 
   public function renderActionDescription($value) {
-    return pht('Assign task to: %s.', $this->renderHandleList($value));
+    if (head($value) === PhabricatorPeopleNoOwnerDatasource::FUNCTION_TOKEN) {
+      return pht('Unassign task.');
+    } else {
+      return pht('Assign task to: %s.', $this->renderHandleList($value));
+    }
   }
 
 }

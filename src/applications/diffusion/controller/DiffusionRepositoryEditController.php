@@ -6,12 +6,13 @@ abstract class DiffusionRepositoryEditController
   protected function buildApplicationCrumbs($is_main = false) {
     $crumbs = parent::buildApplicationCrumbs();
 
-    if ($this->diffusionRequest) {
-      $repository = $this->getDiffusionRequest()->getRepository();
-      $repo_uri = $this->getRepositoryControllerURI($repository, '');
+    if ($this->hasDiffusionRequest()) {
+      $drequest = $this->getDiffusionRequest();
+      $repository = $drequest->getRepository();
+      $repo_uri = $repository->getURI();
       $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
 
-      $crumbs->addTextCrumb('r'.$repository->getCallsign(), $repo_uri);
+      $crumbs->addTextCrumb($repository->getDisplayname(), $repo_uri);
 
       if ($is_main) {
         $crumbs->addTextCrumb(pht('Edit Repository'));

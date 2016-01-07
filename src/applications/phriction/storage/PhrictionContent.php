@@ -21,6 +21,8 @@ final class PhrictionContent extends PhrictionDAO
   protected $changeType;
   protected $changeRef;
 
+  private $renderedTableOfContents;
+
   public function renderContent(PhabricatorUser $viewer) {
     return PhabricatorMarkupEngine::renderOneObject(
       $this,
@@ -98,27 +100,22 @@ final class PhrictionContent extends PhrictionDAO
     $output,
     PhutilMarkupEngine $engine) {
 
-    $classes = array();
-    $classes[] = 'phabricator-remarkup';
-    $toc = PhutilRemarkupHeaderBlockRule::renderTableOfContents(
-      $engine);
-
-    if ($toc) {
-      $classes[] = 'remarkup-has-toc';
-      $toc = phutil_tag_div('phabricator-remarkup-toc', array(
-        phutil_tag_div(
-          'phabricator-remarkup-toc-header',
-          pht('Table of Contents')),
-        $toc,
-      ));
-    }
+    $this->renderedTableOfContents =
+      PhutilRemarkupHeaderBlockRule::renderTableOfContents($engine);
 
     return phutil_tag(
       'div',
       array(
-        'class' => implode(' ', $classes),
+        'class' => 'phabricator-remarkup',
       ),
-      array($toc, $output));
+      $output);
+  }
+
+  /**
+   * @task markup
+   */
+  public function getRenderedTableOfContents() {
+    return $this->renderedTableOfContents;
   }
 
 

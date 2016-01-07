@@ -116,6 +116,25 @@ final class PhabricatorPeopleProfilePictureController
       }
     }
 
+    $builtins = array(
+      'user1.png',
+      'user2.png',
+      'user3.png',
+      'user4.png',
+      'user5.png',
+      'user6.png',
+      'user7.png',
+      'user8.png',
+      'user9.png',
+      );
+    foreach ($builtins as $builtin) {
+      $file = PhabricatorFile::loadBuiltin($viewer, $builtin);
+      $images[$file->getPHID()] = array(
+        'uri' => $file->getBestURI(),
+        'tip' => pht('Builtin Image'),
+      );
+    }
+
     // Try to add external account images for any associated external accounts.
     $accounts = id(new PhabricatorExternalAccountQuery())
       ->setViewer($viewer)

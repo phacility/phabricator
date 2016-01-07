@@ -49,14 +49,15 @@ final class HeraldRuleViewController extends HeraldController {
       new HeraldTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-        $timeline,
-      ),
-      array(
-        'title' => $rule->getName(),
+    $title = $rule->getName();
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $object_box,
+          $timeline,
       ));
   }
 
@@ -66,8 +67,7 @@ final class HeraldRuleViewController extends HeraldController {
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($rule)
-      ->setObjectURI($this->getApplicationURI("rule/{$id}/"));
+      ->setObject($rule);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,

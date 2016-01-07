@@ -50,7 +50,12 @@ JX.behavior('refresh-csrf', function(config) {
 
   // Additionally, add the CSRF token as an HTTP header to every AJAX request.
   JX.Request.listen('open', function(r) {
-    r.getTransport().setRequestHeader(config.header, current_token);
+    var via = JX.$U(window.location).getRelativeURI();
+
+    var xport = r.getTransport();
+
+    xport.setRequestHeader(config.header, current_token);
+    xport.setRequestHeader(config.viaHeader, via);
   });
 
   // Does this type of routable show the "Busy" spinner?

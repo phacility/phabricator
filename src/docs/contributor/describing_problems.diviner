@@ -1,0 +1,159 @@
+@title Describing Root Problems
+@group detail
+
+Explains how to describe a root problem effectively.
+
+Overview
+========
+
+We receive many feature requests with poor problem descriptions. You may have
+filed such a request if you've been sent here. This document explains what we
+want, and how to give us the information to help you.
+
+We will **never** implement a feature request without first understanding the
+root problem.
+
+Good problem descriptions let us answer your questions quickly and correctly,
+and suggest workarounds or alternate ways to accomplish what you want.
+
+Poor problem descriptions require us to ask multiple clarifying questions and
+do not give us enough information to suggest alternate solutions or
+workarounds. We need to keep going back and forth to understand the problem
+you're really facing, which means it will take a long time to get the answer
+you want.
+
+
+What We Want
+============
+
+We want a description of your overarching goal. The problem you started trying
+to solve first, long before you decided what feature you needed.
+
+This doesn't need to be very detailed, we just need to know what you are
+ultimately hoping to accomplish.
+
+Problem descriptions should include context and explain why you're encountering
+a problem and why it's important for you to resolve it.
+
+Here are some examples of good ways to start a problem description:
+
+> My company does contracting work for government agencies. Because of the
+> nature of our customers, deadlines are critical and it's very important
+> for us to keep track of where we are on a timeline. We're using Maniphest
+> to track tasks...
+
+> I have poor eyesight, and use a screenreader to help me use software like
+> Phabricator in my job as a developer. I'm having difficulty...
+
+> We work on a large server program which has very long compile times.
+> Switching branches is a huge pain (you have to rebuild the binary after
+> every switch, which takes about 8 minutes), but we've recently begun using
+> `git worktree` to help, which has made life a lot better. However, ...
+
+> I triage manual test failures from our offshore QA team. Here's how our
+> workflow works...
+
+All of these descriptions are helpful: the provide context about what goals
+you're trying to accomplish and why.
+
+Here are some examples of ways to start a problem description that probably
+are not very good:
+
+> {icon times color=red} Add custom keyboard shortcuts.
+
+> {icon times color=red} I have a problem: there is no way to download
+> .tar archives of repositories.
+
+> {icon times color=red} I want an RSS feed of my tokens. My root problem is
+> that I do not have an RSS feed of my tokens.
+
+> {icon times color=red} There is no way to see other users' email addresses.
+> That is a problem.
+
+> {icon times color=red} I've used some other software that has a cool
+> feature. Phabricator should have that feature too.
+
+These problem descriptions are not helpful. They do not describe goals or
+provide context.
+
+
+"5 Whys" Technique
+================
+
+If you're having trouble understanding what we're asking for, one technique
+which may help is ask yourself "Why?" repeatedly. Each answer will usually
+get you closer to describing the root problem.
+
+For example:
+
+> I want custom keyboard shortcuts.
+
+This is a very poor feature request which does not describe the root problem.
+It limits us to only one possible solution. Try asking "Why?" to get closer
+to the root problem.
+
+> **Why?**
+> I want to add a shortcut to create a new task.
+
+This is still very poor, but we can now think about solutions involving making
+this whole flow easier, or adding a shortcut for exactly this to the upstream,
+which might be a lot easier than adding custom keyboard shortcuts.
+
+It's common to stop here and report this as your root problem. This is **not**
+a root problem. This problem is only //slightly// more general than the one
+we started with. Let's ask "Why?" again to get closer to the root problem.
+
+> **Why?**
+> I create a lot of very similar tasks every day.
+
+This is still quite poor, but we can now think about solutions like a bulk task
+creation flow, or maybe point you at task creation templating or prefilling or
+the Conduit API or email integration or Doorkeeper.
+
+> **Why?**
+> The other developers email me issues and I copy/paste them into Maniphest.
+
+This is getting closer, but still doesn't tell us what your goal is.
+
+> **Why?**
+> We set up email integration before, but each task needs to have specific
+> projects so that didn't work and now I'm stuck doing the entry by hand.
+
+This is in the realm of reasonable, and likely easy to solve with custom
+inbound addresses and Herald rules, or with a small extension to Herald. We
+might try to improve the documentation to make the feature easier to discover
+or understand.
+
+You could (and should) go even further than this and explain why tasks need to
+be tagged with specific projects. It's very easy to provide more context and
+can only improve the speed and quality of our response.
+
+Note that this solution (Herald rules on inbound email) has nothing to do with
+the narrow feature request (keyboard shortcuts) that you otherwise arrived at,
+but there's no possible way we can suggest a solution involving email
+integration or Herald if your report doesn't even mention that part of the
+context.
+
+
+Additional Resources
+====================
+
+Poor problem descriptions are a common issue in software development and
+extensively documented elsewhere. Here are some additional resources describing
+how to describe problems and ask questions effectivey:
+
+  - [[ http://www.catb.org/esr/faqs/smart-questions.html | How To Ask
+    Questions The Smart Way ]], by Eric S. Raymond
+  - [[ http://xyproblem.info | XY Problem ]]
+  - [[ https://en.wikipedia.org/wiki/5_Whys | 5 Whys Technique ]]
+
+Asking good questions and describing problems clearly is an important,
+fundamental communication skill that software professionals should cultivate.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to @{article:Contribuing Feature Requests}.

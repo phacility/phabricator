@@ -6,9 +6,14 @@ final class DiffusionChangeController extends DiffusionController {
     return true;
   }
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $drequest = $this->diffusionRequest;
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
+    }
+
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
 
     $content = array();
 
@@ -33,7 +38,6 @@ final class DiffusionChangeController extends DiffusionController {
     }
 
     $repository = $drequest->getRepository();
-    $callsign = $repository->getCallsign();
     $changesets = array(
       0 => $changeset,
     );
@@ -59,7 +63,8 @@ final class DiffusionChangeController extends DiffusionController {
     $left_uri = $drequest->generateURI($raw_params);
     $changeset_view->setRawFileURIs($left_uri, $right_uri);
 
-    $changeset_view->setRenderURI('/diffusion/'.$callsign.'/diff/');
+    $changeset_view->setRenderURI($repository->getPathURI('diff/'));
+
     $changeset_view->setWhitespace(
       DifferentialChangesetParser::WHITESPACE_SHOW_ALL);
     $changeset_view->setUser($viewer);
@@ -89,15 +94,18 @@ final class DiffusionChangeController extends DiffusionController {
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-        $content,
-      ),
-      array(
-        'title' => pht('Change'),
-      ));
+    return $this->newPage()
+      ->setTitle(
+        array(
+          basename($drequest->getPath()),
+          $repository->getDisplayName(),
+        ))
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $object_box,
+          $content,
+        ));
   }
 
   private function buildActionView(DiffusionRequest $drequest) {
@@ -142,7 +150,6 @@ final class DiffusionChangeController extends DiffusionController {
       ->setActionList($actions);
 
     $stable_commit = $drequest->getStableCommit();
-    $callsign = $drequest->getRepository()->getCallsign();
 
     $view->addProperty(
       pht('Commit'),

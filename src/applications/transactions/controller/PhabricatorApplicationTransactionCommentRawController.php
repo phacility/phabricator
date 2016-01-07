@@ -3,19 +3,13 @@
 final class PhabricatorApplicationTransactionCommentRawController
   extends PhabricatorApplicationTransactionController {
 
-  private $phid;
-
-  public function willProcessRequest(array $data) {
-    $this->phid = $data['phid'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $phid = $request->getURIData('phid');
 
     $xaction = id(new PhabricatorObjectQuery())
-      ->withPHIDs(array($this->phid))
-      ->setViewer($user)
+      ->withPHIDs(array($phid))
+      ->setViewer($viewer)
       ->executeOne();
 
     if (!$xaction) {
@@ -34,7 +28,7 @@ final class PhabricatorApplicationTransactionCommentRawController
 
     $obj_phid = $xaction->getObjectPHID();
     $obj_handle = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withPHIDs(array($obj_phid))
       ->executeOne();
 
@@ -59,13 +53,13 @@ final class PhabricatorApplicationTransactionCommentRawController
             $addendum = PhabricatorMarkupEngine::renderOneObject(
               id(new PhabricatorMarkupOneOff())->setContent($details_text),
               'default',
-              $user);
+              $viewer);
           }
         }
       }
     }
     $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->addCancelButton($obj_handle->getURI())
       ->setTitle($title);
 

@@ -167,6 +167,10 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     return self::getStatusAttribute($status, 'transaction.color');
   }
 
+  public static function isDisabledStatus($status) {
+    return self::getStatusAttribute($status, 'disabled');
+  }
+
   public static function getStatusIcon($status) {
     $icon = self::getStatusAttribute($status, 'transaction.icon');
     if ($icon) {
@@ -274,6 +278,7 @@ final class ManiphestTaskStatus extends ManiphestConstants {
           'prefixes' => 'optional list<string>',
           'suffixes' => 'optional list<string>',
           'keywords' => 'optional list<string>',
+          'disabled' => 'optional bool',
         ));
     }
 

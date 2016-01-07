@@ -2,24 +2,31 @@
  * @provides phui-document-view-pro-css
  */
 
-.phui-document-view.phui-document-view-pro,
-.phui-document-view-pro-box {
+.phui-document-view.phui-document-view-pro {
   max-width: 800px;
-  padding: 0 16px;
+  padding: 16px 16px 64px 16px;
+  margin: 0 auto;
+}
+
+.phui-document-container {
+  background-color: #fff;
   position: relative;
+  border-bottom: 1px solid #dedee1;
+}
+
+.phui-document-view-pro-box,
+.phui-document-properties {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.phui-property-list-section {
+  max-width: 800px;
   margin: 16px auto;
 }
 
-.phui-document-properties {
-  max-width: 800px;
-  padding: 0 16px;
-  background-color: {$lightgreybackground};
-  margin: 0 auto;
-  border-radius: 3px;
-}
-
-.device-phone .phui-document-properties {
-  margin: 0 8px;
+.device .phui-property-list-section {
+  margin: 0 8px 16px;
 }
 
 .device-phone .phui-document-view.phui-document-view-pro {
@@ -29,7 +36,7 @@
 
 .phui-document-view-pro .phui-document-toc {
   position: absolute;
-  top: 18px;
+  top: 34px;
   left: -36px;
 }
 
@@ -49,7 +56,7 @@ a.button.phui-document-toc {
   position: absolute;
   z-index: 30;
   background-color: #fff;
-  top: 38px;
+  top: 52px;
   left: -44px;
 }
 
@@ -73,6 +80,20 @@ a.button.phui-document-toc {
   color: #fff;
 }
 
+.phui-document-view-pro .phui-document-toc-content {
+  margin: 4px 12px;
+}
+
+.phui-document-view-pro .phui-document-toc-header {
+  font-weight: bold;
+  color: {$bluetext};
+  margin-bottom: 8px;
+}
+
+.phui-document-view-pro .phui-document-toc-content li {
+  margin: 4px 8px;
+}
+
 .phui-document-view-pro .phui-document-content .phabricator-remarkup {
   padding: 16px 0;
   line-height: 1.7em;
@@ -94,6 +115,7 @@ a.button.phui-document-toc {
 
 .device-phone .phui-document-view.phui-document-view-pro .phui-header-shell {
   margin: 8px 0 0 0;
+  padding: 8px 0 20px;
 }
 
 .phui-document-view.phui-document-view-pro .phui-header-tall
@@ -106,4 +128,73 @@ a.button.phui-document-toc {
 .device-phone .phui-document-view-pro .phui-header-subheader {
   display: block;
   padding: 8px 0 0 0;
+}
+
+.phui-document-view-pro .phui-info-view {
+  margin: 16px 0 0 0;
+}
+
+
+
+
+.phui-document-view-pro-box .phui-timeline-view {
+  padding: 16px 0 0 0;
+  background: none;
+  border-top: 1px solid rgba(71, 87, 120, 0.20);
+}
+
+.phui-document-view-pro-box .phui-timeline-image {
+  border-radius: 25px;
+}
+
+.phui-document-view-pro-box .phui-timeline-wedge {
+  display: none;
+}
+
+.phui-document-view-pro-box .phui-timeline-major-event .phui-timeline-group {
+  border: none;
+}
+
+.phui-document-view-pro-box .phui-timeline-major-event .phui-timeline-content {
+  border: none;
+}
+
+.device-desktop .phui-document-view-pro-box
+  .phui-timeline-event-view.phui-timeline-minor-event {
+    margin-left: 62px;
+}
+
+.phui-document-view-pro-box .phui-timeline-title {
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
+  background-color: #fff;
+  border-bottom: 1px solid #F1F1F4;
+}
+
+.phui-document-view-pro-box .phui-timeline-title-with-icon {
+  padding-left: 12px;
+}
+
+.phui-document-view-pro-box .phui-timeline-icon-fill {
+  display: none;
+}
+
+.phui-document-view-pro-box .phui-object-box {
+  margin: 0;
+}
+
+.phui-document-view-pro-box .phui-object-box .phui-form-view {
+  padding-bottom: 0;
+}
+
+.phui-document-view-pro-box .phui-object-box .remarkup-assist-textarea {
+  height: 9em;
+}
+
+.document-has-foot .phui-document-view-pro {
+  padding-bottom: 0;
+}
+
+.phui-document-foot-content {
+  margin: 64px 0 32px;
 }

@@ -11,7 +11,7 @@ final class PhabricatorElasticSearchSetupCheck extends PhabricatorSetupCheck {
       return;
     }
 
-    $engine = new PhabricatorElasticSearchEngine();
+    $engine = new PhabricatorElasticFulltextStorageEngine();
 
     $index_exists = null;
     $index_sane = null;
@@ -70,8 +70,8 @@ final class PhabricatorElasticSearchSetupCheck extends PhabricatorSetupCheck {
   }
 
   protected function shouldUseElasticSearchEngine() {
-    $search_engine = PhabricatorSearchEngine::loadEngine();
-    return ($search_engine instanceof PhabricatorElasticSearchEngine);
+    $search_engine = PhabricatorFulltextStorageEngine::loadEngine();
+    return ($search_engine instanceof PhabricatorElasticFulltextStorageEngine);
   }
 
 }

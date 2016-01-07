@@ -13,7 +13,8 @@ final class PhabricatorProjectDescriptionField
           'description' => pht('Short project description.'),
           'fulltext'    => PhabricatorSearchDocumentFieldType::FIELD_BODY,
         ),
-      ));
+      ),
+      $internal = true);
   }
 
 }

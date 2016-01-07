@@ -265,7 +265,7 @@ final class PhabricatorConfigWelcomeController
 
 
     $maniphest_uri = PhabricatorEnv::getURI('/maniphest/');
-    $maniphest_create_uri = PhabricatorEnv::getURI('/maniphest/task/create/');
+    $maniphest_create_uri = PhabricatorEnv::getURI('/maniphest/task/edit/');
     $maniphest_all_uri = PhabricatorEnv::getURI('/maniphest/query/all/');
     $quick[] = $this->newItem(
       $request,

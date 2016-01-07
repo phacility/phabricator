@@ -14,7 +14,7 @@ final class PhabricatorXHPASTViewFrameController
       phutil_tag(
         'iframe',
         array(
-          'src'         => '/xhpast/frameset/'.$id.'/',
+          'src'         => "/xhpast/frameset/{$id}/",
           'frameborder' => '0',
           'style'       => 'width: 100%; height: 800px;',
         '',

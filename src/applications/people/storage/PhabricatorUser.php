@@ -15,7 +15,8 @@ final class PhabricatorUser
     PhabricatorDestructibleInterface,
     PhabricatorSSHPublicKeyInterface,
     PhabricatorFlaggableInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorFulltextInterface {
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';
@@ -273,8 +274,7 @@ final class PhabricatorUser
 
     $this->updateNameTokens();
 
-    id(new PhabricatorSearchIndexer())
-      ->queueDocumentForIndexing($this->getPHID());
+    PhabricatorSearchWorker::queueDocumentForIndexing($this->getPHID());
 
     return $result;
   }
@@ -504,7 +504,11 @@ final class PhabricatorUser
     return $preferences;
   }
 
-  public function loadEditorLink($path, $line, $callsign) {
+  public function loadEditorLink(
+    $path,
+    $line,
+    PhabricatorRepository $repository = null) {
+
     $editor = $this->loadPreferences()->getPreference(
       PhabricatorUserPreferences::PREFERENCE_EDITOR);
 
@@ -522,6 +526,12 @@ final class PhabricatorUser
 
     if (!strlen($editor)) {
       return null;
+    }
+
+    if ($repository) {
+      $callsign = $repository->getCallsign();
+    } else {
+      $callsign = null;
     }
 
     $uri = strtr($editor, array(
@@ -1307,6 +1317,14 @@ final class PhabricatorUser
     PhabricatorApplicationTransactionView $timeline,
     AphrontRequest $request) {
     return $timeline;
+  }
+
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+
+  public function newFulltextEngine() {
+    return new PhabricatorUserFulltextEngine();
   }
 
 }

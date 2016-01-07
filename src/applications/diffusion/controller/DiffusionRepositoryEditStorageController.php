@@ -3,24 +3,15 @@
 final class DiffusionRepositoryEditStorageController
   extends DiffusionRepositoryEditController {
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $user = $request->getUser();
-    $drequest = $this->diffusionRequest;
-    $repository = $drequest->getRepository();
-
-    $repository = id(new PhabricatorRepositoryQuery())
-      ->setViewer($user)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->withIDs(array($repository->getID()))
-      ->executeOne();
-
-    if (!$repository) {
-      return new Aphront404Response();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContextForEdit();
+    if ($response) {
+      return $response;
     }
+
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
 
     $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
 
@@ -44,7 +35,7 @@ final class DiffusionRepositoryEditStorageController
     }
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setLabel(pht('Storage Service'))
@@ -60,8 +51,8 @@ final class DiffusionRepositoryEditStorageController
           "web interface. To edit it, run this command:\n\n  %s",
           sprintf(
             'phabricator/ $ ./bin/repository edit %s --as %s --local-path ...',
-            $repository->getCallsign(),
-            $user->getUsername())))
+            $repository->getMonogram(),
+            $viewer->getUsername())))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($edit_uri, pht('Done')));
@@ -71,14 +62,10 @@ final class DiffusionRepositoryEditStorageController
       ->setForm($form)
       ->setFormErrors($errors);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($object_box);
   }
 
 }

@@ -38,31 +38,34 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
   public function getRoutes() {
     return array(
      '/phame/' => array(
-        '' => 'PhamePostListController',
-        'live/(?P<id>[^/]+)/(?P<more>.*)' => 'PhameBlogLiveController',
+        '' => 'PhameHomeController',
+
+        // NOTE: The live routes include an initial "/", so leave it off
+        // this route.
+        '(?P<live>live)/(?P<blogID>\d+)' => $this->getLiveRoutes(),
         'post/' => array(
-          '(?:(?P<filter>draft|all)/)?' => 'PhamePostListController',
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhamePostListController',
           'blogger/(?P<bloggername>[\w\.-_]+)/' => 'PhamePostListController',
-          'delete/(?P<id>[^/]+)/' => 'PhamePostDeleteController',
           'edit/(?:(?P<id>[^/]+)/)?' => 'PhamePostEditController',
-          'view/(?P<id>\d+)/' => 'PhamePostViewController',
-          'publish/(?P<id>\d+)/' => 'PhamePostPublishController',
-          'unpublish/(?P<id>\d+)/' => 'PhamePostUnpublishController',
-          'notlive/(?P<id>\d+)/' => 'PhamePostNotLiveController',
-          'preview/' => 'PhamePostPreviewController',
+          'history/(?P<id>\d+)/' => 'PhamePostHistoryController',
+          'view/(?P<id>\d+)/(?:(?P<slug>[^/]+)/)?' => 'PhamePostViewController',
+          '(?P<action>publish|unpublish)/(?P<id>\d+)/'
+            => 'PhamePostPublishController',
+          'preview/(?P<id>\d+)/' => 'PhamePostPreviewController',
+          'preview/' => 'PhabricatorMarkupPreviewController',
           'framed/(?P<id>\d+)/' => 'PhamePostFramedController',
-          'new/' => 'PhamePostNewController',
-          'move/(?P<id>\d+)/' => 'PhamePostNewController',
+          'move/(?P<id>\d+)/' => 'PhamePostMoveController',
+          'comment/(?P<id>[1-9]\d*)/' => 'PhamePostCommentController',
         ),
         'blog/' => array(
-          '(?:(?P<filter>user|all)/)?' => 'PhameBlogListController',
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhameBlogListController',
-          'delete/(?P<id>[^/]+)/' => 'PhameBlogDeleteController',
+          'archive/(?P<id>[^/]+)/' => 'PhameBlogArchiveController',
           'edit/(?P<id>[^/]+)/' => 'PhameBlogEditController',
-          'view/(?P<id>[^/]+)/' => 'PhameBlogViewController',
+          'view/(?P<blogID>\d+)/' => 'PhameBlogViewController',
+          'manage/(?P<id>[^/]+)/' => 'PhameBlogManageController',
           'feed/(?P<id>[^/]+)/' => 'PhameBlogFeedController',
           'new/' => 'PhameBlogEditController',
+          'picture/(?P<id>[1-9]\d*)/' => 'PhameBlogProfilePictureController',
         ),
       ) + $this->getResourceSubroutes(),
     );
@@ -82,16 +85,14 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
   }
 
   public function getBlogRoutes() {
-    return array(
-      '/(?P<more>.*)' => 'PhameBlogLiveController',
-    );
+    return $this->getLiveRoutes();
   }
 
-  public function getBlogCDNRoutes() {
+  private function getLiveRoutes() {
     return array(
-      '/phame/' => array(
-        'r/(?P<id>\d+)/(?P<hash>[^/]+)/(?P<name>.*)' =>
-            'PhameResourceController',
+      '/' => array(
+        '' => 'PhameBlogViewController',
+        'post/(?P<id>\d+)/(?:(?P<slug>[^/]+)/)?' => 'PhamePostViewController',
       ),
     );
   }
@@ -99,6 +100,15 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
   public function getQuicksandURIPatternBlacklist() {
     return array(
       '/phame/live/.*',
+    );
+  }
+
+  protected function getCustomCapabilities() {
+    return array(
+      PhameBlogCreateCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_USER,
+        'caption' => pht('Default create policy for blogs.'),
+      ),
     );
   }
 

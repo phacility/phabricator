@@ -6,22 +6,25 @@ final class DiffusionTagListController extends DiffusionController {
     return true;
   }
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $drequest = $this->getDiffusionRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
+    }
 
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $pager = new PHUIPagerView();
-    $pager->setURI($request->getRequestURI(), 'offset');
-    $pager->setOffset($request->getInt('offset'));
+    $pager = id(new PHUIPagerView())
+      ->readFromRequest($request);
 
     $params = array(
       'limit' => $pager->getPageSize() + 1,
       'offset' => $pager->getOffset(),
     );
 
-    if ($drequest->getSymbolicCommit()) {
+    if (strlen($drequest->getSymbolicCommit())) {
       $is_commit = true;
       $params['commit'] = $drequest->getSymbolicCommit();
     } else {
@@ -79,18 +82,20 @@ final class DiffusionTagListController extends DiffusionController {
         'commit' => $drequest->getSymbolicCommit(),
       ));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $content,
-        $pager,
-      ),
-      array(
-        'title' => array(
+    $pager_box = $this->renderTablePagerBox($pager);
+
+    return $this->newPage()
+      ->setTitle(
+        array(
           pht('Tags'),
-          pht('%s Repository', $repository->getCallsign()),
-        ),
-      ));
+          $repository->getDisplayName(),
+        ))
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $content,
+          $pager_box,
+        ));
   }
 
 }

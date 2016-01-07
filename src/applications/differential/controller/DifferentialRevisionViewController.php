@@ -1047,6 +1047,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $operations = id(new DrydockRepositoryOperationQuery())
       ->setViewer($viewer)
       ->withObjectPHIDs(array($revision->getPHID()))
+      ->withIsDismissed(false)
       ->withOperationTypes(
         array(
           DrydockLandRepositoryOperation::OPCONST,

@@ -182,7 +182,9 @@ final class ReleephBranchSearchEngine
         $item->setStatusIcon('fa-code-fork orange');
         $item->addIcon(
           'fa-code-fork',
-          pht('%d Open Pull Request(s)', new PhutilNumber($open_count)));
+          pht(
+            '%s Open Pull Request(s)',
+            new PhutilNumber($open_count)));
       }
 
       $list->addItem($item);

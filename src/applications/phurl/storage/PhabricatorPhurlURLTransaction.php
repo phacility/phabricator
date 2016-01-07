@@ -5,10 +5,10 @@ final class PhabricatorPhurlURLTransaction
 
   const TYPE_NAME = 'phurl.name';
   const TYPE_URL = 'phurl.longurl';
+  const TYPE_ALIAS = 'phurl.alias';
   const TYPE_DESCRIPTION = 'phurl.description';
 
-  const MAILTAG_CONTENT = 'phurl:content';
-  const MAILTAG_OTHER = 'phurl:other';
+  const MAILTAG_DETAILS = 'phurl-details';
 
   public function getApplicationName() {
     return 'phurl';
@@ -28,6 +28,7 @@ final class PhabricatorPhurlURLTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_NAME:
       case self::TYPE_URL:
+      case self::TYPE_ALIAS:
       case self::TYPE_DESCRIPTION:
         $phids[] = $this->getObjectPHID();
         break;
@@ -49,6 +50,7 @@ final class PhabricatorPhurlURLTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_NAME:
       case self::TYPE_URL:
+      case self::TYPE_ALIAS:
       case self::TYPE_DESCRIPTION:
         return 'fa-pencil';
         break;
@@ -78,11 +80,35 @@ final class PhabricatorPhurlURLTransaction
             $new);
         }
       case self::TYPE_URL:
-        return pht(
-          '%s changed the destination of the URL from %s to %s.',
-          $this->renderHandleLink($author_phid),
-          $old,
-          $new);
+        if ($old === null) {
+          return pht(
+            '%s set the destination of the URL to %s.',
+            $this->renderHandleLink($author_phid),
+            $new);
+        } else {
+          return pht(
+            '%s changed the destination of the URL from %s to %s.',
+            $this->renderHandleLink($author_phid),
+            $old,
+            $new);
+        }
+      case self::TYPE_ALIAS:
+        if ($old === null) {
+          return pht(
+            '%s set the alias of the URL to %s.',
+            $this->renderHandleLink($author_phid),
+            $new);
+        } else if ($new === null) {
+          return pht(
+            '%s removed the alias of the URL.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s changed the alias of the URL from %s to %s.',
+            $this->renderHandleLink($author_phid),
+            $old,
+            $new);
+        }
       case self::TYPE_DESCRIPTION:
         return pht(
           "%s updated the URL's description.",
@@ -119,12 +145,33 @@ final class PhabricatorPhurlURLTransaction
       case self::TYPE_URL:
         if ($old === null) {
           return pht(
-            '%s created %s.',
+            '%s set the destination of %s to %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $new);
+        } else {
+          return pht(
+            '%s changed the destination of %s from %s to %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $old,
+            $new);
+        }
+      case self::TYPE_ALIAS:
+        if ($old === null) {
+          return pht(
+            '%s set the alias of %s to %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $new);
+        } else if ($new === null) {
+          return pht(
+            '%s removed the alias of %s.',
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($object_phid));
         } else {
           return pht(
-            '%s changed the destination of %s from %s to %s',
+            '%s changed the alias of %s from %s to %s.',
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($object_phid),
             $old,
@@ -147,6 +194,7 @@ final class PhabricatorPhurlURLTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_NAME:
       case self::TYPE_URL:
+      case self::TYPE_ALIAS:
       case self::TYPE_DESCRIPTION:
         return PhabricatorTransactions::COLOR_GREEN;
     }
@@ -185,7 +233,8 @@ final class PhabricatorPhurlURLTransaction
       case self::TYPE_NAME:
       case self::TYPE_DESCRIPTION:
       case self::TYPE_URL:
-        $tags[] = self::MAILTAG_CONTENT;
+      case self::TYPE_ALIAS:
+        $tags[] = self::MAILTAG_DETAILS;
         break;
     }
     return $tags;

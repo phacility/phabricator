@@ -75,8 +75,7 @@ final class DivinerAtomController extends DivinerController {
     $document = id(new PHUIDocumentViewPro())
       ->setBook($book->getTitle(), $group_name)
       ->setHeader($header)
-      ->addClass('diviner-view')
-      ->setPropertyList($prop_list);
+      ->addClass('diviner-view');
 
     if ($atom) {
       $this->buildDefined($properties, $symbol);
@@ -243,10 +242,10 @@ final class DivinerAtomController extends DivinerController {
       array(
         $crumbs,
         $document,
+        $prop_list,
       ),
       array(
         'title' => $symbol->getTitle(),
-        'class' => 'pro-white-background',
       ));
   }
 

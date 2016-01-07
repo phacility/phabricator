@@ -3,23 +3,16 @@
 final class DiffusionRepositoryEditStagingController
   extends DiffusionRepositoryEditController {
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $user = $request->getUser();
-    $drequest = $this->diffusionRequest;
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContextForEdit();
+    if ($response) {
+      return $response;
+    }
+
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $repository = id(new PhabricatorRepositoryQuery())
-      ->setViewer($user)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->withIDs(array($repository->getID()))
-      ->executeOne();
-    if (!$repository) {
-      return new Aphront404Response();
-    }
 
     if (!$repository->supportsStaging()) {
       return new Aphront404Response();
@@ -43,7 +36,7 @@ final class DiffusionRepositoryEditStagingController
       id(new PhabricatorRepositoryEditor())
         ->setContinueOnNoEffect(true)
         ->setContentSourceFromRequest($request)
-        ->setActor($user)
+        ->setActor($viewer)
         ->applyTransactions($repository, $xactions);
 
       return id(new AphrontRedirectResponse())->setURI($edit_uri);
@@ -55,7 +48,7 @@ final class DiffusionRepositoryEditStagingController
     $title = pht('Edit %s', $repository->getName());
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendRemarkupInstructions(
         pht(
           "To make it easier to run integration tests and builds on code ".
@@ -79,14 +72,10 @@ final class DiffusionRepositoryEditStagingController
       ->setHeaderText($title)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($object_box);
   }
 
 }

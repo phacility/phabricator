@@ -78,7 +78,7 @@ final class PhabricatorAuthManagementRefreshWorkflow
         "%s\n",
         pht(
           'Found %s account(s) to refresh.',
-          new PhutilNumber(count($accounts))));
+          phutil_count($accounts)));
     }
 
     $providers = PhabricatorAuthProvider::getAllEnabledProviders();

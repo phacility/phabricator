@@ -47,4 +47,8 @@ final class PhabricatorProjectSearchField
 
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitProjectListParameterType();
+  }
+
 }

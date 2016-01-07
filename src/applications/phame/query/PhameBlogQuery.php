@@ -5,7 +5,10 @@ final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $ids;
   private $phids;
   private $domain;
+  private $statuses;
+
   private $needBloggers;
+  private $needProfileImage;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -22,6 +25,16 @@ final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
+  public function withStatuses(array $status) {
+    $this->statuses = $status;
+    return $this;
+  }
+
+  public function needProfileImage($need) {
+    $this->needProfileImage = $need;
+    return $this;
+  }
+
   public function newResultObject() {
     return new PhameBlog();
   }
@@ -32,6 +45,13 @@ final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'status IN (%Ls)',
+        $this->statuses);
+    }
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
@@ -55,6 +75,39 @@ final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     }
 
     return $where;
+  }
+
+  protected function didFilterPage(array $blogs) {
+    if ($this->needProfileImage) {
+      $default = null;
+
+      $file_phids = mpull($blogs, 'getProfileImagePHID');
+      $file_phids = array_filter($file_phids);
+      if ($file_phids) {
+        $files = id(new PhabricatorFileQuery())
+          ->setParentQuery($this)
+          ->setViewer($this->getViewer())
+          ->withPHIDs($file_phids)
+          ->execute();
+        $files = mpull($files, null, 'getPHID');
+      } else {
+        $files = array();
+      }
+
+      foreach ($blogs as $blog) {
+        $file = idx($files, $blog->getProfileImagePHID());
+        if (!$file) {
+          if (!$default) {
+            $default = PhabricatorFile::loadBuiltin(
+              $this->getViewer(),
+              'blog.png');
+          }
+          $file = $default;
+        }
+        $blog->attachProfileImageFile($file);
+      }
+    }
+    return $blogs;
   }
 
   public function getQueryApplicationClass() {

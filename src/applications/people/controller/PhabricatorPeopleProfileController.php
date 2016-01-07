@@ -43,7 +43,6 @@ final class PhabricatorPeopleProfileController
 
     $actions = id(new PhabricatorActionListView())
       ->setObject($user)
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -210,6 +209,7 @@ final class PhabricatorPeopleProfileController
         $badges = id(new PhabricatorBadgesQuery())
           ->setViewer($viewer)
           ->withPHIDs($badge_phids)
+          ->withStatuses(array(PhabricatorBadgesBadge::STATUS_ACTIVE))
           ->execute();
 
         $flex = new PHUIBadgeBoxView();

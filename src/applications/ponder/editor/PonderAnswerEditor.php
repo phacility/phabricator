@@ -10,6 +10,7 @@ final class PonderAnswerEditor extends PonderEditor {
     $types = parent::getTransactionTypes();
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
+    $types[] = PhabricatorTransactions::TYPE_EDGE;
 
     $types[] = PonderAnswerTransaction::TYPE_CONTENT;
     $types[] = PonderAnswerTransaction::TYPE_STATUS;

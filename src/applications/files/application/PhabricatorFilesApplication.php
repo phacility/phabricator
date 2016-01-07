@@ -83,6 +83,9 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
           'PhabricatorFileTransformListController',
         'uploaddialog/' => 'PhabricatorFileUploadDialogController',
         'download/(?P<phid>[^/]+)/' => 'PhabricatorFileDialogController',
+        'iconset/(?P<key>[^/]+)/' => array(
+          'select/' => 'PhabricatorFileIconSetSelectController',
+        ),
       ) + $this->getResourceSubroutes(),
     );
   }
