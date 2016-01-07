@@ -1462,7 +1462,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
   private function renderRevisionTooltip(
     DifferentialRevision $revision,
-    array $handles) {
+    $handles) {
     $viewer = $this->getRequest()->getUser();
 
     $date = phabricator_date($revision->getDateModified(), $viewer);
@@ -1802,7 +1802,7 @@ final class DiffusionBrowseController extends DiffusionController {
       $revision_link = javelin_tag(
         'a',
         array(
-          'href' => $revision->getURI(),
+          'href' => '/'.$revision->getMonogram(),
           'sigil' => 'has-tooltip',
           'meta'  => array(
             'tip'   => $tooltip,
