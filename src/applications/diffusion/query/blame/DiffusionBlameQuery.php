@@ -114,7 +114,9 @@ abstract class DiffusionBlameQuery extends DiffusionQuery {
         continue;
       }
 
-      $map[$path] = "blame({$repository_id}, {$identifier}, {$path}, raw)";
+      $path_hash = PhabricatorHash::digestForIndex($path);
+
+      $map[$path] = "blame({$repository_id}, {$identifier}, {$path_hash}, raw)";
     }
 
     return $map;
