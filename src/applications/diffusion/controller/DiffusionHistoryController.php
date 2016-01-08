@@ -52,6 +52,7 @@ final class DiffusionHistoryController extends DiffusionController {
     if ($show_graph) {
       $history_table->setParents($history_results['parents']);
       $history_table->setIsHead(!$pager->getOffset());
+      $history_table->setIsTail(!$pager->getHasMorePages());
     }
 
     $history_panel = new PHUIObjectBoxView();
