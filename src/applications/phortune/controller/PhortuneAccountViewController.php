@@ -132,6 +132,10 @@ final class PhortuneAccountViewController extends PhortuneController {
     $methods = id(new PhortunePaymentMethodQuery())
       ->setViewer($viewer)
       ->withAccountPHIDs(array($account->getPHID()))
+      ->withStatuses(
+        array(
+          PhortunePaymentMethod::STATUS_ACTIVE,
+        ))
       ->execute();
 
     foreach ($methods as $method) {
