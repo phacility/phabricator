@@ -216,7 +216,10 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
               $low_level_query->getRevisionMatchData());
           }
 
-          $diff = $this->generateFinalDiff($revision, $acting_as_phid);
+          $diff = id(new DifferentialDiffExtractionEngine())
+            ->setViewer($actor)
+            ->setAuthorPHID($acting_as_phid)
+            ->newDiffFromCommit($commit);
 
           $vs_diff = $this->loadChangedByCommit($revision, $diff);
           $changed_uri = null;
@@ -277,65 +280,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       PhabricatorRepositoryCommit::IMPORTED_MESSAGE);
   }
 
-  private function generateFinalDiff(
-    DifferentialRevision $revision,
-    $actor_phid) {
-
-    $viewer = PhabricatorUser::getOmnipotentUser();
-
-    $drequest = DiffusionRequest::newFromDictionary(array(
-      'user' => $viewer,
-      'repository' => $this->repository,
-    ));
-
-    $raw_diff = DiffusionQuery::callConduitWithDiffusionRequest(
-      $viewer,
-      $drequest,
-      'diffusion.rawdiffquery',
-      array(
-        'commit' => $this->commit->getCommitIdentifier(),
-      ));
-
-    // TODO: Support adds, deletes and moves under SVN.
-    if (strlen($raw_diff)) {
-      $changes = id(new ArcanistDiffParser())->parseDiff($raw_diff);
-    } else {
-      // This is an empty diff, maybe made with `git commit --allow-empty`.
-      // NOTE: These diffs have the same tree hash as their ancestors, so
-      // they may attach to revisions in an unexpected way. Just let this
-      // happen for now, although it might make sense to special case it
-      // eventually.
-      $changes = array();
-    }
-
-    $diff = DifferentialDiff::newFromRawChanges($viewer, $changes)
-      ->setRepositoryPHID($this->repository->getPHID())
-      ->setAuthorPHID($actor_phid)
-      ->setCreationMethod('commit')
-      ->setSourceControlSystem($this->repository->getVersionControlSystem())
-      ->setLintStatus(DifferentialLintStatus::LINT_AUTO_SKIP)
-      ->setUnitStatus(DifferentialUnitStatus::UNIT_AUTO_SKIP)
-      ->setDateCreated($this->commit->getEpoch())
-      ->setDescription(
-        pht(
-          'Commit %s',
-          $this->commit->getMonogram()));
-
-    $parents = DiffusionQuery::callConduitWithDiffusionRequest(
-      $viewer,
-      $drequest,
-      'diffusion.commitparentsquery',
-      array(
-        'commit' => $this->commit->getCommitIdentifier(),
-      ));
-    if ($parents) {
-      $diff->setSourceControlBaseRevision(head($parents));
-    }
-
-    // TODO: Attach binary files.
-
-    return $diff->save();
-  }
 
   private function loadChangedByCommit(
     DifferentialRevision $revision,

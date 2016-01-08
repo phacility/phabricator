@@ -385,6 +385,12 @@ final class DifferentialDiff
     return $map;
   }
 
+  public function getURI() {
+    $id = $this->getID();
+    return "/differential/diff/{$id}/";
+  }
+
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
