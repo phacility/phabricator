@@ -5,7 +5,7 @@ final class PhortunePaymentMethodDisableController
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-    $method_id = $request->getURIData('methodID');
+    $method_id = $request->getURIData('id');
 
     $method = id(new PhortunePaymentMethodQuery())
       ->setViewer($viewer)
