@@ -142,17 +142,21 @@ final class DifferentialDiffExtractionEngine extends Phobject {
           return true;
         }
 
-        $drequest = DiffusionRequest::newFromDictionary(array(
-          'user' => $viewer,
-          'repository' => $repository,
-          'commit' => $identifier,
-          'path' => $path,
-        ));
+        $drequest = DiffusionRequest::newFromDictionary(
+          array(
+            'user' => $viewer,
+            'repository' => $repository,
+          ));
 
-        $corpus = DiffusionFileContentQuery::newFromDiffusionRequest($drequest)
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->loadFileContent()
-          ->getCorpus();
+        $response = DiffusionQuery::callConduitWithDiffusionRequest(
+          $viewer,
+          $drequest,
+          'diffusion.filecontentquery',
+          array(
+            'commit' => $identifier,
+            'path' => $path,
+          ));
+        $corpus = $response['corpus'];
 
         if ($files[$file_phid]->loadFileData() != $corpus) {
           return true;
