@@ -30,10 +30,8 @@ final class PhabricatorFilesManagementMigrateWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $console = PhutilConsole::getConsole();
-
-    $engine_id = $args->getArg('engine');
-    if (!$engine_id) {
+    $target_key = $args->getArg('engine');
+    if (!$target_key) {
       throw new PhutilArgumentUsageException(
         pht(
           'Specify an engine to migrate to with `%s`. '.
@@ -42,7 +40,7 @@ final class PhabricatorFilesManagementMigrateWorkflow
           'files engines'));
     }
 
-    $engine = PhabricatorFile::buildEngine($engine_id);
+    $target_engine = PhabricatorFile::buildEngine($target_key);
 
     $iterator = $this->buildIterator($args);
     if (!$iterator) {
@@ -56,62 +54,90 @@ final class PhabricatorFilesManagementMigrateWorkflow
     $is_dry_run = $args->getArg('dry-run');
 
     $failed = array();
-
+    $engines = PhabricatorFileStorageEngine::loadAllEngines();
     foreach ($iterator as $file) {
-      $fid = 'F'.$file->getID();
+      $monogram = $file->getMonogram();
 
-      if ($file->getStorageEngine() == $engine_id) {
-        $console->writeOut(
+      $engine_key = $file->getStorageEngine();
+      $engine = idx($engines, $engine_key);
+
+      if (!$engine) {
+        echo tsprintf(
           "%s\n",
           pht(
-            "%s: Already stored on '%s'",
-            $fid,
-            $engine_id));
+            '%s: Uses unknown storage engine "%s".',
+            $monogram,
+            $engine_key));
+        $failed[] = $file;
+        continue;
+      }
+
+      if ($engine->isChunkEngine()) {
+        echo tsprintf(
+          "%s\n",
+          pht(
+            '%s: Stored as chunks, no data to migrate directly.',
+            $monogram));
+        continue;
+      }
+
+      if ($engine_key === $target_key) {
+        echo tsprintf(
+          "%s\n",
+          pht(
+            '%s: Already stored in engine "%s".',
+            $monogram,
+            $target_key));
         continue;
       }
 
       if ($is_dry_run) {
-        $console->writeOut(
+        echo tsprintf(
           "%s\n",
           pht(
-            "%s: Would migrate from '%s' to '%s' (dry run)",
-            $fid,
-            $file->getStorageEngine(),
-            $engine_id));
+            '%s: Would migrate from "%s" to "%s" (dry run).',
+            $monogram,
+            $engine_key,
+            $target_key));
         continue;
       }
 
-      $console->writeOut(
+      echo tsprintf(
         "%s\n",
         pht(
-          "%s: Migrating from '%s' to '%s'...",
-          $fid,
-          $file->getStorageEngine(),
-          $engine_id));
+          '%s: Migrating from "%s" to "%s"...',
+          $monogram,
+          $engine_key,
+          $target_key));
 
       try {
-        $file->migrateToEngine($engine);
-        $console->writeOut("%s\n", pht('Done.'));
+        $file->migrateToEngine($target_engine);
+
+        echo tsprintf(
+          "%s\n",
+          pht('Done.'));
+
       } catch (Exception $ex) {
-        $console->writeOut("%s\n", pht('Failed!'));
-        $console->writeErr("%s\n", (string)$ex);
+        echo tsprintf(
+          "%s\n",
+          pht('Failed! %s', (string)$ex));
         $failed[] = $file;
+
+        throw $ex;
       }
     }
 
     if ($failed) {
-      $console->writeOut("**%s**\n", pht('Failures!'));
-      $ids = array();
-      foreach ($failed as $file) {
-        $ids[] = 'F'.$file->getID();
-      }
-      $console->writeOut("%s\n", implode(', ', $ids));
+      $monograms = mpull($failed, 'getMonogram');
+
+      echo tsprintf(
+        "%s\n",
+        pht('Failures: %s.', implode(', ', $monograms)));
 
       return 1;
-    } else {
-      $console->writeOut("**%s**\n", pht('Success!'));
-      return 0;
     }
+
+    return 0;
   }
 
 }
