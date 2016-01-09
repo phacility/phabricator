@@ -79,7 +79,7 @@ final class PhabricatorEmbedFileRemarkupRule
     require_celerity_resource('lightbox-attachment-css');
 
     $attrs = array();
-    $image_class = null;
+    $image_class = 'phabricator-remarkup-embed-image';
 
     $use_size = true;
     if (!$options['size']) {
@@ -117,8 +117,6 @@ final class PhabricatorEmbedFileRemarkupRule
             $attrs['width'] = $x;
             $attrs['height'] = $y;
           }
-
-          $image_class = 'phabricator-remarkup-embed-image';
           break;
       }
     }
