@@ -19,6 +19,20 @@ final class PhabricatorFilesManagementMigrateWorkflow
             'help'      => pht('Show what would be migrated.'),
           ),
           array(
+            'name' => 'min-size',
+            'param' => 'bytes',
+            'help' => pht(
+              'Do not migrate data for files which are smaller than a given '.
+              'filesize.'),
+          ),
+          array(
+            'name' => 'max-size',
+            'param' => 'bytes',
+            'help' => pht(
+              'Do not migrate data for files which are larger than a given '.
+              'filesize.'),
+          ),
+          array(
             'name'      => 'all',
             'help'      => pht('Migrate all files.'),
           ),
@@ -53,8 +67,13 @@ final class PhabricatorFilesManagementMigrateWorkflow
 
     $is_dry_run = $args->getArg('dry-run');
 
+    $min_size = (int)$args->getArg('min-size');
+    $max_size = (int)$args->getArg('max-size');
+
     $failed = array();
     $engines = PhabricatorFileStorageEngine::loadAllEngines();
+    $total_bytes = 0;
+    $total_files = 0;
     foreach ($iterator as $file) {
       $monogram = $file->getMonogram();
 
@@ -91,27 +110,59 @@ final class PhabricatorFilesManagementMigrateWorkflow
         continue;
       }
 
+      $byte_size = $file->getByteSize();
+
+      if ($min_size && ($byte_size < $min_size)) {
+        echo tsprintf(
+          "%s\n",
+          pht(
+            '%s: File size (%s) is smaller than minimum size (%s).',
+            $monogram,
+            phutil_format_bytes($byte_size),
+            phutil_format_bytes($min_size)));
+        continue;
+      }
+
+      if ($max_size && ($byte_size > $max_size)) {
+        echo tsprintf(
+          "%s\n",
+          pht(
+            '%s: File size (%s) is larger than maximum size (%s).',
+            $monogram,
+            phutil_format_bytes($byte_size),
+            phutil_format_bytes($max_size)));
+        continue;
+      }
+
       if ($is_dry_run) {
         echo tsprintf(
           "%s\n",
           pht(
-            '%s: Would migrate from "%s" to "%s" (dry run).',
+            '%s: (%s) Would migrate from "%s" to "%s" (dry run)...',
             $monogram,
+            phutil_format_bytes($byte_size),
             $engine_key,
             $target_key));
-        continue;
+      } else {
+        echo tsprintf(
+          "%s\n",
+          pht(
+            '%s: (%s) Migrating from "%s" to "%s"...',
+            $monogram,
+            phutil_format_bytes($byte_size),
+            $engine_key,
+            $target_key));
       }
 
-      echo tsprintf(
-        "%s\n",
-        pht(
-          '%s: Migrating from "%s" to "%s"...',
-          $monogram,
-          $engine_key,
-          $target_key));
-
       try {
-        $file->migrateToEngine($target_engine);
+        if ($is_dry_run) {
+          // Do nothing, this is a dry run.
+        } else {
+          $file->migrateToEngine($target_engine);
+        }
+
+        $total_files += 1;
+        $total_bytes += $byte_size;
 
         echo tsprintf(
           "%s\n",
@@ -125,6 +176,25 @@ final class PhabricatorFilesManagementMigrateWorkflow
 
         throw $ex;
       }
+    }
+
+    echo tsprintf(
+      "%s\n",
+      pht(
+        'Total Migrated Files: %s',
+        new PhutilNumber($total_files)));
+
+    echo tsprintf(
+      "%s\n",
+      pht(
+        'Total Migrated Bytes: %s',
+        phutil_format_bytes($total_bytes)));
+
+    if ($is_dry_run) {
+      echo tsprintf(
+        "%s\n",
+        pht(
+          'This was a dry run, so no real migrations were performed.'));
     }
 
     if ($failed) {
