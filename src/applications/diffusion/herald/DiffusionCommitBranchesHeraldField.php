@@ -14,7 +14,7 @@ final class DiffusionCommitBranchesHeraldField
     $repository = $object->getRepository();
 
     $params = array(
-      'callsign' => $repository->getCallsign(),
+      'repository' => $repository->getPHID(),
       'contains' => $commit->getCommitIdentifier(),
     );
 

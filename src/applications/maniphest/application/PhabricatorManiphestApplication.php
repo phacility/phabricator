@@ -52,13 +52,6 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
         'task/' => array(
           $this->getEditRoutePattern('edit/')
             => 'ManiphestTaskEditController',
-          'descriptionpreview/'
-            => 'PhabricatorMarkupPreviewController',
-        ),
-        'transaction/' => array(
-          'save/' => 'ManiphestTransactionSaveController',
-          'preview/(?P<id>[1-9]\d*)/'
-            => 'ManiphestTransactionPreviewController',
         ),
         'export/(?P<key>[^/]+)/' => 'ManiphestExportController',
         'subpriority/' => 'ManiphestSubpriorityController',

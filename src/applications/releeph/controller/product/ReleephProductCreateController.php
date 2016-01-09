@@ -121,11 +121,11 @@ final class ReleephProductCreateController extends ReleephProductController {
 
     foreach ($repos as $repo_id => $repo) {
       $repo_name = $repo->getName();
-      $callsign = $repo->getCallsign();
-      $choices[$repo->getPHID()] = "r{$callsign} ({$repo_name})";
+      $display = $repo->getDisplayName();
+      $choices[$repo->getPHID()] = "{$display} ({$repo_name})";
     }
 
-    ksort($choices);
+    asort($choices);
     return $choices;
   }
 

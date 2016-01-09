@@ -17,12 +17,14 @@ abstract class PhabricatorStandardCustomField
   private $default;
   private $isCopyable;
   private $hasStorageValue;
+  private $isBuiltin;
 
   abstract public function getFieldType();
 
   public static function buildStandardFields(
     PhabricatorCustomField $template,
-    array $config) {
+    array $config,
+    $builtin = false) {
 
     $types = id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
@@ -47,6 +49,10 @@ abstract class PhabricatorStandardCustomField
         ->setFieldKey($full_key)
         ->setFieldConfig($value)
         ->setApplicationField($template);
+
+      if ($builtin) {
+        $standard->setIsBuiltin(true);
+      }
 
       $field = $template->setProxy($standard);
       $fields[] = $field;
@@ -91,6 +97,15 @@ abstract class PhabricatorStandardCustomField
   public function setFieldDescription($description) {
     $this->fieldDescription = $description;
     return $this;
+  }
+
+  public function setIsBuiltin($is_builtin) {
+    $this->isBuiltin = $is_builtin;
+    return $this;
+  }
+
+  public function getIsBuiltin() {
+    return $this->isBuiltin;
   }
 
   public function setFieldConfig(array $config) {
@@ -470,7 +485,11 @@ abstract class PhabricatorStandardCustomField
   }
 
   public function getModernFieldKey() {
-    return 'custom.'.$this->getRawStandardFieldKey();
+    if ($this->getIsBuiltin()) {
+      return $this->getRawStandardFieldKey();
+    } else {
+      return 'custom.'.$this->getRawStandardFieldKey();
+    }
   }
 
   public function getConduitDictionaryValue() {

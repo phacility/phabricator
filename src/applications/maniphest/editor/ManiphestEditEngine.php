@@ -156,7 +156,10 @@ final class ManiphestEditEngine
         ->setConduitDescription(pht('Update the task description.'))
         ->setConduitTypeDescription(pht('New task description.'))
         ->setTransactionType(ManiphestTransaction::TYPE_DESCRIPTION)
-        ->setValue($object->getDescription()),
+        ->setValue($object->getDescription())
+        ->setPreviewPanel(
+          id(new PHUIRemarkupPreviewPanel())
+            ->setHeader(pht('Description Preview'))),
     );
   }
 

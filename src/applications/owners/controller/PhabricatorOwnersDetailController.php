@@ -268,9 +268,8 @@ final class PhabricatorOwnersDetailController
       if (!$repo) {
         continue;
       }
-      $href = DiffusionRequest::generateDiffusionURI(
+      $href = $repo->generateURI(
         array(
-          'callsign' => $repo->getCallsign(),
           'branch'   => $repo->getDefaultBranch(),
           'path'     => $path->getPath(),
           'action'   => 'browse',

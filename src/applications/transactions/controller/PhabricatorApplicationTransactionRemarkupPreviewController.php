@@ -10,9 +10,9 @@ final class PhabricatorApplicationTransactionRemarkupPreviewController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
-    $corpus = $request->getStr('corpus');
+    $text = $request->getStr('text');
 
-    $remarkup = new PHUIRemarkupView($viewer, $corpus);
+    $remarkup = new PHUIRemarkupView($viewer, $text);
 
     $content = array(
       'content' => hsprintf('%s', $remarkup),

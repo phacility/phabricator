@@ -7,6 +7,8 @@ final class PhabricatorProjectQuery
   private $phids;
   private $memberPHIDs;
   private $slugs;
+  private $slugNormals;
+  private $slugMap;
   private $names;
   private $nameTokens;
   private $icons;
@@ -157,6 +159,24 @@ final class PhabricatorProjectQuery
     );
   }
 
+  public function getSlugMap() {
+    if ($this->slugMap === null) {
+      throw new PhutilInvalidStateException('execute');
+    }
+    return $this->slugMap;
+  }
+
+  protected function willExecute() {
+    $this->slugMap = array();
+    $this->slugNormals = array();
+    if ($this->slugs) {
+      foreach ($this->slugs as $slug) {
+        $normal = PhabricatorSlug::normalizeProjectSlug($slug);
+        $this->slugNormals[$slug] = $normal;
+      }
+    }
+  }
+
   protected function loadPage() {
     return $this->loadStandardPage($this->newResultObject());
   }
@@ -181,11 +201,11 @@ final class PhabricatorProjectQuery
 
     $viewer_phid = $this->getViewer()->getPHID();
 
-    $member_type = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+    $material_type = PhabricatorProjectMaterializedMemberEdgeType::EDGECONST;
     $watcher_type = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
 
     $types = array();
-    $types[] = $member_type;
+    $types[] = $material_type;
     if ($this->needWatchers) {
       $types[] = $watcher_type;
     }
@@ -206,11 +226,21 @@ final class PhabricatorProjectQuery
 
     // If we only need to know if the viewer is a member, we can restrict
     // the query to just their PHID.
+    $any_edges = true;
     if (!$this->needMembers && !$this->needWatchers) {
-      $edge_query->withDestinationPHIDs(array($viewer_phid));
+      if ($viewer_phid) {
+        $edge_query->withDestinationPHIDs(array($viewer_phid));
+      } else {
+        // If we don't need members or watchers and don't have a viewer PHID
+        // (viewer is logged-out or omnipotent), they'll never be a member
+        // so we don't need to issue this query at all.
+        $any_edges = false;
+      }
     }
 
-    $edge_query->execute();
+    if ($any_edges) {
+      $edge_query->execute();
+    }
 
     $membership_projects = array();
     foreach ($projects as $project) {
@@ -222,9 +252,13 @@ final class PhabricatorProjectQuery
         $source_phids = array($project_phid);
       }
 
-      $member_phids = $edge_query->getDestinationPHIDs(
-        $source_phids,
-        array($member_type));
+      if ($any_edges) {
+        $member_phids = $edge_query->getDestinationPHIDs(
+          $source_phids,
+          array($material_type));
+      } else {
+        $member_phids = array();
+      }
 
       if (in_array($viewer_phid, $member_phids)) {
         $membership_projects[$project_phid] = $project;
@@ -287,17 +321,7 @@ final class PhabricatorProjectQuery
       }
     }
 
-    if ($this->needSlugs) {
-      $slugs = id(new PhabricatorProjectSlug())
-        ->loadAllWhere(
-          'projectPHID IN (%Ls)',
-          mpull($projects, 'getPHID'));
-      $slugs = mgroup($slugs, 'getProjectPHID');
-      foreach ($projects as $project) {
-        $project_slugs = idx($slugs, $project->getPHID(), array());
-        $project->attachSlugs($project_slugs);
-      }
-    }
+    $this->loadSlugs($projects);
 
     return $projects;
   }
@@ -356,7 +380,7 @@ final class PhabricatorProjectQuery
       $where[] = qsprintf(
         $conn,
         'slug.slug IN (%Ls)',
-        $this->slugs);
+        $this->slugNormals);
     }
 
     if ($this->names !== null) {
@@ -464,7 +488,7 @@ final class PhabricatorProjectQuery
         $conn,
         'JOIN %T e ON e.src = p.phid AND e.type = %d',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-        PhabricatorProjectProjectHasMemberEdgeType::EDGECONST);
+        PhabricatorProjectMaterializedMemberEdgeType::EDGECONST);
     }
 
     if ($this->slugs !== null) {
@@ -581,6 +605,78 @@ final class PhabricatorProjectQuery
     }
 
     return $ancestors;
+  }
+
+  private function loadSlugs(array $projects) {
+    // Build a map from primary slugs to projects.
+    $primary_map = array();
+    foreach ($projects as $project) {
+      $primary_slug = $project->getPrimarySlug();
+      if ($primary_slug === null) {
+        continue;
+      }
+
+      $primary_map[$primary_slug] = $project;
+    }
+
+    // Link up all of the queried slugs which correspond to primary
+    // slugs. If we can link up everything from this (no slugs were queried,
+    // or only primary slugs were queried) we don't need to load anything
+    // else.
+    $unknown = $this->slugNormals;
+    foreach ($unknown as $input => $normal) {
+      if (!isset($primary_map[$normal])) {
+        continue;
+      }
+
+      $this->slugMap[$input] = array(
+        'slug' => $normal,
+        'projectPHID' => $primary_map[$normal]->getPHID(),
+      );
+
+      unset($unknown[$input]);
+    }
+
+    // If we need slugs, we have to load everything.
+    // If we still have some queried slugs which we haven't mapped, we only
+    // need to look for them.
+    // If we've mapped everything, we don't have to do any work.
+    $project_phids = mpull($projects, 'getPHID');
+    if ($this->needSlugs) {
+      $slugs = id(new PhabricatorProjectSlug())->loadAllWhere(
+        'projectPHID IN (%Ls)',
+        $project_phids);
+    } else if ($unknown) {
+      $slugs = id(new PhabricatorProjectSlug())->loadAllWhere(
+        'projectPHID IN (%Ls) AND slug IN (%Ls)',
+        $project_phids,
+        $unknown);
+    } else {
+      $slugs = array();
+    }
+
+    // Link up any slugs we were not able to link up earlier.
+    $extra_map = mpull($slugs, 'getProjectPHID', 'getSlug');
+    foreach ($unknown as $input => $normal) {
+      if (!isset($extra_map[$normal])) {
+        continue;
+      }
+
+      $this->slugMap[$input] = array(
+        'slug' => $normal,
+        'projectPHID' => $extra_map[$normal],
+      );
+
+      unset($unknown[$input]);
+    }
+
+    if ($this->needSlugs) {
+      $slug_groups = mgroup($slugs, 'getProjectPHID');
+      foreach ($projects as $project) {
+        $project_slugs = idx($slug_groups, $project->getPHID(), array());
+        $project->attachSlugs($project_slugs);
+      }
+    }
   }
 
 }

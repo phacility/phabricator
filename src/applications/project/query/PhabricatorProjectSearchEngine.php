@@ -13,7 +13,8 @@ final class PhabricatorProjectSearchEngine
 
   public function newQuery() {
     return id(new PhabricatorProjectQuery())
-      ->needImages(true);
+      ->needImages(true)
+      ->withIsMilestone(false);
   }
 
   protected function buildCustomSearchFields() {
@@ -130,6 +131,10 @@ protected function buildQueryFromParameters(array $map) {
 
     $set = new PhabricatorProjectIconSet();
     foreach ($set->getIcons() as $icon) {
+      if ($icon->getIsDisabled()) {
+        continue;
+      }
+
       $options[$icon->getKey()] = array(
         id(new PHUIIconView())
           ->setIconFont($icon->getIcon()),
@@ -164,49 +169,22 @@ protected function buildQueryFromParameters(array $map) {
     array $handles) {
     assert_instances_of($projects, 'PhabricatorProject');
     $viewer = $this->requireViewer();
-    $handles = $viewer->loadHandles(mpull($projects, 'getPHID'));
 
-    $list = new PHUIObjectItemListView();
-    $list->setUser($viewer);
-    $can_edit_projects = id(new PhabricatorPolicyFilter())
-      ->setViewer($viewer)
-      ->requireCapabilities(array(PhabricatorPolicyCapability::CAN_EDIT))
-      ->apply($projects);
+    $list = id(new PhabricatorProjectListView())
+      ->setUser($viewer)
+      ->setProjects($projects)
+      ->renderList();
 
-    foreach ($projects as $key => $project) {
-      $id = $project->getID();
-
-      $tag_list = id(new PHUIHandleTagListView())
-        ->setSlim(true)
-        ->setHandles(array($handles[$project->getPHID()]));
-
-      $item = id(new PHUIObjectItemView())
-        ->setHeader($project->getName())
-        ->setHref($this->getApplicationURI("view/{$id}/"))
-        ->setImageURI($project->getProfileImageURI())
-        ->addAttribute($tag_list);
-
-      if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ARCHIVED) {
-        $item->addIcon('delete-grey', pht('Archived'));
-        $item->setDisabled(true);
-      }
-
-      $list->addItem($item);
-    }
-
-    $result = new PhabricatorApplicationSearchResultView();
-    $result->setObjectList($list);
-    $result->setNoDataString(pht('No projects found.'));
-
-    return $result;
-
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setObjectList($list)
+      ->setNoDataString(pht('No projects found.'));
   }
 
   protected function getNewUserBody() {
     $create_button = id(new PHUIButtonView())
       ->setTag('a')
       ->setText(pht('Create a Project'))
-      ->setHref('/project/create/')
+      ->setHref('/project/edit/')
       ->setColor(PHUIButtonView::GREEN);
 
     $icon = $this->getApplication()->getFontIcon();

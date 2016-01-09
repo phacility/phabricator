@@ -254,7 +254,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     var value = area.value;
 
     var data = {
-      corpus: value
+      text: value
     };
 
     var onupdate = function(r) {

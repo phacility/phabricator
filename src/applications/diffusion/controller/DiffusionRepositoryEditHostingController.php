@@ -5,24 +5,16 @@ final class DiffusionRepositoryEditHostingController
 
   private $serve;
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $user = $request->getUser();
-    $drequest = $this->diffusionRequest;
-    $repository = $drequest->getRepository();
-    $this->serve = $request->getURIData('serve');
-
-    $repository = id(new PhabricatorRepositoryQuery())
-      ->setViewer($user)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->withIDs(array($repository->getID()))
-      ->executeOne();
-    if (!$repository) {
-      return new Aphront404Response();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContextForEdit();
+    if ($response) {
+      return $response;
     }
+
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+
+    $this->serve = $request->getURIData('serve');
 
     if (!$this->serve) {
       return $this->handleHosting($repository);
@@ -107,14 +99,10 @@ final class DiffusionRepositoryEditHostingController
       ->setHeaderText($title)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($object_box);
   }
 
   public function handleProtocols(PhabricatorRepository $repository) {
@@ -272,14 +260,10 @@ final class DiffusionRepositoryEditHostingController
       ->setHeaderText($title)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($object_box);
   }
 
 }

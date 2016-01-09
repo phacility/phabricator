@@ -151,6 +151,26 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return 'r'.$this->getCallsign();
   }
 
+  public function getDisplayName() {
+    // TODO: This is intended to produce a human-readable name that is not
+    // necessarily a global, unique identifier. Eventually, it may just return
+    // a string like "skynet" instead of "rSKYNET".
+    return $this->getMonogram();
+  }
+
+  public function getAllMonograms() {
+    $monograms = array();
+
+    $monograms[] = 'R'.$this->getID();
+
+    $callsign = $this->getCallsign();
+    if (strlen($callsign)) {
+      $monograms[] = 'r'.$callsign;
+    }
+
+    return $monograms;
+  }
+
   public function getDetail($key, $default = null) {
     return idx($this->details, $key, $default);
   }
@@ -581,6 +601,151 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return '/diffusion/'.$this->getCallsign().'/';
   }
 
+  public function getPathURI($path) {
+    return $this->getURI().$path;
+  }
+
+  public function getCommitURI($identifier) {
+    $callsign = $this->getCallsign();
+    return "/r{$callsign}{$identifier}";
+  }
+
+  public function generateURI(array $params) {
+    $req_branch = false;
+    $req_commit = false;
+
+    $action = idx($params, 'action');
+    switch ($action) {
+      case 'history':
+      case 'browse':
+      case 'change':
+      case 'lastmodified':
+      case 'tags':
+      case 'branches':
+      case 'lint':
+      case 'pathtree':
+      case 'refs':
+        break;
+      case 'branch':
+        // NOTE: This does not actually require a branch, and won't have one
+        // in Subversion. Possibly this should be more clear.
+        break;
+      case 'commit':
+      case 'rendering-ref':
+        $req_commit = true;
+        break;
+      default:
+        throw new Exception(
+          pht(
+            'Action "%s" is not a valid repository URI action.',
+            $action));
+    }
+
+    $path     = idx($params, 'path');
+    $branch   = idx($params, 'branch');
+    $commit   = idx($params, 'commit');
+    $line     = idx($params, 'line');
+
+    if ($req_commit && !strlen($commit)) {
+      throw new Exception(
+        pht(
+          'Diffusion URI action "%s" requires commit!',
+          $action));
+    }
+
+    if ($req_branch && !strlen($branch)) {
+      throw new Exception(
+        pht(
+          'Diffusion URI action "%s" requires branch!',
+          $action));
+    }
+
+    if ($action === 'commit') {
+      return $this->getCommitURI($commit);
+    }
+
+
+    $identifier = $this->getID();
+
+    $callsign = $this->getCallsign();
+    if ($callsign !== null) {
+      $identifier = $callsign;
+    }
+
+    if (strlen($identifier)) {
+      $identifier = phutil_escape_uri_path_component($identifier);
+    }
+
+    if (strlen($path)) {
+      $path = ltrim($path, '/');
+      $path = str_replace(array(';', '$'), array(';;', '$$'), $path);
+      $path = phutil_escape_uri($path);
+    }
+
+    if (strlen($branch)) {
+      $branch = phutil_escape_uri_path_component($branch);
+      $path = "{$branch}/{$path}";
+    }
+
+    if (strlen($commit)) {
+      $commit = str_replace('$', '$$', $commit);
+      $commit = ';'.phutil_escape_uri($commit);
+    }
+
+    if (strlen($line)) {
+      $line = '$'.phutil_escape_uri($line);
+    }
+
+    switch ($action) {
+      case 'change':
+      case 'history':
+      case 'browse':
+      case 'lastmodified':
+      case 'tags':
+      case 'branches':
+      case 'lint':
+      case 'pathtree':
+      case 'refs':
+        $uri = "/diffusion/{$identifier}/{$action}/{$path}{$commit}{$line}";
+        break;
+      case 'branch':
+        if (strlen($path)) {
+          $uri = "/diffusion/{$identifier}/repository/{$path}";
+        } else {
+          $uri = "/diffusion/{$identifier}/";
+        }
+        break;
+      case 'external':
+        $commit = ltrim($commit, ';');
+        $uri = "/diffusion/external/{$commit}/";
+        break;
+      case 'rendering-ref':
+        // This isn't a real URI per se, it's passed as a query parameter to
+        // the ajax changeset stuff but then we parse it back out as though
+        // it came from a URI.
+        $uri = rawurldecode("{$path}{$commit}");
+        break;
+    }
+
+    if ($action == 'rendering-ref') {
+      return $uri;
+    }
+
+    $uri = new PhutilURI($uri);
+
+    if (isset($params['lint'])) {
+      $params['params'] = idx($params, 'params', array()) + array(
+        'lint' => $params['lint'],
+      );
+    }
+
+    if (idx($params, 'params')) {
+      $uri->setQueryParams($params['params']);
+    }
+
+    return $uri;
+  }
+
   public function getNormalizedPath() {
     $uri = (string)$this->getCloneURIObject();
 
@@ -703,6 +868,47 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return (bool)$this->getDetail('importing', false);
   }
 
+  public function loadImportProgress() {
+    $progress = queryfx_all(
+      $this->establishConnection('r'),
+      'SELECT importStatus, count(*) N FROM %T WHERE repositoryID = %d
+        GROUP BY importStatus',
+      id(new PhabricatorRepositoryCommit())->getTableName(),
+      $this->getID());
+
+    $done = 0;
+    $total = 0;
+    foreach ($progress as $row) {
+      $total += $row['N'] * 4;
+      $status = $row['importStatus'];
+      if ($status & PhabricatorRepositoryCommit::IMPORTED_MESSAGE) {
+        $done += $row['N'];
+      }
+      if ($status & PhabricatorRepositoryCommit::IMPORTED_CHANGE) {
+        $done += $row['N'];
+      }
+      if ($status & PhabricatorRepositoryCommit::IMPORTED_OWNERS) {
+        $done += $row['N'];
+      }
+      if ($status & PhabricatorRepositoryCommit::IMPORTED_HERALD) {
+        $done += $row['N'];
+      }
+    }
+
+    if ($total) {
+      $ratio = ($done / $total);
+    } else {
+      $ratio = 0;
+    }
+
+    // Cap this at "99.99%", because it's confusing to users when the actual
+    // fraction is "99.996%" and it rounds up to "100.00%".
+    if ($ratio > 0.9999) {
+      $ratio = 0.9999;
+    }
+
+    return $ratio;
+  }
 
   /**
    * Should this repository publish feed, notifications, audits, and email?

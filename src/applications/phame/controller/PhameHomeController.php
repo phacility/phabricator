@@ -28,10 +28,18 @@ final class PhameHomeController extends PhamePostController {
         ->withVisibility(PhameConstants::VISIBILITY_PUBLISHED)
         ->executeWithCursorPager($pager);
 
-      $post_list = id(new PhamePostListView())
-        ->setPosts($posts)
-        ->setViewer($viewer)
-        ->showBlog(true);
+      if ($posts) {
+        $post_list = id(new PhamePostListView())
+          ->setPosts($posts)
+          ->setViewer($viewer)
+          ->showBlog(true);
+      } else {
+        $post_list = id(new PHUIBigInfoView())
+          ->setIcon('fa-star')
+          ->setTitle('No Visible Posts')
+          ->setDescription(
+            pht('There aren\'t any visible blog posts.'));
+      }
     } else {
       $create_button = id(new PHUIButtonView())
         ->setTag('a')
@@ -43,7 +51,7 @@ final class PhameHomeController extends PhamePostController {
         ->setIcon('fa-star')
         ->setTitle('Welcome to Phame')
         ->setDescription(
-          pht('There aren\'t any visible Blog Posts.'))
+          pht('There aren\'t any visible blog posts.'))
         ->addAction($create_button);
     }
 
@@ -77,7 +85,7 @@ final class PhameHomeController extends PhamePostController {
       ->setViewer($viewer);
 
     $draft_list = null;
-    if ($viewer->isLoggedIn()) {
+    if ($viewer->isLoggedIn() && $blogs) {
       $drafts = id(new PhamePostQuery())
         ->setViewer($viewer)
         ->withBloggerPHIDs(array($viewer->getPHID()))

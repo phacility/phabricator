@@ -26,11 +26,21 @@ final class PHUIFormIconSetControl
     $input_id = celerity_generate_unique_node_id();
     $display_id = celerity_generate_unique_node_id();
 
+    $is_disabled = $this->getDisabled();
+
+    $classes = array();
+    $classes[] = 'button';
+    $classes[] = 'grey';
+
+    if ($is_disabled) {
+      $classes[] = 'disabled';
+    }
+
     $button = javelin_tag(
       'a',
       array(
         'href' => '#',
-        'class' => 'button grey',
+        'class' => implode(' ', $classes),
         'sigil' => 'phui-form-iconset-button',
       ),
       $set->getChooseButtonText());
@@ -79,6 +89,7 @@ final class PHUIFormIconSetControl
       'input',
       array(
         'type' => 'hidden',
+        'disabled' => ($is_disabled ? 'disabled' : null),
         'name' => $this->getName(),
         'value' => $this->getValue(),
         'id' => $input_id,

@@ -76,11 +76,6 @@ final class ProjectQueryConduitAPIMethod extends ProjectConduitAPIMethod {
     $request->getValue('icons');
     if ($request->getValue('icons')) {
       $icons = array();
-      // the internal 'fa-' prefix is a detail hidden from api clients
-      // but needs to pre prepended to the values in the icons array:
-      foreach ($request->getValue('icons') as $value) {
-        $icons[] = 'fa-'.$value;
-      }
       $query->withIcons($icons);
     }
 

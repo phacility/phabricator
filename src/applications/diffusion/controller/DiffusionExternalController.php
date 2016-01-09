@@ -6,12 +6,7 @@ final class DiffusionExternalController extends DiffusionController {
     return true;
   }
 
-  protected function shouldLoadDiffusionRequest() {
-    return false;
-  }
-
-  protected function processDiffusionRequest(AphrontRequest $request) {
-
+  public function handleRequest(AphrontRequest $request) {
     $uri = $request->getStr('uri');
     $id  = $request->getStr('id');
 
@@ -45,13 +40,13 @@ final class DiffusionExternalController extends DiffusionController {
 
       if ($best_match) {
         $repository = $repositories[$best_match];
-        $redirect = DiffusionRequest::generateDiffusionURI(
+        $redirect = $repository->generateURI(
           array(
-            'action'    => 'browse',
-            'callsign'  => $repository->getCallsign(),
-            'branch'    => $repository->getDefaultBranch(),
-            'commit'    => $id,
+            'action' => 'browse',
+            'branch' => $repository->getDefaultBranch(),
+            'commit' => $id,
           ));
+
         return id(new AphrontRedirectResponse())->setURI($redirect);
       }
     }
@@ -64,10 +59,11 @@ final class DiffusionExternalController extends DiffusionController {
 
     if (empty($commits)) {
       $desc = null;
-      if ($uri) {
-        $desc = $uri.', at ';
+      if (strlen($uri)) {
+        $desc = pht('"%s", at "%s"', $uri, $id);
+      } else {
+        $desc = pht('"%s"', $id);
       }
-      $desc .= $id;
 
       $content = id(new PHUIInfoView())
         ->setTitle(pht('Unknown External'))
@@ -83,10 +79,9 @@ final class DiffusionExternalController extends DiffusionController {
     } else if (count($commits) == 1) {
       $commit = head($commits);
       $repo = $repositories[$commit->getRepositoryID()];
-      $redirect = DiffusionRequest::generateDiffusionURI(
+      $redirect = $repo->generateURI(
         array(
           'action'    => 'browse',
-          'callsign'  => $repo->getCallsign(),
           'branch'    => $repo->getDefaultBranch(),
           'commit'    => $commit->getCommitIdentifier(),
         ));
@@ -96,10 +91,9 @@ final class DiffusionExternalController extends DiffusionController {
       $rows = array();
       foreach ($commits as $commit) {
         $repo = $repositories[$commit->getRepositoryID()];
-        $href = DiffusionRequest::generateDiffusionURI(
+        $href = $repo->generateURI(
           array(
             'action'    => 'browse',
-            'callsign'  => $repo->getCallsign(),
             'branch'    => $repo->getDefaultBranch(),
             'commit'    => $commit->getCommitIdentifier(),
           ));
@@ -109,7 +103,7 @@ final class DiffusionExternalController extends DiffusionController {
             array(
               'href' => $href,
             ),
-              'r'.$repo->getCallsign().$commit->getCommitIdentifier()),
+            $commit->getMonogram()),
           $commit->loadCommitData()->getSummary(),
         );
       }
@@ -137,11 +131,13 @@ final class DiffusionExternalController extends DiffusionController {
       $content->setTable($table);
     }
 
-    return $this->buildApplicationPage(
-      $content,
-      array(
-        'title' => pht('Unresolvable External'),
-      ));
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('External'));
+
+    return $this->newPage()
+      ->setTitle(pht('Unresolvable External'))
+      ->setCrumbs($crumbs)
+      ->appendChild($content);
   }
 
 }

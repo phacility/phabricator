@@ -41,7 +41,6 @@ final class PHUIInfoView extends AphrontView {
   }
 
   public function addButton(PHUIButtonView $button) {
-
     $this->buttons[] = $button;
     return $this;
   }

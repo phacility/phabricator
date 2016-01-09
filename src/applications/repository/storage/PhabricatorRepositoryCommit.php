@@ -203,10 +203,7 @@ final class PhabricatorRepositoryCommit
   }
 
   public function getURI() {
-    $repository = $this->getRepository();
-    $callsign = $repository->getCallsign();
-    $commit_identifier = $this->getCommitIdentifier();
-    return '/r'.$callsign.$commit_identifier;
+    return '/'.$this->getMonogram();
   }
 
   /**
@@ -251,6 +248,50 @@ final class PhabricatorRepositoryCommit
     return $this->setAuditStatus($status);
   }
 
+  public function getMonogram() {
+    $repository = $this->getRepository();
+    $callsign = $repository->getCallsign();
+    $identifier = $this->getCommitIdentifier();
+    if ($callsign !== null) {
+      return "r{$callsign}{$identifier}";
+    } else {
+      $id = $repository->getID();
+      return "R{$id}:{$identifier}";
+    }
+  }
+
+  public function getDisplayName() {
+    $repository = $this->getRepository();
+    $identifier = $this->getCommitIdentifier();
+    return $repository->formatCommitName($identifier);
+  }
+
+  public function getShortName() {
+    $identifier = $this->getCommitIdentifier();
+    return substr($identifier, 0, 9);
+  }
+
+  public function renderAuthorLink($handles) {
+    $author_phid = $this->getAuthorPHID();
+    if ($author_phid && isset($handles[$author_phid])) {
+      return $handles[$author_phid]->renderLink();
+    }
+
+    return $this->renderAuthorShortName($handles);
+  }
+
+  public function renderAuthorShortName($handles) {
+    $author_phid = $this->getAuthorPHID();
+    if ($author_phid && isset($handles[$author_phid])) {
+      return $handles[$author_phid]->getName();
+    }
+
+    $data = $this->getCommitData();
+    $name = $data->getAuthorName();
+
+    $parsed = new PhutilEmailAddress($name);
+    return nonempty($parsed->getDisplayName(), $parsed->getAddress());
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

@@ -120,15 +120,24 @@ final class PhamePostViewController
       $add_comment = phutil_tag_div('mlb mlt', $add_comment);
     }
 
+    list($prev, $next) = $this->loadAdjacentPosts($post);
+
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($post);
 
-    $properties->invokeWillRenderEvent();
+    $next_view = new PhameNextPostView();
+    if ($next) {
+      $next_view->setNext($next->getTitle(), $next->getViewURI());
+    }
+    if ($prev) {
+      $next_view->setPrevious($prev->getTitle(), $prev->getViewURI());
+    }
 
+    $document->setFoot($next_view);
     $crumbs = $this->buildApplicationCrumbs();
 
-    $page =  $this->newPage()
+    $page = $this->newPage()
       ->setTitle($post->getTitle())
       ->setPageObjectPHIDs(array($post->getPHID()))
       ->setCrumbs($crumbs)
@@ -234,6 +243,26 @@ final class PhamePostViewController
       ->setSubmitButtonName(pht('Add Comment'));
 
     return phutil_tag_div('phui-document-view-pro-box', $box);
+  }
+
+  private function loadAdjacentPosts(PhamePost $post) {
+    $viewer = $this->getViewer();
+
+    $query = id(new PhamePostQuery())
+      ->setViewer($viewer)
+      ->withVisibility(PhameConstants::VISIBILITY_PUBLISHED)
+      ->withBlogPHIDs(array($post->getBlog()->getPHID()))
+      ->setLimit(1);
+
+    $prev = id(clone $query)
+      ->setAfterID($post->getID())
+      ->execute();
+
+    $next = id(clone $query)
+      ->setBeforeID($post->getID())
+      ->execute();
+
+    return array(head($prev), head($next));
   }
 
 }

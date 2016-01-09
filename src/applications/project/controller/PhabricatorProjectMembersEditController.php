@@ -12,10 +12,6 @@ final class PhabricatorProjectMembersEditController
       ->withIDs(array($id))
       ->needMembers(true)
       ->needImages(true)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-        ))
       ->executeOne();
     if (!$project) {
       return new Aphront404Response();
@@ -72,9 +68,11 @@ final class PhabricatorProjectMembersEditController
       $project,
       PhabricatorPolicyCapability::CAN_EDIT);
 
+    $supports_edit = $project->supportsEditMembers();
+
     $form_box = null;
     $title = pht('Add Members');
-    if ($can_edit) {
+    if ($can_edit && $supports_edit) {
       $header_name = pht('Edit Members');
       $view_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
 
@@ -99,14 +97,16 @@ final class PhabricatorProjectMembersEditController
 
     $nav = $this->buildIconNavView($project);
     $nav->selectFilter("members/{$id}/");
-    $nav->appendChild($form_box);
-    $nav->appendChild($member_list);
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Members'));
+
+    return $this->newPage()
+      ->setNavigation($nav)
+      ->setCrumbs($crumbs)
+      ->setTitle(array($project->getName(), $title))
+      ->appendChild($form_box)
+      ->appendChild($member_list);
   }
 
   private function renderMemberList(

@@ -6,7 +6,7 @@ final class DiffusionRepositoryCreateController
   private $edit;
   private $repository;
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
+  public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
     $this->edit = $request->getURIData('edit');
 
@@ -19,6 +19,11 @@ final class DiffusionRepositoryCreateController
     switch ($this->edit) {
       case 'remote':
       case 'policy':
+        $response = $this->loadDiffusionContextForEdit();
+        if ($response) {
+          return $response;
+        }
+
         $repository = $this->getDiffusionRequest()->getRepository();
 
         // Make sure we have CAN_EDIT.
@@ -275,14 +280,10 @@ final class DiffusionRepositoryCreateController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($form);
   }
 
 

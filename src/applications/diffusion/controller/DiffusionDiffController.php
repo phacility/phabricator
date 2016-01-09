@@ -6,27 +6,18 @@ final class DiffusionDiffController extends DiffusionController {
     return true;
   }
 
-  protected function shouldLoadDiffusionRequest() {
-    return false;
+  protected function getDiffusionBlobFromRequest(AphrontRequest $request) {
+    return $request->getStr('ref');
   }
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $data = $request->getURIMap();
-    $data = $data + array(
-      'dblob' => $this->getRequest()->getStr('ref'),
-    );
-    try {
-      $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
-        $data,
-        $request);
-    } catch (Exception $ex) {
-      return id(new Aphront404Response())
-        ->setRequest($request);
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
     }
-    $this->setDiffusionRequest($drequest);
 
-    $drequest = $this->getDiffusionRequest();
     $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
 
     if (!$request->isAjax()) {
 

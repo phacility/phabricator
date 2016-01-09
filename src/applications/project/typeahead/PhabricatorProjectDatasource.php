@@ -67,7 +67,7 @@ final class PhabricatorProjectDatasource
         ->setDisplayType(pht('Project'))
         ->setURI('/tag/'.$proj->getPrimarySlug().'/')
         ->setPHID($proj->getPHID())
-        ->setIcon($proj->getIcon())
+        ->setIcon($proj->getDisplayIconIcon())
         ->setColor($proj->getColor())
         ->setPriorityType('proj')
         ->setClosed($closed);

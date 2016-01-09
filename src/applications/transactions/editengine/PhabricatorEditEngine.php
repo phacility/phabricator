@@ -64,10 +64,6 @@ abstract class PhabricatorEditEngine
   abstract public function getEngineApplicationClass();
   abstract protected function buildCustomEditFields($object);
 
-  protected function didBuildCustomEditFields($object, array $fields) {
-    return;
-  }
-
   public function getFieldsForConfig(
     PhabricatorEditEngineConfiguration $config) {
 
@@ -93,7 +89,6 @@ abstract class PhabricatorEditEngine
     }
 
     $fields = mpull($fields, null, 'getKey');
-    $this->didBuildCustomEditFields($object, $fields);
 
     $extensions = PhabricatorEditEngineExtension::getAllEnabledExtensions();
     foreach ($extensions as $extension) {
@@ -115,7 +110,6 @@ abstract class PhabricatorEditEngine
       }
 
       $extension_fields = mpull($extension_fields, null, 'getKey');
-      $extension->didBuildCustomEditFields($this, $object, $extension_fields);
 
       foreach ($extension_fields as $key => $field) {
         $fields[$key] = $field;
@@ -123,8 +117,13 @@ abstract class PhabricatorEditEngine
     }
 
     $config = $this->getEditEngineConfiguration();
+    $fields = $this->willConfigureFields($object, $fields);
     $fields = $config->applyConfigurationToFields($this, $object, $fields);
 
+    return $fields;
+  }
+
+  protected function willConfigureFields($object, array $fields) {
     return $fields;
   }
 
@@ -962,6 +961,28 @@ abstract class PhabricatorEditEngine
       $header_text = $this->getObjectEditTitleText($object);
     }
 
+    $show_preview = !$request->isAjax();
+
+    if ($show_preview) {
+      $previews = array();
+      foreach ($fields as $field) {
+        $preview = $field->getPreviewPanel();
+        if (!$preview) {
+          continue;
+        }
+
+        $control_id = $field->getControlID();
+
+        $preview
+          ->setControlID($control_id)
+          ->setPreviewURI('/transactions/remarkuppreview/');
+
+        $previews[] = $preview;
+      }
+    } else {
+      $previews = array();
+    }
+
     $form = $this->buildEditForm($object, $fields);
 
     if ($request->isAjax()) {
@@ -998,7 +1019,8 @@ abstract class PhabricatorEditEngine
     return $controller->newPage()
       ->setTitle($header_text)
       ->setCrumbs($crumbs)
-      ->appendChild($box);
+      ->appendChild($box)
+      ->appendChild($previews);
   }
 
   protected function newEditResponse(
@@ -1665,7 +1687,16 @@ abstract class PhabricatorEditEngine
       // Let the parameter type interpret the value. This allows you to
       // use usernames in list<user> fields, for example.
       $parameter_type = $type->getConduitParameterType();
-      $xaction['value'] = $parameter_type->getValue($xaction, 'value');
+
+      try {
+        $xaction['value'] = $parameter_type->getValue($xaction, 'value');
+      } catch (Exception $ex) {
+        throw new PhutilProxyException(
+          pht(
+            'Exception when processing transaction of type "%s".',
+            $xaction['type']),
+          $ex);
+      }
 
       $type_xactions = $type->generateTransactions(
         clone $template,

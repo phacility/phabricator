@@ -6,15 +6,18 @@ final class DiffusionBranchTableController extends DiffusionController {
     return true;
   }
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $drequest = $this->getDiffusionRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
+    }
 
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $pager = new PHUIPagerView();
-    $pager->setURI($request->getRequestURI(), 'offset');
-    $pager->setOffset($request->getInt('offset'));
+    $pager = id(new PHUIPagerView())
+      ->readFromRequest($request);
 
     // TODO: Add support for branches that contain commit
     $branches = $this->callConduitWithDiffusionRequest(
@@ -57,18 +60,20 @@ final class DiffusionBranchTableController extends DiffusionController {
         'branches' => true,
       ));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $content,
-        $pager,
-      ),
-      array(
-        'title' => array(
+    $pager_box = $this->renderTablePagerBox($pager);
+
+    return $this->newPage()
+      ->setTitle(
+        array(
           pht('Branches'),
-          'r'.$repository->getCallsign(),
-        ),
-      ));
+          $repository->getDisplayName(),
+        ))
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $content,
+          $pager_box,
+        ));
   }
 
 }

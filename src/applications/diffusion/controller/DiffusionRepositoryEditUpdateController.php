@@ -3,30 +3,22 @@
 final class DiffusionRepositoryEditUpdateController
   extends DiffusionRepositoryEditController {
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $viewer = $request->getUser();
-    $drequest = $this->diffusionRequest;
-    $repository = $drequest->getRepository();
-
-    $repository = id(new PhabricatorRepositoryQuery())
-      ->setViewer($viewer)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->withIDs(array($repository->getID()))
-      ->executeOne();
-    if (!$repository) {
-      return new Aphront404Response();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContextForEdit();
+    if ($response) {
+      return $response;
     }
+
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
 
     $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
 
     if ($request->isFormPost()) {
       $params = array(
-        'callsigns' => array(
-          $repository->getCallsign(),
+        'repositories' => array(
+          $repository->getPHID(),
         ),
       );
 

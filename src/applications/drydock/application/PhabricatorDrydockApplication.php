@@ -96,6 +96,7 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
           '(?P<id>[1-9]\d*)/' => array(
             '' => 'DrydockRepositoryOperationViewController',
             'status/' => 'DrydockRepositoryOperationStatusController',
+            'dismiss/' => 'DrydockRepositoryOperationDismissController',
           ),
         ),
       ),

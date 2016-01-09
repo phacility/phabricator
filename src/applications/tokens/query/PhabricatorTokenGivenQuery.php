@@ -22,68 +22,62 @@ final class PhabricatorTokenGivenQuery
     return $this;
   }
 
-  protected function loadPage() {
-    $table = new PhabricatorTokenGiven();
-    $conn_r = $table->establishConnection('r');
-
-    $rows = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($rows);
+  public function newResultObject() {
+    return new PhabricatorTokenGiven();
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function loadPage() {
+    return $this->loadStandardPage($this->newResultObject());
+  }
 
-    if ($this->authorPHIDs) {
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
-    if ($this->objectPHIDs) {
+    if ($this->objectPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'objectPHID IN (%Ls)',
         $this->objectPHIDs);
     }
 
-    if ($this->tokenPHIDs) {
+    if ($this->tokenPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'tokenPHID IN (%Ls)',
         $this->tokenPHIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   protected function willFilterPage(array $results) {
-    $object_phids = array_filter(mpull($results, 'getObjectPHID'));
-    if (!$object_phids) {
-      return array();
-    }
+    $object_phids = mpull($results, 'getObjectPHID');
 
     $objects = id(new PhabricatorObjectQuery())
       ->setViewer($this->getViewer())
       ->withPHIDs($object_phids)
       ->execute();
+    $objects = mpull($objects, null, 'getPHID');
 
     foreach ($results as $key => $result) {
-      $phid = $result->getObjectPHID();
-      if (empty($objects[$phid])) {
-        unset($results[$key]);
-      } else {
-        $result->attachObject($objects[$phid]);
+      $object = idx($objects, $result->getObjectPHID());
+
+      if ($object) {
+        if ($object instanceof PhabricatorTokenReceiverInterface) {
+          $result->attachObject($object);
+          continue;
+        }
       }
+
+      $this->didRejectResult($result);
+      unset($results[$key]);
     }
 
     return $results;

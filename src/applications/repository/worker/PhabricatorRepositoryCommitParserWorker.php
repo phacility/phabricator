@@ -17,30 +17,26 @@ abstract class PhabricatorRepositoryCommitParserWorker
         pht('No "%s" in task data.', 'commitID'));
     }
 
-    $commit = id(new PhabricatorRepositoryCommit())->load($commit_id);
-
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withIDs(array($commit_id))
+      ->executeOne();
     if (!$commit) {
       throw new PhabricatorWorkerPermanentFailureException(
         pht('Commit "%s" does not exist.', $commit_id));
     }
 
-    return $this->commit = $commit;
+    $this->commit = $commit;
+
+    return $commit;
   }
 
   final protected function doWork() {
-    if (!$this->loadCommit()) {
-      return;
-    }
-
-    $repository = id(new PhabricatorRepositoryQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withIDs(array($this->commit->getRepositoryID()))
-      ->executeOne();
-    if (!$repository) {
-      return;
-    }
+    $commit = $this->loadCommit();
+    $repository = $commit->getRepository();
 
     $this->repository = $repository;
+
     $this->parseCommit($repository, $this->commit);
   }
 
@@ -52,14 +48,14 @@ abstract class PhabricatorRepositoryCommitParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit);
 
-  protected function isBadCommit($full_commit_name) {
+  protected function isBadCommit(PhabricatorRepositoryCommit $commit) {
     $repository = new PhabricatorRepository();
 
     $bad_commit = queryfx_one(
       $repository->establishConnection('w'),
       'SELECT * FROM %T WHERE fullCommitName = %s',
       PhabricatorRepository::TABLE_BADCOMMIT,
-      $full_commit_name);
+      $commit->getMonogram());
 
     return (bool)$bad_commit;
   }

@@ -24,8 +24,7 @@ abstract class PhabricatorConfigOptionType extends Phobject {
     $value) {
 
     if (is_array($value)) {
-      $json = new PhutilJSON();
-      return $json->encodeFormatted($value);
+      return PhabricatorConfigJSON::prettyPrintJSON($value);
     } else {
       return $value;
     }

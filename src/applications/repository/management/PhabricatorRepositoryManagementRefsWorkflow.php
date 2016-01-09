@@ -7,7 +7,7 @@ final class PhabricatorRepositoryManagementRefsWorkflow
     $this
       ->setName('refs')
       ->setExamples('**refs** [__options__] __repository__ ...')
-      ->setSynopsis(pht('Update refs in __repository__, named by callsign.'))
+      ->setSynopsis(pht('Update refs in __repository__.'))
       ->setArguments(
         array(
           array(
@@ -27,15 +27,16 @@ final class PhabricatorRepositoryManagementRefsWorkflow
     if (!$repos) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Specify one or more repositories to update refs for, '.
-          'by callsign.'));
+          'Specify one or more repositories to update refs for.'));
     }
 
     $console = PhutilConsole::getConsole();
     foreach ($repos as $repo) {
       $console->writeOut(
         "%s\n",
-        pht("Updating refs in '%s'...", $repo->getCallsign()));
+        pht(
+          'Updating refs in "%s"...',
+          $repo->getDisplayName()));
 
       $engine = id(new PhabricatorRepositoryRefEngine())
         ->setRepository($repo)

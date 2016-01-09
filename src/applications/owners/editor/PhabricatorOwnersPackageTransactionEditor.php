@@ -204,6 +204,10 @@ final class PhabricatorOwnersPackageTransactionEditor
         }
         break;
       case PhabricatorOwnersPackageTransaction::TYPE_PATHS:
+        if (!$xactions) {
+          continue;
+        }
+
         $old = mpull($object->getPaths(), 'getRef');
         foreach ($xactions as $xaction) {
           $new = $xaction->getNewValue();

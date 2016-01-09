@@ -20,6 +20,7 @@ final class DrydockRepositoryOperation extends DrydockDAO
   protected $operationType;
   protected $operationState;
   protected $properties = array();
+  protected $isDismissed;
 
   private $repository = self::ATTACHABLE;
   private $object = self::ATTACHABLE;
@@ -30,7 +31,8 @@ final class DrydockRepositoryOperation extends DrydockDAO
 
     return id(new DrydockRepositoryOperation())
       ->setOperationState(self::STATE_WAIT)
-      ->setOperationType($op->getOperationConstant());
+      ->setOperationType($op->getOperationConstant())
+      ->setIsDismissed(0);
   }
 
   protected function getConfiguration() {
@@ -43,6 +45,7 @@ final class DrydockRepositoryOperation extends DrydockDAO
         'repositoryTarget' => 'bytes',
         'operationType' => 'text32',
         'operationState' => 'text32',
+        'isDismissed' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_object' => array(
@@ -196,11 +199,17 @@ final class DrydockRepositoryOperation extends DrydockDAO
   }
 
   public function getPolicy($capability) {
-    return $this->getRepository()->getPolicy($capability);
+    $need_capability = $this->getRequiredRepositoryCapability($capability);
+
+    return $this->getRepository()
+      ->getPolicy($need_capability);
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return $this->getRepository()->hasAutomaticCapability($capability, $viewer);
+    $need_capability = $this->getRequiredRepositoryCapability($capability);
+
+    return $this->getRepository()
+      ->hasAutomaticCapability($need_capability, $viewer);
   }
 
   public function describeAutomaticCapability($capability) {
@@ -208,5 +217,18 @@ final class DrydockRepositoryOperation extends DrydockDAO
       'A repository operation inherits the policies of the repository it '.
       'affects.');
   }
+
+  private function getRequiredRepositoryCapability($capability) {
+    // To edit a RepositoryOperation, require that the user be able to push
+    // to the repository.
+
+    $map = array(
+      PhabricatorPolicyCapability::CAN_EDIT =>
+        DiffusionPushCapability::CAPABILITY,
+    );
+
+    return idx($map, $capability, $capability);
+  }
+
 
 }

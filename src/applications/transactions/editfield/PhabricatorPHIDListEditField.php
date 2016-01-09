@@ -35,7 +35,11 @@ abstract class PhabricatorPHIDListEditField
   }
 
   protected function newConduitParameterType() {
-    return new ConduitPHIDListParameterType();
+    if ($this->getIsSingleValue()) {
+      return new ConduitPHIDParameterType();
+    } else {
+      return new ConduitPHIDListParameterType();
+    }
   }
 
   protected function getValueFromRequest(AphrontRequest $request, $key) {

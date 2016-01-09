@@ -28,7 +28,7 @@ final class DiffusionHovercardEngineExtension
 
     $author_phid = $commit->getAuthorPHID();
     if ($author_phid) {
-      $author = $viewer->loadHandle($author)->renderLink();
+      $author = $viewer->renderHandle($author_phid);
     } else {
       $commit_data = $commit->loadCommitData();
       $author = phutil_tag('em', array(), $commit_data->getAuthorName());

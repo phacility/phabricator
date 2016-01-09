@@ -3,9 +3,14 @@
 final class DiffusionMirrorDeleteController
   extends DiffusionController {
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $viewer = $request->getUser();
-    $drequest = $this->diffusionRequest;
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
+    }
+
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
     $mirror = id(new PhabricatorRepositoryMirrorQuery())
@@ -28,16 +33,12 @@ final class DiffusionMirrorDeleteController
       return id(new AphrontReloadResponse())->setURI($edit_uri);
     }
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setTitle(pht('Really delete mirror?'))
       ->appendChild(
         pht('Phabricator will stop pushing updates to this mirror.'))
       ->addSubmitButton(pht('Delete Mirror'))
       ->addCancelButton($edit_uri);
-
-    return id(new AphrontDialogResponse())
-      ->setDialog($dialog);
   }
 
 

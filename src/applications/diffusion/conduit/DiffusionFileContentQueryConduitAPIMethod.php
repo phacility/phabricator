@@ -19,7 +19,6 @@ final class DiffusionFileContentQueryConduitAPIMethod
     return array(
       'path' => 'required string',
       'commit' => 'required string',
-      'needsBlame' => 'optional bool',
       'timeout' => 'optional int',
       'byteLimit' => 'optional int',
     );
@@ -27,12 +26,8 @@ final class DiffusionFileContentQueryConduitAPIMethod
 
   protected function getResult(ConduitAPIRequest $request) {
     $drequest = $this->getDiffusionRequest();
-    $needs_blame = $request->getValue('needsBlame');
-    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
-      $drequest);
-    $file_query
-      ->setViewer($request->getUser())
-      ->setNeedsBlame($needs_blame);
+
+    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest($drequest);
 
     $timeout = $request->getValue('timeout');
     if ($timeout) {
@@ -44,20 +39,44 @@ final class DiffusionFileContentQueryConduitAPIMethod
       $file_query->setByteLimit($byte_limit);
     }
 
-    $file_content = $file_query->loadFileContent();
+    $content = $file_query->execute();
 
-    if ($needs_blame) {
-      list($text_list, $rev_list, $blame_dict) = $file_query->getBlameData();
-    } else {
-      $text_list = $rev_list = $blame_dict = array();
+    $too_slow = (bool)$file_query->getExceededTimeLimit();
+    $too_huge = (bool)$file_query->getExceededByteLimit();
+
+    $file_phid = null;
+    if (!$too_slow && !$too_huge) {
+      $file = $this->newFile($drequest, $content);
+      $file_phid = $file->getPHID();
     }
 
-    $file_content
-      ->setBlameDict($blame_dict)
-      ->setRevList($rev_list)
-      ->setTextList($text_list);
+    return array(
+      'tooSlow' => $too_slow,
+      'tooHuge' => $too_huge,
+      'filePHID' => $file_phid,
+    );
+  }
 
-    return $file_content->toDictionary();
+  private function newFile(DiffusionRequest $drequest, $content) {
+    $path = $drequest->getPath();
+    $name = basename($path);
+
+    $repository = $drequest->getRepository();
+    $repository_phid = $repository->getPHID();
+
+    $file = PhabricatorFile::buildFromFileDataOrHash(
+      $content,
+      array(
+        'name' => $name,
+        'ttl' => time() + phutil_units('48 hours in seconds'),
+        'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+      ));
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $file->attachToObject($repository_phid);
+    unset($unguarded);
+
+    return $file;
   }
 
 }

@@ -5,6 +5,27 @@ abstract class PhabricatorSearchEngineAPIMethod
 
   abstract public function newSearchEngine();
 
+  final public function getQueryMaps($query) {
+    $maps = $this->getCustomQueryMaps($query);
+
+    // Make sure we emit empty maps as objects, not lists.
+    foreach ($maps as $key => $map) {
+      if (!$map) {
+        $maps[$key] = (object)$map;
+      }
+    }
+
+    if (!$maps) {
+      $maps = (object)$maps;
+    }
+
+    return $maps;
+  }
+
+  protected function getCustomQueryMaps($query) {
+    return array();
+  }
+
   public function getApplication() {
     $engine = $this->newSearchEngine();
     $class = $engine->getApplicationClassName();
@@ -36,7 +57,7 @@ abstract class PhabricatorSearchEngineAPIMethod
     $engine = $this->newSearchEngine()
       ->setViewer($request->getUser());
 
-    return $engine->buildConduitResponse($request);
+    return $engine->buildConduitResponse($request, $this);
   }
 
   final public function getMethodDescription() {

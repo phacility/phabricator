@@ -86,10 +86,15 @@ final class DiffusionURITestCase extends PhutilTestCase {
   }
 
   public function testURIGeneration() {
+    $actor = PhabricatorUser::getOmnipotentUser();
+
+    $repository = PhabricatorRepository::initializeNewRepository($actor)
+      ->setCallsign('A')
+      ->makeEphemeral();
+
     $map = array(
       '/diffusion/A/browse/branch/path.ext;abc$1' => array(
         'action'    => 'browse',
-        'callsign'  => 'A',
         'branch'    => 'branch',
         'path'      => 'path.ext',
         'commit'    => 'abc',
@@ -97,24 +102,20 @@ final class DiffusionURITestCase extends PhutilTestCase {
       ),
       '/diffusion/A/browse/a%252Fb/path.ext' => array(
         'action'    => 'browse',
-        'callsign'  => 'A',
         'branch'    => 'a/b',
         'path'      => 'path.ext',
       ),
       '/diffusion/A/browse/%2B/%20%21' => array(
         'action'    => 'browse',
-        'callsign'  => 'A',
         'path'      => '+/ !',
       ),
       '/diffusion/A/browse/money/%24%24100$2' => array(
         'action'    => 'browse',
-        'callsign'  => 'A',
         'path'      => 'money/$100',
         'line'      => '2',
       ),
       '/diffusion/A/browse/path/to/file.ext?view=things' => array(
         'action'    => 'browse',
-        'callsign'  => 'A',
         'path'      => 'path/to/file.ext',
         'params'    => array(
           'view' => 'things',
@@ -122,7 +123,6 @@ final class DiffusionURITestCase extends PhutilTestCase {
       ),
       '/diffusion/A/repository/master/' => array(
         'action'    => 'branch',
-        'callsign'  => 'A',
         'branch'    => 'master',
       ),
       'path/to/file.ext;abc' => array(
@@ -132,7 +132,6 @@ final class DiffusionURITestCase extends PhutilTestCase {
       ),
       '/diffusion/A/browse/branch/path.ext$3-5%2C7-12%2C14' => array(
         'action'    => 'browse',
-        'callsign'  => 'A',
         'branch'    => 'branch',
         'path'      => 'path.ext',
         'line'      => '3-5,7-12,14',
@@ -140,10 +139,8 @@ final class DiffusionURITestCase extends PhutilTestCase {
     );
 
     foreach ($map as $expect => $input) {
-      $actual = DiffusionRequest::generateDiffusionURI($input);
-      $this->assertEqual(
-        $expect,
-        (string)$actual);
+      $actual = $repository->generateURI($input);
+      $this->assertEqual($expect, (string)$actual);
     }
   }
 

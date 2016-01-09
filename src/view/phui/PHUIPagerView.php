@@ -58,6 +58,10 @@ final class PHUIPagerView extends AphrontView {
     return $this->hasMorePages;
   }
 
+  public function getHasMorePages() {
+    return $this->hasMorePages;
+  }
+
   public function setSurroundingPages($pages) {
     $this->surroundingPages = max(0, $pages);
     return $this;

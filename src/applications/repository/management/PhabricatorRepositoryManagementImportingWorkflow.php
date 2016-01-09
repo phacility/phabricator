@@ -9,8 +9,7 @@ final class PhabricatorRepositoryManagementImportingWorkflow
       ->setExamples('**importing** __repository__ ...')
       ->setSynopsis(
         pht(
-          'Show commits in __repository__, named by callsign, which are '.
-          'still importing.'))
+          'Show commits in __repository__ which are still importing.'))
       ->setArguments(
         array(
           array(
@@ -30,8 +29,7 @@ final class PhabricatorRepositoryManagementImportingWorkflow
     if (!$repos) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Specify one or more repositories to find importing commits for, '.
-          'by callsign.'));
+          'Specify one or more repositories to find importing commits for.'));
     }
 
     $repos = mpull($repos, null, 'getID');
@@ -54,7 +52,7 @@ final class PhabricatorRepositoryManagementImportingWorkflow
         $repo = $repos[$row['repositoryID']];
         $identifier = $row['commitIdentifier'];
 
-        $console->writeOut('%s', 'r'.$repo->getCallsign().$identifier);
+        $console->writeOut('%s', $repo->formatCommitName($identifier));
 
         if (!$args->getArg('simple')) {
           $status = $row['importStatus'];

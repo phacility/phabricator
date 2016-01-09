@@ -493,6 +493,90 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $this->assertFalse((bool)$this->refreshProject($child, $user2));
   }
 
+  public function testSlugMaps() {
+    // When querying by slugs, slugs should be normalized and the mapping
+    // should be reported correctly.
+    $user = $this->createUser();
+    $user->save();
+
+    $name = 'queryslugproject';
+    $name2 = 'QUERYslugPROJECT';
+    $slug = 'queryslugextra';
+    $slug2 = 'QuErYSlUgExTrA';
+
+    $project = PhabricatorProject::initializeNewProject($user);
+
+    $xactions = array();
+
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME)
+      ->setNewValue($name);
+
+    $xactions[] = id(new PhabricatorProjectTransaction())
+      ->setTransactionType(PhabricatorProjectTransaction::TYPE_SLUGS)
+      ->setNewValue(array($slug));
+
+    $this->applyTransactions($project, $user, $xactions);
+
+    $project_query = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withSlugs(array($name));
+    $project_query->execute();
+    $map = $project_query->getSlugMap();
+
+    $this->assertEqual(
+      array(
+        $name => $project->getPHID(),
+      ),
+      ipull($map, 'projectPHID'));
+
+    $project_query = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withSlugs(array($slug));
+    $project_query->execute();
+    $map = $project_query->getSlugMap();
+
+    $this->assertEqual(
+      array(
+        $slug => $project->getPHID(),
+      ),
+      ipull($map, 'projectPHID'));
+
+    $project_query = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withSlugs(array($name, $slug, $name2, $slug2));
+    $project_query->execute();
+    $map = $project_query->getSlugMap();
+
+    $expect = array(
+      $name => $project->getPHID(),
+      $slug => $project->getPHID(),
+      $name2 => $project->getPHID(),
+      $slug2 => $project->getPHID(),
+    );
+
+    $actual = ipull($map, 'projectPHID');
+
+    ksort($expect);
+    ksort($actual);
+
+    $this->assertEqual($expect, $actual);
+
+    $expect = array(
+      $name => $name,
+      $slug => $slug,
+      $name2 => $name,
+      $slug2 => $slug,
+    );
+
+    $actual = ipull($map, 'slug');
+
+    ksort($expect);
+    ksort($actual);
+
+    $this->assertEqual($expect, $actual);
+  }
+
   private function attemptProjectEdit(
     PhabricatorProject $proj,
     PhabricatorUser $user,
@@ -627,6 +711,157 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
       pht('Leave allowed without any permission.'));
   }
 
+
+  public function testComplexConstraints() {
+    $user = $this->createUser();
+    $user->save();
+
+    $engineering = $this->createProject($user);
+    $engineering_scan = $this->createProject($user, $engineering);
+    $engineering_warp = $this->createProject($user, $engineering);
+
+    $exploration = $this->createProject($user);
+    $exploration_diplomacy = $this->createProject($user, $exploration);
+
+    $task_engineering = $this->newTask(
+      $user,
+      array($engineering),
+      pht('Engineering Only'));
+
+    $task_exploration = $this->newTask(
+      $user,
+      array($exploration),
+      pht('Exploration Only'));
+
+    $task_warp_explore = $this->newTask(
+      $user,
+      array($engineering_warp, $exploration),
+      pht('Warp to New Planet'));
+
+    $task_diplomacy_scan = $this->newTask(
+      $user,
+      array($engineering_scan, $exploration_diplomacy),
+      pht('Scan Diplomat'));
+
+    $task_diplomacy = $this->newTask(
+      $user,
+      array($exploration_diplomacy),
+      pht('Diplomatic Meeting'));
+
+    $task_warp_scan = $this->newTask(
+      $user,
+      array($engineering_scan, $engineering_warp),
+      pht('Scan Warp Drives'));
+
+    $this->assertQueryByProjects(
+      $user,
+      array(
+        $task_engineering,
+        $task_warp_explore,
+        $task_diplomacy_scan,
+        $task_warp_scan,
+      ),
+      array($engineering),
+      pht('All Engineering'));
+
+    $this->assertQueryByProjects(
+      $user,
+      array(
+        $task_diplomacy_scan,
+        $task_warp_scan,
+      ),
+      array($engineering_scan),
+      pht('All Scan'));
+
+    $this->assertQueryByProjects(
+      $user,
+      array(
+        $task_warp_explore,
+        $task_diplomacy_scan,
+      ),
+      array($engineering, $exploration),
+      pht('Engineering + Exploration'));
+
+    // This is testing that a query for "Parent" and "Parent > Child" works
+    // properly.
+    $this->assertQueryByProjects(
+      $user,
+      array(
+        $task_diplomacy_scan,
+        $task_warp_scan,
+      ),
+      array($engineering, $engineering_scan),
+      pht('Engineering + Scan'));
+  }
+
+  private function newTask(
+    PhabricatorUser $viewer,
+    array $projects,
+    $name = null) {
+
+    $task = ManiphestTask::initializeNewTask($viewer);
+
+    if (!strlen($name)) {
+      $name = pht('Test Task');
+    }
+
+    $xactions = array();
+
+    $xactions[] = id(new ManiphestTransaction())
+      ->setTransactionType(ManiphestTransaction::TYPE_TITLE)
+      ->setNewValue($name);
+
+    if ($projects) {
+      $xactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue(
+          'edge:type',
+          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST)
+        ->setNewValue(
+          array(
+            '=' => array_fuse(mpull($projects, 'getPHID')),
+          ));
+    }
+
+    $editor = id(new ManiphestTransactionEditor())
+      ->setActor($viewer)
+      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContinueOnNoEffect(true)
+      ->applyTransactions($task, $xactions);
+
+    return $task;
+  }
+
+  private function assertQueryByProjects(
+    PhabricatorUser $viewer,
+    array $expect,
+    array $projects,
+    $label = null) {
+
+    $datasource = id(new PhabricatorProjectLogicalDatasource())
+      ->setViewer($viewer);
+
+    $project_phids = mpull($projects, 'getPHID');
+    $constraints = $datasource->evaluateTokens($project_phids);
+
+    $query = id(new ManiphestTaskQuery())
+      ->setViewer($viewer);
+
+    $query->withEdgeLogicConstraints(
+      PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+      $constraints);
+
+    $tasks = $query->execute();
+
+    $expect_phids = mpull($expect, 'getTitle', 'getPHID');
+    ksort($expect_phids);
+
+    $actual_phids = mpull($tasks, 'getTitle', 'getPHID');
+    ksort($actual_phids);
+
+    $this->assertEqual($expect_phids, $actual_phids, $label);
+  }
+
   private function refreshProject(
     PhabricatorProject $project,
     PhabricatorUser $viewer,
@@ -664,15 +899,15 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
       ->setNewValue($name);
 
     if ($parent) {
-      $xactions[] = id(new PhabricatorProjectTransaction())
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_PARENT)
-        ->setNewValue($parent->getPHID());
-    }
-
-    if ($is_milestone) {
-      $xactions[] = id(new PhabricatorProjectTransaction())
-        ->setTransactionType(PhabricatorProjectTransaction::TYPE_MILESTONE)
-        ->setNewValue(true);
+      if ($is_milestone) {
+        $xactions[] = id(new PhabricatorProjectTransaction())
+          ->setTransactionType(PhabricatorProjectTransaction::TYPE_MILESTONE)
+          ->setNewValue($parent->getPHID());
+      } else {
+        $xactions[] = id(new PhabricatorProjectTransaction())
+          ->setTransactionType(PhabricatorProjectTransaction::TYPE_PARENT)
+          ->setNewValue($parent->getPHID());
+      }
     }
 
     $this->applyTransactions($project, $user, $xactions);

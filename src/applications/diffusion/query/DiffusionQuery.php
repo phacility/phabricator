@@ -53,7 +53,7 @@ abstract class DiffusionQuery extends PhabricatorQuery {
     $repository = $drequest->getRepository();
 
     $core_params = array(
-      'callsign' => $repository->getCallsign(),
+      'repository' => $repository->getPHID(),
     );
 
     if ($drequest->getBranch() !== null) {

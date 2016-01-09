@@ -130,10 +130,7 @@ final class HeraldCommitAdapter
   }
 
   public function getHeraldName() {
-    return
-      'r'.
-      $this->repository->getCallsign().
-      $this->commit->getCommitIdentifier();
+    return $this->commit->getMonogram();
   }
 
   public function loadAffectedPaths() {

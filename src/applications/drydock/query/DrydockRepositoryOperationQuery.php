@@ -8,6 +8,7 @@ final class DrydockRepositoryOperationQuery extends DrydockQuery {
   private $repositoryPHIDs;
   private $operationStates;
   private $operationTypes;
+  private $isDismissed;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -36,6 +37,11 @@ final class DrydockRepositoryOperationQuery extends DrydockQuery {
 
   public function withOperationTypes(array $types) {
     $this->operationTypes = $types;
+    return $this;
+  }
+
+  public function withIsDismissed($dismissed) {
+    $this->isDismissed = $dismissed;
     return $this;
   }
 
@@ -150,6 +156,13 @@ final class DrydockRepositoryOperationQuery extends DrydockQuery {
         $conn,
         'operationType IN (%Ls)',
         $this->operationTypes);
+    }
+
+    if ($this->isDismissed !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'isDismissed = %d',
+        (int)$this->isDismissed);
     }
 
     return $where;

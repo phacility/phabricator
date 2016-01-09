@@ -26,7 +26,7 @@ final class PhabricatorCommitBranchesField
 
     $params = array(
       'contains' => $this->getObject()->getCommitIdentifier(),
-      'callsign' => $this->getObject()->getRepository()->getCallsign(),
+      'repository' => $this->getObject()->getRepository()->getPHID(),
     );
 
     try {
