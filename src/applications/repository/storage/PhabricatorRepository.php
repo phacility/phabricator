@@ -46,6 +46,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   protected $name;
   protected $callsign;
+  protected $repositorySlug;
   protected $uuid;
   protected $viewPolicy;
   protected $editPolicy;
@@ -93,6 +94,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'sort255',
         'callsign' => 'sort32',
+        'repositorySlug' => 'sort64?',
         'versionControlSystem' => 'text32',
         'uuid' => 'text64?',
         'pushPolicy' => 'policy',
@@ -100,11 +102,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         'almanacServicePHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_phid' => null,
-        'phid' => array(
-          'columns' => array('phid'),
-          'unique' => true,
-        ),
         'callsign' => array(
           'columns' => array('callsign'),
           'unique' => true,
@@ -114,6 +111,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         ),
         'key_vcs' => array(
           'columns' => array('versionControlSystem'),
+        ),
+        'key_slug' => array(
+          'columns' => array('repositorySlug'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();
@@ -297,7 +298,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    * @return string
    */
   public function getCloneName() {
-    $name = $this->getDetail('clone-name');
+    $name = $this->getRepositorySlug();
 
     // Make some reasonable effort to produce reasonable default directory
     // names from repository names.
@@ -312,6 +313,82 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     return $name;
+  }
+
+  public static function isValidRepositorySlug($slug) {
+    try {
+      self::asssertValidRepositorySlug($slug);
+      return true;
+    } catch (Exception $ex) {
+      return false;
+    }
+  }
+
+  public static function asssertValidRepositorySlug($slug) {
+    if (!strlen($slug)) {
+      throw new Exception(
+        pht(
+          'The empty string is not a valid repository short name. '.
+          'Repository short names must be at least one character long.'));
+    }
+
+    if (strlen($slug) > 64) {
+      throw new Exception(
+        pht(
+          'The name "%s" is not a valid repository short name. Repository '.
+          'short names must not be longer than 64 characters.',
+          $slug));
+    }
+
+    if (preg_match('/[^a-zA-Z0-9._-]/', $slug)) {
+      throw new Exception(
+        pht(
+          'The name "%s" is not a valid repository short name. Repository '.
+          'short names may only contain letters, numbers, periods, hyphens '.
+          'and underscores.',
+          $slug));
+    }
+
+    if (!preg_match('/^[a-zA-Z0-9]/', $slug)) {
+      throw new Exception(
+        pht(
+          'The name "%s" is not a valid repository short name. Repository '.
+          'short names must begin with a letter or number.',
+          $slug));
+    }
+
+    if (!preg_match('/[a-zA-Z0-9]\z/', $slug)) {
+      throw new Exception(
+        pht(
+          'The name "%s" is not a valid repository short name. Repository '.
+          'short names must end with a letter or number.',
+          $slug));
+    }
+
+    if (preg_match('/__|--|\\.\\./', $slug)) {
+      throw new Exception(
+        pht(
+          'The name "%s" is not a valid repository short name. Repository '.
+          'short names must not contain multiple consecutive underscores, '.
+          'hyphens, or periods.',
+          $slug));
+    }
+
+    if (preg_match('/^[A-Z]+\z/', $slug)) {
+      throw new Exception(
+        pht(
+          'The name "%s" is not a valid repository short name. Repository '.
+          'short names may not contain only uppercase letters.',
+          $slug));
+    }
+
+    if (preg_match('/^\d+\z/', $slug)) {
+      throw new Exception(
+        pht(
+          'The name "%s" is not a valid repository short name. Repository '.
+          'short names may not contain only numbers.',
+          $slug));
+    }
   }
 
 

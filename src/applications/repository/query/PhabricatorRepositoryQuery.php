@@ -11,6 +11,7 @@ final class PhabricatorRepositoryQuery
   private $nameContains;
   private $remoteURIs;
   private $datasourceQuery;
+  private $slugs;
 
   private $numericIdentifiers;
   private $callsignIdentifiers;
@@ -111,6 +112,11 @@ final class PhabricatorRepositoryQuery
 
   public function withDatasourceQuery($query) {
     $this->datasourceQuery = $query;
+    return $this;
+  }
+
+  public function withSlugs(array $slugs) {
+    $this->slugs = $slugs;
     return $this;
   }
 
@@ -562,6 +568,13 @@ final class PhabricatorRepositoryQuery
         'r.name LIKE %> OR r.callsign LIKE %>',
         $query,
         $callsign);
+    }
+
+    if ($this->slugs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'r.repositorySlug IN (%Ls)',
+        $this->slugs);
     }
 
     return $where;

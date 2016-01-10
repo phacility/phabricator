@@ -17,13 +17,15 @@ final class DiffusionRepositoryEditBasicController
 
     $v_name = $repository->getName();
     $v_desc = $repository->getDetail('description');
-    $v_clone_name = $repository->getDetail('clone-name');
+    $v_clone_name = $repository->getRepositorySlug();
     $v_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $repository->getPHID(),
       PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
     $e_name = true;
+    $e_slug = null;
     $errors = array();
 
+    $validation_exception = null;
     if ($request->isFormPost()) {
       $v_name = $request->getStr('name');
       $v_desc = $request->getStr('description');
@@ -71,13 +73,20 @@ final class DiffusionRepositoryEditBasicController
               '=' => array_fuse($v_projects),
             ));
 
-        id(new PhabricatorRepositoryEditor())
+        $editor = id(new PhabricatorRepositoryEditor())
           ->setContinueOnNoEffect(true)
           ->setContentSourceFromRequest($request)
-          ->setActor($viewer)
-          ->applyTransactions($repository, $xactions);
+          ->setActor($viewer);
 
-        return id(new AphrontRedirectResponse())->setURI($edit_uri);
+        try {
+          $editor->applyTransactions($repository, $xactions);
+
+          return id(new AphrontRedirectResponse())->setURI($edit_uri);
+        } catch (PhabricatorApplicationTransactionValidationException $ex) {
+          $validation_exception = $ex;
+
+          $e_slug = $ex->getShortMessage($type_clone_name);
+        }
       }
     }
 
@@ -102,6 +111,7 @@ final class DiffusionRepositoryEditBasicController
             ->setName('cloneName')
             ->setLabel(pht('Clone/Checkout As'))
             ->setValue($v_clone_name)
+            ->setError($e_slug)
             ->setCaption(
               pht(
                 'Optional directory name to use when cloning or checking out '.
@@ -130,6 +140,7 @@ final class DiffusionRepositoryEditBasicController
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
+      ->setValidationException($validation_exception)
       ->setForm($form)
       ->setFormErrors($errors);
 

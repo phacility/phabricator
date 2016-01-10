@@ -286,7 +286,7 @@ final class DiffusionRepositoryEditMainController
     $view->addProperty(pht('Type'), $type);
     $view->addProperty(pht('Callsign'), $repository->getCallsign());
 
-    $clone_name = $repository->getDetail('clone-name');
+    $clone_name = $repository->getRepositorySlug();
 
     if ($repository->isHosted()) {
       $view->addProperty(
