@@ -62,8 +62,21 @@ abstract class PhabricatorRepositoryEngine extends Phobject {
    * @return  void
    */
   protected function verifyGitOrigin(PhabricatorRepository $repository) {
-    list($remotes) = $repository->execxLocalCommand(
-      'remote show -n origin');
+    try {
+      list($remotes) = $repository->execxLocalCommand(
+        'remote show -n origin');
+    } catch (CommandException $ex) {
+      throw new PhutilProxyException(
+        pht(
+          'Expected to find a Git working copy at path "%s", but the '.
+          'path exists and is not a valid working copy. If you remove '.
+          'this directory, the daemons will automatically recreate it '.
+          'correctly. Phabricator will not destroy the directory for you '.
+          'because it can not be sure that it does not contain important '.
+          'data.',
+          $repository->getLocalPath()),
+        $ex);
+    }
 
     $matches = null;
     if (!preg_match('/^\s*Fetch URL:\s*(.*?)\s*$/m', $remotes, $matches)) {

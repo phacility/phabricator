@@ -287,4 +287,49 @@ abstract class DiffusionController extends PhabricatorController {
       ->appendChild($pager);
   }
 
+  protected function renderDirectoryReadme(DiffusionBrowseResultSet $browse) {
+    $readme_path = $browse->getReadmePath();
+    if ($readme_path === null) {
+      return null;
+    }
+
+    $drequest = $this->getDiffusionRequest();
+    $viewer = $this->getViewer();
+
+    try {
+      $result = $this->callConduitWithDiffusionRequest(
+        'diffusion.filecontentquery',
+        array(
+          'path' => $readme_path,
+          'commit' => $drequest->getStableCommit(),
+        ));
+    } catch (Exception $ex) {
+      return null;
+    }
+
+    $file_phid = $result['filePHID'];
+    if (!$file_phid) {
+      return null;
+    }
+
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($file_phid))
+      ->executeOne();
+    if (!$file) {
+      return null;
+    }
+
+    $corpus = $file->loadFileData();
+
+    if (!strlen($corpus)) {
+      return null;
+    }
+
+    return id(new DiffusionReadmeView())
+      ->setUser($this->getViewer())
+      ->setPath($readme_path)
+      ->setContent($corpus);
+  }
+
 }

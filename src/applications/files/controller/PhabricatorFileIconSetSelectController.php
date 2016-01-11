@@ -26,7 +26,7 @@ final class PhabricatorFileIconSetSelectController
       }
     }
 
-    require_celerity_resource('project-icon-css');
+    require_celerity_resource('phui-icon-set-selector-css');
     Javelin::initBehavior('phabricator-tooltips');
 
     $ii = 0;
@@ -37,19 +37,26 @@ final class PhabricatorFileIconSetSelectController
       $view = id(new PHUIIconView())
         ->setIconFont($icon->getIcon());
 
+      $classes = array();
+      $classes[] = 'icon-button';
+
+      $is_selected = ($icon->getKey() == $v_icon);
+
+      if ($is_selected) {
+        $classes[] = 'selected';
+      }
+
+      $is_disabled = $icon->getIsDisabled();
+      if ($is_disabled && !$is_selected) {
+        continue;
+      }
+
       $aural = javelin_tag(
         'span',
         array(
           'aural' => true,
         ),
         pht('Choose "%s" Icon', $label));
-
-      $classes = array();
-      $classes[] = 'icon-button';
-
-      if ($icon->getKey() == $v_icon) {
-        $classes[] = 'selected';
-      }
 
       $buttons[] = javelin_tag(
         'button',

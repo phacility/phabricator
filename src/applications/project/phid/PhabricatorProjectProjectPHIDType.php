@@ -51,7 +51,7 @@ final class PhabricatorProjectProjectPHIDType extends PhabricatorPHIDType {
       }
 
       $handle->setImageURI($project->getProfileImageURI());
-      $handle->setIcon($project->getDisplayIcon());
+      $handle->setIcon($project->getDisplayIconIcon());
       $handle->setTagColor($project->getDisplayColor());
 
       if ($project->isArchived()) {

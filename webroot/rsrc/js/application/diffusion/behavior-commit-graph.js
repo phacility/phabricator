@@ -37,6 +37,7 @@ JX.behavior('diffusion-commit-graph', function(config) {
 
   // Stroke with fill (for commit circles).
   function fstroke(c) {
+    cxt.lineWidth = 1;
     cxt.fillStyle = color(c);
     cxt.strokeStyle = '#ffffff';
     cxt.fill();
@@ -52,7 +53,7 @@ JX.behavior('diffusion-commit-graph', function(config) {
       return (col * cell) + (cell / 2);
     };
 
-    var h = 30;
+    var h = 32;
     var w = cell * config.count;
 
     var canvas = JX.$N('canvas', {width: w, height: h});
@@ -117,16 +118,17 @@ JX.behavior('diffusion-commit-graph', function(config) {
         case 'o':
         case '^':
         case '|':
-          if (c == 'o' || c == '^') {
-            origin = xpos(jj);
+        case 'x':
+        case 'X':
+
+          if (c !== 'X') {
+            cxt.beginPath();
+            cxt.moveTo(xpos(jj), (c == '^' ? h/2 : 0));
+            cxt.lineTo(xpos(jj), (c == 'x' ? h/2 : h));
+            lstroke(jj);
           }
 
-          cxt.beginPath();
-          cxt.moveTo(xpos(jj), (c == '^' ? h/2 : 0));
-          cxt.lineTo(xpos(jj), h);
-          lstroke(jj);
-
-          if (c == 'o' || c == '^') {
+          if (c == 'o' || c == '^' || c == 'x' || c == 'X') {
             cxt.beginPath();
             cxt.arc(xpos(jj), h/2, 3, 0, 2 * Math.PI, true);
             fstroke(jj);

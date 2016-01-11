@@ -6,6 +6,7 @@ final class PhabricatorIconSetIcon
   private $key;
   private $icon;
   private $label;
+  private $isDisabled;
 
   public function setKey($key) {
     $this->key = $key;
@@ -26,6 +27,15 @@ final class PhabricatorIconSetIcon
       return $this->getKey();
     }
     return $this->icon;
+  }
+
+  public function setIsDisabled($is_disabled) {
+    $this->isDisabled = $is_disabled;
+    return $this;
+  }
+
+  public function getIsDisabled() {
+    return $this->isDisabled;
   }
 
   public function setLabel($label) {

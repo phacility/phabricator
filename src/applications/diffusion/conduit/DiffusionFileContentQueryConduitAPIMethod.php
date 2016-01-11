@@ -27,8 +27,7 @@ final class DiffusionFileContentQueryConduitAPIMethod
   protected function getResult(ConduitAPIRequest $request) {
     $drequest = $this->getDiffusionRequest();
 
-    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest($drequest)
-      ->setViewer($request->getUser());
+    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest($drequest);
 
     $timeout = $request->getValue('timeout');
     if ($timeout) {
@@ -40,16 +39,44 @@ final class DiffusionFileContentQueryConduitAPIMethod
       $file_query->setByteLimit($byte_limit);
     }
 
-    $file_content = $file_query->loadFileContent();
+    $content = $file_query->execute();
 
-    $text_list = $rev_list = $blame_dict = array();
+    $too_slow = (bool)$file_query->getExceededTimeLimit();
+    $too_huge = (bool)$file_query->getExceededByteLimit();
 
-    $file_content
-      ->setBlameDict($blame_dict)
-      ->setRevList($rev_list)
-      ->setTextList($text_list);
+    $file_phid = null;
+    if (!$too_slow && !$too_huge) {
+      $file = $this->newFile($drequest, $content);
+      $file_phid = $file->getPHID();
+    }
 
-    return $file_content->toDictionary();
+    return array(
+      'tooSlow' => $too_slow,
+      'tooHuge' => $too_huge,
+      'filePHID' => $file_phid,
+    );
+  }
+
+  private function newFile(DiffusionRequest $drequest, $content) {
+    $path = $drequest->getPath();
+    $name = basename($path);
+
+    $repository = $drequest->getRepository();
+    $repository_phid = $repository->getPHID();
+
+    $file = PhabricatorFile::buildFromFileDataOrHash(
+      $content,
+      array(
+        'name' => $name,
+        'ttl' => time() + phutil_units('48 hours in seconds'),
+        'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+      ));
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $file->attachToObject($repository_phid);
+    unset($unguarded);
+
+    return $file;
   }
 
 }

@@ -22,7 +22,7 @@ JX.behavior('choose-control', function() {
       }
 
       var params = {
-        value: input.value
+        icon: input.value
       };
 
       new JX.Workflow(data.uri, params)

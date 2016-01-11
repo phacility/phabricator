@@ -45,7 +45,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   private $slugs = self::ATTACHABLE;
   private $parentProject = self::ATTACHABLE;
 
-  const DEFAULT_ICON = 'fa-briefcase';
   const DEFAULT_COLOR = 'blue';
 
   const TABLE_DATASOURCE_TOKEN = 'project_datasourcetoken';
@@ -63,9 +62,11 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     $join_policy = $app->getPolicy(
       ProjectDefaultJoinCapability::CAPABILITY);
 
+    $default_icon = PhabricatorProjectIconSet::getDefaultIconKey();
+
     return id(new PhabricatorProject())
       ->setAuthorPHID($actor->getPHID())
-      ->setIcon(self::DEFAULT_ICON)
+      ->setIcon($default_icon)
       ->setColor(self::DEFAULT_COLOR)
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
@@ -484,12 +485,24 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return $number;
   }
 
-  public function getDisplayIcon() {
+  public function getDisplayIconKey() {
     if ($this->isMilestone()) {
-      return 'fa-map-marker';
+      $key = PhabricatorProjectIconSet::getMilestoneIconKey();
+    } else {
+      $key = $this->getIcon();
     }
 
-    return $this->getIcon();
+    return $key;
+  }
+
+  public function getDisplayIconIcon() {
+    $key = $this->getDisplayIconKey();
+    return PhabricatorProjectIconSet::getIconIcon($key);
+  }
+
+  public function getDisplayIconName() {
+    $key = $this->getDisplayIconKey();
+    return PhabricatorProjectIconSet::getIconName($key);
   }
 
   public function getDisplayColor() {
@@ -608,6 +621,10 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         ->setKey('slug')
         ->setType('string')
         ->setDescription(pht('Primary slug/hashtag.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('icon')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Information about the project icon.')),
     );
   }
 
@@ -615,6 +632,11 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return array(
       'name' => $this->getName(),
       'slug' => $this->getPrimarySlug(),
+      'icon' => array(
+        'key' => $this->getDisplayIconKey(),
+        'name' => $this->getDisplayIconName(),
+        'icon' => $this->getDisplayIconIcon(),
+      ),
     );
   }
 

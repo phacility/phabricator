@@ -156,10 +156,10 @@ abstract class PhabricatorProjectController extends PhabricatorController {
         $subprojects_icon = 'fa-sitemap grey';
       }
 
-      if ($project->supportsMilestones()) {
-        $milestones_icon = 'fa-map-marker';
-      } else {
-        $milestones_icon = 'fa-map-marker grey';
+      $key = PhabricatorProjectIconSet::getMilestoneIconKey();
+      $milestones_icon = PhabricatorProjectIconSet::getIconIcon($key);
+      if (!$project->supportsMilestones()) {
+        $milestones_icon = "{$milestones_icon} grey";
       }
 
       $nav->addIcon(

@@ -153,44 +153,62 @@ final class DiffusionBrowseController extends DiffusionController {
       );
     }
 
-    $file_content = DiffusionFileContent::newFromConduit(
-      $this->callConduitWithDiffusionRequest(
-        'diffusion.filecontentquery',
-        $params));
-    $data = $file_content->getCorpus();
+    $response = $this->callConduitWithDiffusionRequest(
+      'diffusion.filecontentquery',
+      $params);
 
-    if ($view === 'raw') {
-      return $this->buildRawResponse($path, $data);
-    }
+    $hit_byte_limit = $response['tooHuge'];
+    $hit_time_limit = $response['tooSlow'];
 
-    $this->loadLintMessages();
-    $this->coverage = $drequest->loadCoverage();
-
-    if ($byte_limit && (strlen($data) == $byte_limit)) {
+    $file_phid = $response['filePHID'];
+    if ($hit_byte_limit) {
       $corpus = $this->buildErrorCorpus(
         pht(
           'This file is larger than %s byte(s), and too large to display '.
           'in the web UI.',
-          $byte_limit));
-    } else if (ArcanistDiffUtils::isHeuristicBinaryFile($data)) {
-      $file = $this->loadFileForData($path, $data);
-      $file_uri = $file->getBestURI();
-
-      if ($file->isViewableImage()) {
-        $corpus = $this->buildImageCorpus($file_uri);
-      } else {
-        $corpus = $this->buildBinaryCorpus($file_uri, $data);
-      }
+          phutil_format_bytes($byte_limit)));
+    } else if ($hit_time_limit) {
+      $corpus = $this->buildErrorCorpus(
+        pht(
+          'This file took too long to load from the repository (more than '.
+          '%s second(s)).',
+          new PhutilNumber($time_limit)));
     } else {
-      // Build the content of the file.
-      $corpus = $this->buildCorpus(
-        $show_blame,
-        $show_color,
-        $file_content,
-        $needs_blame,
-        $drequest,
-        $path,
-        $data);
+      $file = id(new PhabricatorFileQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($file_phid))
+        ->executeOne();
+      if (!$file) {
+        throw new Exception(pht('Failed to load content file!'));
+      }
+
+      if ($view === 'raw') {
+        return $file->getRedirectResponse();
+      }
+
+      $data = $file->loadFileData();
+      if (ArcanistDiffUtils::isHeuristicBinaryFile($data)) {
+        $file_uri = $file->getBestURI();
+
+        if ($file->isViewableImage()) {
+          $corpus = $this->buildImageCorpus($file_uri);
+        } else {
+          $corpus = $this->buildBinaryCorpus($file_uri, $data);
+        }
+      } else {
+        $this->loadLintMessages();
+        $this->coverage = $drequest->loadCoverage();
+
+        // Build the content of the file.
+        $corpus = $this->buildCorpus(
+          $show_blame,
+          $show_color,
+          $data,
+          $needs_blame,
+          $drequest,
+          $path,
+          $data);
+      }
     }
 
     if ($request->isAjax()) {
@@ -327,23 +345,7 @@ final class DiffusionBrowseController extends DiffusionController {
     }
 
     $content[] = $this->buildOpenRevisions();
-
-
-    $readme_path = $results->getReadmePath();
-    if ($readme_path) {
-      $readme_content = $this->callConduitWithDiffusionRequest(
-        'diffusion.filecontentquery',
-        array(
-          'path' => $readme_path,
-          'commit' => $drequest->getStableCommit(),
-        ));
-      if ($readme_content) {
-        $content[] = id(new DiffusionReadmeView())
-          ->setUser($this->getViewer())
-          ->setPath($readme_path)
-          ->setContent($readme_content['corpus']);
-      }
-    }
+    $content[] = $this->renderDirectoryReadme($results);
 
     $crumbs = $this->buildCrumbs(
       array(
@@ -584,7 +586,7 @@ final class DiffusionBrowseController extends DiffusionController {
   private function buildCorpus(
     $show_blame,
     $show_color,
-    DiffusionFileContent $file_content,
+    $file_corpus,
     $needs_blame,
     DiffusionRequest $drequest,
     $path,
@@ -594,7 +596,6 @@ final class DiffusionBrowseController extends DiffusionController {
     $blame_timeout = 15;
     $blame_failed = false;
 
-    $file_corpus = $file_content->getCorpus();
     $highlight_limit = DifferentialChangesetParser::HIGHLIGHT_BYTE_LIMIT;
     $blame_limit = DifferentialChangesetParser::HIGHLIGHT_BYTE_LIMIT;
     $can_highlight = (strlen($file_corpus) <= $highlight_limit);
@@ -1256,28 +1257,6 @@ final class DiffusionBrowseController extends DiffusionController {
     return $rows;
   }
 
-  private function loadFileForData($path, $data) {
-    $file = PhabricatorFile::buildFromFileDataOrHash(
-      $data,
-      array(
-        'name' => basename($path),
-        'ttl' => time() + 60 * 60 * 24,
-        'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
-      ));
-
-    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $file->attachToObject(
-        $this->getDiffusionRequest()->getRepository()->getPHID());
-    unset($unguarded);
-
-    return $file;
-  }
-
-  private function buildRawResponse($path, $data) {
-    $file = $this->loadFileForData($path, $data);
-    return $file->getRedirectResponse();
-  }
-
   private function buildImageCorpus($file_uri) {
     $properties = new PHUIPropertyListView();
 
@@ -1299,7 +1278,6 @@ final class DiffusionBrowseController extends DiffusionController {
   }
 
   private function buildBinaryCorpus($file_uri, $data) {
-
     $size = new PhutilNumber(strlen($data));
     $text = pht('This is a binary file. It is %s byte(s) in length.', $size);
     $text = id(new PHUIBoxView())
