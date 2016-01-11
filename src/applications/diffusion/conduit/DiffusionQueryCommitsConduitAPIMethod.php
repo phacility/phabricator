@@ -79,6 +79,7 @@ final class DiffusionQueryCommitsConduitAPIMethod
         'repositoryPHID' => $commit->getRepository()->getPHID(),
         'identifier' => $commit->getCommitIdentifier(),
         'epoch' => $commit->getEpoch(),
+        'authorEpoch' => $commit_data->getCommitDetail('authorEpoch'),
         'uri' => $uri,
         'isImporting' => !$commit->isImported(),
         'summary' => $commit->getSummary(),
@@ -99,6 +100,7 @@ final class DiffusionQueryCommitsConduitAPIMethod
           ->withIdentifier($commit->getCommitIdentifier())
           ->execute();
 
+        $dict['authorEpoch'] = $lowlevel_commitref->getAuthorEpoch();
         $dict['author'] = $lowlevel_commitref->getAuthor();
         $dict['authorName'] = $lowlevel_commitref->getAuthorName();
         $dict['authorEmail'] = $lowlevel_commitref->getAuthorEmail();
