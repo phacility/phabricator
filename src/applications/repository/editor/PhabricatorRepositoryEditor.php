@@ -39,7 +39,7 @@ final class PhabricatorRepositoryEditor
     $types[] = PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY;
     $types[] = PhabricatorRepositoryTransaction::TYPE_CREDENTIAL;
     $types[] = PhabricatorRepositoryTransaction::TYPE_DANGEROUS;
-    $types[] = PhabricatorRepositoryTransaction::TYPE_CLONE_NAME;
+    $types[] = PhabricatorRepositoryTransaction::TYPE_SLUG;
     $types[] = PhabricatorRepositoryTransaction::TYPE_SERVICE;
     $types[] = PhabricatorRepositoryTransaction::TYPE_SYMBOLS_LANGUAGE;
     $types[] = PhabricatorRepositoryTransaction::TYPE_SYMBOLS_SOURCES;
@@ -98,7 +98,7 @@ final class PhabricatorRepositoryEditor
         return $object->getCredentialPHID();
       case PhabricatorRepositoryTransaction::TYPE_DANGEROUS:
         return $object->shouldAllowDangerousChanges();
-      case PhabricatorRepositoryTransaction::TYPE_CLONE_NAME:
+      case PhabricatorRepositoryTransaction::TYPE_SLUG:
         return $object->getRepositorySlug();
       case PhabricatorRepositoryTransaction::TYPE_SERVICE:
         return $object->getAlmanacServicePHID();
@@ -147,7 +147,7 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_STAGING_URI:
       case PhabricatorRepositoryTransaction::TYPE_AUTOMATION_BLUEPRINTS:
         return $xaction->getNewValue();
-      case PhabricatorRepositoryTransaction::TYPE_CLONE_NAME:
+      case PhabricatorRepositoryTransaction::TYPE_SLUG:
         $name = $xaction->getNewValue();
         if (strlen($name)) {
           return $name;
@@ -220,7 +220,7 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_DANGEROUS:
         $object->setDetail('allow-dangerous-changes', $xaction->getNewValue());
         return;
-      case PhabricatorRepositoryTransaction::TYPE_CLONE_NAME:
+      case PhabricatorRepositoryTransaction::TYPE_SLUG:
         $object->setRepositorySlug($xaction->getNewValue());
         return;
       case PhabricatorRepositoryTransaction::TYPE_SERVICE:
@@ -331,7 +331,7 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY:
       case PhabricatorRepositoryTransaction::TYPE_CREDENTIAL:
       case PhabricatorRepositoryTransaction::TYPE_DANGEROUS:
-      case PhabricatorRepositoryTransaction::TYPE_CLONE_NAME:
+      case PhabricatorRepositoryTransaction::TYPE_SLUG:
       case PhabricatorRepositoryTransaction::TYPE_SERVICE:
       case PhabricatorRepositoryTransaction::TYPE_SYMBOLS_SOURCES:
       case PhabricatorRepositoryTransaction::TYPE_SYMBOLS_LANGUAGE:
@@ -454,7 +454,7 @@ final class PhabricatorRepositoryEditor
         }
         break;
 
-      case PhabricatorRepositoryTransaction::TYPE_CLONE_NAME:
+      case PhabricatorRepositoryTransaction::TYPE_SLUG:
         foreach ($xactions as $xaction) {
           $old = $xaction->getOldValue();
           $new = $xaction->getNewValue();

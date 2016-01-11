@@ -17,7 +17,7 @@ final class DiffusionRepositoryEditBasicController
 
     $v_name = $repository->getName();
     $v_desc = $repository->getDetail('description');
-    $v_clone_name = $repository->getRepositorySlug();
+    $v_slug = $repository->getRepositorySlug();
     $v_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $repository->getPHID(),
       PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
@@ -30,10 +30,7 @@ final class DiffusionRepositoryEditBasicController
       $v_name = $request->getStr('name');
       $v_desc = $request->getStr('description');
       $v_projects = $request->getArr('projectPHIDs');
-
-      if ($repository->isHosted()) {
-        $v_clone_name = $request->getStr('cloneName');
-      }
+      $v_slug = $request->getStr('slug');
 
       if (!strlen($v_name)) {
         $e_name = pht('Required');
@@ -49,7 +46,7 @@ final class DiffusionRepositoryEditBasicController
         $type_name = PhabricatorRepositoryTransaction::TYPE_NAME;
         $type_desc = PhabricatorRepositoryTransaction::TYPE_DESCRIPTION;
         $type_edge = PhabricatorTransactions::TYPE_EDGE;
-        $type_clone_name = PhabricatorRepositoryTransaction::TYPE_CLONE_NAME;
+        $type_slug = PhabricatorRepositoryTransaction::TYPE_SLUG;
 
         $xactions[] = id(clone $template)
           ->setTransactionType($type_name)
@@ -60,8 +57,8 @@ final class DiffusionRepositoryEditBasicController
           ->setNewValue($v_desc);
 
         $xactions[] = id(clone $template)
-          ->setTransactionType($type_clone_name)
-          ->setNewValue($v_clone_name);
+          ->setTransactionType($type_slug)
+          ->setNewValue($v_slug);
 
         $xactions[] = id(clone $template)
           ->setTransactionType($type_edge)
@@ -85,7 +82,7 @@ final class DiffusionRepositoryEditBasicController
         } catch (PhabricatorApplicationTransactionValidationException $ex) {
           $validation_exception = $ex;
 
-          $e_slug = $ex->getShortMessage($type_clone_name);
+          $e_slug = $ex->getShortMessage($type_slug);
         }
       }
     }
@@ -102,23 +99,13 @@ final class DiffusionRepositoryEditBasicController
           ->setName('name')
           ->setLabel(pht('Name'))
           ->setValue($v_name)
-          ->setError($e_name));
-
-    if ($repository->isHosted()) {
-      $form
-        ->appendChild(
-          id(new AphrontFormTextControl())
-            ->setName('cloneName')
-            ->setLabel(pht('Clone/Checkout As'))
-            ->setValue($v_clone_name)
-            ->setError($e_slug)
-            ->setCaption(
-              pht(
-                'Optional directory name to use when cloning or checking out '.
-                'this repository.')));
-    }
-
-    $form
+          ->setError($e_name))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('slug')
+          ->setLabel(pht('Short Name'))
+          ->setValue($v_slug)
+          ->setError($e_slug))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setUser($viewer)
