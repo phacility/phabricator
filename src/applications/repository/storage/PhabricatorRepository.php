@@ -924,7 +924,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $this->isBranchInFilter($branch, 'branch-filter');
   }
 
-  public function formatCommitName($commit_identifier) {
+  public function formatCommitName($commit_identifier, $local = false) {
     $vcs = $this->getVersionControlSystem();
 
     $type_git = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
@@ -933,12 +933,23 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $is_git = ($vcs == $type_git);
     $is_hg = ($vcs == $type_hg);
     if ($is_git || $is_hg) {
-      $short_identifier = substr($commit_identifier, 0, 12);
+      $name = substr($commit_identifier, 0, 12);
+      $need_scope = false;
     } else {
-      $short_identifier = $commit_identifier;
+      $name = $commit_identifier;
+      $need_scope = true;
     }
 
-    return 'r'.$this->getCallsign().$short_identifier;
+    if (!$local) {
+      $need_scope = true;
+    }
+
+    if ($need_scope) {
+      $scope = 'r'.$this->getCallsign();
+      $name = $scope.$name;
+    }
+
+    return $name;
   }
 
   public function isImporting() {
