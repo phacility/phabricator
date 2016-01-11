@@ -321,7 +321,7 @@ final class PhabricatorPolicyFilter extends Phobject {
       $objects_in = array();
       foreach ($structs as $struct) {
         $extended_key = $struct['key'];
-        if (empty($extended_objects[$key])) {
+        if (empty($extended_objects[$extended_key])) {
           // If this object has already been rejected by an earlier filtering
           // pass, we don't need to do any tests on it.
           continue;
@@ -335,8 +335,8 @@ final class PhabricatorPolicyFilter extends Phobject {
             // We weren't able to load the corresponding object, so just
             // reject this result outright.
 
-            $reject = $extended_objects[$key];
-            unset($extended_objects[$key]);
+            $reject = $extended_objects[$extended_key];
+            unset($extended_objects[$extended_key]);
 
             // TODO: This could be friendlier.
             $this->rejectObject($reject, false, '<bad-ref>');
