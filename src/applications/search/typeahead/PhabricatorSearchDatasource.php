@@ -21,6 +21,7 @@ final class PhabricatorSearchDatasource
       new PhabricatorProjectDatasource(),
       new PhabricatorApplicationDatasource(),
       new PhabricatorTypeaheadMonogramDatasource(),
+      new DiffusionRepositoryDatasource(),
       new DiffusionSymbolDatasource(),
     );
   }

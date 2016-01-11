@@ -606,9 +606,10 @@ final class PhabricatorRepositoryQuery
       }
       $where[] = qsprintf(
         $conn,
-        'r.name LIKE %> OR r.callsign LIKE %>',
+        'r.name LIKE %> OR r.callsign LIKE %> OR r.repositorySlug LIKE %>',
         $query,
-        $callsign);
+        $callsign,
+        $query);
     }
 
     if ($this->slugs !== null) {
