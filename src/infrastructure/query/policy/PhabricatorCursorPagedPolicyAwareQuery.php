@@ -1872,6 +1872,16 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       return $this;
     }
 
+    foreach ($this->edgeLogicConstraints as $type => $constraints) {
+      foreach ($constraints as $operator => $list) {
+        switch ($operator) {
+          case PhabricatorQueryConstraint::OPERATOR_EMPTY:
+            throw new PhabricatorEmptyQueryException(
+              pht('This query specifies an empty constraint.'));
+        }
+      }
+    }
+
     // This should probably be more modular, eventually, but we only do
     // project-based edge logic today.
 
