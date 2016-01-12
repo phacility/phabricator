@@ -18,7 +18,10 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     $viewer = $this->getViewer();
     $request = $this->getRequest();
 
-    $id = $request->getURIData('id');
+    $id = nonempty(
+      $request->getURIData('projectID'),
+      $request->getURIData('id'));
+
     $slug = $request->getURIData('slug');
 
     if ($slug) {

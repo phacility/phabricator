@@ -4,26 +4,34 @@ final class PhabricatorProfilePanelConfiguration
   extends PhabricatorSearchDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorExtendedPolicyInterface {
+    PhabricatorExtendedPolicyInterface,
+    PhabricatorApplicationTransactionInterface {
 
   protected $profilePHID;
   protected $panelKey;
   protected $builtinKey;
   protected $panelOrder;
-  protected $isDisabled;
+  protected $visibility;
   protected $panelProperties = array();
 
   private $profileObject = self::ATTACHABLE;
   private $panel = self::ATTACHABLE;
 
+  const VISIBILITY_VISIBLE = 'visible';
+  const VISIBILITY_DISABLED = 'disabled';
+
+  public static function initializeNewBuiltin() {
+    return id(new self())
+      ->setVisibility(self::VISIBILITY_VISIBLE);
+  }
+
   public static function initializeNewPanelConfiguration(
     PhabricatorProfilePanelInterface $profile_object,
     PhabricatorProfilePanel $panel) {
 
-    return id(new self())
+    return self::initializeNewBuiltin()
       ->setProfilePHID($profile_object->getPHID())
       ->setPanelKey($panel->getPanelKey())
-      ->setIsDisabled(0)
       ->attachPanel($panel)
       ->attachProfileObject($profile_object);
   }
@@ -36,9 +44,9 @@ final class PhabricatorProfilePanelConfiguration
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'panelKey' => 'text64',
-        'builtinKey' => 'text64',
-        'panelOrder' => 'uint32',
-        'isDisabled' => 'bool',
+        'builtinKey' => 'text64?',
+        'panelOrder' => 'uint32?',
+        'visibility' => 'text32',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_profile' => array(
@@ -46,6 +54,11 @@ final class PhabricatorProfilePanelConfiguration
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorProfilePanelPHIDType::TYPECONST);
   }
 
   public function attachPanel(PhabricatorProfilePanel $panel) {
@@ -67,10 +80,6 @@ final class PhabricatorProfilePanelConfiguration
     return $this->assertAttached($this->profileObject);
   }
 
-  public function buildNavigationMenuItems() {
-    return $this->getPanel()->buildNavigationMenuItems($this);
-  }
-
   public function setPanelProperty($key, $value) {
     $this->panelProperties[$key] = $value;
     return $this;
@@ -78,6 +87,18 @@ final class PhabricatorProfilePanelConfiguration
 
   public function getPanelProperty($key, $default = null) {
     return idx($this->panelProperties, $key, $default);
+  }
+
+  public function buildNavigationMenuItems() {
+    return $this->getPanel()->buildNavigationMenuItems($this);
+  }
+
+  public function getPanelTypeName() {
+    return $this->getPanel()->getPanelTypeName();
+  }
+
+  public function getDisplayName() {
+    return $this->getPanel()->getDisplayName($this);
   }
 
 
@@ -119,6 +140,29 @@ final class PhabricatorProfilePanelConfiguration
         $capability,
       ),
     );
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorProfilePanelEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorProfilePanelConfigurationTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 }

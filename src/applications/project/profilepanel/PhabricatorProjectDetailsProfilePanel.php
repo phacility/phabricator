@@ -5,6 +5,36 @@ final class PhabricatorProjectDetailsProfilePanel
 
   const PANELKEY = 'project.details';
 
+  public function getPanelTypeName() {
+    return pht('Project Details');
+  }
+
+  private function getDefaultName() {
+    return pht('Project Details');
+  }
+
+  public function getDisplayName(
+    PhabricatorProfilePanelConfiguration $config) {
+    $name = $config->getPanelProperty('name');
+
+    if (strlen($name)) {
+      return $name;
+    }
+
+    return $this->getDefaultName();
+  }
+
+  public function buildEditEngineFields(
+    PhabricatorProfilePanelConfiguration $config) {
+    return array(
+      id(new PhabricatorTextEditField())
+        ->setKey('name')
+        ->setLabel(pht('Name'))
+        ->setPlaceholder($this->getDefaultName())
+        ->setValue($config->getPanelProperty('name')),
+    );
+  }
+
   protected function newNavigationMenuItems(
     PhabricatorProfilePanelConfiguration $config) {
 

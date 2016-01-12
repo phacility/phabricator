@@ -5,6 +5,7 @@ final class PhabricatorProfilePanelEngine extends Phobject {
   private $viewer;
   private $profileObject;
   private $panels;
+  private $controller;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -23,6 +24,103 @@ final class PhabricatorProfilePanelEngine extends Phobject {
 
   public function getProfileObject() {
     return $this->profileObject;
+  }
+
+  public function setController(PhabricatorController $controller) {
+    $this->controller = $controller;
+    return $this;
+  }
+
+  public function getController() {
+    return $this->controller;
+  }
+
+  public function buildResponse() {
+    $controller = $this->getController();
+
+    $viewer = $controller->getViewer();
+    $this->setViewer($viewer);
+
+    $request = $controller->getRequest();
+
+    $panel_action = $request->getURIData('panelAction');
+    $panel_id = $request->getURIData('panelID');
+
+    $panel_list = $this->loadPanels();
+
+    $selected_panel = null;
+    if (strlen($panel_id)) {
+      $panel_id_int = (int)$panel_id;
+      foreach ($panel_list as $panel) {
+        if ($panel_id_int) {
+          if ((int)$panel->getID() === $panel_id) {
+            $selected_panel = $panel;
+            break;
+          }
+        }
+
+        $builtin_key = $panel->getBuiltinKey();
+        if ($builtin_key === (string)$panel_id) {
+          $selected_panel = $panel;
+          break;
+        }
+      }
+    }
+
+    switch ($panel_action) {
+      case 'view':
+      case 'info':
+      case 'hide':
+      case 'builtin':
+        if (!$selected_panel) {
+          return new Aphront404Response();
+        }
+        break;
+    }
+
+    $navigation = $this->buildNavigation();
+    $navigation->selectFilter('panel.configure');
+
+    $crumbs = $controller->buildApplicationCrumbsForEditEngine();
+
+    switch ($panel_action) {
+      case 'view':
+        $content = $this->buildPanelViewContent($selected_panel);
+        break;
+      case 'configure':
+        $content = $this->buildPanelConfigureContent($panel_list);
+        $crumbs->addTextCrumb(pht('Configure Menu'));
+        break;
+      case 'new':
+        $panel_key = $request->getURIData('panelKey');
+        $content = $this->buildPanelNewContent($panel_key);
+        break;
+      case 'builtin':
+        $content = $this->buildPanelBuiltinContent($selected_panel);
+        break;
+      case 'edit':
+        $content = $this->buildPanelEditContent();
+        break;
+      default:
+        throw new Exception(
+          pht(
+            'Unsupported panel action "%s".',
+            $panel_action));
+    }
+
+    if ($content instanceof AphrontResponse) {
+      return $content;
+    }
+
+    if ($content instanceof AphrontResponseProducerInterface) {
+      return $content;
+    }
+
+    return $controller->newPage()
+      ->setTitle(pht('Profile Stuff'))
+      ->setNavigation($navigation)
+      ->setCrumbs($crumbs)
+      ->appendChild($content);
   }
 
   public function buildNavigation() {
@@ -60,6 +158,11 @@ final class PhabricatorProfilePanelEngine extends Phobject {
       }
     }
 
+    $configure_item = $this->newConfigureMenuItem();
+    if ($configure_item) {
+      $nav->addMenuItem($configure_item);
+    }
+
     $nav->selectFilter(null);
 
     return $nav;
@@ -75,16 +178,35 @@ final class PhabricatorProfilePanelEngine extends Phobject {
 
   private function loadPanels() {
     $viewer = $this->getViewer();
+    $object = $this->getProfileObject();
 
     $panels = $this->loadBuiltinProfilePanels();
 
-    // TODO: Load persisted panels.
+    $stored_panels = id(new PhabricatorProfilePanelConfigurationQuery())
+      ->setViewer($viewer)
+      ->withProfilePHIDs(array($object->getPHID()))
+      ->execute();
+
+    // Merge the stored panels into the builtin panels. If a builtin panel has
+    // a stored version, replace the defaults with the stored changes.
+    foreach ($stored_panels as $stored_panel) {
+      $builtin_key = $stored_panel->getBuiltinKey();
+      if ($builtin_key !== null) {
+        $panels[$builtin_key] = $stored_panel;
+      } else {
+        $panels[] = $stored_panel;
+      }
+    }
 
     foreach ($panels as $panel) {
       $impl = $panel->getPanel();
 
       $impl->setViewer($viewer);
     }
+
+    // Normalize keys since callers shouldn't rely on this array being
+    // partially keyed.
+    $panels = array_values($panels);
 
     return $panels;
   }
@@ -128,6 +250,7 @@ final class PhabricatorProfilePanelEngine extends Phobject {
       }
 
       $builtin
+        ->setProfilePHID($object->getPHID())
         ->attachPanel($panel)
         ->attachProfileObject($object)
         ->setPanelOrder($order);
@@ -147,6 +270,210 @@ final class PhabricatorProfilePanelEngine extends Phobject {
           'Expected buildNavigationMenuItems() to return a list of '.
           'PHUIListItemView objects, but got a surprise.'));
     }
+  }
+
+  private function newConfigureMenuItem() {
+    if (!PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
+      return null;
+    }
+
+    $viewer = $this->getViewer();
+    $object = $this->getProfileObject();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $object,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    return id(new PHUIListItemView())
+      ->setName('Configure Menu')
+      ->setKey('panel.configure')
+      ->setIcon('fa-gear')
+      ->setHref($this->getPanelURI('configure/'))
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(!$can_edit)
+      ->setRenderNameAsTooltip(true);
+  }
+
+  public function getConfigureURI() {
+    return $this->getPanelURI('configure/');
+  }
+
+  private function getPanelURI($path) {
+    $project = $this->getProfileObject();
+    $id = $project->getID();
+    return "/project/{$id}/panel/{$path}";
+  }
+
+  private function buildPanelConfigureContent(array $panels) {
+    $viewer = $this->getViewer();
+    $object = $this->getProfileObject();
+
+    PhabricatorPolicyFilter::requireCapability(
+      $viewer,
+      $object,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $list = new PHUIObjectItemListView();
+    foreach ($panels as $panel) {
+      $id = $panel->getID();
+      $builtin_key = $panel->getBuiltinKey();
+
+      $can_edit = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $panel,
+        PhabricatorPolicyCapability::CAN_EDIT);
+
+      $item = id(new PHUIObjectItemView());
+
+      $name = $panel->getDisplayName();
+      $type = $panel->getPanelTypeName();
+      if (!strlen(trim($name))) {
+        $name = pht('Untitled "%s" Item', $type);
+      }
+
+      $item->setHeader($name);
+      $item->addAttribute($type);
+
+      if ($can_edit) {
+        if ($id) {
+          $item->setHref($this->getPanelURI("edit/{$id}/"));
+        } else {
+          $item->setHref($this->getPanelURI("builtin/{$builtin_key}/"));
+        }
+      }
+
+      $list->addItem($item);
+    }
+
+    $action_view = id(new PhabricatorActionListView())
+      ->setUser($viewer);
+
+    $panel_types = PhabricatorProfilePanel::getAllPanels();
+
+    $action_view->addAction(
+      id(new PhabricatorActionView())
+        ->setLabel(true)
+        ->setName(pht('Add New Menu Item...')));
+
+    foreach ($panel_types as $panel_type) {
+      if (!$panel_type->canAddToObject($object)) {
+        continue;
+      }
+
+      $panel_key = $panel_type->getPanelKey();
+
+      $action_view->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon($panel_type->getPanelTypeIcon())
+          ->setName($panel_type->getPanelTypeName())
+          ->setHref($this->getPanelURI("new/{$panel_key}/")));
+    }
+
+    $action_view->addAction(
+      id(new PhabricatorActionView())
+        ->setLabel(true)
+        ->setName(pht('Documentation')));
+
+    $action_view->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-book')
+        ->setName(pht('TODO: Write Documentation')));
+
+    $action_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Configure Menu'))
+      ->setHref('#')
+      ->setIconFont('fa-gear')
+      ->setDropdownMenu($action_view);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Profile Menu Items'))
+      ->addActionLink($action_button);
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setObjectList($list);
+
+    return $box;
+  }
+
+  private function buildPanelNewContent($panel_key) {
+    $panel_types = PhabricatorProfilePanel::getAllPanels();
+    $panel_type = idx($panel_types, $panel_key);
+    if (!$panel_type) {
+      return new Aphront404Response();
+    }
+
+    $object = $this->getProfileObject();
+    if (!$panel_type->canAddToObject($object)) {
+      return new Aphront404Response();
+    }
+
+    $configuration =
+      PhabricatorProfilePanelConfiguration::initializeNewPanelConfiguration(
+        $object,
+        $panel_type);
+
+    $viewer = $this->getViewer();
+
+    PhabricatorPolicyFilter::requireCapability(
+      $viewer,
+      $configuration,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $controller = $this->getController();
+
+    return id(new PhabricatorProfilePanelEditEngine())
+      ->setPanelEngine($this)
+      ->setProfileObject($object)
+      ->setNewPanelConfiguration($configuration)
+      ->setController($controller)
+      ->buildResponse();
+  }
+
+  private function buildPanelEditContent() {
+    $viewer = $this->getViewer();
+    $object = $this->getProfileObject();
+    $controller = $this->getController();
+
+    return id(new PhabricatorProfilePanelEditEngine())
+      ->setPanelEngine($this)
+      ->setProfileObject($object)
+      ->setController($controller)
+      ->buildResponse();
+  }
+
+  private function buildPanelBuiltinContent(
+    PhabricatorProfilePanelConfiguration $configuration) {
+
+    // If this builtin panel has already been persisted, redirect to the
+    // edit page.
+    $id = $configuration->getID();
+    if ($id) {
+      return id(new AphrontRedirectResponse())
+        ->setURI($this->getPanelURI("edit/{$id}/"));
+    }
+
+    // Otherwise, act like we're creating a new panel, we're just starting
+    // with the builtin template.
+    $viewer = $this->getViewer();
+
+    PhabricatorPolicyFilter::requireCapability(
+      $viewer,
+      $configuration,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $object = $this->getProfileObject();
+    $controller = $this->getController();
+
+    return id(new PhabricatorProfilePanelEditEngine())
+      ->setIsBuiltin(true)
+      ->setPanelEngine($this)
+      ->setProfileObject($object)
+      ->setNewPanelConfiguration($configuration)
+      ->setController($controller)
+      ->buildResponse();
   }
 
 }

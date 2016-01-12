@@ -658,36 +658,36 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   public function getBuiltinProfilePanels() {
     $panels = array();
 
-    $panels[] = id(new PhabricatorProfilePanelConfiguration())
+    $panels[] = PhabricatorProfilePanelConfiguration::initializeNewBuiltin()
       ->setBuiltinKey(self::PANEL_PROFILE)
       ->setPanelKey(PhabricatorProjectDetailsProfilePanel::PANELKEY);
 
-    $panels[] = id(new PhabricatorProfilePanelConfiguration())
+    $panels[] = PhabricatorProfilePanelConfiguration::initializeNewBuiltin()
       ->setBuiltinKey(self::PANEL_WORKBOARD)
       ->setPanelKey(PhabricatorProjectWorkboardProfilePanel::PANELKEY);
 
     // TODO: This is temporary.
-    $href = urisprintf(
+    $uri = urisprintf(
       '/maniphest/?statuses=open()&projects=%s#R',
       $this->getPHID());
 
-    $panels[] = id(new PhabricatorProfilePanelConfiguration())
+    $panels[] = PhabricatorProfilePanelConfiguration::initializeNewBuiltin()
       ->setBuiltinKey('tasks')
       ->setPanelKey(PhabricatorLinkProfilePanel::PANELKEY)
-      ->setPanelProperty('icon', 'fa-anchor')
+      ->setPanelProperty('icon', 'maniphest')
       ->setPanelProperty('name', pht('Open Tasks'))
-      ->setPanelProperty('href', $href);
+      ->setPanelProperty('uri', $uri);
 
     // TODO: This is temporary.
     $id = $this->getID();
-    $panels[] = id(new PhabricatorProfilePanelConfiguration())
+    $panels[] = PhabricatorProfilePanelConfiguration::initializeNewBuiltin()
       ->setBuiltinKey('feed')
       ->setPanelKey(PhabricatorLinkProfilePanel::PANELKEY)
-      ->setPanelProperty('icon', 'fa-newspaper-o')
+      ->setPanelProperty('icon', 'feed')
       ->setPanelProperty('name', pht('Feed'))
-      ->setPanelProperty('href', "/project/feed/{$id}/");
+      ->setPanelProperty('uri', "/project/feed/{$id}/");
 
-    $panels[] = id(new PhabricatorProfilePanelConfiguration())
+    $panels[] = PhabricatorProfilePanelConfiguration::initializeNewBuiltin()
       ->setBuiltinKey(self::PANEL_MEMBERS)
       ->setPanelKey(PhabricatorProjectMembersProfilePanel::PANELKEY);
 

@@ -12,6 +12,25 @@ abstract class PhabricatorProfilePanel extends Phobject {
   abstract protected function newNavigationMenuItems(
     PhabricatorProfilePanelConfiguration $config);
 
+  public function getPanelTypeIcon() {
+    return null;
+  }
+
+  abstract public function getPanelTypeName();
+
+  abstract public function getDisplayName(
+    PhabricatorProfilePanelConfiguration $config);
+
+  public function buildEditEngineFields(
+    PhabricatorProfilePanelConfiguration $config) {
+    return array();
+  }
+
+  public function canAddToObject(
+    PhabricatorProfilePanelInterface $object) {
+    return false;
+  }
+
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
     return $this;

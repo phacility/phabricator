@@ -5,7 +5,7 @@ final class PhabricatorProfilePanelConfigurationQuery
 
   private $ids;
   private $phids;
-  private $profileObjectPHIDs;
+  private $profilePHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -17,8 +17,8 @@ final class PhabricatorProfilePanelConfigurationQuery
     return $this;
   }
 
-  public function withProfileObjectPHIDs(array $phids) {
-    $this->profileObjectPHIDs = $phids;
+  public function withProfilePHIDs(array $phids) {
+    $this->profilePHIDs = $phids;
     return $this;
   }
 
@@ -47,14 +47,52 @@ final class PhabricatorProfilePanelConfigurationQuery
         $this->phids);
     }
 
-    if ($this->profileObjectPHIDs !== null) {
+    if ($this->profilePHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'profileObjectPHID IN (%Ls)',
-        $this->profileObjectPHIDs);
+        'profilePHID IN (%Ls)',
+        $this->profilePHIDs);
     }
 
     return $where;
+  }
+
+  protected function willFilterPage(array $page) {
+    $panels = PhabricatorProfilePanel::getAllPanels();
+    foreach ($page as $key => $panel) {
+      $panel_type = idx($panels, $panel->getPanelKey());
+      if (!$panel_type) {
+        $this->didRejectResult($panel);
+        unset($page[$key]);
+        continue;
+      }
+      $panel->attachPanel($panel_type);
+    }
+
+    if (!$page) {
+      return array();
+    }
+
+    $profile_phids = mpull($page, 'getProfilePHID');
+
+    $profiles = id(new PhabricatorObjectQuery())
+      ->setViewer($this->getViewer())
+      ->setParentQuery($this)
+      ->withPHIDs($profile_phids)
+      ->execute();
+    $profiles = mpull($profiles, null, 'getPHID');
+
+    foreach ($page as $key => $panel) {
+      $profile = idx($profiles, $panel->getProfilePHID());
+      if (!$profile) {
+        $this->didRejectResult($panel);
+        unset($page[$key]);
+        continue;
+      }
+      $panel->attachProfileObject($profile);
+    }
+
+    return $page;
   }
 
   public function getQueryApplicationClass() {

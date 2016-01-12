@@ -5,6 +5,36 @@ final class PhabricatorProjectMembersProfilePanel
 
   const PANELKEY = 'project.members';
 
+  public function getPanelTypeName() {
+    return pht('Project Members');
+  }
+
+  private function getDefaultName() {
+    return pht('Members');
+  }
+
+  public function getDisplayName(
+    PhabricatorProfilePanelConfiguration $config) {
+    $name = $config->getPanelProperty('name');
+
+    if (strlen($name)) {
+      return $name;
+    }
+
+    return $this->getDefaultName();
+  }
+
+  public function buildEditEngineFields(
+    PhabricatorProfilePanelConfiguration $config) {
+    return array(
+      id(new PhabricatorTextEditField())
+        ->setKey('name')
+        ->setLabel(pht('Name'))
+        ->setPlaceholder($this->getDefaultName())
+        ->setValue($config->getPanelProperty('name')),
+    );
+  }
+
   protected function newNavigationMenuItems(
     PhabricatorProfilePanelConfiguration $config) {
 
@@ -12,7 +42,7 @@ final class PhabricatorProjectMembersProfilePanel
 
     $id = $project->getID();
 
-    $name = pht('Members');
+    $name = $this->getDisplayName($config);
     $icon = 'fa-group';
     $href = "/project/members/{$id}/";
 

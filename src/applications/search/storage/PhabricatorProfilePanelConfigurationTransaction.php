@@ -3,6 +3,8 @@
 final class PhabricatorProfilePanelConfigurationTransaction
   extends PhabricatorApplicationTransaction {
 
+  const TYPE_PROPERTY = 'profilepanel.property';
+
   public function getApplicationName() {
     return 'search';
   }
