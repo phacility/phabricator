@@ -10,7 +10,7 @@ final class PhabricatorRepositoryRepositoryPHIDType
   }
 
   public function getTypeIcon() {
-    return 'fa-database';
+    return 'fa-code';
   }
 
   public function newObject() {

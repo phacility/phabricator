@@ -1761,7 +1761,7 @@ final class DiffusionBrowseController extends DiffusionController {
             'size'  => 600,
           ),
         ),
-        $commit->getShortName());
+        $commit->getLocalName());
 
       $links[$identifier] = $commit_link;
     }

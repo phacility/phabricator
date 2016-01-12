@@ -266,9 +266,20 @@ final class PhabricatorRepositoryCommit
     return $repository->formatCommitName($identifier);
   }
 
-  public function getShortName() {
+  /**
+   * Return a local display name for use in the context of the containing
+   * repository.
+   *
+   * In Git and Mercurial, this returns only a short hash, like "abcdef012345".
+   * See @{method:getDisplayName} for a short name that always includes
+   * repository context.
+   *
+   * @return string Short human-readable name for use inside a repository.
+   */
+  public function getLocalName() {
+    $repository = $this->getRepository();
     $identifier = $this->getCommitIdentifier();
-    return substr($identifier, 0, 9);
+    return $repository->formatCommitName($identifier, $local = true);
   }
 
   public function renderAuthorLink($handles) {

@@ -100,6 +100,7 @@ abstract class PhabricatorPHIDListEditField
 
     $type = new PhabricatorDatasourceEditType();
     $type->setIsSingleValue($this->getIsSingleValue());
+    $type->setConduitParameterType($this->newConduitParameterType());
     return $type;
   }
 

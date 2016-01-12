@@ -58,6 +58,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       ->setMaximumBytes(255)
       ->truncateString((string)$author));
 
+    $data->setCommitDetail('authorEpoch', $ref->getAuthorEpoch());
     $data->setCommitDetail('authorName', $ref->getAuthorName());
     $data->setCommitDetail('authorEmail', $ref->getAuthorEmail());
 

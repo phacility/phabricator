@@ -12,7 +12,11 @@ final class PhabricatorUsersEditField
   }
 
   protected function newConduitParameterType() {
-    return new ConduitUserListParameterType();
+    if ($this->getIsSingleValue()) {
+      return new ConduitUserParameterType();
+    } else {
+      return new ConduitUserListParameterType();
+    }
   }
 
 }

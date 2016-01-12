@@ -116,7 +116,15 @@ final class ManiphestTaskPriority extends ManiphestConstants {
     return $config;
   }
 
-  public static function validateConfiguration(array $config) {
+  public static function validateConfiguration($config) {
+    if (!is_array($config)) {
+      throw new Exception(
+        pht(
+          'Configuration is not valid. Maniphest priority configurations '.
+          'must be dictionaries.',
+          $config));
+    }
+
     foreach ($config as $key => $value) {
       if (!ctype_digit((string)$key)) {
         throw new Exception(

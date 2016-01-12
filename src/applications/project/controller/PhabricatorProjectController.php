@@ -149,7 +149,7 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     $nav->addIcon("feed/{$id}/", pht('Feed'), 'fa-newspaper-o');
     $nav->addIcon("members/{$id}/", pht('Members'), 'fa-group');
 
-    if (PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
+    if (false && PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
       if ($project->supportsSubprojects()) {
         $subprojects_icon = 'fa-sitemap';
       } else {
@@ -172,7 +172,6 @@ abstract class PhabricatorProjectController extends PhabricatorController {
         pht('Milestones'),
         $milestones_icon);
     }
-
 
     return $nav;
   }

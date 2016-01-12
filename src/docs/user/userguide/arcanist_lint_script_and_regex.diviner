@@ -109,7 +109,8 @@ The regex should capture these named patterns with `(?P<name>...)`:
     not specified, defaults to the linted file. It is generally not necessary
     to capture this unless the linter can raise messages in files other than
     the one it is linting.
-  - `line` (optional) The line number of the message.
+  - `line` (optional) The line number of the message. If no text is
+    captured, the message is assumed to affect the entire file.
   - `char` (optional) The character offset of the message.
   - `offset` (optional) The byte offset of the message. If captured, this
     supersedes `line` and `char`.

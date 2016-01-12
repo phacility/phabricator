@@ -17,6 +17,7 @@ final class PhabricatorRepositoryQuery
   private $callsignIdentifiers;
   private $phidIdentifiers;
   private $monogramIdentifiers;
+  private $slugIdentifiers;
 
   private $identifierMap;
 
@@ -56,26 +57,38 @@ final class PhabricatorRepositoryQuery
     $callsigns = array();
     $phids = array();
     $monograms = array();
+    $slugs = array();
 
     foreach ($identifiers as $identifier) {
       if (ctype_digit((string)$identifier)) {
         $ids[$identifier] = $identifier;
-      } else if (preg_match('/^(r[A-Z]+)|(R[1-9]\d*)\z/', $identifier)) {
-        $monograms[$identifier] = $identifier;
-      } else {
-        $repository_type = PhabricatorRepositoryRepositoryPHIDType::TYPECONST;
-        if (phid_get_type($identifier) === $repository_type) {
-          $phids[$identifier] = $identifier;
-        } else {
-          $callsigns[$identifier] = $identifier;
-        }
+        continue;
       }
+
+      if (preg_match('/^(r[A-Z]+)|(R[1-9]\d*)\z/', $identifier)) {
+        $monograms[$identifier] = $identifier;
+        continue;
+      }
+
+      $repository_type = PhabricatorRepositoryRepositoryPHIDType::TYPECONST;
+      if (phid_get_type($identifier) === $repository_type) {
+        $phids[$identifier] = $identifier;
+        continue;
+      }
+
+      if (preg_match('/^[A-Z]+\z/', $identifier)) {
+        $callsigns[$identifier] = $identifier;
+        continue;
+      }
+
+      $slugs[$identifier] = $identifier;
     }
 
     $this->numericIdentifiers = $ids;
     $this->callsignIdentifiers = $callsigns;
     $this->phidIdentifiers = $phids;
     $this->monogramIdentifiers = $monograms;
+    $this->slugIdentifiers = $slugs;
 
     return $this;
   }
@@ -305,6 +318,26 @@ final class PhabricatorRepositoryQuery
       }
     }
 
+    if ($this->slugIdentifiers) {
+      $slug_map = array();
+      foreach ($repositories as $repository) {
+        $slug = $repository->getRepositorySlug();
+        if ($slug === null) {
+          continue;
+        }
+
+        $normal = phutil_utf8_strtolower($slug);
+        $slug_map[$normal] = $repository;
+      }
+
+      foreach ($this->slugIdentifiers as $slug) {
+        $normal = phutil_utf8_strtolower($slug);
+        if (isset($slug_map[$normal])) {
+          $this->identifierMap[$slug] = $slug_map[$normal];
+        }
+      }
+    }
+
     return $repositories;
   }
 
@@ -480,7 +513,8 @@ final class PhabricatorRepositoryQuery
     if ($this->numericIdentifiers ||
       $this->callsignIdentifiers ||
       $this->phidIdentifiers ||
-      $this->monogramIdentifiers) {
+      $this->monogramIdentifiers ||
+      $this->slugIdentifiers) {
       $identifier_clause = array();
 
       if ($this->numericIdentifiers) {
@@ -531,6 +565,13 @@ final class PhabricatorRepositoryQuery
         }
       }
 
+      if ($this->slugIdentifiers) {
+        $identifier_clause[] = qsprintf(
+          $conn,
+          'r.repositorySlug IN (%Ls)',
+          $this->slugIdentifiers);
+      }
+
       $where = array('('.implode(' OR ', $identifier_clause).')');
     }
 
@@ -565,9 +606,10 @@ final class PhabricatorRepositoryQuery
       }
       $where[] = qsprintf(
         $conn,
-        'r.name LIKE %> OR r.callsign LIKE %>',
+        'r.name LIKE %> OR r.callsign LIKE %> OR r.repositorySlug LIKE %>',
         $query,
-        $callsign);
+        $callsign,
+        $query);
     }
 
     if ($this->slugs !== null) {
