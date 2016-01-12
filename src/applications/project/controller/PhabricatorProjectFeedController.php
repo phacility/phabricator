@@ -33,7 +33,7 @@ final class PhabricatorProjectFeedController
       ->setHeaderText(pht('Project Activity'))
       ->appendChild($feed);
 
-    $nav = $this->buildIconNavView($project);
+    $nav = $this->getProfileMenu();
     $nav->selectFilter('feed');
 
     $crumbs = $this->buildApplicationCrumbs();

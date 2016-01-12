@@ -43,7 +43,7 @@ final class PhabricatorProjectProfileController
       new PhabricatorProjectTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    $nav = $this->buildIconNavView($project);
+    $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorProject::PANEL_PROFILE);
 
     $crumbs = $this->buildApplicationCrumbs();

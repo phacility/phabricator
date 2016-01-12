@@ -5,6 +5,7 @@ final class PHUIApplicationMenuView extends Phobject {
   private $viewer;
   private $crumbs;
   private $searchEngine;
+  private $profileMenu;
 
   private $items = array();
 
@@ -30,6 +31,16 @@ final class PHUIApplicationMenuView extends Phobject {
       ->setHref($href);
 
     return $this->addItem($item);
+  }
+
+  public function setProfileMenu(
+    AphrontSideNavFilterView $nav) {
+    $this->profileMenu = $nav;
+    return $this;
+  }
+
+  public function getProfileMenu() {
+    return $this->profileMenu;
   }
 
   public function addItem(PHUIListItemView $item) {
@@ -60,6 +71,15 @@ final class PHUIApplicationMenuView extends Phobject {
 
     $view = id(new PHUIListView())
       ->setUser($viewer);
+
+    $profile_menu = $this->getProfileMenu();
+    if ($profile_menu) {
+      foreach ($profile_menu->getMenu()->getItems() as $item) {
+        $item = clone $item;
+        $item->setRenderNameAsTooltip(false);
+        $view->addMenuItem($item);
+      }
+    }
 
     $crumbs = $this->getCrumbs();
     if ($crumbs) {

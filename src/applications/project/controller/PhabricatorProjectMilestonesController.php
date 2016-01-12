@@ -76,7 +76,7 @@ final class PhabricatorProjectMilestonesController
         ->setProjects($milestones)
         ->renderList());
 
-    $nav = $this->buildIconNavView($project);
+    $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorProject::PANEL_MILESTONES);
 
     $crumbs = $this->buildApplicationCrumbs();

@@ -21,6 +21,8 @@ final class PhabricatorProjectEditPictureController
       return new Aphront404Response();
     }
 
+    $this->setProject($project);
+
     $edit_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
     $view_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
 
@@ -280,15 +282,16 @@ final class PhabricatorProjectEditPictureController
       ->setHeaderText(pht('Upload New Picture'))
       ->setForm($upload_form);
 
-    $nav = $this->buildIconNavView($project);
+    $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorProject::PANEL_PROFILE);
-    $nav->appendChild($form_box);
-    $nav->appendChild($upload_box);
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setNavigation($nav)
+      ->appendChild(
+        array(
+          $form_box,
+          $upload_box,
+        ));
   }
 }

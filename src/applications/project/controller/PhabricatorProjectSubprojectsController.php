@@ -75,7 +75,7 @@ final class PhabricatorProjectSubprojectsController
         ->setProjects($subprojects)
         ->renderList());
 
-    $nav = $this->buildIconNavView($project);
+    $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorProject::PANEL_SUBPROJECTS);
 
     $crumbs = $this->buildApplicationCrumbs();

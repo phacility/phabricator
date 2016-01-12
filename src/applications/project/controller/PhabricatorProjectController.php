@@ -3,6 +3,7 @@
 abstract class PhabricatorProjectController extends PhabricatorController {
 
   private $project;
+  private $profileMenu;
 
   protected function setProject(PhabricatorProject $project) {
     $this->project = $project;
@@ -80,50 +81,33 @@ abstract class PhabricatorProjectController extends PhabricatorController {
   }
 
   public function buildApplicationMenu() {
-    return $this->buildSideNavView(true)->getMenu();
+    $menu = $this->newApplicationMenu();
+
+    $profile_menu = $this->getProfileMenu();
+    if ($profile_menu) {
+      $menu->setProfileMenu($profile_menu);
+    }
+
+    $menu->setSearchEngine(new PhabricatorProjectSearchEngine());
+
+    return $menu;
   }
 
-  public function buildSideNavView($for_app = false) {
-    $project = $this->getProject();
-
-
-
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
-
-    $viewer = $this->getViewer();
-
-    $id = null;
-    if ($for_app) {
+  protected function getProfileMenu() {
+    if (!$this->profileMenu) {
+      $project = $this->getProject();
       if ($project) {
-        $id = $project->getID();
-        $nav->addFilter("profile/{$id}/", pht('Profile'));
-        $nav->addFilter("board/{$id}/", pht('Workboard'));
-        $nav->addFilter("members/{$id}/", pht('Members'));
-        $nav->addFilter("feed/{$id}/", pht('Feed'));
+        $viewer = $this->getViewer();
+
+        $engine = id(new PhabricatorProfilePanelEngine())
+          ->setViewer($viewer)
+          ->setProfileObject($project);
+
+        $this->profileMenu = $engine->buildNavigation();
       }
-      $nav->addFilter('create', pht('Create Project'));
     }
 
-    if (!$id) {
-      id(new PhabricatorProjectSearchEngine())
-        ->setViewer($viewer)
-        ->addNavigationItems($nav->getMenu());
-    }
-
-    $nav->selectFilter(null);
-
-    return $nav;
-  }
-
-  public function buildIconNavView(PhabricatorProject $project) {
-    $viewer = $this->getViewer();
-
-    $engine = id(new PhabricatorProfilePanelEngine())
-      ->setViewer($viewer)
-      ->setProfileObject($project);
-
-    return $engine->buildNavigation();
+    return $this->profileMenu;
   }
 
   protected function buildApplicationCrumbs() {
