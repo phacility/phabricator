@@ -86,6 +86,8 @@ abstract class PhabricatorProjectController extends PhabricatorController {
   public function buildSideNavView($for_app = false) {
     $project = $this->getProject();
 
+
+
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
@@ -115,65 +117,13 @@ abstract class PhabricatorProjectController extends PhabricatorController {
   }
 
   public function buildIconNavView(PhabricatorProject $project) {
-    $this->setProject($project);
     $viewer = $this->getViewer();
-    $id = $project->getID();
-    $picture = $project->getProfileImageURI();
-    $name = $project->getName();
 
-    $columns = id(new PhabricatorProjectColumnQuery())
+    $engine = id(new PhabricatorProfilePanelEngine())
       ->setViewer($viewer)
-      ->withProjectPHIDs(array($project->getPHID()))
-      ->execute();
-    if ($columns) {
-      $board_icon = 'fa-columns';
-    } else {
-      $board_icon = 'fa-columns grey';
-    }
+      ->setProfileObject($project);
 
-    $nav = new AphrontSideNavFilterView();
-    $nav->setIconNav(true);
-    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
-    $nav->addIcon("profile/{$id}/", $name, null, $picture);
-
-    $class = 'PhabricatorManiphestApplication';
-    if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
-      $phid = $project->getPHID();
-      $nav->addIcon("board/{$id}/", pht('Workboard'), $board_icon);
-      $query_uri = urisprintf(
-        '/maniphest/?statuses=open()&projects=%s#R',
-        $phid);
-      $nav->addIcon(null, pht('Open Tasks'), 'fa-anchor', null, $query_uri);
-    }
-
-    $nav->addIcon("feed/{$id}/", pht('Feed'), 'fa-newspaper-o');
-    $nav->addIcon("members/{$id}/", pht('Members'), 'fa-group');
-
-    if (false && PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
-      if ($project->supportsSubprojects()) {
-        $subprojects_icon = 'fa-sitemap';
-      } else {
-        $subprojects_icon = 'fa-sitemap grey';
-      }
-
-      $key = PhabricatorProjectIconSet::getMilestoneIconKey();
-      $milestones_icon = PhabricatorProjectIconSet::getIconIcon($key);
-      if (!$project->supportsMilestones()) {
-        $milestones_icon = "{$milestones_icon} grey";
-      }
-
-      $nav->addIcon(
-        "subprojects/{$id}/",
-        pht('Subprojects'),
-        $subprojects_icon);
-
-      $nav->addIcon(
-        "milestones/{$id}/",
-        pht('Milestones'),
-        $milestones_icon);
-    }
-
-    return $nav;
+    return $engine->buildNavigation();
   }
 
   protected function buildApplicationCrumbs() {

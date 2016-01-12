@@ -6,7 +6,7 @@ abstract class PhabricatorProjectBoardController
   public function buildIconNavView(PhabricatorProject $project) {
     $id = $project->getID();
     $nav = parent::buildIconNavView($project);
-    $nav->selectFilter("board/{$id}/");
+    $nav->selectFilter(PhabricatorProject::PANEL_WORKBOARD);
     $nav->addClass('project-board-nav');
     return $nav;
   }

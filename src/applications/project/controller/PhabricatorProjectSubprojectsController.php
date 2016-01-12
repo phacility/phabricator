@@ -76,7 +76,7 @@ final class PhabricatorProjectSubprojectsController
         ->renderList());
 
     $nav = $this->buildIconNavView($project);
-    $nav->selectFilter("subprojects/{$id}/");
+    $nav->selectFilter(PhabricatorProject::PANEL_SUBPROJECTS);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Subprojects'));

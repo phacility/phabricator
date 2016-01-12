@@ -77,7 +77,7 @@ final class PhabricatorProjectMilestonesController
         ->renderList());
 
     $nav = $this->buildIconNavView($project);
-    $nav->selectFilter("milestones/{$id}/");
+    $nav->selectFilter(PhabricatorProject::PANEL_MILESTONES);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Milestones'));

@@ -281,7 +281,7 @@ final class PhabricatorProjectEditPictureController
       ->setForm($upload_form);
 
     $nav = $this->buildIconNavView($project);
-    $nav->selectFilter("edit/{$id}/");
+    $nav->selectFilter(PhabricatorProject::PANEL_PROFILE);
     $nav->appendChild($form_box);
     $nav->appendChild($upload_box);
 

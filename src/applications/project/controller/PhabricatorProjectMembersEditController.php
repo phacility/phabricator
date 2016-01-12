@@ -96,7 +96,7 @@ final class PhabricatorProjectMembersEditController
     $member_list = $this->renderMemberList($project, $handles);
 
     $nav = $this->buildIconNavView($project);
-    $nav->selectFilter("members/{$id}/");
+    $nav->selectFilter(PhabricatorProject::PANEL_MEMBERS);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Members'));
