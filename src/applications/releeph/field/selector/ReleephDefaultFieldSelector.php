@@ -10,12 +10,7 @@ final class ReleephDefaultFieldSelector extends ReleephFieldSelector {
    * as possible. This obivously is an abomination. -epriestley
    */
   public static function isFacebook() {
-    try {
-      class_exists('ReleephFacebookKarmaFieldSpecification');
-      return true;
-    } catch (Exception $ex) {
-      return false;
-    }
+    return class_exists('ReleephFacebookKarmaFieldSpecification');
   }
 
   /**
