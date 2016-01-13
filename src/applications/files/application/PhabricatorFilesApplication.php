@@ -70,7 +70,7 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
     return array(
       '/F(?P<id>[1-9]\d*)' => 'PhabricatorFileInfoController',
       '/file/' => array(
-        '(query/(?P<key>[^/]+)/)?' => 'PhabricatorFileListController',
+        '(query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorFileListController',
         'upload/' => 'PhabricatorFileUploadController',
         'dropupload/' => 'PhabricatorFileDropUploadController',
         'compose/' => 'PhabricatorFileComposeController',
