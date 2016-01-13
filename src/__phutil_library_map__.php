@@ -1870,6 +1870,8 @@ phutil_register_library_map(array(
     'PhabricatorBadgeHasRecipientEdgeType' => 'applications/badges/edge/PhabricatorBadgeHasRecipientEdgeType.php',
     'PhabricatorBadgesApplication' => 'applications/badges/application/PhabricatorBadgesApplication.php',
     'PhabricatorBadgesArchiveController' => 'applications/badges/controller/PhabricatorBadgesArchiveController.php',
+    'PhabricatorBadgesAward' => 'applications/badges/storage/PhabricatorBadgesAward.php',
+    'PhabricatorBadgesAwardQuery' => 'applications/badges/query/PhabricatorBadgesAwardQuery.php',
     'PhabricatorBadgesBadge' => 'applications/badges/storage/PhabricatorBadgesBadge.php',
     'PhabricatorBadgesCommentController' => 'applications/badges/controller/PhabricatorBadgesCommentController.php',
     'PhabricatorBadgesController' => 'applications/badges/controller/PhabricatorBadgesController.php',
@@ -6231,6 +6233,12 @@ phutil_register_library_map(array(
     'PhabricatorBadgeHasRecipientEdgeType' => 'PhabricatorEdgeType',
     'PhabricatorBadgesApplication' => 'PhabricatorApplication',
     'PhabricatorBadgesArchiveController' => 'PhabricatorBadgesController',
+    'PhabricatorBadgesAward' => array(
+      'PhabricatorBadgesDAO',
+      'PhabricatorDestructibleInterface',
+      'PhabricatorPolicyInterface',
+    ),
+    'PhabricatorBadgesAwardQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorBadgesBadge' => array(
       'PhabricatorBadgesDAO',
       'PhabricatorPolicyInterface',

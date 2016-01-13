@@ -6,6 +6,7 @@ final class PhabricatorBadgesEditRecipientsController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
+    $xactions = array();
 
     $badge = id(new PhabricatorBadgesQuery())
       ->setViewer($viewer)
@@ -21,30 +22,23 @@ final class PhabricatorBadgesEditRecipientsController
       return new Aphront404Response();
     }
 
-    $recipient_phids = $badge->getRecipientPHIDs();
     $view_uri = $this->getApplicationURI('view/'.$badge->getID().'/');
+    $awards = $badge->getAwards();
+    $recipient_phids = mpull($awards, 'getRecipientPHID');
 
     if ($request->isFormPost()) {
-      $recipient_spec = array();
-
-      $remove = $request->getStr('remove');
-      if ($remove) {
-        $recipient_spec['-'] = array_fuse(array($remove));
-      }
+      $award_phids = array();
 
       $add_recipients = $request->getArr('phids');
       if ($add_recipients) {
-        $recipient_spec['+'] = array_fuse($add_recipients);
+        foreach ($add_recipients as $phid) {
+          $award_phids[] = $phid;
+        }
       }
 
-      $type_recipient = PhabricatorBadgeHasRecipientEdgeType::EDGECONST;
-
-      $xactions = array();
-
       $xactions[] = id(new PhabricatorBadgesTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-        ->setMetadataValue('edge:type', $type_recipient)
-        ->setNewValue($recipient_spec);
+        ->setTransactionType(PhabricatorBadgesTransaction::TYPE_AWARD)
+        ->setNewValue($award_phids);
 
       $editor = id(new PhabricatorBadgesEditor($badge))
         ->setActor($viewer)

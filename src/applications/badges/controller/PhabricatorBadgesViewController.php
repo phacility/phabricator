@@ -50,7 +50,8 @@ final class PhabricatorBadgesViewController
       $badge,
       new PhabricatorBadgesTransactionQuery());
 
-    $recipient_phids = $badge->getRecipientPHIDs();
+    $awards = $badge->getAwards();
+    $recipient_phids = mpull($awards, 'getRecipientPHID');
     $recipient_phids = array_reverse($recipient_phids);
     $handles = $this->loadViewerHandles($recipient_phids);
 

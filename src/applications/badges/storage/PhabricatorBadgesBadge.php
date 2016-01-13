@@ -19,7 +19,7 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
   protected $status;
   protected $creatorPHID;
 
-  private $recipientPHIDs = self::ATTACHABLE;
+  private $awards = self::ATTACHABLE;
 
   const STATUS_ACTIVE = 'open';
   const STATUS_ARCHIVED = 'closed';
@@ -102,13 +102,13 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
     return ($this->getStatus() == self::STATUS_ARCHIVED);
   }
 
-  public function attachRecipientPHIDs(array $phids) {
-    $this->recipientPHIDs = $phids;
+  public function attachAwards(array $awards) {
+    $this->awards = $awards;
     return $this;
   }
 
-  public function getRecipientPHIDs() {
-    return $this->assertAttached($this->recipientPHIDs);
+  public function getAwards() {
+    return $this->assertAttached($this->awards);
   }
 
   public function getViewURI() {
@@ -196,6 +196,15 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
 
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
+
+    $awards = id(new PhabricatorBadgesAwardQuery())
+      ->setViewer($engine->getViewer())
+      ->withBadgePHIDs(array($this->getPHID()))
+      ->execute();
+
+    foreach ($awards as $award) {
+      $engine->destroyObjectPermanently($award);
+    }
 
     $this->openTransaction();
       $this->delete();

@@ -9,6 +9,8 @@ final class PhabricatorBadgesTransaction
   const TYPE_ICON = 'badges:icon';
   const TYPE_STATUS = 'badges:status';
   const TYPE_FLAVOR = 'badges:flavor';
+  const TYPE_AWARD = 'badges:award';
+  const TYPE_REVOKE = 'badges:revoke';
 
   const MAILTAG_DETAILS = 'badges:details';
   const MAILTAG_COMMENT = 'badges:comment';
