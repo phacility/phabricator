@@ -5,6 +5,7 @@ final class PhabricatorProfilePanelConfigurationTransaction
 
   const TYPE_PROPERTY = 'profilepanel.property';
   const TYPE_ORDER = 'profilepanel.order';
+  const TYPE_VISIBILITY = 'profilepanel.visibility';
 
   public function getApplicationName() {
     return 'search';

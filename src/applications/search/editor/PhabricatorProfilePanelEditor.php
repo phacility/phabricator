@@ -16,6 +16,7 @@ final class PhabricatorProfilePanelEditor
 
     $types[] = PhabricatorProfilePanelConfigurationTransaction::TYPE_PROPERTY;
     $types[] = PhabricatorProfilePanelConfigurationTransaction::TYPE_ORDER;
+    $types[] = PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY;
 
     return $types;
   }
@@ -30,6 +31,8 @@ final class PhabricatorProfilePanelEditor
         return $object->getPanelProperty($key, null);
       case PhabricatorProfilePanelConfigurationTransaction::TYPE_ORDER:
         return $object->getPanelOrder();
+      case PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY:
+        return $object->getVisibility();
     }
   }
 
@@ -39,6 +42,7 @@ final class PhabricatorProfilePanelEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorProfilePanelConfigurationTransaction::TYPE_PROPERTY:
+      case PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY:
         return $xaction->getNewValue();
       case PhabricatorProfilePanelConfigurationTransaction::TYPE_ORDER:
         return (int)$xaction->getNewValue();
@@ -58,6 +62,9 @@ final class PhabricatorProfilePanelEditor
       case PhabricatorProfilePanelConfigurationTransaction::TYPE_ORDER:
         $object->setPanelOrder($xaction->getNewValue());
         return;
+      case PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY:
+        $object->setVisibility($xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -70,6 +77,7 @@ final class PhabricatorProfilePanelEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorProfilePanelConfigurationTransaction::TYPE_PROPERTY:
       case PhabricatorProfilePanelConfigurationTransaction::TYPE_ORDER:
+      case PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY:
         return;
     }
 

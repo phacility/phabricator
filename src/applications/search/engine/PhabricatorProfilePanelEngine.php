@@ -53,7 +53,7 @@ final class PhabricatorProfilePanelEngine extends Phobject {
       $panel_id_int = (int)$panel_id;
       foreach ($panel_list as $panel) {
         if ($panel_id_int) {
-          if ((int)$panel->getID() === $panel_id) {
+          if ((int)$panel->getID() === $panel_id_int) {
             $selected_panel = $panel;
             break;
           }
@@ -101,6 +101,9 @@ final class PhabricatorProfilePanelEngine extends Phobject {
       case 'builtin':
         $content = $this->buildPanelBuiltinContent($selected_panel);
         break;
+      case 'hide':
+        $content = $this->buildPanelHideContent($selected_panel);
+        break;
       case 'edit':
         $content = $this->buildPanelEditContent();
         break;
@@ -134,6 +137,10 @@ final class PhabricatorProfilePanelEngine extends Phobject {
     $panels = $this->getPanels();
 
     foreach ($panels as $panel) {
+      if ($panel->isDisabled()) {
+        continue;
+      }
+
       $items = $panel->buildNavigationMenuItems();
       foreach ($items as $item) {
         $this->validateNavigationMenuItem($item);
@@ -435,9 +442,22 @@ final class PhabricatorProfilePanelEngine extends Phobject {
 
         if ($id) {
           $item->setHref($this->getPanelURI("edit/{$id}/"));
+          $hide_uri = $this->getPanelURI("hide/{$id}/");
         } else {
           $item->setHref($this->getPanelURI("builtin/{$builtin_key}/"));
+          $hide_uri = $this->getPanelURI("hide/{$builtin_key}/");
         }
+
+        $item->addAction(
+          id(new PHUIListItemView())
+            ->setHref($hide_uri)
+            ->setWorkflow(true)
+            ->setIcon(pht('fa-eye')));
+      }
+
+      if ($panel->isDisabled()) {
+        $item->setDisabled(true);
+        $item->addIcon('fa-times grey', pht('Disabled'));
       }
 
       $list->addItem($item);
@@ -571,6 +591,60 @@ final class PhabricatorProfilePanelEngine extends Phobject {
       ->setNewPanelConfiguration($configuration)
       ->setController($controller)
       ->buildResponse();
+  }
+
+  private function buildPanelHideContent(
+    PhabricatorProfilePanelConfiguration $configuration) {
+
+    $controller = $this->getController();
+    $request = $controller->getRequest();
+    $viewer = $this->getViewer();
+
+    PhabricatorPolicyFilter::requireCapability(
+      $viewer,
+      $configuration,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $v_visibility = $configuration->getVisibility();
+    if ($request->isFormPost()) {
+      $v_visibility = $request->getStr('visibility');
+
+      $type_visibility =
+        PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY;
+
+      $xactions = array();
+
+      $xactions[] = id(new PhabricatorProfilePanelConfigurationTransaction())
+        ->setTransactionType($type_visibility)
+        ->setNewValue($v_visibility);
+
+      $editor = id(new PhabricatorProfilePanelEditor())
+        ->setContentSourceFromRequest($request)
+        ->setActor($viewer)
+        ->setContinueOnMissingFields(true)
+        ->setContinueOnNoEffect(true)
+        ->applyTransactions($configuration, $xactions);
+
+      return id(new AphrontRedirectResponse())
+        ->setURI($this->getConfigureURI());
+    }
+
+    $map = PhabricatorProfilePanelConfiguration::getVisibilityNameMap();
+
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->appendControl(
+        id(new AphrontFormSelectControl())
+          ->setName('visibility')
+          ->setLabel(pht('Visibility'))
+          ->setValue($v_visibility)
+          ->setOptions($map));
+
+    return $controller->newDialog()
+      ->setTitle(pht('Change Item Visibility'))
+      ->appendForm($form)
+      ->addCancelButton($this->getConfigureURI())
+      ->addSubmitButton(pht('Save Changes'));
   }
 
 }

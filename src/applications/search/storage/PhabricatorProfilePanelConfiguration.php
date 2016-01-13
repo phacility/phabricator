@@ -56,6 +56,13 @@ final class PhabricatorProfilePanelConfiguration
     ) + parent::getConfiguration();
   }
 
+  public static function getVisibilityNameMap() {
+    return array(
+      self::VISIBILITY_VISIBLE => pht('Visible'),
+      self::VISIBILITY_DISABLED => pht('Disabled'),
+    );
+  }
+
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorProfilePanelPHIDType::TYPECONST);
@@ -113,6 +120,10 @@ final class PhabricatorProfilePanelConfiguration
       '~%s%020d',
       $order,
       $this->getID());
+  }
+
+  public function isDisabled() {
+    return ($this->getVisibility() === self::VISIBILITY_DISABLED);
   }
 
 
