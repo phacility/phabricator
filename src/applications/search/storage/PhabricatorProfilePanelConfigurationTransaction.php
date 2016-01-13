@@ -4,6 +4,7 @@ final class PhabricatorProfilePanelConfigurationTransaction
   extends PhabricatorApplicationTransaction {
 
   const TYPE_PROPERTY = 'profilepanel.property';
+  const TYPE_ORDER = 'profilepanel.order';
 
   public function getApplicationName() {
     return 'search';

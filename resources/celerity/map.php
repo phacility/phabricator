@@ -424,6 +424,7 @@ return array(
     'rsrc/js/application/releeph/releeph-request-state-change.js' => 'a0b57eb8',
     'rsrc/js/application/releeph/releeph-request-typeahead.js' => 'de2e896f',
     'rsrc/js/application/repository/repository-crossreference.js' => 'e5339c43',
+    'rsrc/js/application/search/behavior-reorder-profile-menu-items.js' => 'e2e0a072',
     'rsrc/js/application/search/behavior-reorder-queries.js' => 'e9581f08',
     'rsrc/js/application/slowvote/behavior-slowvote-embed.js' => '887ad43f',
     'rsrc/js/application/transactions/behavior-comment-actions.js' => '1f2fcaf8',
@@ -663,6 +664,7 @@ return array(
     'javelin-behavior-remarkup-preview' => '4b700e9e',
     'javelin-behavior-reorder-applications' => '76b9fc3e',
     'javelin-behavior-reorder-columns' => 'e1d25dfb',
+    'javelin-behavior-reorder-profile-menu-items' => 'e2e0a072',
     'javelin-behavior-repository-crossreference' => 'e5339c43',
     'javelin-behavior-scrollbar' => '834a1173',
     'javelin-behavior-search-reorder-queries' => 'e9581f08',
@@ -1932,6 +1934,13 @@ return array(
     ),
     'e292eaf4' => array(
       'javelin-install',
+    ),
+    'e2e0a072' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-workflow',
+      'javelin-dom',
+      'phabricator-draggable-list',
     ),
     'e379b58e' => array(
       'javelin-behavior',

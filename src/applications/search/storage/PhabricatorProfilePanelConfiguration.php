@@ -101,6 +101,20 @@ final class PhabricatorProfilePanelConfiguration
     return $this->getPanel()->getDisplayName($this);
   }
 
+  public function getSortKey() {
+    $order = $this->getPanelOrder();
+    if ($order === null) {
+      $order = 'Z';
+    } else {
+      $order = sprintf('%020d', $order);
+    }
+
+    return sprintf(
+      '~%s%020d',
+      $order,
+      $this->getID());
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

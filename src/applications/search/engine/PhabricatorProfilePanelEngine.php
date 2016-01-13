@@ -91,6 +91,9 @@ final class PhabricatorProfilePanelEngine extends Phobject {
         $content = $this->buildPanelConfigureContent($panel_list);
         $crumbs->addTextCrumb(pht('Configure Menu'));
         break;
+      case 'reorder':
+        $content = $this->buildPanelReorderContent($panel_list);
+        break;
       case 'new':
         $panel_key = $request->getURIData('panelKey');
         $content = $this->buildPanelNewContent($panel_key);
@@ -204,6 +207,8 @@ final class PhabricatorProfilePanelEngine extends Phobject {
       $impl->setViewer($viewer);
     }
 
+    $panels = msort($panels, 'getSortKey');
+
     // Normalize keys since callers shouldn't rely on this array being
     // partially keyed.
     $panels = array_values($panels);
@@ -305,6 +310,79 @@ final class PhabricatorProfilePanelEngine extends Phobject {
     return "/project/{$id}/panel/{$path}";
   }
 
+  private function buildPanelReorderContent(array $panels) {
+    $viewer = $this->getViewer();
+    $object = $this->getProfileObject();
+
+    PhabricatorPolicyFilter::requireCapability(
+      $viewer,
+      $object,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $controller = $this->getController();
+    $request = $controller->getRequest();
+
+    $request->validateCSRF();
+
+    $order = $request->getStrList('order');
+
+    $by_builtin = array();
+    $by_id = array();
+
+    foreach ($panels as $key => $panel) {
+      $id = $panel->getID();
+      if ($id) {
+        $by_id[$id] = $key;
+        continue;
+      }
+
+      $builtin_key = $panel->getBuiltinKey();
+      if ($builtin_key) {
+        $by_builtin[$builtin_key] = $key;
+        continue;
+      }
+    }
+
+    $key_order = array();
+    foreach ($order as $order_item) {
+      if (isset($by_id[$order_item])) {
+        $key_order[] = $by_id[$order_item];
+        continue;
+      }
+      if (isset($by_builtin[$order_item])) {
+        $key_order[] = $by_builtin[$order_item];
+        continue;
+      }
+    }
+
+    $panels = array_select_keys($panels, $key_order) + $panels;
+
+    $type_order =
+      PhabricatorProfilePanelConfigurationTransaction::TYPE_ORDER;
+
+    $order = 1;
+    foreach ($panels as $panel) {
+      $xactions = array();
+
+      $xactions[] = id(new PhabricatorProfilePanelConfigurationTransaction())
+        ->setTransactionType($type_order)
+        ->setNewValue($order);
+
+      $editor = id(new PhabricatorProfilePanelEditor())
+        ->setContentSourceFromRequest($request)
+        ->setActor($viewer)
+        ->setContinueOnMissingFields(true)
+        ->setContinueOnNoEffect(true)
+        ->applyTransactions($panel, $xactions);
+
+      $order++;
+    }
+
+    return id(new AphrontRedirectResponse())
+      ->setURI($this->getConfigureURI());
+  }
+
+
   private function buildPanelConfigureContent(array $panels) {
     $viewer = $this->getViewer();
     $object = $this->getProfileObject();
@@ -314,7 +392,18 @@ final class PhabricatorProfilePanelEngine extends Phobject {
       $object,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $list = new PHUIObjectItemListView();
+    $list_id = celerity_generate_unique_node_id();
+
+    Javelin::initBehavior(
+      'reorder-profile-menu-items',
+      array(
+        'listID' => $list_id,
+        'orderURI' => $this->getPanelURI('reorder/'),
+      ));
+
+    $list = id(new PHUIObjectItemListView())
+      ->setID($list_id);
+
     foreach ($panels as $panel) {
       $id = $panel->getID();
       $builtin_key = $panel->getBuiltinKey();
@@ -336,6 +425,14 @@ final class PhabricatorProfilePanelEngine extends Phobject {
       $item->addAttribute($type);
 
       if ($can_edit) {
+        $item
+          ->setGrippable(true)
+          ->addSigil('profile-menu-item')
+          ->setMetadata(
+            array(
+              'key' => nonempty($id, $builtin_key),
+            ));
+
         if ($id) {
           $item->setHref($this->getPanelURI("edit/{$id}/"));
         } else {
