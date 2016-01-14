@@ -103,7 +103,7 @@ final class DivinerAtomSearchEngine extends PhabricatorApplicationSearchEngine {
 
   protected function getBuiltinQueryNames() {
     return array(
-      'all' => pht('All'),
+      'all' => pht('All Atoms'),
     );
   }
 

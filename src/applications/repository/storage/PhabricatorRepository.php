@@ -823,30 +823,40 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $uri;
   }
 
-  public function getNormalizedPath() {
-    $uri = (string)$this->getCloneURIObject();
+  public function updateURIIndex() {
+    $uris = array(
+      (string)$this->getCloneURIObject(),
+    );
 
+    foreach ($uris as $key => $uri) {
+      $uris[$key] = $this->getNormalizedURI($uri)
+        ->getNormalizedPath();
+    }
+
+    PhabricatorRepositoryURIIndex::updateRepositoryURIs(
+      $this->getPHID(),
+      $uris);
+
+    return $this;
+  }
+
+  private function getNormalizedURI($uri) {
     switch ($this->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $normalized_uri = new PhabricatorRepositoryURINormalizer(
+        return new PhabricatorRepositoryURINormalizer(
           PhabricatorRepositoryURINormalizer::TYPE_GIT,
           $uri);
-        break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $normalized_uri = new PhabricatorRepositoryURINormalizer(
+        return new PhabricatorRepositoryURINormalizer(
           PhabricatorRepositoryURINormalizer::TYPE_SVN,
           $uri);
-        break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $normalized_uri = new PhabricatorRepositoryURINormalizer(
+        return new PhabricatorRepositoryURINormalizer(
           PhabricatorRepositoryURINormalizer::TYPE_MERCURIAL,
           $uri);
-        break;
       default:
         throw new Exception(pht('Unrecognized version control system.'));
     }
-
-    return $normalized_uri->getNormalizedPath();
   }
 
   public function isTracked() {
@@ -2231,13 +2241,17 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
 
+    $phid = $this->getPHID();
+
     $this->openTransaction();
 
       $this->delete();
 
+      PhabricatorRepositoryURIIndex::updateRepositoryURIs($phid, array());
+
       $books = id(new DivinerBookQuery())
         ->setViewer($engine->getViewer())
-        ->withRepositoryPHIDs(array($this->getPHID()))
+        ->withRepositoryPHIDs(array($phid))
         ->execute();
       foreach ($books as $book) {
         $engine->destroyObject($book);
@@ -2245,7 +2259,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
       $atoms = id(new DivinerAtomQuery())
         ->setViewer($engine->getViewer())
-        ->withRepositoryPHIDs(array($this->getPHID()))
+        ->withRepositoryPHIDs(array($phid))
         ->execute();
       foreach ($atoms as $atom) {
         $engine->destroyObject($atom);

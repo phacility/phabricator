@@ -180,7 +180,7 @@ JX.behavior('differential-dropdown-menus', function(config) {
       if (nodes.length) {
         reveal_item
           .setDisabled(false)
-          .setName(pht('Show Entire File'))
+          .setName(pht('Show All Context'))
           .setIcon('fa-file-o')
           .setHandler(function(e) {
             show_more(JX.$(data.containerID));
@@ -191,7 +191,7 @@ JX.behavior('differential-dropdown-menus', function(config) {
         reveal_item
           .setDisabled(true)
           .setIcon('fa-file')
-          .setName(pht('Entire File Shown'))
+          .setName(pht('All Context Shown'))
           .setHandler(function(e) { e.prevent(); });
       }
 

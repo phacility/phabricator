@@ -384,7 +384,7 @@ final class PhabricatorProjectBoardViewController
       ->appendChild($board)
       ->addClass('project-board-wrapper');
 
-    $nav = $this->buildIconNavView($project);
+    $nav = $this->getProfileMenu();
 
     return $this->newPage()
       ->setTitle(pht('%s Board', $project->getName()))

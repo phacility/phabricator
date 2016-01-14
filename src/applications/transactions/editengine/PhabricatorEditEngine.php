@@ -57,6 +57,10 @@ abstract class PhabricatorEditEngine
     return $this;
   }
 
+  public function isEngineConfigurable() {
+    return true;
+  }
+
 
 /* -(  Managing Fields  )---------------------------------------------------- */
 
@@ -1005,8 +1009,11 @@ abstract class PhabricatorEditEngine
     }
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($header_text)
-      ->addActionLink($action_button);
+      ->setHeader($header_text);
+
+    if ($action_button) {
+      $header->addActionLink($action_button);
+    }
 
     $crumbs = $this->buildCrumbs($object, $final = true);
 
@@ -1066,6 +1073,10 @@ abstract class PhabricatorEditEngine
   }
 
   private function buildEditFormActionButton($object) {
+    if (!$this->isEngineConfigurable()) {
+      return null;
+    }
+
     $viewer = $this->getViewer();
 
     $action_view = id(new PhabricatorActionListView())

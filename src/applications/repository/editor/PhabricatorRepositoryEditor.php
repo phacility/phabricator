@@ -518,4 +518,8 @@ final class PhabricatorRepositoryEditor
     throw new PhabricatorApplicationTransactionValidationException($errors);
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
 }

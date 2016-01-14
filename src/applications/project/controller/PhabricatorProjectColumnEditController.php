@@ -144,13 +144,11 @@ final class PhabricatorProjectColumnEditController
       ->setValidationException($validation_exception)
       ->setForm($form);
 
-    $nav = $this->buildIconNavView($project);
-    $nav->appendChild($form_box);
+    $nav = $this->getProfileMenu();
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setNavigation($nav)
+      ->appendChild($form_box);
   }
 }
