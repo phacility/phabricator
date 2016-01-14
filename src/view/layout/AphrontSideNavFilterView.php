@@ -29,11 +29,13 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $menuID;
   private $iconNav;
   private $isProfileMenu;
+  private $footer = array();
 
   public function setMenuID($menu_id) {
     $this->menuID = $menu_id;
     return $this;
   }
+
   public function getMenuID() {
     return $this->menuID;
   }
@@ -187,6 +189,11 @@ final class AphrontSideNavFilterView extends AphrontView {
     return $this->selectedFilter;
   }
 
+  public function appendFooter($footer) {
+    $this->footer[] = $footer;
+    return $this;
+  }
+
   public function render() {
     if ($this->menu->getItems()) {
       if (!$this->baseURI) {
@@ -220,7 +227,7 @@ final class AphrontSideNavFilterView extends AphrontView {
 
     if ($this->getIsProfileMenu()) {
       require_celerity_resource('phui-profile-menu-css');
-      $nav_classes[] = 'phui-profile-menu';
+      // No class, we're going to put it on the shell instead.
     } else if ($this->iconNav) {
       $nav_classes[] = 'phabricator-icon-nav';
     } else {
@@ -301,7 +308,17 @@ final class AphrontSideNavFilterView extends AphrontView {
 
     $nav_classes = array_merge($nav_classes, $this->classes);
 
-    return phutil_tag(
+    $footer = $this->footer;
+
+    if ($this->getIsProfileMenu()) {
+      $internal_footer = $footer;
+      $external_footer = null;
+    } else {
+      $internal_footer = null;
+      $external_footer = $footer;
+    }
+
+    $menu = phutil_tag(
       'div',
       array(
         'class' => implode(' ', $nav_classes),
@@ -319,8 +336,27 @@ final class AphrontSideNavFilterView extends AphrontView {
           array(
             $crumbs,
             $this->renderChildren(),
+            $internal_footer,
           )),
       ));
+
+    if ($this->getIsProfileMenu()) {
+      $shell = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-navigation-shell phui-profile-menu',
+        ),
+        array(
+          $menu,
+        ));
+    } else {
+      $shell = array(
+        $menu,
+        $external_footer,
+      );
+    }
+
+    return $shell;
   }
 
 }

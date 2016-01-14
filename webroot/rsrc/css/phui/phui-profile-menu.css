@@ -2,22 +2,32 @@
  * @provides phui-profile-menu-css
  */
 
-.phui-profile-menu .phabricator-side-menu {
-  background: {$menu.profile.background};
-  box-shadow: inset -2px 0 2px rgba(0, 0, 0, 0.150);
-  width: 240px;
+.device-desktop .phui-navigation-shell.phui-profile-menu {
+  display: table;
+  height: calc(100vh - {$menu.main.height});
 }
 
-.phui-profile-menu .phabricator-nav-local {
+.device-desktop .phui-profile-menu .phabricator-nav {
+  display: table-row;
+}
+
+.device-desktop .phui-profile-menu .phabricator-nav-local {
+  display: table-cell;
+  position: relative;
+  vertical-align: top;
+  width: 240px;
   margin-top: 0;
 }
 
 .device-desktop .phui-profile-menu .phabricator-nav-content {
-  margin-left: 240px;
+  display: table-cell;
+  margin-left: 0;
 }
 
-.device-desktop .phui-profile-menu + .phabricator-standard-page-footer {
-  margin-left: 256px;
+.phui-profile-menu .phabricator-side-menu {
+  background: {$menu.profile.background};
+  box-shadow: inset -2px 0 2px rgba(0, 0, 0, 0.150);
+  width: 240px;
 }
 
 .phui-profile-menu .phabricator-side-menu .phui-list-item-view {

@@ -197,6 +197,8 @@ final class CelerityDefaultPostprocessor
       'menu.profile.icon' => '#ffffff',
       'menu.profile.icon.disabled' => '#b9bcc2',
 
+      'menu.main.height' => '44px',
+
     );
   }
 
