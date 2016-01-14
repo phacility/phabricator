@@ -37,6 +37,21 @@ final class PhabricatorProfilePanelIconSet
         'name' => pht('Conpherence'),
       ),
       array(
+        'key' => 'differential',
+        'icon' => 'fa-cog',
+        'name' => pht('Differential'),
+      ),
+      array(
+        'key' => 'diffusion',
+        'icon' => 'fa-code',
+        'name' => pht('Diffusion'),
+      ),
+      array(
+        'key' => 'calendar',
+        'icon' => 'fa-calendar',
+        'name' => pht('Calendar'),
+      ),
+      array(
         'key' => 'create',
         'icon' => 'fa-plus',
         'name' => pht('Create'),

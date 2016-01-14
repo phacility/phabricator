@@ -36,6 +36,10 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
 
   abstract protected function getPanelURI($path);
 
+  protected function isPanelEngineConfigurable() {
+    return PhabricatorEnv::getEnvConfig('phabricator.show-prototypes');
+  }
+
   public function buildResponse() {
     $controller = $this->getController();
 
@@ -45,6 +49,18 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
     $request = $controller->getRequest();
 
     $panel_action = $request->getURIData('panelAction');
+
+    // If the engine is not configurable, don't respond to any of the editing
+    // or configuration routes.
+    if (!$this->isPanelEngineConfigurable()) {
+      switch ($panel_action) {
+        case 'view':
+          break;
+        default:
+          return new Aphront404Response();
+      }
+    }
+
     $panel_id = $request->getURIData('panelID');
 
     $panel_list = $this->loadPanels();
@@ -286,7 +302,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
   }
 
   private function newConfigureMenuItem() {
-    if (!PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
+    if (!$this->isPanelEngineConfigurable()) {
       return null;
     }
 
