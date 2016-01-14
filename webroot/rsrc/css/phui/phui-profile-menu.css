@@ -48,7 +48,8 @@
 }
 
 .phui-profile-menu .phabricator-side-menu .phui-list-item-icon,
-.phui-profile-menu .phabricator-side-menu .phui-icon-view {
+.phui-profile-menu .phabricator-side-menu
+  .phui-list-item-href .phui-icon-view {
   position: absolute;
   left: 13px;
   top: 12px;
@@ -90,4 +91,17 @@
 .phui-profile-menu .phabricator-side-menu .phui-divider {
   margin: 4px 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.200);
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-motivator {
+  white-space: normal;
+  padding: 18px 15px;
+  font-size: 12px;
+  color: {$menu.profile.text};
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-motivator .phui-icon-view {
+  position: static;
+  font-size: 12px;
+  color: {$menu.profile.text};
 }
