@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '2a7bdb75',
+    'core.pkg.css' => '30316566',
     'core.pkg.js' => '1f5f365a',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '2de124c9',
@@ -143,7 +143,7 @@ return array(
     'rsrc/css/phui/phui-object-item-list-view.css' => '26c30d3f',
     'rsrc/css/phui/phui-pager.css' => 'bea33d23',
     'rsrc/css/phui/phui-pinboard-view.css' => '2495140e',
-    'rsrc/css/phui/phui-profile-menu.css' => '6123de4e',
+    'rsrc/css/phui/phui-profile-menu.css' => '05546270',
     'rsrc/css/phui/phui-property-list-view.css' => '27b2849e',
     'rsrc/css/phui/phui-remarkup-preview.css' => '1a8f2591',
     'rsrc/css/phui/phui-spacing.css' => '042804d6',
@@ -822,7 +822,7 @@ return array(
     'phui-object-item-list-view-css' => '26c30d3f',
     'phui-pager-css' => 'bea33d23',
     'phui-pinboard-view-css' => '2495140e',
-    'phui-profile-menu-css' => '6123de4e',
+    'phui-profile-menu-css' => '05546270',
     'phui-property-list-view-css' => '27b2849e',
     'phui-remarkup-preview-css' => '1a8f2591',
     'phui-spacing-css' => '042804d6',

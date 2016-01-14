@@ -85,3 +85,9 @@
   background-color: rgba(0, 0, 0, 0.150);
   color: {$menu.profile.text.selected};
 }
+
+
+.phui-profile-menu .phabricator-side-menu .phui-divider {
+  margin: 4px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.200);
+}
