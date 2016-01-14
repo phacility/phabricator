@@ -26,8 +26,7 @@ abstract class PhabricatorProfilePanel extends Phobject {
     return array();
   }
 
-  public function canAddToObject(
-    PhabricatorProfilePanelInterface $object) {
+  public function canAddToObject($object) {
     return false;
   }
 

@@ -13,8 +13,7 @@ final class PhabricatorLinkProfilePanel
     return pht('Link');
   }
 
-  public function canAddToObject(
-    PhabricatorProfilePanelInterface $object) {
+  public function canAddToObject($object) {
     return true;
   }
 

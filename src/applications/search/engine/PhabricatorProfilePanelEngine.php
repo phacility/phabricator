@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorProfilePanelEngine extends Phobject {
+abstract class PhabricatorProfilePanelEngine extends Phobject {
 
   private $viewer;
   private $profileObject;
@@ -16,8 +16,7 @@ final class PhabricatorProfilePanelEngine extends Phobject {
     return $this->viewer;
   }
 
-  public function setProfileObject(
-    PhabricatorProfilePanelInterface $profile_object) {
+  public function setProfileObject($profile_object) {
     $this->profileObject = $profile_object;
     return $this;
   }
@@ -34,6 +33,8 @@ final class PhabricatorProfilePanelEngine extends Phobject {
   public function getController() {
     return $this->controller;
   }
+
+  abstract protected function getPanelURI($path);
 
   public function buildResponse() {
     $controller = $this->getController();
@@ -132,7 +133,7 @@ final class PhabricatorProfilePanelEngine extends Phobject {
   public function buildNavigation() {
     $nav = id(new AphrontSideNavFilterView())
       ->setIsProfileMenu(true)
-      ->setBaseURI(new PhutilURI('/project/'));
+      ->setBaseURI(new PhutilURI($this->getPanelURI('')));
 
     $panels = $this->getPanels();
 
@@ -225,7 +226,7 @@ final class PhabricatorProfilePanelEngine extends Phobject {
 
   private function loadBuiltinProfilePanels() {
     $object = $this->getProfileObject();
-    $builtins = $object->getBuiltinProfilePanels();
+    $builtins = $this->getBuiltinProfilePanels($object);
 
     $panels = PhabricatorProfilePanel::getAllPanels();
 
@@ -308,12 +309,6 @@ final class PhabricatorProfilePanelEngine extends Phobject {
 
   public function getConfigureURI() {
     return $this->getPanelURI('configure/');
-  }
-
-  private function getPanelURI($path) {
-    $project = $this->getProfileObject();
-    $id = $project->getID();
-    return "/project/{$id}/panel/{$path}";
   }
 
   private function buildPanelReorderContent(array $panels) {
@@ -644,6 +639,10 @@ final class PhabricatorProfilePanelEngine extends Phobject {
       ->appendForm($form)
       ->addCancelButton($this->getConfigureURI())
       ->addSubmitButton(pht('Save Changes'));
+  }
+
+  protected function newPanel() {
+    return PhabricatorProfilePanelConfiguration::initializeNewBuiltin();
   }
 
 }

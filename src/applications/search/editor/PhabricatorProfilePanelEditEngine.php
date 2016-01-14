@@ -23,8 +23,7 @@ final class PhabricatorProfilePanelEditEngine
     return $this->panelEngine;
   }
 
-  public function setProfileObject(
-    PhabricatorProfilePanelInterface $profile_object) {
+  public function setProfileObject($profile_object) {
     $this->profileObject = $profile_object;
     return $this;
   }
