@@ -51,4 +51,8 @@ abstract class PhabricatorProfilePanel extends Phobject {
       ->execute();
   }
 
+  protected function newItem() {
+    return new PHUIListItemView();
+  }
+
 }

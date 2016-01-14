@@ -61,9 +61,7 @@ final class PhabricatorProjectWorkboardProfilePanel
     $href = "/project/board/{$id}/";
     $name = $this->getDisplayName($config);
 
-    $item = id(new PHUIListItemView())
-      ->setRenderNameAsTooltip(true)
-      ->setType(PHUIListItemView::TYPE_ICON_NAV)
+    $item = $this->newItem()
       ->setHref($href)
       ->setName($name)
       ->setIcon($icon);

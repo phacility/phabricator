@@ -28,6 +28,7 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $classes = array();
   private $menuID;
   private $iconNav;
+  private $isProfileMenu;
 
   public function setMenuID($menu_id) {
     $this->menuID = $menu_id;
@@ -53,6 +54,15 @@ final class AphrontSideNavFilterView extends AphrontView {
 
   public function getCrumbs() {
     return $this->crumbs;
+  }
+
+  public function setIsProfileMenu($is_profile) {
+    $this->isProfileMenu = $is_profile;
+    return $this;
+  }
+
+  public function getIsProfileMenu() {
+    return $this->isProfileMenu;
   }
 
   public function setIconNav($nav) {
@@ -207,9 +217,16 @@ final class AphrontSideNavFilterView extends AphrontView {
 
     $nav_classes = array();
     $nav_classes[] = 'phabricator-nav';
-    if ($this->iconNav) {
+
+    if ($this->getIsProfileMenu()) {
+      require_celerity_resource('phui-profile-menu-css');
+      $nav_classes[] = 'phui-profile-menu';
+    } else if ($this->iconNav) {
       $nav_classes[] = 'phabricator-icon-nav';
+    } else {
+      $nav_classes[] = 'phabricator-basic-nav';
     }
+
 
     $nav_id = null;
     $drag_id = null;

@@ -46,9 +46,7 @@ final class PhabricatorProjectDetailsProfilePanel
 
     $href = "/project/profile/{$id}/";
 
-    $item = id(new PHUIListItemView())
-      ->setRenderNameAsTooltip(true)
-      ->setType(PHUIListItemView::TYPE_ICON_NAV)
+    $item = $this->newItem()
       ->setHref($href)
       ->setName($name)
       ->setProfileImage($picture);

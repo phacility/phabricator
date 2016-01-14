@@ -46,9 +46,7 @@ final class PhabricatorProjectMembersProfilePanel
     $icon = 'fa-group';
     $href = "/project/members/{$id}/";
 
-    $item = id(new PHUIListItemView())
-      ->setRenderNameAsTooltip(true)
-      ->setType(PHUIListItemView::TYPE_ICON_NAV)
+    $item = $this->newItem()
       ->setHref($href)
       ->setName($name)
       ->setIcon($icon);

@@ -26,6 +26,21 @@ final class PhabricatorProfilePanelIconSet
         'icon' => 'fa-newspaper-o',
         'name' => pht('Feed'),
       ),
+      array(
+        'key' => 'phriction',
+        'icon' => 'fa-book',
+        'name' => pht('Phriction'),
+      ),
+      array(
+        'key' => 'conpherence',
+        'icon' => 'fa-comments',
+        'name' => pht('Conpherence'),
+      ),
+      array(
+        'key' => 'create',
+        'icon' => 'fa-plus',
+        'name' => pht('Create'),
+      ),
     );
 
     $icons = array();

@@ -131,7 +131,7 @@ final class PhabricatorProfilePanelEngine extends Phobject {
 
   public function buildNavigation() {
     $nav = id(new AphrontSideNavFilterView())
-      ->setIconNav(true)
+      ->setIsProfileMenu(true)
       ->setBaseURI(new PhutilURI('/project/'));
 
     $panels = $this->getPanels();
@@ -303,8 +303,7 @@ final class PhabricatorProfilePanelEngine extends Phobject {
       ->setIcon('fa-gear')
       ->setHref($this->getPanelURI('configure/'))
       ->setDisabled(!$can_edit)
-      ->setWorkflow(!$can_edit)
-      ->setRenderNameAsTooltip(true);
+      ->setWorkflow(!$can_edit);
   }
 
   public function getConfigureURI() {
