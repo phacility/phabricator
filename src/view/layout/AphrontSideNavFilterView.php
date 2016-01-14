@@ -27,7 +27,6 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $crumbs;
   private $classes = array();
   private $menuID;
-  private $iconNav;
   private $isProfileMenu;
   private $footer = array();
 
@@ -67,11 +66,6 @@ final class AphrontSideNavFilterView extends AphrontView {
     return $this->isProfileMenu;
   }
 
-  public function setIconNav($nav) {
-    $this->iconNav = $nav;
-    return $this;
-  }
-
   public function setActive($active) {
     $this->active = $active;
     return $this;
@@ -103,26 +97,6 @@ final class AphrontSideNavFilterView extends AphrontView {
   public function addFilter($key, $name, $uri = null) {
     return $this->addThing(
       $key, $name, $uri, PHUIListItemView::TYPE_LINK);
-  }
-
-  public function addIcon($key, $name, $icon, $image = null, $uri = null) {
-    if (!$uri) {
-      $href = clone $this->baseURI;
-      $href->setPath(rtrim($href->getPath().$key, '/').'/');
-      $href = (string)$href;
-    } else {
-      $href = $uri;
-    }
-
-    $item = id(new PHUIListItemView())
-      ->setKey($key)
-      ->setRenderNameAsTooltip(true)
-      ->setType(PHUIListItemView::TYPE_ICON_NAV)
-      ->setIcon($icon)
-      ->setHref($href)
-      ->setName($name)
-      ->setProfileImage($image);
-    return $this->addMenuItem($item);
   }
 
   public function addButton($key, $name, $uri = null) {
@@ -228,12 +202,9 @@ final class AphrontSideNavFilterView extends AphrontView {
     if ($this->getIsProfileMenu()) {
       require_celerity_resource('phui-profile-menu-css');
       // No class, we're going to put it on the shell instead.
-    } else if ($this->iconNav) {
-      $nav_classes[] = 'phabricator-icon-nav';
     } else {
       $nav_classes[] = 'phabricator-basic-nav';
     }
-
 
     $nav_id = null;
     $drag_id = null;

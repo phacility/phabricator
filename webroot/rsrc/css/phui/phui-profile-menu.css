@@ -4,6 +4,7 @@
 
 .device-desktop .phui-navigation-shell.phui-profile-menu {
   display: table;
+  width: 100%;
   height: calc(100vh - {$menu.main.height});
 }
 
