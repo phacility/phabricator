@@ -23,7 +23,7 @@ final class PhabricatorRepositoryTransaction
   const TYPE_PUSH_POLICY = 'repo:push-policy';
   const TYPE_CREDENTIAL = 'repo:credential';
   const TYPE_DANGEROUS = 'repo:dangerous';
-  const TYPE_CLONE_NAME = 'repo:clone-name';
+  const TYPE_SLUG = 'repo:slug';
   const TYPE_SERVICE = 'repo:service';
   const TYPE_SYMBOLS_SOURCES = 'repo:symbol-source';
   const TYPE_SYMBOLS_LANGUAGE = 'repo:symbol-language';
@@ -369,19 +369,19 @@ final class PhabricatorRepositoryTransaction
             '%s enabled protection against dangerous changes.',
             $this->renderHandleLink($author_phid));
         }
-      case self::TYPE_CLONE_NAME:
+      case self::TYPE_SLUG:
         if (strlen($old) && !strlen($new)) {
           return pht(
-            '%s removed the clone name of this repository.',
+            '%s removed the short name of this repository.',
             $this->renderHandleLink($author_phid));
         } else if (strlen($new) && !strlen($old)) {
           return pht(
-            '%s set the clone name of this repository to "%s".',
+            '%s set the short name of this repository to "%s".',
             $this->renderHandleLink($author_phid),
             $new);
         } else {
           return pht(
-            '%s changed the clone name of this repository from "%s" to "%s".',
+            '%s changed the short name of this repository from "%s" to "%s".',
             $this->renderHandleLink($author_phid),
             $old,
             $new);

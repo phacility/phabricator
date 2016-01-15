@@ -62,6 +62,10 @@ final class PhabricatorEditEngineSearchEngine
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
     foreach ($engines as $engine) {
+      if (!$engine->isEngineConfigurable()) {
+        continue;
+      }
+
       $engine_key = $engine->getEngineKey();
       $query_uri = "/transactions/editengine/{$engine_key}/";
 

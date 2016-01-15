@@ -71,7 +71,7 @@ final class DiffusionLintSaveRunner extends Phobject {
     } else if ($uuid) {
       $repository_query->withUUIDs(array($uuid));
     } else if ($remote_uri) {
-      $repository_query->withRemoteURIs(array($remote_uri));
+      $repository_query->withURIs(array($remote_uri));
     }
 
     $repository = $repository_query->executeOne();

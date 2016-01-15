@@ -285,6 +285,76 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
       pht('Extended Policy with Cycle'));
   }
 
+
+  /**
+   * Test bulk checks of extended policies.
+   *
+   * This is testing an issue with extended policy filtering which allowed
+   * unusual inputs to slip objects through the filter. See D14993.
+   */
+  public function testBulkExtendedPolicies() {
+    $object1 = $this->buildObject(PhabricatorPolicies::POLICY_USER)
+      ->setPHID('PHID-TEST-1');
+    $object2 = $this->buildObject(PhabricatorPolicies::POLICY_USER)
+      ->setPHID('PHID-TEST-2');
+    $object3 = $this->buildObject(PhabricatorPolicies::POLICY_USER)
+      ->setPHID('PHID-TEST-3');
+
+    $extended = $this->buildObject(PhabricatorPolicies::POLICY_ADMIN)
+      ->setPHID('PHID-TEST-999');
+
+    $object1->setExtendedPolicies(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW => array(
+          array(
+            $extended,
+            array(
+              PhabricatorPolicyCapability::CAN_VIEW,
+              PhabricatorPolicyCapability::CAN_EDIT,
+            ),
+          ),
+        ),
+      ));
+
+    $object2->setExtendedPolicies(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW => array(
+          array($extended, PhabricatorPolicyCapability::CAN_VIEW),
+        ),
+      ));
+
+    $object3->setExtendedPolicies(
+      array(
+        PhabricatorPolicyCapability::CAN_VIEW => array(
+          array(
+            $extended,
+            array(
+              PhabricatorPolicyCapability::CAN_VIEW,
+              PhabricatorPolicyCapability::CAN_EDIT,
+            ),
+          ),
+        ),
+      ));
+
+    $user = $this->buildUser('user');
+
+    $visible = id(new PhabricatorPolicyFilter())
+      ->setViewer($user)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+        ))
+      ->apply(
+        array(
+          $object1,
+          $object2,
+          $object3,
+        ));
+
+    $this->assertEqual(array(), $visible);
+  }
+
+
   /**
    * An omnipotent user should be able to see even objects with invalid
    * policies.
@@ -430,10 +500,12 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
     $object->setCapabilities(
       array(
         PhabricatorPolicyCapability::CAN_VIEW,
+        PhabricatorPolicyCapability::CAN_EDIT,
       ));
     $object->setPolicies(
       array(
         PhabricatorPolicyCapability::CAN_VIEW => $policy,
+        PhabricatorPolicyCapability::CAN_EDIT => $policy,
       ));
 
     return $object;

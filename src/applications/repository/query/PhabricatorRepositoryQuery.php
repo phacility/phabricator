@@ -9,13 +9,15 @@ final class PhabricatorRepositoryQuery
   private $types;
   private $uuids;
   private $nameContains;
-  private $remoteURIs;
+  private $uris;
   private $datasourceQuery;
+  private $slugs;
 
   private $numericIdentifiers;
   private $callsignIdentifiers;
   private $phidIdentifiers;
   private $monogramIdentifiers;
+  private $slugIdentifiers;
 
   private $identifierMap;
 
@@ -55,26 +57,38 @@ final class PhabricatorRepositoryQuery
     $callsigns = array();
     $phids = array();
     $monograms = array();
+    $slugs = array();
 
     foreach ($identifiers as $identifier) {
       if (ctype_digit((string)$identifier)) {
         $ids[$identifier] = $identifier;
-      } else if (preg_match('/^(r[A-Z]+)|(R[1-9]\d*)\z/', $identifier)) {
-        $monograms[$identifier] = $identifier;
-      } else {
-        $repository_type = PhabricatorRepositoryRepositoryPHIDType::TYPECONST;
-        if (phid_get_type($identifier) === $repository_type) {
-          $phids[$identifier] = $identifier;
-        } else {
-          $callsigns[$identifier] = $identifier;
-        }
+        continue;
       }
+
+      if (preg_match('/^(r[A-Z]+)|(R[1-9]\d*)\z/', $identifier)) {
+        $monograms[$identifier] = $identifier;
+        continue;
+      }
+
+      $repository_type = PhabricatorRepositoryRepositoryPHIDType::TYPECONST;
+      if (phid_get_type($identifier) === $repository_type) {
+        $phids[$identifier] = $identifier;
+        continue;
+      }
+
+      if (preg_match('/^[A-Z]+\z/', $identifier)) {
+        $callsigns[$identifier] = $identifier;
+        continue;
+      }
+
+      $slugs[$identifier] = $identifier;
     }
 
     $this->numericIdentifiers = $ids;
     $this->callsignIdentifiers = $callsigns;
     $this->phidIdentifiers = $phids;
     $this->monogramIdentifiers = $monograms;
+    $this->slugIdentifiers = $slugs;
 
     return $this;
   }
@@ -104,13 +118,18 @@ final class PhabricatorRepositoryQuery
     return $this;
   }
 
-  public function withRemoteURIs(array $uris) {
-    $this->remoteURIs = $uris;
+  public function withURIs(array $uris) {
+    $this->uris = $uris;
     return $this;
   }
 
   public function withDatasourceQuery($query) {
     $this->datasourceQuery = $query;
+    return $this;
+  }
+
+  public function withSlugs(array $slugs) {
+    $this->slugs = $slugs;
     return $this;
   }
 
@@ -244,17 +263,6 @@ final class PhabricatorRepositoryQuery
       }
     }
 
-    // TODO: Denormalize this, too.
-    if ($this->remoteURIs) {
-      $try_uris = $this->getNormalizedPaths();
-      $try_uris = array_fuse($try_uris);
-      foreach ($repositories as $key => $repository) {
-        if (!isset($try_uris[$repository->getNormalizedPath()])) {
-          unset($repositories[$key]);
-        }
-      }
-    }
-
     // Build the identifierMap
     if ($this->numericIdentifiers) {
       foreach ($this->numericIdentifiers as $id) {
@@ -295,6 +303,26 @@ final class PhabricatorRepositoryQuery
       foreach ($this->monogramIdentifiers as $monogram) {
         if (isset($monogram_map[$monogram])) {
           $this->identifierMap[$monogram] = $monogram_map[$monogram];
+        }
+      }
+    }
+
+    if ($this->slugIdentifiers) {
+      $slug_map = array();
+      foreach ($repositories as $repository) {
+        $slug = $repository->getRepositorySlug();
+        if ($slug === null) {
+          continue;
+        }
+
+        $normal = phutil_utf8_strtolower($slug);
+        $slug_map[$normal] = $repository;
+      }
+
+      foreach ($this->slugIdentifiers as $slug) {
+        $normal = phutil_utf8_strtolower($slug);
+        if (isset($slug_map[$normal])) {
+          $this->identifierMap[$slug] = $slug_map[$normal];
         }
       }
     }
@@ -406,6 +434,8 @@ final class PhabricatorRepositoryQuery
   protected function buildSelectClauseParts(AphrontDatabaseConnection $conn) {
     $parts = parent::buildSelectClauseParts($conn);
 
+    $parts[] = 'r.*';
+
     if ($this->shouldJoinSummaryTable()) {
       $parts[] = 's.*';
     }
@@ -423,7 +453,26 @@ final class PhabricatorRepositoryQuery
         PhabricatorRepository::TABLE_SUMMARY);
     }
 
+    if ($this->shouldJoinURITable()) {
+      $joins[] = qsprintf(
+        $conn,
+        'LEFT JOIN %T uri ON r.phid = uri.repositoryPHID',
+        id(new PhabricatorRepositoryURIIndex())->getTableName());
+    }
+
     return $joins;
+  }
+
+  protected function shouldGroupQueryResultRows() {
+    if ($this->shouldJoinURITable()) {
+      return true;
+    }
+
+    return parent::shouldGroupQueryResultRows();
+  }
+
+  private function shouldJoinURITable() {
+    return ($this->uris !== null);
   }
 
   private function shouldJoinSummaryTable() {
@@ -474,7 +523,8 @@ final class PhabricatorRepositoryQuery
     if ($this->numericIdentifiers ||
       $this->callsignIdentifiers ||
       $this->phidIdentifiers ||
-      $this->monogramIdentifiers) {
+      $this->monogramIdentifiers ||
+      $this->slugIdentifiers) {
       $identifier_clause = array();
 
       if ($this->numericIdentifiers) {
@@ -525,6 +575,13 @@ final class PhabricatorRepositoryQuery
         }
       }
 
+      if ($this->slugIdentifiers) {
+        $identifier_clause[] = qsprintf(
+          $conn,
+          'r.repositorySlug IN (%Ls)',
+          $this->slugIdentifiers);
+      }
+
       $where = array('('.implode(' OR ', $identifier_clause).')');
     }
 
@@ -545,7 +602,7 @@ final class PhabricatorRepositoryQuery
     if (strlen($this->nameContains)) {
       $where[] = qsprintf(
         $conn,
-        'name LIKE %~',
+        'r.name LIKE %~',
         $this->nameContains);
     }
 
@@ -559,9 +616,27 @@ final class PhabricatorRepositoryQuery
       }
       $where[] = qsprintf(
         $conn,
-        'r.name LIKE %> OR r.callsign LIKE %>',
+        'r.name LIKE %> OR r.callsign LIKE %> OR r.repositorySlug LIKE %>',
         $query,
-        $callsign);
+        $callsign,
+        $query);
+    }
+
+    if ($this->slugs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'r.repositorySlug IN (%Ls)',
+        $this->slugs);
+    }
+
+    if ($this->uris !== null) {
+      $try_uris = $this->getNormalizedPaths();
+      $try_uris = array_fuse($try_uris);
+
+      $where[] = qsprintf(
+        $conn,
+        'uri.repositoryURI IN (%Ls)',
+        $try_uris);
     }
 
     return $where;
@@ -580,7 +655,7 @@ final class PhabricatorRepositoryQuery
     // or an `svn+ssh` URI, we could deduce how to normalize it. However, this
     // would be more complicated and it's not clear if it matters in practice.
 
-    foreach ($this->remoteURIs as $uri) {
+    foreach ($this->uris as $uri) {
       $normalized_uris[] = new PhabricatorRepositoryURINormalizer(
         PhabricatorRepositoryURINormalizer::TYPE_GIT,
         $uri);

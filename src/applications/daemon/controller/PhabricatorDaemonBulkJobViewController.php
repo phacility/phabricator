@@ -71,9 +71,15 @@ final class PhabricatorDaemonBulkJobViewController
       ->setUser($viewer)
       ->setObject($job);
 
+    if ($job->isConfirming()) {
+      $continue_uri = $job->getMonitorURI();
+    } else {
+      $continue_uri = $job->getDoneURI();
+    }
+
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setHref($job->getDoneURI())
+        ->setHref($continue_uri)
         ->setIcon('fa-arrow-circle-o-right')
         ->setName(pht('Continue')));
 

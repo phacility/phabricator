@@ -63,10 +63,16 @@ final class PhabricatorProjectLogicalViewerDatasource
     $phids = mpull($projects, 'getPHID');
 
     $results = array();
-    foreach ($phids as $phid) {
+    if ($phids) {
+      foreach ($phids as $phid) {
+        $results[] = new PhabricatorQueryConstraint(
+          PhabricatorQueryConstraint::OPERATOR_OR,
+          $phid);
+      }
+    } else {
       $results[] = new PhabricatorQueryConstraint(
-        PhabricatorQueryConstraint::OPERATOR_OR,
-        $phid);
+        PhabricatorQueryConstraint::OPERATOR_EMPTY,
+        null);
     }
 
     return $results;

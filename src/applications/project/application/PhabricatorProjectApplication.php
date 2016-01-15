@@ -61,6 +61,8 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
           => 'PhabricatorProjectEditPictureController',
         $this->getEditRoutePattern('edit/')
           => 'PhabricatorProjectEditController',
+        '(?P<projectID>[1-9]\d*)/panel/'
+          => $this->getPanelRouting('PhabricatorProjectPanelController'),
         'subprojects/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectSubprojectsController',
         'milestones/(?P<id>[1-9]\d*)/'

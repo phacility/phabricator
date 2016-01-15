@@ -8,19 +8,9 @@ final class PhabricatorProjectListController
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $viewer = $request->getViewer();
-    $query_key = $request->getURIData('queryKey');
-
-    $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($query_key)
-      ->setSearchEngine(new PhabricatorProjectSearchEngine())
-      ->setNavigation($this->buildSideNavView());
-
-    return $this->delegateToController($controller);
-  }
-
-  public function buildApplicationMenu() {
-    return $this->buildSideNavView(true)->getMenu();
+    return id(new PhabricatorProjectSearchEngine())
+      ->setController($this)
+      ->buildResponse();
   }
 
   protected function buildApplicationCrumbs() {

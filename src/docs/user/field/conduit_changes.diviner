@@ -39,7 +39,7 @@ Use {nav My Deprecated Calls} to find calls to deprecated methods you have
 made, and {nav Deprecated Call Logs} to find deprecated calls by all users.
 
 You can also search for calls by specific users. For example, it may be useful
-to serach for any bot accounts you run to make sure they aren't calling
+to search for any bot accounts you run to make sure they aren't calling
 outdated APIs.
 
 The most common cause of calls to deprecated methods is users running very

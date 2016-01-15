@@ -10,7 +10,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     PhabricatorCustomFieldInterface,
     PhabricatorDestructibleInterface,
     PhabricatorFulltextInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorProfilePanelInterface {
 
   protected $name;
   protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;
@@ -48,6 +49,12 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   const DEFAULT_COLOR = 'blue';
 
   const TABLE_DATASOURCE_TOKEN = 'project_datasourcetoken';
+
+  const PANEL_PROFILE = 'project.profile';
+  const PANEL_WORKBOARD = 'project.workboard';
+  const PANEL_MEMBERS = 'project.members';
+  const PANEL_MILESTONES = 'project.milestones';
+  const PANEL_SUBPROJECTS = 'project.subprojects';
 
   public static function initializeNewProject(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -642,6 +649,49 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function getConduitSearchAttachments() {
     return array();
+  }
+
+
+/* -(  PhabricatorProfilePanelInterface  )----------------------------------- */
+
+
+  public function getBuiltinProfilePanels() {
+    $panels = array();
+
+    $panels[] = PhabricatorProfilePanelConfiguration::initializeNewBuiltin()
+      ->setBuiltinKey(self::PANEL_PROFILE)
+      ->setPanelKey(PhabricatorProjectDetailsProfilePanel::PANELKEY);
+
+    $panels[] = PhabricatorProfilePanelConfiguration::initializeNewBuiltin()
+      ->setBuiltinKey(self::PANEL_WORKBOARD)
+      ->setPanelKey(PhabricatorProjectWorkboardProfilePanel::PANELKEY);
+
+    // TODO: This is temporary.
+    $uri = urisprintf(
+      '/maniphest/?statuses=open()&projects=%s#R',
+      $this->getPHID());
+
+    $panels[] = PhabricatorProfilePanelConfiguration::initializeNewBuiltin()
+      ->setBuiltinKey('tasks')
+      ->setPanelKey(PhabricatorLinkProfilePanel::PANELKEY)
+      ->setPanelProperty('icon', 'maniphest')
+      ->setPanelProperty('name', pht('Open Tasks'))
+      ->setPanelProperty('uri', $uri);
+
+    // TODO: This is temporary.
+    $id = $this->getID();
+    $panels[] = PhabricatorProfilePanelConfiguration::initializeNewBuiltin()
+      ->setBuiltinKey('feed')
+      ->setPanelKey(PhabricatorLinkProfilePanel::PANELKEY)
+      ->setPanelProperty('icon', 'feed')
+      ->setPanelProperty('name', pht('Feed'))
+      ->setPanelProperty('uri', "/project/feed/{$id}/");
+
+    $panels[] = PhabricatorProfilePanelConfiguration::initializeNewBuiltin()
+      ->setBuiltinKey(self::PANEL_MEMBERS)
+      ->setPanelKey(PhabricatorProjectMembersProfilePanel::PANELKEY);
+
+    return $panels;
   }
 
 }

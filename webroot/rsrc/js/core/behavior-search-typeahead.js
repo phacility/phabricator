@@ -54,7 +54,8 @@ JX.behavior('phabricator-search-typeahead', function(config) {
       'apps' : 2,
       'proj' : 3,
       'user' : 4,
-      'symb' : 5
+      'repo' : 5,
+      'symb' : 6
     };
 
     var tokens = this.tokenize(value);

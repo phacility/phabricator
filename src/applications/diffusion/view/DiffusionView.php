@@ -128,7 +128,7 @@ abstract class DiffusionView extends AphrontView {
     $commit,
     $summary = '') {
 
-    $commit_name = $repository->formatCommitName($commit);
+    $commit_name = $repository->formatCommitName($commit, $local = true);
 
     if (strlen($summary)) {
       $commit_name .= ': '.$summary;

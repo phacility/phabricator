@@ -829,6 +829,33 @@ final class ManiphestTransactionEditor
             last($with_effect));
         }
         break;
+      case ManiphestTransaction::TYPE_OWNER:
+        foreach ($xactions as $xaction) {
+          $old = $xaction->getOldValue();
+          $new = $xaction->getNewValue();
+          if (!strlen($new)) {
+            continue;
+          }
+
+          if ($new === $old) {
+            continue;
+          }
+
+          $assignee_list = id(new PhabricatorPeopleQuery())
+            ->setViewer($this->getActor())
+            ->withPHIDs(array($new))
+            ->execute();
+          if (!$assignee_list) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'User "%s" is not a valid user.',
+                $new),
+              $xaction);
+          }
+        }
+        break;
     }
 
     return $errors;

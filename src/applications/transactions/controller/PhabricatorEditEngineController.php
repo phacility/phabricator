@@ -72,6 +72,10 @@ abstract class PhabricatorEditEngineController
       $engine = $config->getEngine();
     }
 
+    if (!$engine->isEngineConfigurable()) {
+      return null;
+    }
+
     return $config;
   }
 

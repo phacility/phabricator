@@ -57,6 +57,10 @@ abstract class PhabricatorEditEngine
     return $this;
   }
 
+  public function isEngineConfigurable() {
+    return true;
+  }
+
 
 /* -(  Managing Fields  )---------------------------------------------------- */
 
@@ -1005,8 +1009,11 @@ abstract class PhabricatorEditEngine
     }
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($header_text)
-      ->addActionLink($action_button);
+      ->setHeader($header_text);
+
+    if ($action_button) {
+      $header->addActionLink($action_button);
+    }
 
     $crumbs = $this->buildCrumbs($object, $final = true);
 
@@ -1066,6 +1073,10 @@ abstract class PhabricatorEditEngine
   }
 
   private function buildEditFormActionButton($object) {
+    if (!$this->isEngineConfigurable()) {
+      return null;
+    }
+
     $viewer = $this->getViewer();
 
     $action_view = id(new PhabricatorActionListView())
@@ -1632,6 +1643,7 @@ abstract class PhabricatorEditEngine
     array $types,
     PhabricatorApplicationTransaction $template) {
 
+    $viewer = $request->getUser();
     $transactions_key = 'transactions';
 
     $xactions = $request->getValue($transactions_key);
@@ -1687,6 +1699,8 @@ abstract class PhabricatorEditEngine
       // Let the parameter type interpret the value. This allows you to
       // use usernames in list<user> fields, for example.
       $parameter_type = $type->getConduitParameterType();
+
+      $parameter_type->setViewer($viewer);
 
       try {
         $xaction['value'] = $parameter_type->getValue($xaction, 'value');

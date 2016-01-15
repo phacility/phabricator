@@ -16,6 +16,10 @@ final class PhabricatorEditEngineConfigurationListController
     $engine = PhabricatorEditEngine::getByKey($viewer, $engine_key)
       ->setViewer($viewer);
 
+    if (!$engine->isEngineConfigurable()) {
+      return new Aphront404Response();
+    }
+
     $items = array();
     $items[] = id(new PHUIListItemView())
       ->setType(PHUIListItemView::TYPE_LABEL)

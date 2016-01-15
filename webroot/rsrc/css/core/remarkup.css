@@ -518,6 +518,7 @@ var.remarkup-assist-textarea {
 .phabricator-remarkup hr {
   background: {$thinblueborder};
   margin: 24px 0;
+  clear: both;
 }
 
 .phabricator-remarkup .remarkup-highlight {

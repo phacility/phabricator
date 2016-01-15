@@ -17,6 +17,8 @@ final class PhabricatorProjectMembersEditController
       return new Aphront404Response();
     }
 
+    $this->setProject($project);
+
     $member_phids = $project->getMemberPHIDs();
 
     if ($request->isFormPost()) {
@@ -95,8 +97,8 @@ final class PhabricatorProjectMembersEditController
 
     $member_list = $this->renderMemberList($project, $handles);
 
-    $nav = $this->buildIconNavView($project);
-    $nav->selectFilter("members/{$id}/");
+    $nav = $this->getProfileMenu();
+    $nav->selectFilter(PhabricatorProject::PANEL_MEMBERS);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Members'));

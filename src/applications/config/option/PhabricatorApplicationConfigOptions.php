@@ -21,7 +21,14 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
     }
 
     if ($option->isCustomType()) {
-      return $option->getCustomObject()->validateOption($option, $value);
+      try {
+        return $option->getCustomObject()->validateOption($option, $value);
+      } catch (Exception $ex) {
+        // If custom validators threw exceptions, convert them to configuation
+        // validation exceptions so we repair the configuration and raise
+        // an error.
+        throw new PhabricatorConfigValidationException($ex->getMessage());
+      }
     }
 
     switch ($option->getType()) {

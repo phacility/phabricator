@@ -125,6 +125,16 @@ final class ProjectRemarkupRuleTestCase extends PhabricatorTestCase {
         ),
       ),
 
+      '**#orbital**' => array(
+        'embed' => array(),
+        'ref' => array(
+          array(
+            'offset' => 3,
+            'id' => 'orbital',
+          ),
+        ),
+      ),
+
     );
 
     foreach ($cases as $input => $expect) {

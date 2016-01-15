@@ -46,13 +46,6 @@ final class AphrontSideNavFilterView extends AphrontView {
     return $this;
   }
 
-  public static function newFromMenu(PHUIListView $menu) {
-    $object = new AphrontSideNavFilterView();
-    $object->setBaseURI(new PhutilURI('/'));
-    $object->menu = $menu;
-    return $object;
-  }
-
   public function setCrumbs(PHUICrumbsView $crumbs) {
     $this->crumbs = $crumbs;
     return $this;

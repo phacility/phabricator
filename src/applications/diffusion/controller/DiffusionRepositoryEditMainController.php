@@ -286,15 +286,12 @@ final class DiffusionRepositoryEditMainController
     $view->addProperty(pht('Type'), $type);
     $view->addProperty(pht('Callsign'), $repository->getCallsign());
 
-    $clone_name = $repository->getDetail('clone-name');
-
-    if ($repository->isHosted()) {
-      $view->addProperty(
-        pht('Clone/Checkout As'),
-        $clone_name
-          ? $clone_name.'/'
-          : phutil_tag('em', array(), $repository->getCloneName().'/'));
+    $short_name = $repository->getRepositorySlug();
+    if ($short_name === null) {
+      $short_name = $repository->getCloneName();
+      $short_name = phutil_tag('em', array(), $short_name);
     }
+    $view->addProperty(pht('Short Name'), $short_name);
 
     $view->invokeWillRenderEvent();
 

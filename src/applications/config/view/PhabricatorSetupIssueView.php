@@ -275,20 +275,21 @@ final class PhabricatorSetupIssueView extends AphrontView {
       $update = array();
       foreach ($configs as $config) {
         if (idx($options, $config) && $options[$config]->getLocked()) {
-          continue;
+          $name = pht('View "%s"', $config);
+        } else {
+          $name = pht('Edit "%s"', $config);
         }
         $link = phutil_tag(
           'a',
           array(
             'href' => '/config/edit/'.$config.'/?issue='.$issue->getIssueKey(),
           ),
-          pht('Edit %s', $config));
+          $name);
         $update[] = phutil_tag('li', array(), $link);
       }
       if ($update) {
         $update = phutil_tag('ul', array(), $update);
         if (!$related) {
-
           $update_info = phutil_tag(
           'p',
           array(),

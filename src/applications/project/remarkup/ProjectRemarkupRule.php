@@ -32,7 +32,7 @@ final class ProjectRemarkupRule extends PhabricatorObjectRemarkupRule {
     // controlling and these names should parse correctly.
 
     // These characters may never appear anywhere in a hashtag.
-    $never = '\s?!,:;{}#\\(\\)"\'';
+    $never = '\s?!,:;{}#\\(\\)"\'\\*/~';
 
     // These characters may not appear at the edge of the string.
     $never_edge = '.';
