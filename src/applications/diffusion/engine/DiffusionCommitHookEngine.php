@@ -308,6 +308,7 @@ final class DiffusionCommitHookEngine extends Phobject {
     $rules = null;
     $blocking_effect = null;
     $blocked_update = null;
+    $blocking_xscript = null;
     foreach ($updates as $update) {
       $adapter = id(clone $adapter_template)
         ->setPushLog($update);
@@ -332,6 +333,7 @@ final class DiffusionCommitHookEngine extends Phobject {
           if ($effect->getAction() == $block_action) {
             $blocking_effect = $effect;
             $blocked_update = $update;
+            $blocking_xscript = $xscript;
             break;
           }
         }
@@ -357,13 +359,16 @@ final class DiffusionCommitHookEngine extends Phobject {
       throw new DiffusionCommitHookRejectException(
         pht(
           "This push was rejected by Herald push rule %s.\n".
-          "Change: %s\n".
-          "  Rule: %s\n".
-          "Reason: %s",
+          "    Change: %s\n".
+          "      Rule: %s\n".
+          "    Reason: %s\n".
+          "Transcript: %s",
           $rule->getMonogram(),
           $blocked_name,
           $rule->getName(),
-          $message));
+          $message,
+          PhabricatorEnv::getProductionURI(
+            '/herald/transcript/'.$blocking_xscript->getID().'/')));
     }
   }
 
