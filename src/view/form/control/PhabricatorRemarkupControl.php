@@ -44,6 +44,9 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
 
     $root_id = celerity_generate_unique_node_id();
 
+    $user_datasource = new PhabricatorPeopleDatasource();
+    $proj_datasource = new PhabricatorProjectDatasource();
+
     Javelin::initBehavior(
       'phabricator-remarkup-assist',
       array(
@@ -59,6 +62,20 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         ),
         'disabled' => $this->getDisabled(),
         'rootID' => $root_id,
+        'autocompleteMap' => (object)array(
+          64 => array( // "@"
+            'datasourceURI' => $user_datasource->getDatasourceURI(),
+            'headerIcon' => 'fa-user',
+            'headerText' => pht('Find User:'),
+            'hintText' => $user_datasource->getPlaceholderText(),
+          ),
+          35 => array( // "#"
+            'datasourceURI' => $proj_datasource->getDatasourceURI(),
+            'headerIcon' => 'fa-briefcase',
+            'headerText' => pht('Find Project:'),
+            'hintText' => $proj_datasource->getPlaceholderText(),
+          ),
+        ),
       ));
     Javelin::initBehavior('phabricator-tooltips', array());
 

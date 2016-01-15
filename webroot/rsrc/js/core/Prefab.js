@@ -325,7 +325,8 @@ JX.install('Prefab', {
         sprite: fields[10],
         color: fields[11],
         tokenType: fields[12],
-        unique: fields[13] || false
+        unique: fields[13] || false,
+        autocomplete: fields[14]
       };
     },
 
