@@ -55,19 +55,13 @@ JX.install('PHUIXAutocomplete', {
         JX.bind(this, this._update));
 
       var select = JX.bind(this, this._onselect);
-      JX.DOM.listen(this._getNode(), 'click', 'typeahead-result', select);
+      JX.DOM.listen(this._getNode(), 'mousedown', 'typeahead-result', select);
 
       var device = JX.bind(this, this._ondevice);
       JX.Stratcom.listen('phabricator-device-change', null, device);
 
-      // When the user clicks away from the textarea, deactivate. However, we
-      // don't want to deactivate if we're blurring because they clicked an
-      // option in the dropdown, so put a timeout on the deactivation. This
-      // will let the click run first if they did actually click a result.
-      var deactivate = JX.bind(this, function() {
-        setTimeout(JX.bind(this, this._deactivate), 10);
-      });
-
+      // When the user clicks away from the textarea, deactivate.
+      var deactivate = JX.bind(this, this._deactivate);
       JX.DOM.listen(area, 'blur', null, deactivate);
     },
 
