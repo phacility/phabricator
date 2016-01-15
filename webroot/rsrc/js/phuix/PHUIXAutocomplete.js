@@ -60,8 +60,14 @@ JX.install('PHUIXAutocomplete', {
       var device = JX.bind(this, this._ondevice);
       JX.Stratcom.listen('phabricator-device-change', null, device);
 
-      // When the user clicks away from the textarea, deactivate.
-      var deactivate = JX.bind(this, this._deactivate);
+      // When the user clicks away from the textarea, deactivate. However, we
+      // don't want to deactivate if we're blurring because they clicked an
+      // option in the dropdown, so put a timeout on the deactivation. This
+      // will let the click run first if they did actually click a result.
+      var deactivate = JX.bind(this, function() {
+        setTimeout(JX.bind(this, this._deactivate), 10);
+      });
+
       JX.DOM.listen(area, 'blur', null, deactivate);
     },
 
@@ -134,6 +140,9 @@ JX.install('PHUIXAutocomplete', {
           JX.bind(this, this._onresults, code));
 
         datasource.setTransformer(JX.bind(this, this._transformresult));
+        datasource.setSortHandler(
+          JX.bind(datasource, JX.Prefab.sortHandler, {}));
+        datasource.setFilterHandler(JX.Prefab.filterClosedResults);
 
         this._datasources[code] = datasource;
       }
