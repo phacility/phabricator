@@ -119,6 +119,16 @@ JX.install('PHUIXAutocomplete', {
           return;
       }
 
+      // Get all the text on the current line. If the line begins with
+      // whitespace, don't activate: the user is probably typing code or a
+      // numbered list.
+      var line = area.value.substring(0, head);
+      line = line.split('\n');
+      line = line[line.length - 1];
+      if (line.match(/^\s+/)) {
+        return;
+      }
+
       this._cursorHead = head;
       this._cursorTail = range.end;
       this._pixelHead = JX.TextAreaUtils.getPixelDimensions(
@@ -369,6 +379,13 @@ JX.install('PHUIXAutocomplete', {
 
       var x = this._pixelHead.start.x;
       var y = Math.max(this._pixelHead.end.y, pixels.end.y) + 24;
+
+      // If the first character after the trigger is a space, just deactivate
+      // immediately. This occurs if a user types a numbered list using "#".
+      if (text.length && text[0] == ' ') {
+        this._deactivate();
+        return;
+      }
 
       var trim = this._trim(text);
 
