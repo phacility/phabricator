@@ -600,17 +600,24 @@ JX.install('PHUIXAutocomplete', {
         return false;
       }
 
-      // If the user types a string like "@username:" (with a trailing comma),
+      // If the user types a string like "@username:" (with a trailing colon),
       // then presses tab or return to pick the completion, don't destroy the
       // trailing character.
       var suffixes = this._getSuffixes();
       var value = this._value;
+      var found_suffix = false;
       for (var ii = 0; ii < suffixes.length; ii++) {
         var last = value.substring(value.length - suffixes[ii].length);
         if (last == suffixes[ii]) {
           ref += suffixes[ii];
+          found_suffix = true;
           break;
         }
+      }
+
+      // If we didn't find an existing suffix, add a space.
+      if (!found_suffix) {
+        ref = ref + ' ';
       }
 
       area.value = text.substring(0, head - 1) + ref + text.substring(tail);
