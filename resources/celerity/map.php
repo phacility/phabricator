@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '3a97c8b9',
-    'core.pkg.js' => '5813273d',
+    'core.pkg.js' => '573e6664',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '2de124c9',
     'differential.pkg.js' => 'f83532f8',
@@ -249,9 +249,9 @@ return array(
     'rsrc/externals/javelin/lib/control/typeahead/Typeahead.js' => '70baed2f',
     'rsrc/externals/javelin/lib/control/typeahead/normalizer/TypeaheadNormalizer.js' => 'e6e25838',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadCompositeSource.js' => '503e17fd',
-    'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadOnDemandSource.js' => '8b3fd187',
+    'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadOnDemandSource.js' => '013ffff9',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadPreloadedSource.js' => '54f314a0',
-    'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadSource.js' => '2818f5ce',
+    'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadSource.js' => '1bc11c4a',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadStaticSource.js' => '6c0e62fa',
     'rsrc/externals/raphael/g.raphael.js' => '40dde778',
     'rsrc/externals/raphael/g.raphael.line.js' => '40da039e',
@@ -507,7 +507,7 @@ return array(
     'rsrc/js/phui/behavior-phui-object-box-tabs.js' => '2bfa2836',
     'rsrc/js/phuix/PHUIXActionListView.js' => 'b5c256b8',
     'rsrc/js/phuix/PHUIXActionView.js' => '8cf6d262',
-    'rsrc/js/phuix/PHUIXAutocomplete.js' => '5582787f',
+    'rsrc/js/phuix/PHUIXAutocomplete.js' => '0abdd4a8',
     'rsrc/js/phuix/PHUIXDropdownMenu.js' => 'bd4c8dca',
     'rsrc/js/phuix/PHUIXFormControl.js' => '8fba1997',
     'rsrc/js/phuix/PHUIXIconView.js' => 'bff6884b',
@@ -709,9 +709,9 @@ return array(
     'javelin-typeahead' => '70baed2f',
     'javelin-typeahead-composite-source' => '503e17fd',
     'javelin-typeahead-normalizer' => 'e6e25838',
-    'javelin-typeahead-ondemand-source' => '8b3fd187',
+    'javelin-typeahead-ondemand-source' => '013ffff9',
     'javelin-typeahead-preloaded-source' => '54f314a0',
-    'javelin-typeahead-source' => '2818f5ce',
+    'javelin-typeahead-source' => '1bc11c4a',
     'javelin-typeahead-static-source' => '6c0e62fa',
     'javelin-uri' => 'c989ade3',
     'javelin-util' => '93cc50d6',
@@ -836,7 +836,7 @@ return array(
     'phui-workpanel-view-css' => 'adec7699',
     'phuix-action-list-view' => 'b5c256b8',
     'phuix-action-view' => '8cf6d262',
-    'phuix-autocomplete' => '5582787f',
+    'phuix-autocomplete' => '0abdd4a8',
     'phuix-dropdown-menu' => 'bd4c8dca',
     'phuix-form-control-view' => '8fba1997',
     'phuix-icon-view' => 'bff6884b',
@@ -863,6 +863,12 @@ return array(
     'unhandled-exception-css' => '4c96257a',
   ),
   'requires' => array(
+    '013ffff9' => array(
+      'javelin-install',
+      'javelin-util',
+      'javelin-request',
+      'javelin-typeahead-source',
+    ),
     '01774ab2' => array(
       'javelin-dom',
       'javelin-util',
@@ -911,6 +917,12 @@ return array(
       'javelin-dom',
       'javelin-router',
     ),
+    '0abdd4a8' => array(
+      'javelin-install',
+      'javelin-dom',
+      'phuix-icon-view',
+      'phabricator-prefab',
+    ),
     '0b7a4f6e' => array(
       'javelin-behavior',
       'javelin-typeahead-ondemand-source',
@@ -949,6 +961,12 @@ return array(
       'javelin-install',
       'javelin-util',
       'phabricator-keyboard-shortcut-manager',
+    ),
+    '1bc11c4a' => array(
+      'javelin-install',
+      'javelin-util',
+      'javelin-dom',
+      'javelin-typeahead-normalizer',
     ),
     '1d298e3a' => array(
       'javelin-install',
@@ -1008,12 +1026,6 @@ return array(
       'phabricator-phtize',
       'phabricator-drag-and-drop-file-upload',
       'phabricator-draggable-list',
-    ),
-    '2818f5ce' => array(
-      'javelin-install',
-      'javelin-util',
-      'javelin-dom',
-      'javelin-typeahead-normalizer',
     ),
     '2926fff2' => array(
       'javelin-behavior',
@@ -1197,12 +1209,6 @@ return array(
       'javelin-util',
       'javelin-request',
       'javelin-typeahead-source',
-    ),
-    '5582787f' => array(
-      'javelin-install',
-      'javelin-dom',
-      'phuix-icon-view',
-      'phabricator-prefab',
     ),
     '558829c2' => array(
       'javelin-stratcom',
@@ -1488,12 +1494,6 @@ return array(
       'javelin-dom',
       'javelin-stratcom',
       'javelin-vector',
-    ),
-    '8b3fd187' => array(
-      'javelin-install',
-      'javelin-util',
-      'javelin-request',
-      'javelin-typeahead-source',
     ),
     '8bdb2835' => array(
       'phui-fontkit-css',

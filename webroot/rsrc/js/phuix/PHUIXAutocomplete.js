@@ -12,6 +12,7 @@ JX.install('PHUIXAutocomplete', {
     this._map = {};
     this._datasources = {};
     this._listNodes = [];
+    this._resultMap = {};
   },
 
   members: {
@@ -35,6 +36,7 @@ JX.install('PHUIXAutocomplete', {
     _x: null,
     _y: null,
     _visible: false,
+    _resultMap: null,
 
     setArea: function(area) {
       this._area = area;
@@ -205,13 +207,43 @@ JX.install('PHUIXAutocomplete', {
       }
     },
 
-    _onresults: function(code, nodes, value) {
+    _onresults: function(code, nodes, value, partial) {
+      // Even if these results are out of date, we still want to fill in the
+      // result map so we can terminate things later.
+      if (!partial) {
+        if (!this._resultMap[code]) {
+          this._resultMap[code] = {};
+        }
+
+        var hits = [];
+        for (var ii = 0; ii < nodes.length; ii++) {
+          var result = this._datasources[code].getResult(nodes[ii].rel);
+          if (!result) {
+            hits = null;
+            break;
+          }
+
+          hits.push(result.autocomplete);
+        }
+
+        if (hits !== null) {
+          this._resultMap[code][value] = hits;
+        }
+      }
+
       if (code !== this._active) {
         return;
       }
 
       if (value !== this._value) {
         return;
+      }
+
+      if (this._isTerminatedString(value)) {
+        if (this._hasUnrefinableResults(value)) {
+          this._deactivate();
+          return;
+        }
       }
 
       var list = this._getListNode();
@@ -289,6 +321,59 @@ JX.install('PHUIXAutocomplete', {
       // The "." character does not cancel because of projects named
       // "node.js" or "blog.mycompany.com".
       return ['#', '@', ',', '!', '?'];
+    },
+
+    _getTerminators: function() {
+      return [' ', ':', ',', '.', '!', '?'];
+    },
+
+    _isTerminatedString: function(string) {
+      var terminators = this._getTerminators();
+      for (var ii = 0; ii < terminators.length; ii++) {
+        var term = terminators[ii];
+        if (string.substring(string.length - term.length) == term) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+
+    _hasUnrefinableResults: function(query) {
+      if (!this._resultMap[this._active]) {
+        return false;
+      }
+
+      var map = this._resultMap[this._active];
+
+      for (var ii = 1; ii < query.length; ii++) {
+        var prefix = query.substring(0, ii);
+        if (map.hasOwnProperty(prefix)) {
+          var results = map[prefix];
+
+          // If any prefix of the query has no results, the full query also
+          // has no results so we can not refine them.
+          if (!results.length) {
+            return true;
+          }
+
+          // If there is exactly one match and the it is a prefix of the query,
+          // we can safely assume the user just typed out the right result
+          // from memory and doesn't need to refine it.
+          if (results.length == 1) {
+            // Strip the first character off, like a "#" or "@".
+            var result = results[0].substring(1);
+
+            if (query.length >= result.length) {
+              if (query.substring(0, result.length) === result) {
+                return true;
+              }
+            }
+          }
+        }
+      }
+
+      return false;
     },
 
     _trim: function(str) {
@@ -416,7 +501,32 @@ JX.install('PHUIXAutocomplete', {
         }
       }
 
-      this._datasource.didChange(trim);
+      // If the input is terminated by a space or another word-terminating
+      // punctuation mark, we're going to deactivate if the results can not
+      // be refined by addding more words.
+
+      // The idea is that if you type "@alan ab", you're allowed to keep
+      // editing "ab" until you type a space, period, or other terminator,
+      // since you might not be sure how to spell someone's last name or the
+      // second word of a project.
+
+      // Once you do terminate a word, if the words you have have entered match
+      // nothing or match only one exact match, we can safely deactivate and
+      // assume you're just typing text because further words could never
+      // refine the result set.
+
+      var force;
+      if (this._isTerminatedString(text)) {
+        if (this._hasUnrefinableResults(text)) {
+          this._deactivate();
+          return;
+        }
+        force = true;
+      } else {
+        force = false;
+      }
+
+      this._datasource.didChange(trim, force);
 
       this._x = x;
       this._y = y;
