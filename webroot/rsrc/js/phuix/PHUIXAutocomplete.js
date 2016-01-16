@@ -276,7 +276,13 @@ JX.install('PHUIXAutocomplete', {
     },
 
     _getSuffixes: function() {
-      return[' ', ':', ','];
+      return [' ', ':', ',', ')'];
+    },
+
+    _getCancelCharacters: function() {
+      // The "." character does not cancel because of projects named
+      // "node.js" or "blog.mycompany.com".
+      return ['#', '@', ',', '!', '?'];
     },
 
     _trim: function(str) {
@@ -391,6 +397,18 @@ JX.install('PHUIXAutocomplete', {
       }
 
       var trim = this._trim(text);
+
+      // Deactivate immediately if a user types a character that we are
+      // reasonably sure means they don't want to use the autocomplete. For
+      // example, "##" is almost certainly a header or monospaced text, not
+      // a project autocompletion.
+      var cancels = this._getCancelCharacters();
+      for (var ii = 0; ii < cancels.length; ii++) {
+        if (trim.indexOf(cancels[ii]) !== -1) {
+          this._deactivate();
+          return;
+        }
+      }
 
       this._datasource.didChange(trim);
 
