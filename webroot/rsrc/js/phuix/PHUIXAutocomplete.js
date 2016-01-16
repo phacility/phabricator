@@ -32,6 +32,9 @@ JX.install('PHUIXAutocomplete', {
     _focus: null,
     _focusRef: null,
     _listNodes: null,
+    _x: null,
+    _y: null,
+    _visible: false,
 
     setArea: function(area) {
       this._area = area;
@@ -186,6 +189,7 @@ JX.install('PHUIXAutocomplete', {
       JX.DOM.hide(node);
 
       this._active = false;
+      this._visible = false;
     },
 
     _onkeypress: function(e) {
@@ -412,18 +416,33 @@ JX.install('PHUIXAutocomplete', {
 
       this._datasource.didChange(trim);
 
-      var node = this._getNode();
-      node.style.left = x + 'px';
-      node.style.top = y + 'px';
-      JX.DOM.show(node);
+      this._x = x;
+      this._y = y;
 
-      var echo = this._getEchoNode();
       var hint = trim;
-      if (!hint.length) {
+      if (hint.length) {
+        // We only show the autocompleter after the user types at least one
+        // character. For example, "@" does not trigger it, but "@d" does.
+        this._visible = true;
+      } else {
         hint = this._getSpec().hintText;
       }
 
+      var echo = this._getEchoNode();
       JX.DOM.setContent(echo, hint);
+
+      this._redraw();
+    },
+
+    _redraw: function() {
+      if (!this._visible) {
+        return;
+      }
+
+      var node = this._getNode();
+      node.style.left = this._x + 'px';
+      node.style.top = this._y + 'px';
+      JX.DOM.show(node);
     },
 
     _autocomplete: function() {
