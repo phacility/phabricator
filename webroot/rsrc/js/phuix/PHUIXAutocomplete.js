@@ -127,13 +127,13 @@ JX.install('PHUIXAutocomplete', {
           return;
       }
 
-      // Get all the text on the current line. If the line begins with
-      // whitespace, don't activate: the user is probably typing code or a
+      // Get all the text on the current line. If the line only contains
+      // whitespace, don't actiavte: the user is probably typing code or a
       // numbered list.
-      var line = area.value.substring(0, head);
+      var line = area.value.substring(0, head - 1);
       line = line.split('\n');
       line = line[line.length - 1];
-      if (line.match(/^\s+/)) {
+      if (line.match(/^\s+$/)) {
         return;
       }
 
@@ -219,6 +219,11 @@ JX.install('PHUIXAutocomplete', {
         for (var ii = 0; ii < nodes.length; ii++) {
           var result = this._datasources[code].getResult(nodes[ii].rel);
           if (!result) {
+            hits = null;
+            break;
+          }
+
+          if (!result.autocomplete || !result.autocomplete.length) {
             hits = null;
             break;
           }
