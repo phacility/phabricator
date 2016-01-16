@@ -38,3 +38,45 @@ a.phui-icon-view:hover {
   text-decoration: none;
   color: {$sky};
 }
+
+/* - Icon in a Circle ------------------------------------------------------- */
+
+.phui-icon-circle {
+  border: 1px solid {$lightblueborder};
+  border-radius: 24px;
+  height: 24px;
+  width: 24px;
+  text-align: center;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.phui-icon-circle.circle-medium {
+  height: 36px;
+  width: 36px;
+  border-radius: 36px;
+}
+
+.phui-icon-circle .phui-icon-view {
+  height: 24px;
+  width: 24px;
+  font-size: 11px;
+  line-height: 24px;
+  color: {$lightblueborder};
+  cursor: pointer;
+}
+
+.phui-icon-circle.circle-medium .phui-icon-view {
+  font-size: 18px;
+  line-height: 36px;
+}
+
+a.phui-icon-circle:hover {
+  text-decoration: none;
+  border-color: {$sky};
+  cursor: pointer;
+}
+
+a.phui-icon-circle:hover .phui-icon-view {
+  color: {$sky};
+}
