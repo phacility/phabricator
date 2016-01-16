@@ -111,6 +111,9 @@ JX.install('PHUIXAutocomplete', {
         case '-': // Might be an unnumbered list.
         case '.': // Might be a numbered list.
         case '|': // Might be a table cell.
+        case '>': // Might be a blockquote.
+        case '!': // Might be a blockquote attribution line.
+        case ':': // Might be a "NOTE:".
           // We'll let these autocomplete.
           break;
         default:
