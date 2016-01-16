@@ -304,6 +304,14 @@ JX.install('PHUIXAutocomplete', {
     },
 
     _onselect: function (e) {
+      if (!e.isNormalMouseEvent()) {
+        // Eat right clicks, control clicks, etc., on the results. These can
+        // not do anything meaningful and if we let them through they'll blur
+        // the field and dismiss the results.
+        e.kill();
+        return;
+      }
+
       var target = e.getNode('typeahead-result');
 
       for (var ii = 0; ii < this._listNodes.length; ii++) {
