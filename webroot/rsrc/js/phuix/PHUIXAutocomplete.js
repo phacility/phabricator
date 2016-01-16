@@ -232,6 +232,8 @@ JX.install('PHUIXAutocomplete', {
       if (this._focus === null && nodes.length) {
         this._setFocus(0);
       }
+
+      this._redraw();
     },
 
     _setFocus: function(idx) {
@@ -440,9 +442,25 @@ JX.install('PHUIXAutocomplete', {
       }
 
       var node = this._getNode();
-      node.style.left = this._x + 'px';
-      node.style.top = this._y + 'px';
       JX.DOM.show(node);
+
+      var p = new JX.Vector(this._x, this._y);
+      var s = JX.Vector.getScroll();
+      var v = JX.Vector.getViewport();
+
+      // If the menu would run off the bottom of the screen when showing the
+      // maximum number of possible choices, put it above instead. We're doing
+      // this based on the maximum size so the menu doesn't jump up and down
+      // as results arrive.
+
+      var option_height = 30;
+      var extra_margin = 24;
+      if ((s.y + v.y) < (p.y + (5 * option_height) + extra_margin)) {
+        var d = JX.Vector.getDim(node);
+        p.y = p.y - d.y - 36;
+      }
+
+      p.setPos(node);
     },
 
     _autocomplete: function() {
