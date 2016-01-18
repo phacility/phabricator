@@ -65,7 +65,7 @@ final class PhabricatorRepositoryQuery
         continue;
       }
 
-      if (preg_match('/^(r[A-Z]+)|(R[1-9]\d*)\z/', $identifier)) {
+      if (preg_match('/^(r[A-Z]+|R[1-9]\d*)\z/', $identifier)) {
         $monograms[$identifier] = $identifier;
         continue;
       }
