@@ -9,6 +9,7 @@ final class PhabricatorProjectQuery
   private $slugs;
   private $slugNormals;
   private $slugMap;
+  private $allSlugs;
   private $names;
   private $nameTokens;
   private $icons;
@@ -169,10 +170,19 @@ final class PhabricatorProjectQuery
   protected function willExecute() {
     $this->slugMap = array();
     $this->slugNormals = array();
+    $this->allSlugs = array();
     if ($this->slugs) {
       foreach ($this->slugs as $slug) {
-        $normal = PhabricatorSlug::normalizeProjectSlug($slug);
-        $this->slugNormals[$slug] = $normal;
+        if (PhabricatorSlug::isValidProjectSlug($slug)) {
+          $normal = PhabricatorSlug::normalizeProjectSlug($slug);
+          $this->slugNormals[$slug] = $normal;
+          $this->allSlugs[$normal] = $normal;
+        }
+
+        // NOTE: At least for now, we query for the normalized slugs but also
+        // for the slugs exactly as entered. This allows older projects with
+        // slugs that are no longer valid to continue to work.
+        $this->allSlugs[$slug] = $slug;
       }
     }
   }
@@ -380,7 +390,7 @@ final class PhabricatorProjectQuery
       $where[] = qsprintf(
         $conn,
         'slug.slug IN (%Ls)',
-        $this->slugNormals);
+        $this->allSlugs);
     }
 
     if ($this->names !== null) {
@@ -625,13 +635,17 @@ final class PhabricatorProjectQuery
     // else.
     $unknown = $this->slugNormals;
     foreach ($unknown as $input => $normal) {
-      if (!isset($primary_map[$normal])) {
+      if (isset($primary_map[$input])) {
+        $match = $input;
+      } else if (isset($primary_map[$normal])) {
+        $match = $normal;
+      } else {
         continue;
       }
 
       $this->slugMap[$input] = array(
-        'slug' => $normal,
-        'projectPHID' => $primary_map[$normal]->getPHID(),
+        'slug' => $match,
+        'projectPHID' => $primary_map[$match]->getPHID(),
       );
 
       unset($unknown[$input]);
@@ -658,13 +672,17 @@ final class PhabricatorProjectQuery
     // Link up any slugs we were not able to link up earlier.
     $extra_map = mpull($slugs, 'getProjectPHID', 'getSlug');
     foreach ($unknown as $input => $normal) {
-      if (!isset($extra_map[$normal])) {
+      if (isset($extra_map[$input])) {
+        $match = $input;
+      } else if (isset($extra_map[$normal])) {
+        $match = $normal;
+      } else {
         continue;
       }
 
       $this->slugMap[$input] = array(
-        'slug' => $normal,
-        'projectPHID' => $extra_map[$normal],
+        'slug' => $match,
+        'projectPHID' => $extra_map[$match],
       );
 
       unset($unknown[$input]);
