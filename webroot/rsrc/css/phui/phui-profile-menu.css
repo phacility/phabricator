@@ -17,7 +17,9 @@
   position: relative;
   vertical-align: top;
   width: 240px;
+  max-width: 240px;
   margin-top: 0;
+  overflow: hidden;
 }
 
 .device-desktop .phui-profile-menu .phabricator-nav-content {
