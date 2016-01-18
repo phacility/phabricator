@@ -519,6 +519,23 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return $this->getColor();
   }
 
+  public function getDisplayIconComposeIcon() {
+    $icon = $this->getDisplayIconIcon();
+    return $icon;
+  }
+
+  public function getDisplayIconComposeColor() {
+    $color = $this->getDisplayColor();
+
+    $map = array(
+      'grey' => 'charcoal',
+      'checkered' => 'backdrop',
+    );
+
+    return idx($map, $color, $color);
+  }
+
+
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 
