@@ -756,10 +756,15 @@ final class PhabricatorProjectTransactionEditor
   }
 
   private function removeSlugs(PhabricatorProject $project, array $slugs) {
-    $slugs = $this->normalizeSlugs($slugs);
-
     if (!$slugs) {
       return;
+    }
+
+    // We're going to try to delete both the literal and normalized versions
+    // of all slugs. This allows us to destroy old slugs that are no longer
+    // valid.
+    foreach ($this->normalizeSlugs($slugs) as $slug) {
+      $slugs[] = $slug;
     }
 
     $objects = id(new PhabricatorProjectSlug())->loadAllWhere(
