@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => 'c61091b0',
+    'core.pkg.css' => '7fce81fc',
     'core.pkg.js' => '573e6664',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '2de124c9',
@@ -143,7 +143,7 @@ return array(
     'rsrc/css/phui/phui-object-item-list-view.css' => '26c30d3f',
     'rsrc/css/phui/phui-pager.css' => 'bea33d23',
     'rsrc/css/phui/phui-pinboard-view.css' => '2495140e',
-    'rsrc/css/phui/phui-profile-menu.css' => 'a26fa598',
+    'rsrc/css/phui/phui-profile-menu.css' => '72d69773',
     'rsrc/css/phui/phui-property-list-view.css' => '27b2849e',
     'rsrc/css/phui/phui-remarkup-preview.css' => '1a8f2591',
     'rsrc/css/phui/phui-spacing.css' => '042804d6',
@@ -500,6 +500,7 @@ return array(
     'rsrc/js/core/phtize.js' => 'd254d646',
     'rsrc/js/phui/behavior-phui-dropdown-menu.js' => '54733475',
     'rsrc/js/phui/behavior-phui-object-box-tabs.js' => '2bfa2836',
+    'rsrc/js/phui/behavior-phui-profile-menu.js' => 'bf2c93d6',
     'rsrc/js/phuix/PHUIXActionListView.js' => 'b5c256b8',
     'rsrc/js/phuix/PHUIXActionView.js' => '8cf6d262',
     'rsrc/js/phuix/PHUIXAutocomplete.js' => '21dc9144',
@@ -648,6 +649,7 @@ return array(
     'javelin-behavior-pholio-mock-view' => 'fbe497e7',
     'javelin-behavior-phui-dropdown-menu' => '54733475',
     'javelin-behavior-phui-object-box-tabs' => '2bfa2836',
+    'javelin-behavior-phui-profile-menu' => 'bf2c93d6',
     'javelin-behavior-policy-control' => 'ae45872f',
     'javelin-behavior-policy-rule-editor' => '5e9f347c',
     'javelin-behavior-project-boards' => 'ba4fa35c',
@@ -817,7 +819,7 @@ return array(
     'phui-object-item-list-view-css' => '26c30d3f',
     'phui-pager-css' => 'bea33d23',
     'phui-pinboard-view-css' => '2495140e',
-    'phui-profile-menu-css' => 'a26fa598',
+    'phui-profile-menu-css' => '72d69773',
     'phui-property-list-view-css' => '27b2849e',
     'phui-remarkup-preview-css' => '1a8f2591',
     'phui-spacing-css' => '042804d6',
@@ -1771,6 +1773,11 @@ return array(
       'javelin-dom',
       'javelin-util',
       'javelin-request',
+    ),
+    'bf2c93d6' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
     ),
     'bff6884b' => array(
       'javelin-install',

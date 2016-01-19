@@ -191,13 +191,28 @@ final class CelerityDefaultPostprocessor
       // Background color for "dark" themes.
       'page.background.dark' => '#ebecee',
 
+      // NOTE: We can't just do these with an alpha channel because the
+      // fixed items in the footer may render on top of other items, so the
+      // backgrounds must be opaque.
+
+      // This is the base background color.
       'menu.profile.background' => '#525868',
+
+      // This is premultiplied 7.5% alpha.
+      'menu.profile.background.hover' => '#4c5160',
+
+      // This is premultiplied 15% alpha.
+      'menu.profile.background.selected' => '#464b59',
+
       'menu.profile.text' => '#c6c7cb',
       'menu.profile.text.selected' => '#ffffff',
-      'menu.profile.icon' => '#ffffff',
       'menu.profile.icon.disabled' => '#b9bcc2',
 
       'menu.main.height' => '44px',
+
+      'menu.profile.width' => '240px',
+      'menu.profile.width.collapsed' => '80px',
+      'menu.profile.item.height' => '46px',
 
     );
   }

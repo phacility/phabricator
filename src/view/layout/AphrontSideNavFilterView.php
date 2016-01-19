@@ -27,6 +27,7 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $crumbs;
   private $classes = array();
   private $menuID;
+  private $mainID;
   private $isProfileMenu;
   private $footer = array();
 
@@ -168,6 +169,13 @@ final class AphrontSideNavFilterView extends AphrontView {
     return $this;
   }
 
+  public function getMainID() {
+    if (!$this->mainID) {
+      $this->mainID = celerity_generate_unique_node_id();
+    }
+    return $this->mainID;
+  }
+
   public function render() {
     if ($this->menu->getItems()) {
       if (!$this->baseURI) {
@@ -212,7 +220,7 @@ final class AphrontSideNavFilterView extends AphrontView {
     $local_id = null;
     $background_id = null;
     $local_menu = null;
-    $main_id = celerity_generate_unique_node_id();
+    $main_id = $this->getMainID();
 
     if ($this->flexible) {
       $drag_id = celerity_generate_unique_node_id();

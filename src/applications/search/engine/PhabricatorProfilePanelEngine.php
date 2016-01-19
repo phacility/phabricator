@@ -6,6 +6,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
   private $profileObject;
   private $panels;
   private $controller;
+  private $navigation;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -147,6 +148,10 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
   }
 
   public function buildNavigation() {
+    if ($this->navigation) {
+      return $this->navigation;
+    }
+
     $nav = id(new AphrontSideNavFilterView())
       ->setIsProfileMenu(true)
       ->setBaseURI(new PhutilURI($this->getPanelURI('')));
@@ -185,14 +190,15 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
       }
     }
 
-    $configure_item = $this->newConfigureMenuItem();
-    if ($configure_item) {
-      $nav->addMenuItem($configure_item);
+    $more_items = $this->newAutomaticMenuItems($nav);
+    foreach ($more_items as $item) {
+      $nav->addMenuItem($item);
     }
 
     $nav->selectFilter(null);
 
-    return $nav;
+    $this->navigation = $nav;
+    return $this->navigation;
   }
 
   private function getPanels() {
@@ -301,26 +307,112 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
     }
   }
 
-  private function newConfigureMenuItem() {
-    if (!$this->isPanelEngineConfigurable()) {
-      return null;
+  private function newAutomaticMenuItems(AphrontSideNavFilterView $nav) {
+    $items = array();
+
+    // NOTE: We're adding a spacer item for the fixed footer, so that if the
+    // menu taller than the page content you can still scroll down the page far
+    // enough to access the last item without the content being obscured by the
+    // fixed items.
+    $items[] = id(new PHUIListItemView())
+      ->setHideInApplicationMenu(true)
+      ->addClass('phui-profile-menu-spacer');
+
+    if ($this->isPanelEngineConfigurable()) {
+      $viewer = $this->getViewer();
+      $object = $this->getProfileObject();
+
+      $can_edit = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $object,
+        PhabricatorPolicyCapability::CAN_EDIT);
+
+      $expanded_edit_icon = id(new PHUIIconView())
+        ->addClass('phui-list-item-icon')
+        ->addClass('phui-profile-menu-visible-when-expanded')
+        ->setIconFont('fa-pencil');
+
+      $collapsed_edit_icon = id(new PHUIIconView())
+        ->addClass('phui-list-item-icon')
+        ->addClass('phui-profile-menu-visible-when-collapsed')
+        ->setIconFont('fa-pencil')
+        ->addSigil('has-tooltip')
+        ->setMetadata(
+          array(
+            'tip' => pht('Edit Menu'),
+            'align' => 'E',
+          ));
+
+      $items[] = id(new PHUIListItemView())
+        ->setName('Edit Menu')
+        ->setKey('panel.configure')
+        ->addIcon($expanded_edit_icon)
+        ->addIcon($collapsed_edit_icon)
+        ->addClass('phui-profile-menu-footer')
+        ->addClass('phui-profile-menu-footer-1')
+        ->setHref($this->getPanelURI('configure/'))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit);
     }
 
+    $collapse_id = celerity_generate_unique_node_id();
+
     $viewer = $this->getViewer();
-    $object = $this->getProfileObject();
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $object,
-      PhabricatorPolicyCapability::CAN_EDIT);
+    $collapse_key =
+      PhabricatorUserPreferences::PREFERENCE_PROFILE_MENU_COLLAPSED;
 
-    return id(new PHUIListItemView())
-      ->setName('Configure Menu')
-      ->setKey('panel.configure')
-      ->setIcon('fa-gear')
-      ->setHref($this->getPanelURI('configure/'))
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(!$can_edit);
+    $preferences = $viewer->loadPreferences();
+    $is_collapsed = $preferences->getPreference($collapse_key, false);
+
+    if ($is_collapsed) {
+      $nav->addClass('phui-profile-menu-collapsed');
+    } else {
+      $nav->addClass('phui-profile-menu-expanded');
+    }
+
+    if ($viewer->isLoggedIn()) {
+      $settings_uri = '/settings/adjust/?key='.$collapse_key;
+    } else {
+      $settings_uri = null;
+    }
+
+    Javelin::initBehavior(
+      'phui-profile-menu',
+      array(
+        'menuID' => $nav->getMainID(),
+        'collapseID' => $collapse_id,
+        'isCollapsed' => $is_collapsed,
+        'settingsURI' => $settings_uri,
+      ));
+
+    $collapse_icon = id(new PHUIIconView())
+      ->addClass('phui-list-item-icon')
+      ->addClass('phui-profile-menu-visible-when-expanded')
+      ->setIconFont('fa-angle-left');
+
+    $expand_icon = id(new PHUIIconView())
+      ->addClass('phui-list-item-icon')
+      ->addClass('phui-profile-menu-visible-when-collapsed')
+      ->addSigil('has-tooltip')
+      ->setMetadata(
+        array(
+          'tip' => pht('Expand'),
+          'align' => 'E',
+        ))
+      ->setIconFont('fa-angle-right');
+
+    $items[] = id(new PHUIListItemView())
+      ->setName('Collapse')
+      ->addIcon($collapse_icon)
+      ->addIcon($expand_icon)
+      ->setID($collapse_id)
+      ->addClass('phui-profile-menu-footer')
+      ->addClass('phui-profile-menu-footer-2')
+      ->setHideInApplicationMenu(true)
+      ->setHref('#');
+
+    return $items;
   }
 
   public function getConfigureURI() {

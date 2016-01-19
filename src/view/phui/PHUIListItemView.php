@@ -28,6 +28,17 @@ final class PHUIListItemView extends AphrontTagView {
   private $aural;
   private $profileImage;
   private $indented;
+  private $hideInApplicationMenu;
+  private $icons = array();
+
+  public function setHideInApplicationMenu($hide) {
+    $this->hideInApplicationMenu = $hide;
+    return $this;
+  }
+
+  public function getHideInApplicationMenu() {
+    return $this->hideInApplicationMenu;
+  }
 
   public function setDropdownMenu(PhabricatorActionListView $actions) {
     Javelin::initBehavior('phui-dropdown-menu');
@@ -148,6 +159,15 @@ final class PHUIListItemView extends AphrontTagView {
   public function setStatusColor($color) {
     $this->statusColor = $color;
     return $this;
+  }
+
+  public function addIcon(PHUIIconView $icon) {
+    $this->icons[] = $icon;
+    return $this;
+  }
+
+  public function getIcons() {
+    return $this->icons;
   }
 
   protected function getTagName() {
@@ -274,6 +294,8 @@ final class PHUIListItemView extends AphrontTagView {
       $classes[] = 'phui-list-item-indented';
     }
 
+    $icons = $this->getIcons();
+
     return javelin_tag(
       $this->href ? 'a' : 'div',
       array(
@@ -285,6 +307,7 @@ final class PHUIListItemView extends AphrontTagView {
       array(
         $aural,
         $icon,
+        $icons,
         $this->renderChildren(),
         $name,
       ));

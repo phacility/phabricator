@@ -16,10 +16,15 @@
   display: table-cell;
   position: relative;
   vertical-align: top;
-  width: 240px;
-  max-width: 240px;
+  width: {$menu.profile.width};
+  max-width: {$menu.profile.width};
   margin-top: 0;
   overflow: hidden;
+}
+
+.device-desktop .phui-profile-menu-collapsed .phabricator-nav-local {
+  width: {$menu.profile.width.collapsed};
+  max-width: {$menu.profile.width.collapsed};
 }
 
 .device-desktop .phui-profile-menu .phabricator-nav-content {
@@ -47,21 +52,45 @@
   line-height: 22px;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  /* NOTE: We must have an opaque background on these items so the footer
+     items appear opaque when the render over normal items. */
+  background: {$menu.profile.background};
 }
 
 .phui-profile-menu .phabricator-side-menu .phui-list-item-icon,
 .phui-profile-menu .phabricator-side-menu
   .phui-list-item-href .phui-icon-view {
   position: absolute;
-  left: 13px;
   top: 12px;
+  left: 13px;
   font-size: 20px;
   width: 22px;
   height: 22px;
   line-height: 22px;
   text-align: center;
-  color: {$menu.profile.icon};
+  color: {$menu.profile.text};
   background-size: 100%;
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phui-list-item-href {
+  text-align: center;
+  padding: 42px 8px 12px;
+  font-size: 11px;
+  line-height: 13px;
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phui-list-item-name {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phui-list-item-icon,
+.phui-profile-menu .phui-profile-menu-collapsed
+  .phui-list-item-href .phui-icon-view  {
+  top: 10px;
+  left: 29px;
 }
 
 .phui-profile-menu .phabricator-side-menu
@@ -76,7 +105,16 @@
 
 .device-desktop .phui-profile-menu .phabricator-side-menu
   .phui-list-item-href:hover {
-  background-color: rgba(0, 0, 0, 0.075);
+  background-color: {$menu.profile.background.hover};
+  color: {$menu.profile.text.selected};
+}
+
+.phui-profile-menu .phabricator-side-menu
+  .phui-list-item-selected
+  .phui-list-item-icon,
+.device-desktop .phui-profile-menu .phabricator-side-menu
+  .phui-list-item-href:hover
+  .phui-list-item-icon {
   color: {$menu.profile.text.selected};
 }
 
@@ -85,7 +123,7 @@
 .device-desktop .phui-profile-menu .phabricator-side-menu
   .phui-list-item-selected
   .phui-list-item-href:hover {
-  background-color: rgba(0, 0, 0, 0.150);
+  background-color: {$menu.profile.background.selected};
   color: {$menu.profile.text.selected};
 }
 
@@ -106,4 +144,57 @@
   position: static;
   font-size: 12px;
   color: {$menu.profile.text};
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-profile-menu-spacer {
+  box-sizing: border-box;
+  height: {$menu.profile.item.height};
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer {
+  position: fixed;
+  box-sizing: border-box;
+  width: {$menu.profile.width};
+  bottom: 0px;
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer-1 {
+  left: 0;
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer-2 {
+  left: 120px;
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phui-profile-menu-footer {
+  width: 40px;
+  height: {$menu.profile.item.height};
+  bottom: 0px;
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phui-profile-menu-footer-1 {
+  left: 0;
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phui-profile-menu-footer-2 {
+  left: 40px;
+}
+
+
+.phui-profile-menu .phui-profile-menu-collapsed .phui-profile-menu-footer
+  .phui-list-item-name {
+  display: none;
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phui-profile-menu-footer
+  .phui-list-item-icon {
+  top: 10px;
+  left: 10px;
+}
+
+.phui-profile-menu .phui-profile-menu-expanded
+  .phui-profile-menu-visible-when-collapsed,
+.phui-profile-menu .phui-profile-menu-collapsed
+  .phui-profile-menu-visible-when-expanded {
+  display: none;
 }
