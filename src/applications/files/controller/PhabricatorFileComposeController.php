@@ -110,8 +110,8 @@ final class PhabricatorFileComposeController
           ),
         ),
         id(new PHUIIconView())
-          ->setSpriteIcon($icon)
-          ->setSpriteSheet(PHUIIconView::SPRITE_PROJECTS));
+          ->setIconFont($icon)
+          ->addClass('compose-icon-bg'));
     }
 
     $dialog_id = celerity_generate_unique_node_id();
@@ -122,8 +122,8 @@ final class PhabricatorFileComposeController
     $preview = id(new PHUIIconView())
       ->setID($preview_id)
       ->addClass('compose-background-'.$value_color)
-      ->setSpriteIcon($value_icon)
-      ->setSpriteSheet(PHUIIconView::SPRITE_PROJECTS);
+      ->setIconFont($value_icon)
+      ->addClass('compose-icon-bg');
 
     $color_input = javelin_tag(
       'input',

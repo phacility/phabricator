@@ -44,7 +44,7 @@ final class PhabricatorFilesComposeIconBuiltinFile
 
   public static function getAllIcons() {
     $root = dirname(phutil_get_library_root('phabricator'));
-    $root = $root.'/resources/sprite/projects_2x/';
+    $root = $root.'/resources/builtin/projects/';
 
     $quips = self::getIconQuips();
 
