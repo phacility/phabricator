@@ -113,6 +113,38 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $this->assertTrue($caught instanceof Exception);
   }
 
+  public function testAncestorMembers() {
+    $user1 = $this->createUser();
+    $user1->save();
+
+    $user2 = $this->createUser();
+    $user2->save();
+
+    $parent = $this->createProject($user1);
+    $child = $this->createProject($user1, $parent);
+
+    $this->joinProject($child, $user1);
+    $this->joinProject($child, $user2);
+
+    $project = id(new PhabricatorProjectQuery())
+      ->setViewer($user1)
+      ->withPHIDs(array($child->getPHID()))
+      ->needAncestorMembers(true)
+      ->executeOne();
+
+    $members = array_fuse($project->getParentProject()->getMemberPHIDs());
+    ksort($members);
+
+    $expect = array_fuse(
+      array(
+        $user1->getPHID(),
+        $user2->getPHID(),
+      ));
+    ksort($expect);
+
+    $this->assertEqual($expect, $members);
+  }
+
   public function testAncestryQueries() {
     $user = $this->createUser();
     $user->save();
@@ -577,24 +609,6 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $this->assertEqual($expect, $actual);
   }
 
-  private function attemptProjectEdit(
-    PhabricatorProject $proj,
-    PhabricatorUser $user,
-    $skip_refresh = false) {
-
-    $proj = $this->refreshProject($proj, $user, true);
-
-    $new_name = $proj->getName().' '.mt_rand();
-
-    $xaction = new PhabricatorProjectTransaction();
-    $xaction->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME);
-    $xaction->setNewValue($new_name);
-
-    $this->applyTransactions($proj, $user, array($xaction));
-
-    return true;
-  }
-
   public function testJoinLeaveProject() {
     $user = $this->createUser();
     $user->save();
@@ -793,6 +807,25 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
       array($engineering, $engineering_scan),
       pht('Engineering + Scan'));
   }
+
+  private function attemptProjectEdit(
+    PhabricatorProject $proj,
+    PhabricatorUser $user,
+    $skip_refresh = false) {
+
+    $proj = $this->refreshProject($proj, $user, true);
+
+    $new_name = $proj->getName().' '.mt_rand();
+
+    $xaction = new PhabricatorProjectTransaction();
+    $xaction->setTransactionType(PhabricatorProjectTransaction::TYPE_NAME);
+    $xaction->setNewValue($new_name);
+
+    $this->applyTransactions($proj, $user, array($xaction));
+
+    return true;
+  }
+
 
   private function newTask(
     PhabricatorUser $viewer,

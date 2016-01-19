@@ -30,6 +30,7 @@ final class PhabricatorProjectQuery
 
   private $needSlugs;
   private $needMembers;
+  private $needAncestorMembers;
   private $needWatchers;
   private $needImages;
 
@@ -106,6 +107,11 @@ final class PhabricatorProjectQuery
 
   public function needMembers($need_members) {
     $this->needMembers = $need_members;
+    return $this;
+  }
+
+  public function needAncestorMembers($need_ancestor_members) {
+    $this->needAncestorMembers = $need_ancestor_members;
     return $this;
   }
 
@@ -220,8 +226,16 @@ final class PhabricatorProjectQuery
       $types[] = $watcher_type;
     }
 
+    $all_graph = $this->getAllReachableAncestors($projects);
+
+    if ($this->needAncestorMembers) {
+      $src_projects = $all_graph;
+    } else {
+      $src_projects = $projects;
+    }
+
     $all_sources = array();
-    foreach ($projects as $project) {
+    foreach ($src_projects as $project) {
       if ($project->isMilestone()) {
         $phid = $project->getParentProjectPHID();
       } else {
@@ -234,10 +248,15 @@ final class PhabricatorProjectQuery
       ->withSourcePHIDs($all_sources)
       ->withEdgeTypes($types);
 
+    $need_all_edges =
+      $this->needMembers ||
+      $this->needWatchers ||
+      $this->needAncestorMembers;
+
     // If we only need to know if the viewer is a member, we can restrict
     // the query to just their PHID.
     $any_edges = true;
-    if (!$this->needMembers && !$this->needWatchers) {
+    if (!$need_all_edges) {
       if ($viewer_phid) {
         $edge_query->withDestinationPHIDs(array($viewer_phid));
       } else {
@@ -253,7 +272,7 @@ final class PhabricatorProjectQuery
     }
 
     $membership_projects = array();
-    foreach ($projects as $project) {
+    foreach ($src_projects as $project) {
       $project_phid = $project->getPHID();
 
       if ($project->isMilestone()) {
@@ -274,7 +293,7 @@ final class PhabricatorProjectQuery
         $membership_projects[$project_phid] = $project;
       }
 
-      if ($this->needMembers) {
+      if ($this->needMembers || $this->needAncestorMembers) {
         $project->attachMemberPHIDs($member_phids);
       }
 
@@ -289,12 +308,15 @@ final class PhabricatorProjectQuery
       }
     }
 
-    $all_graph = $this->getAllReachableAncestors($projects);
-    $member_graph = $this->getAllReachableAncestors($membership_projects);
+    // If we loaded ancestor members, we've already populated membership
+    // lists above, so we can skip this step.
+    if (!$this->needAncestorMembers) {
+      $member_graph = $this->getAllReachableAncestors($membership_projects);
 
-    foreach ($all_graph as $phid => $project) {
-      $is_member = isset($member_graph[$phid]);
-      $project->setIsUserMember($viewer_phid, $is_member);
+      foreach ($all_graph as $phid => $project) {
+        $is_member = isset($member_graph[$phid]);
+        $project->setIsUserMember($viewer_phid, $is_member);
+      }
     }
 
     return $projects;

@@ -582,7 +582,7 @@ final class PhabricatorProjectTransactionEditor
     return id(new PhabricatorProjectQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withPHIDs(array($object->getPHID()))
-      ->needMembers(true)
+      ->needAncestorMembers(true)
       ->executeOne();
   }
 
