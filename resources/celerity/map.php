@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '9d3a79f4',
+    'core.pkg.css' => 'c61091b0',
     'core.pkg.js' => '573e6664',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '2de124c9',
@@ -32,10 +32,10 @@ return array(
     'rsrc/css/aphront/typeahead.css' => '0e403212',
     'rsrc/css/application/almanac/almanac.css' => 'dbb9b3af',
     'rsrc/css/application/auth/auth.css' => '0877ed6e',
-    'rsrc/css/application/base/main-menu-view.css' => '2f670a96',
+    'rsrc/css/application/base/main-menu-view.css' => 'd00a795a',
     'rsrc/css/application/base/notification-menu.css' => 'f31c0bde',
     'rsrc/css/application/base/phabricator-application-launch-view.css' => '95351601',
-    'rsrc/css/application/base/phui-theme.css' => '6b451f24',
+    'rsrc/css/application/base/phui-theme.css' => '981a58f8',
     'rsrc/css/application/base/standard-page-view.css' => '7b0d68d8',
     'rsrc/css/application/chatlog/chatlog.css' => 'd295b020',
     'rsrc/css/application/conduit/conduit-api.css' => '7bc725c4',
@@ -155,7 +155,6 @@ return array(
     'rsrc/css/phui/phui-workboard-view.css' => '95a54f74',
     'rsrc/css/phui/phui-workpanel-view.css' => 'adec7699',
     'rsrc/css/sprite-login.css' => '60e8560e',
-    'rsrc/css/sprite-main-header.css' => 'f07bbb87',
     'rsrc/css/sprite-menu.css' => '9dd65b92',
     'rsrc/css/sprite-projects.css' => 'e5ad842a',
     'rsrc/css/sprite-tokens.css' => '4f399012',
@@ -336,7 +335,6 @@ return array(
     'rsrc/image/phrequent_inactive.png' => 'bfc15a69',
     'rsrc/image/sprite-login-X2.png' => 'e3991e37',
     'rsrc/image/sprite-login.png' => '03d5af29',
-    'rsrc/image/sprite-main-header.png' => '3673af44',
     'rsrc/image/sprite-menu-X2.png' => 'cfd8fca5',
     'rsrc/image/sprite-menu.png' => 'd7a99faa',
     'rsrc/image/sprite-projects-X2.png' => '853552c7',
@@ -753,7 +751,7 @@ return array(
     'phabricator-hovercard-view-css' => '1239cd52',
     'phabricator-keyboard-shortcut' => '1ae869f2',
     'phabricator-keyboard-shortcut-manager' => 'c1700f6f',
-    'phabricator-main-menu-view' => '2f670a96',
+    'phabricator-main-menu-view' => 'd00a795a',
     'phabricator-nav-view-css' => 'a24cb589',
     'phabricator-notification' => 'ccf1cbf8',
     'phabricator-notification-css' => '9c279160',
@@ -829,7 +827,7 @@ return array(
     'phui-status-list-view-css' => '888cedb8',
     'phui-tag-view-css' => 'e60e227b',
     'phui-text-css' => 'cf019f54',
-    'phui-theme-css' => '6b451f24',
+    'phui-theme-css' => '981a58f8',
     'phui-timeline-view-css' => '2efceff8',
     'phui-two-column-view-css' => '39ecafb1',
     'phui-workboard-view-css' => '95a54f74',
@@ -853,7 +851,6 @@ return array(
     'releeph-request-typeahead-css' => '667a48ae',
     'setup-issue-css' => 'db7e9c40',
     'sprite-login-css' => '60e8560e',
-    'sprite-main-header-css' => 'f07bbb87',
     'sprite-menu-css' => '9dd65b92',
     'sprite-projects-css' => 'e5ad842a',
     'sprite-tokens-css' => '4f399012',
@@ -1053,9 +1050,6 @@ return array(
     '2caa8fb8' => array(
       'javelin-install',
       'javelin-event',
-    ),
-    '2f670a96' => array(
-      'phui-theme-css',
     ),
     '327a00d1' => array(
       'javelin-behavior',
@@ -1851,6 +1845,9 @@ return array(
       'javelin-dom',
       'javelin-workflow',
       'phabricator-drag-and-drop-file-upload',
+    ),
+    'd00a795a' => array(
+      'phui-theme-css',
     ),
     'd19198c8' => array(
       'javelin-install',

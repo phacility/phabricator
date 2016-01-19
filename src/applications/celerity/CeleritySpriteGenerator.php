@@ -150,33 +150,6 @@ final class CeleritySpriteGenerator extends Phobject {
     return $sheet;
   }
 
-  public function buildMainHeaderSheet() {
-    $gradients = $this->getDirectoryList('main_header');
-    $template = new PhutilSprite();
-
-    $sprites = array();
-    foreach ($gradients as $gradient) {
-      $path = $this->getPath('main_header/'.$gradient.'.png');
-      $sprite = id(clone $template)
-        ->setName('main-header-'.$gradient)
-        ->setSourceFile($path)
-        ->setTargetCSS('.phui-theme-'.$gradient.
-          ' .phabricator-main-menu-background');
-      $sprite->setSourceSize(6, 44);
-      $sprites[] = $sprite;
-    }
-
-    $sheet = $this->buildSheet('main-header',
-      false,
-      PhutilSpriteSheet::TYPE_REPEAT_X);
-
-    foreach ($sprites as $sprite) {
-      $sheet->addSprite($sprite);
-    }
-
-    return $sheet;
-  }
-
   private function getPath($to_path = null) {
     $root = dirname(phutil_get_library_root('phabricator'));
     return $root.'/resources/sprite/'.$to_path;
