@@ -190,7 +190,8 @@ final class HeraldTranscript extends HeraldDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID('HLXS');
+    return PhabricatorPHID::generateNewPHID(
+      HeraldTranscriptPHIDType::TYPECONST);
   }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */

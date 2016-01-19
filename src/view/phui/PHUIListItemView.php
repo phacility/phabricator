@@ -9,7 +9,6 @@ final class PHUIListItemView extends AphrontTagView {
   const TYPE_CUSTOM   = 'type-custom';
   const TYPE_DIVIDER  = 'type-divider';
   const TYPE_ICON     = 'type-icon';
-  const TYPE_ICON_NAV = 'type-icon-nav';
 
   const STATUS_WARN   = 'phui-list-item-warn';
   const STATUS_FAIL   = 'phui-list-item-fail';

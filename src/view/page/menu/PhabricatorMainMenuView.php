@@ -27,7 +27,6 @@ final class PhabricatorMainMenuView extends AphrontView {
     $user = $this->user;
 
     require_celerity_resource('phabricator-main-menu-view');
-    require_celerity_resource('sprite-main-header-css');
 
     $header_id = celerity_generate_unique_node_id();
     $menu_bar = array();
@@ -137,7 +136,7 @@ final class PhabricatorMainMenuView extends AphrontView {
 
     $application_menu = $this->renderApplicationMenu($bar_items);
     $classes = array();
-    $classes[] = 'phabricator-main-menu sprite-main-header';
+    $classes[] = 'phabricator-main-menu';
     $classes[] = 'phabricator-main-menu-background';
 
     return phutil_tag(

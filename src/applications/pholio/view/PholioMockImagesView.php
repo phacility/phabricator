@@ -68,11 +68,9 @@ final class PholioMockImagesView extends AphrontView {
 
     // TODO: We could maybe do a better job with tailoring this, which is the
     // image shown on the review stage.
-    $default_name = 'image-100x100.png';
-    $builtins = PhabricatorFile::loadBuiltins(
-      $this->getUser(),
-      array($default_name));
-    $default = $builtins[$default_name];
+    $viewer = $this->getUser();
+
+    $default = PhabricatorFile::loadBuiltin($viewer, 'image-100x100.png');
 
     $engine = id(new PhabricatorMarkupEngine())
       ->setViewer($this->getUser());

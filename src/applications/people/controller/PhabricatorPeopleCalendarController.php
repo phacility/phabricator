@@ -1,33 +1,26 @@
 <?php
 
 final class PhabricatorPeopleCalendarController
-  extends PhabricatorPeopleController {
-
-  private $username;
+  extends PhabricatorPeopleProfileController {
 
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function shouldRequireAdmin() {
-    return false;
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $username = $request->getURIData('username');
 
-  public function willProcessRequest(array $data) {
-    $this->username = idx($data, 'username');
-  }
-
-  public function processRequest() {
-    $viewer = $this->getRequest()->getUser();
     $user = id(new PhabricatorPeopleQuery())
       ->setViewer($viewer)
-      ->withUsernames(array($this->username))
+      ->withUsernames(array($username))
       ->needProfileImage(true)
       ->executeOne();
-
     if (!$user) {
       return new Aphront404Response();
     }
+
+    $this->setUser($user);
 
     $picture = $user->getProfileImageURI();
 
@@ -89,16 +82,16 @@ final class PhabricatorPeopleCalendarController
       $month_view->addEvent($event);
     }
 
-    $name = $user->getUsername();
+    $nav = $this->getProfileMenu();
+    $nav->selectFilter('calendar');
 
-    $nav = $this->buildIconNavView($user);
-    $nav->selectFilter("{$name}/calendar/");
-    $nav->appendChild($month_view);
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Calendar'));
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => pht('Calendar'),
-      ));
+    return $this->newPage()
+      ->setTitle(pht('Calendar'))
+      ->setNavigation($nav)
+      ->setCrumbs($crumbs)
+      ->appendChild($month_view);
   }
 }

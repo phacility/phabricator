@@ -86,38 +86,6 @@ final class CeleritySpriteGenerator extends Phobject {
     return $sheet;
   }
 
-  public function buildProjectsSheet() {
-    $icons = $this->getDirectoryList('projects_1x');
-    $scales = array(
-      '1x' => 1,
-      '2x' => 2,
-    );
-    $template = id(new PhutilSprite())
-      ->setSourceSize(50, 50);
-
-    $sprites = array();
-    $prefix = 'projects-';
-    foreach ($icons as $icon) {
-      $sprite = id(clone $template)
-        ->setName($prefix.$icon)
-        ->setTargetCSS('.'.$prefix.$icon);
-
-      foreach ($scales as $scale_key => $scale) {
-        $path = $this->getPath('projects_'.$scale_key.'/'.$icon.'.png');
-        $sprite->setSourceFile($path, $scale);
-      }
-      $sprites[] = $sprite;
-    }
-
-    $sheet = $this->buildSheet('projects', true);
-    $sheet->setScales($scales);
-    foreach ($sprites as $sprite) {
-      $sheet->addSprite($sprite);
-    }
-
-    return $sheet;
-  }
-
   public function buildLoginSheet() {
     $icons = $this->getDirectoryList('login_1x');
     $scales = array(
@@ -143,33 +111,6 @@ final class CeleritySpriteGenerator extends Phobject {
 
     $sheet = $this->buildSheet('login', true);
     $sheet->setScales($scales);
-    foreach ($sprites as $sprite) {
-      $sheet->addSprite($sprite);
-    }
-
-    return $sheet;
-  }
-
-  public function buildMainHeaderSheet() {
-    $gradients = $this->getDirectoryList('main_header');
-    $template = new PhutilSprite();
-
-    $sprites = array();
-    foreach ($gradients as $gradient) {
-      $path = $this->getPath('main_header/'.$gradient.'.png');
-      $sprite = id(clone $template)
-        ->setName('main-header-'.$gradient)
-        ->setSourceFile($path)
-        ->setTargetCSS('.phui-theme-'.$gradient.
-          ' .phabricator-main-menu-background');
-      $sprite->setSourceSize(6, 44);
-      $sprites[] = $sprite;
-    }
-
-    $sheet = $this->buildSheet('main-header',
-      false,
-      PhutilSpriteSheet::TYPE_REPEAT_X);
-
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
     }

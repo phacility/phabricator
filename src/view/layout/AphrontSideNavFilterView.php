@@ -27,12 +27,14 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $crumbs;
   private $classes = array();
   private $menuID;
-  private $iconNav;
+  private $isProfileMenu;
+  private $footer = array();
 
   public function setMenuID($menu_id) {
     $this->menuID = $menu_id;
     return $this;
   }
+
   public function getMenuID() {
     return $this->menuID;
   }
@@ -55,9 +57,13 @@ final class AphrontSideNavFilterView extends AphrontView {
     return $this->crumbs;
   }
 
-  public function setIconNav($nav) {
-    $this->iconNav = $nav;
+  public function setIsProfileMenu($is_profile) {
+    $this->isProfileMenu = $is_profile;
     return $this;
+  }
+
+  public function getIsProfileMenu() {
+    return $this->isProfileMenu;
   }
 
   public function setActive($active) {
@@ -91,26 +97,6 @@ final class AphrontSideNavFilterView extends AphrontView {
   public function addFilter($key, $name, $uri = null) {
     return $this->addThing(
       $key, $name, $uri, PHUIListItemView::TYPE_LINK);
-  }
-
-  public function addIcon($key, $name, $icon, $image = null, $uri = null) {
-    if (!$uri) {
-      $href = clone $this->baseURI;
-      $href->setPath(rtrim($href->getPath().$key, '/').'/');
-      $href = (string)$href;
-    } else {
-      $href = $uri;
-    }
-
-    $item = id(new PHUIListItemView())
-      ->setKey($key)
-      ->setRenderNameAsTooltip(true)
-      ->setType(PHUIListItemView::TYPE_ICON_NAV)
-      ->setIcon($icon)
-      ->setHref($href)
-      ->setName($name)
-      ->setProfileImage($image);
-    return $this->addMenuItem($item);
   }
 
   public function addButton($key, $name, $uri = null) {
@@ -177,6 +163,11 @@ final class AphrontSideNavFilterView extends AphrontView {
     return $this->selectedFilter;
   }
 
+  public function appendFooter($footer) {
+    $this->footer[] = $footer;
+    return $this;
+  }
+
   public function render() {
     if ($this->menu->getItems()) {
       if (!$this->baseURI) {
@@ -207,8 +198,12 @@ final class AphrontSideNavFilterView extends AphrontView {
 
     $nav_classes = array();
     $nav_classes[] = 'phabricator-nav';
-    if ($this->iconNav) {
-      $nav_classes[] = 'phabricator-icon-nav';
+
+    if ($this->getIsProfileMenu()) {
+      require_celerity_resource('phui-profile-menu-css');
+      // No class, we're going to put it on the shell instead.
+    } else {
+      $nav_classes[] = 'phabricator-basic-nav';
     }
 
     $nav_id = null;
@@ -284,7 +279,17 @@ final class AphrontSideNavFilterView extends AphrontView {
 
     $nav_classes = array_merge($nav_classes, $this->classes);
 
-    return phutil_tag(
+    $footer = $this->footer;
+
+    if ($this->getIsProfileMenu()) {
+      $internal_footer = $footer;
+      $external_footer = null;
+    } else {
+      $internal_footer = null;
+      $external_footer = $footer;
+    }
+
+    $menu = phutil_tag(
       'div',
       array(
         'class' => implode(' ', $nav_classes),
@@ -302,8 +307,27 @@ final class AphrontSideNavFilterView extends AphrontView {
           array(
             $crumbs,
             $this->renderChildren(),
+            $internal_footer,
           )),
       ));
+
+    if ($this->getIsProfileMenu()) {
+      $shell = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-navigation-shell phui-profile-menu',
+        ),
+        array(
+          $menu,
+        ));
+    } else {
+      $shell = array(
+        $menu,
+        $external_footer,
+      );
+    }
+
+    return $shell;
   }
 
 }

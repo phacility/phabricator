@@ -1,25 +1,15 @@
 <?php
 
 final class PhabricatorPeopleProfileEditController
-  extends PhabricatorPeopleController {
+  extends PhabricatorPeopleProfileController {
 
-  private $id;
-
-  public function shouldRequireAdmin() {
-    return false;
-  }
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
 
     $user = id(new PhabricatorPeopleQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->needProfileImage(true)
       ->requireCapabilities(
         array(
@@ -30,6 +20,8 @@ final class PhabricatorPeopleProfileEditController
     if (!$user) {
       return new Aphront404Response();
     }
+
+    $this->setUser($user);
 
     $profile_uri = '/p/'.$user->getUsername().'/';
 
@@ -91,14 +83,12 @@ final class PhabricatorPeopleProfileEditController
       $form_box->setInfoView($note);
     }
 
-    $nav = $this->buildIconNavView($user);
-    $nav->selectFilter('/');
-    $nav->appendChild($form_box);
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Edit Profile'));
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($form_box);
   }
 }

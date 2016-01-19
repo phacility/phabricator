@@ -400,21 +400,32 @@ final class DifferentialChangesetViewController extends DifferentialController {
   private function loadCoverage(DifferentialChangeset $changeset) {
     $target_phids = $changeset->getDiff()->getBuildTargetPHIDs();
     if (!$target_phids) {
-      return array();
+      return null;
     }
 
     $unit = id(new HarbormasterBuildUnitMessage())->loadAllWhere(
       'buildTargetPHID IN (%Ls)',
       $target_phids);
 
+    if (!$unit) {
+      return null;
+    }
+
     $coverage = array();
     foreach ($unit as $message) {
-      $test_coverage = $message->getProperty('coverage', array());
+      $test_coverage = $message->getProperty('coverage');
+      if ($test_coverage === null) {
+        continue;
+      }
       $coverage_data = idx($test_coverage, $changeset->getFileName());
       if (!strlen($coverage_data)) {
         continue;
       }
       $coverage[] = $coverage_data;
+    }
+
+    if (!$coverage) {
+      return null;
     }
 
     return ArcanistUnitTestResult::mergeCoverage($coverage);

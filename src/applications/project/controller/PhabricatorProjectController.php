@@ -102,7 +102,7 @@ abstract class PhabricatorProjectController extends PhabricatorController {
       if ($project) {
         $viewer = $this->getViewer();
 
-        $engine = id(new PhabricatorProfilePanelEngine())
+        $engine = id(new PhabricatorProjectProfilePanelEngine())
           ->setViewer($viewer)
           ->setProfileObject($project);
 

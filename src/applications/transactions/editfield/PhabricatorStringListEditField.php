@@ -7,6 +7,11 @@ final class PhabricatorStringListEditField
     return new AphrontFormTextControl();
   }
 
+  protected function getValueForControl() {
+    $value = $this->getValue();
+    return implode(', ', $value);
+  }
+
   protected function newConduitParameterType() {
     return new ConduitStringListParameterType();
   }

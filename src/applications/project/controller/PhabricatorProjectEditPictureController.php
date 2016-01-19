@@ -123,7 +123,7 @@ final class PhabricatorProjectEditPictureController
 
     $images[PhabricatorPHIDConstants::PHID_VOID] = array(
       'uri' => $default_image->getBestURI(),
-      'tip' => pht('Default Picture'),
+      'tip' => pht('No Picture'),
     );
 
     require_celerity_resource('people-profile-css');
@@ -181,7 +181,11 @@ final class PhabricatorProjectEditPictureController
     $form->appendChild(
       id(new AphrontFormMarkupControl())
         ->setLabel(pht('Use Picture'))
-        ->setValue($buttons));
+        ->setValue(
+          array(
+            $this->renderDefaultForm($project),
+            $buttons,
+          )));
 
     $launch_id = celerity_generate_unique_node_id();
     $input_id = celerity_generate_unique_node_id();
@@ -226,38 +230,6 @@ final class PhabricatorProjectEditPictureController
         ->setLabel(pht('Quick Create'))
         ->setValue($compose_form));
 
-    $default_button = javelin_tag(
-      'button',
-      array(
-        'class' => 'grey',
-      ),
-      pht('Use Project Icon'));
-
-    $default_input = javelin_tag(
-      'input',
-      array(
-        'type' => 'hidden',
-        'name' => 'projectPHID',
-        'value' => $project->getPHID(),
-      ));
-
-    $default_form = phabricator_form(
-      $viewer,
-      array(
-        'class' => 'profile-image-form',
-        'method' => 'POST',
-        'action' => '/file/compose/',
-       ),
-      array(
-        $default_input,
-        $default_button,
-      ));
-
-    $form->appendChild(
-      id(new AphrontFormMarkupControl())
-        ->setLabel(pht('Use Default'))
-        ->setValue($default_form));
-
     $upload_form = id(new AphrontFormView())
       ->setUser($viewer)
       ->setEncType('multipart/form-data')
@@ -294,4 +266,69 @@ final class PhabricatorProjectEditPictureController
           $upload_box,
         ));
   }
+
+  private function renderDefaultForm(PhabricatorProject $project) {
+    $viewer = $this->getViewer();
+    $compose_color = $project->getDisplayIconComposeColor();
+    $compose_icon = $project->getDisplayIconComposeIcon();
+
+    $default_builtin = id(new PhabricatorFilesComposeIconBuiltinFile())
+      ->setColor($compose_color)
+      ->setIcon($compose_icon);
+
+    $file_builtins = PhabricatorFile::loadBuiltins(
+      $viewer,
+      array($default_builtin));
+
+    $file_builtin = head($file_builtins);
+
+    $default_button = javelin_tag(
+      'button',
+      array(
+        'class' => 'grey profile-image-button',
+        'sigil' => 'has-tooltip',
+        'meta' => array(
+          'tip' => pht('Use Icon and Color'),
+          'size' => 300,
+        ),
+      ),
+      phutil_tag(
+        'img',
+        array(
+          'height' => 50,
+          'width' => 50,
+          'src' => $file_builtin->getBestURI(),
+        )));
+
+    $inputs = array(
+      'projectPHID' => $project->getPHID(),
+      'icon' => $compose_icon,
+      'color' => $compose_color,
+    );
+
+    foreach ($inputs as $key => $value) {
+      $inputs[$key] = javelin_tag(
+        'input',
+        array(
+          'type' => 'hidden',
+          'name' => $key,
+          'value' => $value,
+        ));
+    }
+
+    $default_form = phabricator_form(
+      $viewer,
+      array(
+        'class' => 'profile-image-form',
+        'method' => 'POST',
+        'action' => '/file/compose/',
+       ),
+      array(
+        $inputs,
+        $default_button,
+      ));
+
+    return $default_form;
+  }
+
 }

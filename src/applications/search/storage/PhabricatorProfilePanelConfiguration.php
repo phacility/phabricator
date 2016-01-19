@@ -26,7 +26,7 @@ final class PhabricatorProfilePanelConfiguration
   }
 
   public static function initializeNewPanelConfiguration(
-    PhabricatorProfilePanelInterface $profile_object,
+    $profile_object,
     PhabricatorProfilePanel $panel) {
 
     return self::initializeNewBuiltin()
@@ -77,8 +77,7 @@ final class PhabricatorProfilePanelConfiguration
     return $this->assertAttached($this->panel);
   }
 
-  public function attachProfileObject(
-    PhabricatorProfilePanelInterface $profile_object) {
+  public function attachProfileObject($profile_object) {
     $this->profileObject = $profile_object;
     return $this;
   }

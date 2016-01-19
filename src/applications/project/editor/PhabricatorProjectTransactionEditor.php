@@ -713,6 +713,10 @@ final class PhabricatorProjectTransactionEditor
       }
     }
 
+    if ($this->getIsNewObject()) {
+      $this->setDefaultProfilePicture($object);
+    }
+
     // TODO: We should dump an informational transaction onto the parent
     // project to show that we created the sub-thing.
 
@@ -756,10 +760,15 @@ final class PhabricatorProjectTransactionEditor
   }
 
   private function removeSlugs(PhabricatorProject $project, array $slugs) {
-    $slugs = $this->normalizeSlugs($slugs);
-
     if (!$slugs) {
       return;
+    }
+
+    // We're going to try to delete both the literal and normalized versions
+    // of all slugs. This allows us to destroy old slugs that are no longer
+    // valid.
+    foreach ($this->normalizeSlugs($slugs) as $slug) {
+      $slugs[] = $slug;
     }
 
     $objects = id(new PhabricatorProjectSlug())->loadAllWhere(
@@ -881,5 +890,31 @@ final class PhabricatorProjectTransactionEditor
     return $results;
   }
 
+  private function setDefaultProfilePicture(PhabricatorProject $project) {
+    if ($project->isMilestone()) {
+      return;
+    }
+
+    $compose_color = $project->getDisplayIconComposeColor();
+    $compose_icon = $project->getDisplayIconComposeIcon();
+
+    $builtin = id(new PhabricatorFilesComposeIconBuiltinFile())
+      ->setColor($compose_color)
+      ->setIcon($compose_icon);
+
+    $data = $builtin->loadBuiltinFileData();
+
+    $file = PhabricatorFile::newFromFileData(
+      $data,
+      array(
+        'name' => $builtin->getBuiltinDisplayName(),
+        'profile' => true,
+        'canCDN' => true,
+      ));
+
+    $project
+      ->setProfileImagePHID($file->getPHID())
+      ->save();
+  }
 
 }

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorProfilePanelEngine extends Phobject {
+abstract class PhabricatorProfilePanelEngine extends Phobject {
 
   private $viewer;
   private $profileObject;
@@ -16,8 +16,7 @@ final class PhabricatorProfilePanelEngine extends Phobject {
     return $this->viewer;
   }
 
-  public function setProfileObject(
-    PhabricatorProfilePanelInterface $profile_object) {
+  public function setProfileObject($profile_object) {
     $this->profileObject = $profile_object;
     return $this;
   }
@@ -35,6 +34,12 @@ final class PhabricatorProfilePanelEngine extends Phobject {
     return $this->controller;
   }
 
+  abstract protected function getPanelURI($path);
+
+  protected function isPanelEngineConfigurable() {
+    return PhabricatorEnv::getEnvConfig('phabricator.show-prototypes');
+  }
+
   public function buildResponse() {
     $controller = $this->getController();
 
@@ -44,6 +49,18 @@ final class PhabricatorProfilePanelEngine extends Phobject {
     $request = $controller->getRequest();
 
     $panel_action = $request->getURIData('panelAction');
+
+    // If the engine is not configurable, don't respond to any of the editing
+    // or configuration routes.
+    if (!$this->isPanelEngineConfigurable()) {
+      switch ($panel_action) {
+        case 'view':
+          break;
+        default:
+          return new Aphront404Response();
+      }
+    }
+
     $panel_id = $request->getURIData('panelID');
 
     $panel_list = $this->loadPanels();
@@ -131,8 +148,8 @@ final class PhabricatorProfilePanelEngine extends Phobject {
 
   public function buildNavigation() {
     $nav = id(new AphrontSideNavFilterView())
-      ->setIconNav(true)
-      ->setBaseURI(new PhutilURI('/project/'));
+      ->setIsProfileMenu(true)
+      ->setBaseURI(new PhutilURI($this->getPanelURI('')));
 
     $panels = $this->getPanels();
 
@@ -225,7 +242,7 @@ final class PhabricatorProfilePanelEngine extends Phobject {
 
   private function loadBuiltinProfilePanels() {
     $object = $this->getProfileObject();
-    $builtins = $object->getBuiltinProfilePanels();
+    $builtins = $this->getBuiltinProfilePanels($object);
 
     $panels = PhabricatorProfilePanel::getAllPanels();
 
@@ -285,7 +302,7 @@ final class PhabricatorProfilePanelEngine extends Phobject {
   }
 
   private function newConfigureMenuItem() {
-    if (!PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
+    if (!$this->isPanelEngineConfigurable()) {
       return null;
     }
 
@@ -303,18 +320,11 @@ final class PhabricatorProfilePanelEngine extends Phobject {
       ->setIcon('fa-gear')
       ->setHref($this->getPanelURI('configure/'))
       ->setDisabled(!$can_edit)
-      ->setWorkflow(!$can_edit)
-      ->setRenderNameAsTooltip(true);
+      ->setWorkflow(!$can_edit);
   }
 
   public function getConfigureURI() {
     return $this->getPanelURI('configure/');
-  }
-
-  private function getPanelURI($path) {
-    $project = $this->getProfileObject();
-    $id = $project->getID();
-    return "/project/{$id}/panel/{$path}";
   }
 
   private function buildPanelReorderContent(array $panels) {
@@ -645,6 +655,10 @@ final class PhabricatorProfilePanelEngine extends Phobject {
       ->appendForm($form)
       ->addCancelButton($this->getConfigureURI())
       ->addSubmitButton(pht('Save Changes'));
+  }
+
+  protected function newPanel() {
+    return PhabricatorProfilePanelConfiguration::initializeNewBuiltin();
   }
 
 }

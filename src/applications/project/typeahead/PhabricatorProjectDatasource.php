@@ -65,12 +65,17 @@ final class PhabricatorProjectDatasource
         ->setName($all_strings)
         ->setDisplayName($proj->getName())
         ->setDisplayType(pht('Project'))
-        ->setURI('/tag/'.$proj->getPrimarySlug().'/')
+        ->setURI($proj->getURI())
         ->setPHID($proj->getPHID())
         ->setIcon($proj->getDisplayIconIcon())
         ->setColor($proj->getColor())
         ->setPriorityType('proj')
         ->setClosed($closed);
+
+      $slug = $proj->getPrimarySlug();
+      if (strlen($slug)) {
+        $proj_result->setAutocomplete('#'.$slug);
+      }
 
       $proj_result->setImageURI($proj->getProfileImageURI());
 

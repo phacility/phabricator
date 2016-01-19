@@ -16,13 +16,11 @@
 }
 
 .phabricator-main-menu-background {
-  min-height: 43px;
-  background-color: #ebecee;
-  border-bottom: 1px solid rgba(0,0,0,.1);
+  min-height: 44px;
 }
 
 .device-desktop .phabricator-main-menu {
-  height: 43px;
+  height: 44px;
   padding-right: 4px;
 }
 
