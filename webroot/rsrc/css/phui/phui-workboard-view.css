@@ -41,6 +41,11 @@
   left: 253px;
 }
 
+.device-desktop .phui-profile-menu-collapsed .project-board-wrapper
+  .phui-workboard-view-shadow {
+  left: 93px;
+}
+
 .device-desktop .phui-workboard-view .aphront-multi-column-fixed
   .aphront-multi-column-inner {
     margin-left: 0;

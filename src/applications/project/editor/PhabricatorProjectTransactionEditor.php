@@ -917,4 +917,19 @@ final class PhabricatorProjectTransactionEditor
       ->save();
   }
 
+
+  protected function shouldApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  protected function buildHeraldAdapter(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    return id(new PhabricatorProjectHeraldAdapter())
+      ->setProject($object);
+  }
+
 }
