@@ -32,15 +32,6 @@ final class PhabricatorProjectProfilePanelEngine
       ->setPanelProperty('name', pht('Open Tasks'))
       ->setPanelProperty('uri', $uri);
 
-    // TODO: This is temporary.
-    $id = $object->getID();
-    $panels[] = $this->newPanel()
-      ->setBuiltinKey('feed')
-      ->setPanelKey(PhabricatorLinkProfilePanel::PANELKEY)
-      ->setPanelProperty('icon', 'feed')
-      ->setPanelProperty('name', pht('Feed'))
-      ->setPanelProperty('uri', "/project/feed/{$id}/");
-
     $panels[] = $this->newPanel()
       ->setBuiltinKey(PhabricatorProject::PANEL_MEMBERS)
       ->setPanelKey(PhabricatorProjectMembersProfilePanel::PANELKEY);

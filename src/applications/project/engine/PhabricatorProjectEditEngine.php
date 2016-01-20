@@ -78,7 +78,12 @@ final class PhabricatorProjectEditEngine
   }
 
   protected function getObjectViewURI($object) {
-    return $object->getURI();
+    if ($this->getIsCreate()) {
+      return $object->getURI();
+    } else {
+      $id = $object->getID();
+      return "/project/history/{$id}/";
+    }
   }
 
   protected function getObjectCreateCancelURI($object) {

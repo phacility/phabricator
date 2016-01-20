@@ -20,7 +20,7 @@ final class PhabricatorProjectArchiveController
       return new Aphront404Response();
     }
 
-    $edit_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
+    $edit_uri = $this->getApplicationURI('history/'.$project->getID().'/');
 
     if ($request->isFormPost()) {
       if ($project->isArchived()) {

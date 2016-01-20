@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorProjectProfileController
+final class PhabricatorProjectHistoryController
   extends PhabricatorProjectController {
 
   public function shouldAllowPublic() {
@@ -19,7 +19,7 @@ final class PhabricatorProjectProfileController
     $picture = $project->getProfileImageURI();
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($project->getName())
+      ->setHeader(pht('Project History'))
       ->setUser($viewer)
       ->setPolicyObject($project)
       ->setImage($picture);
@@ -37,57 +37,25 @@ final class PhabricatorProjectProfileController
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    $member_list = id(new PhabricatorProjectMemberListView())
-      ->setUser($viewer)
-      ->setProject($project)
-      ->setLimit(5)
-      ->setUserPHIDs($project->getMemberPHIDs());
-
-    $watcher_list = id(new PhabricatorProjectWatcherListView())
-      ->setUser($viewer)
-      ->setProject($project)
-      ->setLimit(5)
-      ->setUserPHIDs($project->getWatcherPHIDs());
+    $timeline = $this->buildTransactionTimeline(
+      $project,
+      new PhabricatorProjectTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorProject::PANEL_PROFILE);
 
-
-    $stories = id(new PhabricatorFeedQuery())
-      ->setViewer($viewer)
-      ->setFilterPHIDs(
-        array(
-          $project->getPHID(),
-        ))
-      ->setLimit(50)
-      ->execute();
-
-    $feed = $this->renderStories($stories);
-
-    $feed = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Recent Activity'))
-      ->appendChild($feed);
-
-    $columns = id(new AphrontMultiColumnView())
-      ->setFluidLayout(true)
-      ->addColumn($feed)
-      ->addColumn(
-        array(
-          $member_list,
-          $watcher_list,
-        ));
-
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('History'));
 
     return $this->newPage()
       ->setNavigation($nav)
       ->setCrumbs($crumbs)
       ->setTitle($project->getName())
-      ->setPageObjectPHIDs(array($project->getPHID()))
       ->appendChild(
         array(
           $object_box,
-          $columns,
+          $timeline,
         ));
   }
 
@@ -98,14 +66,52 @@ final class PhabricatorProjectProfileController
     $id = $project->getID();
 
     $view = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($project);
+      ->setUser($viewer);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $project,
+      PhabricatorPolicyCapability::CAN_EDIT);
 
     $view->addAction(
       id(new PhabricatorActionView())
-        ->setName(pht('Edit Project'))
+        ->setName(pht('Back to Profile'))
+        ->setIcon('fa-chevron-left')
+        ->setHref($project->getURI()));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Details'))
         ->setIcon('fa-pencil')
-        ->setHref($this->getApplicationURI("history/{$id}/")));
+        ->setHref($this->getApplicationURI("edit/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Picture'))
+        ->setIcon('fa-picture-o')
+        ->setHref($this->getApplicationURI("picture/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    if ($project->isArchived()) {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Activate Project'))
+          ->setIcon('fa-check')
+          ->setHref($this->getApplicationURI("archive/{$id}/"))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    } else {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Archive Project'))
+          ->setIcon('fa-ban')
+          ->setHref($this->getApplicationURI("archive/{$id}/"))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    }
 
     return $view;
   }
@@ -118,30 +124,10 @@ final class PhabricatorProjectProfileController
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setObject($project)
       ->setActionList($actions);
-
-    $view->addProperty(
-      pht('Looks Like'),
-      $viewer->renderHandle($project->getPHID())->setAsTag(true));
-
-    $field_list = PhabricatorCustomField::getObjectFields(
-      $project,
-      PhabricatorCustomField::ROLE_VIEW);
-    $field_list->appendFieldsToPropertyList($project, $viewer, $view);
 
     return $view;
   }
 
-  private function renderStories(array $stories) {
-    assert_instances_of($stories, 'PhabricatorFeedStory');
-
-    $builder = new PhabricatorFeedBuilder($stories);
-    $builder->setUser($this->getRequest()->getUser());
-    $builder->setShowHovercards(true);
-    $view = $builder->buildView();
-
-    return phutil_tag_div('profile-feed', $view->render());
-  }
 
 }
