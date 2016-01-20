@@ -188,21 +188,18 @@ final class PhabricatorProjectTransactionEditor
         switch ($edge_type) {
           case PhabricatorProjectProjectHasMemberEdgeType::EDGECONST:
           case PhabricatorObjectHasWatcherEdgeType::EDGECONST:
+            $edge_const = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+            if ($edge_type != $edge_const) {
+              break;
+            }
+
             $old = $xaction->getOldValue();
             $new = $xaction->getNewValue();
 
-            // When adding members or watchers, we add subscriptions.
+            // When adding members, we add subscriptions. When removing
+            // members, we remove subscriptions.
             $add = array_keys(array_diff_key($new, $old));
-
-            // When removing members, we remove their subscription too.
-            // When unwatching, we leave subscriptions, since it's fine to be
-            // subscribed to a project but not be a member of it.
-            $edge_const = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
-            if ($edge_type == $edge_const) {
-              $rem = array_keys(array_diff_key($old, $new));
-            } else {
-              $rem = array();
-            }
+            $rem = array_keys(array_diff_key($old, $new));
 
             // NOTE: The subscribe is "explicit" because there's no implicit
             // unsubscribe, so Join -> Leave -> Join doesn't resubscribe you
@@ -212,27 +209,12 @@ final class PhabricatorProjectTransactionEditor
             // this, which is a fairly weird edge case and pretty arguable both
             // ways.
 
-            // Subscriptions caused by watches should also clearly be explicit,
-            // and that case is unambiguous.
-
             id(new PhabricatorSubscriptionsEditor())
               ->setActor($this->requireActor())
               ->setObject($object)
               ->subscribeExplicit($add)
               ->unsubscribe($rem)
               ->save();
-
-            if ($rem) {
-              // When removing members, also remove any watches on the project.
-              $edge_editor = new PhabricatorEdgeEditor();
-              foreach ($rem as $rem_phid) {
-                $edge_editor->removeEdge(
-                  $object->getPHID(),
-                  PhabricatorObjectHasWatcherEdgeType::EDGECONST,
-                  $rem_phid);
-              }
-              $edge_editor->save();
-            }
             break;
         }
         break;

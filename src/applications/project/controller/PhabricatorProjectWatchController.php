@@ -18,11 +18,11 @@ final class PhabricatorProjectWatchController
       return new Aphront404Response();
     }
 
-    $done_uri = "/project/members/{$id}/";
-
-    // You must be a member of a project to watch it.
-    if (!$project->isUserMember($viewer->getPHID())) {
-      return new Aphront400Response();
+    $via = $request->getStr('via');
+    if ($via == 'profile') {
+      $done_uri = $project->getURI();
+    } else {
+      $done_uri = "/project/members/{$id}/";
     }
 
     if ($request->isDialogFormPost()) {
@@ -38,7 +38,7 @@ final class PhabricatorProjectWatchController
           break;
       }
 
-      $type_member = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
+      $type_watcher = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
       $member_spec = array(
         $edge_action => array($viewer->getPHID() => $viewer->getPHID()),
       );
@@ -46,7 +46,7 @@ final class PhabricatorProjectWatchController
       $xactions = array();
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-        ->setMetadataValue('edge:type', $type_member)
+        ->setMetadataValue('edge:type', $type_watcher)
         ->setNewValue($member_spec);
 
       $editor = id(new PhabricatorProjectTransactionEditor($project))
@@ -82,6 +82,7 @@ final class PhabricatorProjectWatchController
 
     return $this->newDialog()
       ->setTitle($title)
+      ->addHiddenInput('via', $via)
       ->appendParagraph($body)
       ->addCancelButton($done_uri)
       ->addSubmitButton($submit);

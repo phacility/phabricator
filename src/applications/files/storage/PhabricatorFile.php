@@ -1352,10 +1352,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 

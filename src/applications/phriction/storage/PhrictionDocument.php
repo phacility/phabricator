@@ -198,10 +198,6 @@ final class PhrictionDocument extends PhrictionDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
 

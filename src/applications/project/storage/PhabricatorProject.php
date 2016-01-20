@@ -548,11 +548,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return false;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return $this->isUserMember($phid) &&
-           !$this->isUserWatcher($phid);
-  }
-
 
 /* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
 

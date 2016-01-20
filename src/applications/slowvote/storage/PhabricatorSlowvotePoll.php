@@ -183,10 +183,6 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 

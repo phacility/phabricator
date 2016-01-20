@@ -535,10 +535,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 
 

@@ -22,17 +22,6 @@ interface PhabricatorSubscribableInterface {
    */
   public function shouldShowSubscribersProperty();
 
-
-  /**
-   * Return `true` to indicate that the "Subscribe" action should be shown and
-   * enabled when rendering action lists for this object, or `false` to omit
-   * the action.
-   *
-   * @param   phid  Viewing or acting user PHID.
-   * @return  bool  True to allow the user to subscribe.
-   */
-  public function shouldAllowSubscription($phid);
-
 }
 
 // TEMPLATE IMPLEMENTATION /////////////////////////////////////////////////////
@@ -45,10 +34,6 @@ interface PhabricatorSubscribableInterface {
   }
 
   public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
-  public function shouldAllowSubscription($phid) {
     return true;
   }
 

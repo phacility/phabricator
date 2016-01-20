@@ -173,10 +173,6 @@ final class PhabricatorPhurlURL extends PhabricatorPhurlDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 
 

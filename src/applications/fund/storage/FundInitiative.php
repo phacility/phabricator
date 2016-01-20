@@ -182,10 +182,6 @@ final class FundInitiative extends FundDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 
 /* -(  PhabricatorTokenRecevierInterface  )---------------------------------- */
 

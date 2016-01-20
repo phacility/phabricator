@@ -332,10 +332,6 @@ final class HeraldRule extends HeraldDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

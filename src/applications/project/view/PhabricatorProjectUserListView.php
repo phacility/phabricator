@@ -79,7 +79,7 @@ abstract class PhabricatorProjectUserListView extends AphrontView {
         ->setHref($handle->getURI())
         ->setImageURI($handle->getImageURI());
 
-      if ($can_edit) {
+      if ($can_edit && !$limit) {
         $remove_uri = $this->getRemoveURI($user_phid);
 
         $item->addAction(
@@ -94,16 +94,32 @@ abstract class PhabricatorProjectUserListView extends AphrontView {
     }
 
     if ($user_phids) {
-      $header = pht(
+      $header_text = pht(
         '%s (%s)',
         $this->getHeaderText(),
         phutil_count($user_phids));
     } else {
-      $header = $this->getHeaderText();
+      $header_text = $this->getHeaderText();
+    }
+
+    $id = $project->getID();
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($header_text);
+
+    if ($limit) {
+      $header->addActionLink(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setIcon(
+            id(new PHUIIconView())
+              ->setIconFont('fa-list-ul'))
+          ->setText(pht('View All'))
+          ->setHref("/project/members/{$id}/"));
     }
 
     return id(new PHUIObjectBoxView())
-      ->setHeaderText($header)
+      ->setHeader($header)
       ->setObjectList($list);
   }
 

@@ -152,22 +152,22 @@ final class PhabricatorProjectMembersViewController
           ->setDisabled(!$can_leave)
           ->setWorkflow(true)
           ->setName(pht('Leave Project')));
+    }
 
-      if (!$project->isUserWatcher($viewer->getPHID())) {
-        $view->addAction(
-          id(new PhabricatorActionView())
-            ->setWorkflow(true)
-            ->setHref('/project/watch/'.$project->getID().'/')
-            ->setIcon('fa-eye')
-            ->setName(pht('Watch Project')));
-      } else {
-        $view->addAction(
-          id(new PhabricatorActionView())
-            ->setWorkflow(true)
-            ->setHref('/project/unwatch/'.$project->getID().'/')
-            ->setIcon('fa-eye-slash')
-            ->setName(pht('Unwatch Project')));
-      }
+    if (!$project->isUserWatcher($viewer->getPHID())) {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setWorkflow(true)
+          ->setHref('/project/watch/'.$project->getID().'/')
+          ->setIcon('fa-eye')
+          ->setName(pht('Watch Project')));
+    } else {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setWorkflow(true)
+          ->setHref('/project/unwatch/'.$project->getID().'/')
+          ->setIcon('fa-eye-slash')
+          ->setName(pht('Unwatch Project')));
     }
 
     $can_add = $can_edit && $supports_edit;

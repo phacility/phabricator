@@ -52,6 +52,7 @@ final class PhabricatorProjectProfileController
     $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorProject::PANEL_PROFILE);
 
+    $watch_action = $this->renderWatchAction($project);
 
     $stories = id(new PhabricatorFeedQuery())
       ->setViewer($viewer)
@@ -62,10 +63,15 @@ final class PhabricatorProjectProfileController
       ->setLimit(50)
       ->execute();
 
+
     $feed = $this->renderStories($stories);
 
+    $feed_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Recent Activity'))
+      ->addActionLink($watch_action);
+
     $feed = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Recent Activity'))
+      ->setHeader($feed_header)
       ->appendChild($feed);
 
     $columns = id(new AphrontMultiColumnView())
@@ -143,5 +149,34 @@ final class PhabricatorProjectProfileController
 
     return phutil_tag_div('profile-feed', $view->render());
   }
+
+  private function renderWatchAction(PhabricatorProject $project) {
+    $viewer = $this->getViewer();
+    $viewer_phid = $viewer->getPHID();
+    $id = $project->getID();
+
+    $is_watcher = ($viewer_phid && $project->isUserWatcher($viewer_phid));
+
+    if (!$is_watcher) {
+      $watch_icon = 'fa-eye';
+      $watch_text = pht('Watch Project');
+      $watch_href = "/project/watch/{$id}/?via=profile";
+    } else {
+      $watch_icon = 'fa-eye-slash';
+      $watch_text = pht('Unwatch Project');
+      $watch_href = "/project/unwatch/{$id}/?via=profile";
+    }
+
+    $watch_icon = id(new PHUIIconView())
+      ->setIconFont($watch_icon);
+
+    return id(new PHUIButtonView())
+      ->setTag('a')
+      ->setWorkflow(true)
+      ->setIcon($watch_icon)
+      ->setText($watch_text)
+      ->setHref($watch_href);
+  }
+
 
 }

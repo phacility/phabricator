@@ -227,10 +227,6 @@ final class ManiphestTask extends ManiphestDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 
 /* -(  Markup Interface  )--------------------------------------------------- */
 
