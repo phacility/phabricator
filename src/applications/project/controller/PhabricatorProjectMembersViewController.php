@@ -110,6 +110,49 @@ final class PhabricatorProjectMembersViewController
         $descriptions[PhabricatorPolicyCapability::CAN_JOIN]);
     }
 
+    $viewer_phid = $viewer->getPHID();
+
+    if ($project->isUserWatcher($viewer_phid)) {
+      $watch_item = id(new PHUIStatusItemView())
+        ->setIcon('fa-eye green')
+        ->setTarget(phutil_tag('strong', array(), pht('Watching')))
+        ->setNote(
+          pht(
+            'You will receive mail about changes made to any related '.
+            'object.'));
+
+      $watch_status = id(new PHUIStatusListView())
+        ->addItem($watch_item);
+
+      $view->addProperty(pht('Watching'), $watch_status);
+    }
+
+    if ($project->isUserMember($viewer_phid)) {
+      $is_silenced = $this->isProjectSilenced($project);
+      if ($is_silenced) {
+        $mail_icon = 'fa-envelope-o grey';
+        $mail_target = pht('Disabled');
+        $mail_note = pht(
+          'When mail is sent to project members, you will not receive '.
+          'a copy.');
+      } else {
+        $mail_icon = 'fa-envelope-o green';
+        $mail_target = pht('Enabled');
+        $mail_note = pht(
+          'You will receive mail that is sent to project members.');
+      }
+
+      $mail_item = id(new PHUIStatusItemView())
+        ->setIcon($mail_icon)
+        ->setTarget(phutil_tag('strong', array(), $mail_target))
+        ->setNote($mail_note);
+
+      $mail_status = id(new PHUIStatusListView())
+        ->addItem($mail_item);
+
+      $view->addProperty(pht('Mail to Members'), $mail_status);
+    }
+
     return $view;
   }
 
@@ -136,7 +179,9 @@ final class PhabricatorProjectMembersViewController
 
     $can_leave = $supports_edit && (!$is_locked || $can_edit);
 
-    if (!$project->isUserMember($viewer->getPHID())) {
+    $viewer_phid = $viewer->getPHID();
+
+    if (!$project->isUserMember($viewer_phid)) {
       $view->addAction(
         id(new PhabricatorActionView())
           ->setHref('/project/update/'.$project->getID().'/join/')
@@ -170,6 +215,23 @@ final class PhabricatorProjectMembersViewController
           ->setName(pht('Unwatch Project')));
     }
 
+    $can_silence = $project->isUserMember($viewer_phid);
+    $is_silenced = $this->isProjectSilenced($project);
+
+    if ($is_silenced) {
+      $silence_text = pht('Enable Mail');
+    } else {
+      $silence_text = pht('Disable Mail');
+    }
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName($silence_text)
+        ->setIcon('fa-envelope-o')
+        ->setHref("/project/silence/{$id}/")
+        ->setWorkflow(true)
+        ->setDisabled(!$can_silence));
+
     $can_add = $can_edit && $supports_edit;
 
     $view->addAction(
@@ -200,6 +262,22 @@ final class PhabricatorProjectMembersViewController
         ->setWorkflow(true));
 
     return $view;
+  }
+
+  private function isProjectSilenced(PhabricatorProject $project) {
+    $viewer = $this->getViewer();
+
+    $viewer_phid = $viewer->getPHID();
+    if (!$viewer_phid) {
+      return false;
+    }
+
+    $edge_type = PhabricatorProjectSilencedEdgeType::EDGECONST;
+    $silenced = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $project->getPHID(),
+      $edge_type);
+    $silenced = array_fuse($silenced);
+    return isset($silenced[$viewer_phid]);
   }
 
 }

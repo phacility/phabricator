@@ -148,7 +148,6 @@ final class PhabricatorProjectEditEngine
           'icon',
           'color',
           'slugs',
-          'subscriberPHIDs',
         ));
 
     return array(

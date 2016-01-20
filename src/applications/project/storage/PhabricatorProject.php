@@ -6,7 +6,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface,
     PhabricatorExtendedPolicyInterface,
-    PhabricatorSubscribableInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorDestructibleInterface,
     PhabricatorFulltextInterface,
@@ -178,7 +177,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
     return $extended;
   }
-
 
   public function isUserMember($user_phid) {
     if ($this->memberPHIDs !== self::ATTACHABLE) {
@@ -533,19 +531,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     );
 
     return idx($map, $color, $color);
-  }
-
-
-
-/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
-
-
-  public function isAutomaticallySubscribed($phid) {
-    return false;
-  }
-
-  public function shouldShowSubscribersProperty() {
-    return false;
   }
 
 

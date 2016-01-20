@@ -30,11 +30,9 @@ final class PhabricatorProjectWatchController
       switch ($action) {
         case 'watch':
           $edge_action = '+';
-          $force_subscribe = true;
           break;
         case 'unwatch':
           $edge_action = '-';
-          $force_subscribe = false;
           break;
       }
 

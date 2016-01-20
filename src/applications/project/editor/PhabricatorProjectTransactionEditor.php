@@ -178,51 +178,6 @@ final class PhabricatorProjectTransactionEditor
     return parent::applyCustomExternalTransaction($object, $xaction);
   }
 
-  protected function applyBuiltinExternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_EDGE:
-        $edge_type = $xaction->getMetadataValue('edge:type');
-        switch ($edge_type) {
-          case PhabricatorProjectProjectHasMemberEdgeType::EDGECONST:
-          case PhabricatorObjectHasWatcherEdgeType::EDGECONST:
-            $edge_const = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
-            if ($edge_type != $edge_const) {
-              break;
-            }
-
-            $old = $xaction->getOldValue();
-            $new = $xaction->getNewValue();
-
-            // When adding members, we add subscriptions. When removing
-            // members, we remove subscriptions.
-            $add = array_keys(array_diff_key($new, $old));
-            $rem = array_keys(array_diff_key($old, $new));
-
-            // NOTE: The subscribe is "explicit" because there's no implicit
-            // unsubscribe, so Join -> Leave -> Join doesn't resubscribe you
-            // if we use an implicit subscribe, even though you never willfully
-            // unsubscribed. Not sure if adding implicit unsubscribe (which
-            // would not write the unsubscribe row) is justified to deal with
-            // this, which is a fairly weird edge case and pretty arguable both
-            // ways.
-
-            id(new PhabricatorSubscriptionsEditor())
-              ->setActor($this->requireActor())
-              ->setObject($object)
-              ->subscribeExplicit($add)
-              ->unsubscribe($rem)
-              ->save();
-            break;
-        }
-        break;
-    }
-
-    return parent::applyBuiltinExternalTransaction($object, $xaction);
-  }
-
   protected function validateAllTransactions(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -584,6 +539,10 @@ final class PhabricatorProjectTransactionEditor
     );
   }
 
+  protected function getMailCc(PhabricatorLiskDAO $object) {
+    return array();
+  }
+
   public function getMailTagsMap() {
     return array(
       PhabricatorProjectTransaction::MAILTAG_METADATA =>
@@ -592,8 +551,6 @@ final class PhabricatorProjectTransactionEditor
         pht('Project membership changes.'),
       PhabricatorProjectTransaction::MAILTAG_WATCHERS =>
         pht('Project watcher list changes.'),
-      PhabricatorProjectTransaction::MAILTAG_SUBSCRIBERS =>
-        pht('Project subscribers change.'),
       PhabricatorProjectTransaction::MAILTAG_OTHER =>
         pht('Other project activity not listed above occurs.'),
     );
