@@ -1,0 +1,53 @@
+@title Projects User Guide
+@group userguide
+
+Organize users and objects with projects.
+
+Overview
+========
+
+NOTE: This document is only partially complete.
+
+Phabricator projects are flexible groups of users and objects.
+
+
+Joining Projects
+================
+
+Once you join a project, you become a member and will receive mail sent to the
+project, like a mailing list. For example, if a project is added as a
+subscriber on a task or a reviewer on a revision, you will receive mail about
+that task or revision.
+
+If you'd prefer not to receive mail sent to a project, you can go to
+{nav Members} and select {nav Disable Mail}. If you disable mail for a project,
+you will no longer receive mail sent to the project.
+
+
+Watching Projects
+=================
+
+Watching a project allows you to closely follow all activity related to a
+project.
+
+You can **watch** a project by clicking {nav Watch Project} on the project
+page. To stop watching a project, click {nav Unwatch Project}.
+
+When you watch a project, you will receive a copy of mail about any objects
+(like tasks or revisions) that are tagged with the project, or that the project
+is a subscriber, reviewer, or auditor for. For moderately active projects, this
+may be a large volume of mail.
+
+
+Edit Notifications
+==================
+
+Edit notifications are generated when project details (like the project
+description, name, or icon) are updated, or when users join or leave projects.
+
+By default, these notifications are are only sent to the acting user. These
+notifications are usually not very interesting, and project mail is already
+complicated by members and watchers.
+
+If you'd like to receive edit notifications for a project, you can write a
+Herald rule to keep you in the loop.

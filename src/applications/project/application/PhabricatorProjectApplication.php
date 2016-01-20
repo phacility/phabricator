@@ -135,4 +135,13 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
     );
   }
 
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Projects User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Projects User Guide'),
+      ),
+    );
+  }
+
 }
