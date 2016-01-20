@@ -4,7 +4,13 @@ final class PhabricatorProjectWatcherListView
   extends PhabricatorProjectUserListView {
 
   protected function canEditList() {
-    return false;
+    $viewer = $this->getUser();
+    $project = $this->getProject();
+
+    return PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $project,
+      PhabricatorPolicyCapability::CAN_EDIT);
   }
 
   protected function getNoDataString() {
@@ -12,7 +18,9 @@ final class PhabricatorProjectWatcherListView
   }
 
   protected function getRemoveURI($phid) {
-    return null;
+    $project = $this->getProject();
+    $id = $project->getID();
+    return "/project/watchers/{$id}/remove/?phid={$phid}";
   }
 
   protected function getHeaderText() {

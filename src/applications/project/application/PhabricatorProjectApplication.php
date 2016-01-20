@@ -51,7 +51,7 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
           => 'PhabricatorProjectMembersViewController',
         'members/(?P<id>[1-9]\d*)/add/'
           => 'PhabricatorProjectMembersAddController',
-        'members/(?P<id>[1-9]\d*)/remove/'
+        '(?P<type>members|watchers)/(?P<id>[1-9]\d*)/remove/'
           => 'PhabricatorProjectMembersRemoveController',
         'profile/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectProfileController',
