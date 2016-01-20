@@ -106,65 +106,6 @@ final class PhabricatorProjectProfileController
           ->setWorkflow(true));
     }
 
-    $can_lock = $can_edit && $this->hasApplicationCapability(
-      ProjectCanLockProjectsCapability::CAPABILITY);
-
-    if ($project->getIsMembershipLocked()) {
-      $lock_name = pht('Unlock Project');
-      $lock_icon = 'fa-unlock';
-    } else {
-      $lock_name = pht('Lock Project');
-      $lock_icon = 'fa-lock';
-    }
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName($lock_name)
-        ->setIcon($lock_icon)
-        ->setHref($this->getApplicationURI("lock/{$id}/"))
-        ->setDisabled(!$can_lock)
-        ->setWorkflow(true));
-
-    $action = null;
-    if (!$project->isUserMember($viewer->getPHID())) {
-      $can_join = PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $project,
-        PhabricatorPolicyCapability::CAN_JOIN);
-
-      $action = id(new PhabricatorActionView())
-        ->setUser($viewer)
-        ->setRenderAsForm(true)
-        ->setHref('/project/update/'.$project->getID().'/join/')
-        ->setIcon('fa-plus')
-        ->setDisabled(!$can_join)
-        ->setName(pht('Join Project'));
-      $view->addAction($action);
-    } else {
-      $action = id(new PhabricatorActionView())
-        ->setWorkflow(true)
-        ->setHref('/project/update/'.$project->getID().'/leave/')
-        ->setIcon('fa-times')
-        ->setName(pht('Leave Project...'));
-      $view->addAction($action);
-
-      if (!$project->isUserWatcher($viewer->getPHID())) {
-        $action = id(new PhabricatorActionView())
-          ->setWorkflow(true)
-          ->setHref('/project/watch/'.$project->getID().'/')
-          ->setIcon('fa-eye')
-          ->setName(pht('Watch Project'));
-        $view->addAction($action);
-      } else {
-        $action = id(new PhabricatorActionView())
-          ->setWorkflow(true)
-          ->setHref('/project/unwatch/'.$project->getID().'/')
-          ->setIcon('fa-eye-slash')
-          ->setName(pht('Unwatch Project'));
-        $view->addAction($action);
-      }
-    }
-
     return $view;
   }
 
@@ -206,17 +147,9 @@ final class PhabricatorProjectProfileController
           ->setAsInline(true)
         : phutil_tag('em', array(), pht('None')));
 
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $viewer,
-      $project);
-
     $view->addProperty(
       pht('Looks Like'),
       $viewer->renderHandle($project->getPHID())->setAsTag(true));
-
-    $view->addProperty(
-      pht('Joinable By'),
-      $descriptions[PhabricatorPolicyCapability::CAN_JOIN]);
 
     $field_list = PhabricatorCustomField::getObjectFields(
       $project,

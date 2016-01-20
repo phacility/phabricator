@@ -73,21 +73,24 @@
   background-size: 100%;
 }
 
-.phui-profile-menu .phui-profile-menu-collapsed .phui-list-item-href {
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-list-item-href {
   text-align: center;
   padding: 42px 8px 12px;
   font-size: 11px;
   line-height: 13px;
 }
 
-.phui-profile-menu .phui-profile-menu-collapsed .phui-list-item-name {
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-list-item-name {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.phui-profile-menu .phui-profile-menu-collapsed .phui-list-item-icon,
-.phui-profile-menu .phui-profile-menu-collapsed
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-list-item-icon,
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
   .phui-list-item-href .phui-icon-view  {
   top: 10px;
   left: 29px;
@@ -166,27 +169,31 @@
   left: 120px;
 }
 
-.phui-profile-menu .phui-profile-menu-collapsed .phui-profile-menu-footer {
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-profile-menu-footer {
   width: 40px;
   height: {$menu.profile.item.height};
   bottom: 0px;
 }
 
-.phui-profile-menu .phui-profile-menu-collapsed .phui-profile-menu-footer-1 {
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-profile-menu-footer-1 {
   left: 0;
 }
 
-.phui-profile-menu .phui-profile-menu-collapsed .phui-profile-menu-footer-2 {
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-profile-menu-footer-2 {
   left: 40px;
 }
 
-
-.phui-profile-menu .phui-profile-menu-collapsed .phui-profile-menu-footer
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-profile-menu-footer
   .phui-list-item-name {
   display: none;
 }
 
-.phui-profile-menu .phui-profile-menu-collapsed .phui-profile-menu-footer
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-profile-menu-footer
   .phui-list-item-icon {
   top: 10px;
   left: 10px;
