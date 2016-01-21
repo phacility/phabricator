@@ -54,23 +54,46 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
       $future->setStdoutSizeLimit($byte_limit + 1);
     }
 
+    $drequest = $this->getRequest();
+
+    $name = basename($drequest->getPath());
+    $ttl = PhabricatorTime::getNow() + phutil_units('48 hours in seconds');
+
     try {
-      $file_content = $this->resolveFileContentFuture($future);
+      $threshold = PhabricatorFileStorageEngine::getChunkThreshold();
+      $future->setReadBufferSize($threshold);
+
+      $source = id(new PhabricatorExecFutureFileUploadSource())
+        ->setName($name)
+        ->setTTL($ttl)
+        ->setViewPolicy(PhabricatorPolicies::POLICY_NOONE)
+        ->setExecFuture($future);
+
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $file = $source->uploadFile();
+      unset($unguarded);
+
     } catch (CommandException $ex) {
       if (!$future->getWasKilledByTimeout()) {
         throw $ex;
       }
 
       $this->didHitTimeLimit = true;
-      $file_content = null;
+      $file = null;
     }
 
-    if ($byte_limit && (strlen($file_content) > $byte_limit)) {
+    if ($byte_limit && ($file->getByteSize() > $byte_limit)) {
       $this->didHitByteLimit = true;
-      $file_content = null;
+
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        id(new PhabricatorDestructionEngine())
+          ->destroyObject($file);
+      unset($unguarded);
+
+      $file = null;
     }
 
-    return $file_content;
+    return $file;
   }
 
 }
