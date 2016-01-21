@@ -38,6 +38,9 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
         'key_garbagecollect' => array(
           'columns' => array('artifactType', 'dateCreated'),
         ),
+        'key_target' => array(
+          'columns' => array('buildTargetPHID', 'artifactType'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
