@@ -381,6 +381,12 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $column = $orderable[$key];
       $column['value'] = $value_map[$key];
 
+      // If the vector component is reversed, we need to reverse whatever the
+      // order of the column is.
+      if ($order->getIsReversed()) {
+        $column['reverse'] = !idx($column, 'reverse', false);
+      }
+
       $columns[] = $column;
     }
 
