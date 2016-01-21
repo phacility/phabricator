@@ -256,10 +256,19 @@ final class PhabricatorStorageManagementAPI extends Phobject {
         $query = str_replace('{$'.$key.'}', $value, $query);
       }
 
-      queryfx(
-        $conn,
-        '%Q',
-        $query);
+      try {
+        queryfx($conn, '%Q', $query);
+      } catch (AphrontAccessDeniedQueryException $ex) {
+        throw new PhutilProxyException(
+          pht(
+            'Unable to access a required database or table. This almost '.
+            'always means that the user you are connecting with ("%s") does '.
+            'not have sufficient permissions granted in MySQL. You can '.
+            'use `bin/storage databases` to get a list of all databases '.
+            'permission is required on.',
+            $this->getUser()),
+          $ex);
+      }
     }
   }
 
