@@ -123,6 +123,16 @@ final class PhabricatorStorageManagementAPI extends Phobject {
         'SELECT patch FROM %T',
         self::TABLE_STATUS);
       return ipull($applied, 'patch');
+    } catch (AphrontAccessDeniedQueryException $ex) {
+      throw new PhutilProxyException(
+        pht(
+          'Failed while trying to read schema status: the database "%s" '.
+          'exists, but the current user ("%s") does not have permission to '.
+          'access it. GRANT the current user more permissions, or use a '.
+          'different user.',
+          $this->getDatabaseName('meta_data'),
+          $this->getUser()),
+        $ex);
     } catch (AphrontQueryException $ex) {
       return null;
     }

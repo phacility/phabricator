@@ -47,6 +47,25 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
       $databases);
     $database_info = ipull($database_info, null, 'SCHEMA_NAME');
 
+    // Find databases which exist, but which the user does not have permission
+    // to see.
+    $invisible_databases = array();
+    foreach ($databases as $database_name) {
+      if (isset($database_info[$database_name])) {
+        continue;
+      }
+
+      try {
+        queryfx($conn, 'SHOW TABLES IN %T', $database_name);
+      } catch (AphrontAccessDeniedQueryException $ex) {
+        // This database exists, the user just doesn't have permission to
+        // see it.
+        $invisible_databases[] = $database_name;
+      } catch (AphrontSchemaQueryException $ex) {
+        // This database is legitimately missing.
+      }
+    }
+
     $sql = array();
     foreach ($tables as $table) {
       $sql[] = qsprintf(
@@ -148,6 +167,13 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
       $server_schema->addDatabase($database_schema);
     }
 
+    foreach ($invisible_databases as $database_name) {
+      $server_schema->addDatabase(
+        id(new PhabricatorConfigDatabaseSchema())
+          ->setName($database_name)
+          ->setAccessDenied(true));
+    }
+
     return $server_schema;
   }
 
@@ -194,6 +220,7 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
       if (!$actual_database) {
         $actual_database = $expect_database->newEmptyClone();
       }
+
       if (!$expect_database) {
         $expect_database = $actual_database->newEmptyClone();
       }
