@@ -19,7 +19,6 @@ final class PHUIListItemView extends AphrontTagView {
   private $isExternal;
   private $key;
   private $icon;
-  private $appIcon;
   private $selected;
   private $disabled;
   private $renderNameAsTooltip;
@@ -179,7 +178,7 @@ final class PHUIListItemView extends AphrontTagView {
     $classes[] = 'phui-list-item-view';
     $classes[] = 'phui-list-item-'.$this->type;
 
-    if ($this->icon || $this->appIcon) {
+    if ($this->icon) {
       $classes[] = 'phui-list-item-has-icon';
     }
 
@@ -277,12 +276,6 @@ final class PHUIListItemView extends AphrontTagView {
       $icon = id(new PHUIIconView())
         ->setHeadSize(PHUIIconView::HEAD_SMALL)
         ->setImage($this->profileImage);
-    }
-
-    if ($this->appIcon) {
-      $icon = id(new PHUIIconView())
-        ->addClass('phui-list-item-icon')
-        ->setIconFont($this->appIcon);
     }
 
     $classes = array();
