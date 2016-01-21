@@ -327,12 +327,12 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
         $object,
         PhabricatorPolicyCapability::CAN_EDIT);
 
-      $expanded_edit_icon = id(new PHUIIconView())
+      $expanded_edit_icon = id(new PHUIIconCircleView())
         ->addClass('phui-list-item-icon')
         ->addClass('phui-profile-menu-visible-when-expanded')
         ->setIconFont('fa-pencil');
 
-      $collapsed_edit_icon = id(new PHUIIconView())
+      $collapsed_edit_icon = id(new PHUIIconCircleView())
         ->addClass('phui-list-item-icon')
         ->addClass('phui-profile-menu-visible-when-collapsed')
         ->setIconFont('fa-pencil')
@@ -386,12 +386,12 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
         'settingsURI' => $settings_uri,
       ));
 
-    $collapse_icon = id(new PHUIIconView())
+    $collapse_icon = id(new PHUIIconCircleView())
       ->addClass('phui-list-item-icon')
       ->addClass('phui-profile-menu-visible-when-expanded')
       ->setIconFont('fa-angle-left');
 
-    $expand_icon = id(new PHUIIconView())
+    $expand_icon = id(new PHUIIconCircleView())
       ->addClass('phui-list-item-icon')
       ->addClass('phui-profile-menu-visible-when-collapsed')
       ->addSigil('has-tooltip')

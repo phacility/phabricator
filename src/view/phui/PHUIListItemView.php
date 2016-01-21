@@ -160,7 +160,7 @@ final class PHUIListItemView extends AphrontTagView {
     return $this;
   }
 
-  public function addIcon(PHUIIconView $icon) {
+  public function addIcon($icon) {
     $this->icons[] = $icon;
     return $this;
   }
@@ -275,6 +275,7 @@ final class PHUIListItemView extends AphrontTagView {
     if ($this->profileImage) {
       $icon = id(new PHUIIconView())
         ->setHeadSize(PHUIIconView::HEAD_SMALL)
+        ->addClass('phui-list-item-icon')
         ->setImage($this->profileImage);
     }
 

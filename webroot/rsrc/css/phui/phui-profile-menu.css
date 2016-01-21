@@ -45,29 +45,27 @@
 .phui-profile-menu .phabricator-side-menu .phui-list-item-href {
   display: block;
   text-decoration: none;
-  padding: 12px 8px 12px 48px;
-  font-size: 15px;
+  padding: 0 8px 0 48px;
+  height: 48px;
+  font-size: {$biggerfontsize};
   -webkit-font-smoothing: antialiased;
   color: {$menu.profile.text};
   line-height: 22px;
   overflow: hidden;
   text-overflow: ellipsis;
-
-  /* NOTE: We must have an opaque background on these items so the footer
-     items appear opaque when the render over normal items. */
-  background: {$menu.profile.background};
+  line-height: 48px;
 }
 
 .phui-profile-menu .phabricator-side-menu .phui-list-item-icon,
 .phui-profile-menu .phabricator-side-menu
-  .phui-list-item-href .phui-icon-view {
+  .phui-list-item-href .phui-list-item-icon {
   position: absolute;
   top: 12px;
   left: 13px;
-  font-size: 20px;
-  width: 22px;
-  height: 22px;
-  line-height: 22px;
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
   text-align: center;
   color: {$menu.profile.text};
   background-size: 100%;
@@ -76,9 +74,10 @@
 .phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
   .phui-list-item-href {
   text-align: center;
-  padding: 42px 8px 12px;
-  font-size: 11px;
-  line-height: 13px;
+  padding: 42px 4px 14px;
+  line-height: 14px;
+  height: auto;
+  font-size: {$smallerfontsize};
 }
 
 .phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
@@ -91,9 +90,9 @@
 .phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
   .phui-list-item-icon,
 .phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
-  .phui-list-item-href .phui-icon-view  {
-  top: 10px;
-  left: 29px;
+  .phui-list-item-href .phui-list-item-icon  {
+  top: 14px;
+  left: 31px;
 }
 
 .phui-profile-menu .phabricator-side-menu
@@ -130,10 +129,9 @@
   color: {$menu.profile.text.selected};
 }
 
-
 .phui-profile-menu .phabricator-side-menu .phui-divider {
   margin: 4px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.200);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .phui-profile-menu .phabricator-side-menu .phui-motivator {
@@ -154,49 +152,10 @@
   height: {$menu.profile.item.height};
 }
 
-.phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer {
-  position: fixed;
-  box-sizing: border-box;
-  width: {$menu.profile.width};
-  bottom: 0px;
-}
-
-.phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer-1 {
-  left: 0;
-}
-
-.phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer-2 {
-  left: 120px;
-}
-
-.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
-  .phui-profile-menu-footer {
-  width: 40px;
-  height: {$menu.profile.item.height};
-  bottom: 0px;
-}
-
-.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
-  .phui-profile-menu-footer-1 {
-  left: 0;
-}
-
-.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
-  .phui-profile-menu-footer-2 {
-  left: 40px;
-}
-
 .phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
   .phui-profile-menu-footer
   .phui-list-item-name {
   display: none;
-}
-
-.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
-  .phui-profile-menu-footer
-  .phui-list-item-icon {
-  top: 10px;
-  left: 10px;
 }
 
 .phui-profile-menu .phui-profile-menu-expanded
@@ -204,4 +163,26 @@
 .phui-profile-menu .phui-profile-menu-collapsed
   .phui-profile-menu-visible-when-expanded {
   display: none;
+}
+
+.phui-profile-menu .phui-profile-menu-footer .phui-icon-circle {
+  border-color: {$menu.profile.text};
+}
+
+.phui-profile-menu .phui-profile-menu-footer .phui-icon-circle .phui-icon-view {
+  color: {$menu.profile.text};
+}
+
+.phui-profile-menu .phui-profile-menu-footer:hover .phui-icon-circle {
+  border-color: #fff;
+}
+
+.phui-profile-menu .phui-profile-menu-footer:hover .phui-icon-circle
+  .phui-icon-view {
+    color: #fff;
+}
+
+.phui-profile-menu .phui-profile-menu-footer
+  .phui-icon-circle.phui-list-item-icon {
+  font-size: 11px;
 }
