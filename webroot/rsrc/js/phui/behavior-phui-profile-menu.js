@@ -6,7 +6,18 @@
  */
 
 JX.behavior('phui-profile-menu', function(config) {
-  var menu_node = JX.$(config.menuID);
+  // NOTE: This behavior is not initialized in the rendering pipeline for the
+  // menu, so it can get initialized when we build but do not render a menu
+  // (for example, when a page like the panel edit page only has items in
+  // the mobile/application menu, and does not show the profile menu). For now,
+  // just bail if we can't find the menu.
+
+  try {
+    var menu_node = JX.$(config.menuID);
+  } catch (ex) {
+    return;
+  }
+
   var collapse_node = JX.$(config.collapseID);
 
   var is_collapsed = config.isCollapsed;
