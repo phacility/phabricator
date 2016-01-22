@@ -382,7 +382,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
       array(
         'menuID' => $nav->getMainID(),
         'collapseID' => $collapse_id,
-        'isCollapsed' => $is_collapsed,
+        'isCollapsed' => (bool)$is_collapsed,
         'settingsURI' => $settings_uri,
       ));
 
