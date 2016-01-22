@@ -51,3 +51,45 @@ complicated by members and watchers.
 
 If you'd like to receive edit notifications for a project, you can write a
 Herald rule to keep you in the loop.
+
+
+Customizing Menus
+=================
+
+Projects support profile menus, which are customizable. For full details on
+managing and customizing profile menus, see @{article:Profile Menu User Guide}.
+
+Here are some examples of common ways to customize project profile menus that
+may be useful:
+
+**Link to Tasks or Repositories**: You can add a menu item for "Open Tasks" or
+"Active Repositories" for a project by running the search in the appropriate
+application, then adding a link to the search results to the menu.
+
+This can let you quickly jump from a project screen to related tasks,
+revisions, repositories, or other objects.
+
+For more details on how to use search and manage queries, see
+@{article:Search User Guide}.
+
+**New Task Button**: To let users easily make a new task that is tagged with
+the current project, add a link to the "New Task" form with the project
+prefilled, or to a custom form with appropriate defaults.
+
+For information on customizing and prefilling forms, see
+@{article:User Guide: Customizing Forms}.
+
+**Link to Wiki Pages**: You can add links to relevant wiki pages or other
+documentation to the menu to make it easy to find and access. You could also
+link to a Conpherence if you have a chatroom for a project.
+
+**Link to External Resources**: You can link to external resources outside
+of Phabricator if you have other pages which are relevant to a project.
+
+**Set Workboard as Default**: For projects that are mostly used to organize
+tasks, change the default item to the workboard instead of the profile to get
+to the workboard view more easily.
+
+**Hide Unused Items**: If you have a project which you don't expect to have
+members or won't have a workboard, you can hide these items to streamline the
+menu.

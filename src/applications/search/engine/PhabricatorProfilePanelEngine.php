@@ -630,7 +630,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
 
         if ($panel->isDisabled()) {
           $hide_icon = 'fa-plus';
-          $hide_text = pht('Show');
+          $hide_text = pht('Enable');
         } else if ($panel->getBuiltinKey() !== null) {
           $hide_icon = 'fa-times';
           $hide_text = pht('Disable');
@@ -683,10 +683,14 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
         ->setLabel(true)
         ->setName(pht('Documentation')));
 
+    $doc_link = PhabricatorEnv::getDoclink('Profile Menu User Guide');
+    $doc_name = pht('Profile Menu User Guide');
+
     $action_view->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-book')
-        ->setName(pht('TODO: Write Documentation')));
+        ->setHref($doc_link)
+        ->setName($doc_name));
 
     $action_button = id(new PHUIButtonView())
       ->setTag('a')
