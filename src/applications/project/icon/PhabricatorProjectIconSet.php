@@ -125,16 +125,6 @@ final class PhabricatorProjectIconSet
     return $icons;
   }
 
-  public static function getColorMap() {
-    $shades = PHUITagView::getShadeMap();
-    $shades = array_select_keys(
-      $shades,
-      array(PhabricatorProject::DEFAULT_COLOR)) + $shades;
-    unset($shades[PHUITagView::COLOR_DISABLED]);
-
-    return $shades;
-  }
-
   private static function getIconSpecifications() {
     return PhabricatorEnv::getEnvConfig('projects.icons');
   }
@@ -310,6 +300,159 @@ final class PhabricatorProjectIconSet
           'Project icons must include one icon marked with special attribute '.
           '"%s", but no such icon exists.',
           self::SPECIAL_MILESTONE));
+    }
+
+  }
+
+  private static function getColorSpecifications() {
+    return PhabricatorEnv::getEnvConfig('projects.colors');
+  }
+
+  public static function getColorMap() {
+    $specifications = self::getColorSpecifications();
+    return ipull($specifications, 'name', 'key');
+  }
+
+  public static function getDefaultColorKey() {
+    $specifications = self::getColorSpecifications();
+
+    foreach ($specifications as $specification) {
+      if (idx($specification, 'default')) {
+        return $specification['key'];
+      }
+    }
+
+    return null;
+  }
+
+  private static function getAvailableColorKeys() {
+    $list = array();
+
+    $specifications = self::getDefaultColorMap();
+    foreach ($specifications as $specification) {
+      $list[] = $specification['key'];
+    }
+
+    return $list;
+  }
+
+  public static function getDefaultColorMap() {
+    return array(
+      array(
+        'key' => PHUITagView::COLOR_RED,
+        'name' => pht('Red'),
+      ),
+      array(
+        'key' => PHUITagView::COLOR_ORANGE,
+        'name' => pht('Orange'),
+      ),
+      array(
+        'key' => PHUITagView::COLOR_YELLOW,
+        'name' => pht('Yellow'),
+      ),
+      array(
+        'key' => PHUITagView::COLOR_GREEN,
+        'name' => pht('Green'),
+      ),
+      array(
+        'key' => PHUITagView::COLOR_BLUE,
+        'name' => pht('Blue'),
+        'default' => true,
+      ),
+      array(
+        'key' => PHUITagView::COLOR_INDIGO,
+        'name' => pht('Indigo'),
+      ),
+      array(
+        'key' => PHUITagView::COLOR_VIOLET,
+        'name' => pht('Violet'),
+      ),
+      array(
+        'key' => PHUITagView::COLOR_PINK,
+        'name' => pht('Pink'),
+      ),
+      array(
+        'key' => PHUITagView::COLOR_GREY,
+        'name' => pht('Grey'),
+      ),
+      array(
+        'key' => PHUITagView::COLOR_CHECKERED,
+        'name' => pht('Checkered'),
+      ),
+    );
+  }
+
+  public static function validateColorConfiguration($config) {
+    if (!is_array($config)) {
+      throw new Exception(
+        pht('Configuration must be a list of project color specifications.'));
+    }
+
+    $available_keys = self::getAvailableColorKeys();
+    $available_keys = array_fuse($available_keys);
+
+    foreach ($config as $idx => $value) {
+      if (!is_array($value)) {
+        throw new Exception(
+          pht(
+            'Value for index "%s" should be a dictionary.',
+            $idx));
+      }
+
+      PhutilTypeSpec::checkMap(
+        $value,
+        array(
+          'key' => 'string',
+          'name' => 'string',
+          'default' => 'optional bool',
+        ));
+
+      $key = $value['key'];
+      if (!isset($available_keys[$key])) {
+        throw new Exception(
+          pht(
+            'Color key "%s" is not a valid color key. The supported color '.
+            'keys are: %s.',
+            $key,
+            implode(', ', $available_keys)));
+      }
+    }
+
+    $default = null;
+    $keys = array();
+    foreach ($config as $idx => $value) {
+      $key = $value['key'];
+      if (isset($keys[$key])) {
+        throw new Exception(
+          pht(
+            'Project colors must have unique keys, but two icons share the '.
+            'same key ("%s").',
+            $key));
+      } else {
+        $keys[$key] = true;
+      }
+
+      if (idx($value, 'default')) {
+        if ($default === null) {
+          $default = $value;
+        } else {
+          $original_key = $default['key'];
+          throw new Exception(
+            pht(
+              'Two different colors ("%s", "%s") are marked as the default '.
+              'color. Only one color may be marked as the default.',
+              $key,
+              $original_key));
+        }
+      }
+    }
+
+    if ($default === null) {
+      throw new Exception(
+        pht(
+          'Project colors must include one color marked as the "%s" color, '.
+          'but no such color exists.',
+          'default'));
     }
 
   }

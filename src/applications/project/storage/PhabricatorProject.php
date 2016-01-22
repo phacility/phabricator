@@ -44,8 +44,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   private $slugs = self::ATTACHABLE;
   private $parentProject = self::ATTACHABLE;
 
-  const DEFAULT_COLOR = 'blue';
-
   const TABLE_DATASOURCE_TOKEN = 'project_datasourcetoken';
 
   const PANEL_PROFILE = 'project.profile';
@@ -68,11 +66,12 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       ProjectDefaultJoinCapability::CAPABILITY);
 
     $default_icon = PhabricatorProjectIconSet::getDefaultIconKey();
+    $default_color = PhabricatorProjectIconSet::getDefaultColorKey();
 
     return id(new PhabricatorProject())
       ->setAuthorPHID($actor->getPHID())
       ->setIcon($default_icon)
-      ->setColor(self::DEFAULT_COLOR)
+      ->setColor($default_color)
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
       ->setJoinPolicy($join_policy)
@@ -511,7 +510,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function getDisplayColor() {
     if ($this->isMilestone()) {
-      return self::DEFAULT_COLOR;
+      return PhabricatorProjectIconSet::getDefaultColorKey();
     }
 
     return $this->getColor();

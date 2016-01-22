@@ -21,7 +21,7 @@ final class PhabricatorProjectConfigOptions
 
   public function getOptions() {
     $default_icons = PhabricatorProjectIconSet::getDefaultConfiguration();
-    $icons_type = 'custom:PhabricatorProjectTypeConfigOptionType';
+    $icons_type = 'custom:PhabricatorProjectIconsConfigOptionType';
 
     $icons_description = $this->deformat(pht(<<<EOTEXT
 Allows you to change and customize the available project icons.
@@ -47,6 +47,27 @@ configuration.
 EOTEXT
       ));
 
+    $default_colors = PhabricatorProjectIconSet::getDefaultColorMap();
+    $colors_type = 'custom:PhabricatorProjectColorsConfigOptionType';
+
+    $colors_description = $this->deformat(pht(<<<EOTEXT
+Allows you to relabel project colors.
+
+The list of available colors can not be expanded, but the existing colors may
+be given labels.
+
+Configure a list of color specifications. Each color specification should be a
+dictionary, which may contain these keys:
+
+  - `key` //Required string.// The internal key identifying the color.
+  - `name` //Required string.// Human-readable label for the color.
+  - `default` //Optional bool.// Selects the default color used when creating
+    new projects. Exactly one color must be selected as the default.
+
+You can look at the default configuration below for an example of a valid
+configuration.
+EOTEXT
+      ));
 
     $default_fields = array(
       'std:project:internal:description' => true,
@@ -76,6 +97,9 @@ EOTEXT
       $this->newOption('projects.icons', $icons_type, $default_icons)
         ->setSummary(pht('Adjust project icons.'))
         ->setDescription($icons_description),
+      $this->newOption('projects.colors', $colors_type, $default_colors)
+        ->setSummary(pht('Adjust project colors.'))
+        ->setDescription($colors_description),
     );
   }
 
