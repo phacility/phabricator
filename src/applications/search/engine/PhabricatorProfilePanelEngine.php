@@ -891,46 +891,13 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
         ->addCancelButton($done_uri);
     }
 
-    $type_visibility =
-      PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY;
-
-    $v_visible = PhabricatorProfilePanelConfiguration::VISIBILITY_VISIBLE;
-    $v_default = PhabricatorProfilePanelConfiguration::VISIBILITY_DEFAULT;
-
     if ($request->isFormPost()) {
-      // First, mark any existing default panels as merely visible.
-      foreach ($panels as $panel) {
-        if (!$panel->isDefault()) {
-          continue;
-        }
-
-        $xactions = array();
-
-        $xactions[] = id(new PhabricatorProfilePanelConfigurationTransaction())
-          ->setTransactionType($type_visibility)
-          ->setNewValue($v_visible);
-
-        $editor = id(new PhabricatorProfilePanelEditor())
-          ->setContentSourceFromRequest($request)
-          ->setActor($viewer)
-          ->setContinueOnMissingFields(true)
-          ->setContinueOnNoEffect(true)
-          ->applyTransactions($panel, $xactions);
+      $key = $configuration->getID();
+      if (!$key) {
+        $key = $configuration->getBuiltinKey();
       }
 
-      // Now, make this panel the default.
-      $xactions = array();
-
-      $xactions[] = id(new PhabricatorProfilePanelConfigurationTransaction())
-        ->setTransactionType($type_visibility)
-        ->setNewValue($v_default);
-
-      $editor = id(new PhabricatorProfilePanelEditor())
-        ->setContentSourceFromRequest($request)
-        ->setActor($viewer)
-        ->setContinueOnMissingFields(true)
-        ->setContinueOnNoEffect(true)
-        ->applyTransactions($configuration, $xactions);
+      $this->adjustDefault($key);
 
       return id(new AphrontRedirectResponse())
         ->setURI($done_uri);
@@ -948,6 +915,71 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
 
   protected function newPanel() {
     return PhabricatorProfilePanelConfiguration::initializeNewBuiltin();
+  }
+
+  public function adjustDefault($key) {
+    $controller = $this->getController();
+    $request = $controller->getRequest();
+    $viewer = $request->getViewer();
+
+    $panels = $this->loadPanels();
+
+    // To adjust the default panel, we first change any existing panels that
+    // are marked as defaults to "visible", then make the new default panel
+    // the default.
+
+    $default = array();
+    $visible = array();
+
+    foreach ($panels as $panel) {
+      $builtin_key = $panel->getBuiltinKey();
+      $id = $panel->getID();
+
+      $is_target =
+        (($builtin_key !== null) && ($builtin_key === $key)) ||
+        (($id !== null) && ($id === (int)$key));
+
+      if ($is_target) {
+        if (!$panel->isDefault()) {
+          $default[] = $panel;
+        }
+      } else {
+        if ($panel->isDefault()) {
+          $visible[] = $panel;
+        }
+      }
+    }
+
+    $type_visibility =
+      PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY;
+
+    $v_visible = PhabricatorProfilePanelConfiguration::VISIBILITY_VISIBLE;
+    $v_default = PhabricatorProfilePanelConfiguration::VISIBILITY_DEFAULT;
+
+    $apply = array(
+      array($v_visible, $visible),
+      array($v_default, $default),
+    );
+
+    foreach ($apply as $group) {
+      list($value, $panels) = $group;
+      foreach ($panels as $panel) {
+        $xactions = array();
+
+        $xactions[] = id(new PhabricatorProfilePanelConfigurationTransaction())
+          ->setTransactionType($type_visibility)
+          ->setNewValue($value);
+
+        $editor = id(new PhabricatorProfilePanelEditor())
+          ->setContentSourceFromRequest($request)
+          ->setActor($viewer)
+          ->setContinueOnMissingFields(true)
+          ->setContinueOnNoEffect(true)
+          ->applyTransactions($panel, $xactions);
+      }
+    }
+
+    return $this;
   }
 
 }

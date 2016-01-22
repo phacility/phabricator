@@ -761,8 +761,15 @@ final class PhabricatorProjectBoardViewController
     $board_uri = $this->getApplicationURI("board/{$id}/");
     $import_uri = $this->getApplicationURI("board/{$id}/import/");
 
-    switch ($type) {
-      case 'backlog-only':
+    $set_default = $request->getBool('default');
+    if ($set_default) {
+      $this
+        ->getProfilePanelEngine()
+        ->adjustDefault(PhabricatorProject::PANEL_WORKBOARD);
+    }
+
+    if ($request->isFormPost()) {
+      if ($type == 'backlog-only') {
         $column = PhabricatorProjectColumn::initializeNewColumn($viewer)
           ->setSequence(0)
           ->setProperty('isDefault', true)
@@ -773,12 +780,14 @@ final class PhabricatorProjectBoardViewController
 
         return id(new AphrontRedirectResponse())
           ->setURI($board_uri);
-      case 'import':
+      } else {
         return id(new AphrontRedirectResponse())
           ->setURI($import_uri);
+      }
     }
 
     $new_selector = id(new AphrontFormRadioButtonControl())
+      ->setLabel(pht('Columns'))
       ->setName('initialize-type')
       ->setValue('backlog-only')
       ->addButton(
@@ -790,11 +799,20 @@ final class PhabricatorProjectBoardViewController
         pht('Import Columns'),
         pht('Import board columns from another project.'));
 
+    $default_checkbox = id(new AphrontFormCheckboxControl())
+      ->setLabel(pht('Make Default'))
+      ->addCheckbox(
+        'default',
+        1,
+        pht('Make the workboard the default view for this project.'),
+        true);
+
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->appendRemarkupInstructions(
         pht('The workboard for this project has not been created yet.'))
       ->appendControl($new_selector)
+      ->appendControl($default_checkbox)
       ->appendControl(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($profile_uri)
