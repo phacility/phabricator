@@ -44,7 +44,7 @@ final class PhabricatorFileComposeController
         ));
 
       if ($project_phid) {
-        $edit_uri = '/project/profile/'.$project->getID().'/';
+        $edit_uri = '/project/history/'.$project->getID().'/';
 
         $xactions = array();
         $xactions[] = id(new PhabricatorProjectTransaction())

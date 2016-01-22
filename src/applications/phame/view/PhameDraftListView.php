@@ -92,7 +92,11 @@ final class PhameDraftListView extends AphrontTagView {
         ),
         pht('Drafts')));
 
-    return array($header, $list);
+    return id(new PHUIBoxView())
+      ->appendChild($header)
+      ->appendChild($list)
+      ->addClass('pl')
+      ->setColor(PHUIBoxView::BLUE);
   }
 
 }

@@ -24,6 +24,7 @@ final class PHUIRemarkupView extends AphrontView {
 
     return PhabricatorMarkupEngine::renderOneObject(
       id(new PhabricatorMarkupOneOff())
+        ->setPreserveLinebreaks(true)
         ->setContent($corpus),
       'default',
       $viewer);

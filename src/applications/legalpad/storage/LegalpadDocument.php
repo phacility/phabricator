@@ -167,10 +167,6 @@ final class LegalpadDocument extends LegalpadDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

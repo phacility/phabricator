@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorProjectTypeConfigOptionType
+final class PhabricatorProjectIconsConfigOptionType
   extends PhabricatorConfigJSONOptionType {
 
   public function validateOption(PhabricatorConfigOption $option, $value) {

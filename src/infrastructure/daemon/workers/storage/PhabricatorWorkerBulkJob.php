@@ -222,10 +222,6 @@ final class PhabricatorWorkerBulkJob
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

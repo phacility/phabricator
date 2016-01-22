@@ -340,10 +340,6 @@ final class PhameBlog extends PhameDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 
 /* -(  PhabricatorConduitResultInterface  )---------------------------------- */
 

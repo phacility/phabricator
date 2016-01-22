@@ -13,6 +13,11 @@ final class PhabricatorProjectDetailsProfilePanel
     return pht('Project Details');
   }
 
+  public function canMakeDefault(
+    PhabricatorProfilePanelConfiguration $config) {
+    return true;
+  }
+
   public function getDisplayName(
     PhabricatorProfilePanelConfiguration $config) {
     $name = $config->getPanelProperty('name');

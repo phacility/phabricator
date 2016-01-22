@@ -19,7 +19,6 @@ final class PHUIListItemView extends AphrontTagView {
   private $isExternal;
   private $key;
   private $icon;
-  private $appIcon;
   private $selected;
   private $disabled;
   private $renderNameAsTooltip;
@@ -28,6 +27,17 @@ final class PHUIListItemView extends AphrontTagView {
   private $aural;
   private $profileImage;
   private $indented;
+  private $hideInApplicationMenu;
+  private $icons = array();
+
+  public function setHideInApplicationMenu($hide) {
+    $this->hideInApplicationMenu = $hide;
+    return $this;
+  }
+
+  public function getHideInApplicationMenu() {
+    return $this->hideInApplicationMenu;
+  }
 
   public function setDropdownMenu(PhabricatorActionListView $actions) {
     Javelin::initBehavior('phui-dropdown-menu');
@@ -150,6 +160,15 @@ final class PHUIListItemView extends AphrontTagView {
     return $this;
   }
 
+  public function addIcon($icon) {
+    $this->icons[] = $icon;
+    return $this;
+  }
+
+  public function getIcons() {
+    return $this->icons;
+  }
+
   protected function getTagName() {
     return 'li';
   }
@@ -159,7 +178,7 @@ final class PHUIListItemView extends AphrontTagView {
     $classes[] = 'phui-list-item-view';
     $classes[] = 'phui-list-item-'.$this->type;
 
-    if ($this->icon || $this->appIcon) {
+    if ($this->icon) {
       $classes[] = 'phui-list-item-has-icon';
     }
 
@@ -256,13 +275,8 @@ final class PHUIListItemView extends AphrontTagView {
     if ($this->profileImage) {
       $icon = id(new PHUIIconView())
         ->setHeadSize(PHUIIconView::HEAD_SMALL)
-        ->setImage($this->profileImage);
-    }
-
-    if ($this->appIcon) {
-      $icon = id(new PHUIIconView())
         ->addClass('phui-list-item-icon')
-        ->setIconFont($this->appIcon);
+        ->setImage($this->profileImage);
     }
 
     $classes = array();
@@ -273,6 +287,8 @@ final class PHUIListItemView extends AphrontTagView {
     if ($this->indented) {
       $classes[] = 'phui-list-item-indented';
     }
+
+    $icons = $this->getIcons();
 
     return javelin_tag(
       $this->href ? 'a' : 'div',
@@ -285,6 +301,7 @@ final class PHUIListItemView extends AphrontTagView {
       array(
         $aural,
         $icon,
+        $icons,
         $this->renderChildren(),
         $name,
       ));

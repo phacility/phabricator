@@ -565,23 +565,25 @@ var.remarkup-assist-textarea {
 .phuix-autocomplete {
   position: absolute;
   width: 300px;
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.300);
+  box-shadow: {$dropshadow};
   background: #ffffff;
-  border: 1px solid {$blueborder};
+  border: 1px solid {$lightgreyborder};
+  border-radius: 3px;
 }
 
 .phuix-autocomplete-head {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: 4px 8px;
+  padding: 6px 8px;
   background: {$lightgreybackground};
-  color: {$greytext};
+  color: {$darkgreytext};
+  border-radius: 3px;
 }
 
 .phuix-autocomplete-head .phui-icon-view {
   margin-right: 4px;
-  color: {$greytext};
+  color: {$lightgreytext};
 }
 
 .phuix-autocomplete-echo {
@@ -591,22 +593,26 @@ var.remarkup-assist-textarea {
 
 .phuix-autocomplete-list a.jx-result {
   display: block;
-  padding: 4px 8px;
+  padding: 5px 8px;
   font-size: {$normalfontsize};
-  border-top: 1px solid {$hoverborder};
+  border-top: 1px solid {$thinblueborder};
+  font-weight: bold;
   color: {$darkgreytext};
 }
 
 .phuix-autocomplete-list a.jx-result .phui-icon-view {
   margin-right: 4px;
+  color: {$lightbluetext};
 }
 
 .phuix-autocomplete-list a.jx-result:hover {
   text-decoration: none;
-  background: {$hoverblue};
+  background: {$sh-bluebackground};
+  color: #000;
 }
 
 .phuix-autocomplete-list a.jx-result.focused,
 .phuix-autocomplete-list a.jx-result.focused:hover {
-  background: {$hoverblue};
+  background: {$sh-bluebackground};
+  color: #000;
 }

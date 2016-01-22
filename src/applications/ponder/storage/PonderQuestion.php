@@ -252,10 +252,6 @@ final class PonderQuestion extends PonderDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 

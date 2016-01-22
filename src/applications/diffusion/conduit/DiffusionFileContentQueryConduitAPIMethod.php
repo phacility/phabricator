@@ -39,14 +39,20 @@ final class DiffusionFileContentQueryConduitAPIMethod
       $file_query->setByteLimit($byte_limit);
     }
 
-    $content = $file_query->execute();
+    $file = $file_query->execute();
 
     $too_slow = (bool)$file_query->getExceededTimeLimit();
     $too_huge = (bool)$file_query->getExceededByteLimit();
 
     $file_phid = null;
     if (!$too_slow && !$too_huge) {
-      $file = $this->newFile($drequest, $content);
+      $repository = $drequest->getRepository();
+      $repository_phid = $repository->getPHID();
+
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $file->attachToObject($repository_phid);
+      unset($unguarded);
+
       $file_phid = $file->getPHID();
     }
 
@@ -55,28 +61,6 @@ final class DiffusionFileContentQueryConduitAPIMethod
       'tooHuge' => $too_huge,
       'filePHID' => $file_phid,
     );
-  }
-
-  private function newFile(DiffusionRequest $drequest, $content) {
-    $path = $drequest->getPath();
-    $name = basename($path);
-
-    $repository = $drequest->getRepository();
-    $repository_phid = $repository->getPHID();
-
-    $file = PhabricatorFile::buildFromFileDataOrHash(
-      $content,
-      array(
-        'name' => $name,
-        'ttl' => time() + phutil_units('48 hours in seconds'),
-        'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
-      ));
-
-    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $file->attachToObject($repository_phid);
-    unset($unguarded);
-
-    return $file;
   }
 
 }

@@ -115,7 +115,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
     foreach ($circles as $circle) {
       $circleview[] =
         id(new PHUIIconCircleView())
-          ->setIcon($circle)
+          ->setIconFont($circle)
           ->setHref('#')
           ->addClass('mmr');
     }
@@ -124,7 +124,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
     foreach ($circles as $circle) {
       $circleview[] =
         id(new PHUIIconCircleView())
-          ->setIcon($circle)
+          ->setIconFont($circle)
           ->setSize(PHUIIconCircleView::MEDIUM)
           ->setHref('#')
           ->addClass('mmr');

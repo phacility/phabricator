@@ -74,10 +74,6 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
 

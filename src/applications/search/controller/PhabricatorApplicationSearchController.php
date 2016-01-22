@@ -100,7 +100,7 @@ final class PhabricatorApplicationSearchController
     } else if (!strlen($this->queryKey)) {
       $found_query_data = false;
 
-      if ($request->isHTTPGet()) {
+      if ($request->isHTTPGet() || $request->isQuicksand()) {
         // If this is a GET request and it has some query data, don't
         // do anything unless it's only before= or after=. We'll build and
         // execute a query from it below. This allows external tools to build

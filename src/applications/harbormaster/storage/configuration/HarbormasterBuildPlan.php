@@ -129,10 +129,6 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

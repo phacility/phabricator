@@ -159,10 +159,6 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 

@@ -641,6 +641,7 @@ abstract class PhabricatorApplication
     return array(
       '(?P<panelAction>view)/(?P<panelID>[^/]+)/' => $controller,
       '(?P<panelAction>hide)/(?P<panelID>[^/]+)/' => $controller,
+      '(?P<panelAction>default)/(?P<panelID>[^/]+)/' => $controller,
       '(?P<panelAction>configure)/' => $controller,
       '(?P<panelAction>reorder)/' => $controller,
       '(?P<panelAction>edit)/'.$edit_route => $controller,

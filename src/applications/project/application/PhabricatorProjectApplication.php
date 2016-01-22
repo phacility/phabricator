@@ -48,13 +48,13 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
         'lock/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectLockController',
         'members/(?P<id>[1-9]\d*)/'
-          => 'PhabricatorProjectMembersEditController',
-        'members/(?P<id>[1-9]\d*)/remove/'
+          => 'PhabricatorProjectMembersViewController',
+        'members/(?P<id>[1-9]\d*)/add/'
+          => 'PhabricatorProjectMembersAddController',
+        '(?P<type>members|watchers)/(?P<id>[1-9]\d*)/remove/'
           => 'PhabricatorProjectMembersRemoveController',
         'profile/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectProfileController',
-        'feed/(?P<id>[1-9]\d*)/'
-          => 'PhabricatorProjectFeedController',
         'view/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectViewController',
         'picture/(?P<id>[1-9]\d*)/'
@@ -89,6 +89,8 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
         'history/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectHistoryController',
         '(?P<action>watch|unwatch)/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectWatchController',
+        'silence/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorProjectSilenceController',
       ),
       '/tag/' => array(
         '(?P<slug>[^/]+)/' => 'PhabricatorProjectViewController',
@@ -130,6 +132,15 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
   public function getApplicationSearchDocumentTypes() {
     return array(
       PhabricatorProjectProjectPHIDType::TYPECONST,
+    );
+  }
+
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Projects User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Projects User Guide'),
+      ),
     );
   }
 

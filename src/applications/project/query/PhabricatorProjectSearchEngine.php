@@ -42,7 +42,7 @@ final class PhabricatorProjectSearchEngine
   }
 
 
-protected function buildQueryFromParameters(array $map) {
+  protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
     if (strlen($map['name'])) {
@@ -155,8 +155,6 @@ protected function buildQueryFromParameters(array $map) {
           ->setType(PHUITagView::TYPE_SHADE)
           ->setShade($color)
           ->setName($name),
-        ' ',
-        $name,
       );
     }
 

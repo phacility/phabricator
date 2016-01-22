@@ -19,50 +19,16 @@ final class PhabricatorProjectBoardViewController
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
-    $id = $request->getURIData('id');
 
-    $show_hidden = $request->getBool('hidden');
-    $this->showHidden = $show_hidden;
-
-    $project = id(new PhabricatorProjectQuery())
-      ->setViewer($viewer)
-      ->needImages(true);
-    $id = $request->getURIData('id');
-    $slug = $request->getURIData('slug');
-    if ($slug) {
-      $project->withSlugs(array($slug));
-    } else {
-      $project->withIDs(array($id));
-    }
-    $project = $project->executeOne();
-    if (!$project) {
-      return new Aphront404Response();
+    $response = $this->loadProject();
+    if ($response) {
+      return $response;
     }
 
-    $this->setProject($project);
-    $this->id = $project->getID();
+    $project = $this->getProject();
 
-    $sort_key = $request->getStr('order');
-    switch ($sort_key) {
-      case PhabricatorProjectColumn::ORDER_NATURAL:
-      case PhabricatorProjectColumn::ORDER_PRIORITY:
-        break;
-      default:
-        $sort_key = PhabricatorProjectColumn::DEFAULT_ORDER;
-        break;
-    }
-    $this->sortKey = $sort_key;
-
-    $column_query = id(new PhabricatorProjectColumnQuery())
-      ->setViewer($viewer)
-      ->withProjectPHIDs(array($project->getPHID()));
-    if (!$show_hidden) {
-      $column_query->withStatuses(
-        array(PhabricatorProjectColumn::STATUS_ACTIVE));
-    }
-
-    $columns = $column_query->execute();
-    $columns = mpull($columns, null, 'getSequence');
+    $this->readRequestState();
+    $columns = $this->loadColumns($project);
 
     // TODO: Expand the checks here if we add the ability
     // to hide the Backlog column
@@ -72,32 +38,31 @@ final class PhabricatorProjectBoardViewController
         $project,
         PhabricatorPolicyCapability::CAN_EDIT);
       if (!$can_edit) {
-        return $this->noAccessDialog($project);
+        $content = $this->buildNoAccessContent($project);
+      } else {
+        $content = $this->buildInitializeContent($project);
       }
-      switch ($request->getStr('initialize-type')) {
-        case 'backlog-only':
-          $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-            $column = PhabricatorProjectColumn::initializeNewColumn($viewer)
-              ->setSequence(0)
-              ->setProperty('isDefault', true)
-              ->setProjectPHID($project->getPHID())
-              ->save();
-            $column->attachProject($project);
-            $columns[0] = $column;
-          unset($unguarded);
-          break;
-        case 'import':
-          return id(new AphrontRedirectResponse())
-            ->setURI(
-              $this->getApplicationURI('board/'.$project->getID().'/import/'));
-          break;
-        default:
-          return $this->initializeWorkboardDialog($project);
-          break;
-      }
-    }
 
-    ksort($columns);
+      if ($content instanceof AphrontResponse) {
+        return $content;
+      }
+
+      $nav = $this->getProfileMenu();
+      $nav->selectFilter(PhabricatorProject::PANEL_WORKBOARD);
+
+      $crumbs = $this->buildApplicationCrumbs();
+      $crumbs->addTextCrumb(pht('Workboard'));
+
+      return $this->newPage()
+        ->setTitle(
+          array(
+            pht('Workboard'),
+            $project->getName(),
+          ))
+        ->setNavigation($nav)
+        ->setCrumbs($crumbs)
+        ->appendChild($content);
+    }
 
     $board_uri = $this->getApplicationURI('board/'.$project->getID().'/');
 
@@ -350,7 +315,7 @@ final class PhabricatorProjectBoardViewController
 
     $sort_menu = $this->buildSortMenu(
       $viewer,
-      $sort_key);
+      $this->sortKey);
 
     $filter_menu = $this->buildFilterMenu(
       $viewer,
@@ -358,7 +323,7 @@ final class PhabricatorProjectBoardViewController
       $engine,
       $query_key);
 
-    $manage_menu = $this->buildManageMenu($project, $show_hidden);
+    $manage_menu = $this->buildManageMenu($project, $this->showHidden);
 
     $header_link = phutil_tag(
       'a',
@@ -400,6 +365,44 @@ final class PhabricatorProjectBoardViewController
           $header_box,
           $board_box,
         ));
+  }
+
+  private function readRequestState() {
+    $request = $this->getRequest();
+    $project = $this->getProject();
+
+    $this->showHidden = $request->getBool('hidden');
+    $this->id = $project->getID();
+
+    $sort_key = $request->getStr('order');
+    switch ($sort_key) {
+      case PhabricatorProjectColumn::ORDER_NATURAL:
+      case PhabricatorProjectColumn::ORDER_PRIORITY:
+        break;
+      default:
+        $sort_key = PhabricatorProjectColumn::DEFAULT_ORDER;
+        break;
+    }
+    $this->sortKey = $sort_key;
+  }
+
+  private function loadColumns(PhabricatorProject $project) {
+    $viewer = $this->getViewer();
+
+    $column_query = id(new PhabricatorProjectColumnQuery())
+      ->setViewer($viewer)
+      ->withProjectPHIDs(array($project->getPHID()));
+
+    if (!$this->showHidden) {
+      $column_query->withStatuses(
+        array(PhabricatorProjectColumn::STATUS_ACTIVE));
+    }
+
+    $columns = $column_query->execute();
+    $columns = mpull($columns, null, 'getSequence');
+    ksort($columns);
+
+    return $columns;
   }
 
   private function buildSortMenu(
@@ -697,47 +700,6 @@ final class PhabricatorProjectBoardViewController
     return $column_button;
   }
 
-  private function initializeWorkboardDialog(PhabricatorProject $project) {
-
-    $instructions = pht('This workboard has not been setup yet.');
-    $new_selector = id(new AphrontFormRadioButtonControl())
-      ->setName('initialize-type')
-      ->setValue('backlog-only')
-      ->addButton(
-        'backlog-only',
-        pht('New Empty Board'),
-        pht('Create a new board with just a backlog column.'))
-      ->addButton(
-        'import',
-        pht('Import Columns'),
-        pht('Import board columns from another project.'));
-
-    $dialog = id(new AphrontDialogView())
-      ->setUser($this->getRequest()->getUser())
-      ->setTitle(pht('New Workboard'))
-      ->addSubmitButton('Continue')
-      ->addCancelButton($this->getApplicationURI('view/'.$project->getID().'/'))
-      ->appendParagraph($instructions)
-      ->appendChild($new_selector);
-
-    return id(new AphrontDialogResponse())
-      ->setDialog($dialog);
-  }
-
-  private function noAccessDialog(PhabricatorProject $project) {
-
-    $instructions = pht('This workboard has not been setup yet.');
-
-    $dialog = id(new AphrontDialogView())
-      ->setUser($this->getRequest()->getUser())
-      ->setTitle(pht('No Workboard'))
-      ->addCancelButton($this->getApplicationURI('view/'.$project->getID().'/'))
-      ->appendParagraph($instructions);
-
-    return id(new AphrontDialogResponse())
-      ->setDialog($dialog);
-  }
-
 
   /**
    * Add current state parameters (like order and the visibility of hidden
@@ -784,6 +746,80 @@ final class PhabricatorProjectBoardViewController
     }
 
     return $create_uri;
+  }
+
+
+  private function buildInitializeContent(PhabricatorProject $project) {
+    $request = $this->getRequest();
+    $viewer = $this->getViewer();
+
+    $type = $request->getStr('initialize-type');
+
+    $id = $project->getID();
+
+    $profile_uri = $this->getApplicationURI("profile/{$id}/");
+    $board_uri = $this->getApplicationURI("board/{$id}/");
+    $import_uri = $this->getApplicationURI("board/{$id}/import/");
+
+    switch ($type) {
+      case 'backlog-only':
+        $column = PhabricatorProjectColumn::initializeNewColumn($viewer)
+          ->setSequence(0)
+          ->setProperty('isDefault', true)
+          ->setProjectPHID($project->getPHID())
+          ->save();
+
+        return id(new AphrontRedirectResponse())
+          ->setURI($board_uri);
+      case 'import':
+        return id(new AphrontRedirectResponse())
+          ->setURI($import_uri);
+    }
+
+    $new_selector = id(new AphrontFormRadioButtonControl())
+      ->setName('initialize-type')
+      ->setValue('backlog-only')
+      ->addButton(
+        'backlog-only',
+        pht('New Empty Board'),
+        pht('Create a new board with just a backlog column.'))
+      ->addButton(
+        'import',
+        pht('Import Columns'),
+        pht('Import board columns from another project.'));
+
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->appendRemarkupInstructions(
+        pht('The workboard for this project has not been created yet.'))
+      ->appendControl($new_selector)
+      ->appendControl(
+        id(new AphrontFormSubmitControl())
+          ->addCancelButton($profile_uri)
+          ->setValue(pht('Create Workboard')));
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Create Workboard'))
+      ->setForm($form);
+
+    return $box;
+  }
+
+  private function buildNoAccessContent(PhabricatorProject $project) {
+    $viewer = $this->getViewer();
+
+    $id = $project->getID();
+
+    $profile_uri = $this->getApplicationURI("profile/{$id}/");
+
+    return $this->newDialog()
+      ->setTitle(pht('Unable to Create Workboard'))
+      ->appendParagraph(
+        pht(
+          'The workboard for this project has not been created yet, '.
+          'but you do not have permission to create it. Only users '.
+          'who can edit this project can create a workboard for it.'))
+      ->addCancelButton($profile_uri);
   }
 
 }

@@ -485,10 +485,6 @@ final class DifferentialRevision extends DifferentialDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 
 /* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
 

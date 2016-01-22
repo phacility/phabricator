@@ -191,13 +191,20 @@ final class CelerityDefaultPostprocessor
       // Background color for "dark" themes.
       'page.background.dark' => '#ebecee',
 
-      'menu.profile.background' => '#525868',
+      // This is the base background color.
+      'menu.profile.background' => '#525867',
+      'menu.profile.background.hover' => '#464b58',
+      'menu.profile.background.selected' => '#393d48',
+
       'menu.profile.text' => '#c6c7cb',
       'menu.profile.text.selected' => '#ffffff',
-      'menu.profile.icon' => '#ffffff',
       'menu.profile.icon.disabled' => '#b9bcc2',
 
       'menu.main.height' => '44px',
+
+      'menu.profile.width' => '240px',
+      'menu.profile.width.collapsed' => '88px',
+      'menu.profile.item.height' => '46px',
 
     );
   }

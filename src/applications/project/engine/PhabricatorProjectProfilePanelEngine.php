@@ -20,27 +20,6 @@ final class PhabricatorProjectProfilePanelEngine
       ->setBuiltinKey(PhabricatorProject::PANEL_WORKBOARD)
       ->setPanelKey(PhabricatorProjectWorkboardProfilePanel::PANELKEY);
 
-    // TODO: This is temporary.
-    $uri = urisprintf(
-      '/maniphest/?statuses=open()&projects=%s#R',
-      $object->getPHID());
-
-    $panels[] = $this->newPanel()
-      ->setBuiltinKey('tasks')
-      ->setPanelKey(PhabricatorLinkProfilePanel::PANELKEY)
-      ->setPanelProperty('icon', 'maniphest')
-      ->setPanelProperty('name', pht('Open Tasks'))
-      ->setPanelProperty('uri', $uri);
-
-    // TODO: This is temporary.
-    $id = $object->getID();
-    $panels[] = $this->newPanel()
-      ->setBuiltinKey('feed')
-      ->setPanelKey(PhabricatorLinkProfilePanel::PANELKEY)
-      ->setPanelProperty('icon', 'feed')
-      ->setPanelProperty('name', pht('Feed'))
-      ->setPanelProperty('uri', "/project/feed/{$id}/");
-
     $panels[] = $this->newPanel()
       ->setBuiltinKey(PhabricatorProject::PANEL_MEMBERS)
       ->setPanelKey(PhabricatorProjectMembersProfilePanel::PANELKEY);
