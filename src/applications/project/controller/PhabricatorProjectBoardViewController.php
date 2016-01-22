@@ -769,6 +769,8 @@ final class PhabricatorProjectBoardViewController
           ->setProjectPHID($project->getPHID())
           ->save();
 
+        $project->setHasWorkboard(1)->save();
+
         return id(new AphrontRedirectResponse())
           ->setURI($board_uri);
       case 'import':
