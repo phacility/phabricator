@@ -712,16 +712,15 @@ final class PhabricatorProjectBoardViewController
         pht('Import Columns'),
         pht('Import board columns from another project.'));
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($this->getRequest()->getUser())
+
+    $cancel_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
+
+    return $this->newDialog()
       ->setTitle(pht('New Workboard'))
       ->addSubmitButton('Continue')
-      ->addCancelButton($this->getApplicationURI('view/'.$project->getID().'/'))
+      ->addCancelButton($cancel_uri)
       ->appendParagraph($instructions)
       ->appendChild($new_selector);
-
-    return id(new AphrontDialogResponse())
-      ->setDialog($dialog);
   }
 
   private function noAccessDialog(PhabricatorProject $project) {

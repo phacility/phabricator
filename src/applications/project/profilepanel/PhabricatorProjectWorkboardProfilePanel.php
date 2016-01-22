@@ -13,6 +13,11 @@ final class PhabricatorProjectWorkboardProfilePanel
     return pht('Workboard');
   }
 
+  public function canMakeDefault(
+    PhabricatorProfilePanelConfiguration $config) {
+    return true;
+  }
+
   public function getDisplayName(
     PhabricatorProfilePanelConfiguration $config) {
     $name = $config->getPanelProperty('name');

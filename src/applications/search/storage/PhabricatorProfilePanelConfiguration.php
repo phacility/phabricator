@@ -17,6 +17,7 @@ final class PhabricatorProfilePanelConfiguration
   private $profileObject = self::ATTACHABLE;
   private $panel = self::ATTACHABLE;
 
+  const VISIBILITY_DEFAULT = 'default';
   const VISIBILITY_VISIBLE = 'visible';
   const VISIBILITY_DISABLED = 'disabled';
 
@@ -54,13 +55,6 @@ final class PhabricatorProfilePanelConfiguration
         ),
       ),
     ) + parent::getConfiguration();
-  }
-
-  public static function getVisibilityNameMap() {
-    return array(
-      self::VISIBILITY_VISIBLE => pht('Visible'),
-      self::VISIBILITY_DISABLED => pht('Disabled'),
-    );
   }
 
   public function generatePHID() {
@@ -107,6 +101,10 @@ final class PhabricatorProfilePanelConfiguration
     return $this->getPanel()->getDisplayName($this);
   }
 
+  public function canMakeDefault() {
+    return $this->getPanel()->canMakeDefault($this);
+  }
+
   public function getSortKey() {
     $order = $this->getPanelOrder();
     if ($order === null) {
@@ -123,6 +121,10 @@ final class PhabricatorProfilePanelConfiguration
 
   public function isDisabled() {
     return ($this->getVisibility() === self::VISIBILITY_DISABLED);
+  }
+
+  public function isDefault() {
+    return ($this->getVisibility() === self::VISIBILITY_DEFAULT);
   }
 
 

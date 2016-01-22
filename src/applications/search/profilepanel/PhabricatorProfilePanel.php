@@ -30,6 +30,11 @@ abstract class PhabricatorProfilePanel extends Phobject {
     return false;
   }
 
+  public function canMakeDefault(
+    PhabricatorProfilePanelConfiguration $config) {
+    return false;
+  }
+
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
     return $this;
