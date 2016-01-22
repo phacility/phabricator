@@ -18,6 +18,7 @@
   vertical-align: top;
   width: {$menu.profile.width};
   max-width: {$menu.profile.width};
+  transition: .2s;
   margin-top: 0;
   overflow: hidden;
 }
@@ -92,7 +93,7 @@
 .phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
   .phui-list-item-href .phui-list-item-icon  {
   top: 14px;
-  left: 31px;
+  left: 32px;
 }
 
 .phui-profile-menu .phabricator-side-menu
@@ -109,6 +110,7 @@
   .phui-list-item-href:hover {
   background-color: {$menu.profile.background.hover};
   color: {$menu.profile.text.selected};
+  transition: 0.2s;
 }
 
 .phui-profile-menu .phabricator-side-menu
@@ -118,15 +120,14 @@
   .phui-list-item-href:hover
   .phui-list-item-icon {
   color: {$menu.profile.text.selected};
+  transition: 0.2s;
 }
 
 .phui-profile-menu .phabricator-side-menu .phui-list-item-selected
-  .phui-list-item-href,
-.device-desktop .phui-profile-menu .phabricator-side-menu
-  .phui-list-item-selected
-  .phui-list-item-href:hover {
+  .phui-list-item-href {
   background-color: {$menu.profile.background.selected};
   color: {$menu.profile.text.selected};
+  transition: 0.2s;
 }
 
 .phui-profile-menu .phabricator-side-menu .phui-divider {
@@ -165,6 +166,22 @@
   display: none;
 }
 
+
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-profile-menu-footer .phui-list-item-href {
+  padding: 20px 0 20px;
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer
+  .phui-list-item-href:hover {
+    background: transparent;
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-profile-menu-footer .phui-list-item-href .phui-list-item-icon {
+    top: 8px;
+}
+
 .phui-profile-menu .phui-profile-menu-footer .phui-icon-circle {
   border-color: {$menu.profile.text};
 }
@@ -173,16 +190,50 @@
   color: {$menu.profile.text};
 }
 
-.phui-profile-menu .phui-profile-menu-footer:hover .phui-icon-circle {
-  border-color: #fff;
+.phui-profile-menu .phui-profile-menu-footer .phui-list-item-href:hover
+  .phui-icon-circle,
+.phui-profile-menu .phui-list-item-selected.phui-profile-menu-footer
+  .phui-icon-circle {
+    border-color: #fff;
 }
 
-.phui-profile-menu .phui-profile-menu-footer:hover .phui-icon-circle
-  .phui-icon-view {
+.phui-profile-menu .phui-profile-menu-footer .phui-list-item-href:hover
+  .phui-icon-circle .phui-icon-view,
+.phui-profile-menu .phui-list-item-selected.phui-profile-menu-footer
+  .phui-icon-circle .phui-icon-view {
     color: #fff;
 }
 
 .phui-profile-menu .phui-profile-menu-footer
   .phui-icon-circle.phui-list-item-icon {
   font-size: 11px;
+}
+
+div.phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer-1 {
+  bottom: 40px;
+  position: fixed;
+  background-color: {$menu.profile.background};
+}
+
+div.phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer-2 {
+  bottom: 0;
+  position: fixed;
+  background-color: {$menu.profile.background};
+}
+
+.phui-profile-menu .phui-profile-menu-footer-1,
+.phui-profile-menu .phui-profile-menu-footer-2 {
+  width: {$menu.profile.width};
+  transition: .2s;
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phui-profile-menu-footer-1,
+.phui-profile-menu .phui-profile-menu-collapsed .phui-profile-menu-footer-2 {
+  width: {$menu.profile.width.collapsed};
+  transition: .2s;
+}
+
+.phui-profile-menu .phabricator-side-menu
+  .phui-list-item-selected.phui-profile-menu-footer .phui-list-item-href {
+    background: transparent;
 }
