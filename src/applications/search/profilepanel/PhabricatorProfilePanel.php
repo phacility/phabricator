@@ -26,8 +26,12 @@ abstract class PhabricatorProfilePanel extends Phobject {
     return array();
   }
 
-  public function canAddToObject(
-    PhabricatorProfilePanelInterface $object) {
+  public function canAddToObject($object) {
+    return false;
+  }
+
+  public function canMakeDefault(
+    PhabricatorProfilePanelConfiguration $config) {
     return false;
   }
 
@@ -49,6 +53,10 @@ abstract class PhabricatorProfilePanel extends Phobject {
       ->setAncestorClass(__CLASS__)
       ->setUniqueMethod('getPanelKey')
       ->execute();
+  }
+
+  protected function newItem() {
+    return new PHUIListItemView();
   }
 
 }

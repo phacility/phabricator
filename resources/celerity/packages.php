@@ -116,6 +116,7 @@ return array(
     'phui-spacing-css',
     'phui-form-css',
     'phui-icon-view-css',
+    'phui-profile-menu-css',
 
     'phabricator-application-launch-view-css',
     'phabricator-action-list-view-css',

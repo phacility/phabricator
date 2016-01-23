@@ -188,10 +188,6 @@ final class PholioMock extends PholioDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 

@@ -12,14 +12,11 @@ final class PhabricatorProjectUpdateController
       PhabricatorPolicyCapability::CAN_VIEW,
     );
 
-    $process_action = false;
     switch ($action) {
       case 'join':
         $capabilities[] = PhabricatorPolicyCapability::CAN_JOIN;
-        $process_action = $request->isFormPost();
         break;
       case 'leave':
-        $process_action = $request->isDialogFormPost();
         break;
       default:
         return new Aphront404Response();
@@ -35,10 +32,13 @@ final class PhabricatorProjectUpdateController
       return new Aphront404Response();
     }
 
-    $project_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
+    if (!$project->supportsEditMembers()) {
+      return new Aphront404Response();
+    }
 
-    if ($process_action) {
+    $done_uri = "/project/members/{$id}/";
 
+    if ($request->isFormPost()) {
       $edge_action = null;
       switch ($action) {
         case 'join':
@@ -50,6 +50,7 @@ final class PhabricatorProjectUpdateController
       }
 
       $type_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+
       $member_spec = array(
         $edge_action => array($viewer->getPHID() => $viewer->getPHID()),
       );
@@ -67,46 +68,47 @@ final class PhabricatorProjectUpdateController
         ->setContinueOnMissingFields(true)
         ->applyTransactions($project, $xactions);
 
-      return id(new AphrontRedirectResponse())->setURI($project_uri);
+      return id(new AphrontRedirectResponse())->setURI($done_uri);
     }
 
-    $dialog = null;
-    switch ($action) {
-      case 'leave':
-        $dialog = new AphrontDialogView();
-        $dialog->setUser($viewer);
-        if ($this->userCannotLeave($project)) {
-         $dialog->setTitle(pht('You can not leave this project.'));
-          $body = pht('The membership is locked for this project.');
-        } else {
-          $dialog->setTitle(pht('Really leave project?'));
-          $body = pht(
-            'Your tremendous contributions to this project will be sorely '.
-            'missed. Are you sure you want to leave?');
-          $dialog->addSubmitButton(pht('Leave Project'));
-        }
-        $dialog->appendParagraph($body);
-        $dialog->addCancelButton($project_uri);
-        break;
-      default:
-        return new Aphront404Response();
+    $is_locked = $project->getIsMembershipLocked();
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $project,
+      PhabricatorPolicyCapability::CAN_EDIT);
+    $can_leave = ($can_edit || !$is_locked);
+
+    $button = null;
+    if ($action == 'leave') {
+      if ($can_leave) {
+        $title = pht('Leave Project');
+        $body = pht(
+          'Your tremendous contributions to this project will be sorely '.
+          'missed. Are you sure you want to leave?');
+        $button = pht('Leave Project');
+      } else {
+        $title = pht('Membership Locked');
+        $body = pht(
+          'Membership for this project is locked. You can not leave.');
+      }
+    } else {
+      $title = pht('Join Project');
+      $body = pht(
+        'Join this project? You will become a member and enjoy whatever '.
+        'benefits membership may confer.');
+      $button = pht('Join Project');
     }
 
-    return id(new AphrontDialogResponse())->setDialog($dialog);
+    $dialog = $this->newDialog()
+      ->setTitle($title)
+      ->appendParagraph($body)
+      ->addCancelButton($done_uri);
+
+    if ($button) {
+      $dialog->addSubmitButton($button);
+    }
+
+    return $dialog;
   }
 
-  /**
-   * This is enforced in @{class:PhabricatorProjectTransactionEditor}. We use
-   * this logic to render a better form for users hitting this case.
-   */
-  private function userCannotLeave(PhabricatorProject $project) {
-    $viewer = $this->getViewer();
-
-    return
-      $project->getIsMembershipLocked() &&
-      !PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $project,
-        PhabricatorPolicyCapability::CAN_EDIT);
-  }
 }

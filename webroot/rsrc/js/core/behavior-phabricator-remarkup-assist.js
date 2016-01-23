@@ -7,6 +7,7 @@
  *           phabricator-textareautils
  *           javelin-workflow
  *           javelin-vector
+ *           phuix-autocomplete
  */
 
 JX.behavior('phabricator-remarkup-assist', function(config) {
@@ -292,5 +293,14 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
 
       assist(area, data.action, root, e.getNode('remarkup-assist'));
     });
+
+  var autocomplete = new JX.PHUIXAutocomplete()
+    .setArea(area);
+
+  for (var k in config.autocompleteMap) {
+    autocomplete.addAutocomplete(k, config.autocompleteMap[k]);
+  }
+
+  autocomplete.start();
 
 });

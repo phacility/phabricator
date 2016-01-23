@@ -1,11 +1,13 @@
 <?php
 
-final class PhabricatorProfilePanelEngine extends Phobject {
+abstract class PhabricatorProfilePanelEngine extends Phobject {
 
   private $viewer;
   private $profileObject;
   private $panels;
+  private $defaultPanel;
   private $controller;
+  private $navigation;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -16,8 +18,7 @@ final class PhabricatorProfilePanelEngine extends Phobject {
     return $this->viewer;
   }
 
-  public function setProfileObject(
-    PhabricatorProfilePanelInterface $profile_object) {
+  public function setProfileObject($profile_object) {
     $this->profileObject = $profile_object;
     return $this;
   }
@@ -35,6 +36,23 @@ final class PhabricatorProfilePanelEngine extends Phobject {
     return $this->controller;
   }
 
+  private function setDefaultPanel(
+    PhabricatorProfilePanelConfiguration $default_panel) {
+    $this->defaultPanel = $default_panel;
+    return $this;
+  }
+
+  public function getDefaultPanel() {
+    $this->loadPanels();
+    return $this->defaultPanel;
+  }
+
+  abstract protected function getPanelURI($path);
+
+  protected function isPanelEngineConfigurable() {
+    return PhabricatorEnv::getEnvConfig('phabricator.show-prototypes');
+  }
+
   public function buildResponse() {
     $controller = $this->getController();
 
@@ -44,6 +62,18 @@ final class PhabricatorProfilePanelEngine extends Phobject {
     $request = $controller->getRequest();
 
     $panel_action = $request->getURIData('panelAction');
+
+    // If the engine is not configurable, don't respond to any of the editing
+    // or configuration routes.
+    if (!$this->isPanelEngineConfigurable()) {
+      switch ($panel_action) {
+        case 'view':
+          break;
+        default:
+          return new Aphront404Response();
+      }
+    }
+
     $panel_id = $request->getURIData('panelID');
 
     $panel_list = $this->loadPanels();
@@ -71,6 +101,7 @@ final class PhabricatorProfilePanelEngine extends Phobject {
       case 'view':
       case 'info':
       case 'hide':
+      case 'default':
       case 'builtin':
         if (!$selected_panel) {
           return new Aphront404Response();
@@ -104,6 +135,11 @@ final class PhabricatorProfilePanelEngine extends Phobject {
       case 'hide':
         $content = $this->buildPanelHideContent($selected_panel);
         break;
+      case 'default':
+        $content = $this->buildPanelDefaultContent(
+          $selected_panel,
+          $panel_list);
+        break;
       case 'edit':
         $content = $this->buildPanelEditContent();
         break;
@@ -130,9 +166,13 @@ final class PhabricatorProfilePanelEngine extends Phobject {
   }
 
   public function buildNavigation() {
+    if ($this->navigation) {
+      return $this->navigation;
+    }
+
     $nav = id(new AphrontSideNavFilterView())
-      ->setIconNav(true)
-      ->setBaseURI(new PhutilURI('/project/'));
+      ->setIsProfileMenu(true)
+      ->setBaseURI(new PhutilURI($this->getPanelURI('')));
 
     $panels = $this->getPanels();
 
@@ -168,14 +208,15 @@ final class PhabricatorProfilePanelEngine extends Phobject {
       }
     }
 
-    $configure_item = $this->newConfigureMenuItem();
-    if ($configure_item) {
-      $nav->addMenuItem($configure_item);
+    $more_items = $this->newAutomaticMenuItems($nav);
+    foreach ($more_items as $item) {
+      $nav->addMenuItem($item);
     }
 
     $nav->selectFilter(null);
 
-    return $nav;
+    $this->navigation = $nav;
+    return $this->navigation;
   }
 
   private function getPanels() {
@@ -202,7 +243,15 @@ final class PhabricatorProfilePanelEngine extends Phobject {
     foreach ($stored_panels as $stored_panel) {
       $builtin_key = $stored_panel->getBuiltinKey();
       if ($builtin_key !== null) {
-        $panels[$builtin_key] = $stored_panel;
+        // If this builtin actually exists, replace the builtin with the
+        // stored configuration. Otherwise, we're just going to drop the
+        // stored config: it corresponds to an out-of-date or uninstalled
+        // panel.
+        if (isset($panels[$builtin_key])) {
+          $panels[$builtin_key] = $stored_panel;
+        } else {
+          continue;
+        }
       } else {
         $panels[] = $stored_panel;
       }
@@ -220,12 +269,39 @@ final class PhabricatorProfilePanelEngine extends Phobject {
     // partially keyed.
     $panels = array_values($panels);
 
+
+    // Make sure exactly one valid panel is marked as default.
+    $default = null;
+    $first = null;
+    foreach ($panels as $panel) {
+      if (!$panel->canMakeDefault()) {
+        continue;
+      }
+
+      if ($panel->isDefault()) {
+        $default = $panel;
+        break;
+      }
+
+      if ($first === null) {
+        $first = $panel;
+      }
+    }
+
+    if (!$default) {
+      $default = $first;
+    }
+
+    if ($default) {
+      $this->setDefaultPanel($default);
+    }
+
     return $panels;
   }
 
   private function loadBuiltinProfilePanels() {
     $object = $this->getProfileObject();
-    $builtins = $object->getBuiltinProfilePanels();
+    $builtins = $this->getBuiltinProfilePanels($object);
 
     $panels = PhabricatorProfilePanel::getAllPanels();
 
@@ -284,37 +360,116 @@ final class PhabricatorProfilePanelEngine extends Phobject {
     }
   }
 
-  private function newConfigureMenuItem() {
-    if (!PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
-      return null;
+  private function newAutomaticMenuItems(AphrontSideNavFilterView $nav) {
+    $items = array();
+
+    // NOTE: We're adding a spacer item for the fixed footer, so that if the
+    // menu taller than the page content you can still scroll down the page far
+    // enough to access the last item without the content being obscured by the
+    // fixed items.
+    $items[] = id(new PHUIListItemView())
+      ->setHideInApplicationMenu(true)
+      ->addClass('phui-profile-menu-spacer');
+
+    if ($this->isPanelEngineConfigurable()) {
+      $viewer = $this->getViewer();
+      $object = $this->getProfileObject();
+
+      $can_edit = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $object,
+        PhabricatorPolicyCapability::CAN_EDIT);
+
+      $expanded_edit_icon = id(new PHUIIconCircleView())
+        ->addClass('phui-list-item-icon')
+        ->addClass('phui-profile-menu-visible-when-expanded')
+        ->setIconFont('fa-pencil');
+
+      $collapsed_edit_icon = id(new PHUIIconCircleView())
+        ->addClass('phui-list-item-icon')
+        ->addClass('phui-profile-menu-visible-when-collapsed')
+        ->setIconFont('fa-pencil')
+        ->addSigil('has-tooltip')
+        ->setMetadata(
+          array(
+            'tip' => pht('Edit Menu'),
+            'align' => 'E',
+          ));
+
+      $items[] = id(new PHUIListItemView())
+        ->setName('Edit Menu')
+        ->setKey('panel.configure')
+        ->addIcon($expanded_edit_icon)
+        ->addIcon($collapsed_edit_icon)
+        ->addClass('phui-profile-menu-footer')
+        ->addClass('phui-profile-menu-footer-1')
+        ->setHref($this->getPanelURI('configure/'))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit);
     }
 
+    $collapse_id = celerity_generate_unique_node_id();
+
     $viewer = $this->getViewer();
-    $object = $this->getProfileObject();
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $object,
-      PhabricatorPolicyCapability::CAN_EDIT);
+    $collapse_key =
+      PhabricatorUserPreferences::PREFERENCE_PROFILE_MENU_COLLAPSED;
 
-    return id(new PHUIListItemView())
-      ->setName('Configure Menu')
-      ->setKey('panel.configure')
-      ->setIcon('fa-gear')
-      ->setHref($this->getPanelURI('configure/'))
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(!$can_edit)
-      ->setRenderNameAsTooltip(true);
+    $preferences = $viewer->loadPreferences();
+    $is_collapsed = $preferences->getPreference($collapse_key, false);
+
+    if ($is_collapsed) {
+      $nav->addClass('phui-profile-menu-collapsed');
+    } else {
+      $nav->addClass('phui-profile-menu-expanded');
+    }
+
+    if ($viewer->isLoggedIn()) {
+      $settings_uri = '/settings/adjust/?key='.$collapse_key;
+    } else {
+      $settings_uri = null;
+    }
+
+    Javelin::initBehavior(
+      'phui-profile-menu',
+      array(
+        'menuID' => $nav->getMainID(),
+        'collapseID' => $collapse_id,
+        'isCollapsed' => (bool)$is_collapsed,
+        'settingsURI' => $settings_uri,
+      ));
+
+    $collapse_icon = id(new PHUIIconCircleView())
+      ->addClass('phui-list-item-icon')
+      ->addClass('phui-profile-menu-visible-when-expanded')
+      ->setIconFont('fa-angle-left');
+
+    $expand_icon = id(new PHUIIconCircleView())
+      ->addClass('phui-list-item-icon')
+      ->addClass('phui-profile-menu-visible-when-collapsed')
+      ->addSigil('has-tooltip')
+      ->setMetadata(
+        array(
+          'tip' => pht('Expand'),
+          'align' => 'E',
+        ))
+      ->setIconFont('fa-angle-right');
+
+    $items[] = id(new PHUIListItemView())
+      ->setName('Collapse')
+      ->addIcon($collapse_icon)
+      ->addIcon($expand_icon)
+      ->setID($collapse_id)
+      ->addClass('phui-profile-menu-footer')
+      ->addClass('phui-profile-menu-footer-2')
+      ->setHideInApplicationMenu(true)
+      ->setHref('#');
+
+    return $items;
   }
 
   public function getConfigureURI() {
     return $this->getPanelURI('configure/');
-  }
-
-  private function getPanelURI($path) {
-    $project = $this->getProfileObject();
-    $id = $project->getID();
-    return "/project/{$id}/panel/{$path}";
   }
 
   private function buildPanelReorderContent(array $panels) {
@@ -441,6 +596,31 @@ final class PhabricatorProfilePanelEngine extends Phobject {
             ));
 
         if ($id) {
+          $default_uri = $this->getPanelURI("default/{$id}/");
+        } else {
+          $default_uri = $this->getPanelURI("default/{$builtin_key}/");
+        }
+
+        if ($panel->isDefault()) {
+          $default_icon = 'fa-thumb-tack green';
+          $default_text = pht('Current Default');
+        } else if ($panel->canMakeDefault()) {
+          $default_icon = 'fa-thumb-tack';
+          $default_text = pht('Make Default');
+        } else {
+          $default_text = null;
+        }
+
+        if ($default_text !== null) {
+          $item->addAction(
+            id(new PHUIListItemView())
+              ->setHref($default_uri)
+              ->setWorkflow(true)
+              ->setName($default_text)
+              ->setIcon($default_icon));
+        }
+
+        if ($id) {
           $item->setHref($this->getPanelURI("edit/{$id}/"));
           $hide_uri = $this->getPanelURI("hide/{$id}/");
         } else {
@@ -448,16 +628,27 @@ final class PhabricatorProfilePanelEngine extends Phobject {
           $hide_uri = $this->getPanelURI("hide/{$builtin_key}/");
         }
 
+        if ($panel->isDisabled()) {
+          $hide_icon = 'fa-plus';
+          $hide_text = pht('Enable');
+        } else if ($panel->getBuiltinKey() !== null) {
+          $hide_icon = 'fa-times';
+          $hide_text = pht('Disable');
+        } else {
+          $hide_icon = 'fa-times';
+          $hide_text = pht('Delete');
+        }
+
         $item->addAction(
           id(new PHUIListItemView())
             ->setHref($hide_uri)
             ->setWorkflow(true)
-            ->setIcon(pht('fa-eye')));
+            ->setName($hide_text)
+            ->setIcon($hide_icon));
       }
 
       if ($panel->isDisabled()) {
         $item->setDisabled(true);
-        $item->addIcon('fa-times grey', pht('Disabled'));
       }
 
       $list->addItem($item);
@@ -492,10 +683,14 @@ final class PhabricatorProfilePanelEngine extends Phobject {
         ->setLabel(true)
         ->setName(pht('Documentation')));
 
+    $doc_link = PhabricatorEnv::getDoclink('Profile Menu User Guide');
+    $doc_name = pht('Profile Menu User Guide');
+
     $action_view->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-book')
-        ->setName(pht('TODO: Write Documentation')));
+        ->setHref($doc_link)
+        ->setName($doc_name));
 
     $action_button = id(new PHUIButtonView())
       ->setTag('a')
@@ -605,46 +800,186 @@ final class PhabricatorProfilePanelEngine extends Phobject {
       $configuration,
       PhabricatorPolicyCapability::CAN_EDIT);
 
+    if ($configuration->getBuiltinKey() === null) {
+      $new_value = null;
+
+      $title = pht('Delete Menu Item');
+      $body = pht('Delete this menu item?');
+      $button = pht('Delete Menu Item');
+    } else if ($configuration->isDisabled()) {
+      $new_value = PhabricatorProfilePanelConfiguration::VISIBILITY_VISIBLE;
+
+      $title = pht('Enable Menu Item');
+      $body = pht(
+        'Enable this menu item? It will appear in the menu again.');
+      $button = pht('Enable Menu Item');
+    } else {
+      $new_value = PhabricatorProfilePanelConfiguration::VISIBILITY_DISABLED;
+
+      $title = pht('Disable Menu Item');
+      $body = pht(
+        'Disable this menu item? It will no longer appear in the menu, but '.
+        'you can re-enable it later.');
+      $button = pht('Disable Menu Item');
+    }
+
     $v_visibility = $configuration->getVisibility();
     if ($request->isFormPost()) {
-      $v_visibility = $request->getStr('visibility');
+      if ($new_value === null) {
+        $configuration->delete();
+      } else {
+        $type_visibility =
+          PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY;
 
-      $type_visibility =
-        PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY;
+        $xactions = array();
 
-      $xactions = array();
+        $xactions[] = id(new PhabricatorProfilePanelConfigurationTransaction())
+          ->setTransactionType($type_visibility)
+          ->setNewValue($new_value);
 
-      $xactions[] = id(new PhabricatorProfilePanelConfigurationTransaction())
-        ->setTransactionType($type_visibility)
-        ->setNewValue($v_visibility);
-
-      $editor = id(new PhabricatorProfilePanelEditor())
-        ->setContentSourceFromRequest($request)
-        ->setActor($viewer)
-        ->setContinueOnMissingFields(true)
-        ->setContinueOnNoEffect(true)
-        ->applyTransactions($configuration, $xactions);
+        $editor = id(new PhabricatorProfilePanelEditor())
+          ->setContentSourceFromRequest($request)
+          ->setActor($viewer)
+          ->setContinueOnMissingFields(true)
+          ->setContinueOnNoEffect(true)
+          ->applyTransactions($configuration, $xactions);
+      }
 
       return id(new AphrontRedirectResponse())
         ->setURI($this->getConfigureURI());
     }
 
-    $map = PhabricatorProfilePanelConfiguration::getVisibilityNameMap();
+    return $controller->newDialog()
+      ->setTitle($title)
+      ->appendParagraph($body)
+      ->addCancelButton($this->getConfigureURI())
+      ->addSubmitButton($button);
+  }
 
-    $form = id(new AphrontFormView())
-      ->setUser($viewer)
-      ->appendControl(
-        id(new AphrontFormSelectControl())
-          ->setName('visibility')
-          ->setLabel(pht('Visibility'))
-          ->setValue($v_visibility)
-          ->setOptions($map));
+  private function buildPanelDefaultContent(
+    PhabricatorProfilePanelConfiguration $configuration,
+    array $panels) {
+
+    $controller = $this->getController();
+    $request = $controller->getRequest();
+    $viewer = $this->getViewer();
+
+    PhabricatorPolicyFilter::requireCapability(
+      $viewer,
+      $configuration,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $done_uri = $this->getConfigureURI();
+
+    if (!$configuration->canMakeDefault()) {
+      return $controller->newDialog()
+        ->setTitle(pht('Not Defaultable'))
+        ->appendParagraph(
+          pht(
+            'This item can not be set as the default item. This is usually '.
+            'because the item has no page of its own, or links to an '.
+            'external page.'))
+        ->addCancelButton($done_uri);
+    }
+
+    if ($configuration->isDefault()) {
+      return $controller->newDialog()
+        ->setTitle(pht('Already Default'))
+        ->appendParagraph(
+          pht(
+            'This item is already set as the default item for this menu.'))
+        ->addCancelButton($done_uri);
+    }
+
+    if ($request->isFormPost()) {
+      $key = $configuration->getID();
+      if (!$key) {
+        $key = $configuration->getBuiltinKey();
+      }
+
+      $this->adjustDefault($key);
+
+      return id(new AphrontRedirectResponse())
+        ->setURI($done_uri);
+    }
 
     return $controller->newDialog()
-      ->setTitle(pht('Change Item Visibility'))
-      ->appendForm($form)
-      ->addCancelButton($this->getConfigureURI())
-      ->addSubmitButton(pht('Save Changes'));
+      ->setTitle(pht('Make Default'))
+      ->appendParagraph(
+        pht(
+          'Set this item as the default for this menu? Users arriving on '.
+          'this page will be shown the content of this item by default.'))
+      ->addCancelButton($done_uri)
+      ->addSubmitButton(pht('Make Default'));
+  }
+
+  protected function newPanel() {
+    return PhabricatorProfilePanelConfiguration::initializeNewBuiltin();
+  }
+
+  public function adjustDefault($key) {
+    $controller = $this->getController();
+    $request = $controller->getRequest();
+    $viewer = $request->getViewer();
+
+    $panels = $this->loadPanels();
+
+    // To adjust the default panel, we first change any existing panels that
+    // are marked as defaults to "visible", then make the new default panel
+    // the default.
+
+    $default = array();
+    $visible = array();
+
+    foreach ($panels as $panel) {
+      $builtin_key = $panel->getBuiltinKey();
+      $id = $panel->getID();
+
+      $is_target =
+        (($builtin_key !== null) && ($builtin_key === $key)) ||
+        (($id !== null) && ($id === (int)$key));
+
+      if ($is_target) {
+        if (!$panel->isDefault()) {
+          $default[] = $panel;
+        }
+      } else {
+        if ($panel->isDefault()) {
+          $visible[] = $panel;
+        }
+      }
+    }
+
+    $type_visibility =
+      PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY;
+
+    $v_visible = PhabricatorProfilePanelConfiguration::VISIBILITY_VISIBLE;
+    $v_default = PhabricatorProfilePanelConfiguration::VISIBILITY_DEFAULT;
+
+    $apply = array(
+      array($v_visible, $visible),
+      array($v_default, $default),
+    );
+
+    foreach ($apply as $group) {
+      list($value, $panels) = $group;
+      foreach ($panels as $panel) {
+        $xactions = array();
+
+        $xactions[] = id(new PhabricatorProfilePanelConfigurationTransaction())
+          ->setTransactionType($type_visibility)
+          ->setNewValue($value);
+
+        $editor = id(new PhabricatorProfilePanelEditor())
+          ->setContentSourceFromRequest($request)
+          ->setActor($viewer)
+          ->setContinueOnMissingFields(true)
+          ->setContinueOnNoEffect(true)
+          ->applyTransactions($panel, $xactions);
+      }
+    }
+
+    return $this;
   }
 
 }

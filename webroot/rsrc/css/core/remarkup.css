@@ -561,3 +561,58 @@ var.remarkup-assist-textarea {
 .device .remarkup-assist-nodevice {
   display: none;
 }
+
+.phuix-autocomplete {
+  position: absolute;
+  width: 300px;
+  box-shadow: {$dropshadow};
+  background: #ffffff;
+  border: 1px solid {$lightgreyborder};
+  border-radius: 3px;
+}
+
+.phuix-autocomplete-head {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 6px 8px;
+  background: {$lightgreybackground};
+  color: {$darkgreytext};
+  border-radius: 3px;
+}
+
+.phuix-autocomplete-head .phui-icon-view {
+  margin-right: 4px;
+  color: {$lightgreytext};
+}
+
+.phuix-autocomplete-echo {
+  margin-left: 4px;
+  color: {$lightgreytext};
+}
+
+.phuix-autocomplete-list a.jx-result {
+  display: block;
+  padding: 5px 8px;
+  font-size: {$normalfontsize};
+  border-top: 1px solid {$thinblueborder};
+  font-weight: bold;
+  color: {$darkgreytext};
+}
+
+.phuix-autocomplete-list a.jx-result .phui-icon-view {
+  margin-right: 4px;
+  color: {$lightbluetext};
+}
+
+.phuix-autocomplete-list a.jx-result:hover {
+  text-decoration: none;
+  background: {$sh-bluebackground};
+  color: #000;
+}
+
+.phuix-autocomplete-list a.jx-result.focused,
+.phuix-autocomplete-list a.jx-result.focused:hover {
+  background: {$sh-bluebackground};
+  color: #000;
+}

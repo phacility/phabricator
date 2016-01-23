@@ -59,12 +59,15 @@ final class PhabricatorPeopleDatasource
         $closed = pht('Mailing List');
       }
 
+      $username = $user->getUsername();
+
       $result = id(new PhabricatorTypeaheadResult())
         ->setName($user->getFullName())
-        ->setURI('/p/'.$user->getUsername())
+        ->setURI('/p/'.$username.'/')
         ->setPHID($user->getPHID())
-        ->setPriorityString($user->getUsername())
+        ->setPriorityString($username)
         ->setPriorityType('user')
+        ->setAutocomplete('@'.$username)
         ->setClosed($closed);
 
       if ($user->getIsMailingList()) {

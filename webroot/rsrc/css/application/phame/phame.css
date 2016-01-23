@@ -49,17 +49,14 @@
 
 .phame-blog-list {
   margin: 24px 16px 16px 16px;
-  padding: 16px;
-  background-color: {$bluebackground};
-  border-radius: 3px;
 }
 
 .device .phame-blog-list {
-  padding: 16px 8px;
-  background-color: #F1F1F4;
+  padding: 0;
+  background-color: {$bluebackground};
   margin: 0;
   border-radius: 0;
-  border-bottom: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 .phame-blog-list-item:last-child {

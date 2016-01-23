@@ -422,6 +422,11 @@ abstract class PhabricatorStorageManagementWorkflow
         continue;
       }
 
+      if ($actual_database->getAccessDenied()) {
+        // If we can't access the database, we can't access the tables either.
+        continue;
+      }
+
       $issues = array();
       if ($database->hasIssue($issue_charset)) {
         $issues[] = $issue_charset;
@@ -634,6 +639,8 @@ abstract class PhabricatorStorageManagementWorkflow
 
     $any_surplus = false;
     $all_surplus = true;
+    $any_access = false;
+    $all_access = true;
     foreach ($errors as $error) {
       $pieces = array_select_keys(
         $error,
@@ -643,10 +650,18 @@ abstract class PhabricatorStorageManagementWorkflow
 
       $name = PhabricatorConfigStorageSchema::getIssueName($error['issue']);
 
-      if ($error['issue'] === PhabricatorConfigStorageSchema::ISSUE_SURPLUS) {
+      $issue = $error['issue'];
+
+      if ($issue === PhabricatorConfigStorageSchema::ISSUE_SURPLUS) {
         $any_surplus = true;
       } else {
         $all_surplus = false;
+      }
+
+      if ($issue === PhabricatorConfigStorageSchema::ISSUE_ACCESSDENIED) {
+        $any_access = true;
+      } else {
+        $all_access = false;
       }
 
       $table->addRow(
@@ -668,10 +683,23 @@ abstract class PhabricatorStorageManagementWorkflow
         'does not expect). For information on resolving these '.
         'issues, see the "Surplus Schemata" section in the "Managing Storage '.
         'Adjustments" article in the documentation.');
+    } else if ($all_access) {
+      $message[] = pht(
+        'The user you are connecting to MySQL with does not have the correct '.
+        'permissions, and can not access some databases or tables that it '.
+        'needs to be able to access. GRANT the user additional permissions.');
     } else {
       $message[] = pht(
         'The schemata have errors (detailed above) which the adjustment '.
         'workflow can not fix.');
+
+      if ($any_access) {
+        $message[] = pht(
+          'Some of these errors are caused by access control problems. '.
+          'The user you are connecting with does not have permission to see '.
+          'all of the database or tables that Phabricator uses. You need to '.
+          'GRANT the user more permission, or use a different user.');
+      }
 
       if ($any_surplus) {
         $message[] = pht(
@@ -697,6 +725,11 @@ abstract class PhabricatorStorageManagementWorkflow
       $console->writeOut(
         "**<bg:yellow> %s </bg>**\n\n%s\n",
         pht('SURPLUS SCHEMATA'),
+        phutil_console_wrap($message));
+    } else if ($all_access) {
+      $console->writeOut(
+        "**<bg:yellow> %s </bg>**\n\n%s\n",
+        pht('ACCESS DENIED'),
         phutil_console_wrap($message));
     } else {
       $console->writeOut(

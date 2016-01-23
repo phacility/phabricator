@@ -1,0 +1,95 @@
+@title Projects User Guide
+@group userguide
+
+Organize users and objects with projects.
+
+Overview
+========
+
+NOTE: This document is only partially complete.
+
+Phabricator projects are flexible groups of users and objects.
+
+
+Joining Projects
+================
+
+Once you join a project, you become a member and will receive mail sent to the
+project, like a mailing list. For example, if a project is added as a
+subscriber on a task or a reviewer on a revision, you will receive mail about
+that task or revision.
+
+If you'd prefer not to receive mail sent to a project, you can go to
+{nav Members} and select {nav Disable Mail}. If you disable mail for a project,
+you will no longer receive mail sent to the project.
+
+
+Watching Projects
+=================
+
+Watching a project allows you to closely follow all activity related to a
+project.
+
+You can **watch** a project by clicking {nav Watch Project} on the project
+page. To stop watching a project, click {nav Unwatch Project}.
+
+When you watch a project, you will receive a copy of mail about any objects
+(like tasks or revisions) that are tagged with the project, or that the project
+is a subscriber, reviewer, or auditor for. For moderately active projects, this
+may be a large volume of mail.
+
+
+Edit Notifications
+==================
+
+Edit notifications are generated when project details (like the project
+description, name, or icon) are updated, or when users join or leave projects.
+
+By default, these notifications are are only sent to the acting user. These
+notifications are usually not very interesting, and project mail is already
+complicated by members and watchers.
+
+If you'd like to receive edit notifications for a project, you can write a
+Herald rule to keep you in the loop.
+
+
+Customizing Menus
+=================
+
+Projects support profile menus, which are customizable. For full details on
+managing and customizing profile menus, see @{article:Profile Menu User Guide}.
+
+Here are some examples of common ways to customize project profile menus that
+may be useful:
+
+**Link to Tasks or Repositories**: You can add a menu item for "Open Tasks" or
+"Active Repositories" for a project by running the search in the appropriate
+application, then adding a link to the search results to the menu.
+
+This can let you quickly jump from a project screen to related tasks,
+revisions, repositories, or other objects.
+
+For more details on how to use search and manage queries, see
+@{article:Search User Guide}.
+
+**New Task Button**: To let users easily make a new task that is tagged with
+the current project, add a link to the "New Task" form with the project
+prefilled, or to a custom form with appropriate defaults.
+
+For information on customizing and prefilling forms, see
+@{article:User Guide: Customizing Forms}.
+
+**Link to Wiki Pages**: You can add links to relevant wiki pages or other
+documentation to the menu to make it easy to find and access. You could also
+link to a Conpherence if you have a chatroom for a project.
+
+**Link to External Resources**: You can link to external resources outside
+of Phabricator if you have other pages which are relevant to a project.
+
+**Set Workboard as Default**: For projects that are mostly used to organize
+tasks, change the default item to the workboard instead of the profile to get
+to the workboard view more easily.
+
+**Hide Unused Items**: If you have a project which you don't expect to have
+members or won't have a workboard, you can hide these items to streamline the
+menu.

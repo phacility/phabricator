@@ -2,11 +2,39 @@
  * @provides phui-theme-css
  */
 
- .phui-theme-light button.phabricator-main-menu-search-dropdown .caret:before {
+/*--- Base Colors ------------------------------------------------------------*/
+
+.phui-theme-blindigo .phabricator-main-menu-background {
+  background: #41506e;
+}
+
+.phui-theme-dark .phabricator-main-menu-background {
+  background: #171c20;
+}
+
+.phui-theme-indigo .phabricator-main-menu-background {
+  background: #4a2b85;
+}
+
+.phui-theme-red .phabricator-main-menu-background {
+  background: #650404;
+}
+
+.phui-theme-blue .phabricator-main-menu-background {
+  background: #004377;
+}
+
+.phui-theme-green .phabricator-main-menu-background {
+  background: #124A1B;
+}
+
+/*--- Light Colors -----------------------------------------------------------*/
+
+.phui-theme-light button.phabricator-main-menu-search-dropdown .caret:before {
   color: {$lightbluetext};
 }
 
- .phui-theme-light .phabricator-main-menu-search
+.phui-theme-light .phabricator-main-menu-search
   button.phabricator-main-menu-search-dropdown .phui-icon-view {
   color: {$lightbluetext};
   text-shadow: {$whitetextshadow};

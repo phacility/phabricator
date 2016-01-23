@@ -9,6 +9,7 @@ final class PhabricatorProjectQuery
   private $slugs;
   private $slugNormals;
   private $slugMap;
+  private $allSlugs;
   private $names;
   private $nameTokens;
   private $icons;
@@ -29,6 +30,7 @@ final class PhabricatorProjectQuery
 
   private $needSlugs;
   private $needMembers;
+  private $needAncestorMembers;
   private $needWatchers;
   private $needImages;
 
@@ -108,6 +110,11 @@ final class PhabricatorProjectQuery
     return $this;
   }
 
+  public function needAncestorMembers($need_ancestor_members) {
+    $this->needAncestorMembers = $need_ancestor_members;
+    return $this;
+  }
+
   public function needWatchers($need_watchers) {
     $this->needWatchers = $need_watchers;
     return $this;
@@ -169,10 +176,19 @@ final class PhabricatorProjectQuery
   protected function willExecute() {
     $this->slugMap = array();
     $this->slugNormals = array();
+    $this->allSlugs = array();
     if ($this->slugs) {
       foreach ($this->slugs as $slug) {
-        $normal = PhabricatorSlug::normalizeProjectSlug($slug);
-        $this->slugNormals[$slug] = $normal;
+        if (PhabricatorSlug::isValidProjectSlug($slug)) {
+          $normal = PhabricatorSlug::normalizeProjectSlug($slug);
+          $this->slugNormals[$slug] = $normal;
+          $this->allSlugs[$normal] = $normal;
+        }
+
+        // NOTE: At least for now, we query for the normalized slugs but also
+        // for the slugs exactly as entered. This allows older projects with
+        // slugs that are no longer valid to continue to work.
+        $this->allSlugs[$slug] = $slug;
       }
     }
   }
@@ -210,8 +226,16 @@ final class PhabricatorProjectQuery
       $types[] = $watcher_type;
     }
 
+    $all_graph = $this->getAllReachableAncestors($projects);
+
+    if ($this->needAncestorMembers) {
+      $src_projects = $all_graph;
+    } else {
+      $src_projects = $projects;
+    }
+
     $all_sources = array();
-    foreach ($projects as $project) {
+    foreach ($src_projects as $project) {
       if ($project->isMilestone()) {
         $phid = $project->getParentProjectPHID();
       } else {
@@ -224,10 +248,15 @@ final class PhabricatorProjectQuery
       ->withSourcePHIDs($all_sources)
       ->withEdgeTypes($types);
 
+    $need_all_edges =
+      $this->needMembers ||
+      $this->needWatchers ||
+      $this->needAncestorMembers;
+
     // If we only need to know if the viewer is a member, we can restrict
     // the query to just their PHID.
     $any_edges = true;
-    if (!$this->needMembers && !$this->needWatchers) {
+    if (!$need_all_edges) {
       if ($viewer_phid) {
         $edge_query->withDestinationPHIDs(array($viewer_phid));
       } else {
@@ -243,7 +272,7 @@ final class PhabricatorProjectQuery
     }
 
     $membership_projects = array();
-    foreach ($projects as $project) {
+    foreach ($src_projects as $project) {
       $project_phid = $project->getPHID();
 
       if ($project->isMilestone()) {
@@ -264,7 +293,7 @@ final class PhabricatorProjectQuery
         $membership_projects[$project_phid] = $project;
       }
 
-      if ($this->needMembers) {
+      if ($this->needMembers || $this->needAncestorMembers) {
         $project->attachMemberPHIDs($member_phids);
       }
 
@@ -279,12 +308,15 @@ final class PhabricatorProjectQuery
       }
     }
 
-    $all_graph = $this->getAllReachableAncestors($projects);
-    $member_graph = $this->getAllReachableAncestors($membership_projects);
+    // If we loaded ancestor members, we've already populated membership
+    // lists above, so we can skip this step.
+    if (!$this->needAncestorMembers) {
+      $member_graph = $this->getAllReachableAncestors($membership_projects);
 
-    foreach ($all_graph as $phid => $project) {
-      $is_member = isset($member_graph[$phid]);
-      $project->setIsUserMember($viewer_phid, $is_member);
+      foreach ($all_graph as $phid => $project) {
+        $is_member = isset($member_graph[$phid]);
+        $project->setIsUserMember($viewer_phid, $is_member);
+      }
     }
 
     return $projects;
@@ -380,7 +412,7 @@ final class PhabricatorProjectQuery
       $where[] = qsprintf(
         $conn,
         'slug.slug IN (%Ls)',
-        $this->slugNormals);
+        $this->allSlugs);
     }
 
     if ($this->names !== null) {
@@ -625,13 +657,17 @@ final class PhabricatorProjectQuery
     // else.
     $unknown = $this->slugNormals;
     foreach ($unknown as $input => $normal) {
-      if (!isset($primary_map[$normal])) {
+      if (isset($primary_map[$input])) {
+        $match = $input;
+      } else if (isset($primary_map[$normal])) {
+        $match = $normal;
+      } else {
         continue;
       }
 
       $this->slugMap[$input] = array(
-        'slug' => $normal,
-        'projectPHID' => $primary_map[$normal]->getPHID(),
+        'slug' => $match,
+        'projectPHID' => $primary_map[$match]->getPHID(),
       );
 
       unset($unknown[$input]);
@@ -658,13 +694,17 @@ final class PhabricatorProjectQuery
     // Link up any slugs we were not able to link up earlier.
     $extra_map = mpull($slugs, 'getProjectPHID', 'getSlug');
     foreach ($unknown as $input => $normal) {
-      if (!isset($extra_map[$normal])) {
+      if (isset($extra_map[$input])) {
+        $match = $input;
+      } else if (isset($extra_map[$normal])) {
+        $match = $normal;
+      } else {
         continue;
       }
 
       $this->slugMap[$input] = array(
-        'slug' => $normal,
-        'projectPHID' => $extra_map[$normal],
+        'slug' => $match,
+        'projectPHID' => $extra_map[$match],
       );
 
       unset($unknown[$input]);

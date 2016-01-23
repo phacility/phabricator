@@ -99,81 +99,8 @@ JX.install('Prefab', {
         datasource = new JX.TypeaheadPreloadedSource(config.src);
       }
 
-      // Sort results so that the viewing user always comes up first; after
-      // that, prefer unixname matches to realname matches.
-
-      var sort_handler = function(value, list, cmp) {
-        var priority_hits = {};
-        var self_hits     = {};
-
-        var tokens = this.tokenize(value);
-
-        for (var ii = 0; ii < list.length; ii++) {
-          var item = list[ii];
-
-          for (var jj = 0; jj < tokens.length; jj++) {
-            if (item.name.indexOf(tokens[jj]) === 0) {
-              priority_hits[item.id] = true;
-            }
-          }
-
-          if (!item.priority) {
-            continue;
-          }
-
-          if (config.username && item.priority == config.username) {
-            self_hits[item.id] = true;
-          }
-
-          for (var hh = 0; hh < tokens.length; hh++) {
-            if (item.priority.substr(0, tokens[hh].length) == tokens[hh]) {
-              priority_hits[item.id] = true;
-            }
-          }
-        }
-
-        list.sort(function(u, v) {
-          if (self_hits[u.id] != self_hits[v.id]) {
-            return self_hits[v.id] ? 1 : -1;
-          }
-
-          // If one result is open and one is closed, show the open result
-          // first. The "!" tricks here are becaused closed values are display
-          // strings, so the value is either `null` or some truthy string. If
-          // we compare the values directly, we'll apply this rule to two
-          // objects which are both closed but for different reasons, like
-          // "Archived" and "Disabled".
-
-          var u_open = !u.closed;
-          var v_open = !v.closed;
-
-          if (u_open != v_open) {
-            if (u_open) {
-              return -1;
-            } else {
-              return 1;
-            }
-          }
-
-          if (priority_hits[u.id] != priority_hits[v.id]) {
-            return priority_hits[v.id] ? 1 : -1;
-          }
-
-          // Sort users ahead of other result types.
-          if (u.priorityType != v.priorityType) {
-            if (u.priorityType == 'user') {
-              return -1;
-            }
-            if (v.priorityType == 'user') {
-              return 1;
-            }
-          }
-
-          return cmp(u, v);
-        });
-      };
-
-      datasource.setSortHandler(JX.bind(datasource, sort_handler));
+      datasource.setSortHandler(
+        JX.bind(datasource, JX.Prefab.sortHandler, config));
       datasource.setFilterHandler(JX.Prefab.filterClosedResults);
       datasource.setTransformer(JX.Prefab.transformDatasourceResults);
 
@@ -251,6 +178,80 @@ JX.install('Prefab', {
       };
     },
 
+    sortHandler: function(config, value, list, cmp) {
+      // Sort results so that the viewing user always comes up first; after
+      // that, prefer unixname matches to realname matches.
+      var priority_hits = {};
+      var self_hits = {};
+
+      var tokens = this.tokenize(value);
+
+      for (var ii = 0; ii < list.length; ii++) {
+        var item = list[ii];
+
+        for (var jj = 0; jj < tokens.length; jj++) {
+          if (item.name.indexOf(tokens[jj]) === 0) {
+            priority_hits[item.id] = true;
+          }
+        }
+
+        if (!item.priority) {
+          continue;
+        }
+
+        if (config.username && item.priority == config.username) {
+          self_hits[item.id] = true;
+        }
+
+        for (var hh = 0; hh < tokens.length; hh++) {
+          if (item.priority.substr(0, tokens[hh].length) == tokens[hh]) {
+            priority_hits[item.id] = true;
+          }
+        }
+      }
+
+      list.sort(function(u, v) {
+        if (self_hits[u.id] != self_hits[v.id]) {
+          return self_hits[v.id] ? 1 : -1;
+        }
+
+        // If one result is open and one is closed, show the open result
+        // first. The "!" tricks here are becaused closed values are display
+        // strings, so the value is either `null` or some truthy string. If
+        // we compare the values directly, we'll apply this rule to two
+        // objects which are both closed but for different reasons, like
+        // "Archived" and "Disabled".
+
+        var u_open = !u.closed;
+        var v_open = !v.closed;
+
+        if (u_open != v_open) {
+          if (u_open) {
+            return -1;
+          } else {
+            return 1;
+          }
+        }
+
+        if (priority_hits[u.id] != priority_hits[v.id]) {
+          return priority_hits[v.id] ? 1 : -1;
+        }
+
+        // Sort users ahead of other result types.
+        if (u.priorityType != v.priorityType) {
+          if (u.priorityType == 'user') {
+            return -1;
+          }
+          if (v.priorityType == 'user') {
+            return 1;
+          }
+        }
+
+        return cmp(u, v);
+      });
+    },
+
+
     /**
      * Filter callback for tokenizers and typeaheads which filters out closed
      * or disabled objects unless they are the only options.
@@ -325,7 +326,8 @@ JX.install('Prefab', {
         sprite: fields[10],
         color: fields[11],
         tokenType: fields[12],
-        unique: fields[13] || false
+        unique: fields[13] || false,
+        autocomplete: fields[14]
       };
     },
 

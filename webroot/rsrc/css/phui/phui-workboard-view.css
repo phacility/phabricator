@@ -38,7 +38,12 @@
 }
 
 .device-desktop .project-board-wrapper .phui-workboard-view-shadow {
-  left: 53px;
+  left: 253px;
+}
+
+.device-desktop .phui-profile-menu-collapsed .project-board-wrapper
+  .phui-workboard-view-shadow {
+  left: 101px;
 }
 
 .device-desktop .phui-workboard-view .aphront-multi-column-fixed
@@ -85,14 +90,4 @@
   display: block;
   margin: 8px 0 2px 0;
   padding: 0;
-}
-
-.device-desktop .phabricator-icon-nav.project-board-nav
-  .phabricator-nav-local {
-    margin-top: 64px;
-}
-
-.device-desktop .phabricator-icon-nav.project-board-nav
-  .phabricator-nav-content {
-    margin: 0;
 }

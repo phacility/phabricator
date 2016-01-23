@@ -17,6 +17,7 @@ final class PhabricatorProfilePanelConfiguration
   private $profileObject = self::ATTACHABLE;
   private $panel = self::ATTACHABLE;
 
+  const VISIBILITY_DEFAULT = 'default';
   const VISIBILITY_VISIBLE = 'visible';
   const VISIBILITY_DISABLED = 'disabled';
 
@@ -26,7 +27,7 @@ final class PhabricatorProfilePanelConfiguration
   }
 
   public static function initializeNewPanelConfiguration(
-    PhabricatorProfilePanelInterface $profile_object,
+    $profile_object,
     PhabricatorProfilePanel $panel) {
 
     return self::initializeNewBuiltin()
@@ -56,13 +57,6 @@ final class PhabricatorProfilePanelConfiguration
     ) + parent::getConfiguration();
   }
 
-  public static function getVisibilityNameMap() {
-    return array(
-      self::VISIBILITY_VISIBLE => pht('Visible'),
-      self::VISIBILITY_DISABLED => pht('Disabled'),
-    );
-  }
-
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorProfilePanelPHIDType::TYPECONST);
@@ -77,8 +71,7 @@ final class PhabricatorProfilePanelConfiguration
     return $this->assertAttached($this->panel);
   }
 
-  public function attachProfileObject(
-    PhabricatorProfilePanelInterface $profile_object) {
+  public function attachProfileObject($profile_object) {
     $this->profileObject = $profile_object;
     return $this;
   }
@@ -108,6 +101,10 @@ final class PhabricatorProfilePanelConfiguration
     return $this->getPanel()->getDisplayName($this);
   }
 
+  public function canMakeDefault() {
+    return $this->getPanel()->canMakeDefault($this);
+  }
+
   public function getSortKey() {
     $order = $this->getPanelOrder();
     if ($order === null) {
@@ -124,6 +121,10 @@ final class PhabricatorProfilePanelConfiguration
 
   public function isDisabled() {
     return ($this->getVisibility() === self::VISIBILITY_DISABLED);
+  }
+
+  public function isDefault() {
+    return ($this->getVisibility() === self::VISIBILITY_DEFAULT);
   }
 
 

@@ -13,6 +13,11 @@ final class PhabricatorProjectDetailsProfilePanel
     return pht('Project Details');
   }
 
+  public function canMakeDefault(
+    PhabricatorProfilePanelConfiguration $config) {
+    return true;
+  }
+
   public function getDisplayName(
     PhabricatorProfilePanelConfiguration $config) {
     $name = $config->getPanelProperty('name');
@@ -46,9 +51,7 @@ final class PhabricatorProjectDetailsProfilePanel
 
     $href = "/project/profile/{$id}/";
 
-    $item = id(new PHUIListItemView())
-      ->setRenderNameAsTooltip(true)
-      ->setType(PHUIListItemView::TYPE_ICON_NAV)
+    $item = $this->newItem()
       ->setHref($href)
       ->setName($name)
       ->setProfileImage($picture);

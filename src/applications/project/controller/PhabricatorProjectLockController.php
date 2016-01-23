@@ -27,7 +27,16 @@ final class PhabricatorProjectLockController
       return new Aphront404Response();
     }
 
-    $done_uri = $project->getURI();
+    $done_uri = "/project/members/{$id}/";
+
+    if (!$project->supportsEditMembers()) {
+      return $this->newDialog()
+        ->setTitle(pht('Membership Immutable'))
+        ->appendChild(
+          pht('This project does not support editing membership.'))
+        ->addCancelButton($done_uri);
+    }
+
     $is_locked = $project->getIsMembershipLocked();
 
     if ($request->isFormPost()) {

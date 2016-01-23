@@ -8,13 +8,12 @@ final class PhabricatorProjectProfileController
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $viewer = $request->getUser();
-
     $response = $this->loadProject();
     if ($response) {
       return $response;
     }
 
+    $viewer = $request->getUser();
     $project = $this->getProject();
     $id = $project->getID();
     $picture = $project->getProfileImageURI();
@@ -38,13 +37,51 @@ final class PhabricatorProjectProfileController
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    $timeline = $this->buildTransactionTimeline(
-      $project,
-      new PhabricatorProjectTransactionQuery());
-    $timeline->setShouldTerminate(true);
+    $member_list = id(new PhabricatorProjectMemberListView())
+      ->setUser($viewer)
+      ->setProject($project)
+      ->setLimit(5)
+      ->setUserPHIDs($project->getMemberPHIDs());
+
+    $watcher_list = id(new PhabricatorProjectWatcherListView())
+      ->setUser($viewer)
+      ->setProject($project)
+      ->setLimit(5)
+      ->setUserPHIDs($project->getWatcherPHIDs());
 
     $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorProject::PANEL_PROFILE);
+
+    $watch_action = $this->renderWatchAction($project);
+
+    $stories = id(new PhabricatorFeedQuery())
+      ->setViewer($viewer)
+      ->setFilterPHIDs(
+        array(
+          $project->getPHID(),
+        ))
+      ->setLimit(50)
+      ->execute();
+
+
+    $feed = $this->renderStories($stories);
+
+    $feed_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Recent Activity'))
+      ->addActionLink($watch_action);
+
+    $feed = id(new PHUIObjectBoxView())
+      ->setHeader($feed_header)
+      ->appendChild($feed);
+
+    $columns = id(new AphrontMultiColumnView())
+      ->setFluidLayout(true)
+      ->addColumn($feed)
+      ->addColumn(
+        array(
+          $member_list,
+          $watcher_list,
+        ));
 
     $crumbs = $this->buildApplicationCrumbs();
 
@@ -53,8 +90,11 @@ final class PhabricatorProjectProfileController
       ->setCrumbs($crumbs)
       ->setTitle($project->getName())
       ->setPageObjectPHIDs(array($project->getPHID()))
-      ->appendChild($object_box)
-      ->appendChild($timeline);
+      ->appendChild(
+        array(
+          $object_box,
+          $columns,
+        ));
   }
 
   private function buildActionListView(PhabricatorProject $project) {
@@ -67,103 +107,11 @@ final class PhabricatorProjectProfileController
       ->setUser($viewer)
       ->setObject($project);
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $project,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
     $view->addAction(
       id(new PhabricatorActionView())
-        ->setName(pht('Edit Details'))
+        ->setName(pht('Edit Project'))
         ->setIcon('fa-pencil')
-        ->setHref($this->getApplicationURI("edit/{$id}/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Edit Picture'))
-        ->setIcon('fa-picture-o')
-        ->setHref($this->getApplicationURI("picture/{$id}/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
-    if ($project->isArchived()) {
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Activate Project'))
-          ->setIcon('fa-check')
-          ->setHref($this->getApplicationURI("archive/{$id}/"))
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(true));
-    } else {
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Archive Project'))
-          ->setIcon('fa-ban')
-          ->setHref($this->getApplicationURI("archive/{$id}/"))
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(true));
-    }
-
-    $can_lock = $can_edit && $this->hasApplicationCapability(
-      ProjectCanLockProjectsCapability::CAPABILITY);
-
-    if ($project->getIsMembershipLocked()) {
-      $lock_name = pht('Unlock Project');
-      $lock_icon = 'fa-unlock';
-    } else {
-      $lock_name = pht('Lock Project');
-      $lock_icon = 'fa-lock';
-    }
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName($lock_name)
-        ->setIcon($lock_icon)
-        ->setHref($this->getApplicationURI("lock/{$id}/"))
-        ->setDisabled(!$can_lock)
-        ->setWorkflow(true));
-
-    $action = null;
-    if (!$project->isUserMember($viewer->getPHID())) {
-      $can_join = PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $project,
-        PhabricatorPolicyCapability::CAN_JOIN);
-
-      $action = id(new PhabricatorActionView())
-        ->setUser($viewer)
-        ->setRenderAsForm(true)
-        ->setHref('/project/update/'.$project->getID().'/join/')
-        ->setIcon('fa-plus')
-        ->setDisabled(!$can_join)
-        ->setName(pht('Join Project'));
-      $view->addAction($action);
-    } else {
-      $action = id(new PhabricatorActionView())
-        ->setWorkflow(true)
-        ->setHref('/project/update/'.$project->getID().'/leave/')
-        ->setIcon('fa-times')
-        ->setName(pht('Leave Project...'));
-      $view->addAction($action);
-
-      if (!$project->isUserWatcher($viewer->getPHID())) {
-        $action = id(new PhabricatorActionView())
-          ->setWorkflow(true)
-          ->setHref('/project/watch/'.$project->getID().'/')
-          ->setIcon('fa-eye')
-          ->setName(pht('Watch Project'));
-        $view->addAction($action);
-      } else {
-        $action = id(new PhabricatorActionView())
-          ->setWorkflow(true)
-          ->setHref('/project/unwatch/'.$project->getID().'/')
-          ->setIcon('fa-eye-slash')
-          ->setName(pht('Unwatch Project'));
-        $view->addAction($action);
-      }
-    }
+        ->setHref($this->getApplicationURI("history/{$id}/")));
 
     return $view;
   }
@@ -179,44 +127,9 @@ final class PhabricatorProjectProfileController
       ->setObject($project)
       ->setActionList($actions);
 
-    $hashtags = array();
-    foreach ($project->getSlugs() as $slug) {
-      $hashtags[] = id(new PHUITagView())
-        ->setType(PHUITagView::TYPE_OBJECT)
-        ->setName('#'.$slug->getSlug());
-    }
-
-    if ($hashtags) {
-      $view->addProperty(pht('Hashtags'), phutil_implode_html(' ', $hashtags));
-    }
-
-    $view->addProperty(
-      pht('Members'),
-      $project->getMemberPHIDs()
-        ? $viewer
-          ->renderHandleList($project->getMemberPHIDs())
-          ->setAsInline(true)
-        : phutil_tag('em', array(), pht('None')));
-
-    $view->addProperty(
-      pht('Watchers'),
-      $project->getWatcherPHIDs()
-        ? $viewer
-          ->renderHandleList($project->getWatcherPHIDs())
-          ->setAsInline(true)
-        : phutil_tag('em', array(), pht('None')));
-
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $viewer,
-      $project);
-
     $view->addProperty(
       pht('Looks Like'),
       $viewer->renderHandle($project->getPHID())->setAsTag(true));
-
-    $view->addProperty(
-      pht('Joinable By'),
-      $descriptions[PhabricatorPolicyCapability::CAN_JOIN]);
 
     $field_list = PhabricatorCustomField::getObjectFields(
       $project,
@@ -224,6 +137,45 @@ final class PhabricatorProjectProfileController
     $field_list->appendFieldsToPropertyList($project, $viewer, $view);
 
     return $view;
+  }
+
+  private function renderStories(array $stories) {
+    assert_instances_of($stories, 'PhabricatorFeedStory');
+
+    $builder = new PhabricatorFeedBuilder($stories);
+    $builder->setUser($this->getRequest()->getUser());
+    $builder->setShowHovercards(true);
+    $view = $builder->buildView();
+
+    return phutil_tag_div('profile-feed', $view->render());
+  }
+
+  private function renderWatchAction(PhabricatorProject $project) {
+    $viewer = $this->getViewer();
+    $viewer_phid = $viewer->getPHID();
+    $id = $project->getID();
+
+    $is_watcher = ($viewer_phid && $project->isUserWatcher($viewer_phid));
+
+    if (!$is_watcher) {
+      $watch_icon = 'fa-eye';
+      $watch_text = pht('Watch Project');
+      $watch_href = "/project/watch/{$id}/?via=profile";
+    } else {
+      $watch_icon = 'fa-eye-slash';
+      $watch_text = pht('Unwatch Project');
+      $watch_href = "/project/unwatch/{$id}/?via=profile";
+    }
+
+    $watch_icon = id(new PHUIIconView())
+      ->setIconFont($watch_icon);
+
+    return id(new PHUIButtonView())
+      ->setTag('a')
+      ->setWorkflow(true)
+      ->setIcon($watch_icon)
+      ->setText($watch_text)
+      ->setHref($watch_href);
   }
 
 

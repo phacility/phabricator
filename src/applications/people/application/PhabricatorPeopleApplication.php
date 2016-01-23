@@ -63,10 +63,12 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
         'picture/(?P<id>[1-9]\d*)/' =>
           'PhabricatorPeopleProfilePictureController',
         ),
-      '/p/(?P<username>[\w._-]+)/'
-        => 'PhabricatorPeopleProfileController',
-      '/p/(?P<username>[\w._-]+)/calendar/'
-        => 'PhabricatorPeopleCalendarController',
+      '/p/(?P<username>[\w._-]+)/' => array(
+        '' => 'PhabricatorPeopleProfileViewController',
+        'panel/'
+          => $this->getPanelRouting('PhabricatorPeopleProfilePanelController'),
+        'calendar/' => 'PhabricatorPeopleCalendarController',
+      ),
     );
   }
 

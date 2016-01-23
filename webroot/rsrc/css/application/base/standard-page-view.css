@@ -37,10 +37,6 @@
   margin-left: 221px;
 }
 
-.device-desktop div.phabricator-icon-nav + .phabricator-standard-page-footer {
-  margin-left: 58px;
-}
-
 .device .phabricator-side-menu-home + .phabricator-standard-page-footer {
   display: none;
 }

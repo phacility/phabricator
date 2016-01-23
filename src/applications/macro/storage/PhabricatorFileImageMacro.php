@@ -115,10 +115,6 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 
 /* -(  PhabricatorTokenRecevierInterface  )---------------------------------- */
 

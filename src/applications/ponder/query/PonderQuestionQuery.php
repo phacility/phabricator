@@ -129,13 +129,13 @@ final class PonderQuestionQuery
     return $questions;
   }
 
-  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn_r) {
-    $joins = array();
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
 
     if ($this->answererPHIDs) {
       $answer_table = new PonderAnswer();
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T a ON a.questionID = q.id AND a.authorPHID IN (%Ls)',
         $answer_table->getTableName(),
         $this->answererPHIDs);

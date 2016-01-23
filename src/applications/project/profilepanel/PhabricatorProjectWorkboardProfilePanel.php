@@ -13,6 +13,11 @@ final class PhabricatorProjectWorkboardProfilePanel
     return pht('Workboard');
   }
 
+  public function canMakeDefault(
+    PhabricatorProfilePanelConfiguration $config) {
+    return true;
+  }
+
   public function getDisplayName(
     PhabricatorProfilePanelConfiguration $config) {
     $name = $config->getPanelProperty('name');
@@ -47,26 +52,17 @@ final class PhabricatorProjectWorkboardProfilePanel
 
     $project = $config->getProfileObject();
 
-    $columns = id(new PhabricatorProjectColumnQuery())
-      ->setViewer($viewer)
-      ->withProjectPHIDs(array($project->getPHID()))
-      ->execute();
-    if ($columns) {
-      $icon = 'fa-columns';
-    } else {
-      $icon = 'fa-columns grey';
-    }
+    $has_workboard = $project->getHasWorkboard();
 
     $id = $project->getID();
     $href = "/project/board/{$id}/";
     $name = $this->getDisplayName($config);
 
-    $item = id(new PHUIListItemView())
-      ->setRenderNameAsTooltip(true)
-      ->setType(PHUIListItemView::TYPE_ICON_NAV)
+    $item = $this->newItem()
       ->setHref($href)
       ->setName($name)
-      ->setIcon($icon);
+      ->setDisabled(!$has_workboard)
+      ->setIcon('fa-columns');
 
     return array(
       $item,

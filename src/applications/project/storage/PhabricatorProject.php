@@ -6,12 +6,10 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface,
     PhabricatorExtendedPolicyInterface,
-    PhabricatorSubscribableInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorDestructibleInterface,
     PhabricatorFulltextInterface,
-    PhabricatorConduitResultInterface,
-    PhabricatorProfilePanelInterface {
+    PhabricatorConduitResultInterface {
 
   protected $name;
   protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;
@@ -46,8 +44,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   private $slugs = self::ATTACHABLE;
   private $parentProject = self::ATTACHABLE;
 
-  const DEFAULT_COLOR = 'blue';
-
   const TABLE_DATASOURCE_TOKEN = 'project_datasourcetoken';
 
   const PANEL_PROFILE = 'project.profile';
@@ -70,11 +66,12 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       ProjectDefaultJoinCapability::CAPABILITY);
 
     $default_icon = PhabricatorProjectIconSet::getDefaultIconKey();
+    $default_color = PhabricatorProjectIconSet::getDefaultColorKey();
 
     return id(new PhabricatorProject())
       ->setAuthorPHID($actor->getPHID())
       ->setIcon($default_icon)
-      ->setColor(self::DEFAULT_COLOR)
+      ->setColor($default_color)
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
       ->setJoinPolicy($join_policy)
@@ -179,7 +176,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
     return $extended;
   }
-
 
   public function isUserMember($user_phid) {
     if ($this->memberPHIDs !== self::ATTACHABLE) {
@@ -514,27 +510,26 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function getDisplayColor() {
     if ($this->isMilestone()) {
-      return self::DEFAULT_COLOR;
+      return PhabricatorProjectIconSet::getDefaultColorKey();
     }
 
     return $this->getColor();
   }
 
-
-/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
-
-
-  public function isAutomaticallySubscribed($phid) {
-    return false;
+  public function getDisplayIconComposeIcon() {
+    $icon = $this->getDisplayIconIcon();
+    return $icon;
   }
 
-  public function shouldShowSubscribersProperty() {
-    return false;
-  }
+  public function getDisplayIconComposeColor() {
+    $color = $this->getDisplayColor();
 
-  public function shouldAllowSubscription($phid) {
-    return $this->isUserMember($phid) &&
-           !$this->isUserWatcher($phid);
+    $map = array(
+      'grey' => 'charcoal',
+      'checkered' => 'backdrop',
+    );
+
+    return idx($map, $color, $color);
   }
 
 
@@ -649,49 +644,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function getConduitSearchAttachments() {
     return array();
-  }
-
-
-/* -(  PhabricatorProfilePanelInterface  )----------------------------------- */
-
-
-  public function getBuiltinProfilePanels() {
-    $panels = array();
-
-    $panels[] = PhabricatorProfilePanelConfiguration::initializeNewBuiltin()
-      ->setBuiltinKey(self::PANEL_PROFILE)
-      ->setPanelKey(PhabricatorProjectDetailsProfilePanel::PANELKEY);
-
-    $panels[] = PhabricatorProfilePanelConfiguration::initializeNewBuiltin()
-      ->setBuiltinKey(self::PANEL_WORKBOARD)
-      ->setPanelKey(PhabricatorProjectWorkboardProfilePanel::PANELKEY);
-
-    // TODO: This is temporary.
-    $uri = urisprintf(
-      '/maniphest/?statuses=open()&projects=%s#R',
-      $this->getPHID());
-
-    $panels[] = PhabricatorProfilePanelConfiguration::initializeNewBuiltin()
-      ->setBuiltinKey('tasks')
-      ->setPanelKey(PhabricatorLinkProfilePanel::PANELKEY)
-      ->setPanelProperty('icon', 'maniphest')
-      ->setPanelProperty('name', pht('Open Tasks'))
-      ->setPanelProperty('uri', $uri);
-
-    // TODO: This is temporary.
-    $id = $this->getID();
-    $panels[] = PhabricatorProfilePanelConfiguration::initializeNewBuiltin()
-      ->setBuiltinKey('feed')
-      ->setPanelKey(PhabricatorLinkProfilePanel::PANELKEY)
-      ->setPanelProperty('icon', 'feed')
-      ->setPanelProperty('name', pht('Feed'))
-      ->setPanelProperty('uri', "/project/feed/{$id}/");
-
-    $panels[] = PhabricatorProfilePanelConfiguration::initializeNewBuiltin()
-      ->setBuiltinKey(self::PANEL_MEMBERS)
-      ->setPanelKey(PhabricatorProjectMembersProfilePanel::PANELKEY);
-
-    return $panels;
   }
 
 }

@@ -75,8 +75,11 @@ final class PHUIApplicationMenuView extends Phobject {
     $profile_menu = $this->getProfileMenu();
     if ($profile_menu) {
       foreach ($profile_menu->getMenu()->getItems() as $item) {
+        if ($item->getHideInApplicationMenu()) {
+          continue;
+        }
+
         $item = clone $item;
-        $item->setRenderNameAsTooltip(false);
         $view->addMenuItem($item);
       }
     }

@@ -89,7 +89,12 @@ final class PhameBlogListView extends AphrontTagView {
         ),
         pht('Blogs')));
 
-    return array($header, $list);
+    return id(new PHUIBoxView())
+      ->appendChild($header)
+      ->appendChild($list)
+      ->addClass('pl')
+      ->setColor(PHUIBoxView::BLUE);
+
   }
 
 }

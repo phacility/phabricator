@@ -6,11 +6,13 @@ final class PhabricatorProjectMembersRemoveController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
+    $type = $request->getURIData('type');
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
       ->needMembers(true)
+      ->needWatchers(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -21,27 +23,31 @@ final class PhabricatorProjectMembersRemoveController
       return new Aphront404Response();
     }
 
-    $member_phids = $project->getMemberPHIDs();
-    $remove_phid = $request->getStr('phid');
+    if ($type == 'watchers') {
+      $is_watcher = true;
+      $edge_type = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
+    } else {
+      if (!$project->supportsEditMembers()) {
+        return new Aphront404Response();
+      }
 
-    if (!in_array($remove_phid, $member_phids)) {
-      return new Aphront404Response();
+      $is_watcher = false;
+      $edge_type = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
     }
 
     $members_uri = $this->getApplicationURI('members/'.$project->getID().'/');
+    $remove_phid = $request->getStr('phid');
 
     if ($request->isFormPost()) {
-      $member_spec = array();
-      $member_spec['-'] = array($remove_phid => $remove_phid);
-
-      $type_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
-
       $xactions = array();
 
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-        ->setMetadataValue('edge:type', $type_member)
-        ->setNewValue($member_spec);
+        ->setMetadataValue('edge:type', $edge_type)
+        ->setNewValue(
+          array(
+            '-' => array($remove_phid => $remove_phid),
+          ));
 
       $editor = id(new PhabricatorProjectTransactionEditor($project))
         ->setActor($viewer)
@@ -59,18 +65,31 @@ final class PhabricatorProjectMembersRemoveController
       ->withPHIDs(array($remove_phid))
       ->executeOne();
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
-      ->setTitle(pht('Really Remove Member?'))
-      ->appendParagraph(
-        pht(
-          'Really remove %s from the project %s?',
-          phutil_tag('strong', array(), $handle->getName()),
-          phutil_tag('strong', array(), $project->getName())))
-      ->addCancelButton($members_uri)
-      ->addSubmitButton(pht('Remove Project Member'));
+    $target_name = phutil_tag('strong', array(), $handle->getName());
+    $project_name = phutil_tag('strong', array(), $project->getName());
 
-    return id(new AphrontDialogResponse())->setDialog($dialog);
+    if ($is_watcher) {
+      $title = pht('Remove Watcher');
+      $body = pht(
+        'Remove %s as a watcher of %s?',
+        $target_name,
+        $project_name);
+      $button = pht('Remove Watcher');
+    } else {
+      $title = pht('Remove Member');
+      $body = pht(
+        'Remove %s as a project member of %s?',
+        $target_name,
+        $project_name);
+      $button = pht('Remove Member');
+    }
+
+    return $this->newDialog()
+      ->setTitle($title)
+      ->addHiddenInput('phid', $remove_phid)
+      ->appendParagraph($body)
+      ->addCancelButton($members_uri)
+      ->addSubmitButton($button);
   }
 
 }
