@@ -8,8 +8,48 @@ Overview
 
 NOTE: This document is only partially complete.
 
-Phabricator projects are flexible groups of users and objects.
+Phabricator projects are flexible, general-purpose groups of objects that you
+can use to organize information. Projects have some basic information like
+a name and an icon, and may optionally have members.
 
+For example, you can create projects to provide:
+
+  - **Organization**: Create a project to represent a product or initative,
+    then use it to organize related work.
+  - **Groups**: Create a project to represent a group of people (like a team),
+    then add members of the group as project members.
+  - **Tags**: To create a tag, just create a project without any members. Then
+    tag anything you want.
+  - **Access Control Lists**: Add members to a project, then restrict the
+    visibility of objects to members of that project. See "Understanding
+    Policies" below to understand how policies and projects interact in
+    more detail.
+
+Understanding Policies
+======================
+
+An important rule to understand about projects is that **adding or removing
+projects to an object never affects who can see the object**.
+
+For example, if you tag a task with a project like {nav Backend}, that does not
+change who can see the task. In particular, it does not limit visibility to
+only members of the "Backend" project, nor does it allow them to see it if they
+otherwise could not. Likewise, removing projects does not affect visibility.
+
+If you're familiar with other software that works differently, this may be
+unexpected, but the rule in Phabrictor is simple: **adding and removing
+projects never affects policies.**
+
+Note that you //can// write policy rules which restrict capabilities to members
+of a specific project or set of projects, but you do this by editing an
+object's policies and adding rules based on project membership, not by tagging
+or untagging the object with projects.
+
+To manage who can seen an object, use the object's policy controls,
+Spaces (see @{article:Spaces User Guide}) and Custom Forms
+(see @{article:User Guide: Customizing Forms}).
+
+For more details about rationale, see "Policies In Depth", below.
 
 Joining Projects
 ================
@@ -93,3 +133,71 @@ to the workboard view more easily.
 **Hide Unused Items**: If you have a project which you don't expect to have
 members or won't have a workboard, you can hide these items to streamline the
 menu.
+
+
+Policies In Depth
+=================
+
+As discussed above, adding and removing projects never affects who can see an
+object. This is an explicit product design choice aimed at reducing the
+complexity of policy management.
+
+Phabricator projects are a flexible, general-purpose, freeform tool. This is a
+good match for many organizational use cases, but a very poor match for
+policies. It is important that policies be predictable and rigid, because the
+cost of making a mistake with policies is high (inadvertent disclosure of
+private information).
+
+In Phabricator, each object (like a task) can be tagged with multiple projects.
+This is important in a flexible organizational tool, but is a liability in a
+policy tool.
+
+If each project potentially affected visibility, it would become more difficult
+to predict the visibility of objects and easier to make mistakes with policies.
+There are different, reasonable expectations about how policies might be
+affected when tagging objects with projects, but these expectations are in
+conflict, and different users have different expectations. For example:
+
+  - if a user adds a project like {nav Backend} to a task, their intent
+    might be to //open// the task up and share it with the "Backend" team;
+  - if a user adds a project like {nav Security Vulnerability} to a task,
+    their intent might be to //close// the task down and restrict it to just
+    the security team;
+  - if a user adds a project like {nav Easy Starter Task} to a task, their
+    intent might be to not affect policies at all;
+  - if a user adds {nav Secret Inner Council} to a task already tagged with
+    {nav Security Vulnerability}, their intent might be to //open// the task
+    to members of //either// project, or //close// the task to just members of
+    //both// projects;
+  - if a user adds {nav Backend} to a task already tagged with
+    {nav Security Vulnerability}, their intent is totally unclear;
+  - in all cases, users may be adding projects purely to organize objects
+    without intending to affect policies.
+
+We can't distinguish between these cases without adding substantial complexity,
+and even if we made an attempt to navigate this it would still be very
+difficult to predict the effect of tagging an object with multiple
+policy-affecting projects. Users would need to learn many rules about how these
+policy types interacted to predict the policy effects of adding or removing a
+project.
+
+Because of the implied complexity, we almost certainly could not prevent some
+cases where a user intends to take a purely organizational action (like adding
+a {nav Needs Documentation} tag) and accidentally opens a private object to a
+wide audience. The policy system is intended to make these catastrophically bad
+cases very difficult, and allowing projects to affect policies would make these
+mistakes much easier to make.
+
+We believe the only reasonable way we could reduce ambiguity and complexity is
+by making project policy actions explicit and rule-based. But we already have a
+system for explicit, rule-based management of policies: the policy system. The
+policy tools are designed for policy management and aimed at making actions
+explicit and mistakes very difficult.
+
+Many of the use cases where project-based access control seems like it might be
+a good fit can be satisfied with Spaces instead (see @{article:Spaces User
+Guide}). Spaces are explicit, unambiguous containers for groups of objects with
+similar policies.
+
+Form customization also provides a powerful tool for making many policy
+management tasks easier (see @{article:User Guide: Customizing Forms}).
