@@ -8,6 +8,7 @@ final class PHUIHeaderView extends AphrontTagView {
   private $tags = array();
   private $image;
   private $imageURL = null;
+  private $imageEditURL = null;
   private $subheader;
   private $headerIcon;
   private $noBackground;
@@ -54,6 +55,11 @@ final class PHUIHeaderView extends AphrontTagView {
 
   public function setImageURL($url) {
     $this->imageURL = $url;
+    return $this;
+  }
+
+  public function setImageEditURL($url) {
+    $this->imageEditURL = $url;
     return $this;
   }
 
@@ -174,16 +180,45 @@ final class PHUIHeaderView extends AphrontTagView {
   }
 
   protected function getTagContent() {
+
     $image = null;
     if ($this->image) {
+      $image_href = null;
+      if ($this->imageURL) {
+        $image_href = $this->imageURL;
+      } else if ($this->imageEditURL) {
+        $image_href = $this->imageEditURL;
+      }
+
       $image = phutil_tag(
-        ($this->imageURL ? 'a' : 'span'),
+        'span',
         array(
-          'href' => $this->imageURL,
           'class' => 'phui-header-image',
           'style' => 'background-image: url('.$this->image.')',
-        ),
-        ' ');
+        ));
+
+      if ($image_href) {
+        $edit_view = null;
+        if ($this->imageEditURL) {
+          $edit_view = phutil_tag(
+            'span',
+            array(
+              'class' => 'phui-header-image-edit',
+            ),
+            pht('Edit'));
+        }
+
+        $image = phutil_tag(
+          'a',
+          array(
+            'href' => $image_href,
+            'class' => 'phui-header-image-href',
+          ),
+          array(
+            $image,
+            $edit_view,
+          ));
+      }
     }
 
     $viewer = $this->getUser();

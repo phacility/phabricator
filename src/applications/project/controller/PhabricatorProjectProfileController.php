@@ -31,6 +31,15 @@ final class PhabricatorProjectProfileController
       $header->setStatus('fa-ban', 'red', pht('Archived'));
     }
 
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $project,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    if ($can_edit) {
+      $header->setImageEditURL($this->getApplicationURI("picture/{$id}/"));
+    }
+
     $properties = $this->buildPropertyListView($project);
 
     $watch_action = $this->renderWatchAction($project);
