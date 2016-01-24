@@ -1826,7 +1826,7 @@ final class DiffusionBrowseController extends DiffusionController {
       $names = array();
       foreach ($blame_commits as $identifier => $commit) {
         $author = $commit->renderAuthorShortName($handles);
-        $name = $commit->getShortName();
+        $name = $commit->getLocalName();
 
         $authors[$identifier] = $author;
         $names[$identifier] = $name;
