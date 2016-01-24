@@ -44,13 +44,13 @@ final class PhabricatorProjectsEditEngineExtension
 
     $projects_field = id(new PhabricatorProjectsEditField())
       ->setKey('projectPHIDs')
-      ->setLabel(pht('Projects'))
+      ->setLabel(pht('Tags'))
       ->setEditTypeKey('projects')
-      ->setAliases(array('project', 'projects'))
+      ->setAliases(array('project', 'projects', 'tag', 'tags'))
       ->setIsCopyable(true)
       ->setUseEdgeTransactions(true)
-      ->setCommentActionLabel(pht('Change Projects'))
-      ->setDescription(pht('Select projects for the object.'))
+      ->setCommentActionLabel(pht('Change Project Tags'))
+      ->setDescription(pht('Select project tags for the object.'))
       ->setTransactionType($edge_type)
       ->setMetadataValue('edge:type', $project_edge_type)
       ->setValue($project_phids);
@@ -58,14 +58,14 @@ final class PhabricatorProjectsEditEngineExtension
     $projects_field->setViewer($engine->getViewer());
 
     $edit_add = $projects_field->getConduitEditType('projects.add')
-      ->setConduitDescription(pht('Add projects.'));
+      ->setConduitDescription(pht('Add project tags.'));
 
     $edit_set = $projects_field->getConduitEditType('projects.set')
       ->setConduitDescription(
-        pht('Set projects, overwriting current value.'));
+        pht('Set project tags, overwriting current value.'));
 
     $edit_rem = $projects_field->getConduitEditType('projects.remove')
-      ->setConduitDescription(pht('Remove projects.'));
+      ->setConduitDescription(pht('Remove project tags.'));
 
     return array(
       $projects_field,

@@ -163,7 +163,7 @@ final class PhabricatorSearchApplicationSearchEngine
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setName('projectPHIDs')
-          ->setLabel(pht('In Any Project'))
+          ->setLabel(pht('Tags'))
           ->setDatasource(new PhabricatorProjectDatasource())
           ->setValue($project_phids));
   }

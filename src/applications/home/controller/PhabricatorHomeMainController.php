@@ -190,7 +190,7 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
     if (!$tasks) {
       return $this->renderMiniPanel(
         pht('No "Needs Triage" Tasks'),
-        pht('No tasks in projects you are a member of need triage.'));
+        pht('No tasks tagged with projects you are a member of need triage.'));
     }
 
     $title = pht('Needs Triage');
