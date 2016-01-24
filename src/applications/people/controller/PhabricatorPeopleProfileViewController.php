@@ -27,9 +27,14 @@ final class PhabricatorPeopleProfileViewController
     $profile = $user->loadUserProfile();
     $picture = $user->getProfileImageURI();
 
+    $profile_icon = PhabricatorPeopleIconSet::getIconIcon($profile->getIcon());
+    $profile_icon = id(new PHUIIconView())
+      ->setIconFont($profile_icon.' grey');
+    $profile_title = $profile->getDisplayTitle();
+
     $header = id(new PHUIHeaderView())
       ->setHeader($user->getFullName())
-      ->setSubheader($profile->getTitle())
+      ->setSubheader(array($profile_icon, $profile_title))
       ->setImage($picture);
 
     $actions = id(new PhabricatorActionListView())

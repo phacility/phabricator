@@ -27,6 +27,7 @@ final class PhabricatorObjectHandle
   private $complete;
   private $objectName;
   private $policyFiltered;
+  private $subtitle;
 
   public function setIcon($icon) {
     $this->icon = $icon;
@@ -42,6 +43,15 @@ final class PhabricatorObjectHandle
       return $this->icon;
     }
     return $this->getTypeIcon();
+  }
+
+  public function setSubtitle($subtitle) {
+    $this->subtitle = $subtitle;
+    return $this;
+  }
+
+  public function getSubtitle() {
+    return $this->subtitle;
   }
 
   public function setTagColor($color) {

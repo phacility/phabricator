@@ -79,6 +79,13 @@ abstract class PhabricatorProjectUserListView extends AphrontView {
         ->setHref($handle->getURI())
         ->setImageURI($handle->getImageURI());
 
+      $icon = id(new PHUIIconView())
+        ->setIconFont($handle->getIcon().' grey');
+
+      $subtitle = $handle->getSubtitle();
+
+      $item->addAttribute(array($icon, ' ', $subtitle));
+
       if ($can_edit && !$limit) {
         $remove_uri = $this->getRemoveURI($user_phid);
 
