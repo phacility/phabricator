@@ -41,27 +41,6 @@ final class PhabricatorPeopleProfileViewController
       ->setObject($user)
       ->setUser($viewer);
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $user,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-pencil')
-        ->setName(pht('Edit Profile'))
-        ->setHref($this->getApplicationURI('editprofile/'.$user->getID().'/'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-picture-o')
-        ->setName(pht('Edit Profile Picture'))
-        ->setHref($this->getApplicationURI('picture/'.$user->getID().'/'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
     $class = 'PhabricatorConpherenceApplication';
     if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
       $href = id(new PhutilURI('/conpherence/new/'))
@@ -78,78 +57,9 @@ final class PhabricatorPeopleProfileViewController
           ->setHref($href));
     }
 
-    if ($viewer->getIsAdmin()) {
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setIcon('fa-wrench')
-          ->setName(pht('Edit Settings'))
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(!$can_edit)
-          ->setHref('/settings/'.$user->getID().'/'));
-
-      if ($user->getIsAdmin()) {
-        $empower_icon = 'fa-arrow-circle-o-down';
-        $empower_name = pht('Remove Administrator');
-      } else {
-        $empower_icon = 'fa-arrow-circle-o-up';
-        $empower_name = pht('Make Administrator');
-      }
-
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setIcon($empower_icon)
-          ->setName($empower_name)
-          ->setDisabled(($user->getPHID() == $viewer->getPHID()))
-          ->setWorkflow(true)
-          ->setHref($this->getApplicationURI('empower/'.$user->getID().'/')));
-
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setIcon('fa-tag')
-          ->setName(pht('Change Username'))
-          ->setWorkflow(true)
-          ->setHref($this->getApplicationURI('rename/'.$user->getID().'/')));
-
-      if ($user->getIsDisabled()) {
-        $disable_icon = 'fa-check-circle-o';
-        $disable_name = pht('Enable User');
-      } else {
-        $disable_icon = 'fa-ban';
-        $disable_name = pht('Disable User');
-      }
-
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setIcon($disable_icon)
-          ->setName($disable_name)
-          ->setDisabled(($user->getPHID() == $viewer->getPHID()))
-          ->setWorkflow(true)
-          ->setHref($this->getApplicationURI('disable/'.$user->getID().'/')));
-
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setIcon('fa-times')
-          ->setName(pht('Delete User'))
-          ->setDisabled(($user->getPHID() == $viewer->getPHID()))
-          ->setWorkflow(true)
-          ->setHref($this->getApplicationURI('delete/'.$user->getID().'/')));
-
-      $can_welcome = $user->canEstablishWebSessions();
-
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setIcon('fa-envelope')
-          ->setName(pht('Send Welcome Email'))
-          ->setWorkflow(true)
-          ->setDisabled(!$can_welcome)
-          ->setHref($this->getApplicationURI('welcome/'.$user->getID().'/')));
-    }
 
     $properties = $this->buildPropertyView($user, $actions);
     $name = $user->getUsername();
-
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($name);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -225,8 +135,9 @@ final class PhabricatorPeopleProfileViewController
         $box = id(new PHUIObjectBoxView())
           ->setHeaderText(pht('Badges'))
           ->appendChild($flex);
-        }
       }
+    }
+
     return $box;
   }
 

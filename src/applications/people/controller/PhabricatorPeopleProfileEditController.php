@@ -23,7 +23,7 @@ final class PhabricatorPeopleProfileEditController
 
     $this->setUser($user);
 
-    $profile_uri = '/p/'.$user->getUsername().'/';
+    $done_uri = $this->getApplicationURI("manage/{$id}/");
 
     $field_list = PhabricatorCustomField::getObjectFields(
       $user,
@@ -46,7 +46,7 @@ final class PhabricatorPeopleProfileEditController
 
       try {
         $editor->applyTransactions($user, $xactions);
-        return id(new AphrontRedirectResponse())->setURI($profile_uri);
+        return id(new AphrontRedirectResponse())->setURI($done_uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
       }
@@ -61,7 +61,7 @@ final class PhabricatorPeopleProfileEditController
     $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->addCancelButton($profile_uri)
+          ->addCancelButton($done_uri)
           ->setValue(pht('Save Profile')));
 
     $allow_public = PhabricatorEnv::getEnvConfig('policy.allow-public');

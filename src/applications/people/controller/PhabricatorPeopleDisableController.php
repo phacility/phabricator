@@ -3,21 +3,14 @@
 final class PhabricatorPeopleDisableController
   extends PhabricatorPeopleController {
 
-  private $id;
-  private $via;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-    $this->via = $data['via'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $admin = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
+    $via = $request->getURIData('id');
 
     $user = id(new PhabricatorPeopleQuery())
-      ->setViewer($admin)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->executeOne();
     if (!$user) {
       return new Aphront404Response();
@@ -27,16 +20,16 @@ final class PhabricatorPeopleDisableController
     // on profiles and also via the "X" action on the approval queue. We do
     // things slightly differently depending on the context the actor is in.
 
-    $is_disapprove = ($this->via == 'disapprove');
+    $is_disapprove = ($via == 'disapprove');
     if ($is_disapprove) {
       $done_uri = $this->getApplicationURI('query/approval/');
       $should_disable = true;
     } else {
-      $done_uri = '/p/'.$user->getUsername().'/';
+      $done_uri = $this->getApplicationURI("manage/{$id}/");
       $should_disable = !$user->getIsDisabled();
     }
 
-    if ($admin->getPHID() == $user->getPHID()) {
+    if ($viewer->getPHID() == $user->getPHID()) {
       return $this->newDialog()
         ->setTitle(pht('Something Stays Your Hand'))
         ->appendParagraph(
@@ -47,7 +40,7 @@ final class PhabricatorPeopleDisableController
 
     if ($request->isFormPost()) {
       id(new PhabricatorUserEditor())
-        ->setActor($admin)
+        ->setActor($viewer)
         ->disableUser($user, $should_disable);
 
       return id(new AphrontRedirectResponse())->setURI($done_uri);
