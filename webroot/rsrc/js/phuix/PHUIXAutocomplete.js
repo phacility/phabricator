@@ -333,7 +333,7 @@ JX.install('PHUIXAutocomplete', {
     _getCancelCharacters: function() {
       // The "." character does not cancel because of projects named
       // "node.js" or "blog.mycompany.com".
-      return ['#', '@', ',', '!', '?'];
+      return ['#', '@', ',', '!', '?', '{', '}'];
     },
 
     _getTerminators: function() {
