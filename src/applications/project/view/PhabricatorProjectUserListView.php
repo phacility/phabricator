@@ -120,7 +120,8 @@ abstract class PhabricatorProjectUserListView extends AphrontView {
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setObjectList($list);
+      ->setObjectList($list)
+      ->setBackground(PHUIBoxView::GREY);
   }
 
 }

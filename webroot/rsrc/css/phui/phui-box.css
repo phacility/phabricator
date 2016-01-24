@@ -15,9 +15,33 @@
 .phui-box-grey {
   background-color: rgba(71,87,120,0.1);
   border-radius: 3px;
+  border: none;
 }
 
 .phui-box-blue {
   background-color: {$bluebackground};
   border-radius: 3px;
+  border: none;
+}
+
+.phui-box-blue .phui-object-item,
+.phui-box-grey .phui-object-item {
+  background: transparent;
+}
+
+.phui-box-blue .phui-object-item-link,
+.phui-box-grey .phui-object-item-link {
+  color: {$darkbluetext};
+}
+
+.phui-box-blue .phui-header-shell,
+.phui-box-grey .phui-header-shell {
+  border-bottom: 2px solid #fff;
+}
+
+.phui-box-blue .phui-info-severity-nodata,
+.phui-box-grey .phui-info-severity-nodata {
+  background: transparent;
+  padding: 12px 4px;
+  text-align: center;
 }

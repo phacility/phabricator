@@ -30,12 +30,9 @@ final class PhabricatorProjectProfileController
       $header->setStatus('fa-ban', 'red', pht('Archived'));
     }
 
-    $actions = $this->buildActionListView($project);
-    $properties = $this->buildPropertyListView($project, $actions);
-
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
+    $properties = $this->buildPropertyListView($project);
+    $watch_action = $this->renderWatchAction($project);
+    $header->addActionLink($watch_action);
 
     $member_list = id(new PhabricatorProjectMemberListView())
       ->setUser($viewer)
@@ -52,8 +49,6 @@ final class PhabricatorProjectProfileController
     $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorProject::PANEL_PROFILE);
 
-    $watch_action = $this->renderWatchAction($project);
-
     $stories = id(new PhabricatorFeedQuery())
       ->setViewer($viewer)
       ->setFilterPHIDs(
@@ -63,27 +58,41 @@ final class PhabricatorProjectProfileController
       ->setLimit(50)
       ->execute();
 
-
     $feed = $this->renderStories($stories);
+    $feed = phutil_tag_div('project-view-feed', $feed);
 
-    $feed_header = id(new PHUIHeaderView())
-      ->setHeader(pht('Recent Activity'))
-      ->addActionLink($watch_action);
-
-    $feed = id(new PHUIObjectBoxView())
-      ->setHeader($feed_header)
-      ->appendChild($feed);
-
-    $columns = id(new AphrontMultiColumnView())
-      ->setFluidLayout(true)
-      ->addColumn($feed)
-      ->addColumn(
+    $columns = id(new PHUITwoColumnView())
+      ->setMainColumn(
+        array(
+          $properties,
+          $feed,
+        ))
+      ->setSideColumn(
         array(
           $member_list,
           $watcher_list,
         ));
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
+
+    $header = phutil_tag(
+      'div',
+      array(
+        'class' => 'project-view-header',
+      ),
+      $header);
+
+    require_celerity_resource('project-view-css');
+    $home = phutil_tag(
+      'div',
+      array(
+        'class' => 'project-view-home',
+      ),
+      array(
+        $header,
+        $columns,
+      ));
 
     return $this->newPage()
       ->setNavigation($nav)
@@ -92,49 +101,28 @@ final class PhabricatorProjectProfileController
       ->setPageObjectPHIDs(array($project->getPHID()))
       ->appendChild(
         array(
-          $object_box,
-          $columns,
+          $home,
         ));
   }
 
-  private function buildActionListView(PhabricatorProject $project) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $id = $project->getID();
-
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($project);
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Edit Project'))
-        ->setIcon('fa-pencil')
-        ->setHref($this->getApplicationURI("history/{$id}/")));
-
-    return $view;
-  }
-
   private function buildPropertyListView(
-    PhabricatorProject $project,
-    PhabricatorActionListView $actions) {
+    PhabricatorProject $project) {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setObject($project)
-      ->setActionList($actions);
-
-    $view->addProperty(
-      pht('Looks Like'),
-      $viewer->renderHandle($project->getPHID())->setAsTag(true));
+      ->setObject($project);
 
     $field_list = PhabricatorCustomField::getObjectFields(
       $project,
       PhabricatorCustomField::ROLE_VIEW);
     $field_list->appendFieldsToPropertyList($project, $viewer, $view);
+
+    $view = id(new PHUIBoxView())
+      ->setColor(PHUIBoxView::GREY)
+      ->appendChild($view)
+      ->addClass('project-view-properties');
 
     return $view;
   }
@@ -147,7 +135,7 @@ final class PhabricatorProjectProfileController
     $builder->setShowHovercards(true);
     $view = $builder->buildView();
 
-    return phutil_tag_div('profile-feed', $view->render());
+    return $view;
   }
 
   private function renderWatchAction(PhabricatorProject $project) {

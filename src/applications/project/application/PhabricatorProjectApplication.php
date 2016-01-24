@@ -86,7 +86,7 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
         ),
         'update/(?P<id>[1-9]\d*)/(?P<action>[^/]+)/'
           => 'PhabricatorProjectUpdateController',
-        'history/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectHistoryController',
+        'manage/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectManageController',
         '(?P<action>watch|unwatch)/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectWatchController',
         'silence/(?P<id>[1-9]\d*)/'

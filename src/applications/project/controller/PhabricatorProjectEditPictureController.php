@@ -23,8 +23,8 @@ final class PhabricatorProjectEditPictureController
 
     $this->setProject($project);
 
-    $edit_uri = $this->getApplicationURI('history/'.$project->getID().'/');
-    $view_uri = $this->getApplicationURI('history/'.$project->getID().'/');
+    $edit_uri = $this->getApplicationURI('manage/'.$project->getID().'/');
+    $view_uri = $this->getApplicationURI('manage/'.$project->getID().'/');
 
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
     $e_file = true;
@@ -255,7 +255,7 @@ final class PhabricatorProjectEditPictureController
       ->setForm($upload_form);
 
     $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorProject::PANEL_PROFILE);
+    $nav->selectFilter(PhabricatorProject::PANEL_MANAGE);
 
     return $this->newPage()
       ->setTitle($title)

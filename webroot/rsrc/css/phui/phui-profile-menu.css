@@ -165,7 +165,7 @@
 
 .phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
   .phui-profile-menu-footer .phui-list-item-href {
-  padding: 20px 0 20px;
+  padding: 20px 0 24px;
 }
 
 .phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer
@@ -202,28 +202,20 @@
 
 .phui-profile-menu .phui-profile-menu-footer
   .phui-icon-circle.phui-list-item-icon {
-  font-size: 11px;
+  font-size: 12px;
 }
 
 div.phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer-1 {
-  bottom: 40px;
-  position: fixed;
-  background-color: {$menu.profile.background};
-}
-
-div.phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer-2 {
   bottom: 0;
   position: fixed;
   background-color: {$menu.profile.background};
 }
 
-.phui-profile-menu .phui-profile-menu-footer-1,
-.phui-profile-menu .phui-profile-menu-footer-2 {
+.phui-profile-menu .phui-profile-menu-footer-1 {
   width: {$menu.profile.width};
 }
 
-.phui-profile-menu .phui-profile-menu-collapsed .phui-profile-menu-footer-1,
-.phui-profile-menu .phui-profile-menu-collapsed .phui-profile-menu-footer-2 {
+.phui-profile-menu .phui-profile-menu-collapsed .phui-profile-menu-footer-1 {
   width: {$menu.profile.width.collapsed};
 }
 

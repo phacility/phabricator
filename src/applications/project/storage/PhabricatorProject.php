@@ -49,6 +49,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   const PANEL_PROFILE = 'project.profile';
   const PANEL_WORKBOARD = 'project.workboard';
   const PANEL_MEMBERS = 'project.members';
+  const PANEL_MANAGE = 'project.manage';
   const PANEL_MILESTONES = 'project.milestones';
   const PANEL_SUBPROJECTS = 'project.subprojects';
 

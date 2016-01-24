@@ -371,47 +371,8 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
       ->setHideInApplicationMenu(true)
       ->addClass('phui-profile-menu-spacer');
 
-    if ($this->isPanelEngineConfigurable()) {
-      $viewer = $this->getViewer();
-      $object = $this->getProfileObject();
-
-      $can_edit = PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $object,
-        PhabricatorPolicyCapability::CAN_EDIT);
-
-      $expanded_edit_icon = id(new PHUIIconCircleView())
-        ->addClass('phui-list-item-icon')
-        ->addClass('phui-profile-menu-visible-when-expanded')
-        ->setIconFont('fa-pencil');
-
-      $collapsed_edit_icon = id(new PHUIIconCircleView())
-        ->addClass('phui-list-item-icon')
-        ->addClass('phui-profile-menu-visible-when-collapsed')
-        ->setIconFont('fa-pencil')
-        ->addSigil('has-tooltip')
-        ->setMetadata(
-          array(
-            'tip' => pht('Edit Menu'),
-            'align' => 'E',
-          ));
-
-      $items[] = id(new PHUIListItemView())
-        ->setName('Edit Menu')
-        ->setKey('panel.configure')
-        ->addIcon($expanded_edit_icon)
-        ->addIcon($collapsed_edit_icon)
-        ->addClass('phui-profile-menu-footer')
-        ->addClass('phui-profile-menu-footer-1')
-        ->setHref($this->getPanelURI('configure/'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit);
-    }
-
     $collapse_id = celerity_generate_unique_node_id();
-
     $viewer = $this->getViewer();
-
     $collapse_key =
       PhabricatorUserPreferences::PREFERENCE_PROFILE_MENU_COLLAPSED;
 
@@ -442,7 +403,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
     $collapse_icon = id(new PHUIIconCircleView())
       ->addClass('phui-list-item-icon')
       ->addClass('phui-profile-menu-visible-when-expanded')
-      ->setIconFont('fa-angle-left');
+      ->setIconFont('fa-chevron-left');
 
     $expand_icon = id(new PHUIIconCircleView())
       ->addClass('phui-list-item-icon')
@@ -453,7 +414,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
           'tip' => pht('Expand'),
           'align' => 'E',
         ))
-      ->setIconFont('fa-angle-right');
+      ->setIconFont('fa-chevron-right');
 
     $items[] = id(new PHUIListItemView())
       ->setName('Collapse')
@@ -461,7 +422,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
       ->addIcon($expand_icon)
       ->setID($collapse_id)
       ->addClass('phui-profile-menu-footer')
-      ->addClass('phui-profile-menu-footer-2')
+      ->addClass('phui-profile-menu-footer-1')
       ->setHideInApplicationMenu(true)
       ->setHref('#');
 

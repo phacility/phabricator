@@ -82,7 +82,7 @@ final class PhabricatorProjectEditEngine
       return $object->getURI();
     } else {
       $id = $object->getID();
-      return "/project/history/{$id}/";
+      return "/project/manage/{$id}/";
     }
   }
 
