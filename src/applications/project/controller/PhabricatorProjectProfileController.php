@@ -31,6 +31,7 @@ final class PhabricatorProjectProfileController
     }
 
     $properties = $this->buildPropertyListView($project);
+
     $watch_action = $this->renderWatchAction($project);
     $header->addActionLink($watch_action);
 
@@ -118,6 +119,10 @@ final class PhabricatorProjectProfileController
       $project,
       PhabricatorCustomField::ROLE_VIEW);
     $field_list->appendFieldsToPropertyList($project, $viewer, $view);
+
+    if ($view->isEmpty()) {
+      return null;
+    }
 
     $view = id(new PHUIBoxView())
       ->setColor(PHUIBoxView::GREY)
