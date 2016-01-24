@@ -22,7 +22,8 @@ final class PhabricatorProjectProfileController
       ->setHeader($project->getName())
       ->setUser($viewer)
       ->setPolicyObject($project)
-      ->setImage($picture);
+      ->setImage($picture)
+      ->setProfileHeader(true);
 
     if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ACTIVE) {
       $header->setStatus('fa-check', 'bluegrey', pht('Active'));
@@ -76,13 +77,6 @@ final class PhabricatorProjectProfileController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setBorder(true);
-
-    $header = phutil_tag(
-      'div',
-      array(
-        'class' => 'project-view-header',
-      ),
-      $header);
 
     require_celerity_resource('project-view-css');
     $home = phutil_tag(

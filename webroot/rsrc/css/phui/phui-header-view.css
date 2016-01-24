@@ -253,3 +253,40 @@ body .phui-header-shell.phui-bleed-header
 .phui-header-subheader .phui-badge-flex-view:after {
   display: inline;
 }
+
+/*** Profile Header ***********************************************************/
+
+.phui-profile-header {
+  padding: 24px 20px 20px 24px;
+}
+
+.device-phone .phui-profile-header {
+  padding: 12px;
+}
+
+.phui-profile-header.phui-header-shell {
+  margin: 0;
+  border: none;
+}
+
+.phui-profile-header .phui-header-image {
+  height: 80px;
+  width: 80px;
+}
+
+.phui-profile-header .phui-header-col1 {
+  width: 96px;
+}
+
+.phui-profile-header .phui-header-subheader {
+  margin-top: 12px;
+}
+
+.phui-profile-header.phui-header-shell .phui-header-header {
+  font-family: 'Aleo', {$fontfamily};
+  font-size: 24px;
+}
+
+.phui-profile-header .phui-header-col3 {
+  vertical-align: top;
+}

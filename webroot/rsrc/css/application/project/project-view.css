@@ -6,41 +6,13 @@
   background: #fff;
 }
 
-.project-view-header {
-  padding: 32px 24px 32px;
-}
-
-.project-view-header .phui-header-shell {
-  margin: 0;
-  padding: 0;
-  border: none;
-}
-
-.project-view-header .phui-header-image {
-  height: 80px;
-  width: 80px;
-}
-
-.project-view-header .phui-header-col1 {
-  width: 96px;
-}
-
-.project-view-header .phui-header-subheader {
-  margin-top: 12px;
-}
-
-.project-view-header .phui-header-shell .phui-header-header {
-  font-family: 'Aleo', {$fontfamily};
-  font-size: 24px;
-}
-
-.project-view-header .phui-header-col3 {
-  vertical-align: top;
-}
-
 .phui-box.phui-box-grey.project-view-properties {
   margin: 0 16px 0 16px;
   padding: 4px 12px;
+}
+
+.device-phone .phui-box.phui-box-grey.project-view-properties {
+  margin: 0 12px 0 12px;
 }
 
 .project-view-properties .phui-property-list-key {
