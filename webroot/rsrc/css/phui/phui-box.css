@@ -39,9 +39,11 @@
   border-bottom: 2px solid #fff;
 }
 
-.phui-box-blue .phui-info-severity-nodata,
-.phui-box-grey .phui-info-severity-nodata {
+.phui-object-box.phui-box-blue div.phui-info-severity-nodata,
+.phui-object-box.phui-box-grey div.phui-info-severity-nodata {
   background: transparent;
   padding: 12px 4px;
   text-align: center;
+  border: none;
+  color: {$greytext};
 }

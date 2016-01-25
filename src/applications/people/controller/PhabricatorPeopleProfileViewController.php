@@ -29,52 +29,65 @@ final class PhabricatorPeopleProfileViewController
 
     $profile_icon = PhabricatorPeopleIconSet::getIconIcon($profile->getIcon());
     $profile_icon = id(new PHUIIconView())
-      ->setIconFont($profile_icon.' grey');
+      ->setIconFont($profile_icon);
     $profile_title = $profile->getDisplayTitle();
 
     $header = id(new PHUIHeaderView())
       ->setHeader($user->getFullName())
       ->setSubheader(array($profile_icon, $profile_title))
-      ->setImage($picture);
+      ->setImage($picture)
+      ->setProfileHeader(true);
 
-    $actions = id(new PhabricatorActionListView())
-      ->setObject($user)
-      ->setUser($viewer);
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $user,
+      PhabricatorPolicyCapability::CAN_EDIT);
 
-    $class = 'PhabricatorConpherenceApplication';
-    if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
-      $href = id(new PhutilURI('/conpherence/new/'))
-        ->setQueryParam('participant', $user->getPHID());
-
-      $can_send = $viewer->isLoggedIn();
-
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setIcon('fa-comments')
-          ->setName(pht('Send Message'))
-          ->setWorkflow(true)
-          ->setDisabled(!$can_send)
-          ->setHref($href));
+    if ($can_edit) {
+      $id = $user->getID();
+      $header->setImageEditURL($this->getApplicationURI("picture/{$id}/"));
     }
 
-
-    $properties = $this->buildPropertyView($user, $actions);
+    $properties = $this->buildPropertyView($user);
     $name = $user->getUsername();
 
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
-
-    $feed = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Recent Activity'))
-      ->appendChild($this->buildPeopleFeed($user, $viewer));
+    $feed = $this->buildPeopleFeed($user, $viewer);
+    $feed = phutil_tag_div('project-view-feed', $feed);
 
     $badges = $this->buildBadgesView($user);
+
+    if ($badges) {
+      $columns = id(new PHUITwoColumnView())
+        ->addClass('project-view-badges')
+        ->setMainColumn(
+          array(
+            $properties,
+            $feed,
+          ))
+        ->setSideColumn(
+          array(
+            $badges,
+          ));
+    } else {
+      $columns = array($properties, $feed);
+    }
 
     $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorPeopleProfilePanelEngine::PANEL_PROFILE);
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
+
+    require_celerity_resource('project-view-css');
+    $home = phutil_tag(
+      'div',
+      array(
+        'class' => 'project-view-home',
+      ),
+      array(
+        $header,
+        $columns,
+      ));
 
     return $this->newPage()
       ->setTitle($user->getUsername())
@@ -82,26 +95,31 @@ final class PhabricatorPeopleProfileViewController
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $object_box,
-          $badges,
-          $feed,
+          $home,
         ));
   }
 
   private function buildPropertyView(
-    PhabricatorUser $user,
-    PhabricatorActionListView $actions) {
+    PhabricatorUser $user) {
 
     $viewer = $this->getRequest()->getUser();
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setObject($user)
-      ->setActionList($actions);
+      ->setObject($user);
 
     $field_list = PhabricatorCustomField::getObjectFields(
       $user,
       PhabricatorCustomField::ROLE_VIEW);
     $field_list->appendFieldsToPropertyList($user, $viewer, $view);
+
+    if ($view->isEmpty()) {
+      return null;
+    }
+
+    $view = id(new PHUIBoxView())
+      ->setColor(PHUIBoxView::GREY)
+      ->appendChild($view)
+      ->addClass('project-view-properties');
 
     return $view;
   }
@@ -132,9 +150,10 @@ final class PhabricatorPeopleProfileViewController
           $flex->addItem($item);
         }
 
-        $box = id(new PHUIObjectBoxView())
-          ->setHeaderText(pht('Badges'))
-          ->appendChild($flex);
+      $box = id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('Badges'))
+        ->appendChild($flex)
+        ->setBackground(PHUIBoxView::GREY);
       }
     }
 
@@ -161,7 +180,7 @@ final class PhabricatorPeopleProfileViewController
       'requires but just a single step.'));
     $view = $builder->buildView();
 
-    return phutil_tag_div('phabricator-project-feed', $view->render());
+    return $view->render();
 
   }
 

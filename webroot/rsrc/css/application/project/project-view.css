@@ -54,3 +54,11 @@
 .project-view-home .phui-box-grey .phui-object-item-list-view {
   padding: 8px;
 }
+
+.device-desktop .phui-two-column-view.project-view-badges .phui-side-column {
+  width: 364px;
+}
+
+.profile-no-badges {
+  padding: 24px 0;
+}

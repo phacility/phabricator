@@ -28,7 +28,7 @@ final class PhabricatorPeopleProfileManageController
 
     $profile_icon = PhabricatorPeopleIconSet::getIconIcon($profile->getIcon());
     $profile_icon = id(new PHUIIconView())
-      ->setIconFont($profile_icon.' grey');
+      ->setIconFont($profile_icon);
     $profile_title = $profile->getDisplayTitle();
 
     $header = id(new PHUIHeaderView())
