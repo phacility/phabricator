@@ -3,10 +3,8 @@
  */
 
 .phui-workpanel-view .phui-header-shell {
-  padding: 16px 0 8px;
-  border-color: {$lightgreyborder};
-  width: 300px;
-  background-color: transparent;
+  padding: 8px;
+  width: 284px;
 }
 
 .phui-workpanel-view .phui-header-shell .phui-header-header {
@@ -24,7 +22,10 @@
 
 .device-phone .phui-workboard-view {
   width: auto;
-  margin: 0 8px;
+}
+
+.device .phui-workpanel-view .phui-header-shell {
+  width: auto;
 }
 
 .phui-workboard-view {
@@ -34,6 +35,18 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.phui-workboard-view .phui-object-item {
+  background-color: #fff;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+  margin-bottom: 6px;
+}
+
+.phui-workboard-view .phui-object-item-frame {
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 .phui-workboard-view .phui-object-item .phui-object-item-objname {
@@ -62,7 +75,7 @@
 }
 
 .phui-workpanel-view .phui-workpanel-body {
-  padding-top: 8px;
+  padding: 8px 8px 4px 8px;
 }
 
 .phui-workpanel-view .phui-workpanel-footer-action a {
@@ -86,7 +99,7 @@
   display: inline-block;
 }
 
-.aphront-multi-column-fixed .phui-workpanel-view {
+.device-desktop .aphront-multi-column-fixed .phui-workpanel-view {
   width: 300px;
 }
 
@@ -147,4 +160,48 @@
 
 .phui-workpanel-view .phui-object-item-attribute a {
   color: {$bluetext};
+}
+
+
+/* - Draggable Colors --------------------------------------------------------*/
+
+.phui-workboard-view .phui-object-item.drag-dragging {
+  box-shadow: {$dropshadow};
+  background-color: {$sh-greybackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-red {
+  background-color: {$sh-redbackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-orange {
+  background-color: {$sh-orangebackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-yellow {
+  background-color: {$sh-yellowbackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-green {
+  background-color: {$sh-greenbackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-blue {
+  background-color: {$sh-bluebackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-indigo {
+  background-color: {$sh-indigobackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-violet {
+  background-color: {$sh-violetbackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-pink {
+  background-color: {$sh-pinkbackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-sky {
+  background-color: {$sh-bluebackground};
 }

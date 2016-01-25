@@ -67,10 +67,6 @@
   text-shadow: {$whitetextshadow};
 }
 
-.phui-theme-light .sprite-main-header {
-  background-image: none;
-}
-
 .device-desktop.phui-theme-light .phabricator-main-menu-brand:hover {
   background-color: rgba(55,55,55,.08);
   cursor: hand;
@@ -119,9 +115,5 @@
 /*--- Blindigo "Phacility" ---------------------------------------------------*/
 
 .phui-theme-blindigo {
-  background-color: #F1F1F4;
-}
-
-.phui-theme-blindigo .phui-workpanel-view .phui-header-shell {
   background-color: #F1F1F4;
 }
