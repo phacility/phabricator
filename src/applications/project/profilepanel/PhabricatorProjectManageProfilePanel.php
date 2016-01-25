@@ -13,6 +13,11 @@ final class PhabricatorProjectManageProfilePanel
     return pht('Manage');
   }
 
+  public function canHidePanel(
+    PhabricatorProfilePanelConfiguration $config) {
+    return false;
+  }
+
   public function canMakeDefault(
     PhabricatorProfilePanelConfiguration $config) {
     return true;

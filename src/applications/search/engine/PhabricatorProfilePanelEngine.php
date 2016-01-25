@@ -600,10 +600,13 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
           $hide_text = pht('Delete');
         }
 
+        $can_disable = $panel->canHidePanel();
+
         $item->addAction(
           id(new PHUIListItemView())
             ->setHref($hide_uri)
             ->setWorkflow(true)
+            ->setDisabled(!$can_disable)
             ->setName($hide_text)
             ->setIcon($hide_icon));
       }
@@ -760,6 +763,14 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
       $viewer,
       $configuration,
       PhabricatorPolicyCapability::CAN_EDIT);
+
+    if (!$configuration->canHidePanel()) {
+      return $controller->newDialog()
+        ->setTitle(pht('Mandatory Panel'))
+        ->appendParagraph(
+          pht('This panel is very important, and can not be disabled.'))
+        ->addCancelButton($this->getConfigureURI());
+    }
 
     if ($configuration->getBuiltinKey() === null) {
       $new_value = null;

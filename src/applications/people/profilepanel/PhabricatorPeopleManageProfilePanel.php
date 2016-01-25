@@ -13,6 +13,11 @@ final class PhabricatorPeopleManageProfilePanel
     return pht('Manage');
   }
 
+  public function canHidePanel(
+    PhabricatorProfilePanelConfiguration $config) {
+    return false;
+  }
+
   public function getDisplayName(
     PhabricatorProfilePanelConfiguration $config) {
     $name = $config->getPanelProperty('name');
