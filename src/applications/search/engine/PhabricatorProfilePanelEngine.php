@@ -49,9 +49,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
 
   abstract protected function getPanelURI($path);
 
-  protected function isPanelEngineConfigurable() {
-    return PhabricatorEnv::getEnvConfig('phabricator.show-prototypes');
-  }
+  abstract protected function isPanelEngineConfigurable();
 
   public function buildResponse() {
     $controller = $this->getController();

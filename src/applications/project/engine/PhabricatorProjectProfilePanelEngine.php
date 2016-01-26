@@ -3,6 +3,10 @@
 final class PhabricatorProjectProfilePanelEngine
   extends PhabricatorProfilePanelEngine {
 
+  protected function isPanelEngineConfigurable() {
+    return true;
+  }
+
   protected function getPanelURI($path) {
     $project = $this->getProfileObject();
     $id = $project->getID();
