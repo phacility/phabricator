@@ -49,12 +49,14 @@ final class PhabricatorProjectProfileController
       ->setUser($viewer)
       ->setProject($project)
       ->setLimit(5)
+      ->setBackground(PHUIBoxView::GREY)
       ->setUserPHIDs($project->getMemberPHIDs());
 
     $watcher_list = id(new PhabricatorProjectWatcherListView())
       ->setUser($viewer)
       ->setProject($project)
       ->setLimit(5)
+      ->setBackground(PHUIBoxView::GREY)
       ->setUserPHIDs($project->getWatcherPHIDs());
 
     $nav = $this->getProfileMenu();
