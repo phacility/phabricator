@@ -140,22 +140,22 @@ to your `.bashrc`, `.profile` or similar:
 == Configuration ==
 
 Some Arcanist commands can be configured. This configuration is read from
-several sources:
+three sources, in order:
 
-  # A customization can force any setting with
-    @{method@arcanist:ArcanistWorkingCopyIdentity::setRuntimeConfig}.
-  # User can specify settings for working copy in `arc/config` file located in
-    VCS directory (e.g. `.git/arc/config`) in JSON format. This file can also be
-    modified by running `arc set-config --local`.
-  # Repository can specify its config in `.arcconfig` in JSON format.
-  # User can specify the settings in `~/.arcrc` (JSON) through the `config` key.
-    This file can be modified also by `arc set-config --global`.
-  # Machine can specify the settings with `/etc/arcconfig` (JSON). On Windows,
-    the file path is `C:\ProgramData\Phabricator\Arcanist\config`.
+  # A project can specify configuration in an `.arcconfig` file. This file is
+    JSON, and can be updated using  `arc set-config --local` or by editing
+    it manually.
+  # User configuration is read from `~/.arcconfig`. This file is JSON, and can
+    be updated using `arc set-config`.
+  # Host configuration is read from `/etc/arcconfig` (on Windows, the path
+    is `C:\ProgramData\Phabricator\Arcanist\config`).
 
-The first place where the setting is defined wins.
+Arcanist uses the first definition it encounters as the runtime setting.
 
 Existing settings can be printed with `arc get-config`.
+
+Use `arc help set-config` and `arc help get-config` for more information
+about reading and writing configuration.
 
 == Next Steps ==
 
