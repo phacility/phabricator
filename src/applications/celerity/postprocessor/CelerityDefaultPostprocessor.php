@@ -185,20 +185,15 @@ final class CelerityDefaultPostprocessor
       'sh-disabledtext'         => '#a6a6a6',
       'sh-disabledbackground'   => '#f3f3f3',
 
-      // Background color for "light" themes.
-      'page.background.light' => '#f7f7f7',
+      // Background color for "most" themes.
+      'page.background' => '#f1f1f4',
 
       // Background color for "dark" themes.
       'page.background.dark' => '#ebecee',
 
-      // This is the base background color.
-      'menu.profile.background' => '#525867',
-      'menu.profile.background.hover' => '#464b58',
-      'menu.profile.background.selected' => '#393d48',
-
-      'menu.profile.text' => '#c6c7cb',
-      'menu.profile.text.selected' => '#ffffff',
-      'menu.profile.icon.disabled' => '#b9bcc2',
+      'menu.profile.text' => 'rgba(255,255,255,.8)',
+      'menu.profile.text.selected' => 'rgba(255,255,255,1)',
+      'menu.profile.icon.disabled' => 'rgba(255,255,255,.4)',
 
       'menu.main.height' => '44px',
 

@@ -13,7 +13,7 @@
 }
 
 .phui-box-grey {
-  background-color: rgba(71,87,120,0.06);
+  background-color: {$page.background};
   border-radius: 3px;
   border: none;
 }

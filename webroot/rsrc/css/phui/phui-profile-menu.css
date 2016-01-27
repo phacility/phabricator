@@ -33,7 +33,7 @@
 }
 
 .phui-profile-menu .phabricator-side-menu {
-  background: {$menu.profile.background};
+  background: #525867;
   box-shadow: inset -2px 0 2px rgba(0, 0, 0, 0.150);
   width: 240px;
 }
@@ -107,7 +107,7 @@
 
 .device-desktop .phui-profile-menu .phabricator-side-menu
   .phui-list-item-href:hover {
-  background-color: {$menu.profile.background.hover};
+  background-color: rgba(0,0,0,0.15);
   color: {$menu.profile.text.selected};
 }
 
@@ -122,8 +122,13 @@
 
 .phui-profile-menu .phabricator-side-menu .phui-list-item-selected
   .phui-list-item-href {
-  background-color: {$menu.profile.background.selected};
+  background-color: rgba(0,0,0,0.3);
   color: {$menu.profile.text.selected};
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-list-item-selected
+  .phui-list-item-href:hover {
+  background-color: rgba(0,0,0,0.45);
 }
 
 .phui-profile-menu .phabricator-side-menu .phui-divider {
@@ -190,14 +195,14 @@
   .phui-icon-circle,
 .phui-profile-menu .phui-list-item-selected.phui-profile-menu-footer
   .phui-icon-circle {
-    border-color: #fff;
+    border-color: {$menu.profile.text.selected};
 }
 
 .phui-profile-menu .phui-profile-menu-footer .phui-list-item-href:hover
   .phui-icon-circle .phui-icon-view,
 .phui-profile-menu .phui-list-item-selected.phui-profile-menu-footer
   .phui-icon-circle .phui-icon-view {
-    color: #fff;
+    color: {$menu.profile.text.selected};
 }
 
 .phui-profile-menu .phui-profile-menu-footer
@@ -205,10 +210,9 @@
   font-size: 12px;
 }
 
-div.phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer-1 {
+.phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer-1 {
   bottom: 0;
   position: fixed;
-  background-color: {$menu.profile.background};
 }
 
 .phui-profile-menu .phui-profile-menu-footer-1 {

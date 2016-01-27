@@ -25,7 +25,6 @@ final class PhabricatorUIConfigOptions
     $experimental_link = 'https://secure.phabricator.com/T4214';
     $options = array(
       'blindigo' => 'blindigo',
-      'light' => 'light',
       'red' => 'red',
       'blue' => 'blue',
       'green' => 'green',
@@ -52,7 +51,7 @@ EOJSON;
     return array(
       $this->newOption('ui.header-color', 'enum', 'blindigo')
         ->setDescription(
-          pht('Sets the color of the main header.'))
+          pht('Sets the default color scheme of Phabricator.'))
         ->setEnumOptions($options),
       $this->newOption('ui.footer-items', 'list<wild>', array())
         ->setSummary(
