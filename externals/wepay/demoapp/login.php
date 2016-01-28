@@ -1,5 +1,6 @@
 <?php
 require './_shared.php';
+header('Content-Type: text/html; charset=utf-8');
 
 // ** YOU MUST CHANGE THIS FOR THE SAMPLE APP TO WORK **
 $redirect_uri = 'http://YOUR SERVER NAME/login.php';
@@ -16,7 +17,7 @@ if (!empty($_SESSION['wepay_access_token'])) {
 // like a domain mismatch on your redirect_uri
 if (!empty($_GET['error'])) {
 	echo 'Error during user authentication: ';
-	echo htmlentities($_GET['error_description']);
+	echo htmlentities($_GET['error_description'], ENT_QUOTES, 'UTF-8');
 	exit;
 }
 
