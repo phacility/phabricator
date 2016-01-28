@@ -290,9 +290,8 @@ final class ManiphestReportController extends ManiphestController {
 
     list($burn_x, $burn_y) = $this->buildSeries($data);
 
-    require_celerity_resource('raphael-core');
-    require_celerity_resource('raphael-g');
-    require_celerity_resource('raphael-g-line');
+    require_celerity_resource('d3');
+    require_celerity_resource('phui-chart-css');
 
     Javelin::initBehavior('line-chart', array(
       'hardpoint' => $id,
@@ -306,7 +305,11 @@ final class ManiphestReportController extends ManiphestController {
       'yformat' => 'int',
     ));
 
-    return array($filter, $chart, $panel);
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Burnup Rate'))
+      ->appendChild($chart);
+
+    return array($filter, $box, $panel);
   }
 
   private function renderReportFilters(array $tokens, $has_window) {

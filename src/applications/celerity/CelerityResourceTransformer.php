@@ -66,7 +66,7 @@ final class CelerityResourceTransformer extends Phobject {
       return $data;
     }
 
-    // Some resources won't survive minification (like Raphael.js), and are
+    // Some resources won't survive minification (like d3.min.js), and are
     // marked so as not to be minified.
     if (strpos($data, '@'.'do-not-minify') !== false) {
       return $data;
