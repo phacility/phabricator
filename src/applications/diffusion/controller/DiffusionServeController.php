@@ -2,6 +2,27 @@
 
 final class DiffusionServeController extends DiffusionController {
 
+  private $serviceViewer;
+  private $serviceRepository;
+
+  public function setServiceViewer(PhabricatorUser $viewer) {
+    $this->serviceViewer = $viewer;
+    return $this;
+  }
+
+  public function getServiceViewer() {
+    return $this->serviceViewer;
+  }
+
+  public function setServiceRepository(PhabricatorRepository $repository) {
+    $this->serviceRepository = $repository;
+    return $this;
+  }
+
+  public function getServiceRepository() {
+    return $this->serviceRepository;
+  }
+
   public function isVCSRequest(AphrontRequest $request) {
     $identifier = $this->getRepositoryIdentifierFromRequest($request);
     if ($identifier === null) {
@@ -45,6 +66,75 @@ final class DiffusionServeController extends DiffusionController {
   }
 
   public function handleRequest(AphrontRequest $request) {
+    $service_exception = null;
+    $response = null;
+
+    try {
+      $response = $this->serveRequest($request);
+    } catch (Exception $ex) {
+      $service_exception = $ex;
+    }
+
+    try {
+      $remote_addr = $request->getRemoteAddr();
+      $remote_addr = ip2long($remote_addr);
+
+      $pull_event = id(new PhabricatorRepositoryPullEvent())
+        ->setEpoch(PhabricatorTime::getNow())
+        ->setRemoteAddress($remote_addr)
+        ->setRemoteProtocol('http');
+
+      if ($response) {
+        $pull_event
+          ->setResultType('wild')
+          ->setResultCode($response->getHTTPResponseCode());
+
+        if ($response instanceof PhabricatorVCSResponse) {
+          $pull_event->setProperties(
+            array(
+              'response.message' => $response->getMessage(),
+            ));
+        }
+      } else {
+        $pull_event
+          ->setResultType('exception')
+          ->setResultCode(500)
+          ->setProperties(
+            array(
+              'exception.class' => $ex->getClass(),
+              'exception.message' => $ex->getMessage(),
+            ));
+      }
+
+      $viewer = $this->getServiceViewer();
+      if ($viewer) {
+        $pull_event->setPullerPHID($viewer->getPHID());
+      }
+
+      $repository = $this->getServiceRepository();
+      if ($repository) {
+        $pull_event->setRepositoryPHID($repository->getPHID());
+      }
+
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $pull_event->save();
+      unset($unguarded);
+
+    } catch (Exception $ex) {
+      if ($service_exception) {
+        throw $service_exception;
+      }
+      throw $ex;
+    }
+
+    if ($service_exception) {
+      throw $service_exception;
+    }
+
+    return $response;
+  }
+
+  private function serveRequest(AphrontRequest $request) {
     $identifier = $this->getRepositoryIdentifierFromRequest($request);
 
     // If authentication credentials have been provided, try to find a user
@@ -64,6 +154,8 @@ final class DiffusionServeController extends DiffusionController {
       // being "not logged in".
       $viewer = new PhabricatorUser();
     }
+
+    $this->setServiceViewer($viewer);
 
     $allow_public = PhabricatorEnv::getEnvConfig('policy.allow-public');
     $allow_auth = PhabricatorEnv::getEnvConfig('diffusion.allow-http-auth');
@@ -110,6 +202,8 @@ final class DiffusionServeController extends DiffusionController {
         }
       }
     }
+
+    $this->setServiceRepository($repository);
 
     if (!$repository->isTracked()) {
       return new PhabricatorVCSResponse(
