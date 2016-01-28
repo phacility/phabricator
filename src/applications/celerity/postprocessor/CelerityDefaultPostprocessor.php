@@ -63,7 +63,7 @@ final class CelerityDefaultPostprocessor
       'violet'        => '#8e44ad',
       'lightviolet'   => '#ecdff1',
       'charcoal'      => '#4b4d51',
-      'backdrop'      => '#dadee7',
+      'backdrop'      => '#c4cde0',
       'hoverwhite'    => 'rgba(255,255,255,.6)',
       'hovergrey'     => '#c5cbcf',
       'hoverblue'     => '#eceff5',
