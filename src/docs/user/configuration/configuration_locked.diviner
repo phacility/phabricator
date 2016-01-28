@@ -1,0 +1,101 @@
+@title Configuration Guide: Locked and Hidden Configuration
+@group config
+
+Details about locked and hidden configuration.
+
+
+Overview
+========
+
+Some configuration options are **Locked** or **Hidden**. If an option has one
+of these attributes, it means:
+
+  - **Locked Configuration**: This setting can not be written from the web UI.
+  - **Hidden Configuration**: This setting can not be read or written from
+    the web UI.
+
+This document explains these attributes in more detail.
+
+
+Locked Configuration
+====================
+
+**Locked Configuration** can not be edited from the web UI. In general, you
+can edit it from the CLI instead, with `bin/config`:
+
+```
+phabricator/ $ ./bin/config set <key> <value>
+```
+
+A few settings have alternate CLI tools. Refer to the setting page for
+details.
+
+Note that these settings can not be written to the database, even from the
+CLI.
+
+Locked values can not be unlocked: they are locked because of what the setting
+does or how the setting operates. Some of the reasons configuration options are
+locked include:
+
+
+**Required for bootstrapping**: Some options, like `mysql.host`, must be
+available before Phabricator can read configuration from the database.
+
+If you stored `mysql.host` only in the database, Phabricator would not know how
+to connect to the database in order to read the value in the first place.
+
+These options must be provided in a configuration source which is read earlier
+in the bootstrapping process, before Phabricator connects to the database.
+
+
+**Errors could not be fixed from the web UI**: Some options, like
+`phabricator.base-uri`, can effectively disable the web UI if they are
+configured incorrectly.
+
+If these options could be configured from the web UI, you could not fix them if
+you made a mistake (because the web UI would no longer work, so you could not
+load the page to change the value).
+
+We require these options to be edited from the CLI to make sure the editor has
+access to fix any mistakes.
+
+
+**Attackers could gain greater access**: Some options could be modified by an
+attacker who has gained access to an administrator account in order to gain
+greater access.
+
+For example, an attacker who could modify `metamta.mail-adapter` (and other
+similar options), could potentially reconfigure Phabricator to send mail
+through an evil server they controlled, then trigger password resets on other
+user accounts to compromise them.
+
+We require these options to be edited from the CLI to make sure the editor
+has full access to the install.
+
+
+Hidden Configuration
+====================
+
+**Hidden Configuration** is similar to locked configuration, but also can not
+be //read// from the web UI.
+
+In almost all cases, configuration is hidden because it is some sort of secret
+key or access token for an external service. These values are hidden from the
+web UI to prevent administrators (or attackers who have compromised
+administrator accounts) from reading them.
+
+You can review (and edit) hidden configuration from the CLI:
+
+```
+phabricator/ $ ./bin/config get <key>
+phabricator/ $ ./bin/config set <key> <value>
+
+```
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to the @{article: Configuration Guide}.
