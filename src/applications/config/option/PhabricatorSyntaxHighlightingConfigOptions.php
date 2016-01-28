@@ -11,7 +11,7 @@ final class PhabricatorSyntaxHighlightingConfigOptions
     return pht('Options relating to syntax highlighting source code.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-code';
   }
 

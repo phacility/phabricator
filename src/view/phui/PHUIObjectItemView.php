@@ -169,11 +169,11 @@ final class PHUIObjectItemView extends AphrontTagView {
         $fi = 'fa-refresh ph-spin sky';
       break;
     }
-    $this->setFontIcon($fi);
+    $this->setIcon($fi);
     return $this;
   }
 
-  public function setFontIcon($icon) {
+  public function setIcon($icon) {
     $this->fontIcon = id(new PHUIIconView())
       ->setIcon($icon);
     return $this;

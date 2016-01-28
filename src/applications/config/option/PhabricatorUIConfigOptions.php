@@ -11,7 +11,7 @@ final class PhabricatorUIConfigOptions
     return pht('Configure the Phabricator UI, including colors.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-magnet';
   }
 

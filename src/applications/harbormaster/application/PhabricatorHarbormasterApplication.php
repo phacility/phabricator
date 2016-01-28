@@ -14,7 +14,7 @@ final class PhabricatorHarbormasterApplication extends PhabricatorApplication {
     return pht('Build/CI');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-ship';
   }
 

@@ -18,7 +18,7 @@ final class PhabricatorPhrequentApplication extends PhabricatorApplication {
     return true;
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-clock-o';
   }
 

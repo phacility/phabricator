@@ -155,7 +155,7 @@ abstract class PhabricatorApplication
     return null;
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-puzzle-piece';
   }
 

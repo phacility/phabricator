@@ -14,7 +14,7 @@ final class PhabricatorPassphraseApplication extends PhabricatorApplication {
     return pht('Credential Store');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-user-secret';
   }
 

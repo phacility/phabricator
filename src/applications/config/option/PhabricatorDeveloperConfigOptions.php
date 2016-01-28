@@ -11,7 +11,7 @@ final class PhabricatorDeveloperConfigOptions
     return pht('Options for Phabricator developers, including debugging.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-bug';
   }
 

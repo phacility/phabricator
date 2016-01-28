@@ -11,7 +11,7 @@ final class PhabricatorPasteConfigOptions
     return pht('Configure Paste.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-paste';
   }
 

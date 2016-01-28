@@ -14,7 +14,7 @@ final class PhabricatorBadgesApplication extends PhabricatorApplication {
     return pht('Achievements and Notority');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-trophy';
   }
 

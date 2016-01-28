@@ -14,7 +14,7 @@ final class PhabricatorSpacesApplication extends PhabricatorApplication {
     return pht('Policy Namespaces');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-th-large';
   }
 

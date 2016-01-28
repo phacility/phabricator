@@ -14,7 +14,7 @@ final class PhabricatorPhrictionApplication extends PhabricatorApplication {
     return '/w/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-book';
   }
 

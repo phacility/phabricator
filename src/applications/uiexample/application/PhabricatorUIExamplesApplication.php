@@ -14,7 +14,7 @@ final class PhabricatorUIExamplesApplication extends PhabricatorApplication {
     return pht('UIExamples');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-magnet';
   }
 

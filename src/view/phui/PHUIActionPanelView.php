@@ -24,7 +24,7 @@ final class PHUIActionPanelView extends AphrontTagView {
     return $this;
   }
 
-  public function setFontIcon($image) {
+  public function setIcon($image) {
     $this->fontIcon = $image;
     return $this;
   }

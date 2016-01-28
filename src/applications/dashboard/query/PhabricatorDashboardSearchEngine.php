@@ -181,7 +181,7 @@ final class PhabricatorDashboardSearchEngine
       ->setHref('/dashboard/create/')
       ->setColor(PHUIButtonView::GREEN);
 
-    $icon = $this->getApplication()->getFontIcon();
+    $icon = $this->getApplication()->getIcon();
     $app_name =  $this->getApplication()->getName();
     $view = id(new PHUIBigInfoView())
       ->setIcon($icon)

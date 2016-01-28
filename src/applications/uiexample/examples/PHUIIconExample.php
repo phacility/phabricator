@@ -23,9 +23,9 @@ final class PHUIIconExample extends PhabricatorUIExample {
 
   public function renderExample() {
 
-    $colors = PHUIIconView::getFontIconColors();
+    $colors = PHUIIconView::getIconColors();
     $colors = array_merge(array(null), $colors);
-    $fas = PHUIIconView::getFontIcons();
+    $fas = PHUIIconView::getIcons();
 
     $trans = $this->listTransforms();
 

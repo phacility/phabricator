@@ -14,7 +14,7 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
     return '/maniphest/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-anchor';
   }
 

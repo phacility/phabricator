@@ -11,7 +11,7 @@ final class PhabricatorOwnersConfigOptions
     return pht('Configure Owners.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-gift';
   }
 

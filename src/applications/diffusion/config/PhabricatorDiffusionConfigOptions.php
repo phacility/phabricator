@@ -11,7 +11,7 @@ final class PhabricatorDiffusionConfigOptions
     return pht('Configure Diffusion repository browsing.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-code';
   }
 

@@ -1773,7 +1773,7 @@ abstract class PhabricatorEditEngine
 
   public function getIcon() {
     $application = $this->getApplication();
-    return $application->getFontIcon();
+    return $application->getIcon();
   }
 
   public function loadQuickCreateItems() {

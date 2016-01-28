@@ -18,7 +18,7 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
     return '/project/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-briefcase';
   }
 

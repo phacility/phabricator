@@ -18,7 +18,7 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
     return "\xE2\x99\x9F";
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-users';
   }
 

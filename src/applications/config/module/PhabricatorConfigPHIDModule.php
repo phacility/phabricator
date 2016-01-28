@@ -23,7 +23,7 @@ final class PhabricatorConfigPHIDModule extends PhabricatorConfigModule {
         $app = PhabricatorApplication::getByClass($class_name);
         $app_name = $app->getName();
 
-        $icon = $app->getFontIcon();
+        $icon = $app->getIcon();
         if ($icon) {
           $app_icon = id(new PHUIIconView())->setIcon($icon);
         } else {

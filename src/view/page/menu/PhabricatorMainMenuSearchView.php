@@ -128,7 +128,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
     if ($application) {
       $application_value = get_class($application);
       if ($application->getApplicationSearchDocumentTypes()) {
-        $application_icon = $application->getFontIcon();
+        $application_icon = $application->getIcon();
       }
     }
 

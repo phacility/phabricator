@@ -140,7 +140,7 @@ final class PhabricatorHomePreferencesSettingsPanel
         continue;
       }
 
-      $icon = $application->getFontIcon();
+      $icon = $application->getIcon();
       if (!$icon) {
         $icon = 'application';
       }

@@ -352,7 +352,7 @@ abstract class PhabricatorController extends AphrontController {
 
     $application = $this->getCurrentApplication();
     if ($application) {
-      $icon = $application->getFontIcon();
+      $icon = $application->getIcon();
       if (!$icon) {
         $icon = 'fa-puzzle';
       }
