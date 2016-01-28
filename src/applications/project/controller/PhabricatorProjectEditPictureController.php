@@ -23,8 +23,8 @@ final class PhabricatorProjectEditPictureController
 
     $this->setProject($project);
 
-    $edit_uri = $this->getApplicationURI('manage/'.$project->getID().'/');
-    $view_uri = $this->getApplicationURI('manage/'.$project->getID().'/');
+    $edit_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
+    $view_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
 
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
     $e_file = true;

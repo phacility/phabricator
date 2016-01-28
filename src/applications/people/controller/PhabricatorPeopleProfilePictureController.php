@@ -22,8 +22,9 @@ final class PhabricatorPeopleProfilePictureController
     }
 
     $this->setUser($user);
+    $name = $user->getUserName();
 
-    $done_uri = $this->getApplicationURI("manage/{$id}/");
+    $done_uri = '/p/'.$name.'/';
 
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
     $e_file = true;
@@ -251,9 +252,13 @@ final class PhabricatorPeopleProfilePictureController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Edit Profile Picture'));
 
+    $nav = $this->getProfileMenu();
+    $nav->selectFilter(PhabricatorPeopleProfilePanelEngine::PANEL_MANAGE);
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($nav)
       ->appendChild(
         array(
           $form_box,

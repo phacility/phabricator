@@ -86,9 +86,13 @@ final class PhabricatorPeopleProfileEditController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Edit Profile'));
 
+    $nav = $this->getProfileMenu();
+    $nav->selectFilter(PhabricatorPeopleProfilePanelEngine::PANEL_MANAGE);
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($nav)
       ->appendChild($form_box);
   }
 }
