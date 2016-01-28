@@ -832,13 +832,11 @@ final class DiffusionBrowseController extends DiffusionController {
     $editor_link = $user->loadEditorLink($path, $line, $repository);
     $template = $user->loadEditorLink($path, '%l', $repository);
 
-    $icon_edit = id(new PHUIIconView())
-      ->setIconFont('fa-pencil');
     $button = id(new PHUIButtonView())
       ->setTag('a')
       ->setText(pht('Open in Editor'))
       ->setHref($editor_link)
-      ->setIcon($icon_edit)
+      ->setIcon('fa-pencil')
       ->setID('editor_link')
       ->setMetadata(array('link_template' => $template))
       ->setDisabled(!$editor_link);
@@ -860,13 +858,11 @@ final class DiffusionBrowseController extends DiffusionController {
       $icon = 'fa-file-text';
     }
 
-    $iconview = id(new PHUIIconView())
-      ->setIconFont($icon);
     $button = id(new PHUIButtonView())
       ->setTag('a')
       ->setText($text)
       ->setHref($href)
-      ->setIcon($iconview);
+      ->setIcon($icon);
 
     return $button;
   }

@@ -80,7 +80,7 @@ final class PHUIActionPanelView extends AphrontTagView {
     $icon = null;
     if ($this->fontIcon) {
       $fonticon = id(new PHUIIconView())
-        ->setIconFont($this->fontIcon);
+        ->setIcon($this->fontIcon);
       $icon = phutil_tag(
         'span',
         array(

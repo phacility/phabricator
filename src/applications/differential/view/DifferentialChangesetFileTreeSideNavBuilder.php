@@ -91,12 +91,12 @@ final class DifferentialChangesetFileTreeSideNavBuilder extends Phobject {
         $href = '#'.$data->getAnchorName();
         $title = $name;
         $icon = id(new PHUIIconView())
-          ->setIconFont('fa-file-text-o bluetext');
+          ->setIcon('fa-file-text-o bluetext');
       } else {
         $name .= '/';
         $title = $path->getFullPath().'/';
         $icon = id(new PHUIIconView())
-          ->setIconFont('fa-folder-open blue');
+          ->setIcon('fa-folder-open blue');
       }
 
       $name_element = phutil_tag(

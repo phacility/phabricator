@@ -299,7 +299,7 @@ final class PhabricatorObjectHandle
     $icon = null;
     if ($this->getPolicyFiltered()) {
       $icon = id(new PHUIIconView())
-        ->setIconFont('fa-lock lightgreytext');
+        ->setIcon('fa-lock lightgreytext');
     }
 
     $attributes = $attributes + array(

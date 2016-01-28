@@ -175,7 +175,7 @@ final class PHUIObjectItemView extends AphrontTagView {
 
   public function setFontIcon($icon) {
     $this->fontIcon = id(new PHUIIconView())
-      ->setIconFont($icon);
+      ->setIcon($icon);
     return $this;
   }
 
@@ -401,7 +401,7 @@ final class PHUIObjectItemView extends AphrontTagView {
       foreach ($this->icons as $spec) {
         $icon = $spec['icon'];
         $icon = id(new PHUIIconView())
-          ->setIconFont($icon)
+          ->setIcon($icon)
           ->addClass('phui-object-item-icon-image');
 
         if (isset($spec['attributes']['tip'])) {
@@ -725,7 +725,7 @@ final class PHUIObjectItemView extends AphrontTagView {
     Javelin::initBehavior('phabricator-tooltips');
 
     $icon = id(new PHUIIconView())
-      ->setIconFont($icon);
+      ->setIcon($icon);
 
     $options = array(
       'class' => 'phui-object-item-status-icon',

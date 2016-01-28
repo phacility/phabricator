@@ -33,7 +33,7 @@ abstract class AlmanacController
     Javelin::initBehavior('phabricator-tooltips', array());
 
     $icon_builtin = id(new PHUIIconView())
-      ->setIconFont('fa-circle')
+      ->setIcon('fa-circle')
       ->addSigil('has-tooltip')
       ->setMetadata(
         array(
@@ -42,7 +42,7 @@ abstract class AlmanacController
         ));
 
     $icon_custom = id(new PHUIIconView())
-      ->setIconFont('fa-circle-o grey')
+      ->setIcon('fa-circle-o grey')
       ->addSigil('has-tooltip')
       ->setMetadata(
         array(
@@ -166,9 +166,7 @@ abstract class AlmanacController
       ->setWorkflow(true)
       ->setDisabled(!$can_edit)
       ->setText(pht('Add Property'))
-      ->setIcon(
-        id(new PHUIIconView())
-          ->setIconFont('fa-plus'));
+      ->setIcon('fa-plus');
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Properties'))

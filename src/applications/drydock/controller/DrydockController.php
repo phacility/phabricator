@@ -39,9 +39,9 @@ abstract class DrydockController extends PhabricatorController {
       ->execute();
 
     $consumed_yes = id(new PHUIIconView())
-      ->setIconFont('fa-check green');
+      ->setIcon('fa-check green');
     $consumed_no = id(new PHUIIconView())
-      ->setIconFont('fa-clock-o grey');
+      ->setIcon('fa-clock-o grey');
 
     $rows = array();
     foreach ($commands as $command) {
@@ -98,7 +98,7 @@ abstract class DrydockController extends PhabricatorController {
         id(new PHUIButtonView())
           ->setTag('a')
           ->setHref($all_uri)
-          ->setIconFont('fa-search')
+          ->setIcon('fa-search')
           ->setText(pht('View All')));
 
     return id(new PHUIObjectBoxView())

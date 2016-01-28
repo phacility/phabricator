@@ -143,14 +143,11 @@ final class PhabricatorEmailAddressesSettingsPanel
     $header->setHeader(pht('Email Addresses'));
 
     if ($editable) {
-      $icon = id(new PHUIIconView())
-        ->setIconFont('fa-plus');
-
       $button = new PHUIButtonView();
       $button->setText(pht('Add New Address'));
       $button->setTag('a');
       $button->setHref($uri->alter('new', 'true'));
-      $button->setIcon($icon);
+      $button->setIcon('fa-plus');
       $button->addSigil('workflow');
       $header->addActionLink($button);
     }

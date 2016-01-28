@@ -25,7 +25,7 @@ final class PhabricatorConfigPHIDModule extends PhabricatorConfigModule {
 
         $icon = $app->getFontIcon();
         if ($icon) {
-          $app_icon = id(new PHUIIconView())->setIconFont($icon);
+          $app_icon = id(new PHUIIconView())->setIcon($icon);
         } else {
           $app_icon = null;
         }
@@ -36,7 +36,7 @@ final class PhabricatorConfigPHIDModule extends PhabricatorConfigModule {
 
       $icon = $type->getTypeIcon();
       if ($icon) {
-        $type_icon = id(new PHUIIconView())->setIconFont($icon);
+        $type_icon = id(new PHUIIconView())->setIcon($icon);
       } else {
         $type_icon = null;
       }

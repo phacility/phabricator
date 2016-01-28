@@ -401,7 +401,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
     $collapse_icon = id(new PHUIIconCircleView())
       ->addClass('phui-list-item-icon')
       ->addClass('phui-profile-menu-visible-when-expanded')
-      ->setIconFont('fa-chevron-left');
+      ->setIcon('fa-chevron-left');
 
     $expand_icon = id(new PHUIIconCircleView())
       ->addClass('phui-list-item-icon')
@@ -412,7 +412,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
           'tip' => pht('Expand'),
           'align' => 'E',
         ))
-      ->setIconFont('fa-chevron-right');
+      ->setIcon('fa-chevron-right');
 
     $items[] = id(new PHUIListItemView())
       ->setName('Collapse')
@@ -658,7 +658,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
       ->setTag('a')
       ->setText(pht('Configure Menu'))
       ->setHref('#')
-      ->setIconFont('fa-gear')
+      ->setIcon('fa-gear')
       ->setDropdownMenu($action_view);
 
     $header = id(new PHUIHeaderView())

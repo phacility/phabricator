@@ -80,7 +80,7 @@ final class PhabricatorIconRemarkupRule extends PhutilRemarkupRule {
     }
 
     $icon_view = id(new PHUIIconView())
-      ->setIconFont('fa-'.$icon, implode(' ', $classes));
+      ->setIcon('fa-'.$icon, implode(' ', $classes));
 
     return $this->getEngine()->storeText($icon_view);
   }

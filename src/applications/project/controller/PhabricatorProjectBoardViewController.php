@@ -405,7 +405,7 @@ final class PhabricatorProjectBoardViewController
     $sort_key) {
 
     $sort_icon = id(new PHUIIconView())
-      ->setIconFont('fa-sort-amount-asc bluegrey');
+      ->setIcon('fa-sort-amount-asc bluegrey');
 
     $named = array(
       PhabricatorProjectColumn::ORDER_NATURAL => pht('Natural'),
@@ -675,7 +675,7 @@ final class PhabricatorProjectBoardViewController
     }
 
     $column_button = id(new PHUIIconView())
-      ->setIconFont('fa-caret-down')
+      ->setIcon('fa-caret-down')
       ->setHref('#')
       ->addSigil('boards-dropdown-menu')
       ->setMetadata(

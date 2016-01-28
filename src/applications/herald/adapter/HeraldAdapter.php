@@ -830,7 +830,7 @@ abstract class HeraldAdapter extends Phobject {
     require_celerity_resource('herald-css');
 
     $icon = id(new PHUIIconView())
-      ->setIconFont('fa-chevron-circle-right lightgreytext')
+      ->setIcon('fa-chevron-circle-right lightgreytext')
       ->addClass('herald-list-icon');
 
     if ($rule->getMustMatchAll()) {

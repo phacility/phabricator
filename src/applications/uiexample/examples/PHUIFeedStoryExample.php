@@ -70,7 +70,7 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
       '<strong><a>harding (Tom Harding)</a></strong> awarded '.
       '<a>M10: Workboards</a> a token.');
     $action1 = id(new PHUIIconView())
-      ->setIconFont('fa-trophy bluegrey')
+      ->setIcon('fa-trophy bluegrey')
       ->setHref('#');
     $token =
         id(new PHUIIconView())
@@ -91,10 +91,10 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
       '<strong><a>wgharding (Warren Harding)</a></strong> '.
       'asked a new question.');
     $action1 = id(new PHUIIconView())
-      ->setIconFont('fa-chevron-up bluegrey')
+      ->setIcon('fa-chevron-up bluegrey')
       ->setHref('#');
     $action2 = id(new PHUIIconView())
-      ->setIconFont('fa-chevron-down bluegrey')
+      ->setIcon('fa-chevron-down bluegrey')
       ->setHref('#');
     $story4 = id(new PHUIFeedStoryView())
       ->setTitle($text)

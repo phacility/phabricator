@@ -59,7 +59,7 @@ final class ConpherenceThreadListView extends AphrontView {
     $data = $thread->getDisplayData($user);
     $icon = id(new PHUIIconView())
       ->addClass('msr')
-      ->setIconFont($thread->getPolicyIconName($policy_objects));
+      ->setIcon($thread->getPolicyIconName($policy_objects));
     $title = phutil_tag(
       'span',
       array(),
@@ -109,7 +109,7 @@ final class ConpherenceThreadListView extends AphrontView {
       'conpherence-room-list-header');
     $header->appendChild(
       id(new PHUIIconView())
-      ->setIconFont('fa-search')
+      ->setIcon('fa-search')
       ->setHref('/conpherence/search/')
       ->setText(pht('Search')));
     $menu->addMenuItem($header);

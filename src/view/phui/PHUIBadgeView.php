@@ -104,7 +104,7 @@ final class PHUIBadgeView extends AphrontTagView {
   protected function getTagContent() {
 
     $icon = id(new PHUIIconView())
-      ->setIconFont($this->icon);
+      ->setIcon($this->icon);
 
     $illustration = phutil_tag_div('phui-badge-illustration', $icon);
 

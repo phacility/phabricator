@@ -126,14 +126,12 @@ final class PhabricatorDesktopNotificationsSettingsPanel
         id(new AphrontFormSubmitControl())
         ->setValue(pht('Save Preference')));
 
-    $test_icon = id(new PHUIIconView())
-      ->setIconFont('fa-exclamation-triangle');
     $test_button = id(new PHUIButtonView())
       ->setTag('a')
       ->setWorkflow(true)
       ->setText(pht('Send Test Notification'))
       ->setHref('/notification/test/')
-      ->setIcon($test_icon);
+      ->setIcon('fa-exclamation-triangle');
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeader(

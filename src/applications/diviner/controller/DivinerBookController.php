@@ -33,7 +33,7 @@ final class DivinerBookController extends DivinerController {
       ->setTag('a')
       ->setText(pht('Actions'))
       ->setHref('#')
-      ->setIconFont('fa-bars')
+      ->setIcon('fa-bars')
       ->addClass('phui-mobile-menu')
       ->setDropdownMenu($actions);
 

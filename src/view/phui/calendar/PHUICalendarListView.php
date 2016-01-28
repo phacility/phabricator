@@ -60,7 +60,7 @@ final class PHUICalendarListView extends AphrontTagView {
       }
 
       $dot = id(new PHUIIconView())
-        ->setIconFont($event->getIcon(), $icon_color)
+        ->setIcon($event->getIcon(), $icon_color)
         ->addClass('phui-calendar-list-item-icon');
 
       $title = phutil_tag(

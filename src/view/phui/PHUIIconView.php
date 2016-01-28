@@ -48,7 +48,7 @@ final class PHUIIconView extends AphrontTagView {
     return $this;
   }
 
-  public function setIconFont($icon, $color = null) {
+  public function setIcon($icon, $color = null) {
     $this->iconFont = $icon;
     $this->iconColor = $color;
     return $this;

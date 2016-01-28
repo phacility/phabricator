@@ -269,7 +269,7 @@ final class PHUIListItemView extends AphrontTagView {
 
       $icon = id(new PHUIIconView())
         ->addClass('phui-list-item-icon')
-        ->setIconFont($icon_name);
+        ->setIcon($icon_name);
     }
 
     if ($this->profileImage) {

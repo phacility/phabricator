@@ -166,7 +166,7 @@ final class PhabricatorProjectProfileController
     }
 
     $watch_icon = id(new PHUIIconView())
-      ->setIconFont($watch_icon);
+      ->setIcon($watch_icon);
 
     return id(new PHUIButtonView())
       ->setTag('a')

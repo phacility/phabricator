@@ -1090,7 +1090,7 @@ abstract class PhabricatorEditEngine
       ->setTag('a')
       ->setText(pht('Configure Form'))
       ->setHref('#')
-      ->setIconFont('fa-gear')
+      ->setIcon('fa-gear')
       ->setDropdownMenu($action_view);
 
     return $action_button;

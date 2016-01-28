@@ -23,21 +23,17 @@ final class PHUIButtonBarExample extends PhabricatorUIExample {
     );
     $button_bar1 = new PHUIButtonBarView();
     foreach ($icons as $text => $icon) {
-      $image = id(new PHUIIconView())
-          ->setIconFont($icon);
       $button = id(new PHUIButtonView())
         ->setTag('a')
         ->setColor(PHUIButtonView::GREY)
         ->setTitle($text)
-        ->setIcon($image);
+        ->setIcon($icon);
 
       $button_bar1->addButton($button);
     }
 
     $button_bar2 = new PHUIButtonBarView();
     foreach ($icons as $text => $icon) {
-      $image = id(new PHUIIconView())
-          ->setIconFont($icon);
       $button = id(new PHUIButtonView())
         ->setTag('a')
         ->setColor(PHUIButtonView::SIMPLE)
@@ -49,14 +45,12 @@ final class PHUIButtonBarExample extends PhabricatorUIExample {
 
     $button_bar3 = new PHUIButtonBarView();
     foreach ($icons as $text => $icon) {
-      $image = id(new PHUIIconView())
-          ->setIconFont($icon);
       $button = id(new PHUIButtonView())
         ->setTag('a')
         ->setColor(PHUIButtonView::SIMPLE)
         ->setTitle($text)
         ->setTooltip($text)
-        ->setIcon($image);
+        ->setIcon($icon);
 
       $button_bar3->addButton($button);
     }
@@ -64,13 +58,11 @@ final class PHUIButtonBarExample extends PhabricatorUIExample {
     $button_bar4 = new PHUIButtonBarView();
     $button_bar4->setBorderless(true);
     foreach ($icons as $text => $icon) {
-      $image = id(new PHUIIconView())
-          ->setIconFont($icon);
       $button = id(new PHUIButtonView())
         ->setTag('a')
         ->setTitle($text)
         ->setTooltip($text)
-        ->setIcon($image);
+        ->setIcon($icon);
 
       $button_bar4->addButton($button);
     }

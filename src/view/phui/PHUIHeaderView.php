@@ -117,7 +117,7 @@ final class PHUIHeaderView extends AphrontTagView {
     }
 
     $img = id(new PHUIIconView())
-      ->setIconFont($icon);
+      ->setIcon($icon);
 
     $tag = phutil_tag(
       'span',
@@ -287,7 +287,7 @@ final class PHUIHeaderView extends AphrontTagView {
 
     if ($this->headerIcon) {
       $icon = id(new PHUIIconView())
-        ->setIconFont($this->headerIcon);
+        ->setIcon($this->headerIcon);
       $left[] = $icon;
     }
     $left[] = phutil_tag(
@@ -461,7 +461,7 @@ final class PHUIHeaderView extends AphrontTagView {
     }
 
     $icon = id(new PHUIIconView())
-      ->setIconFont($policy->getIcon().' bluegrey');
+      ->setIcon($policy->getIcon().' bluegrey');
 
     $link = javelin_tag(
       'a',

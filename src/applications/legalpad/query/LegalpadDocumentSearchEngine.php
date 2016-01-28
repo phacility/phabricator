@@ -186,7 +186,7 @@ final class LegalpadDocumentSearchEngine
         if ($signature) {
           $item->addAttribute(
             array(
-              id(new PHUIIconView())->setIconFont('fa-check-square-o', 'green'),
+              id(new PHUIIconView())->setIcon('fa-check-square-o', 'green'),
               ' ',
               pht(
                 'Signed on %s',
@@ -195,7 +195,7 @@ final class LegalpadDocumentSearchEngine
         } else {
           $item->addAttribute(
             array(
-              id(new PHUIIconView())->setIconFont('fa-square-o', 'grey'),
+              id(new PHUIIconView())->setIcon('fa-square-o', 'grey'),
               ' ',
               pht('Not Signed'),
             ));

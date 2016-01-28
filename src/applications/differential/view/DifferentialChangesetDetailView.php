@@ -206,7 +206,7 @@ final class DifferentialChangesetDetailView extends AphrontView {
     $display_filename = $changeset->getDisplayFilename();
     $display_icon = $this->getFileIcon($display_filename);
     $icon = id(new PHUIIconView())
-      ->setIconFont($display_icon);
+      ->setIcon($display_icon);
 
     $renderer = DifferentialChangesetHTMLRenderer::getHTMLRendererByKey(
       $this->getRenderer());

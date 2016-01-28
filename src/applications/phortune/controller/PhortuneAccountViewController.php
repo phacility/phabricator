@@ -254,9 +254,7 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')
-          ->setIcon(
-            id(new PHUIIconView())
-              ->setIconFont('fa-list'))
+          ->setIcon('fa-list')
           ->setHref($orders_uri)
           ->setText(pht('View All Orders')));
 
@@ -298,9 +296,7 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')
-          ->setIcon(
-            id(new PHUIIconView())
-              ->setIconFont('fa-list'))
+          ->setIcon('fa-list')
           ->setHref($charges_uri)
           ->setText(pht('View All Charges')));
 
@@ -336,7 +332,7 @@ final class PhortuneAccountViewController extends PhortuneController {
           ->setTag('a')
           ->setIcon(
             id(new PHUIIconView())
-              ->setIconFont('fa-list'))
+              ->setIcon('fa-list'))
           ->setHref($subscriptions_uri)
           ->setText(pht('View All Subscriptions')));
 

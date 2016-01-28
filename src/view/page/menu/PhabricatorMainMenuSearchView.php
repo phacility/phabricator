@@ -203,7 +203,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
       ->setIcon(
         id(new PHUIIconView())
           ->addSigil('global-search-dropdown-icon')
-          ->setIconFont($current_icon))
+          ->setIcon($current_icon))
       ->setDropdown(true);
 
     $input = javelin_tag(

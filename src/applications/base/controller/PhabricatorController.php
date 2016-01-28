@@ -400,7 +400,7 @@ abstract class PhabricatorController extends AphrontController {
     }
 
     $icon = id(new PHUIIconView())
-      ->setIconFont($icon_name);
+      ->setIcon($icon_name);
 
     require_celerity_resource('policy-css');
 

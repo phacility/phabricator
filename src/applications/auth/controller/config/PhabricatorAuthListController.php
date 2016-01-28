@@ -147,13 +147,11 @@ final class PhabricatorAuthListController
       ->setSeverity($severity)
       ->setErrors($issues);
 
-    $image = id(new PHUIIconView())
-          ->setIconFont('fa-plus');
     $button = id(new PHUIButtonView())
         ->setTag('a')
         ->setColor(PHUIButtonView::SIMPLE)
         ->setHref($this->getApplicationURI('config/new/'))
-        ->setIcon($image)
+        ->setIcon('fa-plus')
         ->setDisabled(!$can_manage)
         ->setText(pht('Add Provider'));
 

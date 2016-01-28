@@ -53,7 +53,7 @@ final class PhameDraftListView extends AphrontTagView {
         $post->getTitle());
 
       $icon = id(new PHUIIconView())
-        ->setIconFont('fa-pencil-square-o')
+        ->setIcon('fa-pencil-square-o')
         ->addClass('phame-blog-list-icon');
 
       $edit = phutil_tag(

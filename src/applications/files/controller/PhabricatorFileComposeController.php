@@ -110,7 +110,7 @@ final class PhabricatorFileComposeController
           ),
         ),
         id(new PHUIIconView())
-          ->setIconFont($icon)
+          ->setIcon($icon)
           ->addClass('compose-icon-bg'));
     }
 
@@ -122,7 +122,7 @@ final class PhabricatorFileComposeController
     $preview = id(new PHUIIconView())
       ->setID($preview_id)
       ->addClass('compose-background-'.$value_color)
-      ->setIconFont($value_icon)
+      ->setIcon($value_icon)
       ->addClass('compose-icon-bg');
 
     $color_input = javelin_tag(

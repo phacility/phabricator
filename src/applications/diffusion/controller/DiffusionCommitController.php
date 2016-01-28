@@ -221,14 +221,12 @@ final class DiffusionCommitController extends DiffusionController {
       $change_panel->setID('toc');
 
       if ($count > self::CHANGES_LIMIT && !$show_all_details) {
-        $icon = id(new PHUIIconView())
-          ->setIconFont('fa-files-o');
 
         $button = id(new PHUIButtonView())
           ->setText(pht('Show All Changes'))
           ->setHref('?show_all=true')
           ->setTag('a')
-          ->setIcon($icon);
+          ->setIcon('fa-files-o');
 
         $warning_view = id(new PHUIInfoView())
           ->setSeverity(PHUIInfoView::SEVERITY_WARNING)

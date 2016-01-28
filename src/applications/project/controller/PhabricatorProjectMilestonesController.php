@@ -50,7 +50,7 @@ final class PhabricatorProjectMilestonesController
         id(new PHUIButtonView())
           ->setTag('a')
           ->setHref("/project/edit/?milestone={$id}")
-          ->setIconFont('fa-plus')
+          ->setIcon('fa-plus')
           ->setDisabled(!$can_create)
           ->setWorkflow(!$can_create)
           ->setText($button_text));

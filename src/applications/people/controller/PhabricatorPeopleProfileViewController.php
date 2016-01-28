@@ -29,7 +29,7 @@ final class PhabricatorPeopleProfileViewController
 
     $profile_icon = PhabricatorPeopleIconSet::getIconIcon($profile->getIcon());
     $profile_icon = id(new PHUIIconView())
-      ->setIconFont($profile_icon);
+      ->setIcon($profile_icon);
     $profile_title = $profile->getDisplayTitle();
 
     $header = id(new PHUIHeaderView())

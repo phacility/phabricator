@@ -137,7 +137,7 @@ final class PhabricatorProjectSearchEngine
 
       $options[$icon->getKey()] = array(
         id(new PHUIIconView())
-          ->setIconFont($icon->getIcon()),
+          ->setIcon($icon->getIcon()),
         ' ',
         $icon->getLabel(),
       );
