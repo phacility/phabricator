@@ -4,8 +4,7 @@
 
 .phui-workboard-view .phui-object-item {
   background-color: #fff;
-  border-top-left-radius: 3px;
-  border-bottom-left-radius: 3px;
+  border-radius: 3px;
   margin-bottom: 6px;
 }
 
