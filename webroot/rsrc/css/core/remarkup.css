@@ -13,12 +13,12 @@
 
 .PhabricatorMonospaced,
 .phabricator-remarkup .remarkup-code-block .remarkup-code {
-  font: 10px/13px "Menlo", "Consolas", "Monaco", monospace;
+  font: 11px/15px "Menlo", "Consolas", "Monaco", monospace;
 }
 
 .platform-windows .PhabricatorMonospaced,
 .platform-windows .phabricator-remarkup .remarkup-code-block .remarkup-code {
-  font: 11px/13px "Menlo", "Consolas", "Monaco", monospace;
+  font: 12px/15px "Menlo", "Consolas", "Monaco", monospace;
 }
 
 .phabricator-remarkup .remarkup-code-block {
@@ -27,28 +27,33 @@
 }
 
 .phabricator-remarkup .remarkup-code-header {
-  padding: 2px 8px;
+  padding: 6px 12px;
   font-size: 13px;
   font-weight: bold;
-  background: {$sh-yellowbackground};
+  background: rgba(71,87,120,0.08);
   display: inline-block;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
 }
 
 .phabricator-remarkup .code-block-counterexample .remarkup-code-header {
   background-color: {$sh-redbackground};
 }
 
+.phabricator-remarkup .remarkup-code-block .remarkup-code-header + pre {
+  border-top-left-radius: 0;
+}
+
 .phabricator-remarkup .remarkup-code-block pre {
-  background: #FEF9ED;
-  border: 1px solid {$sh-lightyellowborder};
+  background: rgba(71,87,120,0.08);
   display: block;
   color: #000;
   overflow: auto;
-  padding: 8px;
+  padding: 12px;
+  border-radius: 3px;
 }
 
 .phabricator-remarkup pre.remarkup-counterexample {
-  border: 1px solid {$sh-lightredborder};
   background-color: {$sh-redbackground};
 }
 
@@ -64,6 +69,10 @@
    link color. */
 .phabricator-remarkup a tt.remarkup-monospaced {
   color: {$anchor};
+}
+
+.phabricator-remarkup .remarkup-header tt.remarkup-monospaced {
+  font-weight: normal;
 }
 
 .phabricator-remarkup ul.remarkup-list {
