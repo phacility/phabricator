@@ -132,6 +132,12 @@ final class PhabricatorProjectManageController
       pht('Looks Like'),
       $viewer->renderHandle($project->getPHID())->setAsTag(true));
 
+
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $project,
+      PhabricatorCustomField::ROLE_VIEW);
+    $field_list->appendFieldsToPropertyList($project, $viewer, $view);
+
     return $view;
   }
 

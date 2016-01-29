@@ -16,6 +16,7 @@ final class PhabricatorPeopleProfileManageController
       ->withIDs(array($id))
       ->needProfile(true)
       ->needProfileImage(true)
+      ->needAvailability(true)
       ->executeOne();
     if (!$user) {
       return new Aphront404Response();
@@ -77,6 +78,11 @@ final class PhabricatorPeopleProfileManageController
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($user);
+
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $user,
+      PhabricatorCustomField::ROLE_VIEW);
+    $field_list->appendFieldsToPropertyList($user, $viewer, $view);
 
     return $view;
   }
