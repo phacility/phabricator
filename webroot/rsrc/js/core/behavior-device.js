@@ -62,6 +62,11 @@ JX.install('Device', {
       JX.Stratcom.invoke('phabricator-device-change', null, device);
     },
 
+    isDesktop: function() {
+      var self = JX.Device;
+      return (self.getDevice() == 'desktop');
+    },
+
     getDevice : function() {
       var self = JX.Device;
       if (self._device === null) {
