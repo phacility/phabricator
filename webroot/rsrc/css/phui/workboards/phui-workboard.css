@@ -6,6 +6,10 @@
   width: 100%;
 }
 
+.device-phone .phui-workboard-view {
+  width: auto;
+}
+
 .device-desktop .phui-workboard-view-shadow {
   overflow-x: auto;
   position: absolute;
@@ -18,7 +22,7 @@
 }
 
 .device-desktop .page-has-warning .phui-workboard-view-shadow {
-  top: 132px;
+  top: 113px;
 }
 
 .device-desktop.with-durable-column .phui-workboard-view-shadow {

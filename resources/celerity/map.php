@@ -153,8 +153,9 @@ return array(
     'rsrc/css/phui/phui-text.css' => 'cf019f54',
     'rsrc/css/phui/phui-timeline-view.css' => '2efceff8',
     'rsrc/css/phui/phui-two-column-view.css' => 'c75bfc5b',
-    'rsrc/css/phui/phui-workboard-view.css' => '04b34072',
-    'rsrc/css/phui/phui-workpanel-view.css' => '31a835ba',
+    'rsrc/css/phui/workboards/phui-workboard.css' => 'b07a5524',
+    'rsrc/css/phui/workboards/phui-workcard.css' => '8ac68d18',
+    'rsrc/css/phui/workboards/phui-workpanel.css' => 'e9339dc3',
     'rsrc/css/sprite-login.css' => '60e8560e',
     'rsrc/css/sprite-menu.css' => '9dd65b92',
     'rsrc/css/sprite-tokens.css' => '4f399012',
@@ -830,8 +831,9 @@ return array(
     'phui-theme-css' => 'ab7b848c',
     'phui-timeline-view-css' => '2efceff8',
     'phui-two-column-view-css' => 'c75bfc5b',
-    'phui-workboard-view-css' => '04b34072',
-    'phui-workpanel-view-css' => '31a835ba',
+    'phui-workboard-view-css' => 'b07a5524',
+    'phui-workcard-view-css' => '8ac68d18',
+    'phui-workpanel-view-css' => 'e9339dc3',
     'phuix-action-list-view' => 'b5c256b8',
     'phuix-action-view' => '8cf6d262',
     'phuix-autocomplete' => '9196fb06',
@@ -1981,6 +1983,9 @@ return array(
     ),
     'e6e25838' => array(
       'javelin-install',
+    ),
+    'e9339dc3' => array(
+      'phui-workcard-view-css',
     ),
     'e9581f08' => array(
       'javelin-behavior',

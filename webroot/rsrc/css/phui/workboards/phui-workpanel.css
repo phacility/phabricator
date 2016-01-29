@@ -1,0 +1,104 @@
+/**
+ * @provides phui-workpanel-view-css
+ * @requires phui-workcard-view-css
+ */
+
+.phui-workpanel-view .phui-header-shell {
+  padding: 8px;
+  width: 284px;
+}
+
+.phui-workpanel-view .phui-header-shell .phui-header-header {
+  font-size: {$biggerfontsize};
+  line-height: 18px;
+  color: {$darkbluetext};
+}
+
+.phui-workpanel-view .phui-header-shell .phui-header-subheader {
+  padding: 0 4px;
+  margin: 0;
+  display: inline-block;
+  color: {$lightgreytext};
+}
+
+.device .phui-workpanel-view .phui-header-shell {
+  width: auto;
+}
+
+.phui-workboard-view {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.phui-workpanel-view .phui-workpanel-header-action {
+  float: right;
+  width: 24px;
+  border-left: 1px solid #b3b5b6;
+}
+
+.phui-workpanel-view .phui-workpanel-body {
+  padding: 8px 8px 4px 8px;
+}
+
+.device-phone .phui-workpanel-view .phui-workpanel-body {
+  padding: 8px 0;
+}
+
+.phui-workpanel-view .phui-workpanel-footer-action a {
+  color: {$darkbluetext};
+  font-weight: bold;
+}
+
+.device-desktop .phui-workpanel-view .phui-workpanel-footer-action:hover {
+  background-color: rgba(100,100,100,.1);
+  border-radius: 3px;
+}
+
+.device-desktop .aphront-multi-column-fixed .phui-workpanel-view {
+  width: 300px;
+}
+
+.device-phone .aphront-multi-column-fixed .phui-workpanel-view,
+.device-phone .phui-workpanel-view .phui-header-shell {
+  width: auto;
+}
+
+.phui-workpanel-body .phui-object-item-list-view {
+  min-height: 54px;
+}
+
+.device .aphront-multi-column-outer
+  div.aphront-multi-column-column-outer .phui-workpanel-body {
+  width: auto;
+}
+
+.project-panel-hidden {
+  opacity: 0.75;
+}
+
+.project-panel-empty .phui-object-item-list-view {
+  background: {$sh-indigobackground};
+  border-radius: 3px;
+  margin-bottom: 4px;
+  border: 1px dashed {$sh-indigoborder};
+}
+
+.project-panel-empty .phui-object-item-list-view .drag-ghost {
+  display: none;
+}
+
+.project-panel-empty .phui-object-item-list-view.drag-target-list {
+  background: rgba(255,255,255,.7);
+}
+
+.phui-workpanel-view.project-panel-over-limit .phui-header-header {
+  color: {$red};
+}
+
+.phui-workpanel-view.project-panel-over-limit .phui-header-shell {
+  border-color: {$red};
+}
