@@ -45,9 +45,9 @@ final class PhabricatorAuthSSHKeyTableView extends AphrontView {
     }
 
     $trusted_icon = id(new PHUIIconView())
-      ->setIconFont('fa-star blue');
+      ->setIcon('fa-star blue');
     $untrusted_icon = id(new PHUIIconView())
-      ->setIconFont('fa-times grey');
+      ->setIcon('fa-times grey');
 
     $rows = array();
     foreach ($keys as $key) {

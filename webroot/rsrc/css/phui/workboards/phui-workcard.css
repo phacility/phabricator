@@ -1,0 +1,126 @@
+/**
+ * @provides phui-workcard-view-css
+ */
+
+.phui-workboard-view .phui-object-item {
+  background-color: #fff;
+  border-radius: 3px;
+  margin-bottom: 6px;
+}
+
+.phui-workboard-view .phui-object-item-name {
+  padding-bottom: 4px;
+}
+
+.phui-workboard-view .phui-object-item-content {
+  margin-top: 0;
+}
+
+.phui-workboard-view .phui-object-item-frame {
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+
+.phui-workboard-view .phui-object-item .phui-object-item-objname {
+  -webkit-touch-callout: text;
+  -webkit-user-select: text;
+  -khtml-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+.phui-workboard-view .phui-object-item-link {
+  white-space: normal;
+  font-weight: normal;
+  color: #000;
+  margin-left: 2px;
+}
+
+.device-desktop .phui-workboard-view .phui-object-item-with-1-actions
+  .phui-object-item-content-box {
+    margin-right: 0;
+    overflow: hidden;
+}
+
+.phui-workboard-view .phui-object-item-objname {
+  vertical-align: top;
+}
+
+.phui-workpanel-view .phui-object-item-grippable .phui-object-item-frame {
+  padding-left: 0;
+}
+
+.phui-workpanel-view .phui-object-item-grip {
+  display: none;
+}
+
+.device-desktop .phui-workpanel-view .phui-list-item-icon {
+  display: none;
+}
+
+.phui-workpanel-view .phui-object-item .phui-list-item-href {
+  height: 26px;
+}
+
+.device-desktop .phui-workpanel-view .phui-object-item:hover
+  .phui-list-item-href {
+    background: #fff;
+    opacity: .7;
+}
+
+.device-desktop .phui-workpanel-view .phui-object-item
+  .phui-list-item-href:hover {
+    background: {$sh-bluebackground};
+    opacity: 1;
+}
+
+.phui-workpanel-view .phui-object-item:hover .phui-list-item-icon {
+  display: block;
+}
+
+
+
+
+/* - Draggable Colors --------------------------------------------------------*/
+
+.phui-workboard-view .phui-object-item.drag-dragging {
+  box-shadow: {$dropshadow};
+  background-color: {$sh-greybackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-red {
+  background-color: {$sh-redbackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-orange {
+  background-color: {$sh-orangebackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-yellow {
+  background-color: {$sh-yellowbackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-green {
+  background-color: {$sh-greenbackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-blue {
+  background-color: {$sh-bluebackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-indigo {
+  background-color: {$sh-indigobackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-violet {
+  background-color: {$sh-violetbackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-pink {
+  background-color: {$sh-pinkbackground};
+}
+
+.phui-workboard-view .drag-dragging.phui-object-item-bar-color-sky {
+  background-color: {$sh-bluebackground};
+}

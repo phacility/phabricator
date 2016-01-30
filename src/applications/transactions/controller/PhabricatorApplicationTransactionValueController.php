@@ -105,7 +105,7 @@ final class PhabricatorApplicationTransactionValueController
         $icon = 'fa-minus-circle red';
       }
       $icon = id(new PHUIIconView())
-        ->setIconFont($icon)
+        ->setIcon($icon)
         ->setText(
           ucfirst($rule['action']).' '.$rule_object->getRuleDescription());
 

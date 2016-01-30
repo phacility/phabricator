@@ -11,7 +11,7 @@ final class PhabricatorManiphestConfigOptions
     return pht('Configure Maniphest.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-anchor';
   }
 

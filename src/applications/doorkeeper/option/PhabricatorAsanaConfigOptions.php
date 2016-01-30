@@ -11,7 +11,7 @@ final class PhabricatorAsanaConfigOptions
     return pht('Asana integration options.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-exchange';
   }
 

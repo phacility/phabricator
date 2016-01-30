@@ -166,7 +166,7 @@ final class PHUITagView extends AphrontTagView {
 
     if ($this->icon) {
       $icon = id(new PHUIIconView())
-        ->setIconFont($this->icon);
+        ->setIcon($this->icon);
     } else {
       $icon = null;
     }

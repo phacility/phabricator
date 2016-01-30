@@ -11,7 +11,7 @@ final class PhabricatorPhurlConfigOptions
     return pht('Options for Phurl.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-link';
   }
 

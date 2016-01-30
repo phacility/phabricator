@@ -11,7 +11,7 @@ final class PhabricatorMetaMTAConfigOptions
     return pht('Configure Mail.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-send';
   }
 

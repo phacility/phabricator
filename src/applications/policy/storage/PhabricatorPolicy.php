@@ -274,7 +274,7 @@ final class PhabricatorPolicy
     $img = null;
     if ($icon) {
       $img = id(new PHUIIconView())
-        ->setIconFont($this->getIcon());
+        ->setIcon($this->getIcon());
     }
 
     if ($this->getHref()) {

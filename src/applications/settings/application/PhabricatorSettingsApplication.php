@@ -14,7 +14,7 @@ final class PhabricatorSettingsApplication extends PhabricatorApplication {
     return pht('User Preferences');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-wrench';
   }
 

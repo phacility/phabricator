@@ -24,8 +24,22 @@ JX.behavior('phui-profile-menu', function(config) {
 
   JX.DOM.listen(collapse_node, 'click', null, function(e) {
     is_collapsed = !is_collapsed;
-    JX.DOM.alterClass(menu_node, 'phui-profile-menu-collapsed', is_collapsed);
-    JX.DOM.alterClass(menu_node, 'phui-profile-menu-expanded', !is_collapsed);
+
+    JX.DOM.alterClass(menu_node, 'phui-profile-menu-collapsing', is_collapsed);
+    JX.DOM.alterClass(menu_node, 'phui-profile-menu-expanding', !is_collapsed);
+
+    var duration = 0.2;
+
+    setTimeout(function() {
+      JX.DOM.alterClass(menu_node, 'phui-profile-menu-collapsed', is_collapsed);
+      JX.DOM.alterClass(menu_node, 'phui-profile-menu-expanded', !is_collapsed);
+    }, (duration / 2) * 1000);
+
+    setTimeout(function() {
+      JX.DOM.alterClass(menu_node, 'phui-profile-menu-collapsing', false);
+      JX.DOM.alterClass(menu_node, 'phui-profile-menu-expanding', false);
+    }, duration * 1000);
+
 
     if (config.settingsURI) {
       new JX.Request(config.settingsURI)

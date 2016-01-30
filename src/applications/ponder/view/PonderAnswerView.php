@@ -74,7 +74,7 @@ final class PonderAnswerView extends AphrontTagView {
       ->setTag('a')
       ->setText(pht('Actions'))
       ->setHref('#')
-      ->setIconFont('fa-bars')
+      ->setIcon('fa-bars')
       ->setDropdownMenu($actions);
 
     $header_name = phutil_tag(
@@ -116,7 +116,7 @@ final class PonderAnswerView extends AphrontTagView {
       $vote_class = 'ponder-footer-action-helpful';
     }
     $icon = id(new PHUIIconView())
-      ->setIconFont('fa-thumbs-up msr');
+      ->setIcon('fa-thumbs-up msr');
     $helpful = phutil_tag(
       'span',
       array(

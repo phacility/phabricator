@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorProjectHistoryController
+final class PhabricatorProjectManageController
   extends PhabricatorProjectController {
 
   public function shouldAllowPublic() {
@@ -43,10 +43,10 @@ final class PhabricatorProjectHistoryController
     $timeline->setShouldTerminate(true);
 
     $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorProject::PANEL_PROFILE);
+    $nav->selectFilter(PhabricatorProject::PANEL_MANAGE);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('History'));
+    $crumbs->addTextCrumb(pht('Manage'));
 
     return $this->newPage()
       ->setNavigation($nav)
@@ -75,15 +75,17 @@ final class PhabricatorProjectHistoryController
 
     $view->addAction(
       id(new PhabricatorActionView())
-        ->setName(pht('Back to Profile'))
-        ->setIcon('fa-chevron-left')
-        ->setHref($project->getURI()));
-
-    $view->addAction(
-      id(new PhabricatorActionView())
         ->setName(pht('Edit Details'))
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI("edit/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Menu'))
+        ->setIcon('fa-th-list')
+        ->setHref($this->getApplicationURI("{$id}/panel/configure/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
@@ -125,6 +127,16 @@ final class PhabricatorProjectHistoryController
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setActionList($actions);
+
+    $view->addProperty(
+      pht('Looks Like'),
+      $viewer->renderHandle($project->getPHID())->setAsTag(true));
+
+
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $project,
+      PhabricatorCustomField::ROLE_VIEW);
+    $field_list->appendFieldsToPropertyList($project, $viewer, $view);
 
     return $view;
   }

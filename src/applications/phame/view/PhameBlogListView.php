@@ -45,7 +45,7 @@ final class PhameBlogListView extends AphrontTagView {
         $blog->getName());
 
       $icon = id(new PHUIIconView())
-        ->setIconFont('fa-plus-square')
+        ->setIcon('fa-plus-square')
         ->addClass('phame-blog-list-icon');
 
       $add_new = phutil_tag(

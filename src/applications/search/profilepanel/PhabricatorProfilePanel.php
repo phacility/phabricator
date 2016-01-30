@@ -30,6 +30,11 @@ abstract class PhabricatorProfilePanel extends Phobject {
     return false;
   }
 
+  public function canHidePanel(
+    PhabricatorProfilePanelConfiguration $config) {
+    return true;
+  }
+
   public function canMakeDefault(
     PhabricatorProfilePanelConfiguration $config) {
     return false;

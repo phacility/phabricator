@@ -14,7 +14,7 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
     return pht('Create Custom Pages');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-dashboard';
   }
 

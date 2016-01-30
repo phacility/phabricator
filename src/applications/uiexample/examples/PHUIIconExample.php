@@ -23,9 +23,9 @@ final class PHUIIconExample extends PhabricatorUIExample {
 
   public function renderExample() {
 
-    $colors = PHUIIconView::getFontIconColors();
+    $colors = PHUIIconView::getIconColors();
     $colors = array_merge(array(null), $colors);
-    $fas = PHUIIconView::getFontIcons();
+    $fas = PHUIIconView::getIcons();
 
     $trans = $this->listTransforms();
 
@@ -33,7 +33,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
     foreach ($colors as $color) {
       $cicons[] = id(new PHUIIconView())
         ->addClass('phui-example-icon-transform')
-        ->setIconFont('fa-tag '.$color)
+        ->setIcon('fa-tag '.$color)
         ->setText(pht('fa-tag %s', $color));
     }
     $ficons = array();
@@ -41,7 +41,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
     foreach ($fas as $fa) {
       $ficons[] = id(new PHUIIconView())
         ->addClass('phui-example-icon-name')
-        ->setIconFont($fa)
+        ->setIcon($fa)
         ->setText($fa);
     }
 
@@ -115,7 +115,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
     foreach ($circles as $circle) {
       $circleview[] =
         id(new PHUIIconCircleView())
-          ->setIconFont($circle)
+          ->setIcon($circle)
           ->setHref('#')
           ->addClass('mmr');
     }
@@ -124,7 +124,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
     foreach ($circles as $circle) {
       $circleview[] =
         id(new PHUIIconCircleView())
-          ->setIconFont($circle)
+          ->setIcon($circle)
           ->setSize(PHUIIconCircleView::MEDIUM)
           ->setHref('#')
           ->addClass('mmr');

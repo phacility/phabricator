@@ -125,16 +125,14 @@ final class PhabricatorCalendarEventViewController
     if ($is_invite_pending) {
       $decline_button = id(new PHUIButtonView())
         ->setTag('a')
-        ->setIcon(id(new PHUIIconView())
-          ->setIconFont('fa-times grey'))
+        ->setIcon('fa-times grey')
         ->setHref($this->getApplicationURI("/event/decline/{$id}/"))
         ->setWorkflow(true)
         ->setText(pht('Decline'));
 
       $accept_button = id(new PHUIButtonView())
         ->setTag('a')
-        ->setIcon(id(new PHUIIconView())
-          ->setIconFont('fa-check green'))
+        ->setIcon('fa-check green')
         ->setHref($this->getApplicationURI("/event/accept/{$id}/"))
         ->setWorkflow(true)
         ->setText(pht('Accept'));

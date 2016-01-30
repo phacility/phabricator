@@ -11,7 +11,7 @@ final class PhabricatorMySQLConfigOptions
     return pht('Database configuration.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-database';
   }
 

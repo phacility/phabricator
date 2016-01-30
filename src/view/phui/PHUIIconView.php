@@ -48,7 +48,7 @@ final class PHUIIconView extends AphrontTagView {
     return $this;
   }
 
-  public function setIconFont($icon, $color = null) {
+  public function setIcon($icon, $color = null) {
     $this->iconFont = $icon;
     $this->iconColor = $color;
     return $this;
@@ -105,7 +105,7 @@ final class PHUIIconView extends AphrontTagView {
     return idx(phutil_json_decode($data), 'sprites');
   }
 
-  public static function getFontIcons() {
+  public static function getIcons() {
     return array(
       'fa-glass',
       'fa-music',
@@ -747,7 +747,7 @@ final class PHUIIconView extends AphrontTagView {
     );
   }
 
-  public static function getFontIconColors() {
+  public static function getIconColors() {
     return array(
       'bluegrey',
       'white',

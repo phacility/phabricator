@@ -236,7 +236,7 @@ final class PHUITimelineEventView extends AphrontView {
       }
 
       $icon = id(new PHUIIconView())
-        ->setIconFont($this->icon.' white')
+        ->setIcon($this->icon.' white')
         ->addClass('phui-timeline-icon');
 
       $icon = phutil_tag(
@@ -297,7 +297,7 @@ final class PHUITimelineEventView extends AphrontView {
 
     if ($items || $has_menu) {
       $icon = id(new PHUIIconView())
-        ->setIconFont('fa-caret-down');
+        ->setIcon('fa-caret-down');
       $aural = javelin_tag(
         'span',
         array(

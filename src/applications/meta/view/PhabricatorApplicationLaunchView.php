@@ -113,7 +113,7 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
       if ($application->getIconURI()) {
         $styles[] = 'background-image: url('.$application->getIconURI().')';
       } else {
-        $classes[] = $application->getFontIcon();
+        $classes[] = $application->getIcon();
         $classes[] = 'phui-icon-view';
         $classes[] = 'phui-font-fa';
       }

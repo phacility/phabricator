@@ -46,7 +46,7 @@ final class PhabricatorNavigationRemarkupRule extends PhutilRemarkupRule {
 
     static $icon_names;
     if (!$icon_names) {
-      $icon_names = array_fuse(PHUIIconView::getFontIcons());
+      $icon_names = array_fuse(PHUIIconView::getIcons());
     }
 
     $out = array();

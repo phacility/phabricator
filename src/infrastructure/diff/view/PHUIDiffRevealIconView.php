@@ -4,7 +4,7 @@ final class PHUIDiffRevealIconView extends AphrontView {
 
   public function render() {
     $icon = id(new PHUIIconView())
-      ->setIconFont('fa-comment')
+      ->setIcon('fa-comment')
       ->addSigil('has-tooltip')
       ->setMetadata(
         array(

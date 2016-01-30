@@ -4,6 +4,7 @@ final class PhabricatorPeopleProfilePanelEngine
   extends PhabricatorProfilePanelEngine {
 
   const PANEL_PROFILE = 'people.profile';
+  const PANEL_MANAGE = 'people.manage';
 
   protected function isPanelEngineConfigurable() {
     return false;
@@ -89,6 +90,10 @@ final class PhabricatorPeopleProfilePanelEngine
         ->setPanelProperty('name', pht('Commits'))
         ->setPanelProperty('uri', $uri);
     }
+
+    $panels[] = $this->newPanel()
+      ->setBuiltinKey(self::PANEL_MANAGE)
+      ->setPanelKey(PhabricatorPeopleManageProfilePanel::PANELKEY);
 
     return $panels;
   }

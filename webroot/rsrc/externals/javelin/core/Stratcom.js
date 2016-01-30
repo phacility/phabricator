@@ -41,6 +41,7 @@ JX.install('Stratcom', {
     _auto : '*',
     _data : {},
     _execContext : [],
+    _touchState: null,
 
     /**
      * Node metadata is stored in a series of blocks to prevent collisions
@@ -330,6 +331,45 @@ JX.install('Stratcom', {
         etype = 'blur';
       }
 
+      // Map of touch events and whether they are unique per touch.
+      var touch_map = {
+        touchstart: true,
+        touchend: true,
+        mousedown: true,
+        mouseup: true,
+        click: true,
+
+        // These can conceivably fire multiple times per touch, so if we see
+        // them more than once that doesn't tell us that we're handling a new
+        // event.
+        mouseover: false,
+        mouseout: false,
+        mousemove: false,
+        touchmove: false
+      };
+
+      // If this is a 'touchstart', we're handling touch events.
+      if (etype == 'touchstart') {
+        this._touchState = {};
+      }
+
+      // If this is a unique touch event that we haven't seen before, remember
+      // it as part of the current touch state. On the other hand, if we've
+      // already seen it, we can deduce that we must be handling a new cursor
+      // event that is unrelated to the last touch we saw, and conclude that
+      // we are no longer processing a touch event.
+      if (touch_map[etype] && this._touchState) {
+        if (!this._touchState[etype]) {
+          this._touchState[etype] = true;
+        } else {
+          this._touchState = null;
+        }
+      }
+
+      // This event is a touch event if we're carrying some touch state.
+      var is_touch = (etype in touch_map) &&
+                     (this._touchState !== null);
+
       var proxy = new JX.Event()
         .setRawEvent(event)
         .setData(event.customData)
@@ -337,9 +377,11 @@ JX.install('Stratcom', {
         .setTarget(target)
         .setNodes(nodes)
         .setNodeDistances(distances)
+        .setIsTouchEvent(is_touch)
         .setPath(path.reverse());
 
-      // Don't touch this for debugging purposes
+      // You can uncomment this to print out all events flowing through
+      // Stratcom, which tends to make debugging easier.
       //JX.log('~> '+proxy.toString());
 
       return this._dispatchProxy(proxy);

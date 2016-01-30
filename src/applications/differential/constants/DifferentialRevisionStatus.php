@@ -63,7 +63,7 @@ final class DifferentialRevisionStatus extends Phobject {
       ArcanistDifferentialRevisionStatus::getNameForRevisionStatus($status);
 
     $img = id(new PHUIIconView())
-      ->setIconFont(self::getRevisionStatusIcon($status));
+      ->setIcon(self::getRevisionStatusIcon($status));
 
     $tag = phutil_tag(
       'span',

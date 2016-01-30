@@ -14,7 +14,7 @@ final class PhabricatorDoorkeeperApplication extends PhabricatorApplication {
     return pht('Doorkeeper');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-recycle';
   }
 

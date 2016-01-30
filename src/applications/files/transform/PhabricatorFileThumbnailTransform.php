@@ -57,9 +57,9 @@ final class PhabricatorFileThumbnailTransform
   public function generateTransforms() {
     return array(
       id(new PhabricatorFileThumbnailTransform())
-        ->setName(pht("Profile (100px \xC3\x97 100px)"))
+        ->setName(pht("Profile (200px \xC3\x97 200px)"))
         ->setKey(self::TRANSFORM_PROFILE)
-        ->setDimensions(100, 100)
+        ->setDimensions(200, 200)
         ->setScaleUp(true),
       id(new PhabricatorFileThumbnailTransform())
         ->setName(pht("Pinboard (280px \xC3\x97 210px)"))

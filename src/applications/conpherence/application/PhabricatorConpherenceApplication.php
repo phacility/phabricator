@@ -14,7 +14,7 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
     return pht('Chat with Others');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-comments';
   }
 

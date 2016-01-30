@@ -55,7 +55,7 @@ abstract class DiffusionView extends AphrontView {
           'align' => 'E',
         ),
       ),
-      id(new PHUIIconView())->setIconFont('fa-history bluegrey'));
+      id(new PHUIIconView())->setIcon('fa-history bluegrey'));
   }
 
   final public function linkBrowse($path, array $details = array()) {
@@ -95,7 +95,7 @@ abstract class DiffusionView extends AphrontView {
     }
 
     $icon = DifferentialChangeType::getIconForFileType($file_type);
-    $icon_view = id(new PHUIIconView())->setIconFont("{$icon} blue");
+    $icon_view = id(new PHUIIconView())->setIcon($icon);
 
     // If we're rendering a file or directory name, don't show the tooltip.
     if ($display_name !== null) {
@@ -183,7 +183,7 @@ abstract class DiffusionView extends AphrontView {
     $name = HarbormasterBuildable::getBuildableStatusName($status);
 
     $icon_view = id(new PHUIIconView())
-      ->setIconFont($icon.' '.$color);
+      ->setIcon($icon.' '.$color);
 
     $tooltip_view = javelin_tag(
       'span',

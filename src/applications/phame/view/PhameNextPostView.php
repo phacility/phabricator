@@ -30,7 +30,7 @@ final class PhameNextPostView extends AphrontTagView {
     require_celerity_resource('phame-css');
 
     $p_icon = id(new PHUIIconView())
-      ->setIconFont('fa-angle-left');
+      ->setIcon('fa-angle-left');
 
     $previous_icon = phutil_tag(
       'div',
@@ -69,7 +69,7 @@ final class PhameNextPostView extends AphrontTagView {
     }
 
     $n_icon = id(new PHUIIconView())
-      ->setIconFont('fa-angle-right');
+      ->setIcon('fa-angle-right');
 
     $next_icon = phutil_tag(
       'div',

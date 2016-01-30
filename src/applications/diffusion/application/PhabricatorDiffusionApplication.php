@@ -14,7 +14,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
     return '/diffusion/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-code';
   }
 

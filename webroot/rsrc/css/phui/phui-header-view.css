@@ -128,9 +128,34 @@ body .phui-header-shell.phui-bleed-header
   display: inline-block;
   background-repeat: no-repeat;
   background-size: 100%;
-  box-shadow: {$borderinset};
   width: 50px;
   height: 50px;
+  border-radius: 3px;
+}
+
+.phui-header-image-href {
+  position: relative;
+  display: block;
+}
+
+.phui-header-image-edit {
+  display: none;
+}
+
+.device-desktop .phui-header-image-href:hover .phui-header-image-edit {
+  display: block;
+  position: absolute;
+  left: 0;
+  background: rgba(0,0,0,0.4);
+  color: #fff;
+  font-weight: normal;
+  bottom: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.device-desktop .phui-header-image-edit:hover {
+  text-decoration: underline;
 }
 
 .phui-header-subheader {
@@ -252,4 +277,41 @@ body .phui-header-shell.phui-bleed-header
 
 .phui-header-subheader .phui-badge-flex-view:after {
   display: inline;
+}
+
+/*** Profile Header ***********************************************************/
+
+.phui-profile-header {
+  padding: 24px 20px 20px 24px;
+}
+
+.device-phone .phui-profile-header {
+  padding: 12px;
+}
+
+.phui-profile-header.phui-header-shell {
+  margin: 0;
+  border: none;
+}
+
+.phui-profile-header .phui-header-image {
+  height: 80px;
+  width: 80px;
+}
+
+.phui-profile-header .phui-header-col1 {
+  width: 96px;
+}
+
+.phui-profile-header .phui-header-subheader {
+  margin-top: 12px;
+}
+
+.phui-profile-header.phui-header-shell .phui-header-header {
+  font-family: 'Aleo', {$fontfamily};
+  font-size: 24px;
+}
+
+.phui-profile-header .phui-header-col3 {
+  vertical-align: top;
 }

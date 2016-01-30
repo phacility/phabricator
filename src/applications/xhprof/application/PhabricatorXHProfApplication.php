@@ -14,7 +14,7 @@ final class PhabricatorXHProfApplication extends PhabricatorApplication {
     return pht('PHP Profiling Tool');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-stethoscope';
   }
 

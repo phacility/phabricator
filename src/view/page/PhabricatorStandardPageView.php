@@ -747,7 +747,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       if ($application) {
         $application_class = get_class($application);
         if ($application->getApplicationSearchDocumentTypes()) {
-          $application_search_icon = $application->getFontIcon();
+          $application_search_icon = $application->getIcon();
         }
       }
     }

@@ -11,7 +11,7 @@ final class PhabricatorPholioConfigOptions
     return pht('Configure Pholio.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-camera-retro';
   }
 

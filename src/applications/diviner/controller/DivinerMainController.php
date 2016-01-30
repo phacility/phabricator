@@ -17,14 +17,11 @@ final class DivinerMainController extends DivinerController {
     $crumbs->setBorder(true);
     $crumbs->addTextCrumb(pht('Books'));
 
-    $search_icon = id(new PHUIIconView())
-      ->setIconFont('fa-search');
-
     $query_button = id(new PHUIButtonView())
       ->setTag('a')
       ->setHref($this->getApplicationURI('query/'))
       ->setText(pht('Advanced Search'))
-      ->setIcon($search_icon);
+      ->setIcon('fa-search');
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Documentation Books'))

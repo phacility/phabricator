@@ -142,7 +142,7 @@ final class AphrontCursorPagerView extends AphrontView {
     $first_uri = $this->getFirstPageURI();
     if ($first_uri) {
       $icon = id(new PHUIIconView())
-        ->setIconFont('fa-fast-backward');
+        ->setIcon('fa-fast-backward');
       $links[] = id(new PHUIButtonView())
         ->setTag('a')
         ->setHref($first_uri)
@@ -155,7 +155,7 @@ final class AphrontCursorPagerView extends AphrontView {
     $prev_uri = $this->getPrevPageURI();
     if ($prev_uri) {
       $icon = id(new PHUIIconView())
-        ->setIconFont('fa-backward');
+        ->setIcon('fa-backward');
       $links[] = id(new PHUIButtonView())
         ->setTag('a')
         ->setHref($prev_uri)
@@ -168,7 +168,7 @@ final class AphrontCursorPagerView extends AphrontView {
     $next_uri = $this->getNextPageURI();
     if ($next_uri) {
       $icon = id(new PHUIIconView())
-        ->setIconFont('fa-forward');
+        ->setIcon('fa-forward');
       $links[] = id(new PHUIButtonView())
         ->setTag('a')
         ->setHref($next_uri)

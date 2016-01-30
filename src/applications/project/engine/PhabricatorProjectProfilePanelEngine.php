@@ -3,6 +3,10 @@
 final class PhabricatorProjectProfilePanelEngine
   extends PhabricatorProfilePanelEngine {
 
+  protected function isPanelEngineConfigurable() {
+    return true;
+  }
+
   protected function getPanelURI($path) {
     $project = $this->getProfileObject();
     $id = $project->getID();
@@ -23,6 +27,10 @@ final class PhabricatorProjectProfilePanelEngine
     $panels[] = $this->newPanel()
       ->setBuiltinKey(PhabricatorProject::PANEL_MEMBERS)
       ->setPanelKey(PhabricatorProjectMembersProfilePanel::PANELKEY);
+
+    $panels[] = $this->newPanel()
+      ->setBuiltinKey(PhabricatorProject::PANEL_MANAGE)
+      ->setPanelKey(PhabricatorProjectManageProfilePanel::PANELKEY);
 
     return $panels;
   }

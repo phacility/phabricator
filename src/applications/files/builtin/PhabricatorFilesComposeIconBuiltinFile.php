@@ -150,7 +150,7 @@ final class PhabricatorFilesComposeIconBuiltinFile
       'fa-bug' => pht('Bug'),
       'fa-building' => pht('Company'),
       'fa-calendar' => pht('Deadline'),
-      'fa-camera-retro' => pht('Leica Enth1usiast'),
+      'fa-camera-retro' => pht('Leica Enthusiast'),
       'fa-chrome' => pht('Shiny'),
       'fa-cloud' => pht('The Cloud'),
       'fa-coffee' => pht('Go Juice'),
@@ -177,7 +177,7 @@ final class PhabricatorFilesComposeIconBuiltinFile
       'fa-internet-explorer' => pht('Now Just Edge'),
       'fa-key' => pht('Primitive Security'),
       'fa-legal' => pht('Hired Protection'),
-      'fa-linux' => pht('M\`Lady'),
+      'fa-linux' => pht('M\'Lady'),
       'fa-lock' => pht('Policy'),
       'fa-microphone' => pht('Podcasting'),
       'fa-mobile' => pht('Tiny Pocket Cat Meme Machine'),
@@ -204,7 +204,7 @@ final class PhabricatorFilesComposeIconBuiltinFile
       'fa-user' => pht('Individual'),
       'fa-users' => pht('Team'),
       'fa-warning' => pht('No Caution Required, Everything Looks Safe'),
-      'fa-wheelchair' => pht('Accessability'),
+      'fa-wheelchair' => pht('Accessibility'),
       'fa-windows' => pht('Windows'),
     );
   }

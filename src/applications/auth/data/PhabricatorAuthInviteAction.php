@@ -88,7 +88,7 @@ final class PhabricatorAuthInviteAction extends Phobject {
     }
 
     return id(new PHUIIconView())
-      ->setIconFont("{$icon} {$color}");
+      ->setIcon("{$icon} {$color}");
   }
 
   public static function newActionListFromAddresses(

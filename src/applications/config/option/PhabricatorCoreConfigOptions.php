@@ -11,7 +11,7 @@ final class PhabricatorCoreConfigOptions
     return pht('Configure core options, including URIs.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-bullseye';
   }
 

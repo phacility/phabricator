@@ -11,7 +11,7 @@ final class PhabricatorTranslationsConfigOptions
     return pht('Options relating to translations.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-globe';
   }
 

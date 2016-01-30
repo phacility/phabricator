@@ -24,7 +24,7 @@ final class PhabricatorApplicationsApplication extends PhabricatorApplication {
     return pht('Explore More Applications');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-globe';
   }
 

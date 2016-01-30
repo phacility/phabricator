@@ -7,7 +7,7 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
   abstract public function getGroup();
   abstract public function getOptions();
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-sliders';
   }
 

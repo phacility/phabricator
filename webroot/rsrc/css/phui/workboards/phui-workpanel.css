@@ -1,12 +1,11 @@
 /**
  * @provides phui-workpanel-view-css
+ * @requires phui-workcard-view-css
  */
 
 .phui-workpanel-view .phui-header-shell {
-  padding: 16px 0 8px;
-  border-color: {$lightgreyborder};
-  width: 300px;
-  background-color: transparent;
+  padding: 8px;
+  width: 284px;
 }
 
 .phui-workpanel-view .phui-header-shell .phui-header-header {
@@ -22,9 +21,8 @@
   color: {$lightgreytext};
 }
 
-.device-phone .phui-workboard-view {
+.device .phui-workpanel-view .phui-header-shell {
   width: auto;
-  margin: 0 8px;
 }
 
 .phui-workboard-view {
@@ -36,25 +34,6 @@
   user-select: none;
 }
 
-.phui-workboard-view .phui-object-item .phui-object-item-objname {
-  -webkit-touch-callout: text;
-  -webkit-user-select: text;
-  -khtml-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
-  user-select: text;
-}
-
-.phui-workboard-view .phui-object-item-link {
-  white-space: normal;
-  display: inline;
-  -webkit-font-smoothing: antialiased;
-}
-
-.phui-workboard-view .phui-object-item-objname {
-  vertical-align: top;
-}
-
 .phui-workpanel-view .phui-workpanel-header-action {
   float: right;
   width: 24px;
@@ -62,7 +41,11 @@
 }
 
 .phui-workpanel-view .phui-workpanel-body {
-  padding-top: 8px;
+  padding: 8px 8px 4px 8px;
+}
+
+.device-phone .phui-workpanel-view .phui-workpanel-body {
+  padding: 8px 0;
 }
 
 .phui-workpanel-view .phui-workpanel-footer-action a {
@@ -75,18 +58,7 @@
   border-radius: 3px;
 }
 
-.phui-workpanel-view .phui-list-item-icon {
-  height: 14px;
-  width: 14px;
-  display: inline-block;
-}
-
-.phui-workpanel-view .phui-list-item-name {
-  padding-left: 5px;
-  display: inline-block;
-}
-
-.aphront-multi-column-fixed .phui-workpanel-view {
+.device-desktop .aphront-multi-column-fixed .phui-workpanel-view {
   width: 300px;
 }
 
@@ -129,22 +101,4 @@
 
 .phui-workpanel-view.project-panel-over-limit .phui-header-shell {
   border-color: {$red};
-}
-
-/* - Workpanel Cards -----------------------------------------------------------
-
-  Slight display changes for how cards work in tight spaces
-
-*/
-
-.phui-workpanel-view .phui-object-item-grippable .phui-object-item-frame {
-  padding-left: 0;
-}
-
-.phui-workpanel-view .phui-object-item-grip {
-  display: none;
-}
-
-.phui-workpanel-view .phui-object-item-attribute a {
-  color: {$bluetext};
 }

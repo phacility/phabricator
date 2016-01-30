@@ -49,7 +49,7 @@ abstract class PhabricatorIconSet
       'span',
       array(),
       array(
-        id(new PHUIIconView())->setIconFont($icon->getIcon()),
+        id(new PHUIIconView())->setIcon($icon->getIcon()),
         ' ',
         $icon->getLabel(),
       ));

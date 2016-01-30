@@ -68,7 +68,7 @@ final class PhabricatorMotivatorProfilePanel
       case 'catfacts':
       default:
         $fact = array(
-          id(new PHUIIconView())->setIconFont('fa-paw'),
+          id(new PHUIIconView())->setIcon('fa-paw'),
           ' ',
           $fact,
         );

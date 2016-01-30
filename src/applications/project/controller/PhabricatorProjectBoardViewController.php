@@ -332,37 +332,32 @@ final class PhabricatorProjectBoardViewController
       ),
       $project->getName());
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($header_link)
-      ->setUser($viewer)
-      ->setNoBackground(true)
-      ->addActionLink($sort_menu)
-      ->addActionLink($filter_menu)
-      ->addActionLink($manage_menu)
-      ->setPolicyObject($project);
-
-    $header_box = id(new PHUIBoxView())
-      ->appendChild($header)
-      ->addClass('project-board-header');
-
     $board_box = id(new PHUIBoxView())
       ->appendChild($board)
       ->addClass('project-board-wrapper');
 
     $nav = $this->getProfileMenu();
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Workboard'));
+    $crumbs->setBorder(true);
+
+    $crumbs->addAction($sort_menu);
+    $crumbs->addAction($filter_menu);
+    $crumbs->addAction($manage_menu);
+
     return $this->newPage()
       ->setTitle(pht('%s Board', $project->getName()))
       ->setPageObjectPHIDs(array($project->getPHID()))
       ->setShowFooter(false)
       ->setNavigation($nav)
+      ->setCrumbs($crumbs)
       ->addQuicksandConfig(
         array(
           'boardConfig' => $behavior_config,
         ))
       ->appendChild(
         array(
-          $header_box,
           $board_box,
         ));
   }
@@ -410,7 +405,7 @@ final class PhabricatorProjectBoardViewController
     $sort_key) {
 
     $sort_icon = id(new PHUIIconView())
-      ->setIconFont('fa-sort-amount-asc bluegrey');
+      ->setIcon('fa-sort-amount-asc bluegrey');
 
     $named = array(
       PhabricatorProjectColumn::ORDER_NATURAL => pht('Natural'),
@@ -443,10 +438,9 @@ final class PhabricatorProjectBoardViewController
       $sort_menu->addAction($item);
     }
 
-    $sort_button = id(new PHUIButtonView())
-      ->setText(pht('Sort: %s', $active_order))
-      ->setIcon($sort_icon)
-      ->setTag('a')
+    $sort_button = id(new PHUIListItemView())
+      ->setName(pht('Sort: %s', $active_order))
+      ->setIcon('fa-sort-amount-asc')
       ->setHref('#')
       ->addSigil('boards-dropdown-menu')
       ->setMetadata(
@@ -461,9 +455,6 @@ final class PhabricatorProjectBoardViewController
     $custom_query,
     PhabricatorApplicationSearchEngine $engine,
     $query_key) {
-
-    $filter_icon = id(new PHUIIconView())
-      ->setIconFont('fa-search-plus bluegrey');
 
     $named = array(
       'open' => pht('Open Tasks'),
@@ -521,10 +512,9 @@ final class PhabricatorProjectBoardViewController
       $filter_menu->addAction($item);
     }
 
-    $filter_button = id(new PHUIButtonView())
-      ->setText(pht('Filter: %s', $active_filter))
-      ->setIcon($filter_icon)
-      ->setTag('a')
+    $filter_button = id(new PHUIListItemView())
+      ->setName(pht('Filter: %s', $active_filter))
+      ->setIcon('fa-search')
       ->setHref('#')
       ->addSigil('boards-dropdown-menu')
       ->setMetadata(
@@ -546,9 +536,6 @@ final class PhabricatorProjectBoardViewController
       $viewer,
       $project,
       PhabricatorPolicyCapability::CAN_EDIT);
-
-    $manage_icon = id(new PHUIIconView())
-      ->setIconFont('fa-cog bluegrey');
 
     $manage_items = array();
 
@@ -602,10 +589,9 @@ final class PhabricatorProjectBoardViewController
       $manage_menu->addAction($item);
     }
 
-    $manage_button = id(new PHUIButtonView())
-      ->setText(pht('Manage Board'))
-      ->setIcon($manage_icon)
-      ->setTag('a')
+    $manage_button = id(new PHUIListItemView())
+      ->setName(pht('Manage Board'))
+      ->setIcon('fa-cog')
       ->setHref('#')
       ->addSigil('boards-dropdown-menu')
       ->setMetadata(
@@ -689,7 +675,7 @@ final class PhabricatorProjectBoardViewController
     }
 
     $column_button = id(new PHUIIconView())
-      ->setIconFont('fa-caret-down')
+      ->setIcon('fa-caret-down')
       ->setHref('#')
       ->addSigil('boards-dropdown-menu')
       ->setMetadata(

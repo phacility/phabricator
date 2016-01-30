@@ -390,13 +390,10 @@ final class DiffusionRepositoryController extends DiffusionController {
       $header->setSubHeader(pht('Showing %d branches.', $limit));
     }
 
-    $icon = id(new PHUIIconView())
-      ->setIconFont('fa-code-fork');
-
     $button = new PHUIButtonView();
     $button->setText(pht('Show All Branches'));
     $button->setTag('a');
-    $button->setIcon($icon);
+    $button->setIcon('fa-code-fork');
     $button->setHref($drequest->generateURI(
       array(
         'action' => 'branches',
@@ -462,13 +459,10 @@ final class DiffusionRepositoryController extends DiffusionController {
         pht('Showing the %d most recent tags.', $tag_limit));
     }
 
-    $icon = id(new PHUIIconView())
-      ->setIconFont('fa-tag');
-
     $button = new PHUIButtonView();
     $button->setText(pht('Show All Tags'));
     $button->setTag('a');
-    $button->setIcon($icon);
+    $button->setIcon('fa-tag');
     $button->setHref($drequest->generateURI(
       array(
         'action' => 'tags',
@@ -557,7 +551,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $history_table->setIsHead(true);
 
     $icon = id(new PHUIIconView())
-      ->setIconFont('fa-list-alt');
+      ->setIcon('fa-list-alt');
 
     $button = id(new PHUIButtonView())
       ->setText(pht('View Full History'))
@@ -620,7 +614,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setHeader(pht('Repository'));
 
     $icon = id(new PHUIIconView())
-      ->setIconFont('fa-folder-open');
+      ->setIcon('fa-folder-open');
 
     $button = new PHUIButtonView();
     $button->setText(pht('Browse Repository'));

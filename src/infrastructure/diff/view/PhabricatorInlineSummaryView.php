@@ -31,7 +31,7 @@ final class PhabricatorInlineSummaryView extends AphrontView {
       }
 
       $icon = id(new PHUIIconView())
-        ->setIconFont('fa-file-code-o darkbluetext mmr');
+        ->setIcon('fa-file-code-o darkbluetext mmr');
       $header = phutil_tag(
         'th',
         array(
@@ -65,7 +65,7 @@ final class PhabricatorInlineSummaryView extends AphrontView {
 
         if ($href) {
           $icon = id(new PHUIIconView())
-            ->setIconFont('fa-share darkbluetext mmr');
+            ->setIcon('fa-share darkbluetext mmr');
 
           $lines = phutil_tag(
             'a',

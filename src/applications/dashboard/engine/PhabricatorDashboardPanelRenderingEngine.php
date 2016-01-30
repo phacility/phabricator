@@ -165,7 +165,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         break;
     }
     $icon = id(new PHUIIconView())
-      ->setIconFont('fa-warning red msr');
+      ->setIcon('fa-warning red msr');
     $content = id(new PHUIBoxView())
       ->addClass('dashboard-box')
       ->appendChild($icon)
@@ -250,7 +250,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
       $edit_uri->setQueryParam('dashboardID', $dashboard_id);
     }
     $action_edit = id(new PHUIIconView())
-      ->setIconFont('fa-pencil')
+      ->setIcon('fa-pencil')
       ->setWorkflow(true)
       ->setHref((string)$edit_uri);
     $header->addActionIcon($action_edit);
@@ -260,7 +260,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         '/dashboard/removepanel/'.$dashboard_id.'/'))
         ->setQueryParam('panelPHID', $panel->getPHID());
       $action_remove = id(new PHUIIconView())
-        ->setIconFont('fa-trash-o')
+        ->setIcon('fa-trash-o')
         ->setHref((string)$uri)
         ->setWorkflow(true);
       $header->addActionIcon($action_remove);

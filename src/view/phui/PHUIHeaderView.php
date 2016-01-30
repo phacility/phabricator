@@ -8,10 +8,12 @@ final class PHUIHeaderView extends AphrontTagView {
   private $tags = array();
   private $image;
   private $imageURL = null;
+  private $imageEditURL = null;
   private $subheader;
   private $headerIcon;
   private $noBackground;
   private $bleedHeader;
+  private $profileHeader;
   private $tall;
   private $properties = array();
   private $actionLinks = array();
@@ -56,6 +58,11 @@ final class PHUIHeaderView extends AphrontTagView {
     return $this;
   }
 
+  public function setImageEditURL($url) {
+    $this->imageEditURL = $url;
+    return $this;
+  }
+
   public function setSubheader($subheader) {
     $this->subheader = $subheader;
     return $this;
@@ -63,6 +70,11 @@ final class PHUIHeaderView extends AphrontTagView {
 
   public function setBleedHeader($bleed) {
     $this->bleedHeader = $bleed;
+    return $this;
+  }
+
+  public function setProfileHeader($bighead) {
+    $this->profileHeader = $bighead;
     return $this;
   }
 
@@ -105,7 +117,7 @@ final class PHUIHeaderView extends AphrontTagView {
     }
 
     $img = id(new PHUIIconView())
-      ->setIconFont($icon);
+      ->setIcon($icon);
 
     $tag = phutil_tag(
       'span',
@@ -153,6 +165,10 @@ final class PHUIHeaderView extends AphrontTagView {
       $classes[] = 'phui-bleed-header';
     }
 
+    if ($this->profileHeader) {
+      $classes[] = 'phui-profile-header';
+    }
+
     if ($this->properties || $this->policyObject ||
         $this->subheader || $this->tall) {
       $classes[] = 'phui-header-tall';
@@ -164,16 +180,45 @@ final class PHUIHeaderView extends AphrontTagView {
   }
 
   protected function getTagContent() {
+
     $image = null;
     if ($this->image) {
+      $image_href = null;
+      if ($this->imageURL) {
+        $image_href = $this->imageURL;
+      } else if ($this->imageEditURL) {
+        $image_href = $this->imageEditURL;
+      }
+
       $image = phutil_tag(
-        ($this->imageURL ? 'a' : 'span'),
+        'span',
         array(
-          'href' => $this->imageURL,
           'class' => 'phui-header-image',
           'style' => 'background-image: url('.$this->image.')',
-        ),
-        ' ');
+        ));
+
+      if ($image_href) {
+        $edit_view = null;
+        if ($this->imageEditURL) {
+          $edit_view = phutil_tag(
+            'span',
+            array(
+              'class' => 'phui-header-image-edit',
+            ),
+            pht('Edit'));
+        }
+
+        $image = phutil_tag(
+          'a',
+          array(
+            'href' => $image_href,
+            'class' => 'phui-header-image-href',
+          ),
+          array(
+            $image,
+            $edit_view,
+          ));
+      }
     }
 
     $viewer = $this->getUser();
@@ -190,7 +235,7 @@ final class PHUIHeaderView extends AphrontTagView {
     if ($this->actionLinks) {
       $actions = array();
       foreach ($this->actionLinks as $button) {
-        $button->setColor(PHUIButtonView::SIMPLE);
+        $button->setColor(PHUIButtonView::GREY);
         $button->addClass(PHUI::MARGIN_SMALL_LEFT);
         $button->addClass('phui-header-action-link');
         $actions[] = $button;
@@ -242,7 +287,7 @@ final class PHUIHeaderView extends AphrontTagView {
 
     if ($this->headerIcon) {
       $icon = id(new PHUIIconView())
-        ->setIconFont($this->headerIcon);
+        ->setIcon($this->headerIcon);
       $left[] = $icon;
     }
     $left[] = phutil_tag(
@@ -416,7 +461,7 @@ final class PHUIHeaderView extends AphrontTagView {
     }
 
     $icon = id(new PHUIIconView())
-      ->setIconFont($policy->getIcon().' bluegrey');
+      ->setIcon($policy->getIcon().' bluegrey');
 
     $link = javelin_tag(
       'a',

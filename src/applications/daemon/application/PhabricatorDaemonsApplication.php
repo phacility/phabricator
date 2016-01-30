@@ -18,7 +18,7 @@ final class PhabricatorDaemonsApplication extends PhabricatorApplication {
     return "\xE2\x98\xAF";
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-pied-piper-alt';
   }
 

@@ -11,7 +11,7 @@ final class PhabricatorMailgunConfigOptions
     return pht('Configure Mailgun integration.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-send-o';
   }
 
