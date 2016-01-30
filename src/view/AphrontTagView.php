@@ -77,6 +77,10 @@ abstract class AphrontTagView extends AphrontView {
     return $this->id;
   }
 
+  public function isEmpty() {
+    return empty($this->getTagContent());
+  }
+
   protected function getTagName() {
     return 'div';
   }

@@ -304,6 +304,7 @@ final class PhabricatorProjectBoardViewController
         $can_edit = idx($task_can_edit_map, $task->getPHID(), false);
         $cards->addItem(id(new ProjectBoardTaskCard())
           ->setViewer($viewer)
+          ->setProject($project)
           ->setTask($task)
           ->setOwner($owner)
           ->setCanEdit($can_edit)
