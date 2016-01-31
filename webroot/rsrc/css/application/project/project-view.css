@@ -31,13 +31,18 @@
   padding: 8px;
 }
 
-.project-view-feed .phui-header-shell {
+.project-view-feed .phui-object-box .phui-header-shell {
   padding: 8px 4px;
 }
 
 .project-view-feed .phui-header-header {
   font-size: {$biggerfontsize};
   margin-left: 4px;
+}
+
+.device-desktop .project-view-feed .phui-feed-story,
+.device-tablet .project-view-feed .phui-feed-story {
+  padding-left: 22px;
 }
 
 .project-view-home .phui-box-grey {
