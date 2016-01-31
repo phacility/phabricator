@@ -86,12 +86,11 @@ final class ProjectBoardTaskCard extends Phobject {
     $project_phids = array_fuse($task->getProjectPHIDs());
     unset($project_phids[$this->project->getPHID()]);
 
-    $handle_list = $viewer->loadHandles($project_phids);
-    $tag_list = id(new PHUIHandleTagListView())
-      ->setSlim(true)
-      ->setHandles($handle_list);
-
-    if (!$tag_list->isEmpty()) {
+    if ($project_phids) {
+      $handle_list = $viewer->loadHandles($project_phids);
+      $tag_list = id(new PHUIHandleTagListView())
+        ->setSlim(true)
+        ->setHandles($handle_list);
       $card->addAttribute($tag_list);
     }
 

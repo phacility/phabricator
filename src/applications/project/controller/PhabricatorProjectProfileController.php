@@ -125,7 +125,7 @@ final class PhabricatorProjectProfileController
       PhabricatorCustomField::ROLE_VIEW);
     $field_list->appendFieldsToPropertyList($project, $viewer, $view);
 
-    if ($view->isEmpty()) {
+    if (!$view->hasAnyProperties()) {
       return null;
     }
 

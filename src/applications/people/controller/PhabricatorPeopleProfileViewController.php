@@ -112,7 +112,7 @@ final class PhabricatorPeopleProfileViewController
       PhabricatorCustomField::ROLE_VIEW);
     $field_list->appendFieldsToPropertyList($user, $viewer, $view);
 
-    if ($view->isEmpty()) {
+    if (!$view->hasAnyProperties()) {
       return null;
     }
 

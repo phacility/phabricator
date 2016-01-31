@@ -115,14 +115,14 @@ final class PHUIPropertyListView extends AphrontView {
     $this->invokedWillRenderEvent = true;
   }
 
-  public function isEmpty() {
+  public function hasAnyProperties() {
     $this->invokeWillRenderEvent();
 
     if ($this->parts) {
-      return false;
+      return true;
     }
 
-    return true;
+    return false;
   }
 
   public function render() {
