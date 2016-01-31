@@ -7,6 +7,7 @@
   text-decoration: none;
   position: relative;
   -webkit-font-smoothing: antialiased;
+  white-space: nowrap;
 }
 
 a.phui-tag-view:hover {
@@ -149,7 +150,7 @@ a.phui-tag-view:hover
 }
 
 .phui-object-item .phabricator-handle-tag-list-item {
-  display: inline;
+  display: inline-block;
   margin: 0 4px 2px 0;
 }
 
