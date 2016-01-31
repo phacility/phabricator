@@ -466,7 +466,10 @@ final class DiffusionServeController extends DiffusionController {
     if ($err) {
       return new PhabricatorVCSResponse(
         500,
-        pht('Error %d: %s', $err, $stderr));
+        pht(
+          'Error %d: %s',
+          $err,
+          phutil_utf8ize($stderr)));
     }
 
     return id(new DiffusionGitResponse())->setGitData($stdout);
