@@ -59,8 +59,8 @@ button.grey,
 input[type="submit"].grey,
 a.grey,
 a.grey:visited {
-  background-color: {$lightgreybackground};
-  border-color: {$lightgreyborder};
+  background-color: rgba(71, 87, 120, 0.06);
+  border-color: rgba(71, 87, 120, 0.12);
   color: {$darkgreytext};
 }
 
@@ -101,27 +101,33 @@ a.button:hover,
 button:hover {
   text-decoration: none;
   background-color: {$sky};
+  transition: 0.1s;
 }
 
 a.button.grey:hover,
 button.grey:hover {
-  background-color: #fff;
+  background-color: rgba(71, 87, 120, 0.12);
+  border-color: rgba(71, 87, 120, 0.2);
+  transition: 0.1s;
 }
 
 a.button.green:hover,
 button.green:hover {
   background-color: #0DAD48;
+  transition: 0.1s;
 }
 
 a.button.simple:hover,
 button.simple:hover {
   background-color: {$blue};
   color: #fff;
+  transition: 0.1s;
 }
 
 a.button.simple:hover .phui-icon-view,
 button.simple:hover .phui-icon-view {
   color: #fff;
+  transition: 0.1s;
 }
 
 a.button.simple .phui-icon-view {

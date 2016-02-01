@@ -57,6 +57,9 @@ final class PhabricatorProjectBoardImportController
           ->setProperties($import_column->getProperties())
           ->save();
       }
+
+      $project->setHasWorkboard(1)->save();
+
       $table->saveTransaction();
 
       return id(new AphrontRedirectResponse())->setURI($board_uri);

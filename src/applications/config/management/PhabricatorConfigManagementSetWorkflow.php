@@ -141,9 +141,10 @@ final class PhabricatorConfigManagementSetWorkflow
     if ($option->getLocked() && $use_database) {
       throw new PhutilArgumentUsageException(
         pht(
-          "Config key '%s' is locked and can only be set in local ".
-          "configuration.",
-          $key));
+          'Config key "%s" is locked and can only be set in local '.
+          'configuration. To learn more, see "%s" in the documentation.',
+          $key,
+          pht('Configuration Guide: Locked and Hidden Configuration')));
     }
 
     try {

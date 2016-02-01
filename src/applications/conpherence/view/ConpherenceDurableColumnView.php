@@ -214,7 +214,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
     $icon = $conpherence->getPolicyIconName($policy_objects);
     $icon = id(new PHUIIconView())
       ->addClass('mmr')
-      ->setIconFont($icon);
+      ->setIcon($icon);
     return $icon;
   }
 
@@ -277,9 +277,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         ->setTag('a')
         ->setHref('/conpherence/search/')
         ->setColor(PHUIButtonView::GREY)
-        ->setIcon(
-          id(new PHUIIconView())
-          ->setIconFont('fa-search'))));
+        ->setIcon('fa-search')));
   }
 
   private function buildHeader() {

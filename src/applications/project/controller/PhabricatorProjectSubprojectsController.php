@@ -23,9 +23,10 @@ final class PhabricatorProjectSubprojectsController
       $project,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $has_support = $project->supportsSubprojects();
+    $allows_subprojects = $project->supportsSubprojects();
+    $allows_milestones = $project->supportsMilestones();
 
-    if ($has_support) {
+    if ($allows_subprojects) {
       $subprojects = id(new PhabricatorProjectQuery())
         ->setViewer($viewer)
         ->withParentProjectPHIDs(array($project->getPHID()))
@@ -36,44 +37,57 @@ final class PhabricatorProjectSubprojectsController
       $subprojects = array();
     }
 
-    $can_create = $can_edit && $has_support;
-
-    if ($project->getHasSubprojects()) {
-      $button_text = pht('Create Subproject');
+    if ($allows_milestones) {
+      $milestones = id(new PhabricatorProjectQuery())
+        ->setViewer($viewer)
+        ->withParentProjectPHIDs(array($project->getPHID()))
+        ->needImages(true)
+        ->withIsMilestone(true)
+        ->setOrder('newest')
+        ->execute();
     } else {
-      $button_text = pht('Add Subprojects');
+      $milestones = array();
     }
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Subprojects'))
-      ->addActionLink(
-        id(new PHUIButtonView())
-          ->setTag('a')
-          ->setHref("/project/edit/?parent={$id}")
-          ->setIconFont('fa-plus')
-          ->setDisabled(!$can_create)
-          ->setWorkflow(!$can_create)
-          ->setText($button_text));
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header);
-
-    if (!$has_support) {
-      $no_support = pht(
-        'This project is a milestone. Milestones can not have subprojects.');
-
-      $info_view = id(new PHUIInfoView())
-        ->setErrors(array($no_support))
-        ->setSeverity(PHUIInfoView::SEVERITY_WARNING);
-
-      $box->setInfoView($info_view);
+    if ($milestones) {
+      $milestone_list = id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('Milestones'))
+        ->setObjectList(
+          id(new PhabricatorProjectListView())
+            ->setUser($viewer)
+            ->setProjects($milestones)
+            ->renderList());
+    } else {
+      $milestone_list = null;
     }
 
-    $box->setObjectList(
-      id(new PhabricatorProjectListView())
-        ->setUser($viewer)
-        ->setProjects($subprojects)
-        ->renderList());
+    if ($subprojects) {
+      $subproject_list = id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('Subprojects'))
+        ->setObjectList(
+          id(new PhabricatorProjectListView())
+            ->setUser($viewer)
+            ->setProjects($subprojects)
+            ->renderList());
+    } else {
+      $subproject_list = null;
+    }
+
+    $property_list = $this->buildPropertyList(
+      $project,
+      $milestones,
+      $subprojects);
+
+    $action_list = $this->buildActionList(
+      $project,
+      $milestones,
+      $subprojects);
+
+    $property_list->setActionList($action_list);
+
+    $header_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Subprojects and Milestones'))
+      ->addPropertyList($property_list);
 
     $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorProject::PANEL_SUBPROJECTS);
@@ -85,7 +99,151 @@ final class PhabricatorProjectSubprojectsController
       ->setNavigation($nav)
       ->setCrumbs($crumbs)
       ->setTitle(array($project->getName(), pht('Subprojects')))
-      ->appendChild($box);
+      ->appendChild(
+        array(
+          $header_box,
+          $milestone_list,
+          $subproject_list,
+        ));
   }
+
+  private function buildPropertyList(
+    PhabricatorProject $project,
+    array $milestones,
+    array $subprojects) {
+    $viewer = $this->getViewer();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer);
+
+    $view->addProperty(
+      pht('Prototype'),
+      $this->renderStatus(
+        'fa-exclamation-triangle red',
+        pht('Warning'),
+        pht('Subprojects and milestones are only partially implemented.')));
+
+    if (!$project->supportsMilestones()) {
+      $milestone_status = $this->renderStatus(
+        'fa-times grey',
+        pht('Already Milestone'),
+        pht(
+          'This project is already a milestone, and milestones may not '.
+          'have their own milestones.'));
+    } else {
+      if (!$milestones) {
+        $milestone_status = $this->renderStatus(
+          'fa-check grey',
+          pht('None Created'),
+          pht(
+            'You can create milestones for this project.'));
+      } else {
+        $milestone_status = $this->renderStatus(
+          'fa-check green',
+          pht('Has Milestones'),
+          pht('This project has milestones.'));
+      }
+    }
+
+    $view->addProperty(pht('Milestones'), $milestone_status);
+
+    if (!$project->supportsSubprojects()) {
+      $subproject_status = $this->renderStatus(
+        'fa-times grey',
+        pht('Milestone'),
+        pht(
+          'This project is a milestone, and milestones may not have '.
+          'subprojects.'));
+    } else {
+      if (!$subprojects) {
+        $subproject_status = $this->renderStatus(
+          'fa-check grey',
+          pht('None Created'),
+          pht('You can create subprojects for this project.'));
+      } else {
+        $subproject_status = $this->renderStatus(
+          'fa-check green',
+          pht('Has Subprojects'),
+          pht(
+            'This project has subprojects.'));
+      }
+    }
+
+    $view->addProperty(pht('Subprojects'), $subproject_status);
+
+    return $view;
+  }
+
+  private function buildActionList(
+    PhabricatorProject $project,
+    array $milestones,
+    array $subprojects) {
+    $viewer = $this->getViewer();
+    $id = $project->getID();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $project,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $allows_milestones = $project->supportsMilestones();
+    $allows_subprojects = $project->supportsSubprojects();
+
+    $view = id(new PhabricatorActionListView())
+      ->setUser($viewer);
+
+    if ($allows_milestones && $milestones) {
+      $milestone_text = pht('Create Next Milestone');
+    } else {
+      $milestone_text = pht('Create Milestone');
+    }
+
+    $can_milestone = ($can_edit && $allows_milestones);
+    $milestone_href = "/project/edit/?milestone={$id}";
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName($milestone_text)
+        ->setIcon('fa-plus')
+        ->setHref($milestone_href)
+        ->setDisabled(!$can_milestone)
+        ->setWorkflow(!$can_milestone));
+
+    $can_subproject = ($can_edit && $allows_subprojects);
+
+    // If we're offering to create the first subproject, we're going to warn
+    // the user about the effects before moving forward.
+    if ($can_subproject && !$subprojects) {
+      $subproject_href = "/project/warning/{$id}/";
+      $subproject_disabled = false;
+      $subproject_workflow = true;
+    } else {
+      $subproject_href = "/project/edit/?parent={$id}";
+      $subproject_disabled = !$can_subproject;
+      $subproject_workflow = !$can_subproject;
+    }
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Create Subproject'))
+        ->setIcon('fa-plus')
+        ->setHref($subproject_href)
+        ->setDisabled($subproject_disabled)
+        ->setWorkflow($subproject_workflow));
+
+    return $view;
+  }
+
+  private function renderStatus($icon, $target, $note) {
+    $item = id(new PHUIStatusItemView())
+      ->setIcon($icon)
+      ->setTarget(phutil_tag('strong', array(), $target))
+      ->setNote($note);
+
+    return id(new PHUIStatusListView())
+      ->addItem($item);
+  }
+
+
 
 }

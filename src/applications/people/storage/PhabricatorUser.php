@@ -451,8 +451,7 @@ final class PhabricatorUser
       $this->getPHID());
 
     if (!$this->profile) {
-      $profile_dao->setUserPHID($this->getPHID());
-      $this->profile = $profile_dao;
+      $this->profile = PhabricatorUserProfile::initializeNewProfile($this);
     }
 
     return $this->profile;

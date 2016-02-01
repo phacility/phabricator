@@ -95,7 +95,7 @@ final class PHUIPinboardItemView extends AphrontView {
       $icon_list = array();
       foreach ($this->iconBlock as $block) {
         $icon = id(new PHUIIconView())
-          ->setIconFont($block[0].' lightgreytext')
+          ->setIcon($block[0].' lightgreytext')
           ->addClass('phui-pinboard-icon');
 
         $count = phutil_tag('span', array(), $block[1]);

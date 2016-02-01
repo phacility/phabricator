@@ -14,7 +14,7 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
     return pht('Review Code');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-cog';
   }
 

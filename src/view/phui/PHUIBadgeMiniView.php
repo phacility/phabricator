@@ -65,7 +65,7 @@ final class PHUIBadgeMiniView extends AphrontTagView {
 
   protected function getTagContent() {
     return id(new PHUIIconView())
-      ->setIconFont($this->icon);
+      ->setIcon($this->icon);
   }
 
 }

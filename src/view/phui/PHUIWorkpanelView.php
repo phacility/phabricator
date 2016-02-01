@@ -58,8 +58,6 @@ final class PHUIWorkpanelView extends AphrontTagView {
   protected function getTagContent() {
     require_celerity_resource('phui-workpanel-view-css');
 
-    $classes = array();
-    $classes[] = 'phui-workpanel-view-inner';
     $footer = '';
     if ($this->footerAction) {
       $footer_tag = $this->footerAction;
@@ -94,16 +92,15 @@ final class PHUIWorkpanelView extends AphrontTagView {
         ),
       $this->cards);
 
-    $view = phutil_tag(
-      'div',
-      array(
-        'class' => implode(' ', $classes),
-      ),
-      array(
-        $header,
-        $body,
-        $footer,
-      ));
+    $view = id(new PHUIBoxView())
+      ->setColor(PHUIBoxView::GREY)
+      ->addClass('phui-workpanel-view-inner')
+      ->appendChild(
+        array(
+          $header,
+          $body,
+          $footer,
+        ));
 
     return $view;
   }

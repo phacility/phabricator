@@ -68,7 +68,7 @@ final class PhabricatorMotivatorProfilePanel
       case 'catfacts':
       default:
         $fact = array(
-          id(new PHUIIconView())->setIconFont('fa-paw'),
+          id(new PHUIIconView())->setIcon('fa-paw'),
           ' ',
           $fact,
         );
@@ -124,7 +124,7 @@ final class PhabricatorMotivatorProfilePanel
       pht(
         'Not all cats can retract their claws, but most of them can.'),
       pht(
-        'In the wild, cats and racooons sometimes hunt together in packs.'),
+        'In the wild, cats and racoons sometimes hunt together in packs.'),
       pht(
         'The Spanish word for cat is "cato". The biggest cat is called '.
         '"el cato".'),

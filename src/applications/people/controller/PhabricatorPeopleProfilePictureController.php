@@ -22,8 +22,9 @@ final class PhabricatorPeopleProfilePictureController
     }
 
     $this->setUser($user);
+    $name = $user->getUserName();
 
-    $profile_uri = '/p/'.$user->getUsername().'/';
+    $done_uri = '/p/'.$name.'/';
 
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
     $e_file = true;
@@ -76,7 +77,7 @@ final class PhabricatorPeopleProfilePictureController
           $xformed->attachToObject($user->getPHID());
         }
         $user->save();
-        return id(new AphrontRedirectResponse())->setURI($profile_uri);
+        return id(new AphrontRedirectResponse())->setURI($done_uri);
       }
     }
 
@@ -241,7 +242,7 @@ final class PhabricatorPeopleProfilePictureController
             pht('Supported formats: %s', implode(', ', $supported_formats))))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->addCancelButton($profile_uri)
+          ->addCancelButton($done_uri)
           ->setValue(pht('Upload Picture')));
 
     $upload_box = id(new PHUIObjectBoxView())
@@ -251,9 +252,13 @@ final class PhabricatorPeopleProfilePictureController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Edit Profile Picture'));
 
+    $nav = $this->getProfileMenu();
+    $nav->selectFilter(PhabricatorPeopleProfilePanelEngine::PANEL_MANAGE);
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($nav)
       ->appendChild(
         array(
           $form_box,

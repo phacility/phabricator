@@ -217,7 +217,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
       $date_sel);
 
     $cicon = id(new PHUIIconView())
-      ->setIconFont('fa-calendar');
+      ->setIcon('fa-calendar');
 
     $cal_icon = javelin_tag(
       'a',

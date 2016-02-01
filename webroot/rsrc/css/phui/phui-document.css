@@ -151,11 +151,11 @@ body .phui-document-view .phui-header-shell.phui-bleed-header {
 
 .phui-document-view .PhabricatorMonospaced,
 .phui-document-view .phabricator-remarkup .remarkup-code-block .remarkup-code {
-  font: 11px/16px "Menlo", "Consolas", "Monaco", monospace;
+  font: 12px/18px "Menlo", "Consolas", "Monaco", monospace;
 }
 
 .platform-windows .phui-document-view .PhabricatorMonospaced,
 .platform-windows .phui-document-view .phabricator-remarkup .remarkup-code-block
   .remarkup-code {
-  font: 12px/16px "Menlo", "Consolas", "Monaco", monospace;
+  font: 13px/18px "Menlo", "Consolas", "Monaco", monospace;
 }

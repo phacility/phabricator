@@ -11,7 +11,7 @@ final class PhabricatorFilesConfigOptions
     return pht('Configure files and file storage.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-file';
   }
 

@@ -11,7 +11,7 @@ final class PhabricatorPolicyConfigOptions
     return pht('Options relating to object visibility.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-lock';
   }
 

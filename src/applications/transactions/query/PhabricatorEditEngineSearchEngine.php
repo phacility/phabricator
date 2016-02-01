@@ -70,7 +70,7 @@ final class PhabricatorEditEngineSearchEngine
       $query_uri = "/transactions/editengine/{$engine_key}/";
 
       $application = $engine->getApplication();
-      $app_icon = $application->getFontIcon();
+      $app_icon = $application->getIcon();
 
       $item = id(new PHUIObjectItemView())
         ->setHeader($engine->getSummaryHeader())

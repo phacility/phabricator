@@ -53,7 +53,7 @@ final class PhabricatorConfigListController
           ->setHeader($group->getName())
           ->setHref('/config/group/'.$group->getKey().'/')
           ->addAttribute($group->getDescription())
-          ->setFontIcon($group->getFontIcon());
+          ->setIcon($group->getIcon());
         $list->addItem($item);
       }
     }

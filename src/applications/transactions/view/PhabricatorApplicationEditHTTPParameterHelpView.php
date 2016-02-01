@@ -210,8 +210,8 @@ EOTEXT
       $uri,
       $uri);
 
-    $yes = id(new PHUIIconView())->setIconFont('fa-check-circle green');
-    $no = id(new PHUIIconView())->setIconFont('fa-times grey');
+    $yes = id(new PHUIIconView())->setIcon('fa-check-circle green');
+    $no = id(new PHUIIconView())->setIcon('fa-times grey');
 
     $rows = array();
     foreach ($fields as $field) {

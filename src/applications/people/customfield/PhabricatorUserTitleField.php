@@ -54,8 +54,7 @@ final class PhabricatorUserTitleField
     return id(new AphrontFormTextControl())
       ->setName($this->getFieldKey())
       ->setValue($this->value)
-      ->setLabel($this->getFieldName())
-      ->setCaption(pht('Serious business title.'));
+      ->setLabel($this->getFieldName());
   }
 
 }

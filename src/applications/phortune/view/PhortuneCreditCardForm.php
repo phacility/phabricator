@@ -107,7 +107,7 @@ final class PhortuneCreditCardForm extends Phobject {
         ),
         array(
           id(new PHUIIconView())
-            ->setIconFont('fa-lock grey'),
+            ->setIcon('fa-lock grey'),
           ' ',
           $assurance,
         ));

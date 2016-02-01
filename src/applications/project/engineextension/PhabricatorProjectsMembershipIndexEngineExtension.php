@@ -61,6 +61,15 @@ final class PhabricatorProjectsMembershipIndexEngineExtension
 
     $conn_w = $project->establishConnection('w');
 
+    $any_milestone = queryfx_one(
+      $conn_w,
+      'SELECT id FROM %T
+        WHERE parentProjectPHID = %s AND milestoneNumber IS NOT NULL
+        LIMIT 1',
+      $project->getTableName(),
+      $project_phid);
+    $has_milestones = (bool)$any_milestone;
+
     $project->openTransaction();
 
       // Delete any existing materialized member edges.
@@ -90,6 +99,14 @@ final class PhabricatorProjectsMembershipIndexEngineExtension
         'UPDATE %T SET hasSubprojects = %d WHERE id = %d',
         $project->getTableName(),
         (int)$has_subprojects,
+        $project->getID());
+
+      // Update the hasMilestones flag.
+      queryfx(
+        $conn_w,
+        'UPDATE %T SET hasMilestones = %d WHERE id = %d',
+        $project->getTableName(),
+        (int)$has_milestones,
         $project->getID());
 
     $project->saveTransaction();

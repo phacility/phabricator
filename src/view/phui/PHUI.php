@@ -42,18 +42,4 @@ final class PHUI extends Phobject {
   const PADDING_MEDIUM_TOP = 'pmt';
   const PADDING_LARGE_TOP = 'plt';
 
-  const TEXT_BOLD = 'phui-text-bold';
-  const TEXT_UPPERCASE = 'phui-text-uppercase';
-  const TEXT_STRIKE = 'phui-text-strike';
-
-  const TEXT_RED = 'phui-text-red';
-  const TEXT_ORANGE = 'phui-text-orange';
-  const TEXT_YELLOW = 'phui-text-yellow';
-  const TEXT_GREEN = 'phui-text-green';
-  const TEXT_BLUE = 'phui-text-blue';
-  const TEXT_INDIGO = 'phui-text-indigo';
-  const TEXT_VIOLET = 'phui-text-violet';
-  const TEXT_WHITE = 'phui-text-white';
-  const TEXT_BLACK = 'phui-text-black';
-
 }

@@ -23,7 +23,7 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
       $remove_html = '';
       if ($user_phid == $user->getPHID()) {
         $icon = id(new PHUIIconView())
-          ->setIconFont('fa-times lightbluetext');
+          ->setIcon('fa-times lightbluetext');
         $remove_html = javelin_tag(
           'a',
           array(

@@ -134,9 +134,7 @@ final class AlmanacServiceViewController
           ->setWorkflow(!$can_edit)
           ->setDisabled(!$can_edit)
           ->setText(pht('Add Binding'))
-          ->setIcon(
-            id(new PHUIIconView())
-              ->setIconFont('fa-plus')));
+          ->setIcon('fa-plus'));
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)

@@ -129,7 +129,19 @@ final class PhabricatorStartup {
 
     self::beginOutputCapture();
 
-    self::$rawInput = (string)file_get_contents('php://input');
+    if (isset($_SERVER['HTTP_CONTENT_ENCODING'])) {
+      $encoding = trim($_SERVER['HTTP_CONTENT_ENCODING']);
+    } else {
+      $encoding = null;
+    }
+
+    if ($encoding === 'gzip') {
+      $source_stream = 'compress.zlib://php://input';
+    } else {
+      $source_stream = 'php://input';
+    }
+
+    self::$rawInput = (string)file_get_contents($source_stream);
   }
 
 

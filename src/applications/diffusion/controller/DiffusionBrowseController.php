@@ -832,13 +832,11 @@ final class DiffusionBrowseController extends DiffusionController {
     $editor_link = $user->loadEditorLink($path, $line, $repository);
     $template = $user->loadEditorLink($path, '%l', $repository);
 
-    $icon_edit = id(new PHUIIconView())
-      ->setIconFont('fa-pencil');
     $button = id(new PHUIButtonView())
       ->setTag('a')
       ->setText(pht('Open in Editor'))
       ->setHref($editor_link)
-      ->setIcon($icon_edit)
+      ->setIcon('fa-pencil')
       ->setID('editor_link')
       ->setMetadata(array('link_template' => $template))
       ->setDisabled(!$editor_link);
@@ -860,13 +858,11 @@ final class DiffusionBrowseController extends DiffusionController {
       $icon = 'fa-file-text';
     }
 
-    $iconview = id(new PHUIIconView())
-      ->setIconFont($icon);
     $button = id(new PHUIButtonView())
       ->setTag('a')
       ->setText($text)
       ->setHref($href)
-      ->setIcon($iconview);
+      ->setIcon($icon);
 
     return $button;
   }
@@ -1084,10 +1080,10 @@ final class DiffusionBrowseController extends DiffusionController {
       $revision_link = null;
       $commit_link = null;
       $before_link = null;
-      $style = null;
-      if ($identifier && !$line['duplicate']) {
-        $style = 'background: '.$line['color'].';';
 
+      $style = 'background: '.$line['color'].';';
+
+      if ($identifier && !$line['duplicate']) {
         if (isset($commit_links[$identifier])) {
           $commit_link = $commit_links[$identifier];
         }
@@ -1826,7 +1822,7 @@ final class DiffusionBrowseController extends DiffusionController {
       $names = array();
       foreach ($blame_commits as $identifier => $commit) {
         $author = $commit->renderAuthorShortName($handles);
-        $name = $commit->getShortName();
+        $name = $commit->getLocalName();
 
         $authors[$identifier] = $author;
         $names[$identifier] = $name;

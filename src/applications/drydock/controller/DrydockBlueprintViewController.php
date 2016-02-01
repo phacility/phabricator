@@ -168,7 +168,7 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
         id(new PHUIButtonView())
           ->setTag('a')
           ->setHref($resources_uri)
-          ->setIconFont('fa-search')
+          ->setIcon('fa-search')
           ->setText(pht('View All')));
 
     return id(new PHUIObjectBoxView())
@@ -233,7 +233,7 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
         id(new PHUIButtonView())
           ->setTag('a')
           ->setHref($authorizations_uri)
-          ->setIconFont('fa-search')
+          ->setIcon('fa-search')
           ->setText(pht('View All')));
 
     return id(new PHUIObjectBoxView())

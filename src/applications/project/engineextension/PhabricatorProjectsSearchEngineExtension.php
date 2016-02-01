@@ -41,10 +41,10 @@ final class PhabricatorProjectsSearchEngineExtension
     $fields[] = id(new PhabricatorProjectSearchField())
       ->setKey('projectPHIDs')
       ->setConduitKey('projects')
-      ->setAliases(array('project', 'projects'))
-      ->setLabel(pht('Projects'))
+      ->setAliases(array('project', 'projects', 'tag', 'tags'))
+      ->setLabel(pht('Tags'))
       ->setDescription(
-        pht('Search for objects associated with given projects.'));
+        pht('Search for objects tagged with given projects.'));
 
     return $fields;
   }

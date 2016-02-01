@@ -14,7 +14,7 @@ final class PhabricatorFlagsApplication extends PhabricatorApplication {
     return '/flag/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-flag';
   }
 

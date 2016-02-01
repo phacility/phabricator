@@ -117,7 +117,7 @@ final class PhabricatorDashboardQueryPanelType
     $key = $panel->getProperty('key');
     $href = $search_engine->getQueryResultsPageURI($key);
     $icon = id(new PHUIIconView())
-        ->setIconFont('fa-search')
+        ->setIcon('fa-search')
         ->setHref($href);
     $header->addActionIcon($icon);
 

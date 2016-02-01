@@ -374,7 +374,7 @@ final class PhabricatorConfigWelcomeController
     $viewer = $request->getUser();
 
     $icon = id(new PHUIIconView())
-      ->setIconFont($icon.' fa-2x');
+      ->setIcon($icon.' fa-2x');
 
     $content = PhabricatorMarkupEngine::renderOneObject(
       id(new PhabricatorMarkupOneOff())->setContent($content),

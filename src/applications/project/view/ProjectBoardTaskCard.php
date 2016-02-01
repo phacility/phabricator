@@ -3,6 +3,7 @@
 final class ProjectBoardTaskCard extends Phobject {
 
   private $viewer;
+  private $project;
   private $task;
   private $owner;
   private $canEdit;
@@ -13,6 +14,14 @@ final class ProjectBoardTaskCard extends Phobject {
   }
   public function getViewer() {
     return $this->viewer;
+  }
+
+  public function setProject(PhabricatorProject $project) {
+    $this->project = $project;
+    return $this;
+  }
+  public function getProject() {
+    return $this->project;
   }
 
   public function setTask(ManiphestTask $task) {
@@ -44,13 +53,14 @@ final class ProjectBoardTaskCard extends Phobject {
     $task = $this->getTask();
     $owner = $this->getOwner();
     $can_edit = $this->getCanEdit();
+    $viewer = $this->getViewer();
 
     $color_map = ManiphestTaskPriority::getColorMap();
     $bar_color = idx($color_map, $task->getPriority(), 'grey');
 
     $card = id(new PHUIObjectItemView())
       ->setObject($task)
-      ->setUser($this->getViewer())
+      ->setUser($viewer)
       ->setObjectName('T'.$task->getID())
       ->setHeader($task->getTitle())
       ->setGrippable($can_edit)
@@ -71,6 +81,17 @@ final class ProjectBoardTaskCard extends Phobject {
 
     if ($owner) {
       $card->addAttribute($owner->renderLink());
+    }
+
+    $project_phids = array_fuse($task->getProjectPHIDs());
+    unset($project_phids[$this->project->getPHID()]);
+
+    if ($project_phids) {
+      $handle_list = $viewer->loadHandles($project_phids);
+      $tag_list = id(new PHUIHandleTagListView())
+        ->setSlim(true)
+        ->setHandles($handle_list);
+      $card->addAttribute($tag_list);
     }
 
     return $card;

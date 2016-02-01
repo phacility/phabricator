@@ -71,7 +71,7 @@ final class DrydockLogListView extends AphrontView {
         $blueprint,
         $resource,
         $lease,
-        id(new PHUIIconView())->setIconFont($icon),
+        id(new PHUIIconView())->setIcon($icon),
         $type,
         $data,
         phabricator_datetime($log->getEpoch(), $viewer),

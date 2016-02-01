@@ -5,6 +5,7 @@ abstract class PhabricatorProjectUserListView extends AphrontView {
   private $project;
   private $userPHIDs;
   private $limit;
+  private $background;
 
   public function setProject(PhabricatorProject $project) {
     $this->project = $project;
@@ -31,6 +32,11 @@ abstract class PhabricatorProjectUserListView extends AphrontView {
 
   public function getLimit() {
     return $this->limit;
+  }
+
+  public function setBackground($color) {
+    $this->background = $color;
+    return $this;
   }
 
   abstract protected function canEditList();
@@ -79,6 +85,13 @@ abstract class PhabricatorProjectUserListView extends AphrontView {
         ->setHref($handle->getURI())
         ->setImageURI($handle->getImageURI());
 
+      $icon = id(new PHUIIconView())
+        ->setIcon($handle->getIcon().' lightbluetext');
+
+      $subtitle = $handle->getSubtitle();
+
+      $item->addAttribute(array($icon, ' ', $subtitle));
+
       if ($can_edit && !$limit) {
         $remove_uri = $this->getRemoveURI($user_phid);
 
@@ -113,14 +126,20 @@ abstract class PhabricatorProjectUserListView extends AphrontView {
           ->setTag('a')
           ->setIcon(
             id(new PHUIIconView())
-              ->setIconFont('fa-list-ul'))
+              ->setIcon('fa-list-ul'))
           ->setText(pht('View All'))
           ->setHref("/project/members/{$id}/"));
     }
 
-    return id(new PHUIObjectBoxView())
+    $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->setObjectList($list);
+
+    if ($this->background) {
+      $box->setBackground($this->background);
+    }
+
+    return $box;
   }
 
 }

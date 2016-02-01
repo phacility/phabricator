@@ -70,7 +70,7 @@ final class PHUIStatusItemView extends AphrontTagView {
     $icon = null;
     if ($this->icon) {
       $icon = id(new PHUIIconView())
-        ->setIconFont($this->icon.' '.$this->iconColor);
+        ->setIcon($this->icon.' '.$this->iconColor);
 
       if ($this->iconLabel) {
         Javelin::initBehavior('phabricator-tooltips');

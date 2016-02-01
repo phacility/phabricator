@@ -79,7 +79,7 @@ final class AphrontTokenizerTemplateView extends AphrontView {
       $content);
 
     $icon = id(new PHUIIconView())
-      ->setIconFont('fa-search');
+      ->setIcon('fa-search');
 
     $browse = id(new PHUIButtonView())
       ->setTag('a')

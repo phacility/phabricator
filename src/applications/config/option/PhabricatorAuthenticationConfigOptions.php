@@ -11,7 +11,7 @@ final class PhabricatorAuthenticationConfigOptions
     return pht('Options relating to authentication.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-key';
   }
 

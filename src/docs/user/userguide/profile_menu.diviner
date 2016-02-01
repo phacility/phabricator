@@ -40,9 +40,10 @@ You can only edit an object's menu if you can edit the object. For example, you
 must have permission to edit a project in order to reconfigure the menu for the
 project.
 
-To edit a menu, click {nav icon="pencil", name="Edit Menu"}. This brings you to
-the menu configuration interface which allows you to add and remove items,
-reorder the menu, edit existing items, and choose a default item.
+To edit a menu, click {nav icon="cogs", name="Manage"} in the menu, then click
+{nav icon="th-list", name="Edit Menu"}. This brings you to the menu
+configuration interface which allows you to add and remove items, reorder the
+menu, edit existing items, and choose a default item.
 
 Menus are comprised of a list of items. Some of the items are builtin
 (for example, projects have builtin "Profile", "Workboard" and "Members"
@@ -94,6 +95,11 @@ Builtin items can not be deleted and have a
 {nav icon="times", name="Disable"} action instead, which will hide them but
 not delete them. You an re-enable a disabled item with the
 {nav icon="plus', name="Enable"} action.
+
+A few items can not be hidden or deleted. For example, the
+{nav icon="cogs", name="Manage"} item must always be available in the menu
+because if you hid it by accident there would no longer be a way to access
+the configuration interface and fix the mistake.
 
 Removing or hiding an item does not disable the underlying functionality.
 For example, if you hide the "Members" item for a project, that just removes

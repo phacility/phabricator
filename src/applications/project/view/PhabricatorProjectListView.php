@@ -29,7 +29,7 @@ final class PhabricatorProjectListView extends AphrontView {
       $color = $project->getColor();
 
       $icon_icon = id(new PHUIIconView())
-        ->setIconFont("{$icon} {$color}");
+        ->setIcon("{$icon} {$color}");
 
       $icon_name = $project->getDisplayIconName();
 

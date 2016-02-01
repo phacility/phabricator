@@ -137,7 +137,7 @@ final class PhabricatorProjectSearchEngine
 
       $options[$icon->getKey()] = array(
         id(new PHUIIconView())
-          ->setIconFont($icon->getIcon()),
+          ->setIcon($icon->getIcon()),
         ' ',
         $icon->getLabel(),
       );
@@ -185,7 +185,7 @@ final class PhabricatorProjectSearchEngine
       ->setHref('/project/edit/')
       ->setColor(PHUIButtonView::GREEN);
 
-    $icon = $this->getApplication()->getFontIcon();
+    $icon = $this->getApplication()->getIcon();
     $app_name =  $this->getApplication()->getName();
     $view = id(new PHUIBigInfoView())
       ->setIcon($icon)

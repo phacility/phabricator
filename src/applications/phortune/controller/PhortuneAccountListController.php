@@ -48,9 +48,7 @@ final class PhortuneAccountListController extends PhortuneController {
         id(new PHUIButtonView())
           ->setTag('a')
           ->setHref($this->getApplicationURI('account/edit/'))
-          ->setIcon(
-            id(new PHUIIconView())
-              ->setIconFont('fa-plus'))
+          ->setIcon('fa-plus')
           ->setText(pht('Create Account')));
 
     $payment_box = id(new PHUIObjectBoxView())
@@ -80,9 +78,7 @@ final class PhortuneAccountListController extends PhortuneController {
         id(new PHUIButtonView())
           ->setTag('a')
           ->setHref($this->getApplicationURI('merchant/'))
-          ->setIcon(
-            id(new PHUIIconView())
-              ->setIconFont('fa-list'))
+          ->setIcon('fa-list')
           ->setText(pht('View All Merchants')));
 
     $merchant_box = id(new PHUIObjectBoxView())

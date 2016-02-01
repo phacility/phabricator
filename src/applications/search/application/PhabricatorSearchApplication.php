@@ -18,7 +18,7 @@ final class PhabricatorSearchApplication extends PhabricatorApplication {
     return pht('Find stuff in big piles.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-search';
   }
 

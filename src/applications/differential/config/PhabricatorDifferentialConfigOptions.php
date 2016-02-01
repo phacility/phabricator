@@ -11,7 +11,7 @@ final class PhabricatorDifferentialConfigOptions
     return pht('Configure Differential code review.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-cog';
   }
 

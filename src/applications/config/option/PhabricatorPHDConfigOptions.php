@@ -11,7 +11,7 @@ final class PhabricatorPHDConfigOptions
     return pht('Options relating to PHD (daemons).');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-pied-piper-alt';
   }
 

@@ -10,7 +10,7 @@ final class PhabricatorTokensApplication extends PhabricatorApplication {
     return '/token/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-thumbs-up';
   }
 

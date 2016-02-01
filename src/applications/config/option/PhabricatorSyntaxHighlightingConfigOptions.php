@@ -11,7 +11,7 @@ final class PhabricatorSyntaxHighlightingConfigOptions
     return pht('Options relating to syntax highlighting source code.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-code';
   }
 
@@ -102,9 +102,8 @@ final class PhabricatorSyntaxHighlightingConfigOptions
           'python' => 'Python',
           'rainbow' => 'Rainbow',
           'remarkup' => 'Remarkup',
-          'rest' => 'reStructuredText',
-          'robotframework' => 'RobotFramework',
           'rst' => 'reStructuredText',
+          'robotframework' => 'RobotFramework',
           'ruby' => 'Ruby',
           'sql' => 'SQL',
           'tex' => 'LaTeX',

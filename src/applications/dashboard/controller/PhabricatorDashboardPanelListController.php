@@ -55,7 +55,7 @@ final class PhabricatorDashboardPanelListController
       ->setHref('/dashboard/panel/create/')
       ->setColor(PHUIButtonView::GREEN);
 
-    $icon = $this->getApplication()->getFontIcon();
+    $icon = $this->getApplication()->getIcon();
     $app_name =  $this->getApplication()->getName();
     $view = id(new PHUIBigInfoView())
       ->setIcon($icon)

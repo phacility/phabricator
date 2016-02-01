@@ -26,6 +26,7 @@ final class PassphraseCredentialTransaction
 
   public function shouldHide() {
     $old = $this->getOldValue();
+    $new = $this->getNewValue();
     switch ($this->getTransactionType()) {
       case self::TYPE_DESCRIPTION:
         return ($old === null);
@@ -35,6 +36,12 @@ final class PassphraseCredentialTransaction
         return !strlen($old);
       case self::TYPE_LOOKEDATSECRET:
         return false;
+      case self::TYPE_DESTROY:
+        // Don't show "undestroy" transactions because they're a bit confusing
+        // and redundant with restoring a secret.
+        if (!$new) {
+          return true;
+        }
     }
     return parent::shouldHide();
   }
@@ -77,12 +84,18 @@ final class PassphraseCredentialTransaction
         }
         break;
       case self::TYPE_SECRET_ID:
-        return pht(
-          '%s updated the secret for this credential.',
-          $this->renderHandleLink($author_phid));
+        if ($old === null) {
+          return pht(
+            '%s attached a new secret to this credential.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s updated the secret for this credential.',
+            $this->renderHandleLink($author_phid));
+        }
       case self::TYPE_DESTROY:
         return pht(
-          '%s destroyed this credential.',
+          '%s destroyed the secret for this credential.',
           $this->renderHandleLink($author_phid));
       case self::TYPE_LOOKEDATSECRET:
         return pht(

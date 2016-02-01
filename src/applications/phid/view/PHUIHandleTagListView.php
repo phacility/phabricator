@@ -9,7 +9,7 @@ final class PHUIHandleTagListView extends AphrontTagView {
   private $slim;
   private $showHovercards;
 
-  public function setHandles(array $handles) {
+  public function setHandles($handles) {
     $this->handles = $handles;
     return $this;
   }

@@ -336,6 +336,11 @@ final class PhabricatorProjectIconSet
     return $list;
   }
 
+  public static function getColorName($color_key) {
+    $map = self::getColorMap();
+    return idx($map, $color_key);
+  }
+
   public static function getDefaultColorMap() {
     return array(
       array(

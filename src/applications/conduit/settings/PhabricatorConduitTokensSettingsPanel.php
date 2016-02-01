@@ -87,23 +87,19 @@ final class PhabricatorConduitTokensSettingsPanel
         'action',
       ));
 
-    $generate_icon = id(new PHUIIconView())
-      ->setIconFont('fa-plus');
     $generate_button = id(new PHUIButtonView())
       ->setText(pht('Generate API Token'))
       ->setHref('/conduit/token/edit/?objectPHID='.$user->getPHID())
       ->setTag('a')
       ->setWorkflow(true)
-      ->setIcon($generate_icon);
+      ->setIcon('fa-plus');
 
-    $terminate_icon = id(new PHUIIconView())
-      ->setIconFont('fa-exclamation-triangle');
     $terminate_button = id(new PHUIButtonView())
       ->setText(pht('Terminate All Tokens'))
       ->setHref('/conduit/token/terminate/?objectPHID='.$user->getPHID())
       ->setTag('a')
       ->setWorkflow(true)
-      ->setIcon($terminate_icon);
+      ->setIcon('fa-exclamation-triangle');
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Active API Tokens'))

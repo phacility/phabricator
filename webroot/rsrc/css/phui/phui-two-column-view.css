@@ -28,7 +28,7 @@
 }
 
 .device-desktop .phui-two-column-view
-  .phui-side-column .phui-object-box:first-child  {
+  .phui-side-column .phui-object-box {
     margin: 0 16px 16px 0;
 }
 

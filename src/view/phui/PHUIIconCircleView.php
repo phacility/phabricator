@@ -15,7 +15,7 @@ final class PHUIIconCircleView extends AphrontTagView {
     return $this;
   }
 
-  public function setIconFont($icon) {
+  public function setIcon($icon) {
     $this->icon = $icon;
     return $this;
   }
@@ -60,7 +60,7 @@ final class PHUIIconCircleView extends AphrontTagView {
 
   protected function getTagContent() {
     return id(new PHUIIconView())
-      ->setIconFont($this->icon)
+      ->setIcon($this->icon)
       ->addClass($this->color);
   }
 

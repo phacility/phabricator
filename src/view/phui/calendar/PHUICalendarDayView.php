@@ -340,7 +340,7 @@ final class PHUICalendarDayView extends AphrontView {
       $button_bar = new PHUIButtonBarView();
 
       $left_icon = id(new PHUIIconView())
-          ->setIconFont('fa-chevron-left bluegrey');
+          ->setIcon('fa-chevron-left bluegrey');
       $left = id(new PHUIButtonView())
         ->setTag('a')
         ->setColor(PHUIButtonView::GREY)
@@ -349,7 +349,7 @@ final class PHUICalendarDayView extends AphrontView {
         ->setIcon($left_icon);
 
       $right_icon = id(new PHUIIconView())
-          ->setIconFont('fa-chevron-right bluegrey');
+          ->setIcon('fa-chevron-right bluegrey');
       $right = id(new PHUIButtonView())
         ->setTag('a')
         ->setColor(PHUIButtonView::GREY)

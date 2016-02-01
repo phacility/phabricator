@@ -11,7 +11,7 @@ final class PhabricatorSecurityConfigOptions
     return pht('Security options.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-lock';
   }
 

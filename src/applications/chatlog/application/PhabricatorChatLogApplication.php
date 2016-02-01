@@ -14,7 +14,7 @@ final class PhabricatorChatLogApplication extends PhabricatorApplication {
     return pht('(Deprecated)');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-coffee';
   }
 

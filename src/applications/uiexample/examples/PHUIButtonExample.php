@@ -112,12 +112,10 @@ final class PHUIButtonExample extends PhabricatorUIExample {
       'Implode Earth' => 'fa-exclamation-triangle red',
     );
     foreach ($icons as $text => $icon) {
-      $image = id(new PHUIIconView())
-        ->setIconFont($icon);
       $column[] = id(new PHUIButtonView())
         ->setTag('a')
         ->setColor(PHUIButtonView::GREY)
-        ->setIcon($image)
+        ->setIcon($icon)
         ->setText($text)
         ->addClass(PHUI::MARGIN_SMALL_RIGHT);
     }
@@ -140,12 +138,10 @@ final class PHUIButtonExample extends PhabricatorUIExample {
     $column = array();
     foreach ($colors as $color) {
       foreach ($icons as $text => $icon) {
-        $image = id(new PHUIIconView())
-            ->setIconFont($icon);
         $column[] = id(new PHUIButtonView())
           ->setTag('a')
           ->setColor($color)
-          ->setIcon($image)
+          ->setIcon($icon)
           ->setText($text)
           ->addClass(PHUI::MARGIN_SMALL_RIGHT);
       }

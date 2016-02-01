@@ -63,7 +63,7 @@ final class PhabricatorNotificationStatusController
       ));
 
     $test_icon = id(new PHUIIconView())
-      ->setIconFont('fa-exclamation-triangle');
+      ->setIcon('fa-exclamation-triangle');
 
     $test_button = id(new PHUIButtonView())
         ->setTag('a')

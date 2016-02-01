@@ -18,7 +18,7 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
     return "\xE2\x99\x9F";
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-users';
   }
 
@@ -62,6 +62,8 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
           'PhabricatorPeopleProfileEditController',
         'picture/(?P<id>[1-9]\d*)/' =>
           'PhabricatorPeopleProfilePictureController',
+        'manage/(?P<id>[1-9]\d*)/' =>
+          'PhabricatorPeopleProfileManageController',
         ),
       '/p/(?P<username>[\w._-]+)/' => array(
         '' => 'PhabricatorPeopleProfileViewController',

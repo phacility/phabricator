@@ -11,7 +11,7 @@ final class PhabricatorProjectConfigOptions
     return pht('Configure Projects.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-briefcase';
   }
 

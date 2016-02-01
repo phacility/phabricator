@@ -49,6 +49,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   const PANEL_PROFILE = 'project.profile';
   const PANEL_WORKBOARD = 'project.workboard';
   const PANEL_MEMBERS = 'project.members';
+  const PANEL_MANAGE = 'project.manage';
   const PANEL_MILESTONES = 'project.milestones';
   const PANEL_SUBPROJECTS = 'project.subprojects';
 
@@ -627,10 +628,17 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         ->setKey('icon')
         ->setType('map<string, wild>')
         ->setDescription(pht('Information about the project icon.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('color')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Information about the project color.')),
     );
   }
 
   public function getFieldValuesForConduit() {
+    $color_key = $this->getColor();
+    $color_name = PhabricatorProjectIconSet::getColorName($color_key);
+
     return array(
       'name' => $this->getName(),
       'slug' => $this->getPrimarySlug(),
@@ -639,11 +647,20 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         'name' => $this->getDisplayIconName(),
         'icon' => $this->getDisplayIconIcon(),
       ),
+      'color' => array(
+        'key' => $color_key,
+        'name' => $color_name,
+      ),
     );
   }
 
   public function getConduitSearchAttachments() {
-    return array();
+    return array(
+      id(new PhabricatorProjectsMembersSearchEngineAttachment())
+        ->setAttachmentKey('members'),
+      id(new PhabricatorProjectsWatchersSearchEngineAttachment())
+        ->setAttachmentKey('watchers'),
+    );
   }
 
 }

@@ -36,7 +36,7 @@ abstract class PhabricatorConfigDatabaseController
     }
 
     return id(new PHUIIconView())
-      ->setIconFont($icon);
+      ->setIcon($icon);
   }
 
   protected function renderAttr($attr, $issue) {
@@ -71,9 +71,7 @@ abstract class PhabricatorConfigDatabaseController
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')
-          ->setIcon(
-            id(new PHUIIconView())
-              ->setIconFont('fa-book'))
+          ->setIcon('fa-book')
           ->setHref($doc_link)
           ->setText(pht('Learn More')));
   }

@@ -11,7 +11,7 @@ final class PhabricatorClusterConfigOptions
     return pht('Configure Phabricator to run on a cluster of hosts.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-sitemap';
   }
 

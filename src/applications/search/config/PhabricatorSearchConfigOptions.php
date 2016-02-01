@@ -11,7 +11,7 @@ final class PhabricatorSearchConfigOptions
     return pht('Options relating to Search.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-search';
   }
 

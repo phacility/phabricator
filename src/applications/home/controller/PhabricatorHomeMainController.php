@@ -190,7 +190,7 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
     if (!$tasks) {
       return $this->renderMiniPanel(
         pht('No "Needs Triage" Tasks'),
-        pht('No tasks in projects you are a member of need triage.'));
+        pht('No tasks tagged with projects you are a member of need triage.'));
     }
 
     $title = pht('Needs Triage');
@@ -318,7 +318,7 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
       ),
       $title);
     $icon = id(new PHUIIconView())
-      ->setIconFont('fa-search')
+      ->setIcon('fa-search')
       ->setHref($href);
     $header = id(new PHUIHeaderView())
       ->setHeader($title)

@@ -105,6 +105,10 @@ final class PhabricatorProfilePanelConfiguration
     return $this->getPanel()->canMakeDefault($this);
   }
 
+  public function canHidePanel() {
+    return $this->getPanel()->canHidePanel($this);
+  }
+
   public function getSortKey() {
     $order = $this->getPanelOrder();
     if ($order === null) {
@@ -120,6 +124,9 @@ final class PhabricatorProfilePanelConfiguration
   }
 
   public function isDisabled() {
+    if (!$this->canHidePanel()) {
+      return false;
+    }
     return ($this->getVisibility() === self::VISIBILITY_DISABLED);
   }
 

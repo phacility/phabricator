@@ -60,7 +60,7 @@ final class PHUICrumbsView extends AphrontView {
           }
 
           $icon = id(new PHUIIconView())
-            ->setIconFont($icon_name);
+            ->setIcon($icon_name);
 
         }
         $name = phutil_tag(

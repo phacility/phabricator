@@ -132,9 +132,7 @@ final class AlmanacDeviceViewController
           ->setWorkflow(!$can_edit)
           ->setDisabled(!$can_edit)
           ->setText(pht('Add Interface'))
-          ->setIcon(
-            id(new PHUIIconView())
-              ->setIconFont('fa-plus')));
+          ->setIcon('fa-plus'));
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -185,7 +183,7 @@ final class AlmanacDeviceViewController
           ->setText(pht('Generate Keypair'))
           ->setIcon(
             id(new PHUIIconView())
-              ->setIconFont('fa-lock')))
+              ->setIcon('fa-lock')))
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')
@@ -195,7 +193,7 @@ final class AlmanacDeviceViewController
           ->setText(pht('Upload Public Key'))
           ->setIcon(
             id(new PHUIIconView())
-              ->setIconFont('fa-upload')));
+              ->setIcon('fa-upload')));
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -221,7 +219,7 @@ final class AlmanacDeviceViewController
     $handles = $viewer->loadHandles(mpull($services, 'getPHID'));
 
     $icon_lock = id(new PHUIIconView())
-      ->setIconFont('fa-lock');
+      ->setIcon('fa-lock');
 
     $rows = array();
     foreach ($services as $service) {

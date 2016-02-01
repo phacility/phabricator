@@ -16,14 +16,14 @@ final class NuanceConsoleController extends NuanceController {
       id(new PHUIObjectItemView())
         ->setHeader(pht('Queues'))
         ->setHref($this->getApplicationURI('queue/'))
-        ->setFontIcon('fa-align-left')
+        ->setIcon('fa-align-left')
         ->addAttribute(pht('Manage Nuance queues.')));
 
     $menu->addItem(
       id(new PHUIObjectItemView())
         ->setHeader(pht('Sources'))
         ->setHref($this->getApplicationURI('source/'))
-        ->setFontIcon('fa-filter')
+        ->setIcon('fa-filter')
         ->addAttribute(pht('Manage Nuance sources.')));
 
     $crumbs = $this->buildApplicationCrumbs();

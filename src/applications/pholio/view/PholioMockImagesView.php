@@ -126,12 +126,12 @@ final class PholioMockImagesView extends AphrontView {
 
     $full_icon = array(
       javelin_tag('span', array('aural' => true), pht('View Raw File')),
-      id(new PHUIIconView())->setIconFont('fa-file-image-o'),
+      id(new PHUIIconView())->setIcon('fa-file-image-o'),
     );
 
     $download_icon = array(
       javelin_tag('span', array('aural' => true), pht('Download File')),
-      id(new PHUIIconView())->setIconFont('fa-download'),
+      id(new PHUIIconView())->setIcon('fa-download'),
     );
 
     $login_uri = id(new PhutilURI('/login/'))

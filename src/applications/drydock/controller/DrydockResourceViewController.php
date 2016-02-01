@@ -168,7 +168,7 @@ final class DrydockResourceViewController extends DrydockResourceController {
         id(new PHUIButtonView())
           ->setTag('a')
           ->setHref($leases_uri)
-          ->setIconFont('fa-search')
+          ->setIcon('fa-search')
           ->setText(pht('View All')));
 
     $lease_list = id(new DrydockLeaseListView())

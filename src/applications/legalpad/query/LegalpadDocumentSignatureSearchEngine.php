@@ -183,7 +183,7 @@ final class LegalpadDocumentSignatureSearchEngine
       pht('Exemption'));
 
     id(new PHUIIconView())
-      ->setIconFont('fa-envelope', 'red')
+      ->setIcon('fa-envelope', 'red')
       ->addSigil('has-tooltip')
       ->setMetadata(array('tip' => pht('Unverified Email')));
 
@@ -276,7 +276,7 @@ final class LegalpadDocumentSignatureSearchEngine
           ->setTag('a')
           ->setHref($this->getApplicationURI('addsignature/'.$document_id.'/'))
           ->setWorkflow(true)
-          ->setIcon(id(new PHUIIconView())->setIconFont('fa-pencil'));
+          ->setIcon('fa-pencil');
     }
 
     if (!$this->document) {
@@ -300,7 +300,7 @@ final class LegalpadDocumentSignatureSearchEngine
 
     return array(
       id(new PHUIIconView())
-        ->setIconFont($icon, $color)
+        ->setIcon($icon, $color)
         ->addSigil('has-tooltip')
         ->setMetadata(array('tip' => $title)),
       javelin_tag(

@@ -11,7 +11,7 @@ final class PhabricatorMacroConfigOptions
     return pht('Configure Macro.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-file-image-o';
   }
 

@@ -25,7 +25,7 @@ abstract class PhabricatorPHIDType extends Phobject {
     $application_class = $this->getPHIDTypeApplicationClass();
     if ($application_class) {
       $application = newv($application_class, array());
-      return $application->getFontIcon();
+      return $application->getIcon();
     }
 
     return null;

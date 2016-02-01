@@ -20,7 +20,7 @@ final class PhabricatorProjectWatchController
 
     $via = $request->getStr('via');
     if ($via == 'profile') {
-      $done_uri = $project->getURI();
+      $done_uri = "/project/profile/{$id}/";
     } else {
       $done_uri = "/project/members/{$id}/";
     }

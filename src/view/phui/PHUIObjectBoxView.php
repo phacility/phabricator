@@ -4,6 +4,7 @@ final class PHUIObjectBoxView extends AphrontView {
 
   private $headerText;
   private $color;
+  private $background;
   private $formErrors = null;
   private $formSaved = false;
   private $infoView;
@@ -103,6 +104,11 @@ final class PHUIObjectBoxView extends AphrontView {
 
   public function setColor($color) {
     $this->color = $color;
+    return $this;
+  }
+
+  public function setBackground($color) {
+    $this->background = $color;
     return $this;
   }
 
@@ -258,7 +264,7 @@ final class PHUIObjectBoxView extends AphrontView {
     if ($this->actionListID) {
       $icon_id = celerity_generate_unique_node_id();
       $icon = id(new PHUIIconView())
-        ->setIconFont('fa-bars');
+        ->setIcon('fa-bars');
       $meta = array(
         'map' => array(
           $this->actionListID => 'phabricator-action-list-toggle',
@@ -385,6 +391,10 @@ final class PHUIObjectBoxView extends AphrontView {
 
     if ($this->color) {
       $content->addClass('phui-object-box-'.$this->color);
+    }
+
+    if ($this->background) {
+      $content->setColor($this->background);
     }
 
     if ($this->collapsed) {

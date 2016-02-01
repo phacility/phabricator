@@ -73,7 +73,7 @@ final class PholioTransactionView
 
     if ($inlines) {
       $icon = id(new PHUIIconView())
-        ->setIconFont('fa-comment bluegrey msr');
+        ->setIcon('fa-comment bluegrey msr');
       $header = phutil_tag(
         'div',
         array(

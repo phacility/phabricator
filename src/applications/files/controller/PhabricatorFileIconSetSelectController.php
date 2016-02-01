@@ -35,7 +35,7 @@ final class PhabricatorFileIconSetSelectController
       $label = $icon->getLabel();
 
       $view = id(new PHUIIconView())
-        ->setIconFont($icon->getIcon());
+        ->setIcon($icon->getIcon());
 
       $classes = array();
       $classes[] = 'icon-button';

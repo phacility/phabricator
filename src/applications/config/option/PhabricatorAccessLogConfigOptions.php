@@ -11,7 +11,7 @@ final class PhabricatorAccessLogConfigOptions
     return pht('Configure the access logs, which log HTTP/SSH requests.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-list';
   }
 

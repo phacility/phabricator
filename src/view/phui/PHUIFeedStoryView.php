@@ -193,7 +193,7 @@ final class PHUIFeedStoryView extends AphrontView {
     $icon = null;
     if ($this->appIcon) {
       $icon = id(new PHUIIconView())
-        ->setIconFont($this->appIcon);
+        ->setIcon($this->appIcon);
     }
 
     $action_list = array();

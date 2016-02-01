@@ -138,15 +138,16 @@ final class PhabricatorPeopleQuery
     if ($this->needProfile) {
       $user_list = mpull($users, null, 'getPHID');
       $profiles = new PhabricatorUserProfile();
-      $profiles = $profiles->loadAllWhere('userPHID IN (%Ls)',
+      $profiles = $profiles->loadAllWhere(
+        'userPHID IN (%Ls)',
         array_keys($user_list));
 
       $profiles = mpull($profiles, null, 'getUserPHID');
       foreach ($user_list as $user_phid => $user) {
         $profile = idx($profiles, $user_phid);
+
         if (!$profile) {
-          $profile = new PhabricatorUserProfile();
-          $profile->setUserPHID($user_phid);
+          $profile = PhabricatorUserProfile::initializeNewProfile($user);
         }
 
         $user->attachUserProfile($profile);

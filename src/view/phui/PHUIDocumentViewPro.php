@@ -78,7 +78,7 @@ final class PHUIDocumentViewPro extends AphrontTagView {
       $toc_id = celerity_generate_unique_node_id();
       $toc[] = id(new PHUIButtonView())
         ->setTag('a')
-        ->setIconFont('fa-align-left')
+        ->setIcon('fa-align-left')
         ->setColor(PHUIButtonView::SIMPLE)
         ->addClass('phui-document-toc')
         ->addSigil('jx-toggle-class')

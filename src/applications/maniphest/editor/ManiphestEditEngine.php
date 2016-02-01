@@ -294,6 +294,7 @@ final class ManiphestEditEngine
     $column_tasks = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
       ->withPHIDs($task_phids)
+      ->needProjectPHIDs(true)
       ->execute();
 
     if ($order == PhabricatorProjectColumn::ORDER_NATURAL) {
@@ -333,6 +334,7 @@ final class ManiphestEditEngine
       ->setViewer($viewer)
       ->setTask($task)
       ->setOwner($owner)
+      ->setProject($column->getProject())
       ->setCanEdit(true)
       ->getItem();
 

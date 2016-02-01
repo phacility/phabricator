@@ -11,7 +11,7 @@ final class PhabricatorMultimeterApplication
     return '/multimeter/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-motorcycle';
   }
 

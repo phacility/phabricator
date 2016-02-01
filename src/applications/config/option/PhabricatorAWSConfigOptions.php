@@ -11,7 +11,7 @@ final class PhabricatorAWSConfigOptions
     return pht('Configure integration with AWS (EC2, SES, S3, etc).');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-server';
   }
 

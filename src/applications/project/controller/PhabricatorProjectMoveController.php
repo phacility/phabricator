@@ -26,9 +26,10 @@ final class PhabricatorProjectMoveController
       return new Aphront404Response();
     }
 
-    $object = id(new PhabricatorObjectQuery())
+    $object = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($object_phid))
+      ->needProjectPHIDs(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -95,6 +96,7 @@ final class PhabricatorProjectMoveController
       $tasks = id(new ManiphestTaskQuery())
         ->setViewer($viewer)
         ->withPHIDs($task_phids)
+        ->needProjectPHIDs(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -149,11 +151,13 @@ final class PhabricatorProjectMoveController
         ->withPHIDs(array($object->getOwnerPHID()))
         ->executeOne();
     }
+
     $card = id(new ProjectBoardTaskCard())
       ->setViewer($viewer)
       ->setTask($object)
       ->setOwner($owner)
       ->setCanEdit(true)
+      ->setProject($project)
       ->getItem();
 
     return id(new AphrontAjaxResponse())->setContent(

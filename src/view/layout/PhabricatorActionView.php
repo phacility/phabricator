@@ -105,7 +105,7 @@ final class PhabricatorActionView extends AphrontView {
       }
       $icon = id(new PHUIIconView())
         ->addClass('phabricator-action-view-icon')
-        ->setIconFont($this->icon.$color);
+        ->setIcon($this->icon.$color);
     }
 
     if ($this->href) {

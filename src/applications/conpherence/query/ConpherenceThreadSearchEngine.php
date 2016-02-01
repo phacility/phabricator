@@ -149,7 +149,7 @@ final class ConpherenceThreadSearchEngine
 
       $icon_name = $conpherence->getPolicyIconName($policy_objects);
       $icon = id(new PHUIIconView())
-        ->setIconFont($icon_name);
+        ->setIcon($icon_name);
       $item = id(new PHUIObjectItemView())
         ->setObjectName($conpherence->getMonogram())
         ->setHeader($title)

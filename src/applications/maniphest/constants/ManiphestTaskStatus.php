@@ -94,7 +94,7 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     $icon = self::getStatusIcon($status);
 
     $img = id(new PHUIIconView())
-      ->setIconFont($icon.' '.$icon_color);
+      ->setIcon($icon.' '.$icon_color);
 
     $tag = phutil_tag(
       'span',

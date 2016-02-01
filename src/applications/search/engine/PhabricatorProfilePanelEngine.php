@@ -49,9 +49,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
 
   abstract protected function getPanelURI($path);
 
-  protected function isPanelEngineConfigurable() {
-    return PhabricatorEnv::getEnvConfig('phabricator.show-prototypes');
-  }
+  abstract protected function isPanelEngineConfigurable();
 
   public function buildResponse() {
     $controller = $this->getController();
@@ -371,47 +369,8 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
       ->setHideInApplicationMenu(true)
       ->addClass('phui-profile-menu-spacer');
 
-    if ($this->isPanelEngineConfigurable()) {
-      $viewer = $this->getViewer();
-      $object = $this->getProfileObject();
-
-      $can_edit = PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $object,
-        PhabricatorPolicyCapability::CAN_EDIT);
-
-      $expanded_edit_icon = id(new PHUIIconCircleView())
-        ->addClass('phui-list-item-icon')
-        ->addClass('phui-profile-menu-visible-when-expanded')
-        ->setIconFont('fa-pencil');
-
-      $collapsed_edit_icon = id(new PHUIIconCircleView())
-        ->addClass('phui-list-item-icon')
-        ->addClass('phui-profile-menu-visible-when-collapsed')
-        ->setIconFont('fa-pencil')
-        ->addSigil('has-tooltip')
-        ->setMetadata(
-          array(
-            'tip' => pht('Edit Menu'),
-            'align' => 'E',
-          ));
-
-      $items[] = id(new PHUIListItemView())
-        ->setName('Edit Menu')
-        ->setKey('panel.configure')
-        ->addIcon($expanded_edit_icon)
-        ->addIcon($collapsed_edit_icon)
-        ->addClass('phui-profile-menu-footer')
-        ->addClass('phui-profile-menu-footer-1')
-        ->setHref($this->getPanelURI('configure/'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit);
-    }
-
     $collapse_id = celerity_generate_unique_node_id();
-
     $viewer = $this->getViewer();
-
     $collapse_key =
       PhabricatorUserPreferences::PREFERENCE_PROFILE_MENU_COLLAPSED;
 
@@ -442,7 +401,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
     $collapse_icon = id(new PHUIIconCircleView())
       ->addClass('phui-list-item-icon')
       ->addClass('phui-profile-menu-visible-when-expanded')
-      ->setIconFont('fa-angle-left');
+      ->setIcon('fa-chevron-left');
 
     $expand_icon = id(new PHUIIconCircleView())
       ->addClass('phui-list-item-icon')
@@ -453,7 +412,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
           'tip' => pht('Expand'),
           'align' => 'E',
         ))
-      ->setIconFont('fa-angle-right');
+      ->setIcon('fa-chevron-right');
 
     $items[] = id(new PHUIListItemView())
       ->setName('Collapse')
@@ -461,7 +420,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
       ->addIcon($expand_icon)
       ->setID($collapse_id)
       ->addClass('phui-profile-menu-footer')
-      ->addClass('phui-profile-menu-footer-2')
+      ->addClass('phui-profile-menu-footer-1')
       ->setHideInApplicationMenu(true)
       ->setHref('#');
 
@@ -639,10 +598,13 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
           $hide_text = pht('Delete');
         }
 
+        $can_disable = $panel->canHidePanel();
+
         $item->addAction(
           id(new PHUIListItemView())
             ->setHref($hide_uri)
             ->setWorkflow(true)
+            ->setDisabled(!$can_disable)
             ->setName($hide_text)
             ->setIcon($hide_icon));
       }
@@ -696,7 +658,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
       ->setTag('a')
       ->setText(pht('Configure Menu'))
       ->setHref('#')
-      ->setIconFont('fa-gear')
+      ->setIcon('fa-gear')
       ->setDropdownMenu($action_view);
 
     $header = id(new PHUIHeaderView())
@@ -800,6 +762,14 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
       $configuration,
       PhabricatorPolicyCapability::CAN_EDIT);
 
+    if (!$configuration->canHidePanel()) {
+      return $controller->newDialog()
+        ->setTitle(pht('Mandatory Panel'))
+        ->appendParagraph(
+          pht('This panel is very important, and can not be disabled.'))
+        ->addCancelButton($this->getConfigureURI());
+    }
+
     if ($configuration->getBuiltinKey() === null) {
       $new_value = null;
 
@@ -891,46 +861,13 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
         ->addCancelButton($done_uri);
     }
 
-    $type_visibility =
-      PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY;
-
-    $v_visible = PhabricatorProfilePanelConfiguration::VISIBILITY_VISIBLE;
-    $v_default = PhabricatorProfilePanelConfiguration::VISIBILITY_DEFAULT;
-
     if ($request->isFormPost()) {
-      // First, mark any existing default panels as merely visible.
-      foreach ($panels as $panel) {
-        if (!$panel->isDefault()) {
-          continue;
-        }
-
-        $xactions = array();
-
-        $xactions[] = id(new PhabricatorProfilePanelConfigurationTransaction())
-          ->setTransactionType($type_visibility)
-          ->setNewValue($v_visible);
-
-        $editor = id(new PhabricatorProfilePanelEditor())
-          ->setContentSourceFromRequest($request)
-          ->setActor($viewer)
-          ->setContinueOnMissingFields(true)
-          ->setContinueOnNoEffect(true)
-          ->applyTransactions($panel, $xactions);
+      $key = $configuration->getID();
+      if (!$key) {
+        $key = $configuration->getBuiltinKey();
       }
 
-      // Now, make this panel the default.
-      $xactions = array();
-
-      $xactions[] = id(new PhabricatorProfilePanelConfigurationTransaction())
-        ->setTransactionType($type_visibility)
-        ->setNewValue($v_default);
-
-      $editor = id(new PhabricatorProfilePanelEditor())
-        ->setContentSourceFromRequest($request)
-        ->setActor($viewer)
-        ->setContinueOnMissingFields(true)
-        ->setContinueOnNoEffect(true)
-        ->applyTransactions($configuration, $xactions);
+      $this->adjustDefault($key);
 
       return id(new AphrontRedirectResponse())
         ->setURI($done_uri);
@@ -948,6 +885,71 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
 
   protected function newPanel() {
     return PhabricatorProfilePanelConfiguration::initializeNewBuiltin();
+  }
+
+  public function adjustDefault($key) {
+    $controller = $this->getController();
+    $request = $controller->getRequest();
+    $viewer = $request->getViewer();
+
+    $panels = $this->loadPanels();
+
+    // To adjust the default panel, we first change any existing panels that
+    // are marked as defaults to "visible", then make the new default panel
+    // the default.
+
+    $default = array();
+    $visible = array();
+
+    foreach ($panels as $panel) {
+      $builtin_key = $panel->getBuiltinKey();
+      $id = $panel->getID();
+
+      $is_target =
+        (($builtin_key !== null) && ($builtin_key === $key)) ||
+        (($id !== null) && ($id === (int)$key));
+
+      if ($is_target) {
+        if (!$panel->isDefault()) {
+          $default[] = $panel;
+        }
+      } else {
+        if ($panel->isDefault()) {
+          $visible[] = $panel;
+        }
+      }
+    }
+
+    $type_visibility =
+      PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY;
+
+    $v_visible = PhabricatorProfilePanelConfiguration::VISIBILITY_VISIBLE;
+    $v_default = PhabricatorProfilePanelConfiguration::VISIBILITY_DEFAULT;
+
+    $apply = array(
+      array($v_visible, $visible),
+      array($v_default, $default),
+    );
+
+    foreach ($apply as $group) {
+      list($value, $panels) = $group;
+      foreach ($panels as $panel) {
+        $xactions = array();
+
+        $xactions[] = id(new PhabricatorProfilePanelConfigurationTransaction())
+          ->setTransactionType($type_visibility)
+          ->setNewValue($value);
+
+        $editor = id(new PhabricatorProfilePanelEditor())
+          ->setContentSourceFromRequest($request)
+          ->setActor($viewer)
+          ->setContinueOnMissingFields(true)
+          ->setContinueOnNoEffect(true)
+          ->applyTransactions($panel, $xactions);
+      }
+    }
+
+    return $this;
   }
 
 }

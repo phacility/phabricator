@@ -18,7 +18,7 @@ final class PhabricatorPhurlApplication extends PhabricatorApplication {
     return '/phurl/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-compress';
   }
 

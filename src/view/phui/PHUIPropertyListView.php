@@ -115,6 +115,16 @@ final class PHUIPropertyListView extends AphrontView {
     $this->invokedWillRenderEvent = true;
   }
 
+  public function hasAnyProperties() {
+    $this->invokeWillRenderEvent();
+
+    if ($this->parts) {
+      return true;
+    }
+
+    return false;
+  }
+
   public function render() {
     $this->invokeWillRenderEvent();
 
@@ -248,7 +258,7 @@ final class PHUIPropertyListView extends AphrontView {
     $name = $part['name'];
     if ($part['icon']) {
       $icon = id(new PHUIIconView())
-        ->setIconFont($part['icon'].' bluegrey');
+        ->setIcon($part['icon'].' bluegrey');
       $name = phutil_tag(
         'span',
         array(

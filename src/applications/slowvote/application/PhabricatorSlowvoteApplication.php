@@ -6,7 +6,7 @@ final class PhabricatorSlowvoteApplication extends PhabricatorApplication {
     return '/vote/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-bar-chart';
   }
 

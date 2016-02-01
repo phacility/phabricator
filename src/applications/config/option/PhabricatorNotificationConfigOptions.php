@@ -11,7 +11,7 @@ final class PhabricatorNotificationConfigOptions
     return pht('Configure real-time notifications.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-bell';
   }
 
