@@ -48,7 +48,6 @@ JX.install('DraggableList', {
     _originScroll : null,
     _target : null,
     _targets : null,
-    _dimensions : null,
     _ghostHandler : null,
     _ghostNode : null,
     _group : null,
@@ -171,7 +170,6 @@ JX.install('DraggableList', {
       this._dragging = e.getNode(this._sigil);
       this._origin = JX.$V(e);
       this._originScroll = JX.Vector.getAggregateScrollForNode(this._dragging);
-      this._dimensions = JX.$V(this._dragging);
 
       for (var ii = 0; ii < this._group.length; ii++) {
         this._group[ii]._clearTarget();
