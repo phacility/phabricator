@@ -290,6 +290,11 @@ JX.install('DraggableList', {
       }
 
       this._target = false;
+
+      // Clear the target position cache, since adding or removing ghosts
+      // changes element positions.
+      this._dirtyTargetCache();
+
       return this;
     },
 
@@ -297,9 +302,6 @@ JX.install('DraggableList', {
       var ghost = this.getGhostNode();
       var targets = this._getTargets();
       var dragging = this._dragging;
-
-      var adjust_h = JX.Vector.getDim(ghost).y;
-      var adjust_y = JX.$V(ghost).y;
 
       // Find the node we're dragging the object underneath. This is the first
       // node in the list that's above the cursor. If that node is the node
@@ -314,34 +316,23 @@ JX.install('DraggableList', {
       var cur_target = null;
       var trigger;
       for (var ii = 0; ii < targets.length; ii++) {
-
-        // If the drop target indicator is above the target, we need to adjust
-        // the target's trigger height down accordingly. This makes dragging
-        // items down the list smoother, because the target doesn't jump to the
-        // next item while the cursor is over it.
-
         trigger = targets[ii].y;
-        if (adjust_y <= trigger) {
-          trigger += adjust_h;
-        }
 
         // If the cursor is above this target, we aren't dropping underneath it.
-
         if (trigger >= p.y) {
           continue;
         }
 
         // Don't choose the dragged row or its predecessor as targets.
-
         cur_target = targets[ii].item;
         if (!dragging) {
           // If the item on the cursor isn't from this list, it can't be
           // dropped onto itself or its predecessor in this list.
         } else {
-          if (cur_target == dragging) {
+          if (cur_target === dragging) {
             cur_target = false;
           }
-          if (targets[ii - 1] && targets[ii - 1].item == dragging) {
+          if (targets[ii - 1] && (targets[ii - 1].item === dragging)) {
             cur_target = false;
           }
         }
@@ -480,7 +471,6 @@ JX.install('DraggableList', {
       for (var ii = 0; ii < group.length; ii++) {
         JX.DOM.alterClass(group[ii].getRootNode(), 'drag-target-list', false);
         group[ii]._clearTarget();
-        group[ii]._dirtyTargetCache();
         group[ii]._lastAdjust = null;
       }
 
