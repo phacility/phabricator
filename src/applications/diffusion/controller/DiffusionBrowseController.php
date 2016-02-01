@@ -1180,7 +1180,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
       if ($this->coverage) {
         require_celerity_resource('differential-changeset-view-css');
-        $cov_index = $line['line'] - 1;
+        $cov_index = $line_index;
 
         if (isset($this->coverage[$cov_index])) {
           $cov_class = $this->coverage[$cov_index];
