@@ -45,6 +45,9 @@ final class PhabricatorProjectProfileController
     $watch_action = $this->renderWatchAction($project);
     $header->addActionLink($watch_action);
 
+    $milestone_list = $this->buildMilestoneList($project);
+    $subproject_list = $this->buildSubprojectList($project);
+
     $member_list = id(new PhabricatorProjectMemberListView())
       ->setUser($viewer)
       ->setProject($project)
@@ -82,6 +85,8 @@ final class PhabricatorProjectProfileController
         ))
       ->setSideColumn(
         array(
+          $milestone_list,
+          $subproject_list,
           $member_list,
           $watcher_list,
         ));
@@ -176,5 +181,90 @@ final class PhabricatorProjectProfileController
       ->setHref($watch_href);
   }
 
+  private function buildMilestoneList(PhabricatorProject $project) {
+    if (!$project->getHasMilestones()) {
+      return null;
+    }
+
+    $viewer = $this->getViewer();
+    $id = $project->getID();
+
+    $milestones = id(new PhabricatorProjectQuery())
+      ->setViewer($viewer)
+      ->withParentProjectPHIDs(array($project->getPHID()))
+      ->needImages(true)
+      ->withIsMilestone(true)
+      ->setOrder('newest')
+      ->execute();
+    if (!$milestones) {
+      return null;
+    }
+
+    $milestone_list = id(new PhabricatorProjectListView())
+      ->setUser($viewer)
+      ->setProjects($milestones)
+      ->renderList();
+
+    $view_all = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon(
+        id(new PHUIIconView())
+          ->setIcon('fa-list-ul'))
+      ->setText(pht('View All'))
+      ->setHref("/project/subprojects/{$id}/");
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Milestones'))
+      ->addActionLink($view_all);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIBoxView::GREY)
+      ->setObjectList($milestone_list);
+  }
+
+  private function buildSubprojectList(PhabricatorProject $project) {
+    if (!$project->getHasSubprojects()) {
+      return null;
+    }
+
+    $viewer = $this->getViewer();
+    $id = $project->getID();
+
+    $limit = 25;
+
+    $subprojects = id(new PhabricatorProjectQuery())
+      ->setViewer($viewer)
+      ->withParentProjectPHIDs(array($project->getPHID()))
+      ->needImages(true)
+      ->withIsMilestone(false)
+      ->setLimit($limit)
+      ->execute();
+    if (!$subprojects) {
+      return null;
+    }
+
+    $subproject_list = id(new PhabricatorProjectListView())
+      ->setUser($viewer)
+      ->setProjects($subprojects)
+      ->renderList();
+
+    $view_all = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon(
+        id(new PHUIIconView())
+          ->setIcon('fa-list-ul'))
+      ->setText(pht('View All'))
+      ->setHref("/project/subprojects/{$id}/");
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Subprojects'))
+      ->addActionLink($view_all);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIBoxView::GREY)
+      ->setObjectList($subproject_list);
+  }
 
 }

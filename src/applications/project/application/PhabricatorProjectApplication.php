@@ -91,6 +91,8 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
           => 'PhabricatorProjectWatchController',
         'silence/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectSilenceController',
+        'warning/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorProjectSubprojectWarningController',
       ),
       '/tag/' => array(
         '(?P<slug>[^/]+)/' => 'PhabricatorProjectViewController',
