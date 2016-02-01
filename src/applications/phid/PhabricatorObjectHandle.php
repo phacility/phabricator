@@ -28,6 +28,7 @@ final class PhabricatorObjectHandle
   private $objectName;
   private $policyFiltered;
   private $subtitle;
+  private $tokenIcon;
 
   public function setIcon($icon) {
     $this->icon = $icon;
@@ -84,6 +85,19 @@ final class PhabricatorObjectHandle
       return $this->tagColor;
     }
     return null;
+  }
+
+  public function setTokenIcon($icon) {
+    $this->tokenIcon = $icon;
+    return $this;
+  }
+
+  public function getTokenIcon() {
+    if ($this->tokenIcon !== null) {
+      return $this->tokenIcon;
+    }
+
+    return $this->getIcon();
   }
 
   public function getTypeIcon() {
