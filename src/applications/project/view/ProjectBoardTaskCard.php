@@ -80,7 +80,7 @@ final class ProjectBoardTaskCard extends Phobject {
       ->setBarColor($bar_color);
 
     if ($owner) {
-      $card->addAttribute($owner->renderLink());
+      $card->addHandleIcon($owner, $owner->getName());
     }
 
     $project_phids = array_fuse($task->getProjectPHIDs());

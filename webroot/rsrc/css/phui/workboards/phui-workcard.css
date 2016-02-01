@@ -5,7 +5,7 @@
 .phui-workpanel-view .phui-object-item {
   background-color: #fff;
   border-radius: 3px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .phui-workpanel-view .phui-object-item-name {
@@ -19,6 +19,8 @@
 .phui-workpanel-view .phui-object-item-frame {
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
+  border-color: {$thinblueborder};
+  border-bottom-color: {$lightblueborder};
 }
 
 .phui-workpanel-view .phui-object-item .phui-object-item-objname {
@@ -60,7 +62,8 @@
 }
 
 .phui-workpanel-view .phui-object-item .phui-list-item-href {
-  height: 26px;
+  height: 24px;
+  width: 24px;
 }
 
 .device-desktop .phui-workpanel-view .phui-object-item:hover
@@ -79,6 +82,9 @@
   display: block;
 }
 
+.phui-workpanel-view .phui-object-item-attributes {
+  margin-right: 12px;
+}
 
 
 

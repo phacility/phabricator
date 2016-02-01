@@ -297,11 +297,13 @@ ul.phui-object-item-list-view {
 .phui-object-item-attributes {
   padding: 0 8px 6px;
   line-height: 18px;
+  min-height: 21px;
 }
 
 .phui-object-item-attribute {
-  display: inline;
+  display: inline-block;
   color: {$greytext};
+  vertical-align: middle;
 }
 
 .phui-object-item-attribute-spacer {
@@ -322,10 +324,6 @@ ul.phui-object-item-list-view {
 
 .device-phone .phui-object-icon-pane {
   margin: 0 0 4px;
-}
-
-.phui-object-item-with-handle-icons .phui-object-item-icons {
-  padding-bottom: 30px;
 }
 
 .phui-object-item-icons {
@@ -537,20 +535,17 @@ ul.phui-object-item-list-view .phui-object-item-selected
 */
 
 .phui-object-item-handle-icons {
-  height: 28px;
-  margin-right: 10px;
   bottom: 0;
-  right: 0;
-  text-align: right;
+  right: 4px;
   position: absolute;
 }
 
 .phui-object-item-handle-icon {
-  margin: 1px;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   display: inline-block;
-  background-size: 28px 28px;
+  background-size: 100%;
+  border-radius: 3px;
   background-repeat: no-repeat;
 }
 

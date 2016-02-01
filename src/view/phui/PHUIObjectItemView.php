@@ -452,14 +452,15 @@ final class PHUIObjectItemView extends AphrontTagView {
         $icon_list);
     }
 
+    $handle_bar = null;
     if ($this->handleIcons) {
       $handle_bar = array();
       foreach ($this->handleIcons as $handleicon) {
         $handle_bar[] =
           $this->renderHandleIcon($handleicon['icon'], $handleicon['label']);
       }
-      $icons[] = phutil_tag(
-        'div',
+      $handle_bar = phutil_tag(
+        'li',
         array(
           'class' => 'phui-object-item-handle-icons',
         ),
@@ -504,7 +505,7 @@ final class PHUIObjectItemView extends AphrontTagView {
     }
 
     $attrs = null;
-    if ($this->attributes) {
+    if ($this->attributes || $handle_bar) {
       $attrs = array();
       $spacer = phutil_tag(
         'span',
@@ -531,7 +532,10 @@ final class PHUIObjectItemView extends AphrontTagView {
         array(
           'class' => 'phui-object-item-attributes',
         ),
-        $attrs);
+        array(
+          $handle_bar,
+          $attrs,
+        ));
     }
 
     $status = null;
@@ -750,7 +754,7 @@ final class PHUIObjectItemView extends AphrontTagView {
 
     if (strlen($label)) {
       $options['sigil'] = 'has-tooltip';
-      $options['meta']  = array('tip' => $label);
+      $options['meta']  = array('tip' => $label, 'align' => 'E');
     }
 
     return javelin_tag('span', $options, '');
