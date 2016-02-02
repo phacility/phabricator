@@ -29,7 +29,7 @@ final class PhabricatorRepositoryPushEvent
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'remoteAddress' => 'uint32?',
+        'remoteAddress' => 'ipaddress?',
         'remoteProtocol' => 'text32?',
         'rejectCode' => 'uint32',
         'rejectDetails' => 'text64?',

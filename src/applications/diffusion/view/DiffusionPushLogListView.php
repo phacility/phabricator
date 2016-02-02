@@ -42,12 +42,9 @@ final class DiffusionPushLogListView extends AphrontView {
       $repository = $log->getRepository();
 
       // Reveal this if it's valid and the user can edit the repository.
-      $remote_addr = '-';
+      $remote_address = '-';
       if (isset($editable_repos[$log->getRepositoryPHID()])) {
-        $remote_long = $log->getPushEvent()->getRemoteAddress();
-        if ($remote_long) {
-          $remote_addr = long2ip($remote_long);
-        }
+        $remote_address = $log->getPushEvent()->getRemoteAddress();
       }
 
       $event_id = $log->getPushEvent()->getID();
@@ -76,7 +73,7 @@ final class DiffusionPushLogListView extends AphrontView {
           ),
           $repository->getDisplayName()),
         $handles[$log->getPusherPHID()]->renderLink(),
-        $remote_addr,
+        $remote_address,
         $log->getPushEvent()->getRemoteProtocol(),
         $log->getRefType(),
         $log->getRefName(),

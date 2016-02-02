@@ -56,15 +56,6 @@ final class DiffusionCommitHookEngine extends Phobject {
     return $this->remoteAddress;
   }
 
-  private function getRemoteAddressForLog() {
-    // If whatever we have here isn't a valid IPv4 address, just store `null`.
-    // Older versions of PHP return `-1` on failure instead of `false`.
-    $remote_address = $this->getRemoteAddress();
-    $remote_address = max(0, ip2long($remote_address));
-    $remote_address = nonempty($remote_address, null);
-    return $remote_address;
-  }
-
   public function setSubversionTransactionInfo($transaction, $repository) {
     $this->subversionTransaction = $transaction;
     $this->subversionRepository = $repository;
@@ -1078,7 +1069,7 @@ final class DiffusionCommitHookEngine extends Phobject {
     $viewer = $this->getViewer();
     return PhabricatorRepositoryPushEvent::initializeNewEvent($viewer)
       ->setRepositoryPHID($this->getRepository()->getPHID())
-      ->setRemoteAddress($this->getRemoteAddressForLog())
+      ->setRemoteAddress($this->getRemoteAddress())
       ->setRemoteProtocol($this->getRemoteProtocol())
       ->setEpoch(time());
   }
