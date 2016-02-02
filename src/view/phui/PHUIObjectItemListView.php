@@ -9,6 +9,7 @@ final class PHUIObjectItemListView extends AphrontTagView {
   private $flush;
   private $allowEmptyList;
   private $states;
+  private $itemClass = 'phui-object-item-standard';
 
   public function setAllowEmptyList($allow_empty_list) {
     $this->allowEmptyList = $allow_empty_list;
@@ -46,6 +47,11 @@ final class PHUIObjectItemListView extends AphrontTagView {
 
   public function setStates($states) {
     $this->states = $states;
+    return $this;
+  }
+
+  public function setItemClass($item_class) {
+    $this->itemClass = $item_class;
     return $this;
   }
 
@@ -89,6 +95,11 @@ final class PHUIObjectItemListView extends AphrontTagView {
           $item->setUser($viewer);
         }
       }
+
+      foreach ($this->items as $item) {
+        $item->addClass($this->itemClass);
+      }
+
       $items = $this->items;
     } else if ($this->allowEmptyList) {
       $items = null;

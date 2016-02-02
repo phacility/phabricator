@@ -374,8 +374,9 @@ ul.phui-object-item-icons {
   attributes.
 */
 
-.phui-workboard-view .phui-object-item {
+.phui-workcard.phui-object-item {
   border-left-width: 4px;
+  box-sizing: border-box;
 }
 
 .phui-object-item {
@@ -680,6 +681,12 @@ ul.phui-object-item-list-view .phui-object-item-selected
 .phui-object-box .phui-object-item-list-view .phui-object-item-frame {
   border: none;
   border-bottom: 1px solid {$thinblueborder};
+}
+
+.drag-clone.phui-object-item-standard .phui-object-item-frame {
+  border: none;
+  opacity: 0.8;
+  background: {$sh-bluebackground};
 }
 
 .phui-object-box .phui-object-item-list-header {

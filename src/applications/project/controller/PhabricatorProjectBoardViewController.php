@@ -288,6 +288,7 @@ final class PhabricatorProjectBoardViewController
         ->setFlush(true)
         ->setAllowEmptyList(true)
         ->addSigil('project-column')
+        ->setItemClass('phui-workcard')
         ->setMetadata(
           array(
             'columnPHID' => $column->getPHID(),
