@@ -154,8 +154,8 @@ return array(
     'rsrc/css/phui/phui-timeline-view.css' => '2efceff8',
     'rsrc/css/phui/phui-two-column-view.css' => 'c75bfc5b',
     'rsrc/css/phui/workboards/phui-workboard.css' => 'b07a5524',
-    'rsrc/css/phui/workboards/phui-workcard.css' => '42c703d7',
-    'rsrc/css/phui/workboards/phui-workpanel.css' => 'b90970eb',
+    'rsrc/css/phui/workboards/phui-workcard.css' => '0d1aa006',
+    'rsrc/css/phui/workboards/phui-workpanel.css' => '68140031',
     'rsrc/css/sprite-login.css' => '60e8560e',
     'rsrc/css/sprite-menu.css' => '9dd65b92',
     'rsrc/css/sprite-tokens.css' => '4f399012',
@@ -831,8 +831,8 @@ return array(
     'phui-timeline-view-css' => '2efceff8',
     'phui-two-column-view-css' => 'c75bfc5b',
     'phui-workboard-view-css' => 'b07a5524',
-    'phui-workcard-view-css' => '42c703d7',
-    'phui-workpanel-view-css' => 'b90970eb',
+    'phui-workcard-view-css' => '0d1aa006',
+    'phui-workpanel-view-css' => '68140031',
     'phuix-action-list-view' => 'b5c256b8',
     'phuix-action-view' => '8cf6d262',
     'phuix-autocomplete' => '9196fb06',
@@ -1319,6 +1319,9 @@ return array(
       'javelin-vector',
       'phabricator-hovercard',
     ),
+    68140031 => array(
+      'phui-workcard-view-css',
+    ),
     '6882e80a' => array(
       'javelin-dom',
     ),
@@ -1751,9 +1754,6 @@ return array(
     ),
     'b6b0d1bb' => array(
       'phui-inline-comment-view-css',
-    ),
-    'b90970eb' => array(
-      'phui-workcard-view-css',
     ),
     'bd4c8dca' => array(
       'javelin-install',

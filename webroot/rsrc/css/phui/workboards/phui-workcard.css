@@ -88,6 +88,10 @@
   margin-right: 12px;
 }
 
+.phui-workpanel-view .drag-ghost {
+  margin-bottom: 8px;
+}
+
 
 /* - Draggable Colors --------------------------------------------------------*/
 

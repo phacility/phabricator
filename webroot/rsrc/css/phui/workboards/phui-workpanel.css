@@ -19,6 +19,7 @@
   margin: 0;
   display: inline-block;
   color: {$lightgreytext};
+  font-size: {$normalfontsize};
 }
 
 .device .phui-workpanel-view .phui-header-shell {
