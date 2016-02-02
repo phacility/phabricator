@@ -593,14 +593,35 @@ ul.phui-object-item-list-view .phui-object-item-selected
 }
 
 .drag-dragging {
-  position: relative;
-  background: {$sh-yellowbackground};
-  opacity: 0.9;
+  opacity: 0.25;
 }
 
 .drag-sending {
   opacity: 0.5;
 }
+
+.drag-clone,
+.drag-frame {
+  /* This allows mousewheel events to pass through the clone and frame while
+     they are being dragged. Without this, the mousewheel does not work during
+     a drag operation. */
+  pointer-events: none;
+}
+
+.drag-frame {
+  position: fixed;
+  overflow: hidden;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.drag-clone {
+  position: absolute;
+  list-style: none;
+}
+
 
 /* - State ---------------------------------------------------------------------
 
