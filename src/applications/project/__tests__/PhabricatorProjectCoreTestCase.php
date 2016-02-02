@@ -808,6 +808,114 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
       pht('Engineering + Scan'));
   }
 
+  public function testTagAncestryConflicts() {
+    $user = $this->createUser();
+    $user->save();
+
+    $stonework = $this->createProject($user);
+    $stonework_masonry = $this->createProject($user, $stonework);
+    $stonework_sculpting = $this->createProject($user, $stonework);
+
+    $task = $this->newTask($user, array());
+    $this->assertEqual(array(), $this->getTaskProjects($task));
+
+    $this->addProjectTags($user, $task, array($stonework->getPHID()));
+    $this->assertEqual(
+      array(
+        $stonework->getPHID(),
+      ),
+      $this->getTaskProjects($task));
+
+    // Adding a descendant should remove the parent.
+    $this->addProjectTags($user, $task, array($stonework_masonry->getPHID()));
+    $this->assertEqual(
+      array(
+        $stonework_masonry->getPHID(),
+      ),
+      $this->getTaskProjects($task));
+
+    // Adding an ancestor should remove the descendant.
+    $this->addProjectTags($user, $task, array($stonework->getPHID()));
+    $this->assertEqual(
+      array(
+        $stonework->getPHID(),
+      ),
+      $this->getTaskProjects($task));
+
+    // Adding two tags in the same hierarchy which are not mutual ancestors
+    // should remove the ancestor but otherwise work fine.
+    $this->addProjectTags(
+      $user,
+      $task,
+      array(
+        $stonework_masonry->getPHID(),
+        $stonework_sculpting->getPHID(),
+      ));
+
+    $expect = array(
+      $stonework_masonry->getPHID(),
+      $stonework_sculpting->getPHID(),
+    );
+    sort($expect);
+
+    $this->assertEqual($expect,  $this->getTaskProjects($task));
+  }
+
+  public function testTagMilestoneConflicts() {
+    $user = $this->createUser();
+    $user->save();
+
+    $stonework = $this->createProject($user);
+    $stonework_1 = $this->createProject($user, $stonework, true);
+    $stonework_2 = $this->createProject($user, $stonework, true);
+
+    $task = $this->newTask($user, array());
+    $this->assertEqual(array(), $this->getTaskProjects($task));
+
+    $this->addProjectTags($user, $task, array($stonework->getPHID()));
+    $this->assertEqual(
+      array(
+        $stonework->getPHID(),
+      ),
+      $this->getTaskProjects($task));
+
+    // Adding a milesone should remove the parent.
+    $this->addProjectTags($user, $task, array($stonework_1->getPHID()));
+    $this->assertEqual(
+      array(
+        $stonework_1->getPHID(),
+      ),
+      $this->getTaskProjects($task));
+
+    // Adding the parent should remove the milestone.
+    $this->addProjectTags($user, $task, array($stonework->getPHID()));
+    $this->assertEqual(
+      array(
+        $stonework->getPHID(),
+      ),
+      $this->getTaskProjects($task));
+
+    // First, add one milestone.
+    $this->addProjectTags($user, $task, array($stonework_1->getPHID()));
+    // Now, adding a second milestone should remove the first milestone.
+    $this->addProjectTags($user, $task, array($stonework_2->getPHID()));
+    $this->assertEqual(
+      array(
+        $stonework_2->getPHID(),
+      ),
+      $this->getTaskProjects($task));
+  }
+
+  private function getTaskProjects(ManiphestTask $task) {
+    $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $task->getPHID(),
+      PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+
+    sort($project_phids);
+
+    return $project_phids;
+  }
+
   private function attemptProjectEdit(
     PhabricatorProject $proj,
     PhabricatorUser $user,
@@ -826,6 +934,30 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     return true;
   }
 
+
+  private function addProjectTags(
+    PhabricatorUser $viewer,
+    ManiphestTask $task,
+    array $phids) {
+
+    $xactions = array();
+
+    $xactions[] = id(new ManiphestTransaction())
+      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+      ->setMetadataValue(
+        'edge:type',
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST)
+      ->setNewValue(
+        array(
+          '+' => array_fuse($phids),
+        ));
+
+    $editor = id(new ManiphestTransactionEditor())
+      ->setActor($viewer)
+      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContinueOnNoEffect(true)
+      ->applyTransactions($task, $xactions);
+  }
 
   private function newTask(
     PhabricatorUser $viewer,
