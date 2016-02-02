@@ -374,11 +374,6 @@ ul.phui-object-item-icons {
   attributes.
 */
 
-.phui-workcard.phui-object-item {
-  border-left-width: 4px;
-  box-sizing: border-box;
-}
-
 .phui-object-item {
   border-left-width: 0;
 }

@@ -338,6 +338,8 @@ final class ManiphestEditEngine
       ->setCanEdit(true)
       ->getItem();
 
+    $tasks->addClass('phui-workcard');
+
     $payload = array(
       'tasks' => $tasks,
       'data' => $data,

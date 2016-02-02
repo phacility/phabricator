@@ -85,7 +85,8 @@ JX.behavior('dashboard-move-panels', function(config) {
   for (ii = 0; ii < cols.length; ii++) {
     col = cols[ii];
     var list = new JX.DraggableList(itemSigil, col)
-      .setFindItemsHandler(JX.bind(null, finditems, col));
+      .setFindItemsHandler(JX.bind(null, finditems, col))
+      .setCanDragX(true);
 
     list.listen('didSend', JX.bind(list, onupdate, col));
     list.listen('didReceive', JX.bind(list, onupdate, col));

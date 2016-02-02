@@ -231,7 +231,8 @@ JX.behavior('project-boards', function(config, statics) {
 
     for (ii = 0; ii < cols.length; ii++) {
       var list = new JX.DraggableList('project-card', cols[ii])
-        .setFindItemsHandler(JX.bind(null, finditems, cols[ii]));
+        .setFindItemsHandler(JX.bind(null, finditems, cols[ii]))
+        .setCanDragX(true);
 
       list.listen('didSend', JX.bind(list, onupdate, cols[ii]));
       list.listen('didReceive', JX.bind(list, onupdate, cols[ii]));

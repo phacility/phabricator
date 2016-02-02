@@ -23,6 +23,7 @@ JX.install('DraggableList', {
     JX.Stratcom.listen('mousemove', null, JX.bind(this, this._onmove));
     JX.Stratcom.listen('scroll', null, JX.bind(this, this._onmove));
     JX.Stratcom.listen('mouseup', null, JX.bind(this, this._ondrop));
+    JX.Stratcom.listen('keypress', null, JX.bind(this, this._onkey));
   },
 
   events : [
@@ -37,7 +38,8 @@ JX.install('DraggableList', {
     'didReceive'],
 
   properties : {
-    findItemsHandler : null
+    findItemsHandler: null,
+    canDragX: false
   },
 
   members : {
@@ -95,10 +97,6 @@ JX.install('DraggableList', {
 
       this._group = result;
       return this;
-    },
-
-    _canDragX : function() {
-      return this._hasGroup();
     },
 
     _hasGroup : function() {
@@ -236,6 +234,8 @@ JX.install('DraggableList', {
 
       var cursor = JX.$V(e);
       this._offset = new JX.Vector(pos.x - cursor.x, pos.y - cursor.y);
+
+      JX.Tooltip.lock();
 
       this.invoke('didBeginDrag', this._dragging);
     },
@@ -446,7 +446,7 @@ JX.install('DraggableList', {
       p.y += this._offset.y;
       this._clone.style.top = p.y + 'px';
 
-      if (this._canDragX()) {
+      if (this.getCanDragX()) {
         p.x += this._offset.x;
         this._clone.style.left = p.x + 'px';
       }
@@ -454,12 +454,24 @@ JX.install('DraggableList', {
       e.kill();
     },
 
+    _onkey: function(e) {
+      // Cancel any current drag if the user presses escape.
+      if (this._dragging && (e.getSpecialKey() == 'esc')) {
+        e.kill();
+        this._drop(null);
+        return;
+      }
+    },
+
     _ondrop : function(e) {
+      var p = JX.$V(e);
+      this._drop(p);
+    },
+
+    _drop: function(cursor) {
       if (!this._dragging) {
         return;
       }
-
-      var p = JX.$V(e);
 
       var dragging = this._dragging;
       this._dragging = null;
@@ -471,22 +483,24 @@ JX.install('DraggableList', {
       var target = false;
       var ghost = false;
 
-      var target_list = this._getTargetList(p);
-      if (target_list) {
-        target = target_list._target;
-        ghost = target_list.getGhostNode();
+      if (cursor) {
+        var target_list = this._getTargetList(cursor);
+        if (target_list) {
+          target = target_list._target;
+          ghost = target_list.getGhostNode();
+        }
       }
 
       JX.$V(0, 0).setPos(dragging);
 
-      if (target !== false) {
+      if (target === false) {
+        this.invoke('didCancelDrag', dragging);
+      } else {
         JX.DOM.remove(dragging);
         JX.DOM.replace(ghost, dragging);
         this.invoke('didSend', dragging, target_list);
         target_list.invoke('didReceive', dragging, this);
         target_list.invoke('didDrop', dragging, target, this);
-      } else {
-        this.invoke('didCancelDrag', dragging);
       }
 
       var group = this._group;
@@ -495,11 +509,12 @@ JX.install('DraggableList', {
         group[ii]._clearTarget();
       }
 
-      if (!this.invoke('didEndDrag', dragging).getPrevented()) {
-        JX.DOM.alterClass(dragging, 'drag-dragging', false);
-      }
+      JX.DOM.alterClass(dragging, 'drag-dragging', false);
+      JX.Tooltip.unlock();
 
       e.kill();
+
+      this.invoke('didEndDrag', dragging);
     },
 
     lock : function() {

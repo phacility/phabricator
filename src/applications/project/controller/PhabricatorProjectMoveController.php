@@ -160,6 +160,8 @@ final class PhabricatorProjectMoveController
       ->setProject($project)
       ->getItem();
 
+    $card->addClass('phui-workcard');
+
     return id(new AphrontAjaxResponse())->setContent(
       array('task' => $card));
  }

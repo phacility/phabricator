@@ -6,6 +6,8 @@
   background-color: #fff;
   border-radius: 3px;
   margin-bottom: 8px;
+  border-left-width: 4px;
+  box-sizing: border-box;
 }
 
 .phui-workcard .phui-object-item-name {
@@ -85,7 +87,6 @@
 .phui-workcard .phui-object-item-attributes {
   margin-right: 12px;
 }
-
 
 
 /* - Draggable Colors --------------------------------------------------------*/
