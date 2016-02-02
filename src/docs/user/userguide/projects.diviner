@@ -162,7 +162,6 @@ subprojects, parent projects, and milestones.
 |---|---|---|---|---|
 | //Members// | Yes | Union of Subprojects | Yes | Same as Parent |
 | //Policies// | Yes | Yes | Affected by Parent | Same as Parent |
-| //Workboard// | Yes | No Custom Columns | Yes | Yes |
 | //Hashtags// | Yes | Yes | Yes | Special |
 
 
@@ -256,14 +255,6 @@ parent project is an ancestor of the new subproject.
 
 You can edit the project afterward to change or remove members if you want to
 split membership apart in a more granular way across multiple new subprojects.
-
-**No Workboard Columns**: Parent projects can not have their own workboard
-columns: instead, the workboard of a parent project shows columns representing
-the child projects.
-
-Thus, a project's workboard columns are destroyed when you add the first
-subproject. All objects on the workboard will be returned to the project's
-backlog. The new board will show columns for subprojects instead.
 
 **Searching**: When you search for a parent project, results for any subproject
 are returned. For example, if you search for {nav Engineering}, your query will

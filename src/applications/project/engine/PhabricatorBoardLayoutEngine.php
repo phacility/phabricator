@@ -320,8 +320,63 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
     $columns = msort($columns, 'getSequence');
     $columns = mpull($columns, null, 'getPHID');
 
-    $this->columnMap = $columns;
+    $need_children = array();
+    foreach ($boards as $phid => $board) {
+      if ($board->getHasMilestones() || $board->getHasSubprojects()) {
+        $need_children[] = $phid;
+      }
+    }
+
+    if ($need_children) {
+      $children = id(new PhabricatorProjectQuery())
+        ->setViewer($viewer)
+        ->withParentProjectPHIDs($need_children)
+        ->execute();
+      $children = mpull($children, null, 'getPHID');
+      $children = mgroup($children, 'getParentProjectPHID');
+    } else {
+      $children = array();
+    }
+
     $columns = mgroup($columns, 'getProjectPHID');
+    foreach ($boards as $board_phid => $board) {
+      $board_columns = idx($columns, $board_phid, array());
+
+      // If the project has milestones, create any missing columns.
+      if ($board->getHasMilestones() || $board->getHasSubprojects()) {
+        $child_projects = idx($children, $board_phid, array());
+
+        $next_sequence = last($board_columns)->getSequence() + 1;
+        $proxy_columns = mpull($board_columns, null, 'getProxyPHID');
+        foreach ($child_projects as $child_phid => $child) {
+          if (isset($proxy_columns[$child_phid])) {
+            continue;
+          }
+
+          $new_column = PhabricatorProjectColumn::initializeNewColumn($viewer)
+            ->attachProject($board)
+            ->attachProxy($child)
+            ->setSequence($next_sequence++)
+            ->setProjectPHID($board_phid)
+            ->setProxyPHID($child_phid);
+
+          $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+            $new_column->save();
+          unset($unguarded);
+
+          $board_columns[$new_column->getPHID()] = $new_column;
+        }
+      }
+
+      $columns[$board_phid] = $board_columns;
+    }
+
+    foreach ($columns as $board_phid => $board_columns) {
+      foreach ($board_columns as $board_column) {
+        $column_phid = $board_column->getPHID();
+        $this->columnMap[$column_phid] = $board_column;
+      }
+    }
 
     return $columns;
   }
@@ -350,6 +405,8 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
     array $columns,
     array $positions) {
 
+    $viewer = $this->getViewer();
+
     $board_phid = $board->getPHID();
     $position_groups = mgroup($positions, 'getObjectPHID');
 
@@ -363,32 +420,143 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
       }
     }
 
+    // Find all the columns which are proxies for other objects.
+    $proxy_map = array();
+    foreach ($columns as $column) {
+      $proxy_phid = $column->getProxyPHID();
+      if ($proxy_phid) {
+        $proxy_map[$proxy_phid] = $column->getPHID();
+      }
+    }
+
     $object_phids = $this->getObjectPHIDs();
+
+    // If we have proxies, we need to force cards into the correct proxy
+    // columns.
+    if ($proxy_map) {
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs($object_phids)
+        ->withEdgeTypes(
+          array(
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+          ));
+      $edge_query->execute();
+
+      $project_phids = $edge_query->getDestinationPHIDs();
+      $project_phids = array_fuse($project_phids);
+    } else {
+      $project_phids = array();
+    }
+
+    if ($project_phids) {
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($project_phids)
+        ->execute();
+      $projects = mpull($projects, null, 'getPHID');
+    } else {
+      $projects = array();
+    }
+
+    // Build a map from every project that any task is tagged with to the
+    // ancestor project which has a column on this board, if one exists.
+    $ancestor_map = array();
+    foreach ($projects as $phid => $project) {
+      if (isset($proxy_map[$phid])) {
+        $ancestor_map[$phid] = $proxy_map[$phid];
+      } else {
+        $seen = array($phid);
+        foreach ($project->getAncestorProjects() as $ancestor) {
+          $ancestor_phid = $ancestor->getPHID();
+          $seen[] = $ancestor_phid;
+          if (isset($proxy_map[$ancestor_phid])) {
+            foreach ($seen as $project_phid) {
+              $ancestor_map[$project_phid] = $proxy_map[$ancestor_phid];
+            }
+          }
+        }
+      }
+    }
+
     foreach ($object_phids as $object_phid) {
       $positions = idx($position_groups, $object_phid, array());
 
-      // Remove any positions in columns which no longer exist.
-      foreach ($positions as $key => $position) {
-        $column_phid = $position->getColumnPHID();
-        if (empty($columns[$column_phid])) {
-          $this->remQueue[] = $position;
-          unset($positions[$key]);
+      // First, check for objects that have corresponding proxy columns. We're
+      // going to overwrite normal column positions if a tag belongs to a proxy
+      // column, since you can't be in normal columns if you're in proxy
+      // columns.
+      $proxy_hits = array();
+      if ($proxy_map) {
+        $object_project_phids = $edge_query->getDestinationPHIDs(
+          array(
+            $object_phid,
+          ));
+
+        foreach ($object_project_phids as $project_phid) {
+          if (isset($ancestor_map[$project_phid])) {
+            $proxy_hits[] = $ancestor_map[$project_phid];
+          }
         }
       }
 
-      // If the object has no position, put it on the default column.
-      if (!$positions) {
-        $new_position = id(new PhabricatorProjectColumnPosition())
-          ->setBoardPHID($board_phid)
-          ->setColumnPHID($default_phid)
-          ->setObjectPHID($object_phid)
-          ->setSequence(0);
+      if ($proxy_hits) {
+        // TODO: For now, only one column hit is permissible.
+        $proxy_hits = array_slice($proxy_hits, 0, 1);
 
-        $this->addQueue[] = $new_position;
+        $proxy_hits = array_fuse($proxy_hits);
 
-        $positions = array(
-          $new_position,
-        );
+        // Check the object positions: we hope to find a position in each
+        // column the object should be part of. We're going to drop any
+        // invalid positions and create new positions where positions are
+        // missing.
+        foreach ($positions as $key => $position) {
+          $column_phid = $position->getColumnPHID();
+          if (isset($proxy_hits[$column_phid])) {
+            // Valid column, mark the position as found.
+            unset($proxy_hits[$column_phid]);
+          } else {
+            // Invalid column, ignore the position.
+            unset($positions[$key]);
+          }
+        }
+
+        // Create new positions for anything we haven't found.
+        foreach ($proxy_hits as $proxy_hit) {
+          $new_position = id(new PhabricatorProjectColumnPosition())
+            ->setBoardPHID($board_phid)
+            ->setColumnPHID($proxy_hit)
+            ->setObjectPHID($object_phid)
+            ->setSequence(0);
+
+          $this->addQueue[] = $new_position;
+
+          $positions[] = $new_position;
+        }
+      } else {
+        // Ignore any positions in columns which no longer exist. We don't
+        // actively destory them because the rest of the code ignores them and
+        // there's no real need to destroy the data.
+        foreach ($positions as $key => $position) {
+          $column_phid = $position->getColumnPHID();
+          if (empty($columns[$column_phid])) {
+            unset($positions[$key]);
+          }
+        }
+
+        // If the object has no position, put it on the default column.
+        if (!$positions) {
+          $new_position = id(new PhabricatorProjectColumnPosition())
+            ->setBoardPHID($board_phid)
+            ->setColumnPHID($default_phid)
+            ->setObjectPHID($object_phid)
+            ->setSequence(0);
+
+          $this->addQueue[] = $new_position;
+
+          $positions = array(
+            $new_position,
+          );
+        }
       }
 
       foreach ($positions as $position) {

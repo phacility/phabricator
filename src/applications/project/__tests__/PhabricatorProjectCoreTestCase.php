@@ -972,7 +972,45 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
       $task1->getPHID(),
     );
     $this->assertTasksInColumn($expect, $user, $board, $column);
+  }
 
+  public function testMilestoneMoves() {
+    $user = $this->createUser();
+    $user->save();
+
+    $board = $this->createProject($user);
+
+    $backlog = $this->addColumn($user, $board, 0);
+
+    // Create a task into the backlog.
+    $task = $this->newTask($user, array($board));
+    $expect = array(
+      $backlog->getPHID(),
+    );
+    $this->assertColumns($expect, $user, $board, $task);
+
+    $milestone = $this->createProject($user, $board, true);
+
+    $this->addProjectTags($user, $task, array($milestone->getPHID()));
+
+    // We just want the side effect of looking at the board: creation of the
+    // milestone column.
+    $this->loadColumns($user, $board, $task);
+
+    $column = id(new PhabricatorProjectColumnQuery())
+      ->setViewer($user)
+      ->withProjectPHIDs(array($board->getPHID()))
+      ->withProxyPHIDs(array($milestone->getPHID()))
+      ->executeOne();
+
+    $this->assertTrue((bool)$column);
+
+    // Moving the task to the milestone should have moved it to the milestone
+    // column.
+    $expect = array(
+      $column->getPHID(),
+    );
+    $this->assertColumns($expect, $user, $board, $task);
   }
 
   private function moveToColumn(
@@ -1014,7 +1052,14 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     PhabricatorUser $viewer,
     PhabricatorProject $board,
     ManiphestTask $task) {
+    $column_phids = $this->loadColumns($viewer, $board, $task);
+    $this->assertEqual($expect, $column_phids);
+  }
 
+  private function loadColumns(
+    PhabricatorUser $viewer,
+    PhabricatorProject $board,
+    ManiphestTask $task) {
     $engine = id(new PhabricatorBoardLayoutEngine())
       ->setViewer($viewer)
       ->setBoardPHIDs(array($board->getPHID()))
@@ -1028,7 +1073,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $column_phids = mpull($columns, 'getPHID');
     $column_phids = array_values($column_phids);
 
-    $this->assertEqual($expect, $column_phids);
+    return $column_phids;
   }
 
   private function assertTasksInColumn(
@@ -1235,6 +1280,16 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     }
 
     $this->applyTransactions($project, $user, $xactions);
+
+    // Force these values immediately; they are normally updated by the
+    // index engine.
+    if ($parent) {
+      if ($is_milestone) {
+        $parent->setHasMilestones(1)->save();
+      } else {
+        $parent->setHasSubprojects(1)->save();
+      }
+    }
 
     return $project;
   }

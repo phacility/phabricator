@@ -222,12 +222,22 @@ final class ManiphestTransactionEditor
         // can't see.
         $omnipotent_viewer = PhabricatorUser::getOmnipotentUser();
 
+        $select_phids = array($board_phid);
+
+        $descendants = id(new PhabricatorProjectQuery())
+          ->setViewer($omnipotent_viewer)
+          ->withAncestorProjectPHIDs($select_phids)
+          ->execute();
+        foreach ($descendants as $descendant) {
+          $select_phids[] = $descendant->getPHID();
+        }
+
         $board_tasks = id(new ManiphestTaskQuery())
           ->setViewer($omnipotent_viewer)
           ->withEdgeLogicPHIDs(
             PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
-            PhabricatorQueryConstraint::OPERATOR_AND,
-            array($board_phid))
+            PhabricatorQueryConstraint::OPERATOR_ANCESTOR,
+            array($select_phids))
           ->execute();
 
         $object_phids = mpull($board_tasks, 'getPHID');

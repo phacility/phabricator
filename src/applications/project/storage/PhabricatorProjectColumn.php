@@ -17,10 +17,12 @@ final class PhabricatorProjectColumn
   protected $name;
   protected $status;
   protected $projectPHID;
+  protected $proxyPHID;
   protected $sequence;
   protected $properties = array();
 
   private $project = self::ATTACHABLE;
+  private $proxy = self::ATTACHABLE;
 
   public static function initializeNewColumn(PhabricatorUser $user) {
     return id(new PhabricatorProjectColumn())
@@ -38,6 +40,7 @@ final class PhabricatorProjectColumn
         'name' => 'text255',
         'status' => 'uint32',
         'sequence' => 'uint32',
+        'proxyPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_status' => array(
@@ -45,6 +48,10 @@ final class PhabricatorProjectColumn
         ),
         'key_sequence' => array(
           'columns' => array('projectPHID', 'sequence'),
+        ),
+        'key_proxy' => array(
+          'columns' => array('projectPHID', 'proxyPHID'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();
@@ -64,6 +71,15 @@ final class PhabricatorProjectColumn
     return $this->assertAttached($this->project);
   }
 
+  public function attachProxy($proxy) {
+    $this->proxy = $proxy;
+    return $this;
+  }
+
+  public function getProxy() {
+    return $this->assertAttached($this->proxy);
+  }
+
   public function isDefaultColumn() {
     return (bool)$this->getProperty('isDefault');
   }
@@ -73,6 +89,11 @@ final class PhabricatorProjectColumn
   }
 
   public function getDisplayName() {
+    $proxy = $this->getProxy();
+    if ($proxy) {
+      return $proxy->getProxyColumnName();
+    }
+
     $name = $this->getName();
     if (strlen($name)) {
       return $name;
@@ -96,11 +117,23 @@ final class PhabricatorProjectColumn
     return null;
   }
 
+  public function getDisplayClass() {
+    $proxy = $this->getProxy();
+    if ($proxy) {
+      return $proxy->getProxyColumnClass();
+    }
+
+    return null;
+  }
+
   public function getHeaderIcon() {
-    $icon = null;
+    $proxy = $this->getProxy();
+    if ($proxy) {
+      return $proxy->getProxyColumnIcon();
+    }
 
     if ($this->isHidden()) {
-      $icon = 'fa-eye-slash';
+      return 'fa-eye-slash';
     }
 
     return null;

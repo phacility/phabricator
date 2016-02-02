@@ -280,10 +280,23 @@ final class ManiphestEditEngine
       return new Aphront404Response();
     }
 
-    // If the workboard's project has been removed from the card's project
-    // list, we are going to remove it from the board completely.
+    // If the workboard's project and all descendant projects have been removed
+    // from the card's project list, we are going to remove it from the board
+    // completely.
+
+    // TODO: If the user did something sneaky and changed a subproject, we'll
+    // currently leave the card where it was but should really move it to the
+    // proper new column.
+
+    $descendant_projects = id(new PhabricatorProjectQuery())
+      ->setViewer($viewer)
+      ->withAncestorProjectPHIDs(array($column->getProjectPHID()))
+      ->execute();
+    $board_phids = mpull($descendant_projects, 'getPHID', 'getPHID');
+    $board_phids[$column->getProjectPHID()] = $column->getProjectPHID();
+
     $project_map = array_fuse($task->getProjectPHIDs());
-    $remove_card = empty($project_map[$column->getProjectPHID()]);
+    $remove_card = !array_intersect_key($board_phids, $project_map);
 
     $positions = id(new PhabricatorProjectColumnPositionQuery())
       ->setViewer($viewer)

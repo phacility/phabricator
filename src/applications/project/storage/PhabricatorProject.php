@@ -9,7 +9,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     PhabricatorCustomFieldInterface,
     PhabricatorDestructibleInterface,
     PhabricatorFulltextInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorColumnProxyInterface {
 
   protected $name;
   protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;
@@ -662,5 +663,26 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         ->setAttachmentKey('watchers'),
     );
   }
+
+
+/* -(  PhabricatorColumnProxyInterface  )------------------------------------ */
+
+
+  public function getProxyColumnName() {
+    return $this->getName();
+  }
+
+  public function getProxyColumnIcon() {
+    return $this->getDisplayIconIcon();
+  }
+
+  public function getProxyColumnClass() {
+    if ($this->isMilestone()) {
+      return 'phui-workboard-column-milestone';
+    }
+
+    return null;
+  }
+
 
 }

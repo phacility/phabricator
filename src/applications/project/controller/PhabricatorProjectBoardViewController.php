@@ -95,16 +95,26 @@ final class PhabricatorProjectBoardViewController
 
     $task_query = $search_engine->buildQueryFromSavedQuery($saved);
 
+    $select_phids = array($project->getPHID());
+    if ($project->getHasSubprojects() || $project->getHasMilestones()) {
+      $descendants = id(new PhabricatorProjectQuery())
+        ->setViewer($viewer)
+        ->withAncestorProjectPHIDs($select_phids)
+        ->execute();
+      foreach ($descendants as $descendant) {
+        $select_phids[] = $descendant->getPHID();
+      }
+    }
+
     $tasks = $task_query
       ->withEdgeLogicPHIDs(
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
-        PhabricatorQueryConstraint::OPERATOR_AND,
-        array($project->getPHID()))
+        PhabricatorQueryConstraint::OPERATOR_ANCESTOR,
+        array($select_phids))
       ->setOrder(ManiphestTaskQuery::ORDER_PRIORITY)
       ->setViewer($viewer)
       ->execute();
     $tasks = mpull($tasks, null, 'getPHID');
-
 
     $board_phid = $project->getPHID();
 
@@ -225,6 +235,13 @@ final class PhabricatorProjectBoardViewController
         }
       }
 
+      $proxy = $column->getProxy();
+      if ($proxy && !$proxy->isMilestone()) {
+        // TODO: For now, don't show subproject columns because we can't
+        // handle tasks with multiple positions yet.
+        continue;
+      }
+
       $task_phids = $layout_engine->getColumnObjectPHIDs(
         $board_phid,
         $column->getPHID());
@@ -245,6 +262,11 @@ final class PhabricatorProjectBoardViewController
       $header_icon = $column->getHeaderIcon();
       if ($header_icon) {
         $panel->setHeaderIcon($header_icon);
+      }
+
+      $display_class = $column->getDisplayClass();
+      if ($display_class) {
+        $panel->addClass($display_class);
       }
 
       if ($column->isHidden()) {
@@ -582,6 +604,12 @@ final class PhabricatorProjectBoardViewController
 
     $column_items = array();
 
+    if ($column->getProxyPHID()) {
+      $default_phid = $column->getProxyPHID();
+    } else {
+      $default_phid = $column->getProjectPHID();
+    }
+
     $column_items[] = id(new PhabricatorActionView())
       ->setIcon('fa-plus')
       ->setName(pht('Create Task...'))
@@ -590,6 +618,7 @@ final class PhabricatorProjectBoardViewController
       ->setMetadata(
         array(
           'columnPHID' => $column->getPHID(),
+          'projectPHID' => $default_phid,
         ));
 
     $batch_edit_uri = $request->getRequestURI();
@@ -737,6 +766,10 @@ final class PhabricatorProjectBoardViewController
           ->setURI($import_uri);
       }
     }
+
+    // TODO: Tailor this UI if the project is already a parent project. We
+    // should not offer options for creating a parent project workboard, since
+    // they can't have their own columns.
 
     $new_selector = id(new AphrontFormRadioButtonControl())
       ->setLabel(pht('Columns'))
