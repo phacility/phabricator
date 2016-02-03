@@ -287,7 +287,8 @@ final class ManiphestEditEngine
 
     $positions = id(new PhabricatorProjectColumnPositionQuery())
       ->setViewer($viewer)
-      ->withColumns(array($column))
+      ->withBoardPHIDs(array($column->getProjectPHID()))
+      ->withColumnPHIDs(array($column->getPHID()))
       ->execute();
     $task_phids = mpull($positions, 'getObjectPHID');
 
