@@ -26,6 +26,8 @@ final class PhabricatorProjectMoveController
       return new Aphront404Response();
     }
 
+    $board_phid = $project->getPHID();
+
     $object = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($object_phid))
@@ -54,11 +56,14 @@ final class PhabricatorProjectMoveController
       return new Aphront404Response();
     }
 
-    $positions = id(new PhabricatorProjectColumnPositionQuery())
+    $engine = id(new PhabricatorBoardLayoutEngine())
       ->setViewer($viewer)
-      ->withColumns($columns)
-      ->withObjectPHIDs(array($object_phid))
-      ->execute();
+      ->setBoardPHIDs(array($board_phid))
+      ->setObjectPHIDs(array($object_phid))
+      ->executeLayout();
+
+    $columns = $engine->getObjectColumns($board_phid, $object_phid);
+    $old_column_phids = mpull($columns, 'getPHID');
 
     $xactions = array();
 
@@ -80,7 +85,7 @@ final class PhabricatorProjectMoveController
         ) + $order_params)
       ->setOldValue(
         array(
-          'columnPHIDs' => mpull($positions, 'getColumnPHID'),
+          'columnPHIDs' => $old_column_phids,
           'projectPHID' => $column->getProjectPHID(),
         ));
 
