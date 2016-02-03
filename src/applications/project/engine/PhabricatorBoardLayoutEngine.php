@@ -23,7 +23,7 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
   }
 
   public function setBoardPHIDs(array $board_phids) {
-    $this->boardPHIDs = $board_phids;
+    $this->boardPHIDs = array_fuse($board_phids);
     return $this;
   }
 
@@ -32,7 +32,7 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
   }
 
   public function setObjectPHIDs(array $object_phids) {
-    $this->objectPHIDs = $object_phids;
+    $this->objectPHIDs = array_fuse($object_phids);
     return $this;
   }
 
