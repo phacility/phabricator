@@ -41,7 +41,7 @@ final class PhabricatorProjectColumnPosition extends PhabricatorProjectDAO
   }
 
   public function getOrderingKey() {
-    if (!$this->getID()) {
+    if (!$this->getID() && !$this->getSequence()) {
       return 0;
     }
 

@@ -10,6 +10,9 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
   private $objectColumnMap = array();
   private $boardLayout = array();
 
+  private $remQueue = array();
+  private $addQueue = array();
+
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
     return $this;
@@ -76,6 +79,207 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
     return array_select_keys($this->columnMap, $column_phids);
   }
 
+  public function queueRemovePosition(
+    $board_phid,
+    $column_phid,
+    $object_phid) {
+
+    $board_layout = idx($this->boardLayout, $board_phid, array());
+    $positions = idx($board_layout, $column_phid, array());
+    $position = idx($positions, $object_phid);
+
+    if ($position) {
+      $this->remQueue[] = $position;
+
+      // If this position hasn't been saved yet, get it out of the add queue.
+      if (!$position->getID()) {
+        foreach ($this->addQueue as $key => $add_position) {
+          if ($add_position === $position) {
+            unset($this->addQueue[$key]);
+          }
+        }
+      }
+    }
+
+    unset($this->boardLayout[$board_phid][$column_phid][$object_phid]);
+
+    return $this;
+  }
+
+  public function queueAddPositionBefore(
+    $board_phid,
+    $column_phid,
+    $object_phid,
+    $before_phid) {
+
+    return $this->queueAddPositionRelative(
+      $board_phid,
+      $column_phid,
+      $object_phid,
+      $before_phid,
+      true);
+  }
+
+  public function queueAddPositionAfter(
+    $board_phid,
+    $column_phid,
+    $object_phid,
+    $after_phid) {
+
+    return $this->queueAddPositionRelative(
+      $board_phid,
+      $column_phid,
+      $object_phid,
+      $after_phid,
+      false);
+  }
+
+  public function queueAddPosition(
+    $board_phid,
+    $column_phid,
+    $object_phid) {
+    return $this->queueAddPositionRelative(
+      $board_phid,
+      $column_phid,
+      $object_phid,
+      null,
+      true);
+  }
+
+  private function queueAddPositionRelative(
+    $board_phid,
+    $column_phid,
+    $object_phid,
+    $relative_phid,
+    $is_before) {
+
+    $board_layout = idx($this->boardLayout, $board_phid, array());
+    $positions = idx($board_layout, $column_phid, array());
+
+    // Check if the object is already in the column, and remove it if it is.
+    $object_position = idx($positions, $object_phid);
+    unset($positions[$object_phid]);
+
+    if (!$object_position) {
+      $object_position = id(new PhabricatorProjectColumnPosition())
+        ->setBoardPHID($board_phid)
+        ->setColumnPHID($column_phid)
+        ->setObjectPHID($object_phid);
+    }
+
+    $found = false;
+    if (!$positions) {
+      $object_position->setSequence(0);
+    } else {
+      foreach ($positions as $position) {
+        if (!$found) {
+          if ($relative_phid === null) {
+            $is_match = true;
+          } else {
+            $position_phid = $position->getObjectPHID();
+            $is_match = ($relative_phid == $position_phid);
+          }
+
+          if ($is_match) {
+            $found = true;
+
+            $sequence = $position->getSequence();
+
+            if (!$is_before) {
+              $sequence++;
+            }
+
+            $object_position->setSequence($sequence++);
+
+            if (!$is_before) {
+              // If we're inserting after this position, continue the loop so
+              // we don't update it.
+              continue;
+            }
+          }
+        }
+
+        if ($found) {
+          $position->setSequence($sequence++);
+          $this->addQueue[] = $position;
+        }
+      }
+    }
+
+    if ($relative_phid && !$found) {
+      throw new Exception(
+        pht(
+          'Unable to find object "%s" in column "%s" on board "%s".',
+          $relative_phid,
+          $column_phid,
+          $board_phid));
+    }
+
+    $this->addQueue[] = $object_position;
+
+    $positions[$object_phid] = $object_position;
+    $positions = msort($positions, 'getOrderingKey');
+
+    $this->boardLayout[$board_phid][$column_phid] = $positions;
+
+    return $this;
+  }
+
+  public function applyPositionUpdates() {
+    foreach ($this->remQueue as $position) {
+      if ($position->getID()) {
+        $position->delete();
+      }
+    }
+    $this->remQueue = array();
+
+    $adds = array();
+    $updates = array();
+
+    foreach ($this->addQueue as $position) {
+      $id = $position->getID();
+      if ($id) {
+        $updates[$id] = $position;
+      } else {
+        $adds[] = $position;
+      }
+    }
+    $this->addQueue = array();
+
+    $table = new PhabricatorProjectColumnPosition();
+    $conn_w = $table->establishConnection('w');
+
+    $pairs = array();
+    foreach ($updates as $id => $position) {
+      // This is ugly because MySQL gets upset with us if it is configured
+      // strictly and we attempt inserts which can't work. We'll never actually
+      // do these inserts since they'll always collide (triggering the ON
+      // DUPLICATE KEY logic), so we just provide dummy values in order to get
+      // there.
+
+      $pairs[] = qsprintf(
+        $conn_w,
+        '(%d, %d, "", "", "")',
+        $id,
+        $position->getSequence());
+    }
+
+    if ($pairs) {
+      queryfx(
+        $conn_w,
+        'INSERT INTO %T (id, sequence, boardPHID, columnPHID, objectPHID)
+          VALUES %Q ON DUPLICATE KEY UPDATE sequence = VALUES(sequence)',
+        $table->getTableName(),
+        implode(', ', $pairs));
+    }
+
+    foreach ($adds as $position) {
+      $position->save();
+    }
+
+    return $this;
+  }
+
   private function loadBoards() {
     $viewer = $this->getViewer();
     $board_phids = $this->getBoardPHIDs();
@@ -114,10 +318,15 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
   private function loadPositions(array $boards) {
     $viewer = $this->getViewer();
 
+    $object_phids = $this->getObjectPHIDs();
+    if (!$object_phids) {
+      return array();
+    }
+
     $positions = id(new PhabricatorProjectColumnPositionQuery())
       ->setViewer($viewer)
       ->withBoardPHIDs(array_keys($boards))
-      ->withObjectPHIDs($this->getObjectPHIDs())
+      ->withObjectPHIDs($object_phids)
       ->execute();
     $positions = msort($positions, 'getOrderingKey');
     $positions = mgroup($positions, 'getBoardPHID');
@@ -150,6 +359,7 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
       foreach ($positions as $key => $position) {
         $column_phid = $position->getColumnPHID();
         if (empty($columns[$column_phid])) {
+          $this->remQueue[] = $position;
           unset($positions[$key]);
         }
       }
@@ -161,6 +371,9 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
           ->setColumnPHID($default_phid)
           ->setObjectPHID($object_phid)
           ->setSequence(0);
+
+        $this->addQueue[] = $new_position;
+
         $positions = array(
           $new_position,
         );
