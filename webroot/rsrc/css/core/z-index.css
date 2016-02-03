@@ -81,10 +81,6 @@ div.phui-calendar-day-event {
   z-index: 5;
 }
 
-.drag-dragging {
-  z-index: 5;
-}
-
 .phui-calendar-date-number  {
   z-index: 5;
 }
@@ -112,6 +108,10 @@ div.phui-calendar-day-event {
 
 .device-desktop .phabricator-notification-menu {
   z-index: 9;
+}
+
+.drag-frame {
+  z-index: 10;
 }
 
 .jx-mask {

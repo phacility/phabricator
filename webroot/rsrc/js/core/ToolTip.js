@@ -9,10 +9,17 @@
 
 JX.install('Tooltip', {
 
-  statics : {
-    _node : null,
+  statics: {
+    _node: null,
+    _lock: 0,
 
     show : function(root, scale, align, content) {
+      var self = JX.Tooltip;
+
+      if (self._lock) {
+        return;
+      }
+
       if (__DEV__) {
         switch (align) {
           case 'N':
@@ -45,27 +52,28 @@ JX.install('Tooltip', {
       node.style.maxWidth  = scale + 'px';
 
       JX.Tooltip.hide();
-      this._node = node;
+      self._node = node;
 
       // Append the tip to the document, but offscreen, so we can measure it.
       node.style.left = '-10000px';
       document.body.appendChild(node);
 
       // Jump through some hoops trying to auto-position the tooltip
-      var pos = this._getSmartPosition(align, root, node);
+      var pos = self._getSmartPosition(align, root, node);
       pos.setPos(node);
     },
 
     _getSmartPosition: function (align, root, node) {
-      var pos = JX.Tooltip._proposePosition(align, root, node);
+      var self = JX.Tooltip;
+      var pos = self._proposePosition(align, root, node);
 
       // If toolip is offscreen, try to be clever
       if (!JX.Tooltip.isOnScreen(pos, node)) {
-        align = JX.Tooltip._getImprovedOrientation(pos, node);
-        pos = JX.Tooltip._proposePosition(align, root, node);
+        align = self._getImprovedOrientation(pos, node);
+        pos = self._proposePosition(align, root, node);
       }
 
-      JX.Tooltip._setAnchor(align);
+      self._setAnchor(align);
       return pos;
     },
 
@@ -167,6 +175,17 @@ JX.install('Tooltip', {
         JX.DOM.remove(this._node);
         this._node = null;
       }
+    },
+
+    lock: function() {
+      var self = JX.Tooltip;
+      self.hide();
+      self._lock++;
+    },
+
+    unlock: function() {
+      var self = JX.Tooltip;
+      self._lock--;
     }
   }
 });

@@ -76,8 +76,7 @@ final class DiffusionServeController extends DiffusionController {
     }
 
     try {
-      $remote_addr = $request->getRemoteAddr();
-      $remote_addr = ip2long($remote_addr);
+      $remote_addr = $request->getRemoteAddress();
 
       $pull_event = id(new PhabricatorRepositoryPullEvent())
         ->setEpoch(PhabricatorTime::getNow())
@@ -720,11 +719,11 @@ final class DiffusionServeController extends DiffusionController {
   }
 
   private function getCommonEnvironment(PhabricatorUser $viewer) {
-    $remote_addr = $this->getRequest()->getRemoteAddr();
+    $remote_address = $this->getRequest()->getRemoteAddress();
 
     return array(
       DiffusionCommitHookEngine::ENV_USER => $viewer->getUsername(),
-      DiffusionCommitHookEngine::ENV_REMOTE_ADDRESS => $remote_addr,
+      DiffusionCommitHookEngine::ENV_REMOTE_ADDRESS => $remote_address,
       DiffusionCommitHookEngine::ENV_REMOTE_PROTOCOL => 'http',
     );
   }

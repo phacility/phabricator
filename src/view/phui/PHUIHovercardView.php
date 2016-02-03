@@ -4,7 +4,7 @@
  * The default one-for-all hovercard. We may derive from this one to create
  * more specialized ones.
  */
-final class PhabricatorHovercardView extends AphrontView {
+final class PHUIHovercardView extends AphrontView {
 
   /**
    * @var PhabricatorObjectHandle
@@ -78,7 +78,7 @@ final class PhabricatorHovercardView extends AphrontView {
     $viewer = $this->getUser();
     $handle = $this->handle;
 
-    require_celerity_resource('phabricator-hovercard-view-css');
+    require_celerity_resource('phui-hovercard-view-css');
 
     $title = array(
       id(new PHUISpacesNamespaceContextView())
@@ -107,7 +107,7 @@ final class PhabricatorHovercardView extends AphrontView {
       $body_title = $handle->getFullName();
     }
 
-    $body[] = phutil_tag_div('phabricator-hovercard-body-header', $body_title);
+    $body[] = phutil_tag_div('phui-hovercard-body-header', $body_title);
 
     foreach ($this->fields as $field) {
       $item = array(
@@ -115,7 +115,7 @@ final class PhabricatorHovercardView extends AphrontView {
         ': ',
         phutil_tag('span', array(), $field['value']),
       );
-      $body[] = phutil_tag_div('phabricator-hovercard-body-item', $item);
+      $body[] = phutil_tag_div('phui-hovercard-body-item', $item);
     }
 
     if ($this->badges) {
@@ -125,7 +125,7 @@ final class PhabricatorHovercardView extends AphrontView {
       $body[] = phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-hovercard-body-item hovercard-badges',
+          'class' => 'phui-hovercard-body-item hovercard-badges',
         ),
         $badges);
     }
@@ -136,7 +136,7 @@ final class PhabricatorHovercardView extends AphrontView {
       $body = phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-hovercard-body-image',
+          'class' => 'phui-hovercard-body-image',
         ),
         phutil_tag(
           'div',
@@ -149,7 +149,7 @@ final class PhabricatorHovercardView extends AphrontView {
         phutil_tag(
           'div',
           array(
-            'class' => 'phabricator-hovercard-body-details',
+            'class' => 'phui-hovercard-body-details',
           ),
           $body));
     }
@@ -178,18 +178,18 @@ final class PhabricatorHovercardView extends AphrontView {
 
     $tail = null;
     if ($buttons) {
-      $tail = phutil_tag_div('phabricator-hovercard-tail', $buttons);
+      $tail = phutil_tag_div('phui-hovercard-tail', $buttons);
     }
 
     $hovercard = phutil_tag_div(
-      'phabricator-hovercard-container',
+      'phui-hovercard-container',
       array(
-        phutil_tag_div('phabricator-hovercard-head', $header),
-        phutil_tag_div('phabricator-hovercard-body grouped', $body),
+        phutil_tag_div('phui-hovercard-head', $header),
+        phutil_tag_div('phui-hovercard-body grouped', $body),
         $tail,
       ));
 
-    return phutil_tag_div('phabricator-hovercard-wrapper', $hovercard);
+    return phutil_tag_div('phui-hovercard-wrapper', $hovercard);
   }
 
 }

@@ -17,8 +17,9 @@
 
   "globals": {
     "JX": false,
-    "Raphael": false,
+    "d3": false,
     "__DEV__": false
   },
+
   "browser": true
 }

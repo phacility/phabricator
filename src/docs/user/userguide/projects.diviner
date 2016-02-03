@@ -184,6 +184,26 @@ subproject rules.
 
 Subprojects can have normal workboards.
 
+The maximum subproject depth is 16. This limit is intended to grossly exceed
+the depth necessary in normal usage.
+
+Objects may not be tagged with multiple projects that are ancestors or
+descendants of one another. For example, a task may not be tagged with both
+{nav Stonework} and {nav Stonework > Masonry}.
+
+When a project tag is added that is the ancestor or descendant of one or more
+existing tags, the old tags are replaced. For example, adding
+{nav Stonework > Masonry} to a task tagged with {nav Stonework} will replace
+{nav Stonework} with the newer, more specific tag.
+
+This restriction does not apply to projects which share some common ancestor
+but are not themselves mutual ancestors. For example, a task may be tagged
+with both {nav Stonework > Masonry} and {nav Stonework > Sculpting}.
+
+This restriction //does// apply when the descendant is a milestone. For
+example, a task may not be tagged with both {nav Stonework} and
+{nav Stonework > Iteration II}.
+
 
 Milestones
 ==========
@@ -203,6 +223,19 @@ Milestones can not have subprojects, and can not have their own milestones.
 By default, Milestones do not have their own hashtags.
 
 Milestones can have normal workboards.
+
+Objects may not be tagged with two different milestones of the same parent
+project. For example, a task may not be tagged with both {nav Stonework >
+Iteration III} and {nav Stonework > Iteration V}.
+
+When a milestone tag is added to an object which already has a tag from the
+same series of milestones, the old tag is removed. For example, adding the
+{nav Stonework > Iteration V} tag to a task which already has the
+{nav Stonework > Iteration III} tag will remove the {nav Iteration III} tag.
+
+This restriction does not apply to milestones which are not part of the same
+series. For example, a task may be tagged with both
+{nav Stonework > Iteration V} and {nav Heraldry > Iteration IX}.
 
 
 Parent Projects

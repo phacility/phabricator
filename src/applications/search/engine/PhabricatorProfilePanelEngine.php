@@ -663,6 +663,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Profile Menu Items'))
+      ->setSubHeader(pht('Drag tabs to reorder menu'))
       ->addActionLink($action_button);
 
     $box = id(new PHUIObjectBoxView())
@@ -907,7 +908,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
 
       $is_target =
         (($builtin_key !== null) && ($builtin_key === $key)) ||
-        (($id !== null) && ($id === (int)$key));
+        (($id !== null) && ((int)$id === (int)$key));
 
       if ($is_target) {
         if (!$panel->isDefault()) {

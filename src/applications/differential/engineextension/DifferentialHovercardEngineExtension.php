@@ -35,7 +35,7 @@ final class DifferentialHovercardEngineExtension
   }
 
   public function renderHovercard(
-    PhabricatorHovercardView $hovercard,
+    PHUIHovercardView $hovercard,
     PhabricatorObjectHandle $handle,
     $object,
     $data) {

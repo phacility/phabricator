@@ -131,6 +131,15 @@ final class PhabricatorMotivatorProfilePanel
       pht(
         'The Japanese word for cat is "kome", which is also the word for '.
         'rice. Japanese cats love to eat rice, so the two are synonymous.'),
+      pht('Cats have five pointy ends.'),
+      pht('cat -A can find mice hiding in files.'),
+      pht('A cat\'s visual, olfactory, and auditory senses, '.
+        'Contribute to their hunting skills and natural defenses.'),
+      pht(
+        'Cats with high self-esteem seek out high perches '.
+        'to launch their attacks. Watch out!'),
+      pht('Cats prefer vanilla ice cream.'),
+      pht('Taco cat spelled backwards is taco cat.'),
     );
   }
 
