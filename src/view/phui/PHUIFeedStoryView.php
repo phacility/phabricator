@@ -157,7 +157,7 @@ final class PHUIFeedStoryView extends AphrontView {
   public function render() {
 
     require_celerity_resource('phui-feed-story-css');
-    Javelin::initBehavior('phabricator-hovercards');
+    Javelin::initBehavior('phui-hovercards');
 
     $body = null;
     $foot = null;

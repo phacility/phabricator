@@ -276,7 +276,7 @@ final class PhabricatorObjectHandle
   }
 
   public function renderHovercardLink($name = null) {
-    Javelin::initBehavior('phabricator-hovercards');
+    Javelin::initBehavior('phui-hovercards');
 
     $attributes = array(
       'sigil' => 'hovercard',

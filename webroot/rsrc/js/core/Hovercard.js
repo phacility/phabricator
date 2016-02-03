@@ -4,7 +4,7 @@
  *           javelin-vector
  *           javelin-request
  *           javelin-uri
- * @provides phabricator-hovercard
+ * @provides phui-hovercard
  * @javelin
  */
 

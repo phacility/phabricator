@@ -19,7 +19,7 @@ final class ManiphestHovercardEngineExtension
   }
 
   public function renderHovercard(
-    PhabricatorHovercardView $hovercard,
+    PHUIHovercardView $hovercard,
     PhabricatorObjectHandle $handle,
     $task,
     $data) {

@@ -32,7 +32,7 @@ abstract class PhabricatorHovercardEngineExtension extends Phobject {
   }
 
   abstract public function renderHovercard(
-    PhabricatorHovercardView $hovercard,
+    PHUIHovercardView $hovercard,
     PhabricatorObjectHandle $handle,
     $object,
     $data);
