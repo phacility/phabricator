@@ -127,8 +127,13 @@ If you plan to use authenticated HTTP, you need to set
 use only anonymous HTTP, you can leave this setting disabled.
 
 If you plan to use authenticated HTTP, you'll also need to configure a VCS
-password in {nav Settings > VCS Password}. This is a different password than
-your main Phabricator password primarily for security reasons.
+password in {nav Settings > VCS Password}.
+
+Your VCS password must be a different password than your main Phabricator
+password because VCS passwords are very easy to accidentally disclose. They are
+often stored in plaintext in world-readable files, observable in `ps` output,
+and present in command output and logs. We strongly encourage you to use SSH
+instead of HTTP to authenticate access to repositories.
 
 Otherwise, if you've configured system accounts above, you're all set. No
 additional server configuration is required to make HTTP work.
