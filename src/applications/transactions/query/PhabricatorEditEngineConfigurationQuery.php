@@ -245,8 +245,7 @@ final class PhabricatorEditEngineConfigurationQuery
     if ($this->identifiers !== null) {
       $where[] = qsprintf(
         $conn,
-        '(id IN (%Ls) OR builtinKey IN (%Ls))',
-        $this->identifiers,
+        '(builtinKey IN (%Ls))',
         $this->identifiers);
     }
 
