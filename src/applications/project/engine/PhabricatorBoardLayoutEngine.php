@@ -6,7 +6,7 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
   private $boardPHIDs;
   private $objectPHIDs;
   private $boards;
-  private $columnMap;
+  private $columnMap = array();
   private $objectColumnMap = array();
   private $boardLayout = array();
 
@@ -66,6 +66,17 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
     }
 
     return $this;
+  }
+
+  public function getColumns($board_phid) {
+    $columns = idx($this->boardLayout, $board_phid, array());
+    return array_select_keys($this->columnMap, array_keys($columns));
+  }
+
+  public function getColumnObjectPHIDs($board_phid, $column_phid) {
+    $columns = idx($this->boardLayout, $board_phid, array());
+    $positions = idx($columns, $column_phid, array());
+    return mpull($positions, 'getObjectPHID');
   }
 
   public function getObjectColumns($board_phid, $object_phid) {
@@ -342,14 +353,15 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
     $board_phid = $board->getPHID();
     $position_groups = mgroup($positions, 'getObjectPHID');
 
+    $layout = array();
     foreach ($columns as $column) {
+      $column_phid = $column->getPHID();
+      $layout[$column_phid] = array();
+
       if ($column->isDefaultColumn()) {
-        $default_phid = $column->getPHID();
-        break;
+        $default_phid = $column_phid;
       }
     }
-
-    $layout = array();
 
     $object_phids = $this->getObjectPHIDs();
     foreach ($object_phids as $object_phid) {
