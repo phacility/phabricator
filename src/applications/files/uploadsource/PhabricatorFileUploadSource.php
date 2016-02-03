@@ -92,21 +92,27 @@ abstract class PhabricatorFileUploadSource
 
     $threshold = PhabricatorFileStorageEngine::getChunkThreshold();
 
-    // If we don't know how large the file is, we're going to read some data
-    // from it until we know whether it's a small file or not. This will give
-    // us enough information to make a decision about chunking.
-    $length = $this->getDataLength();
-    if ($length === null) {
-      $rope = $this->getRope();
-      while ($this->readFileData()) {
-        $length = $rope->getByteLength();
-        if ($length > $threshold) {
-          break;
+    if ($threshold === null) {
+      // If there are no chunk engines available, we clearly can't chunk the
+      // file.
+      $this->shouldChunk = false;
+    } else {
+      // If we don't know how large the file is, we're going to read some data
+      // from it until we know whether it's a small file or not. This will give
+      // us enough information to make a decision about chunking.
+      $length = $this->getDataLength();
+      if ($length === null) {
+        $rope = $this->getRope();
+        while ($this->readFileData()) {
+          $length = $rope->getByteLength();
+          if ($length > $threshold) {
+            break;
+          }
         }
       }
-    }
 
-    $this->shouldChunk = ($length > $threshold);
+      $this->shouldChunk = ($length > $threshold);
+    }
 
     return $this->shouldChunk;
   }
