@@ -97,9 +97,20 @@ final class PhabricatorProjectBoardReorderController
       ->setFlush(true);
 
     foreach ($columns as $column) {
+      // Don't allow milestone columns to be reordered.
+      $proxy = $column->getProxy();
+      if ($proxy && $proxy->isMilestone()) {
+        continue;
+      }
+
+      // At least for now, don't show subproject column.
+      if ($proxy) {
+        continue;
+      }
+
       $item = id(new PHUIObjectItemView())
         ->setHeader($column->getDisplayName())
-        ->addIcon('none', $column->getDisplayType());
+        ->addIcon($column->getHeaderIcon(), $column->getDisplayType());
 
       if ($column->isHidden()) {
         $item->setDisabled(true);

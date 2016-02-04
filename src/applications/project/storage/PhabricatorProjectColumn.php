@@ -27,7 +27,8 @@ final class PhabricatorProjectColumn
   public static function initializeNewColumn(PhabricatorUser $user) {
     return id(new PhabricatorProjectColumn())
       ->setName('')
-      ->setStatus(self::STATUS_ACTIVE);
+      ->setStatus(self::STATUS_ACTIVE)
+      ->attachProxy(null);
   }
 
   protected function getConfiguration() {
@@ -155,6 +156,25 @@ final class PhabricatorProjectColumn
   public function setPointLimit($limit) {
     $this->setProperty('pointLimit', $limit);
     return $this;
+  }
+
+  public function getOrderingKey() {
+    $proxy = $this->getProxy();
+
+    // Normal columns and subproject columns go first, in a user-controlled
+    // order.
+
+    // All the milestone columns go last, in their sequential order.
+
+    if (!$proxy || !$proxy->isMilestone()) {
+      $group = 'A';
+      $sequence = $this->getSequence();
+    } else {
+      $group = 'B';
+      $sequence = $proxy->getMilestoneNumber();
+    }
+
+    return sprintf('%s%012d', $group, $sequence);
   }
 
 
