@@ -195,12 +195,30 @@ final class PhabricatorProjectMoveController
         ))
       ->executeOne();
 
+    $except_phids = array($board_phid);
+    if ($project->getHasSubprojects() || $project->getHasMilestones()) {
+      $descendants = id(new PhabricatorProjectQuery())
+        ->setViewer($viewer)
+        ->withAncestorProjectPHIDs($except_phids)
+        ->execute();
+      foreach ($descendants as $descendant) {
+        $except_phids[] = $descendant->getPHID();
+      }
+    }
+
+    $except_phids = array_fuse($except_phids);
+    $handle_phids = array_fuse($object->getProjectPHIDs());
+    $handle_phids = array_diff_key($handle_phids, $except_phids);
+
+    $project_handles = $viewer->loadHandles($handle_phids);
+    $project_handles = iterator_to_array($project_handles);
+
     $card = id(new ProjectBoardTaskCard())
       ->setViewer($viewer)
       ->setTask($object)
       ->setOwner($owner)
       ->setCanEdit(true)
-      ->setProject($project)
+      ->setProjectHandles($project_handles)
       ->getItem();
 
     $card->addClass('phui-workcard');

@@ -3,7 +3,7 @@
 final class ProjectBoardTaskCard extends Phobject {
 
   private $viewer;
-  private $project;
+  private $projectHandles;
   private $task;
   private $owner;
   private $canEdit;
@@ -16,12 +16,13 @@ final class ProjectBoardTaskCard extends Phobject {
     return $this->viewer;
   }
 
-  public function setProject(PhabricatorProject $project) {
-    $this->project = $project;
+  public function setProjectHandles(array $handles) {
+    $this->projectHandles = $handles;
     return $this;
   }
-  public function getProject() {
-    return $this->project;
+
+  public function getProjectHandles() {
+    return $this->projectHandles;
   }
 
   public function setTask(ManiphestTask $task) {
@@ -83,14 +84,11 @@ final class ProjectBoardTaskCard extends Phobject {
       $card->addHandleIcon($owner, $owner->getName());
     }
 
-    $project_phids = array_fuse($task->getProjectPHIDs());
-    unset($project_phids[$this->project->getPHID()]);
-
-    if ($project_phids) {
-      $handle_list = $viewer->loadHandles($project_phids);
+    $project_handles = $this->getProjectHandles();
+    if ($project_handles) {
       $tag_list = id(new PHUIHandleTagListView())
         ->setSlim(true)
-        ->setHandles($handle_list);
+        ->setHandles($project_handles);
       $card->addAttribute($tag_list);
     }
 

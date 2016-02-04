@@ -344,11 +344,18 @@ final class ManiphestEditEngine
         ->executeOne();
     }
 
+    $handle_phids = $task->getProjectPHIDs();
+    $handle_phids = array_fuse($handle_phids);
+    $handle_phids = array_diff_key($handle_phids, $board_phids);
+
+    $project_handles = $viewer->loadHandles($handle_phids);
+    $project_handles = iterator_to_array($project_handles);
+
     $tasks = id(new ProjectBoardTaskCard())
       ->setViewer($viewer)
       ->setTask($task)
       ->setOwner($owner)
-      ->setProject($column->getProject())
+      ->setProjectHandles($project_handles)
       ->setCanEdit(true)
       ->getItem();
 

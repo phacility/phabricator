@@ -228,6 +228,20 @@ final class PhabricatorProjectBoardViewController
 
     $this->handles = ManiphestTaskListView::loadTaskHandles($viewer, $tasks);
 
+    $all_project_phids = array();
+    foreach ($tasks as $task) {
+      foreach ($task->getProjectPHIDs() as $project_phid) {
+        $all_project_phids[$project_phid] = $project_phid;
+      }
+    }
+
+    foreach ($select_phids as $phid) {
+      unset($all_project_phids[$phid]);
+    }
+
+    $all_handles = $viewer->loadHandles($all_project_phids);
+    $all_handles = iterator_to_array($all_handles);
+
     foreach ($columns as $column) {
       if (!$this->showHidden) {
         if ($column->isHidden()) {
@@ -308,9 +322,12 @@ final class PhabricatorProjectBoardViewController
           $owner = $this->handles[$task->getOwnerPHID()];
         }
         $can_edit = idx($task_can_edit_map, $task->getPHID(), false);
+
+        $handles = array_select_keys($all_handles, $task->getProjectPHIDs());
+
         $cards->addItem(id(new ProjectBoardTaskCard())
           ->setViewer($viewer)
-          ->setProject($project)
+          ->setProjectHandles($handles)
           ->setTask($task)
           ->setOwner($owner)
           ->setCanEdit($can_edit)
