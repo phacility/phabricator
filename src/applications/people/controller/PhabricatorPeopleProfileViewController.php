@@ -176,39 +176,40 @@ final class PhabricatorPeopleProfileViewController
     return $box;
   }
 
-  private function buildBadgesView(
-    PhabricatorUser $user) {
+  private function buildBadgesView(PhabricatorUser $user) {
 
     $viewer = $this->getViewer();
     $class = 'PhabricatorBadgesApplication';
 
-    if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
-      $badge_phids = $user->getBadgePHIDs();
-      if ($badge_phids) {
-        $badges = id(new PhabricatorBadgesQuery())
-          ->setViewer($viewer)
-          ->withPHIDs($badge_phids)
-          ->withStatuses(array(PhabricatorBadgesBadge::STATUS_ACTIVE))
-          ->execute();
+    if (!PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
+      return null;
+    }
 
-        $flex = new PHUIBadgeBoxView();
-        foreach ($badges as $badge) {
-          $item = id(new PHUIBadgeView())
-            ->setIcon($badge->getIcon())
-            ->setHeader($badge->getName())
-            ->setSubhead($badge->getFlavor())
-            ->setQuality($badge->getQuality());
-          $flex->addItem($item);
-        }
+    $badge_phids = $user->getBadgePHIDs();
+    if ($badge_phids) {
+      $badges = id(new PhabricatorBadgesQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($badge_phids)
+        ->withStatuses(array(PhabricatorBadgesBadge::STATUS_ACTIVE))
+        ->execute();
 
-      } else {
-        $error = id(new PHUIBoxView())
-          ->addClass('mlb')
-          ->appendChild(pht('User does not have any badges.'));
-        $flex = id(new PHUIInfoView())
-          ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
-          ->appendChild($error);
+      $flex = new PHUIBadgeBoxView();
+      foreach ($badges as $badge) {
+        $item = id(new PHUIBadgeView())
+          ->setIcon($badge->getIcon())
+          ->setHeader($badge->getName())
+          ->setSubhead($badge->getFlavor())
+          ->setQuality($badge->getQuality());
+        $flex->addItem($item);
       }
+
+    } else {
+      $error = id(new PHUIBoxView())
+        ->addClass('mlb')
+        ->appendChild(pht('User does not have any badges.'));
+      $flex = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
+        ->appendChild($error);
     }
 
     $box = id(new PHUIObjectBoxView())
