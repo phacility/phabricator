@@ -32,6 +32,12 @@ final class PhabricatorProjectDatasource
       $query->withNameTokens($tokens);
     }
 
+    // If this is for policy selection, prevent users from using milestones.
+    $for_policy = $this->getParameter('policy');
+    if ($for_policy) {
+      $query->withIsMilestone(false);
+    }
+
     $projs = $this->executeQuery($query);
 
     $projs = mpull($projs, null, 'getPHID');

@@ -42,6 +42,7 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
   const PREFERENCE_DESKTOP_NOTIFICATIONS = 'desktop-notifications';
 
   const PREFERENCE_PROFILE_MENU_COLLAPSED = 'profile-menu.collapsed';
+  const PREFERENCE_FAVORITE_POLICIES = 'policy.favorites';
 
   // These are in an unusual order for historic reasons.
   const MAILTAG_PREFERENCE_NOTIFY       = 0;
