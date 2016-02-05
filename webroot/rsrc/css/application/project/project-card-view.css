@@ -22,6 +22,7 @@
 .project-card-view .phui-header-shell .phui-header-image {
   border: 3px solid #fff;
   border-radius: 3px;
+  background-color: #fff;
 }
 
 .project-card-view .phui-header-shell .phui-header-header {
@@ -70,7 +71,8 @@
 }
 
 .project-card-view.project-card-red .phui-header-shell {
-  background: linear-gradient(to bottom, {$sh-redbackground} 44px, #fff 44px);
+  background: linear-gradient(to bottom,
+    {$sh-redbackground} 42px, #fff 42px);
 }
 
 .project-card-view.project-card-orange {
@@ -78,7 +80,8 @@
 }
 
 .project-card-view.project-card-orange .phui-header-shell {
-  background: linear-gradient(to bottom, {$sh-orangebackground} 44px, #fff 44px);
+  background: linear-gradient(to bottom,
+    {$sh-orangebackground} 42px, #fff 42px);
 }
 
 .project-card-view.project-card-yellow {
@@ -86,7 +89,8 @@
 }
 
 .project-card-view.project-card-yellow .phui-header-shell {
-  background: linear-gradient(to bottom, {$sh-yellowbackground} 44px, #fff 44px);
+  background: linear-gradient(to bottom,
+    {$sh-yellowbackground} 42px, #fff 42px);
 }
 
 .project-card-view.project-card-green {
@@ -94,7 +98,8 @@
 }
 
 .project-card-view.project-card-green .phui-header-shell {
-  background: linear-gradient(to bottom, {$sh-greenbackground} 44px, #fff 44px);
+  background: linear-gradient(to bottom,
+    {$sh-greenbackground} 42px, #fff 42px);
 }
 
 .project-card-view.project-card-blue {
@@ -102,7 +107,8 @@
 }
 
 .project-card-view.project-card-blue .phui-header-shell {
-  background: linear-gradient(to bottom, {$sh-bluebackground} 44px, #fff 44px);
+  background: linear-gradient(to bottom,
+    {$sh-bluebackground} 42px, #fff 42px);
 }
 
 .project-card-view.project-card-indigo {
@@ -110,7 +116,8 @@
 }
 
 .project-card-view.project-card-indigo .phui-header-shell {
-  background: linear-gradient(to bottom, {$sh-indigobackground} 44px, #fff 44px);
+  background: linear-gradient(to bottom,
+    {$sh-indigobackground} 42px, #fff 42px);
 }
 
 .project-card-view.project-card-violet {
@@ -118,7 +125,8 @@
 }
 
 .project-card-view.project-card-violet .phui-header-shell {
-  background: linear-gradient(to bottom, {$sh-violetbackground} 44px, #fff 44px);
+  background: linear-gradient(to bottom,
+    {$sh-violetbackground} 42px, #fff 42px);
 }
 
 .project-card-view.project-card-pink {
@@ -126,25 +134,17 @@
 }
 
 .project-card-view.project-card-pink .phui-header-shell {
-  background: linear-gradient(to bottom, {$sh-pinkbackground} 44px, #fff 44px);
+  background: linear-gradient(to bottom,
+    {$sh-pinkbackground} 42px, #fff 42px);
 }
 
-.project-card-view.project-card-grey {
-  border-color: {$sh-greyborder};
-}
-
-.project-card-view.project-card-grey .phui-header-shell {
-  background: linear-gradient(to bottom, {$sh-greybackground} 44px, #fff 44px);
-}
-
+.project-card-view.project-card-grey,
 .project-card-view.project-card-checkered {
   border-color: {$sh-greyborder};
 }
 
+.project-card-view.project-card-grey .phui-header-shell,
 .project-card-view.project-card-checkered .phui-header-shell {
-  background-color: #fff;
-  background-image: linear-gradient(45deg, {$sh-greybackground} 25%, transparent 25%, transparent 75%, {$sh-greybackground} 75%, {$sh-greybackground}),
-    linear-gradient(45deg, {$sh-greybackground} 25%, transparent 25%, transparent 75%, {$sh-greybackground} 75%, {$sh-greybackground});
-  background-size: 16px 16px;
-  background-position:0 0, 8px 8px;
+  background: linear-gradient(to bottom,
+    {$sh-greybackground} 42px, #fff 42px);
 }
