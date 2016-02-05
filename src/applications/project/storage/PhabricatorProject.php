@@ -379,7 +379,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       $this->getPHID());
 
     $all_strings = ipull($slugs, 'slug');
-    $all_strings[] = $this->getName();
+    $all_strings[] = $this->getDisplayName();
     $all_strings = implode(' ', $all_strings);
 
     $tokens = PhabricatorTypeaheadDatasource::tokenizeString($all_strings);
