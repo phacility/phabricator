@@ -82,6 +82,10 @@
   width: 364px;
 }
 
+.project-view-home .phui-box-grey .phui-object-item-attribute .phui-icon-view {
+  color: {$lightgreytext};
+}
+
 .profile-no-badges {
   padding: 24px 0;
 }
