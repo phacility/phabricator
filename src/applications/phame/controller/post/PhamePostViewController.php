@@ -101,9 +101,18 @@ final class PhamePostViewController
       $subtitle = pht('Written by %s on %s.', $author, $date);
     }
 
+    $user_icon = $blogger_profile->getIcon();
+    $user_icon = PhabricatorPeopleIconSet::getIconIcon($user_icon);
+    $user_icon = id(new PHUIIconView())->setIcon($user_icon);
+
     $about = id(new PhameDescriptionView())
       ->setTitle($subtitle)
-      ->setDescription($blogger_profile->getTitle())
+      ->setDescription(
+        array(
+          $user_icon,
+          ' ',
+          $blogger_profile->getTitle(),
+        ))
       ->setImage($blogger->getProfileImageURI())
       ->setImageHref('/p/'.$blogger->getUsername());
 
