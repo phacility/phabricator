@@ -41,6 +41,14 @@
   margin-left: 2px;
 }
 
+.phui-object-item-disabled.phui-workcard {
+  background-color: rgba(255,255,255,.67);
+}
+
+.phui-object-item-disabled.phui-workcard .phui-object-item-link {
+  color: {$greytext};
+}
+
 .device-desktop .phui-workcard .phui-object-item-with-1-actions
   .phui-object-item-content-box {
   margin-right: 0;

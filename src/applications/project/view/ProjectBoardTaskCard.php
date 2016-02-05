@@ -84,6 +84,14 @@ final class ProjectBoardTaskCard extends Phobject {
       $card->addHandleIcon($owner, $owner->getName());
     }
 
+    if ($task->isClosed()) {
+      $icon = ManiphestTaskStatus::getStatusIcon($task->getStatus());
+      $icon = id(new PHUIIconView())
+        ->setIcon($icon.' grey');
+      $card->addAttribute($icon);
+      $card->setBarColor('grey');
+    }
+
     $project_handles = $this->getProjectHandles();
     if ($project_handles) {
       $tag_list = id(new PHUIHandleTagListView())
