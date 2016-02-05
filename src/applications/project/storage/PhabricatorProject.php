@@ -490,6 +490,20 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return $number;
   }
 
+  public function getDisplayName() {
+    $name = $this->getName();
+
+    // If this is a milestone, show it as "Parent > Sprint 99".
+    if ($this->isMilestone()) {
+      $name = pht(
+        '%s (%s)',
+        $this->getParentProject()->getName(),
+        $name);
+    }
+
+    return $name;
+  }
+
   public function getDisplayIconKey() {
     if ($this->isMilestone()) {
       $key = PhabricatorProjectIconSet::getMilestoneIconKey();

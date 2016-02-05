@@ -149,8 +149,8 @@ final class PhabricatorProjectBoardViewController
       return $this->newPage()
         ->setTitle(
           array(
+            $project->getDisplayName(),
             pht('Workboard'),
-            $project->getName(),
           ))
         ->setNavigation($nav)
         ->setCrumbs($crumbs)
@@ -371,7 +371,11 @@ final class PhabricatorProjectBoardViewController
     $crumbs->addAction($manage_menu);
 
     return $this->newPage()
-      ->setTitle(pht('%s Board', $project->getName()))
+      ->setTitle(
+        array(
+          $project->getDisplayName(),
+          pht('Workboard'),
+        ))
       ->setPageObjectPHIDs(array($project->getPHID()))
       ->setShowFooter(false)
       ->setNavigation($nav)

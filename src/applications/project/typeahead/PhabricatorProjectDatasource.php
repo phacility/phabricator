@@ -64,12 +64,12 @@ final class PhabricatorProjectDatasource
       }
 
       $all_strings = mpull($proj->getSlugs(), 'getSlug');
-      $all_strings[] = $proj->getName();
+      $all_strings[] = $proj->getDisplayName();
       $all_strings = implode(' ', $all_strings);
 
       $proj_result = id(new PhabricatorTypeaheadResult())
         ->setName($all_strings)
-        ->setDisplayName($proj->getName())
+        ->setDisplayName($proj->getDisplayName())
         ->setDisplayType(pht('Project'))
         ->setURI($proj->getURI())
         ->setPHID($proj->getPHID())

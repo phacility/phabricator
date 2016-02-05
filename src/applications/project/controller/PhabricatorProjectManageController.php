@@ -51,7 +51,11 @@ final class PhabricatorProjectManageController
     return $this->newPage()
       ->setNavigation($nav)
       ->setCrumbs($crumbs)
-      ->setTitle($project->getName())
+      ->setTitle(
+        array(
+          $project->getDisplayName(),
+          pht('Manage'),
+        ))
       ->appendChild(
         array(
           $object_box,

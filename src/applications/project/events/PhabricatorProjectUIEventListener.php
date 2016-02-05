@@ -67,11 +67,13 @@ final class PhabricatorProjectUIEventListener
 
         $annotation = array();
         foreach ($columns as $column) {
+          $project_id = $column->getProject()->getID();
+
           $column_name = pht('(%s)', $column->getDisplayName());
           $column_link = phutil_tag(
             'a',
             array(
-              'href' => $handle->getURI().'board/',
+              'href' => "/project/board/{$project_id}/",
               'class' => 'maniphest-board-link',
             ),
             $column_name);

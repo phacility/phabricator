@@ -115,7 +115,7 @@ final class PhabricatorProjectProfileController
     return $this->newPage()
       ->setNavigation($nav)
       ->setCrumbs($crumbs)
-      ->setTitle($project->getName())
+      ->setTitle($project->getDisplayName())
       ->setPageObjectPHIDs(array($project->getPHID()))
       ->appendChild(
         array(
