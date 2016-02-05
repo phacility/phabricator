@@ -176,7 +176,7 @@ final class PhabricatorProjectEditEngine
       $milestone_phid = null;
     }
 
-    return array(
+    $fields = array(
       id(new PhabricatorHandlesEditField())
         ->setKey('parent')
         ->setLabel(pht('Parent'))
@@ -243,6 +243,49 @@ final class PhabricatorProjectEditEngine
         ->setConduitTypeDescription(pht('New list of slugs.'))
         ->setValue($slugs),
     );
+
+    $can_edit_members = (!$milestone) &&
+                        (!$object->isMilestone()) &&
+                        (!$object->getHasSubprojects());
+
+    if ($can_edit_members) {
+
+      // Show this on the web UI when creating a project, but not when editing
+      // one. It is always available via Conduit.
+      $conduit_only = !$this->getIsCreate();
+
+      $members_field = id(new PhabricatorUsersEditField())
+        ->setKey('members')
+        ->setAliases(array('memberPHIDs'))
+        ->setLabel(pht('Initial Members'))
+        ->setIsConduitOnly($conduit_only)
+        ->setUseEdgeTransactions(true)
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue(
+          'edge:type',
+          PhabricatorProjectProjectHasMemberEdgeType::EDGECONST)
+        ->setDescription(pht('Initial project members.'))
+        ->setConduitDescription(pht('Set project members.'))
+        ->setConduitTypeDescription(pht('New list of members.'))
+        ->setValue(array());
+
+      $members_field->setViewer($this->getViewer());
+
+      $edit_add = $members_field->getConduitEditType('members.add')
+        ->setConduitDescription(pht('Add members.'));
+
+      $edit_set = $members_field->getConduitEditType('members.set')
+        ->setConduitDescription(
+          pht('Set members, overwriting the current value.'));
+
+      $edit_rem = $members_field->getConduitEditType('members.remove')
+        ->setConduitDescription(pht('Remove members.'));
+
+      $fields[] = $members_field;
+    }
+
+    return $fields;
+
   }
 
 }

@@ -219,7 +219,12 @@ final class PhabricatorProjectTransactionEditor
 
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
-        case PhabricatorProjectTransaction::TYPE_MEMBERS:
+        case PhabricatorTransactions::TYPE_EDGE:
+          $type = $xaction->getMetadataValue('edge:type');
+          if ($type != PhabricatorProjectProjectHasMemberEdgeType::EDGECONST) {
+            break;
+          }
+
           if ($is_parent) {
             $errors[] = new PhabricatorApplicationTransactionValidationError(
               $xaction->getTransactionType(),
@@ -791,27 +796,6 @@ final class PhabricatorProjectTransactionEditor
     $actor_phid = $actor->getPHID();
 
     $results = parent::expandTransactions($object, $xactions);
-
-    // Automatically add the author as a member when they create a project
-    // if they're using the web interface.
-
-    $content_source = $this->getContentSource();
-    $source_web = PhabricatorContentSource::SOURCE_WEB;
-    $is_web = ($content_source->getSource() === $source_web);
-
-    if ($this->getIsNewObject() && $is_web) {
-      if ($actor_phid) {
-        $type_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
-
-        $results[] = id(new PhabricatorProjectTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-          ->setMetadataValue('edge:type', $type_member)
-          ->setNewValue(
-            array(
-              '+' => array($actor_phid => $actor_phid),
-            ));
-      }
-    }
 
     $is_milestone = $object->isMilestone();
     foreach ($xactions as $xaction) {
