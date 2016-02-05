@@ -35,6 +35,14 @@
   user-select: none;
 }
 
+.phui-workpanel-view.phui-workboard-column-milestone .phui-box-grey {
+  background-color: rgba(234, 230, 247, 0.75);
+}
+
+.phui-workpanel-view .phui-header-col2 .phui-icon-view {
+  margin-right: 4px;
+}
+
 .phui-workpanel-view .phui-workpanel-header-action {
   float: right;
   width: 24px;
