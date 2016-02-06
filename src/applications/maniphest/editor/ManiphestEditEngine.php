@@ -334,39 +334,27 @@ final class ManiphestEditEngine
       'sortMap' => $sort_map,
     );
 
-    // TODO: This should just use HandlePool once we get through the EditEngine
-    // transition.
-    $owner = null;
-    if ($task->getOwnerPHID()) {
-      $owner = id(new PhabricatorHandleQuery())
-        ->setViewer($viewer)
-        ->withPHIDs(array($task->getOwnerPHID()))
-        ->executeOne();
-    }
-
-    $handle_phids = $task->getProjectPHIDs();
-    $handle_phids = array_fuse($handle_phids);
-    $handle_phids = array_diff_key($handle_phids, $board_phids);
-
-    $project_handles = $viewer->loadHandles($handle_phids);
-    $project_handles = iterator_to_array($project_handles);
-
-    $tasks = id(new ProjectBoardTaskCard())
+    $rendering_engine = id(new PhabricatorBoardRenderingEngine())
       ->setViewer($viewer)
-      ->setTask($task)
-      ->setOwner($owner)
-      ->setProjectHandles($project_handles)
-      ->setCanEdit(true)
-      ->getItem();
+      ->setObjects(array($task))
+      ->setExcludedProjectPHIDs($board_phids);
 
-    $tasks->addClass('phui-workcard');
+    $card = $rendering_engine->renderCard($task->getPHID());
+
+    $item = $card->getItem();
+    $item->addClass('phui-workcard');
 
     $payload = array(
-      'tasks' => $tasks,
+      'tasks' => $item,
       'data' => $data,
     );
 
-    return id(new AphrontAjaxResponse())->setContent($payload);
+    return id(new AphrontAjaxResponse())
+      ->setContent(
+        array(
+          'tasks' => $item,
+          'data' => $data,
+        ));
   }
 
 

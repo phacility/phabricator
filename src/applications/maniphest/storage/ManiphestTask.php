@@ -38,6 +38,7 @@ final class ManiphestTask extends ManiphestDAO
 
   protected $ownerOrdering;
   protected $spacePHID;
+  protected $properties = array();
 
   private $subscriberPHIDs = self::ATTACHABLE;
   private $groupByProjectPHID = self::ATTACHABLE;
@@ -74,6 +75,7 @@ final class ManiphestTask extends ManiphestDAO
         'ccPHIDs' => self::SERIALIZATION_JSON,
         'attached' => self::SERIALIZATION_JSON,
         'projectPHIDs' => self::SERIALIZATION_JSON,
+        'properties' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'ownerPHID' => 'phid?',
@@ -213,6 +215,19 @@ final class ManiphestTask extends ManiphestDAO
       -$this->getSubpriority(),
       $this->getID(),
     );
+  }
+
+  public function setProperty($key, $value) {
+    $this->properties[$key] = $value;
+    return $this;
+  }
+
+  public function getProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function getCoverImageThumbnailPHID() {
+    return idx($this->properties, 'cover.thumbnailPHID');
   }
 
 

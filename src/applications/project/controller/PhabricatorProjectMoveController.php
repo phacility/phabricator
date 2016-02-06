@@ -175,24 +175,11 @@ final class PhabricatorProjectMoveController
 
     $editor->applyTransactions($object, $xactions);
 
-    $owner = null;
-    if ($object->getOwnerPHID()) {
-      $owner = id(new PhabricatorHandleQuery())
-        ->setViewer($viewer)
-        ->withPHIDs(array($object->getOwnerPHID()))
-        ->executeOne();
-    }
-
     // Reload the object so it reflects edits which have been applied.
     $object = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($object_phid))
       ->needProjectPHIDs(true)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
       ->executeOne();
 
     $except_phids = array($board_phid);
@@ -206,25 +193,21 @@ final class PhabricatorProjectMoveController
       }
     }
 
-    $except_phids = array_fuse($except_phids);
-    $handle_phids = array_fuse($object->getProjectPHIDs());
-    $handle_phids = array_diff_key($handle_phids, $except_phids);
-
-    $project_handles = $viewer->loadHandles($handle_phids);
-    $project_handles = iterator_to_array($project_handles);
-
-    $card = id(new ProjectBoardTaskCard())
+    $rendering_engine = id(new PhabricatorBoardRenderingEngine())
       ->setViewer($viewer)
-      ->setTask($object)
-      ->setOwner($owner)
-      ->setCanEdit(true)
-      ->setProjectHandles($project_handles)
-      ->getItem();
+      ->setObjects(array($object))
+      ->setExcludedProjectPHIDs($except_phids);
 
-    $card->addClass('phui-workcard');
+    $card = $rendering_engine->renderCard($object->getPHID());
 
-    return id(new AphrontAjaxResponse())->setContent(
-      array('task' => $card));
+    $item = $card->getItem();
+    $item->addClass('phui-workcard');
+
+    return id(new AphrontAjaxResponse())
+      ->setContent(
+        array(
+          'task' => $item,
+        ));
   }
 
 }

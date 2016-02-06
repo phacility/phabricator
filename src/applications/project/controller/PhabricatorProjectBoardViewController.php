@@ -7,7 +7,6 @@ final class PhabricatorProjectBoardViewController
 
   private $id;
   private $slug;
-  private $handles;
   private $queryKey;
   private $filter;
   private $sortKey;
@@ -226,22 +225,9 @@ final class PhabricatorProjectBoardViewController
       'project-boards',
       $behavior_config);
 
-    $this->handles = ManiphestTaskListView::loadTaskHandles($viewer, $tasks);
-
-    $all_project_phids = array();
-    foreach ($tasks as $task) {
-      foreach ($task->getProjectPHIDs() as $project_phid) {
-        $all_project_phids[$project_phid] = $project_phid;
-      }
-    }
-
-    foreach ($select_phids as $phid) {
-      unset($all_project_phids[$phid]);
-    }
-
-    $all_handles = $viewer->loadHandles($all_project_phids);
-    $all_handles = iterator_to_array($all_handles);
-
+    $visible_columns = array();
+    $column_phids = array();
+    $visible_phids = array();
     foreach ($columns as $column) {
       if (!$this->showHidden) {
         if ($column->isHidden()) {
@@ -267,6 +253,25 @@ final class PhabricatorProjectBoardViewController
       if ($this->sortKey != PhabricatorProjectColumn::ORDER_NATURAL) {
         $column_tasks = array_select_keys($column_tasks, array_keys($tasks));
       }
+
+      $column_phid = $column->getPHID();
+
+      $visible_columns[$column_phid] = $column;
+      $column_phids[$column_phid] = $column_tasks;
+
+      foreach ($column_tasks as $phid => $task) {
+        $visible_phids[$phid] = $phid;
+      }
+    }
+
+    $rendering_engine = id(new PhabricatorBoardRenderingEngine())
+      ->setViewer($viewer)
+      ->setObjects(array_select_keys($tasks, $visible_phids))
+      ->setEditMap($task_can_edit_map)
+      ->setExcludedProjectPHIDs($select_phids);
+
+    foreach ($visible_columns as $column_phid => $column) {
+      $column_tasks = $column_phids[$column_phid];
 
       $panel = id(new PHUIWorkpanelView())
         ->setHeader($column->getDisplayName())
@@ -317,22 +322,10 @@ final class PhabricatorProjectBoardViewController
           ));
 
       foreach ($column_tasks as $task) {
-        $owner = null;
-        if ($task->getOwnerPHID()) {
-          $owner = $this->handles[$task->getOwnerPHID()];
-        }
-        $can_edit = idx($task_can_edit_map, $task->getPHID(), false);
-
-        $handles = array_select_keys($all_handles, $task->getProjectPHIDs());
-
-        $cards->addItem(id(new ProjectBoardTaskCard())
-          ->setViewer($viewer)
-          ->setProjectHandles($handles)
-          ->setTask($task)
-          ->setOwner($owner)
-          ->setCanEdit($can_edit)
-          ->getItem());
+        $card = $rendering_engine->renderCard($task->getPHID());
+        $cards->addItem($card->getItem());
       }
+
       $panel->setCards($cards);
       $board->addPanel($panel);
     }

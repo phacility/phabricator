@@ -7,6 +7,7 @@ final class ProjectBoardTaskCard extends Phobject {
   private $task;
   private $owner;
   private $canEdit;
+  private $coverImageFile;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -23,6 +24,15 @@ final class ProjectBoardTaskCard extends Phobject {
 
   public function getProjectHandles() {
     return $this->projectHandles;
+  }
+
+  public function setCoverImageFile(PhabricatorFile $cover_image_file) {
+    $this->coverImageFile = $cover_image_file;
+    return $this;
+  }
+
+  public function getCoverImageFile() {
+    return $this->coverImageFile;
   }
 
   public function setTask(ManiphestTask $task) {
@@ -82,6 +92,11 @@ final class ProjectBoardTaskCard extends Phobject {
 
     if ($owner) {
       $card->addHandleIcon($owner, $owner->getName());
+    }
+
+    $cover_file = $this->getCoverImageFile();
+    if ($cover_file) {
+      $card->setCoverImage($cover_file->getBestURI());
     }
 
     if ($task->isClosed()) {
