@@ -30,7 +30,7 @@ final class PhabricatorRepositoryPullEvent
       self::CONFIG_COLUMN_SCHEMA => array(
         'repositoryPHID' => 'phid?',
         'pullerPHID' => 'phid?',
-        'remoteAddress' => 'uint32?',
+        'remoteAddress' => 'ipaddress?',
         'remoteProtocol' => 'text32?',
         'resultType' => 'text32',
         'resultCode' => 'uint32',

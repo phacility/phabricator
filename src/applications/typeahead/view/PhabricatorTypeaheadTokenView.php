@@ -32,7 +32,7 @@ final class PhabricatorTypeaheadTokenView
     $token = id(new PhabricatorTypeaheadTokenView())
       ->setKey($handle->getPHID())
       ->setValue($handle->getFullName())
-      ->setIcon($handle->getIcon());
+      ->setIcon($handle->getTokenIcon());
 
     if ($handle->isDisabled() ||
         $handle->getStatus() == PhabricatorObjectHandle::STATUS_CLOSED) {

@@ -93,7 +93,7 @@ final class PhabricatorMentionRemarkupRule extends PhutilRemarkupRule {
 
       if ($exists) {
         $user = $actual_users[$username];
-        Javelin::initBehavior('phabricator-hovercards');
+        Javelin::initBehavior('phui-hovercards');
 
         // Check if the user has view access to the object she was mentioned in
         if ($context_object

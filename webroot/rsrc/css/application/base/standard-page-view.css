@@ -19,14 +19,14 @@
 
 .phabricator-standard-page-footer {
   text-align: right;
-  margin: 32px 16px 16px;
+  margin: 44px 16px 16px;
   padding: 12px 0;
-  border-top: 1px solid rgba(71, 87, 120, 0.20);
+  border-top: 1px solid rgba(55,55,55,.1);
   color: {$greytext};
 }
 
 .device .phabricator-standard-page-footer {
-  margin: 4px 8px;
+  margin: 24px 8px 16px;
 }
 
 !print .phabricator-standard-page-footer {

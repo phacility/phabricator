@@ -75,6 +75,26 @@ final class PhabricatorPeopleIconSet
         'name' => pht('Resources'),
       ),
       array(
+        'key' => 'camera',
+        'icon' => 'fa-camera-retro',
+        'name' => pht('Design'),
+      ),
+      array(
+        'key' => 'music',
+        'icon' => 'fa-headphones',
+        'name' => pht('Musician'),
+      ),
+      array(
+        'key' => 'spy',
+        'icon' => 'fa-user-secret',
+        'name' => pht('Spy'),
+      ),
+      array(
+        'key' => 'android',
+        'icon' => 'fa-android',
+        'name' => pht('Bot'),
+      ),
+      array(
         'key' => 'relationships',
         'icon' => 'fa-glass',
         'name' => pht('Relationships'),

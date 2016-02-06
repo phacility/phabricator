@@ -542,8 +542,12 @@ final class AphrontRequest extends Phobject {
     return $this->isFormPost() && $this->getStr('__dialog__');
   }
 
-  public function getRemoteAddr() {
-    return $_SERVER['REMOTE_ADDR'];
+  public function getRemoteAddress() {
+    $address = $_SERVER['REMOTE_ADDR'];
+    if (!strlen($address)) {
+      return null;
+    }
+    return substr($address, 0, 64);
   }
 
   public function isHTTPS() {

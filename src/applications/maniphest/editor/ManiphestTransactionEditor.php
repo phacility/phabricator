@@ -200,18 +200,6 @@ final class ManiphestTransactionEditor
               'columnPHIDs'));
         }
 
-        $columns = id(new PhabricatorProjectColumnQuery())
-          ->setViewer($this->requireActor())
-          ->withPHIDs($new_phids)
-          ->execute();
-        $columns = mpull($columns, null, 'getPHID');
-
-        $positions = id(new PhabricatorProjectColumnPositionQuery())
-          ->setViewer($this->requireActor())
-          ->withObjectPHIDs(array($object->getPHID()))
-          ->withBoardPHIDs(array($board_phid))
-          ->execute();
-
         $before_phid = idx($xaction->getNewValue(), 'beforePHID');
         $after_phid = idx($xaction->getNewValue(), 'afterPHID');
 
@@ -227,111 +215,86 @@ final class ManiphestTransactionEditor
         // object's position in the "natural" ordering, so we do need to update
         // some rows.
 
+        $object_phid = $object->getPHID();
+
+        // We're doing layout with the ominpotent viewer to make sure we don't
+        // remove positions in columns that exist, but which the actual actor
+        // can't see.
+        $omnipotent_viewer = PhabricatorUser::getOmnipotentUser();
+
+        $select_phids = array($board_phid);
+
+        $descendants = id(new PhabricatorProjectQuery())
+          ->setViewer($omnipotent_viewer)
+          ->withAncestorProjectPHIDs($select_phids)
+          ->execute();
+        foreach ($descendants as $descendant) {
+          $select_phids[] = $descendant->getPHID();
+        }
+
+        $board_tasks = id(new ManiphestTaskQuery())
+          ->setViewer($omnipotent_viewer)
+          ->withEdgeLogicPHIDs(
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+            PhabricatorQueryConstraint::OPERATOR_ANCESTOR,
+            array($select_phids))
+          ->execute();
+
+        $object_phids = mpull($board_tasks, 'getPHID');
+        $object_phids[] = $object_phid;
+
+        $engine = id(new PhabricatorBoardLayoutEngine())
+          ->setViewer($omnipotent_viewer)
+          ->setBoardPHIDs(array($board_phid))
+          ->setObjectPHIDs($object_phids)
+          ->executeLayout();
+
+        // TODO: This logic needs to be revised if we legitimately support
+        // multiple column positions.
+
+        // NOTE: When a task is newly created, it's implicitly added to the
+        // backlog but we don't currently record that in the "$old_phids". Just
+        // clean it up for now.
+        $columns = $engine->getObjectColumns($board_phid, $object_phid);
+        foreach ($columns as $column) {
+          $engine->queueRemovePosition(
+            $board_phid,
+            $column->getPHID(),
+            $object_phid);
+        }
+
         // Remove all existing column positions on the board.
-
-        foreach ($positions as $position) {
-          $position->delete();
+        foreach ($old_phids as $column_phid) {
+          $engine->queueRemovePosition(
+            $board_phid,
+            $column_phid,
+            $object_phid);
         }
 
-        // Add the new column positions.
-
-        foreach ($new_phids as $phid) {
-          $column = idx($columns, $phid);
-          if (!$column) {
-            throw new Exception(
-              pht('No such column "%s" exists!', $phid));
-          }
-
-          // Load the other object positions in the column. Note that we must
-          // skip implicit column creation to avoid generating a new position
-          // if the target column is a backlog column.
-
-          $other_positions = id(new PhabricatorProjectColumnPositionQuery())
-            ->setViewer($this->requireActor())
-            ->withColumns(array($column))
-            ->withBoardPHIDs(array($board_phid))
-            ->setSkipImplicitCreate(true)
-            ->execute();
-          $other_positions = msort($other_positions, 'getOrderingKey');
-
-          // Set up the new position object. We're going to figure out the
-          // right sequence number and then persist this object with that
-          // sequence number.
-          $new_position = id(new PhabricatorProjectColumnPosition())
-            ->setBoardPHID($board_phid)
-            ->setColumnPHID($column->getPHID())
-            ->setObjectPHID($object->getPHID());
-
-          $updates = array();
-          $sequence = 0;
-
-          // If we're just dropping this into the column without any specific
-          // position information, put it at the top.
-          if (!$before_phid && !$after_phid) {
-            $new_position->setSequence($sequence)->save();
-            $sequence++;
-          }
-
-          foreach ($other_positions as $position) {
-            $object_phid = $position->getObjectPHID();
-
-            // If this is the object we're moving before and we haven't
-            // saved yet, insert here.
-            if (($before_phid == $object_phid) && !$new_position->getID()) {
-              $new_position->setSequence($sequence)->save();
-              $sequence++;
-            }
-
-            // This object goes here in the sequence; we might need to update
-            // the row.
-            if ($sequence != $position->getSequence()) {
-              $updates[$position->getID()] = $sequence;
-            }
-            $sequence++;
-
-            // If this is the object we're moving after and we haven't saved
-            // yet, insert here.
-            if (($after_phid == $object_phid) && !$new_position->getID()) {
-              $new_position->setSequence($sequence)->save();
-              $sequence++;
-            }
-          }
-
-          // We should have found a place to put it.
-          if (!$new_position->getID()) {
-            throw new Exception(
-              pht('Unable to find a place to insert object on column!'));
-          }
-
-          // If we changed other objects' column positions, bulk reorder them.
-
-          if ($updates) {
-            $position = new PhabricatorProjectColumnPosition();
-            $conn_w = $position->establishConnection('w');
-
-            $pairs = array();
-            foreach ($updates as $id => $sequence) {
-              // This is ugly because MySQL gets upset with us if it is
-              // configured strictly and we attempt inserts which can't work.
-              // We'll never actually do these inserts since they'll always
-              // collide (triggering the ON DUPLICATE KEY logic), so we just
-              // provide dummy values in order to get there.
-
-              $pairs[] = qsprintf(
-                $conn_w,
-                '(%d, %d, "", "", "")',
-                $id,
-                $sequence);
-            }
-
-            queryfx(
-              $conn_w,
-              'INSERT INTO %T (id, sequence, boardPHID, columnPHID, objectPHID)
-                VALUES %Q ON DUPLICATE KEY UPDATE sequence = VALUES(sequence)',
-              $position->getTableName(),
-              implode(', ', $pairs));
+        // Add new positions.
+        foreach ($new_phids as $column_phid) {
+          if ($before_phid) {
+            $engine->queueAddPositionBefore(
+              $board_phid,
+              $column_phid,
+              $object_phid,
+              $before_phid);
+          } else if ($after_phid) {
+            $engine->queueAddPositionAfter(
+              $board_phid,
+              $column_phid,
+              $object_phid,
+              $after_phid);
+          } else {
+            $engine->queueAddPosition(
+              $board_phid,
+              $column_phid,
+              $object_phid);
           }
         }
+
+        $engine->applyPositionUpdates();
+
         break;
       default:
         break;

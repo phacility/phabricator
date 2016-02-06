@@ -19,7 +19,7 @@ final class DiffusionHovercardEngineExtension
   }
 
   public function renderHovercard(
-    PhabricatorHovercardView $hovercard,
+    PHUIHovercardView $hovercard,
     PhabricatorObjectHandle $handle,
     $commit,
     $data) {

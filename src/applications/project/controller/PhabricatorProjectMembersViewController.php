@@ -48,7 +48,7 @@ final class PhabricatorProjectMembersViewController
     return $this->newPage()
       ->setNavigation($nav)
       ->setCrumbs($crumbs)
-      ->setTitle(array($project->getName(), $title))
+      ->setTitle(array($project->getDisplayName(), $title))
       ->appendChild(
         array(
           $object_box,

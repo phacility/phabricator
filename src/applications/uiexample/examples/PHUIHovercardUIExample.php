@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorHovercardUIExample extends PhabricatorUIExample {
+final class PHUIHovercardUIExample extends PhabricatorUIExample {
 
   public function getName() {
     return pht('Hovercard');
@@ -8,8 +8,8 @@ final class PhabricatorHovercardUIExample extends PhabricatorUIExample {
 
   public function getDescription() {
     return pht(
-      "Use %s to render hovercards. Aren't I genius?",
-      phutil_tag('tt', array(), 'PhabricatorHovercardView'));
+      'Use %s to render hovercards.',
+      phutil_tag('tt', array(), 'PHUIHovercardView'));
   }
 
   public function renderExample() {
@@ -24,7 +24,7 @@ final class PhabricatorHovercardUIExample extends PhabricatorUIExample {
       pht('Introduce cooler Differential Revisions'));
 
     $panel = $this->createPanel(pht('Differential Hovercard'));
-    $panel->appendChild(id(new PhabricatorHovercardView())
+    $panel->appendChild(id(new PHUIHovercardView())
       ->setObjectHandle($diff_handle)
       ->addField(pht('Author'), $user->getUsername())
       ->addField(pht('Updated'), phabricator_datetime(time(), $user))
@@ -41,7 +41,7 @@ final class PhabricatorHovercardUIExample extends PhabricatorUIExample {
       ->setType(PHUITagView::TYPE_STATE)
       ->setName(pht('Closed, Resolved'));
     $panel = $this->createPanel(pht('Maniphest Hovercard'));
-    $panel->appendChild(id(new PhabricatorHovercardView())
+    $panel->appendChild(id(new PHUIHovercardView())
       ->setObjectHandle($task_handle)
       ->setUser($user)
       ->addField(pht('Assigned to'), $user->getUsername())
@@ -66,7 +66,7 @@ final class PhabricatorHovercardUIExample extends PhabricatorUIExample {
     $user_handle->setImageURI(
       celerity_get_resource_uri('/rsrc/image/people/washington.png'));
     $panel = $this->createPanel(pht('Whatevery Hovercard'));
-    $panel->appendChild(id(new PhabricatorHovercardView())
+    $panel->appendChild(id(new PHUIHovercardView())
       ->setObjectHandle($user_handle)
       ->addField(pht('Status'), pht('Available'))
       ->addField(pht('Member since'), '30. February 1750')

@@ -43,24 +43,34 @@
   background-color: #fff;
 }
 
-.device .phame-home-view .phui-side-column {
-  background-color: transparent;
+.phame-home-view {
+  background-color: #fff;
+  border-bottom: 1px solid rgba(55,55,55,.1);
+}
+
+.phame-home-view .phame-home-container {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.phame-home-view .phui-document-container {
+  border: none;
 }
 
 .phame-blog-list {
-  margin: 24px 16px 16px 16px;
+  margin: 96px 16px 16px 16px;
+}
+
+.phame-blog-list + .phame-blog-list {
+  margin-top: 24px;
 }
 
 .device .phame-blog-list {
-  padding: 0;
-  background-color: {$bluebackground};
-  margin: 0;
-  border-radius: 0;
-  border-bottom: 1px solid {$thinblueborder};
+  margin: 16px;
 }
 
-.phame-blog-list-item:last-child {
-  margin-bottom: 0;
+.device-phone .phame-blog-list {
+  margin: 16px 8px;
 }
 
 .phame-blog-list-header {

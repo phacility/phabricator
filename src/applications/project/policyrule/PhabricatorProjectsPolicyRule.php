@@ -48,7 +48,13 @@ final class PhabricatorProjectsPolicyRule
   }
 
   public function getValueControlTemplate() {
-    return $this->getDatasourceTemplate(new PhabricatorProjectDatasource());
+    $datasource = id(new PhabricatorProjectDatasource())
+      ->setParameters(
+        array(
+          'policy' => 1,
+        ));
+
+    return $this->getDatasourceTemplate($datasource);
   }
 
   public function getRuleOrder() {

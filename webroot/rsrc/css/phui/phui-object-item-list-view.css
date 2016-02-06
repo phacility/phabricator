@@ -297,11 +297,13 @@ ul.phui-object-item-list-view {
 .phui-object-item-attributes {
   padding: 0 8px 6px;
   line-height: 18px;
+  min-height: 21px;
 }
 
 .phui-object-item-attribute {
-  display: inline;
+  display: inline-block;
   color: {$greytext};
+  vertical-align: middle;
 }
 
 .phui-object-item-attribute-spacer {
@@ -322,10 +324,6 @@ ul.phui-object-item-list-view {
 
 .device-phone .phui-object-icon-pane {
   margin: 0 0 4px;
-}
-
-.phui-object-item-with-handle-icons .phui-object-item-icons {
-  padding-bottom: 30px;
 }
 
 .phui-object-item-icons {
@@ -375,10 +373,6 @@ ul.phui-object-item-icons {
   Colors for the left-hand border bars, used to indicate object status or other
   attributes.
 */
-
-.phui-workboard-view .phui-object-item {
-  border-left-width: 4px;
-}
 
 .phui-object-item {
   border-left-width: 0;
@@ -537,20 +531,17 @@ ul.phui-object-item-list-view .phui-object-item-selected
 */
 
 .phui-object-item-handle-icons {
-  height: 28px;
-  margin-right: 10px;
   bottom: 0;
-  right: 0;
-  text-align: right;
+  right: 4px;
   position: absolute;
 }
 
 .phui-object-item-handle-icon {
-  margin: 1px;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   display: inline-block;
-  background-size: 28px 28px;
+  background-size: 100%;
+  border-radius: 3px;
   background-repeat: no-repeat;
 }
 
@@ -598,14 +589,35 @@ ul.phui-object-item-list-view .phui-object-item-selected
 }
 
 .drag-dragging {
-  position: relative;
-  background: {$sh-yellowbackground};
-  opacity: 0.9;
+  opacity: 0.25;
 }
 
 .drag-sending {
   opacity: 0.5;
 }
+
+.drag-clone,
+.drag-frame {
+  /* This allows mousewheel events to pass through the clone and frame while
+     they are being dragged. Without this, the mousewheel does not work during
+     a drag operation. */
+  pointer-events: none;
+}
+
+.drag-frame {
+  position: fixed;
+  overflow: hidden;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.drag-clone {
+  position: absolute;
+  list-style: none;
+}
+
 
 /* - State ---------------------------------------------------------------------
 
@@ -664,6 +676,12 @@ ul.phui-object-item-list-view .phui-object-item-selected
 .phui-object-box .phui-object-item-list-view .phui-object-item-frame {
   border: none;
   border-bottom: 1px solid {$thinblueborder};
+}
+
+.drag-clone.phui-object-item-standard .phui-object-item-frame {
+  border: none;
+  opacity: 0.8;
+  background: {$sh-bluebackground};
 }
 
 .phui-object-box .phui-object-item-list-header {

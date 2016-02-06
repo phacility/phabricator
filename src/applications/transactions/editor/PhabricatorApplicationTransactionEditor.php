@@ -400,7 +400,15 @@ abstract class PhabricatorApplicationTransactionEditor
           return $space_phid;
         }
       case PhabricatorTransactions::TYPE_EDGE:
-        return $this->getEdgeTransactionNewValue($xaction);
+        $new_value = $this->getEdgeTransactionNewValue($xaction);
+
+        $edge_type = $xaction->getMetadataValue('edge:type');
+        $type_project = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+        if ($edge_type == $type_project) {
+          $new_value = $this->applyProjectConflictRules($new_value);
+        }
+
+        return $new_value;
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->getNewValueFromApplicationTransactions($xaction);
@@ -3344,6 +3352,129 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     return $state;
+  }
+
+
+  /**
+   * Remove conflicts from a list of projects.
+   *
+   * Objects aren't allowed to be tagged with multiple milestones in the same
+   * group, nor projects such that one tag is the ancestor of any other tag.
+   * If the list of PHIDs include mutually exclusive projects, remove the
+   * conflicting projects.
+   *
+   * @param list<phid> List of project PHIDs.
+   * @return list<phid> List with conflicts removed.
+   */
+  private function applyProjectConflictRules(array $phids) {
+    if (!$phids) {
+      return array();
+    }
+
+    // Overall, the last project in the list wins in cases of conflict (so when
+    // you add something, the thing you just added sticks and removes older
+    // values).
+
+    // Beyond that, there are two basic cases:
+
+    // Milestones: An object can't be in "A > Sprint 3" and "A > Sprint 4".
+    // If multiple projects are milestones of the same parent, we only keep the
+    // last one.
+
+    // Ancestor: You can't be in "A" and "A > B". If "A > B" comes later
+    // in the list, we remove "A" and keep "A > B". If "A" comes later, we
+    // remove "A > B" and keep "A".
+
+    // Note that it's OK to be in "A > B" and "A > C". There's only a conflict
+    // if one project is an ancestor of another. It's OK to have something
+    // tagged with multiple projects which share a common ancestor, so long as
+    // they are not mutual ancestors.
+
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $projects = id(new PhabricatorProjectQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array_keys($phids))
+      ->execute();
+    $projects = mpull($projects, null, 'getPHID');
+
+    // We're going to build a map from each project with milestones to the last
+    // milestone in the list. This last milestone is the milestone we'll keep.
+    $milestone_map = array();
+
+    // We're going to build a set of the projects which have no descendants
+    // later in the list. This allows us to apply both ancestor rules.
+    $ancestor_map = array();
+
+    foreach ($phids as $phid => $ignored) {
+      $project = idx($projects, $phid);
+      if (!$project) {
+        continue;
+      }
+
+      // This is the last milestone we've seen, so set it as the selection for
+      // the project's parent. This might be setting a new value or overwriting
+      // an earlier value.
+      if ($project->isMilestone()) {
+        $parent_phid = $project->getParentProjectPHID();
+        $milestone_map[$parent_phid] = $phid;
+      }
+
+      // Since this is the last item in the list we've examined so far, add it
+      // to the set of projects with no later descendants.
+      $ancestor_map[$phid] = $phid;
+
+      // Remove any ancestors from the set, since this is a later descendant.
+      foreach ($project->getAncestorProjects() as $ancestor) {
+        $ancestor_phid = $ancestor->getPHID();
+        unset($ancestor_map[$ancestor_phid]);
+      }
+    }
+
+    // Now that we've built the maps, we can throw away all the projects which
+    // have conflicts.
+    foreach ($phids as $phid => $ignored) {
+      $project = idx($projects, $phid);
+
+      if (!$project) {
+        // If a PHID is invalid, we just leave it as-is. We could clean it up,
+        // but leaving it untouched is less likely to cause collateral damage.
+        continue;
+      }
+
+      // If this was a milestone, check if it was the last milestone from its
+      // group in the list. If not, remove it from the list.
+      if ($project->isMilestone()) {
+        $parent_phid = $project->getParentProjectPHID();
+        if ($milestone_map[$parent_phid] !== $phid) {
+          unset($phids[$phid]);
+          continue;
+        }
+      }
+
+      // If a later project in the list is a subproject of this one, it will
+      // have removed ancestors from the map. If this project does not point
+      // at itself in the ancestor map, it should be discarded in favor of a
+      // subproject that comes later.
+      if (idx($ancestor_map, $phid) !== $phid) {
+        unset($phids[$phid]);
+        continue;
+      }
+
+      // If a later project in the list is an ancestor of this one, it will
+      // have added itself to the map. If any ancestor of this project points
+      // at itself in the map, this project should be dicarded in favor of
+      // that later ancestor.
+      foreach ($project->getAncestorProjects() as $ancestor) {
+        $ancestor_phid = $ancestor->getPHID();
+        if (isset($ancestor_map[$ancestor_phid])) {
+          unset($phids[$phid]);
+          continue 2;
+        }
+      }
+    }
+
+    return $phids;
   }
 
 }

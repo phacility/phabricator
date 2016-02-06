@@ -231,7 +231,9 @@ JX.behavior('project-boards', function(config, statics) {
 
     for (ii = 0; ii < cols.length; ii++) {
       var list = new JX.DraggableList('project-card', cols[ii])
-        .setFindItemsHandler(JX.bind(null, finditems, cols[ii]));
+        .setFindItemsHandler(JX.bind(null, finditems, cols[ii]))
+        .setOuterContainer(JX.$(config.boardID))
+        .setCanDragX(true);
 
       list.listen('didSend', JX.bind(list, onupdate, cols[ii]));
       list.listen('didReceive', JX.bind(list, onupdate, cols[ii]));
@@ -278,13 +280,16 @@ JX.behavior('project-boards', function(config, statics) {
         // close the dropdown, but don't want to follow the link.
         e.prevent();
 
-        var column_phid = e.getNodeData('column-add-task').columnPHID;
+        var column_data = e.getNodeData('column-add-task');
+        var column_phid = column_data.columnPHID;
+
         var request_data = {
           responseType: 'card',
           columnPHID: column_phid,
-          projects: statics.projectPHID,
+          projects: column_data.projectPHID,
           order: statics.order
         };
+
         var cols = getcolumns();
         var ii;
         var column;

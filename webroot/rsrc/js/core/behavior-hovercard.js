@@ -1,14 +1,14 @@
 /**
- * @provides javelin-behavior-phabricator-hovercards
+ * @provides javelin-behavior-phui-hovercards
  * @requires javelin-behavior
  *           javelin-behavior-device
  *           javelin-stratcom
  *           javelin-vector
- *           phabricator-hovercard
+ *           phui-hovercard
  * @javelin
  */
 
-JX.behavior('phabricator-hovercards', function() {
+JX.behavior('phui-hovercards', function() {
 
   // We listen for mousemove instead of mouseover to handle the case when user
   // scrolls with keyboard. We don't want to display hovercard if node gets

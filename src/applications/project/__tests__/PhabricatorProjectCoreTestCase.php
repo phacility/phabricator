@@ -808,6 +808,318 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
       pht('Engineering + Scan'));
   }
 
+  public function testTagAncestryConflicts() {
+    $user = $this->createUser();
+    $user->save();
+
+    $stonework = $this->createProject($user);
+    $stonework_masonry = $this->createProject($user, $stonework);
+    $stonework_sculpting = $this->createProject($user, $stonework);
+
+    $task = $this->newTask($user, array());
+    $this->assertEqual(array(), $this->getTaskProjects($task));
+
+    $this->addProjectTags($user, $task, array($stonework->getPHID()));
+    $this->assertEqual(
+      array(
+        $stonework->getPHID(),
+      ),
+      $this->getTaskProjects($task));
+
+    // Adding a descendant should remove the parent.
+    $this->addProjectTags($user, $task, array($stonework_masonry->getPHID()));
+    $this->assertEqual(
+      array(
+        $stonework_masonry->getPHID(),
+      ),
+      $this->getTaskProjects($task));
+
+    // Adding an ancestor should remove the descendant.
+    $this->addProjectTags($user, $task, array($stonework->getPHID()));
+    $this->assertEqual(
+      array(
+        $stonework->getPHID(),
+      ),
+      $this->getTaskProjects($task));
+
+    // Adding two tags in the same hierarchy which are not mutual ancestors
+    // should remove the ancestor but otherwise work fine.
+    $this->addProjectTags(
+      $user,
+      $task,
+      array(
+        $stonework_masonry->getPHID(),
+        $stonework_sculpting->getPHID(),
+      ));
+
+    $expect = array(
+      $stonework_masonry->getPHID(),
+      $stonework_sculpting->getPHID(),
+    );
+    sort($expect);
+
+    $this->assertEqual($expect,  $this->getTaskProjects($task));
+  }
+
+  public function testTagMilestoneConflicts() {
+    $user = $this->createUser();
+    $user->save();
+
+    $stonework = $this->createProject($user);
+    $stonework_1 = $this->createProject($user, $stonework, true);
+    $stonework_2 = $this->createProject($user, $stonework, true);
+
+    $task = $this->newTask($user, array());
+    $this->assertEqual(array(), $this->getTaskProjects($task));
+
+    $this->addProjectTags($user, $task, array($stonework->getPHID()));
+    $this->assertEqual(
+      array(
+        $stonework->getPHID(),
+      ),
+      $this->getTaskProjects($task));
+
+    // Adding a milesone should remove the parent.
+    $this->addProjectTags($user, $task, array($stonework_1->getPHID()));
+    $this->assertEqual(
+      array(
+        $stonework_1->getPHID(),
+      ),
+      $this->getTaskProjects($task));
+
+    // Adding the parent should remove the milestone.
+    $this->addProjectTags($user, $task, array($stonework->getPHID()));
+    $this->assertEqual(
+      array(
+        $stonework->getPHID(),
+      ),
+      $this->getTaskProjects($task));
+
+    // First, add one milestone.
+    $this->addProjectTags($user, $task, array($stonework_1->getPHID()));
+    // Now, adding a second milestone should remove the first milestone.
+    $this->addProjectTags($user, $task, array($stonework_2->getPHID()));
+    $this->assertEqual(
+      array(
+        $stonework_2->getPHID(),
+      ),
+      $this->getTaskProjects($task));
+  }
+
+  public function testBoardMoves() {
+    $user = $this->createUser();
+    $user->save();
+
+    $board = $this->createProject($user);
+
+    $backlog = $this->addColumn($user, $board, 0);
+    $column = $this->addColumn($user, $board, 1);
+
+    // New tasks should appear in the backlog.
+    $task1 = $this->newTask($user, array($board));
+    $expect = array(
+      $backlog->getPHID(),
+    );
+    $this->assertColumns($expect, $user, $board, $task1);
+
+    // Moving a task should move it to the destination column.
+    $this->moveToColumn($user, $board, $task1, $backlog, $column);
+    $expect = array(
+      $column->getPHID(),
+    );
+    $this->assertColumns($expect, $user, $board, $task1);
+
+    // Same thing again, with a new task.
+    $task2 = $this->newTask($user, array($board));
+    $expect = array(
+      $backlog->getPHID(),
+    );
+    $this->assertColumns($expect, $user, $board, $task2);
+
+    // Move it, too.
+    $this->moveToColumn($user, $board, $task2, $backlog, $column);
+    $expect = array(
+      $column->getPHID(),
+    );
+    $this->assertColumns($expect, $user, $board, $task2);
+
+    // Now the stuff should be in the column, in order, with the more recently
+    // moved task on top.
+    $expect = array(
+      $task2->getPHID(),
+      $task1->getPHID(),
+    );
+    $this->assertTasksInColumn($expect, $user, $board, $column);
+
+    // Move the second task after the first task.
+    $options = array(
+      'afterPHID' => $task1->getPHID(),
+    );
+    $this->moveToColumn($user, $board, $task2, $column, $column, $options);
+    $expect = array(
+      $task1->getPHID(),
+      $task2->getPHID(),
+    );
+    $this->assertTasksInColumn($expect, $user, $board, $column);
+
+    // Move the second task before the first task.
+    $options = array(
+      'beforePHID' => $task1->getPHID(),
+    );
+    $this->moveToColumn($user, $board, $task2, $column, $column, $options);
+    $expect = array(
+      $task2->getPHID(),
+      $task1->getPHID(),
+    );
+    $this->assertTasksInColumn($expect, $user, $board, $column);
+  }
+
+  public function testMilestoneMoves() {
+    $user = $this->createUser();
+    $user->save();
+
+    $board = $this->createProject($user);
+
+    $backlog = $this->addColumn($user, $board, 0);
+
+    // Create a task into the backlog.
+    $task = $this->newTask($user, array($board));
+    $expect = array(
+      $backlog->getPHID(),
+    );
+    $this->assertColumns($expect, $user, $board, $task);
+
+    $milestone = $this->createProject($user, $board, true);
+
+    $this->addProjectTags($user, $task, array($milestone->getPHID()));
+
+    // We just want the side effect of looking at the board: creation of the
+    // milestone column.
+    $this->loadColumns($user, $board, $task);
+
+    $column = id(new PhabricatorProjectColumnQuery())
+      ->setViewer($user)
+      ->withProjectPHIDs(array($board->getPHID()))
+      ->withProxyPHIDs(array($milestone->getPHID()))
+      ->executeOne();
+
+    $this->assertTrue((bool)$column);
+
+    // Moving the task to the milestone should have moved it to the milestone
+    // column.
+    $expect = array(
+      $column->getPHID(),
+    );
+    $this->assertColumns($expect, $user, $board, $task);
+  }
+
+  private function moveToColumn(
+    PhabricatorUser $viewer,
+    PhabricatorProject $board,
+    ManiphestTask $task,
+    PhabricatorProjectColumn $src,
+    PhabricatorProjectColumn $dst,
+    $options = null) {
+
+    $xactions = array();
+
+    if (!$options) {
+      $options = array();
+    }
+
+    $xactions[] = id(new ManiphestTransaction())
+      ->setTransactionType(ManiphestTransaction::TYPE_PROJECT_COLUMN)
+      ->setOldValue(
+        array(
+          'projectPHID' => $board->getPHID(),
+          'columnPHIDs' => array($src->getPHID()),
+        ))
+      ->setNewValue(
+        array(
+          'projectPHID' => $board->getPHID(),
+          'columnPHIDs' => array($dst->getPHID()),
+        ) + $options);
+
+    $editor = id(new ManiphestTransactionEditor())
+      ->setActor($viewer)
+      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContinueOnNoEffect(true)
+      ->applyTransactions($task, $xactions);
+  }
+
+  private function assertColumns(
+    array $expect,
+    PhabricatorUser $viewer,
+    PhabricatorProject $board,
+    ManiphestTask $task) {
+    $column_phids = $this->loadColumns($viewer, $board, $task);
+    $this->assertEqual($expect, $column_phids);
+  }
+
+  private function loadColumns(
+    PhabricatorUser $viewer,
+    PhabricatorProject $board,
+    ManiphestTask $task) {
+    $engine = id(new PhabricatorBoardLayoutEngine())
+      ->setViewer($viewer)
+      ->setBoardPHIDs(array($board->getPHID()))
+      ->setObjectPHIDs(
+        array(
+          $task->getPHID(),
+        ))
+      ->executeLayout();
+
+    $columns = $engine->getObjectColumns($board->getPHID(), $task->getPHID());
+    $column_phids = mpull($columns, 'getPHID');
+    $column_phids = array_values($column_phids);
+
+    return $column_phids;
+  }
+
+  private function assertTasksInColumn(
+    array $expect,
+    PhabricatorUser $viewer,
+    PhabricatorProject $board,
+    PhabricatorProjectColumn $column) {
+
+    $engine = id(new PhabricatorBoardLayoutEngine())
+      ->setViewer($viewer)
+      ->setBoardPHIDs(array($board->getPHID()))
+      ->setObjectPHIDs($expect)
+      ->executeLayout();
+
+    $object_phids = $engine->getColumnObjectPHIDs(
+      $board->getPHID(),
+      $column->getPHID());
+    $object_phids = array_values($object_phids);
+
+    $this->assertEqual($expect, $object_phids);
+  }
+
+  private function addColumn(
+    PhabricatorUser $viewer,
+    PhabricatorProject $project,
+    $sequence) {
+
+    $project->setHasWorkboard(1)->save();
+
+    return PhabricatorProjectColumn::initializeNewColumn($viewer)
+      ->setSequence(0)
+      ->setProperty('isDefault', ($sequence == 0))
+      ->setProjectPHID($project->getPHID())
+      ->save();
+  }
+
+  private function getTaskProjects(ManiphestTask $task) {
+    $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $task->getPHID(),
+      PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+
+    sort($project_phids);
+
+    return $project_phids;
+  }
+
   private function attemptProjectEdit(
     PhabricatorProject $proj,
     PhabricatorUser $user,
@@ -826,6 +1138,30 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     return true;
   }
 
+
+  private function addProjectTags(
+    PhabricatorUser $viewer,
+    ManiphestTask $task,
+    array $phids) {
+
+    $xactions = array();
+
+    $xactions[] = id(new ManiphestTransaction())
+      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+      ->setMetadataValue(
+        'edge:type',
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST)
+      ->setNewValue(
+        array(
+          '+' => array_fuse($phids),
+        ));
+
+    $editor = id(new ManiphestTransactionEditor())
+      ->setActor($viewer)
+      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContinueOnNoEffect(true)
+      ->applyTransactions($task, $xactions);
+  }
 
   private function newTask(
     PhabricatorUser $viewer,
@@ -944,6 +1280,16 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     }
 
     $this->applyTransactions($project, $user, $xactions);
+
+    // Force these values immediately; they are normally updated by the
+    // index engine.
+    if ($parent) {
+      if ($is_milestone) {
+        $parent->setHasMilestones(1)->save();
+      } else {
+        $parent->setHasSubprojects(1)->save();
+      }
+    }
 
     return $project;
   }

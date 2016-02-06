@@ -280,20 +280,35 @@ final class ManiphestEditEngine
       return new Aphront404Response();
     }
 
-    // If the workboard's project has been removed from the card's project
-    // list, we are going to remove it from the board completely.
+    // If the workboard's project and all descendant projects have been removed
+    // from the card's project list, we are going to remove it from the board
+    // completely.
+
+    // TODO: If the user did something sneaky and changed a subproject, we'll
+    // currently leave the card where it was but should really move it to the
+    // proper new column.
+
+    $descendant_projects = id(new PhabricatorProjectQuery())
+      ->setViewer($viewer)
+      ->withAncestorProjectPHIDs(array($column->getProjectPHID()))
+      ->execute();
+    $board_phids = mpull($descendant_projects, 'getPHID', 'getPHID');
+    $board_phids[$column->getProjectPHID()] = $column->getProjectPHID();
+
     $project_map = array_fuse($task->getProjectPHIDs());
-    $remove_card = empty($project_map[$column->getProjectPHID()]);
+    $remove_card = !array_intersect_key($board_phids, $project_map);
 
     $positions = id(new PhabricatorProjectColumnPositionQuery())
       ->setViewer($viewer)
-      ->withColumns(array($column))
+      ->withBoardPHIDs(array($column->getProjectPHID()))
+      ->withColumnPHIDs(array($column->getPHID()))
       ->execute();
     $task_phids = mpull($positions, 'getObjectPHID');
 
     $column_tasks = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
       ->withPHIDs($task_phids)
+      ->needProjectPHIDs(true)
       ->execute();
 
     if ($order == PhabricatorProjectColumn::ORDER_NATURAL) {
@@ -329,12 +344,22 @@ final class ManiphestEditEngine
         ->executeOne();
     }
 
+    $handle_phids = $task->getProjectPHIDs();
+    $handle_phids = array_fuse($handle_phids);
+    $handle_phids = array_diff_key($handle_phids, $board_phids);
+
+    $project_handles = $viewer->loadHandles($handle_phids);
+    $project_handles = iterator_to_array($project_handles);
+
     $tasks = id(new ProjectBoardTaskCard())
       ->setViewer($viewer)
       ->setTask($task)
       ->setOwner($owner)
+      ->setProjectHandles($project_handles)
       ->setCanEdit(true)
       ->getItem();
+
+    $tasks->addClass('phui-workcard');
 
     $payload = array(
       'tasks' => $tasks,

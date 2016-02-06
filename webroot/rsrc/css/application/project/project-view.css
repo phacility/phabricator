@@ -7,6 +7,23 @@
   padding-bottom: 64px;
 }
 
+.project-view-header-tag {
+  margin-left: 8px;
+  font-size: {$normalfontsize};
+  color: {$bluetext};
+  font-family: {$fontfamily};
+  font-weight: normal;
+}
+
+.device-phone .project-view-header-tag {
+  display: block;
+  margin-left: -4px;
+}
+
+.project-view-header-tag .phui-icon-view {
+  color: {$bluetext};
+}
+
 .phui-box.phui-box-grey.project-view-properties {
   margin: 0 16px 0 16px;
   padding: 4px 12px;
@@ -31,13 +48,18 @@
   padding: 8px;
 }
 
-.project-view-feed .phui-header-shell {
+.project-view-feed .phui-object-box .phui-header-shell {
   padding: 8px 4px;
 }
 
 .project-view-feed .phui-header-header {
   font-size: {$biggerfontsize};
-  margin-left: 4px;
+  margin-left: 8px;
+}
+
+.device-desktop .project-view-feed .phui-feed-story,
+.device-tablet .project-view-feed .phui-feed-story {
+  padding-left: 22px;
 }
 
 .project-view-home .phui-box-grey {
@@ -58,6 +80,10 @@
 
 .device-desktop .phui-two-column-view.project-view-badges .phui-side-column {
   width: 364px;
+}
+
+.project-view-home .phui-box-grey .phui-object-item-attribute .phui-icon-view {
+  color: {$lightgreytext};
 }
 
 .profile-no-badges {

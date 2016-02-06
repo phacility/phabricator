@@ -383,17 +383,24 @@ final class PHUIObjectItemView extends AphrontTagView {
       ),
       $this->header);
 
-    $header = javelin_tag(
+    // Wrap the header content in a <span> with the "slippery" sigil. This
+    // prevents us from beginning a drag if you click the text (like "T123"),
+    // but not if you click the white space after the header.
+    $header = phutil_tag(
       'div',
       array(
         'class' => 'phui-object-item-name',
-        'sigil' => 'slippery',
       ),
-      array(
-        $this->headIcons,
-        $header_name,
-        $header_link,
-      ));
+      javelin_tag(
+        'span',
+        array(
+          'sigil' => 'slippery',
+        ),
+        array(
+          $this->headIcons,
+          $header_name,
+          $header_link,
+        )));
 
     $icons = array();
     if ($this->icons) {
@@ -452,14 +459,15 @@ final class PHUIObjectItemView extends AphrontTagView {
         $icon_list);
     }
 
+    $handle_bar = null;
     if ($this->handleIcons) {
       $handle_bar = array();
       foreach ($this->handleIcons as $handleicon) {
         $handle_bar[] =
           $this->renderHandleIcon($handleicon['icon'], $handleicon['label']);
       }
-      $icons[] = phutil_tag(
-        'div',
+      $handle_bar = phutil_tag(
+        'li',
         array(
           'class' => 'phui-object-item-handle-icons',
         ),
@@ -504,7 +512,7 @@ final class PHUIObjectItemView extends AphrontTagView {
     }
 
     $attrs = null;
-    if ($this->attributes) {
+    if ($this->attributes || $handle_bar) {
       $attrs = array();
       $spacer = phutil_tag(
         'span',
@@ -531,7 +539,10 @@ final class PHUIObjectItemView extends AphrontTagView {
         array(
           'class' => 'phui-object-item-attributes',
         ),
-        $attrs);
+        array(
+          $handle_bar,
+          $attrs,
+        ));
     }
 
     $status = null;
@@ -750,7 +761,7 @@ final class PHUIObjectItemView extends AphrontTagView {
 
     if (strlen($label)) {
       $options['sigil'] = 'has-tooltip';
-      $options['meta']  = array('tip' => $label);
+      $options['meta']  = array('tip' => $label, 'align' => 'E');
     }
 
     return javelin_tag('span', $options, '');

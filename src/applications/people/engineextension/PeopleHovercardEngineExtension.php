@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorPeopleHovercardEngineExtension
+final class PeopleHovercardEngineExtension
   extends PhabricatorHovercardEngineExtension {
 
   const EXTENSIONKEY = 'people';
@@ -36,7 +36,7 @@ final class PhabricatorPeopleHovercardEngineExtension
   }
 
   public function renderHovercard(
-    PhabricatorHovercardView $hovercard,
+    PHUIHovercardView $hovercard,
     PhabricatorObjectHandle $handle,
     $object,
     $data) {

@@ -37,7 +37,7 @@ final class PhabricatorProjectProjectPHIDType extends PhabricatorPHIDType {
     foreach ($handles as $phid => $handle) {
       $project = $objects[$phid];
 
-      $name = $project->getName();
+      $name = $project->getDisplayName();
       $id = $project->getID();
       $slug = $project->getPrimarySlug();
 

@@ -19,6 +19,7 @@
   margin: 0;
   display: inline-block;
   color: {$lightgreytext};
+  font-size: {$normalfontsize};
 }
 
 .device .phui-workpanel-view .phui-header-shell {
@@ -34,6 +35,14 @@
   user-select: none;
 }
 
+.phui-workpanel-view.phui-workboard-column-milestone .phui-box-grey {
+  background-color: rgba(234, 230, 247, 0.75);
+}
+
+.phui-workpanel-view .phui-header-col2 .phui-icon-view {
+  margin-right: 4px;
+}
+
 .phui-workpanel-view .phui-workpanel-header-action {
   float: right;
   width: 24px;
@@ -44,7 +53,7 @@
   padding: 8px 8px 4px 8px;
 }
 
-.device-phone .phui-workpanel-view .phui-workpanel-body {
+.device .phui-workpanel-view .phui-workpanel-body {
   padding: 8px 0;
 }
 

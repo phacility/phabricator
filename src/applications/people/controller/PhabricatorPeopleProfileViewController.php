@@ -54,23 +54,21 @@ final class PhabricatorPeopleProfileViewController
     $feed = $this->buildPeopleFeed($user, $viewer);
     $feed = phutil_tag_div('project-view-feed', $feed);
 
+    $projects = $this->buildProjectsView($user);
     $badges = $this->buildBadgesView($user);
 
-    if ($badges) {
-      $columns = id(new PHUITwoColumnView())
-        ->addClass('project-view-badges')
-        ->setMainColumn(
-          array(
-            $properties,
-            $feed,
-          ))
-        ->setSideColumn(
-          array(
-            $badges,
-          ));
-    } else {
-      $columns = array($properties, $feed);
-    }
+    $columns = id(new PHUITwoColumnView())
+      ->addClass('project-view-badges')
+      ->setMainColumn(
+        array(
+          $properties,
+          $feed,
+        ))
+      ->setSideColumn(
+        array(
+          $projects,
+          $badges,
+        ));
 
     $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorPeopleProfilePanelEngine::PANEL_PROFILE);
@@ -112,7 +110,7 @@ final class PhabricatorPeopleProfileViewController
       PhabricatorCustomField::ROLE_VIEW);
     $field_list->appendFieldsToPropertyList($user, $viewer, $view);
 
-    if ($view->isEmpty()) {
+    if (!$view->hasAnyProperties()) {
       return null;
     }
 
@@ -124,38 +122,100 @@ final class PhabricatorPeopleProfileViewController
     return $view;
   }
 
-  private function buildBadgesView(
+  private function buildProjectsView(
     PhabricatorUser $user) {
 
     $viewer = $this->getViewer();
-    $class = 'PhabricatorBadgesApplication';
-    $box = null;
+    $projects = id(new PhabricatorProjectQuery())
+      ->setViewer($viewer)
+      ->withMemberPHIDs(array($user->getPHID()))
+      ->needImages(true)
+      ->withStatus(PhabricatorProjectQuery::STATUS_OPEN)
+      ->execute();
 
-    if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
-      $badge_phids = $user->getBadgePHIDs();
-      if ($badge_phids) {
-        $badges = id(new PhabricatorBadgesQuery())
-          ->setViewer($viewer)
-          ->withPHIDs($badge_phids)
-          ->withStatuses(array(PhabricatorBadgesBadge::STATUS_ACTIVE))
-          ->execute();
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Projects'));
 
-        $flex = new PHUIBadgeBoxView();
-        foreach ($badges as $badge) {
-          $item = id(new PHUIBadgeView())
-            ->setIcon($badge->getIcon())
-            ->setHeader($badge->getName())
-            ->setSubhead($badge->getFlavor())
-            ->setQuality($badge->getQuality());
-          $flex->addItem($item);
-        }
+    if (!empty($projects)) {
+      $limit = 5;
+      $render_phids = array_slice($projects, 0, $limit);
+      $list = id(new PhabricatorProjectListView())
+        ->setUser($viewer)
+        ->setProjects($render_phids);
 
-      $box = id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Badges'))
-        ->appendChild($flex)
-        ->setBackground(PHUIBoxView::GREY);
+      if (count($projects) > $limit) {
+        $header_text = pht(
+          'Projects (%s)',
+          phutil_count($projects));
+
+        $header = id(new PHUIHeaderView())
+          ->setHeader($header_text)
+          ->addActionLink(
+            id(new PHUIButtonView())
+              ->setTag('a')
+              ->setIcon('fa-list-ul')
+              ->setText(pht('View All'))
+              ->setHref('/project/?member='.$user->getPHID()));
+
       }
+
+    } else {
+      $error = id(new PHUIBoxView())
+        ->addClass('mlb')
+        ->appendChild(pht('User does not belong to any projects.'));
+      $list = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
+        ->appendChild($error);
     }
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($list)
+      ->setBackground(PHUIBoxView::GREY);
+
+    return $box;
+  }
+
+  private function buildBadgesView(PhabricatorUser $user) {
+
+    $viewer = $this->getViewer();
+    $class = 'PhabricatorBadgesApplication';
+
+    if (!PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
+      return null;
+    }
+
+    $badge_phids = $user->getBadgePHIDs();
+    if ($badge_phids) {
+      $badges = id(new PhabricatorBadgesQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($badge_phids)
+        ->withStatuses(array(PhabricatorBadgesBadge::STATUS_ACTIVE))
+        ->execute();
+
+      $flex = new PHUIBadgeBoxView();
+      foreach ($badges as $badge) {
+        $item = id(new PHUIBadgeView())
+          ->setIcon($badge->getIcon())
+          ->setHeader($badge->getName())
+          ->setSubhead($badge->getFlavor())
+          ->setQuality($badge->getQuality());
+        $flex->addItem($item);
+      }
+
+    } else {
+      $error = id(new PHUIBoxView())
+        ->addClass('mlb')
+        ->appendChild(pht('User does not have any badges.'));
+      $flex = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
+        ->appendChild($error);
+    }
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Badges'))
+      ->appendChild($flex)
+      ->setBackground(PHUIBoxView::GREY);
 
     return $box;
   }

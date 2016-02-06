@@ -54,8 +54,10 @@ final class PhabricatorPeopleUserPHIDType extends PhabricatorPHIDType {
         $icon_icon = PhabricatorPeopleIconSet::getIconIcon($icon_key);
         $subtitle = $profile->getDisplayTitle();
 
-        $handle->setIcon($icon_icon);
-        $handle->setSubtitle($subtitle);
+        $handle
+          ->setIcon($icon_icon)
+          ->setSubtitle($subtitle)
+          ->setTokenIcon('fa-user');
       }
 
       $availability = null;

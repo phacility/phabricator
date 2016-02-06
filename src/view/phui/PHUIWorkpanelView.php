@@ -10,8 +10,8 @@ final class PHUIWorkpanelView extends AphrontTagView {
   private $headerTag;
   private $headerIcon;
 
-  public function setHeaderIcon(PHUIIconView $header_icon) {
-    $this->headerIcon = $header_icon;
+  public function setHeaderIcon($icon) {
+    $this->headerIcon = $icon;
     return $this;
   }
 
