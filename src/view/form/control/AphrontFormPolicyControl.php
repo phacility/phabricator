@@ -167,11 +167,16 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
 
     $type_project = PhabricatorPolicyType::TYPE_PROJECT;
 
+    // Make sure we have a "Projects" group before we adjust it.
+    if (empty($options[$type_project])) {
+      $options[$type_project] = array();
+    }
+
+    $options[$type_project] = isort($options[$type_project], 'sort');
+
     $placeholder = id(new PhabricatorPolicy())
       ->setName(pht('Other Project...'))
       ->setIcon('fa-search');
-
-    $options[$type_project] = isort($options[$type_project], 'sort');
 
     $options[$type_project][$this->getSelectProjectKey()] = array(
       'name' => $placeholder->getName(),
