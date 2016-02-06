@@ -110,10 +110,6 @@ div.phui-calendar-day-event {
   z-index: 9;
 }
 
-.drag-frame {
-  z-index: 10;
-}
-
 .jx-mask {
   z-index: 10;
 }
@@ -140,6 +136,10 @@ div.jx-typeahead-results {
 
 .fancy-datepicker {
   z-index: 15;
+}
+
+.drag-frame {
+  z-index: 16;
 }
 
 .jx-hovercard-container {
