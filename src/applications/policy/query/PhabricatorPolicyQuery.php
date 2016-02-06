@@ -230,6 +230,10 @@ final class PhabricatorPolicyQuery
           ->setViewer($viewer)
           ->withMemberPHIDs(array($viewer->getPHID()))
           ->withIsMilestone(false)
+          ->withStatuses(
+            array(
+              PhabricatorProjectStatus::STATUS_ACTIVE,
+            ))
           ->setLimit($default_limit)
           ->execute();
         $default_projects = mpull($default_projects, null, 'getPHID');
