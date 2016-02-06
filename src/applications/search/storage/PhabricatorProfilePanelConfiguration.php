@@ -109,6 +109,10 @@ final class PhabricatorProfilePanelConfiguration
     return $this->getPanel()->canHidePanel($this);
   }
 
+  public function shouldEnableForObject($object) {
+    return $this->getPanel()->shouldEnableForObject($object);
+  }
+
   public function getSortKey() {
     $order = $this->getPanelOrder();
     if ($order === null) {
