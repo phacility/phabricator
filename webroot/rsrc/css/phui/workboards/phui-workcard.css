@@ -106,6 +106,10 @@
   width: 263px;
 }
 
+.phui-workcard.phui-object-item.phui-workcard-upload-target {
+  background-color: {$sh-greenbackground};
+}
+
 
 /* - Draggable Colors --------------------------------------------------------*/
 

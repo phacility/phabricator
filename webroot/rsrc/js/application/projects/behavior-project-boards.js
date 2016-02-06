@@ -7,6 +7,7 @@
  *           javelin-stratcom
  *           javelin-workflow
  *           phabricator-draggable-list
+ *           phabricator-drag-and-drop-file-upload
  */
 
 JX.behavior('project-boards', function(config, statics) {
@@ -348,6 +349,39 @@ JX.behavior('project-boards', function(config, statics) {
           init_board();
         }
       });
+
+    if (JX.PhabricatorDragAndDropFileUpload.isSupported()) {
+      var drop = new JX.PhabricatorDragAndDropFileUpload('project-card')
+        .setURI(config.uploadURI)
+        .setChunkThreshold(config.chunkThreshold);
+
+      drop.listen('didBeginDrag', function(node) {
+        JX.DOM.alterClass(node, 'phui-workcard-upload-target', true);
+      });
+
+      drop.listen('didEndDrag', function(node) {
+        JX.DOM.alterClass(node, 'phui-workcard-upload-target', false);
+      });
+
+      drop.listen('didUpload', function(file) {
+        var node = file.getTargetNode();
+
+        var data = {
+          boardPHID: statics.projectPHID,
+          objectPHID: JX.Stratcom.getData(node).objectPHID,
+          filePHID: file.getPHID()
+        };
+
+        new JX.Workflow(config.coverURI, data)
+          .setHandler(function(r) {
+            JX.DOM.replace(node, JX.$H(r.task));
+          })
+          .start();
+      });
+
+      drop.start();
+    }
+
     return true;
   }
 

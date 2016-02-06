@@ -16,6 +16,7 @@ final class ManiphestTransaction
   const TYPE_UNBLOCK = 'unblock';
   const TYPE_PARENT = 'parent';
   const TYPE_COLUMN = 'column';
+  const TYPE_COVER_IMAGE = 'cover-image';
 
   // NOTE: this type is deprecated. Keep it around for legacy installs
   // so any transactions render correctly.
@@ -162,6 +163,9 @@ final class ManiphestTransaction
         sort($new_cols);
 
         return ($old_cols === $new_cols);
+      case self::TYPE_COVER_IMAGE:
+        // At least for now, don't show these.
+        return true;
     }
 
     return parent::shouldHide();

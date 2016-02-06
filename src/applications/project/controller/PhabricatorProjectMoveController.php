@@ -7,12 +7,13 @@ final class PhabricatorProjectMoveController
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
+    $request->validateCSRF();
+
     $column_phid = $request->getStr('columnPHID');
     $object_phid = $request->getStr('objectPHID');
     $after_phid = $request->getStr('afterPHID');
     $before_phid = $request->getStr('beforePHID');
     $order = $request->getStr('order', PhabricatorProjectColumn::DEFAULT_ORDER);
-
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
@@ -175,39 +176,7 @@ final class PhabricatorProjectMoveController
 
     $editor->applyTransactions($object, $xactions);
 
-    // Reload the object so it reflects edits which have been applied.
-    $object = id(new ManiphestTaskQuery())
-      ->setViewer($viewer)
-      ->withPHIDs(array($object_phid))
-      ->needProjectPHIDs(true)
-      ->executeOne();
-
-    $except_phids = array($board_phid);
-    if ($project->getHasSubprojects() || $project->getHasMilestones()) {
-      $descendants = id(new PhabricatorProjectQuery())
-        ->setViewer($viewer)
-        ->withAncestorProjectPHIDs($except_phids)
-        ->execute();
-      foreach ($descendants as $descendant) {
-        $except_phids[] = $descendant->getPHID();
-      }
-    }
-
-    $rendering_engine = id(new PhabricatorBoardRenderingEngine())
-      ->setViewer($viewer)
-      ->setObjects(array($object))
-      ->setExcludedProjectPHIDs($except_phids);
-
-    $card = $rendering_engine->renderCard($object->getPHID());
-
-    $item = $card->getItem();
-    $item->addClass('phui-workcard');
-
-    return id(new AphrontAjaxResponse())
-      ->setContent(
-        array(
-          'task' => $item,
-        ));
+    return $this->newCardResponse($board_phid, $object_phid);
   }
 
 }

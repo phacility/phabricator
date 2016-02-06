@@ -219,6 +219,9 @@ final class PhabricatorProjectBoardViewController
       'projectPHID' => $project->getPHID(),
       'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
       'createURI' => $this->getCreateURI(),
+      'uploadURI' => '/file/dropupload/',
+      'coverURI' => $this->getApplicationURI('cover/'),
+      'chunkThreshold' => PhabricatorFileStorageEngine::getChunkThreshold(),
       'order' => $this->sortKey,
     );
     $this->initBehavior(

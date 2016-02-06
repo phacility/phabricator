@@ -226,6 +226,10 @@ final class ManiphestTask extends ManiphestDAO
     return idx($this->properties, $key, $default);
   }
 
+  public function getCoverImageFilePHID() {
+    return idx($this->properties, 'cover.filePHID');
+  }
+
   public function getCoverImageThumbnailPHID() {
     return idx($this->properties, 'cover.thumbnailPHID');
   }

@@ -28,6 +28,7 @@ final class ManiphestTransactionEditor
     $types[] = ManiphestTransaction::TYPE_UNBLOCK;
     $types[] = ManiphestTransaction::TYPE_PARENT;
     $types[] = ManiphestTransaction::TYPE_COLUMN;
+    $types[] = ManiphestTransaction::TYPE_COVER_IMAGE;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -66,6 +67,8 @@ final class ManiphestTransactionEditor
         return $xaction->getOldValue();
       case ManiphestTransaction::TYPE_SUBPRIORITY:
         return $object->getSubpriority();
+      case ManiphestTransaction::TYPE_COVER_IMAGE:
+        return $object->getCoverImageFilePHID();
       case ManiphestTransaction::TYPE_MERGED_INTO:
       case ManiphestTransaction::TYPE_MERGED_FROM:
         return null;
@@ -92,6 +95,7 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_MERGED_INTO:
       case ManiphestTransaction::TYPE_MERGED_FROM:
       case ManiphestTransaction::TYPE_UNBLOCK:
+      case ManiphestTransaction::TYPE_COVER_IMAGE:
         return $xaction->getNewValue();
       case ManiphestTransaction::TYPE_PARENT:
       case ManiphestTransaction::TYPE_COLUMN:
@@ -160,6 +164,32 @@ final class ManiphestTransactionEditor
         return;
       case ManiphestTransaction::TYPE_MERGED_INTO:
         $object->setStatus(ManiphestTaskStatus::getDuplicateStatus());
+        return;
+      case ManiphestTransaction::TYPE_COVER_IMAGE:
+        $file_phid = $xaction->getNewValue();
+
+        if ($file_phid) {
+          $file = id(new PhabricatorFileQuery())
+            ->setViewer($this->getActor())
+            ->withPHIDs(array($file_phid))
+            ->executeOne();
+        } else {
+          $file = null;
+        }
+
+        if (!$file || !$file->isTransformableImage()) {
+          $object->setProperty('cover.filePHID', null);
+          $object->setProperty('cover.thumbnailPHID', null);
+          return;
+        }
+
+        $xform_key = PhabricatorFileThumbnailTransform::TRANSFORM_WORKCARD;
+
+        $xform = PhabricatorFileTransform::getTransformByKey($xform_key)
+          ->executeTransform($file);
+
+        $object->setProperty('cover.filePHID', $file->getPHID());
+        $object->setProperty('cover.thumbnailPHID', $xform->getPHID());
         return;
       case ManiphestTransaction::TYPE_MERGED_FROM:
       case ManiphestTransaction::TYPE_PARENT:
@@ -819,6 +849,41 @@ final class ManiphestTransactionEditor
           }
         }
         break;
+      case ManiphestTransaction::TYPE_COVER_IMAGE:
+        foreach ($xactions as $xaction) {
+          $old = $xaction->getOldValue();
+          $new = $xaction->getNewValue();
+          if (!$new) {
+            continue;
+          }
+
+          if ($new === $old) {
+            continue;
+          }
+
+          $file = id(new PhabricatorFileQuery())
+            ->setViewer($this->getActor())
+            ->withPHIDs(array($new))
+            ->executeOne();
+          if (!$file) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('File "%s" is not valid.', $new),
+              $xaction);
+            continue;
+          }
+
+          if (!$file->isTransformableImage()) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('File "%s" is not a valid image file.', $new),
+              $xaction);
+            continue;
+          }
+        }
+        break;
     }
 
     return $errors;
@@ -939,6 +1004,20 @@ final class ManiphestTransactionEditor
       ->setViewer($this->getActor())
       ->withPHIDs(array($column_phid))
       ->executeOne();
+  }
+
+  protected function extractFilePHIDsFromCustomTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    $phids = parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
+
+    switch ($xaction->getTransactionType()) {
+      case ManiphestTransaction::TYPE_COVER_IMAGE:
+        $phids[] = $xaction->getNewValue();
+        break;
+    }
+
+    return $phids;
   }
 
 
