@@ -281,6 +281,13 @@ final class PhabricatorProjectBoardViewController
         ->setSubHeader($column->getDisplayType())
         ->addSigil('workpanel');
 
+      $proxy = $column->getProxy();
+      if ($proxy) {
+        $proxy_id = $proxy->getID();
+        $href = $this->getApplicationURI("view/{$proxy_id}/");
+        $panel->setHref($href);
+      }
+
       $header_icon = $column->getHeaderIcon();
       if ($header_icon) {
         $panel->setHeaderIcon($header_icon);
