@@ -107,17 +107,26 @@ JX.install('PhabricatorDragAndDropFileUpload', {
           return;
         }
 
-        if (!this._node && !this._depth) {
-          this._target = e.getNode(this._sigil);
+        if (!this._node) {
+          var target = e.getNode(this._sigil);
+          if (target !== this._target) {
+            this._updateDepth(-this._depth);
+            this._target = target;
+          }
         }
 
         if (contains(this._getTarget(), e.getTarget())) {
           this._updateDepth(1);
         }
+
       });
 
       var on_dragleave = JX.bind(this, function(e) {
         if (!this.getIsEnabled()) {
+          return;
+        }
+
+        if (!this._getTarget()) {
           return;
         }
 
