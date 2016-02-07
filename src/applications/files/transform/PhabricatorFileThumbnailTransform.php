@@ -77,6 +77,7 @@ final class PhabricatorFileThumbnailTransform
       id(new self())
         ->setName(pht('Workcard (526px)'))
         ->setKey(self::TRANSFORM_WORKCARD)
+        ->setScaleUp(true)
         ->setDimensions(526, null),
     );
   }
