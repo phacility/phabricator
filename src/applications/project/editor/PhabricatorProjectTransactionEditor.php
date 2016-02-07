@@ -631,6 +631,7 @@ final class PhabricatorProjectTransactionEditor
           }
           break;
         case PhabricatorProjectTransaction::TYPE_PARENT:
+        case PhabricatorProjectTransaction::TYPE_MILESTONE:
           $materialize = true;
           $new_parent = $object->getParentProject();
           break;
@@ -667,6 +668,11 @@ final class PhabricatorProjectTransactionEditor
     if ($materialize) {
       id(new PhabricatorProjectsMembershipIndexEngineExtension())
         ->rematerialize($object);
+    }
+
+    if ($new_parent) {
+      id(new PhabricatorProjectsMembershipIndexEngineExtension())
+        ->rematerialize($new_parent);
     }
 
     return parent::applyFinalEffects($object, $xactions);

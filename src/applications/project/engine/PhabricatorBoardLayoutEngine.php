@@ -435,7 +435,7 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
 
     // If we have proxies, we need to force cards into the correct proxy
     // columns.
-    if ($proxy_map) {
+    if ($proxy_map && $object_phids) {
       $edge_query = id(new PhabricatorEdgeQuery())
         ->withSourcePHIDs($object_phids)
         ->withEdgeTypes(
