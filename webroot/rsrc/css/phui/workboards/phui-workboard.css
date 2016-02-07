@@ -12,6 +12,7 @@
 
 .device-desktop .phui-workboard-view-shadow {
   overflow-x: auto;
+  overflow-y: hidden;
   position: absolute;
   top: 79px;
   bottom: 0;
@@ -69,4 +70,10 @@
 
 .device .project-board-wrapper {
   margin: 16px;
+}
+
+.device-desktop .phui-workpanel-body {
+  max-height: calc(100vh - 170px);
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
