@@ -52,6 +52,16 @@
   left: {$menu.profile.width.collapsed};
 }
 
+!print .project-board-wrapper .phui-workboard-view-shadow {
+  position: static;
+}
+
+!print .project-board-wrapper .aphront-multi-column-column-outer {
+  display: block;
+  margin: 0 0 18px;
+  page-break-inside: avoid;
+}
+
 .device-desktop .phui-workboard-view .aphront-multi-column-fixed
   .aphront-multi-column-inner {
     margin-left: 0;

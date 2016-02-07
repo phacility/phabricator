@@ -300,3 +300,7 @@
     max-width: {$menu.profile.width};
   }
 }
+
+!print .phui-profile-menu .phabricator-side-menu {
+  display: none;
+}
