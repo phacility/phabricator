@@ -664,14 +664,21 @@ JX.install('DraggableList', {
 
         // In Safari, we'll eventually reach `window.document`, which is not
         // sufficently node-like to support sigil tests.
-        var lock;
+        var lock = false;
         if (container === window.document) {
           lock = false;
         } else {
           // Some elements may respond to, e.g., `scrollTop` adjustment, even
           // though they are not scrollable. This sigil disables adjustment
           // for them.
-          lock = JX.Stratcom.hasSigil(container, 'lock-scroll-while-dragging');
+          var lock_sigil;
+          if (property == 'scrollTop') {
+            lock_sigil = 'lock-scroll-y-while-dragging';
+          }
+
+          if (lock_sigil) {
+            lock = JX.Stratcom.hasSigil(container, lock_sigil);
+          }
         }
 
         if (!lock) {

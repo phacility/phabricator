@@ -29,7 +29,7 @@ final class PHUIWorkboardView extends AphrontTagView {
       'div',
       array(
         'class' => 'phui-workboard-view-shadow',
-        'sigil' => 'workboard-shadow lock-scroll-while-dragging',
+        'sigil' => 'workboard-shadow lock-scroll-y-while-dragging',
       ),
       $view);
 
