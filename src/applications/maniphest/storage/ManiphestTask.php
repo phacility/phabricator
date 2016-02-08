@@ -37,6 +37,7 @@ final class ManiphestTask extends ManiphestDAO
   protected $ownerOrdering;
   protected $spacePHID;
   protected $properties = array();
+  protected $points;
 
   private $subscriberPHIDs = self::ATTACHABLE;
   private $groupByProjectPHID = self::ATTACHABLE;
@@ -80,6 +81,7 @@ final class ManiphestTask extends ManiphestDAO
         'ownerOrdering' => 'text64?',
         'originalEmailSource' => 'text255?',
         'subpriority' => 'double',
+        'points' => 'double?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
