@@ -77,7 +77,7 @@ final class ManiphestEditEngine
       $owner_value = array($this->getViewer()->getPHID());
     }
 
-    return array(
+    $fields = array(
       id(new PhabricatorHandlesEditField())
         ->setKey('parent')
         ->setLabel(pht('Parent Task'))
@@ -149,18 +149,37 @@ final class ManiphestEditEngine
         ->setValue($object->getPriority())
         ->setOptions($priority_map)
         ->setCommentActionLabel(pht('Change Priority')),
-      id(new PhabricatorRemarkupEditField())
-        ->setKey('description')
-        ->setLabel(pht('Description'))
-        ->setDescription(pht('Task description.'))
-        ->setConduitDescription(pht('Update the task description.'))
-        ->setConduitTypeDescription(pht('New task description.'))
-        ->setTransactionType(ManiphestTransaction::TYPE_DESCRIPTION)
-        ->setValue($object->getDescription())
-        ->setPreviewPanel(
-          id(new PHUIRemarkupPreviewPanel())
-            ->setHeader(pht('Description Preview'))),
     );
+
+    if (ManiphestTaskPoints::getIsEnabled()) {
+      $points_label = ManiphestTaskPoints::getPointsLabel();
+      $action_label = ManiphestTaskPoints::getPointsActionLabel();
+
+      $fields[] = id(new PhabricatorPointsEditField())
+        ->setKey('points')
+        ->setLabel($points_label)
+        ->setDescription(pht('Point value of the task.'))
+        ->setConduitDescription(pht('Change the task point value.'))
+        ->setConduitTypeDescription(pht('New task point value.'))
+        ->setTransactionType(ManiphestTransaction::TYPE_POINTS)
+        ->setIsCopyable(true)
+        ->setValue($object->getPoints())
+        ->setCommentActionLabel($action_label);
+    }
+
+    $fields[] = id(new PhabricatorRemarkupEditField())
+      ->setKey('description')
+      ->setLabel(pht('Description'))
+      ->setDescription(pht('Task description.'))
+      ->setConduitDescription(pht('Update the task description.'))
+      ->setConduitTypeDescription(pht('New task description.'))
+      ->setTransactionType(ManiphestTransaction::TYPE_DESCRIPTION)
+      ->setValue($object->getDescription())
+      ->setPreviewPanel(
+        id(new PHUIRemarkupPreviewPanel())
+          ->setHeader(pht('Description Preview')));
+
+    return $fields;
   }
 
   private function getTaskStatusMap(ManiphestTask $task) {

@@ -35,6 +35,9 @@ JX.install('PHUIXFormControl', {
         case 'select':
           input = this._newSelect(spec);
           break;
+        case 'points':
+          input = this._newPoints(spec);
+          break;
         default:
           // TODO: Default or better error?
           JX.$E('Bad Input Type');
@@ -148,6 +151,25 @@ JX.install('PHUIXFormControl', {
         spec.value,
         {},
         spec.order);
+
+      return {
+        node: node,
+        get: function() {
+          return node.value;
+        },
+        set: function(value) {
+          node.value = value;
+        }
+      };
+    },
+
+    _newPoints: function(spec) {
+      var attrs = {
+        type: 'text',
+        value: spec.value
+      };
+
+      var node = JX.$N('input', attrs);
 
       return {
         node: node,
