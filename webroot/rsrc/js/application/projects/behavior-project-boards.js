@@ -7,6 +7,7 @@
  *           javelin-stratcom
  *           javelin-workflow
  *           phabricator-draggable-list
+ *           phabricator-drag-and-drop-file-upload
  */
 
 JX.behavior('project-boards', function(config, statics) {
@@ -280,13 +281,16 @@ JX.behavior('project-boards', function(config, statics) {
         // close the dropdown, but don't want to follow the link.
         e.prevent();
 
-        var column_phid = e.getNodeData('column-add-task').columnPHID;
+        var column_data = e.getNodeData('column-add-task');
+        var column_phid = column_data.columnPHID;
+
         var request_data = {
           responseType: 'card',
           columnPHID: column_phid,
-          projects: statics.projectPHID,
+          projects: column_data.projectPHID,
           order: statics.order
         };
+
         var cols = getcolumns();
         var ii;
         var column;
@@ -345,6 +349,80 @@ JX.behavior('project-boards', function(config, statics) {
           init_board();
         }
       });
+
+    if (JX.PhabricatorDragAndDropFileUpload.isSupported()) {
+      var drop = new JX.PhabricatorDragAndDropFileUpload('project-card')
+        .setURI(config.uploadURI)
+        .setChunkThreshold(config.chunkThreshold);
+
+      drop.listen('didBeginDrag', function(node) {
+        JX.DOM.alterClass(node, 'phui-workcard-upload-target', true);
+      });
+
+      drop.listen('didEndDrag', function(node) {
+        JX.DOM.alterClass(node, 'phui-workcard-upload-target', false);
+      });
+
+      drop.listen('didUpload', function(file) {
+        var node = file.getTargetNode();
+
+        var data = {
+          boardPHID: statics.projectPHID,
+          objectPHID: JX.Stratcom.getData(node).objectPHID,
+          filePHID: file.getPHID()
+        };
+
+        new JX.Workflow(config.coverURI, data)
+          .setHandler(function(r) {
+            JX.DOM.replace(node, JX.$H(r.task));
+          })
+          .start();
+      });
+
+      drop.start();
+    }
+
+    // When the user drags the workboard background, pan the workboard
+    // horizontally. This allows you to scroll across cards with only the
+    // mouse, without shift + scrollwheel or using the scrollbar.
+
+    var pan_origin = null;
+    var pan_node = null;
+    var pan_x = null;
+
+    JX.Stratcom.listen('mousedown', 'workboard-shadow', function(e) {
+      if (!JX.Device.isDesktop()) {
+        return;
+      }
+
+      if (e.getNode('workpanel')) {
+        return;
+      }
+
+      if (JX.Stratcom.pass()) {
+        return;
+      }
+
+      e.kill();
+
+      pan_origin = JX.$V(e);
+      pan_node = e.getNode('workboard-shadow');
+      pan_x = pan_node.scrollLeft;
+    });
+
+    JX.Stratcom.listen('mousemove', null, function(e) {
+      if (!pan_origin) {
+        return;
+      }
+
+      var cursor = JX.$V(e);
+      pan_node.scrollLeft = pan_x + (pan_origin.x - cursor.x);
+    });
+
+    JX.Stratcom.listen('mouseup', null, function() {
+      pan_origin = null;
+    });
+
     return true;
   }
 

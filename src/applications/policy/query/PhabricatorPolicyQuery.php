@@ -195,10 +195,52 @@ final class PhabricatorPolicyQuery
     $viewer = $this->getViewer();
 
     if ($viewer->getPHID()) {
-      $projects = id(new PhabricatorProjectQuery())
-        ->setViewer($viewer)
-        ->withMemberPHIDs(array($viewer->getPHID()))
-        ->execute();
+      $pref_key = PhabricatorUserPreferences::PREFERENCE_FAVORITE_POLICIES;
+
+      $favorite_limit = 10;
+      $default_limit = 5;
+
+      // If possible, show the user's 10 most recently used projects.
+      $preferences = $viewer->loadPreferences();
+      $favorites = $preferences->getPreference($pref_key);
+      if (!is_array($favorites)) {
+        $favorites = array();
+      }
+      $favorite_phids = array_keys($favorites);
+      $favorite_phids = array_slice($favorite_phids, -$favorite_limit);
+
+      if ($favorite_phids) {
+        $projects = id(new PhabricatorProjectQuery())
+          ->setViewer($viewer)
+          ->withPHIDs($favorite_phids)
+          ->withIsMilestone(false)
+          ->setLimit($favorite_limit)
+          ->execute();
+        $projects = mpull($projects, null, 'getPHID');
+      } else {
+        $projects = array();
+      }
+
+      // If we didn't find enough favorites, add some default projects. These
+      // are just arbitrary projects that the viewer is a member of, but may
+      // be useful on smaller installs and for new users until they can use
+      // the control enough time to establish useful favorites.
+      if (count($projects) < $default_limit) {
+        $default_projects = id(new PhabricatorProjectQuery())
+          ->setViewer($viewer)
+          ->withMemberPHIDs(array($viewer->getPHID()))
+          ->withIsMilestone(false)
+          ->withStatuses(
+            array(
+              PhabricatorProjectStatus::STATUS_ACTIVE,
+            ))
+          ->setLimit($default_limit)
+          ->execute();
+        $default_projects = mpull($default_projects, null, 'getPHID');
+        $projects = $projects + $default_projects;
+        $projects = array_slice($projects, 0, $default_limit);
+      }
+
       foreach ($projects as $project) {
         $phids[] = $project->getPHID();
       }

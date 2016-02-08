@@ -72,6 +72,7 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
           '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorProjectBoardViewController',
         'move/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectMoveController',
+        'cover/' => 'PhabricatorProjectCoverController',
         'board/(?P<projectID>[1-9]\d*)/' => array(
           'edit/(?:(?P<id>\d+)/)?'
             => 'PhabricatorProjectColumnEditController',

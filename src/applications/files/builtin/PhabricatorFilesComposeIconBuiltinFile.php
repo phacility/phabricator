@@ -179,6 +179,7 @@ final class PhabricatorFilesComposeIconBuiltinFile
       'fa-legal' => pht('Hired Protection'),
       'fa-linux' => pht('M\'Lady'),
       'fa-lock' => pht('Policy'),
+      'fa-map-marker' => pht('Destination Beacon'),
       'fa-microphone' => pht('Podcasting'),
       'fa-mobile' => pht('Tiny Pocket Cat Meme Machine'),
       'fa-money' => pht('1 of 99 Problems'),

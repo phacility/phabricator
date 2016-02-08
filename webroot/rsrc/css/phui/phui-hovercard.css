@@ -7,20 +7,17 @@
 }
 
 .phui-hovercard-wrapper {
-  float: left;
   width: 400px;
 }
 
 .device-phone .phui-hovercard-wrapper {
-  float: left;
   width: 300px;
 }
 
 .phui-hovercard-container {
-  float: left;
   width: 100%;
   box-shadow: {$dropshadow};
-  border: 1px solid {$blueborder};
+  border: 1px solid {$lightblueborder};
   border-radius: 3px;
   background-color: #fff;
 }
@@ -33,7 +30,7 @@
 }
 
 .phui-hovercard-head .phui-header-header {
-  font-size: 14px;
+  font-size: {$biggerfontsize};
 }
 
 .phui-hovercard-head .phui-tag-type-state {

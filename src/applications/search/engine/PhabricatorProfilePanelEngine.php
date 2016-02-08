@@ -239,6 +239,10 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
     // Merge the stored panels into the builtin panels. If a builtin panel has
     // a stored version, replace the defaults with the stored changes.
     foreach ($stored_panels as $stored_panel) {
+      if (!$stored_panel->shouldEnableForObject($object)) {
+        continue;
+      }
+
       $builtin_key = $stored_panel->getBuiltinKey();
       if ($builtin_key !== null) {
         // If this builtin actually exists, replace the builtin with the
@@ -340,6 +344,10 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
         ->attachPanel($panel)
         ->attachProfileObject($object)
         ->setPanelOrder($order);
+
+      if (!$builtin->shouldEnableForObject($object)) {
+        continue;
+      }
 
       $map[$builtin_key] = $builtin;
 

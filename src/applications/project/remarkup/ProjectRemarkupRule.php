@@ -16,7 +16,9 @@ final class ProjectRemarkupRule extends PhabricatorObjectRemarkupRule {
       return '#'.$id;
     }
 
-    return $handle->renderTag();
+    $tag = $handle->renderTag();
+    $tag->setPHID($handle->getPHID());
+    return $tag;
   }
 
   protected function getObjectIDPattern() {

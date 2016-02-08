@@ -26,7 +26,7 @@ final class PhabricatorProjectProfileController
       ->setType(PHUITagView::TYPE_SHADE);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(array($project->getName(), $tag))
+      ->setHeader(array($project->getDisplayName(), $tag))
       ->setUser($viewer)
       ->setPolicyObject($project)
       ->setImage($picture)
@@ -115,7 +115,7 @@ final class PhabricatorProjectProfileController
     return $this->newPage()
       ->setNavigation($nav)
       ->setCrumbs($crumbs)
-      ->setTitle($project->getName())
+      ->setTitle($project->getDisplayName())
       ->setPageObjectPHIDs(array($project->getPHID()))
       ->appendChild(
         array(

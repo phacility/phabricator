@@ -27,6 +27,7 @@ final class PhabricatorProjectQuery
   const STATUS_CLOSED   = 'status-closed';
   const STATUS_ACTIVE   = 'status-active';
   const STATUS_ARCHIVED = 'status-archived';
+  private $statuses;
 
   private $needSlugs;
   private $needMembers;
@@ -46,6 +47,11 @@ final class PhabricatorProjectQuery
 
   public function withStatus($status) {
     $this->status = $status;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -385,6 +391,13 @@ final class PhabricatorProjectQuery
         $conn,
         'status IN (%Ld)',
         $filter);
+    }
+
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'status IN (%Ls)',
+        $this->statuses);
     }
 
     if ($this->ids !== null) {

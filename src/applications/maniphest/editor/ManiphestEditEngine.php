@@ -280,14 +280,28 @@ final class ManiphestEditEngine
       return new Aphront404Response();
     }
 
-    // If the workboard's project has been removed from the card's project
-    // list, we are going to remove it from the board completely.
+    // If the workboard's project and all descendant projects have been removed
+    // from the card's project list, we are going to remove it from the board
+    // completely.
+
+    // TODO: If the user did something sneaky and changed a subproject, we'll
+    // currently leave the card where it was but should really move it to the
+    // proper new column.
+
+    $descendant_projects = id(new PhabricatorProjectQuery())
+      ->setViewer($viewer)
+      ->withAncestorProjectPHIDs(array($column->getProjectPHID()))
+      ->execute();
+    $board_phids = mpull($descendant_projects, 'getPHID', 'getPHID');
+    $board_phids[$column->getProjectPHID()] = $column->getProjectPHID();
+
     $project_map = array_fuse($task->getProjectPHIDs());
-    $remove_card = empty($project_map[$column->getProjectPHID()]);
+    $remove_card = !array_intersect_key($board_phids, $project_map);
 
     $positions = id(new PhabricatorProjectColumnPositionQuery())
       ->setViewer($viewer)
-      ->withColumns(array($column))
+      ->withBoardPHIDs(array($column->getProjectPHID()))
+      ->withColumnPHIDs(array($column->getPHID()))
       ->execute();
     $task_phids = mpull($positions, 'getObjectPHID');
 
@@ -320,32 +334,27 @@ final class ManiphestEditEngine
       'sortMap' => $sort_map,
     );
 
-    // TODO: This should just use HandlePool once we get through the EditEngine
-    // transition.
-    $owner = null;
-    if ($task->getOwnerPHID()) {
-      $owner = id(new PhabricatorHandleQuery())
-        ->setViewer($viewer)
-        ->withPHIDs(array($task->getOwnerPHID()))
-        ->executeOne();
-    }
-
-    $tasks = id(new ProjectBoardTaskCard())
+    $rendering_engine = id(new PhabricatorBoardRenderingEngine())
       ->setViewer($viewer)
-      ->setTask($task)
-      ->setOwner($owner)
-      ->setProject($column->getProject())
-      ->setCanEdit(true)
-      ->getItem();
+      ->setObjects(array($task))
+      ->setExcludedProjectPHIDs($board_phids);
 
-    $tasks->addClass('phui-workcard');
+    $card = $rendering_engine->renderCard($task->getPHID());
+
+    $item = $card->getItem();
+    $item->addClass('phui-workcard');
 
     $payload = array(
-      'tasks' => $tasks,
+      'tasks' => $item,
       'data' => $data,
     );
 
-    return id(new AphrontAjaxResponse())->setContent($payload);
+    return id(new AphrontAjaxResponse())
+      ->setContent(
+        array(
+          'tasks' => $item,
+          'data' => $data,
+        ));
   }
 
 

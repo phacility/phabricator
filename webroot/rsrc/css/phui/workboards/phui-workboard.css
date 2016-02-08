@@ -12,6 +12,7 @@
 
 .device-desktop .phui-workboard-view-shadow {
   overflow-x: auto;
+  overflow-y: hidden;
   position: absolute;
   top: 79px;
   bottom: 0;
@@ -52,6 +53,16 @@
   left: {$menu.profile.width.collapsed};
 }
 
+!print .project-board-wrapper .phui-workboard-view-shadow {
+  position: static;
+}
+
+!print .project-board-wrapper .aphront-multi-column-column-outer {
+  display: block;
+  margin: 0 0 18px;
+  page-break-inside: avoid;
+}
+
 .device-desktop .phui-workboard-view .aphront-multi-column-fixed
   .aphront-multi-column-inner {
     margin-left: 0;
@@ -59,4 +70,19 @@
 
 .device .project-board-wrapper {
   margin: 16px;
+}
+
+.device-desktop .phui-workpanel-body {
+  max-height: calc(100vh - 170px);
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.device-desktop .phui-workboard-view .aphront-multi-column-view {
+  pointer-events: none;
+}
+
+.device-desktop .phui-workpanel-view {
+  pointer-events: auto;
+  cursor: auto;
 }

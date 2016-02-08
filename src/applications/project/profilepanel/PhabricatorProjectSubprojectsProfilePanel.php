@@ -13,6 +13,14 @@ final class PhabricatorProjectSubprojectsProfilePanel
     return pht('Subprojects');
   }
 
+  public function shouldEnableForObject($object) {
+    if ($object->isMilestone()) {
+      return false;
+    }
+
+    return true;
+  }
+
   public function getDisplayName(
     PhabricatorProfilePanelConfiguration $config) {
     $name = $config->getPanelProperty('name');

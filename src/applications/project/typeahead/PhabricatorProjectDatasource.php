@@ -32,6 +32,12 @@ final class PhabricatorProjectDatasource
       $query->withNameTokens($tokens);
     }
 
+    // If this is for policy selection, prevent users from using milestones.
+    $for_policy = $this->getParameter('policy');
+    if ($for_policy) {
+      $query->withIsMilestone(false);
+    }
+
     $projs = $this->executeQuery($query);
 
     $projs = mpull($projs, null, 'getPHID');
@@ -58,13 +64,13 @@ final class PhabricatorProjectDatasource
       }
 
       $all_strings = mpull($proj->getSlugs(), 'getSlug');
-      $all_strings[] = $proj->getName();
+      $all_strings[] = $proj->getDisplayName();
       $all_strings = implode(' ', $all_strings);
 
       $proj_result = id(new PhabricatorTypeaheadResult())
         ->setName($all_strings)
-        ->setDisplayName($proj->getName())
-        ->setDisplayType(pht('Project'))
+        ->setDisplayName($proj->getDisplayName())
+        ->setDisplayType($proj->getDisplayIconName())
         ->setURI($proj->getURI())
         ->setPHID($proj->getPHID())
         ->setIcon($proj->getDisplayIconIcon())

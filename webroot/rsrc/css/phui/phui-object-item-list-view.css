@@ -56,6 +56,10 @@ ul.phui-object-item-list-view {
   overflow: hidden;
 }
 
+.phui-object-item-cover-image {
+  display: none;
+}
+
 .phui-object-item-no-bar .phui-object-item-frame {
   border-width: 1px;
 }

@@ -7,6 +7,7 @@ final class PhabricatorFileThumbnailTransform
   const TRANSFORM_PINBOARD = 'pinboard';
   const TRANSFORM_THUMBGRID = 'thumbgrid';
   const TRANSFORM_PREVIEW = 'preview';
+  const TRANSFORM_WORKCARD = 'workcard';
 
   private $name;
   private $key;
@@ -73,6 +74,11 @@ final class PhabricatorFileThumbnailTransform
         ->setName(pht('Preview (220px)'))
         ->setKey(self::TRANSFORM_PREVIEW)
         ->setDimensions(220, null),
+      id(new self())
+        ->setName(pht('Workcard (526px)'))
+        ->setKey(self::TRANSFORM_WORKCARD)
+        ->setScaleUp(true)
+        ->setDimensions(526, null),
     );
   }
 

@@ -4,7 +4,7 @@
  * The default one-for-all hovercard. We may derive from this one to create
  * more specialized ones.
  */
-final class PHUIHovercardView extends AphrontView {
+final class PHUIHovercardView extends AphrontTagView {
 
   /**
    * @var PhabricatorObjectHandle
@@ -70,7 +70,16 @@ final class PHUIHovercardView extends AphrontView {
     return $this;
   }
 
-  public function render() {
+  protected function getTagAttributes() {
+    $classes = array();
+    $classes[] = 'phui-hovercard-wrapper';
+
+    return array(
+      'class' => implode(' ', $classes),
+    );
+  }
+
+  protected function getTagContent() {
     if (!$this->handle) {
       throw new PhutilInvalidStateException('setObjectHandle');
     }
@@ -80,14 +89,17 @@ final class PHUIHovercardView extends AphrontView {
 
     require_celerity_resource('phui-hovercard-view-css');
 
+    // If we're a fully custom Hovercard, skip the common UI
+    $children = $this->renderChildren();
+    if ($children) {
+      return $children;
+    }
+
     $title = array(
       id(new PHUISpacesNamespaceContextView())
         ->setUser($viewer)
         ->setObject($this->getObject()),
-      pht(
-        '%s: %s',
-        $handle->getTypeName(),
-        $this->title ? $this->title : $handle->getName()),
+      $this->title ? $this->title : $handle->getName(),
     );
 
     $header = new PHUIHeaderView();
@@ -182,14 +194,14 @@ final class PHUIHovercardView extends AphrontView {
     }
 
     $hovercard = phutil_tag_div(
-      'phui-hovercard-container',
+      'phui-hovercard-container grouped',
       array(
         phutil_tag_div('phui-hovercard-head', $header),
         phutil_tag_div('phui-hovercard-body grouped', $body),
         $tail,
       ));
 
-    return phutil_tag_div('phui-hovercard-wrapper', $hovercard);
+    return $hovercard;
   }
 
 }

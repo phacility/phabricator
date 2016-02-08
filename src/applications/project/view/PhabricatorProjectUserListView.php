@@ -86,7 +86,7 @@ abstract class PhabricatorProjectUserListView extends AphrontView {
         ->setImageURI($handle->getImageURI());
 
       $icon = id(new PHUIIconView())
-        ->setIcon($handle->getIcon().' lightbluetext');
+        ->setIcon($handle->getIcon());
 
       $subtitle = $handle->getSubtitle();
 
