@@ -9,6 +9,7 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
   private $columnMap = array();
   private $objectColumnMap = array();
   private $boardLayout = array();
+  private $fetchAllBoards;
 
   private $remQueue = array();
   private $addQueue = array();
@@ -38,6 +39,18 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
 
   public function getObjectPHIDs() {
     return $this->objectPHIDs;
+  }
+
+  /**
+   * Fetch all boards, even if the board is disabled.
+   */
+  public function setFetchAllBoards($fetch_all) {
+    $this->fetchAllBoards = $fetch_all;
+    return $this;
+  }
+
+  public function getFetchAllBoards() {
+    return $this->fetchAllBoards;
   }
 
   public function executeLayout() {
@@ -301,9 +314,11 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
       ->execute();
     $boards = mpull($boards, null, 'getPHID');
 
-    foreach ($boards as $key => $board) {
-      if (!$board->getHasWorkboard()) {
-        unset($boards[$key]);
+    if (!$this->fetchAllBoards) {
+      foreach ($boards as $key => $board) {
+        if (!$board->getHasWorkboard()) {
+          unset($boards[$key]);
+        }
       }
     }
 

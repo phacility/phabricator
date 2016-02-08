@@ -39,6 +39,7 @@ final class PhabricatorProjectTransactionEditor
     $types[] = PhabricatorProjectTransaction::TYPE_LOCKED;
     $types[] = PhabricatorProjectTransaction::TYPE_PARENT;
     $types[] = PhabricatorProjectTransaction::TYPE_MILESTONE;
+    $types[] = PhabricatorProjectTransaction::TYPE_HASWORKBOARD;
 
     return $types;
   }
@@ -65,6 +66,8 @@ final class PhabricatorProjectTransactionEditor
         return $object->getColor();
       case PhabricatorProjectTransaction::TYPE_LOCKED:
         return (int)$object->getIsMembershipLocked();
+      case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
+        return (int)$object->getHasWorkboard();
       case PhabricatorProjectTransaction::TYPE_PARENT:
       case PhabricatorProjectTransaction::TYPE_MILESTONE:
         return null;
@@ -87,6 +90,8 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_PARENT:
       case PhabricatorProjectTransaction::TYPE_MILESTONE:
         return $xaction->getNewValue();
+      case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
+        return (int)$xaction->getNewValue();
       case PhabricatorProjectTransaction::TYPE_SLUGS:
         return $this->normalizeSlugs($xaction->getNewValue());
     }
@@ -131,6 +136,9 @@ final class PhabricatorProjectTransactionEditor
         $object->setMilestoneNumber($number);
         $object->setParentProjectPHID($xaction->getNewValue());
         return;
+      case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
+        $object->setHasWorkboard($xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -172,6 +180,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_LOCKED:
       case PhabricatorProjectTransaction::TYPE_PARENT:
       case PhabricatorProjectTransaction::TYPE_MILESTONE:
+      case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
         return;
      }
 

@@ -84,6 +84,8 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
             => 'PhabricatorProjectBoardImportController',
           'reorder/'
             => 'PhabricatorProjectBoardReorderController',
+          'disable/'
+            => 'PhabricatorProjectBoardDisableController',
         ),
         'update/(?P<id>[1-9]\d*)/(?P<action>[^/]+)/'
           => 'PhabricatorProjectUpdateController',

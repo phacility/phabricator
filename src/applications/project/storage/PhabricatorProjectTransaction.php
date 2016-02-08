@@ -12,6 +12,7 @@ final class PhabricatorProjectTransaction
   const TYPE_LOCKED     = 'project:locked';
   const TYPE_PARENT = 'project:parent';
   const TYPE_MILESTONE = 'project:milestone';
+  const TYPE_HASWORKBOARD = 'project:hasworkboard';
 
   // NOTE: This is deprecated, members are just a normal edge now.
   const TYPE_MEMBERS    = 'project:members';
@@ -246,6 +247,17 @@ final class PhabricatorProjectTransaction
           }
         }
         break;
+
+      case self::TYPE_HASWORKBOARD:
+        if ($new) {
+          return pht(
+            '%s enabled the workboard for this project.',
+            $author_handle);
+        } else {
+          return pht(
+            '%s disabled the workboard for this project.',
+            $author_handle);
+        }
     }
 
     return parent::getTitle();
@@ -366,6 +378,20 @@ final class PhabricatorProjectTransaction
             $object_handle,
             $this->renderSlugList($rem));
         }
+
+      case self::TYPE_HASWORKBOARD:
+        if ($new) {
+          return pht(
+            '%s enabled the workboard for %s.',
+            $author_handle,
+            $object_handle);
+        } else {
+          return pht(
+            '%s disabled the workboard for %s.',
+            $author_handle,
+            $object_handle);
+        }
+
     }
 
     return parent::getTitleForFeed();
