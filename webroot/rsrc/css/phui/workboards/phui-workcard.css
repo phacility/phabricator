@@ -110,6 +110,10 @@
   background-color: {$sh-greenbackground};
 }
 
+.phui-object-item-list-view .phui-workcard:last-child {
+  margin-bottom: 0;
+}
+
 
 /* - Draggable Colors --------------------------------------------------------*/
 

@@ -103,9 +103,11 @@ final class PHUIWorkpanelView extends AphrontTagView {
     $body = phutil_tag(
       'div',
         array(
-          'class' => 'phui-workpanel-body',
+          'class' => 'phui-workpanel-body-content',
         ),
       $this->cards);
+
+    $body = phutil_tag_div('phui-workpanel-body', $body);
 
     $view = id(new PHUIBoxView())
       ->setColor(PHUIBoxView::GREY)

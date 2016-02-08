@@ -35,8 +35,8 @@
 }
 
 .phui-workboard-view-shadow::-webkit-scrollbar {
-  height: 12px;
-  width: 12px;
+  height: 8px;
+  width: 8px;
   background: rgba(200,200,200,.6);
 }
 
@@ -70,12 +70,6 @@
 
 .device .project-board-wrapper {
   margin: 16px;
-}
-
-.device-desktop .phui-workpanel-body {
-  max-height: calc(100vh - 170px);
-  overflow-y: scroll;
-  overflow-x: hidden;
 }
 
 .device-desktop .phui-workboard-view .aphront-multi-column-view {
