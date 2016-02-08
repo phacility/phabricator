@@ -382,6 +382,47 @@ JX.behavior('project-boards', function(config, statics) {
       drop.start();
     }
 
+    // When the user drags the workboard background, pan the workboard
+    // horizontally. This allows you to scroll across cards with only the
+    // mouse, without shift + scrollwheel or using the scrollbar.
+
+    var pan_origin = null;
+    var pan_node = null;
+    var pan_x = null;
+
+    JX.Stratcom.listen('mousedown', 'workboard-shadow', function(e) {
+      if (!JX.Device.isDesktop()) {
+        return;
+      }
+
+      if (e.getNode('workpanel')) {
+        return;
+      }
+
+      if (JX.Stratcom.pass()) {
+        return;
+      }
+
+      e.kill();
+
+      pan_origin = JX.$V(e);
+      pan_node = e.getNode('workboard-shadow');
+      pan_x = pan_node.scrollLeft;
+    });
+
+    JX.Stratcom.listen('mousemove', null, function(e) {
+      if (!pan_origin) {
+        return;
+      }
+
+      var cursor = JX.$V(e);
+      pan_node.scrollLeft = pan_x + (pan_origin.x - cursor.x);
+    });
+
+    JX.Stratcom.listen('mouseup', null, function() {
+      pan_origin = null;
+    });
+
     return true;
   }
 

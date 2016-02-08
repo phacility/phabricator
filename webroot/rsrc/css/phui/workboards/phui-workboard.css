@@ -77,3 +77,12 @@
   overflow-y: scroll;
   overflow-x: hidden;
 }
+
+.device-desktop .phui-workboard-view .aphront-multi-column-view {
+  pointer-events: none;
+}
+
+.device-desktop .phui-workpanel-view {
+  pointer-events: auto;
+  cursor: auto;
+}
