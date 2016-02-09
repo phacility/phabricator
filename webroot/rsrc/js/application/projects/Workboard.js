@@ -33,7 +33,11 @@ JX.install('Workboard', {
 
     addBoard: function(board_phid, board_node) {
       this._currentBoard = board_phid;
-      this._boardNodes[board_phid] = board_node;
+
+      if (!this._boardNodes[board_phid]) {
+        this._boardNodes[board_phid] = board_node;
+        this._setupDragHandlers(board_node);
+      }
     },
 
     _getConfig: function() {
@@ -121,6 +125,85 @@ JX.install('Workboard', {
 
     _onpanmouseup: function() {
       this._panOrigin = null;
+    },
+
+
+    _setupDragHandlers: function(board_node) {
+      var columns = this._findBoardColumns(board_node);
+      var column;
+      var ii;
+      var lists = [];
+
+      for (ii = 0; ii < columns.length; ii++) {
+        column = columns[ii];
+
+        var list = new JX.DraggableList('project-card', column)
+          .setOuterContainer(board_node)
+          .setFindItemsHandler(JX.bind(this, this._findCardsInColumn, column))
+          .setCanDragX(true);
+
+        // TODO: Restore these behaviors.
+        // list.listen('didSend', JX.bind(list, onupdate, cols[ii]));
+        // list.listen('didReceive', JX.bind(list, onupdate, cols[ii]));
+        // onupdate(cols[ii]);
+
+        list.listen('didDrop', JX.bind(this, this._onmovecard, list));
+
+        // TODO: Restore these behaviors.
+        // list.listen('didBeginDrag', JX.bind(null, onbegindrag));
+        // list.listen('didEndDrag', JX.bind(null, onenddrag));
+
+        lists.push(list);
+      }
+
+      for (ii = 0; ii < lists.length; ii++) {
+        lists[ii].setGroup(lists);
+      }
+    },
+
+    _findBoardColumns: function(board_node) {
+      return JX.DOM.scry(board_node, 'ul', 'project-column');
+    },
+
+    _findCardsInColumn: function(column_node) {
+      return JX.DOM.scry(column_node, 'li', 'project-card');
+    },
+
+    _onmovecard: function(list, item, after_node) {
+      list.lock();
+      JX.DOM.alterClass(item, 'drag-sending', true);
+
+      var item_phid = JX.Stratcom.getData(item).objectPHID;
+      var data = {
+        objectPHID: item_phid,
+        columnPHID: JX.Stratcom.getData(list.getRootNode()).columnPHID
+      };
+
+      if (after_node) {
+        data.afterPHID = JX.Stratcom.getData(after_node).objectPHID;
+      }
+
+      var before_node = item.nextSibling;
+      if (before_node) {
+        var before_phid = JX.Stratcom.getData(before_node).objectPHID;
+        if (before_phid) {
+          data.beforePHID = before_phid;
+        }
+      }
+
+      // TODO: This should be managed per-board.
+      var config = this._getConfig();
+      data.order = config.order;
+
+      new JX.Workflow(config.moveURI, data)
+        .setHandler(JX.bind(this, this._oncardupdate, item, list))
+        .start();
+    },
+
+    _oncardupdate: function(item, list, response) {
+      list.unlock();
+      JX.DOM.alterClass(item, 'drag-sending', false);
+      JX.DOM.replace(item, JX.$H(response.task));
     }
 
   }

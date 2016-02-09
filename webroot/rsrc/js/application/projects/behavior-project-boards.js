@@ -13,9 +13,6 @@
 
 JX.behavior('project-boards', function(config, statics) {
 
-  function finditems(col) {
-    return JX.DOM.scry(col, 'li', 'project-card');
-  }
 
   function onupdate(col) {
     var data = JX.Stratcom.getData(col);
@@ -64,15 +61,6 @@ JX.behavior('project-boards', function(config, statics) {
     }
   }
 
-  function onresponse(response, item, list) {
-    list.unlock();
-    JX.DOM.alterClass(item, 'drag-sending', false);
-    JX.DOM.replace(item, JX.$H(response.task));
-  }
-
-  function getcolumns() {
-    return JX.DOM.scry(JX.$(statics.boardID), 'ul', 'project-column');
-  }
 
   function colsort(u, v) {
     var ud = JX.Stratcom.getData(u).sort || [];
@@ -126,56 +114,6 @@ JX.behavior('project-boards', function(config, statics) {
     getcontainer().style.minHeight = '';
   }
 
-  function ondrop(list, item, after) {
-    list.lock();
-    JX.DOM.alterClass(item, 'drag-sending', true);
-
-    var item_phid = JX.Stratcom.getData(item).objectPHID;
-    var data = {
-      objectPHID: item_phid,
-      columnPHID: JX.Stratcom.getData(list.getRootNode()).columnPHID
-    };
-
-    var after_phid = null;
-    var items = finditems(list.getRootNode());
-    if (after) {
-      after_phid = JX.Stratcom.getData(after).objectPHID;
-      data.afterPHID = after_phid;
-    }
-    var ii;
-    var ii_item;
-    var ii_item_phid;
-    var ii_prev_item_phid = null;
-    var before_phid = null;
-    for (ii = 0; ii < items.length; ii++) {
-      ii_item = items[ii];
-      ii_item_phid = JX.Stratcom.getData(ii_item).objectPHID;
-      if (ii_item_phid == item_phid) {
-        // skip the item we just dropped
-        continue;
-      }
-      // note this handles when there is no after phid - we are at the top of
-      // the list - quite nicely
-      if (ii_prev_item_phid == after_phid) {
-        before_phid = ii_item_phid;
-        break;
-      }
-      ii_prev_item_phid = ii_item_phid;
-    }
-    if (before_phid) {
-      data.beforePHID = before_phid;
-    }
-
-    data.order = statics.order;
-
-    var workflow = new JX.Workflow(statics.moveURI, data)
-      .setHandler(function(response) {
-        onresponse(response, item, list);
-      });
-
-    workflow.start();
-  }
-
   function onedit(column, r) {
     var new_card = JX.$H(r.tasks).getNode();
     var new_data = JX.Stratcom.getData(new_card);
@@ -224,35 +162,6 @@ JX.behavior('project-boards', function(config, statics) {
     statics.order = update_config.order;
     statics.moveURI = update_config.moveURI;
     statics.createURI = update_config.createURI;
-  }
-
-  function init_board() {
-    var lists = [];
-    var ii;
-    var cols = getcolumns();
-
-    for (ii = 0; ii < cols.length; ii++) {
-      var list = new JX.DraggableList('project-card', cols[ii])
-        .setFindItemsHandler(JX.bind(null, finditems, cols[ii]))
-        .setOuterContainer(JX.$(config.boardID))
-        .setCanDragX(true);
-
-      list.listen('didSend', JX.bind(list, onupdate, cols[ii]));
-      list.listen('didReceive', JX.bind(list, onupdate, cols[ii]));
-
-      list.listen('didDrop', JX.bind(null, ondrop, list));
-
-      list.listen('didBeginDrag', JX.bind(null, onbegindrag));
-      list.listen('didEndDrag', JX.bind(null, onenddrag));
-
-      lists.push(list);
-
-      onupdate(cols[ii]);
-    }
-
-    for (ii = 0; ii < lists.length; ii++) {
-      lists[ii].setGroup(lists);
-    }
   }
 
   function setup() {
@@ -346,9 +255,6 @@ JX.behavior('project-boards', function(config, statics) {
           statics.boardID = new_config.boardID;
         }
         update_statics(new_config);
-        if (data.fromServer) {
-          init_board();
-        }
       });
 
     return true;
@@ -359,7 +265,6 @@ JX.behavior('project-boards', function(config, statics) {
     var current_page_id = JX.Quicksand.getCurrentPageID();
     statics.boardConfigCache = {};
     statics.boardConfigCache[current_page_id] = config;
-    init_board();
     statics.setup = setup();
   }
 
