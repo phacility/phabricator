@@ -40,7 +40,8 @@ JX.install('DraggableList', {
   properties : {
     findItemsHandler: null,
     canDragX: false,
-    outerContainer: null
+    outerContainer: null,
+    hasInfiniteHeight: false
   },
 
   members : {
@@ -286,12 +287,22 @@ JX.install('DraggableList', {
 
     _getTargetList : function(p) {
       var target_list;
+      var infinity;
       if (this._hasGroup()) {
         var group = this._group;
         for (var ii = 0; ii < group.length; ii++) {
           var root = group[ii].getRootNode();
           var rp = JX.$V(root);
           var rd = JX.Vector.getDim(root);
+
+          if (group[ii].getHasInfiniteHeight()) {
+            // The math doesn't work out quite right if we actually use
+            // Math.Infinity, so approximate infinity as the document height.
+            infinity = infinity || JX.Vector.getDocument().y;
+
+            rp.y = 0;
+            rd.y = infinity;
+          }
 
           var is_target = false;
           if (p.x >= rp.x && p.y >= rp.y) {

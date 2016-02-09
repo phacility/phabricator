@@ -140,7 +140,8 @@ JX.install('Workboard', {
         var list = new JX.DraggableList('project-card', column)
           .setOuterContainer(board_node)
           .setFindItemsHandler(JX.bind(this, this._findCardsInColumn, column))
-          .setCanDragX(true);
+          .setCanDragX(true)
+          .setHasInfiniteHeight(true);
 
         // TODO: Restore these behaviors.
         // list.listen('didSend', JX.bind(list, onupdate, cols[ii]));
@@ -148,10 +149,6 @@ JX.install('Workboard', {
         // onupdate(cols[ii]);
 
         list.listen('didDrop', JX.bind(this, this._onmovecard, list));
-
-        // TODO: Restore these behaviors.
-        // list.listen('didBeginDrag', JX.bind(null, onbegindrag));
-        // list.listen('didEndDrag', JX.bind(null, onenddrag));
 
         lists.push(list);
       }
