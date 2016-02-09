@@ -71,7 +71,11 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_COVER_IMAGE:
         return $object->getCoverImageFilePHID();
       case ManiphestTransaction::TYPE_POINTS:
-        return $object->getPoints();
+        $points = $object->getPoints();
+        if ($points !== null) {
+          $points = (double)$points;
+        }
+        return $points;
       case ManiphestTransaction::TYPE_MERGED_INTO:
       case ManiphestTransaction::TYPE_MERGED_FROM:
         return null;
