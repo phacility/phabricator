@@ -192,7 +192,8 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     return id(new AphrontAjaxResponse())
       ->setContent(
         array(
-          'task' => $item,
+          'objectPHID' => $object->getPHID(),
+          'cardHTML' => $item,
         ));
   }
 

@@ -234,7 +234,12 @@ JX.behavior('project-boards', function(config, statics) {
   }
 
   if (!statics.workboard) {
-    statics.workboard = new JX.Workboard(config);
+    statics.workboard = new JX.Workboard(config)
+      .setUploadURI(config.uploadURI)
+      .setCoverURI(config.coverURI)
+      .setMoveURI(config.moveURI)
+      .setChunkThreshold(config.chunkThreshold)
+      .start();
   }
 
   statics.workboard.addBoard(config.projectPHID, JX.$(config.boardID));

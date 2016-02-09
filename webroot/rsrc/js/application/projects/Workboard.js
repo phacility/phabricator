@@ -17,9 +17,14 @@ JX.install('Workboard', {
     this._config = config;
 
     this._boardNodes = {};
+    this._columnMap = {};
+  },
 
-    this._setupCoverImageHandlers();
-    this._setupPanHandlers();
+  properties: {
+    uploadURI: null,
+    coverURI: null,
+    moveURI: null,
+    chunkThreshold: null
   },
 
   members: {
@@ -31,13 +36,19 @@ JX.install('Workboard', {
     _panNode: null,
     _panX: null,
 
+    _columnMap: null,
+
+    start: function() {
+      this._setupCoverImageHandlers();
+      this._setupPanHandlers();
+
+      return this;
+    },
+
     addBoard: function(board_phid, board_node) {
       this._currentBoard = board_phid;
-
-      if (!this._boardNodes[board_phid]) {
-        this._boardNodes[board_phid] = board_node;
-        this._setupDragHandlers(board_node);
-      }
+      this._boardNodes[board_phid] = board_node;
+      this._setupDragHandlers(board_node);
     },
 
     _getConfig: function() {
@@ -49,11 +60,9 @@ JX.install('Workboard', {
         return;
       }
 
-      var config = this._getConfig();
-
       var drop = new JX.PhabricatorDragAndDropFileUpload('project-card')
-        .setURI(config.uploadURI)
-        .setChunkThreshold(config.chunkThreshold);
+        .setURI(this.getUploadURI())
+        .setChunkThreshold(this.getChunkThreshold());
 
       drop.listen('didBeginDrag', function(node) {
         JX.DOM.alterClass(node, 'phui-workcard-upload-target', true);
@@ -63,25 +72,24 @@ JX.install('Workboard', {
         JX.DOM.alterClass(node, 'phui-workcard-upload-target', false);
       });
 
-      drop.listen('didUpload', function(file) {
-        var node = file.getTargetNode();
-
-        var board = JX.DOM.findAbove(node, 'div', 'jx-workboard');
-
-        var data = {
-          boardPHID: JX.Stratcom.getData(board).boardPHID,
-          objectPHID: JX.Stratcom.getData(node).objectPHID,
-          filePHID: file.getPHID()
-        };
-
-        new JX.Workflow(config.coverURI, data)
-          .setHandler(function(r) {
-            JX.DOM.replace(node, JX.$H(r.task));
-          })
-          .start();
-      });
+      drop.listen('didUpload', JX.bind(this, this._oncoverupload));
 
       drop.start();
+    },
+
+    _oncoverupload: function(file) {
+      var node = file.getTargetNode();
+      var board = JX.DOM.findAbove(node, 'div', 'jx-workboard');
+
+      var data = {
+        boardPHID: JX.Stratcom.getData(board).boardPHID,
+        objectPHID: JX.Stratcom.getData(node).objectPHID,
+        filePHID: file.getPHID()
+      };
+
+      new JX.Workflow(this.getCoverURI(), data)
+        .setHandler(JX.bind(this, this._queueCardUpdate))
+        .start();
     },
 
     _setupPanHandlers: function() {
@@ -192,7 +200,7 @@ JX.install('Workboard', {
       var config = this._getConfig();
       data.order = config.order;
 
-      new JX.Workflow(config.moveURI, data)
+      new JX.Workflow(this.getMoveURI(), data)
         .setHandler(JX.bind(this, this._oncardupdate, item, list))
         .start();
     },
@@ -200,7 +208,33 @@ JX.install('Workboard', {
     _oncardupdate: function(item, list, response) {
       list.unlock();
       JX.DOM.alterClass(item, 'drag-sending', false);
-      JX.DOM.replace(item, JX.$H(response.task));
+
+      this._queueCardUpdate(response);
+    },
+
+    _queueCardUpdate: function(response) {
+      var board_node = this._boardNodes[this._currentBoard];
+
+      var columns = this._findBoardColumns(board_node);
+      var cards;
+      var ii;
+      var jj;
+      var data;
+
+      for (ii = 0; ii < columns.length; ii++) {
+        cards = this._findCardsInColumn(columns[ii]);
+        for (jj = 0; jj < cards.length; jj++) {
+          data = JX.Stratcom.getData(cards[jj]);
+          if (data.objectPHID == response.objectPHID) {
+            this._replaceCard(cards[jj], JX.$H(response.cardHTML));
+          }
+        }
+      }
+
+    },
+
+    _replaceCard: function(old_node, new_node) {
+      JX.DOM.replace(old_node, new_node);
     }
 
   }
