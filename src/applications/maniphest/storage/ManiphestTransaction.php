@@ -182,7 +182,7 @@ final class ManiphestTransaction
         return true;
     }
 
-    return parent::shouldHideForMail();
+    return parent::shouldHideForMail($xactions);
   }
 
   public function shouldHideForFeed() {
