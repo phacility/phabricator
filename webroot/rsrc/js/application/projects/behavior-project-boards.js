@@ -8,6 +8,7 @@
  *           javelin-workflow
  *           phabricator-draggable-list
  *           phabricator-drag-and-drop-file-upload
+ *           javelin-workboard
  */
 
 JX.behavior('project-boards', function(config, statics) {
@@ -350,38 +351,6 @@ JX.behavior('project-boards', function(config, statics) {
         }
       });
 
-    if (JX.PhabricatorDragAndDropFileUpload.isSupported()) {
-      var drop = new JX.PhabricatorDragAndDropFileUpload('project-card')
-        .setURI(config.uploadURI)
-        .setChunkThreshold(config.chunkThreshold);
-
-      drop.listen('didBeginDrag', function(node) {
-        JX.DOM.alterClass(node, 'phui-workcard-upload-target', true);
-      });
-
-      drop.listen('didEndDrag', function(node) {
-        JX.DOM.alterClass(node, 'phui-workcard-upload-target', false);
-      });
-
-      drop.listen('didUpload', function(file) {
-        var node = file.getTargetNode();
-
-        var data = {
-          boardPHID: statics.projectPHID,
-          objectPHID: JX.Stratcom.getData(node).objectPHID,
-          filePHID: file.getPHID()
-        };
-
-        new JX.Workflow(config.coverURI, data)
-          .setHandler(function(r) {
-            JX.DOM.replace(node, JX.$H(r.task));
-          })
-          .start();
-      });
-
-      drop.start();
-    }
-
     // When the user drags the workboard background, pan the workboard
     // horizontally. This allows you to scroll across cards with only the
     // mouse, without shift + scrollwheel or using the scrollbar.
@@ -434,5 +403,11 @@ JX.behavior('project-boards', function(config, statics) {
     init_board();
     statics.setup = setup();
   }
+
+  if (!statics.workboard) {
+    statics.workboard = new JX.Workboard(config);
+  }
+
+  statics.workboard.addBoard(config.projectPHID, JX.$(config.boardID));
 
 });

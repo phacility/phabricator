@@ -231,7 +231,12 @@ final class PhabricatorProjectBoardViewController
 
     $board = id(new PHUIWorkboardView())
       ->setUser($viewer)
-      ->setID($board_id);
+      ->setID($board_id)
+      ->addSigil('jx-workboard')
+      ->setMetadata(
+        array(
+          'boardPHID' => $project->getPHID(),
+        ));
 
     $behavior_config = array(
       'boardID' => $board_id,
