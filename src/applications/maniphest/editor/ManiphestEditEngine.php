@@ -307,28 +307,45 @@ final class ManiphestEditEngine
     // currently leave the card where it was but should really move it to the
     // proper new column.
 
+    $board_phid = $column->getProjectPHID();
+
     $descendant_projects = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
       ->withAncestorProjectPHIDs(array($column->getProjectPHID()))
       ->execute();
     $board_phids = mpull($descendant_projects, 'getPHID', 'getPHID');
-    $board_phids[$column->getProjectPHID()] = $column->getProjectPHID();
+    $board_phids[$board_phid] = $board_phid;
 
     $project_map = array_fuse($task->getProjectPHIDs());
     $remove_card = !array_intersect_key($board_phids, $project_map);
 
-    $positions = id(new PhabricatorProjectColumnPositionQuery())
+    // TODO: Maybe the caller should pass a list of visible task PHIDs so we
+    // know which ones we need to reorder? This is a HUGE overfetch.
+    $objects = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
-      ->withBoardPHIDs(array($column->getProjectPHID()))
-      ->withColumnPHIDs(array($column->getPHID()))
+      ->withEdgeLogicPHIDs(
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        PhabricatorQueryConstraint::OPERATOR_ANCESTOR,
+        array($board_phids))
+      ->setViewer($viewer)
       ->execute();
-    $task_phids = mpull($positions, 'getObjectPHID');
+    $objects = mpull($objects, null, 'getPHID');
 
-    $column_tasks = id(new ManiphestTaskQuery())
+    $layout_engine = id(new PhabricatorBoardLayoutEngine())
       ->setViewer($viewer)
-      ->withPHIDs($task_phids)
-      ->needProjectPHIDs(true)
-      ->execute();
+      ->setBoardPHIDs(array($board_phid))
+      ->setObjectPHIDs(array_keys($objects))
+      ->executeLayout();
+
+    $positions = $layout_engine->getColumnObjectPositions(
+      $board_phid,
+      $column_phid);
+
+    $column_phids = $layout_engine->getColumnObjectPHIDs(
+      $board_phid,
+      $column_phid);
+
+    $column_tasks = array_select_keys($objects, $column_phids);
 
     if ($order == PhabricatorProjectColumn::ORDER_NATURAL) {
       // TODO: This is a little bit awkward, because PHP and JS use

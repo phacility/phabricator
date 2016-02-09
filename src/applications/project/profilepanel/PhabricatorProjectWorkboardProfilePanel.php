@@ -18,6 +18,18 @@ final class PhabricatorProjectWorkboardProfilePanel
     return true;
   }
 
+  public function shouldEnableForObject($object) {
+    $viewer = $this->getViewer();
+
+    // Workboards are only available if Maniphest is installed.
+    $class = 'PhabricatorManiphestApplication';
+    if (!PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
+      return false;
+    }
+
+    return true;
+  }
+
   public function getDisplayName(
     PhabricatorProfilePanelConfiguration $config) {
     $name = $config->getPanelProperty('name');
@@ -42,14 +54,6 @@ final class PhabricatorProjectWorkboardProfilePanel
 
   protected function newNavigationMenuItems(
     PhabricatorProfilePanelConfiguration $config) {
-    $viewer = $this->getViewer();
-
-    // Workboards are only available if Maniphest is installed.
-    $class = 'PhabricatorManiphestApplication';
-    if (!PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
-      return array();
-    }
-
     $project = $config->getProfileObject();
 
     $has_workboard = $project->getHasWorkboard();

@@ -86,9 +86,14 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
     return array_select_keys($this->columnMap, array_keys($columns));
   }
 
-  public function getColumnObjectPHIDs($board_phid, $column_phid) {
+  public function getColumnObjectPositions($board_phid, $column_phid) {
     $columns = idx($this->boardLayout, $board_phid, array());
-    $positions = idx($columns, $column_phid, array());
+    return idx($columns, $column_phid, array());
+  }
+
+
+  public function getColumnObjectPHIDs($board_phid, $column_phid) {
+    $positions = $this->getColumnObjectPositions($board_phid, $column_phid);
     return mpull($positions, 'getObjectPHID');
   }
 

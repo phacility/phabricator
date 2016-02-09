@@ -5,6 +5,7 @@ final class PHUISegmentBarSegmentView extends AphrontTagView {
   private $width;
   private $color;
   private $position;
+  private $tooltip;
 
   public function setWidth($width) {
     $this->width = $width;
@@ -22,6 +23,11 @@ final class PHUISegmentBarSegmentView extends AphrontTagView {
 
   public function setPosition($position) {
     $this->position = $position;
+    return $this;
+  }
+
+  public function setTooltip($tooltip) {
+    $this->tooltip = $tooltip;
     return $this;
   }
 
@@ -48,9 +54,25 @@ final class PHUISegmentBarSegmentView extends AphrontTagView {
     $left = floor(100 * $left) / 100;
     $left = sprintf('%.2f%%', $left);
 
+    $tooltip = $this->tooltip;
+    if (strlen($tooltip)) {
+      Javelin::initBehavior('phabricator-tooltips');
+
+      $sigil = 'has-tooltip';
+      $meta = array(
+        'tip' => $tooltip,
+        'align' => 'E',
+      );
+    } else {
+      $sigil = null;
+      $meta = null;
+    }
+
     return array(
       'class' => implode(' ', $classes),
       'style' => "left: {$left}; width: {$width};",
+      'sigil' => $sigil,
+      'meta' => $meta,
     );
   }
 

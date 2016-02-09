@@ -149,6 +149,18 @@
   color: {$menu.profile.text};
 }
 
+.phui-profile-menu .phabricator-side-menu .phui-profile-menu-error {
+  color: {$greytext};
+  font-size: {$smallerfontsize};
+  padding: 18px 15px;
+}
+
+.phui-profile-menu .phabricator-side-menu  .phui-profile-segment-bar {
+  color: {$menu.profile.text};
+  padding: 12px 15px 18px;
+}
+
+
 .phui-profile-menu .phabricator-side-menu .phui-profile-menu-spacer {
   box-sizing: border-box;
   height: {$menu.profile.item.height};
