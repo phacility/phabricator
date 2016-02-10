@@ -121,18 +121,27 @@ final class PhabricatorProjectBoardViewController
       ->setViewer($viewer)
       ->setBoardPHIDs(array($board_phid))
       ->setObjectPHIDs(array_keys($tasks))
+      ->setFetchAllBoards(true)
       ->executeLayout();
 
     $columns = $layout_engine->getColumns($board_phid);
-    if (!$columns) {
+    if (!$columns || !$project->getHasWorkboard()) {
       $can_edit = PhabricatorPolicyFilter::hasCapability(
         $viewer,
         $project,
         PhabricatorPolicyCapability::CAN_EDIT);
-      if (!$can_edit) {
-        $content = $this->buildNoAccessContent($project);
+      if (!$columns) {
+        if (!$can_edit) {
+          $content = $this->buildNoAccessContent($project);
+        } else {
+          $content = $this->buildInitializeContent($project);
+        }
       } else {
-        $content = $this->buildInitializeContent($project);
+        if (!$can_edit) {
+          $content = $this->buildDisabledContent($project);
+        } else {
+          $content = $this->buildEnableContent($project);
+        }
       }
 
       if ($content instanceof AphrontResponse) {
@@ -364,6 +373,9 @@ final class PhabricatorProjectBoardViewController
       ->addClass('project-board-wrapper');
 
     $nav = $this->getProfileMenu();
+    $divider = id(new PHUIListItemView())
+      ->setType(PHUIListItemView::TYPE_DIVIDER);
+    $fullscreen = $this->buildFullscreenMenu();
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Workboard'));
@@ -371,7 +383,9 @@ final class PhabricatorProjectBoardViewController
 
     $crumbs->addAction($sort_menu);
     $crumbs->addAction($filter_menu);
+    $crumbs->addAction($divider);
     $crumbs->addAction($manage_menu);
+    $crumbs->addAction($fullscreen);
 
     return $this->newPage()
       ->setTitle(
@@ -451,7 +465,7 @@ final class PhabricatorProjectBoardViewController
     }
 
     $sort_button = id(new PHUIListItemView())
-      ->setName(pht('Sort: %s', $active_order))
+      ->setName($active_order)
       ->setIcon('fa-sort-amount-asc')
       ->setHref('#')
       ->addSigil('boards-dropdown-menu')
@@ -525,7 +539,7 @@ final class PhabricatorProjectBoardViewController
     }
 
     $filter_button = id(new PHUIListItemView())
-      ->setName(pht('Filter: %s', $active_filter))
+      ->setName($active_filter)
       ->setIcon('fa-search')
       ->setHref('#')
       ->addSigil('boards-dropdown-menu')
@@ -544,6 +558,12 @@ final class PhabricatorProjectBoardViewController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
+    $id = $project->getID();
+
+    $disable_uri = $this->getApplicationURI("board/{$id}/disable/");
+    $add_uri = $this->getApplicationURI("board/{$id}/edit/");
+    $reorder_uri = $this->getApplicationURI("board/{$id}/reorder/");
+
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $project,
@@ -554,14 +574,14 @@ final class PhabricatorProjectBoardViewController
     $manage_items[] = id(new PhabricatorActionView())
       ->setIcon('fa-plus')
       ->setName(pht('Add Column'))
-      ->setHref($this->getApplicationURI('board/'.$this->id.'/edit/'))
+      ->setHref($add_uri)
       ->setDisabled(!$can_edit)
       ->setWorkflow(!$can_edit);
 
     $manage_items[] = id(new PhabricatorActionView())
       ->setIcon('fa-exchange')
       ->setName(pht('Reorder Columns'))
-      ->setHref($this->getApplicationURI('board/'.$this->id.'/reorder/'))
+      ->setHref($reorder_uri)
       ->setDisabled(!$can_edit)
       ->setWorkflow(true);
 
@@ -595,6 +615,13 @@ final class PhabricatorProjectBoardViewController
       ->setHref($batch_edit_uri)
       ->setDisabled(!$can_batch_edit);
 
+    $manage_items[] = id(new PhabricatorActionView())
+      ->setIcon('fa-ban')
+      ->setName(pht('Disable Workboard'))
+      ->setHref($disable_uri)
+      ->setWorkflow(true)
+      ->setDisabled(!$can_edit);
+
     $manage_menu = id(new PhabricatorActionListView())
         ->setUser($viewer);
     foreach ($manage_items as $item) {
@@ -602,16 +629,36 @@ final class PhabricatorProjectBoardViewController
     }
 
     $manage_button = id(new PHUIListItemView())
-      ->setName(pht('Manage Board'))
       ->setIcon('fa-cog')
       ->setHref('#')
       ->addSigil('boards-dropdown-menu')
+      ->addSigil('has-tooltip')
       ->setMetadata(
         array(
+          'tip' => pht('Manage'),
+          'align' => 'S',
           'items' => hsprintf('%s', $manage_menu),
         ));
 
     return $manage_button;
+  }
+
+  private function buildFullscreenMenu() {
+
+    $up = id(new PHUIListItemView())
+      ->setIcon('fa-arrows-alt')
+      ->setHref('#')
+      ->addClass('phui-workboard-expand-icon')
+      ->addSigil('jx-toggle-class')
+      ->addSigil('has-tooltip')
+      ->setMetaData(array(
+        'tip' => pht('Fullscreen'),
+        'map' => array(
+          'phabricator-standard-page' => 'phui-workboard-fullscreen',
+        ),
+      ));
+
+    return $up;
   }
 
   private function buildColumnMenu(
@@ -849,6 +896,61 @@ final class PhabricatorProjectBoardViewController
           'The workboard for this project has not been created yet, '.
           'but you do not have permission to create it. Only users '.
           'who can edit this project can create a workboard for it.'))
+      ->addCancelButton($profile_uri);
+  }
+
+
+  private function buildEnableContent(PhabricatorProject $project) {
+    $request = $this->getRequest();
+    $viewer = $this->getViewer();
+
+    $id = $project->getID();
+    $profile_uri = $this->getApplicationURI("profile/{$id}/");
+    $board_uri = $this->getApplicationURI("board/{$id}/");
+
+    if ($request->isFormPost()) {
+      $xactions = array();
+
+      $xactions[] = id(new PhabricatorProjectTransaction())
+        ->setTransactionType(PhabricatorProjectTransaction::TYPE_HASWORKBOARD)
+        ->setNewValue(1);
+
+      id(new PhabricatorProjectTransactionEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
+        ->applyTransactions($project, $xactions);
+
+      return id(new AphrontRedirectResponse())
+        ->setURI($board_uri);
+    }
+
+    return $this->newDialog()
+      ->setTitle(pht('Workboard Disabled'))
+      ->addHiddenInput('initialize', 1)
+      ->appendParagraph(
+        pht(
+          'This workboard has been disabled, but can be restored to its '.
+          'former glory.'))
+      ->addCancelButton($profile_uri)
+      ->addSubmitButton(pht('Enable Workboard'));
+  }
+
+  private function buildDisabledContent(PhabricatorProject $project) {
+    $viewer = $this->getViewer();
+
+    $id = $project->getID();
+
+    $profile_uri = $this->getApplicationURI("profile/{$id}/");
+
+    return $this->newDialog()
+      ->setTitle(pht('Workboard Disabled'))
+      ->appendParagraph(
+        pht(
+          'This workboard has been disabled, and you do not have permission '.
+          'to enable it. Only users who can edit this project can restore '.
+          'the workboard.'))
       ->addCancelButton($profile_uri);
   }
 

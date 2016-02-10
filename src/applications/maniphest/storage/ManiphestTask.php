@@ -34,19 +34,15 @@ final class ManiphestTask extends ManiphestDAO
   protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
   protected $editPolicy = PhabricatorPolicies::POLICY_USER;
 
-  protected $projectPHIDs = array();
-
   protected $ownerOrdering;
   protected $spacePHID;
   protected $properties = array();
+  protected $points;
 
   private $subscriberPHIDs = self::ATTACHABLE;
   private $groupByProjectPHID = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
   private $edgeProjectPHIDs = self::ATTACHABLE;
-
-  // TODO: This field is unused and should eventually be removed.
-  protected $attached = array();
 
   public static function initializeNewTask(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -72,9 +68,6 @@ final class ManiphestTask extends ManiphestDAO
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
-        'ccPHIDs' => self::SERIALIZATION_JSON,
-        'attached' => self::SERIALIZATION_JSON,
-        'projectPHIDs' => self::SERIALIZATION_JSON,
         'properties' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -88,11 +81,7 @@ final class ManiphestTask extends ManiphestDAO
         'ownerOrdering' => 'text64?',
         'originalEmailSource' => 'text255?',
         'subpriority' => 'double',
-
-        // T6203/NULLABILITY
-        // This should not be nullable. It's going away soon anyway.
-        'ccPHIDs' => 'text?',
-
+        'points' => 'double?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -141,10 +130,6 @@ final class ManiphestTask extends ManiphestDAO
     return PhabricatorEdgeQuery::loadDestinationPHIDs(
       $this->getPHID(),
       ManiphestTaskDependedOnByTaskEdgeType::EDGECONST);
-  }
-
-  public function getAttachedPHIDs($type) {
-    return array_keys(idx($this->attached, $type, array()));
   }
 
   public function generatePHID() {

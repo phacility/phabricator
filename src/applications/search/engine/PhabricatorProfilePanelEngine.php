@@ -236,6 +236,11 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
       ->withProfilePHIDs(array($object->getPHID()))
       ->execute();
 
+    foreach ($stored_panels as $stored_panel) {
+      $impl = $stored_panel->getPanel();
+      $impl->setViewer($viewer);
+    }
+
     // Merge the stored panels into the builtin panels. If a builtin panel has
     // a stored version, replace the defaults with the stored changes.
     foreach ($stored_panels as $stored_panel) {
@@ -257,12 +262,6 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
       } else {
         $panels[] = $stored_panel;
       }
-    }
-
-    foreach ($panels as $panel) {
-      $impl = $panel->getPanel();
-
-      $impl->setViewer($viewer);
     }
 
     $panels = msort($panels, 'getSortKey');
@@ -306,6 +305,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
     $builtins = $this->getBuiltinProfilePanels($object);
 
     $panels = PhabricatorProfilePanel::getAllPanels();
+    $viewer = $this->getViewer();
 
     $order = 1;
     $map = array();
@@ -338,6 +338,9 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
             $builtin_key,
             $panel_key));
       }
+
+      $panel = clone $panel;
+      $panel->setViewer($viewer);
 
       $builtin
         ->setProfilePHID($object->getPHID())

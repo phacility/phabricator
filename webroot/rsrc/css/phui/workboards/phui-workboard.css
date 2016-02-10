@@ -35,8 +35,8 @@
 }
 
 .phui-workboard-view-shadow::-webkit-scrollbar {
-  height: 12px;
-  width: 12px;
+  height: 8px;
+  width: 8px;
   background: rgba(200,200,200,.6);
 }
 
@@ -72,12 +72,6 @@
   margin: 16px;
 }
 
-.device-desktop .phui-workpanel-body {
-  max-height: calc(100vh - 170px);
-  overflow-y: scroll;
-  overflow-x: hidden;
-}
-
 .device-desktop .phui-workboard-view .aphront-multi-column-view {
   pointer-events: none;
 }
@@ -85,4 +79,29 @@
 .device-desktop .phui-workpanel-view {
   pointer-events: auto;
   cursor: auto;
+}
+
+/* Fullscreen */
+
+.device-desktop .phui-workboard-fullscreen .phabricator-main-menu {
+  display: none;
+}
+
+.device-desktop .phui-workboard-fullscreen .phui-profile-menu
+  .phui-workboard-view-shadow {
+    top: 35px;
+    left: 0;
+}
+
+.device-desktop .phui-workboard-fullscreen .phui-workpanel-body-content {
+  max-height: calc(100vh - 120px);
+}
+
+.device-desktop .phui-workboard-fullscreen .phui-profile-menu
+  .phabricator-nav-local {
+    display: none;
+}
+
+.device .phui-workboard-expand-icon {
+  display: none;
 }

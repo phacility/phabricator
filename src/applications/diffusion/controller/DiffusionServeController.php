@@ -100,7 +100,7 @@ final class DiffusionServeController extends DiffusionController {
           ->setResultCode(500)
           ->setProperties(
             array(
-              'exception.class' => $ex->getClass(),
+              'exception.class' => get_class($ex),
               'exception.message' => $ex->getMessage(),
             ));
       }

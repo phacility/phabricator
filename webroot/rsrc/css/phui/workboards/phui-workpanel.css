@@ -35,8 +35,12 @@
   user-select: none;
 }
 
+.phui-workpanel-view .phui-box-grey {
+  background-color: rgba(71,87,120,0.1);
+}
+
 .phui-workpanel-view.phui-workboard-column-milestone .phui-box-grey {
-  background-color: rgba(234, 230, 247, 0.75);
+  background-color: rgba(234, 230, 247, 0.85);
 }
 
 .phui-workpanel-view .phui-header-col2 .phui-icon-view {
@@ -46,11 +50,14 @@
 .phui-workpanel-view .phui-workpanel-header-action {
   float: right;
   width: 24px;
-  border-left: 1px solid #b3b5b6;
 }
 
 .phui-workpanel-view .phui-workpanel-body {
-  padding: 8px 8px 4px 8px;
+  padding: 8px 4px 8px 0;
+}
+
+.phui-workpanel-view .phui-workpanel-body-content {
+  padding: 0 4px 0 8px;
 }
 
 .device .phui-workpanel-view .phui-workpanel-body {
@@ -87,6 +94,24 @@
 
 .project-panel-hidden {
   opacity: 0.75;
+}
+
+.device-desktop .phui-workpanel-body-content {
+  max-height: calc(100vh - 162px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.device-desktop .phui-workpanel-body-content::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+  background: rgba(71,87,120,0.2);
+  border-radius: 4px;
+}
+
+.device-desktop .phui-workpanel-body-content::-webkit-scrollbar-thumb {
+  background: rgba(71,87,120,0.4);
+  border-radius: 4px;
 }
 
 .project-panel-empty .phui-object-item-list-view {

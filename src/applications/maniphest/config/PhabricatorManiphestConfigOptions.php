@@ -336,7 +336,9 @@ EOTEXT
             '"Needs Triage" panel on the home page. You should adjust this if '.
             'you adjust priorities using `%s`.',
             'maniphest.priorities')),
-
+      $this->newOption('maniphest.points', 'map<string, wild>', array())
+        ->setDescription(
+          pht('PROTOTYPE! Very hot. Burns user. Do not touch!')),
     );
   }
 
