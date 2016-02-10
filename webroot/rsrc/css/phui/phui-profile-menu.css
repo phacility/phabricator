@@ -155,9 +155,16 @@
   padding: 18px 15px;
 }
 
-.phui-profile-menu .phabricator-side-menu  .phui-profile-segment-bar {
+.phui-profile-menu .phabricator-side-menu .phui-profile-segment-bar {
   color: {$menu.profile.text};
-  padding: 12px 15px 18px;
+  font-size: {$smallerfontsize};
+  -webkit-font-smoothing: antialiased;
+  padding: 8px 12px 16px;
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-profile-segment-bar {
+    padding: 8px 8px 16px;
 }
 
 
