@@ -28,6 +28,18 @@ JX.install('WorkboardCard', {
       this._column = column;
     },
 
+    getProperties: function() {
+      return this.getColumn().getBoard().getObjectProperties(this.getPHID());
+    },
+
+    getPoints: function() {
+      return this.getProperties().points;
+    },
+
+    getStatus: function() {
+      return this.getProperties().status;
+    },
+
     getNode: function() {
       if (!this._root) {
         var phid = this.getPHID();

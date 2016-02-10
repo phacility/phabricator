@@ -318,14 +318,17 @@ final class PhabricatorProjectBoardViewController
       $column_menu = $this->buildColumnMenu($project, $column);
       $panel->addHeaderAction($column_menu);
 
-      $tag_id = celerity_generate_unique_node_id();
-      $tag_content_id = celerity_generate_unique_node_id();
-
       $count_tag = id(new PHUITagView())
         ->setType(PHUITagView::TYPE_SHADE)
         ->setShade(PHUITagView::COLOR_BLUE)
-        ->setID($tag_id)
-        ->setName(phutil_tag('span', array('id' => $tag_content_id), '-'))
+        ->addSigil('column-points')
+        ->setName(
+          javelin_tag(
+            'span',
+            array(
+              'sigil' => 'column-points-content',
+            ),
+            pht('-')))
         ->setStyle('display: none');
 
       $panel->setHeaderTag($count_tag);
@@ -339,8 +342,6 @@ final class PhabricatorProjectBoardViewController
         ->setMetadata(
           array(
             'columnPHID' => $column->getPHID(),
-            'countTagID' => $tag_id,
-            'countTagContentID' => $tag_content_id,
             'pointLimit' => $column->getPointLimit(),
           ));
 
@@ -359,17 +360,22 @@ final class PhabricatorProjectBoardViewController
     }
 
     $behavior_config = array(
-      'boardID' => $board_id,
-      'projectPHID' => $project->getPHID(),
       'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
       'createURI' => $this->getCreateURI(),
       'uploadURI' => '/file/dropupload/',
       'coverURI' => $this->getApplicationURI('cover/'),
       'chunkThreshold' => PhabricatorFileStorageEngine::getChunkThreshold(),
+      'pointsEnabled' => ManiphestTaskPoints::getIsEnabled(),
+
+      'boardPHID' => $project->getPHID(),
       'order' => $this->sortKey,
       'templateMap' => $templates,
       'columnMaps' => $column_maps,
       'orderMaps' => mpull($all_tasks, 'getWorkboardOrderVectors'),
+      'propertyMaps' => mpull($all_tasks, 'getWorkboardProperties'),
+
+      'boardID' => $board_id,
+      'projectPHID' => $project->getPHID(),
     );
     $this->initBehavior('project-boards', $behavior_config);
 

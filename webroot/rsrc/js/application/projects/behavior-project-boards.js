@@ -11,54 +11,6 @@
 
 JX.behavior('project-boards', function(config, statics) {
 
-
-  function onupdate(col) {
-    var data = JX.Stratcom.getData(col);
-    var cards = finditems(col);
-
-    // Update the count of tasks in the column header.
-    if (!data.countTagNode) {
-      data.countTagNode = JX.$(data.countTagID);
-      JX.DOM.show(data.countTagNode);
-    }
-
-    var sum = 0;
-    for (var ii = 0; ii < cards.length; ii++) {
-      // TODO: Allow this to be computed in some more clever way.
-      sum += 1;
-    }
-
-    // TODO: This is a little bit hacky, but we don't have a PHUIX version of
-    // this element yet.
-
-    var over_limit = (data.pointLimit && (sum > data.pointLimit));
-
-    var display_value = sum;
-    if (data.pointLimit) {
-      display_value = sum + ' / ' + data.pointLimit;
-    }
-    JX.DOM.setContent(JX.$(data.countTagContentID), display_value);
-
-
-    var panel_map = {
-      'project-panel-empty': !cards.length,
-      'project-panel-over-limit': over_limit
-    };
-    var panel = JX.DOM.findAbove(col, 'div', 'workpanel');
-    for (var p in panel_map) {
-      JX.DOM.alterClass(panel, p, !!panel_map[p]);
-    }
-
-    var color_map = {
-      'phui-tag-shade-disabled': (sum === 0),
-      'phui-tag-shade-blue': (sum > 0 && !over_limit),
-      'phui-tag-shade-red': (over_limit)
-    };
-    for (var c in color_map) {
-      JX.DOM.alterClass(data.countTagNode, c, !!color_map[c]);
-    }
-  }
-
   function update_statics(update_config) {
     statics.boardID = update_config.boardID;
     statics.projectPHID = update_config.projectPHID;
@@ -135,7 +87,8 @@ JX.behavior('project-boards', function(config, statics) {
   var board_node = JX.$(config.boardID);
 
   var board = statics.workboard.newBoard(board_phid, board_node)
-    .setOrder(config.order);
+    .setOrder(config.order)
+    .setPointsEnabled(config.pointsEnabled);
 
   var templates = config.templateMap;
   for (var k in templates) {
@@ -154,6 +107,11 @@ JX.behavior('project-boards', function(config, statics) {
   var order_maps = config.orderMaps;
   for (var object_phid in order_maps) {
     board.setOrderMap(object_phid, order_maps[object_phid]);
+  }
+
+  var property_maps = config.propertyMaps;
+  for (var property_phid in property_maps) {
+    board.setObjectProperties(property_phid, property_maps[property_phid]);
   }
 
   board.start();

@@ -12,6 +12,14 @@ JX.install('WorkboardColumn', {
     this._phid = phid;
     this._root = root;
 
+    this._panel = JX.DOM.findAbove(root, 'div', 'workpanel');
+    this._pointsNode = JX.DOM.find(this._panel, 'span', 'column-points');
+
+    this._pointsContentNode = JX.DOM.find(
+      this._panel,
+      'span',
+      'column-points-content');
+
     this._cards = {};
     this._naturalOrder = [];
   },
@@ -22,6 +30,10 @@ JX.install('WorkboardColumn', {
     _board: null,
     _cards: null,
     _naturalOrder: null,
+    _panel: null,
+    _pointsNode: null,
+    _pointsContentNode: null,
+    _dirty: true,
 
     getPHID: function() {
       return this._phid;
@@ -46,6 +58,18 @@ JX.install('WorkboardColumn', {
     setNaturalOrder: function(order) {
       this._naturalOrder = order;
       return this;
+    },
+
+    getPointsNode: function() {
+      return this._pointsNode;
+    },
+
+    getPointsContentNode: function() {
+      return this._pointsContentNode;
+    },
+
+    getWorkpanelNode: function() {
+      return this._panel;
     },
 
     newCard: function(phid) {
@@ -112,8 +136,21 @@ JX.install('WorkboardColumn', {
       return JX.keys(this.getCards());
     },
 
+    getPointLimit: function() {
+      return JX.Stratcom.getData(this.getRoot()).pointLimit;
+    },
+
+    markForRedraw: function() {
+      this._dirty = true;
+    },
+
+    isMarkedForRedraw: function() {
+      return this._dirty;
+    },
+
     redraw: function() {
-      var order = this.getBoard().getOrder();
+      var board = this.getBoard();
+      var order = board.getOrder();
 
       var list;
       if (order == 'natural') {
@@ -124,11 +161,18 @@ JX.install('WorkboardColumn', {
 
       var content = [];
       for (var ii = 0; ii < list.length; ii++) {
-        var node = list[ii].getNode();
+        var card = list[ii];
+
+        var node = card.getNode();
         content.push(node);
+
       }
 
       JX.DOM.setContent(this.getRoot(), content);
+
+      this._redrawFrame();
+
+      this._dirty = false;
     },
 
     _getCardsSortedNaturally: function() {
@@ -170,6 +214,69 @@ JX.install('WorkboardColumn', {
       }
 
       return 0;
+    },
+
+    _redrawFrame: function() {
+      var cards = this.getCards();
+      var board = this.getBoard();
+
+      var points = {};
+      for (var phid in cards) {
+        var card = cards[phid];
+
+        var card_points;
+        if (board.getPointsEnabled()) {
+          card_points = card.getPoints();
+        } else {
+          card_points = 1;
+        }
+
+        if (card_points !== null) {
+          var status = card.getStatus();
+          if (!points[status]) {
+            points[status] = 0;
+          }
+          points[status] += card_points;
+        }
+      }
+
+      var total_points = 0;
+      for (var k in points) {
+        total_points += points[k];
+      }
+
+      var limit = this.getPointLimit();
+
+      var display_value;
+      if (limit !== null && limit !== 0) {
+        display_value = total_points + ' / ' + limit;
+      } else {
+        display_value = total_points;
+      }
+
+      var over_limit = ((limit !== null) && (total_points > limit));
+
+      var content_node = this.getPointsContentNode();
+      var points_node = this.getPointsNode();
+
+      JX.DOM.setContent(content_node, display_value);
+
+      var is_empty = !this.getCardPHIDs().length;
+      var panel = JX.DOM.findAbove(this.getRoot(), 'div', 'workpanel');
+      JX.DOM.alterClass(panel, 'project-panel-empty', is_empty);
+      JX.DOM.alterClass(panel, 'project-panel-over-limit', over_limit);
+
+      var color_map = {
+        'phui-tag-shade-disabled': (total_points === 0),
+        'phui-tag-shade-blue': (total_points > 0 && !over_limit),
+        'phui-tag-shade-red': (over_limit)
+      };
+
+      for (var c in color_map) {
+        JX.DOM.alterClass(points_node, c, !!color_map[c]);
+      }
+
+      JX.DOM.show(points_node);
     }
 
   }

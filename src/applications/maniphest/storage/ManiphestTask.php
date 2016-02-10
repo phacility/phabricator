@@ -221,6 +221,13 @@ final class ManiphestTask extends ManiphestDAO
     );
   }
 
+  public function getWorkboardProperties() {
+    return array(
+      'status' => $this->getStatus(),
+      'points' => (double)$this->getPoints(),
+    );
+  }
+
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 

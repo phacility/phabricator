@@ -19,11 +19,13 @@ JX.install('WorkboardBoard', {
 
     this._templates = {};
     this._orderMaps = {};
+    this._propertiesMap = {};
     this._buildColumns();
   },
 
   properties: {
     order: null,
+    pointsEnabled: false
   },
 
   members: {
@@ -33,6 +35,7 @@ JX.install('WorkboardBoard', {
     _columns: null,
     _templates: null,
     _orderMaps: null,
+    _propertiesMap: null,
 
     getRoot: function() {
       return this._root;
@@ -53,6 +56,15 @@ JX.install('WorkboardBoard', {
     setCardTemplate: function(phid, template)  {
       this._templates[phid] = template;
       return this;
+    },
+
+    setObjectProperties: function(phid, properties) {
+      this._propertiesMap[phid] = properties;
+      return this;
+    },
+
+    getObjectProperties: function(phid) {
+      return this._propertiesMap[phid];
     },
 
     getCardTemplate: function(phid) {
@@ -174,12 +186,18 @@ JX.install('WorkboardBoard', {
       var card = src_column.removeCard(response.objectPHID);
       dst_column.addCard(card, after_phid);
 
+      src_column.markForRedraw();
+      dst_column.markForRedraw();
+
       this.updateCard(response);
 
       list.unlock();
     },
 
-    updateCard: function(response) {
+    updateCard: function(response, options) {
+      options = options || {};
+      options.dirtyColumns = options.dirtyColumns || {};
+
       var columns = this.getColumns();
 
       var phid = response.objectPHID;
@@ -202,8 +220,15 @@ JX.install('WorkboardBoard', {
         this.getColumn(natural_phid).setNaturalOrder(column_maps[natural_phid]);
       }
 
+      var property_maps = response.propertyMaps;
+      for (var property_phid in property_maps) {
+        this.setObjectProperties(property_phid, property_maps[property_phid]);
+      }
+
       for (var column_phid in columns) {
-        var cards = columns[column_phid].getCards();
+        var column = columns[column_phid];
+
+        var cards = column.getCards();
         for (var object_phid in cards) {
           if (object_phid !== phid) {
             continue;
@@ -211,8 +236,20 @@ JX.install('WorkboardBoard', {
 
           var card = cards[object_phid];
           card.redraw();
+
+          column.markForRedraw();
         }
-        columns[column_phid].redraw();
+      }
+
+      this._redrawColumns();
+    },
+
+    _redrawColumns: function() {
+      var columns = this.getColumns();
+      for (var k in columns) {
+        if (columns[k].isMarkedForRedraw()) {
+          columns[k].redraw();
+        }
       }
     }
 

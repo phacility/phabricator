@@ -80,25 +80,6 @@ final class PhabricatorBoardResponseEngine extends Phobject {
       $order_maps[$visible->getPHID()] = $visible->getWorkboardOrderVectors();
     }
 
-    $template = $this->buildTemplate();
-
-    $payload = array(
-      'objectPHID' => $object_phid,
-      'cardHTML' => $template,
-      'columnMaps' => $natural,
-      'orderMaps' => $order_maps,
-    );
-
-    return id(new AphrontAjaxResponse())
-      ->setContent($payload);
-  }
-
-  private function buildTemplate() {
-    $viewer = $this->getViewer();
-    $object_phid = $this->getObjectPHID();
-
-    $excluded_phids = $this->loadExcludedProjectPHIDs();
-
     $object = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($object_phid))
@@ -107,6 +88,28 @@ final class PhabricatorBoardResponseEngine extends Phobject {
     if (!$object) {
       return new Aphront404Response();
     }
+
+    $template = $this->buildTemplate($object);
+
+    $payload = array(
+      'objectPHID' => $object_phid,
+      'cardHTML' => $template,
+      'columnMaps' => $natural,
+      'orderMaps' => $order_maps,
+      'propertyMaps' => array(
+        $object_phid => $object->getWorkboardProperties(),
+      ),
+    );
+
+    return id(new AphrontAjaxResponse())
+      ->setContent($payload);
+  }
+
+  private function buildTemplate($object) {
+    $viewer = $this->getViewer();
+    $object_phid = $this->getObjectPHID();
+
+    $excluded_phids = $this->loadExcludedProjectPHIDs();
 
     $rendering_engine = id(new PhabricatorBoardRenderingEngine())
       ->setViewer($viewer)
